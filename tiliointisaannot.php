@@ -29,7 +29,7 @@
 
 		$query = "	SELECT tunnus, ytunnus, nimi, postitp
 					FROM toimi
-					WHERE yhtio = '$kukarow[yhtio]' 
+					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi != 'P'
 					$lisat
 					ORDER BY nimi";
@@ -90,6 +90,7 @@
 		$kuvaus2	= $tiliointirow['kuvaus2'];
 		$tilino		= $tiliointirow['tilino'];
 		$kustp		= $tiliointirow['kustp'];
+		$toimipaikka = $tiliointirow['toimipaikka'];
 		$hyvak1		= $tiliointirow['hyvak1'];
 		$hyvak2		= $tiliointirow['hyvak2'];
 		$hyvak3		= $tiliointirow['hyvak3'];
@@ -253,6 +254,7 @@
 				'$kuvaus2',
 				'$tilino',
 				'$kustp',
+				'{$toimipaikka}',
 				'$hyvak1',
 				'$hyvak2',
 				'$hyvak3',
@@ -368,12 +370,18 @@
 		$vientij = '';
 		$vientik = '';
 		$vientil = '';
+		$toimipaikka_select_lisa = '';
 
+		$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+		if (mysql_num_rows($toimipaikat_res) > 0) {
+			$toimipaikka_select_lisa = ", tiliointisaanto.toimipaikka";
+		}
 
 		// Näytetään vanhat säännöt muutosta varten
 		if ($tyyppi == 't') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero,
-						kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp, tiliointisaanto.vienti
+						kustannuspaikka.nimi Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN tili ON tili.yhtio = tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
@@ -386,7 +394,7 @@
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite,
 						tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp,
 						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-						kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp, tiliointisaanto.vienti
+						kustannuspaikka.nimi Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -397,7 +405,7 @@
 		elseif ($tyyppi == 'a') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus,
 						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-						kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp, tiliointisaanto.vienti
+						kustannuspaikka.nimi Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -409,7 +417,7 @@
 		elseif ($tyyppi == 'k') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus,
 						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-						kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp, tiliointisaanto.vienti
+						kustannuspaikka.nimi Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -465,6 +473,22 @@
 
 					echo "</td>";
 				}
+				elseif ($kennimi == 'toimipaikka') {
+
+					if ($tiliointirow[$kennimi] != 0) {
+						$query = "	SELECT nimi
+									FROM yhtion_toimipaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$tiliointirow[$kennimi]}'";
+						$nimi_fetch_res = pupe_query($query);
+						$nimi_fetch_row = mysql_fetch_assoc($nimi_fetch_res);
+
+						echo "<td>{$nimi_fetch_row['nimi']}</td>";
+					}
+					else {
+						echo "<td></td>";
+					}
+				}
 				else {
 					echo "<td>$tiliointirow[$kennimi]</td>";
 				}
@@ -472,45 +496,47 @@
 			if ($tyyppi != 't') {
 				echo "<td>";
 
-				if ($tiliointirow["vienti"] == '')  {
-					echo t("Toimittajan oletus");
+				switch ($tiliointirow["vienti"]) {
+					case 'A':
+						echo t("Kotimaa");
+						break;
+					case 'B':
+						echo t("Kotimaa huolinta/rahti");
+						break;
+					case 'C':
+						echo t("Kotimaa vaihto-omaisuus");
+						break;
+					case 'D':
+						echo t("EU");
+						break;
+					case 'E':
+						echo t("EU huolinta/rahti");
+						break;
+					case 'F':
+						echo t("EU vaihto-omaisuus");
+						break;
+					case 'G':
+						echo t("ei-EU");
+						break;
+					case 'H':
+						echo t("ei-EU huolinta/rahti");
+						break;
+					case 'I':
+						echo t("ei-EU vaihto-omaisuus");
+						break;
+					case 'J':
+						echo t("Kotimaa raaka-aine");
+						break;
+					case 'K':
+						echo t("EU raaka-aine");
+						break;
+					case 'L':
+						echo t("ei-EU raaka-aine");
+						break;
+					default:
+						echo t("Toimittajan oletus");
 				}
-				if ($tiliointirow["vienti"] == 'A') {
-					echo t("Kotimaa");
-				}
-				if ($tiliointirow["vienti"] == 'B') {
-					echo t("Kotimaa huolinta/rahti");
-				}
-				if ($tiliointirow["vienti"] == 'C') {
-					echo t("Kotimaa vaihto-omaisuus");
-				}
-				if ($tiliointirow["vienti"] == 'D') {
-					echo t("EU");
-				}
-				if ($tiliointirow["vienti"] == 'E') {
-					echo t("EU huolinta/rahti");
-				}
-				if ($tiliointirow["vienti"] == 'F') {
-					echo t("EU vaihto-omaisuus");
-				}
-				if ($tiliointirow["vienti"] == 'G') {
-					echo t("ei-EU");
-				}
-				if ($tiliointirow["vienti"] == 'H') {
-					echo t("ei-EU huolinta/rahti");
-				}
-				if ($tiliointirow["vienti"] == 'I') {
-					echo t("ei-EU vaihto-omaisuus");
-				}
-				if ($tiliointirow["vienti"] == 'J') {
-					echo t("Kotimaa raaka-aine");
-				}
-				if ($tiliointirow["vienti"] == 'K') {
-					echo t("EU raaka-aine");
-				}
-				if ($tiliointirow["vienti"] == 'L') {
-					echo t("ei-EU raaka-aine");
-				}
+
 				echo "</td>";
 			}
 
@@ -536,6 +562,7 @@
 			$kuvaus		= '';
 			$kuvaus2	= '';
 			$kustp		= '';
+			$toimipaikka = '';
 			$tilino		= '';
 			$hyvak1		= '';
 			$hyvak2		= '';
@@ -672,6 +699,20 @@
 		}
 
 		echo "<td>$ulos</td>";
+
+		if (mysql_num_rows($toimipaikat_res) > 0) {
+
+			echo "<td><select name='toimipaikka'><option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+			while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+				$sel = $toimipaikat_row['tunnus'] == $toimipaikka ? "selected" : "";
+
+				echo "<option value='{$toimipaikat_row['tunnus']}' {$sel}>{$toimipaikat_row['nimi']}</option>";
+			}
+
+			echo "</select></td>";
+		}
 
 		if ($tyyppi != 't') {
 

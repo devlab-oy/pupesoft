@@ -592,7 +592,7 @@
 				$onko_dupli_asn 	= FALSE;
 
 				// Onko tämä kauttalaskutusta?
-				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
 							FROM tiliointisaanto
 							WHERE ttunnus 	= '$trow[tunnus]'
 							and tyyppi 		= 'k'
@@ -607,6 +607,10 @@
 
 					if ($tiliointirow['vienti'] != '') {
 						$trow['oletus_vienti'] = $tiliointirow['vienti'];
+					}
+
+					if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
+						$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 					}
 
 					if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
@@ -626,7 +630,7 @@
 				}
 				else {
 					// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?  //
-					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
 								FROM tiliointisaanto
 								WHERE ttunnus 	= '$trow[tunnus]'
 								and yhtio 		= '$yhtio'
@@ -655,6 +659,10 @@
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
 						}
 
+						if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
+							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+						}
+
 						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
 							$hyvak[1] = "";
 							$hyvak[2] = "";
@@ -672,7 +680,7 @@
 					}
 
 					// Onko tälle ostajatiedoille erityinen kustannuspaikka?
-					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
 								FROM tiliointisaanto
 								WHERE ttunnus 	= '$trow[tunnus]'
 								and yhtio 		= '$yhtio'
@@ -701,6 +709,10 @@
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
 						}
 
+						if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
+							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+						}
+
 						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
 							$hyvak[1] = "";
 							$hyvak[2] = "";
@@ -719,7 +731,7 @@
 
 					if (mysql_num_rows($result) == 0) {
 						// Onko tälle asiakastunnukselle erityinen kustannuspaikka?
-						$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+						$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
 									FROM tiliointisaanto
 									WHERE ttunnus 	= '$trow[tunnus]'
 									and tyyppi 		= 'a'
@@ -734,6 +746,10 @@
 
 							if ($tiliointirow['vienti'] != '') {
 								$trow['oletus_vienti'] = $tiliointirow['vienti'];
+							}
+
+							if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
+								$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 							}
 
 							if ($tiliointirow['hyvak1'] == 'MAKSUUN') {

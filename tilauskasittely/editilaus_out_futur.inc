@@ -239,7 +239,7 @@
 							AND tuotekerroin != 0
 							AND tuotekerroin != 1
 							ORDER BY sorttauskentta";
-				$tt_tuotekerroin_chk_res = mysql_fetch_assoc($query);
+				$tt_tuotekerroin_chk_res = pupe_query($query);
 
 				if (mysql_num_rows($tt_tuotekerroin_chk_res) != 0) {
 					$tt_tuotekerroin_chk_row = mysql_fetch_assoc($tt_tuotekerroin_chk_res);

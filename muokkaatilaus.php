@@ -2133,7 +2133,7 @@
 								$row_comments["viesti"] = preg_replace("/[^0-9]/", "", $row_comments["viesti"]);
 
 								if ($row_comments["viesti"] != "") {
-									echo "<br><a target='_blank' href='https://devlab.zendesk.com/agent/#/tickets/{$row_comments["viesti"]}'>{$row_comments["viesti"]}</a>";
+									echo "<br><a target='_blank' href='https://devlab.zendesk.com/tickets/{$row_comments["viesti"]}'>{$row_comments["viesti"]}</a>";
 									$zendesk_viesti = TRUE;
 								}
 								else {

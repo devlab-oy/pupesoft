@@ -209,10 +209,10 @@
 
 		while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
 
-			$kpl = round(($tilausrivi_row['jt'] + $tilausrivi_row['varattu']));
+			$kpl = $tilausrivi_row['jt'] + $tilausrivi_row['varattu'];
 
 			if ($tilausrivi_row['var'] == 'P') {
-				$kpl = round($tilausrivi_row['tilkpl'] * 1);
+				$kpl = $tilausrivi_row['tilkpl'] * 1;
 			}
 
 			// HUOM: Reklamaatioissa laitetaan nettohyvitysyksikköhinta
@@ -244,9 +244,11 @@
 				if (mysql_num_rows($tt_tuotekerroin_chk_res) != 0) {
 					$tt_tuotekerroin_chk_row = mysql_fetch_assoc($tt_tuotekerroin_chk_res);
 
-					$kpl = round($tt_tuotekerroin_chk_row['tuotekerroin'] * $kpl);
+					$kpl *= $tt_tuotekerroin_chk_row['tuotekerroin'];
 				}
 			}
+
+			$kpl = round($kpl);
 
 			$edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:{$kpl}\n";
 

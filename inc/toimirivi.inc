@@ -616,8 +616,8 @@
 		$sel = $trow[$i] == 'X' ? " selected" : "";
 
 		$ulos  = "<td><select name='{$nimi}'>";
-		$ulos .= "<option value=''>".t("Toimittaja on valittavissa kun perustetaan uutta tuotetta")."</option>";
-		$ulos .= "<option value='X'{$sel}>".t("Toimittaja ei ole valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "<option value=''>".t("Toimittaja ei ole valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "<option value='X'{$sel}>".t("Toimittaja on valittavissa kun perustetaan uutta tuotetta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -2022,7 +2022,7 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I')) $eilah = 'CHECKED';
+			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
@@ -3322,16 +3322,17 @@
 			}
 		}
 
+		$apuqu = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND selite = '$toimitustapa'";
+		$meapu = pupe_query($apuqu);
+		$toimitustapa_apuro = mysql_fetch_assoc($meapu);
+
 		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitusehdolta tai toimitustavalta
 		if ($maksaja == "O") {
-			$apuqu = "	SELECT *
-						FROM toimitustapa
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND selite = '$toimitustapa'";
-			$meapu = pupe_query($apuqu);
-			$apuro = mysql_fetch_assoc($meapu);
 
-			$maksaja = $apuro['merahti'];
+			$maksaja = $toimitustapa_apuro['merahti'];
 
 			// Onko toimitusehdon takana m‰‰ritelty rahdinmaksaja? T‰m‰ yliajaa toimitustavan takana olevan.
 			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = '$toimitusehto' ");
@@ -3430,6 +3431,31 @@
 			$vienti = $alhiro['vienti'];
 
 			echo "<br /><font class='info'>",t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista"),"!</font><br /><br />";
+		}
+
+		if ($yhtiorow['nouto_suoraan_laskutukseen'] == 'K' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))) {
+
+			if (isset($otsikon_laskurow['toimitustapa'])) {
+				$apuqu = "	SELECT *
+							FROM toimitustapa
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND selite = '{$otsikon_laskurow['toimitustapa']}'";
+				$meapu = pupe_query($apuqu);
+				$toimitustapa_apuro2 = mysql_fetch_assoc($meapu);
+			}
+
+			$apuqu = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND selite = '{$toimitustapa}'";
+			$meapu = pupe_query($apuqu);
+			$toimitustapa_apuro3 = mysql_fetch_assoc($meapu);
+
+			if (($kukarow['kesken'] == 0 and $toimitustapa_apuro['nouto'] != '' and $eilahe == '') or
+				(isset($otsikon_laskurow['toimitustapa']) and isset($toimitustapa_apuro2) and $toimitustapa_apuro2['selite'] == $toimitustapa and $toimitustapa_apuro2['nouto'] != '' and $eilahe == '') or
+				(mysql_num_rows($meapu) > 0 and $toimitustapa_apuro3['nouto'] != '' and $eilahe == '')) {
+				echo "<br /><font class='error'>",t("HUOM: Valitsit toimitustavaksi noudon, mutta ei valinnut Suoraan laskutukseen"),"!</font><br /><br />";
+			}
 		}
 
 		// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella

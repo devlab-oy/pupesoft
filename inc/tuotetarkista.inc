@@ -503,6 +503,3 @@ if(!function_exists("tuotetarkista")) {
 		}
 	}
 }
-	
-		
-

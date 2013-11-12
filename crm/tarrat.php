@@ -543,7 +543,6 @@ echo $monivalintalaatikot_normaali;
 
 		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
 		echo "<tr><th>".t("Luo aineisto yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_yht_tiedot' value='on' $chk></td></tr>";
-		echo "<tr><th>".t("Luo aineisto vain valitun asiakaskategorian yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_seg_yht_tiedot' value='on' $cck></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
 				<td><select name='raportti'>
 				<option value='33' $sel[33]>33 ".t("Tarraa")."</option>

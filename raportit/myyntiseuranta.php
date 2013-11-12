@@ -271,6 +271,7 @@
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
 			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
+			if ($myos_poistetut != '')		$myos_poistetutchk		= "CHECKED";
 			if ($naytatoimtuoteno != '')	$naytatoimtuotenochk 	= "CHECKED";
 
 			echo "<table>
@@ -300,6 +301,7 @@
 				<option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
 				</select></td></tr>
 				<tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytun_laajattied' value='laajat' {$ytun_laajattiedchk}></td></tr>
+				<tr><td class='spec'>".t("Huomioi myös poistetut asiakkaat").":</td><td><input type='checkbox' name='myos_poistetut' value='poistetut' {$myos_poistetutchk}></td></tr>
 				</table>
 				</tr>
 				<tr>

@@ -46,15 +46,16 @@
 		}
 
 		$rajaus = array();
-		$rajaus["asmemo_viesti"] 	= $asmemo_viesti;
-		$rajaus["tarra_aineisto"] 	= $tarra_aineisto;
-		$rajaus["raportti"] 		= $raportti;
-		$rajaus["toimas"] 			= $toimas;
-		$rajaus["as_yht_tiedot"] 	= $as_yht_tiedot;
-		$rajaus["limitti"] 			= $limitti;
-		$rajaus["negaatio_haku"] 	= $negaatio_haku;
-		$rajaus["lisaraj_haku"] 	= $lisaraj_haku;
-		$rajaus["ojarj"] 			= $ojarj;
+		$rajaus["asmemo_viesti"] 		= $asmemo_viesti;
+		$rajaus["tarra_aineisto"] 		= $tarra_aineisto;
+		$rajaus["raportti"] 			= $raportti;
+		$rajaus["toimas"] 				= $toimas;
+		$rajaus["as_yht_tiedot"] 		= $as_yht_tiedot;
+		$rajaus["as_seg_yht_tiedot"]	= $as_seg_yht_tiedot;
+		$rajaus["limitti"] 				= $limitti;
+		$rajaus["negaatio_haku"] 		= $negaatio_haku;
+		$rajaus["lisaraj_haku"] 		= $lisaraj_haku;
+		$rajaus["ojarj"] 				= $ojarj;
 
 		foreach ($haku as $a => $b) {
 			$ind = "haku_$a";
@@ -73,6 +74,21 @@
 		if ($as_yht_tiedot == 'on') {
 			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email ";
 			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
+		}
+		
+		if ($as_seg_yht_tiedot == 'on') {
+			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email";
+			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' and yht.rooli='7'";
+			
+			$asiakaskategoria_tunnukset = array();
+			var_dump($dynaaminen_syvintaso);
+			for ($i=1;$i<=$dynaaminen_syvintaso["asiakas"];$i++) {
+				echo "AAAAA";
+				var_dump(${mul_asiakas}.$i);
+			}
+			echo $mul_asiakas;
+			echo $joinilisa; 
+			var_dump($mul_asiakas);
 		}
 
 		$query = "	SELECT asiakas.* $selectilisa
@@ -101,7 +117,7 @@
 			$sarakkeet 		= 3;
 			$rivit 			= 8;
 
-			if ($as_yht_tiedot == 'on') {
+			if ($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') {
 				$sisalto .= "\n";
 				$sisalto .= "\n";
 			}
@@ -119,7 +135,7 @@
 			$worksheet->writeString($excelrivi, $excelsarake, t("Nimitarkenne"), $format_bold);
 			$excelsarake++;
 
-			if ($as_yht_tiedot == 'on') {
+			if ($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') {
 				$worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkilö"), $format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Titteli"), $format_bold);
@@ -190,7 +206,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake, $row["nimitark"]);
 				$excelsarake++;
 
-				if ($as_yht_tiedot == 'on') {
+				if ($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_nimi"]);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_titteli"]);
@@ -209,7 +225,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake, $row["maa"]);
 				$excelsarake++;
 
-				if ($as_yht_tiedot == 'on') {
+				if ($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_email"]);
 					$excelsarake++;
 				}
@@ -230,14 +246,14 @@
 
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimi"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimitark"]))."\n";
-				if ($as_yht_tiedot == 'on' and $row["yht_nimi"] != '') {
+				if (($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') and $row["yht_nimi"] != '') {
 					$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["yht_nimi"]))."\n";
 				}
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["osoite"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["postino"]." ".$row["postitp"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["maa"]))."\n";
 
-				if ($as_yht_tiedot == 'on' and $row["yht_nimi"] != '') {
+				if (($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') and $row["yht_nimi"] != '') {
 					$sisalto .= "\n";
 				}
 				else {
@@ -368,7 +384,7 @@
 				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 			}
         }
-
+		
 		if (strlen($ojarj) > 0) {
         	$jarjestys = $ojarj;
         }
@@ -398,6 +414,10 @@
 					ORDER BY $jarjestys
 					$limit";
 		$result = mysql_query($query) or pupe_error($query);
+query_dump($query);
+echo $lisa;
+echo $monivalintalaatikot;
+echo $monivalintalaatikot_normaali;
 
 		$lim = "";
 		$lim[$limitti] = "SELECTED";
@@ -426,13 +446,14 @@
 		}
 
 		echo "<tr><th valign='bottom'>".t("Näytä lisärajaukset")."</th><td><input type='checkbox' name='lisaraj_haku' $lis_chk></th></tr>";
+		echo "<tr><th>".t("Luo aineisto vain valitun asiakaskategorian yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_seg_yht_tiedot' value='on' $cck></td></tr>";
 
 		echo "</table><br>";
 
 		echo "<table><tr>";
 		echo "<th></th>";
 
-		$urllisa = "&asmemo_viesti=$asmemo_viesti&tarra_aineisto=$tarra_aineisto&raportti=$raportti&toimas=$toimas&as_yht_tiedot=$as_yht_tiedot&limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku".$ulisa;
+		$urllisa = "&asmemo_viesti=$asmemo_viesti&tarra_aineisto=$tarra_aineisto&raportti=$raportti&toimas=$toimas&as_yht_tiedot=$as_yht_tiedot&as_seg_yht_tiedot=$as_seg_yht_tiedot&limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku".$ulisa;
 
 		echo "<th nowrap><a href='$PHP_SELF?ojarj=nimi$urllisa'>".t("Nimi")."</a>";
 		echo "<br><input type='text' size='10' name = 'haku[0]'  value = '$haku[0]'></th>";
@@ -497,6 +518,7 @@
 
 		$tck = "";
 		$chk = "";
+		$cck = "";
 		$sel = "";
 
 		if ($toimas != "") {
@@ -505,6 +527,10 @@
 
 		if ($as_yht_tiedot != "") {
 			$chk = "CHECKED";
+		}
+		
+		if ($as_seg_yht_tiedot != "") {
+			$cck = "CHECKED";
 		}
 
 		$sel[$raportti] = "SELECTED";
@@ -517,6 +543,7 @@
 
 		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
 		echo "<tr><th>".t("Luo aineisto yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_yht_tiedot' value='on' $chk></td></tr>";
+		echo "<tr><th>".t("Luo aineisto vain valitun asiakaskategorian yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_seg_yht_tiedot' value='on' $cck></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
 				<td><select name='raportti'>
 				<option value='33' $sel[33]>33 ".t("Tarraa")."</option>

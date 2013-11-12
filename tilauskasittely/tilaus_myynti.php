@@ -169,6 +169,10 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 if ($kukarow["extranet"] == "") {
 	echo "<script src='../js/tilaus.js'></script>";
 	echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
+
+	if ($toim == 'VAURIOPOYTAKIRJA') {
+		echo "<link rel='stylesheet' type='text/css' href='../css/tilaus_myynti/vauriopoytakirja.css'>";
+	}
 }
 
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
@@ -1774,6 +1778,9 @@ if ($uusitoimitus != "") {
 						AND lasku.tunnus = '{$tilausnumero}'";
 			pupe_query($query);
 		}
+	}
+	else if ($toim == 'VAURIOPOYTAKIRJA') {
+		require('otsik_vauriopoytakirja.inc');
 	}
 	else {
 		require('otsik.inc');

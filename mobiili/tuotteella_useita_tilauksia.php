@@ -100,7 +100,7 @@ $query = "	SELECT
 			tilausrivi.tilkpl,
 			tilausrivi.uusiotunnus,
 			concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-			tuotteen_toimittajat.tuotekerroin,
+			IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
 			tuotteen_toimittajat.liitostunnus,
 			IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
 			FROM lasku
@@ -145,7 +145,7 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
 				tilausrivi.tilkpl,
 				tilausrivi.uusiotunnus,
 				concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-				tuotteen_toimittajat.tuotekerroin,
+				IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
 				tuotteen_toimittajat.liitostunnus,
 				IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
 				FROM lasku

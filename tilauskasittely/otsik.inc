@@ -3444,7 +3444,7 @@
 			if (($kukarow['kesken'] == 0 and $toimitustapa_apuro['nouto'] != '' and $eilahe == '') or
 				(isset($otsikon_laskurow['toimitustapa']) and isset($toimitustapa_apuro2) and $toimitustapa_apuro2['selite'] == $toimitustapa and $toimitustapa_apuro2['nouto'] != '' and $eilahe == '') or
 				(mysql_num_rows($meapu) > 0 and $toimitustapa_apuro3['nouto'] != '' and $eilahe == '')) {
-				echo "<br /><font class='info'>",t("HUOM: Valitsit toimitustavaksi noudon, mutta ei valitannut Suoraan laskutukseen"),"!</font><br /><br />";
+				echo "<br /><font class='error'>",t("HUOM: Valitsit toimitustavaksi noudon, mutta ei valinnut Suoraan laskutukseen"),"!</font><br /><br />";
 			}
 		}
 

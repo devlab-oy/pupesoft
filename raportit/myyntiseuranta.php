@@ -271,7 +271,6 @@
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
 			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
-			if ($myos_poistetut != '')		$myos_poistetutchk		= "CHECKED";
 			if ($naytatoimtuoteno != '')	$naytatoimtuotenochk 	= "CHECKED";
 
 			echo "<table>
@@ -301,7 +300,6 @@
 				<option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
 				</select></td></tr>
 				<tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytun_laajattied' value='laajat' {$ytun_laajattiedchk}></td></tr>
-				<tr><td class='spec'>".t("Etsi myös poistettuja asiakkaita").":</td><td><input type='checkbox' name='myos_poistetut' value='poistetut' {$myos_poistetutchk}></td></tr>
 				</table>
 				</tr>
 				<tr>
@@ -708,10 +706,10 @@
 
 			//	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
 			if ($kukarow["piirit"] != "")	 {
-				$asiakasrajaus = "and lasku.piiri IN ({$kukarow['piirit']})";
+				$myse_asiakasrajaus = "and lasku.piiri IN ({$kukarow['piirit']})";
 			}
 			else {
-				$asiakasrajaus = "";
+				$myse_asiakasrajaus = "";
 			}
 
 			// tutkaillaan saadut muuttujat
@@ -1396,7 +1394,7 @@
 								FROM asiakas
 								WHERE yhtio IN ({$yhtio})
 								AND ytunnus = '{$asiakas}'
-								{$asiakasrajaus}";
+								{$myse_asiakasrajaus}";
 					$result = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($result);
 
@@ -1413,7 +1411,7 @@
 								FROM asiakas
 								WHERE yhtio IN ({$yhtio})
 								AND asiakasnro = '{$asiakasnro}'
-								{$asiakasrajaus}";
+								{$myse_asiakasrajaus}";
 					$result = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($result);
 
@@ -1536,7 +1534,7 @@
 						$tee = '';
 					}
 
-					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|tuote\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
+					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|tuote\.|toimitustapa\.)/i", $myse_asiakasrajaus.$lisa)) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyviä rajauksia ei voida valita kun näytetään asiakastavoitteet")."!</font><br>";
 						$tee = '';
 					}
@@ -1557,7 +1555,7 @@
 						$tee = '';
 					}
 
-					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|asiakas\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
+					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|asiakas\.|toimitustapa\.)/i", $myse_asiakasrajaus.$lisa)) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyviä rajauksia ei voida valita kun näytetään tuotetavoitteet")."!</font><br>";
 						$tee = '';
 					}
@@ -2068,7 +2066,7 @@
 						$query .= " ) ";
 					}
 
-					$query .= "	{$asiakasrajaus}
+					$query .= "	{$myse_asiakasrajaus}
 								{$lisa}
 								GROUP BY {$group}
 								ORDER BY {$order}";

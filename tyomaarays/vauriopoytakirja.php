@@ -338,6 +338,31 @@ function generoi_custom_excel($request) {
 
 	excel_korjaaja_rivit($xls, $excelrivi, $excelsarake, $request);
 
+	$excelrivi = $excelrivi + 2;
+	$excelsarake = 0;
+
+	excel_kustannus_rivit($xls, $excelrivi, $excelsarake, $request);
+
+	$excelrivi = $excelrivi + 2;
+	$excelsarake = 0;
+
+	excel_materiaalit($xls, $excelrivi, $excelsarake, $request);
+
+	$excelrivi = $excelrivi + 2;
+	$excelsarake = 0;
+
+	excel_materiaalit($xls, $excelrivi, $excelsarake, $request, 'tsf');
+
+	$excelrivi++;
+	$excelsarake = 0;
+
+	excel_yhteensa($xls, $excelrivi, $excelsarake, $request);
+
+	$excelrivi = $excelrivi + 2;
+	$excelsarake = 0;
+
+	excel_footer($xls, $excelrivi, $excelsarake, $request);
+
 	$xls_tiedosto = $xls->close();
 
 	return $xls_tiedosto;
@@ -571,6 +596,7 @@ function excel_lisatietoja(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$excelsarake++;
 	$xls->write($excelrivi, $excelsarake, 'selvityksen antaja tähä', array('bold' => true));
 	$excelrivi++;
+	$excelsarake = 0;
 	$xls->write($excelrivi, $excelsarake, t('Puhelin'), array('bold' => true));
 	$excelsarake++;
 	$xls->write($excelrivi, $excelsarake, 'selvityksen antaja puhelin tähä', array(
@@ -650,4 +676,137 @@ function excel_korjaaja_rivit(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$xls->write($excelrivi, $excelsarake, t('Total'), array('bold' => true));
 	$excelsarake++;
 	$xls->write($excelrivi, $excelsarake, 'total tähä', array('bold' => true));
+}
+
+function excel_kustannus_rivit(&$xls, &$excelrivi, &$excelsarake, $request) {
+	global $kukarow, $yhtiorow;
+
+	$xls->write($excelrivi, $excelsarake, t('Kustannus'), array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('kpl'), array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('Yksikkö'), array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('Hinta').'/'.t('yks'), array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('Yhteensä').'('.t('eur').')', array('bold' => true));
+	$excelrivi++;
+	$excelsarake = 0;
+	foreach ($request['tulostettava_vauriopoytakirja']['kustannusrivit'] as $kustannusrivi) {
+		$xls->write($excelrivi, $excelsarake, $kustannusrivi['nimitys'], array('bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $kustannusrivi['tilkpl'], array('bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $kustannusrivi['yksikko'], array('bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $kustannusrivi['hinta'] / $kustannusrivi['tilkpl'], array(
+			'bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $kustannusrivi['rivihinta'], array('bold' => true));
+		$excelsarake++;
+
+		$viimeinen_sarake = $excelsarake;
+
+		$excelrivi++;
+		$excelsarake = 0;
+	}
+	$xls->write($excelrivi, $viimeinen_sarake, 'yhteensä', array('bold' => true));
+}
+
+function excel_materiaalit(&$xls, &$excelrivi, &$excelsarake, $request, $tyyppi = 'urakoitsija') {
+	global $kukarow, $yhtiorow;
+
+	if ($tyyppi == 'urakoitsija') {
+		$materiaalit = $request['tulostettava_vauriopoytakirja']['urakoitsijan_materiaalit'];
+		$otsikko = t('Urakoitsijan materiaali');
+	}
+	else {
+		$materiaalit = $request['tulostettava_vauriopoytakirja']['tsf_materiaalit'];
+		$otsikko = t('TSF materiaali');
+	}
+	
+	$xls->write($excelrivi, $excelsarake, $otsikko, array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('Tunnus'), array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('kpl'), array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('yksikkö').'/'.t('yks'), array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('Hinta').'/'.t('yks'), array('bold' => true));
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('Yhteensä').'('.t('eur').')', array('bold' => true));
+	$excelrivi++;
+	$excelsarake = 0;
+	foreach ($materiaalit as $u_materiaali) {
+		$xls->write($excelrivi, $excelsarake, $u_materiaali['nimitys'], array('bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $u_materiaali['tuoteno'], array('bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $u_materiaali['tilkpl'], array('bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $u_materiaali['yksikko'], array('bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $u_materiaali['hinta'] / $u_materiaali['tilkpl'], array(
+			'bold' => true));
+		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake, $u_materiaali['rivihinta'], array('bold' => true));
+		$excelsarake++;
+
+		$viimeinen_sarake = $excelsarake;
+
+		$excelrivi++;
+		$excelsarake = 0;
+	}
+	$xls->write($excelrivi, $viimeinen_sarake, 'yhteensä', array('bold' => true));
+}
+
+function excel_yhteensa(&$xls, &$excelrivi, &$excelsarake, $request) {
+	global $kukarow, $yhtiorow;
+
+	$xls->write($excelrivi, $excelsarake, t('TSF:lle aiheutuneet kustannukset'), array('bold' => true));
+	$excelsarake = $excelsarake + 2;
+
+	$xls->write($excelrivi, $excelsarake, 'yht kpl', array('bold' => true));
+
+	$excelsarake = $excelsarake + 3;
+
+	$xls->write($excelrivi, $excelsarake, 'yht', array('bold' => true));
+	$excelrivi++;
+	$xls->write($excelrivi, $excelsarake, 'yht2', array('bold' => true));
+
+	$excelrivi++;
+	$excelsarake = 0;
+
+	$xls->write($excelrivi, $excelsarake, t('ALV'), array('bold' => true));
+	$excelsarake = $excelsarake + 2;
+	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['alv'].'%', array('bold' => true));
+	$excelsarake = $excelsarake + 3;
+	$xls->write($excelrivi, $excelsarake, 'alv maara', array('bold' => true));
+
+	$excelrivi++;
+	$excelsarake = 0;
+
+	$xls->write($excelrivi, $excelsarake, t('Yhteensä'), array('bold' => true));
+	$excelsarake = $excelsarake + 4;
+	$xls->write($excelrivi, $excelsarake, 'total yhteensä', array('bold' => true));
+}
+
+function excel_footer(&$xls, &$excelrivi, &$excelsarake, $request) {
+	global $kukarow, $yhtiorow;
+
+	$xls->write($excelrivi, $excelsarake, t('Lisätietoja'));
+	$excelrivi++;
+	$excelsarake = 0;
+	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['kommentti']);
+
+	$excelrivi = $excelrivi + 2;
+	$excelsarake = 0;
+
+	$xls->write($excelrivi, $excelsarake, t('Selvityksestä vastaava').':');
+	$excelrivi++;
+	$excelsarake = 0;
+	$xls->write($excelrivi, $excelsarake, t('Nimi').': '.$request['tulostettava_vauriopoytakirja']['nimi']);
+	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake, t('Puhelin').': '.$request['tulostettava_vauriopoytakirja']['puh']);
 }

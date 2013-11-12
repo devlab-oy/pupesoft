@@ -1287,3 +1287,60 @@
 			}
 		}
 	}
+
+	$paarivin_saldokysely = false;
+
+	if ($sahkoinen_tilausliitanta and (!isset($vastaavat_html) or trim($vastaavat_html) == '') and (!isset($vastaavat_table) or trim($vastaavat_table) == '') and in_array($row['var'], array('U','T'))) {
+
+		$query = "	SELECT tt.tehdas_saldo,
+					tt.tehdas_saldo_paivitetty,
+					tt.liitostunnus,
+					tt.toim_tuoteno,
+					tt.tunnus AS tt_tunnus,
+					toimi.nimi AS toimittajan_nimi,
+					avainsana.selitetark_2,
+					avainsana.selitetark_3,
+					avainsana.selitetark_4,
+					avainsana.selitetark_5,
+					if(tt.jarjestys = 0, 9999, tt.jarjestys) sorttauskentta
+					FROM tuotteen_toimittajat AS tt
+					JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+					LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['yhtio_toimipaikka']}' AND toimi.tunnus = avainsana.selitetark)
+					WHERE tt.yhtio = '{$kukarow['yhtio']}'
+					AND tt.tuoteno = '{$row['tuoteno']}'
+					ORDER BY sorttauskentta
+					LIMIT 1";
+		$tehdas_saldo_res = pupe_query($query);
+		$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
+
+		if ($tehdas_saldo_row['selitetark_2'] != "") {
+
+			$vastaavat_html = "<table width='100%'><tr style='width: 100%;'><th style='text-align: center;'>";
+			$vastaavat_table = "";
+
+			$hae = 'nappi';
+			$rivitunnus = $row['tunnus'];
+			$_vastaavat_tunnus = $row['tunnus'];
+			$_vastaavat_tuoteno = $tehdas_saldo_row['toim_tuoteno'];
+			$_tilattu = (int) $row['tilkpl'];
+
+			$th_rivi = true;
+
+			$vastaavat_table2 = "<div class='availability {$_vastaavat_tunnus}_{$_tilattu}_availability' /><span class='{$_vastaavat_tunnus}_{$_tilattu}_loading'></span></div>&nbsp;";
+ 			$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_custid' value='{$tehdas_saldo_row['selitetark_2']}' />";
+	 		$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_username' value='{$tehdas_saldo_row['selitetark_3']}' />";
+			$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_password' value='{$tehdas_saldo_row['selitetark_4']}' />";
+			$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_suppliernumber' value='{$tehdas_saldo_row['selitetark_5']}' />";
+			$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
+
+			require("inc/sahkoinen_tilausliitanta.inc");
+
+			$vastaavat_html .= $vastaavat_table;
+
+			$vastaavat_html .= "</th></tr></table>";
+
+			$vastaavattuotteet = 1;
+
+			$paarivin_saldokysely = true;
+		}
+	}

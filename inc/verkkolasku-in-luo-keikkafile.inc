@@ -35,6 +35,7 @@
 								FROM asn_sanomat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laji = '{$lajilisa}'
+								AND status = ''
 								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 					$chk_res2 = pupe_query($query);
 
@@ -73,6 +74,7 @@
 								FROM asn_sanomat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laji = '{$lajilisa}'
+								AND status = ''
 								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 					$chk_res = pupe_query($query);
 
@@ -90,7 +92,7 @@
 	}
 
 	if (!function_exists('etsi_sopivat_tilausrivit')) {
-		function etsi_sopivat_tilausrivit($data, $lajilisa, $trow, $isalisa = "", $debug = 0) {
+		function etsi_sopivat_tilausrivit($data, $lajilisa, $trow, $isalisa = "", $debug = 0, $_yhtion_toimipaikka = 0) {
 			global $kukarow;
 
 			if ($debug == 1) {
@@ -110,11 +112,13 @@
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 										AND lasku.tunnus = tilausrivi.otunnus
 										AND lasku.mapvm = '0000-00-00'
-										AND lasku.tapvm = '0000-00-00')
+										AND lasku.tapvm = '0000-00-00'
+										AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 						JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 										AND lasku2.tunnus = tilausrivi.uusiotunnus
 										AND lasku2.mapvm = '0000-00-00'
-										AND lasku2.tapvm = '0000-00-00')
+										AND lasku2.tapvm = '0000-00-00'
+										AND lasku2.yhtio_toimipaikka = '{$_yhtion_toimipaikka}')
 						JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 										AND toimi.tunnus = lasku.liitostunnus
 										AND toimi.tunnus = '{$trow['tunnus']}'
@@ -137,7 +141,9 @@
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 										AND lasku.tunnus = tilausrivi.otunnus
-										AND lasku.tila = 'O' AND lasku.alatila = 'A')
+										AND lasku.tila = 'O'
+										AND lasku.alatila = 'A'
+										AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 						JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 										AND toimi.tunnus = lasku.liitostunnus
 										AND toimi.tunnus = '{$trow['tunnus']}'
@@ -174,12 +180,14 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
 											AND lasku.mapvm = '0000-00-00'
-											AND lasku.tapvm = '0000-00-00')
+											AND lasku.tapvm = '0000-00-00'
+											AND lasku.yhtio_toimipaikka = '{$_yhtion_toimipaikka}')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.otunnus
 											AND lasku2.comments LIKE '%{$data['ostotilausnro']}%'
 											AND lasku2.mapvm = '0000-00-00'
-											AND lasku2.tapvm = '0000-00-00')
+											AND lasku2.tapvm = '0000-00-00'
+											AND lasku2.vanhatunnus = '{$_yhtion_toimipaikka}')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -201,11 +209,10 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.tila = 'O' AND lasku.alatila = 'A')
-							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
-											AND lasku2.tunnus = tilausrivi.otunnus
-											AND lasku2.tila = 'O' AND lasku2.alatila = 'A'
-											AND lasku2.comments LIKE '%{$data['ostotilausnro']}%')
+											AND lasku.tila = 'O'
+											AND lasku.alatila = 'A'
+											AND lasku.comments LIKE '%{$data['ostotilausnro']}%'
+											AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -242,11 +249,13 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
 											AND lasku.mapvm = '0000-00-00'
-											AND lasku.tapvm = '0000-00-00')
+											AND lasku.tapvm = '0000-00-00'
+											AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.uusiotunnus
 											AND lasku2.mapvm = '0000-00-00'
-											AND lasku2.tapvm = '0000-00-00')
+											AND lasku2.tapvm = '0000-00-00'
+											AND lasku2.yhtio_toimipaikka = '{$_yhtion_toimipaikka}')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -268,7 +277,9 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.tila = 'O' AND lasku.alatila = 'A')
+											AND lasku.tila = 'O'
+											AND lasku.alatila = 'A'
+											AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -305,12 +316,14 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
 											AND lasku.mapvm = '0000-00-00'
-											AND lasku.tapvm = '0000-00-00')
+											AND lasku.tapvm = '0000-00-00'
+											AND lasku.yhtio_toimipaikka = '{$_yhtion_toimipaikka}')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.otunnus
 											AND lasku2.comments LIKE '%{$data['ostotilausnro']}%'
 											AND lasku2.mapvm = '0000-00-00'
-											AND lasku2.tapvm = '0000-00-00')
+											AND lasku2.tapvm = '0000-00-00'
+											AND lasku2.vanhatunnus = '{$_yhtion_toimipaikka}')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -331,11 +344,10 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.tila = 'O' AND lasku.alatila = 'A')
-							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
-											AND lasku2.tunnus = tilausrivi.otunnus
-											AND lasku2.tila = 'O' AND lasku2.alatila = 'A'
-											AND lasku2.comments LIKE '%{$data['ostotilausnro']}%')
+											AND lasku.tila = 'O'
+											AND lasku.alatila = 'A'
+											AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}'
+											AND lasku.comments LIKE '%{$data['ostotilausnro']}%')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -371,11 +383,13 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
 											AND lasku.mapvm = '0000-00-00'
-											AND lasku.tapvm = '0000-00-00')
+											AND lasku.tapvm = '0000-00-00'
+											AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.uusiotunnus
 											AND lasku2.mapvm = '0000-00-00'
-											AND lasku2.tapvm = '0000-00-00')
+											AND lasku2.tapvm = '0000-00-00'
+											AND lasku2.yhtio_toimipaikka = '{$_yhtion_toimipaikka}')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -396,7 +410,9 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.tila = 'O' AND lasku.alatila = 'A')
+											AND lasku.tila = 'O'
+											AND lasku.alatila = 'A'
+											AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -1049,7 +1065,7 @@
 				echo "<br>Katotaa etsi_sopivat_tilausrivit<br>";
 			}
 
-			list($kaytettavat_tilausrivit, $skipatut_tilausrivit) = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $isalisa, $debug);
+			list($kaytettavat_tilausrivit, $skipatut_tilausrivit) = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $isalisa, $debug, $_yhtion_toimipaikka);
 
 			if ($debug == 1) {
 				echo "<br>Katottiin etsi_sopivat_tilausrivit / skipatut_tilausrivit<br>";
@@ -1263,7 +1279,12 @@
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
 									tilausrivi.laadittu, tilausrivi.perheid, '1' jarjestys
 									FROM tilausrivi
-									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00' AND lasku.alatila != 'X')
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+										AND lasku.tunnus = tilausrivi.uusiotunnus
+										AND lasku.mapvm = '0000-00-00'
+										AND lasku.tapvm = '0000-00-00'
+										AND lasku.alatila != 'X'
+										AND lasku.yhtio_toimipaikka = '{$_yhtion_toimipaikka}')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
@@ -1285,7 +1306,12 @@
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
 									tilausrivi.laadittu, tilausrivi.perheid, '2' jarjestys
 									FROM tilausrivi
-									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00' AND lasku.alatila != 'X')
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+										AND lasku.tunnus = tilausrivi.uusiotunnus
+										AND lasku.mapvm = '0000-00-00'
+										AND lasku.tapvm = '0000-00-00'
+										AND lasku.alatila != 'X'
+										AND lasku.yhtio_toimipaikka = '{$_yhtion_toimipaikka}')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
@@ -1308,7 +1334,11 @@
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
 									tilausrivi.laadittu, tilausrivi.perheid, '3' jarjestys
 									FROM tilausrivi
-									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.tila = 'O' AND lasku.alatila = 'A')
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+										AND lasku.tunnus = tilausrivi.otunnus
+										AND lasku.tila = 'O'
+										AND lasku.alatila = 'A'
+										AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'

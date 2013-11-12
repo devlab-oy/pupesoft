@@ -2440,6 +2440,9 @@
 										elseif ($vnim == "tavoiteindnyt") {
 											if ($valisummat["tavoitenyt"] <> 0)		$vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"],2);
 										}
+										elseif ($vnim == "kateproskumul") {
+											if ($valisummat["myyntikumul"] <> 0)	$vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100,2);
+										}
 										elseif ((string) $vsum != '') {
 											$vsum = sprintf("%.2f", $vsum);
 										}
@@ -2943,6 +2946,9 @@
 								elseif ($vnim == "tavoiteindnyt") {
 									if ($valisummat["tavoitenyt"] <> 0)		$vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"],2);
 								}
+								elseif ($vnim == "kateproskumul") {
+									if ($valisummat["myyntikumul"] <> 0)	$vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100,2);
+								}
 								elseif ((string) $vsum != '') {
 									$vsum = sprintf("%.2f", $vsum);
 								}
@@ -2993,7 +2999,10 @@
 								if ($totsummat["myykpled"] <> 0)		$vsum = round($totsummat["myykplnyt"] / $totsummat["myykpled"],2);
 							}
 							if ($vnim == "tavoiteindnyt") {
-								if ($totsummat["tavoitenyt"] <> 0)			$vsum = round($totsummat["myyntinyt"] / $totsummat["tavoitenyt"],2);
+								if ($totsummat["tavoitenyt"] <> 0)		$vsum = round($totsummat["myyntinyt"] / $totsummat["tavoitenyt"],2);
+							}
+							if ($vnim == "kateproskumul") {
+								if ($totsummat["myyntikumul"] <> 0)		$vsum = round($totsummat["katekumul"] / $totsummat["myyntikumul"] * 100,2);
 							}
 
 							if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";

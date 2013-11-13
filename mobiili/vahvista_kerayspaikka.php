@@ -100,6 +100,14 @@ if (isset($submit) and trim($submit) != '') {
 				if (!empty($row['uusiotunnus'])) {
 					$saapuminen = $row['uusiotunnus'];
 				}
+				elseif ($yhtiorow['suuntalavat'] == "" and $saapuminen != 0) {
+					// Jos yhtiö ei käytä suuntalavaa ja rivi ei ole saapumisella
+					$query = "	UPDATE tilausrivi SET
+								uusiotunnus = '{$saapuminen}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$row['tunnus']}'";
+					pupe_query($query);
+				}
 
 				// Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
 				if ($maara < $row['varattu']) {

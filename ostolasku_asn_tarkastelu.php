@@ -113,7 +113,7 @@
 	if (!isset($tee)) $tee = '';
 	if (!isset($valitse)) $valitse = '';
 	if (!isset($asn_rivi)) $asn_rivi = '';
-	if (!isset($toimipaikka)) $toimipaikka = 0;
+	if (!isset($toimipaikka)) $toimipaikka = '';
 	if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse, $kolli, $toimittajanumero, $asn_numero) = explode("!°!", $muut_siirrettavat);
 
 	if ($tee == 'poista_sanoma') {
@@ -1455,6 +1455,17 @@
 
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 
+			if (isset($toimipaikka) and trim($toimipaikka) != '') {
+
+				if ($toimipaikka != 'kaikki') {
+					$toimipaikka_ostotilaus_lisa = "AND lasku.vanhatunnus = '{$toimipaikka}'";
+					$toimipaikka_saapuminen_lisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
+				}
+			}
+			else {
+				$toimipaikka_ostotilaus_lisa = $toimipaikka_saapuminen_lisa = "";
+			}
+
 			// Ostotilaukset ja suoraan saapumiselle lis‰tyt, mutta ei saa olla saapumiselle kohdistettu
 			$query1 = "	(SELECT DISTINCT tilausrivi.tunnus,
 						tilausrivi.tuoteno,
@@ -1471,7 +1482,7 @@
 						AND lasku.tila = 'O'
 						AND lasku.alatila = 'A'
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
-						AND lasku.vanhatunnus = '{$toimipaikka}'
+						{$toimipaikka_ostotilaus_lisa}
 						{$tilausnrolisa})
 						UNION
 						(SELECT DISTINCT tilausrivi.tunnus,
@@ -1488,7 +1499,7 @@
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
 						AND lasku.tila = 'K'
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
-						AND lasku.yhtio_toimipaikka = '{$toimipaikka}'
+						{$toimipaikka_saapuminen_lisa}
 						{$tilausnrolisa})";
 
 			// Saapumiset, ei loppulasketut eik‰ sellaset joihin on jo vaihto-omaisuuslasku liitetty, pit‰‰ olla saapumiselle kohdistettu
@@ -1507,7 +1518,7 @@
 						AND lasku.tila 			= 'K'
 						AND lasku.tapvm 		= '0000-00-00'
 						AND lasku.mapvm 		= '0000-00-00'
-						AND lasku.yhtio_toimipaikka = '{$toimipaikka}'
+						{$toimipaikka_saapuminen_lisa}
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'";
 
 			if ($valitse == 'asn') {
@@ -2011,13 +2022,14 @@
 				echo "<th>",t("Toimipaikka"),"<br />(Finvoice, Maventa, ",t("Ostolaskut"),")</th>";
 				echo "<td colspan='4'>";
 				echo "<select name='toimipaikka'>";
+				echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
 				echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
 
 				while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 
 					$sel = '';
 
-					if (isset($toimipaikka)) {
+					if (isset($toimipaikka) and trim($toimipaikka) != "") {
 						if ($toimipaikka == $toimipaikat_row['tunnus']) {
 							$sel = ' selected';
 							$toimipaikka = $toimipaikat_row['tunnus'];
@@ -2183,7 +2195,7 @@
 				$lajilisa = 'tec';
 			}
 
-			$toimipaikkalisa = isset($toimipaikka) ? " AND lasku.yhtio_toimipaikka = '{$toimipaikka}' " : "";
+			$toimipaikkalisa = (isset($toimipaikka) and trim($toimipaikka) != "kaikki") ? " AND lasku.yhtio_toimipaikka = '{$toimipaikka}' " : "";
 
 			$query = "	SELECT toimi.ytunnus,
 						toimi.nimi,

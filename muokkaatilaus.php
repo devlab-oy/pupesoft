@@ -1871,6 +1871,8 @@
 			$toimitettavat_ennakot  = array();
 			$nakyman_tunnukset 		= array();
 
+			$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
+
 			while ($row = mysql_fetch_assoc($result)) {
 
 				if ($toim == 'OSTO' and $row['kuka_ext'] != '' and $ext_chk != '' and (int) $ext_chk != (int) $row['kuka_ext']) {
@@ -2063,8 +2065,6 @@
 
 					$zendesk_viesti = FALSE;
 					$ii = 0;
-
-					$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
 
 					for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 
@@ -2315,6 +2315,9 @@
 						if (in_array($whiletoim, array('OSTO', 'OSTOSUPER')) and $row['tila'] == 'O') {
 
 							if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
+
+								mysql_data_seek($ostotil_tiltyyp_res, 0);
+
 								// ensimmäinen rivi on ns. "oletusavainsana", ei haluta sitä
 								$ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res);
 

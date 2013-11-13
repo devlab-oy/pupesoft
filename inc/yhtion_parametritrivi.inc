@@ -1757,8 +1757,10 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
+		$sel0 = "";
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == 0) {
 			$sel0 = "selected";

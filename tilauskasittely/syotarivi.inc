@@ -258,7 +258,7 @@
 
 		echo "</table></form>";
 	}
-	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (isset($aputoim) and $aputoim == "RIVISYOTTO") or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "REKLAMAATIO")) {
+	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA" or (isset($aputoim) and $aputoim == "RIVISYOTTO") or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "REKLAMAATIO")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>$jarjlisa";
@@ -576,7 +576,7 @@
 			echo "<td valign='top'><input type='text' size='2' name='tilrivinumero' value='$rivinumero'></td>";
 		}
 
-		if (($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T"))) or ($yhtiorow["nimityksen_muutos_tilauksella"] == "T" and ($toim == "TARJOUS" or $toim == "EXTTARJOUS"))) {
+		if (($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA" or (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T"))) or ($yhtiorow["nimityksen_muutos_tilauksella"] == "T" and ($toim == "TARJOUS" or $toim == "EXTTARJOUS"))) {
 			echo "</tr>
 				<tr>$jarjlisa
 					<th colspan='{$nrospanni}' align='left'>".t("Tuotteen nimitys")."</th>

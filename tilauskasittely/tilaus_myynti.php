@@ -229,7 +229,7 @@ if ((int) $valitsetoimitus > 0 and $valitsetoimitus != $tilausnumero) {
 		$toim = "PROJEKTI";
 	}
 }
-elseif (in_array($valitsetoimitus, array("ENNAKKO", "EXTENNAKKO","TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
+elseif (in_array($valitsetoimitus, array("ENNAKKO", "EXTENNAKKO","TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI", "VAURIOPOYTAKIRJA"))) {
 	$uusitoimitus = $valitsetoimitus;
 }
 
@@ -527,7 +527,7 @@ if (
 //Haetaan otsikon kaikki tiedot
 if ((int) $kukarow["kesken"] > 0) {
 
-	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
+	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" or $toim == "VAURIOPOYTAKIRJA")) {
 		$query  = "	SELECT lasku.*, tyomaarays.*
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
@@ -578,6 +578,9 @@ if ($toim == "EXTRANET") {
 }
 elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 	$otsikko = t("Työmääräys");
+}
+elseif ($toim == "VAURIOPOYTAKIRJA") {
+	$otsikko = t("Vauriopöytäkirja");
 }
 elseif ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
 	$otsikko = t("Reklamaatio");
@@ -1000,7 +1003,7 @@ if (isset($tyhjenna)) {
 }
 
 if ($tee == "VALMIS"
-	and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+	and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "VAURIOPOYTAKIRJA"))
 	and $kateinen != ''
 	and $kukarow['extranet'] == ''
 	and (
@@ -1316,7 +1319,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		// Sisäinen työmääräys valmis
 		require("tyomaarays/tyomaarays.inc");
 	}
-	elseif ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO")) {
+	elseif ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "VAURIOPOYTAKIRJA")) {
 		// Työmääräys valmis
 		if ($yhtiorow['tyomaarayksen_kayttaytyminen'] == 'K' and $tyomaarayksen_kayttaytyminen == 'K') {
 
@@ -1787,7 +1790,7 @@ if ($uusitoimitus != "") {
 	}
 
 	//Tässä halutaan jo hakea uuden tilauksen tiedot
-	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
+	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" or $toim == "VAURIOPOYTAKIRJA" )) {
 		$query  = "	SELECT lasku.*, tyomaarays.*
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
@@ -1849,7 +1852,7 @@ if ($tee == 'vakuutushakemus') {
 }
 
 // siirretään tilauksella olevat tuotteet asiakkaan asiakashinnoiksi
-if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EXTTARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","TYOMAARAYS","PROJEKTI"))) {
+if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EXTTARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","TYOMAARAYS","PROJEKTI" ,"VAURIOPOYTAKIRJA"))) {
 
 	$query = "	SELECT tilausrivi.*,
 				if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara
@@ -2145,7 +2148,7 @@ if ($tee == '') {
 		$result = pupe_query($query);
 
 		//Haetaan laskurow uudestaan
-		if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
+		if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" or $toim == "VAURIOPOYTAKIRJA")) {
 			$query  = "	SELECT lasku.*, tyomaarays.*
 						FROM lasku
 						JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
@@ -2209,7 +2212,7 @@ if ($tee == '') {
 
  	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] <> 0) {
-		if ($yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
+		if ($yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI", "VAURIOPOYTAKIRJA"))) {
 			$jarjlisa = "<td class='back' style='width:10px; padding:0px; margin:0px;'></td>";
 		}
 		else {
@@ -2473,7 +2476,7 @@ if ($tee == '') {
 			}
 		}
 
-		if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","TYOMAARAYS","PROJEKTI"))) {
+		if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","TYOMAARAYS","PROJEKTI", "VAURIOPOYTAKIRJA"))) {
 			echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
 					<input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -3069,7 +3072,7 @@ if ($tee == '') {
 
 			echo "</optgroup></select>";
 		}
-		elseif ($yhtiorow["myyntitilaus_osatoimitus"] == "K" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
+		elseif ($yhtiorow["myyntitilaus_osatoimitus"] == "K" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA")) {
 			echo "<td><select name='luotunnusnippu' onchange='submit();'>";
 			echo "<option value =''>$kukarow[kesken]</option>";
 			echo "<option value ='$kukarow[kesken]'>".t("Tee osatoimitus")."</option>";
@@ -3196,7 +3199,7 @@ if ($tee == '') {
 				echo "</td></tr>";
 			}
 
-			if ($toim == 'TYOMAARAYS' or $toim == "TYOMAARAYS_ASENTAJA") {
+			if ($toim == 'TYOMAARAYS' or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA") {
 				// Katsotaan onko kalenterimerkintöjä
 				$query = "	SELECT left(kalenteri.pvmalku, 10) pvmalku_sort,
 							kalenteri.pvmalku,
@@ -4800,7 +4803,7 @@ if ($tee == '') {
 
 		$laskentalisa_riveille = "";
 
-		if (($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $laskurow["tunnusnippu"] > 0 and $projektilla == "") {
+		if (($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA") and $laskurow["tunnusnippu"] > 0 and $projektilla == "") {
 			$tilrivity	= "'L','E'";
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
@@ -4812,7 +4815,7 @@ if ($tee == '') {
 
 			$tunnuslisa = " and tilausrivi.otunnus in ($toimrow[tunnukset]) ";
 		}
-		elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
+		elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA") {
 			$tilrivity	= "'L'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
@@ -4878,7 +4881,7 @@ if ($tee == '') {
 
 		$tilauksen_jarjestys = $yhtiorow['tilauksen_jarjestys'];
 
-		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")) or $toim == "PROJEKTI") {
+		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")) or $toim == "PROJEKTI") {
 			$sorttauslisa = "tuotetyyppi, ";
 		}
 		elseif ($toim == 'EXTRANET') {
@@ -5074,7 +5077,7 @@ if ($tee == '') {
 
 			echo "<br><table>";
 
-			if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
+			if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
 				$trivityyppi_result = t_avainsana("TRIVITYYPPI", "", "ORDER BY avainsana.selitetark");
 
 				if (mysql_num_rows($trivityyppi_result) > 0) {
@@ -5385,7 +5388,7 @@ if ($tee == '') {
 
 				$edotunnus = $row["otunnus"];
 
-				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")) or $toim == "PROJEKTI") {
+				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")) or $toim == "PROJEKTI") {
 					if ($tuotetyyppi == "" and $row["tuotetyyppi"] == '2 Työt') {
 						$tuotetyyppi = 1;
 
@@ -5498,7 +5501,7 @@ if ($tee == '') {
 					$rivino--;
 				}
 
-				if ($muokkauslukko_rivi == "" and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "PROJEKTI"))) {
+				if ($muokkauslukko_rivi == "" and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "PROJEKTI", "VAURIOPOYTAKIRJA"))) {
 
 					$buttonit =  "<div align='center'><form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php#rivi_$rivino' name='siirra_$rivino' method='post'>
 									<input type='hidden' name='toim' value='$toim'>
@@ -5802,7 +5805,7 @@ if ($tee == '') {
 				$trivityyulos = "";
 				$paltoimiulos = "";
 
-				if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
+				if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
 					if ($muokkauslukko_rivi == "" and $row["ei_nayteta"] == "") {
 						if (mysql_num_rows($trivityyppi_result) > 0) {
 							//annetaan valita tilausrivin tyyppi
@@ -7485,7 +7488,7 @@ if ($tee == '') {
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 
-				if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))) {
+				if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "VAURIOPOYTAKIRJA"))) {
 
 					echo "<tr>{$jarjlisa}";
 
@@ -7913,7 +7916,7 @@ if ($tee == '') {
 		}
 
 		// JT-rivikäyttöliittymä
-		if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] != 0 and $toim != "TYOMAARAYS" and $toim != "TYOMAARAYS_ASENTAJA" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and ($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
+		if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] != 0 and $toim != "TYOMAARAYS" and $toim != "TYOMAARAYS_ASENTAJA" and $toim != "VAURIOPOYTAKIRJA" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and ($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
 
 			//katotaan eka halutaanko asiakkaan jt-rivejä näkyviin
 			$asjtq = "SELECT jtrivit from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
@@ -8030,6 +8033,22 @@ if ($tee == '') {
 					<input type='hidden' name='orig_tila' value='$orig_tila'>
 					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
 					<input type='submit' value='* ".t("Työmääräys lepäämään")." *'>
+					</form></td>";
+		}
+
+		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA") {
+			echo "	<td class='back' valign='top'>
+					<form name='tlepaamaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+					<input type='hidden' name='projektilla' value='$projektilla'>
+					<input type='hidden' name='tee' value='LEPAA'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='mista' value = '$mista'>
+					<input type='hidden' name='orig_tila' value='$orig_tila'>
+					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
+					<input type='submit' value='* ".t("Vauriopöytäkirja lepäämään")." *'>
 					</form></td>";
 		}
 

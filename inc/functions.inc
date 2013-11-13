@@ -24424,6 +24424,24 @@ if (!function_exists('hae_asiakashinnat')) {
 	}
 }
 
+if (!function_exists('hae_yhtion_oletusalv')) {
+
+	function hae_yhtion_oletusalv() {
+		global $kukarow, $yhtiorow;
+		//yhtiön oletusalvi!
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'alv'
+					AND selitetark != ''";
+		$oletusalv_result = pupe_query($query);
+
+		$yhtion_oletusalv = mysql_fetch_assoc($oletusalv_result);
+		return $yhtion_oletusalv['selite'];
+	}
+
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

@@ -52,10 +52,21 @@ if ($asiakasid != "" and $tiedot_laskulta == "") {
 				WHERE tunnus = '$asiakasid'";
 
 	$srow_from = "ASIAKAS";
-
-	$sresult = pupe_query($squery);
-	$srow = mysql_fetch_assoc($sresult);
 }
+else {
+	//tyomaarays.viite as tyomaarays_viite, selectoidaan erikseen koska resultista löytyy 2 viite kenttää: tyomaarays.viite ja lasku.viite. mysql driveri yliajaa tyomaarays.viiteen lasku.viitteellä
+	//kts. n rivi. 2717 Dynaaminen osio
+	$squery = "	SELECT tyomaarays.viite as tyomaarays_viite, tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+							FROM lasku
+							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+							WHERE lasku.tunnus = '$kukarow[kesken]'";
+
+	$srow_from = "LASKU";
+}
+
+$sresult = pupe_query($squery);
+$srow = mysql_fetch_assoc($sresult);
 
 if ($tila == "" and !isset($jatka)) {
 	if (!empty($srow)) {
@@ -63,6 +74,454 @@ if ($tila == "" and !isset($jatka)) {
 	}
 	else {
 		asiakkaan_valinta_formi();
+	}
+}
+
+if (isset($jatka)) {
+	// liitostunnusfixaus
+	if ((int)$liitostunnus == 0)
+		$liitostunnus = $asiakasid;
+
+	$asiakas = hae_asiakas($liitostunnus);
+	if ($liitostunnus != "") {
+		$chn = $asiakas['chn'];
+		if ($chn == '') {
+			$chn = '100';
+		}
+	}
+
+	$yhtioalv_tilino = $yhtiorow["alv"];
+
+	if (!isset($clearing)) {
+		$clearing = $laskurow['clearing'];
+	}
+
+	$query = "";
+	if ($kukarow['kesken'] == 0) {
+		$insert = true;
+		$query .= "	INSERT INTO lasku
+					SET laatija = '{$kukarow['kesken']}',
+					luontiaika = NOW(),";
+		$alatila = "";
+	}
+	else {
+		$insert = false;
+		$query .= "	UPDATE lasku
+					SET muuttaja = '{$kukarow['kesken']}',
+					muutospvm = NOW(),";
+	}
+
+	$query .= "	aktiivinen_kuljetus					= '',
+				alatila 							= '$alatila',
+				alv 								= '$alv',
+				alv_tili							= '$yhtioalv_tilino',
+				asiakkaan_tilausnumero				= '$asiakkaan_tilausnumero',
+				chn									= '$chn',
+				clearing							= '$clearing',
+				comments 							= '$comments',
+				eilahetetta 						= '$eilahe',
+				lahetetyyppi 						= '$lahetetyyppi',
+				laskutyyppi							= '{$laskutyyppi}',
+				erikoisale 							= '$erikoisale',
+				erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
+				huolitsija 							= '$huolitsija',
+				hyvaksynnanmuutos 					= '$luokka',
+				prioriteettinro						= '$prioriteettinro',
+				jakelu 								= '$jakelu',
+				jaksotettu							= '$jaksotettu',
+				jtkielto							= '$jtkielto',
+				kassalipas							= '$kassalipas',
+				kauppatapahtuman_luonne				= '$kauppatapahtuman_luonne',
+				kerayspvm 							= '$kervv-$kerkk-$kerpp',
+				keraysvko 							= '$keraysvko',
+				ketjutus 							= '$ketjutus',
+				kohde								= '$kohde',
+				kohdistettu 						= '$maksaja',
+				kolmikantakauppa					= '{$kolmikantakauppa}',
+				kuljetus 							= '$kuljetus',
+				kuljetusmuoto						= '',
+				label								= '{$label}',
+				laskutusvkopv 						= '$laskutusvkopv',
+				liitostunnus						= '$liitostunnus',
+				maa 								= '$maa',
+				maksuehto 							= '$maksuehto',
+				maksuteksti 						= '$maksuteksti',
+				myyja 								= '$myyja',
+				allekirjoittaja						= '$allekirjoittaja',
+				nimi 								= '$nimi',
+				nimitark 							= '$nimitark',
+				ohjausmerkki						= '$ohjausmerkki',
+				olmapvm								= '$voimaika_vv-$voimaika_kk-$voimaika_pp',
+				osatoimitus							= '$osatoimitus',
+				osoite 								= '$osoite',
+				ostotilauksen_kasittely 			= '{$ostotilauksen_kasittely}',
+				ovttunnus 							= '$ovttunnus',
+				piiri 								= '$piiri',
+				postino 							= '$postino',
+				postitp 							= '$postitp',
+				rahtivapaa							= '$rahtivapaa',
+				sisainen 							= '$sisainen',
+				sisviesti1 							= '$sisviesti1',
+				sisviesti2							= '$sisviesti2',
+				sisviesti3							= '$sisviesti3',
+				splittauskielto						= '$splittauskielto',
+				tilaustyyppi						= '$tilaustyyppi',
+				tilausvahvistus 					= '$tilausvahvistus',
+				tilausyhteyshenkilo					= '$tilausyhteyshenkilo',
+				toimaika 							= '$toimvv-$toimkk-$toimpp',
+				toimitusehto 						= '$toimitusehto',
+				toimitustapa 						= '$toimitustapa',
+				toimvko	 							= '$toimvko',
+				toim_maa 							= '$toim_maa',
+				toim_nimi 							= '$tnimi',
+				toim_nimitark 						= '$tnimitark',
+				toim_osoite 						= '$tosoite',
+				toim_ovttunnus 						= '$toim_ovttunnus',
+				toim_postino 						= '$tpostino',
+				toim_postitp 						= '$tpostitp',
+				tunnusnippu							= '$tunnusnippu',
+				valkoodi 							= '$valkoodi',
+				varasto 							= '$varasto',
+				verkkotunnus						= '$verkkotunnus',
+				vienti 								= '$vienti',
+				vienti_kurssi						= '$kurssi',
+				viesti 								= '$viesti',
+				viikorkopros 						= '$yhtiorow[viivastyskorko]',
+				yhtio 								= '$kukarow[yhtio]',
+				yhtio_kotipaikka					= '$yhtiokotipaikka',
+				yhtio_maa							= '$yhtiomaa',
+				yhtio_nimi							= '$yhtionimi',
+				yhtio_osoite						= '$yhtioosoite',
+				yhtio_ovttunnus						= '$yhtioovttunnus',
+				yhtio_postino						= '$yhtiopostino',
+				yhtio_postitp						= '$yhtiopostitp',
+				yhtio_toimipaikka					= '$yhtiotoimipaikka',
+				ytunnus								= '$ytunnus'";
+
+	pupe_query($query);
+
+	$id = mysql_insert_id();
+
+	if ($id != 0) {
+		$query = "	UPDATE kuka
+					SET kesken = '{$id}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kuka = '{$kukarow['kuka']}'
+					AND session = '{$session}'";
+		pupe_query($query);
+
+		$kukarow["kesken"] = $id;
+		$tilausnumero = $id;
+	}
+
+	if ((int)$kukarow["kesken"] != 0) {
+		//Dynaamisen osion checkbox toiminnallisuutta varten. Kaikki tyomääräyksen requestista tulevat kentät
+		//pitää käydä läpi ja katsoa onko array (checkbox), paitsi date ja datetime tyyppiset kentät
+		$dynaamiset_kentat = array(
+			'kotipuh'		 => $kotipuh,
+			'tyopuh'		 => $tyopuh,
+			'myyjaliike'	 => $myyjaliike,
+			'rekno'			 => $rekno,
+			'mittarilukema'	 => $mittarilukema,
+			'merkki'		 => $merkki,
+			'mallivari'		 => $mallivari,
+			'valmnro'		 => $valmnro,
+			'komm1'			 => $komm1,
+			'komm2'			 => $komm2,
+			'suorittaja'	 => $suorittaja,
+			'viite'			 => $viite,
+			'prioriteetti'	 => $prioriteetti,
+			'jalleenmyyja'	 => $jalleenmyyja,
+			'tehdas'		 => $tehdas,
+			'tyoaika'		 => $tyoaika,
+			'vikakoodi'		 => $vikakoodi,
+			'takuunumero'	 => $takuunumero,
+			'tyokoodi'		 => $tyokoodi,
+			'hyvaksy'		 => $hyvaksy,
+		);
+
+		foreach ($dynaamiset_kentat as $kentan_nimi => $dynaaminen_kentta) {
+			if (is_array($dynaaminen_kentta)) {
+				${$kentan_nimi} = implode('#', $dynaaminen_kentta);
+			}
+		}
+
+		if ($insert) {
+			$query = "	INSERT INTO tyomaarays
+						SET laatija = '{$kukarow['kuka']}',
+						luontiaika = NOW(),";
+		}
+		else {
+			$query = "	UPDATE tyomaarays
+						SET ";
+		}
+
+		$query .= "	yhtio			= '$kukarow[yhtio]',
+					kotipuh 		= '$kotipuh',
+					tyopuh 			= '$tyopuh',
+					myyjaliike 		= '$myyjaliike',
+					ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
+					rekno 			= '$rekno',
+					mittarilukema 	= '$mittarilukema',
+					merkki 			= '$merkki',
+					mallivari 		= '$mallivari',
+					valmnro 		= '$valmnro',
+					tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
+					luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
+					valmis			= '$valmisvv-$valmiskk-$valmispp',
+					poistui			= '$poistuivv-$poistuikk-$poistuipp',
+					vpk_valmis		= '$vpk_valmisvv-$vpk_valmiskk-$vpk_valmispp',
+					komm1 			= '$komm1',
+					komm2 			= '$komm2',
+					suorittaja 		= '$suorittaja',
+					viite	 		= '$viite',
+					prioriteetti	= '$prioriteetti',
+					jalleenmyyja 	= '$jalleenmyyja',
+					tehdas			= '$tehdas',
+					tyoaika			= '$tyoaika',
+					vikakoodi		= '$vikakoodi',
+					takuunumero		= '$takuunumero',
+					tyokoodi		= '$tyokoodi',
+					hyvaksy			= '$hyvaksy',
+					lisakuluprosentti = '{$yhtiorow['lisakuluprosentti']}',
+					tyojono			= '{$tyojono}',
+					tyostatus		= '{$tyostatus}',";
+
+		if ($insert) {
+			$query .= " otunnus = '{$kukarow['kesken']}'";
+		}
+		else {
+			$query = substr($query, 0, -1);
+			$query .= " WHERE otunnus = '{$kukarow['kesken']}'";
+		}
+
+		pupe_query($query);
+
+		$ylatila = 'A';
+	}
+
+	$tee = "";
+}
+
+// Palutetaan puhtaat kukarow ja yhtiörow
+$kukarow = hae_kukarow($kukarow['kuka'], $kukarow['yhtio']);
+$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+unset($alv);
+
+function luo_vauriopoytakirja() {
+	global $kukarow, $yhtiorow, $alv, $liitostunnus, $asiakasid, $laskurow;
+
+	// liitostunnusfixaus
+	if ((int)$liitostunnus == 0)
+		$liitostunnus = $asiakasid;
+
+	$asiakas = hae_asiakas($liitostunnus);
+	if ($liitostunnus != "") {
+		$chn = $asiakas['chn'];
+		if ($chn == '') {
+			$chn = '100';
+		}
+	}
+
+	$yhtioalv_tilino = $yhtiorow["alv"];
+
+	if (!isset($clearing)) {
+		$clearing = $laskurow['clearing'];
+	}
+
+	$query = "";
+	if ($kukarow['kesken'] == 0) {
+		$insert = true;
+		$query .= "	INSERT INTO lasku
+					SET laatija = '{$kukarow['kesken']}',
+					luontiaika = NOW(),";
+		$alatila = "";
+	}
+	else {
+		$insert = false;
+		$query .= "	UPDATE lasku
+					SET muuttaja = '{$kukarow['kesken']}',
+					muutospvm = NOW(),";
+	}
+
+	$query .= "	aktiivinen_kuljetus					= '',
+				alatila 							= '$alatila',
+				alv 								= '$alv',
+				alv_tili							= '$yhtioalv_tilino',
+				asiakkaan_tilausnumero				= '$asiakkaan_tilausnumero',
+				chn									= '$chn',
+				clearing							= '$clearing',
+				comments 							= '$comments',
+				eilahetetta 						= '$eilahe',
+				lahetetyyppi 						= '$lahetetyyppi',
+				laskutyyppi							= '{$laskutyyppi}',
+				erikoisale 							= '$erikoisale',
+				erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
+				huolitsija 							= '$huolitsija',
+				hyvaksynnanmuutos 					= '$luokka',
+				prioriteettinro						= '$prioriteettinro',
+				jakelu 								= '$jakelu',
+				jaksotettu							= '$jaksotettu',
+				jtkielto							= '$jtkielto',
+				kassalipas							= '$kassalipas',
+				kauppatapahtuman_luonne				= '$kauppatapahtuman_luonne',
+				kerayspvm 							= '$kervv-$kerkk-$kerpp',
+				keraysvko 							= '$keraysvko',
+				ketjutus 							= '$ketjutus',
+				kohde								= '$kohde',
+				kohdistettu 						= '$maksaja',
+				kolmikantakauppa					= '{$kolmikantakauppa}',
+				kuljetus 							= '$kuljetus',
+				kuljetusmuoto						= '',
+				label								= '{$label}',
+				laskutusvkopv 						= '$laskutusvkopv',
+				liitostunnus						= '$liitostunnus',
+				maa 								= '$maa',
+				maksuehto 							= '$maksuehto',
+				maksuteksti 						= '$maksuteksti',
+				myyja 								= '$myyja',
+				allekirjoittaja						= '$allekirjoittaja',
+				nimi 								= '$nimi',
+				nimitark 							= '$nimitark',
+				ohjausmerkki						= '$ohjausmerkki',
+				olmapvm								= '$voimaika_vv-$voimaika_kk-$voimaika_pp',
+				osatoimitus							= '$osatoimitus',
+				osoite 								= '$osoite',
+				ostotilauksen_kasittely 			= '{$ostotilauksen_kasittely}',
+				ovttunnus 							= '$ovttunnus',
+				piiri 								= '$piiri',
+				postino 							= '$postino',
+				postitp 							= '$postitp',
+				rahtivapaa							= '$rahtivapaa',
+				sisainen 							= '$sisainen',
+				sisviesti1 							= '$sisviesti1',
+				sisviesti2							= '$sisviesti2',
+				sisviesti3							= '$sisviesti3',
+				splittauskielto						= '$splittauskielto',
+				tilaustyyppi						= '$tilaustyyppi',
+				tilausvahvistus 					= '$tilausvahvistus',
+				tilausyhteyshenkilo					= '$tilausyhteyshenkilo',
+				toimaika 							= '$toimvv-$toimkk-$toimpp',
+				toimitusehto 						= '$toimitusehto',
+				toimitustapa 						= '$toimitustapa',
+				toimvko	 							= '$toimvko',
+				toim_maa 							= '$toim_maa',
+				toim_nimi 							= '$tnimi',
+				toim_nimitark 						= '$tnimitark',
+				toim_osoite 						= '$tosoite',
+				toim_ovttunnus 						= '$toim_ovttunnus',
+				toim_postino 						= '$tpostino',
+				toim_postitp 						= '$tpostitp',
+				tunnusnippu							= '$tunnusnippu',
+				valkoodi 							= '$valkoodi',
+				varasto 							= '$varasto',
+				verkkotunnus						= '$verkkotunnus',
+				vienti 								= '$vienti',
+				vienti_kurssi						= '$kurssi',
+				viesti 								= '$viesti',
+				viikorkopros 						= '$yhtiorow[viivastyskorko]',
+				yhtio 								= '$kukarow[yhtio]',
+				yhtio_kotipaikka					= '$yhtiokotipaikka',
+				yhtio_maa							= '$yhtiomaa',
+				yhtio_nimi							= '$yhtionimi',
+				yhtio_osoite						= '$yhtioosoite',
+				yhtio_ovttunnus						= '$yhtioovttunnus',
+				yhtio_postino						= '$yhtiopostino',
+				yhtio_postitp						= '$yhtiopostitp',
+				yhtio_toimipaikka					= '$yhtiotoimipaikka',
+				ytunnus								= '$ytunnus'";
+
+	pupe_query($query);
+
+	$id = mysql_insert_id();
+
+	if ((int)$kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
+
+		$query = "	UPDATE kuka
+					SET kesken = '{$id}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kuka = '{$kukarow['kuka']}'
+					AND session = '{$session}'";
+		pupe_query($query);
+
+		$kukarow["kesken"] = $id;
+		$tilausnumero = $id;
+
+		//Dynaamisen osion checkbox toiminnallisuutta varten. Kaikki tyomääräyksen requestista tulevat kentät
+		//pitää käydä läpi ja katsoa onko array (checkbox), paitsi date ja datetime tyyppiset kentät
+		$dynaamiset_kentat = array(
+			'kotipuh'		 => $kotipuh,
+			'tyopuh'		 => $tyopuh,
+			'myyjaliike'	 => $myyjaliike,
+			'rekno'			 => $rekno,
+			'mittarilukema'	 => $mittarilukema,
+			'merkki'		 => $merkki,
+			'mallivari'		 => $mallivari,
+			'valmnro'		 => $valmnro,
+			'komm1'			 => $komm1,
+			'komm2'			 => $komm2,
+			'suorittaja'	 => $suorittaja,
+			'viite'			 => $viite,
+			'prioriteetti'	 => $prioriteetti,
+			'jalleenmyyja'	 => $jalleenmyyja,
+			'tehdas'		 => $tehdas,
+			'tyoaika'		 => $tyoaika,
+			'vikakoodi'		 => $vikakoodi,
+			'takuunumero'	 => $takuunumero,
+			'tyokoodi'		 => $tyokoodi,
+			'hyvaksy'		 => $hyvaksy,
+		);
+
+		foreach ($dynaamiset_kentat as $kentan_nimi => $dynaaminen_kentta) {
+			if (is_array($dynaaminen_kentta)) {
+				${$kentan_nimi} = implode('#', $dynaaminen_kentta);
+			}
+		}
+
+		if ($insert) {
+			$query = "	INSERT INTO tyomaarays
+						SET laatija = '{$kukarow['kuka']}',
+						luontiaika = NOW(),";
+		}
+		else {
+			$query = "	UPDATE tyomaarays
+						SET ";
+		}
+
+		$query .= "	yhtio			= '$kukarow[yhtio]',
+					kotipuh 		= '$kotipuh',
+					tyopuh 			= '$tyopuh',
+					myyjaliike 		= '$myyjaliike',
+					ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
+					rekno 			= '$rekno',
+					mittarilukema 	= '$mittarilukema',
+					merkki 			= '$merkki',
+					mallivari 		= '$mallivari',
+					valmnro 		= '$valmnro',
+					tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
+					luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
+					valmis			= '$valmisvv-$valmiskk-$valmispp',
+					poistui			= '$poistuivv-$poistuikk-$poistuipp',
+					vpk_valmis		= '$vpk_valmisvv-$vpk_valmiskk-$vpk_valmispp',
+					komm1 			= '$komm1',
+					komm2 			= '$komm2',
+					suorittaja 		= '$suorittaja',
+					viite	 		= '$viite',
+					prioriteetti	= '$prioriteetti',
+					jalleenmyyja 	= '$jalleenmyyja',
+					tehdas			= '$tehdas',
+					tyoaika			= '$tyoaika',
+					vikakoodi		= '$vikakoodi',
+					takuunumero		= '$takuunumero',
+					tyokoodi		= '$tyokoodi',
+					hyvaksy			= '$hyvaksy',
+					lisakuluprosentti = '{$yhtiorow['lisakuluprosentti']}',
+					tyojono			= '{$tyojono}',
+					tyostatus		= '{$tyostatus}',
+					otunnus 		= '$kukarow[kesken]'";
+
+		pupe_query($query);
 	}
 }
 
@@ -125,6 +584,18 @@ function asiakkaan_valinta_formi() {
 function vauriopoytakirja_otsikko() {
 	global $lopetus, $ruutulimit, $toim, $projektilla, $from, $tilausnumero, $mista, $orig_tila, $orig_alatila, $srow, $asiakasid, $ylatila, $alatila, $asentaja, $tyojono;
 
+	$aiheuttaja = array(
+		'nimi'		 => $srow['nimi'],
+		'nimitark'	 => $srow['nimitark'],
+		'osoite'	 => $srow['osoite'],
+		'postino'	 => $srow['postino'],
+		'postitp'	 => $srow['postitp'],
+		'maa'		 => $srow['maa'],
+		'puhelin'	 => $srow['puhelin'],
+		'gsm'		 => $srow['gsm'],
+		'ytunnus'	 => $srow['ytunnus'],
+	);
+
 	echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
 
 	echo "<input type='hidden' name='tee' value='OTSIK'>";
@@ -157,6 +628,9 @@ function vauriopoytakirja_otsikko() {
 			<input type='hidden' name='asentaja' 						 value = '$asentaja'>
 			<input type='hidden' name='tyojono' 						 value = '$tyojono'>
 			<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
+	echo "<input type='hidden' ACCESSKEY='J' name='jatka' value='".t("Jatka")."' />";
+
+	vauriopoytakirja_yleiset_kentat();
 
 	$dynaamiset_kentat = hae_dynaamiset_kentat();
 	echo "<table class='vauriopoytakirja_otsikko'>";
@@ -328,7 +802,7 @@ function vauriopoytakirja_otsikko() {
 
 	echo "</table>";
 
-	aiheuttaja(array());
+	aiheuttaja($aiheuttaja);
 	aiheuttaja(array(), 'laskutusosoite');
 
 	echo "<table class='vauriopoytakirja_otsikko'>";
@@ -380,7 +854,7 @@ function vauriopoytakirja_otsikko() {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='nayttopoytakirja_lahetetty' />";
+	echo "<input type='checkbox' name='nayttopoytakirja_lahetetty' />";
 	echo "</td>";
 
 	echo "</tr>";
@@ -450,9 +924,11 @@ function vauriopoytakirja_otsikko() {
 function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	if ($tyyppi == 'aiheuttaja') {
 		$otsikko = t('Aiheuttaja');
+		$prefix = "";
 	}
 	else {
 		$otsikko = t('Laskutusosoite');
+		$prefix = "laskutus_";
 	}
 	echo "<table class='vauriopoytakirja_otsikko'>";
 
@@ -474,7 +950,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='nimi' />";
+	echo "<input type='text' name='{$prefix}nimi' value='{$params['nimi']}' />";
 	echo "</td>";
 
 	echo "<td>";
@@ -482,7 +958,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='puhelinnumero' />";
+	echo "<input type='text' name='{$prefix}puhelin' value='{$params['puhelin']}' />";
 	echo "</td>";
 	echo "</tr>";
 
@@ -492,7 +968,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='osoite' />";
+	echo "<input type='text' name='{$prefix}osoite' value='{$params['osoite']}' />";
 	echo "</td>";
 
 	echo "<td>";
@@ -500,7 +976,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='matkapuhelin' />";
+	echo "<input type='text' name='{$prefix}gsm' value='{$params['gsm']}' />";
 	echo "</td>";
 	echo "</tr>";
 
@@ -510,7 +986,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='postilokero' />";
+	echo "<input type='text' name='{$prefix}postilokero' />";
 	echo "</td>";
 
 	echo "<td>";
@@ -518,7 +994,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='ytunnus' />";
+	echo "<input type='text' name='{$prefix}ytunnus' value='{$params['ytunnus']}' />";
 	echo "</td>";
 	echo "</tr>";
 
@@ -528,7 +1004,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='postino' />";
+	echo "<input type='text' name='{$prefix}postino' value='{$params['postino']}' />";
 	echo "</td>";
 
 	echo "<td>";
@@ -536,13 +1012,50 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='postitp' />";
+	echo "<input type='text' name='{$prefix}postitp' value='{$params['postitp']}' />";
 	echo "</td>";
 	echo "</tr>";
 
 	echo "</table>";
+}
 
-	echo "</form>";
+function vauriopoytakirja_yleiset_kentat() {
+	global $kukarow, $yhtiorow, $srow;
+	$yhtion_oletusalv = hae_yhtion_oletusalv();
+
+	if (isset($srow)) {
+		if ($srow['alv'] == 0) {
+			$sel_veroton = 'selected';
+			$sel_verollinen = '';
+		}
+		if ($srow['alv'] == $yhtion_oletusalv) {
+			$sel_verollinen = 'selected';
+			$sel_veroton = '';
+		}
+	}
+
+	echo "<table class='vauriopoytakirja_otsikko'>";
+
+	echo "<tr>";
+	echo "<th colspan='4'>".t('Yleiset tiedot')."</th>";
+	echo "</tr>";
+
+	echo "<tr>";
+
+	echo "<td>";
+	echo t('ALV');
+	echo "</td>";
+
+	echo "<td>";
+	echo "<select name='alv'>";
+	echo "<option value='{$yhtion_oletusalv}' {$sel_verollinen}>".t("Verollinen myynti")."</option>";
+	echo "<option value='0' {$sel_veroton}>".t("Veroton myynti")."</option>";
+	echo "</select>";
+	echo "</td>";
+
+	echo "</tr>";
+
+	echo "</table>";
 }
 
 function otsikko($toim) {

@@ -3302,6 +3302,7 @@
 					$query = "	SELECT *
 								FROM kirjoittimet
 								WHERE yhtio = '$kukarow[yhtio]'
+								AND komento != 'EDI'
 								ORDER by kirjoitin";
 					$kirre = pupe_query($query);
 
@@ -3350,6 +3351,7 @@
 					$query = "	SELECT *
 								FROM kirjoittimet
 								WHERE yhtio = '{$kukarow["yhtio"]}'
+								AND komento != 'EDI'
 								ORDER by kirjoitin";
 					$kirre = pupe_query($query);
 

@@ -1416,7 +1416,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-	if (mysql_num_rows($toimipaikat_res) != 0) {
+	if (mysql_num_rows($toimipaikat_res) > 0) {
 
 		echo "<tr>";
 		echo "<td>",t("Toimipaikka"),"</td>";

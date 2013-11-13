@@ -560,8 +560,8 @@
 
 				$query = "	SELECT *
 							FROM kirjoittimet
-							WHERE
-							yhtio = '$kukarow[yhtio]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND komento != 'EDI'
 							ORDER by kirjoitin";
 				$kirre = mysql_query($query) or pupe_error($query);
 
@@ -1204,10 +1204,13 @@
 					$query = "	SELECT *
 								FROM kirjoittimet
 								WHERE yhtio = '$kukarow[yhtio]'
-								ORDER by kirjoitin";
+								AND komento != 'EDI'
+								ORDER BY kirjoitin";
 					$kirre = mysql_query($query) or pupe_error($query);
 
 					echo "<$ero valign='top'><select name='valittu_tulostin'>";
+
+					echo "<option value=''>".t("Ei tulosteta")."</option>";
 
 					while ($kirrow = mysql_fetch_array($kirre)) {
 						$sel = '';
@@ -1311,8 +1314,8 @@
 
 				$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
 							FROM kirjoittimet
-							WHERE
-							$logistiikka_yhtiolisa
+							WHERE $logistiikka_yhtiolisa
+							AND komento != 'EDI'
 							GROUP BY komento
 							ORDER BY jarjestys, kirjoitin";
 				$kirre = mysql_query($query) or pupe_error($query);

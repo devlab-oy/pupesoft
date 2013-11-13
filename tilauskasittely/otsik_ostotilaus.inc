@@ -294,10 +294,9 @@
 			}
 			echo "</select></td></tr>";
 
-			$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]'";
-			$yresult = mysql_query($query) or pupe_error($query);
+			$yresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-			if (mysql_num_rows($yresult) != 0) {
+			if (mysql_num_rows($yresult) > 0) {
 
 				echo "<tr><td></td><td></td>";
 				echo "<td>".t("Tilaava toimipiste").":</td>";

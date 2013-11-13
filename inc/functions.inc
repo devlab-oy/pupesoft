@@ -10774,7 +10774,8 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		if (isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
-						WHERE yhtio='$yhtio' and tunnus='$kukarow[toimipaikka]'";
+						WHERE yhtio = '$yhtio'
+						and tunnus  = '$kukarow[toimipaikka]'";
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {

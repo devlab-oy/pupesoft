@@ -320,7 +320,7 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 	$tee = '';
 }
 
-if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $kukarow['kesken'] > 0 and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
+if (($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' or ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and $tee == 'VALMIS' and isset($tilaustyyppi) and $tilaustyyppi == 'T')) and $kukarow['kesken'] > 0 and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
 
 	$kukarow['kesken'] = (int) $kukarow['kesken'];
 
@@ -8305,6 +8305,7 @@ if ($tee == '') {
 					<input type='hidden' name='projektilla' value='$projektilla'>
 					<input type='hidden' name='tee' value='VALMIS'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='tilaustyyppi' value='{$laskurow['tilaustyyppi']}'>
 					<input type='hidden' name='mista' value = '$mista'>
 					<input type='hidden' name='rahtipainohinta' value='$rahtihinta'>
 					<input type='hidden' name='kaikkiyhteensa' value='".sprintf('%.2f',$summa)."'>

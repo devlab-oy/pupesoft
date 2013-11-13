@@ -2146,10 +2146,16 @@
 
 			// Jos vanha saapuminen, vanhat pyöristyksen nollataan, että ne eivät kumuloidu
 			$laskurow['pyoristys_erot'] = 0;
+			if ($laskurow["rahti_etu"] != 0) {
+				$rahti_etu = $laskurow["rahti_etu"] * ((100 + $laskurow["rahti_etu_alv"]) / 100);
+			}	
+			else {
+					$rahti_etu = $laskurow["rahti_etu"];
+				}
 
 			$valittusumma        = round($hintarow["hinta"], 2);
 			$laskunsumma         = round($osrow["summa"] - $valittusumma, 2);
-			$checksumma			 = $osrow["summa"] - $hintarow["hinta"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot'] - $osrow['osto_kulut'];
+			$checksumma			 = $osrow["summa"] - $hintarow["hinta"] - $rahti_etu - $laskurow['pyoristys_erot'] - $osrow['osto_kulut'];
 			$kohdistettava_summa = round($osrow["summa"], 2);
 
 			$pyoristys_erot_alv = 0;
@@ -2422,6 +2428,7 @@
 
 					// Laitetaan rivikohtaiset rahtikulut eturahtiin
 					$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;
+					$laskurow['rahti_etu_alv'] = $rahti_etu_alv;
 
 					$query = "	UPDATE lasku SET
 								rahti_etu = rahti_etu + $rivikohtaiset_rahtikulut,

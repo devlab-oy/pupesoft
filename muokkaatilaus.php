@@ -2318,17 +2318,6 @@
 								$ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res);
 								$varastotila .= "<br /><font class='info'>".t($ostotil_tiltyyp_row['selitetark'])."</font>";
 							}
-							else {
-
-								switch ($row['tilaustyyppi']) {
-									case '1':
-										$varastotila .= "<br /><font class='info'>".t("Pikalähetys")."</font>";
-										break;
-									case '2':
-										$varastotila .= "<br /><font class='info'>".t("Normaalitilaus")."</font>";
-										break;
-								}
-							}
 						}
 
 						echo "<td class='$class' valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";

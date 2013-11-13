@@ -2064,6 +2064,8 @@
 					$zendesk_viesti = FALSE;
 					$ii = 0;
 
+					$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
+
 					for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 
 						$fieldname = mysql_field_name($result,$i);
@@ -2311,8 +2313,6 @@
 						}
 
 						if (in_array($whiletoim, array('OSTO', 'OSTOSUPER')) and $row['tila'] == 'O') {
-
-							$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
 
 							if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
 								// ensimmäinen rivi on ns. "oletusavainsana", ei haluta sitä

@@ -72,6 +72,19 @@
 
 	if ($ytunnus != '') {
 
+		if (isset($toimipaikka)) {
+
+			if ($toimipaikka != 'kaikki') {
+				$toimipaikkalisa = " AND lasku.vanhatunnus = '{$toimipaikka}' ";
+			}
+			else {
+				$toimipaikkalisa = "";
+			}
+		}
+		else {
+			$toimipaikkalisa = " AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}' ";
+		}
+
 		$query = "	SELECT max(lasku.tunnus) maxtunnus, GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ', ') tunnukset
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.uusiotunnus = 0 and tilausrivi.tyyppi = 'O')
@@ -79,6 +92,7 @@
 					and lasku.liitostunnus = '{$toimittajaid}'
 					and lasku.tila = 'O'
 					and lasku.alatila = 'A'
+					{$toimipaikkalisa}
 					HAVING tunnukset IS NOT NULL";
 		$result = pupe_query($query);
 
@@ -197,10 +211,10 @@
 		echo "<tr><td>{$laskurow['tila']}</td><td>{$laskurow['toimaika']}</td><td>{$tunnusrow['tunnukset']}</td></tr>";
 		echo "</table><br>";
 
-		echo "	<table>
-				<form method='post'>
+		echo "	<form method='post'>
 				<input type='hidden' name='ytunnus' value = '{$ytunnus}'>
-				<input type='hidden' name='toimittajaid' value = '{$toimittajaid}'>";
+				<input type='hidden' name='toimittajaid' value = '{$toimittajaid}'>
+				<table>";
 
 		echo "<tr><th>",t("Näytä tilaukset"),"</th><td>";
 		echo "<select name='otunnus' onchange='submit();'>";
@@ -254,9 +268,45 @@
 		echo "<td><select name='nayta_rivit' onchange='submit();'>";
 		echo "<option value=''>",t("Kaikki avoimet rivit"),"</option>";
 		echo "<option value='vahvistamattomat' {$select}>",t("Vain vahvistamattomia rivejä"),"</option>";
-		echo "</select></td>";
+		echo "</select></td></tr>";
 
-		echo "</form></td></tr></table><br>";
+		$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+		if (mysql_num_rows($toimipaikat_res) != 0) {
+
+			echo "<tr>";
+			echo "<th>",t("Toimipaikka"),"</th>";
+			echo "<td>";
+			echo "<select name='toimipaikka' onchange='submit();'>";
+			echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+			echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+			while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+				$sel = '';
+
+				if (isset($toimipaikka)) {
+					if ($toimipaikka == $toimipaikat_row['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $toimipaikat_row['tunnus'];
+					}
+				}
+				else {
+					if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $toimipaikat_row['tunnus'];
+					}
+				}
+
+				echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+			echo "</tr>";
+		}
+
+		echo "</table></form><br>";
 
 		echo "	<table>
 				<form method='post'>
@@ -285,10 +335,10 @@
 				<input type='hidden' name='tee' value = 'TULOSTAPDF'>";
 
 		echo "<tr><th>".t('Tiedostomuoto').":</th>";
-		
+
 		$sel = "";
 		if (isset($tulosta_exceliin) and $tulosta_exceliin != "") $sel = "SELECTED";
-		
+
 		echo "<td><select name='tulosta_exceliin'>";
 		echo "<option value=''>",t("PDF"),"</option>";
 		echo "<option value='EXCEL' $sel>",t("Excel"),"</option>";

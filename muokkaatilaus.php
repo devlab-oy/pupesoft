@@ -2312,11 +2312,25 @@
 
 						if (in_array($whiletoim, array('OSTO', 'OSTOSUPER')) and $row['tila'] == 'O') {
 
-							$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP", '', " AND selite = '{$row['tilaustyyppi']}'");
+							$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
 
 							if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
+								// ensimmäinen rivi on ns. "oletusavainsana", ei haluta sitä
 								$ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res);
-								$varastotila .= "<br /><font class='info'>".t($ostotil_tiltyyp_row['selitetark'])."</font>";
+
+								while ($ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res)) {
+
+									if ($ostotil_tiltyyp_row['selite'] == $row['tilaustyyppi']) {
+										$varastotila .= "<br /><font class='info'>".t($ostotil_tiltyyp_row['selitetark'])."</font>";
+										break;
+									}
+								}
+							}
+							else {
+
+								if ($row['tilaustyyppi'] == '1') {
+									$varastotila .= "<br /><font class='info'>".t("Pikalähetys")."</font>";
+								}
 							}
 						}
 

@@ -82,7 +82,7 @@
 			}
 		}
 		else {
-			$toimipaikkalisa = " AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}' ";
+			$toimipaikkalisa = $kukarow['toimipaikka'] != 0 ? " AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}' " : "";
 		}
 
 		$query = "	SELECT max(lasku.tunnus) maxtunnus, GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ', ') tunnukset

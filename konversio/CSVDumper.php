@@ -315,7 +315,7 @@ abstract class CSVDumper {
 		}
 
 		exec('cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"');
-		exec('rm "'.$tiedosto_polku.'"');
+		unlink($tiedosto_polku);
 	}
 
 	abstract protected function konvertoi_rivit();

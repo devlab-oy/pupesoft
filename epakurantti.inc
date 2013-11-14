@@ -49,7 +49,7 @@
 					LEFT JOIN tuotepaikat ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.tuoteno = '$tuoteno'
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12";
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13";
 		$result = pupe_query($query);
 		$tuoterow = mysql_fetch_assoc($result);
 
@@ -725,46 +725,128 @@
 			$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 		}
 
-		// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
-		$kustp_ins 		= $tuoterow["kustp"];
-		$kohde_ins 		= $tuoterow["kohde"];
-		$projekti_ins 	= $tuoterow["projekti"];
+		// tehdään kirjaukset per toimipaikka, kustannuspaikka tulee ensisijaisesti toimipaikan takaa
+		if ($yhtiorow["tarkenteiden_prioriteetti"] == "toimipaikka") {
+			$query = "	SELECT varastopaikat.tunnus, varastopaikat.toimipaikka, sum(tuotepaikat.saldo) saldo
+						FROM tuotepaikat
+						JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+						and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+						and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+						GROUP BY 1,2
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND tuoteno = '$tuoteno'
+						HAVING saldo != 0";
+			$vpresult = pupe_query($query);
 
-		// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
+			$vpmaara    = mysql_num_rows($vpresult);
+			$vplask     = 1;
+			$vpkirjattu = 0;
 
-		// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
+			while ($vpaikkarow = mysql_fetch_assoc($vpresult)) {
 
-		$query = "	INSERT into tiliointi set
-					yhtio    = '$kukarow[yhtio]',
-					ltunnus  = '$laskuid',
-					tilino   = '$yhtiorow[varasto]',
-					kustp    = '{$kustp_ins}',
-					kohde	 = '{$kohde_ins}',
-					projekti = '{$projekti_ins}',
-					tapvm    = $updatepvm,
-					summa    = $varaston_muutos,
-					vero     = 0,
-					lukko    = '',
-					selite   = '$epakurantti_selite',
-					laatija  = '$kukarow[kuka]',
-					laadittu = now()";
-		$result = pupe_query($query);
+				if ($vpmaara == $vplask) {
+					// vikalla rundilla laitetaan kaikki mitä ei olla vielä kirjattu
+					$varaston_muutos_vp = $varaston_muutos-$vpkirjattu;
+				}
+				else {
+					$varaston_muutos_vp = round(($vpaikkarow['saldo'] / $tuoterow["saldo"]) * $varaston_muutos, 2);
+					$vpkirjattu += $varaston_muutos_vp;
+				}
 
-		$query = "	INSERT into tiliointi set
-					yhtio    = '$kukarow[yhtio]',
-					ltunnus  = '$laskuid',
-					tilino   = '$varastonmuutos_tili',
-					kustp    = '{$kustp_ins}',
-					kohde	 = '{$kohde_ins}',
-					projekti = '{$projekti_ins}',
-					tapvm    = $updatepvm,
-					summa    = $varaston_muutos * -1,
-					vero     = 0,
-					lukko    = '',
-					selite   = '$epakurantti_selite',
-					laatija  = '$kukarow[kuka]',
-					laadittu = now()";
-		$result = pupe_query($query);
+				// Katotaan toimipaikan takaa
+				$query = "	SELECT kustp, kohde, projekti
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = {$vpaikkarow['toimipaikka']}";
+				$toimipaikkares = pupe_query($query);
+				$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+
+				// Otetaan ensisijaisesti kustannuspaikka toimipaikan takaa
+				$kustp_ins 		= $toimipaikkarow["kustp"] > 0 ? $toimipaikkarow["kustp"] : $tuoterow["kustp"];
+				$kohde_ins 		= $toimipaikkarow["kohde"] > 0 ? $toimipaikkarow["kohde"] : $tuoterow["kohde"];
+				$projekti_ins 	= $toimipaikkarow["projekti"] > 0 ? $toimipaikkarow["projekti"] : $tuoterow["projekti"];
+
+				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
+
+				// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
+
+				$query = "	INSERT into tiliointi set
+							yhtio    = '$kukarow[yhtio]',
+							ltunnus  = '$laskuid',
+							tilino   = '$yhtiorow[varasto]',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
+							tapvm    = $updatepvm,
+							summa    = $varaston_muutos_vp,
+							vero     = 0,
+							lukko    = '',
+							selite   = '$epakurantti_selite',
+							laatija  = '$kukarow[kuka]',
+							laadittu = now()";
+				$result = pupe_query($query);
+
+				$query = "	INSERT into tiliointi set
+							yhtio    = '$kukarow[yhtio]',
+							ltunnus  = '$laskuid',
+							tilino   = '$varastonmuutos_tili',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
+							tapvm    = $updatepvm,
+							summa    = $varaston_muutos_vp * -1,
+							vero     = 0,
+							lukko    = '',
+							selite   = '$epakurantti_selite',
+							laatija  = '$kukarow[kuka]',
+							laadittu = now()";
+				$result = pupe_query($query);
+			}
+		}
+		else {
+			// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
+			$kustp_ins 		= $tuoterow["kustp"];
+			$kohde_ins 		= $tuoterow["kohde"];
+			$projekti_ins 	= $tuoterow["projekti"];
+
+			// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
+
+			// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
+
+			$query = "	INSERT into tiliointi set
+						yhtio    = '$kukarow[yhtio]',
+						ltunnus  = '$laskuid',
+						tilino   = '$yhtiorow[varasto]',
+						kustp    = '{$kustp_ins}',
+						kohde	 = '{$kohde_ins}',
+						projekti = '{$projekti_ins}',
+						tapvm    = $updatepvm,
+						summa    = $varaston_muutos,
+						vero     = 0,
+						lukko    = '',
+						selite   = '$epakurantti_selite',
+						laatija  = '$kukarow[kuka]',
+						laadittu = now()";
+			$result = pupe_query($query);
+
+			$query = "	INSERT into tiliointi set
+						yhtio    = '$kukarow[yhtio]',
+						ltunnus  = '$laskuid',
+						tilino   = '$varastonmuutos_tili',
+						kustp    = '{$kustp_ins}',
+						kohde	 = '{$kohde_ins}',
+						projekti = '{$projekti_ins}',
+						tapvm    = $updatepvm,
+						summa    = $varaston_muutos * -1,
+						vero     = 0,
+						lukko    = '',
+						selite   = '$epakurantti_selite',
+						laatija  = '$kukarow[kuka]',
+						laadittu = now()";
+			$result = pupe_query($query);
+		}
 	}

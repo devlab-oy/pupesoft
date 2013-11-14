@@ -13616,6 +13616,8 @@ if (!function_exists("pupe_DataTables")) {
 										var data = jQuery.parseJSON(return_value);
 
 										if (data.ok) {
+											$('#refresh_screen_ajaxille').val('true');
+
 											$('#rivimyyntihintaalkuperainen_'+tun).val(myyntihinta);
 											$('#rivi_myyntihinta_'+tun).val(myyntihinta);
 										}

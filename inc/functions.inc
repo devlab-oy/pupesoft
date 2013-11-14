@@ -23635,21 +23635,14 @@ if (!function_exists('hyllysiirto')) {
 		$minne_tapa_tunnus = mysql_insert_id();
 
 		// Tehdään kirjanpito
-		if ($yhtiorow['varastosiirto_kirjanpito'] == "K") {
+		if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
 			// Lähettävä varasto
 			$mistavarasto = kuuluukovarastoon($mistarow['hyllyalue'], $mistarow['hyllynro']);
 			$minnevarasto = kuuluukovarastoon($minnerow['hyllyalue'], $minnerow['hyllynro']);
 
-			$query = "	SELECT kustp, kohde, projekti, toimipaikka
-						FROM varastopaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$mistavarasto}'";
-			$mistavarasto_res = pupe_query($query);
-			$mistavarasto_row = mysql_fetch_assoc($mistavarasto_res);
-
-			$mista_kustp    = $mistavarasto_row['kustp'];
-			$mista_kohde    = $mistavarasto_row['kohde'];
-			$mista_projekti = $mistavarasto_row['projekti'];
+			$mista_kustp    = 0;
+			$mista_kohde    = 0;
+			$mista_projekti = 0;
 
 			if ($mistavarasto_row['toimipaikka'] > 0) {
 				$query = "	SELECT kustp, kohde, projekti
@@ -23665,16 +23658,9 @@ if (!function_exists('hyllysiirto')) {
 			}
 
 			if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0) {
-				$query = "	SELECT kustp, kohde, projekti, toimipaikka
-							FROM varastopaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$minnevarasto}'";
-				$minnevarasto_res = pupe_query($query);
-				$minnevarasto_row = mysql_fetch_assoc($minnevarasto_res);
-
-				$minne_kustp    = $minnevarasto_row['kustp'];
-				$minne_kohde    = $minnevarasto_row['kohde'];
-				$minne_projekti = $minnevarasto_row['projekti'];
+				$minne_kustp    = 0;
+				$minne_kohde    = 0;
+				$minne_projekti = 0;
 
 				if ($minnevarasto_row['toimipaikka'] > 0) {
 					$query = "	SELECT kustp, kohde, projekti

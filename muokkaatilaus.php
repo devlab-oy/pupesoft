@@ -2145,7 +2145,7 @@
 
 							echo "<td class='$class' valign='top'>".tv1dateconv($aa, "PITKA", "LYHYT")."<br>".tv1dateconv($bb, "PITKA", "LYHYT")."</td>";
 						}
-						elseif ($fieldname == "tilaus") {
+						elseif ($fieldname == "tilaus" OR $fieldname == "tarjous") {
 
 							$query_comments = "	SELECT group_concat(concat_ws('<br>', comments, sisviesti2) SEPARATOR '<br><br>') comments
 												FROM lasku use index (primary)

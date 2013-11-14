@@ -1343,8 +1343,10 @@
 		}
 		else {
 
-			$query = "	SELECT tt.tehdas_saldo
+			$query = "	SELECT tt.tehdas_saldo,
+						toimi.tehdas_saldo_tarkistus
 						FROM tuotteen_toimittajat AS tt
+						JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
 						WHERE tt.yhtio = '{$kukarow['yhtio']}'
 						AND tt.tuoteno = '{$row['tuoteno']}'
 						AND tt.liitostunnus = '{$row['toimittajan_tunnus']}'
@@ -1352,7 +1354,7 @@
 			$tehdas_saldo_res = pupe_query($query);
 			$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
 
-			if ($tehdas_saldo_row['tehdas_saldo'] != 0) {
+			if ($tehdas_saldo_row['tehdas_saldo'] != 0 or $tehdas_saldo_row['tehdas_saldo_tarkistus'] != '') {
 				$vastaavat_html = "<table width='100%'><tr style='width: 100%;'><th style='text-align: center;'>";
 				$vastaavat_table = "";
 

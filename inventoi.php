@@ -118,7 +118,9 @@
 				avainsana as avainsana_kieli READ,
 				avainsana READ,
 				tili READ,
-				asiakas READ";
+				asiakas READ,
+				varastopaikat READ,
+				yhtion_toimipaikat READ";
 	$result = pupe_query($query);
 
 	//tuotteen varastostatus
@@ -688,7 +690,7 @@
 									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 								}
 
-								if ($yhtiorow["tarkenteiden_prioriteetti"] == "toimipaikka") {
+								if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
 
 									$query = "	SELECT toimipaikka
 												FROM varastopaikat

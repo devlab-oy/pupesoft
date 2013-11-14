@@ -138,7 +138,7 @@
 									$result = pupe_query($query);
 									$laskuid = mysql_insert_id($link);
 
-									if ($yhtiorow["tarkenteiden_prioriteetti"] == "toimipaikka") {
+									if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
 
 										$query = "	SELECT toimipaikka
 													FROM varastopaikat

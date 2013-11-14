@@ -23,7 +23,7 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 			'komm1'			 => 10, //lisatieto: char(80) lisätietoja soneralla ja tapahtumapaikka
 		);
 		$required_fields = array(
-			'nippunro',
+			'takuunumero',
 		);
 		$mandatory_fields = array(
 			'lisakuluprosentti' => 7

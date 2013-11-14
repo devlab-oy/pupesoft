@@ -403,6 +403,31 @@
 
 		echo json_encode($data);
 	}
+	elseif ($_POST['ajax_toiminto'] == 'myyntihinta') {
+		$myyntihinta = (float) str_replace(",",".", $_POST['myyntihinta']);
+		$tunnus = (int) $_POST['tunnus'];
+
+		$query = "	SELECT tuoteno
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tunnus}'";
+		$tuoteno_chk_res = pupe_query($query);
+
+		if (mysql_num_rows($tuoteno_chk_res) == 1) {
+			$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
+
+			$query = "	UPDATE tuote SET
+						myyntihinta = '{$myyntihinta}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$tuoteno_chk_row['tuoteno']}'";
+			pupe_query($query);
+
+			echo json_encode(array('ok' => true));
+		}
+		else {
+			echo json_encode(array('ok' => false));
+		}
+	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl') {
 		$kpl 	 = str_replace(",",".", $_POST['kpl']);
 		$tunnus  = $_POST['tunnus'];

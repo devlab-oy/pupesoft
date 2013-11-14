@@ -296,7 +296,7 @@ function echo_kayttoliittyma($request) {
 }
 
 function generoi_custom_excel($request) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $bold;
 
 	$bold = array('bold' => true);
 
@@ -374,34 +374,25 @@ function generoi_custom_excel($request) {
 function excel_otsikko(&$xls, &$excelrivi, &$excelsarake, $request) {
 	global $kukarow, $yhtiorow, $bold;
 
-	$xls->write($excelrivi, $excelsarake, t('Työ alkoi'));
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, date('d.m.Y H:i:s', $request['tulostettava_vauriopoytakirja']['poistui']));
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Työ päättyi'));
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Työ alkoi'));
+	$xls->write($excelrivi, $excelsarake++, date('d.m.Y H:i:s', $request['tulostettava_vauriopoytakirja']['poistui']));
+	$xls->write($excelrivi, $excelsarake++, t('Työ päättyi'));
 	$xls->write($excelrivi, $excelsarake, date('d.m.Y H:i:s', $request['tulostettava_vauriopoytakirja']['valmis']));
 
 	$excelrivi = $excelrivi + 2;
 	$excelsarake = 0;
 
-	$xls->write($excelrivi, $excelsarake, t('Tapahtumapaikka').':');
+	$xls->write($excelrivi, $excelsarake++, t('Tapahtumapaikka').':');
 	$excelrivi++;
-	$xls->write($excelrivi, $excelsarake, t('Kaupunki').'/'.t('Kunta'));
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['ohjausmerkki']);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Verkostoalue'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Kaupunki').'/'.t('Kunta'));
+	$xls->write($excelrivi, $excelsarake++, $request['tulostettava_vauriopoytakirja']['ohjausmerkki']);
+	$xls->write($excelrivi, $excelsarake++, t('Verkostoalue'), $bold);
 	$xls->write($excelrivi, $excelsarake, t('TLA'));
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, t('Paikka').'/'.t('Osoite'));
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['kohde']);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['jalleenmyyja'], $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Paikka').'/'.t('Osoite'));
+	$xls->write($excelrivi, $excelsarake++, $request['tulostettava_vauriopoytakirja']['kohde']);
+	$xls->write($excelrivi, $excelsarake++, $request['tulostettava_vauriopoytakirja']['jalleenmyyja'], $bold);
 	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['tyomaarays_viite']);
 
 	$excelrivi = $excelrivi + 2;
@@ -409,25 +400,21 @@ function excel_otsikko(&$xls, &$excelrivi, &$excelsarake, $request) {
 
 	$xls->write($excelrivi, $excelsarake, t('Vaurio tapahtui').':');
 	$excelsarake = $excelsarake + 2;
-	$xls->write($excelrivi, $excelsarake, t('Operaattorin tikettinumero'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Operaattorin tikettinumero'), $bold);
 	$xls->write($excelrivi, $excelsarake, t('Kiireellisyys'));
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['vikakoodi']);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['merkki']);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['takuunumero'], $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, $request['tulostettava_vauriopoytakirja']['vikakoodi']);
+	$xls->write($excelrivi, $excelsarake++, $request['tulostettava_vauriopoytakirja']['merkki']);
+	$xls->write($excelrivi, $excelsarake++, $request['tulostettava_vauriopoytakirja']['takuunumero'], $bold);
 	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['prioriteetti']);
 }
 
 function excel_selite(&$xls, &$excelrivi, &$excelsarake, $request) {
 	global $kukarow, $yhtiorow, $bold;
 
-	$xls->write($excelrivi, $excelsarake, t('Ilmoitettu poliisille').':');
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Ilmoitettu poliisille').':');
+	
 	if ($request['tulostettava_vauriopoytakirja']['kotipuh'] == 1) {
 		$xls->write($excelrivi, $excelsarake, t('Kyllä'));
 	}
@@ -438,8 +425,7 @@ function excel_selite(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$excelrivi++;
 	$excelsarake = 0;
 
-	$xls->write($excelrivi, $excelsarake, t('Vahinkotapahtuma').':');
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Vahinkotapahtuma').':');
 	if ($request['tulostettava_vauriopoytakirja']['kontti'] == 1) {
 		$xls->write($excelrivi, $excelsarake, t('Valokuvia ON saatavilla'));
 	}
@@ -513,7 +499,6 @@ function excel_aiheuttajat(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$excelsarake = 0;
 
 	$xls->write($excelrivi, $excelsarake, t('Aiheuttaja kieltäytyy korvausvastuusta').':');
-	$excelsarake++;
 	if ($request['tulostettava_vauriopoytakirja']['hyvaksy'] == 1) {
 		$xls->write($excelrivi, $excelsarake, t('Kyllä'));
 	}
@@ -525,56 +510,41 @@ function excel_aiheuttajat(&$xls, &$excelrivi, &$excelsarake, $request) {
 function excel_yhteystiedot(&$xls, &$excelrivi, &$excelsarake, $request, $yhteystiedot) {
 	global $kukarow, $yhtiorow, $bold;
 
-	$xls->write($excelrivi, $excelsarake, t('Nimi'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, $yhteystiedot['nimi'], $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('puhelinnumero'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Nimi'), $bold);
+	$xls->write($excelrivi, $excelsarake++, $yhteystiedot['nimi'], $bold);
+	$xls->write($excelrivi, $excelsarake++, t('puhelinnumero'), $bold);
 	$xls->write($excelrivi, $excelsarake, $yhteystiedot['puhelin'], $bold);
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, t('Osoite'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, $yhteystiedot['osoite'], $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Matkapuhelin'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Osoite'), $bold);
+	$xls->write($excelrivi, $excelsarake++, $yhteystiedot['osoite'], $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Matkapuhelin'), $bold);
 	$xls->write($excelrivi, $excelsarake, $yhteystiedot['gsm'], $bold);
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, t('Postilokero'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, '', $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Ytunnus'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Postilokero'), $bold);
+	$xls->write($excelrivi, $excelsarake++, '', $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Ytunnus'), $bold);
 	$xls->write($excelrivi, $excelsarake, $yhteystiedot['ytunnus']);
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, t('Postinumero'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, $yhteystiedot['postino'], $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Toimipaikka'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Postinumero'), $bold);
+	$xls->write($excelrivi, $excelsarake++, $yhteystiedot['postino'], $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Toimipaikka'), $bold);
 	$xls->write($excelrivi, $excelsarake, $yhteystiedot['postitp'], $bold);
 }
 
 function excel_kaapeli(&$xls, &$excelrivi, &$excelsarake, $request) {
 	global $kukarow, $yhtiorow, $bold;
 
-	$xls->write($excelrivi, $excelsarake, t('Kaapelinäyttö suoritettu').':');
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Kaapelinäyttö suoritettu').':');
 	if ($request['tulostettava_vauriopoytakirja']['mallivari'] == 1) {
-		$xls->write($excelrivi, $excelsarake, t('Kyllä'));
+		$xls->write($excelrivi, $excelsarake++, t('Kyllä'));
 	}
 	else {
-		$xls->write($excelrivi, $excelsarake, t('Ei'));
+		$xls->write($excelrivi, $excelsarake++, t('Ei'));
 	}
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Näyttöpöytäkirja lähetetty (pakollinen)').':');
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Näyttöpöytäkirja lähetetty (pakollinen)').':');
 	if ($request['tulostettava_vauriopoytakirja']['valmnro'] == 1) {
 		$xls->write($excelrivi, $excelsarake, t('Kyllä'));
 	}
@@ -585,8 +555,7 @@ function excel_kaapeli(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$excelrivi++;
 	$excelsarake = 0;
 
-	$xls->write($excelrivi, $excelsarake, t('Karttakaivuu').':');
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Karttakaivuu').':');
 	if ($request['tulostettava_vauriopoytakirja']['tilno'] == 1) {
 		$xls->write($excelrivi, $excelsarake, t('Kyllä'));
 	}
@@ -596,13 +565,11 @@ function excel_kaapeli(&$xls, &$excelrivi, &$excelsarake, $request) {
 
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, t('Näyttäjä').':', $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Näyttäjä').':', $bold);
 	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['tilausyhteyshenkilo'], $bold);
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, t('Yhteystiedot').':', $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Yhteystiedot').':', $bold);
 	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['kuljetus'], $bold);
 }
 
@@ -616,25 +583,20 @@ function excel_lisatietoja(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$excelrivi = $excelrivi + 2;
 	$excelsarake = 0;
 
-	$xls->write($excelrivi, $excelsarake, t('Selvityksen antaja'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Selvityksen antaja'), $bold);
 	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['suorittaja'], $bold);
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, t('Puhelin'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Puhelin'), $bold);
 	$xls->write($excelrivi, $excelsarake, $request['tulostettava_vauriopoytakirja']['noutaja'], $bold);
 }
 
 function excel_yhteystiedot2(&$xls, &$excelrivi, &$excelsarake, $request) {
 	global $kukarow, $yhtiorow, $bold;
 
-	$xls->write($excelrivi, $excelsarake, t('Yhteystiedot'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, 'yhteystiedot tähä', $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Kesäaika'));
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Yhteystiedot'), $bold);
+	$xls->write($excelrivi, $excelsarake++, 'yhteystiedot tähä', $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Kesäaika'));
 	if (true) {
 		$xls->write($excelrivi, $excelsarake, t('Kyllä'));
 	}
@@ -644,88 +606,61 @@ function excel_yhteystiedot2(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$excelrivi++;
 	$excelsarake = 0;
 
-	$xls->write($excelrivi, $excelsarake, t('Yhteystiedot'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, 'yhteystiedot tähä', $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Yhteystiedot'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Yhteystiedot'), $bold);
+	$xls->write($excelrivi, $excelsarake++, 'yhteystiedot tähä', $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Yhteystiedot'), $bold);
 	$xls->write($excelrivi, $excelsarake, 'yhteystiedot2 tähä', $bold);
 }
 
 function excel_korjaaja_rivit(&$xls, &$excelrivi, &$excelsarake, $request) {
 	global $kukarow, $yhtiorow, $bold;
 
-	$xls->write($excelrivi, $excelsarake, t('Nimi'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Selvitys tehtävästä'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Pvm'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Alko klo'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Päättyi klo'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('NT'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Nimi'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Selvitys tehtävästä'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Pvm'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Alko klo'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Päättyi klo'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('NT'), $bold);
 	$xls->write($excelrivi, $excelsarake, t('YT'), $bold);
 	foreach ($request['tulostettava_vauriopoytakirja']['korjaajat'] as $korjaaja) {
-		$xls->write($excelrivi, $excelsarake, $korjaaja['nimi'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $korjaaja['selvitys'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $korjaaja['pvm'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $korjaaja['alkoi_klo'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $korjaaja['paattyi_klo'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $korjaaja['nt'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $korjaaja['yt'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['nimi'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['selvitys'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['pvm'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['alkoi_klo'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['paattyi_klo'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['nt'], $bold);
+		$xls->write($excelrivi++, $excelsarake, $korjaaja['yt'], $bold);
 	}
 
 	$excelrivi++;
 	$excelsarake = 0;
 	$excelsarake = $excelsarake + 4;
-	$xls->write($excelrivi, $excelsarake, t('Tunnit yht'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, 'tunnit nt', $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Tunnit yht'), $bold);
+	$xls->write($excelrivi, $excelsarake++, 'tunnit nt', $bold);
 	$xls->write($excelrivi, $excelsarake, 'tunnit yt', $bold);
 	$excelrivi++;
 	$excelsarake = 0;
 	$excelsarake = $excelsarake + 4;
-	$xls->write($excelrivi, $excelsarake, t('Total'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Total'), $bold);
 	$xls->write($excelrivi, $excelsarake, 'total tähä', $bold);
 }
 
 function excel_kustannus_rivit(&$xls, &$excelrivi, &$excelsarake, $request) {
 	global $kukarow, $yhtiorow, $bold;
 
-	$xls->write($excelrivi, $excelsarake, t('Kustannus'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('kpl'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Yksikkö'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Hinta').'/'.t('yks'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Kustannus'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('kpl'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Yksikkö'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Hinta').'/'.t('yks'), $bold);
 	$xls->write($excelrivi, $excelsarake, t('Yhteensä').'('.t('eur').')', $bold);
 	$excelrivi++;
 	$excelsarake = 0;
 	foreach ($request['tulostettava_vauriopoytakirja']['kustannusrivit'] as $kustannusrivi) {
-		$xls->write($excelrivi, $excelsarake, $kustannusrivi['nimitys'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $kustannusrivi['tilkpl'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $kustannusrivi['yksikko'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $kustannusrivi['hinta'] / $kustannusrivi['tilkpl'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $kustannusrivi['rivihinta'], $bold);
-		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['nimitys'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['tilkpl'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['yksikko'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['hinta'] / $kustannusrivi['tilkpl'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['rivihinta'], $bold);
 
 		$viimeinen_sarake = $excelsarake;
 
@@ -747,32 +682,21 @@ function excel_materiaalit(&$xls, &$excelrivi, &$excelsarake, $request, $tyyppi 
 		$otsikko = t('TSF materiaali');
 	}
 
-	$xls->write($excelrivi, $excelsarake, $otsikko, $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Tunnus'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('kpl'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('yksikkö').'/'.t('yks'), $bold);
-	$excelsarake++;
-	$xls->write($excelrivi, $excelsarake, t('Hinta').'/'.t('yks'), $bold);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, $otsikko, $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Tunnus'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('kpl'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('yksikkö').'/'.t('yks'), $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Hinta').'/'.t('yks'), $bold);
 	$xls->write($excelrivi, $excelsarake, t('Yhteensä').'('.t('eur').')', $bold);
 	$excelrivi++;
 	$excelsarake = 0;
 	foreach ($materiaalit as $u_materiaali) {
-		$xls->write($excelrivi, $excelsarake, $u_materiaali['nimitys'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $u_materiaali['tuoteno'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $u_materiaali['tilkpl'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $u_materiaali['yksikko'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $u_materiaali['hinta'] / $u_materiaali['tilkpl'], $bold);
-		$excelsarake++;
-		$xls->write($excelrivi, $excelsarake, $u_materiaali['rivihinta'], $bold);
-		$excelsarake++;
+		$xls->write($excelrivi, $excelsarake++, $u_materiaali['nimitys'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $u_materiaali['tuoteno'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $u_materiaali['tilkpl'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $u_materiaali['yksikko'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $u_materiaali['hinta'] / $u_materiaali['tilkpl'], $bold);
+		$xls->write($excelrivi, $excelsarake++, $u_materiaali['rivihinta'], $bold);
 
 		$viimeinen_sarake = $excelsarake;
 
@@ -827,7 +751,6 @@ function excel_footer(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$xls->write($excelrivi, $excelsarake, t('Selvityksestä vastaava').':');
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake, t('Nimi').': '.$request['tulostettava_vauriopoytakirja']['huolitsija']);
-	$excelsarake++;
+	$xls->write($excelrivi, $excelsarake++, t('Nimi').': '.$request['tulostettava_vauriopoytakirja']['huolitsija']);
 	$xls->write($excelrivi, $excelsarake, t('Puhelin').': '.$request['tulostettava_vauriopoytakirja']['jakelu']);
 }

@@ -658,7 +658,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 if ($tee == 'P') {
 
-	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi, liitos, liitostunnus
+	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi, liitos, liitostunnus, tapahtumatunnus
 				FROM tiliointi
 				WHERE tunnus = '$ptunnus'
 				AND yhtio = '$kukarow[yhtio]'
@@ -684,6 +684,7 @@ if ($tee == 'P') {
 	$selite				= $tiliointirow['selite'];
 	$tiliointipvm		= $tiliointirow['tapvm'];
 	$tositenro			= $tiliointirow['tosite'];
+	$tapahtumatunnus	= $tiliointirow['tapahtumatunnus'];
 	$ok					= 1;
 	$alv_tili			= $yhtiorow["alv"];
 	$liitos 			= $tiliointirow['liitos'];

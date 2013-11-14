@@ -72,17 +72,13 @@
 
 	if ($ytunnus != '') {
 
+		$toimipaikkalisa = "";
+
 		if (isset($toimipaikka)) {
 
 			if ($toimipaikka != 'kaikki') {
 				$toimipaikkalisa = " AND lasku.vanhatunnus = '{$toimipaikka}' ";
 			}
-			else {
-				$toimipaikkalisa = "";
-			}
-		}
-		else {
-			$toimipaikkalisa = $kukarow['toimipaikka'] != 0 ? " AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}' " : "";
 		}
 
 		$query = "	SELECT max(lasku.tunnus) maxtunnus, GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ', ') tunnukset
@@ -287,12 +283,6 @@
 
 				if (isset($toimipaikka)) {
 					if ($toimipaikka == $toimipaikat_row['tunnus']) {
-						$sel = ' selected';
-						$toimipaikka = $toimipaikat_row['tunnus'];
-					}
-				}
-				else {
-					if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
 						$sel = ' selected';
 						$toimipaikka = $toimipaikat_row['tunnus'];
 					}

@@ -6292,7 +6292,14 @@ if ($tee == '') {
 						}
 					}
 					elseif (in_array($toim, array('VALMISTAVARASTOON','VALMISTAASIAKKAALLE','RIVISYOTTO','PIKATILAUS'))) {
-						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle ".strtolower($row["yksikko"])."</td>";
+						echo "<td {$class} align='right' valign='top' nowrap>";
+						echo "{$kpl_ruudulle} ".strtolower($row["yksikko"]);
+
+						if ($sahkoinen_tilausliitanta and isset($vastaavat_html) and trim($vastaavat_html) != '' and isset($vastaavat_table2) and trim($vastaavat_table2) != '' and isset($paarivin_saldokysely) and $paarivin_saldokysely and in_array($row['var'], array('U','T'))) {
+							echo "<br />",$vastaavat_table2;
+						}
+
+						echo "</td>";
 					}
 					else {
 						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
@@ -6996,6 +7003,10 @@ if ($tee == '') {
 
 					// tähän se taulu
 					echo $vastaavat_html;
+
+					if ($sahkoinen_tilausliitanta and isset($vastaavat_html) and trim($vastaavat_html) != '' and isset($vastaavat_table2) and trim($vastaavat_table2) != '' and isset($paarivin_saldokysely) and $paarivin_saldokysely and in_array($row['var'], array('U','T'))) {
+						$vastaavat_html = $vastaavat_table = $vastaavat_table2 = "";
+					}
 
 					echo "</td>";
 					echo "<td class='back' valign='top' nowrap></td>";
@@ -8328,7 +8339,7 @@ if ($tee == '') {
 					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
 				}
 
-				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and
+				if ($yhtiorow['lahetteen_tulostustapa'] == "I" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and
 					(
 						($yhtiorow['lahetteen_tulostustapa'] == "I" and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] != ''))) or
 						($laskurow['tila'] == 'L' and in_array($laskurow['alatila'], array('B','C','D'))) or

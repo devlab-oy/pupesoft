@@ -1757,8 +1757,10 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
+		$sel0 = "";
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == 0) {
 			$sel0 = "selected";
@@ -3084,6 +3086,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "nouto_suoraan_laskutukseen") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ''>".t("Noutotilauksia ei laiteta suoraan laskutusjonoon")."</option>
+					<option value = 'K' {$sel}>".t("Noutotilaukset aina suoraan laskutusjonoon")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "reklamaation_vastaanottovarasto" ) {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
@@ -3669,9 +3683,12 @@
 			}
 
 			$ulos .= "</select></td>";
-		}
 
-		$jatko = 0;
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
 	}
 
 	if (mysql_field_name($result, $i) == 'ostotilauksen_toimittajien_saldo_tarkistus') {

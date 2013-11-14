@@ -1338,8 +1338,8 @@
 
 				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, asiakas.keraysvahvistus_lahetys, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
 							FROM lasku
-							JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
-							LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
+							JOIN asiakas ON asiakas.yhtio=lasku.yhtio AND asiakas.tunnus=lasku.liitostunnus
+							LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio AND kuka.tunnus=lasku.myyja AND kuka.extranet = '')
 							WHERE lasku.tunnus	= '$poikkeamatilaus'
 							and lasku.yhtio		= '$kukarow[yhtio]'";
 				$result = pupe_query($query);

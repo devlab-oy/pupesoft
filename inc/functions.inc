@@ -6611,7 +6611,7 @@ if (!function_exists("ostolaskun_vienti")) {
 }
 
 if (!function_exists("verkkolasku_luo_keikkafile")) {
-	function verkkolasku_luo_keikkafile ($tunnus, $trow, $rtuoteno, $alv_talteen = "", $rivikohtaiset_rahtikulut = 0) {
+	function verkkolasku_luo_keikkafile ($tunnus, $trow, $rtuoteno, $alv_talteen = "", $rivikohtaiset_rahtikulut = 0, $_yhtion_toimipaikka = 0) {
 		global $yhtiorow, $kukarow;
 
 		// Tarvitaan $tunnus jossa on ostoreskontralaskun tunnus
@@ -24836,6 +24836,161 @@ if (!function_exists('hae_asiakashinnat')) {
 		}
 
 		return $tuote_hinnat;
+	}
+}
+
+if (!function_exists("tuotteen_budjetoitu_myynti")) {
+	function tuotteen_budjetoitu_myynti(Array $parametrit) {
+		global $yhtiorow, $kukarow;
+
+		// Tuotenumero, pakollinen
+		$tuoteno = isset($parametrit['tuoteno']) ? $parametrit['tuoteno'] : die('pakollinen parametri puuttuu');
+
+		// Alku ja loppupäivät, pakollisia
+		$nykyinen_alku =  isset($parametrit['pvm_alku'])  ? $parametrit['pvm_alku']  : die('pakollinen parametri puuttuu');
+		$nykyinen_loppu = isset($parametrit['pvm_loppu']) ? $parametrit['pvm_loppu'] : die('pakollinen parametri puuttuu');
+
+		// Tilaustuotteiden käsittely, jos ei anneta oletetaan että huomioidaan vaan JT rivit
+		$tilaustuotteiden_kasittely = isset($parametrit['tilaustuotteiden_kasittely']) ? $parametrit['tilaustuotteiden_kasittely'] : 'A';
+
+		// Tuotteen status, tämän voi välittää. Jos ei tule parametrissä niin haetaan
+		$tuote_status = isset($parametrit['tuote_status']) ? trim($parametrit['tuote_status']) : null;
+
+		// Tehdään kaudet päivämääristä
+		$alku_kausi  = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
+		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 6);
+
+		// Annetun alku- ja loppukauden päivä
+		$alku_kausi_pp  = substr(str_replace("-", "", $nykyinen_alku), 6, 2);
+		$loppu_kausi_pp = substr(str_replace("-", "", $nykyinen_loppu), 6, 2);
+
+		// Edellinen kausi
+		$edellinen_alku  = date("Y-m-d", strtotime("-1 year", strtotime($nykyinen_alku)));
+		$edellinen_loppu = date("Y-m-d", strtotime("-1 year", strtotime($nykyinen_loppu)));
+
+		// Haetaan status jos sitä ei ole passattu
+		if (!isset($tuote_status)) {
+			// Haetaan tuotteen status
+			$query = "	SELECT tuote.status
+						FROM tuote
+						WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+						AND tuote.tuoteno = '{$tuoteno}'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
+			$tuote_status = $row['status'];
+		}
+
+		// Tämä palautetaan, lasketaan budjetoitu myynti
+		$budjetoitu_myynti = 0;
+		$budjetin_peruste = array();
+
+		// Status P budjetoitu myynti aina nolla
+		if ($tuote_status == "P") {
+			$budjetin_peruste[] = array(
+				"tuote" => $tuoteno,
+				"status" => $tuote_status,
+				"budjetoitu_myynti" => $budjetoitu_myynti,
+				"syy" => "Puute"
+			);
+
+			return array($budjetoitu_myynti, $budjetin_peruste);
+		}
+
+		// Status T, eli tilaustuote, niin budjetoitu myynti on tuotteen JT-rivit
+		if ($tuote_status == "T" and ($tilaustuotteiden_kasittely == 'A' or $tilaustuotteiden_kasittely == 'C')) {
+			// Haetaan JT-rivit
+			$query = "	SELECT ifnull(sum(tilausrivi.varattu + tilausrivi.jt), 0) jt
+						FROM tilausrivi
+						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							AND lasku.toimaika >= '{$nykyinen_alku}'
+							AND lasku.toimaika <= '{$nykyinen_loppu}')
+						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+						AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.var = 'J'
+						AND tilausrivi.tuoteno = '{$tuoteno}'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
+			$budjetoitu_myynti += $row['jt'];
+
+			$budjetin_peruste[] = array(
+				"tuote" => $tuoteno,
+				"status" => $tuote_status,
+				"budjetoitu_myynti" => $row['jt'],
+				"syy" => "JT-rivit"
+			);
+
+		}
+
+		// Kaikki muut, katsotaan joko budjetti tai myynti
+		if ($tuote_status != 'T' or $tilaustuotteiden_kasittely == 'B' or $tilaustuotteiden_kasittely == 'C') {
+			// Haetaan budjetoitu myynti
+			$query = "	SELECT budjetti_tuote.kausi kausi,
+						ifnull(sum(budjetti_tuote.maara), 0) budjetti,
+						DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivia_kuussa,
+						ifnull(sum(budjetti_tuote.maara), 0) / DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivabudjetti
+						FROM budjetti_tuote
+						WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
+						AND budjetti_tuote.kausi >= '{$alku_kausi}'
+						AND budjetti_tuote.kausi <= '{$loppu_kausi}'
+						AND budjetti_tuote.tuoteno = '{$tuoteno}'
+						GROUP BY 1";
+			$result = pupe_query($query);
+
+			$budjetti_erikseen = 0;
+
+			// Jos budjetti löytyi, lasketaan budjetoitu myynti
+			if (mysql_num_rows($result) > 0) {
+
+				// Loopataan kaudet läpi
+				while ($row = mysql_fetch_assoc($result)) {
+
+					// Montako päivää tältä kaudelta on otettu raporttiin
+					$paivien_maara = $row['paivia_kuussa'];
+
+					if ($row['kausi'] == $alku_kausi) {
+						$paivien_maara -= $alku_kausi_pp - 1;
+					}
+
+					if ($row['kausi'] == $loppu_kausi) {
+						$paivien_maara -= $row['paivia_kuussa'] - $loppu_kausi_pp;
+					}
+
+					$budjetoitu_myynti += $paivien_maara * $row['paivabudjetti'];
+					$budjetti_erikseen += $paivien_maara * $row['paivabudjetti'];
+				}
+
+				$budjetin_peruste[] = array(
+					"tuote" => $tuoteno,
+					"status" => $tuote_status,
+					"budjetoitu_myynti" => $budjetti_erikseen,
+					"syy" => "Budjetti {$alku_kausi}{$alku_kausi_pp} - {$loppu_kausi}{$loppu_kausi_pp}"
+				);
+
+			}
+			else {
+				// Jos ei ole budjettia, otetaan edellisen kauden myynti ja käytetään sitä
+				$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) myynti
+							FROM tilausrivi
+							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+							AND tilausrivi.tyyppi = 'L'
+							AND tilausrivi.tuoteno = '{$tuoteno}'
+							AND tilausrivi.laskutettuaika >= '{$edellinen_alku}'
+							AND tilausrivi.laskutettuaika <= '{$edellinen_loppu}'";
+				$result = pupe_query($query);
+				$row = mysql_fetch_assoc($result);
+				$budjetoitu_myynti += $row['myynti'];
+
+				$budjetin_peruste[] = array(
+					"tuote" => $tuoteno,
+					"status" => $tuote_status,
+					"budjetoitu_myynti" => $row['myynti'],
+					"syy" => "Edellinen kausi {$edellinen_alku} - {$edellinen_loppu}",
+				);
+			}
+		}
+
+		return array($budjetoitu_myynti, $budjetin_peruste);
 	}
 }
 

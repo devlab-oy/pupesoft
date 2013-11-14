@@ -548,14 +548,14 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	if (mysql_num_rows($toimipaikat_res) != 0) {
 
-		$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
+		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
 		echo "<tr>";
 		echo "<th>",t("Toimipaikka"),"</th>";
 		echo "<td>";
 		echo "<select name='toimipaikka'>";
-		echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
-		echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
+		echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+		echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
 
 		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 
@@ -726,7 +726,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		echo "<table>";
 		echo "<tr><th>".t("ytunnus")."</th><th>&nbsp;</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("saapumisnumerot")."</th><th>".t("kpl")."</th><th>".t("varastonarvo")."</th><td class='back'></td></tr>";
 
-		$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
+		$toimipaikka = isset($toimipaikka) ? $toimipaikka : 'kaikki';
 
 		while ($row = mysql_fetch_assoc($result)) {
 
@@ -874,14 +874,14 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	if (mysql_num_rows($toimipaikat_res) != 0) {
 
-		$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
+		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
 		echo "<tr>";
 		echo "<th>",t("Toimipaikka"),"</th>";
 		echo "<td colspan='4'>";
 		echo "<select name='toimipaikka' onchange='submit();'>";
-		echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
-		echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
+		echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+		echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
 
 		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 
@@ -1160,6 +1160,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				echo "<td align='right'>";
 				echo "<form method='post'>";
 				echo "<input type='hidden' name='toimittajaid' 	value='$toimittajaid'>";
+				echo "<input type='hidden' name='toimipaikka' 	value='$toimipaikka'>";
 				echo "<input type='hidden' name='otunnus' 		value='$row[tunnus]'>";
 				echo "<input type='hidden' name='ytunnus' 		value='$ytunnus'>";
 				echo "<input type='hidden' name='keikkaid' 		value='$row[laskunro]'>";
@@ -1428,7 +1429,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 		$toimittaja_where = "AND lasku.liitostunnus = '{$toimittajaid}'";
 	}
 
-	$toimipaikka = $toimipaikka != 'kaikki' ? (int) $toimipaikka : 0;
+	$toimipaikka = isset($toimipaikka) and $toimipaikka != 'kaikki' ? (int) $toimipaikka : 'kaikki';
 
 	// haetaan vaihto-omaisuus- ja huolinta/rahti- laskut joita ei oo liitetty saapumisiin
 	$query = "	SELECT

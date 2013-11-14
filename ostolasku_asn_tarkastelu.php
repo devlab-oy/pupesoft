@@ -628,7 +628,7 @@
 					$upd_res = pupe_query($query);
 				}
 
-				$query = "	SELECT tunnus
+				$query = "	SELECT tunnus, yhtio_toimipaikka
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laskunro = '{$lasku}'
@@ -637,6 +637,7 @@
 				$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
 
 				$tunnus = $tunnus_fetch_row['tunnus'];
+				$_yhtion_toimipaikka = $tunnus_fetch_row['yhtio_toimipaikka'];
 
 				$query = "	SELECT *
 							FROM toimi

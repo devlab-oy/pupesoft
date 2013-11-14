@@ -2744,6 +2744,7 @@ if ($tee == '') {
 				<input type='hidden' name='orig_tila' value='{$orig_tila}'>
 				<input type='hidden' name='orig_alatila' value='{$orig_alatila}'>
 				<input type='hidden' name='yhtiotoimipaikka' value='{$laskurow['yhtio_toimipaikka']}' />
+				<input type='hidden' name='tilaustyyppi' value='{$laskurow['tilaustyyppi']}' />
 				<input type='hidden' id='syotetty_ytunnus' name='syotetty_ytunnus' value=''>";
 		echo "</form>";
 	}

@@ -50,6 +50,14 @@ if (!function_exists("korjaalaskut")) {
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 		if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>".t("Löydettiin tuotteelle")." $tuoteno ".mysql_num_rows($tilausriviresult)." ".t("tilausriviä").".</font><br>";
 
+		if ($yhtiorow["tarkenteiden_prioriteetti"] == "toimipaikka") {
+			// Tässä tapauksessa toimipaikka ohittaa priossa muut vaikka vat_numero ois tyhjä
+			$toimpriolisa = "";
+		}
+		else {
+			$toimpriolisa = " if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ";
+		}
+
 		while ($tilausrivi = mysql_fetch_assoc($tilausriviresult)) {
 
 			// haetaan laskun tiedot
@@ -63,9 +71,9 @@ if (!function_exists("korjaalaskut")) {
 			// Katotaan mille kustannuspaikalle tuote on alunperin tiliöity
 			// HUOM: sama pätkä kuin teelaskuntiliointi.inc:ssä
 			$query = "	SELECT
-						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kustp, 0) > 0, 						tuotteen_alv.kustp, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					if(ifnull(tuote.kustp, 0) > 0, 						tuote.kustp, 					if(ifnull(asiakas.kustannuspaikka, 0) > 0, 				asiakas.kustannuspaikka, 		if(ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					yhtio.myynti_kustp))))) kustp,
-						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kohde, 0) > 0, 						tuotteen_alv.kohde, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					if(ifnull(tuote.kohde, 0) > 0, 						tuote.kohde, 					if(ifnull(asiakas.kohde, 0) > 0, 						asiakas.kohde, 					if(ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					yhtio.myynti_kohde))))) kohde,
-						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.projekti, 0) > 0, 					tuotteen_alv.projekti, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.projekti, 0) > 0, 					yhtion_toimipaikat.projekti, 				if(ifnull(tuote.projekti, 0) > 0, 					tuote.projekti, 				if(ifnull(asiakas.projekti, 0) > 0, 					asiakas.projekti, 				if(ifnull(yhtion_toimipaikat.projekti, 0) > 0, 					yhtion_toimipaikat.projekti, 				yhtio.myynti_projekti))))) projekti
+						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kustp, 0) > 0, 						tuotteen_alv.kustp, 					{$toimpriolisa} ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					if(ifnull(tuote.kustp, 0) > 0, 						tuote.kustp, 					if(ifnull(asiakas.kustannuspaikka, 0) > 0, 				asiakas.kustannuspaikka, 		if(ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					yhtio.myynti_kustp))))) kustp,
+						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kohde, 0) > 0, 						tuotteen_alv.kohde, 					{$toimpriolisa} ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					if(ifnull(tuote.kohde, 0) > 0, 						tuote.kohde, 					if(ifnull(asiakas.kohde, 0) > 0, 						asiakas.kohde, 					if(ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					yhtio.myynti_kohde))))) kohde,
+						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.projekti, 0) > 0, 					tuotteen_alv.projekti, 					{$toimpriolisa} ifnull(yhtion_toimipaikat.projekti, 0) > 0, 				yhtion_toimipaikat.projekti, 				if(ifnull(tuote.projekti, 0) > 0, 					tuote.projekti, 				if(ifnull(asiakas.projekti, 0) > 0, 					asiakas.projekti, 				if(ifnull(yhtion_toimipaikat.projekti, 0) > 0, 					yhtion_toimipaikat.projekti, 				yhtio.myynti_projekti))))) projekti
 						FROM tilausrivi
 						JOIN lasku on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
 						LEFT JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)

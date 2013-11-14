@@ -456,7 +456,7 @@ if ($tila == "" and !isset($jatka)) {
 		echo "<th>".t('Selvityksen antaja')."</th>";
 
 		echo "<td>";
-		echo "<input type='text' name='kirjoitin' value='{$srow['kirjoitin']}' />";
+		echo "<input type='text' name='suorittaja' value='{$srow['suorittaja']}' />";
 		echo "</td>";
 
 		echo "<th>".t('Puhelin')."</th>";

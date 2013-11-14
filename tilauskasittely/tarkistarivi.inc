@@ -1313,7 +1313,7 @@
 		$tehdas_saldo_res = pupe_query($query);
 		$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
 
-		if ($tehdas_saldo_row['selitetark_2'] != "") {
+		if ($tehdas_saldo_row['selitetark_2'] != "" and $tehdas_saldo_row['liitostunnus'] == $row['toimittajan_tunnus']) {
 
 			$vastaavat_html = "<table width='100%'><tr style='width: 100%;'><th style='text-align: center;'>";
 			$vastaavat_table = "";
@@ -1336,11 +1336,30 @@
 			require("inc/sahkoinen_tilausliitanta.inc");
 
 			$vastaavat_html .= $vastaavat_table;
-
 			$vastaavat_html .= "</th></tr></table>";
 
 			$vastaavattuotteet = 1;
-
 			$paarivin_saldokysely = true;
+		}
+		else {
+
+			$query = "	SELECT tt.tehdas_saldo
+						FROM tuotteen_toimittajat AS tt
+						WHERE tt.yhtio = '{$kukarow['yhtio']}'
+						AND tt.tuoteno = '{$row['tuoteno']}'
+						AND tt.liitostunnus = '{$row['toimittajan_tunnus']}'
+						LIMIT 1";
+			$tehdas_saldo_res = pupe_query($query);
+			$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
+
+			if ($tehdas_saldo_row['tehdas_saldo'] != 0) {
+				$vastaavat_html = "<table width='100%'><tr style='width: 100%;'><th style='text-align: center;'>";
+				$vastaavat_table = "";
+
+				$vastaavat_html .= "<div style='float: right;'>".t("Tehtaan saldo").": ".round($tehdas_saldo_row['tehdas_saldo'])."</div>";
+
+				$vastaavat_html .= "</th></tr></table>";
+				$vastaavattuotteet = 1;
+			}
 		}
 	}

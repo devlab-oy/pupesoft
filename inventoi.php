@@ -688,10 +688,35 @@
 									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 								}
 
-								// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
-								$kustp_ins 		= $tuote_row["kustp"];
-								$kohde_ins 		= $tuote_row["kohde"];
-								$projekti_ins 	= $tuote_row["projekti"];
+								if ($yhtiorow["tarkenteiden_prioriteetti"] == "toimipaikka") {
+
+									$query = "	SELECT toimipaikka
+												FROM varastopaikat
+												WHERE
+												concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
+												concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
+												yhtio = '$kukarow[yhtio]'";
+									$varcheckres = pupe_query($query);
+									$varcheckrow = mysql_fetch_assoc($varcheckres);
+
+									$query = "	SELECT kustp, kohde, projekti
+												FROM yhtion_toimipaikat
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus  = {$varcheckrow['toimipaikka']}";
+									$toimipaikkares = pupe_query($query);
+									$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+
+									// Otetaan ensisijaisesti kustannuspaikka toimipaikan takaa
+									$kustp_ins 		= $toimipaikkarow["kustp"] > 0 ? $toimipaikkarow["kustp"] : $tuote_row["kustp"];
+									$kohde_ins 		= $toimipaikkarow["kohde"] > 0 ? $toimipaikkarow["kohde"] : $tuote_row["kohde"];
+									$projekti_ins 	= $toimipaikkarow["projekti"] > 0 ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
+								}
+								else {
+									// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
+									$kustp_ins 		= $tuote_row["kustp"];
+									$kohde_ins 		= $tuote_row["kohde"];
+									$projekti_ins 	= $tuote_row["projekti"];
+								}
 
 								// Kokeillaan varastonmuutos tilin oletuskustannuspaikalle
 								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);

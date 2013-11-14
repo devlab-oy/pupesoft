@@ -760,6 +760,7 @@ if (isset($jatka)) {
 					jalleenmyyja 	= '$jalleenmyyja',
 					tehdas			= '$tehdas',
 					tyoaika			= '$tyoaika',
+					tilno			= '$tilno',
 					vikakoodi		= '$vikakoodi',
 					takuunumero		= '$takuunumero',
 					tyokoodi		= '$tyokoodi',

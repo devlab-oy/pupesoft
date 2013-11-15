@@ -50,6 +50,14 @@ if (!function_exists("korjaalaskut")) {
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 		if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>".t("Löydettiin tuotteelle")." $tuoteno ".mysql_num_rows($tilausriviresult)." ".t("tilausriviä").".</font><br>";
 
+		if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
+			// Tässä tapauksessa toimipaikka ohittaa priossa muut vaikka vat_numero ois tyhjä
+			$toimpriolisa = "";
+		}
+		else {
+			$toimpriolisa = " ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ";
+		}
+
 		while ($tilausrivi = mysql_fetch_assoc($tilausriviresult)) {
 
 			// haetaan laskun tiedot
@@ -63,9 +71,9 @@ if (!function_exists("korjaalaskut")) {
 			// Katotaan mille kustannuspaikalle tuote on alunperin tiliöity
 			// HUOM: sama pätkä kuin teelaskuntiliointi.inc:ssä
 			$query = "	SELECT
-						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kustp, 0) > 0, 						tuotteen_alv.kustp, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					if(ifnull(tuote.kustp, 0) > 0, 						tuote.kustp, 					if(ifnull(asiakas.kustannuspaikka, 0) > 0, 				asiakas.kustannuspaikka, 		if(ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					yhtio.myynti_kustp))))) kustp,
-						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kohde, 0) > 0, 						tuotteen_alv.kohde, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					if(ifnull(tuote.kohde, 0) > 0, 						tuote.kohde, 					if(ifnull(asiakas.kohde, 0) > 0, 						asiakas.kohde, 					if(ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					yhtio.myynti_kohde))))) kohde,
-						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.projekti, 0) > 0, 					tuotteen_alv.projekti, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.projekti, 0) > 0, 					yhtion_toimipaikat.projekti, 				if(ifnull(tuote.projekti, 0) > 0, 					tuote.projekti, 				if(ifnull(asiakas.projekti, 0) > 0, 					asiakas.projekti, 				if(ifnull(yhtion_toimipaikat.projekti, 0) > 0, 					yhtion_toimipaikat.projekti, 				yhtio.myynti_projekti))))) projekti
+						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kustp, 0) > 0, 						tuotteen_alv.kustp, 					if({$toimpriolisa} ifnull(yhtion_toimipaikat.kustp, 0) > 0, 				yhtion_toimipaikat.kustp, 					if(ifnull(tuote.kustp, 0) > 0, 						tuote.kustp, 					if(ifnull(asiakas.kustannuspaikka, 0) > 0, 				asiakas.kustannuspaikka, 		if(ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					yhtio.myynti_kustp))))) kustp,
+						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kohde, 0) > 0, 						tuotteen_alv.kohde, 					if({$toimpriolisa} ifnull(yhtion_toimipaikat.kohde, 0) > 0, 				yhtion_toimipaikat.kohde, 					if(ifnull(tuote.kohde, 0) > 0, 						tuote.kohde, 					if(ifnull(asiakas.kohde, 0) > 0, 						asiakas.kohde, 					if(ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					yhtio.myynti_kohde))))) kohde,
+						if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.projekti, 0) > 0, 					tuotteen_alv.projekti, 					if({$toimpriolisa} ifnull(yhtion_toimipaikat.projekti, 0) > 0, 				yhtion_toimipaikat.projekti, 				if(ifnull(tuote.projekti, 0) > 0, 					tuote.projekti, 				if(ifnull(asiakas.projekti, 0) > 0, 					asiakas.projekti, 				if(ifnull(yhtion_toimipaikat.projekti, 0) > 0, 					yhtion_toimipaikat.projekti, 				yhtio.myynti_projekti))))) projekti
 						FROM tilausrivi
 						JOIN lasku on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
 						LEFT JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
@@ -462,7 +470,7 @@ if (!function_exists('korjaatapahtuma')) {
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 		// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
-		if ($tun_chk_row['laji'] == 'Inventointi') $tun_chk_row['rivitunnus'] = $tun_chk_row['tunnus'];
+		if ($tun_chk_row['laji'] == 'Inventointi' or $tun_chk_row['laji'] == 'siirto') $tun_chk_row['rivitunnus'] = $tun_chk_row['tunnus'];
 
 		// Poistetaan vanhat korjaustapahtumat
 		// Tämä keissi on tärkeä, jos tilikauden alkua ollaan siirretty taaksepäin historiaan
@@ -511,7 +519,7 @@ if (!function_exists('korjaatapahtuma')) {
 			if ($upd_kplhinta !== FALSE) $params['kplhinta'] = $hinta_chk_row['kplhinta'];
 
 			// Laitetaan inventoinnin korjaustapahtumassa alkuperäisen tapahtuman tunnus rivitunnukseksi
-			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];
+			if ($tun_chk_row['laji'] == 'Inventointi' or $tun_chk_row['laji'] == 'siirto') $params['rivitunnus'] = $tun_chk_row['tunnus'];
 
 			kopioitapahtuma($tapahtuma_tunnus, $params);
 
@@ -523,7 +531,7 @@ if (!function_exists('korjaatapahtuma')) {
 			);
 
 			// Laitetaan inventoinnin korjaustapahtumassa alkuperäisen tapahtuman tunnus rivitunnukseksi
-			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];
+			if ($tun_chk_row['laji'] == 'Inventointi' or $tun_chk_row['laji'] == 'siirto') $params['rivitunnus'] = $tun_chk_row['tunnus'];
 
 			$params['hinta'] = $upd_hinta;
 			if ($upd_kplhinta !== FALSE) $params['kplhinta'] = $upd_kplhinta;
@@ -837,7 +845,7 @@ if ($tuoteno != '') {
 							$uusihinta = $alkuperainen_hinta_ostotilaukselta;
 
 							// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
-							$rivitunnuslisa = $trow['laji'] == 'Inventointi' ? $trow['tunnus'] : $trow['rivitunnus'];
+							$rivitunnuslisa = ($trow['laji'] == 'Inventointi' or $trow['laji'] == 'siirto') ? $trow['tunnus'] : $trow['rivitunnus'];
 
 							// Nollataan selite
 							$selite_txt = "";
@@ -936,6 +944,92 @@ if ($tuoteno != '') {
 
 								// summaillaan uutta saldoa
 								$uusisaldo = round($uusisaldo+$trow['kpl'], 2);
+							}
+
+							// jos kyseessä on varastosiirto ja ollaan löydetty jo eka tulo
+							if ($trow['laji'] == 'siirto' and $eka == 0) {
+
+								// katotaan saadaanko tehdä tiliöintejä
+								// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
+								$tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
+								$korjaus_alku   = (int) str_replace("-", "", substr($trow["laadittu"], 0, 10));
+
+								// Haetaan tiliöinnit, näitä on kaksi (varasto ja varastonmuutos)
+								$query = "	SELECT *
+											FROM tiliointi
+											WHERE yhtio  		= '{$kukarow['yhtio']}'
+											AND tapahtumatunnus = '{$trow['tunnus']}'
+											AND tapahtumatunnus > 0
+											AND korjattu = ''
+											LIMIT 2";
+								$sum_chk_res = pupe_query($query);
+
+								while ($sum_chk_row = mysql_fetch_assoc($sum_chk_res)) {
+
+									if ($sum_chk_row["summa"] > 0) {
+										$vasisum = round(abs($trow["kpl"] * $uusikehahin), 2);
+									}
+									else {
+										$vasisum = round(abs($trow["kpl"] * $uusikehahin) * -1, 2);
+									}
+
+									$pvm_chk = $tilikausi_alku > $korjaus_alku ? $yhtiorow['tilikausi_alku'] : "";
+
+									if ($pvm_chk == "") {
+
+										$params = array(
+											'summa' 			=> $vasisum,
+											'summa_valuutassa' 	=> $vasisum,
+											'laatija' 			=> $kukarow['kuka'],
+											'laadittu' 			=> date('Y-m-d H:i:s'),
+										);
+
+										// Tehdään uusi tiliöinti
+										kopioitiliointi($sum_chk_row['tunnus'], "", $params);
+
+										// yliviivataan alkuperäinen tiliöinti
+										$query = "	UPDATE tiliointi
+													SET korjattu = '$kukarow[kuka]',
+													korjausaika  = now()
+													WHERE yhtio  = '$kukarow[yhtio]'
+													AND tunnus   = '$sum_chk_row[tunnus]'";
+										$invupd = pupe_query($query);
+
+										if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+									}
+									else {
+
+										$params = array(
+											'tapvm' 			=> $yhtiorow['tilikausi_alku'],
+											'tapahtumatunnus'	=> 0,
+											'summa' 			=> round($sum_chk_row["summa"] * -1, 2),
+											'summa_valuutassa' 	=> round($sum_chk_row["summa"] * -1, 2),
+											'laatija' 			=> $kukarow['kuka'],
+											'laadittu' 			=> date('Y-m-d H:i:s'),
+										);
+
+										// Tehdään vastakirjaus tilikauden ensimmäiselle päivälle
+										kopioitiliointi($sum_chk_row['tunnus'], "", $params);
+
+										$params = array(
+											'tapvm' 			=> $yhtiorow['tilikausi_alku'],
+											'summa' 			=> $vasisum,
+											'summa_valuutassa' 	=> $vasisum,
+											'laatija' 			=> $kukarow['kuka'],
+											'laadittu' 			=> date('Y-m-d H:i:s'),
+										);
+
+										// Tehdään uusi kirjaus oikeilla hinnoilla tilikauden ensimmäiselle päivälle
+										kopioitiliointi($sum_chk_row['tunnus'], "", $params);
+
+										// Nollataan alkuperäisen tiliöinnin tapahtumatunnus, ku se ei oo enää "voimassa"
+										$query = "	UPDATE tiliointi
+													SET tapahtumatunnus  = 0
+													WHERE yhtio  = '$kukarow[yhtio]'
+													AND tunnus   = '$sum_chk_row[tunnus]'";
+										$invupd = pupe_query($query);
+									}
+								}
 							}
 
 							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo

@@ -220,3 +220,34 @@
 		$ulos .= "</td>";
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") {
+
+		if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";
+		if (mysql_field_name($result, $i) == "kohde")	 $kptyyppi = "O";
+		if (mysql_field_name($result, $i) == "kustp")	 $kptyyppi = "K";
+
+		$tpque = "	SELECT tunnus, nimi, koodi
+					from kustannuspaikka
+					where yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$kptyyppi'
+					and kaytossa != 'E'
+					ORDER BY koodi+0, koodi, nimi";
+		$vresult = mysql_query($tpque) or pupe_error($tpque);
+
+		$sel="";
+		if ($trow[$i] == "") {
+			$sel = "selected";
+		}
+		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei valintaa")."</option>";
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
+		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}

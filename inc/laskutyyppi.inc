@@ -52,6 +52,9 @@
 				case "I":
 					$alatila = "Inventointi";
 					break;
+				case "G":
+					$alatila = "Varastosiirto";
+					break;
 				case "K":
 					$alatila = "Kassalipaan täsmäytys";
 					break;

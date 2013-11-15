@@ -1,8 +1,10 @@
 <?php
 
+require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' avaus epäonnistui!");
 
-$edytunnus = "jokuarvovaan, että mennään ekalla luupilla jo sisään";
+$edytunnus = "luuppiinmeno_ekalla";
 
 /* FILEFORMAATTI:
 	ytunnus
@@ -34,6 +36,10 @@ while ($rivi = fgets($fd)) {
 
  		// asiakas vaihtuu, uusi otsikko
  		if ($tarkytunnus != $edytunnus) {
+
+			if (isset($tilaus_valmiiksi) and $edytunnus != "luuppiinmeno_ekalla") {
+				require("tilaus-valmis.inc");
+			}
 
  			$query = "	UPDATE kuka
 						SET kesken=0
@@ -73,9 +79,6 @@ while ($rivi = fgets($fd)) {
 
  			$arow = mysql_fetch_array($result);
 
-			// Luodaan uusi myyntitilausotsikko
- 			require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
-
 			$id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"]);
 
  			echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
@@ -84,6 +87,7 @@ while ($rivi = fgets($fd)) {
  			$query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
  			$result   = mysql_query($query) or die($query);
  			$laskurow = mysql_fetch_array($result);
+
  		}
 
  		$query = "	SELECT *
@@ -127,9 +131,13 @@ while ($rivi = fgets($fd)) {
  		}
 
  		$edytunnus = $tarkytunnus;
+
 	}
+	
+}
+
+if (isset($tilaus_valmiiksi)) {
+	require("tilaus-valmis.inc");
 }
 
 fclose ($fd);
-
-?>

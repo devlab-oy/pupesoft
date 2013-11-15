@@ -270,12 +270,14 @@
 
 		if (mysql_num_rows($toimipaikat_res) != 0) {
 
+			$sel = (isset($toimipaikka) and $toimipaikka == '0') ? "selected" : "";
+
 			echo "<tr>";
 			echo "<th>",t("Toimipaikka"),"</th>";
 			echo "<td>";
 			echo "<select name='toimipaikka' onchange='submit();'>";
 			echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
-			echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+			echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
 
 			while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 

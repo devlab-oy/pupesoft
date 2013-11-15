@@ -1210,8 +1210,6 @@
 
 					echo "<$ero valign='top'><select name='valittu_tulostin'>";
 
-					echo "<option value=''>".t("Ei tulosteta")."</option>";
-
 					while ($kirrow = mysql_fetch_array($kirre)) {
 						$sel = '';
 

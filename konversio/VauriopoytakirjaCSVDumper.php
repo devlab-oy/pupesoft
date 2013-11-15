@@ -26,7 +26,8 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 			'takuunumero',
 		);
 		$mandatory_fields = array(
-			'lisakuluprosentti' => 7
+			'lisakuluprosentti'	 => 7,
+			'tyostatus'			 => 1, //Urakoitsijalla = 1
 		);
 
 		$this->setFolder('/tmp/sp/');

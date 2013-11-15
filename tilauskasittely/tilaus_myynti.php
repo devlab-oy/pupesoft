@@ -4945,7 +4945,7 @@ if ($tee == '') {
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					$tunnuslisa
 					and tilausrivi.tyyppi in ($tilrivity)
-					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus
+					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus, tuote.try
 					$limitlisa";
 		$result = pupe_query($query);
 
@@ -5389,11 +5389,25 @@ if ($tee == '') {
 				$edotunnus = $row["otunnus"];
 
 				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")) or $toim == "PROJEKTI") {
-					if ($tuotetyyppi == "" and $row["tuotetyyppi"] == '2 Työt') {
+					if ($tuotetyyppi == 2 and $row["tuotetyyppi"] == '2 Työt') {
 						$tuotetyyppi = 1;
 
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("Työt")."</font>:</td></tr>";
+					}
+
+					if ($tuotetyyppi == '' and $row['tuotetyyppi'] == '1 Muut' and $row['try'] == 2) {
+						$tuotetyyppi = 1;
+
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("TSF materiaalit")."</font>:</td></tr>";
+					}
+
+					if ($tuotetyyppi == 1 and $row['tuotetyyppi'] == '1 Muut' and $row['try'] == 1) {
+						$tuotetyyppi = 2;
+
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("Urakoitsijan materiaalit")."</font>:</td></tr>";
 					}
 				}
 				elseif ($toim == 'EXTRANET' and $kukarow['extranet'] != '') {

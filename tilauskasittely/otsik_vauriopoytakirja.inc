@@ -259,7 +259,7 @@ if ($tila == "" and !isset($jatka)) {
 		echo "<td align='center'>";
 		echo t('Operaattorin tiketti numero');
 		echo "<br/>";
-		echo "<input type='text' name='takuunumero' value='{$srow['takuunumero']}' />";
+		echo "<input type='text' name='takuunumero' value='{$srow['takuunumero']}' disabled />";
 		echo "</td>";
 
 		$kiireellisyys = search_array_key_for_value_recursive($dynaamiset_kentat, 'selite', 'prioriteetti');
@@ -963,6 +963,8 @@ function vauriopoytakirja_yleiset_kentat() {
 		}
 	}
 
+	$tyostatukset = hae_tyomaarayksen_statukset();
+
 	echo "<table class='vauriopoytakirja_otsikko'>";
 
 	echo "<tr>";
@@ -979,6 +981,23 @@ function vauriopoytakirja_yleiset_kentat() {
 	echo "<select name='alv'>";
 	echo "<option value='{$yhtion_oletusalv}' {$sel_verollinen}>".t("Verollinen myynti")."</option>";
 	echo "<option value='0' {$sel_veroton}>".t("Veroton myynti")."</option>";
+	echo "</select>";
+	echo "</td>";
+
+	echo "<td>";
+	echo t('Tila');
+	echo "</td>";
+
+	echo "<td>";
+	echo "<select name='tyostatus'>";
+	$sel = "";
+	foreach ($tyostatukset as $tyostatus) {
+		if ($tyostatus['selite'] == $srow['tyostatus']) {
+			$sel = "SELECTED";
+		}
+		echo "<option value='{$tyostatus['selite']}' {$sel}>{$tyostatus['selitetark']}</option>";
+		$sel = "";
+	}
 	echo "</select>";
 	echo "</td>";
 

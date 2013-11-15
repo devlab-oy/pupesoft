@@ -24442,6 +24442,19 @@ if (!function_exists('hae_yhtion_oletusalv')) {
 
 }
 
+function hae_tyomaarayksen_statukset() {
+	global $kukarow, $yhtiorow;
+
+	$status_result = t_avainsana('TYOM_TYOSTATUS');
+
+	$tyomaarays_statukset = array();
+	while ($tyomaarays_status = mysql_fetch_assoc($status_result)) {
+		$tyomaarays_statukset[] = $tyomaarays_status;
+	}
+
+	return $tyomaarays_statukset;
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

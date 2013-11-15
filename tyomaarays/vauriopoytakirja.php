@@ -32,14 +32,6 @@ if (isset($livesearch_tee) and $livesearch_tee == "VAURIOPOYTAKIRJAHAKU") {
 enable_ajax();
 
 echo "<font class='head'>".t("Vauriopöytäkirja")."</font><hr>";
-?>
-<style>
-
-</style>
-<script>
-
-</script>
-<?php
 
 $request = array(
 	'toim'					 => $toim,
@@ -55,6 +47,11 @@ $request = array(
 
 $request['tyomaarays_statukset'] = hae_tyomaarayksen_statukset();
 
+echo_kayttoliittyma($request);
+
+echo "<br/>";
+echo "<br/>";
+
 if ($request['action'] == 'generoi_excel') {
 	$request['tulostettava_vauriopoytakirja'] = hae_vauriopöytäkirjat($request);
 	$request['tulostettava_vauriopoytakirja'] = $request['tulostettava_vauriopoytakirja'][0];
@@ -67,18 +64,13 @@ if ($request['action'] == 'generoi_excel') {
 
 if ($request['action'] == 'hae_vauriopoytakirjat') {
 	$request['vauriopoytakirjat'] = hae_vauriopöytäkirjat($request);
-}
-
-echo_kayttoliittyma($request);
-
-echo "<br/>";
-echo "<br/>";
-
-if (!empty($request['vauriopoytakirjat'])) {
-	echo_vauriopoytakirjat($request);
-}
-else {
-	echo "<font class='message'>".t('Hakuehdoilla ei löytynyt vauriopöytäkirjoja')."</font>";
+	
+	if (!empty($request['vauriopoytakirjat'])) {
+		echo_vauriopoytakirjat($request);
+	}
+	else {
+		echo "<font class='message'>".t('Hakuehdoilla ei löytynyt vauriopöytäkirjoja')."</font>";
+	}
 }
 
 require('inc/footer.inc');
@@ -131,6 +123,9 @@ function echo_vauriopoytakirjat($request) {
 		echo "</td>";
 
 		echo "<td>";
+		$status = search_array_key_for_value_recursive($request['tyomaarays_statukset'], 'selite', $vauriopoytakirja['tyostatus']);
+		$status = $status[0];
+		echo $status['selitetark'];
 		echo "</td>";
 
 		echo "<td class='back' nowrap>";
@@ -178,19 +173,16 @@ function hae_vauriopöytäkirjat($request) {
 		$tyomaarays_where .= "	AND tyomaarays.tyostatus = '{$request['vauriopoytakirjan_tila']}'";
 	}
 
-	$tilausrivi_join = "";
-	$tilausrivi_select = "";
+	if ($request['toim'] == 'asentaja') {
+		$tyomaarays_where .= "	AND tyomaarays.tyostatus = '1'";
+	}
+
 	if ($request['action'] == 'generoi_excel') {
-		$tilausrivi_join = "	LEFT JOIN tilausrivi
-								ON ( tilausrivi.yhtio = lasku.yhtio
-									AND tilausrivi.otunnus = lasku.tunnus )";
-		$tilausrivi_select = "tilausrivi.*,";
 		$tyomaarays_where .= "	AND tyomaarays.otunnus = '{$request['tunnus']}'";
 	}
 
 	$query = "	SELECT tyomaarays.*,
 				tyomaarays.viite as tyomaarays_viite,
-				{$tilausrivi_select}
 				lasku.tunnus as tunnus,
 				lasku.tila as tila,
 				lasku.alatila as alatila,
@@ -199,30 +191,55 @@ function hae_vauriopöytäkirjat($request) {
 				JOIN lasku
 				ON ( lasku.yhtio = tyomaarays.yhtio
 					AND lasku.tunnus = tyomaarays.otunnus )
-				{$tilausrivi_join}
 				WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
 				{$tyomaarays_where}";
 	$result = pupe_query($query);
 
 	$vauriopoytakirjat = array();
 	while ($vauriopoytakirja = mysql_fetch_assoc($result)) {
+		if ($request['action'] == 'generoi_excel') {
+			$vauriopoytakirja['tilausrivit'] = hae_vauriopoytakirja_rivit($vauriopoytakirja['tunnus']);
+		}
+		
 		$vauriopoytakirjat[] = $vauriopoytakirja;
 	}
 
 	return $vauriopoytakirjat;
 }
 
-function hae_tyomaarayksen_statukset() {
+function hae_vauriopoytakirja_rivit($vauriopoytakirja_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$status_result = t_avainsana('TYOM_TYOSTATUS');
-
-	$tyomaarays_statukset = array();
-	while ($tyomaarays_status = mysql_fetch_assoc($status_result)) {
-		$tyomaarays_statukset[] = $tyomaarays_status;
+	if (empty($vauriopoytakirja_tunnus)) {
+		return false;
 	}
 
-	return $tyomaarays_statukset;
+	$query = "	SELECT tilausrivi.*,
+				tuote.tuotetyyppi
+				FROM tilausrivi
+				JOIN tuote
+				ON ( tuote.yhtio = tilausrivi.yhtio
+					AND tuote.tuoteno = tilausrivi.tuoteno )
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus = '{$vauriopoytakirja_tunnus}'";
+	$result = pupe_query($query);
+
+	$tilausrivit = array();
+	while($tilausrivi = mysql_fetch_assoc($result)) {
+		if ($tilausrivi['tuotetyyppi'] == '') {
+			if ($tilausrivi['try'] == 1) {
+				$tilausrivit['kustannukset']['urakoitsija'][] = $tilausrivi;
+			}
+			else {
+				$tilausrivit['kustannukset']['tsf'][] = $tilausrivi;
+			}
+		}
+		else if ($tilausrivi['tuotetyyppi'] == 'K') {
+			$tilausrivit['korjaajat'][] = $tilausrivi;
+		}
+	}
+
+	return $tilausrivit;
 }
 
 function echo_kayttoliittyma($request) {
@@ -621,27 +638,34 @@ function excel_korjaaja_rivit(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$xls->write($excelrivi, $excelsarake++, t('Päättyi klo'), $bold);
 	$xls->write($excelrivi, $excelsarake++, t('NT'), $bold);
 	$xls->write($excelrivi, $excelsarake, t('YT'), $bold);
-	foreach ($request['tulostettava_vauriopoytakirja']['korjaajat'] as $korjaaja) {
-		$xls->write($excelrivi, $excelsarake++, $korjaaja['nimi']);
-		$xls->write($excelrivi, $excelsarake++, $korjaaja['selvitys']);
-		$xls->write($excelrivi, $excelsarake++, $korjaaja['pvm']);
-		$xls->write($excelrivi, $excelsarake++, $korjaaja['alkoi_klo']);
-		$xls->write($excelrivi, $excelsarake++, $korjaaja['paattyi_klo']);
-		$xls->write($excelrivi, $excelsarake++, $korjaaja['nt']);
-		$xls->write($excelrivi++, $excelsarake, $korjaaja['yt']);
+	$excelrivi++;
+	$excelsarake = 0;
+	$normaali_tyo_yhteensa = 0;
+	$ylityo_yhteensa = 0;
+	foreach ($request['tulostettava_vauriopoytakirja']['tilausrivit']['korjaajat'] as $korjaaja) {
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['nimitys']);
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['kommentti']);
+		$xls->write($excelrivi, $excelsarake++, '-');
+		$xls->write($excelrivi, $excelsarake++, '-');
+		$xls->write($excelrivi, $excelsarake++, '-');
+		$xls->write($excelrivi, $excelsarake++, $korjaaja['tilkpl']);
+		$xls->write($excelrivi++, $excelsarake, 0);
+
+		$excelsarake = 0;
+		$normaali_tyo_yhteensa += $korjaaja['tilkpl'];
 	}
 
 	$excelrivi++;
 	$excelsarake = 0;
 	$excelsarake = $excelsarake + 4;
 	$xls->write($excelrivi, $excelsarake++, t('Tunnit yht'), $bold);
-	$xls->write($excelrivi, $excelsarake++, 'tunnit nt', $bold);
-	$xls->write($excelrivi, $excelsarake, 'tunnit yt', $bold);
+	$xls->write($excelrivi, $excelsarake++, $normaali_tyo_yhteensa, $bold);
+	$xls->write($excelrivi, $excelsarake, $ylityo_yhteensa, $bold);
 	$excelrivi++;
 	$excelsarake = 0;
 	$excelsarake = $excelsarake + 4;
 	$xls->write($excelrivi, $excelsarake++, t('Total'), $bold);
-	$xls->write($excelrivi, $excelsarake, 'total tähä', $bold);
+	$xls->write($excelrivi, $excelsarake, ($normaali_tyo_yhteensa + $ylityo_yhteensa), $bold);
 }
 
 function excel_kustannus_rivit(&$xls, &$excelrivi, &$excelsarake, $request) {
@@ -654,11 +678,16 @@ function excel_kustannus_rivit(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$xls->write($excelrivi, $excelsarake, t('Yhteensä').'('.t('eur').')', $bold);
 	$excelrivi++;
 	$excelsarake = 0;
-	foreach ($request['tulostettava_vauriopoytakirja']['kustannusrivit'] as $kustannusrivi) {
+	foreach ($request['tulostettava_vauriopoytakirja']['tilausrivit']['kustannukset'] as $kustannusrivi) {
 		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['nimitys']);
 		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['tilkpl']);
 		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['yksikko']);
-		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['hinta'] / $kustannusrivi['tilkpl']);
+		if (!empty($kustannusrivi['tilkpl'])) {
+			$xls->write($excelrivi, $excelsarake++, $kustannusrivi['hinta'] / $kustannusrivi['tilkpl']);
+		}
+		else {
+			$xls->write($excelrivi, $excelsarake++, 0);
+		}
 		$xls->write($excelrivi, $excelsarake++, $kustannusrivi['rivihinta']);
 
 		$viimeinen_sarake = $excelsarake;
@@ -673,11 +702,11 @@ function excel_materiaalit(&$xls, &$excelrivi, &$excelsarake, $request, $tyyppi 
 	global $kukarow, $yhtiorow, $bold;
 
 	if ($tyyppi == 'urakoitsija') {
-		$materiaalit = $request['tulostettava_vauriopoytakirja']['urakoitsijan_materiaalit'];
+		$materiaalit = $request['tulostettava_vauriopoytakirja']['tilausrivit']['kustannukset']['urakoitsija'];
 		$otsikko = t('Urakoitsijan materiaali');
 	}
 	else {
-		$materiaalit = $request['tulostettava_vauriopoytakirja']['tsf_materiaalit'];
+		$materiaalit = $request['tulostettava_vauriopoytakirja']['tilausrivit']['kustannukset']['tsf'];
 		$otsikko = t('TSF materiaali');
 	}
 
@@ -689,6 +718,9 @@ function excel_materiaalit(&$xls, &$excelrivi, &$excelsarake, $request, $tyyppi 
 	$xls->write($excelrivi, $excelsarake, t('Yhteensä').'('.t('eur').')', $bold);
 	$excelrivi++;
 	$excelsarake = 0;
+	if (empty($materiaalit)) {
+		return;
+	}
 	foreach ($materiaalit as $u_materiaali) {
 		$xls->write($excelrivi, $excelsarake++, $u_materiaali['nimitys']);
 		$xls->write($excelrivi, $excelsarake++, $u_materiaali['tuoteno']);

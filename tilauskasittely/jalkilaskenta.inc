@@ -55,7 +55,7 @@ if (!function_exists("korjaalaskut")) {
 			$toimpriolisa = "";
 		}
 		else {
-			$toimpriolisa = " if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ";
+			$toimpriolisa = " ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ";
 		}
 
 		while ($tilausrivi = mysql_fetch_assoc($tilausriviresult)) {

@@ -675,12 +675,7 @@
 				echo "</td>";
 			}
 
-			$query = "	SELECT *
-						FROM yhtion_toimipaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'";
-			$toimipaikkares = pupe_query($query);
-
-			if (mysql_num_rows($toimipaikkares) > 0)  {
+			if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0)  {
 
 				echo "</tr><tr>";
 

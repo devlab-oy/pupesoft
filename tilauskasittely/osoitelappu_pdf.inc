@@ -266,7 +266,9 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 	if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 		$query = "	SELECT *
 					FROM yhtion_toimipaikat
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$laskurow[yhtio_toimipaikka]'
+					and lasku_logo != ''";
 		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 		if (mysql_num_rows($result) == 1) {

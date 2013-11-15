@@ -997,7 +997,11 @@ if ($tila == '') {
 
 		if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+			$alhqur = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND maa 		= '$laskurow[maa]'
+						AND vat_numero != ''";
 			$alhire = pupe_query($alhqur);
 
 			// ollaan alv-rekisteröity
@@ -1397,9 +1401,7 @@ if ($tila == '') {
 	echo "<th>",t("Näytä toimipaikan rivejä"),"</th>";
 	echo "<td>";
 
-	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
-
-	if (mysql_num_rows($toimipaikat_res) != 0) {
+	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
 
 		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
@@ -1951,7 +1953,7 @@ if ($tila == '') {
 				$query = "	SELECT nimi
 							FROM yhtion_toimipaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$rivirow['toimipaikka']}'";
+							AND tunnus  = '{$rivirow['toimipaikka']}'";
 				$toimipaikka_nimi_res = pupe_query($query);
 				$toimipaikka_nimi_row = mysql_fetch_assoc($toimipaikka_nimi_res);
 

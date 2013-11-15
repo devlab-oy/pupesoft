@@ -182,7 +182,11 @@
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Valitse toimipaikka")."</option>";
 
-		$query = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND vat_numero = '' ORDER BY nimi";
+		$query = "	SELECT *
+					FROM yhtion_toimipaikat
+					WHERE yhtio    = '{$kukarow['yhtio']}'
+					AND vat_numero = ''
+					ORDER BY nimi";
 		$vresult = pupe_query($query);
 
 		while ($vrow = mysql_fetch_assoc($vresult)) {

@@ -212,9 +212,9 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
 		// poikkeava toimipaikka,otetaan sen osoitetiedot
 		$alhqur = "	SELECT *
-					from yhtion_toimipaikat
+					FROM yhtion_toimipaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$kukarow[toimipaikka]'";
+					AND tunnus = '$kukarow[toimipaikka]'";
 		$alhire = pupe_query($alhqur);
 
 		if (mysql_num_rows($alhire) == 1) {

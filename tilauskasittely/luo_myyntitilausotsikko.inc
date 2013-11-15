@@ -317,7 +317,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		// jos meillä on lasku menossa ulkomaille
 		if ($maa != "" and $maa != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero != ''";
+			$alhqur = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio		= '$kukarow[yhtio]'
+						AND maa			= '$maa'
+						AND vat_numero != ''";
 			$alhire = pupe_query($alhqur);
 
 			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista

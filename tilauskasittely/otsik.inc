@@ -811,7 +811,11 @@
 		$alkuperainen_toimipaikka = $yhtiorow['toimipaikka'];
 
 		if (!isset($srow['yhtio_toimipaikka']) and !empty($srow['maa'])) {
-			$alhqur = "SELECT tunnus from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$srow[maa]' and vat_numero != ''";
+			$alhqur = "	SELECT tunnus
+						FROM yhtion_toimipaikat
+						WHERE yhtio		= '$kukarow[yhtio]'
+						AND maa			= '$srow[maa]'
+						AND vat_numero != ''";
 			$alhire = pupe_query($alhqur);
 
 			if (mysql_num_rows($alhire) > 0) {
@@ -1977,10 +1981,7 @@
 			$vasen_sarake[$vasen] .= "</select></td>";
 			$vasen++;
 
-			$query = "	SELECT tunnus, nimi
-						FROM yhtion_toimipaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'";
-			$yht_toimpaik_res = pupe_query($query);
+			$yht_toimpaik_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 			if (mysql_num_rows($yht_toimpaik_res) > 0) {
 

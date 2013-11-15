@@ -675,9 +675,7 @@
 				echo "</td>";
 			}
 
-			if ($yhtiorow['rajaako_toimipaikka_nakymia'] != "") $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']);
-
-			if (mysql_num_rows($toimipaikkares) > 0)  {
+			if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0)  {
 
 				echo "</tr><tr>";
 

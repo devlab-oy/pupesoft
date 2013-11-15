@@ -1401,9 +1401,7 @@ if ($tila == '') {
 	echo "<th>",t("Näytä toimipaikan rivejä"),"</th>";
 	echo "<td>";
 
-	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
-
-	if (mysql_num_rows($toimipaikat_res) != 0) {
+	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
 
 		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 

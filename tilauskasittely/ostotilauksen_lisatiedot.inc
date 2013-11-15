@@ -345,9 +345,7 @@ if ($tee == "") {
 		$pyoristusero_lisatiedot .= "<font class='message'>".t("VIRHE: Pyöristysero ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";
 	}
 
-	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
-
-	if (mysql_num_rows($toimipaikat_res) != 0) {
+	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
 
 		echo "<tr>";
 		echo "<th valign='top'>",t("Toimipaikka"),"</th>";

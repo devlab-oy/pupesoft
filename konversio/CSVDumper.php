@@ -314,8 +314,8 @@ abstract class CSVDumper {
 			$uusi_filename = $tiedosto_array2[$hakemiston_syvyys - 1].'_'.date('YmdHis').'.'.$tiedosto_array[1];
 		}
 
-		exec('cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"');
-		unlink($tiedosto_polku);
+//		exec('cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"');
+//		unlink($tiedosto_polku);
 	}
 
 	abstract protected function konvertoi_rivit();

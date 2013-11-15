@@ -4945,7 +4945,7 @@ if ($tee == '') {
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					$tunnuslisa
 					and tilausrivi.tyyppi in ($tilrivity)
-					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus, tuote.try
+					ORDER BY tilausrivi.otunnus, $sorttauslisa tuote.try, sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus
 					$limitlisa";
 		$result = pupe_query($query);
 
@@ -5255,7 +5255,7 @@ if ($tee == '') {
 
 			echo "</td></tr>";
 
-			$tuotetyyppi				= "";
+			$header_echottu				= false;
 			$positio_varattu			= "";
 			$varaosatyyppi				= "";
 			$vanhaid 					= "KALA";
@@ -5329,6 +5329,18 @@ if ($tee == '') {
 
 			while ($row = mysql_fetch_assoc($result)) {
 
+				if (empty($edellinen_tyyppi)) {
+					$edellinen_tyyppi = $row['tuotetyyppi'];
+				}
+
+				if (empty($edellinen_try)) {
+					$edellinen_try = $row['try'];
+				}
+
+				if ($edellinen_tyyppi != $row['tuotetyyppi'] or $edellinen_try != $row['try']) {
+					$header_echottu = false;
+				}
+
 				// Tuoteperheen lapset, jotka on merkitty puutteeksi
 				if ($kukarow['extranet'] != '' and $row['tunnus'] != $row['perheid'] and strtoupper($row['var']) == 'P' and $row['perheid'] != 0) {
 
@@ -5389,22 +5401,22 @@ if ($tee == '') {
 				$edotunnus = $row["otunnus"];
 
 				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "VAURIOPOYTAKIRJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")) or $toim == "PROJEKTI") {
-					if ($tuotetyyppi == 2 and $row["tuotetyyppi"] == '2 Työt') {
-						$tuotetyyppi = 1;
+					if ($header_echottu == false and $row["tuotetyyppi"] == '2 Työt') {
+						$header_echottu = true;
 
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("Työt")."</font>:</td></tr>";
 					}
 
-					if ($tuotetyyppi == '' and $row['tuotetyyppi'] == '1 Muut' and $row['try'] == 2) {
-						$tuotetyyppi = 1;
+					if ($header_echottu == false and $row['tuotetyyppi'] == '1 Muut' and $row['try'] == 2) {
+						$header_echottu = true;
 
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("TSF materiaalit")."</font>:</td></tr>";
 					}
 
-					if ($tuotetyyppi == 1 and $row['tuotetyyppi'] == '1 Muut' and $row['try'] == 1) {
-						$tuotetyyppi = 2;
+					if ($header_echottu == false and $row['tuotetyyppi'] == '1 Muut' and $row['try'] == 1) {
+						$header_echottu = true;
 
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("Urakoitsijan materiaalit")."</font>:</td></tr>";
@@ -7028,6 +7040,9 @@ if ($tee == '') {
 					echo "</tr>";
 
 				}
+
+				$edellinen_tyyppi = $row['tuotetyyppi'];
+				$edellinen_try = $row['try'];
 			}
 
 			$summa 					= 0; 	// Tilauksen verollinen loppusumma tilauksen valuutassa

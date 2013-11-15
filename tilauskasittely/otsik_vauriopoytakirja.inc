@@ -259,7 +259,7 @@ if ($tila == "" and !isset($jatka)) {
 		echo "<td align='center'>";
 		echo t('Operaattorin tiketti numero');
 		echo "<br/>";
-		echo "<input type='text' name='takuunumero' value='{$srow['takuunumero']}' disabled />";
+		echo "<input type='text' name='takuunumero' value='{$srow['takuunumero']}' readonly />";
 		echo "</td>";
 
 		$kiireellisyys = search_array_key_for_value_recursive($dynaamiset_kentat, 'selite', 'prioriteetti');

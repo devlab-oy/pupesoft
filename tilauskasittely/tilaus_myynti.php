@@ -536,8 +536,9 @@ if (
 	require("{$tilauskaslisa}luo_myyntitilausotsikko.inc");
 
 	if (!isset($tilaustyyppi)) $tilaustyyppi = "";
+	if (!isset($yhtiotoimipaikka)) $yhtiotoimipaikka = '';
 
-	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus, '', $tilaustyyppi);
+	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus, '', $tilaustyyppi, $yhtiotoimipaikka);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
 
@@ -2742,6 +2743,8 @@ if ($tee == '') {
 				<input type='hidden' name='projektilla' value='{$projektilla}'>
 				<input type='hidden' name='orig_tila' value='{$orig_tila}'>
 				<input type='hidden' name='orig_alatila' value='{$orig_alatila}'>
+				<input type='hidden' name='yhtiotoimipaikka' value='{$laskurow['yhtio_toimipaikka']}' />
+				<input type='hidden' name='tilaustyyppi' value='{$laskurow['tilaustyyppi']}' />
 				<input type='hidden' id='syotetty_ytunnus' name='syotetty_ytunnus' value=''>";
 		echo "</form>";
 	}

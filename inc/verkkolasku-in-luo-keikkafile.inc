@@ -2058,7 +2058,7 @@
 				$query = "	SELECT maa
 							FROM yhtion_toimipaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$osrow['yhtio_toimipaikka']}'";
+							AND tunnus  = '{$osrow['yhtio_toimipaikka']}'";
 				$chk_maa_res = pupe_query($query);
 				$chk_maa_row = mysql_fetch_assoc($chk_maa_res);
 
@@ -2113,7 +2113,11 @@
 
 				if ($osrow["maa"] != "" and $osrow["maa"] != $yhtiorow["maa"]) {
 					// tutkitaan ollaanko siellä alv-rekisteröity
-					$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$osrow[maa]' and vat_numero != ''";
+					$alhqur = "	SELECT *
+								FROM yhtion_toimipaikat
+								WHERE yhtio		= '$kukarow[yhtio]'
+								AND maa			= '$osrow[maa]'
+								AND vat_numero != ''";
 					$alhire = pupe_query($alhqur);
 
 					// ollaan alv-rekisteröity

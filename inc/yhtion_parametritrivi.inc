@@ -3728,3 +3728,27 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'tarkenteiden_prioriteetti') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'T' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Kirjanpidon tarkenteet haetaan järjestyksellä: Tuote, Asiakas, Toimipaikka, Yhtiö")."</option>";
+		$ulos .= "<option value = 'T' {$sel}>".t("Kirjanpidon tarkenteet haetaan järjestyksellä: Toimipaikka, Tuote, Asiakas, Yhtiö")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'toimipaikkakasittely') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'L' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Suppeampi toimipaikkakäsittely. Käyttäjän toimipaikka tallennetaan tilauksille.")."</option>";
+		$ulos .= "<option value = 'L' {$sel}>".t("Laajempi toimipaikkakäsittely. Käyttäjän toimipaikka talennetaan tilauksille ja toimipaikka rajaa tilaus-/saapumislistauksia")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

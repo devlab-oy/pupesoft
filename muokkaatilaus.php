@@ -675,12 +675,7 @@
 				echo "</td>";
 			}
 
-			$query = "	SELECT *
-						FROM yhtion_toimipaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'";
-			$toimipaikkares = pupe_query($query);
-
-			if (mysql_num_rows($toimipaikkares) > 0)  {
+			if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0)  {
 
 				echo "</tr><tr>";
 
@@ -1579,6 +1574,7 @@
 		}
 		elseif ($toim == 'OSTO') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
+						lasku.tilaustyyppi,
 						sum(if(tilausrivi.kpl is not null and tilausrivi.kpl != 0, 1, 0)) varastokpl,
 						sum(if(tilausrivi.jaksotettu is not null and tilausrivi.jaksotettu != 0, 1, 0)) vahvistettukpl,
 						count(*) rivit
@@ -1591,13 +1587,14 @@
 						and lasku.alatila IN ('', 'G')
 						and lasku.tilaustyyppi != 'O'
 						$haku
-						GROUP BY 1,2,3,4,5,6,7,8
+						GROUP BY 1,2,3,4,5,6,7,8,9
 						$mt_order_by
 						$rajaus";
-			$miinus = 7;
+			$miinus = 8;
 		}
 		elseif ($toim == 'OSTOSUPER') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
+						lasku.tilaustyyppi,
 						sum(if(tilausrivi.kpl is not null and tilausrivi.kpl != 0, 1, 0)) varastokpl,
 						sum(if(tilausrivi.jaksotettu is not null and tilausrivi.jaksotettu != 0, 1, 0)) vahvistettukpl,
 						count(*) rivit
@@ -1610,10 +1607,10 @@
 						and lasku.alatila in ('A','')
 						and lasku.tilaustyyppi != 'O'
 						$haku
-						GROUP BY 1,2,3,4,5,6,7,8
+						GROUP BY 1,2,3,4,5,6,7,8,9
 						$mt_order_by
 						$rajaus";
-			$miinus = 7;
+			$miinus = 8;
 		}
 		elseif ($toim == 'HAAMU') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
@@ -1911,6 +1908,8 @@
 			$toimitettavat_ennakot  = array();
 			$nakyman_tunnukset 		= array();
 
+			$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
+
 			while ($row = mysql_fetch_assoc($result)) {
 
 				if ($toim == 'OSTO' and $row['kuka_ext'] != '' and $ext_chk != '' and (int) $ext_chk != (int) $row['kuka_ext']) {
@@ -2141,7 +2140,7 @@
 
 							echo "<td class='$class' valign='top'>".tv1dateconv($aa, "PITKA", "LYHYT")."<br>".tv1dateconv($bb, "PITKA", "LYHYT")."</td>";
 						}
-						elseif ($fieldname == "tilaus") {
+						elseif ($fieldname == "tilaus" OR $fieldname == "tarjous") {
 
 							$query_comments = "	SELECT group_concat(concat_ws('<br>', comments, sisviesti2) SEPARATOR '<br><br>') comments
 												FROM lasku use index (primary)
@@ -2348,6 +2347,31 @@
 
 						if (isset($row["vahvistettukpl"]) and $row["vahvistettukpl"] > 0) {
 							$varastotila .= "<font class='info'><br>".t("Toimitusajat vahvistettu")." ({$row['vahvistettukpl']} / {$row['rivit']})</font>";
+						}
+
+						if (in_array($whiletoim, array('OSTO', 'OSTOSUPER')) and $row['tila'] == 'O') {
+
+							if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
+
+								mysql_data_seek($ostotil_tiltyyp_res, 0);
+
+								// ensimmäinen rivi on ns. "oletusavainsana", ei haluta sitä
+								$ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res);
+
+								while ($ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res)) {
+
+									if ($ostotil_tiltyyp_row['selite'] == $row['tilaustyyppi']) {
+										$varastotila .= "<br /><font class='info'>".t($ostotil_tiltyyp_row['selitetark'])."</font>";
+										break;
+									}
+								}
+							}
+							else {
+
+								if ($row['tilaustyyppi'] == '1') {
+									$varastotila .= "<br /><font class='info'>".t("Pikalähetys")."</font>";
+								}
+							}
 						}
 
 						echo "<td class='$class' valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";

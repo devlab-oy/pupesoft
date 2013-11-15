@@ -538,7 +538,7 @@
 
 			$onko_hyvityslasku_kerroin = 1;
 
-			if ($laskun_tyyppi_teksti == 'HYVITYSLASKU' and $laskun_summa_eur < 0) {
+			if ($laskun_tyyppi_teksti == 'HYVITYSLASKU' or $laskun_summa_eur < 0) {
 				$onko_hyvityslasku_kerroin = -1;
 			}
 

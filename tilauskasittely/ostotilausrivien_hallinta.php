@@ -14,41 +14,76 @@
 		require ("inc/kevyt_toimittajahaku.inc");
 	}
 
-	if ($ytunnus == "") {
-		// N‰ytet‰‰n muuten vaan sopivia tilauksia
-		echo "<br><table>";
-		echo "<form method = 'post'>";
-		echo "<tr><th>",t("Toimittaja"),":</th><td><input type='text' size='10' name='ytunnus' value='{$ytunnus}'></td></tr>";
-		echo "<tr><th>",t("N‰yt‰"),":</th>";
+	$select = "";
+	if ($nayta_rivit == 'vahvistamattomat') {
+		$select = "selected";
+	}
+	// N‰ytet‰‰n muuten vaan sopivia tilauksia
+	echo "<form method = 'post'>";
+	echo "<br><table>";
+	echo "<tr><th>",t("Valitse toimittaja"),":</th><td style='text-align: top;'><input type='text' size='10' name='ytunnus' value='{$ytunnus}'> ";
+	echo "<select name='nayta_rivit'>";
+	echo "<option value=''>",t("Kaikki avoimet rivit"),"</option>";
+	echo "<option value='vahvistamattomat' {$select}>",t("Vain vahvistamattomia rivej‰"),"</option> ";
+	echo "<input type='submit' value='",t("Etsi"),"'></td>";
+	echo "</tr>";
 
-		$select = "";
-		if ($nayta_rivit == 'vahvistamattomat') {
-			$select = "selected";
+	echo "<tr><th>",t("N‰yt‰ kaikki"),":</th>";
+	echo "<td><input type='submit' name='nayta_rivit' value='",t("N‰yt‰ kaikkien toimittajien vahvistamattomat rivit"),"'></td></tr>";
+
+	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
+
+		$sel = (isset($toimipaikka) and $toimipaikka == '0') ? "selected" : "";
+
+		echo "<tr>";
+		echo "<th>",t("Toimipaikka"),"</th>";
+		echo "<td>";
+		echo "<select name='toimipaikka'>";
+		echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+		echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+
+		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+			$sel = '';
+
+			if (isset($toimipaikka)) {
+				if ($toimipaikka == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
+			}
+			else {
+				if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
+			}
+
+			echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
 		}
 
-		echo "<td><select name='nayta_rivit'>";
-		echo "<option value=''>",t("Kaikki avoimet rivit"),"</option>";
-		echo "<option value='vahvistamattomat' {$select}>",t("Vain vahvistamattomia rivej‰"),"</option></td>";
-		echo "<td class='back'><input type='submit' value='",t("Etsi"),"'></td></tr>";
-		echo "</form>";
-		echo "</table><br>";
-
-		echo t("tai");
-		echo "<br><br>";
-
-		echo "<table>";
-		echo "<form method='post'>";
-		echo "<input type='hidden' name='nayta_rivit' value='vahvistamattomat'>";
-		echo "<tr><td class='back'><input type='submit' value='",t("N‰yt‰ kaikkien toimittajien vahvistamattomat rivit"),"'></td></tr>";
-		echo "</form>";
-		echo "</table>";
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
 	}
 
-	if ($ytunnus == "" and $nayta_rivit == "vahvistamattomat") {
+	echo "</table>";
+	echo "</form><br>";
+
+	if ($ytunnus == "" and isset($nayta_rivit) and $nayta_rivit != "") {
+
+		$toimipaikkalisa = "";
+
+		if (isset($toimipaikka)) {
+			if ($toimipaikka != 'kaikki') {
+				$toimipaikkalisa = " AND lasku.vanhatunnus = '{$toimipaikka}' ";
+			}
+		}
+
 		$query = "	SELECT tilausrivi.otunnus, lasku.nimi, lasku.ytunnus
 					FROM tilausrivi
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkalisa})
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.toimitettu = ''
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.kpl = 0
@@ -63,7 +98,7 @@
 			echo "<tr><th>",t("Toimittaja"),"</th><th>",t("Tilausnumero"),"</th></tr>";
 
 			while ($row = mysql_fetch_assoc($result)) {
-				echo "<tr><td>{$row['nimi']}</td><td><a href='?ytunnus={$row['ytunnus']}&otunnus={$row['otunnus']}&toimittajaid={$toimittajaid}&ojarj={$apu}'>{$row['otunnus']}</a></td></tr>";
+				echo "<tr><td>{$row['nimi']}</td><td><a href='?ytunnus={$row['ytunnus']}&otunnus={$row['otunnus']}&toimittajaid={$toimittajaid}&ojarj={$apu}&toimipaikka=$toimipaikka'>{$row['otunnus']}</a></td></tr>";
 			}
 
 			echo "</table>";
@@ -75,7 +110,6 @@
 		$toimipaikkalisa = "";
 
 		if (isset($toimipaikka)) {
-
 			if ($toimipaikka != 'kaikki') {
 				$toimipaikkalisa = " AND lasku.vanhatunnus = '{$toimipaikka}' ";
 			}
@@ -266,9 +300,7 @@
 		echo "<option value='vahvistamattomat' {$select}>",t("Vain vahvistamattomia rivej‰"),"</option>";
 		echo "</select></td></tr>";
 
-		$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
-
-		if (mysql_num_rows($toimipaikat_res) != 0) {
+		if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
 
 			$sel = (isset($toimipaikka) and $toimipaikka == '0') ? "selected" : "";
 
@@ -283,11 +315,9 @@
 
 				$sel = '';
 
-				if (isset($toimipaikka)) {
-					if ($toimipaikka == $toimipaikat_row['tunnus']) {
-						$sel = ' selected';
-						$toimipaikka = $toimipaikat_row['tunnus'];
-					}
+				if (isset($toimipaikka) and $toimipaikka == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
 				}
 
 				echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
@@ -392,7 +422,7 @@
 
 		for ($i = 0; $i < mysql_num_fields($presult)-$miinus; $i++) {
 			$apu = $i + 1;
-			echo "<th align='left'><a href = '?ytunnus={$ytunnus}&otunnus={$otunnus}&toimittajaid={$toimittajaid}&ojarj={$apu}'>",t(mysql_field_name($presult,$i)),"</a></th>";
+			echo "<th align='left'><a href = '?ytunnus={$ytunnus}&otunnus={$otunnus}&toimittajaid={$toimittajaid}&ojarj={$apu}&toimipaikka=$toimipaikka'>",t(mysql_field_name($presult,$i)),"</a></th>";
 		}
 
 		echo "<th align='left'>",t("poista"),"</th>";
@@ -464,7 +494,7 @@
 			echo "</tr>";
 		}
 		echo "<tr>
-				<td class='back' colspan='4' align='right'></td>
+				<td class='back' colspan='5' align='right'></td>
 				<td colspan='3' class='spec'>",t("Tilauksen arvo"),":</td>
 				<td align='right' class='spec'>",sprintf("%.2f",$yhteensa),"</td>
 				<td align='right'>",t("Ruksaa kaikki"),":</td>

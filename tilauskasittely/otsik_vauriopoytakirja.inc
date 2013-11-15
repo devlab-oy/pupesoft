@@ -142,6 +142,9 @@ if ($tila == "" and !isset($jatka)) {
 		vauriopoytakirja_yleiset_kentat();
 
 		$dynaamiset_kentat = hae_dynaamiset_kentat();
+
+		$onko_liitetiedostoja = onko_liitetiedostoja($srow['tunnus']);
+
 		echo "<table class='vauriopoytakirja_otsikko'>";
 
 		echo "<tr>";
@@ -306,13 +309,13 @@ if ($tila == "" and !isset($jatka)) {
 		echo "<tr>";
 		echo "<th>".t('Vahinkotapahtuma').":</th>";
 		echo "<td>";
-		if ($srow['kontti'] == 1) {
+		if ($onko_liitetiedostoja) {
 			$checked1 = "CHECKED";
 		}
 		else {
 			$checked1 = "";
 		}
-		echo "<input type='checkbox' disabled name='kontti' {$checked1} /> ".t('Valokuvia saatavilla');
+		echo "<input type='checkbox' disabled {$checked1} /> ".t('Valokuvia saatavilla');
 		echo "</td>";
 		echo "</tr>";
 
@@ -519,13 +522,6 @@ if (isset($jatka)) {
 		}
 	}
 
-	if ($kontti != '') {
-		$kontti = 1;
-	}
-	else {
-		$kontti = 0;
-	}
-
 	$yhtioalv_tilino = $yhtiorow["alv"];
 
 	if (!isset($clearing)) {
@@ -577,7 +573,6 @@ if (isset($jatka)) {
 				kolmikantakauppa					= '{$kolmikantakauppa}',
 				kuljetus 							= '$kuljetus',
 				kuljetusmuoto						= '',
-				kontti								= '{$kontti}',
 				label								= '{$label}',
 				laskutusvkopv 						= '$laskutusvkopv',
 				liitostunnus						= '$liitostunnus',
@@ -999,6 +994,26 @@ function vauriopoytakirja_yleiset_kentat() {
 		$sel = "";
 	}
 	echo "</select>";
+	echo "</td>";
+
+	echo "</tr>";
+
+	echo "<tr>";
+
+	echo "<td>";
+	echo t('Toimintavarmuus');
+	echo "</td>";
+
+	echo "<td>";
+	echo t('ALV');
+	echo "</td>";
+
+	echo "<td>";
+	echo t('Palautusvarmuus');
+	echo "</td>";
+
+	echo "<td>";
+	echo t('ALV');
 	echo "</td>";
 
 	echo "</tr>";

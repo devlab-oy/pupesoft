@@ -24442,17 +24442,40 @@ if (!function_exists('hae_yhtion_oletusalv')) {
 
 }
 
-function hae_tyomaarayksen_statukset() {
-	global $kukarow, $yhtiorow;
+if (!function_exists('hae_tyomaarayksen_statukset')) {
 
-	$status_result = t_avainsana('TYOM_TYOSTATUS');
+	function hae_tyomaarayksen_statukset() {
+		global $kukarow, $yhtiorow;
 
-	$tyomaarays_statukset = array();
-	while ($tyomaarays_status = mysql_fetch_assoc($status_result)) {
-		$tyomaarays_statukset[] = $tyomaarays_status;
+		$status_result = t_avainsana('TYOM_TYOSTATUS');
+
+		$tyomaarays_statukset = array();
+		while ($tyomaarays_status = mysql_fetch_assoc($status_result)) {
+			$tyomaarays_statukset[] = $tyomaarays_status;
+		}
+
+		return $tyomaarays_statukset;
 	}
 
-	return $tyomaarays_statukset;
+}
+
+if (!function_exists('onko_liitetiedostoja')) {
+
+	function onko_liitetiedostoja($tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM liitetiedostot
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND liitostunnus = '{$tunnus}'";
+		$liitetiedosto_result = pupe_query($query);
+		if (mysql_num_rows($liitetiedosto_result) > 0) {
+			return true;
+		}
+
+		return false;
+	}
+
 }
 
 if (!function_exists("korvaavat_kiellot")) {

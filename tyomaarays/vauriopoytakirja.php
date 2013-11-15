@@ -442,7 +442,7 @@ function excel_selite(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$excelsarake = 0;
 
 	$xls->write($excelrivi, $excelsarake++, t('Vahinkotapahtuma').':', $bold);
-	if ($request['tulostettava_vauriopoytakirja']['kontti'] == 1) {
+	if (onko_liitetiedostoja($request['tulostettava_vauriopoytakirja']['tunnus'])) {
 		$xls->write($excelrivi, $excelsarake, t('Valokuvia saatavilla').': '.t('Kyllä'));
 	}
 	else {

@@ -27,11 +27,13 @@ $query = "  SELECT
             tilausrivi.suuntalava,
             tilausrivi.uusiotunnus,
             lasku.liitostunnus,
+            toimi.selaus,
 			IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi,
             IFNULL(tilausrivin_lisatiedot.tilausrivitunnus, 0) as tilausrivitunnus
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 			LEFT JOIN tilausrivin_lisatiedot
 			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
             WHERE tilausrivi.tunnus='{$tilausrivi}'
@@ -151,12 +153,21 @@ echo "<div class='main'>
     <tr>
         <th>",t("Tuote"),"</th>
         <td>{$row['tuoteno']}</td>
-    </tr>
-    <tr>
-        <th>",t("Toim. Tuotekoodi"),"</th>
-        <td>{$row['toim_tuoteno']}</td>
-    </tr>
-    <tr>
+    </tr>";
+
+echo "<tr>";
+
+if (trim($row['selaus']) != "") {
+    echo "<th>{$row['selaus']}</th>";
+}
+else {
+    echo "<th>",t("Toim. Tuotekoodi"),"</th>";
+}
+
+echo "<td>{$row['toim_tuoteno']}</td>";
+echo "</tr>";
+
+echo "<tr>
         <th>",t("Keräyspaikka"),"</th>
         <td>{$row['kerayspaikka']}</td>
         <td>({$row['varattu']} {$row['yksikko']})</td>

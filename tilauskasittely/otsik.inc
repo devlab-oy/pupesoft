@@ -3396,7 +3396,7 @@
 		}
 
 		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
-		if (isset($yhtiotoimipaikka)) $kukarow['toimipaikka'] = $yhtiotoimipaikka;
+		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 

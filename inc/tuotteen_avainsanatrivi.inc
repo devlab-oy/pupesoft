@@ -123,6 +123,38 @@
 						</select>
 					</td>";
 		}
+		elseif ($trow[3] == "sammutin_koko") {
+			$sammuttimen_koot_result = t_avainsana('SAMMUTIN_KOKO');
+			$sammutin_koot = array();
+			while($sammutin_koko = mysql_fetch_assoc($sammuttimen_koot_result)) {
+				$sammutin_koot[] = $sammutin_koko;
+			}
+			$sel = array($trow[$i] => "SELECTED");
+			
+			$ulos = "<td>";
+			$ulos .= "<select name='{$nimi}'>";
+			foreach ($sammutin_koot as $sammutin_koko) {
+				$ulos .= "<option value='{$sammutin_koko['selite']}' {$sel}>{$sammutin_koko['selite']}kg</option>";
+			}
+			$ulos .= "</select>";
+			$ulos .= "</td>";
+		}
+		elseif ($trow[3] == "sammutin_tyyppi") {
+			$sammutin_tyypit = array(
+				'jauhesammutin'			 => t('Jauhesammutin'),
+				'hiilidioksidisammutin'	 => t('Hiilidioksidisammutin'),
+				'nestesammutin'			 => t('Nestesammutin'),
+			);
+			$sel = array($trow[$i] => "SELECTED");
+
+			$ulos = "<td>";
+			$ulos .= "<select name='{$nimi}'>";
+			foreach ($sammutin_tyypit as $index => $sammutin_tyyppi) {
+				$ulos .= "<option value='{$index}' {$sel}>{$sammutin_tyyppi}</option>";
+			}
+			$ulos .= "</select>";
+			$ulos .= "</td>";
+		}
 		else {
 			$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		}

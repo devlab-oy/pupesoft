@@ -14,9 +14,21 @@ if (mysql_field_type($result, $i) == "blob") {
 }
 
 if (mysql_field_name($result, $i) == "paikka") {
-	$query = "	SELECT tunnus, concat_ws(' ', nimi, osoite) as dropdown_text
+	$join = "";
+	if (!empty($asiakas_tunnus)) {
+		$join = "	JOIN kohde
+					ON ( kohde.yhtio = paikka.yhtio
+						AND kohde.tunnus = paikka.kohde )
+					JOIN asiakas
+					ON ( asiakas.yhtio = kohde.yhtio
+						AND asiakas.tunnus = kohde.asiakas
+						AND asiakas.tunnus = '{$asiakas_tunnus}')";
+	}
+	
+	$query = "	SELECT paikka.tunnus, concat_ws(' ', paikka.nimi, paikka.osoite) as dropdown_text
 				FROM paikka
-				WHERE yhtio = '{$kukarow['yhtio']}'";
+				{$join}
+				WHERE paikka.yhtio = '{$kukarow['yhtio']}'";
 	$paikka_result = pupe_query($query);
 	$paikat = array();
 	while ($paikka = mysql_fetch_assoc($paikka_result)) {
@@ -53,7 +65,10 @@ if (mysql_field_name($result, $i) == "paikka") {
 
 //TODO sarjanro. laitteeseen isketty sarjanumero. valmistenumero toisinsanoen. tämä pitää syöttää käsin
 if (mysql_field_name($result, $i) == "sarjanro") {
-	
+	if (!empty($kopioi_rivi)) {
+		$trow['tila'] = "";
+		$trow[$i] = "";
+	}
 }
 
 //TODO oma_numero. kohteen omistajan antana numero. esim tussilla vedetty kylkeen. tämä pitää syöttää käsin
@@ -64,6 +79,10 @@ if (mysql_field_name($result, $i) == "oma_numero") {
 //TODO omistaja. voi olla asiakas tai huoltofirma. ei ole relaatio. tekstikenttä johon voidaan syöttää poikkeava omistaja. tämän avulla saadaan esim. selville kuuluukoo joltain paikalta löytyvä laite ylipäätänsä huollon piiriin.
 if (mysql_field_name($result, $i) == "omistaja") {
 
+}
+
+if (mysql_field_name($result, $i) == "valm_pvm") {
+	$tyyppi = 1.7;
 }
 
 if (mysql_field_name($result, $i) == "tila") {

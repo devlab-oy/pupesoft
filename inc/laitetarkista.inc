@@ -81,6 +81,22 @@ if (!function_exists("laitetarkista")) {
 				if (!$validator->validateItem($sarjanro, 'numero')) {
 					$virhe[$i] = t("Sarjanumero pitää olla numero").'!';
 				}
+
+				$sarjanumero_where = "";
+				if (!empty($trow['tunnus'])) {
+					//kun päivitetään hyväksytään kannassa oleva sama sarjanro
+					$sarjanumero_where = "AND tunnus != '{$trow['tunnus']}'";
+				}
+				$query = "	SELECT sarjanro
+							FROM laite
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND sarjanro = '{$sarjanro}'
+							{$sarjanumero_where}";
+				$sarjanro_result = pupe_query($query);
+
+				if (mysql_num_rows($sarjanro_result) > 0) {
+					$virhe[$i] = t("Sarjanumero pitää olla uniikki").'!';
+				}
 			}
 		}
 

@@ -324,6 +324,10 @@
 				require("inc/$funktio.inc");
 			}
 
+			if ($kopioi_rivi) {
+				unset($trow['tunnus']);
+			}
+
 			if (function_exists($funktio)) {
 				@$funktio($t, $i, $result, $tunnus, $virhe, $trow);
 			}
@@ -362,6 +366,11 @@
 
 		// Luodaan tietue
 		if ($errori == "") {
+
+			if (!empty($kopioi_rivi)) {
+				$kopioitavan_rivin_tunnus = $tunnus;
+				$tunnus = "";
+			}
 
 			$onko_tama_insert = $tunnus == "" ? true : false;
 
@@ -458,6 +467,29 @@
 
 			if ($onko_tama_insert) {
 				$tunnus = mysql_insert_id();
+
+				if (!empty($kopioi_rivi) and $toim == 'laite') {
+					//Laitteen kopioinnissa, kopioidaan myˆs laitteeseen liitetyt huoltosyklit rivit
+					$query = "	SELECT *
+								FROM huoltosyklit_laitteet
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND laite_tunnus = '{$kopioitavan_rivin_tunnus}'";
+					$result = pupe_query($query);
+					while($huoltoskylit_laitteet_rivi = mysql_fetch_assoc($result)) {
+						unset($huoltoskylit_laitteet_rivi['tunnus']);
+						unset($huoltoskylit_laitteet_rivi['luontiaika']);
+						unset($huoltoskylit_laitteet_rivi['muuttaja']);
+						unset($huoltoskylit_laitteet_rivi['muutospvm']);
+						unset($huoltoskylit_laitteet_rivi['viimeinen_tapahtuma']);
+						$huoltoskylit_laitteet_rivi['laatija'] = $kukarow['kuka'];
+						$huoltoskylit_laitteet_rivi['laite_tunnus'] = $tunnus;
+
+						$copy_query = "	INSERT INTO
+										huoltosyklit_laitteet (".implode(", ", array_keys($huoltoskylit_laitteet_rivi)).", luontiaika)
+										VALUES('".implode("', '", array_values($huoltoskylit_laitteet_rivi)). "', now())";
+						pupe_query($copy_query);
+					}
+				}
 			}
 
 			if ($tunnus > 0 and $toim == "tuotteen_toimittajat_tuotenumerot") {
@@ -1622,6 +1654,16 @@
 			echo "</select>";
 			echo "</td>";
 		}
+		else if ($uusi == '' and $toim == 'laite') {
+			echo "<th align='left'>".t("Kopioi")."</th>";
+			echo "<td>";
+			$checked = "";
+			if (!empty($kopioi_rivi)) {
+				$checked = "CHECKED";
+			}
+			echo "<input type='checkbox' name='kopioi_rivi' {$checked} />";
+			echo "</td>";
+		}
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 
@@ -1738,6 +1780,8 @@
 			// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
 			// $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti
 			// $tyyppi --> 1.5 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰
+			// $tyyppi --> 1.6 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰ jossa syˆttˆkent‰t on dropdowneja
+			// $tyyppi --> 1.7 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰ jossa syˆttˆkent‰t on dropdowneja ja vain kk ja vv n‰ytet‰‰n pp on 1
 			// $tyyppi --> 2 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, eik‰ sen arvoa p‰vitet‰ (rivi‰ ei n‰ytet‰ kun tehd‰‰n uusi)
 			// $tyyppi --> 3 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, mutta sen arvo p‰ivitet‰‰n (rivi‰ ei n‰ytet‰ kun tehd‰‰n uusi)
 			// $tyyppi --> 4 rivi‰ ei n‰ytet‰ ollenkaan, mutta sen arvo p‰ivitet‰‰n
@@ -1745,6 +1789,8 @@
 
 			if ($tyyppi == 1 or
 				$tyyppi == 1.5 or
+				$tyyppi == 1.6 or
+				$tyyppi == 1.7 or
 				($tyyppi == 2 and $tunnus!="") or
 				($tyyppi == 3 and $tunnus!="")  or
 				$tyyppi == 5) {
@@ -1767,6 +1813,49 @@
 						<input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
 						<input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
 						<input type = 'text' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
+			}
+			elseif ($tyyppi == 1.6 or $tyyppi == 1.7) {
+				$vva = substr($trow[$i],0,4);
+				$kka = substr($trow[$i],5,2);
+				$ppa = substr($trow[$i],8,2);
+
+				echo "<td>";
+				if ($tyyppi == 1.6) {
+					echo "<select name='tpp[{$i}]'>";
+					$sel = "";
+					foreach (range(1, 31) as $paiva) {
+						if ($ppa == $paiva) {
+							$sel = "SELECTED";
+						}
+						echo "<option value='{$paiva}' {$sel}>{$paiva}</option>";
+						$sel = "";
+					}
+					echo "</select>";
+				}
+				else {
+					echo "<input type='hidden' name='tpp[{$i}]' value='1' />";
+				}
+				echo "<select name='tkk[$i]'>";
+				$sel = "";
+				foreach (range(1, 12) as $kuukausi) {
+					if ($kka == $kuukausi) {
+						$sel = "SELECTED";
+					}
+					echo "<option value='{$kuukausi}' {$sel}>{$kuukausi}</option>";
+					$sel = "";
+				}
+				echo "</select>";
+				echo "<select name='tvv[$i]'>";
+				$sel = "";
+				foreach (range(1900, date('Y', strtotime('now + 4 years'))) as $vuosi) {
+					if ($vva == $vuosi) {
+						$sel = "SELECTED";
+					}
+					echo "<option value='{$vuosi}' {$sel}>{$vuosi}</option>";
+					$sel = "";
+				}
+				echo "</select>";
+				echo "</td>";
 			}
 			elseif ($tyyppi == 2 and $tunnus != "") {
 				echo "<td>$trow[$i]</td>";

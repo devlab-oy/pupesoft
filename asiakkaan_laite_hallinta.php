@@ -342,6 +342,7 @@ function echo_laitteet_table($laitteet = array()) {
 	echo "<th>".t("Sijainti")."</th>";
 	echo "<th>".t("Tila")."</th>";
 	if (empty($kukarow['extranet'])) {
+		echo "<th>".t("Kopioi")."</th>";
 		echo "<th>".t("Poista")."</th>";
 	}
 	echo "</tr>";
@@ -351,7 +352,7 @@ function echo_laitteet_table($laitteet = array()) {
 
 		echo "<td>";
 		if (empty($kukarow['extranet'])) {
-			echo "<a href='yllapito.php?toim=laite&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>{$laite['tuoteno']}</a>";
+			echo "<a href='yllapito.php?toim=laite&asiakas_tunnus={$laite['asiakas_tunnus']}&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>{$laite['tuoteno']}</a>";
 		}
 		else {
 			echo $laite['tuoteno'];
@@ -371,6 +372,14 @@ function echo_laitteet_table($laitteet = array()) {
 		echo "</td>";
 
 		if (empty($kukarow['extranet'])) {
+			echo "<td>";
+			if (!empty($laite['laite_tunnus'])) {
+				echo "<button>";
+				echo "<a href='yllapito.php?toim=laite&kopioi_rivi=on&asiakas_tunnus={$laite['asiakas_tunnus']}&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>".t('Kopioi laite')."</a>";
+				echo "</button>";
+			}
+			echo "</td>";
+			
 			echo "<td>";
 			if (!empty($laite['laite_tunnus'])) {
 				echo "<input type='hidden' class='laite_tunnus' value='{$laite['laite_tunnus']}' />";
@@ -437,7 +446,8 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 		$group = "GROUP BY laite.tunnus";
 	}
 
-	$query = "	SELECT kohde.tunnus as kohde_tunnus,
+	$query = "	SELECT asiakas.tunnus as asiakas_tunnus,
+				kohde.tunnus as kohde_tunnus,
 				kohde.nimi as kohde_nimi,
 				paikka.tunnus as paikka_tunnus,
 				paikka.nimi as paikka_nimi,
@@ -446,9 +456,12 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 				{$select}
 				laite.*
 				FROM kohde
+				JOIN asiakas
+				ON ( asiakas.yhtio = kohde.yhtio
+					AND asiakas.tunnus = kohde.asiakas )
 				LEFT JOIN paikka
 				ON ( paikka.yhtio = kohde.yhtio
-					AND paikka.kohde = kohde.tunnus)
+					AND paikka.kohde = kohde.tunnus )
 				LEFT JOIN laite
 				ON ( laite.yhtio = paikka.yhtio
 					AND laite.paikka = paikka.tunnus )

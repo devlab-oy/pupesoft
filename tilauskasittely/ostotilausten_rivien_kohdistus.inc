@@ -876,6 +876,55 @@ if ($tila == 'tee_kohdistus') {
 		}
 	}
 
+	if (isset($rivi_myyntihinta) and is_array($rivi_myyntihinta) and tarkista_oikeus('yllapito.php', 'tuote', 1) and $yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+
+		$tuoteno_array = array();
+
+		foreach ($rivi_myyntihinta as $tunnus => $_myyntihinta) {
+
+			$query = "	SELECT tuoteno
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tunnus}'";
+			$chk_res = pupe_query($query);
+
+			$_myyntihinta = str_replace(',', '.', $_myyntihinta);
+
+			if (mysql_num_rows($chk_res) == 1 and trim($_myyntihinta) != '' and is_numeric($_myyntihinta)) {
+
+				$chk_row = mysql_fetch_assoc($chk_res);
+
+				// Tarkistetaan onko myyntihinta muuttunut alkuperäiseen verrattuna
+				$query = "	SELECT myyntihinta
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$chk_row['tuoteno']}'";
+				$tuoteno_chk_res = pupe_query($query);
+				$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
+
+				$a = (int) ($tuoteno_chk_row['myyntihinta'] * 100000);
+				$b = (int) ($_myyntihinta * 100000);
+
+				if ($a != $b and !isset($tuoteno_array[$chk_row['tuoteno']])) {
+					$tuoteno_array[$chk_row['tuoteno']] = $_myyntihinta;
+				}
+			}
+		}
+
+		// tuotteen myyntihinta
+		if (count($tuoteno_array) > 0) {
+
+			foreach ($tuoteno_array as $_tuoteno => $_myyntihinta) {
+
+				$query = "	UPDATE tuote SET
+							myyntihinta = '{$_myyntihinta}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$_tuoteno}'";
+				pupe_query($query);
+			}
+		}
+	}
+
 	// katotaan päivitetäänkö toimitettuaikoja
 	if (is_array($rivi_toimitettuaika_vv)) {
 		foreach ($rivi_toimitettuaika_vv as $tunnus => $toimitettuvv) {
@@ -1083,6 +1132,11 @@ if ($tila == '') {
 									and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
 									and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100)) ,'$yhtiorow[hintapyoristys]') alerivihinta";
 	#$kentat_array[] = "tilausrivi.kate kuluhinta";
+
+	if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+		$kentat_array[] = "tuote.myyntihinta myyntihinta";
+	}
+
 	$kentat_array[] = "tilausrivi.toimaika toimaika";
 	$kentat_array[] = "tilausrivi.kommentti kommentti";
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kentat_array[] = "lasku.laskunro keikka";
@@ -1106,6 +1160,11 @@ if ($tila == '') {
 	$kennim_array[] = t('Rivihinta');
 	$kennim_array[] = t('+Alv -Ale');
 	#$kennim_array[] = t('Extrakulu');
+
+	if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+		$kennim_array[] = t('Myyntihinta');
+	}
+
 	$kennim_array[] = t('Toimaika');
 	$kennim_array[] = t('Kommentti');
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kennim_array[] = t('Saapuminen');
@@ -1129,6 +1188,11 @@ if ($tila == '') {
 	$kenhak_array[] = 'alerivihinta';
 	#$kenhak_array[] = 'kuluhinta';
 	$kenhak_array[] = 'rivihinta_2';
+
+	if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+		$kenhak_array[] = 'myyntihinta';
+	}
+
 	$kenhak_array[] = 'toimaika';
 	$kenhak_array[] = 'kommentti';
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kenhak_array[] = 'laskunro';
@@ -1152,6 +1216,11 @@ if ($tila == '') {
 	$kenkok_array[] = 8;
 	#$kenkok_array[] = 4;
 	$kenkok_array[] = 12;
+
+	if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+		$kenkok_array[] = 7;
+	}
+
 	$kenkok_array[] = 12;
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kenkok_array[] = 6;
 
@@ -1597,6 +1666,11 @@ if ($tila == '') {
 	echo "$kennim_array[$pointteri]</th>";
 	$pointteri++;
 
+	if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+		echo "<th nowrap valign='top'><a href='{$href}={$pointteri}{$ulisa}'>{$kennim_array[$pointteri]}</a></th>";
+		$pointteri++;
+	}
+
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
 	$pointteri++;
 
@@ -1649,6 +1723,11 @@ if ($tila == '') {
 
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
 	$pointteri++;
+
+	if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+		echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
+		$pointteri++;
+	}
 
 	echo "<input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
 
@@ -2022,6 +2101,21 @@ if ($tila == '') {
 
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
+
+		if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+
+			echo "<{$td} {$class} valign='top' align='right'>";
+
+			if (tarkista_oikeus('yllapito.php', 'tuote', 1)) {
+				echo "<input type='text' size='7' name='rivi_myyntihinta[{$rivirow['rivitunnus']}]' value='",hintapyoristys($rivirow['myyntihinta'], 6),"' style='text-align: right;' />";
+			}
+			else {
+				echo hintapyoristys($rivirow['myyntihinta'], 6);
+			}
+
+			echo "</{$td}>";
+		}
+
 		echo "<$td $class valign='top'>";
 
 		if ($rivirow["toimaika"] != "0000-00-00") {

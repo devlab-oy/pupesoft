@@ -3653,6 +3653,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'myyntihinta_paivitys_saapuminen') {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Myyntihintaa ei voi p‰ivitt‰‰ saapumisella")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntihinnan voi p‰ivitt‰‰ saapumisella")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

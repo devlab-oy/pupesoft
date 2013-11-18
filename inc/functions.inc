@@ -13596,6 +13596,38 @@ if (!function_exists("pupe_DataTables")) {
 
 						});
 
+						$('input[name^=\"rivi_myyntihinta\"]').each(function(){
+							var tun 				= $(this).attr('id').substring(17);
+							var myyntihinta_alkup	= parseFloat($('#rivimyyntihintaalkuperainen_'+tun).val());
+							var myyntihinta			= parseFloat(this.value.replace(',','.'));
+
+							if (myyntihinta > 9999999999.99) {
+								var virhe = '".t('VIRHE: liian iso loppusumma')."!';
+								alert(virhe);
+							}
+							else if (myyntihinta_alkup != myyntihinta) {
+
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	tunnus: tun,
+										ajax_toiminto: 'myyntihinta',
+										myyntihinta: myyntihinta,
+										no_head: 'yes',
+										ohje: 'off'},
+									function(return_value) {
+										var data = jQuery.parseJSON(return_value);
+
+										if (data.ok) {
+											$('#refresh_screen_ajaxille').val('true');
+
+											$('#rivimyyntihintaalkuperainen_'+tun).val(myyntihinta);
+											$('#rivi_myyntihinta_'+tun).val(myyntihinta);
+										}
+									}
+								);
+							}
+
+						});
+
 						$('input[name^=\"rivi_toimitettuaika_vv\"]').each(function(){
 
 							var tun 				= $(this).attr('id').substring(23);

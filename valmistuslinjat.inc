@@ -391,14 +391,23 @@ function rebuild_valmistuslinjat($from = 'now') {
                                     toimaika    = '{$current['pvmloppu']}'
                                     WHERE yhtio = '{$kukarow['yhtio']}'
                                     AND tunnus  = {$current['otunnus']}";
-			$result = pupe_query($lasku_query);
+			pupe_query($lasku_query);
 
 			$tilausrivi_query = "UPDATE tilausrivi SET
                                           kerayspvm   = '{$current['pvmalku']}',
                                           toimaika    = '{$current['pvmalku']}'
                                           WHERE yhtio = '{$kukarow['yhtio']}'
-                                          AND otunnus = {$current['otunnus']}";
-			$result = pupe_query($tilausrivi_query);
+                                          AND otunnus = {$current['otunnus']}
+										  AND tyyppi = 'V'";
+			pupe_query($tilausrivi_query);
+
+			$tilausrivi_query = "UPDATE tilausrivi SET
+                                          kerayspvm   = '{$current['pvmloppu']}',
+                                          toimaika    = '{$current['pvmloppu']}'
+                                          WHERE yhtio = '{$kukarow['yhtio']}'
+                                          AND otunnus = {$current['otunnus']}
+										  AND tyyppi = 'W'";
+			pupe_query($tilausrivi_query);
 
 			// Laitetaan kierroksen valmistus edellinen muuttujaan
 			$previous = $current;

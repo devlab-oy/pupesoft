@@ -403,7 +403,7 @@
 
 		echo json_encode($data);
 	}
-	elseif ($_POST['ajax_toiminto'] == 'myyntihinta') {
+	elseif ($_POST['ajax_toiminto'] == 'myyntihinta' and tarkista_oikeus('yllapito.php', 'tuote', 1) and $yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
 		$myyntihinta = (float) str_replace(",",".", $_POST['myyntihinta']);
 		$tunnus = (int) $_POST['tunnus'];
 

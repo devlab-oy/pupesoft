@@ -91,6 +91,14 @@ class LaiteCSVDumper extends CSVDumper {
 			}
 		}
 
+		if (!in_array($rivi['sarjanro'], $this->unique_values)) {
+			$this->unique_values[] = $rivi['sarjanro'];
+		}
+		else {
+			$this->errors[$index][] = t('Uniikki kenttä sarjanro')." <b>{$rivi['sarjanro']}</b> ".t('löytyy jo aineistosta');
+			$valid = false;
+		}
+
 		return $valid;
 	}
 

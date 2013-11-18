@@ -651,7 +651,7 @@
 		if ($toitarow['rahtikirjakopio_email'] != '') {
 
 			$polkuinffo = pathinfo($pdffilenimi);
-
+			echo t("L‰hetet‰‰n rahtikirjakopio").": {$toitarow['rahtikirjakopio_email']}<br>";
 			$params = array(
 				"to" => $toitarow['rahtikirjakopio_email'],
 				"subject" => $toitarow['selite']." ".t("Rahtikirjakopio"),

@@ -228,6 +228,11 @@ if ($tee == '') {
 
 	$nayta_sarake = ($vstk == 'Asiakaskäynti' and $piilota_matkasarakkeet != "") ? FALSE : TRUE;
 
+	$tapahaku = '';
+	if ($vstk = 'Asiakaskäynti') {
+		$tapahaku = "'Asiakaskäynti', 'Kliendikülastus'";
+	}
+
 	foreach($yhtiot as $yhtio) {
 
 		$query = "	SELECT kuka.nimi kukanimi,
@@ -245,7 +250,7 @@ if ($tee == '') {
 					AND kalenteri.kuka IN ({$vertaa})
 					AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 					AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-					AND kalenteri.tapa     = '{$vstk}'
+					AND kalenteri.tapa   IN	($tapahaku)
 					AND kalenteri.tyyppi IN ('kalenteri','memo')
 					ORDER BY pvmalku, kalenteri.tunnus";
 		$result = pupe_query($query);

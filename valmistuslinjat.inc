@@ -379,34 +379,34 @@ function rebuild_valmistuslinjat($from = 'now') {
 			$current['pvmloppu'] = date('Y-m-d H:i:s', $pvmloppu);
 
 			// P‰ivitet‰‰n uudet p‰iv‰m‰‰r‰t tietokantaan
-			$query = "UPDATE kalenteri
-                              SET pvmalku = '{$current['pvmalku']}', pvmloppu='{$current['pvmloppu']}'
-                              WHERE yhtio = '{$kukarow['yhtio']}'
-                              AND tunnus  = '{$current['tunnus']}'";
+			$query = "	UPDATE kalenteri
+						SET pvmalku = '{$current['pvmalku']}', pvmloppu='{$current['pvmloppu']}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$current['tunnus']}'";
 			pupe_query($query);
 
 			// P‰ivitet‰‰n laskulle uusi kerayspvm ja tilausrivieille uusi toimaika
-			$lasku_query = "UPDATE lasku SET
-                                    kerayspvm   = '{$current['pvmloppu']}',
-                                    toimaika    = '{$current['pvmloppu']}'
-                                    WHERE yhtio = '{$kukarow['yhtio']}'
-                                    AND tunnus  = {$current['otunnus']}";
+			$lasku_query = "	UPDATE lasku SET
+								kerayspvm   = '{$current['pvmloppu']}',
+								toimaika    = '{$current['pvmloppu']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = {$current['otunnus']}";
 			pupe_query($lasku_query);
 
-			$tilausrivi_query = "UPDATE tilausrivi SET
-                                          kerayspvm   = '{$current['pvmalku']}',
-                                          toimaika    = '{$current['pvmalku']}'
-                                          WHERE yhtio = '{$kukarow['yhtio']}'
-                                          AND otunnus = {$current['otunnus']}
-										  AND tyyppi = 'V'";
+			$tilausrivi_query = "	UPDATE tilausrivi SET
+									kerayspvm   = '{$current['pvmalku']}',
+									toimaika    = '{$current['pvmalku']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = {$current['otunnus']}
+									AND tyyppi = 'V'";
 			pupe_query($tilausrivi_query);
 
-			$tilausrivi_query = "UPDATE tilausrivi SET
-                                          kerayspvm   = '{$current['pvmloppu']}',
-                                          toimaika    = '{$current['pvmloppu']}'
-                                          WHERE yhtio = '{$kukarow['yhtio']}'
-                                          AND otunnus = {$current['otunnus']}
-										  AND tyyppi = 'W'";
+			$tilausrivi_query = "	UPDATE tilausrivi SET
+									kerayspvm   = '{$current['pvmloppu']}',
+									toimaika    = '{$current['pvmloppu']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = {$current['otunnus']}
+									AND tyyppi = 'W'";
 			pupe_query($tilausrivi_query);
 
 			// Laitetaan kierroksen valmistus edellinen muuttujaan

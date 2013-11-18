@@ -9,11 +9,6 @@
 		$tyyppi = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "rahtikirjakopio_email") {
-		$ulos = "<td><input type='text' name='{$nimi}' value='{$trow[$i]}' /></td>";
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "nouto") {
 
 		$sel='';

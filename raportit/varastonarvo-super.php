@@ -589,8 +589,8 @@
 		$elements = mysql_num_rows($result);
 
 		if (!$php_cli) {
-			if (date("Y-m-d") != $vv."-".$kk."-".$pp) echo t("Tuotteita/tuotepaikkoja"),": $elements<br>";
-			else echo t("Saldollisia tuotteita/tuotepaikkoja"),": $elements<br>";
+			if ($tyyppi == "A") echo t("Saldollisia tuotteita/tuotepaikkoja"),": $elements<br>";
+			else echo t("Tuotteita/tuotepaikkoja"),": $elements<br>";
 		}
 
 		if ($summaustaso == 'TRY') {

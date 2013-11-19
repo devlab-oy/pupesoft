@@ -229,8 +229,11 @@ if ($tee == '') {
 	$nayta_sarake = ($vstk == 'Asiakaskäynti' and $piilota_matkasarakkeet != "") ? FALSE : TRUE;
 
 	$tapahaku = '';
-	if ($vstk = 'Asiakaskäynti') {
+	if ($vstk == 'Asiakaskäynti') {
 		$tapahaku = "'Asiakaskäynti', 'Kliendikülastus'";
+	}
+	elseif ($vstk == 'Viikkosuunnitelma') {
+		$tapahaku = "'Viikkosuunnitelma', 'Nädalaplaan'";
 	}
 
 	foreach($yhtiot as $yhtio) {

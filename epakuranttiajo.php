@@ -250,7 +250,7 @@
 					if (!$php_cli) echo "<tr><td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a></td>";
 
 					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['tuoteno']);
-					
+
 					$try = t_avainsana("TRY", '', "and selite = '{$epakurantti_row['try']}'", '', '', "selitetark");
 
 					$try_teksti = $try != "" ? "{$epakurantti_row['try']} - $try" : $epakurantti_row['try'];
@@ -332,10 +332,13 @@
 					$excelrivi++;
 					$excelsarake = 0;
 
-					$vararvot_nyt += $vararvo_nyt;
-					$vararvot_sit += $vararvo_sit;
+					if ($tee != '' OR $ajo_tee == 'NAYTA') {
+						$vararvot_nyt += $vararvo_nyt;
+						$vararvot_sit += $vararvo_sit;
+					}
 
 					$epa_tuotemaara++;
+
 				}
 			}
 		}

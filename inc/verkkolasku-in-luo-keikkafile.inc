@@ -2146,12 +2146,13 @@
 
 			// Jos vanha saapuminen, vanhat pyöristyksen nollataan, että ne eivät kumuloidu
 			$laskurow['pyoristys_erot'] = 0;
-			if ($laskurow["rahti_etu"] != 0) {
+
+			if ($laskurow["rahti_etu"] != 0 and $laskurow["rahti_etu_alv"] != 0) {
 				$rahti_etu = $laskurow["rahti_etu"] * ((100 + $laskurow["rahti_etu_alv"]) / 100);
-			}	
+			}
 			else {
-					$rahti_etu = $laskurow["rahti_etu"];
-				}
+				$rahti_etu = $laskurow["rahti_etu"];
+			}
 
 			$valittusumma        = round($hintarow["hinta"], 2);
 			$laskunsumma         = round($osrow["summa"] - $valittusumma, 2);

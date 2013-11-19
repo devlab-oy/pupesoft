@@ -81,14 +81,10 @@
 			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' and yht.rooli='7'";
 			
 			$asiakaskategoria_tunnukset = array();
-			var_dump($dynaaminen_syvintaso);
-			for ($i=1;$i<=$dynaaminen_syvintaso["asiakas"];$i++) {
-				echo "AAAAA";
-				var_dump(${mul_asiakas}.$i);
+			for ($i = 1; $i <= $dynaaminen_syvintaso["asiakas"]; $i++) {
+				$muuttuja = "mul_asiakas".$i;
+				echo ${$muuttuja};
 			}
-			echo $mul_asiakas;
-			echo $joinilisa; 
-			var_dump($mul_asiakas);
 		}
 
 		$query = "	SELECT asiakas.* $selectilisa
@@ -404,21 +400,30 @@
 			$limit = " LIMIT 1000 ";
 		}
 
+		$asiakas_yhteeyshenkilo_join = "";
+		if (!empty($asiakas_segmentin_yhteystiedot)) {
+			$mul_asiakas = array();
+			for ($i = 1; $i <= $dynaaminenasiakasmaxsyvyys; $i++) {
+				$muuttuja = "mul_asiakas{$i}";
+				$mul_asiakas = array_merge($mul_asiakas, ${$muuttuja});
+			}
+			$asiakas_yhteeyshenkilo_join = "JOIN yhteyshenkilo
+											ON ( yhteyshenkilo.yhtio = asiakas.yhtio
+												AND yhteyshenkilo.liitostunnus = asiakas.tunnus
+												AND yhteyshenkilo.rooli IN ('".implode("','", $mul_asiakas)."'))";
+		}
+
 		//haetaan omat asiakkaat
-		$query = "	SELECT nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4, tunnus
+		$query = "	SELECT asiakas.nimi, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.osasto, asiakas.ryhma, asiakas.piiri, asiakas.flag_1, asiakas.flag_2, asiakas.flag_3, asiakas.flag_4, asiakas.tunnus
 					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]'
-					and laji != 'P'
-					and nimi != ''
+					{$asiakas_yhteeyshenkilo_join}
+					WHERE asiakas.yhtio = '$kukarow[yhtio]'
+					and asiakas.laji != 'P'
+					and asiakas.nimi != ''
 					$lisa
 					ORDER BY $jarjestys
 					$limit";
 		$result = mysql_query($query) or pupe_error($query);
-query_dump($query);
-echo $lisa;
-echo $monivalintalaatikot;
-echo $monivalintalaatikot_normaali;
-
 		$lim = "";
 		$lim[$limitti] = "SELECTED";
 
@@ -445,8 +450,12 @@ echo $monivalintalaatikot_normaali;
 			$lis_chk = ' checked';
 		}
 
-		echo "<tr><th valign='bottom'>".t("Näytä lisärajaukset")."</th><td><input type='checkbox' name='lisaraj_haku' $lis_chk></th></tr>";
-		echo "<tr><th>".t("Luo aineisto vain valitun asiakaskategorian yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_seg_yht_tiedot' value='on' $cck></td></tr>";
+		if (isset($asiakas_segmentin_yhteystiedot) and $asiakas_segmentin_yhteystiedot == 'on') {
+			$asiakas_segmentin_yhteystiedot_chk = 'CHECKED';
+		}
+
+		echo "<tr><th valign='bottom'>".t("Näytä lisärajaukset")."</th><td><input type='checkbox' name='lisaraj_haku' $lis_chk></td></tr>";
+		echo "<tr><th>".t("Luo aineisto vain valitun asiakaskategorian yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='asiakas_segmentin_yhteystiedot' value='on' onclick='submit();' $asiakas_segmentin_yhteystiedot_chk /></td></tr>";
 
 		echo "</table><br>";
 

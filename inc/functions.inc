@@ -18534,7 +18534,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 }
 
 if (!function_exists("pupeFileReader")) {
-	function pupeFileReader($file, $extension = "", $saveintocsvfile = "") {
+	function pupeFileReader($file, $extension = "", $saveintocsvfile = "", $multiple_sheet = false) {
 
         /** Laitetaan rivit arrayseen **/
     	$excelrivit = array();
@@ -18606,63 +18606,26 @@ if (!function_exists("pupeFileReader")) {
         	// Avataan XLSX Zippi
         	exec("cp $file /tmp/$foldername.zip; unzip /tmp/$foldername.zip -d /tmp/$foldername;");
 
-        	$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet1.xml";
-        	$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+			if ($multiple_sheet) {
+				$sheets_dir = "/tmp/$foldername/xl/worksheets/";
+				$number_of_sheets = 0;
+				if ($handle = opendir($sheets_dir)) {
+					while (($file = readdir($handle)) !== false) {
+						if (!in_array($file, array('.', '..')) && !is_dir($sheets_dir.$file))
+							$number_of_sheets++;
+					}
+				}
 
-        	$sheetData		= simplexml_load_file($workSheetFile);
-        	$sharedStrings	= simplexml_load_file($sharedStringsFile);
+				for($i = 1; $i <= $number_of_sheets; $i++) {
+					$excelrivit[$i] = pupeFileReaderXLSRows($foldername, $i, $savefile);
+				}
+			}
+			else {
+				$excelrivit = pupeFileReaderXLSRows($foldername, 1, $savefile);
+			}
 
-        	$sharedStringsArray = array();
-
-        	foreach ($sharedStrings->si as $string) {
-        		$sharedStringsArray[] = utf8_decode($string->t);
-        	}
-
-        	foreach ($sheetData->sheetData->row as $row) {
-
-        		$rowIndex = ($row->attributes()->r)-1;
-
-        		foreach ($row->c as $cell) {
-
-        			if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
-        				$value = $sharedStringsArray[(int) $cell->v];
-        			}
-        			else {
-        				$value = $cell->v;
-        			}
-
-        			$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
-
-        			$excelrivit[$rowIndex][$colIndex] = trim($value);
-        			$colIndex++;
-        		}
-        	}
-
-        	// XLSX failisssa ei ole ollenkaan tyhjiä soluja, injisoidaan ne tässä...
-        	foreach ($excelrivit as $rowIndex => $row) {
-        		$edindex = 0;
-
-        		foreach ($row as $colIndex => $column) {
-
-        			if ($colIndex > 0 and $colIndex > $edindex+1) {
-        				for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
-        					$excelrivit[$rowIndex][$inj] = "";
-        				}
-        			}
-
-        			$edindex = $colIndex;
-        		}
-
-                // Laitetaan solut vielä indeksien mukaan järjestykseen jotta implode toimisi
-        		ksort($excelrivit[$rowIndex]);
-
-        		if (isset($savefile)) {
-        		    fwrite($savefile, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
-        		}
-        	}
-
-        	// Poistetaan zipppi ja purettu zippi
-        	exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
+			// Poistetaan zipppi ja purettu zippi
+			exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
         }
         else {
         	/** PHPExcel kirjasto **/
@@ -18684,22 +18647,14 @@ if (!function_exists("pupeFileReader")) {
         	/** Ladataan file halutuilla parametreilla **/
         	$objPHPExcel = $objReader->load($file);
 
-        	/** Aktivoidaan eka sheetti**/
-        	$objPHPExcel->setActiveSheetIndex(0);
-
-        	/** Loopataan tiedoston rivit **/
-        	foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
-        	    $cellIterator = $row->getCellIterator();
-        	    $cellIterator->setIterateOnlyExistingCells(false);
-
-        		$rowIndex = ($row->getRowIndex())-1;
-
-        	    foreach ($cellIterator as $cell) {
-        	        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
-
-        			$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
-        	    }
-        	}
+			if ($multiple_sheet) {
+				for ($i = 0; $i <= $objPHPExcel->getSheetCount() - 1; $i++) {
+					$excelrivit[$i] = pupeFileReaderXLSRow($objPHPExcel, $i);
+				}
+			}
+			else {
+				$excelrivit = pupeFileReaderXLSRow($objPHPExcel, 0);
+			}
 
         	/** Tuhotaan excel oliot **/
         	unset($objReader);
@@ -18715,6 +18670,94 @@ if (!function_exists("pupeFileReader")) {
             return $excelrivit;
         }
     }
+}
+
+if (!function_exists('pupeFileReaderXLSRows')) {
+	function pupeFileReaderXLSRows($foldername, $i, $savefile) {
+		$excelrivit = array();
+		
+		$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet{$i}.xml";
+		$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+
+		$sheetData		= simplexml_load_file($workSheetFile);
+		$sharedStrings	= simplexml_load_file($sharedStringsFile);
+
+		$sharedStringsArray = array();
+
+		foreach ($sharedStrings->si as $string) {
+			$sharedStringsArray[] = utf8_decode($string->t);
+		}
+
+		foreach ($sheetData->sheetData->row as $row) {
+
+			$rowIndex = ($row->attributes()->r)-1;
+
+			foreach ($row->c as $cell) {
+
+				if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
+					$value = $sharedStringsArray[(int) $cell->v];
+				}
+				else {
+					$value = $cell->v;
+				}
+
+				$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
+
+				$excelrivit[$rowIndex][$colIndex] = trim($value);
+				$colIndex++;
+			}
+		}
+
+		// XLSX failisssa ei ole ollenkaan tyhjiä soluja, injisoidaan ne tässä...
+		foreach ($excelrivit as $rowIndex => $row) {
+			$edindex = 0;
+
+			foreach ($row as $colIndex => $column) {
+
+				if ($colIndex > 0 and $colIndex > $edindex+1) {
+					for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
+						$excelrivit[$rowIndex][$inj] = "";
+					}
+				}
+
+				$edindex = $colIndex;
+			}
+
+			// Laitetaan solut vielä indeksien mukaan järjestykseen jotta implode toimisi
+			ksort($excelrivit[$rowIndex]);
+
+			if (isset($savefile)) {
+				fwrite($savefile, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
+			}
+		}
+
+		return $excelrivit;
+	}
+}
+
+if (!function_exists('pupeFileReaderXLSRow')) {
+	function pupeFileReaderXLSRow(&$objPHPExcel, $i) {
+		$excelrivit = array();
+		
+		/** Aktivoidaan eka sheetti**/
+		$objPHPExcel->setActiveSheetIndex($i);
+
+		/** Loopataan tiedoston rivit **/
+		foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+			$cellIterator = $row->getCellIterator();
+			$cellIterator->setIterateOnlyExistingCells(false);
+
+			$rowIndex = ($row->getRowIndex())-1;
+
+			foreach ($cellIterator as $cell) {
+				$colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+				$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+			}
+		}
+
+		return $excelrivit;
+	}
 }
 
 if (!function_exists("kustannuspaikka_kohde_projekti")) {

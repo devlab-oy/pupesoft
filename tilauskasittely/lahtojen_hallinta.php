@@ -657,32 +657,7 @@
 				require("inc/unifaun_send.inc");
 
 				if ($varasto_lahto_conflict) {
-
-					echo "<font class='error'>",t("VIRHE: valitut lähdöt eivät kuulu valittuun varastoon"),"!<br />";
-
-					$body = "
-					Yhtiö: {$yhtiorow['nimi']}\n
-					Ohjelma: Lähtöjen hallinta\n
-					Toiminto: Tulosta rahtikirjat\n
-					Varasto: {$select_varasto}\n
-					Lähdöt: ".implode(", ", $varasto_lahto_conflict_array)."\n
-					Käyttäjä: {$kukarow['kuka']}\n
-					Kellonaika: ".date("d.m.Y H:i:s")."\n
-					";
-
-					// Sähköpostin lähetykseen parametrit
-					$parametri = array( "to" 			=> "helpdesk@devlab.fi",
-										"cc" 			=> "",
-										"subject"		=> "ERROR: {$yhtiorow['nimi']} -> Lähtöjen hallinnan varasto ja lähtö konflikti!!!",
-										"ctype"			=> "text",
-										"body"			=> $body,
-									);
-
-					if (pupesoft_sahkoposti($parametri)) {
-						echo t("Sähköpostin lähetys onnistui").": helpdesk@devlab.fi<br />";
-					}
-
-					echo "</font><br />";
+					echo "<font class='error'>",t("VIRHE: valitut lähdöt eivät kuulu valittuun varastoon"),"!</font><br />";
 				}
 				else {
 

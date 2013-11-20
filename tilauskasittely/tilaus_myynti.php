@@ -8396,18 +8396,28 @@ if ($tee == '') {
 					echo "</select>";
 				}
 
-				if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $yhtiorow['liiketunnus'] != '') {
+				if ($laskurow['yhtio_toimipaikka'] != 0) {
 
-					$query = "	SELECT asiakkaan_avainsanat.*
-								FROM asiakkaan_avainsanat
-								WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
-								and asiakkaan_avainsanat.laji = 'futur_sahkoinen_lahete'
-								and asiakkaan_avainsanat.avainsana != ''
-								AND asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'";
-					$as_avain_chk_res = pupe_query($query);
+					$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $laskurow['yhtio_toimipaikka']);
 
-					if (mysql_num_rows($as_avain_chk_res) > 0) {
-						echo "<br><br>",t("Lähetä sähköinen lähete")," <input type='checkbox' name='generoi_sahkoinen_lahete' value='true' checked />";
+					if (mysql_num_rows($toimipaikat_res) != 0) {
+
+						$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
+
+						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
+
+							$query = "	SELECT asiakkaan_avainsanat.*
+										FROM asiakkaan_avainsanat
+										WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+										and asiakkaan_avainsanat.laji = 'futur_sahkoinen_lahete'
+										and asiakkaan_avainsanat.avainsana != ''
+										AND asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'";
+							$as_avain_chk_res = pupe_query($query);
+
+							if (mysql_num_rows($as_avain_chk_res) > 0) {
+								echo "<br><br>",t("Lähetä sähköinen lähete")," <input type='checkbox' name='generoi_sahkoinen_lahete' value='true' checked />";
+							}
+						}
 					}
 				}
 

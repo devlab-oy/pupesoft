@@ -451,6 +451,13 @@ else {
 			$result = pupe_query($query);
 		}
 
+		if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+
+			require("inc/sahkoinen_lahete.class.inc");
+
+			sahkoinen_lahete($laskurow);
+		}
+
 		$tilaus_valmis_ulos .= "<font class='message'>".t("HUOM: Tilaus oli jo kerätty! Jos tarvitset keräyslistan, tulosta keräyslistan kopio").".</font><br><br>";
 
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D

@@ -28,7 +28,7 @@
 	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 	pupesoft_flock();
 
-	$yhtio = mysql_escape_string(trim($argv[1]));
+	$yhtio = mysql_real_escape_string(trim($argv[1]));
 	$yhtiorow = hae_yhtion_parametrit($yhtio);
 
 	// Haetaan kukarow
@@ -45,7 +45,7 @@
 	$kukarow = mysql_fetch_assoc($kukares);
 
 	$path = trim($argv[2]);
-	$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
+	$path = substr($path, -1) != '/' ? $path.'/' : $path;
 
 	if ($handle = opendir($path)) {
 
@@ -58,17 +58,15 @@
 
 			if ($ext == 'XML') {
 
-				$filehandle = fopen($path.$file, "r");
-				$contents = fread($filehandle, filesize($path.$file));
-
-				$xml = simplexml_load_string($contents);
+				$xml = simplexml_load_file($path.$file);
 
 				if (is_object($xml)) {
 
-					if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and $xml->MessageHeader->MessageType == 'OutboundDeliveryConfirmation') {
+					if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and trim($xml->MessageHeader->MessageType) == 'OutboundDeliveryConfirmation') {
 
 						$otunnus = (int) $xml->CustPackingSlip->SalesId;
-						$toimaika = $xml->CustPackingSlip->DeliveryDate;
+						list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
+						$toimaika = "{$vv}-{$kk}-{$pp}";
 						$toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
 
 						$tuotteiden_paino = 0;
@@ -76,7 +74,7 @@
 						foreach ($xml->CustPackingSlip->Lines as $line) {
 
 							$tilausrivin_tunnus = (int) $line->TransId;
-							$eankoodi = mysql_escape_string($line->ItemNumber);
+							$eankoodi = mysql_real_escape_string($line->ItemNumber);
 							$keratty = (float) $line->DeliveredQuantity;
 
 							$query = "	UPDATE tilausrivi
@@ -129,4 +127,3 @@
 
 		closedir($handle);
 	}
-

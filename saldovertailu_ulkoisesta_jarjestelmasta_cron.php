@@ -32,7 +32,7 @@
 	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 	pupesoft_flock();
 
-	$yhtio = mysql_escape_string(trim($argv[1]));
+	$yhtio = mysql_real_escape_string(trim($argv[1]));
 	$yhtiorow = hae_yhtion_parametrit($yhtio);
 
 	// Haetaan kukarow
@@ -49,7 +49,7 @@
 	$kukarow = mysql_fetch_assoc($kukares);
 
 	$path = trim($argv[2]);
-	$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
+	$path = substr($path, -1) != '/' ? $path.'/' : $path;
 
 	$error_email = trim($argv[3]);
 
@@ -71,7 +71,7 @@
 
 				if (is_object($xml)) {
 
-					if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and $xml->MessageHeader->MessageType == 'StockReport') {
+					if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and trim($xml->MessageHeader->MessageType) == 'StockReport') {
 
 						// tuki vain yhdelle Posten-varastolle
 						$query = "	SELECT *
@@ -90,10 +90,10 @@
 
 						foreach ($xml->InvCounting as $line) {
 
-							$eankoodi = $line->ItemNumber;
-							$kpl = (float) $line->Quantity;
+							$eankoodi = $line->Line->ItemNumber;
+							$kpl = (float) $line->Line->Quantity;
 
-							$query = "	SELECT tuoteno
+							$query = "	SELECT tuoteno, nimitys
 										FROM tuote
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND eankoodi = '{$eankoodi}'";
@@ -115,20 +115,20 @@
 
 						if (count($saldoeroja) > 0) {
 
-							$body = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":\n\n";
+							$body = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
 
-							$body .= t("Tuoteno")." ".t("Nimitys")." ".t("Posten")." ".t("Pupe")."\n";
+							$body .= t("Tuoteno")." ".t("Nimitys")." ".t("Posten")." ".t("Pupe")."<br>\n";
 
 							foreach ($saldoeroja as $tuoteno => $_arr) {
 
-								$body .= "{$tuoteno} {$_arr['nimitys']} {$_arr['posten']} {$_arr['pupe']}\n";
+								$body .= "{$tuoteno} {$_arr['nimitys']} {$_arr['posten']} {$_arr['pupe']}<br>\n";
 
 							}
 
 							$params = array(
 								'to' => $error_email,
 								'cc' => '',
-								'subject' => t("Posten saldovertailu")." - ".tv1dateconv($luontiaika),
+								'subject' => t("Posten saldovertailu")." - {$luontiaika}",
 								'ctype' => 'html',
 								'body' => $body,
 							);

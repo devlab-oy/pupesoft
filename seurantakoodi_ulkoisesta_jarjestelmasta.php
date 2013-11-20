@@ -44,6 +44,9 @@
 
 	$kukarow = mysql_fetch_assoc($kukares);
 
+	$path = trim($argv[2]);
+	$path = substr($path, -1) != '/' ? $path.'/' : $path;
+
 	if ($handle = opendir($path)) {
 
 		while (false !== ($file = readdir($handle))) {

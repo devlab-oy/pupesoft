@@ -87,7 +87,7 @@
 			}
 			echo "</td>";
 		}
-		
+
 		if ($ulos == '') {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
 				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
@@ -175,7 +175,7 @@
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-			if ($toimaika == "" or $toimaika == "0000-00-00") {
+			if ($toimaika == "" ) {
 				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -186,7 +186,7 @@
 				$toimppa = substr($toimaika, 8, 2);
 			}
 
-			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			if ($kerayspvm == "") {
 				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -267,11 +267,11 @@
 			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}
 
-		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and $toim == 'RIVISYOTTO') {
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO'))) {
 			$tilauksen_rekisterinumerot = hae_tilauksen_rekisterinumerot($laskurow['tunnus']);
 			echo "	<th align='left'>".t("Rekisterinumero")."</th>";
 		}
-		
+
 		echo "	<th align='left'>".t("Tuoteno")."</th>
 				<th align='left'>".t("M‰‰r‰")."</th>
 				<th align='left'>".t("Var")."</th>";
@@ -307,7 +307,7 @@
 			echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
 		}
 
-		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and $toim == 'RIVISYOTTO') {
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO'))) {
 			echo "<td valign='top'>";
 			echo "<input type='text' name='rekisterinumero' size='8' value='{$rekisterinumero}'/>";
 			if (count($tilauksen_rekisterinumerot) > 0) {
@@ -450,13 +450,13 @@
 			echo "<th></th>";
 		}
 
-		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO','PIKATILAUS'))) {
 			$nrospanni = 7;
 		}
 		else {
 			$nrospanni = 6;
 		}
-		
+
 		$nrospanni_vah = 0;
 
 		if ($kukarow['hinnat'] == 0) {
@@ -507,7 +507,7 @@
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-			if ($toimaika == "" or $toimaika == "0000-00-00") {
+			if ($toimaika == "" ) {
 				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -518,7 +518,7 @@
 				$toimppa = substr($toimaika, 8, 2);
 			}
 
-			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			if ($kerayspvm == "" ) {
 				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -716,7 +716,7 @@
 			$kerayspvm = $laskurow["kerayspvm"];
 		}
 
-		if ($toimaika == "" or $toimaika == "0000-00-00") {
+		if ($toimaika == "") {
 			$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -727,7 +727,7 @@
 			$toimppa = substr($toimaika, 8, 2);
 		}
 
-		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+		if ($kerayspvm == "") {
 			$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));

@@ -411,10 +411,7 @@
 
 	if ($avain_sel["SAHKTILTUN"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
-		$query = "	SELECT *
-					FROM yhtion_toimipaikat
-					WHERE yhtio = '$kukarow[yhtio]'";
-		$vresult = pupe_query($query);
+		$vresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='0'>".t("Valitse toimipaikka")."</option>";
@@ -549,8 +546,7 @@
 		$query = "  SELECT nimi, tunnus
 					FROM toimi
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tyyppi != 'P'
-					AND oletus_vienti IN ('C', 'F', 'J', 'K', 'I', 'L')";
+					AND tyyppi not in ('P','K')";
 		$toimi_chk_res = pupe_query($query);
 
 		if (mysql_num_rows($toimi_chk_res) > 0) {

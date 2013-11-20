@@ -36,6 +36,7 @@
 	if (!isset($projekti))			$projekti = "";
 	if (!isset($liitos)) 			$liitos = "";
 	if (!isset($liitostunnus)) 		$liitostunnus = 0;
+	if (!isset($tapahtumatunnus)) 	$tapahtumatunnus = 0;
 	if (!isset($summa_valuutassa))	$summa_valuutassa = "";
 
 	// Otetaan yhtiön oletus jos ei olla submitattu....
@@ -146,6 +147,7 @@
 				<input type='hidden' name = 'grouppaa' value = '$grouppaa'>
 				<input type='hidden' name = 'laji' value = '$laji'>
 				<input type='hidden' name = 'tositenro' value = '$tositenro'>
+				<input type='hidden' name = 'tapahtumatunnus' value = '$tapahtumatunnus'>
 				<input type='hidden' name = 'vv' value = '$vv'>
 				<input type='hidden' name = 'kk' value = '$kk'>
 				<input type='hidden' name = 'iframe' value = '$iframe'>

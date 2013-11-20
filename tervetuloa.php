@@ -11,6 +11,9 @@ if (!isset($tee) or $tee == '') {
 	if (file_exists("tervetuloa_".$kukarow["yhtio"].".inc")) {
 		require("tervetuloa_".$kukarow["yhtio"].".inc");
 	}
+	elseif ($yhtiorow['konserni'] != "" and file_exists("tervetuloa_".$yhtiorow['konserni'].".inc")) {
+		require("tervetuloa_".$yhtiorow['konserni'].".inc");
+	}
 
 	echo "<table>";
 	echo "<tr>";

@@ -27,8 +27,12 @@
 	echo "<font class='head'>".t("Raaka-aineiden ostoraportti")."</font><hr>";
 
 	// org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
-	$org_rajaus = $abcrajaus;
-	list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+	$org_rajaus = isset($abcrajaus) ? $abcrajaus : '';
+	$abcrajaus = isset($abcrajaus) ? $abcrajaus : '';
+
+	if ($abcrajaus != '') {
+		list($abcrajaus, $abcrajaustapa) = explode("##", $abcrajaus);
+	}
 
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
@@ -38,7 +42,7 @@
 	if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
-	if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("m")+4, 1, date("Y")));
+	if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 	if (!isset($kkl1)) $kkl1 = date("m", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 	if (!isset($vvl1)) $vvl1 = date("Y", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 
@@ -46,41 +50,44 @@
 	if (!checkdate($kka1, $ppa1, $vva1)) {
 		echo "<font class='error'>".t("Virheellinen alkupäivä!")."</font><br>";
 		$tee = "";
+		$ehdotusnappi = "";
 	}
 	else {
 		$nykyinen_alku  = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1));
-		$edellinen_alku = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
 	}
 
 	if (!checkdate($kkl1, $ppl1, $vvl1)) {
 		echo "<font class='error'>".t("Virheellinen loppupäivä!")."</font><br>";
 		$tee = "";
+		$ehdotusnappi = "";
 	}
 	else {
-		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1));
-		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1-1));
+		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1));
 	}
 
-	if ($nykyinen_alku > $nykyinen_loppu) {
+	if (isset($nykyinen_alku) and isset($nykyinen_loppu) and $nykyinen_alku > $nykyinen_loppu) {
 		echo "<font class='error'>".t("Virheelliset kaudet!")." $nykyinen_alku > $nykyinen_loppu</font><br>";
 		$tee = "";
+		$ehdotusnappi = "";
 	}
 
 	// Muuttujia
 	$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
 	$toimittajaid = isset($toimittajaid) ? trim($toimittajaid) : "";
+	$tilaustuotteiden_kasittely = isset($tilaustuotteiden_kasittely) ? $tilaustuotteiden_kasittely : 'A';
+	$multi_status = isset($multi_status) ? $multi_status : array();
 
 	// Tämä palauttaa yhden tuotteen ostosuosituksen tiedot
 	function teerivi($tuoteno, $valittu_toimittaja) {
 
 		// Kukarow ja päivämäärät globaaleina
-		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu;
+		global $kukarow, $nykyinen_alku, $nykyinen_loppu, $tilaustuotteiden_kasittely, $multi_status;
 
 		// Tehdään kaudet päivämääristä
 		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 8);
 		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 8);
 
-		// Haetaan lapsituotteen varastosaldo
+		// Haetaan raaka-aineen varastosaldo
 		$query = "	SELECT ifnull(sum(saldo), 0) saldo
 					FROM tuotepaikat
 					WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
@@ -89,7 +96,7 @@
 		$row = mysql_fetch_assoc($result);
 		$lapsi_saldo = $row['saldo'];
 
-		// Haetaan lapsituotteen vuosikulutus (rullaava 12 kk)
+		// Haetaan raaka-aineen vuosikulutus (rullaava 12 kk)
 		$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) vuosikulutus
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
@@ -100,7 +107,7 @@
 		$row = mysql_fetch_assoc($result);
 		$lapsi_vuosikulutus = $row['vuosikulutus'];
 
-		// Haetaan lapsituotteen ostettu, varattu sekä ennakkotilattu määrä
+		// Haetaan raaka-aineen ostettu, varattu, ennakkotilattu sekä valmistuksessa oleva määrä
 		$query = "	SELECT
 					ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
 					ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
@@ -118,7 +125,7 @@
 		$lapsi_ennakko = $row['ennakko'];
 		$lapsi_valmistuksessa = $row['valmistuksessa'];
 
-		// Haetaan lapsituotteen toimittajatiedot
+		// Haetaan raaka-aineen toimittajatiedot
 		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
 					if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
 					tuotteen_toimittajat.toimittaja,
@@ -126,7 +133,7 @@
 					toimi.nimi,
 					toimi.tunnus,
 					tuote.tuotemassa,
-					tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys as tuotteen_tilavuus
+					tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys as tilavuus
 					FROM tuotteen_toimittajat
 					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus and toimi.tunnus = '$valittu_toimittaja')
 					JOIN tuote ON ( tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno )
@@ -153,12 +160,19 @@
 							);
 		}
 
-		// Loopataan läpi lapsituotteen isätuotteet ja lasketaan osto ehdotukset
+		if (isset($multi_status) and count($multi_status) > 0) {
+			$tuote_where = " AND tuote.status in ('".implode("','", $multi_status)."')";
+		}
+		else {
+			$tuote_where = " ";
+		}
+
+		// Loopataan läpi raaka-aineen isätuotteet ja lasketaan ostoehdotukset
 		$query = "	SELECT isatuoteno, kerroin
 					FROM tuoteperhe
 					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
 						AND tuote.tuoteno = tuoteperhe.isatuoteno
-						AND tuote.status NOT IN ('P', 'T'))
+						{$tuote_where})
 					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
 					AND tuoteperhe.tuoteno = '{$tuoteno}'
 					AND tuoteperhe.tyyppi = 'R'";
@@ -166,33 +180,19 @@
 
 		// While loopissa käytettävät muuttujat
 		$lapsi_kulutus = 0;
+		$budjetin_peruste = array();
 
 		while ($isatuote_row = mysql_fetch_assoc($isatuote_result)) {
 
 			// Haetaan isätuotteen budjetoitu myynti
-			$query = "	SELECT ifnull(sum(maara), 0) maara
-						FROM budjetti_tuote
-						WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
-						AND budjetti_tuote.kausi >= '$alku_kausi'
-						AND budjetti_tuote.kausi <= '$loppu_kausi'
-						AND budjetti_tuote.tuoteno = '{$isatuote_row["isatuoteno"]}'";
-			$result = pupe_query($query);
-			$row = mysql_fetch_assoc($result);
-			$isa_budjetoitu_myynti = $row['maara'];
+			$params = array(
+				'tuoteno'                    => $isatuote_row["isatuoteno"],
+				'pvm_alku'                   => $nykyinen_alku,
+				'pvm_loppu'                  => $nykyinen_loppu,
+				'tilaustuotteiden_kasittely' => $tilaustuotteiden_kasittely,
+			);
 
-			// Jos ei ole budjettia, otetaan edellisen kauden myynti ja käytetään sitä
-			if ($isa_budjetoitu_myynti == 0) {
-				$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) myynti_ed
-							FROM tilausrivi
-							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-							AND tilausrivi.tyyppi = 'L'
-							AND tilausrivi.tuoteno = '{$isatuote_row["isatuoteno"]}'
-							AND tilausrivi.laskutettuaika >= '$edellinen_alku'
-							AND tilausrivi.laskutettuaika <= '$edellinen_loppu'";
-				$result = pupe_query($query);
-				$row = mysql_fetch_assoc($result);
-				$isa_budjetoitu_myynti = $row["myynti_ed"];
-			}
+			list($isa_budjetoitu_myynti, $budjetin_peruste[]) = tuotteen_budjetoitu_myynti($params);
 
 			// Haetaan isätuotteiden varastosaldo
 			$query = "	SELECT ifnull(sum(saldo), 0) saldo
@@ -203,7 +203,7 @@
 			$row = mysql_fetch_assoc($result);
 			$isa_saldo = $row['saldo'];
 
-			// Haetaan isätuotteen ostettu, varattu sekä ennakkotilattu määrä
+			// Haetaan isätuotteen ostettu, varattu, ennakkotilattu sekä valmistuksessa määrä
 			$query = "	SELECT
 						ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
 						ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
@@ -221,8 +221,10 @@
 			$isa_ennakko = $row['ennakko'];
 			$isa_valmistuksessa = $row['valmistuksessa'];
 
-			// Isätuotteen myyntiennuste
+			// Isätuotteen reaalisaldo
 			$isa_reaalisaldo = $isa_saldo + $isa_tilattu - $isa_varattu - $isa_ennakko - $isa_valmistuksessa;
+
+			// Isätuotteen myyntiennuste
 			$isa_myyntiennuste = $isa_budjetoitu_myynti - $isa_reaalisaldo;
 
 			// Jos myyntiennuste on miinusta, nollataan ennuste, ettei se vähennä raaka-aine tarvetta (jo valmistetuista tuotteista ei voida käyttää raaka-aineita)
@@ -233,40 +235,49 @@
 			$lapsi_kulutus += ($isa_myyntiennuste * $lapsi_kerroin);
 		}
 
-		// Lasketaan lapsituotteen ostosuositus
+		// Lasketaan raaka-aineen reaalisaldo
 		$lapsi_reaalisaldo = $lapsi_saldo + $lapsi_tilattu - $lapsi_varattu - $lapsi_ennakko - $lapsi_valmistuksessa;
 
+		// Lasketaan raaka-aineen päiväkulutus
 		$lapsi_paivakulutus = round($lapsi_vuosikulutus / 240, 6);
+
+		// Lasketaan raaka-aineen riittopäivät
 		$lapsi_riittopv = ($lapsi_paivakulutus == 0) ? t("Ei tiedossa") : floor($lapsi_reaalisaldo / $lapsi_paivakulutus);
 
+		// Lasketaan raaka-aineen kulutusennuste
 		$lapsi_kulutusennuste = $lapsi_kulutus + ($lapsi_paivakulutus * $toimittajarow['toimitusaika']);
+
+		// Lasketaan raaka-aineen ostosuositus
 		$lapsi_ostosuositus = round($lapsi_kulutusennuste - $lapsi_reaalisaldo);
+
+		// Pyöristetään raaka-aineen ostosuositus toimittajan pakkauskokoon
 		$lapsi_ostettavamaara = round($lapsi_ostosuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'];
 
 		// Palautettava array
 		$tuoterivi = array();
-		$tuoterivi['reaalisaldo'] 			= $lapsi_reaalisaldo;
-		$tuoterivi['varastosaldo']			= $lapsi_saldo;
-		$tuoterivi['tilattu']				= $lapsi_tilattu;
-		$tuoterivi['varattu']				= $lapsi_varattu;
-		$tuoterivi['ennakko']				= $lapsi_ennakko;
-		$tuoterivi['valmistuksessa']		= $lapsi_valmistuksessa;
-		$tuoterivi['paivakulutus']			= $lapsi_paivakulutus;
-		$tuoterivi['vuosikulutus']			= $lapsi_vuosikulutus;
-		$tuoterivi['riittopv'] 				= $lapsi_riittopv;
-		$tuoterivi['kulutusennuste'] 		= $lapsi_kulutusennuste;
-		$tuoterivi['kulutus'] 				= $lapsi_kulutus;
-		$tuoterivi['toimitusaika']			= $toimittajarow['toimitusaika'];
-		$tuoterivi['ostosuositus'] 			= $lapsi_ostosuositus;
-		$tuoterivi['ostoeramaara']			= $lapsi_ostettavamaara;
-		$tuoterivi['pakkauskoko']			= $toimittajarow['pakkauskoko'];
-		$tuoterivi['toimittajan_tunnus'] 	= $toimittajarow['tunnus'];
-		$tuoterivi['toimittajan_ytunnus'] 	= $toimittajarow['toimittaja'];
-		$tuoterivi['toimittajan_nimi'] 		= $toimittajarow['nimi'];
-		$tuoterivi['ostohinta']		 		= $toimittajarow['ostohinta'];
-		$tuoterivi['ostosuosituksen_arvo']	= $toimittajarow['ostohinta'] * $lapsi_ostosuositus;
-		$tuoterivi['ostosuosituksen_paino'] = $toimittajarow['tuotemassa'] * $lapsi_ostosuositus;
+		$tuoterivi['reaalisaldo']              = $lapsi_reaalisaldo;
+		$tuoterivi['varastosaldo']             = $lapsi_saldo;
+		$tuoterivi['tilattu']                  = $lapsi_tilattu;
+		$tuoterivi['varattu']                  = $lapsi_varattu;
+		$tuoterivi['ennakko']                  = $lapsi_ennakko;
+		$tuoterivi['valmistuksessa']           = $lapsi_valmistuksessa;
+		$tuoterivi['paivakulutus']             = $lapsi_paivakulutus;
+		$tuoterivi['vuosikulutus']             = $lapsi_vuosikulutus;
+		$tuoterivi['riittopv']                 = $lapsi_riittopv;
+		$tuoterivi['kulutusennuste']           = $lapsi_kulutusennuste;
+		$tuoterivi['kulutus']                  = $lapsi_kulutus;
+		$tuoterivi['toimitusaika']             = $toimittajarow['toimitusaika'];
+		$tuoterivi['ostosuositus']             = $lapsi_ostosuositus;
+		$tuoterivi['ostoeramaara']             = $lapsi_ostettavamaara;
+		$tuoterivi['pakkauskoko']              = $toimittajarow['pakkauskoko'];
+		$tuoterivi['toimittajan_tunnus']       = $toimittajarow['tunnus'];
+		$tuoterivi['toimittajan_ytunnus']      = $toimittajarow['toimittaja'];
+		$tuoterivi['toimittajan_nimi']         = $toimittajarow['nimi'];
+		$tuoterivi['ostohinta']                = $toimittajarow['ostohinta'];
+		$tuoterivi['ostosuosituksen_arvo']     = $toimittajarow['ostohinta'] * $lapsi_ostosuositus;
+		$tuoterivi['ostosuosituksen_paino']    = $toimittajarow['tuotemassa'] * $lapsi_ostosuositus;
 		$tuoterivi['ostosuosituksen_tilavuus'] = $toimittajarow['tilavuus'] * $lapsi_ostosuositus;
+		$tuoterivi['budjetin_peruste']         = $budjetin_peruste;
 
 		return $tuoterivi;
 	}
@@ -295,9 +306,11 @@
 
 		if ($toimittajaid == 0) {
 			$tee = "ÄLÄMEEMIHINKÄÄN";
+			$ehdotusnappi = "";
 		}
 		else {
 			$tee = "";
+			$ehdotusnappi = "";
 		}
 	}
 
@@ -468,7 +481,8 @@
 		}
 
 		// Haetaan raaka-aineet, jotka osuvat hakuehtoihin
-		$query = "	SELECT tuote.tuoteno,
+		$query = "	SELECT DISTINCT
+					tuote.tuoteno,
 					tuote.nimitys,
 					$toimittaja_select
 					FROM tuote
@@ -480,7 +494,6 @@
 					AND tuote.status != 'P'
 					AND tuote.ostoehdotus != 'E'
 					$tuote_where
-					GROUP BY 1, 2, 3
 					ORDER BY toimittaja, tuote.try, tuote.tuoteno";
 		$res = pupe_query($query);
 
@@ -590,7 +603,7 @@
 				echo "<tr><td>".t("Ennakkotilaukset")."		</td><td>{$tuoterivi['ennakko']}			</td></tr>";
 				echo "<tr><td>".t("Valmistuksessa")."		</td><td>{$tuoterivi['valmistuksessa']}		</td></tr>";
 				echo "<tr><td>".t("Päiväkulutus")."			</td><td>{$tuoterivi['paivakulutus']}		</td></tr>";
-				echo "<tr><td>".t("Vuosikulutus")."			</td><td>{$tuoterivi['vuosikulutus']}		</td></tr>";
+				echo "<tr><td>".t("Vuosikulutus")."         </td><td>{$tuoterivi['vuosikulutus']} (".t("rullaava 12kk").")</td></tr>";
 				echo "<tr><td>".t("Riitto päivät")."		</td><td>{$tuoterivi['riittopv']}			</td></tr>";
 				echo "<tr><td>".t("Kulutusennuste")."		</td><td>{$tuoterivi['kulutusennuste']}		</td></tr>";
 				echo "<tr><td>".t("Budjetoitu kulutus")."	</td><td>{$tuoterivi['kulutus']}			</td></tr>";
@@ -600,7 +613,7 @@
 				echo "<tr><td>".t("Pakkauskoko")."			</td><td>{$tuoterivi['pakkauskoko']}		</td></tr>";
 				echo "</table>";
 
-				echo "</td><td colspan='7'>";
+				echo "</td><td colspan='10'>";
 
 				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." - ".t("Varattu")." - ".t("Ennakkotilaukset")." - ".t("Valmistuksessa")."<br>";
 				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} - {$tuoterivi["varattu"]} - {$tuoterivi["ennakko"]} - {$tuoterivi["valmistuksessa"]}<br><br>";
@@ -608,6 +621,21 @@
 				echo "{$tuoterivi['paivakulutus']} = round({$tuoterivi['vuosikulutus']} / 240)<br><br>";
 				echo t("Riitto Päivät")." = floor(".t("Reaalisaldo")." / ".t("Päiväkulutus").")<br>";
 				echo "{$tuoterivi['riittopv']} = floor({$tuoterivi['reaalisaldo']} / {$tuoterivi['paivakulutus']})<br><br>";
+
+				echo "<font class='info'>";
+				echo t("Budjetoitu kulutus").":<br><br>";
+
+				foreach ($tuoterivi['budjetin_peruste'] as $budjetin_perusteet) {
+					foreach($budjetin_perusteet as $budjetin_peruste) {
+						echo "Valmiste: ".$budjetin_peruste['tuote']."<br>";
+						echo "Tuotteen status: ".$budjetin_peruste['status']."<br>";
+						echo "Budjetin peruste: ".$budjetin_peruste['syy']."<br>";
+						echo "Budjetoitu kulutus: ".$budjetin_peruste['budjetoitu_myynti']."<br><br>";
+					}
+				}
+
+				echo "</font>";
+
 				echo t("Kulutusennuste")." = ".t("Budjetoitu kulutus")." + (".t("Päiväkulutus")." * ".t("Toimitusaika").")<br>";
 				echo "{$tuoterivi['kulutusennuste']} = {$tuoterivi['kulutus']} + ({$tuoterivi['paivakulutus']} * {$tuoterivi['toimitusaika']})<br><br>";
 				echo t("Ostosuositus")." = round(".t("Kulutusennuste")." - ".t("Reaalisaldo").")<br>";
@@ -652,6 +680,23 @@
 		$monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
 		$monivalintalaatikot_normaali = array();
 		require ("tilauskasittely/monivalintalaatikot.inc");
+
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t("Valmisteen status")."</th>";
+		echo "<td>";
+		echo "<select multiple='multiple' name='multi_status[]' onchange='submit();'>";
+		echo "<option value=''>".t("Ei valintaa")."</option>";
+
+		$result = t_avainsana("S");
+
+		while ($srow = mysql_fetch_array($result)) {
+			$sel = in_array($srow["selite"], $multi_status) ? " SELECTED" : "";
+			echo "<option value = '$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
+		}
+		echo "</select>";
 
 		echo "</td>";
 		echo "</tr>";
@@ -738,11 +783,24 @@
 		echo "</td>";
 		echo "</tr>";
 
+		$sel = array(
+			'A' => $tilaustuotteiden_kasittely == 'A' ? 'SELECTED' : '',
+			'B' => $tilaustuotteiden_kasittely == 'B' ? 'SELECTED' : '',
+			'C' => $tilaustuotteiden_kasittely == 'C' ? 'SELECTED' : '',
+		);
+
+		echo "<tr><th>".t("Tilaustuotteiden käsittely")."</th><td>";
+		echo "<select name='tilaustuotteiden_kasittely'>";
+        echo "<option value='A' {$sel['A']}>".t("Tilaustuotteiden kulutusennuste on jälkitoimitusrivit")."</option>";
+        echo "<option value='B' {$sel['B']}>".t("Tilaustuotteiden kulutusennuste on budjetti/myynti")."</option>";
+        echo "<option value='C' {$sel['C']}>".t("Tilaustuotteiden kulutusennuste on jälkitoimitusrivit + budjetti/myynti")."</option>";
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
+
 		echo "</table>";
 
 		echo "<br><input type='submit' name='ehdotusnappi' value = '".t("Aja ostoehdotus")."'></form>";
 	}
 
 	require ("inc/footer.inc");
-
-?>

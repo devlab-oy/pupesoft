@@ -1432,6 +1432,39 @@ if ($tee == 'P' or $tee == 'E') {
 			 </tr>";
 	}
 
+	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
+
+		echo "<tr>";
+		echo "<td>",t("Toimipaikka"),"</td>";
+		echo "<td>";
+		echo "<select name='toimipaikka'>";
+		echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+			$sel = '';
+
+			if (isset($toimipaikka)) {
+				if ($toimipaikka == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
+			}
+			else {
+				if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
+			}
+
+			echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+		}
+
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
+	}
+
 	if ($vienti == 'A') $vientia = 'selected';
 	if ($vienti == 'B') $vientib = 'selected';
 	if ($vienti == 'C') $vientic = 'selected';
@@ -1966,9 +1999,12 @@ if ($tee == 'I') {
 		$osto_rivi_kulu = $osto_rivi_kulu * (1 + ($osto_rivi_kulu_alv / 100));
 	}
 
+	$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
+
 	// Kirjoitetaan lasku
 	$query = "	INSERT into lasku set
 				yhtio 				= '$kukarow[yhtio]',
+				yhtio_toimipaikka	= '{$toimipaikka}',
 				summa 				= '$summa',
 				kasumma 			= '$kassaale',
 				lapvm 				= '$vpv-$vpk-$vpp',

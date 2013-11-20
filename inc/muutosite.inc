@@ -112,7 +112,7 @@
 		// Jaaha p‰ivit‰mme maksutilin!
 		if ($tila == 'T') {
 
-			$kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s.'), tilinumero_print($trow['tilinumero'])." ".$ultilno) ."<br>" . $trow['comments'];
+			$kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t('Laskun maksutili muutettiin. Vanha oli %s.', '', $ultilno)."<br>" . $trow['comments'];
 
 			//P‰ivitet‰‰n lasku
 			$query = "	UPDATE lasku
@@ -1236,6 +1236,34 @@
 		$tila = 'X';
 	}
 
+	if ($tila == 'vaihdatoimipaikka' and isset($toimipaikka)) {
+
+		$toimipaikka = mysql_escape_string($toimipaikka);
+
+		$query = "	UPDATE lasku SET
+					yhtio_toimipaikka = '{$toimipaikka}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tila in ('H','Y','M','P','Q')
+					and tunnus = '$tunnus'";
+		$result = pupe_query($query);
+
+		// haetaan laskun tiedot uudestaan
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus = '{$tunnus}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 1) {
+			echo t("Lasku")." {$tunnus} ".t("ei lˆytynytk‰‰n")."!";
+			exit;
+		}
+
+		$trow = mysql_fetch_assoc($result);
+		$tee = 'E';
+		$tila = 'X';
+	}
+
 	if ($tila == 'viikorkomuuta') {
 		$query = "	UPDATE lasku SET
 					viikorkopros = '$viikorkoprossa'
@@ -1953,6 +1981,40 @@
 			echo "<td class='back'><input type='submit' value='".t("P‰ivit‰")."'></td>";
 			echo "</tr>";
 			echo "</form>";
+
+			$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+			if (mysql_num_rows($toimipaikat_res) != 0) {
+				echo "<form method='post'>";
+				echo "<input type = 'hidden' name='lopetus' value='{$lopetus}'>";
+				echo "<input type = 'hidden' name='tila' value='vaihdatoimipaikka'>";
+				echo "<input type = 'hidden' name='tee' value='M'>";
+				echo "<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
+
+				echo "<tr>";
+				echo "<th>",t("Toimipaikka"),"</th>";
+				echo "<td>";
+				echo "<select name='toimipaikka'>";
+				echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+				while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+					$sel = '';
+
+					if ($trow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $toimipaikat_row['tunnus'];
+					}
+
+					echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+				}
+
+				echo "</select>";
+				echo "</td>";
+				echo "<td class='back'><input type='submit' value='".t("P‰ivit‰")."'></td>";
+				echo "</tr>";
+				echo "</form>";
+			}
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H' or $trow['tila'] == 'Y' or $trow['tila'] == 'Q') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
@@ -2047,7 +2109,7 @@
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t("Toimittajan tilinumero (kotimainen)")."</th>
-						<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
+						<td><input type = 'text' name = 'tili' size='40' value = '$trow[tilinumero]'></td>
 						<td  class='back' rowspan='3'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						<td class='back'>".t("Lasku siirtyy takaisin hyv‰ksynt‰‰n")."</td>
 						</tr>

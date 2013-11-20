@@ -4,11 +4,21 @@ $nimi = "../dataout/elma-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand
 
 if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti epäonnistui!");
 
-$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika
+$query = "	SELECT tilausrivi.tunnus,
+			toim_tuoteno,
+			ostohinta,
+			eankoodi,
+			tilausrivi.tuoteno,
+			ROUND(varattu * IF(tuotteen_toimittajat.tuotekerroin = 0 OR tuotteen_toimittajat.tuotekerroin IS NULL, 1, tuotteen_toimittajat.tuotekerroin), 4) varattu,
+			toimaika
 			FROM tilausrivi
 			LEFT JOIN tuote USING (yhtio, tuoteno)
-			LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
-			WHERE otunnus = '$laskurow[tunnus]' and varattu > 0 and tilausrivi.yhtio='$kukarow[yhtio]'
+			LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
+			LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
+			WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+			AND tilausrivi.varattu > 0
+			AND tilausrivi.yhtio = '{$kukarow['yhtio']}'
+			AND ta.tunnus IS NULL
 			ORDER BY toim_tuoteno";
 $result = pupe_query($query);
 

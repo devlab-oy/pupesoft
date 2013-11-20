@@ -6,6 +6,9 @@ $query = "  SELECT laskun_lisatiedot.sopimus_lisatietoja,
 			laskun_lisatiedot.saate,
 			lasku.olmapvm,
 			lasku.clearing,
+			lasku.viesti,
+			lasku.toimvko,
+			lasku.toimaika as toimitusaika,
 			tilausrivi.*,
 			lasku.varasto,
 			lasku.tilaustyyppi
@@ -27,6 +30,9 @@ while ($tilausrivi = mysql_fetch_assoc($result)) {
 	$viimeinen_voimassaolo_pvm = $tilausrivi['olmapvm'];
 	$saate_teksti = $tilausrivi['saate'];
 	$tilaustyyppi = $tilausrivi['tilaustyyppi'];
+	$viesti = $tilausrivi['viesti'];
+	$toimitusviikko = $tilausrivi['toimvko'];
+	$toimaika = $tilausrivi['toimitusaika'];
 }
 
 $tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);
@@ -44,13 +50,16 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 		$tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas, '', '', '', '', '', '');
 	}
 
-	//Halutaan pitää asiakkaille kopioitavissa tarjouksissa myyjän valitsema varasto
+	//Halutaan pitää asiakkaille kopioitavissa tarjouksissa myyjän valitsema varasto, viesti, toimitusviikko
 	$query = "	UPDATE lasku
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
 				SET lasku.varasto = '{$alkuperainen_varasto}',
 				lasku.olmapvm = '{$viimeinen_voimassaolo_pvm}',
 				laskun_lisatiedot.saate = '{$saate_teksti}',
 				lasku.clearing = '{$clearing}',
+				lasku.viesti = '{$viesti}',
+				lasku.toimvko = '{$toimitusviikko}',
+				lasku.toimaika = '{$toimaika}',
 				lasku.tilaustyyppi = '{$tilaustyyppi}'
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tunnus = '{$tilausnumero}'";
@@ -114,6 +123,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				'hinta'				 => $tilausrivi['hinta'],
 				'varataan_saldoa'	 => 'EI',
 				'var'				 => $tilausrivi['var'],
+				'toimaika'			 => $laskurow['toimaika']
 			);
 
 			lisaa_rivi($parametrit);

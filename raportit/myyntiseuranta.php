@@ -706,10 +706,10 @@
 
 			//	Jos k‰ytt‰j‰ll‰ on valittu piirej‰ niin sallitaan vain ko. piirin/piirien hakeminen
 			if ($kukarow["piirit"] != "")	 {
-				$asiakasrajaus = "and lasku.piiri IN ({$kukarow['piirit']})";
+				$myse_asiakasrajaus = "and lasku.piiri IN ({$kukarow['piirit']})";
 			}
 			else {
-				$asiakasrajaus = "";
+				$myse_asiakasrajaus = "";
 			}
 
 			// tutkaillaan saadut muuttujat
@@ -1390,11 +1390,13 @@
 				}
 
 				if ($asiakas != "") {
+					$myseasraj = str_replace("lasku.", "asiakas.", $myse_asiakasrajaus);
+
 					$query = "	SELECT group_concat(tunnus) asiakkaat
 								FROM asiakas
 								WHERE yhtio IN ({$yhtio})
 								AND ytunnus = '{$asiakas}'
-								{$asiakasrajaus}";
+								{$myseasraj}";
 					$result = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($result);
 
@@ -1407,11 +1409,13 @@
 					}
 				}
 				elseif ($asiakasnro != "") {
+					$myseasraj = str_replace("lasku.", "asiakas.", $myse_asiakasrajaus);
+
 					$query = "	SELECT group_concat(tunnus) asiakkaat
 								FROM asiakas
 								WHERE yhtio IN ({$yhtio})
 								AND asiakasnro = '{$asiakasnro}'
-								{$asiakasrajaus}";
+								{$myseasraj}";
 					$result = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($result);
 
@@ -1534,7 +1538,7 @@
 						$tee = '';
 					}
 
-					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|tuote\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
+					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|tuote\.|toimitustapa\.)/i", $myse_asiakasrajaus.$lisa)) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n asiakastavoitteet")."!</font><br>";
 						$tee = '';
 					}
@@ -1555,7 +1559,7 @@
 						$tee = '';
 					}
 
-					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|asiakas\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
+					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|asiakas\.|toimitustapa\.)/i", $myse_asiakasrajaus.$lisa)) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n tuotetavoitteet")."!</font><br>";
 						$tee = '';
 					}
@@ -2066,7 +2070,7 @@
 						$query .= " ) ";
 					}
 
-					$query .= "	{$asiakasrajaus}
+					$query .= "	{$myse_asiakasrajaus}
 								{$lisa}
 								GROUP BY {$group}
 								ORDER BY {$order}";
@@ -2439,6 +2443,9 @@
 										}
 										elseif ($vnim == "tavoiteindnyt") {
 											if ($valisummat["tavoitenyt"] <> 0)		$vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"],2);
+										}
+										elseif ($vnim == "kateproskumul") {
+											if ($valisummat["myyntikumul"] <> 0)	$vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100,2);
 										}
 										elseif ((string) $vsum != '') {
 											$vsum = sprintf("%.2f", $vsum);
@@ -2943,6 +2950,9 @@
 								elseif ($vnim == "tavoiteindnyt") {
 									if ($valisummat["tavoitenyt"] <> 0)		$vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"],2);
 								}
+								elseif ($vnim == "kateproskumul") {
+									if ($valisummat["myyntikumul"] <> 0)	$vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100,2);
+								}
 								elseif ((string) $vsum != '') {
 									$vsum = sprintf("%.2f", $vsum);
 								}
@@ -2993,7 +3003,10 @@
 								if ($totsummat["myykpled"] <> 0)		$vsum = round($totsummat["myykplnyt"] / $totsummat["myykpled"],2);
 							}
 							if ($vnim == "tavoiteindnyt") {
-								if ($totsummat["tavoitenyt"] <> 0)			$vsum = round($totsummat["myyntinyt"] / $totsummat["tavoitenyt"],2);
+								if ($totsummat["tavoitenyt"] <> 0)		$vsum = round($totsummat["myyntinyt"] / $totsummat["tavoitenyt"],2);
+							}
+							if ($vnim == "kateproskumul") {
+								if ($totsummat["myyntikumul"] <> 0)		$vsum = round($totsummat["katekumul"] / $totsummat["myyntikumul"] * 100,2);
 							}
 
 							if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";

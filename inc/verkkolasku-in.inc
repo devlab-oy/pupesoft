@@ -327,7 +327,6 @@
 				$chk_toimipaikka_res = pupe_query($query);
 
 				while ($chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res)) {
-
 					if ($chk_toimipaikka_row['ovtlisa'] == substr($toim_asiakkaantiedot["toim_ovttunnus"], strlen(trim($chk_toimipaikka_row['ovtlisa'])) * -1)) {
 						$_yhtion_toimipaikka = $chk_toimipaikka_row['tunnus'];
 					}
@@ -542,6 +541,8 @@
 			if ($laskun_tyyppi_teksti == 'HYVITYSLASKU' and $laskun_summa_eur < 0) {
 				$onko_hyvityslasku_kerroin = -1;
 			}
+
+			$rivikohtaiset_rahtikulut = 0;
 
 			if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
 				require("inc/maventa.inc");
@@ -1158,7 +1159,7 @@
 
 					$kirjattava_summa 		  = $omasumma;
 					$summa_varasto 			  = round($omasumma / (1 + ($vero / 100)), 2);
-					$summa_varasto_valuutassa = $summa_varasto;
+					$summa_varasto_valuutassa = round($omasumma / (1 + ($vero / 100)) / $vrow['kurssi'], 2);
 
 					if ($yhtiorow['ostolaskun_kulutilit'] != ''
 						and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
@@ -1179,6 +1180,7 @@
 					}
 
 					$summa			  		= $kirjattava_summa;
+					$summa_valuutassa		= round($summa / $vrow['kurssi'], 2);
 					$totsumma 				= $kirjattava_summa;
 					$totsumma_valuutassa 	= $summa;
 					$kustp            		= $oletuskust;
@@ -1371,11 +1373,12 @@
 								}
 							}
 
-							$summa						 	 = round($summa * (1+($vero/100)),2);
-							$totsumma						+= $summa;
-							$totsumma_valuutassa			+= $summa_valuutassa;
-							$kukarow['yhtio']				 = $yhtio;
-							$kukarow['kuka']				 = 'verkkolas';
+							$summa					= round($summa * (1+($vero/100)),2);
+							$summa_valuutassa		= round($summa * (1+($vero/100)) / $vrow['kurssi'], 2);
+							$totsumma				+= $summa;
+							$totsumma_valuutassa	+= $summa_valuutassa;
+							$kukarow['yhtio']		 = $yhtio;
+							$kukarow['kuka']		 = 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
 
@@ -1463,7 +1466,8 @@
 				}
 
 				// Tehdään ASN Insertit
-				if (($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+				// Pitää olla vaihto-omaisuuslasku
+				if (in_array($trow['oletus_vienti'], array('C','F','I','J','K','L')) and ($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
 
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 					$count_rtuoteno  = count($rtuoteno);
@@ -1539,9 +1543,10 @@
 						foreach ($_array as $key => $value) {
 							if ($value == 0) continue;
 
-							$tili      = $yhtiorow[$key];
-							$summa     = round($value, 2);
-							$totsumma += $summa;
+							$tili      			= $yhtiorow[$key];
+							$summa     			= round($value, 2);
+							$summa_valuutassa	= round($value / $vrow['kurssi'], 2);
+							$totsumma 		   += $summa;
 
 							// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
 							// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.
@@ -1569,10 +1574,12 @@
 					require ("inc/teetiliointi.inc");
 				}
 
-
 				// jos kyseessä on tavaraa
 				if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
-					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+
+					if (!isset($alv_talteen)) $alv_talteen = '';
+
+					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen, $rivikohtaiset_rahtikulut, $_yhtion_toimipaikka);
 				}
 
 				// Lisätään vielä ostovelkatiliöinnin tarkenteet

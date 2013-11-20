@@ -62,13 +62,9 @@ if (!function_exists("toimitarkista")) {
 					$pankkitili = $t[$i];
 
 					if ($tmp_maakoodi == 'FI') {
-
 						require 'pankkitilinoikeellisuus.php';
 
-						if ($pankkitili == '') {
-							$virhe[$i] = t("Pankkitili %s on virheellinen", "", $t[$i]);
-						}
-						else {
+						if ($pankkitili != '') {
 							$t[$i]     = $pankkitili;
 							$vastaus   = luoiban($t[$i]);
 							$tmp_iban  = $vastaus['iban'];
@@ -83,15 +79,22 @@ if (!function_exists("toimitarkista")) {
 
 			if ($t[$i] == '') $t[$i] = $tmp_iban;
 
-			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
-				$virhe[$i] = t("Tieto puuttuu");
-			}
-
 			// Vaaditaan isot kirjaimet
-			$t[$i] = strtoupper($t[$i]);
+			$t[$i] = strtoupper(trim($t[$i]));
 
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
+
+			if ($t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
+
+			// Luodaan swift, jos sitä ei olla syötetty ja tili on suomalainen
+			if (substr($t[$i], 0, 2) == "FI" and $tmp_swift == "") {
+				include ("inc/pankkitiedot.inc");
+				$vastaus = pankkitiedot($t[$i],'');
+				$tmp_swift = $vastaus['swift'];
+			}
 
 			if ($t[$i] != '') {
 				// Jos SEPA-maa, tarkistetaan IBAN
@@ -108,12 +111,11 @@ if (!function_exists("toimitarkista")) {
 
 			if ($t[$i] == '') $t[$i] = $tmp_swift;
 
-			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+			$t[$i] = strtoupper(trim($t[$i]));
+
+			if ($t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
-
-			// Vaaditaan isot kirjaimet
-			$t[$i] = trim(strtoupper($t[$i]));
 
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
@@ -327,7 +329,7 @@ if (!function_exists("toimitarkista")) {
 		if ($fieldname == "edi_polku") {
 			$tmp_edi_polku = trim($t[$i]);
 
-			if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc') {
+			if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc' or $tmp_edi_kuvaus == 'sendorder_out_futur') {
 				// Näissä tyypeissä ei tartte olle mitään kenttiä syötetty
 			}
 			elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin == "localhost" and ($tmp_edi_polku == "" or !is_writable($tmp_edi_polku))) {

@@ -237,6 +237,9 @@ $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
 mysql_set_charset("latin1");
 
+// pupesoft_cleanstring ALL THE COOKIES!!
+$_COOKIE = array_map("pupesoft_cleanstring", $_COOKIE);
+
 // Palvelin-muuttujassa pitää olla lopussa kauttaviiva
 $palvelin = rtrim($palvelin, "/")."/";
 
@@ -400,16 +403,34 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		if ($phpnimi == "muokkaatilaus.php") {
 			// Muistetaan asiakastietojen valinta
 			if (!empty($asiakastiedot)) {
-				// tehdään cookie, voimassa 30 pv
-				setcookie("pupesoft_muokkaatilaus", $asiakastiedot, time()+60*60*24*30, "/");
+				setcookie("pupesoft_muokkaatilaus", $asiakastiedot, time()+60*60*24*90, "/");
 			}
 
 			// Näytetään riittääkö saldo keräyspäivänä
 			if ($naytetaanko_saldot == 'kylla') {
-				setcookie("naytetaanko_saldot", $naytetaanko_saldot, time()+60*60*24*30, "/");
+				setcookie("naytetaanko_saldot", $naytetaanko_saldot, time()+60*60*24*90, "/");
 			}
 			elseif ($naytetaanko_saldot == 'ei') {
-				setcookie("naytetaanko_saldot", '', time()+60*60*24*30, "/");
+				setcookie("naytetaanko_saldot", '', time()+60*60*24*90, "/");
+			}
+		}
+
+		// Tuoteperhe
+		if ($phpnimi == "tuoteperhe.php") {
+			// Muistetaan keräyksen ohituksen valinta
+			if (isset($tallenna_keksiin) and $ohita_kerays == "on") {
+				setcookie("pupesoft_tuoteperhe", "ohitetaan", time()+60*60*24*90, "/");
+				$_COOKIE["pupesoft_tuoteperhe"] = "ohitetaan";
+			}
+			elseif (isset($tallenna_keksiin) and !isset($ohita_kerays)) {
+				setcookie("pupesoft_tuoteperhe", "ei", time()+60*60*24*90, "/");
+				$_COOKIE["pupesoft_tuoteperhe"] = "ei";
+			}
+		}
+
+		if ($phpnimi == 'tilaus_myynti.php') {
+			if (isset($tilausrivi_alvillisuus)) {
+				setcookie('tilausrivi_alvillisuus', $tilausrivi_alvillisuus, time()+60*60*24*90, "/");
 			}
 		}
 
@@ -439,7 +460,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				$dtpalvelin .= "tyomaarays/";
 			}
 
-			if (basename($phpnimi) == "selaasopimuksia.php" or basename($phpnimi) == "asiakkaantilaukset.php") {
+			if (basename($phpnimi) == "selaasopimuksia.php" or basename($phpnimi) == "asiakkaantilaukset.php" or basename($phpnimi) == "varastotilasto.php") {
 				$dtpalvelin .= "raportit/";
 			}
 
@@ -617,10 +638,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			if (file_exists("$pupe_root_polku/zhat.php") and !empty($kukarow['extranet'])) {
 				require_once("$pupe_root_polku/zhat.php");
 
-				echo livezhat_js_sources();
-
 				if (!stristr($phpnimi, 'indexvas')) {
-					echo add_livezhat();
+					echo livezhat_js_sources();
 				}
 			}
 

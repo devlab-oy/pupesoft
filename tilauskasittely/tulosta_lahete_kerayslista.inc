@@ -174,6 +174,9 @@ if (!function_exists('alku_kerayslista')) {
 			elseif ($tyyppi == "REKLAMAATIO") {
 				$pdf->draw_text(240,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 			}
+			elseif ($tyyppi == "TAKUU") {
+				$pdf->draw_text(310,815, t("Takuu", $kieli), 		$thispage, $iso);
+			}
 			elseif ($tyyppi == "MYYNTITILI") {
 				$pdf->draw_text(310,815, t("Myyntitili", $kieli), 		$thispage, $iso);
 			}
@@ -540,6 +543,9 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		elseif ($tyyppi == "REKLAMAATIO") {
 			$pdf->draw_text(310,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 		}
+		elseif ($tyyppi == "TAKUU") {
+			$pdf->draw_text(310,815, t("Takuu", $kieli), 		$thispage, $iso);
+		}
 		elseif ($tyyppi == "MYYNTITILI") {
 			$pdf->draw_text(310,815, t("Myyntitili", $kieli), 				$thispage, $iso);
 		}
@@ -766,6 +772,10 @@ if (!function_exists('rivi_kerayslista')) {
 
 				$varastopaikka = hyllyalue('', $row['hyllyalue'], 'riisuttu') . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
+				if (strpos($varastopaikka, "!!M") !== FALSE) {
+					$varastopaikka = t("Myyntitili", $kieli);
+				}
+
 				$row["perhe_kommentti1"] = "";
 				$row["perhe_kommentti2"] = "";
 
@@ -871,7 +881,8 @@ if (!function_exists('rivi_kerayslista')) {
 					$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$thispage, $pieni);
 				}
 
-				$pdf->draw_text(42,  $kala, $varastopaikka,					$thispage, $norm);
+				list($ff_string, $ff_font) = pdf_fontfit($varastopaikka, 88, $pdf, $norm);
+				$pdf->draw_text(42,  $kala, $ff_string, 					$thispage, $ff_font);
 				$pdf->draw_text(125,  $kala, $row["tuoteno"],				$thispage, $norm);
 
 				$query = "	SELECT tuote.*, group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno
@@ -889,14 +900,14 @@ if (!function_exists('rivi_kerayslista')) {
 
 				// jos rekkulalla on suoraan toimittajalle palautettvia rivejä
 				if ($row['asiakkaan_positio'] > 0) {
-					
+
 					$query = "	SELECT nimi
 								FROM asiakas
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['asiakkaan_positio']}'";
 					$asiakas_check_res = pupe_query($query);
 					$asiakas_check_row	 = mysql_fetch_assoc($asiakas_check_res);
-					
+
 					$row['kommentti'] .= "\n".t("Palutetaan toimittajalle").": ".$asiakas_check_row['nimi'];
 				}
 
@@ -1356,6 +1367,10 @@ if (!function_exists('print_pdf_kerayslista')) {
 				$kutsu = t("Reklamaatio/Purkulista", $kieli);
 				echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
 			}
+			elseif ($tyyppi == "TAKUU") {
+				$kutsu = t("Takuu", $kieli);
+				echo t("Takuu tulostuu")."...<br>";
+			}
 			elseif ($tyyppi == "MYYNTITILI") {
 				$kutsu = t("Myyntitili", $kieli);
 				echo t("Myyntitili tulostuu")."...<br>";
@@ -1394,6 +1409,10 @@ if (!function_exists('print_pdf_kerayslista')) {
 				elseif ($tyyppi == "REKLAMAATIO") {
 					$kutsu = t("Reklamaatio/Purkulista", $kieli);
 					echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
+				}
+				elseif ($tyyppi == "TAKUU") {
+					$kutsu = t("Takuu", $kieli);
+					echo t("Takuu tulostuu")."...<br>";
 				}
 				elseif ($tyyppi == "MYYNTITILI") {
 					$kutsu = t("Myyntitili", $kieli);

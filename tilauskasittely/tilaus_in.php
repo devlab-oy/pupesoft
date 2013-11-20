@@ -5,6 +5,24 @@ require ("../inc/parametrit.inc");
 // tehd‰‰n tiedostolle uniikki nimi
 $filename = "$pupe_root_polku/datain/$tyyppi-order-".md5(uniqid(rand(),true)).".txt";
 
+echo "<script type='text/javascript'>
+		$(document).ready(function() {
+
+			$('#valinta').attr('selectedIndex', -1);
+
+			$('#valinta').change(function()
+			{
+				keijo = ($('#valinta option:selected').val());
+
+				if (keijo == 'multi') {
+					$('#keijo').show();
+				}
+				else {
+					$('#keijo').hide();
+				}
+			});
+		});
+</script>";
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
 	$path_parts = pathinfo($filename);
@@ -86,7 +104,7 @@ else {
 		</tr>
 		<tr>
 			<th>".t("Tiedoston tyyppi")."</th>
-			<td><select name='tyyppi'>
+			<td><select name='tyyppi' id='valinta'>
 		 		<option value='edi'>".t("Editilaus")."</option>
 		 		<option value='futursoft'>Futursoft</option>
 		 		<option value='magento'>Magento</option>
@@ -95,14 +113,15 @@ else {
 				<option value='edifact911'>Orders 91.1</option>
 		 		<option value='multi'>".t("Useita asiakkaita")."</option>
 				<option value='asnui'>".t("ASN-sanoma")."</option>
-				</select>
-		 	</td>
-		 </tr>
-		</table>
+				</select>";
+	echo "<div id='keijo' style='display: none;'><br>".t("Tilaukset suoraan valmis-tilaan")." <input type='checkbox' name='tilaus_valmiiksi' ></div>";
+	echo "</td>";
+	echo "</tr>";
+	echo "</table>";
 
-		<br><input type='submit' value='".t("K‰sittele tiedosto")."'>
-
-		</form>";
+	echo "<br><input type='submit' value='".t("K‰sittele tiedosto")."'>";
+	echo "</form>";
+	
 }
 
 require ("inc/footer.inc");

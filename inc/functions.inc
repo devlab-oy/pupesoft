@@ -20518,13 +20518,16 @@ if (!function_exists('uusi_saapuminen')) {
 }
 
 if (!function_exists('hae_yhtion_toimipaikat')) {
-	function hae_yhtion_toimipaikat($yhtio) {
+	function hae_yhtion_toimipaikat($yhtio, $tunnus = 0) {
 
 		$yhtio = mysql_real_escape_string($yhtio);
+
+		$tunnuslisa = (trim($tunnus) != '' and $tunnus != 0) ? " AND tunnus = '{$tunnus}'" : "";
 
 		$query = "	SELECT *
 					FROM yhtion_toimipaikat
 					WHERE yhtio = '{$yhtio}'
+					{$tunnuslisa}
 					ORDER BY nimi";
 		$res = pupe_query($query);
 		return $res;

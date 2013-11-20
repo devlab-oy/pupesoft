@@ -20,7 +20,7 @@
 	}
 
 	// Pupe datatables koodi
-	pupe_DataTables(array(array($pupe_DataTables[0], 11, 11)));
+	pupe_DataTables(array(array($pupe_DataTables[0], 12, 12)));
 
 	// Piirret‰‰n taulu aluksi display:none, ettei selain piirr‰ sit‰ ruudulle. Toglataan display p‰‰lle kun dokumentti on ready ja datatables tehny rivityksen.
 	echo '<script language="javascript">
@@ -177,6 +177,7 @@
 					tuote.osasto,
 					left(lasku.kerayspvm, 10) kerayspvm,
 					lasku.toimaika,
+					lasku.tunnus valmistusnumero,
 					ifnull(sum(tilausrivi.kpl), 0) valmistettu,
 					ifnull(sum(tilausrivi.varattu), 0) valmistetaan
 					FROM lasku
@@ -193,9 +194,9 @@
 					AND lasku.toimaika <= '{$pvmloppu}'
 					{$lasku_join_ehto}
 					{$lisa}
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 					HAVING valmistettu != 0 OR valmistetaan != 0
-					ORDER BY valmistuslinja, tuoteno, alatila";
+					ORDER BY lasku.kohde, tilausrivi.tuoteno, lasku.alatila, lasku.tunnus";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -214,6 +215,8 @@
 				$worksheet->write($excelrivi, $excelsarake, t("Tuoteryhm‰"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Valmistuslinja"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Valmistusnumero"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Valmistettu kpl"), $format_bold);
 				$excelsarake++;
@@ -238,6 +241,7 @@
 				echo "<th>".t("Tuoteosasto")."</th>";
 				echo "<th>".t("Tuoteryhm‰")."</th>";
 				echo "<th>".t("Valmistuslinja")."</th>";
+				echo "<th>".t("Valmistusnumero")."</th>";
 				echo "<th>".t("Valmistettu kpl")."</th>";
 				echo "<th>".t("Valmistetaan kpl")."</th>";
 				echo "<th>".t("Valmistuksen tila")."</th>";
@@ -252,6 +256,7 @@
 				echo "<td><input type='text' size='8' class='search_field' name='search_osasto_haku'></td>";
 				echo "<td><input type='text' class='search_field' name='search_try_haku'></td>";
 				echo "<td><input type='text' size='8' class='search_field' name='search_valmistuslinja_haku'></td>";
+				echo "<td><input type='text' size='8' class='search_field' name='search_valmistusnumero_haku'></td>";
 				echo "<td><input type='text' size='8' class='search_field' name='search_valmistettu_haku'></td>";
 				echo "<td><input type='text' size='8' class='search_field' name='search_valmistetaan_haku'></td>";
 				echo "<td><input type='text' size='8' class='search_field' name='search_tila_haku'></td>";
@@ -285,12 +290,13 @@
 					echo "<td>{$osasto}</td>";
 					echo "<td>{$try}</td>";
 					echo "<td>$linja</td>";
+					echo "<td>{$rivit['valmistusnumero']}</td>";
 					echo "<td align='right'>{$rivit["valmistettu"]}</td>";
 					echo "<td align='right'>{$rivit["valmistetaan"]}</td>";
 					echo "<td>{$alatila}</td>";
-					echo "<td align='right'>".tv1dateconv($rivit["kerayspvm"])."</td>";
-					echo "<td align='right'>".tv1dateconv($rivit["toimaika"])."</td>";
-					echo "<td align='right'>".tv1dateconv($rivit["toimitettuaika"])."</td>";
+					echo "<td align='right'>".pupe_DataTablesEchoSort($rivit["kerayspvm"]).tv1dateconv($rivit["kerayspvm"])."</td>";
+					echo "<td align='right'>".pupe_DataTablesEchoSort($rivit["toimaika"]).tv1dateconv($rivit["toimaika"])."</td>";
+					echo "<td align='right'>".pupe_DataTablesEchoSort($rivit["toimitettuaika"]).tv1dateconv($rivit["toimitettuaika"])."</td>";
 					echo "</tr>";
 				}
 
@@ -306,6 +312,8 @@
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, $linja);
 					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $rivit['valmistusnumero']);
+					$excelsarake++;					
 					$worksheet->write($excelrivi, $excelsarake, $rivit["valmistettu"]);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, $rivit["valmistetaan"]);
@@ -335,10 +343,10 @@
 				echo "</tbody>";
 				echo "<tfoot>";
 				echo "<tr>";
-				echo "<th colspan='4'>".t("N‰kym‰ yhteens‰").":</th>";
-				echo "<th valign='top' name='yhteensa' id='yhteensa_4' style='text-align: right'></th>";
-				echo "<th valign='top' name='yhteensa' id='yhteensa_5' style='text-align: right'></th>";
-				echo "<th colspan='5'></th>";
+				echo "<th colspan='6'>".t("N‰kym‰ yhteens‰").":</th>";
+				echo "<th valign='top' name='yhteensa' id='yhteensa_6' style='text-align: right'></th>";
+				echo "<th valign='top' name='yhteensa' id='yhteensa_7' style='text-align: right'></th>";
+				echo "<th colspan='4'></th>";
 				echo "</tr>";
 				echo "</tfoot>";
 				echo "</table>";

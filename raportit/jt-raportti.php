@@ -39,7 +39,10 @@
 			}
 		}
 
-		$toimquery = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='$yhtiorow[yhtio]' AND toim_automaattinen_jtraportti != ''";
+		$toimquery = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$yhtiorow[yhtio]'
+						AND toim_automaattinen_jtraportti != ''";
 		$toimresult = mysql_query($toimquery) or die ("Kysely ei onnistu yhtio $query");
 
 		while ($toimrow = mysql_fetch_array($toimresult)) {

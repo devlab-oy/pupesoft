@@ -411,10 +411,7 @@
 
 	if ($avain_sel["SAHKTILTUN"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
-		$query = "	SELECT *
-					FROM yhtion_toimipaikat
-					WHERE yhtio = '$kukarow[yhtio]'";
-		$vresult = pupe_query($query);
+		$vresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='0'>".t("Valitse toimipaikka")."</option>";

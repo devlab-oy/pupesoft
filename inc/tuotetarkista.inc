@@ -441,7 +441,12 @@ if(!function_exists("tuotetarkista")) {
 					$_counter = 0;
 
 					foreach ($kaikki_oletuspaikat as $_tuotepaikka) {
-						echo "<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font><br/>";
+						if ($trow["luedata_from"] == "LUEDATA") { // jos tullaan lue datasta voidaan ja pit‰‰ k‰ytt‰‰ lue datan omaa echo funkkaria!
+							lue_data_echo("<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>");
+						}
+						else {
+							echo "<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>";
+						}
 						list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", trim($_tuotepaikka));
 
 						if ($hyllyalue == "" or !isset($hyllyalue)) {
@@ -502,6 +507,6 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 	}
-	
-		
+
+
 }

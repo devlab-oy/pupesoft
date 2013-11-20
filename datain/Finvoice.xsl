@@ -128,7 +128,7 @@
 	<xsl:variable name="useRowCol6" select="$foundRowVatRatePercent"/>
 	<xsl:variable name="useRowCol7" select="$foundRowVatAmount + $foundRowVatExcludedAmount"/>
 	<xsl:variable name="useRowCol8" select="$foundRowAmount"/>
-	
+
 	<xsl:variable name="useColHdrRow1" select="$foundArticleName + $foundArticleIdentifier + $foundDeliveredQuantity +
 	                                           $foundUnitPriceAmount + $foundRowDiscountPercent + $foundRowVatRatePercent +
 															 $foundRowVatAmount + $foundRowAmount
@@ -172,7 +172,7 @@
 				</style>
 				<style type="text/css" media="print">
 					#pupediv {overflow: visible; height: auto;}
-				</style>				
+				</style>
 			</head>
 			<body>
 				<div id="pupediv">
@@ -190,7 +190,7 @@
 						<td width="50%">
 							<xsl:value-of select="$txtSeller"/>:<br/>
 							<xsl:choose>
-								<xsl:when test="string-length(SellerPartyDetails/SellerPartyIdentifierUrlText) != 0">  
+								<xsl:when test="string-length(SellerPartyDetails/SellerPartyIdentifierUrlText) != 0">
 									<xsl:value-of select="$txtTaxCode"/>:
 									<xsl:call-template name="FormatLink">
 										<xsl:with-param name="link" select="SellerPartyDetails/SellerPartyIdentifierUrlText"/>
@@ -198,7 +198,7 @@
 									</xsl:call-template>
 									<br/>
 								</xsl:when>
-								<xsl:when test="string-length(SellerPartyDetails/SellerPartyIdentifier) != 0">  
+								<xsl:when test="string-length(SellerPartyDetails/SellerPartyIdentifier) != 0">
 									<xsl:value-of select="$txtTaxCode"/>: <xsl:value-of select="SellerPartyDetails/SellerPartyIdentifier"/>
 									<br/>
 								</xsl:when>
@@ -389,7 +389,7 @@
 							<br/>
 							<xsl:if test="string-length(InvoiceDetails/SellerReferenceIdentifier) != 0">
 								<xsl:choose>
-									<xsl:when test="string-length(InvoiceDetails/SellerReferenceIdentifierUrlText) != 0">  
+									<xsl:when test="string-length(InvoiceDetails/SellerReferenceIdentifierUrlText) != 0">
 										<xsl:call-template name="FormatLink">
 											<xsl:with-param name="link" select="InvoiceDetails/SellerReferenceIdentifierUrlText"/>
 											<xsl:with-param name="text" select="InvoiceDetails/SellerReferenceIdentifier"/>
@@ -403,7 +403,7 @@
 							</xsl:if>
 							<xsl:if test="string-length(InvoiceDetails/OrderIdentifier) != 0">
 								<xsl:choose>
-									<xsl:when test="string-length(InvoiceDetails/OrderIdentifierUrlText) != 0">  
+									<xsl:when test="string-length(InvoiceDetails/OrderIdentifierUrlText) != 0">
 										<xsl:call-template name="FormatLink">
 											<xsl:with-param name="link" select="InvoiceDetails/OrderIdentifierUrlText"/>
 											<xsl:with-param name="text" select="InvoiceDetails/OrderIdentifier"/>
@@ -417,7 +417,7 @@
 							</xsl:if>
 							<xsl:if test="string-length(InvoiceDetails/AgreementIdentifier) != 0">
 								<xsl:choose>
-									<xsl:when test="string-length(InvoiceDetails/AgreementIdentifierUrlText) != 0">  
+									<xsl:when test="string-length(InvoiceDetails/AgreementIdentifierUrlText) != 0">
 										<xsl:call-template name="FormatLink">
 											<xsl:with-param name="link" select="InvoiceDetails/AgreementIdentifierUrlText"/>
 											<xsl:with-param name="text" select="InvoiceDetails/AgreementIdentifier"/>
@@ -1282,7 +1282,7 @@
 							<xsl:if test="string-length(SellerPartyDetails/SellerOrganisationTaxCode) != 0">
 								<xsl:value-of select="$txtTaxCode"/><xsl:text>: </xsl:text>
 								<xsl:choose>
-									<xsl:when test="string-length(SellerPartyDetails/SellerOrganisationTaxCodeUrlText) != 0">  
+									<xsl:when test="string-length(SellerPartyDetails/SellerOrganisationTaxCodeUrlText) != 0">
 										<xsl:call-template name="FormatLink">
 											<xsl:with-param name="link" select="SellerPartyDetails/SellerOrganisationTaxCodeUrlText"/>
 											<xsl:with-param name="text" select="SellerPartyDetails/SellerOrganisationTaxCode"/>
@@ -1324,10 +1324,12 @@
 	<!-- Template, joka tulostaa yhteen kuuluvat linkin ja tekstin. -->
 	<xsl:template name="OutputLinkAndText">
 		<xsl:param name="pos"/>
-			<xsl:call-template name="FormatLink">
-				<xsl:with-param name="link" select="/Finvoice/InvoiceUrlText[position()=$pos]"/>
-				<xsl:with-param name="text" select="/Finvoice/InvoiceUrlNameText[position()=$pos]"/>
-			</xsl:call-template>
+			<xsl:if test="substring(/Finvoice/InvoiceUrlText[position()=$pos],1,7) != 'file://'">
+				<xsl:call-template name="FormatLink">
+					<xsl:with-param name="link" select="/Finvoice/InvoiceUrlText[position()=$pos]"/>
+					<xsl:with-param name="text" select="/Finvoice/InvoiceUrlNameText[position()=$pos]"/>
+				</xsl:call-template>
+			</xsl:if>
 	</xsl:template>
 
 	<!-- Template, joka valitsee tulostettavat laskun toimitustiedot. -->
@@ -1742,7 +1744,7 @@
 								 ($invoiceTypeText = 'INVOICE') or
 								 ($invoiceTypeText = 'Invoice') or
 								 ($invoiceTypeText = 'invoice')
-								">  
+								">
 				<xsl:value-of select="$txtINVOICE"/>
 				<xsl:choose>
 					<xsl:when test="($originCode = 'Copy') and
@@ -1775,7 +1777,7 @@
 								 ($invoiceTypeText = 'Credit Note') or
 								 ($invoiceTypeText = 'Credit note') or
 								 ($invoiceTypeText = 'credit note')
-								">  
+								">
 				<xsl:value-of select="$txtCREDITNOTE"/>
 				<xsl:choose>
 					<xsl:when test="($originCode = 'Copy') and
@@ -1898,7 +1900,7 @@
 						</xsl:if>
 						<xsl:if test="$foundRowIdentifier != 0">
 							<xsl:choose>
-								<xsl:when test="string-length($rowIdentifierUrlText) != 0">  
+								<xsl:when test="string-length($rowIdentifierUrlText) != 0">
 									<xsl:call-template name="FormatLink">
 										<xsl:with-param name="link" select="$rowIdentifierUrlText"/>
 										<xsl:with-param name="text" select="$rowIdentifier"/>
@@ -1933,7 +1935,7 @@
 						</xsl:if>
 						<xsl:if test="$foundRowQuotationIdentifier != 0">
 							<xsl:choose>
-								<xsl:when test="string-length($rowQuotationIdentifierUrlText) != 0">  
+								<xsl:when test="string-length($rowQuotationIdentifierUrlText) != 0">
 									<xsl:call-template name="FormatLink">
 										<xsl:with-param name="link" select="$rowQuotationIdentifierUrlText"/>
 										<xsl:with-param name="text" select="$rowQuotationIdentifier"/>
@@ -1990,7 +1992,7 @@
 						</xsl:if>
 						<xsl:if test="$foundRowDeliveryIdentifier != 0">
 							<xsl:choose>
-								<xsl:when test="string-length($rowDeliveryUrlText) != 0">  
+								<xsl:when test="string-length($rowDeliveryUrlText) != 0">
 									<xsl:call-template name="FormatLink">
 										<xsl:with-param name="link" select="$rowDeliveryUrlText"/>
 										<xsl:with-param name="text" select="$rowDeliveryIdentifier"/>
@@ -2083,7 +2085,7 @@
 				</td>
 				<td colspan="7">
 					<xsl:choose>
-						<xsl:when test="string-length($rowAgreementIdentifierUrlText) != 0">  
+						<xsl:when test="string-length($rowAgreementIdentifierUrlText) != 0">
 							<xsl:call-template name="FormatLink">
 								<xsl:with-param name="link" select="$rowAgreementIdentifierUrlText"/>
 								<xsl:with-param name="text" select="$rowAgreementIdentifier"/>
@@ -2117,7 +2119,7 @@
 				</td>
 				<td colspan="7">
 					<xsl:choose>
-						<xsl:when test="string-length($rowPriceListIdentifierUrlText) != 0">  
+						<xsl:when test="string-length($rowPriceListIdentifierUrlText) != 0">
 							<xsl:call-template name="FormatLink">
 								<xsl:with-param name="link" select="$rowPriceListIdentifierUrlText"/>
 								<xsl:with-param name="text" select="$rowPriceListIdentifier"/>
@@ -2139,7 +2141,7 @@
 				</td>
 				<td colspan="7">
 					<xsl:choose>
-						<xsl:when test="string-length($rowRequestOfQuotationIdentifierUrlText) != 0">  
+						<xsl:when test="string-length($rowRequestOfQuotationIdentifierUrlText) != 0">
 							<xsl:call-template name="FormatLink">
 								<xsl:with-param name="link" select="$rowRequestOfQuotationIdentifierUrlText"/>
 								<xsl:with-param name="text" select="$rowRequestOfQuotationIdentifier"/>

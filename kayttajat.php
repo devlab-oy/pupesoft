@@ -735,7 +735,7 @@
 			if ($selkuka != "KOPSAAUUSI") {
 
 				echo "<tr><th align='left'>",t("Salasana"),":</th><td><input type='text' size='50' maxlength='30' name='password' value='{$generoitupass}'></td><td class='back'> <a href='?generatepass=y&selkuka={$selkuka}&toim={$toim}'>",t("Generoi salasana"),"</a></td></tr>";
-				echo "<tr><th align='left'>",t("Nimi"),":</th><td><input type='text' size='50' value='{$krow['nimi']}' maxlength='30' name='firname'></td></tr>";
+				echo "<tr><th align='left'>",t("Nimi"),":</th><td><input type='text' size='50' value='{$krow['nimi']}' name='firname'></td></tr>";
 				echo "<tr><th align='left'>",t("Puhelinnumero"),":</th><td><input type='text' size='50' value='{$krow['puhno']}' maxlength='30' name='phonenum'></td></tr>";
 				echo "<tr><th align='left'>",t("Sähköposti"),":&nbsp;</th><td><input type='text' size='50' value='{$krow['eposti']}' maxlength='50' name='email'></td></tr>";
 				if ($toim == 'extranet') echo "<tr><th align='left'>",t("IP"),":&nbsp;</th><td><input type='text' size='16' value='{$krow['ip']}' maxlength='15' name='ip'></td></tr>";
@@ -1349,7 +1349,11 @@
 					echo "<tr><th align='left'>",t("Toimipaikka"),":</td>";
 					echo "<td><select name='toimipaikka'><option value=''>",t("Oletustoimipaikka"),"</option>";
 
-					$query = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND vat_numero = '' ORDER BY nimi";
+					$query = "	SELECT *
+								FROM yhtion_toimipaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND vat_numero = ''
+								ORDER BY nimi";
 					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_assoc($vares)) {

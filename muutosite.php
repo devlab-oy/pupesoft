@@ -658,7 +658,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 if ($tee == 'P') {
 
-	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi, liitos, liitostunnus
+	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi, liitos, liitostunnus, tapahtumatunnus
 				FROM tiliointi
 				WHERE tunnus = '$ptunnus'
 				AND yhtio = '$kukarow[yhtio]'
@@ -684,6 +684,7 @@ if ($tee == 'P') {
 	$selite				= $tiliointirow['selite'];
 	$tiliointipvm		= $tiliointirow['tapvm'];
 	$tositenro			= $tiliointirow['tosite'];
+	$tapahtumatunnus	= $tiliointirow['tapahtumatunnus'];
 	$ok					= 1;
 	$alv_tili			= $yhtiorow["alv"];
 	$liitos 			= $tiliointirow['liitos'];
@@ -1207,13 +1208,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";
 		if ($trow["osoitetark"] != "") echo "<tr><th>".t("Osoitetark")."</th><td>$trow[osoitetark]</td></tr>";
 		echo "<tr><th>".t("Postino")."</th><td>$trow[postino], $trow[postitp], $trow[maa]</td></tr>";
-
-		echo "<tr><th>".t("Tilinumero")."</th><td>";
-
-		if ($trow["ultilno"] != "") echo $trow['ultilno'];
-		else echo $trow['tilinumero'];
-
-		echo "</td></tr>";
+		echo "<tr><th>".t("Tilinumero")."</th><td>$trow[ultilno]</td></tr>";
 
 		//Ulkomaan ostolaskuille
 		if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {

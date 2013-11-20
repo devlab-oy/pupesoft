@@ -81,6 +81,7 @@
 					AND valkoodi 		 = '{$valkoodi}'
 					AND tapvm 			 = {$tapvmlisa}
 					AND tosite 			 = '{$tositenro}'
+					AND tapahtumatunnus  = '{$tapahtumatunnus}'
 					AND vero 			 = '{$vero}'
 					AND selite 			 = '{$selite}'";
 		$tilrivi_chk_res = pupe_query($query);
@@ -113,6 +114,7 @@
 						selite 			 = '{$selite}',
 						lukko 			 = '',
 						tosite 			 = '{$tositenro}',
+						tapahtumatunnus  = '{$tapahtumatunnus}',
 						laatija 		 = '{$kukarow['kuka']}',
 						laadittu 		 = now()";
 		}
@@ -135,6 +137,7 @@
 					selite 			 = '{$selite}',
 					lukko 			 = '',
 					tosite 			 = '{$tositenro}',
+					tapahtumatunnus  = '{$tapahtumatunnus}',
 					laatija 		 = '{$kukarow['kuka']}',
 					laadittu 		 = now()";
 	}

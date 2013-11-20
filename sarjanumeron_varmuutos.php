@@ -64,8 +64,9 @@
 							if (abs($ero) != 0) {
 
 								$query = "	SELECT tilausrivi_osto.tunnus, tilausrivi_osto.alv, tilausrivi_osto.tyyppi, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, tilausrivi_osto.kpl,
-											tilausrivi_myynti.hyllyalue, tilausrivi_myynti.hyllynro, tilausrivi_myynti.hyllyvali, tilausrivi_myynti.hyllytaso
+											tilausrivi_myynti.hyllyalue, tilausrivi_myynti.hyllynro, tilausrivi_myynti.hyllyvali, tilausrivi_myynti.hyllytaso, tuote.kustp, tuote.kohde, tuote.projekti
 											FROM sarjanumeroseuranta
+											JOIN tuote ON tuote.yhtio=sarjanumeroseuranta.yhtio and tuote.tuoteno = sarjanumeroseuranta.tuoteno
 											LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 											LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 											WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -137,8 +138,38 @@
 									$result = pupe_query($query);
 									$laskuid = mysql_insert_id($link);
 
+									if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
+
+										$query = "	SELECT toimipaikka
+													FROM varastopaikat
+													WHERE
+													concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$sarjarow[hyllyalue]'), 5, '0'),lpad(upper('$sarjarow[hyllynro]'), 5, '0')) and
+													concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$sarjarow[hyllyalue]'), 5, '0'),lpad(upper('$sarjarow[hyllynro]'), 5, '0')) and
+													yhtio = '$kukarow[yhtio]'";
+										$varcheckres = pupe_query($query);
+										$varcheckrow = mysql_fetch_assoc($varcheckres);
+
+										$query = "	SELECT kustp, kohde, projekti
+													FROM yhtion_toimipaikat
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus  = {$varcheckrow['toimipaikka']}";
+										$toimipaikkares = pupe_query($query);
+										$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+
+										// Otetaan ensisijaisesti kustannuspaikka toimipaikan takaa
+										$kustp_ins 		= $toimipaikkarow["kustp"] > 0 ? $toimipaikkarow["kustp"] : $sarjarow["kustp"];
+										$kohde_ins 		= $toimipaikkarow["kohde"] > 0 ? $toimipaikkarow["kohde"] : $sarjarow["kohde"];
+										$projekti_ins 	= $toimipaikkarow["projekti"] > 0 ? $toimipaikkarow["projekti"] : $sarjarow["projekti"];
+									}
+									else {
+										// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
+										$kustp_ins 		= $sarjarow["kustp"];
+										$kohde_ins 		= $sarjarow["kohde"];
+										$projekti_ins 	= $sarjarow["projekti"];
+									}
+
 									// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"]);
+									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"], $kustp_ins, $kohde_ins, $projekti_ins);
 
 									// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
 									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);

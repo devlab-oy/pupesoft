@@ -60,6 +60,7 @@
 		<input type='hidden' name='kerayseran_numero' value='$kerayseran_numero'>
 		<input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
 		<input type='hidden' name='reservipaikka' value='{$reservipaikka}' />
+		<input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}' />
 		<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
 
 	if ($nappikeikalle == 'menossa') {
@@ -194,7 +195,7 @@
 		else {
 			$naytatvale = 1; // halutaan nähä alet
 		}
-		
+
 		if (strpos($laskurow['tilausvahvistus'], 'V') !== FALSE) {
 			$verollisethinnat = TRUE;
 		}

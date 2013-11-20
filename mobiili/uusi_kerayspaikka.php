@@ -501,28 +501,38 @@ echo "	<tr>
 		<tr>
 			<th>",t("Tilausm‰‰r‰"),"</td>
 			<td><input type='text' name='tilausmaara' value='' /></th>
-		</tr>
-		<tr>
-			<td colspan='2'>",t("Tee t‰st‰ oletuspaikka"),"
-			<input type='hidden' name='oletuspaikka[]' value='default' />
-			<input type='checkbox' id='oletuspaikka' name='oletuspaikka[]' {$oletuspaikka_chk} /></td>
 		</tr>";
 
-if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+/*
+Jos yhtiˆll‰ ei ole ns. oletuspaikka-k‰sitett‰ (varastoja on paljon ja ei ole "p‰‰varastoa", joten ei tiedet‰ miss‰ on oletuspaikka), 
+niin ei anneta siirt‰‰ saldoja tai vaihtaa oletuspaikkaa 
+*/
+$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+if (mysql_num_rows($toimipaikat_res) == 0) {
+
 	echo "	<tr>
-				<td colspan='2'>",t("Siirr‰ saldo")," ({$saldo['myytavissa']})
-				<input type='hidden' name='siirra_saldot[]' value='default' />
-				<input type='checkbox' id='siirra_saldot' name='siirra_saldot[]' {$siirra_saldot_chk}/>
-				</td>
+				<td colspan='2'>",t("Tee t‰st‰ oletuspaikka"),"
+				<input type='hidden' name='oletuspaikka[]' value='default' />
+				<input type='checkbox' id='oletuspaikka' name='oletuspaikka[]' {$oletuspaikka_chk} /></td>
 			</tr>";
-}
-elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
-	echo "	<tr>
-				<td colspan='2'>",t("Poista vanha tuotepaikka"),"
-				<input type='hidden' name='poista_vanha_tuotepaikka[]' value='default' />
-				<input type='checkbox' id='poista_vanha_tuotepaikka' name='poista_vanha_tuotepaikka[]' {$poista_vanha_tuotepaikka_chk}/>
-				</td>
-			</tr>";
+
+	if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+		echo "	<tr>
+					<td colspan='2'>",t("Siirr‰ saldo")," ({$saldo['myytavissa']})
+					<input type='hidden' name='siirra_saldot[]' value='default' />
+					<input type='checkbox' id='siirra_saldot' name='siirra_saldot[]' {$siirra_saldot_chk}/>
+					</td>
+				</tr>";
+	}
+	elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+		echo "	<tr>
+					<td colspan='2'>",t("Poista vanha tuotepaikka"),"
+					<input type='hidden' name='poista_vanha_tuotepaikka[]' value='default' />
+					<input type='checkbox' id='poista_vanha_tuotepaikka' name='poista_vanha_tuotepaikka[]' {$poista_vanha_tuotepaikka_chk}/>
+					</td>
+				</tr>";
+	}
 }
 
 echo "</table>";

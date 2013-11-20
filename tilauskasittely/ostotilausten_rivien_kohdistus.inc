@@ -1310,7 +1310,7 @@ if ($tila == '') {
 	}
 
 	if (isset($toimipaikka)) {
-		if ($toimipaikka == 'kaikki') {
+		if ($toimipaikka == 'kaikki' OR $yhtiorow['toimipaikkakasittely'] == "") {
 			$toimipaikkalisa = "";
 		}
 		else {
@@ -1318,7 +1318,7 @@ if ($tila == '') {
 			$toimipaikkalisa = "AND (lasku.vanhatunnus = '{$toimipaikka}' or lasku.vanhatunnus = 0)";
 		}
 	}
-	else {
+	elseif ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
 		$toimipaikkalisa = "AND (lasku.vanhatunnus = '{$laskurow['yhtio_toimipaikka']}' or lasku.vanhatunnus = 0)";
 	}
 
@@ -1467,10 +1467,11 @@ if ($tila == '') {
 
  	echo "<td>{$alku} - {$loppu}  ",t("Sivu"),": {$sivu}</td>";
 	echo "<th>".t("Kohdistettava summa").":</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>";
-	echo "<th>",t("Näytä toimipaikan rivejä"),"</th>";
-	echo "<td>";
 
 	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
+
+		echo "<th>",t("Näytä toimipaikan rivejä"),"</th>";
+		echo "<td>";
 
 		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
@@ -1499,6 +1500,9 @@ if ($tila == '') {
 		}
 
 		echo "</select>";
+	}
+	else {
+		echo "<th></th><td>";
 	}
 
 	echo "</td>";

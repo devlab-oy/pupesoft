@@ -24920,7 +24920,7 @@ if (!function_exists('hae_asiakashinnat')) {
 if (!function_exists('posten_outbounddelivery')) {
 	function posten_outbounddelivery($otunnus) {
 
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $pupe_root_polku;
 
 		$query = "	SELECT lasku.*,
 					tilausrivi.*,
@@ -25034,11 +25034,8 @@ if (!function_exists('posten_outbounddelivery')) {
 			$_line_i++;
 		}
 
-		$path = '/Users/sami/temp/makia/outbounddelivery_testit/';
-		$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
-
-		$filename = 'outbounddelivery_testi_'.md5(uniqid()).".xml";
-		file_put_contents($path.$filename, utf8_encode($xml->asXML()));
+		$filename = $pupe_root_polku."/dataout/outbounddelivery_testi_".md5(uniqid()).".xml";
+		file_put_contents($filename, utf8_encode($xml->asXML()));
 	}
 }
 

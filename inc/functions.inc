@@ -24920,7 +24920,11 @@ if (!function_exists('hae_asiakashinnat')) {
 if (!function_exists('posten_outbounddelivery')) {
 	function posten_outbounddelivery($otunnus) {
 
-		global $kukarow, $yhtiorow, $pupe_root_polku;
+		global $kukarow, $yhtiorow, $pupe_root_polku, $ftp_posten_logistik_host, $ftp_posten_logistik_user, $ftp_posten_logistik_pass, $ftp_posten_logistik_path;
+
+		if ($ftp_posten_logistik_host == '' or $ftp_posten_logistik_user == '' or $ftp_posten_logistik_pass == '' or $ftp_posten_logistik_path == '') {
+			return false;
+		}
 
 		$query = "	SELECT lasku.*,
 					tilausrivi.*,
@@ -25034,8 +25038,19 @@ if (!function_exists('posten_outbounddelivery')) {
 			$_line_i++;
 		}
 
-		$filename = $pupe_root_polku."/dataout/outbounddelivery_testi_".md5(uniqid()).".xml";
-		file_put_contents($filename, utf8_encode($xml->asXML()));
+		$filename = $pupe_root_polku."/dataout/outbounddelivery_".md5(uniqid()).".xml";
+
+		if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
+			echo "<br /><font class='message'>",t("Tiedoston luonti onnistui"),"</font><br />";
+
+			$ftphost = $ftp_posten_logistik_host;
+			$ftpuser = $ftp_posten_logistik_user;
+			$ftppass = $ftp_posten_logistik_pass;
+			$ftppath = $ftp_posten_logistik_path;
+			$ftpfile = realpath($filename);
+
+			require ("inc/ftp-send.inc");
+		}
 	}
 }
 

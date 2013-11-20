@@ -78,8 +78,8 @@
 		
 		if ($as_seg_yht_tiedot == 'on') {
 			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email";
-			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' and yht.rooli='7'";
-			
+			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
+
 			$asiakaskategoria_tunnukset = array();
 			for ($i = 1; $i <= $dynaaminen_syvintaso["asiakas"]; $i++) {
 				$muuttuja = "mul_asiakas".$i;

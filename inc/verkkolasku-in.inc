@@ -327,7 +327,6 @@
 				$chk_toimipaikka_res = pupe_query($query);
 
 				while ($chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res)) {
-
 					if ($chk_toimipaikka_row['ovtlisa'] == substr($toim_asiakkaantiedot["toim_ovttunnus"], strlen(trim($chk_toimipaikka_row['ovtlisa'])) * -1)) {
 						$_yhtion_toimipaikka = $chk_toimipaikka_row['tunnus'];
 					}
@@ -1580,7 +1579,7 @@
 
 					if (!isset($alv_talteen)) $alv_talteen = '';
 
-					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen, $rivikohtaiset_rahtikulut);
+					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen, $rivikohtaiset_rahtikulut, $_yhtion_toimipaikka);
 				}
 
 				// Lisätään vielä ostovelkatiliöinnin tarkenteet

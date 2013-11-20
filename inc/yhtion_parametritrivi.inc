@@ -1757,8 +1757,10 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
+		$sel0 = "";
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == 0) {
 			$sel0 = "selected";
@@ -3084,6 +3086,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "nouto_suoraan_laskutukseen") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ''>".t("Noutotilauksia ei laiteta suoraan laskutusjonoon")."</option>
+					<option value = 'K' {$sel}>".t("Noutotilaukset aina suoraan laskutusjonoon")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "reklamaation_vastaanottovarasto" ) {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
@@ -3639,6 +3653,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'myyntihinta_paivitys_saapuminen') {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Myyntihintaa ei voi päivittää saapumisella")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntihinnan voi päivittää saapumisella")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3669,9 +3696,12 @@
 			}
 
 			$ulos .= "</select></td>";
-		}
 
-		$jatko = 0;
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
 	}
 
 	if (mysql_field_name($result, $i) == 'ostotilauksen_toimittajien_saldo_tarkistus') {
@@ -3707,6 +3737,30 @@
 
 		$ulos .= "<option value = ''>".t("Päivitetään uusi oletuspaikka avoimille ostoriveille")."</option>";
 		$ulos .= "<option value = 'S' {$sel}>".t("Päivitetään uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'tarkenteiden_prioriteetti') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'T' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Kirjanpidon tarkenteet haetaan järjestyksellä: Tuote, Asiakas, Toimipaikka, Yhtiö")."</option>";
+		$ulos .= "<option value = 'T' {$sel}>".t("Kirjanpidon tarkenteet haetaan järjestyksellä: Toimipaikka, Tuote, Asiakas, Yhtiö")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'toimipaikkakasittely') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'L' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Suppeampi toimipaikkakäsittely. Käyttäjän toimipaikka tallennetaan tilauksille.")."</option>";
+		$ulos .= "<option value = 'L' {$sel}>".t("Laajempi toimipaikkakäsittely. Käyttäjän toimipaikka talennetaan tilauksille ja toimipaikka rajaa tilaus-/saapumislistauksia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

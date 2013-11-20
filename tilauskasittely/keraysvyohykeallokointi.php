@@ -132,7 +132,7 @@
 		while ($kuka_row = mysql_fetch_assoc($kuka_res)) {
 			mysql_data_seek($keraysvyohyke_res, 0);
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			echo "<td>{$kuka_row['nimi']}</td>";
 
 			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {

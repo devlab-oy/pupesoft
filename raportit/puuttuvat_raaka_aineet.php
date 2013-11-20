@@ -18,7 +18,7 @@ require('validation/Validation.php');
 require('inc/pupeExcel.inc');
 require('inc/ProgressBar.class.php');
 
-if ($tee == 'lataa_tiedosto') {
+if (isset($tee) and $tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
 		readfile($filepath);
@@ -31,6 +31,21 @@ if ($tee == 'lataa_tiedosto') {
 }
 
 echo "<font class='head'>".t("Puuttuvat raaka-aineet")."</font><hr>";
+
+$tee = isset($tee) ? $tee : '';
+$alku_pp = isset($alku_pp) ? trim($alku_pp) : '';
+$alku_kk = isset($alku_kk) ? trim($alku_kk) : '';
+$alku_vv = isset($alku_vv) ? trim($alku_vv) : '';
+$loppu_pp = isset($loppu_pp) ? trim($loppu_pp) : '';
+$loppu_kk = isset($loppu_kk) ? trim($loppu_kk) : '';
+$loppu_vv = isset($loppu_vv) ? trim($loppu_vv) : '';
+$valmistuksen_tila = isset($valmistuksen_tila) ? trim($valmistuksen_tila) : '';
+$valmistuslinja = isset($valmistuslinja) ? trim($valmistuslinja) : '';
+$mul_osasto = isset($mul_osasto) ? $mul_osasto : array();
+$mul_try = isset($mul_try) ? $mul_try : array();
+$mul_tme = isset($mul_tme) ? $mul_tme : array();
+$generoi_excel = isset($generoi_excel) ? trim($generoi_excel) : '';
+$esitysmuoto = isset($esitysmuoto) ? trim($esitysmuoto) : 'KISSA';
 
 $request = array(
 	'tee'				 => $tee,
@@ -48,6 +63,7 @@ $request = array(
 	'mul_try'			 => $mul_try,
 	'mul_tme'			 => $mul_tme,
 	'generoi_excel'		 => $generoi_excel,
+	'esitysmuoto'        => $esitysmuoto,
 );
 
 $request['valmistuslinjat'] = hae_valmistuslinjat();
@@ -66,7 +82,7 @@ if ($request['tee'] == 'ajaraportti') {
 		$request['valmistukset'] = hae_valmistukset_joissa_raaka_aine_ei_riita($request);
 
 		if ($request['generoi_excel']) {
-			$xls_filename = generoi_custom_excel($request['valmistukset'], $request['valmistuslinjat']);
+			$xls_filename = generoi_custom_excel($request['valmistukset'], $request['valmistuslinjat'], $request['esitysmuoto']);
 
 			echo_tallennus_formi($xls_filename, t('Puuttuvat_raaka_aineet'));
 		}
@@ -221,7 +237,7 @@ function hae_tilattu_kpl($tuoteno) {
 	return $tilattu_row['tilattu'];
 }
 
-function generoi_custom_excel($valmistukset, $valmistuslinjat) {
+function generoi_custom_excel($valmistukset, $valmistuslinjat, $esitysmuoto) {
 	global $kukarow, $yhtiorow;
 
 	if (count($valmistukset) == 0) {
@@ -255,56 +271,67 @@ function generoi_custom_excel($valmistukset, $valmistuslinjat) {
 		'ryhman_ale'	 => t('Toimittaja'),
 	);
 
+	$tulostettu = false;
+
 	foreach ($valmistukset as $valmistus) {
 		foreach ($valmistus['tilausrivit'] as $tilausrivi) {
-			foreach ($valmistus_headerit as $valmistus_header) {
-				$xls->write($rivi, $sarake, $valmistus_header, array('bold' => true));
+
+			if ($esitysmuoto == 'A') {
+
+				foreach ($valmistus_headerit as $valmistus_header) {
+					$xls->write($rivi, $sarake, $valmistus_header, array('bold' => true));
+					$sarake++;
+				}
+				$sarake = 0;
+				$rivi++;
+
+				$xls->write($rivi, $sarake, $tilausrivi['tuoteno']);
 				$sarake++;
-			}
-			$sarake = 0;
-			$rivi++;
-
-			$xls->write($rivi, $sarake, $tilausrivi['tuoteno']);
-			$sarake++;
-			$xls->write($rivi, $sarake, $tilausrivi['nimitys']);
-			$sarake++;
-			$xls->write($rivi, $sarake, $tilausrivi['lasku_tunnus']);
-			$sarake++;
-
-			$valmistuslinja = search_array_key_for_value_recursive($valmistuslinjat, 'selite', $tilausrivi['valmistuslinja']);
-			$valmistuslinja = $valmistuslinja[0];
-			if (empty($valmistuslinja)) {
-				$xls->write($rivi, $sarake, t('Ei valmistuslinjaa'));
+				$xls->write($rivi, $sarake, $tilausrivi['nimitys']);
 				$sarake++;
-			}
-			else {
-				$xls->write($rivi, $sarake, $valmistuslinja['selitetark']);
+				$xls->write($rivi, $sarake, $tilausrivi['lasku_tunnus']);
 				$sarake++;
-			}
 
-			$xls->writeNumber($rivi, $sarake, $tilausrivi['valmistettava_kpl']);
-			$sarake++;
+				$valmistuslinja = search_array_key_for_value_recursive($valmistuslinjat, 'selite', $tilausrivi['valmistuslinja']);
 
-			$laskutyyppi = $tilausrivi['tila'];
-			$alatila = $tilausrivi['alatila'];
-			require('inc/laskutyyppi.inc');
-			$xls->write($rivi, $sarake, $laskutyyppi.' '.$alatila);
-			$sarake++;
+				$valmistuslinja = isset($valmistuslinja[0]['selitetark']) ? $valmistuslinja[0]['selitetark'] : '';
 
-			$xls->write($rivi, $sarake, date('d.m.Y', strtotime($tilausrivi['kerayspvm'])));
-			$sarake++;
-			$xls->write($rivi, $sarake, date('d.m.Y', strtotime($tilausrivi['toimaika'])));
-			$sarake++;
+				if (empty($valmistuslinja)) {
+					$xls->write($rivi, $sarake, t('Ei valmistuslinjaa'));
+					$sarake++;
+				}
+				else {
+					$xls->write($rivi, $sarake, $valmistuslinja['selitetark']);
+					$sarake++;
+				}
 
-			$rivi = $rivi + 2;
-			$sarake = 0;
-
-			foreach ($raaka_aine_headerit as $raaka_aine_header) {
-				$xls->write($rivi, $sarake, $raaka_aine_header, array('bold' => true));
+				$xls->writeNumber($rivi, $sarake, $tilausrivi['valmistettava_kpl']);
 				$sarake++;
+
+				$laskutyyppi = $tilausrivi['tila'];
+				$alatila = $tilausrivi['alatila'];
+				require('inc/laskutyyppi.inc');
+				$xls->write($rivi, $sarake, $laskutyyppi.' '.$alatila);
+				$sarake++;
+
+				$xls->write($rivi, $sarake, date('d.m.Y', strtotime($tilausrivi['kerayspvm'])));
+				$sarake++;
+				$xls->write($rivi, $sarake, date('d.m.Y', strtotime($tilausrivi['toimaika'])));
+				$sarake++;
+
+				$rivi = $rivi + 2;
+				$sarake = 0;
 			}
-			$sarake = 0;
-			$rivi++;
+
+			if (!$tulostettu and $esitysmuoto == 'B') {
+				foreach ($raaka_aine_headerit as $raaka_aine_header) {
+					$xls->write($rivi, $sarake, $raaka_aine_header, array('bold' => true));
+					$sarake++;
+				}
+				$sarake = 0;
+				$rivi++;
+				$tulostettu = true;
+			}
 
 			foreach ($tilausrivi['raaka_aineet'] as $raaka_aine) {
 				$xls->write($rivi, $sarake, $raaka_aine['tuoteno']);
@@ -329,7 +356,11 @@ function generoi_custom_excel($valmistukset, $valmistuslinjat) {
 			}
 
 			$xls_progress_bar->increase();
-			$rivi = $rivi + 2;
+
+			if ($esitysmuoto == 'A') {
+				$rivi = $rivi + 2;
+			}
+
 			$sarake = 0;
 		}
 	}
@@ -344,89 +375,100 @@ function generoi_custom_excel($valmistukset, $valmistuslinjat) {
 function echo_valmistukset_joissa_raaka_aine_ei_riita($request) {
 	global $kukarow, $yhtiorow;
 
+	$tulostettu = false;
+
 	echo "<table>";
+
 	foreach ($request['valmistukset'] as $valmistus) {
+
 		foreach ($valmistus['tilausrivit'] as $tilausrivi) {
-			echo "<thead>";
-			echo "<tr>";
-			echo "<th>".t('Valmisteen tuoteno')."</th>";
-			echo "<th>".t('Valmisteen nimitys')."</th>";
-			echo "<th>".t('Valmistusnumero')."</th>";
-			echo "<th>".t('Valmistuslinja')."</th>";
-			echo "<th>".t('Valmistetaan kpl')."</th>";
-			echo "<th>".t('Valmistuksen tila')."</th>";
-			echo "<th>".t('Keräyspäivä')."</th>";
-			echo "<th>".t('Valmistuspäivä')."</th>";
-			echo "</tr>";
-			echo "</thead>";
 
-			echo "<tbody>";
-			echo "<tr class='aktiivi'>";
+			if ($request['esitysmuoto'] == 'A') {
+				echo "<thead>";
+				echo "<tr>";
+				echo "<th>".t('Valmisteen tuoteno')."</th>";
+				echo "<th>".t('Valmisteen nimitys')."</th>";
+				echo "<th>".t('Valmistusnumero')."</th>";
+				echo "<th>".t('Valmistuslinja')."</th>";
+				echo "<th>".t('Valmistetaan kpl')."</th>";
+				echo "<th>".t('Valmistuksen tila')."</th>";
+				echo "<th>".t('Keräyspäivä')."</th>";
+				echo "<th>".t('Valmistuspäivä')."</th>";
+				echo "</tr>";
+				echo "</thead>";
 
-			echo "<td>";
-			echo $tilausrivi['tuoteno'];
-			echo "</td>";
+				echo "<tbody>";
+				echo "<tr class='aktiivi'>";
 
-			echo "<td>";
-			echo $tilausrivi['nimitys'];
-			echo "</td>";
+				echo "<td>";
+				echo $tilausrivi['tuoteno'];
+				echo "</td>";
 
-			echo "<td>";
-			echo $tilausrivi['lasku_tunnus'];
-			echo "</td>";
+				echo "<td>";
+				echo $tilausrivi['nimitys'];
+				echo "</td>";
 
-			echo "<td>";
-			$valmistuslinja = search_array_key_for_value_recursive($request['valmistuslinjat'], 'selite', $tilausrivi['valmistuslinja']);
-			$valmistuslinja = $valmistuslinja[0];
-			if (empty($valmistuslinja)) {
-				echo t('Ei valmistuslinjaa');
+				echo "<td>";
+				echo $tilausrivi['lasku_tunnus'];
+				echo "</td>";
+
+				echo "<td>";
+				$valmistuslinja = search_array_key_for_value_recursive($request['valmistuslinjat'], 'selite', $tilausrivi['valmistuslinja']);
+				$valmistuslinja = $valmistuslinja[0];
+				if (empty($valmistuslinja)) {
+					echo t('Ei valmistuslinjaa');
+				}
+				else {
+					echo $valmistuslinja['selitetark'];
+				}
+				echo "</td>";
+
+				echo "<td>";
+				echo $tilausrivi['valmistettava_kpl'];
+				echo "</td>";
+
+				echo "<td>";
+				$laskutyyppi = $tilausrivi['tila'];
+				$alatila = $tilausrivi['alatila'];
+				require('inc/laskutyyppi.inc');
+				echo $laskutyyppi.' '.$alatila;
+				echo "</td>";
+
+				echo "<td>";
+				echo date('d.m.Y', strtotime($tilausrivi['kerayspvm']));
+				echo "</td>";
+
+				echo "<td>";
+				echo date('d.m.Y', strtotime($tilausrivi['toimaika']));
+				echo "</td>";
+
+				echo "</tr>";
+
+				echo "<tr>";
+				echo "<td colspan='8'>";
+				echo "&nbsp;";
+				echo "</td>";
+				echo "</tr>";
+
+				echo "</tbody>";
 			}
-			else {
-				echo $valmistuslinja['selitetark'];
+
+			if (!$tulostettu and $request['esitysmuoto'] == 'B') {
+				echo "<thead>";
+				echo "<tr>";
+				echo "<th>".t('Raaka-aineen tuoteno')."</th>";
+				echo "<th>".t('Raaka-aineen nimitys')."</th>";
+				echo "<th>".t('Valmistusnumero')."</th>";
+				echo "<th>".t('Saldo')."</th>";
+				echo "<th>".t('Hyllyssä')."</th>";
+				echo "<th>".t('Myytävissä')."</th>";
+				echo "<th>".t('Tilattu')."</th>";
+				echo "<th>".t('Toimittaja')."</th>";
+				echo "</tr>";
+				echo "</thead>";
+
+				$tulostettu = true;
 			}
-			echo "</td>";
-
-			echo "<td>";
-			echo $tilausrivi['valmistettava_kpl'];
-			echo "</td>";
-
-			echo "<td>";
-			$laskutyyppi = $tilausrivi['tila'];
-			$alatila = $tilausrivi['alatila'];
-			require('inc/laskutyyppi.inc');
-			echo $laskutyyppi.' '.$alatila;
-			echo "</td>";
-
-			echo "<td>";
-			echo date('d.m.Y', strtotime($tilausrivi['kerayspvm']));
-			echo "</td>";
-
-			echo "<td>";
-			echo date('d.m.Y', strtotime($tilausrivi['toimaika']));
-			echo "</td>";
-
-			echo "</tr>";
-
-			echo "<tr>";
-			echo "<td colspan='8'>";
-			echo "&nbsp;";
-			echo "</td>";
-			echo "</tr>";
-
-			echo "</tbody>";
-
-			echo "<thead>";
-			echo "<tr>";
-			echo "<th>".t('Raaka-aineen tuoteno')."</th>";
-			echo "<th>".t('Raaka-aineen nimitys')."</th>";
-			echo "<th>".t('Valmistusnumero')."</th>";
-			echo "<th>".t('Saldo')."</th>";
-			echo "<th>".t('Hyllyssä')."</th>";
-			echo "<th>".t('Myytävissä')."</th>";
-			echo "<th>".t('Tilattu')."</th>";
-			echo "<th>".t('Toimittaja')."</th>";
-			echo "</tr>";
-			echo "</thead>";
 
 			echo "<tbody>";
 			foreach ($tilausrivi['raaka_aineet'] as $raaka_aine) {
@@ -466,16 +508,19 @@ function echo_valmistukset_joissa_raaka_aine_ei_riita($request) {
 
 				echo "</tr>";
 			}
-			echo "<tr>";
-			echo "<td class='back' colspan='8'>";
-			echo "&nbsp;";
-			echo "</td>";
-			echo "</tr>";
-			echo "<tr>";
-			echo "<td class='back' colspan='8'>";
-			echo "&nbsp;";
-			echo "</td>";
-			echo "</tr>";
+
+			if ($request['esitysmuoto'] == 'A') {
+				echo "<tr>";
+				echo "<td class='back' colspan='8'>";
+				echo "&nbsp;";
+				echo "</td>";
+				echo "</tr>";
+				echo "<tr>";
+				echo "<td class='back' colspan='8'>";
+				echo "&nbsp;";
+				echo "</td>";
+				echo "</tr>";
+			}
 
 			echo "</tbody>";
 		}
@@ -487,23 +532,23 @@ function init(&$request) {
 	global $kukarow, $yhtiorow;
 
 	if (empty($request['alku_pp'])) {
-		$request['alku_pp'] = 1;
+		$request['alku_pp'] = date("d", mktime(0, 0, 0, date("m"), 1, date("Y")));
 	}
 	if (empty($request['alku_kk'])) {
-		$request['alku_kk'] = date('m', strtotime('now - 1 month'));
+		$request['alku_kk'] = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")));
 	}
 	if (empty($request['alku_vv'])) {
-		$request['alku_vv'] = date('Y');
+		$request['alku_vv'] = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")));
 	}
 
 	if (empty($request['loppu_pp'])) {
-		$request['loppu_pp'] = date('t', strtotime('now - 1 month'));
+		$request['loppu_pp'] = date("d", mktime(0, 0, 0, date("m")+2, 0, date("Y")));
 	}
 	if (empty($request['loppu_kk'])) {
-		$request['loppu_kk'] = date('m', strtotime('now - 1 month'));
+		$request['loppu_kk'] = date("m", mktime(0, 0, 0, date("m")+2, 0, date("Y")));
 	}
 	if (empty($request['loppu_vv'])) {
-		$request['loppu_vv'] = date('Y');
+		$request['loppu_vv'] = date("Y", mktime(0, 0, 0, date("m")+2, 0, date("Y")));
 	}
 
 	$request['alku_pvm'] = "{$request['alku_vv']}-{$request['alku_kk']}-{$request['alku_pp']}";
@@ -595,12 +640,27 @@ function echo_kayttoliittyma($request) {
 	echo "</td>";
 	echo "</tr>";
 
+	$sel = array(
+		'A' => $request['esitysmuoto'] == 'A' ? 'SELECTED' : '',
+		'B' => $request['esitysmuoto'] == 'B' ? 'SELECTED' : '',
+	);
+
+	echo "<tr>";
+	echo "<th>".t('Esitysmuoto')."</th>";
+	echo "<td>";
+	echo "<select name='esitysmuoto'>";
+	echo "<option value='A' {$sel['A']}>".t('Näytä valmiste sekä raaka-aineet')."</option>";
+	echo "<option value='B' {$sel['B']}>".t('Näytä vain raaka-aineet')."</option>";
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
 	echo "<tr>";
 	echo "<th>".t("Tulosta exceliin")."</th>";
 	echo "<td>";
-	if (!empty($request['generoi_excel'])) {
-		$chk = "CHECKED";
-	}
+
+	$chk = empty($request['generoi_excel']) ? '' : 'CHECKED';
+
 	echo "<input type='checkbox' name='generoi_excel' {$chk}>";
 	echo "</td>";
 	echo "</tr>";

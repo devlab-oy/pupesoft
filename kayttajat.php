@@ -1349,7 +1349,11 @@
 					echo "<tr><th align='left'>",t("Toimipaikka"),":</td>";
 					echo "<td><select name='toimipaikka'><option value=''>",t("Oletustoimipaikka"),"</option>";
 
-					$query = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND vat_numero = '' ORDER BY nimi";
+					$query = "	SELECT *
+								FROM yhtion_toimipaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND vat_numero = ''
+								ORDER BY nimi";
 					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_assoc($vares)) {

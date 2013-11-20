@@ -1390,11 +1390,13 @@
 				}
 
 				if ($asiakas != "") {
+					$myseasraj = str_replace("lasku.", "asiakas.", $myse_asiakasrajaus);
+
 					$query = "	SELECT group_concat(tunnus) asiakkaat
 								FROM asiakas
 								WHERE yhtio IN ({$yhtio})
 								AND ytunnus = '{$asiakas}'
-								{$myse_asiakasrajaus}";
+								{$myseasraj}";
 					$result = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($result);
 
@@ -1407,11 +1409,13 @@
 					}
 				}
 				elseif ($asiakasnro != "") {
+					$myseasraj = str_replace("lasku.", "asiakas.", $myse_asiakasrajaus);
+
 					$query = "	SELECT group_concat(tunnus) asiakkaat
 								FROM asiakas
 								WHERE yhtio IN ({$yhtio})
 								AND asiakasnro = '{$asiakasnro}'
-								{$myse_asiakasrajaus}";
+								{$myseasraj}";
 					$result = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($result);
 

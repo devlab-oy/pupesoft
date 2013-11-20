@@ -891,11 +891,31 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 	$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
 	$result = pupe_query($query);
 
-	if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $yhtiorow['liiketunnus'] != '') {
+	if ($sahkoinen_lahete) {
 
-		require("inc/sahkoinen_lahete.class.inc");
+		$query = "	SELECT yhtio_toimipaikka
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$kukarow['kesken']}'";
+		$chk_toimipaikka_res = pupe_query($query);
+		$chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res);
 
-		sahkoinen_lahete($laskurow);
+		if ($chk_toimipaikka_row['yhtio_toimipaikka'] != 0) {
+
+			$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $chk_toimipaikka_row['yhtio_toimipaikka']);
+
+			if (mysql_num_rows($toimipaikat_res) != 0) {
+
+				$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
+
+				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
+
+					require("inc/sahkoinen_lahete.class.inc");
+
+					sahkoinen_lahete($laskurow);
+				}
+			}
+		}
 	}
 
 	//Nollataan sarjanumerolinkit ja dellataan ostorivit

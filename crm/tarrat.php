@@ -51,7 +51,7 @@
 		$rajaus["raportti"] 			= $raportti;
 		$rajaus["toimas"] 				= $toimas;
 		$rajaus["as_yht_tiedot"] 		= $as_yht_tiedot;
-		$rajaus["as_seg_yht_tiedot"]	= $as_seg_yht_tiedot;
+		$rajaus["asiakas_segmentin_yhteystiedot"]	= $asiakas_segmentin_yhteystiedot;
 		$rajaus["limitti"] 				= $limitti;
 		$rajaus["negaatio_haku"] 		= $negaatio_haku;
 		$rajaus["lisaraj_haku"] 		= $lisaraj_haku;
@@ -76,15 +76,19 @@
 			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
 		}
 		
-		if ($as_seg_yht_tiedot == 'on') {
-			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email";
-			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
-
-			$asiakaskategoria_tunnukset = array();
-			for ($i = 1; $i <= $dynaaminen_syvintaso["asiakas"]; $i++) {
-				$muuttuja = "mul_asiakas".$i;
-				echo ${$muuttuja};
+		if ($asiakas_segmentin_yhteystiedot == 'on') {
+			$mul_asiakas = array();
+			for ($i = 1; $i <= $dynaaminenasiakasmaxsyvyys; $i++) {
+				$muuttuja = "mul_asiakas{$i}";
+				$mul_asiakas = array_merge($mul_asiakas, ${$muuttuja});
 			}
+			
+			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email";
+			$joinilisa = "	JOIN yhteyshenkilo yht
+							ON ( yht.yhtio = asiakas.yhtio
+								AND yht.liitostunnus = asiakas.tunnus
+								AND yht.tyyppi = 'A'
+								AND yht.rooli IN ('".implode("','", $mul_asiakas)."') )";
 		}
 
 		$query = "	SELECT asiakas.* $selectilisa
@@ -113,7 +117,7 @@
 			$sarakkeet 		= 3;
 			$rivit 			= 8;
 
-			if ($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') {
+			if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
 				$sisalto .= "\n";
 				$sisalto .= "\n";
 			}
@@ -131,7 +135,7 @@
 			$worksheet->writeString($excelrivi, $excelsarake, t("Nimitarkenne"), $format_bold);
 			$excelsarake++;
 
-			if ($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') {
+			if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
 				$worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkilö"), $format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Titteli"), $format_bold);
@@ -202,7 +206,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake, $row["nimitark"]);
 				$excelsarake++;
 
-				if ($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') {
+				if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_nimi"]);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_titteli"]);
@@ -221,7 +225,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake, $row["maa"]);
 				$excelsarake++;
 
-				if ($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') {
+				if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_email"]);
 					$excelsarake++;
 				}
@@ -242,14 +246,14 @@
 
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimi"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimitark"]))."\n";
-				if (($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') and $row["yht_nimi"] != '') {
+				if (($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') and $row["yht_nimi"] != '') {
 					$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["yht_nimi"]))."\n";
 				}
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["osoite"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["postino"]." ".$row["postitp"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["maa"]))."\n";
 
-				if (($as_yht_tiedot == 'on' or $as_seg_yht_tiedot == 'on') and $row["yht_nimi"] != '') {
+				if (($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') and $row["yht_nimi"] != '') {
 					$sisalto .= "\n";
 				}
 				else {
@@ -462,7 +466,7 @@
 		echo "<table><tr>";
 		echo "<th></th>";
 
-		$urllisa = "&asmemo_viesti=$asmemo_viesti&tarra_aineisto=$tarra_aineisto&raportti=$raportti&toimas=$toimas&as_yht_tiedot=$as_yht_tiedot&as_seg_yht_tiedot=$as_seg_yht_tiedot&limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku".$ulisa;
+		$urllisa = "&asmemo_viesti=$asmemo_viesti&tarra_aineisto=$tarra_aineisto&raportti=$raportti&toimas=$toimas&as_yht_tiedot=$as_yht_tiedot&asiakas_segmentin_yhteystiedot=$asiakas_segmentin_yhteystiedot&limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku".$ulisa;
 
 		echo "<th nowrap><a href='$PHP_SELF?ojarj=nimi$urllisa'>".t("Nimi")."</a>";
 		echo "<br><input type='text' size='10' name = 'haku[0]'  value = '$haku[0]'></th>";
@@ -527,7 +531,6 @@
 
 		$tck = "";
 		$chk = "";
-		$cck = "";
 		$sel = "";
 
 		if ($toimas != "") {
@@ -536,10 +539,6 @@
 
 		if ($as_yht_tiedot != "") {
 			$chk = "CHECKED";
-		}
-		
-		if ($as_seg_yht_tiedot != "") {
-			$cck = "CHECKED";
 		}
 
 		$sel[$raportti] = "SELECTED";

@@ -386,6 +386,9 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
 		if ($kukarow['oletus_ostovarasto'] != 0) {
 			$varasto = $kukarow["oletus_ostovarasto"];
 		}
+		elseif ($kukarow['oletus_varasto'] != 0) {
+			$varasto = $kukarow["oletus_varasto"];
+		}
 		else {
 			$varasto = $laskurow["varasto"];
 		}

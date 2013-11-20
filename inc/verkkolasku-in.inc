@@ -610,6 +610,20 @@
 
 					if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
 						$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+
+						// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
+						// Jos kustannuspaikka tiliöintisäännön takaa on 0
+						if ($oletuskust == 0 and $yhtiorow['toimipaikkakasittely'] == "L") {
+
+							$query = "	SELECT kustp
+										FROM yhtion_toimipaikat
+										WHERE yhtio = '{$yhtio}'
+										AND tunnus = '{$_yhtion_toimipaikka}'";
+							$toimipaikka_kustp_res = pupe_query($query);
+							$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+							$oletuskust = $toimipaikka_kustp_row['kustp'];
+						}
 					}
 
 					if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
@@ -660,6 +674,20 @@
 
 						if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
 							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+
+							// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
+							// Jos kustannuspaikka tiliöintisäännön takaa on 0
+							if ($oletuskust == 0 and $yhtiorow['toimipaikkakasittely'] == "L") {
+
+								$query = "	SELECT kustp
+											FROM yhtion_toimipaikat
+											WHERE yhtio = '{$yhtio}'
+											AND tunnus = '{$_yhtion_toimipaikka}'";
+								$toimipaikka_kustp_res = pupe_query($query);
+								$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+								$oletuskust = $toimipaikka_kustp_row['kustp'];
+							}
 						}
 
 						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
@@ -710,6 +738,20 @@
 
 						if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
 							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+
+							// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
+							// Jos kustannuspaikka tiliöintisäännön takaa on 0
+							if ($oletuskust == 0 and $yhtiorow['toimipaikkakasittely'] == "L") {
+
+								$query = "	SELECT kustp
+											FROM yhtion_toimipaikat
+											WHERE yhtio = '{$yhtio}'
+											AND tunnus = '{$_yhtion_toimipaikka}'";
+								$toimipaikka_kustp_res = pupe_query($query);
+								$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+								$oletuskust = $toimipaikka_kustp_row['kustp'];
+							}
 						}
 
 						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
@@ -749,6 +791,20 @@
 
 							if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
 								$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+
+								// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
+								// Jos kustannuspaikka tiliöintisäännön takaa on 0
+								if ($oletuskust == 0 and $yhtiorow['toimipaikkakasittely'] == "L") {
+
+									$query = "	SELECT kustp
+												FROM yhtion_toimipaikat
+												WHERE yhtio = '{$yhtio}'
+												AND tunnus = '{$_yhtion_toimipaikka}'";
+									$toimipaikka_kustp_res = pupe_query($query);
+									$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+									$oletuskust = $toimipaikka_kustp_row['kustp'];
+								}
 							}
 
 							if ($tiliointirow['hyvak1'] == 'MAKSUUN') {

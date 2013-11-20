@@ -723,23 +723,25 @@ if ($tila == 'tee_kohdistus') {
 
 		// Tehdään suorituksen tositteelle vastakirjaukset
 		$params = array(
-			'summa' 		=> ($tiliointi1['summa'] * -1),
-			'tapvm'			=> $laskun_maksupvm,
-			'laatija' 		=> $kukarow['kuka'],
-			'laadittu' 		=> date('Y-m-d H:i:s'),
-			'aputunnus'		=> 0,
-			'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
+			'summa' 			=> ($tiliointi1['summa'] * -1),
+			'summa_valuutassa' 	=> ($tiliointi1['summa_valuutassa'] * -1),
+			'tapvm'				=> $laskun_maksupvm,
+			'laatija' 			=> $kukarow['kuka'],
+			'laadittu' 			=> date('Y-m-d H:i:s'),
+			'aputunnus'			=> 0,
+			'selite' 			=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
 		);
 
 		kopioitiliointi($tiliointi1['tunnus'], "", $params);
 
 		$params = array(
-			'summa' 		=> ($tiliointi2['summa'] * -1),
-			'tapvm'			=> $laskun_maksupvm,
-			'laatija' 		=> $kukarow['kuka'],
-			'laadittu' 		=> date('Y-m-d H:i:s'),
-			'aputunnus'		=> 0,
-			'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
+			'summa' 			=> ($tiliointi2['summa'] * -1),
+			'summa_valuutassa' 	=> ($tiliointi2['summa_valuutassa'] * -1),
+			'tapvm'				=> $laskun_maksupvm,
+			'laatija' 			=> $kukarow['kuka'],
+			'laadittu' 			=> date('Y-m-d H:i:s'),
+			'aputunnus'			=> 0,
+			'selite' 			=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
 		);
 
 		kopioitiliointi($tiliointi2['tunnus'], "", $params);
@@ -1290,11 +1292,12 @@ if ($tila == 'tee_kohdistus') {
 				$result = pupe_query($query);
 
 				$params = array(
-					'summa' 		=> $erotus,
-					'laatija' 		=> $kukarow['kuka'],
-					'laadittu' 		=> date('Y-m-d H:i:s'),
-					'aputunnus'		=> 0,
-					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
+					'summa' 			=> $erotus,
+					'summa_valuutassa' 	=> round($erotus / $suoritus['kurssi'], 2),
+					'laatija' 			=> $kukarow['kuka'],
+					'laadittu' 			=> date('Y-m-d H:i:s'),
+					'aputunnus'			=> 0,
+					'selite' 			=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
 				$ttunnus = kopioitiliointi($tiliointi1['tunnus'], "", $params);
@@ -1323,11 +1326,12 @@ if ($tila == 'tee_kohdistus') {
 				$result = pupe_query($query);
 
 				$params = array(
-					'summa' 		=> ($erotus * -1),
-					'laatija' 		=> $kukarow['kuka'],
-					'laadittu' 		=> date('Y-m-d H:i:s'),
-					'aputunnus'		=> $ttunnus,
-					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
+					'summa' 			=> ($erotus * -1),
+					'summa_valuutassa' 	=> round($erotus * -1 / $suoritus['kurssi'], 2),
+					'laatija' 			=> $kukarow['kuka'],
+					'laadittu' 			=> date('Y-m-d H:i:s'),
+					'aputunnus'			=> $ttunnus,
+					'selite' 			=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
 				kopioitiliointi($tiliointi2['tunnus'], "", $params);
@@ -1335,23 +1339,25 @@ if ($tila == 'tee_kohdistus') {
 
 				// Tehdään suorituksen tositteelle vastakirjaukset
 				$params = array(
-					'summa' 		=> $kassaan,
-					'tapvm'			=> $laskun_maksupvm,
-					'laatija' 		=> $kukarow['kuka'],
-					'laadittu' 		=> date('Y-m-d H:i:s'),
-					'aputunnus'		=> 0,
-					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
+					'summa' 			=> $kassaan,
+					'summa_valuutassa' 	=> round($kassaan / $suoritus['kurssi'], 2),
+					'tapvm'				=> $laskun_maksupvm,
+					'laatija' 			=> $kukarow['kuka'],
+					'laadittu' 			=> date('Y-m-d H:i:s'),
+					'aputunnus'			=> 0,
+					'selite' 			=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
 				kopioitiliointi($tiliointi1['tunnus'], "", $params);
 
 				$params = array(
-					'summa' 		=> ($kassaan * -1),
-					'tapvm'			=> $laskun_maksupvm,
-					'laatija' 		=> $kukarow['kuka'],
-					'laadittu' 		=> date('Y-m-d H:i:s'),
-					'aputunnus'		=> 0,
-					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
+					'summa' 			=> ($kassaan * -1),
+					'summa_valuutassa' 	=> round($kassaan * -1 / $suoritus['kurssi'], 2),
+					'tapvm'				=> $laskun_maksupvm,
+					'laatija' 			=> $kukarow['kuka'],
+					'laadittu' 			=> date('Y-m-d H:i:s'),
+					'aputunnus'			=> 0,
+					'selite' 			=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
 				kopioitiliointi($tiliointi2['tunnus'], "", $params);
@@ -1367,23 +1373,25 @@ if ($tila == 'tee_kohdistus') {
 
 				// Tehdään suorituksen tositteelle vastakirjaukset
 				$params = array(
-					'summa' 		=> ($tiliointi1['summa'] * -1),
-					'tapvm'			=> $laskun_maksupvm,
-					'laatija' 		=> $kukarow['kuka'],
-					'laadittu' 		=> date('Y-m-d H:i:s'),
-					'aputunnus'		=> 0,
-					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
+					'summa' 			=> ($tiliointi1['summa'] * -1),
+					'summa_valuutassa' 	=> ($tiliointi1['summa_valuutassa'] * -1),
+					'tapvm'				=> $laskun_maksupvm,
+					'laatija' 			=> $kukarow['kuka'],
+					'laadittu' 			=> date('Y-m-d H:i:s'),
+					'aputunnus'			=> 0,
+					'selite' 			=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
 				);
 
 				kopioitiliointi($tiliointi1['tunnus'], "", $params);
 
 				$params = array(
-					'summa' 		=> ($tiliointi2['summa'] * -1),
-					'tapvm'			=> $laskun_maksupvm,
-					'laatija' 		=> $kukarow['kuka'],
-					'laadittu' 		=> date('Y-m-d H:i:s'),
-					'aputunnus'		=> 0,
-					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
+					'summa' 			=> ($tiliointi2['summa'] * -1),
+					'summa_valuutassa' 	=> ($tiliointi2['summa_valuutassa'] * -1),
+					'tapvm'				=> $laskun_maksupvm,
+					'laatija' 			=> $kukarow['kuka'],
+					'laadittu' 			=> date('Y-m-d H:i:s'),
+					'aputunnus'			=> 0,
+					'selite' 			=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
 				);
 
 				kopioitiliointi($tiliointi2['tunnus'], "", $params);

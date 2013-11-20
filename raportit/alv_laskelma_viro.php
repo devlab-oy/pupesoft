@@ -534,7 +534,6 @@
 			$vainveroton 	 = '';
 			$tuotetyyppilisa = '';
 			$cleantaso 		 = $taso;
-			$lisarajaus		 = '';
 
 			// Kaikki veroton myynti
 			if ($taso == 'ee300') {
@@ -552,7 +551,6 @@
 			if ($taso == 'ee500') {
 				$eetasolisa = " or alv_taso like '%ee510%'
 								or alv_taso like '%ee520%'";
-				$lisarajaus = " JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus AND lasku.tilaustyyppi != '9') ";
 			}
 
 			if ($taso == 'ee600') {
@@ -590,7 +588,6 @@
 					 			count(*) kpl
 								FROM tiliointi
 								$maalisa
-								$lisarajaus
 								WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 								AND korjattu = ''
 								AND (";

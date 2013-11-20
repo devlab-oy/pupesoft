@@ -3098,6 +3098,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "reklamaatiot_lasku") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ''>".t("Reklamaatioista ei tehd‰ omia laskuja")."</option>
+					<option value = 'K' {$sel}>".t("Reklamaatioista tehd‰‰n oma lasku")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "reklamaation_vastaanottovarasto" ) {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat

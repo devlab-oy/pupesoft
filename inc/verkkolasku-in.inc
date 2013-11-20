@@ -613,16 +613,18 @@
 
 						// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
 						// Jos kustannuspaikka tiliöintisäännön takaa on 0
-						if ($oletuskust == 0 and $yhtiorow['toimipaikkakasittely'] == "L") {
+						if (($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "L") {
 
-							$query = "	SELECT kustp
+							$query = "	SELECT kustp, kohde, projekti
 										FROM yhtion_toimipaikat
 										WHERE yhtio = '{$yhtio}'
 										AND tunnus = '{$_yhtion_toimipaikka}'";
 							$toimipaikka_kustp_res = pupe_query($query);
 							$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
-							$oletuskust = $toimipaikka_kustp_row['kustp'];
+							$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+							$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+							$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 						}
 					}
 
@@ -677,16 +679,18 @@
 
 							// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
 							// Jos kustannuspaikka tiliöintisäännön takaa on 0
-							if ($oletuskust == 0 and $yhtiorow['toimipaikkakasittely'] == "L") {
+							if (($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "L") {
 
-								$query = "	SELECT kustp
+								$query = "	SELECT kustp, kohde, projekti
 											FROM yhtion_toimipaikat
 											WHERE yhtio = '{$yhtio}'
 											AND tunnus = '{$_yhtion_toimipaikka}'";
 								$toimipaikka_kustp_res = pupe_query($query);
 								$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
-								$oletuskust = $toimipaikka_kustp_row['kustp'];
+								$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+								$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+								$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 							}
 						}
 
@@ -741,16 +745,18 @@
 
 							// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
 							// Jos kustannuspaikka tiliöintisäännön takaa on 0
-							if ($oletuskust == 0 and $yhtiorow['toimipaikkakasittely'] == "L") {
+							if (($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "L") {
 
-								$query = "	SELECT kustp
+								$query = "	SELECT kustp, kohde, projekti
 											FROM yhtion_toimipaikat
 											WHERE yhtio = '{$yhtio}'
 											AND tunnus = '{$_yhtion_toimipaikka}'";
 								$toimipaikka_kustp_res = pupe_query($query);
 								$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
-								$oletuskust = $toimipaikka_kustp_row['kustp'];
+								$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+								$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+								$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 							}
 						}
 
@@ -794,16 +800,18 @@
 
 								// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
 								// Jos kustannuspaikka tiliöintisäännön takaa on 0
-								if ($oletuskust == 0 and $yhtiorow['toimipaikkakasittely'] == "L") {
+								if (($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "L") {
 
-									$query = "	SELECT kustp
+									$query = "	SELECT kustp, kohde, projekti
 												FROM yhtion_toimipaikat
 												WHERE yhtio = '{$yhtio}'
 												AND tunnus = '{$_yhtion_toimipaikka}'";
 									$toimipaikka_kustp_res = pupe_query($query);
 									$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
-									$oletuskust = $toimipaikka_kustp_row['kustp'];
+									$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+									$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+									$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 								}
 							}
 
@@ -1249,6 +1257,21 @@
 						if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') {
 							$summa_varasto = round($kirjattava_summa / (1 + ($vero / 100)), 2);
 						}
+					}
+
+					// Jos on päällä löyhempi toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
+					if ($_yhtion_toimipaikka != 0 and ($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "") {
+
+						$query = "	SELECT kustp, kohde, projekti
+									FROM yhtion_toimipaikat
+									WHERE yhtio = '{$yhtio}'
+									AND tunnus = '{$_yhtion_toimipaikka}'";
+						$toimipaikka_kustp_res = pupe_query($query);
+						$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+						$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+						$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+						$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 					}
 
 					$summa			  		= $kirjattava_summa;

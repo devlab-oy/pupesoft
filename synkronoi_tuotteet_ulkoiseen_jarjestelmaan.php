@@ -6,6 +6,15 @@
 
 	echo "<font class='head'>",t("Synkronoi tuotteet ulkoiseen j‰rjestelm‰‰n"),"</font><hr><br />";
 
+	if ($ftp_posten_logistik_host == '' or $ftp_posten_logistik_user == '' or $ftp_posten_logistik_pass == '' or $ftp_posten_logistik_path == '') {
+
+		echo "<br /><font class='error'>",t("Tarvittavat FTP-tunnukset ovat puutteelliset"),"!</font><br>";
+
+		require ("inc/footer.inc");
+		exit;
+	}
+
+
 	$query = "	SELECT tuote.*, ta.selite AS synkronointi
 				FROM tuote
 				LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
@@ -154,12 +163,18 @@
 		}
 		else {
 
-			$path = '/Users/sami/temp/makia/materialmaster_testit/';
-			$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
+			$filename = $pupe_root_polku."/dataout/materialmaster_testi_".md5(uniqid()).".xml";
 
-			$filename = 'materialmaster_testi_'.md5(uniqid()).".xml";
-			if (file_put_contents($path.$filename, utf8_encode($xml->asXML()))) {
+			if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
 				echo "<br /><font class='message'>",t("Tiedoston luonti onnistui"),"</font><br />";
+
+				$ftphost = $ftp_posten_logistik_host;
+				$ftpuser = $ftp_posten_logistik_user;
+				$ftppass = $ftp_posten_logistik_pass;
+				$ftppath = $ftp_posten_logistik_path;
+				$ftpfile = realpath($filename);
+
+				require ("inc/ftp-send.inc");
 			}
 			else {
 				echo "<br /><font class='error'>",t("Tiedoston luonti ep‰onnistui"),"</font><br />";

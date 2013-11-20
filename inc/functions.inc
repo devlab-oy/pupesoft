@@ -20016,6 +20016,20 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
 	}
 }
 
+if (!function_exists('onko_varaston_hyllypaikat_kaytossa')) {
+	function onko_varaston_hyllypaikat_kaytossa() {
+		global $kukarow;
+
+		# Haetaan varastopaikka
+		$query = "	SELECT tunnus
+					FROM varaston_hyllypaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					LIMIT 1";
+		$result = pupe_query($query);
+		return (mysql_num_rows($result) == 0) ? false : true;
+	}
+}
+
 /**
  * P‰ivitt‰‰ tilausrivin kpl m‰‰r‰n
  *

@@ -383,7 +383,12 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
 			$kerayspvm = $laskurow["kerayspvm"];
 		}
 
-		$varasto = $laskurow["varasto"];
+		if ($kukarow['oletus_ostovarasto'] != 0) {
+			$varasto = $kukarow["oletus_ostovarasto"];
+		}
+		else {
+			$varasto = $laskurow["varasto"];
+		}
 
 		//Tehd‰‰n muuttujaswitchit
 		if (is_array($hinta_array)) {

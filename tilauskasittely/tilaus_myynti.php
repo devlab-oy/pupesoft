@@ -320,7 +320,7 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 	$tee = '';
 }
 
-if (($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' or ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and $tee == 'VALMIS' and isset($tilaustyyppi) and $tilaustyyppi == 'T')) and $kukarow['kesken'] > 0 and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
+if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $kukarow['kesken'] > 0 and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
 
 	$kukarow['kesken'] = (int) $kukarow['kesken'];
 
@@ -7639,6 +7639,10 @@ if ($tee == '') {
 						$sallijyvitys = TRUE;
 					}
 
+					if (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K') {
+						$sallijyvitys = TRUE;
+					}
+
 					if ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] != '') {
 						$sallijyvitys = TRUE;
 					}
@@ -7653,7 +7657,7 @@ if ($tee == '') {
 						$jyvsumma = '0.00';
 					}
 
-					if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
+					if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI" or (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K')) {
 						echo "	<th colspan='2' nowrap>".t("Näytä").":</th>
 								<td colspan='2' nowrap>
 								<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
@@ -7664,7 +7668,7 @@ if ($tee == '') {
 
 						echo "<select name='toim'>";
 
-						if (file_exists("tulosta_tarjous.inc") and ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI")) {
+						if (file_exists("tulosta_tarjous.inc") and ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI" or (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K'))) {
 							echo "<option value='TARJOUS'>".t("Tarjous")."</option>";
 
 							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='TARJOUS!!!VL' LIMIT 1";
@@ -7727,7 +7731,7 @@ if ($tee == '') {
 							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">
 							</form>";
 
-						if (tarkista_oikeus("tilaus_myynti.php", "TARJOUS") and $laskurow["tilaustyyppi"] == "T" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+						if (tarkista_oikeus("tilaus_myynti.php", "TARJOUS") and ($laskurow["tilaustyyppi"] == "T" or $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K') and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
 							echo "	<form action='' method='post'>
 									<input type='hidden' name='toim' value='{$toim}'>
 									<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
@@ -8305,7 +8309,6 @@ if ($tee == '') {
 					<input type='hidden' name='projektilla' value='$projektilla'>
 					<input type='hidden' name='tee' value='VALMIS'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='tilaustyyppi' value='{$laskurow['tilaustyyppi']}'>
 					<input type='hidden' name='mista' value = '$mista'>
 					<input type='hidden' name='rahtipainohinta' value='$rahtihinta'>
 					<input type='hidden' name='kaikkiyhteensa' value='".sprintf('%.2f',$summa)."'>

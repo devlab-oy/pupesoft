@@ -2069,8 +2069,8 @@
 
 		$sel = $trow[$i] == 'K' ? "selected" : "";
 
-		$ulos .= "<option value = ''>".t("Myyntitilausta ei siirret‰ tarjoukseksi automaattisesti tilaustyypin mukaan")."</option>";
-		$ulos .= "<option value = 'K' {$sel}>".t("Myyntitilaus siirret‰‰n tarjoukseksi automaattisesti tilaustyypin mukaan")."</option>";
+		$ulos .= "<option value = ''>".t("Myyntitilauksella ei n‰ytet‰ aina tarjous-nappia automaattisesti")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella n‰ytet‰‰n aina tarjous-nappi automaattisesti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

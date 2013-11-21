@@ -94,8 +94,9 @@ else {
 				<tr>
 					<th>" . t("Tunnus") . "</th>
 					<th>" . t("Tila") . "</th>
-					<th>" . t("Valmiste") . "</th>
+					<th>" . t("Nimitys") . "</th>
 					<th>" . t("Viite") . "</th>
+					<th>" . t("Määrä") . "</th>
 					<th>" . t("Ylityötunnit") . "</th>
 					<th>" . t("Kommentti") . "</th>
 					<th colspan=2></th>
@@ -114,6 +115,7 @@ else {
 			echo "</td>";
 
 			echo "<td>{$valmistus->viesti()}</td>";
+			echo "<td>" . $valmiste['varattu'] . $valmiste['yksikko'] . "</td>";
 			echo "<td>{$valmistus->ylityotunnit}</td>";
 			echo "<td>{$valmistus->kommentti}</td>";
 			echo "<td><form method='get'>

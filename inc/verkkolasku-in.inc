@@ -608,12 +608,12 @@
 						$trow['oletus_vienti'] = $tiliointirow['vienti'];
 					}
 
+					// Jos kustannuspaikka tiliöintisäännön takana ei ole 0
 					if ($tiliointirow['toimipaikka'] != 0) {
 						$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 
-						// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
-						// Jos kustannuspaikka tiliöintisäännön takaa on 0
-						if ($yhtiorow['toimipaikkakasittely'] == "L") {
+						// Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
+						if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
 
 							$query = "	SELECT kustp, kohde, projekti
 										FROM yhtion_toimipaikat
@@ -674,12 +674,12 @@
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
 						}
 
+						// Jos kustannuspaikka tiliöintisäännön takana ei ole 0
 						if ($tiliointirow['toimipaikka'] != 0) {
 							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 
-							// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
-							// Jos kustannuspaikka tiliöintisäännön takaa on 0
-							if ($yhtiorow['toimipaikkakasittely'] == "L") {
+							// Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
+							if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
 
 								$query = "	SELECT kustp, kohde, projekti
 											FROM yhtion_toimipaikat
@@ -740,12 +740,12 @@
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
 						}
 
+						// Jos kustannuspaikka tiliöintisäännön takana ei ole 0
 						if ($tiliointirow['toimipaikka'] != 0) {
 							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 
-							// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
-							// Jos kustannuspaikka tiliöintisäännön takaa on 0
-							if ($yhtiorow['toimipaikkakasittely'] == "L") {
+							// Jos tarkenteiden prioriteetissä toimipaikka ei ole ennen toimittajaa, niin katsotaan se tässä
+							if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
 
 								$query = "	SELECT kustp, kohde, projekti
 											FROM yhtion_toimipaikat
@@ -795,12 +795,12 @@
 								$trow['oletus_vienti'] = $tiliointirow['vienti'];
 							}
 
+							// Jos kustannuspaikka tiliöintisäännön takana ei ole 0
 							if ($tiliointirow['toimipaikka'] != 0) {
 								$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 
-								// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
-								// Jos kustannuspaikka tiliöintisäännön takaa on 0
-								if ($yhtiorow['toimipaikkakasittely'] == "L") {
+								// Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
+								if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
 
 									$query = "	SELECT kustp, kohde, projekti
 												FROM yhtion_toimipaikat
@@ -1259,8 +1259,8 @@
 						}
 					}
 
-					// Jos on päällä löyhempi toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
-					if ($_yhtion_toimipaikka != 0 and ($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "") {
+					// Jos on toimipaikat käytössä ja toimipaikan takaa katsotaan tarkenteita toimittajan jälkeen, niin katsotaan ne tässä
+					if ($_yhtion_toimipaikka != 0 and ($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['tarkenteiden_prioriteetti'] == "") {
 
 						$query = "	SELECT kustp, kohde, projekti
 									FROM yhtion_toimipaikat

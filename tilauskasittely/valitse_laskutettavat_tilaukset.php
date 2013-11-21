@@ -506,7 +506,7 @@
 
 			while ($row = mysql_fetch_assoc($res)) {
 
-				if (isset($edketjutus) and $edketjutus != $row["ketjutuskentta"]) {
+				if ((isset($edketjutus) and $edketjutus != $row["ketjutuskentta"]) or (isset($edreklamaatiot_lasku) and $edreklamaatiot_lasku != $row['reklamaatiot_lasku'])) {
 					echo "<tr><td class='back' align='center' colspan='5'><hr></td><td class='back' align='center'><font class='info'>".t("Lasku").":</font></td><td class='back' colspan='3'><hr></td></tr>";
 				}
 
@@ -695,6 +695,7 @@
 				echo "</tr>";
 
 				$edketjutus = $row["ketjutuskentta"];
+				$edreklamaatiot_lasku = $row["reklamaatiot_lasku"];
 			}
 
 			echo "</table><br>";

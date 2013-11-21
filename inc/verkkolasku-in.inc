@@ -602,7 +602,7 @@
 
 				if (mysql_num_rows($result) != 0) {
 					$tiliointirow = mysql_fetch_assoc($result);
-					$oletuskust = $tiliointirow['kustp'];
+					$oletuskust = $tiliointirow['kustp'] != 999999999 ? $tiliointirow['kustp'] : $oletuskust;
 
 					if ($tiliointirow['vienti'] != '') {
 						$trow['oletus_vienti'] = $tiliointirow['vienti'];
@@ -668,7 +668,7 @@
 
 					if (mysql_num_rows($result) != 0) {
 						$tiliointirow = mysql_fetch_assoc($result);
-						$oletuskust = $tiliointirow['kustp'];
+						$oletuskust = $tiliointirow['kustp'] != 999999999 ? $tiliointirow['kustp'] : $oletuskust;
 
 						if ($tiliointirow['vienti'] != '') {
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
@@ -734,7 +734,7 @@
 
 					if (mysql_num_rows($result) != 0) {
 						$tiliointirow = mysql_fetch_assoc($result);
-						$oletuskust = $tiliointirow['kustp'];
+						$oletuskust = $tiliointirow['kustp'] != 999999999 ? $tiliointirow['kustp'] : $oletuskust;
 
 						if ($tiliointirow['vienti'] != '') {
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
@@ -789,7 +789,7 @@
 
 						if (mysql_num_rows($result) != 0) {
 							$tiliointirow = mysql_fetch_assoc($result);
-							$oletuskust = $tiliointirow['kustp'];
+							$oletuskust = $tiliointirow['kustp'] != 999999999 ? $tiliointirow['kustp'] : $oletuskust;
 
 							if ($tiliointirow['vienti'] != '') {
 								$trow['oletus_vienti'] = $tiliointirow['vienti'];

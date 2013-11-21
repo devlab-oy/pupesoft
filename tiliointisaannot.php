@@ -119,7 +119,7 @@
 			$tee	= '';
 		}
 
-		if ($kustp != 0) {
+		if ($kustp != 0 and $kustp != 999999999) {
 			$query = "	SELECT tunnus
 						FROM kustannuspaikka
 						WHERE tunnus = '$kustp'
@@ -243,6 +243,7 @@
 	}
 
 	if ($tee == 'U') {
+
 		// Lisätään sääntö
 		$query = "INSERT into tiliointisaanto VALUES (
 				'$kukarow[yhtio]',
@@ -381,7 +382,7 @@
 		// Näytetään vanhat säännöt muutosta varten
 		if ($tyyppi == 't') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero,
-						kustannuspaikka.nimi Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+						if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN tili ON tili.yhtio = tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
@@ -394,7 +395,7 @@
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite,
 						tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp,
 						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-						kustannuspaikka.nimi Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+						if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -405,7 +406,7 @@
 		elseif ($tyyppi == 'a') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus,
 						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-						kustannuspaikka.nimi Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+						if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -417,7 +418,7 @@
 		elseif ($tyyppi == 'k') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus,
 						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-						kustannuspaikka.nimi Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+						if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -488,6 +489,9 @@
 					else {
 						echo "<td></td>";
 					}
+				}
+				elseif ($kennimi == 'Kustannuspaikka' and $tiliointirow['kustp'] == 999999999) {
+					echo "<td>",t("Oletus kustannuspaikka"),"</td>";
 				}
 				else {
 					echo "<td>$tiliointirow[$kennimi]</td>";
@@ -581,6 +585,10 @@
 		$result = pupe_query($query);
 
 		$ulos = "<select name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa")."</option>";
+
+		$valittu = $kustp == 999999999 ? "selected" : "";
+
+		$ulos .= "<option value='999999999' {$valittu}>".t("Oletus kustannuspaikka")."</option>";
 
 		while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 			$valittu = "";

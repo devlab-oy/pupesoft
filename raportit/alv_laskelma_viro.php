@@ -405,6 +405,12 @@
 		}
 		elseif ($tilirow['tilit100'] != '' or $tilirow['tilitMUU'] != '') {
 
+			$tehdaspalautukset_ei = "";
+
+			if ($ryhma != 5) {
+				$tehdaspalautukset_ei = "AND lasku.tilaustyyppi != '9'";
+			}
+
 			echo "<table>";
 			echo "<tr>";
 			echo "<br><font class='head'>".t("Arvonlisäveroerittely kaudelta")." $alvv-$alvk " . t("taso") . " $ryhma</font><hr>";
@@ -423,7 +429,7 @@
 						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
 						count(*) kpl
 						FROM tiliointi
-						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus AND lasku.tilaustyyppi != '9')
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus $tehdaspalautukset_ei)
 						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu = ''

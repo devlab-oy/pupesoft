@@ -325,7 +325,8 @@ if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $kukarow['kesken'] > 0 and tarki
 	$kukarow['kesken'] = (int) $kukarow['kesken'];
 
 	$query = "	UPDATE lasku SET
-				tila = 'T'
+				tila = 'T',
+				tilaustyyppi = 'T'
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tila = 'N'
 				AND alatila = ''

@@ -15,6 +15,7 @@ elseif (@include("parametrit.inc"));
 else exit;
 
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
+$sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
 
 require('validation/Validation.php');
 
@@ -890,6 +891,33 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 	// poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...
 	$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
 	$result = pupe_query($query);
+
+	if ($sahkoinen_lahete) {
+
+		$query = "	SELECT yhtio_toimipaikka
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$kukarow['kesken']}'";
+		$chk_toimipaikka_res = pupe_query($query);
+		$chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res);
+
+		if ($chk_toimipaikka_row['yhtio_toimipaikka'] != 0) {
+
+			$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $chk_toimipaikka_row['yhtio_toimipaikka']);
+
+			if (mysql_num_rows($toimipaikat_res) != 0) {
+
+				$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
+
+				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
+
+					require("inc/sahkoinen_lahete.class.inc");
+
+					sahkoinen_lahete($laskurow);
+				}
+			}
+		}
+	}
 
 	//Nollataan sarjanumerolinkit ja dellataan ostorivit
 	vapauta_sarjanumerot($toim, $kukarow["kesken"]);
@@ -8452,6 +8480,31 @@ if ($tee == '') {
 					}
 
 					echo "</select>";
+				}
+
+				if ($laskurow['yhtio_toimipaikka'] != 0) {
+
+					$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $laskurow['yhtio_toimipaikka']);
+
+					if (mysql_num_rows($toimipaikat_res) != 0) {
+
+						$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
+
+						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
+
+							$query = "	SELECT asiakkaan_avainsanat.*
+										FROM asiakkaan_avainsanat
+										WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+										and asiakkaan_avainsanat.laji = 'futur_sahkoinen_lahete'
+										and asiakkaan_avainsanat.avainsana != ''
+										AND asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'";
+							$as_avain_chk_res = pupe_query($query);
+
+							if (mysql_num_rows($as_avain_chk_res) > 0) {
+								echo "<br><br>",t("Lähetä sähköinen lähete")," <input type='checkbox' name='generoi_sahkoinen_lahete' value='true' checked />";
+							}
+						}
+					}
 				}
 
 				echo "</form>";

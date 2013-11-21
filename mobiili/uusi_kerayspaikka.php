@@ -130,7 +130,7 @@ if (isset($submit) and trim($submit) != '') {
 			}
 
 			// Tarkistetaan että tuotepaikka on olemassa
-			if ($onko_varaston_hyllypaikat_kaytossa and $count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
+			if ($onko_varaston_hyllypaikat_kaytossa and count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
 				$errors[] = t("Varaston tuotepaikkaa ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso) ei ole perustettu").'.';
 			}
 

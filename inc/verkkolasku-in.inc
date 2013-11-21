@@ -608,7 +608,7 @@
 						$trow['oletus_vienti'] = $tiliointirow['vienti'];
 					}
 
-					if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
+					if ($tiliointirow['toimipaikka'] != 0) {
 						$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 
 						// Jos on p‰‰ll‰ laaja toimipaikka-k‰sittely, haetaan kustannuspaikka toimipaikan takaa
@@ -622,9 +622,9 @@
 							$toimipaikka_kustp_res = pupe_query($query);
 							$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
-							$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
-							$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
-							$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+							$oletuskust 	= $oletuskust == 0 							? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+							$oletuskohde 	= $toimipaikka_kustp_row['kohde'] != 0 		? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+							$oletusprojekti = $toimipaikka_kustp_row['projekti'] != 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 						}
 					}
 
@@ -674,7 +674,7 @@
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
 						}
 
-						if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
+						if ($tiliointirow['toimipaikka'] != 0) {
 							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 
 							// Jos on p‰‰ll‰ laaja toimipaikka-k‰sittely, haetaan kustannuspaikka toimipaikan takaa
@@ -688,9 +688,9 @@
 								$toimipaikka_kustp_res = pupe_query($query);
 								$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
-								$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
-								$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
-								$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+								$oletuskust 	= $oletuskust == 0 							? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+								$oletuskohde 	= $toimipaikka_kustp_row['kohde'] != 0 		? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+								$oletusprojekti = $toimipaikka_kustp_row['projekti'] != 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 							}
 						}
 
@@ -740,7 +740,7 @@
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
 						}
 
-						if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
+						if ($tiliointirow['toimipaikka'] != 0) {
 							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 
 							// Jos on p‰‰ll‰ laaja toimipaikka-k‰sittely, haetaan kustannuspaikka toimipaikan takaa
@@ -754,9 +754,9 @@
 								$toimipaikka_kustp_res = pupe_query($query);
 								$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
-								$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
-								$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
-								$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+								$oletuskust 	= $oletuskust == 0 							? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+								$oletuskohde 	= $toimipaikka_kustp_row['kohde'] != 0 		? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+								$oletusprojekti = $toimipaikka_kustp_row['projekti'] != 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 							}
 						}
 
@@ -795,7 +795,7 @@
 								$trow['oletus_vienti'] = $tiliointirow['vienti'];
 							}
 
-							if ($_yhtion_toimipaikka == 0 and $tiliointirow['toimipaikka'] != 0) {
+							if ($tiliointirow['toimipaikka'] != 0) {
 								$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
 
 								// Jos on p‰‰ll‰ laaja toimipaikka-k‰sittely, haetaan kustannuspaikka toimipaikan takaa
@@ -809,9 +809,9 @@
 									$toimipaikka_kustp_res = pupe_query($query);
 									$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
-									$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
-									$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
-									$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+									$oletuskust 	= $oletuskust == 0 							? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+									$oletuskohde 	= $toimipaikka_kustp_row['kohde'] != 0 		? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+									$oletusprojekti = $toimipaikka_kustp_row['projekti'] != 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
 								}
 							}
 

@@ -954,7 +954,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		}
 	}
 
-	if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+	if ($yhtiorow['toimipaikkakasittely'] == "L" and isset($toimipaikka) and $toimipaikka != 'kaikki') {
 		$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
 	}
 	else {

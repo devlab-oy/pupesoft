@@ -404,7 +404,9 @@
 
 		}
 		elseif ($tilirow['tilit100'] != '' or $tilirow['tilitMUU'] != '') {
-			
+
+			$tehdaspalautukset_ei = "";
+
 			if ($ryhma != 5) {
 				$tehdaspalautukset_ei = "AND lasku.tilaustyyppi != '9'";
 			}

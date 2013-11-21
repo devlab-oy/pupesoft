@@ -613,7 +613,7 @@
 
 						// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
 						// Jos kustannuspaikka tiliöintisäännön takaa on 0
-						if (($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "L") {
+						if ($yhtiorow['toimipaikkakasittely'] == "L") {
 
 							$query = "	SELECT kustp, kohde, projekti
 										FROM yhtion_toimipaikat
@@ -679,7 +679,7 @@
 
 							// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
 							// Jos kustannuspaikka tiliöintisäännön takaa on 0
-							if (($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "L") {
+							if ($yhtiorow['toimipaikkakasittely'] == "L") {
 
 								$query = "	SELECT kustp, kohde, projekti
 											FROM yhtion_toimipaikat
@@ -745,7 +745,7 @@
 
 							// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
 							// Jos kustannuspaikka tiliöintisäännön takaa on 0
-							if (($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "L") {
+							if ($yhtiorow['toimipaikkakasittely'] == "L") {
 
 								$query = "	SELECT kustp, kohde, projekti
 											FROM yhtion_toimipaikat
@@ -800,7 +800,7 @@
 
 								// Jos on päällä laaja toimipaikka-käsittely, haetaan kustannuspaikka toimipaikan takaa
 								// Jos kustannuspaikka tiliöintisäännön takaa on 0
-								if (($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['toimipaikkakasittely'] == "L") {
+								if ($yhtiorow['toimipaikkakasittely'] == "L") {
 
 									$query = "	SELECT kustp, kohde, projekti
 												FROM yhtion_toimipaikat

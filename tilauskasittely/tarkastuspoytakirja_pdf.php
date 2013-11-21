@@ -93,6 +93,8 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
 	$query = "	SELECT tilausrivi.*,
 				tilausrivin_lisatiedot.*,
+				toimenpiteen_tyyppi.selite as toimenpiteen_tyyppi,
+				huoltosyklit_laitteet.huoltovali as toimenpiteen_huoltovali,
 				poikkeamarivi.tunnus as poikkeamarivi_tunnus
 				FROM tilausrivi
 				JOIN tilausrivin_lisatiedot
@@ -102,6 +104,37 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 				LEFT JOIN tilausrivi as poikkeamarivi
 				ON ( poikkeamarivi.yhtio = tilausrivin_lisatiedot.yhtio
 					AND poikkeamarivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
+				JOIN tuotteen_avainsanat as toimenpiteen_tyyppi
+				ON ( toimenpiteen_tyyppi.yhtio = tilausrivi.yhtio
+					AND toimenpiteen_tyyppi.tuoteno = tilausrivi.tuoteno
+					AND toimenpiteen_tyyppi.laji = 'tyomaarayksen_ryhmittely' )
+				JOIN laite
+				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+				JOIN paikka
+				ON ( paikka.yhtio = laite.yhtio
+					AND paikka.tunnus = laite.paikka )
+				JOIN tuote AS laite_tuote
+				ON ( laite_tuote.yhtio = laite.yhtio
+					AND laite_tuote.tuoteno = laite.tuoteno )
+				JOIN tuotteen_avainsanat sammutin_koko
+				ON ( sammutin_koko.yhtio = laite_tuote.yhtio
+					AND sammutin_koko.tuoteno = laite_tuote.tuoteno
+					AND sammutin_koko.laji = 'sammutin_koko' )
+				JOIN tuotteen_avainsanat sammutin_tyyppi
+				ON ( sammutin_tyyppi.yhtio = laite_tuote.yhtio
+					AND sammutin_tyyppi.tuoteno = laite_tuote.tuoteno
+					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
+				JOIN huoltosykli
+				ON ( huoltosykli.yhtio = tilausrivi.yhtio
+					AND huoltosykli.toimenpide = tilausrivi.tuoteno
+					AND huoltosykli.olosuhde = paikka.olosuhde
+					AND huoltosykli.koko = sammutin_koko.selite
+					AND huoltosykli.tyyppi = sammutin_tyyppi.selite )
+				JOIN huoltosyklit_laitteet
+				ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
+					AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
+					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.otunnus = '{$lasku_tunnus}'
 				AND tilausrivi.var != 'P'";
@@ -109,6 +142,29 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
 	$rivit = array();
 	while ($rivi = mysql_fetch_assoc($result)) {
+		if (!empty($rivi['poikkeus_tunnus'])) {
+			$rivi['poikkeus'] = 'X';
+		}
+		else {
+			$rivi['poikkeus'] = ' ';
+		}
+
+		if ($rivi['toimenpiteen_tyyppi'] == 'koeponnistus') {
+			$rivi['koeponnistus'] = date('my', strtotime($rivi['toimitettuaika']));
+			$rivi['huolto'] = ' ';
+			$rivi['tarkastus'] = ' ';
+		}
+		else if ($rivi['toimenpiteen_tyyppi'] == 'huolto') {
+			$rivi['koeponnistus'] = ' ';
+			$rivi['huolto'] = date('my', strtotime($rivi['toimitettuaika']));
+			$rivi['tarkastus'] = ' ';
+		}
+		else if ($rivi['toimenpiteen_tyyppi'] == 'tarkastus') {
+			$rivi['koeponnistus'] = ' ';
+			$rivi['huolto'] = ' ';
+			$rivi['tarkastus'] = date('my', strtotime($rivi['toimitettuaika']));
+		}
+		
 		$rivi['laite'] = \PDF\Tarkastuspoytakirja\hae_rivin_laite($rivi['asiakkaan_positio']);
 		$rivit[] = $rivi;
 	}
@@ -119,13 +175,56 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 function hae_rivin_laite($laite_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT *
+	$query = "	SELECT laite.*,
+				concat_ws(' ', tuote.nimitys, tuote.tuoteno) as nimitys,
+				sammutin_koko.selite as sammutin_koko,
+				sammutin_tyyppi.selite as sammutin_tyyppi
 				FROM laite
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$laite_tunnus}'";
+				JOIN tuote
+				ON ( tuote.yhtio = laite.yhtio
+					AND tuote.tuoteno = laite.tuoteno )
+				JOIN tuotteen_avainsanat as sammutin_koko
+				ON ( sammutin_koko.yhtio = tuote.yhtio
+					AND sammutin_koko.tuoteno = tuote.tuoteno
+					AND sammutin_koko.laji = 'sammutin_koko' )
+				JOIN tuotteen_avainsanat as sammutin_tyyppi
+				ON ( sammutin_tyyppi.yhtio = tuote.yhtio
+					AND sammutin_tyyppi.tuoteno = tuote.tuoteno
+					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
+				WHERE laite.yhtio = '{$kukarow['yhtio']}'
+				AND laite.tunnus = '{$laite_tunnus}'";
 	$result = pupe_query($query);
 
-	return mysql_fetch_assoc($result);
+	$laite = mysql_fetch_assoc($result);
+
+	$laite['viimeinen_painekoe'] = date('my', strtotime(hae_laitteen_viimeinen_koeponnistus($laite['tunnus'])));
+
+	return $laite;
+}
+
+function hae_laitteen_viimeinen_koeponnistus($laite_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT huoltosyklit_laitteet.viimeinen_tapahtuma
+				FROM huoltosyklit_laitteet
+				JOIN huoltosykli
+				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
+					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+				JOIN tuote as toimenpide_tuote
+				ON ( toimenpide_tuote.yhtio = huoltosykli.yhtio
+					AND toimenpide_tuote.tuoteno = huoltosykli.toimenpide )
+				JOIN tuotteen_avainsanat
+				ON ( tuotteen_avainsanat.yhtio = toimenpide_tuote.yhtio
+					AND tuotteen_avainsanat.tuoteno = toimenpide_tuote.tuoteno
+					AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely'
+					AND tuotteen_avainsanat.selite = 'koeponnistus')
+				WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
+				AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}'";
+	$result = pupe_query($query);
+
+	$viimeinen_tapahtuma = mysql_fetch_assoc($result);
+
+	return $viimeinen_tapahtuma['viimeinen_tapahtuma'];
 }
 
 function hae_tyomaarayksen_asiakas($asiakas_tunnus) {

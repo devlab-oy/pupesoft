@@ -12,12 +12,10 @@ class TarkastuspoytakirjaPDF2
   @logo          = nil
   @customer_data = nil
   @spot_data     = nil
-  @company       = nil
+  @other_data    = nil
 
   @margin = nil
   @data   = nil
-
-  attr_accessor :customer, :company, :logo
 
   def initialize
     @margin = 20
@@ -30,11 +28,13 @@ class TarkastuspoytakirjaPDF2
     filepath = "/tmp/Tarkastuspoytakirja_#{@data['tunnus'].to_s}.pdf"
     filename = "Tarkastuspoytakirja_#{@data['tunnus'].to_s}.pdf"
 
-    Prawn::Document.generate(filepath, { :page_size => "A4", :page_layout => :landscape, :margin => [@margin, @margin, @margin, @margin] }) do |pdf|
+    Prawn::Document.generate(filepath,
+                             { :page_size   => "A4",
+                               :page_layout => :landscape,
+                               :margin      => [100, @margin, @margin, @margin]
+                             }) do |pdf|
       pdf.font 'Helvetica', :style => :normal, :size => 8
       header pdf
-
-      pdf.move_down 80
 
       info pdf
 
@@ -195,8 +195,10 @@ class TarkastuspoytakirjaPDF2
   def rows(pdf)
     row_headers pdf
 
+    pdf.move_down 10
+
     @data['rivit'].each do |row|
-      row row
+      row pdf, row
     end
   end
 
@@ -248,7 +250,7 @@ class TarkastuspoytakirjaPDF2
 
       pdf.text_box 'Sammute', :at => [x+420, pdf.cursor]
       pdf.text_box 'Säiliön nro', :at => [x+470, pdf.cursor]
-      pdf.text_box 'Ponnep nro', :at => [x+550, pdf.cursor]
+      pdf.text_box 'Ponnep nro', :at => [x+540, pdf.cursor]
       pdf.move_down 5
       pdf.text_box 'Poikkeama raportti', :at => [x+600, pdf.cursor], :rotate => 90
       pdf.text_box 'Viimeinen painekoe', :at => [x+625, pdf.cursor], :rotate => 90
@@ -264,8 +266,47 @@ class TarkastuspoytakirjaPDF2
 
   end
 
-  def row(row)
-    #TÄHÄN JÄÄTIIN
+  def row(pdf, row)
+    table_cells = [
+        pdf.make_cell(:content => row['laite']['oma_numero']),
+        pdf.make_cell(:content => row['laite']['sijainti']),
+        pdf.make_cell(:content => ' '), #muuttunut sijainti
+        pdf.make_cell(:content => row['laite']['nimitys']),
+        pdf.make_cell(:content => row['laite']['sammutin_koko']),
+        pdf.make_cell(:content => ' '), #teholuokka
+        pdf.make_cell(:content => row['laite']['sammutin_tyyppi']),
+        pdf.make_cell(:content => row['laite']['sarjanro']),
+        pdf.make_cell(:content => ' '), #ponnop nro
+        pdf.make_cell(:content => row['laite']['poikkeus']),
+        pdf.make_cell(:content => row['laite']['viimeinen_painekoe']),
+        pdf.make_cell(:content => row['toimenpiteen_huoltovali']),
+        pdf.make_cell(:content => row['tarkastus']),
+        pdf.make_cell(:content => row['huolto']),
+        pdf.make_cell(:content => row['koeponnistus'])
+    ]
+
+    pdf.table([table_cells],
+              :column_widths => {
+                  0  => 30,
+                  1  => 165,
+                  2  => 20,
+                  3  => 100,
+                  4  => 50,
+                  5  => 50,
+                  6  => 55,
+                  7  => 70,
+                  8  => 50,
+                  9  => 25,
+                  10 => 30,
+                  11 => 30,
+                  12 => 30,
+                  13 => 30,
+                  14 => 30,
+                  15 => 30,
+              },
+              :cell_style    => {
+                  :borders => []
+              })
   end
 
   def footer(pdf)
@@ -300,9 +341,7 @@ class TarkastuspoytakirjaPDF2
       pdf.move_down 40
 
       pdf.font 'Helvetica', :style => :bold, :size => 10
-      pdf.indent(600) do
-        pdf.text "Tarkastuspöytäkirjan nro 1848"
-      end
+      pdf.draw_text "Tarkastuspöytäkirjan nro #{@data['tunnus']}", :at => [600, 515.28]
       pdf.font 'Helvetica', :style => :normal
     end
   end
@@ -313,7 +352,7 @@ class TarkastuspoytakirjaPDF2
       file.write Base64.decode64 @logo
     }
     pdf.float do
-      pdf.image filepath, :scale => 0.7
+      pdf.image filepath, :scale => 0.7, :at => [0, 555.28]
     end
   end
 

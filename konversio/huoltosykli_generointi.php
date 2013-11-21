@@ -21,7 +21,7 @@ function generoi_huoltosyklit($request) {
 
 	foreach ($request['sammutin_koot'] as $sammutin_koko) {
 		foreach ($request['sammutin_tyypit'] as $sammutin_tyyppi) {
-			foreach ($request['olosuhteet'] as $olosuhde) {
+			foreach ($request['olosuhteet'] as $olosuhde => $selite) {
 				$toimenpidetuote = paattele_toimenpide_tuote($sammutin_koko, $sammutin_tyyppi);
 
 				if (!empty($toimenpidetuote)) {

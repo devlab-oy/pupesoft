@@ -8,7 +8,7 @@ require 'logger'
 require 'date'
 require 'base64'
 
-class TarkastuspoytakirjaPDF2
+class TyolistaPDF
   @logo          = nil
   @customer_data = nil
   @spot_data     = nil
@@ -25,8 +25,8 @@ class TarkastuspoytakirjaPDF2
     init
 
     #Filename is a separate variable because pdf.render_file wants full path but in HTML save form we want to force the directory user is able to download files from. this is the reason we only retrun filename
-    filepath = "/tmp/Tarkastuspoytakirja_#{@data['tunnus'].to_s}.pdf"
-    filename = "Tarkastuspoytakirja_#{@data['tunnus'].to_s}.pdf"
+    filepath = "/tmp/Tyolista_#{@data['tunnus'].to_s}.pdf"
+    filename = "Tyolista_#{@data['tunnus'].to_s}.pdf"
 
     Prawn::Document.generate(filepath,
                              { :page_size   => "A4",
@@ -277,7 +277,7 @@ class TarkastuspoytakirjaPDF2
         pdf.make_cell(:content => row['laite']['sammutin_tyyppi']),
         pdf.make_cell(:content => row['laite']['sarjanro']),
         pdf.make_cell(:content => ' '), #ponnop nro
-        pdf.make_cell(:content => row['laite']['poikkeus']),
+        pdf.make_cell(:content => ' '), #poikkeus
         pdf.make_cell(:content => row['laite']['viimeinen_painekoe']),
         pdf.make_cell(:content => row['toimenpiteen_huoltovali']),
         pdf.make_cell(:content => row['tarkastus']),
@@ -341,13 +341,13 @@ class TarkastuspoytakirjaPDF2
       pdf.move_down 40
 
       pdf.font 'Helvetica', :style => :bold, :size => 10
-      pdf.draw_text "Tarkastuspöytäkirjan nro #{@data['tunnus']}", :at => [600, 515.28]
+      pdf.draw_text "Tyolistan nro #{@data['tunnus']}", :at => [600, 515.28]
       pdf.font 'Helvetica', :style => :normal
     end
   end
 
   def logo(pdf)
-    filepath = '/tmp/logo/logo.jpeg'
+    filepath = '/tmp/logo.jpeg'
     File.open(filepath, 'a+') { |file|
       file.write Base64.decode64 @logo
     }
@@ -362,7 +362,7 @@ class TarkastuspoytakirjaPDF2
 
 end
 
-class WorkOrderDAO
+class WorkListDAO
 
   attr_accessor :data
 
@@ -377,10 +377,10 @@ end
 
 if !ARGV[0].empty?
 
-  workorder = WorkOrderDAO.new(ARGV[0])
+  worklist = WorkListDAO.new(ARGV[0])
 
-  pdf      = TarkastuspoytakirjaPDF2.new
-  pdf.data = workorder.data
+  pdf      = TyolistaPDF.new
+  pdf.data = worklist.data
 
   puts pdf.generate
 else

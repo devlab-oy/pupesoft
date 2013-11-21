@@ -20,6 +20,7 @@ if ($ajax_request) {
 
 require_once('tilauskasittely/tarkastuspoytakirja_pdf.php');
 require_once('tilauskasittely/poikkeamaraportti_pdf.php');
+require_once('tilauskasittely/tyolista_pdf.php');
 
 echo "<font class='head'>".t("Työjono2").":</font>";
 echo "<hr/>";
@@ -80,64 +81,10 @@ else {
 	}
 
 	if ($request['ala_tee'] == 'tulosta_tyolista') {
-		$request['lasku_tunnukset'] = explode(',', $lasku_tunnukset);
-		$tyomaaraykset = hae_tyomaaraykset($request);
-
-		$header_values = array(
-			'kohde_nimi'		 => array(
-				'header' => t('Kohteen nimi'),
-				'order'	 => 1
-			),
-			'paikka_nimi'		 => array(
-				'header' => t('Paikan nimi'),
-				'order'	 => 10
-			),
-			'paikka_olosuhde'	 => array(
-				'header' => t('Olosuhde'),
-				'order'	 => 20
-			),
-			'tuoteno'			 => array(
-				'header' => t('Tuotenumero'),
-				'order'	 => 9
-			),
-			'oma_numero'		 => array(
-				'header' => t('Oma numero'),
-				'order'	 => 0
-			),
-			'laite_sijainti'	 => array(
-				'header' => t('Laitteen tarkempi sijainti'),
-				'order'	 => 11
-			),
-			'toimaika'			 => array(
-				'header' => t('Huoltoaika'),
-				'order'	 => 30
-			),
-			'tyojono'			 => array(
-				'header' => t('Työjono'),
-				'order'	 => 40
-			),
-			'tyostatus'			 => array(
-				'header' => t('Työstatus'),
-				'order'	 => 50
-			),
-		);
-
-		$force_to_string = array(
-			'tuoteno'
-		);
-
-		$sulje_pois = array(
-			'lasku_tunnus',
-			'asiakas_ytunnus',
-			'asiakas_nimi',
-			'tyojonokoodi',
-			'tyostatusvari',
-			'tyostatus_koodi',
-		);
-
-		if (!empty($tyomaaraykset)) {
-			$excel_filepath = generoi_excel_tiedosto($tyomaaraykset, $header_values, $force_to_string, $sulje_pois);
-			echo_tallennus_formi($excel_filepath, t("Työlista"), 'xlsx');
+		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($request['lasku_tunnukset']);
+		
+		if (!empty($pdf_tiedosto)) {
+			echo_tallennus_formi($pdf_tiedosto, t("Työlista"), 'pdf');
 
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
 			unset($request['lasku_tunnukset']);

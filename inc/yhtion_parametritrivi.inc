@@ -3630,3 +3630,15 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'laite_huolto') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'X' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Laitteiden huolto moduuli ei ole p‰‰ll‰")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Laitteiden huolto moduuli on p‰‰ll‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

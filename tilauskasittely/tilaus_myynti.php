@@ -7707,7 +7707,7 @@ if ($tee == '') {
 
 		}
 
-		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
+		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $yhtiorow['laite_huolto'] == '' and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
 			echo "	<td class='back' valign='top'>
 					<form name='tlepaamaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
 					<input type='hidden' name='toim' value='$toim'>
@@ -7721,6 +7721,14 @@ if ($tee == '') {
 					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
 					<input type='submit' value='* ".t("Työmääräys lepäämään")." *'>
 					</form></td>";
+		}
+
+		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $yhtiorow['laite_huolto'] == 'X' and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
+			echo "<td class='back' valign='top'>";
+			echo "<form action='{$palvelin2}tyomaarays/tyojono2.php'>";
+			echo "<input type='submit' value='OK' />";
+			echo "</form>";
+			echo "</td>";
 		}
 
 		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {
@@ -7968,7 +7976,7 @@ if ($tee == '') {
 					echo "</form></td>";
 				}
 			}
-			elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
+			elseif ($kukarow['tilaus_valmis'] != "4" and $yhtiorow['laite_huolto'] == '' and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
 
 				echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>
@@ -8143,7 +8151,7 @@ if ($tee == '') {
 					</form> ";
 		}
 
-		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "") {
+		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "" and $yhtiorow['laite_huolto'] == '') {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
 							msg = '".t("Haluatko todella poistaa tämän tietueen?")."';

@@ -104,7 +104,7 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 				LEFT JOIN tilausrivi as poikkeamarivi
 				ON ( poikkeamarivi.yhtio = tilausrivin_lisatiedot.yhtio
 					AND poikkeamarivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
-				JOIN tuotteen_avainsanat as toimenpiteen_tyyppi
+				LEFT JOIN tuotteen_avainsanat as toimenpiteen_tyyppi
 				ON ( toimenpiteen_tyyppi.yhtio = tilausrivi.yhtio
 					AND toimenpiteen_tyyppi.tuoteno = tilausrivi.tuoteno
 					AND toimenpiteen_tyyppi.laji = 'tyomaarayksen_ryhmittely' )
@@ -125,13 +125,13 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 				ON ( sammutin_tyyppi.yhtio = laite_tuote.yhtio
 					AND sammutin_tyyppi.tuoteno = laite_tuote.tuoteno
 					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
-				JOIN huoltosykli
+				LEFT JOIN huoltosykli
 				ON ( huoltosykli.yhtio = tilausrivi.yhtio
 					AND huoltosykli.toimenpide = tilausrivi.tuoteno
 					AND huoltosykli.olosuhde = paikka.olosuhde
 					AND huoltosykli.koko = sammutin_koko.selite
 					AND huoltosykli.tyyppi = sammutin_tyyppi.selite )
-				JOIN huoltosyklit_laitteet
+				LEFT JOIN huoltosyklit_laitteet
 				ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
 					AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
 					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
@@ -142,7 +142,7 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
 	$rivit = array();
 	while ($rivi = mysql_fetch_assoc($result)) {
-		if (!empty($rivi['poikkeus_tunnus'])) {
+		if (!empty($rivi['poikkeamarivi_tunnus'])) {
 			$rivi['poikkeus'] = 'X';
 		}
 		else {

@@ -270,7 +270,7 @@ class TarkastuspoytakirjaPDF2
     table_cells = [
         pdf.make_cell(:content => row['laite']['oma_numero']),
         pdf.make_cell(:content => row['laite']['sijainti']),
-        pdf.make_cell(:content => ' '), #muuttunut sijainti
+        pdf.make_cell(:content => '__'), #muuttunut sijainti
         pdf.make_cell(:content => row['laite']['nimitys']),
         pdf.make_cell(:content => row['laite']['sammutin_koko']),
         pdf.make_cell(:content => ' '), #teholuokka
@@ -280,9 +280,9 @@ class TarkastuspoytakirjaPDF2
         pdf.make_cell(:content => row['poikkeus']),
         pdf.make_cell(:content => row['laite']['viimeinen_painekoe']),
         pdf.make_cell(:content => row['toimenpiteen_huoltovali']),
-        pdf.make_cell(:content => row['tarkastus']),
-        pdf.make_cell(:content => row['huolto']),
-        pdf.make_cell(:content => row['koeponnistus'])
+        pdf.make_cell(:content => row['tarkastus'].nil? ? '' : row['tarkastus']),
+        pdf.make_cell(:content => row['huolto'].nil? ? '' : row['huolto']),
+        pdf.make_cell(:content => row['koeponnistus'].nil? ? '' : row['koeponnistus']),
     ]
 
     pdf.table([table_cells],

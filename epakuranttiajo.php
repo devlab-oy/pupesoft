@@ -301,22 +301,24 @@
 					if (!$php_cli) echo "<td align='right'>".round($epakurantti_row['kehahin'],2)."</td>";
 					$worksheet->writeNumber($excelrivi, $excelsarake++, round($epakurantti_row['kehahin'],2));
 
-					$vararvo_nyt = round($epakurantti_row['kehahin']*$epakurantti_row['saldo'], 2);
+					$vararvo_nyt = $vararvo_sit = round($epakurantti_row['kehahin']*$epakurantti_row['saldo'], 2);
 
 					if (!$php_cli) echo "<td align='right'>{$vararvo_nyt}</td>";
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $vararvo_nyt);
 
-					if ($mikataso == 100) {
-						$vararvo_sit = 0;
-					}
-					elseif ($mikataso == 75) {
-						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.25*$epakurantti_row['saldo'], 2);
-					}
-					elseif ($mikataso == 50) {
-						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.5*$epakurantti_row['saldo'], 2);
-					}
-					elseif ($mikataso == 25) {
-						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.75*$epakurantti_row['saldo'], 2);
+					if ($tee != '' OR $ajo_tee == 'NAYTA') {
+						if ($mikataso == 100) {
+							$vararvo_sit = 0;
+						}
+						elseif ($mikataso == 75) {
+							$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.25*$epakurantti_row['saldo'], 2);
+						}
+						elseif ($mikataso == 50) {
+							$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.5*$epakurantti_row['saldo'], 2);
+						}
+						elseif ($mikataso == 25) {
+							$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.75*$epakurantti_row['saldo'], 2);
+						}
 					}
 
 					if (!$php_cli) echo "<td align='right'>{$vararvo_sit}</td>";
@@ -332,10 +334,8 @@
 					$excelrivi++;
 					$excelsarake = 0;
 
-					if ($tee != '' OR $ajo_tee == 'NAYTA') {
-						$vararvot_nyt += $vararvo_nyt;
-						$vararvot_sit += $vararvo_sit;
-					}
+					$vararvot_nyt += $vararvo_nyt;
+					$vararvot_sit += $vararvo_sit;
 
 					$epa_tuotemaara++;
 

@@ -295,7 +295,13 @@
 				$valkoodi = 'EUR';
 			}
 
-			if ($laskun_tyyppi == "381" and $summa > 0) {
+			$onko_hyvityslasku = FALSE;
+
+			if ($laskun_tyyppi == "381" or $laskun_tyyppi_teksti == 'HYVITYSLASKU' or $laskun_summa_eur < 0) {
+				$onko_hyvityslasku = TRUE;
+			}
+
+			if ($onko_hyvityslasku and $summa > 0) {
 				$summa = $summa * -1;
 			}
 
@@ -534,12 +540,6 @@
 						}
 					}
 				}
-			}
-
-			$onko_hyvityslasku_kerroin = 1;
-
-			if ($laskun_tyyppi_teksti == 'HYVITYSLASKU' and $laskun_summa_eur < 0) {
-				$onko_hyvityslasku_kerroin = -1;
 			}
 
 			$rivikohtaiset_rahtikulut = 0;
@@ -1437,7 +1437,7 @@
 							// Hyvityslasku tai summa alle nolla
 							// FINVOICE-laskuilla rivihinta on aina valmiiksi oikeinpäin
 							// LISÄTTY VIELÄ:  and $summa > 0 koska nyt rivihinnat näyttäisi olevan myös INVOIC.D.96A laskulla miinusta kun se on hyväri
-							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $ebid != "MAVENTAXML" and $summa > 0) {
+							if (($onko_hyvityslasku or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $ebid != "MAVENTAXML" and $summa > 0) {
 								$summa = $summa * -1;
 							}
 
@@ -1562,7 +1562,7 @@
 
 				// Tehdään ASN Insertit
 				// Pitää olla vaihto-omaisuuslasku
-				if (in_array($trow['oletus_vienti'], array('C','F','I','J','K','L')) and ($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+				if (in_array($trow['oletus_vienti'], array('C','F','I','J','K','L')) and ($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and !$onko_hyvityslasku) {
 
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 					$count_rtuoteno  = count($rtuoteno);
@@ -1670,7 +1670,7 @@
 				}
 
 				// jos kyseessä on tavaraa
-				if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
+				if (!$onko_hyvityslasku and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
 
 					if (!isset($alv_talteen)) $alv_talteen = '';
 

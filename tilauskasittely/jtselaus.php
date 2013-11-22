@@ -760,15 +760,15 @@
 		}
 
 		if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K') {
-			if (count($varastosta) > 0) {
+			if (count($varastosta) > 0 and trim(implode(", ", $varastosta)) != '') {
 				$laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
 			}
 			else {
 				// Jos ei saada mitään järkevää inputtia, niin riipaistaan tyhjää sitten
 				$laskulisa .= " and lasku.varasto = 0 ";
-			}									
+			}
 		}
-
+		
 		if ($automaaginen != '' or $ei_limiittia != '') {
 			$limit = "";
 		}

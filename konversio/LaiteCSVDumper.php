@@ -16,8 +16,6 @@ class LaiteCSVDumper extends CSVDumper {
 			'oma_numero' => 'DATA20',
 			'paikka'	 => 'LISASIJAINTI',
 			'sijainti'	 => 'LISASIJAINTI',
-				//'sijainti'	 => 'TYYPPI', nämä pitää varmaan myös
-				//'sijainti'	 => 'PAINO',
 		);
 		$required_fields = array(
 			'tuoteno',

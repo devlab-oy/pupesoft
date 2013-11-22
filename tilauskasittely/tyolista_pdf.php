@@ -3,27 +3,143 @@
 namespace PDF\Tyolista;
 
 $filepath = dirname(__FILE__);
-if (file_exists($filepath . '/../inc/parametrit.inc')) {
-	require_once($filepath . '/../inc/parametrit.inc');
+if (file_exists($filepath.'/../inc/parametrit.inc')) {
+	require_once($filepath.'/../inc/parametrit.inc');
 }
 else {
-	require_once($filepath . '/parametrit.inc');
+	require_once($filepath.'/parametrit.inc');
 }
 
 function hae_tyolistat($lasku_tunnukset) {
-	$pdf_tiedostot = array();
 	if (!empty($lasku_tunnukset)) {
-		$tyomaaraykset = \PDF\Tyolista\pdf_hae_tyomaaraykset($lasku_tunnukset);
+		$tyomaarays_rivit = \PDF\Tyolista\pdf_hae_tyomaarayksien_rivit($lasku_tunnukset);
 
-		foreach ($tyomaaraykset as $tyomaarays) {
-			$filepath = kirjoita_json_tiedosto($tyomaarays, "tyolista_{$tyomaarays['tunnus']}");
+		$filepath = kirjoita_json_tiedosto($tyomaarays_rivit, "tyolista_".uniqid()."");
 
-			//ajettavan tiedoston nimi on tyolista_pdf.rb
-			$pdf_tiedostot[] = aja_ruby($filepath, 'tyolista_pdf');
-		}
+		$pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
+
+		return $pdf_tiedosto;
+	}
+}
+
+function pdf_hae_tyomaarayksien_rivit($lasku_tunnukset) {
+	global $kukarow, $yhtiorow;
+
+	if (!empty($lasku_tunnukset)) {
+		$lasku_tunnukset = explode(',', $lasku_tunnukset);
+	}
+	else {
+		return array();
 	}
 
-	return $pdf_tiedostot;
+	//Työlista halutaan tulostaa per kohde. Käyttöliittymä on suunniteltu niin,
+	//että tähän metodiin tulee vain yhden kohteen työmääräyksiä. Sen takia LIMIT 1
+	$query = "	SELECT lasku.*,
+				kohde.tunnus as kohde_tunnus,
+				laite.tunnus as laite_tunnus
+				FROM lasku
+				JOIN tilausrivi
+				ON ( tilausrivi.yhtio = lasku.yhtio
+					AND tilausrivi.otunnus = lasku.tunnus
+					AND tilausrivi.var != 'P')
+				JOIN tilausrivin_lisatiedot
+				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+					)
+				JOIN laite
+				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+				JOIN paikka
+				ON ( paikka.yhtio = laite.yhtio
+					AND paikka.tunnus = laite.paikka )
+				JOIN kohde
+				ON ( kohde.yhtio = paikka.yhtio
+					AND kohde.tunnus = paikka.kohde )
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND lasku.tunnus IN ('".implode("','", $lasku_tunnukset)."')
+				LIMIT 1";
+	$result = pupe_query($query);
+
+	$tyomaarays = mysql_fetch_assoc($result);
+
+	$tyomaarays['rivit'] = \PDF\Tyolista\hae_tyolistan_rivit($lasku_tunnukset);
+	$tyomaarays['kohde'] = \PDF\Tyolista\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
+	$tyomaarays['asiakas'] = \PDF\Tyolista\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
+	$tyomaarays['yhtio'] = $yhtiorow;
+	$tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
+}
+
+function hae_tyolistan_rivit($lasku_tunnukset) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT tilausrivi.*,
+				tilausrivin_lisatiedot.*,
+				toimenpiteen_tyyppi.selite as toimenpiteen_tyyppi,
+				huoltosyklit_laitteet.huoltovali as toimenpiteen_huoltovali
+				FROM tilausrivi
+				JOIN tilausrivin_lisatiedot
+				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+					AND tilausrivin_lisatiedot.asiakkaan_positio != 0 )
+				JOIN tuotteen_avainsanat as toimenpiteen_tyyppi
+				ON ( toimenpiteen_tyyppi.yhtio = tilausrivi.yhtio
+					AND toimenpiteen_tyyppi.tuoteno = tilausrivi.tuoteno
+					AND toimenpiteen_tyyppi.laji = 'tyomaarayksen_ryhmittely' )
+				JOIN laite
+				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+				JOIN paikka
+				ON ( paikka.yhtio = laite.yhtio
+					AND paikka.tunnus = laite.paikka )
+				JOIN tuote AS laite_tuote
+				ON ( laite_tuote.yhtio = laite.yhtio
+					AND laite_tuote.tuoteno = laite.tuoteno )
+				JOIN tuotteen_avainsanat sammutin_koko
+				ON ( sammutin_koko.yhtio = laite_tuote.yhtio
+					AND sammutin_koko.tuoteno = laite_tuote.tuoteno
+					AND sammutin_koko.laji = 'sammutin_koko' )
+				JOIN tuotteen_avainsanat sammutin_tyyppi
+				ON ( sammutin_tyyppi.yhtio = laite_tuote.yhtio
+					AND sammutin_tyyppi.tuoteno = laite_tuote.tuoteno
+					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
+				JOIN huoltosykli
+				ON ( huoltosykli.yhtio = tilausrivi.yhtio
+					AND huoltosykli.toimenpide = tilausrivi.tuoteno
+					AND huoltosykli.olosuhde = paikka.olosuhde
+					AND huoltosykli.koko = sammutin_koko.selite
+					AND huoltosykli.tyyppi = sammutin_tyyppi.selite )
+				JOIN huoltosyklit_laitteet
+				ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
+					AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
+					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus IN ('".implode("','", $lasku_tunnukset)."')
+				AND tilausrivi.var != 'P'";
+	$result = pupe_query($query);
+
+	$rivit = array();
+	while ($rivi = mysql_fetch_assoc($result)) {
+		if ($rivi['toimenpiteen_tyyppi'] == 'koeponnistus') {
+			$rivi['koeponnistus'] = 'X';
+			$rivi['huolto'] = ' ';
+			$rivi['tarkastus'] = ' ';
+		}
+		else if ($rivi['toimenpiteen_tyyppi'] == 'huolto') {
+			$rivi['koeponnistus'] = ' ';
+			$rivi['huolto'] = 'X';
+			$rivi['tarkastus'] = ' ';
+		}
+		else if ($rivi['toimenpiteen_tyyppi'] == 'tarkastus') {
+			$rivi['koeponnistus'] = ' ';
+			$rivi['huolto'] = ' ';
+			$rivi['tarkastus'] = 'X';
+		}
+
+		$rivi['laite'] = \PDF\Tyolista\hae_rivin_laite($rivi['asiakkaan_positio']);
+		$rivit[] = $rivi;
+	}
+
+	return $rivit;
 }
 
 function pdf_hae_tyomaaraykset($lasku_tunnukset) {

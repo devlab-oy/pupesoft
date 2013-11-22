@@ -907,7 +907,7 @@
 				// vika pilkku pois
 				$tunnukset = substr($tunnukset,0,-1);
 
-				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
+				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {
 					$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
 				}
 				else {
@@ -1180,7 +1180,7 @@
 					// Tehdään ketjutus (group by PITÄÄ OLLA sama kuin alhaalla) rivi ~1243
 					$query = "  SELECT
 								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-								if(('{$yhtiorow['reklamaatiot_lasku']}' = 'K' and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
+								if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 								group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
@@ -1368,7 +1368,7 @@
 					// Tehdään ketjutus (group by PITÄÄ OLLA sama kuin alhaalla) rivi ~1243
 					$query = "  SELECT
 								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-								if(('{$yhtiorow['reklamaatiot_lasku']}' = 'K' and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
+								if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 								group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
@@ -1624,7 +1624,7 @@
 				//haetaan kaikki laskutusvalmiit tilaukset jotka saa ketjuttaa, viite pitää olla tyhjää muuten ei laskuteta
 				$query  = " SELECT
 							if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-							if(('{$yhtiorow['reklamaatiot_lasku']}' = 'K' and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
+							if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 							lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,

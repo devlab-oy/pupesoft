@@ -330,7 +330,7 @@
 
 		$query = "	SELECT
 					if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-					if(('{$yhtiorow['reklamaatiot_lasku']}' = 'K' and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
+					if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 					lasku.tunnus,
 					lasku.luontiaika,
 					lasku.chn,
@@ -1049,7 +1049,7 @@
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
 		if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
 
-		if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
+		if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {
 			$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
 		}
 		else {

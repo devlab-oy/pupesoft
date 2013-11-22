@@ -546,7 +546,7 @@
 				// Haetaan laskun kaikki rivit
 				$query = "  SELECT
 							if (tilausrivi.nimitys='Kuljetusvakuutus', tilausrivin_lisatiedot.vanha_otunnus, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus)) rivigroup,
-							if(('{$yhtiorow['reklamaatiot_lasku']}' = 'K' and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
+							if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 							tilausrivi.ale1,
 							tilausrivi.ale2,
 							tilausrivi.ale3,

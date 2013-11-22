@@ -284,20 +284,15 @@
 	}
 
 	if (mysql_field_name($result, $i) == "koontilaskut_yhdistetaan") {
-		$sel1 = "";
-		$sel2 = "";
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		if ($trow[$i] == '') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == 'T') {
-			$sel2 = "selected";
-		}
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('T' => '', 'U' => '', 'V' => '');
 
-		$ulos .= "<option value = '' $sel1>".t("Asiakkaan laskutusosoitteella")."</option>";
-		$ulos .= "<option value = 'T' $sel2>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
+		$ulos .= "<option value = ''>".t("Asiakkaan laskutusosoitteella")."</option>";
+		$ulos .= "<option value = 'T' {$sel['T']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
+		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot erikseen")."</option>";
+		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot erikseen")."</option>";
 
 		$ulos .= "</select></td>";
 
@@ -3093,18 +3088,6 @@
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
 					<option value = ''>".t("Noutotilauksia ei laiteta suoraan laskutusjonoon")."</option>
 					<option value = 'K' {$sel}>".t("Noutotilaukset aina suoraan laskutusjonoon")."</option>
-				</select></td>";
-
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "reklamaatiot_lasku") {
-
-		$sel = $trow[$i] == 'K' ? " selected" : "";
-
-		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value = ''>".t("Reklamaatioista ei tehd‰ omia laskuja")."</option>
-					<option value = 'K' {$sel}>".t("Reklamaatioista tehd‰‰n oma lasku")."</option>
 				</select></td>";
 
 		$jatko = 0;

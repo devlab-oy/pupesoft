@@ -166,8 +166,10 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI")  	$ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>        ".t("Kohteen tyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "MYYNNISTA_OSTO")  	$ulos .= "<option value='MYYNNISTA_OSTO' {$avain_sel['MYYNNISTA_OSTO']}>    ".t("Ostotilauksen käsittely myyntitilauksella")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAIKALLISVARAST")	$ulos .= "<option value='PAIKALLISVARAST' {$avain_sel['PAIKALLISVARAST']}>	".t("Paikallisvarasto")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "OLOSUHDE")		  	$ulos .= "<option value='OLOSUHDE' {$avain_sel['OLOSUHDE']}>				".t("Olosuhde")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "LAITE_TILA")		$ulos .= "<option value='LAITE_TILA' {$avain_sel['LAITE_TILA']}>			".t("Laitteen tila")."</option>";
+		if ($yhtiorow['laite_huolto'] == 'X') {
+			if ($lukitse_laji== "" or $lukitse_laji == "OLOSUHDE")		  	$ulos .= "<option value='OLOSUHDE' {$avain_sel['OLOSUHDE']}>				".t("Olosuhde")."</option>";
+			if ($lukitse_laji== "" or $lukitse_laji == "LAITE_TILA")		$ulos .= "<option value='LAITE_TILA' {$avain_sel['LAITE_TILA']}>			".t("Laitteen tila")."</option>";
+		}
 		if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON") 	 	$ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>        	".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")  	$ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>	".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SAMMUTIN_KOKO")  	$ulos .= "<option value='SAMMUTIN_KOKO' {$avain_sel['SAMMUTIN_KOKO']}>		".t("Sammuttimen koko")."</option>";

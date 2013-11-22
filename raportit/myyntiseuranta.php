@@ -376,13 +376,16 @@
 				<td><input type='checkbox' name='ruksit[140]' value='tilauksittain' {$ruk140chk}></td>
 				<td><input type='text' name='rajaus[140]' value='{$rajaus[140]}'></td>
 				<td class='back'>",t("(Toimii vain jos ajat raporttia tilauksista)"),"</td>
-				</tr>
-				<tr>
-				<th>",t("Listaa kohteittain"),"</th>
-				<td><input type='text' name='jarjestys[150]' size='2' value='{$jarjestys[150]}'></td>
-				<td><input type='checkbox' name='ruksit[150]' value='kohteittain' {$ruk150chk}></td>
-				<td><input type='text' name='rajaus[150]' value='{$rajaus[150]}'></td>
-				</tr>
+				</tr>";
+				if ($yhtiorow['laite_huolto'] == 'X') {
+					echo "	<tr>
+							<th>",t("Listaa kohteittain"),"</th>
+							<td><input type='text' name='jarjestys[150]' size='2' value='{$jarjestys[150]}'></td>
+							<td><input type='checkbox' name='ruksit[150]' value='kohteittain' {$ruk150chk}></td>
+							<td><input type='text' name='rajaus[150]' value='{$rajaus[150]}'></td>
+							</tr>";
+				}
+				echo "
 				<tr>
 				<td class='back'><br></td>
 				</tr>

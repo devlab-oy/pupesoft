@@ -318,7 +318,7 @@
 													   		 	varastopaikat.yhtio = tuotepaikat.yhtio
 													   		 	AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 													   		 	AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-													   		 	AND tunnus = '{$jtsro['varasto']}'
+													   		 	AND varastopaikat.tunnus = '{$jtsro['varasto']}'
 													   		 )";
 								$oletuspaikka_lisa = "";
 							}

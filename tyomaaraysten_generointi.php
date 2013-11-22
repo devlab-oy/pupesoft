@@ -90,6 +90,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 					AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
 				WHERE  laite.yhtio = '{$kukarow['yhtio']}'
 				AND laite.tila IN ('N', 'V')
+				AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
 				HAVING IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 30) DAY)
 				ORDER BY laite_tunnus ASC,
 				tuotteen_avainsanat.selitetark ASC";

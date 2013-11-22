@@ -13,6 +13,11 @@ if (mysql_field_type($result, $i) == "blob") {
 	$jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "tuoteno") {
+	$ulos = "<td>".livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT')."</td>";
+	$jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "paikka") {
 	$join = "";
 	if (!empty($asiakas_tunnus)) {

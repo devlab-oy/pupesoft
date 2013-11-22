@@ -19,7 +19,7 @@
 		require ("inc/parametrit.inc");
 	}
 
-	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
+	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana" or $toim == "laite") {
 		enable_ajax();
 	}
 
@@ -34,6 +34,11 @@
 
 	if (isset($livesearch_tee) and $livesearch_tee == "TUOTERYHMAHAKU") {
 		livesearch_tuoteryhmahaku();
+		exit;
+	}
+
+	if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
+		livesearch_tuotehaku();
 		exit;
 	}
 

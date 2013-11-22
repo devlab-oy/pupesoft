@@ -512,7 +512,6 @@ function echo_laitteen_vaihto_form($request = array()) {
 	echo '<th align="left">'.t("Tuotenumero").'</th>';
 	echo "<td>";
 	echo livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', 'uusi_laite[tuoteno]', '226', $request['uusi_laite']['tuoteno'], 'NOSUBMIT');
-	//echo '<input type="text" name="uusi_laite[tuoteno]" value="'.$request['uusi_laite']['tuoteno'].'" size="35" maxlength="60" />';
 	echo "</td>";
 	echo "</tr>";
 

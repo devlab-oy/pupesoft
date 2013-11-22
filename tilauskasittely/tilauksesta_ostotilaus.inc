@@ -160,11 +160,11 @@
 							$tilaustyyppi = 2;
 						}
 
-						if ($kukarow['oletus_ostovarasto'] != 0) {
-							$oletusostovarasto = $kukarow['oletus_ostovarasto'];
-						}
-						elseif ($myytilrow['varasto'] != 0) {
+						if ($myytilrow['varasto'] != 0) {
 							$oletusostovarasto = $myytilrow['varasto'];
+						}
+						elseif ($kukarow['oletus_ostovarasto'] != 0) {
+							$oletusostovarasto = $kukarow['oletus_ostovarasto'];
 						}
 						else {
 							$oletusostovarasto = 0;
@@ -318,7 +318,7 @@
 													   		 	varastopaikat.yhtio = tuotepaikat.yhtio
 													   		 	AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 													   		 	AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-													   		 	AND varastopaikat.tunnus = '{$jtsro['varasto']}'
+													   		 	AND varastopaikat.tunnus = '{$oletusostovarasto}'
 													   		 )";
 								$oletuspaikka_lisa = "";
 							}

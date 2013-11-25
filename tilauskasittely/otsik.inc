@@ -2010,7 +2010,7 @@
 
 					if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
 
-					if ($predefined_yhtiotoimipaikka == 0 and $selectoitu_varasto_toimipaikka == $yht_toimpaik_row['tunnus']) {
+					if ($yhtiorow['pakollinen_varasto'] == 'K' and $predefined_yhtiotoimipaikka == 0 and $selectoitu_varasto_toimipaikka == $yht_toimpaik_row['tunnus']) {
 						$sel = "selected";
 						$predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
 					}
@@ -3404,7 +3404,7 @@
 			$kukarow['toimipaikka'] = $alhiro['tunnus'];
 		}
 
-		if (isset($varasto) and $varasto != 0 and isset($yhtiotoimipaikka) and (trim($yhtiotoimipaikka) == '' or $yhtiotoimipaikka == 0)) {
+		if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($varasto) and $varasto != 0 and isset($yhtiotoimipaikka) and (trim($yhtiotoimipaikka) == '' or $yhtiotoimipaikka == 0)) {
 
 			$_query  = "SELECT toimipaikka
 						FROM varastopaikat

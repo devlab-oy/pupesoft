@@ -550,7 +550,7 @@
 			$vares = mysql_query($edique) or pupe_error($edique);
 			$varow = mysql_fetch_array($vares);
 
-			if (isset($toimipiste) and (trim($toimipiste) == '' or $toimipiste == 0) and $varow['toimipaikka'] != 0) {
+			if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($toimipiste) and (trim($toimipiste) == '' or $toimipiste == 0) and $varow['toimipaikka'] != 0) {
 				$toimipiste = $varow['toimipaikka'];
 			}
 

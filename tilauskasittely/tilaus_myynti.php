@@ -8066,17 +8066,10 @@ if ($tee == '') {
 		}
 
 		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA") {
+			$lopetus_temp = lopetus($lopetus, '', true);
+
 			echo "	<td class='back' valign='top'>
-					<form name='tlepaamaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
-					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-					<input type='hidden' name='projektilla' value='$projektilla'>
-					<input type='hidden' name='tee' value='LEPAA'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='mista' value = '$mista'>
-					<input type='hidden' name='orig_tila' value='$orig_tila'>
-					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
+					<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
 					<input type='submit' value='* ".t("Vauriopöytäkirja lepäämään")." *'>
 					</form></td>";
 		}

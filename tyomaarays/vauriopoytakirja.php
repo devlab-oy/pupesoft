@@ -64,7 +64,7 @@ if ($request['action'] == 'generoi_excel') {
 
 if ($request['action'] == 'hae_vauriopoytakirjat') {
 	$request['vauriopoytakirjat'] = hae_vauriopöytäkirjat($request);
-	
+
 	if (!empty($request['vauriopoytakirjat'])) {
 		echo_vauriopoytakirjat($request);
 	}
@@ -80,7 +80,7 @@ function echo_vauriopoytakirjat($request) {
 
 	$lopetus = "{$palvelin2}tyomaarays/vauriopoytakirja.php////";
 	foreach ($request as $key => $value) {
-		if (!in_array($key, array('vauriopoytakirjat'))) {
+		if (!in_array($key, array('vauriopoytakirjat', 'tyomaarays_statukset'))) {
 			$lopetus .= "{$key}={$value}//";
 		}
 	}
@@ -173,6 +173,14 @@ function hae_vauriopöytäkirjat($request) {
 		$tyomaarays_where .= "	AND tyomaarays.tyostatus = '{$request['vauriopoytakirjan_tila']}'";
 	}
 
+	if (isset($request['selvityksen_antaja']) and $request['selvityksen_antaja'] != '') {
+		$tyomaarays_where .= "	AND tyomaarays.suorittaja LIKE '%{$request['selvityksen_antaja']}%'";
+	}
+
+	if (isset($request['vauriokohteen_osoite']) and $request['vauriokohteen_osoite'] != '') {
+		$tyomaarays_where .= "	AND ( lasku.ohjausmerkki LIKE '%{$request['vauriokohteen_osoite']}%' OR lasku.kohde LIKE '%{$request['vauriokohteen_osoite']}%' )";
+	}
+
 	if ($request['toim'] == 'asentaja') {
 		$tyomaarays_where .= "	AND tyomaarays.tyostatus = '1'";
 	}
@@ -200,7 +208,7 @@ function hae_vauriopöytäkirjat($request) {
 		if ($request['action'] == 'generoi_excel') {
 			$vauriopoytakirja['tilausrivit'] = hae_vauriopoytakirja_rivit($vauriopoytakirja['tunnus']);
 		}
-		
+
 		$vauriopoytakirjat[] = $vauriopoytakirja;
 	}
 
@@ -225,7 +233,7 @@ function hae_vauriopoytakirja_rivit($vauriopoytakirja_tunnus) {
 	$result = pupe_query($query);
 
 	$tilausrivit = array();
-	while($tilausrivi = mysql_fetch_assoc($result)) {
+	while ($tilausrivi = mysql_fetch_assoc($result)) {
 		if ($tilausrivi['tuotetyyppi'] == '') {
 			if ($tilausrivi['try'] == 1) {
 				$tilausrivit['kustannukset']['urakoitsija'][] = $tilausrivi;
@@ -251,7 +259,7 @@ function echo_kayttoliittyma($request) {
 	echo "<table>";
 
 	echo "<tr>";
-	echo "<th>".t('Tilausnumero')."</th>";
+	echo "<th>".t('Operaattorin tikettinumero')."</th>";
 	echo "<td>";
 	echo livesearch_kentta("vauriopoytakirja_form", "VAURIOPOYTAKIRJAHAKU", "tilausnumero", 136, $request['tilausnumero'], 'EISUBMIT', '', '', '');
 	echo "</td>";
@@ -389,10 +397,11 @@ function generoi_custom_excel($request) {
 function excel_otsikko(&$xls, &$excelrivi, &$excelsarake, $request) {
 	global $kukarow, $yhtiorow, $bold;
 
+	$shiit = $request['tulostettava_vauriopoytakirja']['poistui'];
 	$xls->write($excelrivi, $excelsarake++, t('Työ alkoi'), $bold);
-	$xls->write($excelrivi, $excelsarake++, date('d.m.Y H:i:s', $request['tulostettava_vauriopoytakirja']['poistui']));
+	$xls->write($excelrivi, $excelsarake++, date('d.m.Y H:i:s', strtotime($request['tulostettava_vauriopoytakirja']['poistui'])));
 	$xls->write($excelrivi, $excelsarake++, t('Työ päättyi'), $bold);
-	$xls->write($excelrivi, $excelsarake, date('d.m.Y H:i:s', $request['tulostettava_vauriopoytakirja']['valmis']));
+	$xls->write($excelrivi, $excelsarake, date('d.m.Y H:i:s', strtotime($request['tulostettava_vauriopoytakirja']['valmis'])));
 
 	$excelrivi = $excelrivi + 2;
 	$excelsarake = 0;
@@ -461,10 +470,12 @@ function excel_aiheuttajat(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$xls->write($excelrivi, $excelsarake, t('Aiheuttaja').':', $bold);
 	$excelsarake = $excelsarake + 2;
 	if ($request['tulostettava_vauriopoytakirja']['nimi'] == '') {
-		$xls->write($excelrivi, $excelsarake, t('Aiheuttaja tuntematon').': '.t('Kyllä'));
+		
+		$xls->write($excelrivi, $excelsarake, t('Kyllä'));
 	}
 	else {
-		$xls->write($excelrivi, $excelsarake, t('Aiheuttaja tuntematon').': '.t('Ei'));
+		$xls->write($excelrivi, $excelsarake++, t('Aiheuttaja tuntematon').': ', $bold);
+		$xls->write($excelrivi, $excelsarake++, t('Ei'));
 	}
 
 	$excelrivi++;
@@ -547,7 +558,7 @@ function excel_yhteystiedot(&$xls, &$excelrivi, &$excelsarake, $request, $yhteys
 	$xls->write($excelrivi, $excelsarake++, t('Postinumero'), $bold);
 	$xls->write($excelrivi, $excelsarake++, $yhteystiedot['postino']);
 	$xls->write($excelrivi, $excelsarake++, t('Toimipaikka'), $bold);
-	$xls->write($excelrivi, $excelsarake, $yhteystiedot['postitp'], $bold);
+	$xls->write($excelrivi, $excelsarake, $yhteystiedot['postitp']);
 }
 
 function excel_kaapeli(&$xls, &$excelrivi, &$excelsarake, $request) {
@@ -782,6 +793,8 @@ function excel_footer(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$xls->write($excelrivi, $excelsarake, t('Selvityksestä vastaava').':', $bold);
 	$excelrivi++;
 	$excelsarake = 0;
-	$xls->write($excelrivi, $excelsarake++, t('Nimi').': '.$request['tulostettava_vauriopoytakirja']['huolitsija'], $bold);
-	$xls->write($excelrivi, $excelsarake, t('Puhelin').': '.$request['tulostettava_vauriopoytakirja']['jakelu'], $bold);
+	$xls->write($excelrivi, $excelsarake++, t('Nimi').': ', $bold);
+	$xls->write($excelrivi, $excelsarake++, $request['tulostettava_vauriopoytakirja']['huolitsija']);
+	$xls->write($excelrivi, $excelsarake++, t('Puhelin').': ', $bold);
+	$xls->write($excelrivi, $excelsarake++, $request['tulostettava_vauriopoytakirja']['jakelu']);
 }

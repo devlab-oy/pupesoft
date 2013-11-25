@@ -294,10 +294,6 @@
 			}
 			echo "</select></td></tr>";
 
-			echo "<tr><td></td><td></td>";
-			echo "<td>".t("Tilaa Varastoon").":</td>";
-			echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
-
 			$selectoitu_varasto_toimipaikka = 0;
 
 			$query  = "	SELECT *
@@ -305,24 +301,40 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
-			$vares = mysql_query($query) or pupe_error($query);
+			$vares = pupe_query($query);
 
 			while ($varow = mysql_fetch_array($vares)) {
 				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
 
-					$sel = '';
-
 					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
 					if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
-						$sel = 'selected';
-						$selectoitu_varasto_toimipaikka =  $varow['toimipaikka'];
+						$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
+						break;
 					}
-
-					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
 			}
 
-			echo "</select></td></tr>";
+			$yresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+			if (mysql_num_rows($yresult) > 0) {
+
+				echo "<tr><td></td><td></td><td>".t("Tilaava toimipiste").":</td>";
+				echo "<td valign='middle'>";
+				echo "<select name='toimipiste'>";
+				echo "<option value=''>".t("Ei poikkeavaa toimipistettä")."</option>";
+
+				while($row = mysql_fetch_array($yresult)) {
+					$sel = "";
+
+					if ($srow["vanhatunnus"] == $row["tunnus"] or ($srow['vanhatunnus'] == 0 and $kukarow['toimipaikka'] == $row['tunnus'])) $sel = "selected";
+
+					if ($sel == '' and $srow['vanhatunnus'] == 0 and $selectoitu_varasto_toimipaikka == $row['tunnus']) $sel = "selected";
+
+					echo "<option value='$row[tunnus]' $sel>$row[nimi] ($row[ovtlisa])</option>";
+				}
+
+				echo "</select></td></tr>";
+			}
 
 			if ($toim != "HAAMU") {
 				echo "<tr><td>",t("Tilaustyyppi"),":</td>";
@@ -386,30 +398,26 @@
 			echo "<tr><td>".t("Jakelu").": </td><td valign='middle'>
 					<input type='text' name='jakelu' value='$srow[jakelu]' size='25'></td>";
 
-			$yresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
+			echo "<td>".t("Tilaa Varastoon").":</td>";
+			echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
 
-			if (mysql_num_rows($yresult) > 0) {
+			mysql_data_seek($vares, 0);
 
-				echo "<td>".t("Tilaava toimipiste").":</td>";
-				echo "<td valign='middle'>";
-				echo "<select name='toimipiste'>";
-				echo "<option value=''>".t("Ei poikkeavaa toimipistettä")."</option>";
+			while ($varow = mysql_fetch_array($vares)) {
+				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
 
-				while($row = mysql_fetch_array($yresult)) {
-					$sel = "";
+					$sel = '';
 
-					if ($srow["vanhatunnus"] == $row["tunnus"] or ($srow['vanhatunnus'] == 0 and $kukarow['toimipaikka'] == $row['tunnus'])) $sel = "selected";
+					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
+					if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
+						$sel = 'selected';
+					}
 
-					if ($sel == '' and $srow['vanhatunnus'] == 0 and $selectoitu_varasto_toimipaikka == $row['tunnus']) $sel = "selected";
-
-					echo "<option value='$row[tunnus]' $sel>$row[nimi] ($row[ovtlisa])</option>";
+					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
+			}
 
-				echo "</select></td></tr>";
-			}
-			else {
-				echo "<td></td><td></td></tr>";
-			}
+			echo "</select></td></tr>";
 
 			echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 

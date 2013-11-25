@@ -7658,15 +7658,15 @@ if ($tee == '') {
 
 						$colspani = 4;
 
-						if (in_array($toim, array('TARJOUS','EXTTARJOUS','PROJEKTI') or $laskurow["tilaustyyppi"] == "T")) {
+						if (in_array($toim, array('TARJOUS','EXTTARJOUS','PROJEKTI')) or $laskurow["tilaustyyppi"] == "T") {
 							echo "<th colspan='2' nowrap>".t("Näytä").":</th>";
 
-							$colspani	= 2;
+							$colspani = 2;
 						}
 
 						echo "<td colspan='{$colspani}' nowrap>";
 
-						if (in_array($toim, array('TARJOUS','EXTTARJOUS','PROJEKTI') or $laskurow["tilaustyyppi"] == "T")) {
+						if (in_array($toim, array('TARJOUS','EXTTARJOUS','PROJEKTI')) or $laskurow["tilaustyyppi"] == "T") {
 
 							echo "<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
 									<input type='hidden' name='otunnus' value='$tilausnumero'>

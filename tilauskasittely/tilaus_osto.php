@@ -1075,6 +1075,13 @@
 			echo "</tr>";
 			echo "</table><br>";
 
+			$tilausok = 0;
+
+			if ($yhtiorow['pakollinen_varasto'] == 'K' and $laskurow['varasto'] == 0) {
+				echo "<font class='error'>".t("VIRHE: Varaston valinta on pakollinen")."!</font><br><br>";
+				$tilausok++;
+			}
+
 			echo "<table>";
 			echo "<tr><th>".t("Ytunnus")."</th><th colspan='3'>".t("Toimittaja")."</th></tr>";
 			echo "<tr><td>".tarkistahetu($laskurow["ytunnus"])."</td><td colspan='3'>$laskurow[nimi] $laskurow[nimitark]<br>$laskurow[osoite] $laskurow[postino] $laskurow[postitp]</td></tr>";
@@ -1265,7 +1272,6 @@
 				$nettoyhteensa 		  = 0;
 				$eimitatoi 			  = '';
 				$lask 				  = mysql_num_rows($presult);
-				$tilausok 			  = 0;
 				$divnolla			  = 0;
 				$erikoisale_summa	  = 0;
 				$myyntitilaus_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////tee=AKTIVOI//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}//tilausnumero={$tilausnumero}//from=tilaus_myynti";
@@ -1781,11 +1787,6 @@
 					echo "<font class='error'>".t("VIRHE: liian iso loppusumma")."!</font><br>";
 					$tilausok++;
 				}
-			}
-
-			if ($yhtiorow['pakollinen_varasto'] == 'K' and $laskurow['varasto'] == 0) {
-				echo "<br /><font class='error'>".t("VIRHE: Varaston valinta on pakollinen")."!</font><br><br>";
-				$tilausok++;
 			}
 
 			echo "<br><br><table width='100%'><tr>";

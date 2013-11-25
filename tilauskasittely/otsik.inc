@@ -3404,6 +3404,20 @@
 			$kukarow['toimipaikka'] = $alhiro['tunnus'];
 		}
 
+		if (isset($varasto) and $varasto != 0 and isset($yhtiotoimipaikka) and (trim($yhtiotoimipaikka) == '' or $yhtiotoimipaikka == 0)) {
+
+			$_query  = "SELECT toimipaikka
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$varasto}'";
+			$vares = pupe_query($_query);
+			$varow = mysql_fetch_assoc($vares);
+
+			if ($varow['toimipaikka'] != 0) {
+				$yhtiotoimipaikka = $varow['toimipaikka'];
+			}
+		}
+
 		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
 		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 

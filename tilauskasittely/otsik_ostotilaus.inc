@@ -550,6 +550,10 @@
 			$vares = mysql_query($edique) or pupe_error($edique);
 			$varow = mysql_fetch_array($vares);
 
+			if (isset($toimipiste) and (trim($toimipiste) == '' or $toimipiste == 0) and $varow['toimipaikka'] != 0) {
+				$toimipiste = $varow['toimipaikka'];
+			}
+
 			if ($varow["nimi"] != "" and $varow["osoite"] != "") {
 				$tnimi     = $varow["nimi"];
 				$tnimitark = $varow["nimitark"];

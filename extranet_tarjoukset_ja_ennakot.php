@@ -326,7 +326,7 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 
 		// Kopsataan valitut rivit uudelle myyntitilaukselle
 		require("tilauksesta_myyntitilaus.inc");
-		list($tilauksesta_myyntitilaus, $_tunnus) = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
+		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
 
 		if ($tilauksesta_myyntitilaus != '') {
 			echo "$tilauksesta_myyntitilaus<br><br>";

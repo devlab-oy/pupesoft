@@ -162,7 +162,7 @@
 		$syot_var 		= "H";
 		$tilrivilisa	= " and tilausrivi.var = 'A' and tilausrivi.kpl != 0 ";
 
-		list($tilauksesta_myyntitilaus, $_tunnus) = tilauksesta_myyntitilaus($kukarow["kesken"], $tilrivilisa, $syot_varasto, $syot_var, "", "KOPIOIDAANPAIKAT");
+		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $tilrivilisa, $syot_varasto, $syot_var, "", "KOPIOIDAANPAIKAT");
 
 		echo "$tilauksesta_myyntitilaus<br><br>";
 

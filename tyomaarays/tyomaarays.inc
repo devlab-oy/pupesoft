@@ -344,7 +344,7 @@
 				foreach ($palautettavat as $asiakas => $rivit) {
 					$rivitlisa = " AND tilausrivi.tunnus in (".substr($rivit, 0, -1).")";
 
-					list($tilauksesta_myyntitilaus, $_tunnus) = tilauksesta_myyntitilaus($kukarow["kesken"], $rivitlisa, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
+					$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $rivitlisa, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
 					if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
 
 					// P‰ivitet‰‰n rivit tilatuiksi

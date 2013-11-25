@@ -610,7 +610,7 @@
 
 				$tillisa = " and tilausrivi.tunnus in ($coprow[tunnukset]) ";
 
-				list($tilauksesta_myyntitilaus, $_tunnus) = tilauksesta_myyntitilaus($coprow["otunnus"], $tillisa, "", "", "", "JOO");
+				$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($coprow["otunnus"], $tillisa, "", "", "", "JOO");
 
 				echo "$tilauksesta_myyntitilaus<br>";
 

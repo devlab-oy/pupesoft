@@ -465,7 +465,7 @@
 								FROM tilausrivi
 								JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
 								JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
-								JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus !='')
+								JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.hyllyalue = tilausrivi.hyllyalue AND tuotepaikat.hyllynro = tilausrivi.hyllynro AND tuotepaikat.hyllyvali = tilausrivi.hyllyvali AND tuotepaikat.hyllytaso = tilausrivi.hyllytaso)
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tunnus = '{$tunnus}'
 								ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
@@ -2058,7 +2058,7 @@
 				$query = "	SELECT maa
 							FROM yhtion_toimipaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$osrow['yhtio_toimipaikka']}'";
+							AND tunnus  = '{$osrow['yhtio_toimipaikka']}'";
 				$chk_maa_res = pupe_query($query);
 				$chk_maa_row = mysql_fetch_assoc($chk_maa_res);
 
@@ -2113,7 +2113,11 @@
 
 				if ($osrow["maa"] != "" and $osrow["maa"] != $yhtiorow["maa"]) {
 					// tutkitaan ollaanko siellä alv-rekisteröity
-					$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$osrow[maa]' and vat_numero != ''";
+					$alhqur = "	SELECT *
+								FROM yhtion_toimipaikat
+								WHERE yhtio		= '$kukarow[yhtio]'
+								AND maa			= '$osrow[maa]'
+								AND vat_numero != ''";
 					$alhire = pupe_query($alhqur);
 
 					// ollaan alv-rekisteröity
@@ -2147,9 +2151,16 @@
 			// Jos vanha saapuminen, vanhat pyöristyksen nollataan, että ne eivät kumuloidu
 			$laskurow['pyoristys_erot'] = 0;
 
+			if ($laskurow["rahti_etu"] != 0 and $laskurow["rahti_etu_alv"] != 0) {
+				$rahti_etu = $laskurow["rahti_etu"] * ((100 + $laskurow["rahti_etu_alv"]) / 100);
+			}
+			else {
+				$rahti_etu = $laskurow["rahti_etu"];
+			}
+
 			$valittusumma        = round($hintarow["hinta"], 2);
 			$laskunsumma         = round($osrow["summa"] - $valittusumma, 2);
-			$checksumma			 = $osrow["summa"] - $hintarow["hinta"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot'] - $osrow['osto_kulut'];
+			$checksumma			 = $osrow["summa"] - $hintarow["hinta"] - $rahti_etu - $laskurow['pyoristys_erot'] - $osrow['osto_kulut'];
 			$kohdistettava_summa = round($osrow["summa"], 2);
 
 			$pyoristys_erot_alv = 0;
@@ -2422,6 +2433,7 @@
 
 					// Laitetaan rivikohtaiset rahtikulut eturahtiin
 					$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;
+					$laskurow['rahti_etu_alv'] = $rahti_etu_alv;
 
 					$query = "	UPDATE lasku SET
 								rahti_etu = rahti_etu + $rivikohtaiset_rahtikulut,

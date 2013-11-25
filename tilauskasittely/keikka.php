@@ -34,6 +34,8 @@ if (!isset($toimittajaid)) 		$toimittajaid = "";
 if (!isset($kauttalaskutus)) 	$kauttalaskutus = "";
 if (!isset($mobiili_keikka)) 	$mobiili_keikka = "";
 
+$onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
+
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
 if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
@@ -544,9 +546,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	echo "</tr>";
 
-	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
-
-	if (mysql_num_rows($toimipaikat_res) != 0) {
+	if ($onkolaajattoimipaikat) {
 
 		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
@@ -679,7 +679,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		$havinglisa = "HAVING liitetty_lasku_kpl = 0";
 	}
 
-	if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+	if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') {
 		$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
 	}
 	else {
@@ -870,9 +870,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	echo "<form method='post'>";
 
-	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
-
-	if (mysql_num_rows($toimipaikat_res) != 0) {
+	if ($onkolaajattoimipaikat) {
 
 		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
@@ -958,7 +956,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		}
 	}
 
-	if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+	if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') {
 		$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
 	}
 	else {
@@ -1420,7 +1418,7 @@ function echo_yhteenveto_table($params) {
 }
 
 function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $onkolaajattoimipaikat;
 
 	if ($toimittajaid == null) {
 		$toimittaja_where = '';
@@ -1429,8 +1427,8 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 		$toimittaja_where = "AND lasku.liitostunnus = '{$toimittajaid}'";
 	}
 
-	$toimipaikka = isset($toimipaikka) and $toimipaikka != 'kaikki' ? (int) $toimipaikka : 'kaikki';
-
+	$toimipaikkalisa = ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') ? "AND lasku.yhtio_toimipaikka = '".(int) $toimipaikka."'" : "";
+	
 	// haetaan vaihto-omaisuus- ja huolinta/rahti- laskut joita ei oo liitetty saapumisiin
 	$query = "	SELECT
 				lasku.tunnus,
@@ -1517,7 +1515,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 				AND lasku.alatila 	  = ''
 				AND lasku.mapvm 	  = '0000-00-00'
 				AND lasku.vanhatunnus = 0
-				AND lasku.yhtio_toimipaikka = '{$toimipaikka}'
+				{$toimipaikkalisa}
 				{$toimittaja_where}
 				GROUP BY 1,2,3,4";
 	$result = pupe_query($query);

@@ -10774,7 +10774,8 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		if (isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
-						WHERE yhtio='$yhtio' and tunnus='$kukarow[toimipaikka]'";
+						WHERE yhtio = '$yhtio'
+						and tunnus  = '$kukarow[toimipaikka]'";
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
@@ -13588,6 +13589,38 @@ if (!function_exists("pupe_DataTables")) {
 
 											$('#kohdistettu_summa').html(summa_kohdistettu.toFixed(2));
 											$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+										}
+									}
+								);
+							}
+
+						});
+
+						$('input[name^=\"rivi_myyntihinta\"]').each(function(){
+							var tun 				= $(this).attr('id').substring(17);
+							var myyntihinta_alkup	= parseFloat($('#rivimyyntihintaalkuperainen_'+tun).val());
+							var myyntihinta			= parseFloat(this.value.replace(',','.'));
+
+							if (myyntihinta > 9999999999.99) {
+								var virhe = '".t('VIRHE: liian iso loppusumma')."!';
+								alert(virhe);
+							}
+							else if (myyntihinta_alkup != myyntihinta) {
+
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	tunnus: tun,
+										ajax_toiminto: 'myyntihinta',
+										myyntihinta: myyntihinta,
+										no_head: 'yes',
+										ohje: 'off'},
+									function(return_value) {
+										var data = jQuery.parseJSON(return_value);
+
+										if (data.ok) {
+											$('#refresh_screen_ajaxille').val('true');
+
+											$('#rivimyyntihintaalkuperainen_'+tun).val(myyntihinta);
+											$('#rivi_myyntihinta_'+tun).val(myyntihinta);
 										}
 									}
 								);
@@ -18501,7 +18534,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 }
 
 if (!function_exists("pupeFileReader")) {
-	function pupeFileReader($file, $extension = "", $saveintocsvfile = "") {
+	function pupeFileReader($file, $extension = "", $saveintocsvfile = "", $multiple_sheet = false) {
 
         /** Laitetaan rivit arrayseen **/
     	$excelrivit = array();
@@ -18573,63 +18606,26 @@ if (!function_exists("pupeFileReader")) {
         	// Avataan XLSX Zippi
         	exec("cp $file /tmp/$foldername.zip; unzip /tmp/$foldername.zip -d /tmp/$foldername;");
 
-        	$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet1.xml";
-        	$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+			if ($multiple_sheet) {
+				$sheets_dir = "/tmp/$foldername/xl/worksheets/";
+				$number_of_sheets = 0;
+				if ($handle = opendir($sheets_dir)) {
+					while (($file = readdir($handle)) !== false) {
+						if (!in_array($file, array('.', '..')) && !is_dir($sheets_dir.$file))
+							$number_of_sheets++;
+					}
+				}
 
-        	$sheetData		= simplexml_load_file($workSheetFile);
-        	$sharedStrings	= simplexml_load_file($sharedStringsFile);
+				for($i = 1; $i <= $number_of_sheets; $i++) {
+					$excelrivit[$i] = pupeFileReaderXLSRows($foldername, $i, $savefile);
+				}
+			}
+			else {
+				$excelrivit = pupeFileReaderXLSRows($foldername, 1, $savefile);
+			}
 
-        	$sharedStringsArray = array();
-
-        	foreach ($sharedStrings->si as $string) {
-        		$sharedStringsArray[] = utf8_decode($string->t);
-        	}
-
-        	foreach ($sheetData->sheetData->row as $row) {
-
-        		$rowIndex = ($row->attributes()->r)-1;
-
-        		foreach ($row->c as $cell) {
-
-        			if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
-        				$value = $sharedStringsArray[(int) $cell->v];
-        			}
-        			else {
-        				$value = $cell->v;
-        			}
-
-        			$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
-
-        			$excelrivit[$rowIndex][$colIndex] = trim($value);
-        			$colIndex++;
-        		}
-        	}
-
-        	// XLSX failisssa ei ole ollenkaan tyhjiä soluja, injisoidaan ne tässä...
-        	foreach ($excelrivit as $rowIndex => $row) {
-        		$edindex = 0;
-
-        		foreach ($row as $colIndex => $column) {
-
-        			if ($colIndex > 0 and $colIndex > $edindex+1) {
-        				for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
-        					$excelrivit[$rowIndex][$inj] = "";
-        				}
-        			}
-
-        			$edindex = $colIndex;
-        		}
-
-                // Laitetaan solut vielä indeksien mukaan järjestykseen jotta implode toimisi
-        		ksort($excelrivit[$rowIndex]);
-
-        		if (isset($savefile)) {
-        		    fwrite($savefile, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
-        		}
-        	}
-
-        	// Poistetaan zipppi ja purettu zippi
-        	exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
+			// Poistetaan zipppi ja purettu zippi
+			exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
         }
         else {
         	/** PHPExcel kirjasto **/
@@ -18651,22 +18647,14 @@ if (!function_exists("pupeFileReader")) {
         	/** Ladataan file halutuilla parametreilla **/
         	$objPHPExcel = $objReader->load($file);
 
-        	/** Aktivoidaan eka sheetti**/
-        	$objPHPExcel->setActiveSheetIndex(0);
-
-        	/** Loopataan tiedoston rivit **/
-        	foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
-        	    $cellIterator = $row->getCellIterator();
-        	    $cellIterator->setIterateOnlyExistingCells(false);
-
-        		$rowIndex = ($row->getRowIndex())-1;
-
-        	    foreach ($cellIterator as $cell) {
-        	        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
-
-        			$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
-        	    }
-        	}
+			if ($multiple_sheet) {
+				for ($i = 0; $i <= $objPHPExcel->getSheetCount() - 1; $i++) {
+					$excelrivit[$i] = pupeFileReaderXLSRow($objPHPExcel, $i);
+				}
+			}
+			else {
+				$excelrivit = pupeFileReaderXLSRow($objPHPExcel, 0);
+			}
 
         	/** Tuhotaan excel oliot **/
         	unset($objReader);
@@ -18682,6 +18670,94 @@ if (!function_exists("pupeFileReader")) {
             return $excelrivit;
         }
     }
+}
+
+if (!function_exists('pupeFileReaderXLSRows')) {
+	function pupeFileReaderXLSRows($foldername, $i, $savefile) {
+		$excelrivit = array();
+		
+		$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet{$i}.xml";
+		$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+
+		$sheetData		= simplexml_load_file($workSheetFile);
+		$sharedStrings	= simplexml_load_file($sharedStringsFile);
+
+		$sharedStringsArray = array();
+
+		foreach ($sharedStrings->si as $string) {
+			$sharedStringsArray[] = utf8_decode($string->t);
+		}
+
+		foreach ($sheetData->sheetData->row as $row) {
+
+			$rowIndex = ($row->attributes()->r)-1;
+
+			foreach ($row->c as $cell) {
+
+				if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
+					$value = $sharedStringsArray[(int) $cell->v];
+				}
+				else {
+					$value = $cell->v;
+				}
+
+				$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
+
+				$excelrivit[$rowIndex][$colIndex] = trim($value);
+				$colIndex++;
+			}
+		}
+
+		// XLSX failisssa ei ole ollenkaan tyhjiä soluja, injisoidaan ne tässä...
+		foreach ($excelrivit as $rowIndex => $row) {
+			$edindex = 0;
+
+			foreach ($row as $colIndex => $column) {
+
+				if ($colIndex > 0 and $colIndex > $edindex+1) {
+					for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
+						$excelrivit[$rowIndex][$inj] = "";
+					}
+				}
+
+				$edindex = $colIndex;
+			}
+
+			// Laitetaan solut vielä indeksien mukaan järjestykseen jotta implode toimisi
+			ksort($excelrivit[$rowIndex]);
+
+			if (isset($savefile)) {
+				fwrite($savefile, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
+			}
+		}
+
+		return $excelrivit;
+	}
+}
+
+if (!function_exists('pupeFileReaderXLSRow')) {
+	function pupeFileReaderXLSRow(&$objPHPExcel, $i) {
+		$excelrivit = array();
+		
+		/** Aktivoidaan eka sheetti**/
+		$objPHPExcel->setActiveSheetIndex($i);
+
+		/** Loopataan tiedoston rivit **/
+		foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+			$cellIterator = $row->getCellIterator();
+			$cellIterator->setIterateOnlyExistingCells(false);
+
+			$rowIndex = ($row->getRowIndex())-1;
+
+			foreach ($cellIterator as $cell) {
+				$colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+				$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+			}
+		}
+
+		return $excelrivit;
+	}
 }
 
 if (!function_exists("kustannuspaikka_kohde_projekti")) {
@@ -19983,6 +20059,20 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
 	}
 }
 
+if (!function_exists('onko_varaston_hyllypaikat_kaytossa')) {
+	function onko_varaston_hyllypaikat_kaytossa() {
+		global $kukarow;
+
+		# Haetaan varastopaikka
+		$query = "	SELECT tunnus
+					FROM varaston_hyllypaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					LIMIT 1";
+		$result = pupe_query($query);
+		return (mysql_num_rows($result) == 0) ? false : true;
+	}
+}
+
 /**
  * Päivittää tilausrivin kpl määrän
  *
@@ -20497,13 +20587,16 @@ if (!function_exists('uusi_saapuminen')) {
 }
 
 if (!function_exists('hae_yhtion_toimipaikat')) {
-	function hae_yhtion_toimipaikat($yhtio) {
+	function hae_yhtion_toimipaikat($yhtio, $tunnus = 0) {
 
 		$yhtio = mysql_real_escape_string($yhtio);
+
+		$tunnuslisa = (trim($tunnus) != '' and $tunnus != 0) ? " AND tunnus = '{$tunnus}'" : "";
 
 		$query = "	SELECT *
 					FROM yhtion_toimipaikat
 					WHERE yhtio = '{$yhtio}'
+					{$tunnuslisa}
 					ORDER BY nimi";
 		$res = pupe_query($query);
 		return $res;
@@ -23611,10 +23704,11 @@ if (!function_exists('hyllysiirto')) {
 					hyllyvali	= '{$mistarow['hyllyvali']}',
 					hyllytaso	= '{$mistarow['hyllytaso']}',
 					rivitunnus	= {$tun},
-					selite 		= '".t("Paikasta")." {$mista_texti} ".t("vähennettiin")." {$kappaleet}{$selite}',
+					selite 		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." {$kappaleet}{$selite}',
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
+		$mista_tapa_tunnus = mysql_insert_id();
 
 		$query = "	INSERT into tapahtuma set
 					yhtio 		= '{$kukarow['yhtio']}',
@@ -23631,6 +23725,185 @@ if (!function_exists('hyllysiirto')) {
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
+		$minne_tapa_tunnus = mysql_insert_id();
+
+		// Tehdään kirjanpito
+		if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
+			// Lähettävä varasto
+			$mistavarasto = kuuluukovarastoon($mistarow['hyllyalue'], $mistarow['hyllynro']);
+			$minnevarasto = kuuluukovarastoon($minnerow['hyllyalue'], $minnerow['hyllynro']);
+
+			$mista_kustp    = 0;
+			$mista_kohde    = 0;
+			$mista_projekti = 0;
+
+			if ($mistavarasto_row['toimipaikka'] > 0) {
+				$query = "	SELECT kustp, kohde, projekti
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$mistavarasto_row['toimipaikka']}'";
+				$mistatoimipaikka_res = pupe_query($query);
+				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
+
+				if ($mista_kustp == 0)    $mista_kustp    = $mistatoimipaikka_row['kustp'];
+				if ($mista_kohde == 0)    $mista_kohde    = $mistatoimipaikka_row['kohde'];
+				if ($mista_projekti == 0) $mista_projekti = $mistatoimipaikka_row['projekti'];
+			}
+
+			if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0) {
+				$minne_kustp    = 0;
+				$minne_kohde    = 0;
+				$minne_projekti = 0;
+
+				if ($minnevarasto_row['toimipaikka'] > 0) {
+					$query = "	SELECT kustp, kohde, projekti
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$minnevarasto_row['toimipaikka']}'";
+					$minnetoimipaikka_res = pupe_query($query);
+					$minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
+
+					if ($minne_kustp == 0)    $minne_kustp    = $minnetoimipaikka_row['kustp'];
+					if ($minne_kohde == 0)    $minne_kohde    = $minnetoimipaikka_row['kohde'];
+					if ($minne_projekti == 0) $minne_projekti = $minnetoimipaikka_row['projekti'];
+				}
+
+				$mennaanko = FALSE;
+
+				if ($mista_kustp > 0 and $minne_kustp > 0 and $mista_kustp != $minne_kustp) {
+					$mennaanko = TRUE;
+				}
+				if ($mista_kohde > 0 and $minne_kohde > 0 and $mista_kohde != $minne_kohde) {
+					$mennaanko = TRUE;
+				}
+				if ($mista_projekti > 0 and $minne_projekti > 0 and $mista_projekti != $minne_projekti) {
+					$mennaanko = TRUE;
+				}
+
+				$varastonmuutos = round($kappaleet * $keskihankintahinta, 2);
+				$varastonmuutos_neg = round(-1 * $kappaleet * $keskihankintahinta, 2);
+
+				if ($varastonmuutos != 0 and $mennaanko) {
+
+					$laskuid = 0;
+
+					// Löytyykö sopiva tosite
+					if ((int) $tun > 0) {
+						$query = "	SELECT lasku.tunnus
+									FROM tilausrivi
+									JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila = 'G')
+									WHERE tilausrivi.tunnus = '$tun'
+									and tilausrivi.tyyppi   = 'G'
+									and tilausrivi.yhtio    = '$kukarow[yhtio]'";
+						$result = pupe_query($query);
+
+						if (mysql_num_rows($result) == 1) {
+							$lasrow = mysql_fetch_assoc($result);
+							$laskuid = $lasrow['tunnus'];
+						}
+					}
+
+					if ($laskuid == 0) {
+						$query = "	SELECT tunnus
+									FROM lasku
+									WHERE tila = 'X'
+									and tila   = 'G'
+									and tapvm  = current_date
+									and yhtio  = '$kukarow[yhtio]'";
+						$result = pupe_query($query);
+
+						if (mysql_num_rows($result) == 1) {
+							$lasrow = mysql_fetch_assoc($result);
+							$laskuid = $lasrow['tunnus'];
+						}
+					}
+
+					if ($laskuid == 0) {
+						$query = "	INSERT into lasku set
+									yhtio      = '$kukarow[yhtio]',
+									tapvm      = now(),
+									tila       = 'X',
+									alatila    = 'G',
+									laatija    = '$kukarow[kuka]',
+									luontiaika = current_date";
+						$result = pupe_query($query);
+						$laskuid = mysql_insert_id();
+					}
+
+					// Mistä varasto
+					$query = "	INSERT into tiliointi set
+								yhtio    		= '$kukarow[yhtio]',
+								ltunnus  		= '$laskuid',
+								tilino   		= '$yhtiorow[varasto]',
+								kustp    		= '{$mista_kustp}',
+								kohde	 		= '{$mista_kohde}',
+								projekti 		= '{$mista_projekti}',
+								tapvm    		= current_date,
+								summa    		= {$varastonmuutos_neg},
+								vero     		= 0,
+								lukko    		= '',
+								tapahtumatunnus = $mista_tapa_tunnus,
+								selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  		= '$kukarow[kuka]',
+								laadittu 		= now()";
+					$result = pupe_query($query);
+
+					// Mistä varastonmuutos
+					$query = "	INSERT into tiliointi set
+								yhtio    		= '$kukarow[yhtio]',
+								ltunnus  		= '$laskuid',
+								tilino   		= '$yhtiorow[varastonmuutos]',
+								kustp    		= '{$mista_kustp}',
+								kohde	 		= '{$mista_kohde}',
+								projekti 		= '{$mista_projekti}',
+								tapvm    		= current_date,
+								summa    		= {$varastonmuutos},
+								vero     		= 0,
+								lukko    		= '',
+								tapahtumatunnus = $mista_tapa_tunnus,
+								selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  		= '$kukarow[kuka]',
+								laadittu 		= now()";
+					$result = pupe_query($query);
+
+					// Minne varasto
+					$query = "	INSERT into tiliointi set
+								yhtio    		= '$kukarow[yhtio]',
+								ltunnus  		= '$laskuid',
+								tilino   		= '$yhtiorow[varasto]',
+								kustp    		= '{$minne_kustp}',
+								kohde	 		= '{$minne_kohde}',
+								projekti 		= '{$minne_projekti}',
+								tapvm    		= current_date,
+								summa    		= {$varastonmuutos},
+								vero     		= 0,
+								lukko    		= '',
+								tapahtumatunnus = $minne_tapa_tunnus,
+								selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  		= '$kukarow[kuka]',
+								laadittu 		= now()";
+					$result = pupe_query($query);
+
+					// Minne varastonmuutos
+					$query = "	INSERT into tiliointi set
+								yhtio    		= '$kukarow[yhtio]',
+								ltunnus  		= '$laskuid',
+								tilino   		= '$yhtiorow[varastonmuutos]',
+								kustp    		= '{$minne_kustp}',
+								kohde	 		= '{$minne_kohde}',
+								projekti 		= '{$minne_projekti}',
+								tapvm    		= current_date,
+								summa    		= {$varastonmuutos_neg},
+								vero     		= 0,
+								lukko    		= '',
+								tapahtumatunnus = $minne_tapa_tunnus,
+								selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  		= '$kukarow[kuka]',
+								laadittu 		= now()";
+					$result = pupe_query($query);
+				}
+			}
+		}
 	}
 }
 

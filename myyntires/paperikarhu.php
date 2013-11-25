@@ -932,7 +932,7 @@
 						where yhtio = '{$kukarow['yhtio']}'
 						and tunnus = '{$kirjoitin}'";
 			$kires = pupe_query($query);
-			
+
 			error_log($kirjoitin);
 
 			if (mysql_num_rows($kires) == 1) {

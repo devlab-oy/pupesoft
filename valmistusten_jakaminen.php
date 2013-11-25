@@ -34,9 +34,10 @@ foreach($valmistukset as $valmistus) {
 		echo "<table>";
 		echo "<tr>
 				<th>" . t("Valmistus") . "</th>
-				<th>" . t("Valmistuksen tila") . "</th>
+				<th>" . t("Tila") . "</th>
 				<th>" . t("Nimitys") . "</th>
-				<th>" . t("Varattu") . "</th>
+				<th>" . t("Viite") . "</th>
+				<th>" . t("M‰‰r‰") . "</th>
 				<th>" . t("Valmistettu") . "</th>
 			</tr>";
 
@@ -50,6 +51,7 @@ foreach($valmistukset as $valmistus) {
 			echo "<td>" . $valmistus->tunnus() . "</td>";
 			echo "<td>" . $valmistus->getTila() . "</td>";
 			echo "<td>" . $valmiste['nimitys'] . "</td>";
+			echo "<td>" . $valmistus->viesti() . "</td>";
 			echo "<td>" . $valmiste['varattu'] . $valmiste['yksikko'] . "</td>";
 			echo "<td><input type='text' size='8' name='jaettavat_valmisteet[{$valmiste['tunnus']}]' value='" . $valmiste['varattu'] . "'></td>";
 			echo "</tr>";

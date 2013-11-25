@@ -289,7 +289,7 @@
 							tilaajanrivinro = tunnus
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus  = '$tilausrivi_row[tunnus]'";
-			$tresult = pupe_query($sqlquery);
+			$tresult = pupe_query($sqlquery, $masterlink);
 
 		}
 
@@ -300,7 +300,7 @@
 							SET kirjoitin = 'edi'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus  = '{$laskurow['tunnus']}'";
-				pupe_query($query);
+				pupe_query($query, $masterlink);
 			}
 
 		   	$edi_order .= "*ME\n";

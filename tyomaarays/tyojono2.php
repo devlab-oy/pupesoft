@@ -56,6 +56,10 @@ $request['tyostatukset'] = hae_tyostatukset($request);
 
 echo "<div id='tyojono_wrapper'>";
 
+if (is_string($request['lasku_tunnukset'])) {
+	$request['lasku_tunnukset'] = explode(',', $lasku_tunnukset);
+}
+
 if ($toim == 'TEHDYT_TYOT') {
 	if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' or $request['ala_tee'] == 'tulosta_poikkeamaraportti') {
 		$pdf_tiedostot = ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirjat($request['lasku_tunnukset']) : PDF\Poikkeamaraportti\hae_poikkeamaraportit($request['lasku_tunnukset']));
@@ -65,41 +69,33 @@ if ($toim == 'TEHDYT_TYOT') {
 				echo_tallennus_formi($pdf_tiedosto, ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? t("Tarkastuspˆytakirja") : t("Poikkeamaraportti")), 'pdf');
 			}
 		}
-		//lasku_tunnukset pit‰‰ unsetata koska niit‰ k‰ytet‰‰n hae_tyomaarays funkkarissa
-		unset($request['lasku_tunnukset']);
 	}
-
-	$request['tyomaaraykset'] = hae_tyomaaraykset($request);
-	$request['tyomaaraykset'] = kasittele_tyomaaraykset($request);
-	echo_tyomaaraykset_table($request);
 }
 else {
 	if ($request['ala_tee'] == 'merkkaa_tehdyksi') {
 		merkkaa_tyomaarays_tehdyksi($request);
-		//lasku_tunnukset pit‰‰ unsetata koska niit‰ k‰ytet‰‰n hae_tyomaarays funkkarissa
-		unset($request['lasku_tunnukset']);
 	}
 
 	if ($request['ala_tee'] == 'tulosta_tyolista') {
 		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($request['lasku_tunnukset']);
-		
+
 		if (!empty($pdf_tiedosto)) {
 			echo_tallennus_formi($pdf_tiedosto, t("Tyˆlista"), 'pdf');
 
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
-			unset($request['lasku_tunnukset']);
 		}
 		else {
 			echo t("Tyˆm‰‰r‰ysten generointi ep‰onnistui");
 		}
 	}
-
-	$request['tyomaaraykset'] = hae_tyomaaraykset($request);
-
-	$request['tyomaaraykset'] = kasittele_tyomaaraykset($request);
-
-	echo_tyomaaraykset_table($request);
 }
+
+//lasku_tunnukset pit‰‰ unsetata koska niit‰ k‰ytet‰‰n hae_tyomaarays funkkarissa
+unset($request['lasku_tunnukset']);
+
+$request['tyomaaraykset'] = hae_tyomaaraykset($request);
+$request['tyomaaraykset'] = kasittele_tyomaaraykset($request);
+echo_tyomaaraykset_table($request);
 
 echo "</div>";
 

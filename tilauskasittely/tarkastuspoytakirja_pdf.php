@@ -29,11 +29,8 @@ function hae_tarkastuspoytakirjat($lasku_tunnukset) {
 function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 	global $kukarow, $yhtiorow;
 
-	if (!empty($lasku_tunnukset)) {
-		$lasku_tunnukset = explode(',', $lasku_tunnukset);
-	}
-	else {
-		return array();
+	if (empty($lasku_tunnukset)) {
+		return false;
 	}
 
 	//queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin

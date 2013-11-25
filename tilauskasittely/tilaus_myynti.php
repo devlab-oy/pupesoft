@@ -7640,17 +7640,13 @@ if ($tee == '') {
 						$sallijyvitys = TRUE;
 					}
 
-					if (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K') {
-						$sallijyvitys = TRUE;
-					}
-
 					if ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] != '') {
 						$sallijyvitys = TRUE;
 					}
 				}
 
 				//annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
-				if ($sallijyvitys) {
+				if ($sallijyvitys or (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K')) {
 
 					echo "<tr>$jarjlisa";
 
@@ -7659,15 +7655,24 @@ if ($tee == '') {
 					}
 
 					if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI" or (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K')) {
-						echo "	<th colspan='2' nowrap>".t("Näytä").":</th>
-								<td colspan='2' nowrap>
-								<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
-								<input type='hidden' name='otunnus' value='$tilausnumero'>
-								<input type='hidden' name='projektilla' value='$projektilla'>
-								<input type='hidden' name='tee' value='TULOSTA'>
-								<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=LASKUTATILAUS'>";
+
+						$colspani = 4;
 
 						if (in_array($toim, array('TARJOUS','EXTTARJOUS','PROJEKTI') or $laskurow["tilaustyyppi"] == "T")) {
+							echo "<th colspan='2' nowrap>".t("Näytä").":</th>";
+
+							$colspani	= 2;
+						}
+
+						echo "<td colspan='{$colspani}' nowrap>";
+
+						if (in_array($toim, array('TARJOUS','EXTTARJOUS','PROJEKTI') or $laskurow["tilaustyyppi"] == "T")) {
+
+							echo "<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
+									<input type='hidden' name='otunnus' value='$tilausnumero'>
+									<input type='hidden' name='projektilla' value='$projektilla'>
+									<input type='hidden' name='tee' value='TULOSTA'>
+									<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=LASKUTATILAUS'>";
 
 							echo "<select name='toim'>";
 
@@ -7761,7 +7766,7 @@ if ($tee == '') {
 						$koko = '7';
 					}
 
-					if ($toim != "PROJEKTI") {
+					if ($toim != "PROJEKTI" and $sallijyvitys) {
 						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
 							echo "	<th colspan='5'>".t("Pyöristä katetta").":</th>
 									<td class='spec'>

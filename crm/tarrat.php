@@ -366,7 +366,7 @@
 
 		require ("tilauskasittely/monivalintalaatikot.inc");
 
-		$kentat = "nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
+		$kentat = "asiakas.nimi, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.osasto, asiakas.ryhma, asiakas.piiri, asiakas.flag_1, asiakas.flag_2, asiakas.flag_3, asiakas.flag_4";
 
 		$array = explode(",", $kentat);
         $count = count($array);
@@ -395,7 +395,7 @@
 		$limit = "";
 
 		if ($tarra_aineisto != "") {
-			$lisa .= " and tunnus in ($tarra_aineisto) ";
+			$lisa .= " and asiakas.tunnus in ($tarra_aineisto) ";
 		}
 		elseif (isset($limitti) and $limitti != "KAIKKI" and (int) $limitti > 0) {
 			$limit = " LIMIT $limitti ";
@@ -468,31 +468,31 @@
 
 		$urllisa = "&asmemo_viesti=$asmemo_viesti&tarra_aineisto=$tarra_aineisto&raportti=$raportti&toimas=$toimas&as_yht_tiedot=$as_yht_tiedot&asiakas_segmentin_yhteystiedot=$asiakas_segmentin_yhteystiedot&limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku".$ulisa;
 
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=nimi$urllisa'>".t("Nimi")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.nimi$urllisa'>".t("Nimi")."</a>";
 		echo "<br><input type='text' size='10' name = 'haku[0]'  value = '$haku[0]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=osoite$urllisa'>".t("Osoite")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.osoite$urllisa'>".t("Osoite")."</a>";
 		echo "<br><input type='text' size='10' name = 'haku[1]'  value = '$haku[1]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=postino$urllisa'>".t("Postino")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.postino$urllisa'>".t("Postino")."</a>";
 		echo "<br><input type='text' size='7' name = 'haku[2]'  value = '$haku[2]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=postitp$urllisa'>".t("Postitp")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.postitp$urllisa'>".t("Postitp")."</a>";
 		echo "<br><input type='text' size='10' name = 'haku[3]'  value = '$haku[3]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=maa$urllisa'>".t("Maa")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.maa$urllisa'>".t("Maa")."</a>";
 		echo "<br><input type='text' size='3' name = 'haku[4]'  value = '$haku[4]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=osasto$urllisa'>".t("Osasto")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.osasto$urllisa'>".t("Osasto")."</a>";
 		echo "<br><input type='text' size='3' name = 'haku[5]'  value = '$haku[5]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=ryhma$urllisa'>".t("Ryhma")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.ryhma$urllisa'>".t("Ryhma")."</a>";
 		echo "<br><input type='text' size='3' name = 'haku[6]'  value = '$haku[6]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=piiri$urllisa'>".t("Piiri")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.piiri$urllisa'>".t("Piiri")."</a>";
 		echo "<br><input type='text' size='3' name = 'haku[7]'  value = '$haku[7]'></th>";
 
 		if (isset($lisaraj_haku) and $lisaraj_haku == 'on') {
-			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_1$urllisa'>".t("Muuta 1")."</a>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.flag_1$urllisa'>".t("Muuta 1")."</a>";
 			echo "<br><input type='text' size='3' name = 'haku[8]'  value = '$haku[8]'></th>";
-			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_2$urllisa'>".t("Muuta 2")."</a>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.flag_2$urllisa'>".t("Muuta 2")."</a>";
 			echo "<br><input type='text' size='3' name = 'haku[9]'  value = '$haku[9]'></th>";
-			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_3$urllisa'>".t("Muuta 3")."</a>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.flag_3$urllisa'>".t("Muuta 3")."</a>";
 			echo "<br><input type='text' size='3' name = 'haku[10]' value = '$haku[10]'></th>";
-			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_4$urllisa'>".t("Muuta 4")."</a>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.flag_4$urllisa'>".t("Muuta 4")."</a>";
 			echo "<br><input type='text' size='3' name = 'haku[11]' value = '$haku[11]'></th>";
 		}
 

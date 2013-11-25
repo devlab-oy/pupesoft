@@ -2727,6 +2727,11 @@ if ($tee == '') {
 		}
 	}
 
+	if ($yhtiorow['pakollinen_varasto'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO','TARJOUS')) and $laskurow['varasto'] == 0) {
+		echo "<font class='error'>".t("VIRHE: Varaston valinta on pakollinen")."!</font><br><br>";
+		$tilausok++;
+	}
+
 	if ($kukarow['extranet'] == '' and ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS"))) {
 
 		echo "	<script type='text/javascript'>

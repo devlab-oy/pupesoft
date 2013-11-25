@@ -1934,6 +1934,8 @@
 				$varastot_lisa_query = " and varastopaikat.tunnus in ($varastot_lista) ";
 			}
 
+			$selectoitu_varasto_toimipaikka = 0;
+
 			$query  = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -1959,6 +1961,8 @@
 					elseif ($varow['tunnus'] == $srow["varasto"]) {
 						$sel = 'selected';
 					}
+
+					if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
 
 					$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
@@ -2005,6 +2009,11 @@
 					}
 
 					if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
+
+					if ($predefined_yhtiotoimipaikka == 0 and $selectoitu_varasto_toimipaikka == $yht_toimpaik_row['tunnus']) {
+						$sel = "selected";
+						$predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
+					}
 
 					$oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
 				}

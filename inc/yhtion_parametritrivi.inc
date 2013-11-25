@@ -2931,6 +2931,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "pakollinen_varasto") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Varaston valintaa ei pakoteta myyntitilauksella, ostotilauksella, tarjouksella tai reklamaatiolla")."</option>";
+		$ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta pakotetaan myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
+
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "suuntalavat") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

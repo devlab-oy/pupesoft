@@ -294,26 +294,35 @@
 			}
 			echo "</select></td></tr>";
 
-			$yresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
+			echo "<tr><td></td><td></td>";
+			echo "<td>".t("Tilaa Varastoon").":</td>";
+			echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
 
-			if (mysql_num_rows($yresult) > 0) {
+			$selectoitu_varasto_toimipaikka = 0;
 
-				echo "<tr><td></td><td></td>";
-				echo "<td>".t("Tilaava toimipiste").":</td>";
-				echo "<td valign='middle'>";
-				echo "<select name='toimipiste'>";
-				echo "<option value=''>".t("Ei poikkeavaa toimipistettä")."</option>";
+			$query  = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tyyppi != 'P'
+						ORDER BY tyyppi, nimitys";
+			$vares = mysql_query($query) or pupe_error($query);
 
-				while($row = mysql_fetch_array($yresult)) {
-					$sel = "";
+			while ($varow = mysql_fetch_array($vares)) {
+				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
 
-					if ($srow["vanhatunnus"] == $row["tunnus"] or ($srow['vanhatunnus'] == 0 and $kukarow['toimipaikka'] == $row['tunnus'])) $sel = "selected";
+					$sel = '';
 
-					echo "<option value='$row[tunnus]' $sel>$row[nimi] ($row[ovtlisa])</option>";
+					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
+					if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
+						$sel = 'selected';
+						$selectoitu_varasto_toimipaikka =  $varow['toimipaikka'];
+					}
+
+					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
-
-				echo "</select></td></tr>";
 			}
+
+			echo "</select></td></tr>";
 
 			if ($toim != "HAAMU") {
 				echo "<tr><td>",t("Tilaustyyppi"),":</td>";
@@ -377,29 +386,30 @@
 			echo "<tr><td>".t("Jakelu").": </td><td valign='middle'>
 					<input type='text' name='jakelu' value='$srow[jakelu]' size='25'></td>";
 
-			echo "<td>".t("Tilaa Varastoon").":</td>";
-			echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
+			$yresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-			$query  = "	SELECT *
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tyyppi != 'P'
-						ORDER BY tyyppi, nimitys";
-			$vares = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($yresult) > 0) {
 
-			while ($varow = mysql_fetch_array($vares)) {
-				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
+				echo "<td>".t("Tilaava toimipiste").":</td>";
+				echo "<td valign='middle'>";
+				echo "<select name='toimipiste'>";
+				echo "<option value=''>".t("Ei poikkeavaa toimipistettä")."</option>";
 
-					$sel = '';
+				while($row = mysql_fetch_array($yresult)) {
+					$sel = "";
 
-					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-					if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) $sel = 'selected';
+					if ($srow["vanhatunnus"] == $row["tunnus"] or ($srow['vanhatunnus'] == 0 and $kukarow['toimipaikka'] == $row['tunnus'])) $sel = "selected";
 
-					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+					if ($sel == '' and $srow['vanhatunnus'] == 0 and $selectoitu_varasto_toimipaikka == $row['tunnus']) $sel = "selected";
+
+					echo "<option value='$row[tunnus]' $sel>$row[nimi] ($row[ovtlisa])</option>";
 				}
-			}
 
-			echo "</select></td></tr>";
+				echo "</select></td></tr>";
+			}
+			else {
+				echo "<td></td><td></td></tr>";
+			}
 
 			echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 

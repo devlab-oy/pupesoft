@@ -1783,6 +1783,11 @@
 				}
 			}
 
+			if ($yhtiorow['pakollinen_varasto'] == 'K' and $laskurow['varasto'] == 0) {
+				echo "<br /><font class='error'>".t("VIRHE: Varaston valinta on pakollinen")."!</font><br><br>";
+				$tilausok++;
+			}
+
 			echo "<br><br><table width='100%'><tr>";
 
 			if ($rivienmaara > 0 and $laskurow["liitostunnus"] != '' and $tilausok == 0) {

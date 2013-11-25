@@ -679,19 +679,19 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS" and $muokkauslukko =
 		exit;
 	}
 
-	//Luodaan valituista riveistä suoraan normaali ostotilaus
-	require("tilauksesta_ostotilaus.inc");
-
-	$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');
-	$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"],'U');
-
-	if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
-
 	// Kopsataan valitut rivit uudelle myyntitilaukselle
 	require("tilauksesta_myyntitilaus.inc");
 
-	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], '', '', '', '', '', $perusta_tilaustyyppi);
+	list($tilauksesta_myyntitilaus, $_tunnus) = tilauksesta_myyntitilaus($kukarow["kesken"], '', '', '', '', '', $perusta_tilaustyyppi);
 	if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
+
+	//Luodaan valituista riveistä suoraan normaali ostotilaus
+	require("tilauksesta_ostotilaus.inc");
+
+	$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($_tunnus,'T');
+	$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($_tunnus,'U');
+
+	if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
 
 	$query = "UPDATE lasku SET alatila='B' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 	$result = pupe_query($query);

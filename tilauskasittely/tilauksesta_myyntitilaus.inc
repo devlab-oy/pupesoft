@@ -704,6 +704,6 @@
 			//Korjataan globaali muuttuja
 			$kukarow["kesken"] = $kukarowkesken;
 
-			return $tilauksesta_myyntitilaus;
+			return array($tilauksesta_myyntitilaus, $utunnus);
 		}
 	}

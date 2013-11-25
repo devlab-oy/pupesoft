@@ -7677,7 +7677,7 @@ if ($tee == '') {
 				}
 
 				//annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
-				if ($sallijyvitys or (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K')) {
+				if ($sallijyvitys) {
 
 					echo "<tr>$jarjlisa";
 
@@ -7685,101 +7685,79 @@ if ($tee == '') {
 						$jyvsumma = '0.00';
 					}
 
-					if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI" or (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K')) {
+					if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
+						echo "	<th colspan='2' nowrap>".t("Näytä").":</th>
+								<td colspan='2' nowrap>
+								<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
+								<input type='hidden' name='otunnus' value='$tilausnumero'>
+								<input type='hidden' name='projektilla' value='$projektilla'>
+								<input type='hidden' name='tee' value='TULOSTA'>
+								<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=LASKUTATILAUS'>";
 
-						$colspani = 4;
+						echo "<select name='toim'>";
 
-						if (in_array($toim, array('TARJOUS','EXTTARJOUS','PROJEKTI')) or $laskurow["tilaustyyppi"] == "T") {
-							echo "<th colspan='2' nowrap>".t("Näytä").":</th>";
+						if (file_exists("tulosta_tarjous.inc") and ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI")) {
+							echo "<option value='TARJOUS'>".t("Tarjous")."</option>";
 
-							$colspani = 2;
+							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='TARJOUS!!!VL' LIMIT 1";
+							$tarkres = pupe_query($query);
+
+							if (mysql_num_rows($tarkres) > 0) {
+								echo "<option value='TARJOUS!!!VL'>".("Tarjous VL")."</option>";
+							}
+
+							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='TARJOUS!!!BR' LIMIT 1";
+							$tarkres = pupe_query($query);
+
+							if (mysql_num_rows($tarkres) > 0) {
+								echo "<option value='TARJOUS!!!BR'>".t("Tarjous BR")."</option>";
+							}
 						}
 
-						echo "<td colspan='{$colspani}' nowrap>";
-
-						if (in_array($toim, array('TARJOUS','EXTTARJOUS','PROJEKTI')) or $laskurow["tilaustyyppi"] == "T") {
-
-							echo "<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
-									<input type='hidden' name='otunnus' value='$tilausnumero'>
-									<input type='hidden' name='projektilla' value='$projektilla'>
-									<input type='hidden' name='tee' value='TULOSTA'>
-									<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=LASKUTATILAUS'>";
-
-							echo "<select name='toim'>";
-
-							if (file_exists("tulosta_tarjous.inc")) {
-								echo "<option value='TARJOUS'>".t("Tarjous")."</option>";
-
-								$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='TARJOUS!!!VL' LIMIT 1";
-								$tarkres = pupe_query($query);
-
-								if (mysql_num_rows($tarkres) > 0) {
-									echo "<option value='TARJOUS!!!VL'>".("Tarjous VL")."</option>";
-								}
-
-								$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='TARJOUS!!!BR' LIMIT 1";
-								$tarkres = pupe_query($query);
-
-								if (mysql_num_rows($tarkres) > 0) {
-									echo "<option value='TARJOUS!!!BR'>".t("Tarjous BR")."</option>";
-								}
-							}
-
-							if (file_exists("tulosta_tilausvahvistus_pdf.inc")) {
-								echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
-							}
-
-							if (file_exists("tulosta_myyntisopimus.inc")) {
-								echo "<option value='MYYNTISOPIMUS'>".t("Myyntisopimus")."</option>";
-
-								$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!VL' LIMIT 1";
-								$tarkres = pupe_query($query);
-
-								if (mysql_num_rows($tarkres) > 0) {
-									echo "<option value='MYYNTISOPIMUS!!!VL'>".t("Myyntisopimus VL")."</option>";
-								}
-
-								$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!BR' LIMIT 1";
-								$tarkres = pupe_query($query);
-
-								if (mysql_num_rows($tarkres) > 0) {
-									echo "<option value='MYYNTISOPIMUS!!!BR'>".t("Myyntisopimus BR")."</option>";
-								}
-							}
-							if (file_exists("tulosta_osamaksusoppari.inc")) {
-								echo "<option value='OSAMAKSUSOPIMUS'>".t("Osamaksusopimus")."</option>";
-							}
-							if (file_exists("tulosta_luovutustodistus.inc")) {
-								echo "<option value='LUOVUTUSTODISTUS'>".t("Luovutustodistus")."</option>";
-							}
-							if (file_exists("tulosta_vakuutushakemus.inc")) {
-								echo "<option value='VAKUUTUSHAKEMUS'>".t("Vakuutushakemus")."</option>";
-							}
-							if (file_exists("../tyomaarays/tulosta_tyomaarays.inc")) {
-								echo "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
-							}
-							if (file_exists("tulosta_rekisteriilmoitus.inc")) {
-								echo "<option value='REKISTERIILMOITUS'>".t("Rekisteröinti-ilmoitus")."</option>";
-							}
-							if ($toim == "PROJEKTI") {
-								echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
-							}
-
-							echo "</select>
-								<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
-								<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">
-								</form>";
+						if (file_exists("tulosta_tilausvahvistus_pdf.inc")) {
+							echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
 						}
 
-						if (tarkista_oikeus("tilaus_myynti.php", "TARJOUS") and ($laskurow["tilaustyyppi"] == "T" or $yhtiorow['myyntitilaus_tarjoukseksi'] == 'K') and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
-							echo "	<form action='' method='post'>
-									<input type='hidden' name='toim' value='{$toim}'>
-									<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
-									<input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
-									<input type='submit' value='",t("Tee tilauksesta tarjous"),"'>
-									</form>";
+						if (file_exists("tulosta_myyntisopimus.inc")) {
+							echo "<option value='MYYNTISOPIMUS'>".t("Myyntisopimus")."</option>";
+
+							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!VL' LIMIT 1";
+							$tarkres = pupe_query($query);
+
+							if (mysql_num_rows($tarkres) > 0) {
+								echo "<option value='MYYNTISOPIMUS!!!VL'>".t("Myyntisopimus VL")."</option>";
+							}
+
+							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!BR' LIMIT 1";
+							$tarkres = pupe_query($query);
+
+							if (mysql_num_rows($tarkres) > 0) {
+								echo "<option value='MYYNTISOPIMUS!!!BR'>".t("Myyntisopimus BR")."</option>";
+							}
+						}
+						if (file_exists("tulosta_osamaksusoppari.inc")) {
+							echo "<option value='OSAMAKSUSOPIMUS'>".t("Osamaksusopimus")."</option>";
+						}
+						if (file_exists("tulosta_luovutustodistus.inc")) {
+							echo "<option value='LUOVUTUSTODISTUS'>".t("Luovutustodistus")."</option>";
+						}
+						if (file_exists("tulosta_vakuutushakemus.inc")) {
+							echo "<option value='VAKUUTUSHAKEMUS'>".t("Vakuutushakemus")."</option>";
+						}
+						if (file_exists("../tyomaarays/tulosta_tyomaarays.inc")) {
+							echo "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
+						}
+						if (file_exists("tulosta_rekisteriilmoitus.inc")) {
+							echo "<option value='REKISTERIILMOITUS'>".t("Rekisteröinti-ilmoitus")."</option>";
+						}
+						if ($toim == "PROJEKTI") {
+							echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
 						}
 
+						echo "</select>
+							<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
+							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">
+							</form>";
 						echo "</td>";
 
 						if ($sarakkeet_alku-9 > 0) {
@@ -7797,7 +7775,7 @@ if ($tee == '') {
 						$koko = '7';
 					}
 
-					if ($toim != "PROJEKTI" and $sallijyvitys) {
+					if ($toim != "PROJEKTI") {
 						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
 							echo "	<th colspan='5'>".t("Pyöristä katetta").":</th>
 									<td class='spec'>
@@ -8523,7 +8501,17 @@ if ($tee == '') {
 				echo "</form>";
 			}
 
+			if ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '' and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
+				echo "	<br><br><form action='' method='post'>
+						<input type='hidden' name='toim' value='{$toim}'>
+						<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+						<input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
+						<input type='submit' value='",t("Tee tilauksesta tarjous"),"'>
+						</form>";
+			}
+
 			echo "</td>";
+
 		}
 		elseif ($sarjapuuttuu > 0) {
 			echo "<font class='error'>".t("VIRHE: Tilaukselta puuttuu sarjanumeroita!")."</font>";

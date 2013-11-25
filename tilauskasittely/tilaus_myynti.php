@@ -326,7 +326,8 @@ if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $kukarow['kesken'] > 0 and tarki
 	$kukarow['kesken'] = (int) $kukarow['kesken'];
 
 	$query = "	UPDATE lasku SET
-				tila = 'T'
+				tila = 'T',
+				tilaustyyppi = 'T'
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tila = 'N'
 				AND alatila = ''
@@ -7757,16 +7758,6 @@ if ($tee == '') {
 							<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
 							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">
 							</form>";
-
-						if (tarkista_oikeus("tilaus_myynti.php", "TARJOUS") and $laskurow["tilaustyyppi"] == "T" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
-							echo "	<form action='' method='post'>
-									<input type='hidden' name='toim' value='{$toim}'>
-									<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
-									<input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
-									<input type='submit' value='",t("Tee tilauksesta tarjous"),"'>
-									</form>";
-						}
-
 						echo "</td>";
 
 						if ($sarakkeet_alku-9 > 0) {
@@ -8510,7 +8501,17 @@ if ($tee == '') {
 				echo "</form>";
 			}
 
+			if ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '' and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
+				echo "	<br><br><form action='' method='post'>
+						<input type='hidden' name='toim' value='{$toim}'>
+						<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+						<input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
+						<input type='submit' value='",t("Tee tilauksesta tarjous"),"'>
+						</form>";
+			}
+
 			echo "</td>";
+
 		}
 		elseif ($sarjapuuttuu > 0) {
 			echo "<font class='error'>".t("VIRHE: Tilaukselta puuttuu sarjanumeroita!")."</font>";

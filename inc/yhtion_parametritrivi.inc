@@ -2063,6 +2063,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "myyntitilaus_tarjoukseksi") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksella ei n‰ytet‰ aina tarjous-nappia automaattisesti")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella n‰ytet‰‰n aina tarjous-nappi automaattisesti")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "myyntitilauksen_liitteet") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

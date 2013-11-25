@@ -685,14 +685,6 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS" and $muokkauslukko =
 	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], '', '', '', '', '', $perusta_tilaustyyppi);
 	if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
 
-	//Luodaan valituista riveistä suoraan normaali ostotilaus
-	require("tilauksesta_ostotilaus.inc");
-
-	$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($_tunnus,'T');
-	$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($_tunnus,'U');
-
-	if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
-
 	$query = "UPDATE lasku SET alatila='B' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 	$result = pupe_query($query);
 

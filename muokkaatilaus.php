@@ -935,7 +935,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
 
@@ -975,7 +975,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 6;
+			$miinus = 7;
 		}
 		elseif ($toim == 'ENNAKKO') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, viesti tilausviite, $toimaikalisa alatila, tila, lasku.tunnus, tilausrivi.tyyppi trivityyppi, lasku.tilaustyyppi, lasku.varasto
@@ -1006,7 +1006,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == 'EXTENNAKKO') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, viesti tilausviite, $toimaikalisa alatila, tila, lasku.tunnus, tilausrivi.tyyppi trivityyppi, lasku.tilaustyyppi, lasku.varasto
@@ -1038,7 +1038,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == "SIIRTOLISTA") {
 			$query = "	SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring varasto, lasku.luontiaika, lasku.toimaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
@@ -1050,7 +1050,7 @@
 						$haku
 						$mt_order_by
 						$rajaus";
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == "SIIRTOLISTASUPER") {
 			$query = "	SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring varasto, lasku.luontiaika, lasku.toimaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
@@ -1062,7 +1062,7 @@
 						$haku
 						$mt_order_by
 						$rajaus";
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == "MYYNTITILI") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
@@ -1087,7 +1087,7 @@
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "MYYNTITILISUPER") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
@@ -1113,7 +1113,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "MYYNTITILITOIMITA") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
@@ -1130,7 +1130,7 @@
 						GROUP BY lasku.tunnus
 						$mt_order_by
 						$rajaus";
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "JTTOIMITA") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
@@ -1158,7 +1158,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == 'VALMISTUS') {
 			$tilausrivi_join = "";
@@ -1218,7 +1218,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "VALMISTUSSUPER") {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi varastoon, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi, lasku.varasto
@@ -1248,7 +1248,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "VALMISTUSMYYNTI") {
 			$query = "	SELECT lasku.tunnus tilaus, $seuranta $asiakasstring asiakas, $kohde lasku.viesti, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, lasku.tilaustyyppi, lasku.varasto
@@ -1280,7 +1280,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == "VALMISTUSMYYNTISUPER") {
 			$query = "	SELECT lasku.tunnus tilaus, $seuranta $asiakasstring asiakas, $kohde lasku.viesti, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, tilaustyyppi, lasku.varasto
@@ -1313,7 +1313,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
 
@@ -1355,7 +1355,7 @@
 		    	$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "REKLAMAATIO" or $toim == "VASTAANOTA_REKLAMAATIO" or $toim == "REKLAMAATIOSUPER" or $toim == "TAKUU" or $toim == "TAKUUSUPER") {
 
@@ -1404,7 +1404,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
 			$query = "	SELECT lasku.tunnus tilaus,
@@ -1419,7 +1419,7 @@
 						$haku
 						$mt_order_by
 						$rajaus";
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == "TARJOUS") {
 			$query = "	SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
@@ -1453,7 +1453,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == "TARJOUSSUPER") {
 			$query = "	SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
@@ -1487,7 +1487,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "EXTTARJOUS") {
 			$query = "	SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
@@ -1520,7 +1520,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == "EXTRANET") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
@@ -1545,7 +1545,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == "LASKUTUSKIELTO") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.mapvm, lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
@@ -1570,7 +1570,7 @@
 				   $sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == 'OSTO') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
@@ -1590,7 +1590,7 @@
 						GROUP BY 1,2,3,4,5,6,7,8,9,10
 						$mt_order_by
 						$rajaus";
-			$miinus = 8;
+			$miinus = 9;
 		}
 		elseif ($toim == 'OSTOSUPER') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
@@ -1610,7 +1610,7 @@
 						GROUP BY 1,2,3,4,5,6,7,8,9,10
 						$mt_order_by
 						$rajaus";
-			$miinus = 8;
+			$miinus = 9;
 		}
 		elseif ($toim == 'HAAMU') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
@@ -1624,7 +1624,7 @@
 						$haku
 						$mt_order_by
 						$rajaus";
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == 'PROJEKTI') {
 			$query = "	SELECT if(lasku.tunnusnippu > 0 and lasku.tunnusnippu!=lasku.tunnus, concat(lasku.tunnus,',',lasku.tunnusnippu), lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tunnusnippu, lasku.liitostunnus, lasku.varasto
@@ -1637,7 +1637,7 @@
 						$haku
 						$mt_order_by
 						$rajaus";
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == 'YLLAPITO') {
 			$query = "  SELECT lasku.tunnus tilaus,
@@ -1682,7 +1682,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == 'KESKEN') {
 			$query = "	SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
@@ -1722,7 +1722,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 7;
+			$miinus = 8;
 		}
 		elseif ($toim == 'TOSI_KESKEN') {
 			$query = "	SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
@@ -1759,7 +1759,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 7;
+			$miinus = 8;
 		}
 		elseif ($toim == 'ODOTTAA_SUORITUSTA') {
 			$query = "	SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
@@ -1790,7 +1790,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 7;
+			$miinus = 8;
 		}
 		else {
 			$query = "	SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
@@ -1830,7 +1830,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 8;
+			$miinus = 9;
 		}
 
 		$result = pupe_query($query);

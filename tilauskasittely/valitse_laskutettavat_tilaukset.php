@@ -330,6 +330,7 @@
 
 		$query = "	SELECT
 					if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+					if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 					lasku.tunnus,
 					lasku.luontiaika,
 					lasku.chn,
@@ -376,10 +377,10 @@
 					and tilausrivi.varattu  != 0
 					$alatilat
 					$vientilisa
-					GROUP BY ketjutuskentta, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
+					GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
-					ORDER BY ketjutuskentta, lasku.tunnus";
+					ORDER BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus";
 		$res = pupe_query($query);
 
 		$kateinen = "";
@@ -505,7 +506,7 @@
 
 			while ($row = mysql_fetch_assoc($res)) {
 
-				if (isset($edketjutus) and $edketjutus != $row["ketjutuskentta"]) {
+				if ((isset($edketjutus) and $edketjutus != $row["ketjutuskentta"]) or (isset($edreklamaatiot_lasku) and $edreklamaatiot_lasku != $row['reklamaatiot_lasku'])) {
 					echo "<tr><td class='back' align='center' colspan='5'><hr></td><td class='back' align='center'><font class='info'>".t("Lasku").":</font></td><td class='back' colspan='3'><hr></td></tr>";
 				}
 
@@ -694,6 +695,7 @@
 				echo "</tr>";
 
 				$edketjutus = $row["ketjutuskentta"];
+				$edreklamaatiot_lasku = $row["reklamaatiot_lasku"];
 			}
 
 			echo "</table><br>";
@@ -1047,7 +1049,7 @@
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
 		if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
 
-		if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
+		if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {
 			$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
 		}
 		else {

@@ -97,6 +97,7 @@
 							AND tilausrivi.uusiotunnus = 0
 							AND tilausrivi.otunnus LIKE '%{$row['tilausnumero']}'
 							AND tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}'
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$tilausrivi_muuttuja}
 							ORDER BY laadittu asc";
 				$kokeillaan = pupe_query($query);
@@ -123,6 +124,7 @@
 								AND tilausrivi.uusiotunnus = 0
 								AND lasku.comments LIKE '%{$row['tilausnumero']}%'
 								AND tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}'
+								AND tilausrivi.kpl+tilausrivi.varattu != 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
@@ -149,6 +151,7 @@
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.uusiotunnus = 0
 								AND tilausrivi.otunnus LIKE '%{$row['tilausnumero']}'
+								AND tilausrivi.kpl+tilausrivi.varattu != 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
@@ -175,6 +178,7 @@
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.uusiotunnus = 0
 								AND lasku.comments LIKE '%{$row['tilausnumero']}%'
+								AND tilausrivi.kpl+tilausrivi.varattu != 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
@@ -200,6 +204,7 @@
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.uusiotunnus = 0
+								AND tilausrivi.kpl+tilausrivi.varattu != 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 				}
@@ -290,6 +295,7 @@
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'O'
 									AND tilausrivi.uusiotunnus = 0
+									AND tilausrivi.kpl+tilausrivi.varattu != 0
 									{$loysan_tilausrivi_muuttuja}
 									ORDER BY laadittu ASC";
 						$loysa_result = pupe_query($query);
@@ -497,7 +503,7 @@
 						// etsitään ja splitataan myös myyntitilausrivi ISÄ
 						$query = "	SELECT tilausrivi.tunnus
 									FROM tilausrivi
-									JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$split_row['tunnus']}')
+									JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki > 0 AND tl.tilausrivilinkki = '{$split_row['tunnus']}')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'L'";
 						$myynti_rivi_res = pupe_query($query);
@@ -562,7 +568,7 @@
 									// etsitään ja splitataan myös myyntitilausrivi LAPSI
 									$query = "	SELECT tilausrivi.tunnus
 												FROM tilausrivi
-												JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
+												JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki > 0 AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
 												WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 												AND tilausrivi.tyyppi = 'L'";
 									$myynti_rivi_res = pupe_query($query);
@@ -727,7 +733,7 @@
 					// etsitään ja splitataan myös myyntitilausrivi ISÄ
 					$query = "	SELECT tilausrivi.tunnus
 								FROM tilausrivi
-								JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$tilausrivirow['tunnus']}')
+								JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki > 0 AND tl.tilausrivilinkki = '{$tilausrivirow['tunnus']}')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'L'";
 					$myynti_rivi_res = pupe_query($query);
@@ -792,7 +798,7 @@
 								// etsitään ja splitataan myös myyntitilausrivi LAPSI
 								$query = "	SELECT tilausrivi.tunnus
 											FROM tilausrivi
-											JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
+											JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki > 0 AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
 											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivi.tyyppi = 'L'";
 								$myynti_rivi_res = pupe_query($query);

@@ -248,7 +248,8 @@
 	if ($asiakastiedot["yhtio_toimipaikka"] != '' and $asiakastiedot["yhtio_toimipaikka"] != 0) {
 		$toimipaikkaquery = "	SELECT *
 								FROM yhtion_toimipaikat
-								WHERE yhtio='$kukarow[yhtio]' AND tunnus='$asiakastiedot[yhtio_toimipaikka]'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = '$asiakastiedot[yhtio_toimipaikka]'";
 		$toimipaikkares = pupe_query($toimipaikkaquery);
 		$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
 	}

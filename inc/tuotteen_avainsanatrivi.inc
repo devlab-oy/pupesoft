@@ -13,6 +13,8 @@
 
 		$sel = array($trow[$i] => "SELECTED");
 
+		$tem_laji = $trow[$i];
+
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 		$ulos .= "<option value='nimitys' $sel[nimitys]>".t("Tuotteen nimitys")."</option>";
 		$ulos .= "<option value='lyhytkuvaus' $sel[lyhytkuvaus]>".t("Tuotteen lyhytkuvaus")."</option>";
@@ -25,6 +27,7 @@
 		$ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhmä")."</option>";
 		$ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
 		$ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
+		$ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lisätä EDI-ostotilaukselle")."</option>";
 		$ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
 		if ($yhtiorow['laite_huolto'] == 'X') {
 			$ulos .= "<option value='sammutin_tyyppi' $sel[sammutin_tyyppi]>".t("Sammuttimen tyyppi")."</option>";
@@ -32,6 +35,7 @@
 		}
 		$ulos .= "<option value='tyomaarayksen_ryhmittely' $sel[tyomaarayksen_ryhmittely]>".t("Työmääräyksen ryhmittely")."</option>";
 		$ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
+		$ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
 
 		$sresult = t_avainsana("TUOTEULK");
 
@@ -56,11 +60,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tuoteno") {
-		if($lukitse_avaimeen != "") {
+		if ($lukitse_avaimeen != "") {
 			$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
 			$jatko = 0;
 		}
-		elseif(isset($alasveto[$i])) {
+		elseif (isset($alasveto[$i])) {
 			$ulos = "<td>".$alasveto[$i]."</td>";
 			$jatko = 0;
 		}
@@ -68,7 +72,7 @@
 
 	if (mysql_field_name($result, $i) == "selite") {
 
-		if ($trow["laji"] == "tarratyyppi") {
+		if ($tem_laji == "tarratyyppi") {
 
 			$vresult = t_avainsana("TARRATYYPPI");
 
@@ -85,7 +89,21 @@
 
 			$jatko = 0;
 		}
-		elseif($trow["laji"] == "oletusvalinta") {
+		elseif ($tem_laji == "toimpalautus") {
+			$sel = "";
+
+			if ($trow[$i] != "") {
+				$sel = "SELECTED";
+			}
+
+			$ulos = "<td><select name='$nimi'>";
+			$ulos .= "<option value=' '>".t("Tuote voidaan reklamaatiolla merkata suoraan toimittajalle palautettavaksi")."</option>";
+			$ulos .= "<option value='EI' $sel>".t("Tuotetta EI voida merkata suoraan toimittajalle palautettavaksi")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		elseif ($tem_laji == "oletusvalinta") {
 			$sel = array($trow[$i] => "SELECTED");
 
 
@@ -98,12 +116,12 @@
 							JOIN toimi ON toimi.yhtio=tuotteen_toimittajat.yhtio and toimi.tunnus=tuotteen_toimittajat.liitostunnus
 							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]' and liitostunnus > 0";
 			$oltarkres = pupe_query($olquery);
-			if(mysql_num_rows($oltarkres) > 0) {
-				while($olrow = mysql_fetch_array($oltarkres)) {
+
+			if (mysql_num_rows($oltarkres) > 0) {
+				while ($olrow = mysql_fetch_array($oltarkres)) {
 					$ulos .= "
 						<option value='!!!{$olrow["tunnus"]}' ".$sel["!!!{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan asiakkaalle")."</option>
 						<option value='¡¡¡{$olrow["tunnus"]}' ".$sel["¡¡¡{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan varastoon")."</option>";
-
 				}
 			}
 
@@ -114,16 +132,14 @@
 							AND tyyppi = 'R'
 							LIMIT 1";
 			$oltarkres = pupe_query($olquery);
-			if(mysql_num_rows($oltarkres) > 0) {
-				while($olrow = mysql_fetch_array($oltarkres)) {
-					$ulos .= "
-							<option value='¡¡V' ".$sel["¡¡V"].">".t("Valmistetaan varastoon (oletuspaikka)")."</option>";
 
+			if (mysql_num_rows($oltarkres) > 0) {
+				while ($olrow = mysql_fetch_array($oltarkres)) {
+					$ulos .= "<option value='¡¡V' ".$sel["¡¡V"].">".t("Valmistetaan varastoon (oletuspaikka)")."</option>";
 				}
 			}
-			$ulos .= "
-						</select>
-					</td>";
+
+			$ulos .= "</select></td>";
 		}
 		elseif ($trow[3] == "sammutin_koko") {
 			$sammuttimen_koot_result = t_avainsana('SAMMUTIN_KOKO');
@@ -166,7 +182,7 @@
 
 	if (mysql_field_name($result, $i) == "selitetark") {
 
-		if ($trow["laji"] == "pakkauskoko2" or $trow["laji"] == "pakkauskoko3") {
+		if ($tem_laji == "pakkauskoko2" or $tem_laji == "pakkauskoko3") {
 			$vresult = t_avainsana("Y");
 			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 

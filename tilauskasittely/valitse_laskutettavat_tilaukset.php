@@ -221,7 +221,7 @@
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 						WHERE otunnus  in ($laskutettavat)
-						and var not in ('P','J')
+						and var not in ('P','J','O')
 						and yhtio 		= '$kukarow[yhtio]'
 						and keratty    != ''
 						and toimitettu  = ''

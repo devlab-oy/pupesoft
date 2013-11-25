@@ -112,7 +112,7 @@
 		// Jaaha päivitämme maksutilin!
 		if ($tila == 'T') {
 
-			$kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s.'), tilinumero_print($trow['tilinumero'])." ".$ultilno) ."<br>" . $trow['comments'];
+			$kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t('Laskun maksutili muutettiin. Vanha oli %s.', '', $ultilno)."<br>" . $trow['comments'];
 
 			//Päivitetään lasku
 			$query = "	UPDATE lasku
@@ -890,14 +890,17 @@
 						AND tilino in ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')";
 			$result = pupe_query($query);
 
-			// Haetaan kulutiliöinti
-			$query = "	SELECT *
+			// Etsitään kulutiliöinnit
+			$query = "	SELECT tiliointi.*
 						FROM tiliointi
-						WHERE yhtio		= '$kukarow[yhtio]'
-						AND ltunnus		= '$tunnus'
-						AND tapvm		= '$trow[tapvm]'
-						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-						AND korjattu	= ''";
+						JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+						LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
+						WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
+						AND tiliointi.ltunnus	= '$tunnus'
+						AND tiliointi.tapvm		= '$trow[tapvm]'
+						AND tiliointi.tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+						AND tiliointi.korjattu	= ''
+						AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','O'))";
 			$result = pupe_query($query);
 
 			while ($tiliointirow = mysql_fetch_assoc($result)) {
@@ -951,14 +954,17 @@
 		}
 		else {
 
-			// Haetaan kulutiliöinti
-			$query = "	SELECT tunnus, summa, vero, tilino
+			// Etsitään kulutiliöinnit
+			$query = "	SELECT tiliointi.tunnus, tiliointi.summa, tiliointi.vero, tiliointi.tilino
 						FROM tiliointi
-						WHERE yhtio		= '$kukarow[yhtio]'
-						AND ltunnus		= '$tunnus'
-						AND tapvm		= '$trow[tapvm]'
-						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
-						AND korjattu	= ''";
+						JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+						LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
+						WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
+						AND tiliointi.ltunnus	= '$tunnus'
+						AND tiliointi.tapvm		= '$trow[tapvm]'
+						AND tiliointi.tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
+						AND tiliointi.korjattu	= ''
+						AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','O'))";
 			$result_x = pupe_query($query);
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
@@ -1230,6 +1236,34 @@
 		$tila = 'X';
 	}
 
+	if ($tila == 'vaihdatoimipaikka' and isset($toimipaikka)) {
+
+		$toimipaikka = mysql_escape_string($toimipaikka);
+
+		$query = "	UPDATE lasku SET
+					yhtio_toimipaikka = '{$toimipaikka}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tila in ('H','Y','M','P','Q')
+					and tunnus = '$tunnus'";
+		$result = pupe_query($query);
+
+		// haetaan laskun tiedot uudestaan
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus = '{$tunnus}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 1) {
+			echo t("Lasku")." {$tunnus} ".t("ei löytynytkään")."!";
+			exit;
+		}
+
+		$trow = mysql_fetch_assoc($result);
+		$tee = 'E';
+		$tila = 'X';
+	}
+
 	if ($tila == 'viikorkomuuta') {
 		$query = "	UPDATE lasku SET
 					viikorkopros = '$viikorkoprossa'
@@ -1362,7 +1396,7 @@
 
 			$suljettu_tilikausi = false;
 			$trow_tapvm = $trow['tapvm'];
-			$tapvmlisa = "AND tapvm	= '{$trow['tapvm']}'";
+			$tapvmlisa = "AND tiliointi.tapvm = '{$trow['tapvm']}'";
 
 			if ($trow['tapvm'] < $yhtiorow['tilikausi_alku']) {
 				$suljettu_tilikausi = true;
@@ -1370,14 +1404,17 @@
 				$tapvmlisa = "";
 			}
 
-			// Haetaan kulutiliöinti
-			$query = "	SELECT *
+			// Etsitään kulutiliöinnit
+			$query = "	SELECT tiliointi.*
 						FROM tiliointi
-						WHERE yhtio		= '$kukarow[yhtio]'
-						AND ltunnus		= '$tunnus'
+						JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+						LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
+						WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
+						AND tiliointi.ltunnus	= '$tunnus'
 						{$tapvmlisa}
-						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
-						AND korjattu	= ''";
+						AND tiliointi.tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
+						AND tiliointi.korjattu	= ''
+						AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','O'))";
 			$result_tiliointi = pupe_query($query);
 
 			$varastotili = $yhtiorow['matkalla_olevat'];
@@ -1605,7 +1642,6 @@
 	}
 
 	if ($tila == '') {
-
 		// katotaan onko lasku liitetty saapumiseen
 		$query = "	SELECT lasku.laskunro, keikka.alatila
 					FROM lasku
@@ -1620,15 +1656,15 @@
 		echo "<table>";
 
 		if ($trow['tila'] == 'X') {
+			$pvm = erottele($trow['tapvm']);
 
 			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
-				$pvm = erottele($trow['tapvm']);
 
 				echo "	<form method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee'  value='M'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t("Tapahtumapvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1638,42 +1674,6 @@
 						</tr>
 						</form>";
 			}
-
-			$query = "	SELECT tunnus, liitos, liitostunnus
-						FROM tiliointi
-						WHERE yhtio  = '{$kukarow['yhtio']}'
-						AND ltunnus  = '{$tunnus}'
-						AND korjattu = ''
-						ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
-			$tunnukset_talteen_res = pupe_query($query);
-
-			$tiliointirivit = array();
-			$ed_iliitostunnus = array();
-			$iliitos = array();
-
-			$xxx = 1;
-
-			while ($tunnukset_talteen_row = mysql_fetch_assoc($tunnukset_talteen_res)) {
-				$tiliointirivit[$xxx] = $tunnukset_talteen_row['tunnus'];
-				$ed_iliitostunnus[$xxx] = $tunnukset_talteen_row['liitostunnus'];
-				$iliitos[$xxx] = $tunnukset_talteen_row['liitos'];
-				$xxx++;
-			}
-
-			echo "	<form action = 'tosite.php' method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}/SPLIT/$PHP_SELF////tee=E//tila=//tunnus=$tunnus'>
-					<input type = 'hidden' name='tee'  value=''>
-					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-					<input type = 'hidden' name='tiliointirivit' value='".urlencode(serialize($tiliointirivit))."' />
-					<input type = 'hidden' name='ed_iliitostunnus' value='".urlencode(serialize($ed_iliitostunnus))."' />
-					<input type = 'hidden' name='iliitos' value='".urlencode(serialize($iliitos))."' />
-					<input type = 'hidden' name='tullaan' value='muutosite' />
-					<tr>
-					<th>".t("Vaihda asiakas-/toimittajaliitos")."</th>
-					<td>&nbsp;</td><td class='back'><input type = 'submit' value = '".t("Hae")."'></td>
-					</tr>
-					</form>";
-
 		}
 		else {
 			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku'] and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
@@ -1682,10 +1682,10 @@
 
 				if ($yhtiorow['ostolaskujen_paivays'] == "1"){
 					echo "<form method='post'>
-							<input type = 'hidden' name='lopetus' value='$lopetus'>
+							<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 							<input type = 'hidden' name='tila' value='vaihda_lapvm'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>";
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
 					echo "<tr><th>".t("Lapvm")."</th>";
 					echo "<td><input type = 'text' name = 'vpp' maxlength='2' size='2' value = '$lapvm[pp]'>
 						  <input type = 'text' name = 'vkk' maxlength='2' size='2' value = '$lapvm[kk]'>
@@ -1696,10 +1696,10 @@
 				}
 
 				echo "<form method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee' value='M'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t("Tapahtumapvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1718,10 +1718,10 @@
 
 					if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 						echo "<form method='post'>
-							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+							<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 							<input type = 'hidden' name='tila' value='Q'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 							<tr>
 							<th>".t("summa")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[summa]'></td>
@@ -1736,10 +1736,10 @@
 					$pvm = erottele($trow['kapvm']);
 
 					echo "<form method='post'>
-							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+							<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 							<input type = 'hidden' name='tila' value='C'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 							<tr>
 							<th>".t("kassa-ale ja/tai kapvm")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[kasumma]'>
@@ -1757,10 +1757,10 @@
 				$pvm = erottele($trow['erpcm']);
 
 				echo "<form method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 						<input type = 'hidden' name='tila' value='R'>
 						<input type = 'hidden' name='tee' value='M'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t("eräpvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1774,10 +1774,10 @@
 					$pvm = erottele($trow['kapvm']);
 
 					echo "<form method='post'>
-							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+							<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 							<input type = 'hidden' name='tila' value='B'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 							<tr>
 							<th>".t("kassa-alepvm")."</th>
 							<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1792,10 +1792,10 @@
 				if ($trow['tila'] == 'U' and $trow['mapvm'] == '0000-00-00') {
 
 					echo "<form method='post'>
-							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+							<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 							<input type = 'hidden' name='tila' value='maksuehto'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 							<tr>
 							<th>".t("Vaihda maksuehto")."</th>";
 							echo "<td><select name='maksuehto'>";
@@ -1828,10 +1828,10 @@
 			if ($trow['mapvm'] >= $yhtiorow['tilikausi_alku']) {
 				$pvm=erottele($trow['mapvm']);
 				echo "<form method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 					<input type = 'hidden' name='tila' value='S'>
 					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 					<tr>
 					<th>".t("suorituspvm")."</th>
 					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1872,10 +1872,10 @@
 			if ($trow['vienti']=='L') $vientil = 'selected';
 
 			echo "<form method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 					<input type = 'hidden' name='tila' value='W'>
 					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 					<tr>
 					<th>".t("laskun tyyppi")."</th>";
 
@@ -1970,24 +1970,59 @@
 
 		if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
 			echo "<form method='post'>";
-			echo "<input type = 'hidden' name='lopetus' value='$lopetus'>";
+			echo "<input type = 'hidden' name='lopetus' value='{$lopetus}'>";
 			echo "<input type = 'hidden' name='tila' value='vaihdalaskunumero'>";
 			echo "<input type = 'hidden' name='tee' value='M'>";
-			echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
+			echo "<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
+
 			echo "<tr>";
 			echo "<th>".t("laskunumero")."</th>";
 			echo "<td><input type='text' name='uusi_laskunumero' value='$trow[laskunro]'></td>";
 			echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td>";
 			echo "</tr>";
 			echo "</form>";
+
+			$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+			if (mysql_num_rows($toimipaikat_res) != 0) {
+				echo "<form method='post'>";
+				echo "<input type = 'hidden' name='lopetus' value='{$lopetus}'>";
+				echo "<input type = 'hidden' name='tila' value='vaihdatoimipaikka'>";
+				echo "<input type = 'hidden' name='tee' value='M'>";
+				echo "<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
+
+				echo "<tr>";
+				echo "<th>",t("Toimipaikka"),"</th>";
+				echo "<td>";
+				echo "<select name='toimipaikka'>";
+				echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+				while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+					$sel = '';
+
+					if ($trow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $toimipaikat_row['tunnus'];
+					}
+
+					echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+				}
+
+				echo "</select>";
+				echo "</td>";
+				echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td>";
+				echo "</tr>";
+				echo "</form>";
+			}
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H' or $trow['tila'] == 'Y' or $trow['tila'] == 'Q') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
 			echo "<form method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 					<input type = 'hidden' name='tila' value='jako'>
 					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 					<tr>
 					<th>".t("Jaa ostolasku kahteen osaan").".<br>".t("Syötä uuden laskun summa")."</th>
 					<td><input type='text' name='syotetty_jakosumma' value=''> $trow[valkoodi]</td>
@@ -1999,10 +2034,10 @@
 		// jos meillä on suoraveloitus jolla ei ole maksutiliä (eli tiliöintejä ei ole tehty), se voidaan poistaa jos hyväksyttävänä, valmismaksatukseen tai odottaa suoritusta
 		if ($trow['suoraveloitus'] != "" and $trow["maksu_tili"] == "" and in_array($trow['tila'], array('Q','M','H'))) {
 			echo "	<form method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='A'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 					<tr>
 					<th>".t("Poista suoraveloitus")."</th>
 					<td>Lasku siirtyy takaisin hyväksyntään</td>
@@ -2055,12 +2090,12 @@
 		echo "<form method='post'>
 				<input type = 'hidden' name='tee' value='M'>
 				<input type = 'hidden' name='tila' value='K'>
-				<input type = 'hidden' name='lopetus' value='$lopetus'>
-				<input type = 'hidden' name='tunnus' value='$tunnus'>
+				<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+				<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 				<tr>
 				<th>".t("Lisää kommentti")."</th>
-				<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
-				<td class='back'><input type = 'submit' value = '".t("Lisää")."'></td>
+				<td><input type = 'text' name = 'komm' size='40' value = '{$komm}'></td>
+				<td class='back'><input type = 'submit' value = '",t("Lisää"),"'></td>
 				</tr>
 				</form>";
 
@@ -2070,11 +2105,11 @@
 				echo "<form method='post'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tila' value='T'>
-						<input type = 'hidden' name='lopetus' value='$lopetus'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t("Toimittajan tilinumero (kotimainen)")."</th>
-						<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
+						<td><input type = 'text' name = 'tili' size='40' value = '$trow[tilinumero]'></td>
 						<td  class='back' rowspan='3'><input type = 'submit' value = '".t("Päivitä")."'></td>
 						<td class='back'>".t("Lasku siirtyy takaisin hyväksyntään")."</td>
 						</tr>
@@ -2092,8 +2127,8 @@
 				echo "<form method='post'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tila' value='TU'>
-						<input type = 'hidden' name='lopetus' value='$lopetus'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t('Pankkihaltija')."</th>
 						<td><input type = 'text' name = 'pankki_haltija' size='40' value = '$trow[pankki_haltija]'></td>
@@ -2136,8 +2171,8 @@
 			echo "<form method='post'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='MVIESTI'>
-					<input type = 'hidden' name='lopetus' value='$lopetus'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 					<tr>
 					<th>".t('laskun viesti')."</th>
 					<td><input type = 'text' name = 'viesti' size='40' value = '$trow[viesti]'></td>
@@ -2155,8 +2190,8 @@
 			echo "<form method='post'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='MAKSATUKSEEN'>
-					<input type = 'hidden' name='lopetus' value='$lopetus'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 					<tr>
 					<th>".t("Palauta lasku maksatukseen")."</th>
 					<td></td>
@@ -2188,8 +2223,8 @@
 			echo "<form method='post'>
 					<input type = 'hidden' name='tila' value='nollaahyvak'>
 					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='lopetus' value='$lopetus'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 					<tr>
 					<th>".t("Palauta lasku hyväksyntäkierrokselle")."</th>
 					<td></td>
@@ -2219,8 +2254,8 @@
 				echo "<form method='post'>
 						<input type = 'hidden' name='tila' value='viikorkomuuta'>
 						<input type = 'hidden' name='tee' value='M'>
-						<input type = 'hidden' name='lopetus' value='$lopetus'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t("Viivästyskorkoprosentti")."</th>
 						<td>
@@ -2243,10 +2278,10 @@
 
 			if ($konversio_check_row["kpl"] == 0) {
 				echo "	<form method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 						<input type = 'hidden' name='tila' value='konversio_avaa'>
 						<input type = 'hidden' name='tee' value='M'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t("Muuta konversion lasku avoimeksi summalla")."</th>
 						<td><input type='text' name='syotetty_avoinsumma' value=''> $trow[valkoodi]</td>

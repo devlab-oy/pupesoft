@@ -310,13 +310,13 @@
 	}
 
 	//Siivotaan kommenteista kaikki kummalliset merkit pois
-	$comments 				= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $comments);
-	$viestit				= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $viestit);
-	$sisviestit1			= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit1);
-	$sisviestit2			= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit2);
-	$tilausyhteyshenkilo	= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $tilausyhteyshenkilo);
-	$asiakkaan_tilausnumero	= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
-	$kohde					= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $kohde);
+	$comments 				= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $comments);
+	$viestit				= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $viestit);
+	$sisviestit1			= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit1);
+	$sisviestit2			= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit2);
+	$tilausyhteyshenkilo	= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $tilausyhteyshenkilo);
+	$asiakkaan_tilausnumero	= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
+	$kohde					= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $kohde);
 
 	$fields = "yhtio";
 	$values = "'$kukarow[yhtio]'";
@@ -461,7 +461,7 @@
 				SET uusiotunnus = '$laskurow[tunnus]'
 				WHERE otunnus in ($tunnukset)
 				and yhtio = '$kukarow[yhtio]'
-				and var not in ('P','J')";
+				and var not in ('P','J','O')";
 	$ulasr = pupe_query($query);
 
 	// katotaan montako tilausta ollaan käsittelemässä

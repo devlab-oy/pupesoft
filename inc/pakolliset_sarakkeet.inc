@@ -184,7 +184,6 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "yhteensopivuus_rekisteri" :
 				$pakolliset  = array("REKNO", "AJONEUVOLAJI", "AUTOID", "MAA");
 				$kielletyt   = array();
-				$eiyhtiota 	 = "EILAATIJAA";
 				$saakopoistaa = TRUE;
 				break;
 			case "rekisteritiedot_lisatiedot" :
@@ -224,7 +223,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "tuotteen_toimittajat" :
 				$pakolliset  = array("TUOTENO", "TOIMITTAJA");
-				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM", "TEHDAS_SALDO_PAIVITETTY");
 				$wherelliset = array("TUOTENO", "TOIMITTAJA");
 				$joinattavat = array("TUOTENO" => "tuote");
 				$saakopoistaa = TRUE;
@@ -345,6 +344,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "extranet_kayttajan_lisatiedot" :
 				$pakolliset = array("LIITOSTUNNUS", "LAJI", "SELITE");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "varaston_hyllypaikat":
 				$pakolliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");

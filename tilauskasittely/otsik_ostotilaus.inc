@@ -168,11 +168,32 @@
 				<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>
 				<tr>
 			  	<td valign='top'>".t("Postitp").": </td><td><input type='text' name='postino' size='7' maxlength='15' value='$srow[postino]'>
-			  	<input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'>
-			  	<input type='hidden' name='maa' value='$srow[maa]'>";
+			  	<input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'></td></tr>";
+
+		$query = "	SELECT distinct koodi, nimi
+					FROM maat
+					WHERE nimi != ''
+					ORDER BY koodi";
+		$maaresult = pupe_query($query);
+
+		echo "</td></tr>";
+		echo "<tr><td valign='top'>".t("Maa").": </td><td><select name='maa'>";
+
+		echo "<option value = ''></option>";
+
+		while ($maarow = mysql_fetch_assoc($maaresult)) {
+			$sel="";
+			if (strtoupper($srow["maa"]) == strtoupper($maarow["koodi"])) {
+				$sel = "selected";
+			}
+
+			echo "<option value = '".strtoupper($maarow["koodi"])."' $sel>".t($maarow["nimi"])."</option>";
+		}
+
+		echo "</select></td></tr></table></td>";
 
 		if ($toimittajaid == 0 or $tila == "vaihdaasiakas") {
-			echo "	</td></tr></table></td></tr><tr>
+			echo "	</tr><tr>
 					<td class='back' colspan = '2' align = 'right'><input type = 'hidden' name = 'tila' value = 'vaihdaasiakas'><input type='submit' value='".t("Hae")."'></td>
 					</tr></table></form>";
 
@@ -181,7 +202,6 @@
 		}
 		else {
 
-			echo "</td></tr></table></td>";
 			echo "<td colspan = '2'><table>";
 			echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Toimitusosoite").":</td></tr>";
 			echo "<tr><td valign='top'> ".t("Nimi").": </td><td><input type='text' name='tnimi' size='35' maxlength='31' value='$srow[toim_nimi]'></td></tr>";
@@ -189,7 +209,23 @@
 			echo "<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='tosoite' size='35' maxlength='31' value='$srow[toim_osoite]'></td></tr>";
 			echo "<tr><td valign='top'>".t("Postitp").": </td><td><input type='text' name='tpostino' size='8' maxlength='15' value='$srow[toim_postino]'>";
 			echo "<input type='text' name='tpostitp' size='21' maxlength='20' value='$srow[toim_postitp]'></td></tr>";
-			echo "<input type='hidden' name='tmaa' value='$srow[toim_maa]'>";
+
+			mysql_data_seek($maaresult, 0);
+
+			echo "<tr><td valign='top'>".t("Maa").": </td><td><select name='tmaa'>";
+
+			echo "<option value = ''></option>";
+
+			while ($maarow = mysql_fetch_assoc($maaresult)) {
+				$sel="";
+				if (strtoupper($srow["toim_maa"]) == strtoupper($maarow["koodi"])) {
+					$sel = "selected";
+				}
+
+				echo "<option value = '".strtoupper($maarow["koodi"])."' $sel>".t($maarow["nimi"])."</option>";
+			}
+
+			echo "</select></td></tr>";
 			echo "</table>";
 			echo "</td></tr>";
 
@@ -258,10 +294,9 @@
 			}
 			echo "</select></td></tr>";
 
-			$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]'";
-			$yresult = mysql_query($query) or pupe_error($query);
+			$yresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-			if (mysql_num_rows($yresult) != 0) {
+			if (mysql_num_rows($yresult) > 0) {
 
 				echo "<tr><td></td><td></td>";
 				echo "<td>".t("Tilaava toimipiste").":</td>";
@@ -287,7 +322,6 @@
 				$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
 
 				if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
-
 					while ($ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res)) {
 						$sel = $srow['tilaustyyppi'] == $ostotil_tiltyyp_row['selite'] ? " selected" : "";
 						echo "<option value='{$ostotil_tiltyyp_row['selite']}'{$sel}>{$ostotil_tiltyyp_row['selitetark']}</option>";
@@ -316,10 +350,14 @@
 			$toimtapares = t_avainsana("TOIMITUSTAPA_OS");
 
 			if (mysql_num_rows($toimtapares) > 0) {
+
 				echo "<select name = 'kuljetus'>";
+
 				while($toimtaparow  = mysql_fetch_array($toimtapares)) {
-					echo "<option value='$toimtaparow[selite]'>$toimtaparow[selite]</option>";
+					$sel = $srow['kuljetus'] == $toimtaparow['selite'] ? "selected" : "";
+					echo "<option value='{$toimtaparow['selite']}' {$sel}>",trim("{$toimtaparow['selite']} {$toimtaparow['selitetark']}"),"</option>";
 				}
+
 				echo "</select>";
 			}
 			else {
@@ -422,6 +460,7 @@
 			echo "</tr>";
 			echo "<tr><td>".t("Viesti").":</td><td colspan='3'><textarea name='sisviesti1' rows='2' cols='60'>$srow[sisviesti1]</textarea> (".t("Ostotilaus").")</td></tr>";
 			echo "<tr><td>".t("Kommentit").":</td><td colspan='3'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea> (".t("Sisäinen").")</td></tr>";
+			echo "<tr><td>".t("Ohjausmerkki").":</td><td colspan='3'><input type='text' size='61' name='ohjausmerkki' value='$srow[ohjausmerkki]'>(".t("Sähköinen ostotilaus").")</td></tr>";
 			echo "</table>";
 			echo "<input type='hidden' name='from' value='$from'><br>";
 			echo "<br><br>";
@@ -571,6 +610,7 @@
 					allekirjoittaja		= '$allekirjoittaja',
 					nimi 				= '$nimi',
 					nimitark 			= '$nimitark',
+					ohjausmerkki 		= '$ohjausmerkki',
 					osoite 				= '$osoite',
 					ovttunnus 			= '$ovttunnus',
 					postino 			= '$postino',

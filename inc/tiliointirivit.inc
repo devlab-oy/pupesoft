@@ -36,6 +36,7 @@
 	if (!isset($projekti))			$projekti = "";
 	if (!isset($liitos)) 			$liitos = "";
 	if (!isset($liitostunnus)) 		$liitostunnus = 0;
+	if (!isset($tapahtumatunnus)) 	$tapahtumatunnus = 0;
 	if (!isset($summa_valuutassa))	$summa_valuutassa = "";
 
 	// Otetaan yhtiön oletus jos ei olla submitattu....
@@ -146,12 +147,11 @@
 				<input type='hidden' name = 'grouppaa' value = '$grouppaa'>
 				<input type='hidden' name = 'laji' value = '$laji'>
 				<input type='hidden' name = 'tositenro' value = '$tositenro'>
+				<input type='hidden' name = 'tapahtumatunnus' value = '$tapahtumatunnus'>
 				<input type='hidden' name = 'vv' value = '$vv'>
 				<input type='hidden' name = 'kk' value = '$kk'>
 				<input type='hidden' name = 'iframe' value = '$iframe'>
 				<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
-				<input type='hidden' name = 'liitos' value='{$liitos}' />
-				<input type='hidden' name = 'liitostunnus' value='{$liitostunnus}' />
 				<input type='hidden' name = 'jarj' value = '$jarj'>";
 
 		if ($tiliulos == '') {
@@ -219,6 +219,17 @@
 
 		echo "<input type='text' name='selite' value = '$selite'>";
 
+		if ($trow['tila'] == 'X') {
+			echo "<div style='float:right;'><a href=\"javascript:toggleGroup('eee')\"><img src='{$palvelin2}pics/lullacons/user-option-add.png'></a></div>";
+
+			if ($liitostunnus > 0 or $asiakastoimittajavirhe) {
+				echo "<div id='eee' style='display:block'>";
+			}
+			else {
+				echo "<div id='eee' style='display:none'>";
+			}
+		}
+
 		if ($trow['tila'] == 'X' and trim($liitos) != '' and $liitostunnus > 0) {
 
 			if ($liitos == "A") {
@@ -238,7 +249,23 @@
 			$liitos_nimi_res = pupe_query($query);
 			$liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
-			echo "<br />",t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
+			echo "<br />".t("Valittu")." ".t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}<br>";
+		}
+
+		if ($trow['tila'] == 'X') {
+			$tiliasiakasid = $tilitoimittajaid = "";
+
+			if ($liitos == "A" and $liitostunnus > 0) {
+				$tiliasiakasid = $liitostunnus;
+			}
+			elseif ($liitos == "T" and $liitostunnus > 0) {
+				$tilitoimittajaid = $liitostunnus;
+			}
+
+			echo "<br>";
+			echo t("Asiakas").":    ".livesearch_kentta("uusi", "ASIAKASHAKU", "tiliasiakasid", 170, $tiliasiakasid, "EISUBMIT");
+			echo t("Toimittaja").": ".livesearch_kentta("uusi", "TOIMITTAJAHAKU", "tilitoimittajaid", 170, $tilitoimittajaid, "EISUBMIT");
+			echo "</div>";
 		}
 
 		echo "</td>";
@@ -418,15 +445,15 @@
 			echo "<td>
 					<form action = '$PHP_SELF#$tunnus' method='post'>
 					<input type='hidden' name = 'tilirivformi' value = 'submitattu'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type='hidden' name='tee' value = 'P'>
-					<input type='hidden' name='tunnus' value = '$tunnus'>
-					<input type='hidden' name='viivatut' value = '$viivatut'>
+					<input type='hidden' name = 'lopetus' value = '$lopetus'>
+					<input type='hidden' name = 'tee' value = 'P'>
+					<input type='hidden' name = 'tunnus' value = '$tunnus'>
+					<input type='hidden' name = 'viivatut' value = '$viivatut'>
 					<input type='hidden' name = 'grouppaa' value = '$grouppaa'>
-					<input type='hidden' name='laji' value = '$laji'>
-					<input type='hidden' name='vv' value = '$vv'>
-					<input type='hidden' name='kk' value = '$kk'>
-					<input type='hidden' name='ptunnus' value = '$trow[tunnus]'>
+					<input type='hidden' name = 'laji' value = '$laji'>
+					<input type='hidden' name = 'vv' value = '$vv'>
+					<input type='hidden' name = 'kk' value = '$kk'>
+					<input type='hidden' name = 'ptunnus' value = '$trow[tunnus]'>
 					<input type='hidden' name = 'iframe' value = '$iframe'>
 					<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
 					<input type='hidden' name = 'jarj' value = '$jarj'>
@@ -587,5 +614,3 @@
 
 	echo "</tr>";
 	echo "</table>";
-
-?>

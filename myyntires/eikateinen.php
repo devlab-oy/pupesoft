@@ -394,44 +394,6 @@ function tarkista_pyoristys_erotukset($laskurow, $tunnus) {
 	}
 }
 
-function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
-	global $kukarow, $yhtiorow;
-
-	// Katsotaan onko kassalippaan tämän päivän kassa jo täsmäytetty
-	$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
-						group_concat(distinct tiliointi.selite) selite
-						FROM lasku
-						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE '$kassalipasrow[nimi] %' AND tiliointi.korjattu = '')
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						AND lasku.tila 	  = 'X'
-						AND lasku.alatila = 'K'
-						AND lasku.tapvm   = '$paiva'";
-	$tasmays_result = pupe_query($tasmays_query);
-	$tasmaysrow = mysql_fetch_assoc($tasmays_result);
-
-	// Jos on, niin poistetaan täsmäytys
-	if ($tasmaysrow["ltunnukset"] != "") {
-		$query = "	UPDATE tiliointi
-					SET korjattu = '{$kukarow['kuka']}',
-					korjausaika  = NOW()
-					WHERE yhtio  = '{$kukarow['yhtio']}'
-					AND ltunnus IN ({$tasmaysrow['ltunnukset']})
-					AND korjattu = ''";
-		$result = pupe_query($query);
-
-		$query = "	UPDATE lasku
-					SET tila = 'D',
-					alatila  = 'X',
-					comments = CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen eikateinen.php ohjelmassa')
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus IN ({$tasmaysrow['ltunnukset']})";
-		$result = pupe_query($query);
-
-		echo "<font class='error'>".t("Vapautettiin kassojen %s päivän %s tosite.", '', $kassalipasrow['nimi'], $paiva)."<br/><br/>";
-		echo t("Sinun on täsmäytettävä päivän käteismyynnit uudelleen käteismyynnit ohjelmasta") . "</font>";
-	}
-}
-
 function hae_lasku2($laskuno, $toim) {
 	global $kukarow;
 
@@ -572,6 +534,7 @@ function echo_lasku_table($laskurow, $toim) {
 					FROM maksuehto
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kateinen != ''
+					and kaytossa = ''
 					ORDER BY jarjestys, teksti";
 	}
 	else {
@@ -582,6 +545,7 @@ function echo_lasku_table($laskurow, $toim) {
 					FROM maksuehto
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kateinen = ''
+					and kaytossa = ''
 					ORDER BY jarjestys, teksti";
 	}
 	$vresult = pupe_query($query);

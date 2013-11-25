@@ -12,10 +12,12 @@
 				JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 				AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]')
+				LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				AND tilausrivi.tyyppi  = 'O'
 				AND tilausrivi.otunnus = '$laskurow[tunnus]'
 				AND tilausrivi.varattu > 0
+				AND ta.tunnus IS NULL
 				ORDER BY tilausrivi.tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 

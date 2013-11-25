@@ -291,7 +291,7 @@
 										COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 										ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
 										FROM kerayserat
-										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O'))
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 										LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 										WHERE kerayserat.yhtio 		 = '{$kukarow['yhtio']}'
@@ -341,7 +341,7 @@
 												ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 												FROM kerayserat
 												{$joinlisa}
-												JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+												JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O'))
 												JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 												WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 												AND kerayserat.sscc = '{$row['sscc']}'
@@ -635,140 +635,165 @@
 
 				$select_varasto = (int) $select_varasto;
 
-				require("inc/unifaun_send.inc");
+				// Tarkistetaan onko lähdöt kyseisen varaston lähtöjä
+				$varasto_lahto_conflict = false;
+				$varasto_lahto_conflict_array = array();
 
 				foreach ($checkbox_parent as $lahto) {
 
-					$sel_ltun = $mergeid_arr = array();
-
-					$lahto = (int) $lahto;
-
-					$query = "	SELECT tunnus, toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
-								FROM lasku
+					$query = "	SELECT tunnus
+								FROM lahdot
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tila 	= 'L'
-								AND alatila = 'B'
-								AND toimitustavan_lahto = '{$lahto}'";
-					$result = pupe_query($query);
+								AND varasto = '{$select_varasto}'
+								AND tunnus = '{$lahto}'";
+					$chk_conflict_res = pupe_query($query);
 
-					$toimitustapa_varasto = "";
-					$lahetetaanko_unifaun_era  = FALSE;
-					$lahetetaanko_unifaun_heti = FALSE;
-
-					while ($row = mysql_fetch_assoc($result)) {
-						$sel_ltun[] = $row['tunnus'];
-
-						$toimitustapa_varasto = $row['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$select_varasto;
-
-						$query = "	SELECT *
-									FROM toimitustapa
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND selite  = '{$row['toimitustapa']}'";
-						$toimitustapa_res = pupe_query($query);
-						$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
-
-						// Erätulostus
-						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
-							$lahetetaanko_unifaun_era = $toimitustapa_row["rahtikirja"];
-
-							$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
-							$mergeid_arr[$mergeid] = $mergeid;
-						}
-
-						// Hetitulostus
-						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'H') {
-							$lahetetaanko_unifaun_heti = $toimitustapa_row["rahtikirja"];
-						}
-					}
-
-					if (count($sel_ltun) > 0) {
-						if ($lahetetaanko_unifaun_era !== FALSE) {
-							foreach ($mergeid_arr as $mergeid) {
-
-								if ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
-									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
-								}
-								elseif ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
-									$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
-								}
-
-								$query = "	SELECT unifaun_nimi
-											FROM kirjoittimet
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus  = '{$komento}'";
-								$kires = pupe_query($query);
-								$kirow = mysql_fetch_assoc($kires);
-
-								$unifaun->_closeWithPrinter($mergeid, $kirow['unifaun_nimi']);
-								$unifaun->ftpSend();
-							}
-						}
-
-						$query = "	UPDATE kerayserat
-									SET tila = 'R'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otunnus IN (".implode(",", $sel_ltun).")";
-						$ures  = pupe_query($query);
-
-						$tee 		= "tulosta";
-						$nayta_pdf  = 'foo';
-						$tee_varsinainen_tulostus = ($lahetetaanko_unifaun_era !== FALSE or $lahetetaanko_unifaun_heti !== FALSE) ? FALSE : TRUE;
-
-						require ("rahtikirja-tulostus.php");
-
-						$tee = "";
-					}
-					else {
-						echo "<font class='error'>",t("Lähdössä")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";
+					if (mysql_num_rows($chk_conflict_res) == 0) {
+						$varasto_lahto_conflict = true;
+						array_push($varasto_lahto_conflict_array, $lahto);
 					}
 				}
 
-				foreach ($checkbox_parent as $lahto) {
-					// Siirretään ne tilaukset toiseen lähtöön jotka oli tässä lähdössä, mutta joiden rahtikirjat ei vielä tulostunu.
-					$lahto = (int) $lahto;
+				require("inc/unifaun_send.inc");
 
-					$query = "	(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
-								FROM lasku
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila 	  = 'N'
-								AND lasku.alatila = 'A'
-								AND lasku.toimitustavan_lahto = '{$lahto}')
-								UNION
-								(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
-								FROM lasku
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila 	  = 'L'
-								AND lasku.alatila IN ('A','C')
-								AND lasku.toimitustavan_lahto = '{$lahto}')";
-					$result = pupe_query($query);
+				if ($varasto_lahto_conflict) {
+					echo "<font class='error'>",t("VIRHE: valitut lähdöt eivät kuulu valittuun varastoon"),"!</font><br />";
+				}
+				else {
 
-					while ($row = mysql_fetch_assoc($result)) {
-						$lahdot = seuraavat_lahtoajat($row['toimitustapa'], $row['prioriteettinro'], $row['varasto'], $lahto);
+					foreach ($checkbox_parent as $lahto) {
 
-						if ($lahdot !== FALSE) {
-							// Otetaan eka lähtö
-							$valitu_lahto = array_shift($lahdot);
+						$sel_ltun = $mergeid_arr = array();
 
-							$query = "	UPDATE rahtikirjat
-										SET toimitustapa = '{$row['toimitustapa']}'
-										WHERE yhtio    = '{$kukarow['yhtio']}'
-										AND otsikkonro = '{$row['tunnus']}'";
-							$upd_res = pupe_query($query);
+						$lahto = (int) $lahto;
 
-							$query = "	UPDATE lasku
-										SET toimitustavan_lahto    = '{$valitu_lahto["tunnus"]}',
-										toimitustavan_lahto_siirto = '{$lahto}'
+						$query = "	SELECT tunnus, toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tila 	= 'L'
+									AND alatila = 'B'
+									AND toimitustavan_lahto = '{$lahto}'";
+						$result = pupe_query($query);
+
+						$toimitustapa_varasto = "";
+						$lahetetaanko_unifaun_era  = FALSE;
+						$lahetetaanko_unifaun_heti = FALSE;
+
+						while ($row = mysql_fetch_assoc($result)) {
+							$sel_ltun[] = $row['tunnus'];
+
+							$toimitustapa_varasto = $row['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$select_varasto;
+
+							$query = "	SELECT *
+										FROM toimitustapa
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus  = '{$row['tunnus']}'";
-							$upd_res = pupe_query($query);
+										AND selite  = '{$row['toimitustapa']}'";
+							$toimitustapa_res = pupe_query($query);
+							$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+							// Erätulostus
+							if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
+								$lahetetaanko_unifaun_era = $toimitustapa_row["rahtikirja"];
+
+								$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
+								$mergeid_arr[$mergeid] = $mergeid;
+							}
+
+							// Hetitulostus
+							if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'H') {
+								$lahetetaanko_unifaun_heti = $toimitustapa_row["rahtikirja"];
+							}
+						}
+
+						if (count($sel_ltun) > 0) {
+							if ($lahetetaanko_unifaun_era !== FALSE) {
+								foreach ($mergeid_arr as $mergeid) {
+
+									if ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+										$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+									}
+									elseif ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+										$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+									}
+
+									$query = "	SELECT unifaun_nimi
+												FROM kirjoittimet
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus  = '{$komento}'";
+									$kires = pupe_query($query);
+									$kirow = mysql_fetch_assoc($kires);
+
+									$unifaun->_closeWithPrinter($mergeid, $kirow['unifaun_nimi']);
+									$unifaun->ftpSend();
+								}
+							}
+
+							$query = "	UPDATE kerayserat
+										SET tila = 'R'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus IN (".implode(",", $sel_ltun).")";
+							$ures  = pupe_query($query);
+
+							$tee 		= "tulosta";
+							$nayta_pdf  = 'foo';
+							$tee_varsinainen_tulostus = ($lahetetaanko_unifaun_era !== FALSE or $lahetetaanko_unifaun_heti !== FALSE) ? FALSE : TRUE;
+
+							require ("rahtikirja-tulostus.php");
+
+							$tee = "";
+						}
+						else {
+							echo "<font class='error'>",t("Lähdössä")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";
 						}
 					}
 
-					$query = "	UPDATE lahdot
-								SET aktiivi = 'S'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus  = '{$lahto}'";
-					$upd_res = pupe_query($query);
+					foreach ($checkbox_parent as $lahto) {
+						// Siirretään ne tilaukset toiseen lähtöön jotka oli tässä lähdössä, mutta joiden rahtikirjat ei vielä tulostunu.
+						$lahto = (int) $lahto;
+
+						$query = "	(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
+									FROM lasku
+									WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+									AND lasku.tila 	  = 'N'
+									AND lasku.alatila = 'A'
+									AND lasku.toimitustavan_lahto = '{$lahto}')
+									UNION
+									(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
+									FROM lasku
+									WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+									AND lasku.tila 	  = 'L'
+									AND lasku.alatila IN ('A','C')
+									AND lasku.toimitustavan_lahto = '{$lahto}')";
+						$result = pupe_query($query);
+
+						while ($row = mysql_fetch_assoc($result)) {
+							$lahdot = seuraavat_lahtoajat($row['toimitustapa'], $row['prioriteettinro'], $row['varasto'], $lahto);
+
+							if ($lahdot !== FALSE) {
+								// Otetaan eka lähtö
+								$valitu_lahto = array_shift($lahdot);
+
+								$query = "	UPDATE rahtikirjat
+											SET toimitustapa = '{$row['toimitustapa']}'
+											WHERE yhtio    = '{$kukarow['yhtio']}'
+											AND otsikkonro = '{$row['tunnus']}'";
+								$upd_res = pupe_query($query);
+
+								$query = "	UPDATE lasku
+											SET toimitustavan_lahto    = '{$valitu_lahto["tunnus"]}',
+											toimitustavan_lahto_siirto = '{$lahto}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus  = '{$row['tunnus']}'";
+								$upd_res = pupe_query($query);
+							}
+						}
+
+						$query = "	UPDATE lahdot
+									SET aktiivi = 'S'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus  = '{$lahto}'";
+						$upd_res = pupe_query($query);
+					}
 				}
 			}
 			else {
@@ -1979,7 +2004,7 @@ function hae_yhdistettavat_tilaukset() {
 		$query = "	SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.tunnus
 					FROM lasku
 					JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.perheid != 0 AND tilausrivi.perheid != tilausrivi.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.perheid != 0 AND tilausrivi.perheid != tilausrivi.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O'))
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 						and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
@@ -1996,7 +2021,7 @@ function hae_yhdistettavat_tilaukset() {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$row['perheid']}'
 						AND tyyppi != 'D'
-						AND var not in ('P','J')";
+						AND var not in ('P','J','O')";
 			$isatuote_chk_res = pupe_query($query);
 			$isatuote_chk_row = mysql_fetch_assoc($isatuote_chk_res);
 
@@ -2076,7 +2101,7 @@ function hae_yhdistettavat_tilaukset() {
 						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
 						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
 						JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O') {$ei_lapsia_lisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 							and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
@@ -2330,7 +2355,7 @@ function hae_yhdistettavat_tilaukset() {
 				$query = "	SELECT COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
 							SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
 							FROM lasku
-							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.varattu > 0 AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.varattu > 0 AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O') {$ei_lapsia_lisa})
 							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 							AND lasku.tunnus IN ({$row['tilaukset']})";
 				$rivit_res = pupe_query($query);
@@ -2347,7 +2372,7 @@ function hae_yhdistettavat_tilaukset() {
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus IN ({$row['tilaukset']})
 							AND tilausrivi.tyyppi != 'D'
-							AND tilausrivi.var not in ('P','J')
+							AND tilausrivi.var not in ('P','J','O')
 							{$ei_lapsia_lisa}";
 				$kg_res = pupe_query($query);
 				$kg_row = mysql_fetch_assoc($kg_res);
@@ -2703,7 +2728,7 @@ function hae_yhdistettavat_tilaukset() {
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
-							AND tilausrivi.var not in ('P','J')
+							AND tilausrivi.var not in ('P','J','O')
 							{$ei_lapsia_lisa}
 							GROUP BY 1,2
 							HAVING ohitakerays IS NULL";
@@ -2734,7 +2759,7 @@ function hae_yhdistettavat_tilaukset() {
 								ROUND((kerayserat.kpl * tuote.tuotemassa), 0) AS 'kg'
 								FROM kerayserat
 								JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O') {$ei_lapsia_lisa})
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.sscc = '{$lahto_row['sscc']}'
@@ -2780,7 +2805,7 @@ function hae_yhdistettavat_tilaukset() {
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
-							AND tilausrivi.var not in ('P','J')
+							AND tilausrivi.var not in ('P','J','O')
 							{$ei_lapsia_lisa}
 							ORDER BY kerayserat.sscc, tilausrivi.tuoteno";
 				$rivi_res = pupe_query($query);
@@ -2844,7 +2869,7 @@ function hae_yhdistettavat_tilaukset() {
 								tilausrivi.kerattyaika,
 								ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
 								FROM kerayserat
-								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O') {$ei_lapsia_lisa})
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.sscc = '{$lahto_row['sscc']}'
@@ -2963,7 +2988,7 @@ function hae_yhdistettavat_tilaukset() {
                         count(*) AS keraamatta
                         FROM lahdot
                         JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A')))
-                        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var NOT IN ('P','J'))
+                        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var not in ('P','J','O'))
                         JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
                         JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
                         WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'

@@ -261,7 +261,8 @@
 				FROM maksuehto
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$laskurow[maksuehto]'
-				and jaksotettu != ''";
+				and jaksotettu != ''
+				and kaytossa = ''";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -352,6 +353,7 @@
 						FROM maksuehto
 						WHERE yhtio = '$kukarow[yhtio]'
 						and jaksotettu = ''
+						and kaytossa = ''
 						ORDER BY jarjestys";
 			$mresult = mysql_query($query) or pupe_error($query);
 

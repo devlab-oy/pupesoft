@@ -22,16 +22,6 @@ if (isset($submit) and trim($submit) != '') {
 	if (!isset($_POST['tilausrivi']) and $viivakoodi == '') {
 		$error['tuotteet'] = t("Riviä ei ole valittu").'.';
 	}
-	else {
-		if ($submit == 'edit') {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=muokkaa_suuntalavan_rivia.php?{$url}'>";
-			exit;
-		}
-		elseif ($submit == 'submit') {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}'>";
-			exit();
-		}
-	}
 
 	if ($submit == 'varalle') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalava_varalle.php?{$url}'>";
@@ -124,13 +114,7 @@ echo "<form name='viivakoodiformi' method='post' action='' id='viivakoodiformi'>
 echo "
 <form name='hakuformi' method='post' action=''>
 
-<div class='controls'>";
-
-if($lava['kasittelytapa'] == 'H') echo "<button class='button' name='submit' value='submit' onclick='submit();' disabled>",t("Valitse"),"</button>";
-else echo "<button class='button' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>";
-
-echo "
-	<button name='submit' value='edit' class='button' onclick='submit();'>",t("Muokkaa"),"</button>
+<div class='controls'>
 	<button name='submit' value='varalle' class='button' onclick='return varmista();'>",t("Varalle"),"</button>
 </div>";
 

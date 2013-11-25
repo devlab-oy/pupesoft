@@ -28,7 +28,7 @@
 	if (!isset($maa)) 		 			$maa = "";
 	if (!isset($pkrow))              	$pkrow = array();
 	if (!isset($suoratoimit))        	$suoratoimit = "";
-	if (!isset($jt_huomioi_pvm))        	$jt_huomioi_pvm = "";
+	if (!isset($jt_huomioi_pvm))        $jt_huomioi_pvm = "";
 	if (!isset($tee))                	$tee = "";
 	if (!isset($tilaus)) 	 			$tilaus = "";
 	if (!isset($tilausnumero))       	$tilausnumero = "";
@@ -40,7 +40,7 @@
 	if (!isset($tuotemerkki)) 			$tuotemerkki = "";
 	if (!isset($tuotenumero)) 			$tuotenumero = "";
 	if (!isset($tuoteosasto)) 			$tuoteosasto = "";
-	if (!isset($saldolaskenta)) 			$saldolaskenta = "";
+	if (!isset($saldolaskenta)) 		$saldolaskenta = "";
 	if (!isset($tuoteryhma))  			$tuoteryhma = "";
 	if (!isset($vainvarastosta))     	$vainvarastosta = "";
 	if (!isset($suoratoimitus_rivit))	$suoratoimitus_rivit  = array();
@@ -48,15 +48,16 @@
 	if (!isset($varastosta))  			$varastosta = "";
 	if (!isset($ytunnus)) 	 			$ytunnus = "";
 	if (!isset($myyja))					$myyja = "";
-	if (!isset($automaattinen_poiminta))	$automaattinen_poiminta = "";
+	if (!isset($automaattinen_poiminta))$automaattinen_poiminta = "";
 	if (!isset($mista_tullaan))			$mista_tullaan = "";
+	if (!isset($jt_tyyppi)) 			$jt_tyyppi = "";
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 	// JT-selaus p‰ivitysoikeus, joko JT-selaus p‰ivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivej‰
 	$jtselaus_paivitys_oikeus = FALSE;
 
-	if ($oikeurow['paivitys'] == '1' or (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
+	if ($oikeurow['paivitys'] == '1' or ((strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "verkkolasku-in.php") !== FALSE) and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
 		$jtselaus_paivitys_oikeus = TRUE;
 	}
 
@@ -225,7 +226,7 @@
 		while ($laskurow = mysql_fetch_assoc($jtrest)) {
 
 			$query  = "	UPDATE lasku
-						SET alatila = 'A'
+						SET alatila = ''
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$laskurow[tunnus]'";
 			$apure  = pupe_query($query);
@@ -759,9 +760,15 @@
 		}
 
 		if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K') {
-			$laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
+			if (count($varastosta) > 0 and trim(implode(", ", $varastosta)) != '') {
+				$laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
+			}
+			else {
+				// Jos ei saada mit‰‰n j‰rkev‰‰ inputtia, niin riipaistaan tyhj‰‰ sitten
+				$laskulisa .= " and lasku.varasto = 0 ";
+			}
 		}
-
+		
 		if ($automaaginen != '' or $ei_limiittia != '') {
 			$limit = "";
 		}
@@ -821,6 +828,7 @@
 								$toimittajalisa
 								WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 								and tilausrivi.tyyppi 			= 'E'
+								and tilausrivi.var 		   	   != 'O'
 								and tilausrivi.laskutettuaika 	= '0000-00-00'
 								and tilausrivi.varattu 			> 0
 								and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
@@ -875,6 +883,26 @@
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
+			if ($jt_tyyppi == 'j_manual') {
+				$j_manual_lisa = " and tilausrivin_lisatiedot.jt_manual != '' ";
+			}
+			elseif ($jt_tyyppi == 'j') {
+				$j_manual_lisa = " and tilausrivin_lisatiedot.jt_manual = '' ";
+			}
+			else {
+				$j_manual_lisa = '';
+			}
+
+			if ($jt_tyyppi == 'j_muiden_mukana') {
+				$j_muiden_mukana_lisa = " and tilausrivi.kerayspvm > CURRENT_DATE ";
+			}
+			elseif ($jt_tyyppi == 'j') {
+				$j_muiden_mukana_lisa = ' and tilausrivi.kerayspvm <= CURRENT_DATE ';
+			}
+			else {
+				$j_muiden_mukana_lisa = '';
+			}
+
 			// haetaan vain tuoteperheiden is‰t tai sellaset tuotteet jotka eiv‰t kuulu tuoteperheisiin
 			if ($toim == "ENNAKKO") {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt,
@@ -885,13 +913,15 @@
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
 							tilausrivi.jaksotettu,
 							tuote.status,
-							lasku.jtkielto
+							lasku.jtkielto,
+							'' as jt_manual
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi 			= 'E'
+							and tilausrivi.var 		   	   != 'O'
 							and tilausrivi.laskutettuaika 	= '0000-00-00'
 							and tilausrivi.varattu 			> 0
 							and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
@@ -911,9 +941,10 @@
 							tilausrivi.kerayspvm,
 							tilausrivi.jaksotettu,
 							tuote.status,
-							lasku.jtkielto
+							lasku.jtkielto,
+							tilausrivin_lisatiedot.jt_manual
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus {$j_manual_lisa})
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
 								and lasku.tunnus = tilausrivi.otunnus
 								and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa
@@ -931,6 +962,7 @@
 							and tilausrivi.kpl 				= 0
 							and tilausrivi.jt + tilausrivi.varattu	> 0
 							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
+							{$j_muiden_mukana_lisa}
 							$tilausrivilisa
 							$order
 							$limit";
@@ -953,9 +985,10 @@
 							lasku.toim_maa,
 							tilausrivi.jaksotettu,
 							tuote.status,
-							lasku.jtkielto
+							lasku.jtkielto,
+							tilausrivin_lisatiedot.jt_manual
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus {$j_manual_lisa})
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
@@ -967,6 +1000,7 @@
 							and tilausrivi.kpl 				= 0
 							and tilausrivi.jt  + tilausrivi.varattu	> 0
 							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
+							{$j_muiden_mukana_lisa}
 							$tilausrivilisa
 							$order
 							$limit";
@@ -1052,6 +1086,7 @@
 										JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 										JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+										and tilausrivi.var    != 'O'
 										$otunlisa
 										$pklisa
 										and tilausrivi.varattu > 0
@@ -1238,6 +1273,8 @@
 								echo "</th>";
 
 								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."<br/>".t("Saapumisp‰iv‰")."</th>";
+
+								if ($kukarow['extranet'] == '' and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') echo "<th valign='top'>",t("Tyyppi"),"</th>";
 
 								if ($jtselaus_paivitys_oikeus) {
 									if ($kukarow["extranet"] == "") {
@@ -1542,6 +1579,7 @@
 												FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 												WHERE yhtio 	= '$kukarow[yhtio]'
 												and tyyppi 		= 'E'
+												and var		   != 'O'
 												and tuoteno 	= '$jtrow[tuoteno]'
 												and varattu 	> 0";
 								}
@@ -1617,10 +1655,10 @@
 								}
 
 								// Riitt‰‰ kaikille
-								if ((($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) or $automaaginen == 'vakisin') {
+								if (($jtrow['jt_manual'] == '' or ($jtrow['jt_manual'] != '' and $mista_tullaan != 'MYYNTITILAUKSELTA' and $automaaginen == 'tosi_automaaginen' and $from_varastoon_inc == "")) and (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) or $automaaginen == 'vakisin') {
 
 									// Jos haluttiin toimittaa t‰m‰ rivi automaagisesti
-									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen' or $automaaginen == 'vakisin')) {
+									if (($jtrow['jt_manual'] == '' or ($jtrow['jt_manual'] != '' and $mista_tullaan != 'MYYNTITILAUKSELTA' and $automaaginen == 'tosi_automaaginen' and $from_varastoon_inc == "")) and ($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen' or $automaaginen == 'vakisin')) {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lis‰ttiin tilaukseen")."!";
@@ -1648,6 +1686,7 @@
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 										if ($kukarow["extranet"] == "") {
+
 											echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:green;'>".t("Riitt‰‰ kaikille")."!</font><br>";
 
 											if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
@@ -1662,6 +1701,26 @@
 											}
 
 											echo "</td>";
+
+											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+												echo "<td valign='top' {$class}>";
+
+												if ($jtrow['jt_manual'] != '') {
+													echo t("JT manuaalinen");
+												}
+												elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+													echo t("JT muiden mukana");
+												}
+												else {
+													echo t("JT");
+
+													if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+														echo " ".t("heti");
+													}
+												}
+
+												echo "</td>";
+											}
 
 											echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
 
@@ -1698,10 +1757,10 @@
 									}
 								}
 								// Riitt‰‰ t‰lle riville mutta ei kaikille
-								elseif (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0 and $voiko_toimittaa !== false) {
+								elseif (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0 and $voiko_toimittaa !== false and ($jtrow['jt_manual'] == '' or ($jtrow['jt_manual'] != '' and $mista_tullaan != 'MYYNTITILAUKSELTA' and $from_varastoon_inc == ""))) {
 
 									// Jos haluttiin toimittaa t‰m‰ rivi automaagisesti
-									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $automaaginen == 'tosi_automaaginen') {
+									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $automaaginen == 'tosi_automaaginen' and ($jtrow['jt_manual'] == '' or ($jtrow['jt_manual'] != '' and $mista_tullaan != 'MYYNTITILAUKSELTA' and $from_varastoon_inc == ""))) {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lis‰ttiin tilaukseen")."!";
@@ -1734,6 +1793,27 @@
 											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
+
+										if ($kukarow['extranet'] == '' and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+
+											echo "<td valign='top' {$class}>";
+
+											if ($jtrow['jt_manual'] != '') {
+												echo t("JT manuaalinen");
+											}
+											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+												echo t("JT muiden mukana");
+											}
+											else {
+												echo t("JT");
+
+												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+													echo " ".t("heti");
+												}
+											}
+
+											echo "</td>";
+										}
 
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 										echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
@@ -1769,6 +1849,27 @@
 											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
+
+										if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+
+											echo "<td valign='top' {$class}>";
+
+											if ($jtrow['jt_manual'] != '') {
+												echo t("JT manuaalinen");
+											}
+											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+												echo t("JT muiden mukana");
+											}
+											else {
+												echo t("JT");
+
+												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+													echo " ".t("heti");
+												}
+											}
+
+											echo "</td>";
+										}
 
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 										echo "<td valign='top' align='center' $class>&nbsp;</td>";
@@ -1807,6 +1908,28 @@
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 										if ($kukarow["extranet"] == "") {
+
+											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+
+												echo "<td valign='top' {$class}>";
+
+												if ($jtrow['jt_manual'] != '') {
+													echo t("JT manuaalinen");
+												}
+												elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+													echo t("JT muiden mukana");
+												}
+												else {
+													echo t("JT");
+
+													if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+														echo " ".t("heti");
+													}
+												}
+
+												echo "</td>";
+											}
+
 											echo "	<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
@@ -1966,6 +2089,27 @@
 										echo "</td>";
 
 										if ($kukarow["extranet"] == "") {
+
+											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+												echo "<td valign='top' {$class}>";
+
+												if ($jtrow['jt_manual'] != '') {
+													echo t("JT manuaalinen");
+												}
+												elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+													echo t("JT muiden mukana");
+												}
+												else {
+													echo t("JT");
+
+													if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+														echo " ".t("heti");
+													}
+												}
+
+												echo "</td>";
+											}
+
 											echo "	<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
@@ -2060,17 +2204,22 @@
 
 							echo "<tr class='aktiivi'>";
 
-							$colspan = 3;
+							if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+								$colspan = 4;
+							}
+							else {
+								$colspan = 3;
+							}
 
 							if ($tilaus_on_jo == "") {
 								$colspan++;
 							}
 
-							if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
+							if ($kukarow["resoluutio"] == 'I') {
 								$colspan++;
 							}
 
-							if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "") {
+							if ($jtselaus_paivitys_oikeus) {
 								$colspan++;
 							}
 
@@ -2316,6 +2465,27 @@
 		}
 
 		echo "</select></td></tr>\n";
+
+		if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+
+			$sel = array($jt_tyyppi => 'selected') + array('j' => '', 'j_muiden_mukana' => '', 'j_manual' => '');
+
+			echo "<tr>";
+			echo "<th>",t("JT tyyppi"),"</th>";
+			echo "<td>";
+			echo "<select name='jt_tyyppi'>";
+			echo "<option value=''>",t("N‰yt‰ kaikki"),"</option>";
+			echo "<option value='j' {$sel['j']}>",t("JT heti"),"</option>";
+			echo "<option value='j_muiden_mukana' {$sel['j_muiden_mukana']}>",t("JT muiden mukana"),"</option>";
+
+			if ($yhtiorow['jt_manual'] == 'K') {
+				echo "<option value='j_manual' {$sel['j_manual']}>",t("JT manuaalinen"),"</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+			echo "</tr>";
+		}
 
 		echo "<tr>
 				<th>".t("Tilaus")."</th>

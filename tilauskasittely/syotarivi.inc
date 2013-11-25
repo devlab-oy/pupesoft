@@ -31,6 +31,11 @@
 			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}
 
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K') {
+			$tilauksen_rekisterinumerot = hae_tilauksen_rekisterinumerot($laskurow['tunnus']);
+			echo "	<th align='left'>".t("Rekisterinumero")."</th>";
+		}
+
 		echo "	<th align='left'>".t("Tuotenumero")."</th>
 				<th align='left'>".t("Määrä")."</th>
 				<th align='left'>".t("Var")."</th>";
@@ -60,6 +65,27 @@
 		}
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
+		}
+
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K') {
+			echo "<td valign='top'>";
+			echo "<input type='text' name='rekisterinumero' size='8' value='{$rekisterinumero}'/>";
+			echo "<br/>";
+			if (count($tilauksen_rekisterinumerot) > 0) {
+				echo "<select name='jo_syotetty_rekisterinumero'>";
+				echo "<option value=''>".t('Ei valintaa')."</option>";
+				$i = 0;
+				foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
+					$sel = "";
+					if ($i == 0) {
+						$sel = "SELECTED";
+					}
+					echo "<option value='{$syotetty_rekisterinumero['rekisterinumero']}' {$sel}>{$syotetty_rekisterinumero['rekisterinumero']}</option>";
+					$i++;
+				}
+				echo "</select>";
+			}
+			echo "</td>";
 		}
 
 		if ($ulos == '') {
@@ -149,7 +175,7 @@
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-			if ($toimaika == "" or $toimaika == "0000-00-00") {
+			if ($toimaika == "" ) {
 				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -160,7 +186,7 @@
 				$toimppa = substr($toimaika, 8, 2);
 			}
 
-			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			if ($kerayspvm == "") {
 				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -241,6 +267,11 @@
 			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}
 
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO'))) {
+			$tilauksen_rekisterinumerot = hae_tilauksen_rekisterinumerot($laskurow['tunnus']);
+			echo "	<th align='left'>".t("Rekisterinumero")."</th>";
+		}
+
 		echo "	<th align='left'>".t("Tuoteno")."</th>
 				<th align='left'>".t("Määrä")."</th>
 				<th align='left'>".t("Var")."</th>";
@@ -276,6 +307,27 @@
 			echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
 		}
 
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO'))) {
+			echo "<td valign='top'>";
+			echo "<input type='text' name='rekisterinumero' size='8' value='{$rekisterinumero}'/>";
+			if (count($tilauksen_rekisterinumerot) > 0) {
+				echo "<br/>";
+				echo "<select name='jo_syotetty_rekisterinumero'>";
+				echo "<option value=''>".t('Ei valintaa')."</option>";
+				$sel = "SELECTED";
+				foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
+					if ($syotetty_rekisterinumero['rekisterinumero'] == '') {
+						$sel = '';
+						continue;
+					}
+					echo "<option value='{$syotetty_rekisterinumero['rekisterinumero']}' {$sel}>{$syotetty_rekisterinumero['rekisterinumero']}</option>";
+					$sel = '';
+				}
+				echo "</select>";
+			}
+			echo "</td>";
+		}
+
 		if ($ulos == '') {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
 				// Laitetaan $tila "submit" parametriin, joten jos siellä on jotain ei submitata (valmistuksessa)
@@ -291,7 +343,7 @@
 
 		echo "<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
 
-		$selh = $selj = $selp = "";
+		$selh = $selj = $selp = $selo = "";
 
 		if ($var == "H") {
 			$selh = "SELECTED";
@@ -305,8 +357,14 @@
 		elseif ($var == "W") {
 			$selw = "SELECTED";
 		}
+		elseif ($var == "O") {
+			$selo = "SELECTED";
+		}
 
 		echo "<td valign='top'><select name='var'>";
+		if ($toim == "EXTENNAKKO") {
+			echo "<option value='O' $selo>".t("Optio")."</option>";
+		}
 		echo "<option value=''>".t("Oletus")."</option>";
 		echo "<option value='J' $selj>".t("JT")."</option>";
 		echo "<option value='H' $selh>".t("Hyväksy")."</option>";
@@ -401,7 +459,13 @@
 			echo "<th></th>";
 		}
 
-		$nrospanni = 6;
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','TARJOUS','REKLAMAATIO','PIKATILAUS'))) {
+			$nrospanni = 7;
+		}
+		else {
+			$nrospanni = 6;
+		}
+
 		$nrospanni_vah = 0;
 
 		if ($kukarow['hinnat'] == 0) {
@@ -452,7 +516,7 @@
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-			if ($toimaika == "" or $toimaika == "0000-00-00") {
+			if ($toimaika == "" ) {
 				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -463,7 +527,7 @@
 				$toimppa = substr($toimaika, 8, 2);
 			}
 
-			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			if ($kerayspvm == "" ) {
 				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -567,7 +631,7 @@
 
 		echo "</td></tr></table></form>";
 	}
-	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON" or $toim == "KORJAA" or $toim == "SIIRTOTYOMAARAYS")) {
+	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON" or strpos($_SERVER['SCRIPT_NAME'], "valmista_tilaus.php") !== FALSE or $toim == "SIIRTOTYOMAARAYS")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>$jarjlisa";
@@ -576,10 +640,13 @@
 			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}
 
-		echo "	<th align='left'>".t("Tuoteno")."</th>
-				<th align='left'>".t("Määrä")."</th>
-				</tr>";
+		echo "<th align='left'>".t("Tuoteno")."</th>";
+		echo "<th align='left'>".t("Määrä")."</th>";
 
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<th align='left'>".t("Valmistuslinja")."</th>";
+		}
+		echo "</tr>";
 
 		echo "<tr>$jarjlisa";
 
@@ -608,8 +675,24 @@
 
 		echo "<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
 
-		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<td>";
 
+			$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
+
+			echo "<select name='valmistuslinja'>";
+			echo "<option value = ''>".t("Oletus")."</option>";
+
+			while ($valmistuslinja_row = mysql_fetch_array($valmistuslinja_result)) {
+				$sel = ($valmistuslinja_row["selite"] == $valmistuslinja) ? "selected" : "";
+				echo "<option value='{$valmistuslinja_row["selite"]}' $sel>{$valmistuslinja_row["selitetark"]}</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+		}
+
+		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>$jarjlisa";
 
@@ -617,8 +700,12 @@
 			echo "<th></th>";
 		}
 
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<th align='left'>".t("Toivottu keräysajankohta")."</th>";
+			echo "<th align='left' colspan='2'>".t("Toivottu valmistusajankohta")."</th>";
+		}
 		// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
-		if ($yhtiorow["splittauskielto"] == "K") {
+		elseif ($yhtiorow["splittauskielto"] == "K") {
 			echo "	<th align='left'>".t("Keräysaika")."</th>
 					<th align='left'>".t("Toimitusaika")."</th>";
 		}
@@ -638,7 +725,7 @@
 			$kerayspvm = $laskurow["kerayspvm"];
 		}
 
-		if ($toimaika == "" or $toimaika == "0000-00-00") {
+		if ($toimaika == "") {
 			$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -649,7 +736,7 @@
 			$toimppa = substr($toimaika, 8, 2);
 		}
 
-		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+		if ($kerayspvm == "") {
 			$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -661,9 +748,10 @@
 		}
 
 		// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
-		if ($yhtiorow["splittauskielto"] == "K") {
+		if ($yhtiorow["splittauskielto"] == "K" or ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+			$colspan = $yhtiorow["splittauskielto"] == "K" ? 1 : 2;
 			echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
-			echo "<td valign='top'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+			echo "<td valign='top' colspan='{$colspan}'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
 		}
 		else {
 			echo "<input type='hidden' name='keraysppa' value='$keraysppa'>";
@@ -681,7 +769,14 @@
 			echo "<th></th>";
 		}
 
-		echo "<th colspan='2' align='left'>".t("Kommentti")."</th>
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			$colspan = 3;
+		}
+		else {
+			$colspan = 2;
+		}
+
+		echo "<th colspan='{$colspan}' align='left'>".t("Kommentti")."</th>
 				</tr>";
 
 		echo "<tr>$jarjlisa";
@@ -690,7 +785,7 @@
 			echo "<td valign='top'></td>";
 		}
 
-		echo "<td valign='top' colspan='2'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
+		echo "<td valign='top' colspan='{$colspan}'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
 				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'>";
 
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..

@@ -80,6 +80,11 @@
 
 		$til = " tila in ('L','N','C','D') and tilaustyyppi='R' ";
 	}
+	if ($cleantoim == 'TAKUU') {
+		echo "<font class='head'>".t("Asiakkaan takuut").":</font><hr>";
+
+		$til = " tila in ('L','N','C','D') and tilaustyyppi='U' ";
+	}
 
 	if ($til == "" or $cleantoim == "") {
 		echo "<p><font class='error'>".t("Järjestelmävirhe, tämän modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
@@ -126,7 +131,7 @@
 
 		require ("naytatilaus.inc");
 
-		if ($cleantoim == "MYYNTI" or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI') {
+		if ($cleantoim == "MYYNTI" or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI' or $cleantoim == "TAKUU") {
 			$query = "	SELECT *
 						FROM rahtikirjat
 						WHERE otsikkonro='$tunnus'
@@ -183,7 +188,7 @@
 	}
 
 	if ($ytunnus != '' and ($otunnus == '' and $laskunro == '' and $sopimus == '')) {
-		if ($cleantoim == 'MYYNTI' or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI') {
+		if ($cleantoim == 'MYYNTI' or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI' or $cleantoim == "TAKUU") {
 			require ("inc/asiakashaku.inc");
 		}
 
@@ -383,6 +388,10 @@
 			$summaselli .= " lasku.viesti tilausviite, ";
 		}
 
+		if ($kukarow['resoluutio'] == 'I') {
+			$summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
+		}
+
 		if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
 			if ($laskunro > 0) {
 				$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
@@ -506,10 +515,10 @@
 
 			if ($kukarow['resoluutio'] == 'I') {
 				if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-					pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+					pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
 				}
 				else {
-					pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
+					pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
 				}
 			}
 			else {
@@ -634,7 +643,7 @@
 						echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tilaus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim'>$row[$i]</a>";
 						echo "</td>";
 					}
-					elseif (is_numeric(trim($row[$i])) and mysql_field_name($result,$i) != 'tilausviite') {
+					elseif (is_numeric(trim($row[$i])) and mysql_field_name($result,$i) != 'tilausviite' and mysql_field_name($result,$i) != 'astilno') {
 						echo "<td valign='top' nowrap align='right' $class>$row[$i]</td>";
 					}
 					else {
@@ -655,6 +664,10 @@
 				else {
 					$fn1 = "";
 					$fn2 = "";
+				}
+
+				if (($row["tila"] == "N" or $row["tila"] == "L" or $row['tila'] == 'C') and $cleantoim == "TAKUU") {
+					$fn2 = " (".t("Takuu").") {$fn2}";
 				}
 
 				echo "<td valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</td>";

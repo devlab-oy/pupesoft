@@ -124,12 +124,12 @@
 					$lisatiedot_row = mysql_fetch_assoc($lisatiedot_result);
 				}
 				else {
-					// tila pit‰‰ olla l‰hete, tilaus, ennakko tai siirtolista
+					// tila pit‰‰ olla l‰hete, tilaus, ennakko, tyˆm‰‰r‰ys tai siirtolista
 					$query = "	SELECT *
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$isarivirow[otunnus]'
-								and tila in ('N', 'L', 'E', 'G', 'C')";
+								and tila in ('N', 'L', 'E', 'G', 'C', 'A')";
 					$stresult = pupe_query($query);
 
 					if (mysql_num_rows($stresult) == 0) {

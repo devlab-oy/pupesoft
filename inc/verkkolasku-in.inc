@@ -295,7 +295,13 @@
 				$valkoodi = 'EUR';
 			}
 
-			if ($laskun_tyyppi == "381" and $summa > 0) {
+			$onko_hyvityslasku = FALSE;
+
+			if ($laskun_tyyppi == "381" or $laskun_tyyppi_teksti == 'HYVITYSLASKU' or $laskun_summa_eur < 0) {
+				$onko_hyvityslasku = TRUE;
+			}
+
+			if ($onko_hyvityslasku and $summa > 0) {
 				$summa = $summa * -1;
 			}
 
@@ -327,7 +333,6 @@
 				$chk_toimipaikka_res = pupe_query($query);
 
 				while ($chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res)) {
-
 					if ($chk_toimipaikka_row['ovtlisa'] == substr($toim_asiakkaantiedot["toim_ovttunnus"], strlen(trim($chk_toimipaikka_row['ovtlisa'])) * -1)) {
 						$_yhtion_toimipaikka = $chk_toimipaikka_row['tunnus'];
 					}
@@ -537,6 +542,8 @@
 				}
 			}
 
+			$rivikohtaiset_rahtikulut = 0;
+
 			if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
 				require("inc/maventa.inc");
 			}
@@ -584,7 +591,7 @@
 				$onko_dupli_asn 	= FALSE;
 
 				// Onko tämä kauttalaskutusta?
-				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
 							FROM tiliointisaanto
 							WHERE ttunnus 	= '$trow[tunnus]'
 							and tyyppi 		= 'k'
@@ -595,10 +602,30 @@
 
 				if (mysql_num_rows($result) != 0) {
 					$tiliointirow = mysql_fetch_assoc($result);
-					$oletuskust = $tiliointirow['kustp'];
+					$oletuskust = $tiliointirow['kustp'] != 999999999 ? $tiliointirow['kustp'] : $oletuskust;
 
 					if ($tiliointirow['vienti'] != '') {
 						$trow['oletus_vienti'] = $tiliointirow['vienti'];
+					}
+
+					// Jos kustannuspaikka tiliöintisäännön takana ei ole 0
+					if ($tiliointirow['toimipaikka'] != 0) {
+						$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+
+						// Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
+						if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
+
+							$query = "	SELECT kustp, kohde, projekti
+										FROM yhtion_toimipaikat
+										WHERE yhtio = '{$yhtio}'
+										AND tunnus = '{$_yhtion_toimipaikka}'";
+							$toimipaikka_kustp_res = pupe_query($query);
+							$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+							$oletuskust 	= $oletuskust == 0 							? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+							$oletuskohde 	= $toimipaikka_kustp_row['kohde'] != 0 		? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+							$oletusprojekti = $toimipaikka_kustp_row['projekti'] != 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+						}
 					}
 
 					if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
@@ -618,7 +645,7 @@
 				}
 				else {
 					// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?  //
-					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
 								FROM tiliointisaanto
 								WHERE ttunnus 	= '$trow[tunnus]'
 								and yhtio 		= '$yhtio'
@@ -641,10 +668,30 @@
 
 					if (mysql_num_rows($result) != 0) {
 						$tiliointirow = mysql_fetch_assoc($result);
-						$oletuskust = $tiliointirow['kustp'];
+						$oletuskust = $tiliointirow['kustp'] != 999999999 ? $tiliointirow['kustp'] : $oletuskust;
 
 						if ($tiliointirow['vienti'] != '') {
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
+						}
+
+						// Jos kustannuspaikka tiliöintisäännön takana ei ole 0
+						if ($tiliointirow['toimipaikka'] != 0) {
+							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+
+							// Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
+							if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
+
+								$query = "	SELECT kustp, kohde, projekti
+											FROM yhtion_toimipaikat
+											WHERE yhtio = '{$yhtio}'
+											AND tunnus = '{$_yhtion_toimipaikka}'";
+								$toimipaikka_kustp_res = pupe_query($query);
+								$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+								$oletuskust 	= $oletuskust == 0 							? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+								$oletuskohde 	= $toimipaikka_kustp_row['kohde'] != 0 		? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+								$oletusprojekti = $toimipaikka_kustp_row['projekti'] != 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+							}
 						}
 
 						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
@@ -664,7 +711,7 @@
 					}
 
 					// Onko tälle ostajatiedoille erityinen kustannuspaikka?
-					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
 								FROM tiliointisaanto
 								WHERE ttunnus 	= '$trow[tunnus]'
 								and yhtio 		= '$yhtio'
@@ -687,10 +734,30 @@
 
 					if (mysql_num_rows($result) != 0) {
 						$tiliointirow = mysql_fetch_assoc($result);
-						$oletuskust = $tiliointirow['kustp'];
+						$oletuskust = $tiliointirow['kustp'] != 999999999 ? $tiliointirow['kustp'] : $oletuskust;
 
 						if ($tiliointirow['vienti'] != '') {
 							$trow['oletus_vienti'] = $tiliointirow['vienti'];
+						}
+
+						// Jos kustannuspaikka tiliöintisäännön takana ei ole 0
+						if ($tiliointirow['toimipaikka'] != 0) {
+							$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+
+							// Jos tarkenteiden prioriteetissä toimipaikka ei ole ennen toimittajaa, niin katsotaan se tässä
+							if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
+
+								$query = "	SELECT kustp, kohde, projekti
+											FROM yhtion_toimipaikat
+											WHERE yhtio = '{$yhtio}'
+											AND tunnus = '{$_yhtion_toimipaikka}'";
+								$toimipaikka_kustp_res = pupe_query($query);
+								$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+								$oletuskust 	= $oletuskust == 0 							? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+								$oletuskohde 	= $toimipaikka_kustp_row['kohde'] != 0 		? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+								$oletusprojekti = $toimipaikka_kustp_row['projekti'] != 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+							}
 						}
 
 						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
@@ -711,7 +778,7 @@
 
 					if (mysql_num_rows($result) == 0) {
 						// Onko tälle asiakastunnukselle erityinen kustannuspaikka?
-						$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+						$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
 									FROM tiliointisaanto
 									WHERE ttunnus 	= '$trow[tunnus]'
 									and tyyppi 		= 'a'
@@ -722,10 +789,30 @@
 
 						if (mysql_num_rows($result) != 0) {
 							$tiliointirow = mysql_fetch_assoc($result);
-							$oletuskust = $tiliointirow['kustp'];
+							$oletuskust = $tiliointirow['kustp'] != 999999999 ? $tiliointirow['kustp'] : $oletuskust;
 
 							if ($tiliointirow['vienti'] != '') {
 								$trow['oletus_vienti'] = $tiliointirow['vienti'];
+							}
+
+							// Jos kustannuspaikka tiliöintisäännön takana ei ole 0
+							if ($tiliointirow['toimipaikka'] != 0) {
+								$_yhtion_toimipaikka = $tiliointirow['toimipaikka'];
+
+								// Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
+								if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
+
+									$query = "	SELECT kustp, kohde, projekti
+												FROM yhtion_toimipaikat
+												WHERE yhtio = '{$yhtio}'
+												AND tunnus = '{$_yhtion_toimipaikka}'";
+									$toimipaikka_kustp_res = pupe_query($query);
+									$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+									$oletuskust 	= $oletuskust == 0 							? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+									$oletuskohde 	= $toimipaikka_kustp_row['kohde'] != 0 		? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+									$oletusprojekti = $toimipaikka_kustp_row['projekti'] != 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+								}
 							}
 
 							if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
@@ -783,7 +870,7 @@
 				$tilalk = explode("-", $yhtiorow["ostoreskontrakausi_alku"]);
 				$tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
-				// Verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
+				// Verrataan vähän päivämääriä. onpa ikävää PHP:ssä!
 				$ostoresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
 				$ostoresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
 				$syotettypvm 	= (int) date('Ymd', mktime(0,0,0, $tpk, $tpp, $tpv));
@@ -1152,7 +1239,7 @@
 
 					$kirjattava_summa 		  = $omasumma;
 					$summa_varasto 			  = round($omasumma / (1 + ($vero / 100)), 2);
-					$summa_varasto_valuutassa = $summa_varasto;
+					$summa_varasto_valuutassa = round($omasumma / (1 + ($vero / 100)) / $vrow['kurssi'], 2);
 
 					if ($yhtiorow['ostolaskun_kulutilit'] != ''
 						and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
@@ -1172,7 +1259,23 @@
 						}
 					}
 
+					// Jos on toimipaikat käytössä ja toimipaikan takaa katsotaan tarkenteita toimittajan jälkeen, niin katsotaan ne tässä
+					if ($_yhtion_toimipaikka != 0 and ($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['tarkenteiden_prioriteetti'] == "") {
+
+						$query = "	SELECT kustp, kohde, projekti
+									FROM yhtion_toimipaikat
+									WHERE yhtio = '{$yhtio}'
+									AND tunnus = '{$_yhtion_toimipaikka}'";
+						$toimipaikka_kustp_res = pupe_query($query);
+						$toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
+
+						$oletuskust 	= $oletuskust == 0 		? $toimipaikka_kustp_row['kustp'] 		: $oletuskust;
+						$oletuskohde 	= $oletuskohde == 0 	? $toimipaikka_kustp_row['kohde'] 		: $oletuskohde;
+						$oletusprojekti = $oletusprojekti == 0 	? $toimipaikka_kustp_row['projekti'] 	: $oletusprojekti;
+					}
+
 					$summa			  		= $kirjattava_summa;
+					$summa_valuutassa		= round($summa / $vrow['kurssi'], 2);
 					$totsumma 				= $kirjattava_summa;
 					$totsumma_valuutassa 	= $summa;
 					$kustp            		= $oletuskust;
@@ -1334,7 +1437,7 @@
 							// Hyvityslasku tai summa alle nolla
 							// FINVOICE-laskuilla rivihinta on aina valmiiksi oikeinpäin
 							// LISÄTTY VIELÄ:  and $summa > 0 koska nyt rivihinnat näyttäisi olevan myös INVOIC.D.96A laskulla miinusta kun se on hyväri
-							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $ebid != "MAVENTAXML" and $summa > 0) {
+							if (($onko_hyvityslasku or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $ebid != "MAVENTAXML" and $summa > 0) {
 								$summa = $summa * -1;
 							}
 
@@ -1365,11 +1468,12 @@
 								}
 							}
 
-							$summa						 	 = round($summa * (1+($vero/100)),2);
-							$totsumma						+= $summa;
-							$totsumma_valuutassa			+= $summa_valuutassa;
-							$kukarow['yhtio']				 = $yhtio;
-							$kukarow['kuka']				 = 'verkkolas';
+							$summa					= round($summa * (1+($vero/100)),2);
+							$summa_valuutassa		= round($summa * (1+($vero/100)) / $vrow['kurssi'], 2);
+							$totsumma				+= $summa;
+							$totsumma_valuutassa	+= $summa_valuutassa;
+							$kukarow['yhtio']		 = $yhtio;
+							$kukarow['kuka']		 = 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
 
@@ -1457,7 +1561,8 @@
 				}
 
 				// Tehdään ASN Insertit
-				if (($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+				// Pitää olla vaihto-omaisuuslasku
+				if (in_array($trow['oletus_vienti'], array('C','F','I','J','K','L')) and ($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and !$onko_hyvityslasku) {
 
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 					$count_rtuoteno  = count($rtuoteno);
@@ -1533,9 +1638,10 @@
 						foreach ($_array as $key => $value) {
 							if ($value == 0) continue;
 
-							$tili      = $yhtiorow[$key];
-							$summa     = round($value, 2);
-							$totsumma += $summa;
+							$tili      			= $yhtiorow[$key];
+							$summa     			= round($value, 2);
+							$summa_valuutassa	= round($value / $vrow['kurssi'], 2);
+							$totsumma 		   += $summa;
 
 							// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
 							// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.
@@ -1563,10 +1669,12 @@
 					require ("inc/teetiliointi.inc");
 				}
 
-
 				// jos kyseessä on tavaraa
-				if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
-					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+				if (!$onko_hyvityslasku and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
+
+					if (!isset($alv_talteen)) $alv_talteen = '';
+
+					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen, $rivikohtaiset_rahtikulut, $_yhtion_toimipaikka);
 				}
 
 				// Lisätään vielä ostovelkatiliöinnin tarkenteet

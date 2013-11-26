@@ -11,6 +11,9 @@
 	if (!isset($tapahtumalaji))  $tapahtumalaji = "";
 	if (!isset($tilalehinta))  	 $tilalehinta = "";
 	if (!isset($historia))  	 $historia = "";
+	if (!isset($toimipaikka))	 $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
+
+	$onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
@@ -1093,6 +1096,12 @@
 
 			echo "</td></tr></table><br>";
 
+			$toimipaikkarajaus = "";
+
+			if ($onkolaajattoimipaikat and trim($toimipaikka) != "" and $toimipaikka != 'kaikki') {
+				$toimipaikkarajaus = " and (lasku.yhtio_toimipaikka = '{$toimipaikka}' OR lasku.vanhatunnus = '{$toimipaikka}')";
+			}
+
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi,
 						lasku.tunnus,
@@ -1113,7 +1122,7 @@
 						lasku2.luontiaika
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
 						LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
@@ -1125,10 +1134,41 @@
 						ORDER BY pvm, tunnus";
 			$jtresult = pupe_query($query);
 
-			if (mysql_num_rows($jtresult) != 0) {
+			// Varastosaldot ja paikat
+			echo "<font class='message'>".t("Tuotteen tilaukset")."</font>";
 
-				// Varastosaldot ja paikat
-				echo "<font class='message'>".t("Tuotteen tilaukset")."</font><hr>";
+			if ($onkolaajattoimipaikat) {
+
+				$sel = $toimipaikka == 0 ? "selected" : "";
+
+				echo "&nbsp;&nbsp;<a href='#' name='TuotteenTilaukset'><img src='pics/lullacons/arrow-double-up-green.png' /></a>";
+
+				echo "&nbsp;&nbsp;";
+				echo "<form action='{$PHP_SELF}#TuotteenTilaukset' method='post'>
+				<input type='hidden' name='toim' value='{$toim}'>
+				<input type='hidden' name='lopetus' value='{$lopetus}'>
+				<input type='hidden' name='tuoteno' value='{$tuoteno}'>
+				<input type='hidden' name='tee' value='Z'>
+				<input type='hidden' name='historia' value='{$historia}'>
+				<input type='hidden' name='tapahtumalaji' value='{$tapahtumalaji}'>
+				<input type='hidden' name='toim_kutsu' value='{$toim_kutsu}'>";
+
+				echo "<select name='toimipaikka' onchange='submit();'>";
+				echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+				echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+
+				while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+					$sel = $toimipaikat_row['tunnus'] == $toimipaikka ? "selected" : "";
+					echo "<option value='{$toimipaikat_row['tunnus']}' {$sel}>{$toimipaikat_row['nimi']}</option>";
+				}
+
+				echo "</select>";
+				echo "</form>";
+			}
+
+			echo "<hr>";
+
+			if (mysql_num_rows($jtresult) != 0) {
 
 				$myyta = $kokonaismyytavissa;
 
@@ -1295,6 +1335,9 @@
 
 				echo "</table><br>";
 			}
+			else {
+				echo "<font class='info'>",t("Ei tilauksia"),"</font><br /><br />";
+			}
 
 			if ($toim != "TYOMAARAYS_ASENTAJA") {
 				if (!isset($raportti)) {
@@ -1313,6 +1356,7 @@
 					<input type='hidden' name='historia' value='$historia'>
 					<input type='hidden' name='tapahtumalaji' value='$tapahtumalaji'>
 					<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>
+					<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />
 					<font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
 					(<input type='radio' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")." /
 					<input type='radio' onclick='submit()' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")
@@ -1771,15 +1815,38 @@
 
 			if ($toim != "TYOMAARAYS_ASENTAJA") {
 				// Varastotapahtumat
-				echo "<font class='message'>".t("Tuotteen tapahtumat")."</font><hr>";
-				echo "<table>";
+				echo "<font class='message'>".t("Tuotteen tapahtumat")."</font>";
+
 				echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<input type='hidden' name='tee' value='Z'>";
 				echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 				echo "<input type='hidden' name='raportti' value='$raportti'>";
-				echo "<a href='#' name='Tapahtumat'>";
+
+				echo "&nbsp;&nbsp;<a href='#' name='Tapahtumat'><img src='pics/lullacons/arrow-double-up-green.png' /></a>";
+
+				if ($onkolaajattoimipaikat) {
+
+					$sel = $toimipaikka == 0 ? "selected" : "";
+
+					echo "&nbsp;&nbsp;";
+					echo "<select name='toimipaikka' onchange='submit();'>";
+					echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+					echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+
+					mysql_data_seek($toimipaikat_res, 0);
+
+					while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+						$sel = $toimipaikat_row['tunnus'] == $toimipaikka ? "selected" : "";
+						echo "<option value='{$toimipaikat_row['tunnus']}' {$sel}>{$toimipaikat_row['nimi']}</option>";
+					}
+
+					echo "</select>";
+				}
+
+				echo "<hr>";
+				echo "<table>";
 
 				if ($historia == "") $historia=1;
 				$chk[$historia] = "SELECTED";
@@ -1896,6 +1963,26 @@
 				$ale_query_concat_lisa = substr($ale_query_concat_lisa, 0, -1);
 				$ale_query_concat_lisa .= "),";
 
+				$toimipaikkarajaus = "";
+
+				if ($onkolaajattoimipaikat and trim($toimipaikka) != "" and $toimipaikka != 'kaikki') {
+
+					$query  = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tyyppi != 'P'
+								AND toimipaikka = '{$toimipaikka}'";
+					$vares = pupe_query($query);
+					$varow = mysql_fetch_assoc($vares);
+
+					if (!empty($varow['tunnukset'])) {
+						$toimipaikkarajaus = "JOIN varastopaikat ON varastopaikat.yhtio = tapahtuma.yhtio
+						and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+						and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+						and varastopaikat.tunnus IN ({$varow['tunnukset']})";
+					}
+				}
+
 				$query = "	SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 							if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
 							concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
@@ -1910,6 +1997,7 @@
 							lasku2.laskunro lasku2laskunro,
 							concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), $ale_query_concat_lisa round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta
 							FROM tapahtuma use index (yhtio_tuote_laadittu)
+							{$toimipaikkarajaus}
 							LEFT JOIN tilausrivi use index (primary) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
 							LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							LEFT JOIN lasku use index (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)

@@ -1981,6 +1981,10 @@
 						and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
 						and varastopaikat.tunnus IN ({$varow['tunnukset']})";
 					}
+					else {
+						// Jos toimipaikkarajaus palauttaa NULLia, ei näytetä tapahtumia
+						$ehto = "AND tapahtuma.tunnus = 0";
+					}
 				}
 
 				$query = "	SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,

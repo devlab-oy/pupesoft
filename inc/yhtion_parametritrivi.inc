@@ -2937,8 +2937,8 @@
 
 		$sel = $trow[$i] == 'K' ? "selected" : "";
 
-		$ulos .= "<option value = ''>".t("Varaston valintaa ei pakoteta myyntitilauksella, ostotilauksella, tarjouksella tai reklamaatiolla")."</option>";
-		$ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta pakotetaan myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
+		$ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen")."</option>";
+		$ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
 
 
 		$jatko = 0;

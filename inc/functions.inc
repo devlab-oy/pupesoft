@@ -24932,6 +24932,80 @@ if (!function_exists('hae_asiakashinnat')) {
 	}
 }
 
+if (!function_exists('hae_ostolaskun_tyypin_oletustili')) {
+	function hae_ostolaskun_tyypin_oletustili($ostolasku_tyyppi, $toimittaja_tunnus = '') {
+		global $kukarow, $yhtiorow;
+
+		$oletustili = false;
+
+		if ($toimittaja_tunnus != '') {
+			$toimittajarow = hae_toimittaja($toimittaja_tunnus);
+
+			if ($toimittajarow['oletus_vienti'] == $ostolasku_tyyppi) {
+				$oletustili = $toimittajarow['tilino'];
+			}
+		}
+
+		if ($toimittaja_tunnus == '' or ($toimittaja_tunnus != '' and !$oletustili)) {
+			switch ($ostolasku_tyyppi) {
+				case 'A':
+					//Kotimaa
+					$oletustili = $yhtiorow['ostolasku_kotimaa_kulu'];
+					break;
+				case 'B':
+					//Kotimaa huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_kotimaa_rahti'];
+					break;
+				case 'C':
+					//Kotimaa vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_kotimaa_vaihto_omaisuus'];
+					break;
+				case 'J':
+					//Kotimaa raaka-aine
+					$oletustili = $yhtiorow['ostolasku_kotimaa_raaka_aine'];
+					break;
+				case 'D':
+					//EU
+					$oletustili = $yhtiorow['ostolasku_eu_kulu'];
+					break;
+				case 'E':
+					//EU huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_eu_rahti'];
+					break;
+				case 'F':
+					//EU vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_eu_vaihto_omaisuus'];
+					break;
+				case 'K':
+					//EU raaka-aine
+					$oletustili = $yhtiorow['ostolasku_eu_raaka_aine'];
+					break;
+				case 'G':
+					//ei-EU
+					$oletustili = $yhtiorow['ostolasku_ei_eu_kulu'];
+					break;
+				case 'H':
+					//ei-EU huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_ei_eu_rahti'];
+					break;
+				case 'I':
+					//ei-EU vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_ei_eu_vaihto_omaisuus'];
+					break;
+				case 'L':
+					//ei-EU raaka-aine
+					$oletustili = $yhtiorow['ostolasku_ei_eu_raaka_aine'];
+					break;
+				default:
+					//ERROR
+					break;
+			}
+		}
+
+		return $oletustili;
+	}
+}
+
 if (!function_exists("tuotteen_budjetoitu_myynti")) {
 	function tuotteen_budjetoitu_myynti(Array $parametrit) {
 		global $yhtiorow, $kukarow;

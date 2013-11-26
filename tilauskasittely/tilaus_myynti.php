@@ -7126,7 +7126,6 @@ if ($tee == '') {
 				while ($alvrow = mysql_fetch_assoc($alvresult)) {
 
 					$aquery = "	SELECT
-								tilausrivi.otunnus,
 								tuote.sarjanumeroseuranta,
 								tuote.ei_saldoa,
 								tuote.tuoteno,
@@ -7138,9 +7137,9 @@ if ($tee == '') {
 								FROM tilausrivi
 								JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
-								{$tunnuslisa}
-								and tilausrivi.tunnus in ({$alvrow['rivit']})";
+								WHERE tilausrivi.yhtio	=	'{$kukarow['yhtio']}'
+								AND tilausrivi.otunnus	=	'{$kukarow['kesken']}'
+								AND tilausrivi.tunnus	IN	({$alvrow['rivit']})";
 					$aresult = pupe_query($aquery);
 
 					while ($arow = mysql_fetch_assoc($aresult)) {
@@ -7212,39 +7211,37 @@ if ($tee == '') {
 							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - ($arow["kehahin"]*$arow["varattu"]);
 						}
 
-						if ($arow["otunnus"] == $kukarow["kesken"]){
-							if ($arow['varattu'] > 0) {
-								if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
-									$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
-									$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
-									$arvo_kotimaa			+= $arow["rivihinta"];
-									$arvo_kotimaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
-									$kotiarvo_kotimaa		+= $arow["kotirivihinta"];
-									$kotiarvo_kotimaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
-									$kate_kotimaa			+= $rivikate;
-									$kate_kotimaa_eieri		+= $rivikate_eieri;
-								}
-								else {
-									$summa_ulkomaa			+= $arow["rivihinta"]+$arow["alv"];
-									$summa_ulkomaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
-									$arvo_ulkomaa			+= $arow["rivihinta"];
-									$arvo_ulkomaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
-									$kotiarvo_ulkomaa		+= $arow["kotirivihinta"];
-									$kotiarvo_ulkomaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
-									$kate_ulkomaa			+= $rivikate;
-									$kate_ulkomaa_eieri		+= $rivikate_eieri;
-								}
+						if ($arow['varattu'] > 0) {
+							if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
+								$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
+								$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
+								$arvo_kotimaa			+= $arow["rivihinta"];
+								$arvo_kotimaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
+								$kotiarvo_kotimaa		+= $arow["kotirivihinta"];
+								$kotiarvo_kotimaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
+								$kate_kotimaa			+= $rivikate;
+								$kate_kotimaa_eieri		+= $rivikate_eieri;
 							}
-
-							$summa			+= hintapyoristys($arow["rivihinta"]+$arow["alv"]);
-							$summa_eieri	+= hintapyoristys($arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"]);
-							$arvo			+= hintapyoristys($arow["rivihinta"]);
-							$arvo_eieri		+= hintapyoristys($arow["rivihinta_ei_erikoisaletta"]);
-							$kotiarvo		+= hintapyoristys($arow["kotirivihinta"]);
-							$kotiarvo_eieri	+= hintapyoristys($arow["kotirivihinta_ei_erikoisaletta"]);
-							$kate			+= $rivikate;
-							$kate_eieri		+= $rivikate_eieri;
+							else {
+								$summa_ulkomaa			+= $arow["rivihinta"]+$arow["alv"];
+								$summa_ulkomaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
+								$arvo_ulkomaa			+= $arow["rivihinta"];
+								$arvo_ulkomaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
+								$kotiarvo_ulkomaa		+= $arow["kotirivihinta"];
+								$kotiarvo_ulkomaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
+								$kate_ulkomaa			+= $rivikate;
+								$kate_ulkomaa_eieri		+= $rivikate_eieri;
+							}
 						}
+
+						$summa			+= hintapyoristys($arow["rivihinta"]+$arow["alv"]);
+						$summa_eieri	+= hintapyoristys($arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"]);
+						$arvo			+= hintapyoristys($arow["rivihinta"]);
+						$arvo_eieri		+= hintapyoristys($arow["rivihinta_ei_erikoisaletta"]);
+						$kotiarvo		+= hintapyoristys($arow["kotirivihinta"]);
+						$kotiarvo_eieri	+= hintapyoristys($arow["kotirivihinta_ei_erikoisaletta"]);
+						$kate			+= $rivikate;
+						$kate_eieri		+= $rivikate_eieri;
 					}
 				}
 

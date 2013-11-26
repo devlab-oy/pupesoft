@@ -254,7 +254,7 @@ function paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($lait
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
 					AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-					AND tilausrivi.tunnus = '{$tilausrivit['lisatyt_rivit1'][0]}')
+					AND tilausrivi.tunnus = '{$tilausrivit[0][0]}')
 				SET asiakkaan_positio = {$laite['laite_tunnus']}
 				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'";
 	pupe_query($query);

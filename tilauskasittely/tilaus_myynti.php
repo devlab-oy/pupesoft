@@ -679,14 +679,6 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS" and $muokkauslukko =
 		exit;
 	}
 
-	//Luodaan valituista riveistä suoraan normaali ostotilaus
-	require("tilauksesta_ostotilaus.inc");
-
-	$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');
-	$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"],'U');
-
-	if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
-
 	// Kopsataan valitut rivit uudelle myyntitilaukselle
 	require("tilauksesta_myyntitilaus.inc");
 

@@ -284,7 +284,7 @@ function hyvaksy_ennakko($parametrit) {
 
 	// Vaihdetaan tila/alatila Ennakko/Lep‰‰m‰ss‰
 	if ($onnistuiko_toiminto) {
-		
+
 		$query = "	UPDATE lasku
 					SET viesti = '{$viesti}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -452,9 +452,9 @@ function hylkaa($valittu_tarjous_tunnus) {
 		AND tunnus = '{$kukarow['kesken']}'";
 	}
 	$result = pupe_query($query);
-	
+
 	if($toim == "EXTTARJOUS") {
-		
+
 		$query = "	UPDATE tilausrivi
 					SET tyyppi = 'D'
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -790,7 +790,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 	$tunnus = $params['tarjous_tunnus'];
 	$toim = $params['toim'];
 	$nro = 0;
-	
+
 	echo "<font class='message'>".t("Tilausrivit")."</font>";
 
 	echo "<form id='hyvaksy_hylkaa_formi' method='post' action=''>";

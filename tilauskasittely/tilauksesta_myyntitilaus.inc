@@ -366,7 +366,7 @@
 			$laskures = mysql_query($query);
 			$laskurow = mysql_fetch_array($laskures);
 
-			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.positio
+			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.toimittajan_tunnus
 						FROM tilausrivi
 						LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -512,7 +512,15 @@
 					$varasto = "";
 				}
 
-				if ($kopioi_paikat != "") {
+				if (($coprivirow["var"] == "T" or $coprivirow["var"] == "U") and $coprivirow['toimittajan_tunnus'] != 0) {
+					if ($coprivirow['var'] == 'T') {
+						$paikka = "¡¡¡{$coprivirow['toimittajan_tunnus']}";
+					}
+					else {
+						$paikka = "!!!{$coprivirow['toimittajan_tunnus']}";
+					}
+				}
+				elseif ($kopioi_paikat != "") {
 					$paikka	= $coprivirow['hyllyalue']."#!¡!#".$coprivirow['hyllynro']."#!¡!#".$coprivirow['hyllyvali']."#!¡!#".$coprivirow['hyllytaso'];
 				}
 				else {
@@ -616,7 +624,6 @@
 									case 'tilausrivitunnus':
 									case 'tiliointirivitunnus':
 									case 'tilausrivilinkki':
-									case 'toimittajan_tunnus':
 									case 'luontiaika':
 									case 'laatija':
 										$values .= "";

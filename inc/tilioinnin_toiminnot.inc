@@ -1,7 +1,5 @@
 <?php
 
-require_once('functions.inc');
-
 if ($_POST['ajax_toiminto'] == 'tilin_oletusalv') {
 	$tili = mysql_real_escape_string($_POST['tilino']);
 
@@ -18,7 +16,7 @@ if ($_POST['ajax_toiminto'] == 'tilin_oletusalv') {
 
 		echo json_encode(
 			array('vero' => preg_replace ('/\.?0*$/', '', $row['oletus_alv']))
-		);	
+		);
 		exit;
 	}
 
@@ -35,4 +33,3 @@ if ($_POST['ajax_toiminto'] == 'hae_ostolaskun_tyypin_oletustili') {
 }
 
 exit;
-?>

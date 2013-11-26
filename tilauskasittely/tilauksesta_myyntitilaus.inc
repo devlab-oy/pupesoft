@@ -35,7 +35,6 @@
 			$monistares = pupe_query($query);
 			$monistarow = mysql_fetch_array($monistares);
 
-
 			$tehdaan_uusi_otsikko = TRUE;
 
 			// Katsotaan löytyykö jo sopiva otsikko, jos ei niin tehdään uusi, eli tässä tapauksessa ei kopsata vanhaa
@@ -354,10 +353,12 @@
 			$isaok				= array();
 
 			if ($perusta == "TYOMAARAYS") {
-				$tymlisa = t("työmääräykselle");
+				$tymlisa    = t("työmääräykselle");
+				$linkkilisa = "<a href='tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero=$utunnus'>".t("Siirry myyntitilaukselle")."</a>";
 			}
 			else {
-				$tymlisa = t("myyntitilaukselle");
+				$tymlisa    = t("myyntitilaukselle");
+				$linkkilisa = "<a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$utunnus'>".t("Siirry myyntitilaukselle")."</a>";
 			}
 
 			$tilauksesta_myyntitilaus .= "<font class='message'>".t("Lisätään valitut rivit")." $tymlisa: $utunnus</font><br>";
@@ -710,6 +711,10 @@
 
 			//Korjataan globaali muuttuja
 			$kukarow["kesken"] = $kukarowkesken;
+
+			if ($tilauksesta_myyntitilaus != "" and $linkkilisa != "") {
+				$tilauksesta_myyntitilaus .= "<br><br>$linkkilisa<br>";
+			}
 
 			return $tilauksesta_myyntitilaus;
 		}

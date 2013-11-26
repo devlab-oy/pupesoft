@@ -1398,7 +1398,9 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 	if ($tv_kaytossa) $cspani = 11;
 	else $cspani = 10;
 
-	$cspani = $yhtiorow['toimipaikkakasittely'] == 'L' ? 11 : 10;
+	if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+		$cspani++;
+	}
 
 	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 		$cspani++;

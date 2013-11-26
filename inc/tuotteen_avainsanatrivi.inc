@@ -173,6 +173,22 @@
 			$ulos .= "</select>";
 			$ulos .= "</td>";
 		}
+		elseif ($trow[3] == "tyomaarayksen_ryhmittely" and $yhtiorow['laite_huolto'] == 'X') {
+			$toimenpidetuote_tyypit = array(
+				'tarkastus'		 => t('Tarkastus'),
+				'huolto'		 => t('Huolto'),
+				'koeponnistus'	 => t('Koeponnistus'),
+			);
+			$sel = array($trow[$i] => "SELECTED");
+
+			$ulos = "<td>";
+			$ulos .= "<select name='{$nimi}'>";
+			foreach ($toimenpidetuote_tyypit as $index => $toimenpidetuote_tyyppi) {
+				$ulos .= "<option value='{$index}' {$sel}>{$toimenpidetuote_tyyppi}</option>";
+			}
+			$ulos .= "</select>";
+			$ulos .= "</td>";
+		}
 		else {
 			$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		}

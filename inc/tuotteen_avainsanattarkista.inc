@@ -140,6 +140,23 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "jarjestys") {
+			if ($tem_laji == 'tyomaarayksen_ryhmittely' and $yhtiorow['laite_huolto'] == 'X') {
+				if ($tem_selite == 'tarkastus') {
+					$t[$i] = 3;
+				}
+				else if ($tem_selite == 'huolto') {
+					$t[$i] = 2;
+				}
+				else if ($tem_selite == 'koeponnistus') {
+					$t[$i] = 1;
+				}
+				else {
+					$t[$i] = '';
+				}
+			}
+		}
+
 		if (mysql_field_name($result, $i) == 'tunnus') {
 
 			$query = "	SELECT tunnus

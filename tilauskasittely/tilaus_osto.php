@@ -1429,6 +1429,24 @@
 							echo "<ul>";
 							echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyssä").": $hyllyssa $pop_yks</li><li>".t("Myytävissä").": $myytavissa $pop_yks</li>";
 							echo "<li>".t("Tilattu").": $prow[tilattu] $pop_yks</li><li>".t("Varattu").": $prow[varattukpl] $pop_yks</li>";
+
+							if ($prow['paikka'] != '') {
+
+								list($_hyllyalue, $_hyllynro, $_hyllyvali, $_hyllytaso) = explode(" ", $prow['paikka']);
+
+								$query = "	SELECT halytysraja
+											FROM tuotepaikat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND hyllyalue = '{$_hyllyalue}'
+											AND hyllynro = '{$_hyllynro}'
+											AND hyllyvali = '{$_hyllyvali}'
+											AND hyllytaso = '{$_hyllytaso}'";
+								$halyraja_chk_res = pupe_query($query);
+								$halyraja_chk_row = mysql_fetch_assoc($halyraja_chk_res);
+
+								echo "<li>",t("Hälytysraja"),": {$halyraja_chk_row['halytysraja']} {$pop_yks}</li>";
+							}
+
 							echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
 							echo "</ul>";
 							echo "</div>";

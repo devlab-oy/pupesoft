@@ -113,21 +113,56 @@ if ($tee == 'G') {
 }
 
 // Tositeselailu
-if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
-	if  ($tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
+if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or isset($tee_W) or isset($tee_T) or isset($tee_S) or isset($tee_Å) or isset($tee_Ä) or isset($tee_automaattikirjauksia_muutettu) or isset($tee_kasintehtyja_alvkirjauksia) or isset($tee_alvkirjauksia_ilmanalvtasoa) or isset($tee_automaattikirjauksia_alv_muutettu) or isset($tee_KP)) {
+
+	$tav = !isset($tav) ? 0 : (int) $tav;
+	$tak = !isset($tak) ? 0 : (int) $tak;
+	$tap = !isset($tap) ? 0 : (int) $tap;
+
+	if  (isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or isset($tee_W) or isset($tee_T) or isset($tee_S) or isset($tee_Å) or isset($tee_Ä) or isset($tee_automaattikirjauksia_muutettu) or isset($tee_kasintehtyja_alvkirjauksia) or isset($tee_alvkirjauksia_ilmanalvtasoa) or isset($tee_automaattikirjauksia_alv_muutettu) or isset($tee_KP)) {
+
+		$ppa = (int) $ppa;
+		$kka = (int) $kka;
+		$vva = (int) $vva;
+		$ppl = (int) $ppl;
+		$kkl = (int) $kkl;
+		$vvl = (int) $vvl;
+
+		$query  = "SELECT TO_DAYS('{$vvl}-{$kkl}-{$ppl}') - TO_DAYS('{$vva}-{$kka}-{$ppa}') ero";
+		$result = pupe_query($query);
+		$row    = mysql_fetch_assoc($result);
+
+		if ($row["ero"] > 365) {
+			echo "<font class='error'>",t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentaväli!"),"</font><br>";
+
+			unset($tee_alvkirjauksia_ilmanalvtasoa);
+			unset($tee_automaattikirjauksia_alv_muutettu);
+			unset($tee_automaattikirjauksia_muutettu);
+			unset($tee_kasintehtyja_alvkirjauksia);
+			unset($tee_KP);
+			unset($tee_S);
+			unset($tee_T);
+			unset($tee_W);
+			unset($tee_X);
+			unset($tee_XKAIKKI);
+			unset($tee_Y);
+			unset($tee_Z);
+			unset($tee_Ä);
+			unset($tee_Å);
+		}
 
 		// Etsitään virheet vain kuluvalta tilikaudelta!
-		if ($tee == 'Z') {
+		if (isset($tee_Z)) {
 			$query = "	SELECT ltunnus, tapvm, round(sum(summa),2) summa, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tapvm_tilino)
-						WHERE yhtio = '$kukarow[yhtio]'
-						and korjattu = ''
-						and tapvm >= '$yhtiorow[tilikausi_alku]'
-						and tapvm <= '$yhtiorow[tilikausi_loppu]'
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND tiliointi.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						GROUP BY ltunnus, tapvm
 						HAVING summa <> 0";
 		}
-		if ($tee == 'X') {
+		if (isset($tee_X)) {
 			// etsii kaikki tositteet joilta puuttuu kustannuspaikka, EI myynti ja tasetilit
 			// Onko where oikein!
 			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
@@ -137,8 +172,8 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						AND tili.sisainen_taso like '3%'
 						AND tiliointi.tilino = tili.tilino
 						AND tiliointi.korjattu = ''
-						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliointi.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND tiliointi.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						AND tiliointi.kustp = 0
 						AND tiliointi.tilino != '$yhtiorow[myynti]'
 						AND tiliointi.tilino != '$yhtiorow[myynti_ei_eu]'
@@ -146,7 +181,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						AND tiliointi.tilino != '$yhtiorow[varastonmuutos]'
 						AND tiliointi.tilino != '$yhtiorow[pyoristys]'";
 		}
-		if ($tee == 'XKAIKKI') {
+		if (isset($tee_XKAIKKI)) {
 			// etsii kaikki tositteet joilta puuttuu kustannuspaikka, myös myynti ja tasetilit
 			$query = "	SELECT tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, 'n/a', 'n/a', 'n/a', tiliointi.selite
 						FROM tiliointi use index (yhtio_tilino_tapvm)
@@ -154,12 +189,12 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
 						AND tiliointi.korjattu = ''
 						AND tiliointi.tilino not in ('{$yhtiorow["alv"]}', '{$yhtiorow["pyoristys"]}')
-						AND tiliointi.tapvm >= '{$yhtiorow["tilikausi_alku"]}'
-						AND tiliointi.tapvm <= '{$yhtiorow["tilikausi_loppu"]}'
+						AND tiliointi.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND tiliointi.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						AND tiliointi.kustp = 0
 						ORDER BY tiliointi.ltunnus";
 		}
-		if ($tee == 'W') {
+		if (isset($tee_W)) {
 			$query = "	(SELECT lasku.tunnus ltunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
 						count(tiliointi.tunnus) saamistilejä,
 						round(sum(tiliointi.summa),2) heitto
@@ -172,8 +207,8 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 											and tiliointi.tilino in ('$yhtiorow[ostovelat]','$yhtiorow[konserniostovelat]')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('H','Y','M','P','Q')
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
-						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						GROUP BY 1,2,3,4,5,6
 						HAVING saamistilejä != 1)
 
@@ -190,13 +225,13 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('H','Y','M','P','Q')
 						and lasku.mapvm != '0000-00-00'
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
-						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						GROUP BY 1,2,3,4,5,6
 						HAVING heitto <> 0)";
 		}
 
-		if ($tee == 'S') {
+		if (isset($tee_S)) {
 			$query = "	SELECT lasku.tunnus ltunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
 						if(sum(ifnull(t1.summa, 0))=0,0,1)+if(sum(ifnull(t2.summa, 0))=0,0,1)+if(sum(ifnull(t3.summa, 0))=0,0,1) korjattu,
 						count(distinct t1.tilino)+count(distinct t2.tilino)+count(distinct t3.tilino) saamistilejä
@@ -208,13 +243,13 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						and lasku.tila = 'U'
 						and lasku.alatila = 'X'
 						and lasku.mapvm != '0000-00-00'
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
-						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						GROUP BY 1,2,3,4,5,6
 						HAVING saamistilejä > 1 and korjattu > 0";
 		}
 
-		if ($tee == 'Å') {
+		if (isset($tee_Å)) {
 			$query = "	(SELECT distinct lasku.tunnus ltunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, tr1.tuoteno, s1.sarjanumero, if(tr1.alv>=500, 'MV', tr1.alv) alv1, if(tr2.alv>=500, 'MV', tr2.alv) alv2, l2.laskunro, l2.nimi
 						FROM lasku
 						JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[osto_marginaali]'
@@ -225,8 +260,8 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'U'
 						and lasku.alatila = 'X'
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
-						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						HAVING (alv1 != 'MV' or alv2 != 'MV')
 						ORDER by lasku.laskunro)
 
@@ -242,13 +277,13 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'U'
 						and lasku.alatila = 'X'
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
-						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						HAVING (alv1 != 'MV' or alv2 != 'MV')
 						ORDER by l2.laskunro)";
 		}
 
-		if ($tee == 'Ä') {
+		if (isset($tee_Ä)) {
 			$query = "	SELECT lasku.tunnus ltunnus, lasku.ytunnus, lasku.nimi, lasku.tapvm, lasku.summa, ifnull(sum(t1.summa),0) + ifnull(sum(t2.summa),0) + ifnull(sum(t3.summa),0) ero
 						FROM lasku
 						LEFT JOIN tiliointi t1 ON (lasku.yhtio = t1.yhtio and lasku.tunnus = t1.ltunnus and t1.korjattu = '' and t1.tilino = '$yhtiorow[myyntisaamiset]')
@@ -258,27 +293,27 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						and lasku.tila = 'U'
 						and lasku.alatila = 'X'
 						and lasku.mapvm != '0000-00-00'
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
-						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						GROUP BY ltunnus
 						HAVING round(sum(t1.summa),2) != 0 or round(sum(t2.summa),2) != 0 or round(sum(t3.summa),2) != 0
 						ORDER by lasku.laskunro";
 		}
 
-		if ($tee == 'automaattikirjauksia_muutettu') {
+		if (isset($tee_automaattikirjauksia_muutettu)) {
 			$query = "	SELECT lasku.tunnus ltunnus, lasku.tapvm, lasku.summa, lasku.ytunnus, lasku.nimi, 'n/a'
 						FROM tiliointi use index (yhtio_tapvm_tilino)
 						JOIN lasku use index (PRIMARY) ON (lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tiliointi.ltunnus and lasku.tila in ('H','Y','M','P','Q','U'))
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu != ''
-						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliointi.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND tiliointi.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						GROUP BY lasku.tunnus
 						ORDER BY lasku.tapvm, lasku.ytunnus";
 			$viivatut = "on";
 		}
 
-		if ($tee == 'automaattikirjauksia_alv_muutettu') {
+		if (isset($tee_automaattikirjauksia_alv_muutettu)) {
 
 			// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity
 			$query = "	SELECT ifnull(group_concat(DISTINCT concat(\"'\", toim_alv, \"'\")), '') tilino
@@ -301,15 +336,15 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						JOIN lasku use index (PRIMARY) ON (lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tiliointi.ltunnus and lasku.tila in ('H','Y','M','P','Q','U'))
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu != ''
-						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliointi.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND tiliointi.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						AND (tiliointi.vero != 0 or tiliointi.tilino in ($tilino_alv))
 						GROUP BY lasku.tunnus
 						ORDER BY lasku.tapvm, lasku.ytunnus";
 			$viivatut = "on";
 		}
 
-		if ($tee == 'kasintehtyja_alvkirjauksia') {
+		if (isset($tee_kasintehtyja_alvkirjauksia)) {
 			// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity
 			$query = "	SELECT ifnull(group_concat(DISTINCT concat(\"'\", toim_alv, \"'\")), '') tilino
 						FROM yhtion_toimipaikat
@@ -332,13 +367,13 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						AND tiliointi.korjattu = ''
 						and tiliointi.aputunnus = 0
 						AND tiliointi.tilino in ($tilino_alv)
-						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliointi.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND tiliointi.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						GROUP BY ltunnus, tapvm
 						ORDER BY tapvm, ltunnus";
 		}
 
-		if ($tee == 'alvkirjauksia_ilmanalvtasoa') {
+		if (isset($tee_alvkirjauksia_ilmanalvtasoa)) {
 			// tutkitaan onko tiliöintejä tileillä ilman alv-tasoa
 			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tapvm_tilino)
@@ -346,13 +381,13 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu = ''
 						AND tiliointi.vero != 0
-						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliointi.tapvm >= '{$vva}-{$kka}-{$ppa}'
+						AND tiliointi.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
 						GROUP BY ltunnus, tapvm
 						ORDER BY tapvm, ltunnus";
 		}
 
-		if ($tee == 'KP') {
+		if (isset($tee_KP)) {
 			// tutkitaan saldoja kirjanpidon ja pankkisaldon välillä
 			$query = "	SELECT
 						tiliotedata.aineisto ltunnus,
@@ -365,8 +400,8 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						FROM tiliotedata
 						LEFT JOIN tiliotedata as t1 on (tiliotedata.yhtio=t1.yhtio and tiliotedata.tyyppi = t1.tyyppi and tiliotedata.aineisto = t1.aineisto and t1.tiliointitunnus > 0)
 						WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
-						AND tiliotedata.alku >= '$yhtiorow[tilikausi_alku]'
-						AND tiliotedata.alku <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliotedata.alku >= '{$vva}-{$kka}-{$ppa}'
+						AND tiliotedata.alku <= '{$vvl}-{$kkl}-{$ppl}'
 						AND tiliotedata.tyyppi = 1
 						AND left(tiliotedata.tieto,3) = 'T50'
 						AND SUBSTRING(tiliotedata.tieto, 7, 1) = 1
@@ -378,10 +413,6 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 		$plisa = "";
 		$lisa  = "";
 		$summa = str_replace ( ",", ".", $summa);
-
-		$tav = (int) $tav;
-		$tak = (int) $tak;
-		$tap = (int) $tap;
 
 		if ($tav > 0 and $tav < 1000) {
 			$tav += 2000;
@@ -471,7 +502,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 
 		$miinusta = 0;
 
-		if ($tee == 'KP') {
+		if (isset($tee_KP)) {
 			$miinusta = 0;
 		}
 
@@ -506,12 +537,12 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 				$kennimi = mysql_field_name($result, $i);
 
 				if ($i == 1) {
-					if (mysql_field_name($result,$i) == 'tapvm' or (mysql_field_name($result,$i) == 'alku' and $tee == 'KP')) {
+					if (mysql_field_name($result,$i) == 'tapvm' or (mysql_field_name($result,$i) == 'alku' and isset($tee_KP))) {
 						$orgpvm 		= $trow[$kennimi];
 						$trow[$kennimi] = tv1dateconv($trow[$kennimi]);
 
 						// Ei tiedetä vielä näytetäänkö
-						if ($tee == 'KP') {
+						if (isset($tee_KP)) {
 							ob_start();
 						}
 					}
@@ -534,7 +565,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 				elseif (mysql_field_name($result, $i) == "ytunnus") {
 						echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
 					}
-				elseif (mysql_field_name($result, $i) == "tiliote" and $tee == 'KP') {
+				elseif (mysql_field_name($result, $i) == "tiliote" and isset($tee_KP)) {
 					$pano = sprintf("%.2f",substr($trow[$kennimi],21,19) / 100);
 					$otto = sprintf("%.2f",substr($trow[$kennimi],48,19) / 100);
 
@@ -551,7 +582,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 					echo t("Otot")." <font class='error'>".$otto."</font><br>";
 					echo t("Yhteensä")." ".$psaldo."</td>";
 				}
-				elseif (mysql_field_name($result, $i) == "kirjanpito" and $tee == 'KP') {
+				elseif (mysql_field_name($result, $i) == "kirjanpito" and isset($tee_KP)) {
 
 					$huom 	= "";
 					$linkki = "";
@@ -604,12 +635,12 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						echo "<td><br><br>".t("Ei tiliöintejä")."</td>";
 					}
 				}
-				elseif (mysql_field_name($result, $i) == "ero" and $tee == 'KP') {
+				elseif (mysql_field_name($result, $i) == "ero" and isset($tee_KP)) {
 					$ero = sprintf("%.2f", $saldo-$kpito);
 
 					echo "<td align='right'><br><br>$ero<br></td>";
 				}
-				elseif (mysql_field_name($result, $i) == "muutetut_tositteet" and $tee == 'KP') {
+				elseif (mysql_field_name($result, $i) == "muutetut_tositteet" and isset($tee_KP)) {
 					if ($ero != 0) {
 
 						if ($ltunnukset["ltunnus"] != "") {
@@ -1500,8 +1531,8 @@ if ($tee == "") {
 		$kentta = 'tap';
 	}
 
-	echo "<form name = 'valikko' method='post'>";
-	echo "<input type='hidden' name='tee' value='Y'>";
+	echo "<form name = 'valikko' action='muutosite.php' method='post'>";
+	echo "<input type='hidden' name='tee_Y' value='Y'>";
 	echo "<table>";
 	echo "<tr><th colspan='3'>".t("Etsi tositetta")."</th></tr>";
 	echo "<tr>
@@ -1551,58 +1582,99 @@ if ($tee == "") {
 	echo "</table>";
 	echo "</form>";
 
+
+
+	echo "<form action = 'muutosite.php'>";
 	echo "<br><br><table>";
-	echo "	<tr><th colspan='2'>".t("Etsi tapahtumia ajalta")." ".tv1dateconv($yhtiorow["tilikausi_alku"], "", "LYHYT")." - ".tv1dateconv($yhtiorow["tilikausi_loppu"], "", "LYHYT")."</th></tr>";
+
+	$tkalku = explode("-", $yhtiorow["tilikausi_alku"]);
+	$tklopu = explode("-", $yhtiorow["tilikausi_loppu"]);
+
+	if (!isset($kka)) $kka = $tkalku[1];
+	if (!isset($vva)) $vva = $tkalku[0];
+	if (!isset($ppa)) $ppa = $tkalku[2];
+	if (!isset($kkl)) $kkl = $tklopu[1];
+	if (!isset($vvl)) $vvl = $tklopu[0];
+	if (!isset($ppl)) $ppl = $tklopu[2];
+
+	// Ei sallita loppupäivää tulevaisuudessa
+	if (date("Ymd",mktime(0, 0, 0, $kkl, $ppl, $vvl)) > date("Ymd")) {
+		$kkl = date("m");
+		$vvl = date("Y");
+		$ppl = date("d");
+	}
+
+	$query  = "SELECT TO_DAYS('{$vvl}-{$kkl}-{$ppl}') - TO_DAYS('{$vva}-{$kka}-{$ppa}') ero";
+	$result = pupe_query($query);
+	$row    = mysql_fetch_assoc($result);
+
+	// Sallitaan vain vuosi takaperin
+	if ($row["ero"] > 365) {
+		$kka = date("m",mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
+		$vva = date("Y",mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
+		$ppa = date("d",mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
+	}
+
+	echo "	<tr><th colspan='2'>".t("Etsi tapahtumia ajalta").":
+		<input type='text' name='ppa' value='{$ppa}' size='3'>
+		<input type='text' name='kka' value='{$kka}' size='3'>
+		<input type='text' name='vva' value='{$vva}' size='5'>
+		-
+		<input type='text' name='ppl' value='{$ppl}' size='3'>
+		<input type='text' name='kkl' value='{$kkl}' size='3'>
+		<input type='text' name='vvl' value='{$vvl}' size='5'>
+		</th></tr>";
 
 	echo "	<tr class='aktiivi'>
 			<td>".t("näytä tositteet, jotka eivät täsmää")."</td>
-		  	<td><form action = '?tee=Z' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_Z' value = '".t("Näytä")."'></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joilla on manuaalisia alv kirjauksia")."</td>
-		  	<td><form action = '?tee=kasintehtyja_alvkirjauksia' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_kasintehtyja_alvkirjauksia' value = '".t("Näytä")."'></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joilla on alv kirjauksia tileille, jotka ei ole alv-ilmoituksessa")."</td>
-		  	<td><form action = '?tee=alvkirjauksia_ilmanalvtasoa' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_alvkirjauksia_ilmanalvtasoa' value = '".t("Näytä")."'></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka")." (".t("ei huomioida myynti- ja varastonmuutostilejä").")</td>
-		  	<td><form action = '?tee=X' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_X' value = '".t("Näytä")."'></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka")." (".t("huomioidaan kaikki tilit").")</td>
-		  	<td><form action = '?tee=XKAIKKI' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_XKAIKKI' value = '".t("Näytä")."'></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden ostovelat ei täsmää")."</td>
-		  	<td><form action = '?tee=W' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_W'  value = '".t("Näytä")."'></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden myyntisaamiset ei täsmää")."</td>
-		  	<td><form action = '?tee=S' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_S' value = '".t("Näytä")."'></td>
 			</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä maksetut laskut, joilla on myyntisaamisia")."</td>
-		  	<td><form action = '?tee=Ä' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_Ä' value = '".t("Näytä")."'></td>
 			</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden automaattikirjauksia on muutettu")."</td>
-		  	<td><form action = '?tee=automaattikirjauksia_muutettu' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_automaattikirjauksia_muutettu' value = '".t("Näytä")."'></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden automaattisia alv-kirjauksia on muutettu")."</td>
-		  	<td><form action = '?tee=automaattikirjauksia_alv_muutettu' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_automaattikirjauksia_alv_muutettu' value = '".t("Näytä")."'></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden marginaaliverotiliöinnit ovat väärin")."</td>
-		  	<td><form action = '?tee=Å' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_Å' value = '".t("Näytä")."'></td>
 			</tr>
 			<tr class='aktiivi'>
 		  	<td>näytä saldo pankin tiliotteen ja kirjanpidon välillä</td>
-		  	<td><form action = '?tee=KP' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	<td><input type = 'submit' name = 'tee_KP' value = '".t("Näytä")."'></td>
 			</tr>
-			</table>";
+			</table>
+			</form>";
 }
 
 require ("inc/footer.inc");

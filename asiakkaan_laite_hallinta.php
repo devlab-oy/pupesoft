@@ -379,9 +379,9 @@ function echo_laitteet_table($laitteet = array()) {
 		if (empty($kukarow['extranet'])) {
 			echo "<td>";
 			if (!empty($laite['laite_tunnus'])) {
-				echo "<button>";
-				echo "<a href='yllapito.php?toim=laite&kopioi_rivi=on&asiakas_tunnus={$laite['asiakas_tunnus']}&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>".t('Kopioi laite')."</a>";
-				echo "</button>";
+				echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=laite&kopioi_rivi=on&asiakas_tunnus={$laite['asiakas_tunnus']}&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>";
+				echo "<input type='submit' value='".t('Kopioi laite')."' />";
+				echo "</form>";
 			}
 			echo "</td>";
 			

@@ -29,13 +29,16 @@
 					// Katotaan onko rahtivapaa
 					var rvcb_ch = document.getElementById('rahtivapaa').checked;
 
+					// katotaan onks iPadkäyttäjä
+					var isiPad = navigator.userAgent.match(/iPad/i) != null;
+
 					if (merahti == 'K' && mrdd_sel != 1) {
 						mrdd_id.options[1].selected = '1';
-						alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+						if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
 					}
 					else if (merahti != 'K' && mrdd_sel != 2 && rvcb_ch != true) {
 						mrdd_id.options[2].selected = '1';
-						alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+						if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
 					}
 				}
 

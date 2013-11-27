@@ -82,8 +82,8 @@ if [ "$jatketaanko" = "k" ]; then
 	cd $pupedir
 	git fetch origin        # paivitetaan lokaali repo remoten tasolle
 	git checkout .          # revertataan kaikki local muutokset
-	git checkout master     # varmistetaan, etta on master branchi kaytossa
-	git pull origin master  # paivitetaan master branchi
+	git checkout joonas/asiakas_laitteet     # varmistetaan, etta on master branchi kaytossa
+	git pull origin joonas/asiakas_laitteet  # paivitetaan master branchi
 	git remote prune origin # poistetaan ylimääriset branchit
 
 	echo "${green}Pupesoft päivitetty!${normal}"

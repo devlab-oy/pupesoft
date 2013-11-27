@@ -118,6 +118,9 @@ if (!empty($request['haettu_asiakas'])) {
 		$asiakkaan_kohteet['asiakas'] = $request['haettu_asiakas'];
 		$asiakkaan_kohteet['logo'] = base64_encode(hae_yhtion_lasku_logo());
 		$request['pdf_filepath'] = tulosta_kalustoraportti($asiakkaan_kohteet);
+
+		unset($request['ala_tee']);
+		$asiakkaan_kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
 	}
 	else if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' or $request['ala_tee'] == 'tulosta_poikkeamaraportti') {
 		$pdf_tiedostot = ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirjat($request['lasku_tunnukset']) : PDF\Poikkeamaraportti\hae_poikkeamaraportit($request['lasku_tunnukset']));

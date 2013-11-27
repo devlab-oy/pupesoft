@@ -1395,7 +1395,34 @@
 
 						// tehd‰‰n pop-up divi jos keikalla on kommentti...
 						if ($prow["tunnus"] != "") {
-							list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"]);
+
+							if ($laskurow['vanhatunnus'] != 0) {
+
+								$query  = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
+											FROM varastopaikat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tyyppi != 'P'
+											AND toimipaikka = '{$laskurow['vanhatunnus']}'";
+								$vares = pupe_query($query);
+								$varow = mysql_fetch_assoc($vares);
+
+								$saldo = $hyllyssa = $myytavissa = 0;
+
+								if (!empty($varow['tunnukset'])) {
+
+									foreach (explode(",", $varow['tunnukset']) as $_var_tun) {
+										list ($_saldo, $_hyllyssa, $_myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"], '', $_var_tun);
+
+										$saldo += $_saldo;
+										$hyllyssa += $_hyllyssa;
+										$myytavissa += $_myytavissa;
+									}
+								}
+							}
+							else {
+								list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"]);
+							}
+
 							$pop_yks = t_avainsana("Y", "", "and avainsana.selite='$prow[yksikko]'", "", "", "selite");
 
 							echo "<div id='div_$prow[tunnus]' class='popup' style='width: 400px;'>";

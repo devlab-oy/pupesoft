@@ -88,7 +88,7 @@ if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 	if ($toiminto == "kalkyyli" and $tee == "") {
 		$varastoon_msg .= "<th valign='top'>".t("Vanha")." ".t("saldo")."<br>".t("Uusi")." ".t("saldo")."</th>";
 
-		if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+		if ($yhtiorow['toimipaikkakasittely'] == 'L' and $laskurow['yhtio_toimipaikka'] != 0) {
 			$varastoon_msg .= "<th valign='top'>".t("Toimipaikan vanha saldo")."<br>".t("Toimipaikan uusi saldo")."</th>";
 		}
 	}
@@ -1202,41 +1202,37 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 		$varastoon_msg .= "<td align='right'>$varastoon_saldo<br><font class='$varastoon_fontti'>$varastoon_saldo_uusi$varastoon_saldo_viesti</font></td>";
 
-		if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+		if ($yhtiorow['toimipaikkakasittely'] == 'L' and $laskurow['yhtio_toimipaikka'] != 0) {
 
 			$varastoon_msg .= "<td align='right'>";
 
-			if ($laskurow['yhtio_toimipaikka'] != 0) {
+			$toimipaikan_saldo = 0;
 
-				$toimipaikan_saldo = 0;
+			$query  = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi != 'P'
+						AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
+			$vares = pupe_query($query);
 
-				$query  = "	SELECT tunnus
-							FROM varastopaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tyyppi != 'P'
-							AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
-				$vares = pupe_query($query);
+			while ($varow = mysql_fetch_assoc($vares)) {
 
-				while ($varow = mysql_fetch_assoc($vares)) {
+				list($varastoon_saldo, $dummy1, $dummy2, $dummy3) = saldo_myytavissa($tuorow["tuoteno"], '', $varow['tunnus']);
 
-					list($varastoon_saldo, $dummy1, $dummy2, $dummy3) = saldo_myytavissa($tuorow["tuoteno"], '', $varow['tunnus']);
-
-					$toimipaikan_saldo += $varastoon_saldo;
-				}
-
-				$varastoon_saldo_uusi = $toimipaikan_saldo + $tilrivirow["varattu"];
-
-				$varastoon_fontti = "";
-				$varastoon_saldo_viesti = "";
-
-				if ($varastoon_saldo_uusi <= 0) {
-					$varastoon_fontti = "error";
-					$varastoon_saldo_viesti = "<br>".t("HUOM: Saldo j‰‰ negatiiviseksi!");
-				}
-
-				$varastoon_msg .= "{$toimipaikan_saldo}<br><font class='{$varastoon_fontti}'>{$varastoon_saldo_uusi}{$varastoon_saldo_viesti}</font>";
-
+				$toimipaikan_saldo += $varastoon_saldo;
 			}
+
+			$varastoon_saldo_uusi = $toimipaikan_saldo + $tilrivirow["varattu"];
+
+			$varastoon_fontti = "";
+			$varastoon_saldo_viesti = "";
+
+			if ($varastoon_saldo_uusi <= 0) {
+				$varastoon_fontti = "error";
+				$varastoon_saldo_viesti = "<br>".t("HUOM: Saldo j‰‰ negatiiviseksi!");
+			}
+
+			$varastoon_msg .= "{$toimipaikan_saldo}<br><font class='{$varastoon_fontti}'>{$varastoon_saldo_uusi}{$varastoon_saldo_viesti}</font>";
 
 			$varastoon_msg .= "</td>";
 		}

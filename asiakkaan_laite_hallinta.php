@@ -20,9 +20,11 @@ if (isset($_POST["tee"])) {
 $filepath = dirname(__FILE__);
 if (file_exists($filepath . '/inc/parametrit.inc')) {
 	require_once($filepath . '/inc/parametrit.inc');
+	require_once($filepath . '/inc/tyojono2_functions.inc');
 }
 else {
 	require_once($filepath . '/parametrit.inc');
+	require_once($filepath . '/tyojono2_functions.inc');
 }
 
 if (!empty($kukarow['extranet'])) {
@@ -482,11 +484,28 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 		$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_nimi'] = $kohde['kohde_nimi'];
 		$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_tunnus'] = $kohde['kohde_tunnus'];
 
-		if (!empty($kohde['paikka_tunnus'])) {
+		if ($request['ala_tee'] == 'tulosta_kalustoraportti' and !empty($kohde['laite_tunnus'])) {
+			$kohde['viimeiset_tapahtumat'] = hae_laitteen_viimeiset_tapahtumat($kohde['laite_tunnus']);
+		}
+
+		if (!empty($kohde['paikka_tunnus']) and $request['ala_tee'] != 'tulosta_kalustoraportti') {
 			$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
 			$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
+		}
+		else if (!empty($kohde['paikka_tunnus']) and $request['ala_tee'] == 'tulosta_kalustoraportti') {
+			if (!empty($kohde['laite_tunnus'])) {
+				if (onko_laitteella_poikkeus($kohde['laite_tunnus'])) {
+					$kohde['poikkeus'] = 'X';
+				}
+				else {
+					$kohde['poikkeus'] = '';
+				}
+				$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
+				$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
+			}
 		}
 	}
 
 	return $asiakkaan_kohteet;
 }
+

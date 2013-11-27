@@ -325,7 +325,7 @@ function echo_tyomaaraykset_table($request = array()) {
 			echo implode('<br/>', $tyomaarays['lasku_tunnukset']);
 		}
 		else {
-			echo "monta";
+			echo "...";
 		}
 		echo "</td>";
 
@@ -583,4 +583,51 @@ function hae_tyostatukset($request = array()) {
 	}
 
 	return $tyostatukset;
+}
+
+function hae_laitteen_viimeiset_tapahtumat($laite_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT huoltosyklit_laitteet.viimeinen_tapahtuma,
+				tuotteen_avainsanat.selite AS tapahtuman_tyyppi
+				FROM huoltosyklit_laitteet
+				JOIN huoltosykli
+				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
+					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+				JOIN tuote as toimenpide_tuote
+				ON ( toimenpide_tuote.yhtio = huoltosykli.yhtio
+					AND toimenpide_tuote.tuoteno = huoltosykli.toimenpide )
+				JOIN tuotteen_avainsanat
+				ON ( tuotteen_avainsanat.yhtio = toimenpide_tuote.yhtio
+					AND tuotteen_avainsanat.tuoteno = toimenpide_tuote.tuoteno
+					AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely')
+				WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
+				AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}'";
+	$result = pupe_query($query);
+
+	$viimeiset_tapahtumat = array();
+	while($viimeinen_tapahtuma = mysql_fetch_assoc($result)) {
+		$viimeiset_tapahtumat[$viimeinen_tapahtuma['tapahtuman_tyyppi']] = $viimeinen_tapahtuma['viimeinen_tapahtuma'];
+	}
+
+	return $viimeiset_tapahtumat;
+}
+
+function onko_laitteella_poikkeus($laite_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT *
+				FROM tilausrivin_lisatiedot
+				JOIN tilausrivi as poikkeus_rivi
+				ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
+					AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
+				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite_tunnus}'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) > 0) {
+		return true;
+	}
+
+	return false;
 }

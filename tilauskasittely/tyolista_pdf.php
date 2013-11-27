@@ -3,11 +3,13 @@
 namespace PDF\Tyolista;
 
 $filepath = dirname(__FILE__);
-if (file_exists($filepath.'/../inc/parametrit.inc')) {
-	require_once($filepath.'/../inc/parametrit.inc');
+if (file_exists($filepath . '/../inc/parametrit.inc')) {
+	require_once($filepath . '/../inc/parametrit.inc');
+	require_once($filepath . '/../inc/tyojono2_functions.inc');
 }
 else {
-	require_once($filepath.'/parametrit.inc');
+	require_once($filepath . '/parametrit.inc');
+	require_once($filepath . '/tyojono2_functions.inc');
 }
 
 function hae_tyolistat($lasku_tunnukset) {
@@ -166,34 +168,10 @@ function hae_rivin_laite($laite_tunnus) {
 
 	$laite = mysql_fetch_assoc($result);
 
-	$laite['viimeinen_painekoe'] = date('my', strtotime(hae_laitteen_viimeinen_koeponnistus($laite['tunnus'])));
+	$laite['viimeinen_painekoe'] = hae_laitteen_viimeiset_tapahtumat($laite['tunnus']);
+	$laite['viimeinen_painekoe'] = date('my', strtotime($laite['viimeinen_painekoe']['koeponnistus']));
 
 	return $laite;
-}
-
-function hae_laitteen_viimeinen_koeponnistus($laite_tunnus) {
-	global $kukarow, $yhtiorow;
-
-	$query = "	SELECT huoltosyklit_laitteet.viimeinen_tapahtuma
-				FROM huoltosyklit_laitteet
-				JOIN huoltosykli
-				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
-					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
-				JOIN tuote as toimenpide_tuote
-				ON ( toimenpide_tuote.yhtio = huoltosykli.yhtio
-					AND toimenpide_tuote.tuoteno = huoltosykli.toimenpide )
-				JOIN tuotteen_avainsanat
-				ON ( tuotteen_avainsanat.yhtio = toimenpide_tuote.yhtio
-					AND tuotteen_avainsanat.tuoteno = toimenpide_tuote.tuoteno
-					AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely'
-					AND tuotteen_avainsanat.selite = 'koeponnistus')
-				WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
-				AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}'";
-	$result = pupe_query($query);
-
-	$viimeinen_tapahtuma = mysql_fetch_assoc($result);
-
-	return $viimeinen_tapahtuma['viimeinen_tapahtuma'];
 }
 
 function hae_tyomaarayksen_asiakas($asiakas_tunnus) {

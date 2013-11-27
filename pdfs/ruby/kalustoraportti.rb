@@ -281,16 +281,33 @@ class KalustoraporttiPDF
     @x += 35
     @pdf.draw_text row['huoltovali'], :at => [@x, @y]
 
-    @pdf.draw_text row['tark kkvv'], :at => [@x, @y]
+    @x += 50
+
+    begin Date.parse(row['viimeiset_tapahtumat']['tarkastus'])
+      date = Date.parse(row['viimeiset_tapahtumat']['tarkastus']).strftime('%m%y')
+      @pdf.draw_text date, :at => [@x, @y]
+    rescue
+
+    end
 
     @x += 40
-    @pdf.draw_text row['huolto kkvv'], :at => [@x, @y]
+    begin Date.parse(row['viimeiset_tapahtumat']['huolto'])
+      date = Date.parse(row['viimeiset_tapahtumat']['huolto']).strftime('%m%y')
+      @pdf.draw_text date, :at => [@x, @y]
+    rescue
+
+    end
 
     @x += 40
-    @pdf.draw_text row['painekoe_vuosi'], :at => [@x, @y]
+    begin Date.parse(row['viimeiset_tapahtumat']['koeponnistus'])
+      date = Date.parse(row['viimeiset_tapahtumat']['koeponnistus']).strftime('%m%y')
+      @pdf.draw_text date, :at => [@x, @y]
+    rescue
+
+    end
 
     @x += 50
-    @pdf.draw_text row['poikkeama_raportti'], :at => [@x, @y]
+    @pdf.draw_text row['poikkeus'], :at => [@x, @y]
   end
 end
 

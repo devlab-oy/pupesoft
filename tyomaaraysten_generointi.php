@@ -263,7 +263,7 @@ function paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($lait
 	$query = "	UPDATE tilausrivi
 				SET kommentti = '{$laiteen_kohde_ja_paikka_tiedot}'
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$tilausrivit['lisatyt_rivit1'][0]}'";
+				AND tunnus = '{$tilausrivit[0][0]}'";
 	pupe_query($query);
 }
 

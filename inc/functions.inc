@@ -24996,7 +24996,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
 		$query = "	SELECT tunnus
 					FROM toimitustapa
-					WHERE yhtio = '{$kukarow['kuka']}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND selite = '{$looprow['toimitustapa']}'";
 		$toimitustapa_chk_res = pupe_query($query);
 		$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);

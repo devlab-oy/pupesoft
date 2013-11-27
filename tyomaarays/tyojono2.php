@@ -22,7 +22,7 @@ require_once('tilauskasittely/tarkastuspoytakirja_pdf.php');
 require_once('tilauskasittely/poikkeamaraportti_pdf.php');
 require_once('tilauskasittely/tyolista_pdf.php');
 
-echo "<font class='head'>".t("Työjono2").":</font>";
+echo "<font class='head'>".t("Laitehuoltojen työjono").":</font>";
 echo "<hr/>";
 echo "<br/>";
 $js = hae_tyojono2_js();

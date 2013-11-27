@@ -88,7 +88,7 @@ class KalustoraporttiPDF
       },
       {
         :header => 'Asiakasvastaava',
-        :value => '??'
+        :value => ' '
       },
     ]
     self.other_info(other_data)

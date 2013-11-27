@@ -1847,8 +1847,8 @@
 			// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
 			// $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti
 			// $tyyppi --> 1.5 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰
-			// $tyyppi --> 1.6 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰ jossa syˆttˆkent‰t on dropdowneja
-			// $tyyppi --> 1.7 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰ jossa syˆttˆkent‰t on dropdowneja ja vain kk ja vv n‰ytet‰‰n pp on 1
+			// $tyyppi --> 1.6 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰ jossa syˆttˆkent‰t on dropdowneja, $vuosi_vaihteluvali voi rajata dropdownissa n‰ytett‰vi‰ vuosia
+			// $tyyppi --> 1.7 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰ jossa syˆttˆkent‰t on dropdowneja ja vain kk ja vv n‰ytet‰‰n pp on 1, $vuosi_vaihteluvali voi rajata dropdownissa n‰ytett‰vi‰ vuosia
 			// $tyyppi --> 2 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, eik‰ sen arvoa p‰vitet‰ (rivi‰ ei n‰ytet‰ kun tehd‰‰n uusi)
 			// $tyyppi --> 3 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, mutta sen arvo p‰ivitet‰‰n (rivi‰ ei n‰ytet‰ kun tehd‰‰n uusi)
 			// $tyyppi --> 4 rivi‰ ei n‰ytet‰ ollenkaan, mutta sen arvo p‰ivitet‰‰n
@@ -1925,7 +1925,11 @@
 				echo "</select>";
 				echo "<select name='tvv[$i]'>";
 				$sel = "";
-				foreach (range(1900, date('Y', strtotime('now + 4 years'))) as $vuosi) {
+				if (empty($vuosi_vaihteluvali)) {
+					$vuosi_vaihteluvali['min'] = 1970;
+					$vuosi_vaihteluvali['max'] = date('Y', strtotime('now + 4 years'));
+				}
+				foreach (range($vuosi_vaihteluvali['min'], $vuosi_vaihteluvali['max']) as $vuosi) {
 					if ($vva == $vuosi) {
 						$sel = "SELECTED";
 					}

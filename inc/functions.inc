@@ -24986,7 +24986,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
 		$receiver = $custpickinglist->addChild('Receiver');
 		$receiver->addChild('RecCustAccount', 0);
-		$receiver->addChild('RecCustName', substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark'], 0, 50)));
+		$receiver->addChild('RecCustName', substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']), 0, 50));
 		$receiver->addChild('RecCustStreet', substr($looprow['toim_osoite'], 0, 50));
 		$receiver->addChild('RecCustStreet2', substr($looprow['toim_osoite'], 0, 50));
 		$receiver->addChild('RecCustPostCode', substr($looprow['toim_postino'], 0, 10));

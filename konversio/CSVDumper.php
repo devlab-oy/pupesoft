@@ -92,6 +92,8 @@ abstract class CSVDumper {
 			echo "<br/>";
 		}
 		else {
+			echo t('Virheiden lukumäärä').': '.count($this->errors);
+			echo "<br/>";
 			foreach ($this->errors as $rivinumero => $row_errors) {
 				echo t('Rivillä')." {$rivinumero} ".t('oli seuraavat virheet').":";
 				echo "<br/>";

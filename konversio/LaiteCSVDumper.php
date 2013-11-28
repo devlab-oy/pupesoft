@@ -34,7 +34,6 @@ class LaiteCSVDumper extends CSVDumper {
 		$progressbar->initialize(count($this->rivit));
 
 		foreach ($this->rivit as $index => &$rivi) {
-			$rivi = $this->decode_to_utf8($rivi);
 			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
 

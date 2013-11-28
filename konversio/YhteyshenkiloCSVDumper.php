@@ -34,7 +34,6 @@ class YhteyshenkiloCSVDumper extends CSVDumper {
 			if ($rivi['YHTHENK1'] != '') {
 				//Asiakas aineistossa on kahta data. Asiakkaita sekä yhteyshenkilöitä.
 				//$rivi['YHTEYSHENK1'] == '' niin kyseessä on asiakas
-				$rivi = $this->decode_to_utf8($rivi);
 				$rivi = $this->konvertoi_rivi($rivi);
 				$rivi = $this->lisaa_pakolliset_kentat($rivi);
 

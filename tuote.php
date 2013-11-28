@@ -1131,7 +1131,7 @@
 			$toimipaikkarajaus = "";
 
 			if ($onkolaajattoimipaikat and trim($toimipaikka) != "" and $toimipaikka != 'kaikki') {
-				$toimipaikkarajaus = " and (lasku.yhtio_toimipaikka = '{$toimipaikka}' OR lasku.vanhatunnus = '{$toimipaikka}')";
+				$toimipaikkarajaus = " and ((lasku.yhtio_toimipaikka = '{$toimipaikka}' and tilausrivi.tyyppi != 'O') OR (lasku.vanhatunnus = '{$toimipaikka}' and tilausrivi.tyyppi = 'O'))";
 			}
 
 			// Tilausrivit tälle tuotteelle

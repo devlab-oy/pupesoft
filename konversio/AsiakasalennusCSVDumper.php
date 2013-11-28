@@ -20,8 +20,8 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 			'alennus'
 		);
 
-		$this->setFilepath("/tmp/asiakasalennus.csv");
-		$this->setSeparator(';');
+		$this->setFilepath("/tmp/konversio/ASIALENNUS.csv");
+		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('asiakasalennus');

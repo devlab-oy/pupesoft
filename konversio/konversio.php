@@ -29,6 +29,7 @@ $request['konversio_tyypit'] = array(
 	'laite'					 => t('Laite'),
 	'yhteyshenkilo'			 => t('Yhteyshenkilö'),
 	'asiakasalennus'		 => t('Asiakasalennus'),
+	'kaikki'				 => t('Kaikki'),
 );
 
 if ($request['action'] == 'aja_konversio') {
@@ -65,6 +66,56 @@ if ($request['action'] == 'aja_konversio') {
 			break;
 
 		case 'laite':
+			$dumper = new LaiteCSVDumper($request['kukarow']);
+			break;
+
+		case 'kaikki':
+			echo t('Tuote').':';
+			$dumper = new TuoteCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Toimenpidetuotteiden avainsanat').':';
+			$dumper = new TuotteenavainsanaToimenpideCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Tuoteryhmät').':';
+			$dumper = new TuoteryhmaCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Laite tuotteiden avainsanat').':';
+			$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Asiakkaat').':';
+			$dumper = new AsiakasCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Yhteyshenkilöt').':';
+			$dumper = new YhteyshenkiloCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Kohteet').':';
+			$dumper = new KohdeCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Asiakasalennukset').':';
+			$dumper = new AsiakasalennusCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Paikat').':';
+			$dumper = new PaikkaCSVDumper($request['kukarow']);
+			$dumper->aja();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Laitteet').':';
 			$dumper = new LaiteCSVDumper($request['kukarow']);
 			break;
 

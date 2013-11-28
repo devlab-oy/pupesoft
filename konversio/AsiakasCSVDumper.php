@@ -24,8 +24,8 @@ class AsiakasCSVDumper extends CSVDumper {
 			'nimi',
 		);
 
-		$this->setFilepath("/tmp/asiakas.csv");
-		$this->setSeparator(';');
+		$this->setFilepath("/tmp/konversio/ASIAKAS.csv");
+		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('asiakas');

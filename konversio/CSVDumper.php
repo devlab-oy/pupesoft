@@ -86,7 +86,7 @@ abstract class CSVDumper {
 		$this->dump_data();
 
 		echo "<br/>";
-		
+
 		if (empty($this->errors)) {
 			echo t('Kaikki ok ajetaan data kantaan');
 			echo "<br/>";
@@ -118,6 +118,8 @@ abstract class CSVDumper {
 
 			$rivi = explode($this->separator, $rivi);
 			$rivi = $this->to_assoc($rivi, $csv_headerit);
+
+			array_walk($rivi, array($this, 'escape_single_quotes'));
 
 			$rivit[] = $rivi;
 
@@ -188,6 +190,10 @@ abstract class CSVDumper {
 		}
 
 		return $rivi;
+	}
+
+	private function escape_single_quotes(&$item, $key) {
+		$item = str_replace("'", "\'", $item);
 	}
 
 	abstract protected function konvertoi_rivit();

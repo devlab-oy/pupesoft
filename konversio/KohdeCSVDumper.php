@@ -28,8 +28,8 @@ class KohdeCSVDumper extends CSVDumper {
 			'nimi'
 		);
 
-		$this->setFilepath("/tmp/kohde.csv");
-		$this->setSeparator(';');
+		$this->setFilepath("/tmp/konversio/LINJA.csv");
+		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('kohde');

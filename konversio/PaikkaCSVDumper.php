@@ -19,8 +19,8 @@ class PaikkaCSVDumper extends CSVDumper {
 			'kohde',
 		);
 
-		$this->setFilepath("/tmp/laite.csv");
-		$this->setSeparator(';');
+		$this->setFilepath("/tmp/konversio/LAITE.csv");
+		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('paikka');

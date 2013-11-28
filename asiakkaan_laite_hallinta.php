@@ -190,7 +190,7 @@ function echo_kalustoraportti_form($haettu_asiakas) {
 	echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
 	echo "<input type='hidden' id='ala_tee' name='ala_tee' value='tulosta_kalustoraportti' />";
 	echo "<input type='hidden' id='asiakasid' name='asiakasid' value='{$haettu_asiakas['tunnus']}' />";
-	echo "<input type='submit' value='".t("Tulosta kalustoraportti")."' />";
+	echo "<input type='submit' value='".t("Tallenna kalustoraportti PDF")."' />";
 	echo "</form>";
 }
 

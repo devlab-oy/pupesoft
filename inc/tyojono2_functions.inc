@@ -321,12 +321,7 @@ function echo_tyomaaraykset_table($request = array()) {
 		echo "<tr class='kohde_tr_hidden aktiivi'>";
 
 		echo "<td>";
-		if (count($tyomaarays['lasku_tunnukset']) < 5) {
-			echo implode('<br/>', $tyomaarays['lasku_tunnukset']);
-		}
-		else {
-			echo "...";
-		}
+		echo count($tyomaarays['lasku_tunnukset']);
 		echo "</td>";
 
 		echo "<td>";
@@ -353,7 +348,7 @@ function echo_tyomaaraykset_table($request = array()) {
 			echo "<input type='hidden' name='ala_tee' value='tulosta_tarkastuspoytakirja' />";
 			echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
 			echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
-			echo "<input type='submit' value='".t("Tulosta tarkastuspyötäkirja")."' />";
+			echo "<input type='submit' value='".t("Tallenna tarkastuspyötäkirja PDF")."' />";
 			echo "</form>";
 			echo "</td>";
 		}
@@ -386,7 +381,7 @@ function echo_tyomaaraykset_table($request = array()) {
 			echo "<form class='multisubmit' name='tulosta_tyolista'>";
 			echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
 			echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
-			echo "<input type='submit' value='".t("Tulosta työlistat")."' />";
+			echo "<input type='submit' value='".t("Tallenna työlista PDF")."' />";
 			echo "</form>";
 			echo "</td>";
 		}

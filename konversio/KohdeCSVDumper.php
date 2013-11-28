@@ -11,8 +11,8 @@ class KohdeCSVDumper extends CSVDumper {
 
 		$konversio_array = array(
 			'asiakas'	 => 'ASIAKAS',
-			//'nimi'		 => 'LINJA', Perl-skripteistä lunttasin, että näin pitäis olla, mutta aineistoa kun kattoo niin ei ehkä.
-			'nimi'		 => 'NIMI',
+			'nimi'		 => 'LINJA',
+			//'nimi'		 => 'NIMI',
 			'nimitark'	 => 'KOODI',
 			'osoite'	 => 'KATUOS',
 			'postitp'	 => 'POSTIOS',
@@ -72,8 +72,13 @@ class KohdeCSVDumper extends CSVDumper {
 			if ($key == 'asiakas') {
 				$asiakas_tunnus = $this->hae_asiakas_tunnus($value);
 				if ($asiakas_tunnus == 0 and in_array($key, $this->required_fields)) {
-					$this->errors[$index][] = t('Asiakasta')." <b>{$value} ".$rivi['nimi']."</b> ".t('ei löydy');
-					$valid = false;
+					if (!in_array($value, $this->unique_values) and is_numeric($value)) {
+						$this->unique_values[] = $value;
+						$this->luo_asiakas($value);
+					}
+//					$this->errors[$index][] = t('Asiakasta')." <b>{$value} ".$rivi['nimi']."</b> ".t('ei löydy');
+//					$valid = false;
+					$rivi[$key] = $asiakas_tunnus;
 				}
 				else {
 					$rivi[$key] = $asiakas_tunnus;
@@ -102,6 +107,16 @@ class KohdeCSVDumper extends CSVDumper {
 		}
 
 		return 0;
+	}
+	
+	private function luo_asiakas($asiakas_tunnus) {
+		$query = "	INSERT INTO asiakas "
+				. "SET nimi = 'Kaato-asiakas',"
+				. "asiakasnro = '{$asiakas_tunnus}',"
+				. "laatija = 'import',"
+				. "luontiaika = NOW(),"
+				. "yhtio = '{$this->kukarow['yhtio']}'";
+		pupe_query($query);
 	}
 
 }

@@ -7134,9 +7134,9 @@ if ($tee == '') {
 								FROM tilausrivi
 								JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
-								{$tunnuslisa}
-								and tilausrivi.tunnus in ({$alvrow['rivit']})";
+								WHERE tilausrivi.yhtio	=	'{$kukarow['yhtio']}'
+								AND tilausrivi.otunnus	=	'{$kukarow['kesken']}'
+								AND tilausrivi.tunnus	IN	({$alvrow['rivit']})";
 					$aresult = pupe_query($aquery);
 
 					while ($arow = mysql_fetch_assoc($aresult)) {

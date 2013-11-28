@@ -421,12 +421,12 @@
 						tiliointi.tilino,
 						tili.nimi,
 						group_concat(lasku.tunnus) ltunnus,
-						sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
-						sum(round(tiliointi.summa, 2)) $kerroin nettosumma,
-						sum(round(tiliointi.summa * tiliointi.vero / 100, 2)) $kerroin verot,
-						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
-						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi), 2)) $kerroin nettosumma_valuutassa,
-						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
+						round(sum(tiliointi.summa * (1 + tiliointi.vero / 100)), 2) $kerroin bruttosumma,
+						round(sum(tiliointi.summa), 2) $kerroin nettosumma,
+						round(sum(tiliointi.summa * tiliointi.vero / 100), 2) $kerroin verot,
+						round(sum(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100)), 2) $kerroin bruttosumma_valuutassa,
+						round(sum(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi)), 2) $kerroin nettosumma_valuutassa,
+						round(sum(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100), 2) $kerroin verot_valuutassa,
 						count(*) kpl
 						FROM tiliointi
 						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus $tehdaspalautukset_ei)

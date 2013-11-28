@@ -1860,6 +1860,7 @@
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<input type='hidden' name='tee' value='Z'>";
 				echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+				echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 				echo "<input type='hidden' name='raportti' value='$raportti'>";
 
 				echo "&nbsp;&nbsp;<a href='#' name='Tapahtumat'><img src='pics/lullacons/arrow-double-up-green.png' /></a>";

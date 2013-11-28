@@ -73,6 +73,10 @@ abstract class CSVDumper {
 			throw new Exception('Konversio_array on tyhjä');
 		}
 
+		if (empty($this->kukarow)) {
+			throw new Exception('Kukarow on tyhjä');
+		}
+
 		$this->lue_csv_tiedosto();
 
 		$this->konvertoi_rivit();

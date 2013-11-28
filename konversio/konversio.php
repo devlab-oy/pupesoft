@@ -79,7 +79,7 @@ if ($request['action'] == 'aja_konversio') {
 		$dumper = new TuotteenavainsanaToimenpideCSVDumper($request['kukarow']);
 		$dumper->aja();
 
-		$dumper = new TuoteryhmaCSVDumper;
+		$dumper = new TuoteryhmaCSVDumper($request['kukarow']);
 		$dumper->aja();
 	}
 }

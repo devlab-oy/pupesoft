@@ -4456,6 +4456,37 @@ if ($tee == '') {
 		require("${pupe_root_polku}/allr_kamppikset.php");
 	}
 
+	$sele = array("K" => "", "E" => "");
+
+	if ($tilausrivi_alvillisuus == "") {
+		if ($yhtiorow["alv_kasittely"] == "") {
+			// verolliset hinnat
+			$tilausrivi_alvillisuus = "K";
+		}
+		else {
+			// verottomat hinnat
+			$tilausrivi_alvillisuus = "E";
+		}
+	}
+
+	if ($tilausrivi_alvillisuus == "E") {
+		$sele["E"] = "checked";
+	}
+	else {
+		$sele["K"] = "checked";
+		$tilausrivi_alvillisuus = "K";
+	}
+
+	echo "<div>";
+	$action_jackson = "";
+	if ($tila != "MUUTA" and $tapa != "MUOKKAA") {		
+		$action_jackson = "onclick='submit();'";
+	}
+	
+	echo t("Verottomat hinnat").": <input type='radio' $action_jackson name='tilausrivi_alvillisuus' value='E' $sele[E]>";
+	echo t("Verolliset hinnat").": <input type='radio' $action_jackson name='tilausrivi_alvillisuus' value='K' $sele[K]>";
+	echo "</div>";
+	
 	//Syöttörivi
 	if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
 		echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lisää rivi").": </font></td></tr></table>";
@@ -5171,27 +5202,6 @@ if ($tee == '') {
 					echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
 					echo "<font class='head'>".t("Tilausrivit").":</font>";
 
-					$sele = array("K" => "", "E" => "");
-
-					if ($tilausrivi_alvillisuus == "") {
-						if ($yhtiorow["alv_kasittely"] == "") {
-							// verolliset hinnat
-							$tilausrivi_alvillisuus = "K";
-						}
-						else {
-							// verottomat hinnat
-							$tilausrivi_alvillisuus = "E";
-						}
-					}
-
-					if ($tilausrivi_alvillisuus == "E") {
-						$sele["E"] = "checked";
-					}
-					else {
-						$sele["K"] = "checked";
-						$tilausrivi_alvillisuus = "K";
-					}
-
 					echo "<form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' method='post'>
  							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 							<input type='hidden' name='mista' value='$mista'>
@@ -5202,9 +5212,7 @@ if ($tee == '') {
  							<input type='hidden' name='projektilla' value='$projektilla'>
  							<input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>
  							<input type='hidden' name='orig_tila' value = '$orig_tila'>
- 							<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
-						 	".t("Verolliset hinnat").": <input type='radio' onclick='submit();' name='tilausrivi_alvillisuus' value='K' $sele[K]>
-						 	".t("Verottomat hinnat").": <input type='radio' onclick='submit();' name='tilausrivi_alvillisuus' value='E' $sele[E]>
+ 							<input type='hidden' name='orig_alatila' value = '$orig_alatila'>	
 							</form>";
 
 					if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {

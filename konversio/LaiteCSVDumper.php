@@ -11,6 +11,7 @@ class LaiteCSVDumper extends CSVDumper {
 
 		$konversio_array = array(
 			'tuoteno'	 => 'MALLI',
+			'nimitys'    => 'NIMI',
 			'sarjanro'	 => 'MITAT',
 			'valm_pvm'	 => 'TOIMPVM', //?? sarake on kauttaaltaan tyhjä
 			'oma_numero' => 'DATA20',
@@ -77,7 +78,14 @@ class LaiteCSVDumper extends CSVDumper {
 				if ($valid) {
 					$valid = $this->loytyyko_tuote($rivi[$key]);
 					if (!$valid) {
-						$this->errors[$index][] = t('Tuote')." {$rivi[$key]} ".t('puuttuu');
+						list($valid, $tuoteno) = $this->loytyyko_tuote_nimella($rivi['nimitys']);
+						if(!$valid) {
+							$this->errors[$index][] = t('Tuote')." {$rivi[$key]} ".t('puuttuu');
+						}
+						else {
+							$this->errors[$index][] = t('Tuote lisättiin tuotenumerolle')." {$tuoteno} !!!!";
+							$rivi[$key] = $tuoteno;
+						}
 					}
 				}
 			}
@@ -88,14 +96,21 @@ class LaiteCSVDumper extends CSVDumper {
 			}
 		}
 
-		if (!in_array($rivi['sarjanro'], $this->unique_values)) {
+		if (!in_array($rivi['sarjanro'], $this->unique_values) and $rivi['sarjanro'] != '') {
 			$this->unique_values[] = $rivi['sarjanro'];
 		}
 		else {
-			$this->errors[$index][] = t('Uniikki kenttä sarjanro')." <b>{$rivi['sarjanro']}</b> ".t('löytyy jo aineistosta');
+			if ($rivi['sarjanro'] == '') {
+				$this->errors[$index][] = t('Sarjanumero kenttä on tyhjä');
+			}
+			else {
+				$this->errors[$index][] = t('Uniikki kenttä sarjanro')." <b>{$rivi['sarjanro']}</b> ".t('löytyy jo aineistosta');
+			}
 			$valid = false;
 		}
 
+		unset($rivi['nimitys']);
+		
 		return $valid;
 	}
 
@@ -110,6 +125,21 @@ class LaiteCSVDumper extends CSVDumper {
 		}
 
 		return false;
+	}
+	
+	private function loytyyko_tuote_nimella($nimitys) {
+		$query = "	SELECT tuoteno "
+				. "FROM tuote "
+				. "WHERE yhtio = '{$this->kukarow['yhtio']}' "
+				. "AND nimitys = '{$nimitys}'";
+		$result = pupe_query($query);
+		
+		if (mysql_num_rows($result) == 1) {
+			$tuote = mysql_fetch_assoc($result);
+			return array(true,$tuote['tuoteno']);
+		}
+
+		return array(false, '');
 	}
 
 	private function hae_paikka_tunnus($paikan_nimi) {

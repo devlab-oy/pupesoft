@@ -72,8 +72,13 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 			if ($key == 'asiakas') {
 				$asiakas_tunnus = $this->hae_asiakas_tunnus($value);
 				if ($asiakas_tunnus == 0 and in_array($key, $this->required_fields)) {
-					$this->errors[$index][] = t('Asiakasta')." <b>{$value}</b> ".t('ei löydy');
-					$valid = false;
+					if (!in_array($value, $this->unique_values) and is_numeric($value)) {
+						$this->unique_values[] = $value;
+						$this->luo_asiakas($value);
+					}
+//					$this->errors[$index][] = t('Asiakasta')." <b>{$value}</b> ".t('ei löydy');
+//					$valid = false;
+					$rivi[$key] = $asiakas_tunnus;
 				}
 				else {
 					$rivi[$key] = $asiakas_tunnus;
@@ -102,6 +107,16 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 		}
 
 		return 0;
+	}
+	
+	private function luo_asiakas($asiakas_tunnus) {
+		$query = "	INSERT INTO asiakas "
+				. "SET nimi = 'Kaato-asiakas',"
+				. "asiakasnro = '{$asiakas_tunnus}',"
+				. "laatija = 'import',"
+				. "luontiaika = NOW(),"
+				. "yhtio = '{$this->kukarow['yhtio']}'";
+		pupe_query($query);
 	}
 
 }

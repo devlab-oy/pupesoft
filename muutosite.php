@@ -1009,7 +1009,7 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><th>".t("Toim_osoite")."</th><td>$trow[toim_osoite]</td></tr>";
 			echo "<tr><th>".t("Toim_postino")."</th><td>$trow[toim_postino], $trow[toim_postitp], $trow[toim_maa]</td></tr>";
 		}
-		echo "<tr><th>".t("Apuselite")."</th><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
+
 		echo "</table>";
 
 		// Lopetettaan vasen sarake, aloitetaan keskisarake
@@ -1033,7 +1033,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
-		
+
 		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["luontiaika"], "PITKÄ")." &raquo; $trow[laatija_nimi]</td></tr>";
 
 		// Onko laskua karhuttu?
@@ -1175,7 +1175,9 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><th colspan='3'>".t("Fakta")."</th></tr>";
 			echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
 		}
-
+		echo "<table>";
+		echo "<th>".t("Selite tiliöinneille")."</th><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td>";
+		echo "</table>";
 		// Lopetaaan koko table
 		echo "</table>";
 
@@ -1207,7 +1209,6 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><th>".t("Tapvm")."</th><td>".tv1dateconv($trow["tapvm"])."</td></tr>";
 		echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]</td></tr>";
 		echo "<tr><th>".t("Liitetiedostot")."</th><td>".ebid($tunnus) ."</td></tr>";
-		echo "<tr><th>".t("Apuselite")."</th><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
 		echo "</table>";
 
 		if ($trow["liitostunnus"] > 0) {
@@ -1249,7 +1250,6 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 
 		echo "<tr><th>".t("Maksutieto")."</th><td>".wordwrap($trow["viite"]." ".$trow["viesti"]." ".$trow["sisviesti1"], 40, "<br>")."</td></tr>";
-		echo "<tr><th>".t("Apuselite")."</th><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
 		echo "</table>";
 		echo "</form>";
 		// Lopetaan vasen sarake, aloitetaan keskisarake
@@ -1374,6 +1374,9 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><th colspan='3'>".t("Fakta")." / ".t("Kommentit")."</th></tr>";
 			echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"].$vali.$trow["comments"], 120, "<br>")."</td></tr>";
 		}
+		echo "<table>";
+		echo "<th>".t("Selite tiliöinneille")."</th><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td>";
+		echo "</table>";
 
 		// Lopetetaan koko otsikko
 		echo "</table>";

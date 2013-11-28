@@ -100,13 +100,13 @@ if ($request['action'] == 'aja_konversio') {
 			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";
-			echo t('Kohteet').':';
-			$dumper = new KohdeCSVDumper($request['kukarow']);
+			echo t('Asiakasalennukset').':';
+			$dumper = new AsiakasalennusCSVDumper($request['kukarow']);
 			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";
-			echo t('Asiakasalennukset').':';
-			$dumper = new AsiakasalennusCSVDumper($request['kukarow']);
+			echo t('Kohteet').':';
+			$dumper = new KohdeCSVDumper($request['kukarow']);
 			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";

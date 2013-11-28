@@ -2429,33 +2429,47 @@
 						}
 					}
 
-					// löytyykö $kukarow["oletus_varasto"]?
-					if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
-						mysql_data_seek($result,0);
+					// ostotilaus
+					// jos otsikolle on setattu $varasto ja tuotepaikkaa ei löydy kyseisestä varastosta
+					// ostetaan tyhjältä paikalta, koska ostotilauksen valmiiksi laittaminen perustaa kyseiseen varastoon uuden tuotepaikan
 
-						while ($olerow = mysql_fetch_assoc($result)) {
-							if ($olerow["varastotunnus"] == $kukarow["oletus_varasto"]) {
-								$p_hyllyalue	= $olerow["hyllyalue"];
-								$p_hyllynro		= $olerow["hyllynro"];
-								$p_hyllyvali	= $olerow["hyllyvali"];
-								$p_hyllytaso	= $olerow["hyllytaso"];
+					// keissit:
+					// jos $rivityyppi = 'O' ja setattu $varasto ja is_array($varasto)
+					if (!$loydetytpaikat and $rivityyppi == 'O' and isset($varasto) and is_array($varasto)) {
+						$p_hyllyalue	= "";
+						$p_hyllynro		= "";
+						$p_hyllyvali	= "";
+						$p_hyllytaso	= "";
+					}
+					else {
+						// löytyykö $kukarow["oletus_varasto"]?
+						if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
+							mysql_data_seek($result,0);
 
-								$loydetytpaikat = TRUE;
-								break;
+							while ($olerow = mysql_fetch_assoc($result)) {
+								if ($olerow["varastotunnus"] == $kukarow["oletus_varasto"]) {
+									$p_hyllyalue	= $olerow["hyllyalue"];
+									$p_hyllynro		= $olerow["hyllynro"];
+									$p_hyllyvali	= $olerow["hyllyvali"];
+									$p_hyllytaso	= $olerow["hyllytaso"];
+
+									$loydetytpaikat = TRUE;
+									break;
+								}
 							}
 						}
-					}
 
-					//Jos ei löytynyt niin myydään oletuspaikalta
-					if (!$loydetytpaikat) {
-						mysql_data_seek($result,0);
-						$olerow = mysql_fetch_assoc($result);
+						//Jos ei löytynyt niin myydään oletuspaikalta
+						if (!$loydetytpaikat) {
+							mysql_data_seek($result,0);
+							$olerow = mysql_fetch_assoc($result);
 
-						$p_hyllyalue	= $olerow["hyllyalue"];
-						$p_hyllynro		= $olerow["hyllynro"];
-						$p_hyllyvali	= $olerow["hyllyvali"];
-						$p_hyllytaso	= $olerow["hyllytaso"];
-					}
+							$p_hyllyalue	= $olerow["hyllyalue"];
+							$p_hyllynro		= $olerow["hyllynro"];
+							$p_hyllyvali	= $olerow["hyllyvali"];
+							$p_hyllytaso	= $olerow["hyllytaso"];
+						}
+					}	
 				}
 			}
 

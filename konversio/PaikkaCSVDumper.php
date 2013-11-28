@@ -10,7 +10,7 @@ class PaikkaCSVDumper extends CSVDumper {
 		parent::__construct($kukarow);
 
 		$konversio_array = array(
-			'kohde'	 => 'KUSTPAIKKA',
+			'kohde'	 => 'SIJAINTI',
 			'nimi'	 => 'LISASIJAINTI',
 			'osoite' => 'SIJAINTI',
 			'kuvaus' => 'SIJAINTI',

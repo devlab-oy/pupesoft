@@ -1343,7 +1343,7 @@
 			}
 
 			if ($toim != "TYOMAARAYS_ASENTAJA") {
-				if (!isset($raportti)) {
+				if (!isset($raportti) or $raportti == "") {
 					if ($tuoterow["tuotetyyppi"] == "R") $raportti="KULUTUS";
 					else $raportti="MYYNTI";
 				}

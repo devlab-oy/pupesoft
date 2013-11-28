@@ -1,8 +1,6 @@
 <?php
 
-require_once('CSVDumper.php');
-
-class TuotteenavainsanaCSVDumper extends CSVDumper {
+class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
 
 	protected $unique_values = array();
 
@@ -10,18 +8,16 @@ class TuotteenavainsanaCSVDumper extends CSVDumper {
 		parent::__construct($kukarow);
 
 		$konversio_array = array(
-			'tuoteno'	 => 'MALLI',
-			'tyyppi'	 => 'TYYPPI',
-			'paino'		 => 'PAINO',
+			'tuoteno'	 => 'KOODI',
+			'selite'	 => 'DATA1',
+			'try'		 => 'RYHMA',
 		);
 		$required_fields = array(
 			'tuoteno',
-			'tyyppi',
-			'paino',
 		);
 
-		$this->setFilepath("/tmp/laite.csv");
-		$this->setSeparator(';');
+		$this->setFilepath("/tmp/konversio/VARAOSA.csv");
+		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('tuotteen_avainsanat');
@@ -52,14 +48,22 @@ class TuotteenavainsanaCSVDumper extends CSVDumper {
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
-				if ($konvertoitu_header == 'tyyppi') {
-					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header].'sammutin';
-				}
-				else if ($konvertoitu_header == 'paino') {
-					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header].'kg';
-				}
-				else if ($konvertoitu_header == 'tuoteno') {
-					$rivi_temp[$konvertoitu_header] = strtoupper($rivi[$csv_header]);
+				if ($konvertoitu_header == 'selite') {
+					if ($rivi[$csv_header] == '3') {
+						$rivi_temp[$konvertoitu_header] = 'tarkastus';
+						$rivi_temp['selitetark'] = 3;
+					}
+					else if ($rivi[$csv_header] == '2') {
+						$rivi_temp[$konvertoitu_header] = 'huolto';
+						$rivi_temp['selitetark'] = 2;
+					}
+					else if ($rivi[$csv_header] == '1') {
+						$rivi_temp[$konvertoitu_header] = 'koeponnistus';
+						$rivi_temp['selitetark'] = 1;
+					}
+					else {
+						$rivi_temp[$konvertoitu_header] = '';
+					}
 				}
 				else {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
@@ -78,21 +82,8 @@ class TuotteenavainsanaCSVDumper extends CSVDumper {
 				$valid = false;
 			}
 
-			if ($key == 'tyyppi') {
-				if (isset($this->unique_values[$rivi['tuoteno']]['tyypit']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['tyypit'])) {
-					$valid = false;
-				}
-				else {
-					$this->unique_values[$rivi['tuoteno']]['tyypit'][$index] = $value;
-				}
-			}
-			else if ($key == 'paino') {
-				if (isset($this->unique_values[$rivi['tuoteno']]['painot']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['painot'])) {
-					$valid = false;
-				}
-				else {
-					$this->unique_values[$rivi['tuoteno']]['painot'][$index] = $value;
-				}
+			if ($key == 'selite' and empty($value)) {
+				$valid = false;
 			}
 		}
 
@@ -117,6 +108,7 @@ class TuotteenavainsanaCSVDumper extends CSVDumper {
 							kieli,
 							laji,
 							selite,
+							selitetark,
 							laatija,
 							luontiaika
 						)
@@ -125,32 +117,11 @@ class TuotteenavainsanaCSVDumper extends CSVDumper {
 							"'.$rivi['yhtio'].'",
 							"'.$rivi['tuoteno'].'",
 							"'.$rivi['kieli'].'",
-							"sammutin_tyyppi",
-							"'.$rivi['tyyppi'].'",
+							"tyomaarayksen_ryhmittely",
+							"'.$rivi['selite'].'",
+							"'.$rivi['selitetark'].'",
 							"'.$rivi['laatija'].'",
-							"'.$rivi['luontiaika'].'"
-						)';
-			pupe_query($query);
-
-			$query = '	INSERT INTO '.$this->table.'
-						(
-							yhtio,
-							tuoteno,
-							kieli,
-							laji,
-							selite,
-							laatija,
-							luontiaika
-						)
-						VALUES
-						(
-							"'.$rivi['yhtio'].'",
-							"'.$rivi['tuoteno'].'",
-							"'.$rivi['kieli'].'",
-							"sammutin_koko",
-							"'.$rivi['paino'].'",
-							"'.$rivi['laatija'].'",
-							"'.$rivi['luontiaika'].'"
+							'.$rivi['luontiaika'].'
 						)';
 			pupe_query($query);
 
@@ -159,3 +130,5 @@ class TuotteenavainsanaCSVDumper extends CSVDumper {
 	}
 
 }
+
+?>

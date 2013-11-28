@@ -10,7 +10,9 @@ require_once('YhteyshenkiloCSVDumper.php');
 require_once('KohdeCSVDumper.php');
 require_once('PaikkaCSVDumper.php');
 require_once('LaiteCSVDumper.php');
-require_once('TuotteenavainsanaCSVDumper.php');
+require_once('TuotteenavainsanaLaiteCSVDumper.php');
+require_once('TuotteenavainsanaToimenpideCSVDumper.php');
+require_once('TuoteryhmaCSVDumper.php');
 
 $request = array(
 	'action'			 => $action,
@@ -39,7 +41,7 @@ if ($request['action'] == 'aja_konversio') {
 			break;
 
 		case 'tuotteen_avainsanat':
-			$dumper = new TuotteenavainsanaCSVDumper($request['kukarow']);
+			$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
 			break;
 
 		case 'asiakas':
@@ -72,6 +74,14 @@ if ($request['action'] == 'aja_konversio') {
 	}
 
 	$dumper->aja();
+
+	if ($request['konversio_tyyppi'] == 'tuote') {
+		$dumper = new TuotteenavainsanaToimenpideCSVDumper($request['kukarow']);
+		$dumper->aja();
+
+		$dumper = new TuoteryhmaCSVDumper;
+		$dumper->aja();
+	}
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 	$query_array = array(
@@ -82,6 +92,8 @@ else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 		'DELETE FROM paikka',
 		'DELETE FROM laite',
 		'DELETE FROM asiakasalennus',
+		'DELETE FROM tuotteen_avainsanat',
+		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
 	);
 	foreach ($query_array as $query) {
 		pupe_query($query);

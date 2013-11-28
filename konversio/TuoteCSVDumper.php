@@ -23,8 +23,8 @@ class TuoteCSVDumper extends CSVDumper {
 			'nimitys',
 		);
 
-		$this->setFilepath("/tmp/tuote.csv");
-		$this->setSeparator(';');
+		$this->setFilepath("/tmp/konversio/VARAOSA.csv");
+		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('tuote');
@@ -35,7 +35,7 @@ class TuoteCSVDumper extends CSVDumper {
 		$progressbar->initialize(count($this->rivit));
 
 		foreach ($this->rivit as $index => &$rivi) {
-			$rivi = $this->decode_to_utf8($rivi);
+//			$rivi = $this->decode_to_utf8($rivi);
 			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
 

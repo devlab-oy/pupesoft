@@ -1412,7 +1412,7 @@
 
 								if (!empty($varow['tunnukset'])) {
 									$_varastot_tmp = explode(",", $varow['tunnukset']);
-									$_varastot = $_varastot + $_varastot_tmp;
+									$_varastot = array_merge($_varastot, $_varastot_tmp);
 								}
 							}
 

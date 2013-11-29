@@ -1502,7 +1502,7 @@
 								break;
 						}
 
-						$otsikkorivi .= "<th>".t("{$month}")."</th>";
+						$otsikkorivi .= "<th>".t($month)."</th>";
 
 						$ppk = date("t");
 						$alku = "{$vv}-".sprintf("%02s", $kk)."-01 00:00:00";

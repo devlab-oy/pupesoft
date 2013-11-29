@@ -181,7 +181,7 @@
 			$generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
 		}
 
-		if (!empty($sliitostunnus)) {
+		if ($eiliittymaa != 'ON' AND $yhtiorow["myyntitilaus_saatavat"] == "" AND !empty($sliitostunnus)) {
          	$generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
         }
 		elseif (!empty($sytunnus)) {

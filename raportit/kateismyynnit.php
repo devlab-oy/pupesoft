@@ -2004,24 +2004,6 @@
 					$kassayhteensa += $row["tilsumma"];
 				}
 
-				$kassalippaan_kateisotot_yhteensa = 0;
-				foreach($kateisotot[$edkassa] as $kateisotto) {
-					$kassalippaan_kateisotot_yhteensa += $kateisotto['summa'];
-					echo "<tr class='aktiivi'>";
-					echo "<td>{$kateisotto['kassalipas_nimi']}</td>";
-					echo "<td>{$kateisotto['selite']} - {$kateisotto['kuka_nimi']}</td>";
-					echo "<td>-</td>";
-					echo "<td>-</td>";
-					echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
-					echo "<td>{$kateisotto['summa']}</td>";
-					echo "</tr>";
-				}
-
-				//$kassalippaan_kateisotot_yhteensa aina < 0 $kateismaksuyhteensa aina > 0
-				$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
-				$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
-				$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
-
 				if ($edkassa != '') {
 					echo "</table><table width='100%'>";
 					echo "<tr><td colspan='6' class='tumma'>$edtyyppi ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></th>";

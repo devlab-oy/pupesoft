@@ -13,6 +13,7 @@ require_once('LaiteCSVDumper.php');
 require_once('TuotteenavainsanaLaiteCSVDumper.php');
 require_once('TuotteenavainsanaToimenpideCSVDumper.php');
 require_once('TuoteryhmaCSVDumper.php');
+require_once 'TarkastuksetCSVDumper.php';
 
 $request = array(
 	'action'			 => $action,
@@ -29,6 +30,7 @@ $request['konversio_tyypit'] = array(
 	'laite'					 => t('Laite'),
 	'yhteyshenkilo'			 => t('Yhteyshenkilö'),
 	'asiakasalennus'		 => t('Asiakasalennus'),
+	'tarkastukset'			 => t('Tarkastukset'),
 	'kaikki'				 => t('Kaikki'),
 );
 
@@ -67,6 +69,10 @@ if ($request['action'] == 'aja_konversio') {
 
 		case 'laite':
 			$dumper = new LaiteCSVDumper($request['kukarow']);
+			break;
+		
+		case 'tarkastukset':
+			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
 			break;
 
 		case 'kaikki':

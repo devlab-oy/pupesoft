@@ -20,8 +20,8 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 			'paino',
 		);
 
-		$this->setFilepath("/tmp/konversio/LAITE.csv");
-		$this->setSeparator(';#x#');
+		$this->setFilepath("/tmp/konversio/LAITE_s.csv");
+		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('tuotteen_avainsanat');
@@ -55,7 +55,7 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header].'sammutin';
 				}
 				else if ($konvertoitu_header == 'paino') {
-					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header].'kg';
+					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
 				}
 				else if ($konvertoitu_header == 'tuoteno') {
 					$rivi_temp[$konvertoitu_header] = strtoupper($rivi[$csv_header]);
@@ -73,7 +73,7 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 		$valid = true;
 		foreach ($rivi as $key => $value) {
 			if (in_array($key, $this->required_fields) and $value == '') {
-				$this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
+//				$this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
 				$valid = false;
 			}
 

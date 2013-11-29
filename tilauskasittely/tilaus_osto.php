@@ -1409,19 +1409,14 @@
 								$saldo = $hyllyssa = $myytavissa = 0;
 
 								if (!empty($varow['tunnukset'])) {
-
-									foreach (explode(",", $varow['tunnukset']) as $_var_tun) {
-										list ($_saldo, $_hyllyssa, $_myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"], '', $_var_tun);
-
-										$saldo += $_saldo;
-										$hyllyssa += $_hyllyssa;
-										$myytavissa += $_myytavissa;
-									}
+									$_varastot = explode(",", $varow['tunnukset']);
 								}
 							}
 							else {
-								list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"]);
+								$_varastot = $laskurow['varasto'];
 							}
+
+							list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"], '', $_varastot);
 
 							$pop_yks = t_avainsana("Y", "", "and avainsana.selite='$prow[yksikko]'", "", "", "selite");
 

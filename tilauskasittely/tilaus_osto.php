@@ -1432,6 +1432,7 @@
 								$query = "	SELECT halytysraja
 											FROM tuotepaikat
 											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tuoteno = '{$prow['tuoteno']}'
 											AND hyllyalue = '{$_hyllyalue}'
 											AND hyllynro = '{$_hyllynro}'
 											AND hyllyvali = '{$_hyllyvali}'

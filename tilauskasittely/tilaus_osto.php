@@ -1396,6 +1396,8 @@
 						// tehd‰‰n pop-up divi jos keikalla on kommentti...
 						if ($prow["tunnus"] != "") {
 
+							$_varastot = $laskurow['varasto'];
+
 							if ($laskurow['vanhatunnus'] != 0) {
 
 								$query  = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
@@ -1411,9 +1413,6 @@
 								if (!empty($varow['tunnukset'])) {
 									$_varastot = explode(",", $varow['tunnukset']);
 								}
-							}
-							else {
-								$_varastot = $laskurow['varasto'];
 							}
 
 							list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"], '', $_varastot);

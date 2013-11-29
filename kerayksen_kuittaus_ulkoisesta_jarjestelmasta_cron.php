@@ -54,9 +54,12 @@
 			if ($file == '.' or $file == '..' or $file == '.DS_Store' or is_dir($path.$file)) continue;
 
 			$path_parts = pathinfo($file);
-			$ext = strtoupper($path_parts['extension']);
 
-			if ($ext == 'XML') {
+			if (isset($path_parts['extension'])) {
+				$ext = strtoupper($path_parts['extension']);
+			}
+
+			if (isset($ext) and $ext == 'XML') {
 
 				$xml = simplexml_load_file($path.$file);
 

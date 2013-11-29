@@ -13,7 +13,8 @@ require_once('LaiteCSVDumper.php');
 require_once('TuotteenavainsanaLaiteCSVDumper.php');
 require_once('TuotteenavainsanaToimenpideCSVDumper.php');
 require_once('TuoteryhmaCSVDumper.php');
-require_once 'TarkastuksetCSVDumper.php';
+require_once('HuoltosykliCSVDumper.php');
+require_once('TarkastuksetKantaCSVDumper.php');
 
 $request = array(
 	'action'			 => $action,
@@ -30,6 +31,7 @@ $request['konversio_tyypit'] = array(
 	'laite'					 => t('Laite'),
 	'yhteyshenkilo'			 => t('Yhteyshenkilö'),
 	'asiakasalennus'		 => t('Asiakasalennus'),
+	'huoltosykli'			 => t('Huoltosykli'),
 	'tarkastukset'			 => t('Tarkastukset'),
 	'kaikki'				 => t('Kaikki'),
 );
@@ -70,9 +72,13 @@ if ($request['action'] == 'aja_konversio') {
 		case 'laite':
 			$dumper = new LaiteCSVDumper($request['kukarow']);
 			break;
+
+		case 'huoltosykli':
+			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
+			break;
 		
 		case 'tarkastukset':
-			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
+			$dumper = new TarkastuksetKantaCSVDumper($request['kukarow']);
 			break;
 
 		case 'kaikki':
@@ -123,6 +129,14 @@ if ($request['action'] == 'aja_konversio') {
 			echo "<br/>";
 			echo t('Laitteet').':';
 			$dumper = new LaiteCSVDumper($request['kukarow']);
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Huoltosyklit').':';
+			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Tarkastukset').':';
+			$dumper = new Tar($request['kukarow']);
 			break;
 
 		default:

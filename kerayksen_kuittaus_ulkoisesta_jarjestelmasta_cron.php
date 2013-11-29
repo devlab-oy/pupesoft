@@ -121,6 +121,12 @@
 									viesti			= ''";
 						$result_rk = pupe_query($query);
 
+						$query = "	UPDATE lasku SET
+									tila = 'L',
+									alatila = 'D'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$laskurow['tunnus']}'";
+						$upd_res = pupe_query($query);
 
 						unlink($path.$file);
 					}

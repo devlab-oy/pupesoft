@@ -12,6 +12,8 @@ class LaiteCSVDumper extends CSVDumper {
 		$konversio_array = array(
 			'tuoteno'	 => 'MALLI',
 			'nimitys'    => 'NIMI',
+			'tyyppi'	 => 'TYYPPI',
+			'koko'		 => 'PAINO',
 			'sarjanro'	 => 'MITAT',
 			'valm_pvm'	 => 'TOIMPVM', //?? sarake on kauttaaltaan tyhjä
 			'oma_numero' => 'DATA20',
@@ -23,8 +25,8 @@ class LaiteCSVDumper extends CSVDumper {
 			'paikka',
 		);
 
-		$this->setFilepath("/tmp/konversio/LAITE.csv");
-		$this->setSeparator(';#x#');
+		$this->setFilepath("/tmp/konversio/LAITE_s.csv");
+		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('laite');
@@ -54,7 +56,15 @@ class LaiteCSVDumper extends CSVDumper {
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
-				$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+				if ($konvertoitu_header == 'tyyppi') {
+					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header].'sammutin';
+				}
+				else if ($konvertoitu_header == 'paino') {
+					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+				}
+				else {
+					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+				}
 			}
 		}
 
@@ -80,10 +90,12 @@ class LaiteCSVDumper extends CSVDumper {
 					if (!$valid) {
 						list($valid, $tuoteno) = $this->loytyyko_tuote_nimella($rivi['nimitys']);
 						if(!$valid) {
-							$this->errors[$index][] = t('Tuote')." {$rivi[$key]} ".t('puuttuu');
+							$this->luo_tuote($rivi['tuoteno'], $rivi['tyyppi'], $rivi['koko']);
+							$rivi[$key] = $rivi['tuoteno'];
+//							$this->errors[$index][] = t('Tuote')." {$rivi[$key]} ".t('puuttuu');
 						}
 						else {
-							$this->errors[$index][] = t('Tuote lisättiin tuotenumerolle')." {$tuoteno} !!!!";
+//							$this->errors[$index][] = t('Tuote lisättiin tuotenumerolle')." {$tuoteno} !!!!";
 							$rivi[$key] = $tuoteno;
 						}
 					}
@@ -96,19 +108,8 @@ class LaiteCSVDumper extends CSVDumper {
 			}
 		}
 
-		if (!in_array($rivi['sarjanro'], $this->unique_values) and $rivi['sarjanro'] != '') {
-			$this->unique_values[] = $rivi['sarjanro'];
-		}
-		else {
-			if ($rivi['sarjanro'] == '') {
-				$this->errors[$index][] = t('Sarjanumero kenttä on tyhjä');
-			}
-			else {
-				$this->errors[$index][] = t('Uniikki kenttä sarjanro')." <b>{$rivi['sarjanro']}</b> ".t('löytyy jo aineistosta');
-			}
-			$valid = false;
-		}
-
+		unset($rivi['tyyppi']);
+		unset($rivi['koko']);
 		unset($rivi['nimitys']);
 		
 		return $valid;
@@ -140,6 +141,63 @@ class LaiteCSVDumper extends CSVDumper {
 		}
 
 		return array(false, '');
+	}
+	
+	private function luo_tuote($tuoteno, $tyyppi, $koko) {
+		$query = "	INSERT INTO tuote "
+				. "SET yhtio = '{$this->kukarow['yhtio']}', "
+				. "tuoteno = '{$tuoteno}', "
+				. "nimitys = '{$tuoteno}', "
+				. "try = '80', "
+				. "tuotetyyppi = '', "
+				. "ei_saldoa = '',"
+				. "laatija = 'import',"
+				. "luontiaika = NOW()";
+		pupe_query($query);
+		
+		$query = '	INSERT INTO tuotteen_avainsanat
+						(
+							yhtio,
+							tuoteno,
+							kieli,
+							laji,
+							selite,
+							laatija,
+							luontiaika
+						)
+						VALUES
+						(
+							"'.$this->kukarow['yhtio'].'",
+							"'.$tuoteno.'",
+							"fi",
+							"sammutin_tyyppi",
+							"'.$tyyppi.'",
+							"import",
+							NOW()
+						)';
+			pupe_query($query);
+
+			$query = '	INSERT INTO tuotteen_avainsanat
+						(
+							yhtio,
+							tuoteno,
+							kieli,
+							laji,
+							selite,
+							laatija,
+							luontiaika
+						)
+						VALUES
+						(
+							"'.$this->kukarow['yhtio'].'",
+							"'.$tuoteno.'",
+							"fi",
+							"sammutin_koko",
+							"'.$koko.'",
+							"import",
+							NOW()
+						)';
+			pupe_query($query);
 	}
 
 	private function hae_paikka_tunnus($paikan_nimi) {

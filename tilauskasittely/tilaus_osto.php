@@ -1396,7 +1396,7 @@
 						// tehd‰‰n pop-up divi jos keikalla on kommentti...
 						if ($prow["tunnus"] != "") {
 
-							$_varastot = $laskurow['varasto'];
+							$_varastot = array($laskurow['varasto']);
 
 							if ($laskurow['vanhatunnus'] != 0) {
 
@@ -1411,7 +1411,8 @@
 								$saldo = $hyllyssa = $myytavissa = 0;
 
 								if (!empty($varow['tunnukset'])) {
-									$_varastot = explode(",", $varow['tunnukset']);
+									$_varastot_tmp = explode(",", $varow['tunnukset']);
+									$_varastot = $_varastot + $_varastot_tmp;
 								}
 							}
 

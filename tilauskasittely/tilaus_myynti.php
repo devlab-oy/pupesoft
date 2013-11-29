@@ -3435,7 +3435,7 @@ if ($tee == '') {
 
 		// Parametrejä saatanat.php:lle
 		$sytunnus 	 	 = $laskurow['ytunnus'];
-		$sliitostunnus	 = $laskurow['liitostunnus'];
+		$sliitostunnus	 = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "" : $laskurow['liitostunnus'];
 		$eiliittymaa 	 = "ON";
 		$luottorajavirhe = "";
 		$jvvirhe 		 = "";

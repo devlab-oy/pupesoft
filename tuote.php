@@ -1124,7 +1124,7 @@
 
 				echo "</select>";
 				echo "</form>";
-				echo "<br /><font class='message'>(",t("tilaukset, raportointi ja tapahtumat"),")</font>";
+				echo " <font class='message'>(",t("tilaukset, raportointi ja tapahtumat"),")</font>";
 				echo "<hr /><br />";
 			}
 

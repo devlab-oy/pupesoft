@@ -496,7 +496,7 @@ if (!function_exists('finvoice_otsik')) {
 			#xml_add("AccountDimensionText",								"",										$tootfinvoice);
 			#xml_add("SellerAccountText",									"",										$tootfinvoice);
 		}
-		elseif ($silent == "" or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
+		elseif ($silent == "" or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE  or strpos($_SERVER['SCRIPT_NAME'], "uudelleenluo_laskuaineisto.php") !== FALSE) {
 			if ($senderpartyid == "" or $senderintermediator == "") {
 				$tulos_ulos .= t("Finvoiceaineistoa ei voitu luoda. Yhtiolta puuttuu finvoice_senderpartyid tai finvoice_senderintermediator tunnus. Tulosta lasku manuaalisesti!")." ".$lasrow["laskunro"]."<br>\r\n<br>\r\n";
 			}

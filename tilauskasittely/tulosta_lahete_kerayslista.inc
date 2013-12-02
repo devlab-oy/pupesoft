@@ -174,6 +174,9 @@ if (!function_exists('alku_kerayslista')) {
 			elseif ($tyyppi == "REKLAMAATIO") {
 				$pdf->draw_text(240,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 			}
+			elseif ($tyyppi == "TAKUU") {
+				$pdf->draw_text(310,815, t("Takuu", $kieli), 		$thispage, $iso);
+			}
 			elseif ($tyyppi == "MYYNTITILI") {
 				$pdf->draw_text(310,815, t("Myyntitili", $kieli), 		$thispage, $iso);
 			}
@@ -540,6 +543,9 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		elseif ($tyyppi == "REKLAMAATIO") {
 			$pdf->draw_text(310,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 		}
+		elseif ($tyyppi == "TAKUU") {
+			$pdf->draw_text(310,815, t("Takuu", $kieli), 		$thispage, $iso);
+		}
 		elseif ($tyyppi == "MYYNTITILI") {
 			$pdf->draw_text(310,815, t("Myyntitili", $kieli), 				$thispage, $iso);
 		}
@@ -690,7 +696,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
 if (!function_exists('rivi_kerayslista')) {
 	function rivi_kerayslista($params) {
-		global $kukarow, $yhtiorow, $asrow;
+		global $kukarow, $yhtiorow, $asrow, $onkolaajattoimipaikat;
 
 		// Luodaan muuttujat
 		foreach ($params as $key => $val) {
@@ -765,6 +771,10 @@ if (!function_exists('rivi_kerayslista')) {
 				or ($row["var"] == "J" and $yhtiorow["lahetteen_tulostustapa"] == "I")) {
 
 				$varastopaikka = hyllyalue('', $row['hyllyalue'], 'riisuttu') . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
+
+				if (strpos($varastopaikka, "!!M") !== FALSE) {
+					$varastopaikka = t("Myyntitili", $kieli);
+				}
 
 				$row["perhe_kommentti1"] = "";
 				$row["perhe_kommentti2"] = "";
@@ -871,7 +881,8 @@ if (!function_exists('rivi_kerayslista')) {
 					$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$thispage, $pieni);
 				}
 
-				$pdf->draw_text(42,  $kala, $varastopaikka,					$thispage, $norm);
+				list($ff_string, $ff_font) = pdf_fontfit($varastopaikka, 88, $pdf, $norm);
+				$pdf->draw_text(42,  $kala, $ff_string, 					$thispage, $ff_font);
 				$pdf->draw_text(125,  $kala, $row["tuoteno"],				$thispage, $norm);
 
 				$query = "	SELECT tuote.*, group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno
@@ -889,14 +900,14 @@ if (!function_exists('rivi_kerayslista')) {
 
 				// jos rekkulalla on suoraan toimittajalle palautettvia rivejä
 				if ($row['asiakkaan_positio'] > 0) {
-					
+
 					$query = "	SELECT nimi
 								FROM asiakas
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['asiakkaan_positio']}'";
 					$asiakas_check_res = pupe_query($query);
 					$asiakas_check_row	 = mysql_fetch_assoc($asiakas_check_res);
-					
+
 					$row['kommentti'] .= "\n".t("Palutetaan toimittajalle").": ".$asiakas_check_row['nimi'];
 				}
 
@@ -923,6 +934,21 @@ if (!function_exists('rivi_kerayslista')) {
 					//katotaan mihin varastooon tilausrivillä tuotepaikka kuuluu
 					$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
+					if ($onkolaajattoimipaikat and $laskurow['yhtio_toimipaikka'] != 0) {
+
+						$query  = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
+									FROM varastopaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tyyppi != 'P'
+									AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
+						$vares = pupe_query($query);
+						$varow = mysql_fetch_assoc($vares);
+
+						if (!empty($varow['tunnukset'])) {
+							$rivipaikka = $varow['tunnukset'];
+						}
+					}
+
 					//saldot per varastopaikka
 					if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
 						$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
@@ -935,7 +961,7 @@ if (!function_exists('rivi_kerayslista')) {
 									JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 									and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 									and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-									and varastopaikat.tunnus = '$rivipaikka'
+									and varastopaikat.tunnus IN ({$rivipaikka})
 									JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
 									and sarjanumeroseuranta.tuoteno = tuote.tuoteno
 									and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
@@ -960,7 +986,7 @@ if (!function_exists('rivi_kerayslista')) {
 									JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 									and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 									and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-									and varastopaikat.tunnus = '$rivipaikka'
+									and varastopaikat.tunnus IN ({$rivipaikka})
 									WHERE tuote.yhtio = '$kukarow[yhtio]'
 									and tuote.tuoteno = '$row[tuoteno]'
 									ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
@@ -1356,6 +1382,10 @@ if (!function_exists('print_pdf_kerayslista')) {
 				$kutsu = t("Reklamaatio/Purkulista", $kieli);
 				echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
 			}
+			elseif ($tyyppi == "TAKUU") {
+				$kutsu = t("Takuu", $kieli);
+				echo t("Takuu tulostuu")."...<br>";
+			}
 			elseif ($tyyppi == "MYYNTITILI") {
 				$kutsu = t("Myyntitili", $kieli);
 				echo t("Myyntitili tulostuu")."...<br>";
@@ -1394,6 +1424,10 @@ if (!function_exists('print_pdf_kerayslista')) {
 				elseif ($tyyppi == "REKLAMAATIO") {
 					$kutsu = t("Reklamaatio/Purkulista", $kieli);
 					echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
+				}
+				elseif ($tyyppi == "TAKUU") {
+					$kutsu = t("Takuu", $kieli);
+					echo t("Takuu tulostuu")."...<br>";
 				}
 				elseif ($tyyppi == "MYYNTITILI") {
 					$kutsu = t("Myyntitili", $kieli);

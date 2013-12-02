@@ -644,7 +644,30 @@
 		//itse print komento...
 		$line = exec("$kirjoitin $pdffilenimi");
 	}
+	
+	if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+		
+		// Lähetetään rahtikirja myös kuljetusfirman sähköpostiin jos se löytyy
+		if ($toitarow['rahtikirjakopio_email'] != '') {
 
+			$polkuinffo = pathinfo($pdffilenimi);
+			echo t("Lähetetään rahtikirjakopio").": {$toitarow['rahtikirjakopio_email']}<br>";
+			$params = array(
+				"to" => $toitarow['rahtikirjakopio_email'],
+				"subject" => $toitarow['selite']." ".t("Rahtikirjakopio"),
+				"ctype" => "text",
+				"attachements"	=> array(0 	=> array(
+											"filename"		=> $pdffilenimi,
+											"newfilename"	=> "",
+											"ctype"			=> $polkuinffo['extension'],
+											)
+										)
+			);
+			
+			pupesoft_sahkoposti($params);
+		}
+	}
+	
 	system("rm -f $pdffilenimi");
 
 ?>

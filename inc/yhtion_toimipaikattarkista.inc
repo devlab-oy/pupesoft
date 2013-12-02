@@ -109,9 +109,9 @@ if(!function_exists("yhtion_toimipaikattarkista")) {
 
 				$query = "	SELECT *
 							FROM yhtion_toimipaikat
-							WHERE yhtio = '$kukarow[yhtio]'
-							and maa = '$tem_maa'
-							and tunnus != '$tunnus'
+							WHERE yhtio     = '$kukarow[yhtio]'
+							and maa         = '$tem_maa'
+							and tunnus     != '$tunnus'
 							and vat_numero != ''";
 				$vresult = mysql_query($query) or pupe_error($query);
 

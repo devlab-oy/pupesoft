@@ -250,7 +250,7 @@
 					if (!$php_cli) echo "<tr><td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a></td>";
 
 					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['tuoteno']);
-					
+
 					$try = t_avainsana("TRY", '', "and selite = '{$epakurantti_row['try']}'", '', '', "selitetark");
 
 					$try_teksti = $try != "" ? "{$epakurantti_row['try']} - $try" : $epakurantti_row['try'];
@@ -301,22 +301,24 @@
 					if (!$php_cli) echo "<td align='right'>".round($epakurantti_row['kehahin'],2)."</td>";
 					$worksheet->writeNumber($excelrivi, $excelsarake++, round($epakurantti_row['kehahin'],2));
 
-					$vararvo_nyt = round($epakurantti_row['kehahin']*$epakurantti_row['saldo'], 2);
+					$vararvo_nyt = $vararvo_sit = round($epakurantti_row['kehahin']*$epakurantti_row['saldo'], 2);
 
 					if (!$php_cli) echo "<td align='right'>{$vararvo_nyt}</td>";
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $vararvo_nyt);
 
-					if ($mikataso == 100) {
-						$vararvo_sit = 0;
-					}
-					elseif ($mikataso == 75) {
-						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.25*$epakurantti_row['saldo'], 2);
-					}
-					elseif ($mikataso == 50) {
-						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.5*$epakurantti_row['saldo'], 2);
-					}
-					elseif ($mikataso == 25) {
-						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.75*$epakurantti_row['saldo'], 2);
+					if ($tee != '' OR $ajo_tee == 'NAYTA') {
+						if ($mikataso == 100) {
+							$vararvo_sit = 0;
+						}
+						elseif ($mikataso == 75) {
+							$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.25*$epakurantti_row['saldo'], 2);
+						}
+						elseif ($mikataso == 50) {
+							$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.5*$epakurantti_row['saldo'], 2);
+						}
+						elseif ($mikataso == 25) {
+							$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.75*$epakurantti_row['saldo'], 2);
+						}
 					}
 
 					if (!$php_cli) echo "<td align='right'>{$vararvo_sit}</td>";
@@ -336,6 +338,7 @@
 					$vararvot_sit += $vararvo_sit;
 
 					$epa_tuotemaara++;
+
 				}
 			}
 		}

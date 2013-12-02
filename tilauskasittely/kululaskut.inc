@@ -140,7 +140,7 @@ if ($tee_kululaskut == "liita") {
 		else {
 			$liitasumma = abs($liitasumma);
 		}
-		
+
 		$verosumma		= (float) round($liitasumma * ($oslasrow["summa"]/($oslasrow["summa"]-$alvisumma)), 2);
 		$verotonsumma	= (float) $liitasumma;
 	}
@@ -515,7 +515,7 @@ if ($silent == "") {
 								FROM lasku matkalasku
 								JOIN tilausrivi matkarivi ON matkarivi.yhtio=matkalasku.yhtio and matkarivi.otunnus=matkalasku.tunnus and matkarivi.kpl > 0 and matkarivi.tyyppi  != 'D'
 								LEFT JOIN tilausrivi tilrivi ON tilrivi.yhtio=matkalasku.yhtio and tilrivi.otunnus = '$kukarow[kesken]' and tilrivi.tyyppi  != 'D'
-								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilrivi.tunnus and tilausrivin_lisatiedot.tilausrivilinkki = matkarivi.tunnus
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilrivi.tunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = matkarivi.tunnus
 								WHERE matkalasku.yhtio	= '$kukarow[yhtio]'
 								and matkalasku.tunnus	= $osresrow[tunnus]";
 					$mlrivires = pupe_query($query);
@@ -623,7 +623,53 @@ if ($silent == "") {
 		echo "</select></th>";
 		echo "<td>&nbsp;</td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
-		echo "</tr></table>";
+		echo "</tr>";
+
+		if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
+
+			$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
+
+			echo "<tr>";
+			echo "<th>",t("Toimipaikka"),"</th>";
+			echo "<th>";
+			echo "<select name='toimipaikka'>";
+			echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+			echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+
+			while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+				$sel = '';
+
+				if (isset($toimipaikka)) {
+					if ($toimipaikka == $toimipaikat_row['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $toimipaikat_row['tunnus'];
+					}
+				}
+				else {
+					if ($laskurow['yhtio_toimipaikka'] != 0) {
+						if ($laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus']) {
+							$sel = ' selected';
+							$toimipaikka = $toimipaikat_row['tunnus'];
+						}
+					}
+					elseif ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $toimipaikat_row['tunnus'];
+					}
+				}
+
+				echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+			}
+
+			echo "</select>";
+			echo "</th>";
+			echo "<td>&nbsp;</td>";
+			echo "<td class='back'><input type='submit' value='",t("Hae"),"'></td>";
+			echo "</tr>";
+		}
+
+		echo "</table>";
 
 		echo "</form>";
 
@@ -697,11 +743,19 @@ if ($silent == "") {
 			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
 		}
 
+		if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+			$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
+		}
+		else {
+			$toimipaikkalisa = "";
+		}
+
 		// haetaan vaihto-omaisuus, rahti ja raaka-aine laskuja (kotimaa, ei-eu, eu) HUOMAA LIMIT!
 		$query = "	SELECT lasku.*, (select min(tunnus) from tiliointi where lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu='') tiliointi
 					FROM lasku use index (kohdistus_index)
 					WHERE lasku.yhtio='$kukarow[yhtio]'
 					and lasku.tila in ('H','Y','M','P','Q')
+					{$toimipaikkalisa}
 					$vientitilat
 					$lisa
 					$aikalisa

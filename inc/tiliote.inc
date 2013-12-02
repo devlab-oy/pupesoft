@@ -241,7 +241,7 @@
 
 							if (mysql_num_rows($result) != 1) {
 								// poistetaan oy:t ja ab:t
-								$maksaatemp = trim(preg_replace('/\b(OY|AB)\b/i', '', strtoupper($maksaa)));
+								$maksaatemp = trim(preg_replace('/\b(OY|AB|OU)\b/i', '', strtoupper($maksaa)));
 
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 											FROM lasku
@@ -570,7 +570,7 @@
 
 				echo "<tr>";
 				echo "<td>".substr($tietue, 147, 18)."</td>";
-				echo "<td>".substr($tietue, 99, 30)."<br>\n$tilinvaluutta".tilinumero_print($pankkitilino)."</td>";
+				echo "<td>".substr($tietue, 99, 30)."<br>\n$tilinvaluutta $pankkitilino</td>";
 
 				$tililimiitti = (int) (substr($tietue, 117, 30) / 100);
 
@@ -919,7 +919,7 @@
 
 			if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
 
-			echo "<td name='td_{$td_perheid}' class='$class'>".tilinumero_print($tilino)."</td>";
+			echo "<td name='td_{$td_perheid}' class='$class'>$tilino</td>";
 			echo "<td name='td_{$td_perheid}' class='$class'>".pankkipvm($pvm)."</td>";
 			echo "<td name='td_{$td_perheid}' class='$class'>$koodi $koodiselite</td>";
 			echo "<td name='td_{$td_perheid}' class='$class'></td>

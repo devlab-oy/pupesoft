@@ -181,7 +181,7 @@
 			$generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
 		}
 
-		if (!empty($sliitostunnus)) {
+		if (($eiliittymaa == 'ON' AND !empty($sliitostunnus) AND $yhtiorow["myyntitilaus_saatavat"] == "") OR ($eiliittymaa != 'ON' AND !empty($sliitostunnus))) {
          	$generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
         }
 		elseif (!empty($sytunnus)) {
@@ -707,7 +707,7 @@
 
 				//katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehdä tilausta
 				$query = " 	SELECT count(lasku.tunnus) kpl
-							FROM lasku
+							FROM lasku USE INDEX (yhtio_tila_mapvm)
 							JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
 							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')
 							WHERE lasku.yhtio = '$saatavat_yhtio'

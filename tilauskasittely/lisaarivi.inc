@@ -548,7 +548,7 @@
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
 		// Etsit‰‰n korvaavia tuotteita
-		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA") {
+		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA" and $laskurow['tilaustyyppi'] != '9') {
 			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myyd‰‰n, vastaavia ei
 			$krkaikkimyytavissa	= 0;
 
@@ -1997,7 +1997,7 @@
 			$var = $puu_var[$i];
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS')))) {
+			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS')))) {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -2013,7 +2013,7 @@
 				}
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS')))) {
+			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS')))) {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
@@ -2429,33 +2429,47 @@
 						}
 					}
 
-					// lˆytyykˆ $kukarow["oletus_varasto"]?
-					if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
-						mysql_data_seek($result,0);
+					// ostotilaus
+					// jos otsikolle on setattu $varasto ja tuotepaikkaa ei lˆydy kyseisest‰ varastosta
+					// ostetaan tyhj‰lt‰ paikalta, koska ostotilauksen valmiiksi laittaminen perustaa kyseiseen varastoon uuden tuotepaikan
 
-						while ($olerow = mysql_fetch_assoc($result)) {
-							if ($olerow["varastotunnus"] == $kukarow["oletus_varasto"]) {
-								$p_hyllyalue	= $olerow["hyllyalue"];
-								$p_hyllynro		= $olerow["hyllynro"];
-								$p_hyllyvali	= $olerow["hyllyvali"];
-								$p_hyllytaso	= $olerow["hyllytaso"];
+					// keissit:
+					// jos $rivityyppi = 'O' ja setattu $varasto ja is_array($varasto)
+					if (!$loydetytpaikat and $rivityyppi == 'O' and isset($varasto) and is_array($varasto)) {
+						$p_hyllyalue	= "";
+						$p_hyllynro		= "";
+						$p_hyllyvali	= "";
+						$p_hyllytaso	= "";
+					}
+					else {
+						// lˆytyykˆ $kukarow["oletus_varasto"]?
+						if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
+							mysql_data_seek($result,0);
 
-								$loydetytpaikat = TRUE;
-								break;
+							while ($olerow = mysql_fetch_assoc($result)) {
+								if ($olerow["varastotunnus"] == $kukarow["oletus_varasto"]) {
+									$p_hyllyalue	= $olerow["hyllyalue"];
+									$p_hyllynro		= $olerow["hyllynro"];
+									$p_hyllyvali	= $olerow["hyllyvali"];
+									$p_hyllytaso	= $olerow["hyllytaso"];
+
+									$loydetytpaikat = TRUE;
+									break;
+								}
 							}
 						}
-					}
 
-					//Jos ei lˆytynyt niin myyd‰‰n oletuspaikalta
-					if (!$loydetytpaikat) {
-						mysql_data_seek($result,0);
-						$olerow = mysql_fetch_assoc($result);
+						//Jos ei lˆytynyt niin myyd‰‰n oletuspaikalta
+						if (!$loydetytpaikat) {
+							mysql_data_seek($result,0);
+							$olerow = mysql_fetch_assoc($result);
 
-						$p_hyllyalue	= $olerow["hyllyalue"];
-						$p_hyllynro		= $olerow["hyllynro"];
-						$p_hyllyvali	= $olerow["hyllyvali"];
-						$p_hyllytaso	= $olerow["hyllytaso"];
-					}
+							$p_hyllyalue	= $olerow["hyllyalue"];
+							$p_hyllynro		= $olerow["hyllynro"];
+							$p_hyllyvali	= $olerow["hyllyvali"];
+							$p_hyllytaso	= $olerow["hyllytaso"];
+						}
+					}	
 				}
 			}
 
@@ -2731,7 +2745,7 @@
 			if ($suoratoimitus_splittaus and $rivitunnus == $lisatty_tun) {
 				// P‰ivitet‰‰n suoratoimitus-myyntitilausrivin m‰‰r‰t
 				$query = "	UPDATE tilausrivi
-							JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
+							JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
 							SET tilausrivi.tilkpl	= '$varattu',
 							tilausrivi.varattu 		= if(tilausrivi.varattu != 0, $varattu, 0),
 							tilausrivi.jt 			= if(tilausrivi.jt != 0, $varattu, 0)

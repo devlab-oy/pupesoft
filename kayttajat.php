@@ -400,10 +400,8 @@
 			$pres = pupe_query($query);
 
 			if (count($profiilit) > 0 and $profiilit[0] !='') {
-
 				//käydään uudestaan profiili läpi
-				foreach($profiilit as $prof) {
-
+				foreach ($profiilit as $prof) {
 					$query = "	SELECT *
 								FROM oikeu
 								WHERE yhtio = '{$yhtio}'
@@ -417,10 +415,10 @@
 						$query = "	SELECT yhtio, paivitys
 									FROM oikeu
 									WHERE yhtio		= '{$yhtio}'
-									and kuka		= '{$ktunnus}'
-									and sovellus	= '{$trow['sovellus']}'
-									and nimi		= '{$trow['nimi']}'
-									and alanimi 	= '{$trow['alanimi']}'";
+									AND kuka		= '{$ktunnus}'
+									AND sovellus	= '{$trow['sovellus']}'
+									AND nimi		= '{$trow['nimi']}'
+									AND alanimi 	= '{$trow['alanimi']}'";
 						$tarkesult = pupe_query($query);
 						$tarkesultrow = mysql_fetch_assoc($tarkesult);
 
@@ -435,11 +433,18 @@
 										jarjestys 	= '{$trow['jarjestys']}',
 										jarjestys2	= '{$trow['jarjestys2']}',
 										hidden		= '{$trow['hidden']}',
-										yhtio		= '{$yhtio}'";
+										yhtio		= '{$yhtio}',
+										laatija 	= '{$kukarow['kuka']}',
+										luontiaika 	= now(),
+										muutospvm 	= now(),
+										muuttaja 	= '{$kukarow['kuka']}'";
 							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
-							$query = "	UPDATE oikeu SET paivitys = '1'
+							$query = "	UPDATE oikeu
+										SET paivitys = '1',
+										muutospvm 	 = now(),
+										muuttaja 	 = '{$kukarow['kuka']}'
 										WHERE kuka		= '{$ktunnus}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'
@@ -617,7 +622,7 @@
 
 			if (count($profiilit) > 0 and $profiilit[0] != '') {
 				//käydään uudestaan profiili läpi
-				foreach($profiilit as $prof) {
+				foreach ($profiilit as $prof) {
 					$query = "	SELECT *
 								FROM oikeu
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -649,11 +654,18 @@
 										jarjestys 	= '{$trow['jarjestys']}',
 										jarjestys2	= '{$trow['jarjestys2']}',
 										hidden		= '{$trow['hidden']}',
-										yhtio		= '{$kukarow['yhtio']}'";
+										yhtio		= '{$kukarow['yhtio']}',
+										laatija 	= '{$kukarow['kuka']}',
+										luontiaika 	= now(),
+										muutospvm 	= now(),
+										muuttaja 	= '{$kukarow['kuka']}'";
 							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
-							$query = "	UPDATE oikeu SET paivitys = '1'
+							$query = "	UPDATE oikeu
+										SET paivitys = '1',
+										muutospvm 	 = now(),
+										muuttaja 	 = '{$kukarow['kuka']}'
 										WHERE kuka		= '{$kuka}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'
@@ -723,7 +735,7 @@
 			if ($selkuka != "KOPSAAUUSI") {
 
 				echo "<tr><th align='left'>",t("Salasana"),":</th><td><input type='text' size='50' maxlength='30' name='password' value='{$generoitupass}'></td><td class='back'> <a href='?generatepass=y&selkuka={$selkuka}&toim={$toim}'>",t("Generoi salasana"),"</a></td></tr>";
-				echo "<tr><th align='left'>",t("Nimi"),":</th><td><input type='text' size='50' value='{$krow['nimi']}' maxlength='30' name='firname'></td></tr>";
+				echo "<tr><th align='left'>",t("Nimi"),":</th><td><input type='text' size='50' value='{$krow['nimi']}' name='firname'></td></tr>";
 				echo "<tr><th align='left'>",t("Puhelinnumero"),":</th><td><input type='text' size='50' value='{$krow['puhno']}' maxlength='30' name='phonenum'></td></tr>";
 				echo "<tr><th align='left'>",t("Sähköposti"),":&nbsp;</th><td><input type='text' size='50' value='{$krow['eposti']}' maxlength='50' name='email'></td></tr>";
 				if ($toim == 'extranet') echo "<tr><th align='left'>",t("IP"),":&nbsp;</th><td><input type='text' size='16' value='{$krow['ip']}' maxlength='15' name='ip'></td></tr>";
@@ -1337,7 +1349,11 @@
 					echo "<tr><th align='left'>",t("Toimipaikka"),":</td>";
 					echo "<td><select name='toimipaikka'><option value=''>",t("Oletustoimipaikka"),"</option>";
 
-					$query = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND vat_numero = '' ORDER BY nimi";
+					$query = "	SELECT *
+								FROM yhtion_toimipaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND vat_numero = ''
+								ORDER BY nimi";
 					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_assoc($vares)) {

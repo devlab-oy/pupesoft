@@ -342,19 +342,25 @@
 		if (mysql_num_rows($result) > 0) {
 
 			echo "<table>";
-			echo "<tr><th>".t("Tuoteno")."</th>";
-			echo "<th>".t("Oletuspaikkojen m‰‰r‰")."</th></tr>";
-
 			echo "<form method='POST'>";
 			echo "<input type='hidden' name='tee' value='CLEANOLETUKSET'>";
 
-			$saldolliset = array();
+			if (mysql_num_rows($result) < 500) {
 
-			while ($lrow = mysql_fetch_array($result)) {
-				echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>$lrow[oletukset]</td></tr>";
+				echo "<tr><th>".t("Tuoteno")."</th>";
+				echo "<th>".t("Oletuspaikkojen m‰‰r‰")."</th></tr>";
+
+				$saldolliset = array();
+
+				while ($lrow = mysql_fetch_array($result)) {
+					echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>$lrow[oletukset]</td></tr>";
+				}
+
+				echo "<tr><tdclass='back'><br><br></td></tr>";
 			}
-
-			echo "<tr><tdclass='back'><br><br></td></tr>";
+			else {
+				echo t("Virheellisi‰ oletuspaikkoja on yli %s. Niit‰ ei n‰ytet‰ ruudulla.", "", 500)."<br>";
+			}
 
 			echo "</table><br><br>";
 			echo "<input type='submit' value='".t("Korjaa oletuspaikat")."'></form>";

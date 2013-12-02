@@ -12,23 +12,30 @@ echo "<div class='header'>
 <button onclick='window.location.href=\"index.php\"' class='button left'><img src='back2.png'></button>
 <h1>TULOUTA</h1></div>";
 
-echo "<div class='main'>
-	<b>",t("TULOTYYPPI"),"</b>
+echo "<div class='main'>";
+echo "<b>",t("TULOTYYPPI"),"</b>";
 
-	<ul>
-	<li><a href='alusta.php' class='button'>",t("ASN / Suuntalava"),"</a></li>
-	<li><a href='ostotilaus.php?uusi' class='button'>",t("Ostotilaus"),"</a>";
+echo "<ul>";
 
-echo "<a href='ostotilaus.php' class='button'><font style='color: red'>(".t("Jatka edellistä").")</font></a>";
+if ($yhtiorow['suuntalavat'] != "") {
+	echo "<li><a href='alusta.php' class='button'>",t("ASN / Suuntalava"),"</a></li>";
+}
 
-echo "</li>
+echo "<li><a href='ostotilaus.php?uusi' class='button'>",t("Ostotilaus"),"</a>";
 
-	<br>
-	<li><a href='suuntalavat.php' class='button'>",t("Suuntalavat"),"</a></li>
-	<ul>
-</div>";
+echo "<a href='ostotilaus.php' class='button'><font color='chucknorris'>(".t("Jatka edellistä").")</font></a>";
 
-echo "<div class='controls'>
-</div>";
+echo "</li>";
+
+if ($yhtiorow['suuntalavat'] != "") {
+	echo "<br>";
+	echo "<li><a href='suuntalavat.php' class='button'>",t("Suuntalavat"),"</a></li>";
+}
+
+echo "<ul>";
+echo "</div>";
+
+echo "<div class='controls'>";
+echo "</div>";
 
 require('inc/footer.inc');

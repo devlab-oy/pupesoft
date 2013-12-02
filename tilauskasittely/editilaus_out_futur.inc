@@ -55,6 +55,9 @@
 	   	$edi_order .= "*MS {$laskurow['tunnus']}\n";
 	   	$edi_order .= "*RS OSTOTIL\n";
 
+	   	if ($myynti_vai_osto == 'O') $_toimitustapa = $laskurow['kuljetus'];
+	   	else $_toimitustapa = $laskurow['toimitustapa'];
+
 	   	$edi_order .= "OSTOTIL.OT_NRO:{$laskurow['tunnus']}\n";
 		// 0 = Örum
 	   	$edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:0\n";
@@ -62,7 +65,7 @@
 		$edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
 		$edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
-		$edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$laskurow['toimitustapa']}\n";
+		$edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$_toimitustapa}\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:{$laskurow['toimitusehto']}\n";
 		$edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$laskurow['maksuehto']}\n";
 		$edi_order .= "OSTOTIL.OT_VIITTEEMME:{$laskurow['viesti']}\n";
@@ -185,22 +188,31 @@
 
 	   	$i = 1;
 
+	   	$ta_lisa = $ta_where = "";
+
+	   	if ($myynti_vai_osto == 'O') {
+	   		$ta_lisa = "LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')";
+	   		$ta_where = "AND ta.tunnus IS NULL";
+	   	}
+
 		$query = "	SELECT tilausrivi.*
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
+					{$ta_lisa}
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-					AND tilausrivi.var not in ('U','J')";
+					AND tilausrivi.var not in ('U','J')
+					{$ta_where}";
 		$tilausrivi_res = pupe_query($query);
 
 		if (mysql_num_rows($tilausrivi_res) == 0) return false;
 
 		while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
 
-			$kpl = round(($tilausrivi_row['jt'] + $tilausrivi_row['varattu']), 0);
+			$kpl = $tilausrivi_row['jt'] + $tilausrivi_row['varattu'];
 
 			if ($tilausrivi_row['var'] == 'P') {
-				$kpl = round($tilausrivi_row['tilkpl'] * 1, 0);
+				$kpl = $tilausrivi_row['tilkpl'] * 1;
 			}
 
 			// HUOM: Reklamaatioissa laitetaan nettohyvitysyksikköhinta
@@ -215,6 +227,28 @@
 			$edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
 			$edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tilausrivi_row['tuoteno']}\n";
 			$edi_order .= "OSTOTILRIV.OTR_NIMI:{$tilausrivi_row['nimitys']}\n";
+
+			if ($myynti_vai_osto == 'O') {
+
+				// Haetaan tuotteen toimittajan tuotekerroin
+				$query = "	SELECT tuotekerroin, if(jarjestys = 0, 9999, jarjestys) sorttauskentta
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$tilausrivi_row['tuoteno']}'
+							AND liitostunnus = '{$laskurow['liitostunnus']}'
+							AND tuotekerroin != 0
+							AND tuotekerroin != 1
+							ORDER BY sorttauskentta";
+				$tt_tuotekerroin_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($tt_tuotekerroin_chk_res) != 0) {
+					$tt_tuotekerroin_chk_row = mysql_fetch_assoc($tt_tuotekerroin_chk_res);
+
+					$kpl *= $tt_tuotekerroin_chk_row['tuotekerroin'];
+				}
+			}
+
+			$kpl = round($kpl);
 
 			$edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:{$kpl}\n";
 
@@ -255,11 +289,19 @@
 							tilaajanrivinro = tunnus
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus  = '$tilausrivi_row[tunnus]'";
-			$tresult = pupe_query($sqlquery);
+			$tresult = pupe_query($sqlquery, $masterlink);
 
 		}
 
 		if ($i > 1) {
+
+			if ($myynti_vai_osto == 'O') {
+				$query = "	UPDATE lasku
+							SET kirjoitin = 'edi'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$laskurow['tunnus']}'";
+				pupe_query($query, $masterlink);
+			}
 
 		   	$edi_order .= "*ME\n";
 		   	$edi_order .= "*IE\n";

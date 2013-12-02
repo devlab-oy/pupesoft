@@ -534,6 +534,7 @@ function echo_lasku_table($laskurow, $toim) {
 					FROM maksuehto
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kateinen != ''
+					and kaytossa = ''
 					ORDER BY jarjestys, teksti";
 	}
 	else {
@@ -544,6 +545,7 @@ function echo_lasku_table($laskurow, $toim) {
 					FROM maksuehto
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kateinen = ''
+					and kaytossa = ''
 					ORDER BY jarjestys, teksti";
 	}
 	$vresult = pupe_query($query);

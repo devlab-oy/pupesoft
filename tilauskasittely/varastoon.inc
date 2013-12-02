@@ -87,6 +87,10 @@ if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 
 	if ($toiminto == "kalkyyli" and $tee == "") {
 		$varastoon_msg .= "<th valign='top'>".t("Vanha")." ".t("saldo")."<br>".t("Uusi")." ".t("saldo")."</th>";
+
+		if ($yhtiorow['toimipaikkakasittely'] == 'L' and $laskurow['yhtio_toimipaikka'] != 0) {
+			$varastoon_msg .= "<th valign='top'>".t("Toimipaikan vanha saldo")."<br>".t("Toimipaikan uusi saldo")."</th>";
+		}
 	}
 
 	$varastoon_msg .= "</tr>";
@@ -1197,6 +1201,41 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 
 		$varastoon_msg .= "<td align='right'>$varastoon_saldo<br><font class='$varastoon_fontti'>$varastoon_saldo_uusi$varastoon_saldo_viesti</font></td>";
+
+		if ($yhtiorow['toimipaikkakasittely'] == 'L' and $laskurow['yhtio_toimipaikka'] != 0) {
+
+			$varastoon_msg .= "<td align='right'>";
+
+			$toimipaikan_saldo = 0;
+
+			$query  = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi != 'P'
+						AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
+			$vares = pupe_query($query);
+
+			while ($varow = mysql_fetch_assoc($vares)) {
+
+				list($varastoon_saldo, $dummy1, $dummy2, $dummy3) = saldo_myytavissa($tuorow["tuoteno"], '', $varow['tunnus']);
+
+				$toimipaikan_saldo += $varastoon_saldo;
+			}
+
+			$varastoon_saldo_uusi = $toimipaikan_saldo + $tilrivirow["varattu"];
+
+			$varastoon_fontti = "";
+			$varastoon_saldo_viesti = "";
+
+			if ($varastoon_saldo_uusi <= 0) {
+				$varastoon_fontti = "error";
+				$varastoon_saldo_viesti = "<br>".t("HUOM: Saldo jää negatiiviseksi!");
+			}
+
+			$varastoon_msg .= "{$toimipaikan_saldo}<br><font class='{$varastoon_fontti}'>{$varastoon_saldo_uusi}{$varastoon_saldo_viesti}</font>";
+
+			$varastoon_msg .= "</td>";
+		}
 	}
 
 	$varastoon_msg .= "</tr>";
@@ -1311,7 +1350,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 				}
 			}
 			else {
-				echo "<font class='error'>".t("En löytänyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
+				if (!$tullaan_automaattikohdistuksesta) echo "<font class='error'>".t("En löytänyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
 			}
 
 			// tarkistetaan onko lasku Teccom-lasku ja onko laskulla asn_sanomat -taulussa rivejä, joita ei ole käsitelty
@@ -1353,7 +1392,11 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 
 if ($toiminto == "kalkyyli" and $tee == "") {
 	if ($tv_kaytossa) $cspani = 11;
-	else $cspani = 9;
+	else $cspani = 10;
+
+	if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+		$cspani++;
+	}
 
 	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 		$cspani++;
@@ -1446,11 +1489,13 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattik
 if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistukset) > 0) {
 	$rekurkoko = count($korjattavat_valmistukset);
 
-	echo "<table>";
+	if (!$tullaan_automaattikohdistuksesta) {
+		echo "<table>";
 
-	echo "<tr>";
-	echo "<th colspan='6'>".t("Korjataan valmistukset joihin tämä varastoonvienti vaikuttaa")."</td>";
-	echo "</tr>";
+		echo "<tr>";
+		echo "<th colspan='6'>".t("Korjataan valmistukset joihin tämä varastoonvienti vaikuttaa")."</td>";
+		echo "</tr>";
+	}
 
 
 	// Tässä on rekursiivista toimintaa $korjattavat_valmistukset-array voi kasvaa matkan varrella
@@ -1460,14 +1505,16 @@ if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistuk
 		$rekurkoko = count($korjattavat_valmistukset);
 	}
 
-	echo "</table>";
+	if (!$tullaan_automaattikohdistuksesta) {
+		echo "</table>";
+	}
 }
 
 if ($toiminto == "kaikkiok" and $tee == "varma" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 	echo "<br><font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("riviä").".</font><br><br>";
 }
-elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
-	if ($mobiili_keikka != "yes") {
+elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '') {
+	if ($mobiili_keikka != "yes" and !$tullaan_automaattikohdistuksesta) {
 		echo "<font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("riviä").".</font><br><br>";
 	}
 

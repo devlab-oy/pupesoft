@@ -743,7 +743,7 @@ if ($silent == "") {
 			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
 		}
 
-		if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+		if ($yhtiorow['toimipaikkakasittely'] == "L" and isset($toimipaikka) and $toimipaikka != 'kaikki') {
 			$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
 		}
 		else {
@@ -1041,6 +1041,7 @@ if ($silent == "") {
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='otunnus' value='$otunnus'>";

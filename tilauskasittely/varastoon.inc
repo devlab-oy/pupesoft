@@ -1633,12 +1633,14 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tull
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
 	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+	echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 	echo "<input type='submit' value='".t("Takaisin saapumisen valintaan")."'>";
 	echo "</form>&nbsp;";
 	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value=''>";
 	echo "<input type='hidden' name='ytunnus' value=''>";
+	echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 	echo "<input type='submit' value='".t("Takaisin toimittajan valintaan")."'>";
 	echo "</form>";
 }

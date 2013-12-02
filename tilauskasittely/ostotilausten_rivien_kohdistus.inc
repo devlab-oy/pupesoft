@@ -1556,6 +1556,7 @@ if ($tila == '') {
 		echo $hiddenit;
 		echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 		echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
 		echo "<form name='formi' method='post'>";
@@ -1582,6 +1583,7 @@ if ($tila == '') {
 		echo $hiddenit;
 		echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 		echo "<input type='submit' value='".t("Siirrä rivejä toiselta saapumiselta")."'></form>";
 
 		echo "<form method='post'>";
@@ -1591,6 +1593,7 @@ if ($tila == '') {
 		echo "<input type='hidden' name='tee' value='K'>";
 		echo "<input type='hidden' name='tila' value='valmis'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 		echo "<input type='submit' value='".t("Kohdistus valmis")."'></form>";
 	}
 
@@ -2225,6 +2228,7 @@ if ($tila == '') {
 				$hiddenit
 				<input type='hidden' name='ojarj' value=\"$ojarj\">
 				<input type='hidden' name='otunnus' value='$otunnus'>
+				<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
 				<input type='submit' value='".t("Tee uusi rivi")."'>
 				</form>";
 
@@ -2237,6 +2241,7 @@ if ($tila == '') {
 				<input type='hidden' name='tila' value='FAILISTA'>
 				$hiddenit
 				<input type='hidden' name='ojarj' value=\"$ojarj\">
+				<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
 				<input type='submit' value='".t("Kohdista tiedostosta")."'>
 				</form>";
 
@@ -2252,6 +2257,7 @@ if ($tila == '') {
 				$hiddenit
 				<input type='hidden' name='ojarj' value=\"$ojarj\">
 				<input type='hidden' name='otunnus' value='$otunnus'>
+				<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
 				<input type='submit' value='".t("Siirrä rivejä toiselta saapumiselta")."'>
 				</form>";
 
@@ -2262,6 +2268,7 @@ if ($tila == '') {
 				<input type='hidden' name='laskunsumma' value='$laskunsumma'>
 				<input type='hidden' name='tee' value='K'>
 				<input type='hidden' name='tila' value='valmis'>
+				<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
 				<input type='hidden' name='otunnus' value='$otunnus'>
 				</form>";
 	}

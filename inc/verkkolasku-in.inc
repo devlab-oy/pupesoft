@@ -101,6 +101,9 @@
 			$rtuoteno[]["rivihinta_valuutassa"]
 			*/
 
+			//siivotaan viite
+			$laskun_tilausviite = pupesoft_cleanstring($laskun_tilausviite);
+
 			// generic error messagen alku
 			$return  = "Tiedosto: $file\n";
 			$return .= "Lähettäjä: $laskuttajan_nimi\n";

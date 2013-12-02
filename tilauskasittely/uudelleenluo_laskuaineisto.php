@@ -842,6 +842,9 @@
 		elmaedi_aineisto_loppu($tootedi, $timestamppi);
 		pupevoice_aineisto_loppu($tootxml);
 
+		//	Tulostetaan virheet jos niitä oli
+		echo $tulos_ulos;
+
 		// suljetaan faili
 		fclose($tootxml);
 		fclose($tootedi);

@@ -45,7 +45,8 @@ $request = array(
 	"tilausnumero"				 => $tilausnumero,
 	"action"					 => $action,
 	"valitut_asiakastunnukset"	 => $valitut_asiakastunnukset,
-	"saate_teksti"				 => $saate_teksti
+	"saate_teksti"				 => $saate_teksti,
+	"viesti"					 => $viesti,
 );
 
 $asiakasid = $kukarow['tunnus'] * -1;
@@ -65,6 +66,7 @@ if ($request['action'] == 'liita_asiakkaat') {
 		"tilausnumero"				 => $tilausnumero,
 		"valitut_asiakastunnukset"	 => $valitut_asiakastunnukset,
 		'alv'						 => alv_oletus(),
+		"viesti"					 => $viesti,
 	);
 	luo_tarjouspohja($parametrit);
 }

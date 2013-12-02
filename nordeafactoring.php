@@ -1,14 +1,6 @@
 <?php
 
-	if(isset($_POST["tee"])) $tee = $_POST["tee"];
-	else $tee = "";
-	if(isset($_POST["kaunisnimi"])) $kaunisnimi = $_POST["kaunisnimi"];
-	else $kaunisnimi = "";
-	if(isset($_POST["valkoodi"])) $valkoodi = $_POST["valkoodi"];
-	else $valkoodi = "";
-
-
-	if($tee == 'lataa_tiedosto') $lataa_tiedosto = 1;
+	if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
 
 	require('inc/parametrit.inc');
 
@@ -16,7 +8,8 @@
 		readfile("dataout/".$filenimi);
 		exit;
 	}
-	elseif($toim == "OKO") {
+
+	if ($toim == "OKO") {
 		echo "<font class='head'>".t("OKO Saatavarahoitus siirtotiedosto").":</font><hr><br>";
 		$factoringyhtio = "OKO";
 	}
@@ -206,7 +199,7 @@
 		$ulos .= sprintf ('%06.6s',	 	$frow["sopimusnumero"]);					//sopimusnumero
 		$ulos .= sprintf ('%-3.3s', 	$valkoodi);									//valuutta
 
-		if($toim == "OKO") {
+		if ($toim == "OKO") {
 			$ulos .= sprintf ('%-2.2s', "OP");										//rahoitusyhtiˆn tunnus
 		}
 		elseif ($toim == "SAMPO") {
@@ -216,7 +209,7 @@
 			$ulos .= sprintf ('%-2.2s', "MR");										//rahoitusyhtiˆn tunnus
 		}
 
-		if($toim == "OKO") {
+		if ($toim == "OKO") {
 			$ulos .= sprintf ('%-30.30s', 	$yhtiorow["nimi"]);						//siirt‰j‰n nimi
 		}
 		else {
@@ -264,7 +257,7 @@
 			exit;
 		}
 
-		$query = "	SELECT if(lasku.summa >= 0, '01', '02') tyyppi,
+		$query = "	SELECT if (lasku.summa >= 0, '01', '02') tyyppi,
 					lasku.ytunnus,
 					lasku.nimi,
 					lasku.nimitark,
@@ -341,7 +334,7 @@
 				}
 
 				//luodaan ostajatietue
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-4.4s', 	"LA01");									   				//sovellustunnus
 				}
 				elseif ($toim == 'SAMPO') {
@@ -354,7 +347,7 @@
 				$ulos .= sprintf ('%01.1s',	 		1);											   				//tietuetunnus
 				$ulos .= sprintf ('%06.6s',	 		$frow["sopimusnumero"]);					   				//sopimusnumero
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-10.10s',	$asirow["asiakasnro"]);						   				//ostajan numero aka asiakasnumero
 				}
 				else {
@@ -364,28 +357,28 @@
 
 				$ulos .= sprintf ('%-10.10s', 		str_replace('-','',$laskurow["ytunnus"]));	   				//ostajan ytunnus
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-30.30s', 	strtoupper($laskurow["nimi"]));			   					//ostajan nimi
 				}
 				else {
 					$ulos .= sprintf ('%-30.30s', 	$laskurow["nimi"]);						   					//ostajan nimi
 				}
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-30.30s',  	"");									   					//ostajan nimitark (Ei k‰ytˆss‰)
 				}
 				else {
 					$ulos .= sprintf ('%-30.30s',  	$laskurow["nimitark"]);					   					//ostajan nimitark
 				}
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-20.20s', 	strtoupper($laskurow["osoite"]));		   					//ostajan osoite
 				}
 				else {
 					$ulos .= sprintf ('%-20.20s', 	$laskurow["osoite"]);					   					//ostajan osoite
 				}
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-20.20s', 	$laskurow["postino"]." ".strtoupper($laskurow["postitp"]));	//ostajan postino ja postitp
 				}
 				else {
@@ -399,7 +392,7 @@
 				$ulos .= sprintf ('%-2.2s', 		"FI");														//kieli
 				$ulos .= sprintf ('%-3.3s', 		$laskurow["valkoodi"]);										//valuutta
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%04.4s', 	"");														//viivastyskorko (Ei k‰ytˆss‰)
 				}
 				else {
@@ -409,7 +402,7 @@
 				$ulos .= sprintf ('%03.3s', 		0);
 				$ulos .= sprintf ('%06.6s',   		0);
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%03.3s',   	1);															//myyj‰n sopimustunnus
 					$ulos .= sprintf ('%-179.179s',	0);
 				}
@@ -430,7 +423,7 @@
 				$ulos .= "\r\n";
 
 				//luodaan laskutietue
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-4.4s', 	"LA01");									   				//sovellustunnus
 				}
 				elseif ($toim == 'SAMPO') {
@@ -443,7 +436,7 @@
 				$ulos .= sprintf ('%01.1s',	 		3);															//tietuetunnus
 				$ulos .= sprintf ('%06.6s',	 		$frow["sopimusnumero"]);									//sopimusnumero
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-10.10s',	$asirow["asiakasnro"]);						   				//ostajan numero aka asiakasnumero
 				}
 				else {
@@ -465,7 +458,7 @@
 				$ulos .= sprintf ('%012.12s', 		$laskurow["summa"]);										//summa etumerkitˆn, senttein‰
 				$ulos .= sprintf ('%06.6s', 		$laskurow["erpcm"]);										//er‰p‰iv‰
 
-				if($laskurow["kasumma"] > 0) {
+				if ($laskurow["kasumma"] > 0) {
 					$ulos .= sprintf ('%06.6s', 	$laskurow["kapvm"]);										//kassa-ale1 pvm
 				}
 				else{
@@ -484,7 +477,7 @@
 					$ulos .= sprintf ('%012.12s',		0);
 				}
 
-				if($laskurow["kasumma"] > 0) {
+				if ($laskurow["kasumma"] > 0) {
 					$ulos .= sprintf ('%012.12s', 	$laskurow["kasumma"]);										//kassa-ale1 valuutassa
 				}
 				else {
@@ -503,7 +496,7 @@
 					$ulos .= sprintf ('%024.24s',  		0);
 				}
 
-				if($laskurow["kasumma"] > 0 and $toim != "OKO") {
+				if ($laskurow["kasumma"] > 0 and $toim != "OKO") {
 					$ulos .= sprintf ('%01.1s', 	1);															//kassa-ale1 koodi 0-ei alennusta, 1-alennus
 				}
 				else {
@@ -614,7 +607,7 @@
 				}
 				//luodaan summatietue
 				//luodaan laskutietue
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-4.4s', 	"LA01");								//sovellustunnus
 				}
 				elseif ($toim == 'SAMPO') {
@@ -645,7 +638,7 @@
 				$ulos .= sprintf ('%06.6s', 		0);
 				$ulos .= sprintf ('%013.13s', 		0);
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$ulos .= sprintf ('%-286.286s',	"");
 				}
 				elseif ($toim == 'SAMPO') {
@@ -659,7 +652,7 @@
 				$ulos .= "\r\n";
 
 				//keksit‰‰n uudelle failille joku hyv‰ nimi:
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					$filenimi = "OKOsiirto-$factoringsiirtonumero.txt";
 				}
 				elseif ($toim == 'SAMPO') {
@@ -687,7 +680,7 @@
 				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 
-				if($toim == "OKO") {
+				if ($toim == "OKO") {
 					echo "<input type='hidden' name='kaunisnimi' value='OKOMYSA.DAT'>";
 				}
 				else {

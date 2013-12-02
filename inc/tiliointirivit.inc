@@ -36,6 +36,7 @@
 	if (!isset($projekti))			$projekti = "";
 	if (!isset($liitos)) 			$liitos = "";
 	if (!isset($liitostunnus)) 		$liitostunnus = 0;
+	if (!isset($tapahtumatunnus)) 	$tapahtumatunnus = 0;
 	if (!isset($summa_valuutassa))	$summa_valuutassa = "";
 
 	// Otetaan yhtiön oletus jos ei olla submitattu....
@@ -146,6 +147,7 @@
 				<input type='hidden' name = 'grouppaa' value = '$grouppaa'>
 				<input type='hidden' name = 'laji' value = '$laji'>
 				<input type='hidden' name = 'tositenro' value = '$tositenro'>
+				<input type='hidden' name = 'tapahtumatunnus' value = '$tapahtumatunnus'>
 				<input type='hidden' name = 'vv' value = '$vv'>
 				<input type='hidden' name = 'kk' value = '$kk'>
 				<input type='hidden' name = 'iframe' value = '$iframe'>
@@ -215,7 +217,10 @@
 		// Ei rikota rivinvaihtoja
 		$selite = str_ireplace("<br>", "(br)", $selite);
 
-		echo "<input type='text' name='selite' value = '$selite'>";
+		if ($selite == '' and $lisaselite != '') {
+			$selite = $lisaselite;
+		}
+		echo "<input type='text' class='selite' name='selite' value = '$selite'>";
 
 		if ($trow['tila'] == 'X') {
 			echo "<div style='float:right;'><a href=\"javascript:toggleGroup('eee')\"><img src='{$palvelin2}pics/lullacons/user-option-add.png'></a></div>";
@@ -273,8 +278,8 @@
 		}
 
 		if ($virhe != "") $virhe .= "<br>";
-
-		echo "<td valign='top'><input type='Submit' value = '".t("Lisää")."'></td>";
+		echo "<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />";
+		echo "<td valign='top'><input type='Submit' class='hae_lisaselite' value = '".t("Lisää")."'></td>";
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") === FALSE and strpos($_SERVER['SCRIPT_NAME'], "selaajamuuta.php") === FALSE) {
 			echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'> ".t("Jaksota")."</td>";
@@ -455,7 +460,8 @@
 					<input type='hidden' name = 'iframe' value = '$iframe'>
 					<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
 					<input type='hidden' name = 'jarj' value = '$jarj'>
-					<input type='Submit' value = '".t("Muuta")."'>
+					<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />
+					<input type='Submit' class='hae_lisaselite' value = '".t("Muuta")."'>
 					</td></tr></form>";
 		}
 		else {

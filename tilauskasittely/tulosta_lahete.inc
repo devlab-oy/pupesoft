@@ -1846,6 +1846,12 @@ if (!function_exists('rivi_lahete')) {
 				$return = rivi_eialeja_lahete($return);
 			}
 			elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc" or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc") {
+
+				// Verollinen lähetetyyppi, lisätään alvit hintaan
+				if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc' and strpos($lahetetyyppi, "_verollinen") !== FALSE) {
+					$return['row']['hinta']	= hintapyoristys($row['hinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+				}
+
 				// tulosta_lahete_viivakoodi.inc
 				$return = rivi_viivakoodi_lahete($return);
 			}
@@ -4200,6 +4206,23 @@ if (!function_exists('print_pdf_lahete')) {
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 						$kutsu .= ", ".trim($laskurow["nimi"]);
+					}
+
+					// Jos tilausvahvistuksessa on R, halutaan rekkarinumeroita otsikkoon
+					/*
+					Tsekataan rekisteritieto kentistä distinct rekkarit ja kirjoitetaan muutama niistä emailin subjektiin ihan loppuun sulkujen sisään.
+					Muutama = 2, ja jos on enemmänkin rekkareita niin sitten niistä info tyyliin näin: (ABC-123, EFG-456, ..). Ja jos esim yksi niin: (ABC-123).
+					*/
+					if (strpos($laskurow['tilausvahvistus'], 'R') !== FALSE) {
+
+						$rekkarit_subject = array_slice(array_keys(hae_tilauksen_rekisterinumerot($laskurow['tunnus'], true)), 0, 3);
+
+						if (count($rekkarit_subject) > 0) {
+
+							if (isset($rekkarit_subject[2])) $rekkarit_subject[2] = '...';
+
+							$kutsu .= " (".implode(", ", $rekkarit_subject).")";
+						}
 					}
 
 					$kutsu = "{$yhtiorow["nimi"]} - $kutsu";

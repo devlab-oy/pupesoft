@@ -49,7 +49,7 @@
         }
 
 		echo "<tr class='aktiivi'><td>".substr($tietue,27,16)."</td>";
-		echo "<td>".tilinumero_print($viiteaineisto_tilino)."</td>";
+		echo "<td>$viiteaineisto_tilino</td>";
 		echo "<td>".pankkipvm(substr($tietue,15,6))."</td>";
 		echo "<td>".pankkipvm(substr($tietue,21,6))."</td>";
 		echo "<td>".substr($tietue,63,12)."</td>";

@@ -35,7 +35,6 @@
 			$monistares = pupe_query($query);
 			$monistarow = mysql_fetch_array($monistares);
 
-
 			$tehdaan_uusi_otsikko = TRUE;
 
 			// Katsotaan löytyykö jo sopiva otsikko, jos ei niin tehdään uusi, eli tässä tapauksessa ei kopsata vanhaa
@@ -354,10 +353,12 @@
 			$isaok				= array();
 
 			if ($perusta == "TYOMAARAYS") {
-				$tymlisa = t("työmääräykselle");
+				$tymlisa    = t("työmääräykselle");
+				$linkkilisa = "<a href='tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero=$utunnus'>".t("Siirry myyntitilaukselle")."</a>";
 			}
 			else {
-				$tymlisa = t("myyntitilaukselle");
+				$tymlisa    = t("myyntitilaukselle");
+				$linkkilisa = "<a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$utunnus'>".t("Siirry myyntitilaukselle")."</a>";
 			}
 
 			$tilauksesta_myyntitilaus .= "<font class='message'>".t("Lisätään valitut rivit")." $tymlisa: $utunnus</font><br>";
@@ -366,7 +367,7 @@
 			$laskures = mysql_query($query);
 			$laskurow = mysql_fetch_array($laskures);
 
-			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.positio
+			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.toimittajan_tunnus
 						FROM tilausrivi
 						LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -512,7 +513,15 @@
 					$varasto = "";
 				}
 
-				if ($kopioi_paikat != "") {
+				if (($coprivirow["var"] == "T" or $coprivirow["var"] == "U") and $coprivirow['toimittajan_tunnus'] != 0) {
+					if ($coprivirow['var'] == 'T') {
+						$paikka = "¡¡¡{$coprivirow['toimittajan_tunnus']}";
+					}
+					else {
+						$paikka = "!!!{$coprivirow['toimittajan_tunnus']}";
+					}
+				}
+				elseif ($kopioi_paikat != "") {
 					$paikka	= $coprivirow['hyllyalue']."#!¡!#".$coprivirow['hyllynro']."#!¡!#".$coprivirow['hyllyvali']."#!¡!#".$coprivirow['hyllytaso'];
 				}
 				else {
@@ -616,7 +625,6 @@
 									case 'tilausrivitunnus':
 									case 'tiliointirivitunnus':
 									case 'tilausrivilinkki':
-									case 'toimittajan_tunnus':
 									case 'luontiaika':
 									case 'laatija':
 										$values .= "";
@@ -703,6 +711,10 @@
 
 			//Korjataan globaali muuttuja
 			$kukarow["kesken"] = $kukarowkesken;
+
+			if ($tilauksesta_myyntitilaus != "" and $linkkilisa != "") {
+				$tilauksesta_myyntitilaus .= "<br><br>$linkkilisa<br>";
+			}
 
 			return $tilauksesta_myyntitilaus;
 		}

@@ -10,6 +10,8 @@
 
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
+	if (!isset($lahdekeraysvyohyke)) $lahdekeraysvyohyke = array();
+
 
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
@@ -19,13 +21,15 @@
 			<table>";
 
 	echo "<tr><th>",t("L‰hdevarasto, eli varasto josta ker‰t‰‰n"),":</th>";
-	echo "<td colspan='4'>";
+	echo "<td><table>";
 
 	$query  = "	SELECT tunnus, nimitys, maa
 				FROM varastopaikat
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				ORDER BY tyyppi, nimitys";
 	$vares = pupe_query($query);
+
+	$kala = 0;
 
 	while ($varow = mysql_fetch_assoc($vares)) {
 		$sel = '';
@@ -36,13 +40,68 @@
 			$varastomaa = '(' . maa(strtoupper($varow['maa'])) . ')';
 		}
 
-		echo "<input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}<br />";
+		if ($kala == 0) echo "<tr>";
+
+		echo "<td><input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}</td>";
+
+		if ($kala == 3) {
+			echo "</tr>";
+			$kala = -1;
+		}
+
+		$kala++;
 	}
 
-	echo "</td></tr>";
+	if ($kala != 0) {
+		echo "</tr>";
+	}
+
+	echo "</table></td></tr>";
+
+	if ($yhtiorow['kerayserat'] == 'K') {
+
+		$query = "	SELECT nimitys, tunnus
+					FROM keraysvyohyke
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$keraysvyohyke_res = pupe_query($query);
+
+		if (mysql_num_rows($keraysvyohyke_res) > 0) {
+
+			echo "<tr><th>",t("Ker‰ysvyˆhyke josta ker‰t‰‰n"),"</th>";
+			echo "<td>";
+			echo "<input type='hidden' name='lahdekeraysvyohyke[]' value='default' />";
+			echo "<table>";
+
+			$kala = 0;
+
+			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
+
+				$chk = in_array($keraysvyohyke_row['tunnus'], $lahdekeraysvyohyke) ? " checked" : "";
+
+				if ($kala == 0) echo "<tr>";
+
+				echo "<td><input type='checkbox' name='lahdekeraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} /> {$keraysvyohyke_row['nimitys']}</td>";
+
+				if ($kala == 3) {
+					echo "</tr>";
+					$kala = -1;
+				}
+
+				$kala++;
+			}
+
+			if ($kala != 0) {
+				echo "</tr>";
+			}
+
+			echo "</table></td></tr>";
+		}
+	}
+	
+	echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
 	echo "<tr><th>",t("Kohdevarasto, eli varasto jonne l‰hetet‰‰n"),":</th>";
-	echo "<td colspan='4'><select name='kohdevarasto'><option value=''>",t("Valitse"),"</option>";
+	echo "<td><select name='kohdevarasto'><option value=''>",t("Valitse"),"</option>";
 
 	mysql_data_seek($vares, 0);
 
@@ -59,6 +118,43 @@
 	}
 
 	echo "</select></td></tr>";
+	
+	if ($yhtiorow['kerayserat'] == 'K') {
+		if (mysql_num_rows($keraysvyohyke_res) > 0) {
+			mysql_data_seek($keraysvyohyke_res, 0);
+
+			echo "<tr><th>",t("Ker‰ysvyˆhyke"),"</th>";
+			echo "<td>";
+			echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
+			echo "<table>";
+
+			$kala = 0;
+
+			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
+
+				$chk = in_array($keraysvyohyke_row['tunnus'], $keraysvyohyke) ? " checked" : "";
+
+				if ($kala == 0) echo "<tr>";
+
+				echo "<td><input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} /> {$keraysvyohyke_row['nimitys']}</td>";
+
+				if ($kala == 3) {
+					echo "</tr>";
+					$kala = -1;
+				}
+
+				$kala++;
+			}
+
+			if ($kala != 0) {
+				echo "</tr>";
+			}
+
+			echo "</table></td></tr>";
+		}
+	}
+	
+	echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
 	echo "<tr><th>",t("Lis‰rajaukset"),"</th><td>";
 
@@ -68,32 +164,6 @@
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	echo "</td></tr>";
-
-	if ($yhtiorow['kerayserat'] == 'K') {
-
-		$query = "	SELECT nimitys, tunnus
-					FROM keraysvyohyke
-					WHERE yhtio = '{$kukarow['yhtio']}'";
-		$keraysvyohyke_res = pupe_query($query);
-
-		if (mysql_num_rows($keraysvyohyke_res) > 0) {
-
-			echo "<tr><th>",t("Ker‰ysvyˆhyke"),"</th>";
-			echo "<td>";
-
-			echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
-
-			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
-
-				$chk = in_array($keraysvyohyke_row['tunnus'], $keraysvyohyke) ? " checked" : "";
-
-				echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} /> {$keraysvyohyke_row['nimitys']}<br />";
-			}
-
-			echo "</td></tr>";
-		}
-	}
-
 	echo "<tr><th>",t("Toimittaja"),"</th><td><input type='text' size='20' name='toimittaja' value='{$toimittaja}'></td></tr>";
 
 	echo "<tr><th>",t("ABC-luokkarajaus ja rajausperuste"),"</th><td>";
@@ -181,6 +251,7 @@
 		if ($kohdevarasto > 0 and count($lahdevarastot) > 0) {
 
 			$abcjoin = "";
+			$lahdevyohykkeet = FALSE;
 
 			if ($abcrajaus != "") {
 				// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
@@ -190,18 +261,42 @@
 							(abc_aputaulu.luokka <= '{$abcrajaus}' OR abc_aputaulu.luokka_osasto <= '{$abcrajaus}' OR abc_aputaulu.luokka_try <= '{$abcrajaus}'))";
 			}
 
+			if (count($lahdekeraysvyohyke) > 1) {
+
+				// ensimm‰inen alkio on 'default' ja se otetaan pois
+				array_shift($lahdekeraysvyohyke);
+
+				$query = "	SELECT distinct concat(varastopaikat.tunnus, '##', keraysvyohyke.tunnus) tunnari
+							FROM varastopaikat
+							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = varastopaikat.yhtio AND keraysvyohyke.varasto = varastopaikat.tunnus AND keraysvyohyke.tunnus IN (".implode(",", $lahdekeraysvyohyke)."))
+							WHERE varastopaikat.yhtio = '{$kukarow['yhtio']}'
+							AND varastopaikat.tunnus IN (".implode(",", $lahdevarastot).")";
+				$result = pupe_query($query);
+
+				// Ylikirjataan $lahdevarastot-array
+				$lahdevarastot = array();
+
+				if (mysql_num_rows($result) > 0) {
+					$lahdevyohykkeet = TRUE;
+
+					while ($kvrow = mysql_fetch_assoc($result)) {
+						$lahdevarastot[] = $kvrow['tunnari'];
+					}
+				}
+			}
+
 			if (count($keraysvyohyke) > 1) {
 
 				// ensimm‰inen alkio on 'default' ja se otetaan pois
 				array_shift($keraysvyohyke);
 
 				$keraysvyohykelisa = "	JOIN varaston_hyllypaikat AS vh ON (
-											vh.yhtio = tuotepaikat.yhtio AND
-											vh.hyllyalue = tuotepaikat.hyllyalue AND
-											vh.hyllynro = tuotepaikat.hyllynro AND
-											vh.hyllytaso = tuotepaikat.hyllytaso AND
-											vh.hyllyvali = tuotepaikat.hyllyvali AND
-											vh.keraysvyohyke IN (".implode(",", $keraysvyohyke)."))
+										vh.yhtio = tuotepaikat.yhtio AND
+										vh.hyllyalue = tuotepaikat.hyllyalue AND
+										vh.hyllynro = tuotepaikat.hyllynro AND
+										vh.hyllytaso = tuotepaikat.hyllytaso AND
+										vh.hyllyvali = tuotepaikat.hyllyvali AND
+										vh.keraysvyohyke IN (".implode(",", $keraysvyohyke)."))
 										JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
 			}
 
@@ -252,7 +347,7 @@
 						{$kohdepaikkalisa}
 						ORDER BY tuotepaikat.tuoteno";
 			$resultti = pupe_query($query);
-
+			
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;
 			}
@@ -262,6 +357,16 @@
 
 			// tehd‰‰n jokaiselle valitulle lahdevarastolle erikseen
 			foreach ($lahdevarastot as $lahdevarasto) {
+
+				$lahdevyohyke = 0;
+
+				if ($lahdevyohykkeet) {
+					list($lahdevarasto, $lahdevyohyke) = explode("##", $lahdevarasto);
+				}
+
+				$lahdevarasto = (int) $lahdevarasto;
+				$lahdevyohyke = (int) $lahdevyohyke;
+
 				//	Varmistetaan ett‰ aloitetaan aina uusi otsikko uudelle varastolle
 				$tehtyriveja = 0;
 
@@ -334,9 +439,14 @@
 					}
 
 					// L‰hdevaraston myyt‰viss‰m‰‰r‰
-					list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
+					if ($lahdevyohykkeet) {
+						list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto."##".$lahdevyohyke);
+					}
+					else {
+						list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
+					}
 
-					// jos l‰hdevarasto on sama kuin kohdevarasto, niin silloin kohdepaikka on aina oletupaikka, joten poistetaan sen myyt‰viss‰m‰‰r‰ l‰hdepuolelta
+					// jos l‰hdevarasto on sama kuin kohdevarasto, niin silloin kohdepaikka on aina oletuspaikka, joten poistetaan sen myyt‰viss‰m‰‰r‰ l‰hdepuolelta
 					if ($kohdevarasto == $lahdevarasto) {
 						$saldo_myytavissa_lahde = (float) $saldo_myytavissa_lahde - $saldo_myytavissa_kohde;
 					}

@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '') {
+	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '') {
 		global $kukarow, $yhtiorow, $session;
 
 		$query	= "	SELECT *
@@ -192,6 +192,10 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
 			$maksaja = $apuro['merahti'];
 
+			if ($yhtiorow['nouto_suoraan_laskutukseen'] == 'K' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $apuro['nouto'] != '') {
+				$eilahe = 'o';
+			}
+
 			// Onko toimitusehdon takana määritelty rahdinmaksaja? Tämä yliajaa toimitustavan takana olevan.
 			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$yhtiorow[oletus_toimitusehto]') ");
 
@@ -313,7 +317,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		// jos meillä on lasku menossa ulkomaille
 		if ($maa != "" and $maa != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero != ''";
+			$alhqur = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio		= '$kukarow[yhtio]'
+						AND maa			= '$maa'
+						AND vat_numero != ''";
 			$alhire = pupe_query($alhqur);
 
 			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista

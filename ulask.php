@@ -1076,6 +1076,24 @@ if ($tee == 'P' or $tee == 'E') {
 							$('.ostolaskun_kulutilit').hide();
 							$('#summa_echotus').html($('#summa').val());
 						}
+
+						$.ajax({
+							async: true,
+							dataType: 'JSON',
+							type: 'POST',
+							data: {
+								ajax_toiminto: 'hae_ostolaskun_tyypin_oletustili',
+								vienti: $('#vienti').val(),
+								toimittaja_tunnus: $('#toimittajaid').val()
+							},
+							url: 'ulask.php?no_head=yes'
+						}).done(function(data) {
+							//Jos vain yksi tiliointi rivi on näkyvissä, muutetaan sen arvo, jotta manuaalisesti tehdyn monen rivin ostolaskun tiliöinnit eivät ylikirjoitu
+							if ($(\"tr[class='tiliointirivi']:visible\").length == 1) {
+								var nakyvissa_oleva_tiliointirivi = $(\"tr[class='tiliointirivi']:visible\");
+								$(nakyvissa_oleva_tiliointirivi[0]).find('input.tilinumero').val(data);
+							}
+						});
 					});
 				});
 			</script>";
@@ -1414,6 +1432,39 @@ if ($tee == 'P' or $tee == 'E') {
 			 </tr>";
 	}
 
+	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
+
+		echo "<tr>";
+		echo "<td>",t("Toimipaikka"),"</td>";
+		echo "<td>";
+		echo "<select name='toimipaikka'>";
+		echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+			$sel = '';
+
+			if (isset($toimipaikka)) {
+				if ($toimipaikka == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
+			}
+			else {
+				if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
+			}
+
+			echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+		}
+
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
+	}
+
 	if ($vienti == 'A') $vientia = 'selected';
 	if ($vienti == 'B') $vientib = 'selected';
 	if ($vienti == 'C') $vientic = 'selected';
@@ -1678,11 +1729,11 @@ if ($tee == 'P' or $tee == 'E') {
 
 		for ($i = 1; $i < 50; $i++) {
 
-			echo "<tr id='tiliointirivi_{$i}' style='display:none;'><td valign='top'>";
+			echo "<tr id='tiliointirivi_{$i}' class='tiliointirivi' style='display:none;'><td valign='top'>";
 
  			// Tehaan kentta tai naytetaan popup
 			if ($iulos[$i] == '') {
-				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]");
+				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]", 'tilinumero');
 			}
 			else {
 				echo "$iulos[$i]";
@@ -1807,7 +1858,7 @@ if ($tee == 'P' or $tee == 'E') {
 	}
 
 	echo "<br>
-		<input type = 'hidden' name = 'toimittajaid' value = '$toimittajaid'>
+		<input type = 'hidden' id='toimittajaid' name = 'toimittajaid' value = '$toimittajaid'>
 		<input type = 'hidden' name = 'maara' id='maara' value = '$maara'>
 		<input type = 'submit' value = '".t("Perusta")."' tabindex='-1'></form>";
 
@@ -1948,9 +1999,12 @@ if ($tee == 'I') {
 		$osto_rivi_kulu = $osto_rivi_kulu * (1 + ($osto_rivi_kulu_alv / 100));
 	}
 
+	$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
+
 	// Kirjoitetaan lasku
 	$query = "	INSERT into lasku set
 				yhtio 				= '$kukarow[yhtio]',
+				yhtio_toimipaikka	= '{$toimipaikka}',
 				summa 				= '$summa',
 				kasumma 			= '$kassaale',
 				lapvm 				= '$vpv-$vpk-$vpp',
@@ -2659,7 +2713,7 @@ if ($tee == "") {
 
 			echo "<th><form action = '?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajalle")." $row[nimi]</th>";
 
-			echo "<td><input type='hidden'  name='toimittajaid' value='$toimittajaid'></td>
+			echo "<td><input type='hidden'  id='toimittajaid' name='toimittajaid' value='$toimittajaid'></td>
 			<td>".t("tiliöintirivejä").":</td>
 			<td><select name='maara'><option value ='2'>1
 			<option value ='4'>3

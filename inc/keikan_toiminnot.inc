@@ -54,7 +54,11 @@
 
 			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 				// tutkitaan ollaanko siellä alv-rekisteröity
-				$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='{$kukarow['yhtio']}' and maa='{$laskurow['maa']}' and vat_numero != ''";
+				$alhqur = "	SELECT *
+							FROM yhtion_toimipaikat
+							WHERE yhtio		= '{$kukarow['yhtio']}'
+							AND maa			= '{$laskurow['maa']}'
+							AND vat_numero != ''";
 				$alhire = pupe_query($alhqur);
 
 				// ollaan alv-rekisteröity
@@ -402,6 +406,31 @@
 		$data = array('hinta' => $hinta, 'rivihinta' => (float) $hinnat['rivihinta'], 'alerivihinta' => (float) $hinnat['alerivihinta']);
 
 		echo json_encode($data);
+	}
+	elseif ($_POST['ajax_toiminto'] == 'myyntihinta' and tarkista_oikeus('yllapito.php', 'tuote', 1) and $yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
+		$myyntihinta = (float) str_replace(",",".", $_POST['myyntihinta']);
+		$tunnus = (int) $_POST['tunnus'];
+
+		$query = "	SELECT tuoteno
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tunnus}'";
+		$tuoteno_chk_res = pupe_query($query);
+
+		if (mysql_num_rows($tuoteno_chk_res) == 1) {
+			$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
+
+			$query = "	UPDATE tuote SET
+						myyntihinta = '{$myyntihinta}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$tuoteno_chk_row['tuoteno']}'";
+			pupe_query($query);
+
+			echo json_encode(array('ok' => true));
+		}
+		else {
+			echo json_encode(array('ok' => false));
+		}
 	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl') {
 		$kpl 	 = str_replace(",",".", $_POST['kpl']);

@@ -57,7 +57,7 @@
 	// JT-selaus päivitysoikeus, joko JT-selaus päivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivejä
 	$jtselaus_paivitys_oikeus = FALSE;
 
-	if ($oikeurow['paivitys'] == '1' or (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
+	if ($oikeurow['paivitys'] == '1' or ((strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "verkkolasku-in.php") !== FALSE) and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
 		$jtselaus_paivitys_oikeus = TRUE;
 	}
 
@@ -760,9 +760,15 @@
 		}
 
 		if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K') {
-			$laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
+			if (count($varastosta) > 0 and trim(implode(", ", $varastosta)) != '') {
+				$laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
+			}
+			else {
+				// Jos ei saada mitään järkevää inputtia, niin riipaistaan tyhjää sitten
+				$laskulisa .= " and lasku.varasto = 0 ";
+			}
 		}
-
+		
 		if ($automaaginen != '' or $ei_limiittia != '') {
 			$limit = "";
 		}

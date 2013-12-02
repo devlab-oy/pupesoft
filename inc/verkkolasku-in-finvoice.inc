@@ -44,6 +44,8 @@ $ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode($xml->BuyerPartyDetails-
 $ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier));
 $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName));
 
+if (trim($laskuttajan_vat) == "" and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") $laskuttajan_vat = $xml->SellerPartyDetails->SellerPartyIdentifier;
+
 $laskuttajan_toimittajanumero = "";
 
 if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") {
@@ -177,6 +179,8 @@ if (count($tuotetiedot) > 0) {
 // Verotiedot
 $vattiedot	= $xml->InvoiceDetails->VatSpecificationDetails;
 $i 			= 0;
+
+$alv_talteen = (float) str_replace(",", ".", $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent);
 
 if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {

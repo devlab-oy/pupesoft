@@ -45,5 +45,3 @@
 			$tilausrivityyppi = "Terminaalitoimitus";
 			break;
 	}
-
-?>

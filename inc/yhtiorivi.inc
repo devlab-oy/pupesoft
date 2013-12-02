@@ -112,6 +112,18 @@
 		(mysql_field_name($result, $i) == "siirtovelka") or
 		(mysql_field_name($result, $i) == "factoringsaamiset") or
 		(mysql_field_name($result, $i) == "selvittelytili") or
+		(mysql_field_name($result, $i) == "ostolasku_kotimaa_kulu") or
+		(mysql_field_name($result, $i) == "ostolasku_kotimaa_rahti") or
+		(mysql_field_name($result, $i) == "ostolasku_kotimaa_vaihto_omaisuus") or
+		(mysql_field_name($result, $i) == "ostolasku_kotimaa_raaka_aine") or
+		(mysql_field_name($result, $i) == "ostolasku_eu_kulu") or
+		(mysql_field_name($result, $i) == "ostolasku_eu_rahti") or
+		(mysql_field_name($result, $i) == "ostolasku_eu_vaihto_omaisuus") or
+		(mysql_field_name($result, $i) == "ostolasku_eu_raaka_aine") or
+		(mysql_field_name($result, $i) == "ostolasku_ei_eu_kulu") or
+		(mysql_field_name($result, $i) == "ostolasku_ei_eu_rahti") or
+		(mysql_field_name($result, $i) == "ostolasku_ei_eu_vaihto_omaisuus") or
+		(mysql_field_name($result, $i) == "ostolasku_ei_eu_raaka_aine") or
 		(mysql_field_name($result, $i) == "raaka_ainevarasto") or
 		(mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
 		(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or

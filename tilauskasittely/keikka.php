@@ -770,6 +770,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<input type='hidden' name='lisarajaus' value='{$lisarajaus}' />";
 			echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
+			echo "<input type='hidden' name='lopetus' value='$PHP_SELF////toimipaikka=$toimipaikka//lisarajaus=$lisarajaus//indexvas=1' />";
 
 			if ($keikkarajaus == '' and $row['keikat'] != '' and strpos($row['keikat'], ',') === FALSE) {
 				echo "<input type='hidden' name='keikkarajaus' value='{$row['keikat']}' />";
@@ -1428,7 +1429,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 	}
 
 	$toimipaikkalisa = ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') ? "AND lasku.yhtio_toimipaikka = '".(int) $toimipaikka."'" : "";
-	
+
 	// haetaan vaihto-omaisuus- ja huolinta/rahti- laskut joita ei oo liitetty saapumisiin
 	$query = "	SELECT
 				lasku.tunnus,

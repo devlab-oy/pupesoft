@@ -129,14 +129,17 @@ if ($request['action'] == 'aja_konversio') {
 			echo "<br/>";
 			echo t('Laitteet').':';
 			$dumper = new LaiteCSVDumper($request['kukarow']);
+			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Huoltosyklit').':';
 			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
+			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Tarkastukset').':';
-			$dumper = new Tar($request['kukarow']);
+			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
+			$dumper->aja();
 			break;
 
 		default:
@@ -144,7 +147,9 @@ if ($request['action'] == 'aja_konversio') {
 			break;
 	}
 
-	$dumper->aja();
+	if ($request['konversio_tyyppi'] != 'kaikki') {
+		$dumper->aja();
+	}
 
 	if ($request['konversio_tyyppi'] == 'tuote') {
 		$dumper = new TuotteenavainsanaToimenpideCSVDumper($request['kukarow']);
@@ -165,6 +170,13 @@ else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 		'DELETE FROM asiakasalennus',
 		'DELETE FROM tuotteen_avainsanat',
 		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
+		'DELETE FROM huoltosykli',
+		'DELETE FROM huoltosyklit_laitteet',
+		'DELETE FROM tyomaarays',
+		'DELETE FROM lasku',
+		'DELETE FROM laskun_lisatiedot',
+		'DELETE FROM tilausrivi',
+		'DELETE FROM tilausrivin_lisatiedot',
 	);
 	foreach ($query_array as $query) {
 		pupe_query($query);

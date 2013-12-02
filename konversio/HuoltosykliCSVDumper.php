@@ -1,6 +1,8 @@
 <?php
 
-class HuoltosykliCSVDumper {
+require_once('CSVDumper.php');
+
+class HuoltosykliCSVDumper extends CSVDumper{
 
 	protected $unique_values = array();
 
@@ -72,12 +74,17 @@ class HuoltosykliCSVDumper {
 			if ($key == 'laite') {
 				$attrs = $this->hae_tuotteen_tyyppi_koko($rivi[$key]);
 
-				if (empty($attrs)) {
-					$this->errors[$index][] = t('Huoltosyklin laitteelle')." <b>{$rivi[$key]}</b> ".t('löytyi enemmän kuin 2 tai ei yhtään laitteen koko tai tyyppiä');
+				if ($attrs == 1) {
+					$this->errors[$index][] = t('Huoltosyklin laitteelle')." <b>{$rivi[$key]}</b> ".t('löytyi enemmän kuin 2 laitteen koko tai tyyppiä');
+					$valid = false;
+				}
+				else if ($attrs == 0) {
+					$this->errors[$index][] = t('Huoltosyklin laitteelle')." <b>{$rivi[$key]}</b> ".t('löytyi 0 laitteen koko tai tyyppiä');
 					$valid = false;
 				}
 				else {
-					$rivi = array_merge($rivi, $attrs);
+					$rivi['tyyppi'] = $attrs['tyyppi'];
+					$rivi['koko'] = $attrs['koko'];
 				}
 			}
 			else if ($key == 'toimenpide') {
@@ -100,6 +107,7 @@ class HuoltosykliCSVDumper {
 		foreach ($this->rivit as $rivi) {
 			$nimitys_temp = $rivi['nimitys'];
 			unset($rivi['nimitys']);
+			unset($rivi['laite']);
 
 			$query = "	INSERT INTO {$this->table}
 						(".implode(", ", array_keys($rivi)).")
@@ -107,7 +115,7 @@ class HuoltosykliCSVDumper {
 						('".implode("', '", array_values($rivi))."')";
 
 			//Purkka fix
-			$query = str_replace('"now()"', 'now()', $query);
+			$query = str_replace("'now()'", 'now()', $query);
 			pupe_query($query);
 
 			$rivi['olosuhde'] = 'X';
@@ -122,7 +130,7 @@ class HuoltosykliCSVDumper {
 						('".implode("', '", array_values($rivi))."')";
 
 			//Purkka fix
-			$query = str_replace('"now()"', 'now()', $query);
+			$query = str_replace("'now()'", 'now()', $query);
 			pupe_query($query);
 
 			$progress_bar->increase();
@@ -148,7 +156,11 @@ class HuoltosykliCSVDumper {
 		$attrs = array();
 
 		if (mysql_num_rows($result) > 2) {
-			return false;
+			return 1;
+		}
+
+		if (mysql_num_rows($result) == 0) {
+			return 0;
 		}
 
 		while ($attr = mysql_fetch_assoc($result)) {

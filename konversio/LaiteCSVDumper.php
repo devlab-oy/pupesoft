@@ -95,10 +95,8 @@ class LaiteCSVDumper extends CSVDumper {
 						if(!$valid) {
 							$this->luo_tuote($rivi['tuoteno'], $rivi['tyyppi'], $rivi['koko']);
 							$rivi[$key] = $rivi['tuoteno'];
-//							$this->errors[$index][] = t('Tuote')." {$rivi[$key]} ".t('puuttuu');
 						}
 						else {
-//							$this->errors[$index][] = t('Tuote lisättiin tuotenumerolle')." {$tuoteno} !!!!";
 							$rivi[$key] = $tuoteno;
 						}
 					}

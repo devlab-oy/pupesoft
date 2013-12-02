@@ -1,6 +1,8 @@
 <?php
 
-class TarkastuksetCSVDumper {
+require_once('CSVDumper.php');
+
+class TarkastuksetCSVDumper extends CSVDumper{
 
 	protected $unique_values = array();
 

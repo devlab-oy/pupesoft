@@ -172,7 +172,7 @@ abstract class CSVDumper {
 						('".implode("', '", array_values($rivi))."')";
 
 			//Purkka fix
-			$query = str_replace('"now()"', 'now()', $query);
+			$query = str_replace("'now()'", 'now()', $query);
 			pupe_query($query);
 			$progress_bar->increase();
 		}

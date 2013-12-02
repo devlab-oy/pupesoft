@@ -73,24 +73,24 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 		$valid = true;
 		foreach ($rivi as $key => $value) {
 			if (in_array($key, $this->required_fields) and $value == '') {
-//				$this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
 				$valid = false;
 			}
 
 			if ($key == 'tyyppi') {
-				if (isset($this->unique_values[$rivi['tuoteno']]['tyypit']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['tyypit'])) {
+				//Näiden iffien tarkoitus on filtteröidä duplikaatit, sekä ne joiden arvo on eri kuin ensimmäisen rivin.
+				if (( isset($this->unique_values[$rivi['tuoteno']]['tyypit']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['tyypit']) ) or ( isset($this->unique_values[$rivi['tuoteno']]['tyypit']) and $this->unique_values[$rivi['tuoteno']]['tyypit'][0] != $value)) {
 					$valid = false;
 				}
 				else {
-					$this->unique_values[$rivi['tuoteno']]['tyypit'][$index] = $value;
+					$this->unique_values[$rivi['tuoteno']]['tyypit'][0] = $value;
 				}
 			}
 			else if ($key == 'paino') {
-				if (isset($this->unique_values[$rivi['tuoteno']]['painot']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['painot'])) {
+				if ( (isset($this->unique_values[$rivi['tuoteno']]['painot']) and in_array($value, $this->unique_values[$rivi['tuoteno']]['painot']) ) or ( isset($this->unique_values[$rivi['tuoteno']]['painot']) and $this->unique_values[$rivi['tuoteno']]['painot'][0] != $value)) {
 					$valid = false;
 				}
 				else {
-					$this->unique_values[$rivi['tuoteno']]['painot'][$index] = $value;
+					$this->unique_values[$rivi['tuoteno']]['painot'][0] = $value;
 				}
 			}
 		}

@@ -28,7 +28,7 @@
 						and selitetark_2 = '$xalias_set'";
 			$al_res = mysql_query($query) or pupe_error($query);
 
-			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "" or trim($oletusarvo[$al_nimi]) != "") {
+			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "" or trim($oletusarvo[$al_nimi]) != "" or trim($ohjeteksti[$al_nimi]) != "") {
 
 				$pakollisuus = "";
 				$nakyvyys = "";
@@ -51,7 +51,8 @@
 							selitetark 		= '$xotsikko',
 							selitetark_2 	= '$xalias_set',
 							selitetark_3 	= '$pakollisuus',
-							selitetark_4	= '".$oletusarvo[$al_nimi]."'";
+							selitetark_4	= '{$oletusarvo[$al_nimi]}',
+							selitetark_5	= '{$ohjeteksti[$al_nimi]}'";
 				$al_res = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -185,6 +186,7 @@
 		echo "<th>Pakollisuus</th>";
 		echo "<th>Seliteteksti</th>";
 		echo "<th>Oletusarvo</th>";
+		echo "<th>Ohjeteksti</th>";
 		echo "<th>Esimerkkejä</th>";
 		echo "</tr>";
 
@@ -227,6 +229,7 @@
 			$box 	 = "";
 			$pakollisuusbox = "";
 			$oletusarvo = "";
+			$ohjeteksti = "";
 
 			$query = "	SELECT *
 						FROM avainsana
@@ -243,6 +246,7 @@
 				$box = $al_row['nakyvyys'] != '' ? "CHECKED" : "";
 				$pakollisuusbox = $al_row['selitetark_3'] == 'PAKOLLINEN' ? "CHECKED" : "";
 				$oletusarvo = $al_row['selitetark_4'];
+				$ohjeteksti = $al_row['selitetark_5'];
 			}
 
 			// $tyyppi --> 0 riviä ei näytetä ollenkaan
@@ -263,6 +267,7 @@
 				echo "<th align='left'><input type='text' size='30' name='mysqlalias[".mysql_field_name($result, $i)."]' value='$otsikko'></th>";
 
 				echo "<th align='left'><input type='text' size='30' name='oletusarvo[".mysql_field_name($result, $i)."]' value='$oletusarvo'></th>";
+				echo "<th align='left'><textarea cols='30' rows='4' name='ohjeteksti[".mysql_field_name($result, $i)."]'>{$ohjeteksti}</textarea></th>";
 			}
 
 			if ($jatko == 0) {

@@ -21,10 +21,19 @@ if(!function_exists("pankkitiedot")) {
 	function pankkitiedot($tilino, $asiakastunnus) {
 		global $yhtiorow;
 
-		$tmp_tilino=substr($tilino,0,1);
+		// Onko IBAN?
+		if (substr($tilino, 0, 2) == "FI") {
+			$rahalaitoskoodi1 = substr($tilino, 4, 1);
+			$rahalaitoskoodi2 = substr($tilino, 5, 1);
+			$rahalaitoskoodi2 = substr($tilino, 4, 3);
+		}
+		else {
+			$rahalaitoskoodi1 = substr($tilino, 0, 1);
+			$rahalaitoskoodi2 = substr($tilino, 1, 1);
+			$rahalaitoskoodi2 = substr($tilino, 0, 3);
+		}
 
 		//	oletuksia
-
 		//väliviivallinen ytunnus 11 merkkiä
 		$ytunnus 				= sprintf("%08.8s",str_replace('-', '', $yhtiorow["ytunnus"]));
 		$ytunnus 				= substr($ytunnus,0,7)."-".substr($ytunnus,-1);
@@ -40,7 +49,7 @@ if(!function_exists("pankkitiedot")) {
 		$pankki["tiedostonimi"] 	= "XXXXXXXX.DAT";
 		$pankki["tiedostonimilum2"] = "XXXXLUM2.DAT";
 
-		switch ($tmp_tilino) {
+		switch ($rahalaitoskoodi1) {
 			case (1) : //Nordea
 				$pankki["rahalaitos"]		= '1 ';
 				$pankki["pankkilaitos"] 	= "Nordea";
@@ -54,8 +63,7 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["swift"]			= "NDEAFIHH";
 				break;
 			case (3) :
-				$tmp_tilino = substr($tilino, 1, 1);
-				switch ($tmp_tilino) {
+				switch ($rahalaitoskoodi1) {
 					case (1) : //Handelsbanken
 						$pankki["rahalaitos"] 		= '  ';
 						$pankki["pankkilaitos"] 	= "Handelsbanken";
@@ -118,9 +126,7 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["swift"]			= "AABAFI22";
 				break;
 			case (7) :
-				$tmp_tilino = substr($tilino, 0, 3);
-
-				switch ($tmp_tilino) {
+				switch ($rahalaitoskoodi3) {
 					case (711) : //Calyon Pankki
 						$pankki["rahalaitos"]		= '  ';
 						$pankki["pankkilaitos"] 	= "Calyon";
@@ -164,4 +170,3 @@ if(!function_exists("pankkitiedot")) {
 		}
 	}
 }
-?>

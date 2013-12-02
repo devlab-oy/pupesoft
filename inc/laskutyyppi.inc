@@ -52,6 +52,9 @@
 				case "I":
 					$alatila = "Inventointi";
 					break;
+				case "G":
+					$alatila = "Varastosiirto";
+					break;
 				case "K":
 					$alatila = "Kassalipaan täsmäytys";
 					break;
@@ -163,6 +166,9 @@
 		case "E":
 			$laskutyyppi = "Ennakkotilaus";
 			switch($alatila) {
+				case "H":
+					$alatila = "hylätty";
+					break;
 				case "J":
 					$alatila = "";
 					break;
@@ -420,5 +426,3 @@
 			}
 			break;
 	}
-
-?>

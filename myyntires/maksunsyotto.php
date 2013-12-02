@@ -14,7 +14,7 @@ if ($tee != "CHECK" or $tiliote != 'Z') {
 	echo "<font class='head'>".t("Suorituksen käsinsyöttö")."</font><hr>";
 }
 
-//Tultiinko tiliotteelta ja olisiko tämä jo viety?
+// Tultiinko tiliotteelta ja olisiko tämä jo viety?
 if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
 	$query = "	SELECT tunnus
 				FROM suoritus
@@ -512,7 +512,7 @@ if ($ytunnus != '' and $tee == "") {
 		else {
 			if ($tilino == $row['tilino']) $sel='selected';
 		}
-		echo "<option value='$row[tunnus]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
+		echo "<option value='$row[tunnus]' $sel>$row[nimi] $row[tilino] $row[valkoodi]</option>\n";
 		$sel='';
 	}
 	echo "</select>";

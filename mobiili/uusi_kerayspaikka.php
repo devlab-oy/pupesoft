@@ -8,29 +8,61 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-$alusta_tunnus = (int) $alusta_tunnus;
-$liitostunnus = (int) $liitostunnus;
-$tilausrivi = (int) $tilausrivi;
+if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
 
-$data = array(
-	'alusta_tunnus' => $alusta_tunnus,
-	'liitostunnus' => $liitostunnus,
-	'tilausrivi' => $tilausrivi,
-	'ostotilaus' => $ostotilaus,
-	'saapuminen' => $saapuminen,
-	'tilausten_lukumaara' => $tilausten_lukumaara,
-	'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
-	'tuotenumero' => $tuotenumero,
-);
-$url = http_build_query($data);
+	if (empty($tuotepaikan_tunnus)) {
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllysiirrot.php'>";
+		exit();
+	}
+
+	$data = array(
+		'tuotepaikan_tunnus' => $tuotepaikan_tunnus,
+		'mista_koodi' => $mista_koodi,
+		'minne_koodi' => $minne_koodi,
+	);
+
+	$url = http_build_query($data);
+}
+else {
+	$alusta_tunnus = (int) $alusta_tunnus;
+	$liitostunnus = (int) $liitostunnus;
+	$tilausrivi = (int) $tilausrivi;
+
+	$data = array(
+		'alusta_tunnus' => $alusta_tunnus,
+		'liitostunnus' => $liitostunnus,
+		'tilausrivi' => $tilausrivi,
+		'ostotilaus' => $ostotilaus,
+		'saapuminen' => $saapuminen,
+		'tilausten_lukumaara' => $tilausten_lukumaara,
+		'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
+		'tuotenumero' => $tuotenumero,
+	);
+
+	$url = http_build_query($data);
+}
 
 // Virheet
 $errors = array();
+if (!isset($tuotepaikka)) $tuotepaikka = '';
+
+$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa();
 
 // Suuntalavan kanssa
-if (!empty($alusta_tunnus)) {
+if (!empty($alusta_tunnus) and $yhtiorow['suuntalavat'] != "") {
 	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
 	$row = mysql_fetch_assoc($res);
+}
+elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+
+	$query = "	SELECT tuotepaikat.*, tuote.yksikko
+				FROM tuotepaikat
+				JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
+				WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+				AND tuotepaikat.tunnus = '{$tuotepaikan_tunnus}'";
+	$res = pupe_query($query);
+	$row = mysql_fetch_assoc($res);
+
 }
 // Ilman suuntalavaa
 else {
@@ -44,9 +76,11 @@ else {
 	$row = mysql_fetch_assoc(pupe_query($query));
 }
 
-// Tarkistetaan tuotteen saldo
-list($saldo['saldo'], $saldo['hyllyssa'], $saldo['myytavissa']) = saldo_myytavissa($row['tuoteno'], '', '', '0', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
-$saldo['myytavissa'] = ($saldo['myytavissa'] > 0) ? $saldo['myytavissa'] : 0;
+if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+	// Tarkistetaan tuotteen saldo
+	list($saldo['saldo'], $saldo['hyllyssa'], $saldo['myytavissa']) = saldo_myytavissa($row['tuoteno'], '', '', '0', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
+	$saldo['myytavissa'] = ($saldo['myytavissa'] > 0) ? $saldo['myytavissa'] : 0;
+}
 
 if (isset($submit) and trim($submit) != '') {
 
@@ -96,7 +130,7 @@ if (isset($submit) and trim($submit) != '') {
 			}
 
 			// Tarkistetaan ett‰ tuotepaikka on olemassa
-			if (count($errors) == 0 and ! tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
+			if ($onko_varaston_hyllypaikat_kaytossa and count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
 				$errors[] = t("Varaston tuotepaikkaa ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso) ei ole perustettu").'.';
 			}
 
@@ -108,13 +142,28 @@ if (isset($submit) and trim($submit) != '') {
 			$result = pupe_query($query);
 			$tuote = mysql_fetch_assoc($result);
 
-			if (count($siirra_saldot) > 0) {
+			if (isset($siirra_saldot) and count($siirra_saldot) > 0) {
 				if (count($siirra_saldot) == 1 and $siirra_saldot[0] == 'default') {
 					$siirra_saldot = '';
 				}
 				else {
 					$siirra_saldot = $siirra_saldot[1];
 				}
+			}
+			else {
+				$siirra_saldot = '';
+			}
+
+			if (isset($poista_vanha_tuotepaikka) and count($poista_vanha_tuotepaikka) > 0) {
+				if (count($poista_vanha_tuotepaikka) == 1 and $poista_vanha_tuotepaikka[0] == 'default') {
+					$poista_vanha_tuotepaikka = '';
+				}
+				else {
+					$poista_vanha_tuotepaikka = $poista_vanha_tuotepaikka[1];
+				}
+			}
+			else {
+				$poista_vanha_tuotepaikka = '';
 			}
 
 			if ($tuote['sarjanumeroseuranta'] != '' and $siirra_saldot == 'on') {
@@ -150,7 +199,15 @@ if (isset($submit) and trim($submit) != '') {
 
 				// Jos syˆtetty‰ paikkaa ei ole t‰m‰n tuotteen, lis‰t‰‰n uusi tuotepaikka
 				if (mysql_num_rows($oma_paikka) == 0) {
-					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Saapumisessa', $oletus, $halytysraja, $tilausmaara);
+
+					if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+						$_viesti = 'Hyllysiirroissa';
+					}
+					else {
+						$_viesti = 'Saapumisessa';
+					}
+
+					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, '', $halytysraja, $tilausmaara);
 				}
 				else {
 					// Nollataan poistettava kentt‰ varmuuden vuoksi
@@ -168,10 +225,35 @@ if (isset($submit) and trim($submit) != '') {
 				// P‰ivitet‰‰n oletuspaikat jos tehd‰‰n t‰st‰ oletuspaikka
 				if ($oletus == 'X') {
 					// Asetetaan oletuspaikka uusiksi
-					paivita_oletuspaikka($row['tuoteno'], $hylly);
+					paivita_oletuspaikka($row['tuoteno'], $hylly, true);
+
+					if ($poista_vanha_tuotepaikka == 'on') {
+
+						// Lukitaan taulut saldojen siirtoa varten
+						$query = "LOCK TABLE
+									tuotepaikat WRITE";
+						$result = pupe_query($query);
+
+						$query = "	UPDATE tuotepaikat SET
+									muuttaja      = '{$kukarow['kuka']}',
+									muutospvm     = now(),
+									poistettava   = 'D'
+									WHERE tuoteno = '{$row['tuoteno']}'
+									AND yhtio     = '{$kukarow['yhtio']}'
+									AND hyllyalue = '{$row['hyllyalue']}'
+									AND hyllynro  = '{$row['hyllynro']}'
+									AND hyllyvali = '{$row['hyllyvali']}'
+									AND hyllytaso = '{$row['hyllytaso']}'";
+						$result = pupe_query($query);
+
+						// Unlock tables
+						$query = "UNLOCK TABLES";
+						$result = pupe_query($query);
+
+					}
 
 					// Siirret‰‰n saldot jos on siirrett‰v‰‰
-					if ($siirra_saldot == 'on' and $saldo['myytavissa'] > 0 and $tuote['sarjanumeroseuranta'] == '') {
+					if ($siirra_saldot == 'on' and isset($saldo) and $saldo['myytavissa'] > 0 and $tuote['sarjanumeroseuranta'] == '') {
 
 						// Lukitaan taulut saldojen siirtoa varten
 						$query = "LOCK TABLE
@@ -324,13 +406,20 @@ if (isset($submit) and trim($submit) != '') {
 					}
 				}
 
-				// Asetetaan tuotepaikka tilausriville
-				$affected_rows = paivita_tilausrivin_hylly($tilausrivi, $hylly);
+				if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+					// Asetetaan tuotepaikka tilausriville
+					$affected_rows = paivita_tilausrivin_hylly($tilausrivi, $hylly);
+				}
 
 				// Palataan edelliselle sivulle
-				if(isset($hyllytys)) {
+				if (isset($hyllytys)) {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
-				} else {
+				}
+				elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+					$minne_hyllypaikka = trim("{$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}");
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteen_hyllypaikan_muutos.php?minne_hyllypaikka={$minne_hyllypaikka}&{$url}'>"; exit();
+				}
+				else {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>"; exit;
 				}
 			}
@@ -341,20 +430,31 @@ if (isset($submit) and trim($submit) != '') {
 }
 
 $oletuspaikka_chk = "";
-$siirra_saldot_chk = "";
 
 if (!isset($oletuspaikka) or count($oletuspaikka) == 2) $oletuspaikka_chk = "checked";
-if (!isset($siirra_saldot) or $siirra_saldot == 'on') $siirra_saldot_chk = "checked";
 
-$onko_suoratoimitus_res = onko_suoratoimitus($tilausrivi);
+if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
 
-if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
-	if ($row_suoratoimitus["suoraan_laskutukseen"] == "") $oletuspaikka_chk = '';
+	$siirra_saldot_chk = "";
+	if (!isset($siirra_saldot) or $siirra_saldot == 'on') $siirra_saldot_chk = "checked";
+
+	$onko_suoratoimitus_res = onko_suoratoimitus($tilausrivi);
+
+	if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
+		if ($row_suoratoimitus["suoraan_laskutukseen"] == "") $oletuspaikka_chk = '';
+	}
+}
+elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+	$poista_vanha_tuotepaikka_chk = "";
+	if (!isset($poista_vanha_tuotepaikka) or is_array($poista_vanha_tuotepaikka) or $poista_vanha_tuotepaikka == 'on') $poista_vanha_tuotepaikka_chk = "checked";
 }
 
 $paluu_url = "vahvista_kerayspaikka.php?{$url}";
 if (isset($hyllytys)) {
 	$paluu_url = "hyllytys.php?{$url}";
+}
+elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+	$paluu_url = "tuotteen_hyllypaikan_muutos.php?{$url}";
 }
 
 // View
@@ -377,18 +477,22 @@ echo "<div class='main'>
 		<tr>
 			<th>",t("Tuote"),"</th>
 			<td colspan='3'>{$row['tuoteno']}</td>
-		</tr>
-		<tr>
-			<th>",t("Toim. Tuotekoodi"),"</th>
-			<td colspan='3'>{$row['toim_tuoteno']}</td>
-		</tr>
-		<tr>
+		</tr>";
+
+if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+	echo "	<tr>
+				<th>",t("Toim. Tuotekoodi"),"</th>
+				<td colspan='3'>{$row['toim_tuoteno']}</td>
+			</tr>";
+}
+
+echo "	<tr>
 			<th>",t("Ker‰yspaikka"),"</th>
 			<td colspan='3'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
 		</tr>
 		<tr>
 			<th>",t("Uusi tuotepaikka"),"</td>
-			<td><input type='text' name='tuotepaikka' /></td>
+			<td><input type='text' name='tuotepaikka' value='{$tuotepaikka}' /></td>
 		</tr>
 		<tr>
 			<th>",t("H‰lytysraja"),"</td>
@@ -397,24 +501,55 @@ echo "<div class='main'>
 		<tr>
 			<th>",t("Tilausm‰‰r‰"),"</td>
 			<td><input type='text' name='tilausmaara' value='' /></th>
-		</tr>
-		<tr>
-			<td colspan='2'>",t("Tee t‰st‰ oletuspaikka"),"
-			<input type='hidden' name='oletuspaikka[]' value='default' />
-			<input type='checkbox' id='oletuspaikka' name='oletuspaikka[]' {$oletuspaikka_chk} /></td>
-		</tr>
-		<tr>
-			<td colspan='2'>",t("Siirr‰ saldo")," ({$saldo['myytavissa']})
-			<input type='hidden' name='siirra_saldot[]' value='default' />
-			<input type='checkbox' id='siirra_saldot' name='siirra_saldot[]' {$siirra_saldot_chk}/>
-			</td>
-		</tr>
-	</table>
+		</tr>";
 
-	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
-	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
-</div>";
+/*
+Jos yhtiˆll‰ ei ole ns. oletuspaikka-k‰sitett‰ (varastoja on paljon ja ei ole "p‰‰varastoa", joten ei tiedet‰ miss‰ on oletuspaikka), 
+niin ei anneta siirt‰‰ saldoja tai vaihtaa oletuspaikkaa 
+*/
+$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+if (mysql_num_rows($toimipaikat_res) == 0) {
+
+	echo "	<tr>
+				<td colspan='2'>",t("Tee t‰st‰ oletuspaikka"),"
+				<input type='hidden' name='oletuspaikka[]' value='default' />
+				<input type='checkbox' id='oletuspaikka' name='oletuspaikka[]' {$oletuspaikka_chk} /></td>
+			</tr>";
+
+	if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+		echo "	<tr>
+					<td colspan='2'>",t("Siirr‰ saldo")," ({$saldo['myytavissa']})
+					<input type='hidden' name='siirra_saldot[]' value='default' />
+					<input type='checkbox' id='siirra_saldot' name='siirra_saldot[]' {$siirra_saldot_chk}/>
+					</td>
+				</tr>";
+	}
+	elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+		echo "	<tr>
+					<td colspan='2'>",t("Poista vanha tuotepaikka"),"
+					<input type='hidden' name='poista_vanha_tuotepaikka[]' value='default' />
+					<input type='checkbox' id='poista_vanha_tuotepaikka' name='poista_vanha_tuotepaikka[]' {$poista_vanha_tuotepaikka_chk}/>
+					</td>
+				</tr>";
+	}
+}
+
+echo "</table>";
+
+if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+	echo "<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />";
+	echo "<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />";
+	echo "<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />";
+}
+elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+	echo "<input type='hidden' name='tuotepaikan_tunnus' value='{$tuotepaikan_tunnus}' />";
+	echo "<input type='hidden' name='tullaan' value='{$tullaan}' />";
+	echo "<input type='hidden' name='mista_koodi' value='{$mista_koodi}' />";
+	echo "<input type='hidden' name='minne_koodi' value='{$minne_koodi}' />";
+}
+
+echo "</div>";
 
 echo "<div class='controls'>
 	<button name='submit' class='button' value='submit' onclick='submit();'>",t("Perusta"),"</button>
@@ -427,13 +562,26 @@ echo "
 $(document).ready(function() {
 	$('#oletuspaikka').on('change', function() {
 		if ($('#oletuspaikka').is(':checked')) {
-			// enabloidaan siirra saldot checkbox
-			$('#siirra_saldot').removeAttr('disabled');
+			if ($('#poista_vanha_tuotepaikka')) {
+				// enabloidaan poista vanha tuotepaikka checkbox
+				$('#poista_vanha_tuotepaikka').removeAttr('disabled');
+			}
+			else {
+				// enabloidaan siirra saldot checkbox
+				$('#siirra_saldot').removeAttr('disabled');
+			}
 		}
 		else {
-			// Tyhjennet‰‰n ja disabloidaan siirra saldot checkbox
-			$('#siirra_saldot').attr('disabled', 'disabled');
-			$('#siirra_saldot').removeAttr('checked');
+			if ($('#poista_vanha_tuotepaikka')) {
+				// Tyhjennet‰‰n ja disabloidaan poista vanha tuotepaikka checkbox
+				$('#poista_vanha_tuotepaikka').attr('disabled', 'disabled');
+				$('#poista_vanha_tuotepaikka').removeAttr('checked');
+			}
+			else {
+				// Tyhjennet‰‰n ja disabloidaan siirra saldot checkbox
+				$('#siirra_saldot').attr('disabled', 'disabled');
+				$('#siirra_saldot').removeAttr('checked');
+			}
 		}
 	});
 });

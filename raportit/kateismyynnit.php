@@ -323,6 +323,13 @@
 			-->
 	</script>";
 
+	// Jos tullaan takaisin muutosite.phpn lopeta:sta
+	if (is_string($kassavalinnat)) {
+		$kassakone = unserialize(base64_decode($kassavalinnat));
+	}
+
+	$lisakenttialinkkiin = "&lopetus=$PHP_SELF////myyjanro=$myyjanro//myyja=$myyja//tilityskpl=$tilityskpl//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//koti=$koti//printteri=$printteri//tee=$tee//kassavalinnat=".base64_encode(serialize($kassakone));
+
 	// Lockdown-funktio, joka tarkistaa onko kyseinen kassalipas jo täsmätty.
 	function lockdown($vv, $kk, $pp, $tasmayskassa) {
 		global $kukarow, $kassakone, $yhtiorow;
@@ -1125,7 +1132,7 @@
 
 			if (count($ltunnukset) > 0) {
 				tosite_print($vv, $kk, $pp, $ltunnukset);
-				echo "$ltunnukset[kassalipas] ".t("on jo täsmätty. Tosite löytyy myös")." <a href='".$palvelin2."muutosite.php?tee=E&tunnus=$ltunnukset[ltunnukset]'>".t("täältä")."</a><br>";
+				echo "$ltunnukset[kassalipas] ".t("on jo täsmätty. Tosite löytyy myös")." <a href='{$palvelin2}muutosite.php?tee=E&tunnus=$ltunnukset[ltunnukset]$lisakenttialinkkiin'>".t("täältä")."</a><br>";
 			}
 		}
 
@@ -1494,7 +1501,7 @@
 						echo "<td>$row[kassanimi]</td>";
 						echo "<td>".substr($row["nimi"],0,23)."</td>";
 						echo "<td>$row[ytunnus]</td>";
-						echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+						echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 						echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 						echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
@@ -1736,7 +1743,7 @@
 							echo "<td>$row[kassanimi]</td>";
 							echo "<td>".substr($row["nimi"],0,23)."</td>";
 							echo "<td>$row[ytunnus]</td>";
-							echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+							echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 							echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
@@ -1827,7 +1834,7 @@
 							echo "<td>$row[kassanimi]</td>";
 							echo "<td>".substr($row["nimi"],0,23)."</td>";
 							echo "<td>$row[ytunnus]</td>";
-							echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+							echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 							echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
@@ -1963,7 +1970,7 @@
 					echo "<td>$row[kassanimi]</td>";
 					echo "<td>".substr($row["nimi"],0,23)."</td>";
 					echo "<td>$row[ytunnus]</td>";
-					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+					echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 					echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 					echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
@@ -2074,7 +2081,7 @@
 						echo "<td>".t("Käteissuoritus")."</td>";
 						echo "<td>".substr($row["nimi"],0,23)."</td>";
 						echo "<td>$row[ytunnus]</td>";
-						echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+						echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 						echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 						echo "<td align='right'>".sprintf('%.2f', $row['summa'])."</td></tr>";
 
@@ -2424,16 +2431,30 @@
 
 		$like = "%{\"loppukassa\":{%\"" . $row["kassa"] . "\"%}%}%";
 
+		//katotaan eka löytyykö viimesen 4 viikkoon tapahtumia
 		$pk_query = "	SELECT tunnus, tapvm, sisviesti2
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tila 	= 'X'
 						AND alatila = 'K'
-						AND tapvm >= date_sub(current_date, interval 7 day)
+						AND tapvm >= date_sub(current_date, interval 28 day)
 						AND sisviesti2 LIKE '$like'
 						ORDER BY tapvm DESC
 						LIMIT 1";
 		$pk_result = pupe_query($pk_query);
+
+		//jos aikarajatulla haulla ei löytynyt mitään haetaan ilman aikarajausta
+		if (mysql_num_rows($pk_result) == 0) {
+			$pk_query = "	SELECT tunnus, tapvm, sisviesti2
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tila 	= 'X'
+							AND alatila = 'K'
+							AND sisviesti2 LIKE '$like'
+							ORDER BY tapvm DESC
+							LIMIT 1";
+			$pk_result = pupe_query($pk_query);
+		}
 
 		if (mysql_num_rows($pk_result) == 1) {
 			$pk_row = mysql_fetch_assoc($pk_result);

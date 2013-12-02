@@ -531,7 +531,7 @@
 		while ($row = mysql_fetch_assoc($result)) {
 			$sel = '';
 			if (isset($tilino) and $tilino == $row['tilino']) $sel = 'selected';
-			echo "<option value='$row[tilino]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
+			echo "<option value='$row[tilino]' $sel>$row[nimi] $row[tilino] $row[valkoodi]</option>\n";
 		}
 		echo "</select></td></tr>";
 
@@ -658,7 +658,7 @@
 			echo "<td valign='top' align='right'>$maksurow[summa]</td>";
 			echo "<td valign='top'>$maksurow[valkoodi]</td>";
 
-			echo "<td valign='top'>".tilinumero_print($maksurow["tilino"])."</td>";
+			echo "<td valign='top'>".$maksurow["tilino"]."</td>";
 
 			echo "<td valign='top'>$maksurow[viite]<br>$maksurow[viesti]</td>";
 			echo "<td valign='top'><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$maksurow[tltunnus]&lopetus=$PHP_SELF//////tila=$tila//tilino=$tilino//valuutta=$valuutta//haku[suoritus.nimi_maksaja]={$haku["suoritus.nimi_maksaja"]}//haku[suoritus.kirjpvm]={$haku["suoritus.kirjpvm"]}//haku[suoritus.summa]={$haku["suoritus.summa"]}//haku[suoritus.valkoodi]={$haku["suoritus.valkoodi"]}//haku[suoritus.tilino]={$haku["suoritus.tilino"]}//haku[suoritus.viite]={$haku["suoritus.viite"]}//haku[tiliointi.tilino]={$haku["tiliointi.tilino"]}'>$maksurow[ttilino]</a></td>";

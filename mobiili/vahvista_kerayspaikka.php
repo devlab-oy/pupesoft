@@ -11,6 +11,8 @@ elseif (@include_once("inc/parametrit.inc"));
 # N‰m‰ on pakollisia
 if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
+$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa();
+
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $tilausrivi = (int) $tilausrivi;
@@ -66,22 +68,28 @@ if (isset($submit) and trim($submit) != '') {
 			exit;
 			break;
 		case 'submit':
+
 			# Tarkistetaan m‰‰r‰
 			if (!is_numeric($maara) or $maara < 1) {
 				$errors[] = t("Virheellinen m‰‰r‰");
 			}
-			# Tarkistetaan koodi
-			$options = array('varmistuskoodi' => $koodi);
-			if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options)) {
-				$errors[] = t("Virheellinen varmistuskoodi");
+
+			if ($onko_varaston_hyllypaikat_kaytossa) {
+
+				# Tarkistetaan koodi
+				$options = array('varmistuskoodi' => $koodi);
+				if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options)) {
+					$errors[] = t("Virheellinen varmistuskoodi");
+				}
+
+				# Setataan viimeinen muuttuja jos lavalla vain yksi rivi j‰jell‰
+				if (!empty($alusta_tunnus)) {
+					$query = "SELECT * FROM tilausrivi WHERE suuntalava = '{$alusta_tunnus}' AND yhtio='{$kukarow['yhtio']}'";
+					$rivit_result = pupe_query($query);
+					$rivit = mysql_num_rows($rivit_result);
+				}
 			}
 
-			# Setataan viimeinen muuttuja jos lavalla vain yksi rivi j‰jell‰
-			if (!empty($alusta_tunnus)) {
-				$query = "SELECT * FROM tilausrivi WHERE suuntalava = '{$alusta_tunnus}' AND yhtio='{$kukarow['yhtio']}'";
-				$rivit_result = pupe_query($query);
-				$rivit = mysql_num_rows($rivit_result);
-			}
 			$viimeinen = (isset($rivit) and $rivit == 1) ? true : false;
 
 			# Jos ei virheit‰
@@ -91,6 +99,14 @@ if (isset($submit) and trim($submit) != '') {
 				# Jos rivi on jo kohdistettu eri saapumiselle
 				if (!empty($row['uusiotunnus'])) {
 					$saapuminen = $row['uusiotunnus'];
+				}
+				elseif ($yhtiorow['suuntalavat'] == "" and $saapuminen != 0) {
+					// Jos yhtiˆ ei k‰yt‰ suuntalavaa ja rivi ei ole saapumisella
+					$query = "	UPDATE tilausrivi SET
+								uusiotunnus = '{$saapuminen}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$row['tunnus']}'";
+					pupe_query($query);
 				}
 
 				// Tarkastetaan syˆtetyt m‰‰r‰t, eli tarviiko tilausrivia splittailla tai kopioida
@@ -121,8 +137,9 @@ if (isset($submit) and trim($submit) != '') {
 				}
 
 				$temppi_lava = false;
+
 				# Vied‰‰n varastoon temppi lavalla
-				if (($alusta_tunnus == 0 && $saapuminen != 0) || ($alusta_tunnus != 0 && $row['uusiotunnus'] == 0)) {
+				if ($yhtiorow['suuntalavat'] != "" and (($alusta_tunnus == 0 && $saapuminen != 0) || ($alusta_tunnus != 0 && $row['uusiotunnus'] == 0))) {
 					$temppi_lava = true;
 					# Tarkottaa ett‰ on tultu ostotilauksen tuloutuksesta ilman ett‰ kyseisell‰
 					# tilauksella on suuntalavaa. Ratkaisuna tehd‰‰n v‰liaikainen lava.
@@ -185,10 +202,15 @@ if (isset($submit) and trim($submit) != '') {
 					"hyllytaso" => $row['hyllytaso']);
 
 				# Saapumiset
-				$saapumiset = hae_saapumiset($alusta_tunnus);
+				if ($yhtiorow['suuntalavat'] != "") {
+					$saapumiset = hae_saapumiset($alusta_tunnus);
+				}
+				else {
+					$saapumiset = array($saapuminen);
+				}
 
 				# Viimeisell‰ rivill‰ vied‰‰n koko suuntalava, jolloin lava merkataan puretuksi
-				if($viimeinen) {
+				if ($viimeinen) {
 					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly);
 				}
 				else {
@@ -196,6 +218,7 @@ if (isset($submit) and trim($submit) != '') {
 						vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly, $rivi);
 					}
 				}
+
 				# Jos temppi lava niin merkataan suoraan puretuksi
 				if ($temppi_lava) {
 					$query = "	UPDATE suuntalavat SET
@@ -324,12 +347,16 @@ echo "<div class='main'>
 	<tr>
 		<th>",t("Ker‰yspaikka"),"</th>
 		<td colspan='2'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
-	</tr>
-	<tr>
-		<th>",t("Koodi"),"</th>
-		<td colspan='2'><input type='text' name='koodi' id='koodi' value='' size='7' />
-	</tr>
-	<tr>
+	</tr>";
+
+if ($onko_varaston_hyllypaikat_kaytossa) {
+	echo "<tr>
+			<th>",t("Koodi"),"</th>
+			<td colspan='2'><input type='text' name='koodi' id='koodi' value='' size='7' />
+		</tr>";
+}
+
+echo "<tr>
 		<td><input type='hidden' name='saapuminen' value='{$saapuminen}' /></td>
 	</tr>
 </table>
@@ -339,12 +366,22 @@ echo "<div class='controls'>
 	<button name='submit' class='button' value='submit' id='vahvista' onclick='return vahvista();'>",t("Vahvista"),"</button>";
 
 # Jos hyllytyksest‰ niin t‰m‰ piiloon
-if (!isset($hyllytys)) echo "<button class='button right' name='submit' value='new'>",t("Uusi ker‰yspaikka"),"</button>";
+if (!isset($hyllytys)) {
+	echo "<button class='button right' name='submit' value='new'>",t("Uusi ker‰yspaikka"),"</button>";
+
+	$saapuminen = !isset($saapuminen) ? $row['uusiotunnus'] : $saapuminen;
+
+	echo "<button type='submit' class='button right' onclick=\"vahvistaformi.action='suuntalavalle.php'\">",t("SUUNTALAVALLE"),"</button>";
+	echo "<input type='hidden' name='tullaan' value='pre_vahvista_kerayspaikka' />";
+	echo "<input type='hidden' name='hyllytetty' value='{$maara}' />";
+}
+
 
 echo "
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
+	<input type='hidden' name='saapuminen' value='{$saapuminen}' />
 	<input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 	<input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
 	<input type='hidden' name='viivakoodi' value='{$viivakoodi}' />

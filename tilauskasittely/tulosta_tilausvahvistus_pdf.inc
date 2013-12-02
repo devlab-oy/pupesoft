@@ -36,8 +36,18 @@
 	elseif ($naytatvale == 8) {
 		$lahetetyyppi .= "tulosta_lahete_ean_eiale.inc";
 	}
+	elseif ($naytatvale == 10) {
+		$lahetetyyppi .= "tulosta_lahete_viivakoodi_ykshinta_normaali.inc";
+	}
+	elseif ($naytatvale == 11) {
+		$lahetetyyppi .= "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc";
+	}
 	else {
 		$lahetetyyppi .= "tulosta_lahete.inc";
+	}
+
+	if ($verollisethinnat) {
+		$lahetetyyppi = substr($lahetetyyppi, 0, -4) . "_verollinen.inc";
 	}
 
 	#Testausta varten.....
@@ -47,6 +57,8 @@
 	#$lahetetyyppi = "tulosta_lahete_brutto.inc";
 	#$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # Näytetään asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # Näytetään asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 	#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
@@ -116,13 +128,19 @@
 
 	$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
+	$jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, IF(tilausrivi.var='J', 1, 0)) jtsort,";
+	
+	if (in_array($naytatvale, array(10,11))) {
+		$jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, 0) jtsort,";
+	}
+
 	// generoidaan lähetteelle ja keräyslistalle rivinumerot
 	// Rivit groupataan tilausvahvistukselle
 	if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
 		$query = "  SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tilaajanrivinro, tilausrivi.otunnus, tilausrivi.netto, {$ale_query_select_lisa}
 					tilausrivi.toimaika, tilausrivi.hinta, tilausrivi.keratty, tilausrivi.var, tilausrivi.yksikko,
 					$sorttauskentta,
-					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					{$jtsort_lisa}
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta,
@@ -139,6 +157,7 @@
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.var != 'O'
 					and $wherelisa
 					$tyyppilisa
 					and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
@@ -151,7 +170,7 @@
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					$sorttauskentta,
-					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					{$jtsort_lisa}
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta
@@ -160,6 +179,7 @@
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.var != 'O'
 					and $wherelisa
 					$tyyppilisa
 					and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'

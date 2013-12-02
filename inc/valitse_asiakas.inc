@@ -45,7 +45,8 @@ $request = array(
 	"tilausnumero"				 => $tilausnumero,
 	"action"					 => $action,
 	"valitut_asiakastunnukset"	 => $valitut_asiakastunnukset,
-	"saate_teksti"				 => $saate_teksti
+	"saate_teksti"				 => $saate_teksti,
+	"viesti"					 => $viesti,
 );
 
 $asiakasid = $kukarow['tunnus'] * -1;
@@ -65,6 +66,7 @@ if ($request['action'] == 'liita_asiakkaat') {
 		"tilausnumero"				 => $tilausnumero,
 		"valitut_asiakastunnukset"	 => $valitut_asiakastunnukset,
 		'alv'						 => alv_oletus(),
+		"viesti"					 => $viesti,
 	);
 	luo_tarjouspohja($parametrit);
 }
@@ -178,7 +180,7 @@ function echo_asiakas_rajaus($request) {
 	echo "<input type='text' name='hakuehto' value='{$request['hakuehto']}'>";
 	echo "<input type='submit' value='".t("Hae")."'>";
 	echo "<br>";
-	echo t("N‰ytet‰‰n 100 ensimm‰ist‰ hakutulosta");
+	echo t("Haetut asiakkaat");
 	echo "</div>";
 	echo "</form>";
 }
@@ -373,8 +375,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 					WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 					 {$where}
 					GROUP BY asiakas.tunnus
-					ORDER BY asiakas.nimi
-					LIMIT 100";
+					ORDER BY asiakas.nimi";
 	}
 	else {
 		$query = "	(SELECT asiakas.*,
@@ -443,8 +444,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 					AND asiakas.nimi LIKE '%{$request['hakuehto']}%'
 					 {$where}
 					GROUP BY asiakas.tunnus)
-					ORDER BY nimi
-					LIMIT 100";
+					ORDER BY nimi";
 	}
 	$result = pupe_query($query);
 

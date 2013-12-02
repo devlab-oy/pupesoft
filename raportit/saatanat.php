@@ -181,7 +181,7 @@
 			$generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
 		}
 
-		if (!empty($sliitostunnus)) {
+		if (($eiliittymaa == 'ON' AND !empty($sliitostunnus) AND $yhtiorow["myyntitilaus_saatavat"] == "") OR ($eiliittymaa != 'ON' AND !empty($sliitostunnus))) {
          	$generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
         }
 		elseif (!empty($sytunnus)) {
@@ -326,24 +326,13 @@
 
 		if (mysql_num_rows($result) > 0) {
 
-			if ($eiliittymaa != 'ON' and @include('Spreadsheet/Excel/Writer.php')) {
+			if ($eiliittymaa != 'ON') {
 
-				//keksitään failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+				include('inc/pupeExcel.inc');
 
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-				$workbook->setVersion(8);
-				$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-				$format_bold =& $workbook->addFormat();
-				$format_bold->setBold();
-
-				$excelrivi = 0;
-			}
-
-			if (isset($workbook)) {
+				$worksheet 	 = new pupeExcel();
+				$format_bold = array("bold" => TRUE);
+				$excelrivi 	 = 0;
 				$excelsarake = 0;
 
 				if ($grouppaus != "kustannuspaikka") {
@@ -568,7 +557,7 @@
 					echo "<td valign='top' align='right'>$luottoraja</td>";
 					echo "</tr>";
 
-					if (isset($workbook)) {
+					if ($eiliittymaa != 'ON') {
 						$excelsarake = 0;
 
 						if ($grouppaus != "kustannuspaikka") {
@@ -718,7 +707,7 @@
 
 				//katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehdä tilausta
 				$query = " 	SELECT count(lasku.tunnus) kpl
-							FROM lasku
+							FROM lasku USE INDEX (yhtio_tila_mapvm)
 							JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
 							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')
 							WHERE lasku.yhtio = '$saatavat_yhtio'
@@ -747,14 +736,13 @@
 				}
 			}
 
-			if (isset($workbook)) {
+			if ($eiliittymaa != 'ON') {
 
-				// We need to explicitly close the workbook
-				$workbook->close();
+				$excelnimi = $worksheet->close();
 
 				echo "<br><br><form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xls'>";
+				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xlsx'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
@@ -803,4 +791,3 @@
 	if ($eiliittymaa != 'ON') {
 		require ("inc/footer.inc");
 	}
-?>

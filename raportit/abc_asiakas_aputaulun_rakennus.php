@@ -14,6 +14,8 @@ if ($php_cli) {
 		die;
 	}
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	// otetaan tietokanta connect
 	require ("../inc/connect.inc");
 	require ("../inc/functions.inc");

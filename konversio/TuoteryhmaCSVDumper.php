@@ -46,9 +46,6 @@ class TuoteryhmaCSVDumper extends CSVDumper {
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
 				if ($konvertoitu_header == 'selite') {
-					if (substr($rivi[$csv_header], 0, 2) == '25') {
-						$st = "";
-					}
 					$rivi_temp[$konvertoitu_header] = substr($rivi[$csv_header], 0, 2);
 					$selitetark = $rivi[$csv_header];
 					$rivi_temp['selitetark'] = preg_replace("/[^a-zA-ZäÄöÖåÅ]/", "", $selitetark);

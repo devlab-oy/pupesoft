@@ -15,6 +15,7 @@ require_once('TuotteenavainsanaToimenpideCSVDumper.php');
 require_once('TuoteryhmaCSVDumper.php');
 require_once('HuoltosykliCSVDumper.php');
 require_once('TarkastuksetKantaCSVDumper.php');
+require_once('TarkastuksetCSVDumper.php');
 
 $request = array(
 	'action'			 => $action,
@@ -32,6 +33,7 @@ $request['konversio_tyypit'] = array(
 	'yhteyshenkilo'			 => t('Yhteyshenkilö'),
 	'asiakasalennus'		 => t('Asiakasalennus'),
 	'huoltosykli'			 => t('Huoltosykli'),
+	'tarkastukset_kanta'	 => t('Tarkastukset kanta'),
 	'tarkastukset'			 => t('Tarkastukset'),
 	'kaikki'				 => t('Kaikki'),
 );
@@ -76,9 +78,13 @@ if ($request['action'] == 'aja_konversio') {
 		case 'huoltosykli':
 			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
 			break;
-		
-		case 'tarkastukset':
+
+		case 'tarkastukset_kanta':
 			$dumper = new TarkastuksetKantaCSVDumper($request['kukarow']);
+			break;
+
+		case 'tarkastukset':
+			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
 			break;
 
 		case 'kaikki':
@@ -161,22 +167,22 @@ if ($request['action'] == 'aja_konversio') {
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 	$query_array = array(
-		'DELETE FROM asiakas',
-		'DELETE FROM yhteyshenkilo',
-		'DELETE FROM tuote',
-		'DELETE FROM kohde',
-		'DELETE FROM paikka',
-		'DELETE FROM laite',
-		'DELETE FROM asiakasalennus',
-		'DELETE FROM tuotteen_avainsanat',
+		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
-		'DELETE FROM huoltosykli',
-		'DELETE FROM huoltosyklit_laitteet',
-		'DELETE FROM tyomaarays',
-		'DELETE FROM lasku',
-		'DELETE FROM laskun_lisatiedot',
-		'DELETE FROM tilausrivi',
-		'DELETE FROM tilausrivin_lisatiedot',
+		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tilausrivi WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tilausrivin_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
 	);
 	foreach ($query_array as $query) {
 		pupe_query($query);

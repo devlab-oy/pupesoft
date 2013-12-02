@@ -1908,7 +1908,7 @@
 							echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
 							echo "<td>{$kateisotto['summa']}</td>";
 							echo "</tr>";
-							$vahennetty .= "{$kateisotto['tunnus']}, ";
+							$vahennetty[$kateisotto['tunnus']] = "{$kateisotto['tunnus']}";
 						}
 						$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
 						$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
@@ -2009,7 +2009,7 @@
 
 				$kassalippaan_kateisotot_yhteensa = 0;
 				foreach($kateisotot[$edkassa] as $kateisotto) {
-					if (strpos($vahennetty, $kateisotto["tunnus"]) === FALSE) {
+					if (!isset($vahennetty[$kateisotto["tunnus"]])) {
 						$kassalippaan_kateisotot_yhteensa += $kateisotto['summa'];
 						echo "<tr class='aktiivi'>";
 						echo "<td>{$kateisotto['kassalipas_nimi']}</td>";

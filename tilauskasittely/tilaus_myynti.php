@@ -5564,7 +5564,9 @@ if ($tee == '') {
 						$pklisa = " and (tilausrivi.perheid = '$row[perheid]' or tilausrivi.perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)
+					$query = "	SELECT 
+								sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)), 
+								count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'

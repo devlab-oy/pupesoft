@@ -1323,6 +1323,8 @@
 							$pkres = pupe_query($query);
 							$pkrow = mysql_fetch_assoc($pkres);
 
+							$lisays = 0;
+
 							if ($prow["perheid2"] == 0 or $prow["perheid2"] == -1) {
 								$query  = "	SELECT tuoteperhe.tunnus
 											FROM tuoteperhe
@@ -1331,10 +1333,9 @@
 											and tuoteperhe.tyyppi 		= 'L'";
 								$lisaresult = pupe_query($query);
 
-								$lisays = mysql_num_rows($lisaresult)+1;
-							}
-							else {
-								$lisays = 0;
+								if (mysql_num_rows($lisaresult) > 0) {
+									$lisays = mysql_num_rows($lisaresult)+1;
+								}
 							}
 
 							$pkrow['kpl2'] += $lisays;

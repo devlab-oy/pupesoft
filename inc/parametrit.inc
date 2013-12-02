@@ -640,6 +640,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 				if (!stristr($phpnimi, 'indexvas')) {
 					echo livezhat_js_sources();
+					echo add_livezhat();
 				}
 			}
 

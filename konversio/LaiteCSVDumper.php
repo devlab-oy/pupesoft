@@ -11,7 +11,7 @@ class LaiteCSVDumper extends CSVDumper {
 
 		$konversio_array = array(
 			'tuoteno'	 => 'MALLI',
-			'nimitys'    => 'NIMI',
+			'nimitys'	 => 'NIMI',
 			'tyyppi'	 => 'TYYPPI',
 			'koko'		 => 'PAINO',
 			'sarjanro'	 => 'MITAT',
@@ -19,6 +19,7 @@ class LaiteCSVDumper extends CSVDumper {
 			'oma_numero' => 'DATA20',
 			'paikka'	 => 'LISASIJAINTI',
 			'sijainti'	 => 'LISASIJAINTI',
+			'koodi'		 => 'KOODI',
 		);
 		$required_fields = array(
 			'tuoteno',
@@ -92,7 +93,7 @@ class LaiteCSVDumper extends CSVDumper {
 					$valid = $this->loytyyko_tuote($rivi[$key]);
 					if (!$valid) {
 						list($valid, $tuoteno) = $this->loytyyko_tuote_nimella($rivi['nimitys']);
-						if(!$valid) {
+						if (!$valid) {
 							$this->luo_tuote($rivi['tuoteno'], $rivi['tyyppi'], $rivi['koko']);
 							$rivi[$key] = $rivi['tuoteno'];
 						}
@@ -112,7 +113,7 @@ class LaiteCSVDumper extends CSVDumper {
 		unset($rivi['tyyppi']);
 		unset($rivi['koko']);
 		unset($rivi['nimitys']);
-		
+
 		return $valid;
 	}
 
@@ -128,34 +129,34 @@ class LaiteCSVDumper extends CSVDumper {
 
 		return false;
 	}
-	
+
 	private function loytyyko_tuote_nimella($nimitys) {
 		$query = "	SELECT tuoteno "
-				. "FROM tuote "
-				. "WHERE yhtio = '{$this->kukarow['yhtio']}' "
-				. "AND nimitys = '{$nimitys}'";
+				."FROM tuote "
+				."WHERE yhtio = '{$this->kukarow['yhtio']}' "
+				."AND nimitys = '{$nimitys}'";
 		$result = pupe_query($query);
-		
+
 		if (mysql_num_rows($result) == 1) {
 			$tuote = mysql_fetch_assoc($result);
-			return array(true,$tuote['tuoteno']);
+			return array(true, $tuote['tuoteno']);
 		}
 
 		return array(false, '');
 	}
-	
+
 	private function luo_tuote($tuoteno, $tyyppi, $koko) {
 		$query = "	INSERT INTO tuote "
-				. "SET yhtio = '{$this->kukarow['yhtio']}', "
-				. "tuoteno = '{$tuoteno}', "
-				. "nimitys = '{$tuoteno}', "
-				. "try = '80', "
-				. "tuotetyyppi = '', "
-				. "ei_saldoa = '',"
-				. "laatija = 'import',"
-				. "luontiaika = NOW()";
+				."SET yhtio = '{$this->kukarow['yhtio']}', "
+				."tuoteno = '{$tuoteno}', "
+				."nimitys = '{$tuoteno}', "
+				."try = '80', "
+				."tuotetyyppi = '', "
+				."ei_saldoa = '',"
+				."laatija = 'import',"
+				."luontiaika = NOW()";
 		pupe_query($query);
-		
+
 		$query = '	INSERT INTO tuotteen_avainsanat
 						(
 							yhtio,
@@ -176,9 +177,9 @@ class LaiteCSVDumper extends CSVDumper {
 							"import",
 							NOW()
 						)';
-			pupe_query($query);
+		pupe_query($query);
 
-			$query = '	INSERT INTO tuotteen_avainsanat
+		$query = '	INSERT INTO tuotteen_avainsanat
 						(
 							yhtio,
 							tuoteno,
@@ -198,7 +199,7 @@ class LaiteCSVDumper extends CSVDumper {
 							"import",
 							NOW()
 						)';
-			pupe_query($query);
+		pupe_query($query);
 	}
 
 	private function hae_paikka_tunnus($paikan_nimi) {

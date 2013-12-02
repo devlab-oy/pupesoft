@@ -100,7 +100,7 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
 	}
 
 	protected function dump_data() {
-		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan'));
+		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
 		$progress_bar->initialize(count($this->rivit));
 		foreach ($this->rivit as $rivi) {
 			$query = '	INSERT INTO '.$this->table.'

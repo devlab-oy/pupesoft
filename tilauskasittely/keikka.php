@@ -1302,6 +1302,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$formalku .= "<input type='hidden' name='tunnus' value='$tsekkirow[tunnus]'>";
 	$formalku .= "<input type='hidden' name='laskunro' value='$tsekkirow[laskunro]'>";
 	$formalku .= "<input type='hidden' name='nappikeikalle' value='menossa'>";
+	$formalku .= "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 
 	$formloppu = "</form></td>";
 

@@ -405,6 +405,12 @@
 		}
 		elseif ($tilirow['tilit100'] != '' or $tilirow['tilitMUU'] != '') {
 
+			$tehdaspalautukset_ei = "";
+
+			if ($ryhma != 5) {
+				$tehdaspalautukset_ei = "AND lasku.tilaustyyppi != '9'";
+			}
+
 			echo "<table>";
 			echo "<tr>";
 			echo "<br><font class='head'>".t("Arvonlisäveroerittely kaudelta")." $alvv-$alvk " . t("taso") . " $ryhma</font><hr>";
@@ -415,15 +421,15 @@
 						tiliointi.tilino,
 						tili.nimi,
 						group_concat(lasku.tunnus) ltunnus,
-						sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
-						sum(round(tiliointi.summa, 2)) $kerroin nettosumma,
-						sum(round(tiliointi.summa * tiliointi.vero / 100, 2)) $kerroin verot,
-						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
-						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi), 2)) $kerroin nettosumma_valuutassa,
-						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
+						round(sum(tiliointi.summa * (1 + tiliointi.vero / 100)), 2) $kerroin bruttosumma,
+						round(sum(tiliointi.summa), 2) $kerroin nettosumma,
+						round(sum(tiliointi.summa * tiliointi.vero / 100), 2) $kerroin verot,
+						round(sum(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100)), 2) $kerroin bruttosumma_valuutassa,
+						round(sum(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi)), 2) $kerroin nettosumma_valuutassa,
+						round(sum(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100), 2) $kerroin verot_valuutassa,
 						count(*) kpl
 						FROM tiliointi
-						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus AND lasku.tilaustyyppi != '9')
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus $tehdaspalautukset_ei)
 						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu = ''

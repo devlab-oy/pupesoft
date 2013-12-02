@@ -184,7 +184,6 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "yhteensopivuus_rekisteri" :
 				$pakolliset  = array("REKNO", "AJONEUVOLAJI", "AUTOID", "MAA");
 				$kielletyt   = array();
-				$eiyhtiota 	 = "EILAATIJAA";
 				$saakopoistaa = TRUE;
 				break;
 			case "rekisteritiedot_lisatiedot" :

@@ -512,7 +512,7 @@ if ($ytunnus != '' and $tee == "") {
 		else {
 			if ($tilino == $row['tilino']) $sel='selected';
 		}
-		echo "<option value='$row[tunnus]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
+		echo "<option value='$row[tunnus]' $sel>$row[nimi] $row[tilino] $row[valkoodi]</option>\n";
 		$sel='';
 	}
 	echo "</select>";

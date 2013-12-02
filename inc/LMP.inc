@@ -16,7 +16,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("asiakas")."</th><th>" . t("tilino") .  "</th></tr>";
-			echo "<tr><td>".substr($tietue, 147, 35)."</td><td>" . tilinumero_print($pankkitilino) . "</td></tr>";
+			echo "<tr><td>".substr($tietue, 147, 35)."</td><td>$pankkitilino</td></tr>";
 
 			$query = "	SELECT hyvak, nimi, oletus_rahatili, oletus_kulutili, yhtio
 						FROM yriti
@@ -120,7 +120,7 @@
 			$tilino = substr($tietue, 144, 14);
 
 			echo "<td>$maksaa</td>";
-			echo "<td>".tilinumero_print($tilino)."</td>";
+			echo "<td>$tilino</td>";
 			echo "<td align='right'>".sprintf("%01.2f",$maara)."</td>";
 
 			// Tama on todellinen tapahtuma

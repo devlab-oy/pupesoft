@@ -623,13 +623,34 @@
 
 			//	Päivitetään tapvm ja viesti laskulle
 			$viesti = t("Matkalasku")." ".date("d").".".date("m").".".date("Y");
-			$query = " UPDATE lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL $erpaivia DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
-			$updres = pupe_query($query);
 
-			//	Päivitetään tiliöintien tapvm as well
-			$query = " UPDATE tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
-			$updres = pupe_query($query);
+			// Otetaan yhtiön tiedoista ostoreskontran sallittu tilikauden ajankohta
+			$tilalk = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
+			$tillop = (int) str_replace("-", "", $yhtiorow["tilikausi_loppu"]);
+			$latapv = (int) str_replace("-", "", $laskurow["tapvm"]);
 
+			// Jos lasku on suljetulla kaudella, niin ei kosketa tapvm:iin
+			if ($latapv >= $tilalk and $latapv <= $tillop) {
+				$query = "	UPDATE lasku
+							SET tapvm 	= now(),
+							erpcm 		= DATE_ADD(now(), INTERVAL $erpaivia DAY),
+							viesti 		= '$viesti'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus  = '$tunnus'";
+				$updres = pupe_query($query);
+
+				//	Päivitetään tiliöintien tapvm as well
+				$query = " UPDATE tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
+				$updres = pupe_query($query);
+			}
+			else {
+				$query = "	UPDATE lasku
+							SET erpcm	= DATE_ADD(now(), INTERVAL $erpaivia DAY),
+							viesti 		= '$viesti'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus  = '$tunnus'";
+				$updres = pupe_query($query);
+			}
 		}
 
 		// Kuka hyväksyi??
@@ -1497,10 +1518,19 @@
 
 		//tablen sarakkeiden määrä riippuu $kukarow['taso']
 		$sarakkeet_base = 12;
+
 		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
 			$sarakkeet_base = 14;
 		}
-		pupe_DataTables(array(array('mur', 11, $sarakkeet_base)));
+
+		$sarakkeet_vis = 11;
+
+		if ($liitetaanko_editilaus_laskulle_hakemisto != '') {
+			$sarakkeet_vis++;
+			$sarakkeet_base++;
+		}
+
+		pupe_DataTables(array(array('mur', $sarakkeet_vis, $sarakkeet_base)));
 
 		echo "<table class='display dataTable' id='mur'>";
 		echo "<thead>";
@@ -1547,7 +1577,7 @@
 
 			 // Eli vain tasolla 1/2/3 ja ensimmäiselle hyväksyjälle.
 			if (($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $onko_eka_hyvaksyja) {
-				echo "<td valign='top'><a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
+				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm'])."<a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
 			}
 			else {
 				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm']).tv1dateconv($trow["tapvm"])."</td>";

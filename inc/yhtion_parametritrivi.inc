@@ -284,20 +284,15 @@
 	}
 
 	if (mysql_field_name($result, $i) == "koontilaskut_yhdistetaan") {
-		$sel1 = "";
-		$sel2 = "";
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		if ($trow[$i] == '') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == 'T') {
-			$sel2 = "selected";
-		}
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('T' => '', 'U' => '', 'V' => '');
 
-		$ulos .= "<option value = '' $sel1>".t("Asiakkaan laskutusosoitteella")."</option>";
-		$ulos .= "<option value = 'T' $sel2>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
+		$ulos .= "<option value = ''>".t("Asiakkaan laskutusosoitteella")."</option>";
+		$ulos .= "<option value = 'T' {$sel['T']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
+		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot erikseen")."</option>";
+		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot erikseen")."</option>";
 
 		$ulos .= "</select></td>";
 
@@ -333,6 +328,23 @@
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Tilausvahvistus l‰hetet‰‰n jokaisesta osatilauksesta erikseen");
 		$ulos .= "<option value = '1' $sel[1]>".t("Tilausvahvistus l‰hetet‰‰n alkuper‰isest‰ tilauksesta");
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "tilausvahvistus_sisaisista") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tilausvahvistusta ei l‰hetet‰ asiakkaalle sis‰isist‰ laskuista eik‰ suoraan laskutusjonoon laitetuista tilauksista");
+		$ulos .= "<option value = 'U' $sel[U]>".t("Tilausvahvistus l‰hetet‰‰n asiakkaalle suoraan laskutusjonoon laitetuista tilauksista");
+		$ulos .= "<option value = 'S' $sel[S]>".t("Tilausvahvistus l‰hetet‰‰n asiakkaalle sis‰isist‰ laskuista sek‰ suoraan laskutusjonoon laitetuista tilauksista");
 
 		$ulos .= "</select></td>";
 
@@ -1741,8 +1753,10 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
+		$sel0 = "";
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == 0) {
 			$sel0 = "selected";
@@ -2040,6 +2054,19 @@
 
 		$ulos .= "<option value = ''>".t("Myyntitilauksella n‰ytet‰‰n saatavat per asiakas")."</option>";
 		$ulos .= "<option value = 'Y' $sel[Y]>".t("Myyntitilauksella n‰ytet‰‰n saatavat per ytunnus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "myyntitilaus_tarjoukseksi") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksella ei n‰ytet‰ /Tee tilauksesta tarjous/-nappia")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella n‰ytet‰‰n /Tee tilauksesta tarjous/-nappi")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2913,6 +2940,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "pakollinen_varasto") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen")."</option>";
+		$ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
+
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "suuntalavat") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3063,6 +3103,18 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
 					<option value = ''>".t("Ei tulosteta VAK/ADR-erittely‰ l‰hetteen kanssa")."</option>
 					<option value = 'K' $sel>".t("Tulostetaan VAK/ADR-erittely l‰hetteen tulostuksen kanssa")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "nouto_suoraan_laskutukseen") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ''>".t("Noutotilauksia ei laiteta suoraan laskutusjonoon")."</option>
+					<option value = 'K' {$sel}>".t("Noutotilaukset aina suoraan laskutusjonoon")."</option>
 				</select></td>";
 
 		$jatko = 0;
@@ -3623,6 +3675,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'myyntihinta_paivitys_saapuminen') {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Myyntihintaa ei voi p‰ivitt‰‰ saapumisella")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntihinnan voi p‰ivitt‰‰ saapumisella")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3653,9 +3718,12 @@
 			}
 
 			$ulos .= "</select></td>";
-		}
 
-		$jatko = 0;
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
 	}
 
 	if (mysql_field_name($result, $i) == 'ostotilauksen_toimittajien_saldo_tarkistus') {
@@ -3691,6 +3759,30 @@
 
 		$ulos .= "<option value = ''>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ostoriveille")."</option>";
 		$ulos .= "<option value = 'S' {$sel}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'tarkenteiden_prioriteetti') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'T' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Kirjanpidon tarkenteet haetaan j‰rjestyksell‰: Tuote, Asiakas, Toimipaikka, Yhtiˆ")."</option>";
+		$ulos .= "<option value = 'T' {$sel}>".t("Kirjanpidon tarkenteet haetaan j‰rjestyksell‰: Toimipaikka, Tuote, Asiakas, Yhtiˆ")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'toimipaikkakasittely') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'L' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Suppeampi toimipaikkak‰sittely. K‰ytt‰j‰n toimipaikka tallennetaan tilauksille.")."</option>";
+		$ulos .= "<option value = 'L' {$sel}>".t("Laajempi toimipaikkak‰sittely. K‰ytt‰j‰n toimipaikka talennetaan tilauksille ja toimipaikka rajaa tilaus-/saapumislistauksia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -1399,10 +1399,12 @@
 	<!-- Template, joka tulostaa yhteen kuuluvat linkin ja tekstin. -->
 	<xsl:template name="OutputLinkAndText">
 		<xsl:param name="pos"/>
-		<xsl:call-template name="FormatLink">
-			<xsl:with-param name="link" select="/Finvoice/InvoiceUrlText[position()=$pos]"/>
-			<xsl:with-param name="text" select="/Finvoice/InvoiceUrlNameText[position()=$pos]"/>
-		</xsl:call-template>
+		<xsl:if test="substring(/Finvoice/InvoiceUrlText[position()=$pos],1,7) != 'file://'">
+			<xsl:call-template name="FormatLink">
+				<xsl:with-param name="link" select="/Finvoice/InvoiceUrlText[position()=$pos]"/>
+				<xsl:with-param name="text" select="/Finvoice/InvoiceUrlNameText[position()=$pos]"/>
+			</xsl:call-template>
+		</xsl:if>
 	</xsl:template>
 	<!-- Template, joka tulostaa yhden tai kahden päiväyksen aikajakson. -->
 	<xsl:template name="OutputDatePeriod">

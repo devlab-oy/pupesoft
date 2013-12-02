@@ -8,10 +8,14 @@ class HuoltosykliCSVDumper {
 		parent::__construct($kukarow);
 
 		$konversio_array = array(
-			
+			'laite'		 => 'LAITE',
+			'toimenpide' => 'TUOTENRO',
+			'nimitys'	 => 'NIMIKE',
+			'huoltovali' => 'VALI',
 		);
 		$required_fields = array(
-			
+			'laite',
+			'toimenpide',
 		);
 
 		$this->setFilepath("/tmp/konversio/TUOTETARK.csv");
@@ -28,10 +32,10 @@ class HuoltosykliCSVDumper {
 		foreach ($this->rivit as $index => &$rivi) {
 			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
-			
+
 			//index + 2, koska eka rivi on header ja laskenta alkaa riviltä 0
 			$valid = $this->validoi_rivi($rivi, $index + 2);
-			
+
 			if (!$valid) {
 				unset($this->rivit[$index]);
 			}
@@ -45,7 +49,12 @@ class HuoltosykliCSVDumper {
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
-				$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+				if ($konvertoitu_header == 'huoltovali') {
+					$rivi_temp[$konvertoitu_header] = (int)$rivi[$csv_header] * 30;
+				}
+				else {
+					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+				}
 			}
 		}
 
@@ -54,15 +63,113 @@ class HuoltosykliCSVDumper {
 
 	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
+		foreach ($rivi as $key => $value) {
+			if (in_array($key, $this->required_fields) and $value == '') {
+				$this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
+				$valid = false;
+			}
+
+			if ($key == 'laite') {
+				$attrs = $this->hae_tuotteen_tyyppi_koko($rivi[$key]);
+
+				if (empty($attrs)) {
+					$this->errors[$index][] = t('Huoltosyklin laitteelle')." <b>{$rivi[$key]}</b> ".t('löytyi enemmän kuin 2 tai ei yhtään laitteen koko tai tyyppiä');
+					$valid = false;
+				}
+				else {
+					$rivi = array_merge($rivi, $attrs);
+				}
+			}
+			else if ($key == 'toimenpide') {
+				$valid_temp = $this->loytyyko_toimenpide_tuote($rivi[$key]);
+				if (!$valid_temp) {
+					$this->errors[$index][] = t('Toimenpide tuotetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
+					if ($valid) {
+						$valid = false;
+					}
+				}
+			}
+		}
 
 		return $valid;
 	}
 
+	protected function dump_data() {
+		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan'));
+		$progress_bar->initialize(count($this->rivit));
+		foreach ($this->rivit as $rivi) {
+			$nimitys_temp = $rivi['nimitys'];
+			unset($rivi['nimitys']);
+
+			$query = "	INSERT INTO {$this->table}
+						(".implode(", ", array_keys($rivi)).")
+						VALUES
+						('".implode("', '", array_values($rivi))."')";
+
+			//Purkka fix
+			$query = str_replace('"now()"', 'now()', $query);
+			pupe_query($query);
+
+			$rivi['olosuhde'] = 'X';
+
+			if (stristr($nimitys_temp, 'tarkastus')) {
+				$rivi['huoltovali'] = $rivi['huoltovali'] / 2;
+			}
+
+			$query = "	INSERT INTO {$this->table}
+						(".implode(", ", array_keys($rivi)).")
+						VALUES
+						('".implode("', '", array_values($rivi))."')";
+
+			//Purkka fix
+			$query = str_replace('"now()"', 'now()', $query);
+			pupe_query($query);
+
+			$progress_bar->increase();
+		}
+	}
+
 	protected function lisaa_pakolliset_kentat($rivi) {
 		$rivi = parent::lisaa_pakolliset_kentat($rivi);
-		$rivi['kieli'] = 'fi';
+		$rivi['pakollisuus'] = '1';
+		$rivi['olosuhde'] = 'A'; //Olosuhde sisällä
 
 		return $rivi;
+	}
+
+	private function hae_tuotteen_tyyppi_koko($tuoteno) {
+		$query = "	SELECT tuotteen_avainsanat.laji,
+					tuotteen_avainsanat.selite
+					FROM tuotteen_avainsanat
+					WHERE tuotteen_avainsanat.yhtio = '{$this->kukarow['yhtio']}'
+					AND tuotteen_avainsanat.laji IN ('sammutin_koko','sammutin_tyyppi')
+					AND tuotteen_avainsanat.tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+		$attrs = array();
+
+		if (mysql_num_rows($result) > 2) {
+			return false;
+		}
+
+		while ($attr = mysql_fetch_assoc($result)) {
+			$attrs[str_replace('sammutin_', '', $attr['laji'])] = $attr['selite'];
+		}
+
+		return $attrs;
+	}
+
+	private function loytyyko_toimenpide_tuote($tuoteno) {
+		$query = "	SELECT *
+					FROM tuote
+					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
+					AND tuote.tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			return false;
+		}
+
+		return true;
 	}
 
 }

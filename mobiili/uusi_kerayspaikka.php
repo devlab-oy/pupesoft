@@ -46,8 +46,10 @@ else {
 $errors = array();
 if (!isset($tuotepaikka)) $tuotepaikka = '';
 
+$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa();
+
 // Suuntalavan kanssa
-if (!empty($alusta_tunnus)) {
+if (!empty($alusta_tunnus) and $yhtiorow['suuntalavat'] != "") {
 	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
 	$row = mysql_fetch_assoc($res);
 }
@@ -128,7 +130,7 @@ if (isset($submit) and trim($submit) != '') {
 			}
 
 			// Tarkistetaan ett‰ tuotepaikka on olemassa
-			if (count($errors) == 0 and ! tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
+			if ($onko_varaston_hyllypaikat_kaytossa and count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
 				$errors[] = t("Varaston tuotepaikkaa ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso) ei ole perustettu").'.';
 			}
 
@@ -205,7 +207,7 @@ if (isset($submit) and trim($submit) != '') {
 						$_viesti = 'Saapumisessa';
 					}
 
-					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, $oletus, $halytysraja, $tilausmaara);
+					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, '', $halytysraja, $tilausmaara);
 				}
 				else {
 					// Nollataan poistettava kentt‰ varmuuden vuoksi
@@ -223,7 +225,7 @@ if (isset($submit) and trim($submit) != '') {
 				// P‰ivitet‰‰n oletuspaikat jos tehd‰‰n t‰st‰ oletuspaikka
 				if ($oletus == 'X') {
 					// Asetetaan oletuspaikka uusiksi
-					paivita_oletuspaikka($row['tuoteno'], $hylly);
+					paivita_oletuspaikka($row['tuoteno'], $hylly, true);
 
 					if ($poista_vanha_tuotepaikka == 'on') {
 
@@ -499,28 +501,38 @@ echo "	<tr>
 		<tr>
 			<th>",t("Tilausm‰‰r‰"),"</td>
 			<td><input type='text' name='tilausmaara' value='' /></th>
-		</tr>
-		<tr>
-			<td colspan='2'>",t("Tee t‰st‰ oletuspaikka"),"
-			<input type='hidden' name='oletuspaikka[]' value='default' />
-			<input type='checkbox' id='oletuspaikka' name='oletuspaikka[]' {$oletuspaikka_chk} /></td>
 		</tr>";
 
-if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+/*
+Jos yhtiˆll‰ ei ole ns. oletuspaikka-k‰sitett‰ (varastoja on paljon ja ei ole "p‰‰varastoa", joten ei tiedet‰ miss‰ on oletuspaikka), 
+niin ei anneta siirt‰‰ saldoja tai vaihtaa oletuspaikkaa 
+*/
+$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+if (mysql_num_rows($toimipaikat_res) == 0) {
+
 	echo "	<tr>
-				<td colspan='2'>",t("Siirr‰ saldo")," ({$saldo['myytavissa']})
-				<input type='hidden' name='siirra_saldot[]' value='default' />
-				<input type='checkbox' id='siirra_saldot' name='siirra_saldot[]' {$siirra_saldot_chk}/>
-				</td>
+				<td colspan='2'>",t("Tee t‰st‰ oletuspaikka"),"
+				<input type='hidden' name='oletuspaikka[]' value='default' />
+				<input type='checkbox' id='oletuspaikka' name='oletuspaikka[]' {$oletuspaikka_chk} /></td>
 			</tr>";
-}
-elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
-	echo "	<tr>
-				<td colspan='2'>",t("Poista vanha tuotepaikka"),"
-				<input type='hidden' name='poista_vanha_tuotepaikka[]' value='default' />
-				<input type='checkbox' id='poista_vanha_tuotepaikka' name='poista_vanha_tuotepaikka[]' {$poista_vanha_tuotepaikka_chk}/>
-				</td>
-			</tr>";
+
+	if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
+		echo "	<tr>
+					<td colspan='2'>",t("Siirr‰ saldo")," ({$saldo['myytavissa']})
+					<input type='hidden' name='siirra_saldot[]' value='default' />
+					<input type='checkbox' id='siirra_saldot' name='siirra_saldot[]' {$siirra_saldot_chk}/>
+					</td>
+				</tr>";
+	}
+	elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+		echo "	<tr>
+					<td colspan='2'>",t("Poista vanha tuotepaikka"),"
+					<input type='hidden' name='poista_vanha_tuotepaikka[]' value='default' />
+					<input type='checkbox' id='poista_vanha_tuotepaikka' name='poista_vanha_tuotepaikka[]' {$poista_vanha_tuotepaikka_chk}/>
+					</td>
+				</tr>";
+	}
 }
 
 echo "</table>";

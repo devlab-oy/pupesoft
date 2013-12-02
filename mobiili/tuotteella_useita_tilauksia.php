@@ -69,7 +69,7 @@ if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
 }
 
-$orderby = "tuoteno";
+$orderby = "tilausrivi_tyyppi DESC, ostotilaus, sorttaus_kpl";
 $ascdesc = "desc";
 
 if (isset($sort_by)) {
@@ -100,8 +100,9 @@ $query = "	SELECT
 			tilausrivi.tilkpl,
 			tilausrivi.uusiotunnus,
 			concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-			tuotteen_toimittajat.tuotekerroin,
-			tuotteen_toimittajat.liitostunnus
+			IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+			tuotteen_toimittajat.liitostunnus,
+			IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
 			FROM lasku
 			JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
 				AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
@@ -109,9 +110,12 @@ $query = "	SELECT
 			JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
 				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+			LEFT JOIN tilausrivin_lisatiedot
+			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
 			WHERE lasku.tila = 'O'
 			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
+			AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
 			{$query_lisa}
 			ORDER BY {$orderby} {$ascdesc}
 		";
@@ -141,8 +145,9 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
 				tilausrivi.tilkpl,
 				tilausrivi.uusiotunnus,
 				concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-				tuotteen_toimittajat.tuotekerroin,
-				tuotteen_toimittajat.liitostunnus
+				IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+				tuotteen_toimittajat.liitostunnus,
+				IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
 				FROM lasku
 				JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
 					AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
@@ -150,9 +155,12 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
 				JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
 					AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 					AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+				LEFT JOIN tilausrivin_lisatiedot
+				ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
 				WHERE lasku.tila = 'O'
 				AND lasku.alatila = 'A'
 				AND lasku.yhtio='{$kukarow['yhtio']}'
+				AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
 				{$query_lisa}
 				ORDER BY {$orderby} {$ascdesc}
 			";
@@ -264,6 +272,11 @@ echo "</tr>";
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {
 
+	if ($row['tilausrivi_tyyppi'] == 'o') {
+	    //suoratoimitus asiakkaalle
+	    $row['tilausrivi_tyyppi'] = 'JTS';
+	}
+
 	# Jos rivi on jo kohdistettu eri saapumiselle
 	if ($row['uusiotunnus'] != 0) $saapuminen = $row['uusiotunnus'];
 
@@ -290,7 +303,7 @@ while($row = mysql_fetch_assoc($result)) {
 	}
 	echo "
 		<td><a href='hyllytys.php?{$url}'>".($row['varattu']+$row['kpl']).
-			"(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].")
+			"(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].") {$row['tilausrivi_tyyppi']}
 		</a></td>
 		<td>{$row['hylly']}</td>";
 	echo "<tr>";

@@ -27,15 +27,19 @@ $query = "  SELECT
             tilausrivi.suuntalava,
             tilausrivi.uusiotunnus,
             lasku.liitostunnus,
-			IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi
+            toimi.selaus,
+			IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi,
+            IFNULL(tilausrivin_lisatiedot.tilausrivitunnus, 0) as tilausrivitunnus
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 			LEFT JOIN tilausrivin_lisatiedot
 			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'
-            AND lasku.tunnus='{$ostotilaus}'";
+            AND lasku.tunnus='{$ostotilaus}'
+            AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'";
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 
@@ -49,7 +53,7 @@ $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
 
 // Jos saapumista ei ole setattu, tehdään uusi saapuminen haetulle toimittajalle
 if (empty($saapuminen)) {
-    $saapuminen = uusi_saapuminen($toimittaja);
+    $saapuminen = uusi_saapuminen($toimittaja, $kukarow['toimipaikka']);
     $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
     $updated = pupe_query($update_kuka);
 }
@@ -67,7 +71,7 @@ else {
         // Haetaan toimittajan tiedot uudestaan ja tehdään uudelle toimittajalle saapuminen
         $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
         $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
-        $saapuminen = uusi_saapuminen($toimittaja);
+        $saapuminen = uusi_saapuminen($toimittaja, $kukarow['toimipaikka']);
     }
 
     // Päivitetään kuka.kesken
@@ -83,7 +87,7 @@ if (isset($submit)) {
     switch($submit) {
         case 'ok':
             # Vahvista keräyspaikka
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."{$url}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
             break;
         case 'suuntalavalle':
             if (!is_numeric($hyllytetty) or $hyllytetty < 0) {
@@ -149,35 +153,67 @@ echo "<div class='main'>
     <tr>
         <th>",t("Tuote"),"</th>
         <td>{$row['tuoteno']}</td>
-    </tr>
-    <tr>
-        <th>",t("Toim. Tuotekoodi"),"</th>
-        <td>{$row['toim_tuoteno']}</td>
-    </tr>
-    <tr>
+    </tr>";
+
+echo "<tr>";
+
+if (trim($row['selaus']) != "") {
+    echo "<th>{$row['selaus']}</th>";
+}
+else {
+    echo "<th>",t("Toim. Tuotekoodi"),"</th>";
+}
+
+echo "<td>{$row['toim_tuoteno']}</td>";
+echo "</tr>";
+
+echo "<tr>
         <th>",t("Keräyspaikka"),"</th>
         <td>{$row['kerayspaikka']}</td>
         <td>({$row['varattu']} {$row['yksikko']})</td>
-    </tr>
-    <tr>
-        <th>",t("Ostotilaus"),"</th>
-        <td>{$ostotilaus}</td>
-        <td><input type='hidden' name='ostotilaus' value='$ostotilaus'></td>
-    </tr>
-    <td><input type='hidden' name='saapuminen' value='$saapuminen'></td>
+    </tr>";
+
+if ($row['tilausrivitunnus'] != 0) {
+
+    $query = "  SELECT tilausrivi.otunnus, lasku.nimi
+                FROM tilausrivi
+                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.tunnus = '{$row['tilausrivitunnus']}'";
+    $tilausrivitunnus_res = pupe_query($query);
+    $tilausrivitunnus_row = mysql_fetch_assoc($tilausrivitunnus_res);
+
+    echo "<tr>
+            <td colspan='3' align='center'><font color='chucknorris'>",t("Myyntitilaus")," {$tilausrivitunnus_row['otunnus']} - {$tilausrivitunnus_row['nimi']}</font>
+            <input type='hidden' name='ostotilaus' value='{$ostotilaus}'></td>
+        </tr>";
+}
+else {
+    echo "<tr>
+            <th>",t("Ostotilaus"),"</th>
+            <td>{$ostotilaus}</td>
+            <td><input type='hidden' name='ostotilaus' value='$ostotilaus'></td>
+        </tr>";
+}
+
+echo "<td><input type='hidden' name='saapuminen' value='$saapuminen'></td>
 </table>
 </div>";
 
 $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
 
 # Napit
-echo "
-<div class='controls'>
-<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}'\">",t("OK"),"</button>
-<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>
-<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>
-</div>
-</form>";
+echo "<div class='controls'>";
+echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}'\">",t("OK"),"</button>";
+echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>";
+
+if ($yhtiorow['suuntalavat'] != "") {
+    echo "<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>";
+
+}
+
+echo "</div>";
+echo "</form>";
 
 echo "<div class='error'>";
     foreach($errors as $virhe) {

@@ -334,6 +334,14 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "valmistusaika_sekunneissa") {
+			$valmistusaika_sekunneissa = trim($t[$i]);
+
+			if ($valmistusaika_sekunneissa != "" and (!is_numeric($valmistusaika_sekunneissa) or $valmistusaika_sekunneissa < 0)) {
+				$virhe[$i] = t("Valmistusaika pit‰‰ olla suurempi tai yht‰suuri kuin 0");
+			}
+		}
+
 		if ($fieldname == 'status') {
 			$tem_status = $t[$i];
 			$tem_status_vanha = $trow[$i];
@@ -433,7 +441,12 @@ if(!function_exists("tuotetarkista")) {
 					$_counter = 0;
 
 					foreach ($kaikki_oletuspaikat as $_tuotepaikka) {
-						echo "<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font><br/>";
+						if ($trow["luedata_from"] == "LUEDATA") { // jos tullaan lue datasta voidaan ja pit‰‰ k‰ytt‰‰ lue datan omaa echo funkkaria!
+							lue_data_echo("<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>");
+						}
+						else {
+							echo "<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>";
+						}
 						list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", trim($_tuotepaikka));
 
 						if ($hyllyalue == "" or !isset($hyllyalue)) {
@@ -487,5 +500,13 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 		}
+		//tarkistetaan ettei yritet‰ laittaa ostoehdotus sarakkeeseen v‰‰ri‰ kirjaimia! sallitut "E" = ei ja "" = kyll‰
+		if ($fieldname == "ostoehdotus"){
+			if ($t[$i] != "E" AND $t[$i] != "") {
+				$virhe[$i] = t("Ostoehdotus arvo tulee olla joko E tai tyhj‰! (E = ei n‰ytet‰ ja tyhj‰ = n‰ytet‰‰n)");
+			}
+		}
 	}
+
+
 }

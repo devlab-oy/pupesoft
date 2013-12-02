@@ -6,6 +6,7 @@
 
 	if ($tee != '') {
 		$query  = "	LOCK TABLE tuotepaikat WRITE,
+					tiliointi WRITE,
 					tapahtuma WRITE,
 					sanakirja WRITE,
 					tilausrivin_lisatiedot WRITE,
@@ -13,15 +14,17 @@
 					varastopaikat READ,
 					varaston_hyllypaikat READ,
 					tilausrivi WRITE,
+					tilausrivi as t WRITE,
 					tilausrivi as tilausrivi_osto READ,
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,
-					lasku READ,
+					lasku WRITE,
 					asiakas READ,
 					avainsana as a1 READ,
 					avainsana as a2 READ,
 					avainsana as a3 READ,
-					avainsana as a4 READ";
+					avainsana as a4 READ,
+					yhtion_toimipaikat READ";
 		$result = pupe_query($query);
 	}
 	else {

@@ -30,6 +30,9 @@
 	if (!isset($laskunroloppu)) 		$laskunroloppu = "";
 	if (!isset($kerayseran_numero)) 	$kerayseran_numero = "";
 	if (!isset($kerayseran_tilaukset)) 	$kerayseran_tilaukset = "";
+	if (!isset($toimipaikka))			$toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
+
+	$onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 	if ($toim == "OSOITELAPPU") {
 		//osoitelapuille on vähän eri päivämäärävaatimukset kuin muilla
@@ -178,6 +181,9 @@
 	if ($toim == "REKLAMAATIO") {
 		$fuse = t("Reklamaatio/Purkulista");
 	}
+	if ($toim == "TAKUU") {
+		$fuse = t("Takuu");
+	}
 
 	if (isset($muutparametrit) and $muutparametrit != '') {
 		$muut = explode('/',$muutparametrit);
@@ -194,7 +200,7 @@
 		echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
 	}
 
-	if ($laskunro > 0 and $laskunroloppu > 0 and $laskunro < $laskunroloppu) {
+	if ($laskunro <> 0 and $laskunroloppu <> 0 and $laskunro < $laskunroloppu) {
 		$tee = "TULOSTA";
 
 		$tulostukseen = array();
@@ -395,6 +401,27 @@
 			}
 
 			echo "</tr>";
+
+			if ($onkolaajattoimipaikat and $toim == "VASTAANOTTORAPORTTI") {
+
+				$sel = $toimipaikka == 0 ? "selected" : "";
+
+				echo "<tr>";
+				echo "<th>",t("Toimipaikka"),"</th>";
+				echo "<td colspan='3'>";
+				echo "<select name='toimipaikka'>";
+				echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+				echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+
+				while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+					$sel = $toimipaikat_row['tunnus'] == $toimipaikka ? "selected" : "";
+					echo "<option value='{$toimipaikat_row['tunnus']}' {$sel}>{$toimipaikat_row['nimi']}</option>";
+				}
+
+				echo "</select>";
+				echo "</td><td class='back'></td>";
+				echo "</tr>";
+			}
 		}
 
 		echo "<tr><th>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
@@ -435,7 +462,7 @@
 					 	 	and lasku.toim_postitp	= '$asiakasrow[toim_postitp]' ";
 		}
 
-		if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'U') {
+		if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == 'U') {
 			$where1 .= " lasku.tila in ('C','L') ";
 
 			$where2 .= " and lasku.alatila in('C','D','X')";
@@ -448,8 +475,14 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
-		if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == '') {
-			$where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'R' ";
+		if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == '') {
+
+			if ($toim == "TAKUU") {
+				$where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'U' ";
+			}
+			else {
+				$where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'R' ";
+			}
 
 			$where2 .= " and lasku.alatila in ('','A','B','C','J','D') ";
 
@@ -513,6 +546,10 @@
 		if ($toim == "VASTAANOTTORAPORTTI") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa Vastaanottoraportti
 			$where1 .= " lasku.tila = 'K' ";
+
+			if ($onkolaajattoimipaikat and $toim == "VASTAANOTTORAPORTTI" and $toimipaikka != 'kaikki') {
+				$where2 .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
+			}
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
@@ -817,7 +854,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'O')
 						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
 						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))";
 
@@ -826,7 +863,7 @@
 		}
 
 
-		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {
+		if (strlen($laskunro) <> 0 and strpos($laskunro, ",") !== FALSE) {
 			$where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
 
 			$where3 = "";
@@ -834,7 +871,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (lasno_index) ";
 		}
-		elseif ($laskunro > 0) {
+		elseif ($laskunro <> 0) {
 			$where2 .= " and lasku.laskunro = '$laskunro' ";
 
 			$where3 = "";
@@ -909,7 +946,7 @@
 		}
 
 		if ($toim == "VASTAANOTTORAPORTTI") {
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')";
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'O')";
 			$where5 = " AND tilausrivi.kpl != 0 ";
 		}
 
@@ -981,6 +1018,7 @@
 						<input type='hidden' name='vvl' value='$vvl'>
 						<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>
 						<input type='hidden' name='mista' value='tulostakopio'>
+						<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />
 						<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
 			}
 			echo "<table><tr>";
@@ -1079,6 +1117,7 @@
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 									and tilausrivi.otunnus = '$row[tunnus]'
+									and (tilausrivi.var != 'O' or tilausrivi.tyyppi='O')
 									and tilausrivi.tyyppi not in ('D','V')";
 						$sumres = pupe_query($query);
 						$sumrow = mysql_fetch_assoc($sumres);
@@ -1356,7 +1395,7 @@
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 		}
-		elseif ($toim == "REKLAMAATIO") {
+		elseif ($toim == "REKLAMAATIO" or $toim == "TAKUU") {
 			$tulostimet[0] = 'Keräyslista';
 			if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
 				$komento["Keräyslista"] .= " -# $kappaleet ";
@@ -1733,6 +1772,7 @@
 								and tilausrivi.tyyppi  != 'D'
 								and tilausrivi.yhtio 	= tuote.yhtio
 								and tilausrivi.tuoteno  = tuote.tuoteno
+								and tilausrivi.var != 'O'
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = pupe_query($query);
 
@@ -1987,7 +2027,7 @@
 				$tee = '';
 			}
 
-			if ($toim == "KERAYSLISTA" or $toim == "SIIRTOLISTA" or $toim == "REKLAMAATIO") {
+			if ($toim == "KERAYSLISTA" or $toim == "SIIRTOLISTA" or $toim == "REKLAMAATIO" or $toim == "TAKUU") {
 
 				require_once ("tulosta_lahete_kerayslista.inc");
 
@@ -2070,6 +2110,7 @@
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
 								WHERE kerayserat.otunnus IN ({$kerayseran_tilaukset})
+								and tilausrivi.var != 'O'
 								AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 								ORDER BY sorttauskentta";
 				}
@@ -2080,12 +2121,15 @@
 								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 								if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 								tuote.sarjanumeroseuranta,
-								tuote.eankoodi
+								tuote.eankoodi,
+								abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
 								FROM tilausrivi
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 								WHERE tilausrivi.otunnus in ($tilausnumeroita)
 								and tilausrivi.yhtio   = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi  != 'D'
+								and tilausrivi.var != 'O'
 								$lisa1
 								$where_lisa
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
@@ -2114,6 +2158,9 @@
 				}
 				elseif ($toim == "REKLAMAATIO") {
 					$tyyppi = "REKLAMAATIO";
+				}
+				elseif ($toim == "TAKUU") {
+					$tyyppi = "TAKUU";
 				}
 				else {
 					$tyyppi = "";
@@ -2265,6 +2312,7 @@
 		}
 	}
 
-	if (@include("inc/footer.inc"));
-	elseif (@include("footer.inc"));
-	else exit;
+	if ($tee != 'NAYTATILAUS') {
+		if (@include("inc/footer.inc"));
+		elseif (@include("footer.inc"));
+	}

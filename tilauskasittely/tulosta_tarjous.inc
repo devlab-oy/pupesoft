@@ -1402,7 +1402,12 @@ if (!function_exists('loppu_tarjous')) {
 						}
 					}
 
-					if ($laskurow["rahtivapaa"] == "") $pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
+					if ($laskurow["rahtivapaa"] == "") {
+						$pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
+					}
+					else {
+						$pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti, $page_tarjous[$sivu], $norm);
+					}
 
 					$pdf_tarjous->draw_text(30,  $kuha-36, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous[$sivu], $norm);
 

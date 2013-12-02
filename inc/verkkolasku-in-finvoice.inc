@@ -9,6 +9,7 @@ if (strpos($file, "maventa") !== false) $laskun_ebid = $ebid = "MAVENTAXML";
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;
 $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 $laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
+$laskun_tyyppi_teksti	= $xml->InvoiceDetails->InvoiceTypeText;
 $laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
 $laskun_tapvm			= $xml->InvoiceDetails->InvoiceDate;
 $laskun_lapvm			= $xml->InvoiceDetails->InvoiceDate;
@@ -42,6 +43,8 @@ $ostaja_asiakkaantiedot["nimi"] 			= trim(utf8_decode($xml->BuyerPartyDetails->B
 $ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerStreetName));
 $ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier));
 $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName));
+
+if (trim($laskuttajan_vat) == "" and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") $laskuttajan_vat = $xml->SellerPartyDetails->SellerPartyIdentifier;
 
 $laskuttajan_toimittajanumero = "";
 
@@ -176,6 +179,8 @@ if (count($tuotetiedot) > 0) {
 // Verotiedot
 $vattiedot	= $xml->InvoiceDetails->VatSpecificationDetails;
 $i 			= 0;
+
+$alv_talteen = (float) str_replace(",", ".", $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent);
 
 if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {

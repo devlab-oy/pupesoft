@@ -31,6 +31,9 @@ if ($php_cli) {
 
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];
+
+	// Pupeasennuksen root
+	$pupe_root_polku = dirname(dirname(__FILE__));
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
@@ -120,7 +123,6 @@ $ketjutus             	= "";
 $editilaus_maksuehto	= "";
 $editilaus_maksuteksti	= "";
 $editilaus_toimitustapa = "";
-$tilaus_hyvaksyntaan	= "";
 $editilaus_rahtivapaa	= "";
 $editilaus_tilaustyyppi = "";
 $editilaus_eilahetetta	= "";
@@ -1894,12 +1896,6 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
-				if ($editilaus_tilaustyyppi != 'K') {
-					// Tilaus merkataan valmiiksi
-					$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-					$result = mysql_query($query) or die($query);
-				}
-
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
 				$result   = mysql_query($query) or die($query);
@@ -1997,20 +1993,16 @@ while ($tietue = fgets($fd)) {
 						require ("tilaus-valmis.inc");
 					}
 
-					// Halutaanko tilaus hyväksynnän kautta!
-					if ($tilaus_hyvaksyntaan != "") {
-						$query = "	UPDATE lasku SET
-									alatila = 'F'
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tunnus = '$editilaus_lasku_tunnus'";
-						$magento_maksettu_res = pupe_query($query);
-					}
-
 					$edi_ulos .= "$tilaus_valmis_ulos\n";
 					$edi_ulos .= "$tilaus_valmis_message\n";
 					$edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
 				}
 				elseif ($editilaus_tila == "Z") {
+					$query = "	UPDATE lasku SET
+								alatila 		= 'A'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = '$editilaus_lasku_tunnus'";
+					$terminaali_tilaus_res = pupe_query($query);
 					$edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
 				}
 				elseif ($editilaus_tilaustyyppi == 3) {
@@ -2064,7 +2056,6 @@ while ($tietue = fgets($fd)) {
 			$editilaus_maksuehto	= "";
 			$editilaus_maksuteksti	= "";
 			$editilaus_toimitustapa = "";
-			$tilaus_hyvaksyntaan	= "";
 			$editilaus_rahtivapaa	= "";
 			$editilaus_tilaustyyppi = "";
 			$editilaus_eilahetetta	= "";

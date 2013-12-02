@@ -557,6 +557,9 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='lasku_yhtio'	  value='$asiakas[yhtio]'>";
 			echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
 
+			if (isset($yhtiotoimipaikka)) echo "<input type='hidden' name='yhtiotoimipaikka'  value='{$yhtiotoimipaikka}' />";
+			if (isset($tilaustyyppi)) echo "<input type='hidden' name='tilaustyyppi'  value='{$tilaustyyppi}' />";
+
 			if (is_array($varastosta)) {
 				foreach ($varastosta as $varatunnu) {
 					echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
@@ -614,6 +617,9 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='lasku_yhtio'	  value='$asiakas[yhtio]'>";
 			echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 			echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
+
+			if (isset($yhtiotoimipaikka)) echo "<input type='hidden' name='yhtiotoimipaikka'  value='{$yhtiotoimipaikka}' />";
+			if (isset($tilaustyyppi)) echo "<input type='hidden' name='tilaustyyppi'  value='{$tilaustyyppi}' />";
 
 			if (is_array($varastosta)) {
 				foreach ($varastosta as $varatunnu) {

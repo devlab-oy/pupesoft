@@ -113,6 +113,7 @@
 	if (!isset($tee)) $tee = '';
 	if (!isset($valitse)) $valitse = '';
 	if (!isset($asn_rivi)) $asn_rivi = '';
+	if (!isset($toimipaikka)) $toimipaikka = '';
 	if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse, $kolli, $toimittajanumero, $asn_numero) = explode("!°!", $muut_siirrettavat);
 
 	if ($tee == 'poista_sanoma') {
@@ -628,7 +629,7 @@
 					$upd_res = pupe_query($query);
 				}
 
-				$query = "	SELECT tunnus
+				$query = "	SELECT tunnus, yhtio_toimipaikka
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laskunro = '{$lasku}'
@@ -637,6 +638,7 @@
 				$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
 
 				$tunnus = $tunnus_fetch_row['tunnus'];
+				$_yhtion_toimipaikka = $tunnus_fetch_row['yhtio_toimipaikka'];
 
 				$query = "	SELECT *
 							FROM toimi
@@ -864,7 +866,9 @@
 
 		$multi = "";
 		require("inc/tuotehaku.inc");
-		$prow["tuoteno"] = $tuoteno;
+
+		$prow["tuoteno"]      = $tuoteno;
+		$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
 
 		require('tilauskasittely/tarkistarivi_ostotilaus.inc');
 
@@ -1345,7 +1349,7 @@
 			}
 		}
 
-		echo "<form method='post' action='?tee=etsi&valitse={$valitse}&kolli={$kolli}&asn_numero={$asn_numero}&toimittajanumero={$toimittajanumero}&lasku={$lasku}&rivitunnus={$rivitunnus}&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&lopetus={$lopetus}'>";
+		echo "<form method='post' action='?tee=etsi&valitse={$valitse}&kolli={$kolli}&asn_numero={$asn_numero}&toimipaikka={$toimipaikka}&toimittajanumero={$toimittajanumero}&lasku={$lasku}&rivitunnus={$rivitunnus}&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&lopetus={$lopetus}'>";
 
 		echo "<table>";
 		echo "<tr><th colspan='6'>",t("Etsi tilausrivi"),"</th></tr>";
@@ -1451,6 +1455,17 @@
 
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 
+			if (isset($toimipaikka) and trim($toimipaikka) != '') {
+
+				if ($toimipaikka != 'kaikki') {
+					$toimipaikka_ostotilaus_lisa = "AND lasku.vanhatunnus = '{$toimipaikka}'";
+					$toimipaikka_saapuminen_lisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
+				}
+			}
+			else {
+				$toimipaikka_ostotilaus_lisa = $toimipaikka_saapuminen_lisa = "";
+			}
+
 			// Ostotilaukset ja suoraan saapumiselle lis‰tyt, mutta ei saa olla saapumiselle kohdistettu
 			$query1 = "	(SELECT DISTINCT tilausrivi.tunnus,
 						tilausrivi.tuoteno,
@@ -1467,6 +1482,7 @@
 						AND lasku.tila = 'O'
 						AND lasku.alatila = 'A'
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
+						{$toimipaikka_ostotilaus_lisa}
 						{$tilausnrolisa})
 						UNION
 						(SELECT DISTINCT tilausrivi.tunnus,
@@ -1483,6 +1499,7 @@
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
 						AND lasku.tila = 'K'
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
+						{$toimipaikka_saapuminen_lisa}
 						{$tilausnrolisa})";
 
 			// Saapumiset, ei loppulasketut eik‰ sellaset joihin on jo vaihto-omaisuuslasku liitetty, pit‰‰ olla saapumiselle kohdistettu
@@ -1501,6 +1518,7 @@
 						AND lasku.tila 			= 'K'
 						AND lasku.tapvm 		= '0000-00-00'
 						AND lasku.mapvm 		= '0000-00-00'
+						{$toimipaikka_saapuminen_lisa}
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'";
 
 			if ($valitse == 'asn') {
@@ -1820,6 +1838,7 @@
 			echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}' />";
 			echo "<input type='hidden' id='lasku' name='lasku' value='{$lasku}' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
+			echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}' />";
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>",t("Toimittajanro"),"</th>";
@@ -1993,7 +2012,37 @@
 
 		if ($valitse == '') {
 			echo "<form method='post' action='?tee='>";
-			echo "<table><tr>";
+			echo "<table>";
+
+			$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+			if (mysql_num_rows($toimipaikat_res) != 0) {
+
+				echo "<tr>";
+				echo "<th>",t("Toimipaikka"),"<br />(Finvoice, Maventa, ",t("Ostolaskut"),")</th>";
+				echo "<td colspan='4'>";
+				echo "<select name='toimipaikka'>";
+				echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+				echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+				while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+					$sel = '';
+
+					if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $toimipaikat_row['tunnus'];
+					}
+
+					echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+				}
+
+				echo "</select>";
+				echo "</td>";
+				echo "</tr>";
+			}
+
+			echo "<tr>";
 			echo "<th>",t("Valitse"),"</th>";
 			echo "<td><input type='submit' name='nayta_finvoice' value='",t("Finvoice"),"' /></td>";
 			echo "<td><input type='submit' name='nayta_maventa' value='",t("Maventa"),"' /></td>";
@@ -2033,6 +2082,7 @@
 			echo "<input type='hidden' id='tee' name='tee' value='nayta' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 			echo "<input type='hidden' id='kolli' name='kolli' value='' />";
+			echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}' />";
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>",t("Ytunnus"),"</th>";
@@ -2137,6 +2187,8 @@
 				$lajilisa = 'tec';
 			}
 
+			$toimipaikkalisa = (isset($toimipaikka) and trim($toimipaikka) != "kaikki") ? " AND lasku.yhtio_toimipaikka = '{$toimipaikka}' " : "";
+
 			$query = "	SELECT toimi.ytunnus,
 						toimi.nimi,
 						toimi.nimitark,
@@ -2154,6 +2206,7 @@
 						sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
+						JOIN lasku ON (lasku.yhtio = asn_sanomat.yhtio AND lasku.laskunro = asn_sanomat.asn_numero {$toimipaikkalisa})
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.laji = '{$lajilisa}'
 						AND asn_sanomat.status NOT IN ('X', 'E', 'D')

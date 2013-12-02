@@ -1,5 +1,7 @@
 <?php
 
+	require_once('tilauskasittely/luo_myyntitilausotsikko.inc');
+
 	if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 		$tvs_tila 		= "V";
 		$tvs_tyyppi		= "'V','L'";
@@ -463,165 +465,167 @@
 
 				$laskurow['pakkaamo'] = pakkaamo($laskurow["tunnus"], "yes", $ei_pakkaamoa);
 
-				// Tulostetaan keräyslista
-				require_once ("tulosta_lahete_kerayslista.inc");
+				if ($yhtiorow['tulosta_valmistus_tulosteet'] == '') {
+					// Tulostetaan keräyslista
+					require_once ("tulosta_lahete_kerayslista.inc");
 
-				// Haetaan asiakkaan tiedot
-				$query = "  SELECT luokka,
-							puhelin,
-							if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
-							asiakasnro as asiakasnro_aito,
-							kerayserat,
-							kieli
-							FROM asiakas
-							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-				$riresult = mysql_query($query) or pupe_error($query);
-				$asrow = mysql_fetch_array($riresult);
+					// Haetaan asiakkaan tiedot
+					$query = "  SELECT luokka,
+								puhelin,
+								if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+								asiakasnro as asiakasnro_aito,
+								kerayserat,
+								kieli
+								FROM asiakas
+								WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+					$riresult = mysql_query($query) or pupe_error($query);
+					$asrow = mysql_fetch_array($riresult);
 
-				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+					$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
 
-				if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-				else $pjat_sortlisa = "";
+					if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+					else $pjat_sortlisa = "";
 
-				// Keräyslistan rivit
-				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+					// Keräyslistan rivit
+					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 
-					$sorttauskentta = str_replace("as sorttauskentta", "", $sorttauskentta);
+						$sorttauskentta = str_replace("as sorttauskentta", "", $sorttauskentta);
 
-					$querysel = "	tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
-									sum(tilausrivi.tilkpl) tilkpl,
-									sum(tilausrivi.varattu) varattu,
-									sum(tilausrivi.jt) jt,
-									group_concat(tilausrivi.tunnus) tunnus,
-									min($sorttauskentta) as sorttauskentta, ";
+						$querysel = "	tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
+										sum(tilausrivi.tilkpl) tilkpl,
+										sum(tilausrivi.varattu) varattu,
+										sum(tilausrivi.jt) jt,
+										group_concat(tilausrivi.tunnus) tunnus,
+										min($sorttauskentta) as sorttauskentta, ";
 
-					$lisa = "	and tilausrivi.tyyppi in ($tvs_tyyppi)
-								GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys, tuotetyyppi, myyntihinta_maara, tuote.sarjanumeroseuranta";
-				}
-				else {
-					$querysel = " tilausrivi.*, $sorttauskentta,";
-					$lisa = " ";
-				}
-
-				$query = "	SELECT
-							$querysel
-							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-							if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-							tuote.sarjanumeroseuranta,
-							tuote.eankoodi
-							FROM tilausrivi use index (yhtio_otunnus)
-							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-							WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.var in ('','H')
-							and tilausrivi.tyyppi != 'D'
-							$lisasalker
-							$lisa
-							ORDER BY $pjat_sortlisa sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
-				$riresult = mysql_query($query) or pupe_error($query);
-
-				$tilausnumeroita = $laskurow["tunnus"];
-
-				//generoidaan rivinumerot
-				$rivinumerot = array();
-
-				$kal = 1;
-
-				while ($row = mysql_fetch_array($riresult)) {
-					$rivinumerot[$row["tunnus"]] = $kal;
-					$kal++;
-				}
-
-				mysql_data_seek($riresult,0);
-
-				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					$tyyppi = "";
-				}
-				elseif ($toim == "MYYNTITILI") {
-					$tyyppi = "MYYNTITILI";
-				}
-				else {
-					$tyyppi = "SIIRTOLISTA";
-				}
-
-				$params_kerayslista = array(
-				'asrow'           	=> $asrow,
-				'boldi'           	=> $boldi,
-				'iso'             	=> $iso,
-				'kala'            	=> 0,
-				'kieli'           	=> $kieli,
-				'komento'			=> '',
-				'laskurow'        	=> $laskurow,
-				'norm'            	=> $norm,
-				'page'            	=> '',
-				'paino'           	=> 0,
-				'pdf'             	=> NULL,
-				'perheid'         	=> 0,
-				'perheid2'        	=> 0,
-				'pieni'           	=> $pieni,
-				'pieni_boldi'     	=> $pieni_boldi,
-				'rectparam'       	=> $rectparam,
-				'rivinkorkeus'    	=> $rivinkorkeus,
-				'rivinumerot'    	=> $rivinumerot,
-				'row'             	=> NULL,
-				'sivu'            	=> 1,
-				'tee'             	=> $tee,
-				'thispage'			=> NULL,
-				'tilausnumeroita' 	=> $tilausnumeroita,
-				'toim'            	=> $toim,
-				'tots'            	=> 0,
-				'tyyppi'		  	=> $tyyppi,
-				'kerayslistatyyppi'	=> '');
-
-				// Aloitellaan keräyslistan teko
-				$params_kerayslista = alku_kerayslista($params_kerayslista);
-
-				while ($row = mysql_fetch_assoc($riresult)) {
-					$params_kerayslista["row"] = $row;
-					$params_kerayslista = rivi_kerayslista($params_kerayslista);
-				}
-
-				$params_kerayslista["tots"] = 1;
-				$params_kerayslista = loppu_kerayslista($params_kerayslista);
-
-				//tulostetaan failit ja valitaan sopivat printterit
-				if ($laskurow["varasto"] == '') {
-					$query = "	SELECT *
-								FROM varastopaikat
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tyyppi != 'P'
-								ORDER BY alkuhyllyalue,alkuhyllynro
-								LIMIT 1";
-				}
-				else {
-					$query = "	SELECT *
-								FROM varastopaikat
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus  = '$laskurow[varasto]'
-								ORDER BY alkuhyllyalue,alkuhyllynro";
-				}
-				$prires = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($prires) > 0) {
-					$prirow = mysql_fetch_array($prires);
-
-					if (!isset($valittu_tulostin) or $valittu_tulostin == "oletukselle") {
-						$apuprintteri = $prirow['printteri0']; // keräyslistaprintteri
+						$lisa = "	and tilausrivi.tyyppi in ($tvs_tyyppi)
+									GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys, tuotetyyppi, myyntihinta_maara, tuote.sarjanumeroseuranta";
 					}
 					else {
-						$apuprintteri = $valittu_tulostin;
+						$querysel = " tilausrivi.*, $sorttauskentta,";
+						$lisa = " ";
 					}
 
-					//haetaan lähetteen tulostuskomento
-					$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
-					$kirres= mysql_query($query) or pupe_error($query);
-					$kirrow= mysql_fetch_array($kirres);
-					$komento=$kirrow['komento'];
-				}
+					$query = "	SELECT
+								$querysel
+								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+								if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+								tuote.sarjanumeroseuranta,
+								tuote.eankoodi
+								FROM tilausrivi use index (yhtio_otunnus)
+								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+								WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+								and tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.var in ('','H')
+								and tilausrivi.tyyppi != 'D'
+								$lisasalker
+								$lisa
+								ORDER BY $pjat_sortlisa sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
+					$riresult = mysql_query($query) or pupe_error($query);
 
-				//tulostetaan sivu
-				$params_kerayslista["komento"] = $komento;
-				print_pdf_kerayslista($params_kerayslista);
+					$tilausnumeroita = $laskurow["tunnus"];
+
+					//generoidaan rivinumerot
+					$rivinumerot = array();
+
+					$kal = 1;
+
+					while ($row = mysql_fetch_array($riresult)) {
+						$rivinumerot[$row["tunnus"]] = $kal;
+						$kal++;
+					}
+
+					mysql_data_seek($riresult,0);
+
+					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+						$tyyppi = "";
+					}
+					elseif ($toim == "MYYNTITILI") {
+						$tyyppi = "MYYNTITILI";
+					}
+					else {
+						$tyyppi = "SIIRTOLISTA";
+					}
+
+					$params_kerayslista = array(
+					'asrow'           	=> $asrow,
+					'boldi'           	=> $boldi,
+					'iso'             	=> $iso,
+					'kala'            	=> 0,
+					'kieli'           	=> $kieli,
+					'komento'			=> '',
+					'laskurow'        	=> $laskurow,
+					'norm'            	=> $norm,
+					'page'            	=> '',
+					'paino'           	=> 0,
+					'pdf'             	=> NULL,
+					'perheid'         	=> 0,
+					'perheid2'        	=> 0,
+					'pieni'           	=> $pieni,
+					'pieni_boldi'     	=> $pieni_boldi,
+					'rectparam'       	=> $rectparam,
+					'rivinkorkeus'    	=> $rivinkorkeus,
+					'rivinumerot'    	=> $rivinumerot,
+					'row'             	=> NULL,
+					'sivu'            	=> 1,
+					'tee'             	=> $tee,
+					'thispage'			=> NULL,
+					'tilausnumeroita' 	=> $tilausnumeroita,
+					'toim'            	=> $toim,
+					'tots'            	=> 0,
+					'tyyppi'		  	=> $tyyppi,
+					'kerayslistatyyppi'	=> '');
+
+					// Aloitellaan keräyslistan teko
+					$params_kerayslista = alku_kerayslista($params_kerayslista);
+
+					while ($row = mysql_fetch_assoc($riresult)) {
+						$params_kerayslista["row"] = $row;
+						$params_kerayslista = rivi_kerayslista($params_kerayslista);
+					}
+
+					$params_kerayslista["tots"] = 1;
+					$params_kerayslista = loppu_kerayslista($params_kerayslista);
+
+					//tulostetaan failit ja valitaan sopivat printterit
+					if ($laskurow["varasto"] == '') {
+						$query = "	SELECT *
+									FROM varastopaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tyyppi != 'P'
+									ORDER BY alkuhyllyalue,alkuhyllynro
+									LIMIT 1";
+					}
+					else {
+						$query = "	SELECT *
+									FROM varastopaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus  = '$laskurow[varasto]'
+									ORDER BY alkuhyllyalue,alkuhyllynro";
+					}
+					$prires = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($prires) > 0) {
+						$prirow = mysql_fetch_array($prires);
+
+						if (!isset($valittu_tulostin) or $valittu_tulostin == "oletukselle") {
+							$apuprintteri = $prirow['printteri0']; // keräyslistaprintteri
+						}
+						else {
+							$apuprintteri = $valittu_tulostin;
+						}
+
+						//haetaan lähetteen tulostuskomento
+						$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+						$kirres= mysql_query($query) or pupe_error($query);
+						$kirrow= mysql_fetch_array($kirres);
+						$komento=$kirrow['komento'];
+					}
+
+					//tulostetaan sivu
+					$params_kerayslista["komento"] = $komento;
+					print_pdf_kerayslista($params_kerayslista);
+				}
 
 				// jos halutaan MYÖS lähete
 				if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
@@ -715,6 +719,42 @@
 					}
 
 					loppu_valm($page[$sivu], 1);
+
+					//tulostetaan failit ja valitaan sopivat printterit
+					if ($laskurow["varasto"] == '') {
+						$query = "	SELECT *
+									FROM varastopaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tyyppi != 'P'
+									ORDER BY alkuhyllyalue,alkuhyllynro
+									LIMIT 1";
+					}
+					else {
+						$query = "	SELECT *
+									FROM varastopaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus  = '$laskurow[varasto]'
+									ORDER BY alkuhyllyalue,alkuhyllynro";
+					}
+					$prires = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($prires) > 0) {
+						$prirow = mysql_fetch_array($prires);
+
+						if (!isset($valittu_tulostin) or $valittu_tulostin == "oletukselle") {
+							$apuprintteri = $prirow['printteri0']; // keräyslistaprintteri
+						}
+						else {
+							$apuprintteri = $valittu_tulostin;
+						}
+
+						//haetaan lähetteen tulostuskomento
+						$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+						$kirres= mysql_query($query) or pupe_error($query);
+						$kirrow= mysql_fetch_array($kirres);
+						$komento=$kirrow['komento'];
+					}
+
 					print_pdf_valm($komento);
 				}
 
@@ -786,4 +826,3 @@
 			}
 		}
 	}
-?>

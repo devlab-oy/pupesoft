@@ -1,10 +1,12 @@
 <?php
 
 require_once('CSVDumper.php');
+require_once('inc/laite_huolto_functions.inc');
 
 class TarkastuksetCSVDumper extends CSVDumper {
 
 	protected $unique_values = array();
+	protected $products = array();
 
 	public function __construct($kukarow) {
 		parent::__construct($kukarow);
@@ -79,27 +81,34 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			}
 
 			if ($key == 'laite') {
-				$laite_tunnus = $this->hae_laite_koodilla($rivi[$key]);
+				$laite = $this->hae_laite_koodilla($rivi[$key]);
 
-				if (isset($laite_tunnus) and is_numeric($laite_tunnus)) {
-					$asiakas_tunnus = $this->hae_laitteen_asiakas($laite_tunnus);
-					if ($asiakas_tunnus) {
-						$rivi[$key] = $laite_tunnus;
-						$rivi['liitostunnus'] = $asiakas_tunnus;
-					}
-					else {
-						$this->errors[$index][] = t('FATAL!! Laitteelta puuttuu asiakas')." <b>{$rivi[$key]}</b> ";
-						$valid = false;
-					}
+				if (isset($laite['laite_tunnus']) and is_numeric($laite['laite_tunnus'])) {
+					$rivi[$key] = $laite['laite_tunnus'];
+					$rivi['laite_tuoteno'] = $laite['tuoteno'];
+					$rivi['liitostunnus'] = $laite['asiakas_tunnus'];
+					$rivi['kohde_nimi'] = $laite['kohde_nimi'];
+					$rivi['paikka_nimi'] = $laite['paikka_nimi'];
 				}
 				else {
-					$this->errors[$index][] = t('Laitetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
+					$this->errors[$index][] = t('FATAL Laitetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
 					$valid = false;
 				}
 			}
 			else if ($key == 'toimenpide') {
 				if (!$this->loytyyko_tuote($rivi[$key])) {
 					$this->errors[$index][] = t('Toimenpide tuotetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
+					$valid = false;
+				}
+				else {
+					//loytyyko_tuote metodi populoi products arrayta
+					$rivi['toimenpide_tuotteen_tyyppi'] = $this->products[$rivi[$key]]['selite'];
+					//HUOM tarvitseeko hae_huoltosykli $rivi['toimenpide_tuotteen_tyyppi'] ??
+					$rivi['huoltosykli_tunnus'] = $this->hae_huoltosykli($rivi['laite'], $rivi['toimenpide']);
+				}
+			}
+			else if ($key == 'status') {
+				if (!stristr($rivi[$key], 'valmis')) {
 					$valid = false;
 				}
 			}
@@ -119,38 +128,40 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
 		$progress_bar->initialize(count($this->rivit));
 		foreach ($this->rivit as $rivi) {
+			$params = array(
+				'asiakas_tunnus'			 => $rivi['liitostunnus'],
+				'toimenpide_tuotteen_tyyppi' => $rivi['toimenpide_tuotteen_tyyppi'],
+				'toimenpide'				 => $rivi['toimenpide'],
+				'laite_tunnus'				 => $rivi['laite'],
+				'huoltosykli_tunnus'		 => $rivi['huoltosykli_tunnus'],
+				'tuoteno'					 => $rivi['laite_tuoteno'],
+				'kohde_nimi'				 => $rivi['kohde_nimi'],
+				'paikka_nimi'				 => $rivi['kohde_nimi'],
+				'tyojono'					 => 'joonas',
+				'viimeinen_tapahtuma'		 => $rivi['toimitettu'],
+			);
+			$tyomaarays_tunnus = generoi_tyomaarays($params);
 
-			$query = "	INSERT INTO {$this->table}
-						(".implode(", ", array_keys($rivi)).")
-						VALUES
-						('".implode("', '", array_values($rivi))."')";
+			$params = array(
+				'lasku_tunnukset' => array($tyomaarays_tunnus),
+				'toimitettuaika' => $rivi['toimitettu'],
+			);
+			merkkaa_tyomaarays_tehdyksi($params);
+			paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $rivi['huoltosykli_tunnus'], $rivi['toimitettu']);
 
-			//Purkka fix
-			$query = str_replace("'now()'", 'now()', $query);
-			pupe_query($query);
-
+			//TODO jos kyseessä on koeponnistus niin pitäisi osata merkata huollon ja tarkastuksen viimeinen tapahtuma oikein
+			//TODO poikkeukset pitää merkata historiaan.
+			
 			$progress_bar->increase();
 		}
 	}
 
 	private function hae_laite_koodilla($koodi) {
-		$query = "	SELECT tunnus
-					FROM laite
-					WHERE yhtio = '{$this->kukarow['yhtio']}'
-					AND koodi = '{$koodi}'";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) != 1) {
-			return false;
-		}
-
-		$laite = mysql_fetch_assoc($result);
-
-		return $laite['tunnus'];
-	}
-
-	private function hae_laitteen_asiakas($laite_tunnus) {
-		$query = "	SELECT asiakas.tunnus
+		$query = "	SELECT laite.tunnus AS laite_tunnus,
+					laite.tuoteno,
+					paikka.nimi AS paikka_nimi,
+					kohde.nimi AS kohde_nimi,
+					asiakas.tunnus AS asiakas_tunnus
 					FROM laite
 					JOIN paikka
 					ON ( paikka.yhtio = laite.yhtio
@@ -161,30 +172,67 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					JOIN asiakas
 					ON ( asiakas.yhtio = kohde.yhtio
 						AND asiakas.tunnus = kohde.asiakas )
-					WHERE laite.yhtio = '{$this->kukarow['yhtio']}'
-					AND laite.tunnus = '{$laite_tunnus}'";
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND koodi = '{$koodi}'";
 		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 1) {
+			return false;
+		}
+
+		return mysql_fetch_assoc($result);
+	}
+
+	private function loytyyko_tuote($tuoteno) {
+		if (array_key_exists($tuoteno, $this->products)) {
+			return true;
+		}
+
+		$query = "	SELECT tuoteno,
+					tuotteen_avainsanat.selite
+					FROM tuote
+					JOIN tuotteen_avainsanat
+					ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
+						AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+						AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+		if (mysql_num_rows($result) == 1) {
+			$tuote = mysql_fetch_assoc($result);
+			$this->products[$tuote['tuoteno']] = $tuote;
+			return true;
+		}
+
+		return false;
+	}
+
+	private function hae_huoltosykli($laite_tunnus, $toimenpide_tuoteno) {
+		$query = "	SELECT huoltosykli.tunnus
+					FROM huoltosykli
+					JOIN huoltosyklit_laitteet
+					ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
+						AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
+						AND huoltosykli_laitteet.laite_tunnus = '{$laite_tunnus}' )
+					WHERE huoltosykli.yhtio = '{$this->kukarow['yhtio']}'
+					AND huoltosykli.toimenpide = '{$toimenpide_tuoteno}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) > 1) {
+			die('Viduks meni huoltosykli haku');
+		}
 
 		if (mysql_num_rows($result) == 0) {
 			return false;
 		}
 
-		$asiakas = mysql_fetch_assoc($result);
+		$huoltosykli = mysql_fetch_assoc($result);
 
-		return $asiakas['tunnus'];
+		return $huoltosykli['tunnus'];
 	}
 
-	private function loytyyko_tuote($tuoteno) {
-		$query = "	SELECT tunnus
-					FROM tuote
-					WHERE yhtio = '{$this->kukarow['yhtio']}'
-					AND tuoteno = '{$tuoteno}'";
-		$result = pupe_query($query);
-		if (mysql_num_rows($result) == 1) {
-			return true;
-		}
-
-		return false;
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
 	}
 
 }

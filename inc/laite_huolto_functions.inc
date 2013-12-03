@@ -246,13 +246,29 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 
 	//lisätään sammuttimen toimenpiteen palvelurivi
 	$trow = hae_tuote($huollettavan_laitteen_huoltosyklirivi['toimenpide']);
+
+	if (isset($huollettavan_laitteen_huoltosyklirivi['tilausrivi_hinta']) and $huollettavan_laitteen_huoltosyklirivi['tilausrivi_hinta'] != '') {
+		$hinta = $huollettavan_laitteen_huoltosyklirivi['tilausrivi_hinta'];
+	}
+	else {
+		$hinta = $trow['hinta'];
+	}
+
+	if (isset($huollettavan_laitteen_huoltosyklirivi['ale']) and $huollettavan_laitteen_huoltosyklirivi['ale'] != '') {
+		$ale = $huollettavan_laitteen_huoltosyklirivi['ale'];
+	}
+	else {
+		$ale = 0;
+	}
+
 	$parametrit = array(
 		'trow'		 => $trow,
 		'laskurow'	 => $laskurow,
 		'kpl'		 => 1,
 		'tuoteno'	 => $trow['tuoteno'],
-		'hinta'		 => $trow['hinta'],
+		'hinta'		 => $hinta,
 		'netto'		 => '',
+		'ale1'		 => $ale,
 	);
 	$rivit = lisaa_rivi($parametrit);
 

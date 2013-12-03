@@ -2,7 +2,7 @@
 
 require_once('CSVDumper.php');
 
-class HuoltosykliCSVDumper extends CSVDumper{
+class HuoltosykliCSVDumper extends CSVDumper {
 
 	protected $unique_values = array();
 
@@ -106,6 +106,7 @@ class HuoltosykliCSVDumper extends CSVDumper{
 		$progress_bar->initialize(count($this->rivit));
 		foreach ($this->rivit as $rivi) {
 			$nimitys_temp = $rivi['nimitys'];
+			$laite_tuoteno_temp = $rivi['laite'];
 			unset($rivi['nimitys']);
 			unset($rivi['laite']);
 
@@ -117,6 +118,9 @@ class HuoltosykliCSVDumper extends CSVDumper{
 			//Purkka fix
 			$query = str_replace("'now()'", 'now()', $query);
 			pupe_query($query);
+
+			$huoltosykli_tunnus_sisalla = mysql_insert_id();
+			$huoltosykli_huoltovali_sisalla = $rivi['huoltovali'];
 
 			$rivi['olosuhde'] = 'X';
 
@@ -132,6 +136,11 @@ class HuoltosykliCSVDumper extends CSVDumper{
 			//Purkka fix
 			$query = str_replace("'now()'", 'now()', $query);
 			pupe_query($query);
+
+			$huoltosykli_tunnus_ulkona = mysql_insert_id();
+			$huoltosykli_huoltovali_ulkona = $rivi['huoltovali'];
+
+			$this->liita_laitteet_huoltosykliin($laite_tuoteno_temp, $huoltosykli_huoltovali_sisalla, $huoltosykli_huoltovali_ulkona, $huoltosykli_tunnus_sisalla, $huoltosykli_tunnus_ulkona);
 
 			$progress_bar->increase();
 		}
@@ -182,6 +191,57 @@ class HuoltosykliCSVDumper extends CSVDumper{
 		}
 
 		return true;
+	}
+
+	private function liita_laitteet_huoltosykliin($laite_tuoteno, $huoltosykli_huoltovali_sisalla, $huoltosykli_huoltovali_ulkona, $huoltosykli_tunnus_sisalla, $huoltosykli_tunnus_ulkona) {
+		$query = "	SELECT laite.tunnus
+					paikka.olosuhde
+					FROM laite
+					JOIN paikka
+					ON ( paikka.yhtio = laite.yhtio
+						AND paikka.tunnus = laite.paikka )
+					WHERE laite.yhtio = '{$this->kukarow['yhtio']}'
+					AND laite.tuoteno = '{$laite_tuoteno}'";
+		$result = pupe_query($query);
+
+		while ($laite = mysql_fetch_assoc($result)) {
+			if ($laite['olosuhde'] == 'A') {
+				$query = "	INSERT INTO huoltosyklit_laitteet
+							SET yhtio = '{$this->kukarow['yhtio']}',
+							huoltosykli_tunnus = '{$huoltosykli_tunnus_sisalla}',
+							laite_tunnus = '{$laite['tunnus']}',
+							huoltovali = '{$huoltosykli_huoltovali_sisalla}',
+							pakollisuus = '1',
+							laatija = 'import',
+							luontiaika = NOW()";
+			}
+			else if ($laite['olosuhde'] == 'X') {
+				$query = "	INSERT INTO huoltosyklit_laitteet
+							SET yhtio = '{$this->kukarow['yhtio']}',
+							huoltosykli_tunnus = '{$huoltosykli_tunnus_ulkona}',
+							laite_tunnus = '{$laite['tunnus']}',
+							huoltovali = '{$huoltosykli_huoltovali_ulkona}',
+							pakollisuus = '1',
+							laatija = 'import',
+							luontiaika = NOW()";
+			}
+			else {
+				//JOS ONGELMIA LAITETAAN ULOS
+				$query = "	INSERT INTO huoltosyklit_laitteet
+							SET yhtio = '{$this->kukarow['yhtio']}',
+							huoltosykli_tunnus = '{$huoltosykli_tunnus_ulkona}',
+							laite_tunnus = '{$laite['tunnus']}',
+							huoltovali = '{$huoltosykli_huoltovali_ulkona}',
+							pakollisuus = '1',
+							laatija = 'import',
+							luontiaika = NOW()";
+			}
+			pupe_query($query);
+		}
+	}
+
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
 	}
 
 }

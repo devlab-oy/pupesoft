@@ -8653,12 +8653,28 @@ if (!function_exists("livesearch_tuotehaku")) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
-			$haku_array = explode(" ", $haku);
-			$haku_query = "";
+			$haku_array 		= explode(" ", $haku);
+			$tuoteno_haku_query = "";
+			$nimitys_haku_query = "";
+			$tuoteindex 		= "";
+			$nimitindex			= "";
+
+			if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
+				$tuoteindex = "USE INDEX (tuoteno)";
+				$nimitindex = "USE INDEX (nimitys)";
+			}
 
 			foreach ($haku_array as $haku) {
 				$haku = mysql_real_escape_string($haku);
-				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
+
+				if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
+					$tuoteno_haku_query .= " and match (tuote.tuoteno) against ('$haku*' IN BOOLEAN MODE) ";
+					$nimitys_haku_query .= " and match (tuote.nimitys) against ('$haku*' IN BOOLEAN MODE) ";
+				}
+				else {
+					$tuoteno_haku_query .= " and tuote.tuoteno like ('%$haku%') ";
+					$nimitys_haku_query .= " and tuote.nimitys like ('%$haku%') ";
+				}
 			}
 
 			// vientikieltokäsittely:
@@ -8712,14 +8728,23 @@ if (!function_exists("livesearch_tuotehaku")) {
 			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
 			}
-			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
+
+			$query = "	(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
 						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
-						FROM tuote
+						FROM tuote $tuoteindex
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						$naytetaanko_poistetut
 						$kieltolisa
-						$haku_query
-						ORDER BY jarjestys, tuote.tuoteno
+						$tuoteno_haku_query)
+						UNION
+						(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
+						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
+						FROM tuote $nimitindex
+						WHERE tuote.yhtio = '$kukarow[yhtio]'
+						$naytetaanko_poistetut
+						$kieltolisa
+						$nimitys_haku_query)
+						ORDER BY jarjestys, tuoteno
 						LIMIT 500";
 			$result = pupe_query($query);
 
@@ -18675,7 +18700,7 @@ if (!function_exists("pupeFileReader")) {
 if (!function_exists('pupeFileReaderXLSRows')) {
 	function pupeFileReaderXLSRows($foldername, $i, $savefile) {
 		$excelrivit = array();
-		
+
 		$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet{$i}.xml";
 		$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
 
@@ -18738,7 +18763,7 @@ if (!function_exists('pupeFileReaderXLSRows')) {
 if (!function_exists('pupeFileReaderXLSRow')) {
 	function pupeFileReaderXLSRow(&$objPHPExcel, $i) {
 		$excelrivit = array();
-		
+
 		/** Aktivoidaan eka sheetti**/
 		$objPHPExcel->setActiveSheetIndex($i);
 

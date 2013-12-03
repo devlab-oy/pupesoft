@@ -236,9 +236,17 @@ function merkkaa_tyomaarays_tehdyksi($request) {
 				AND tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
 	pupe_query($query);
 
+	//Toimitettuaika manual setti‰ k‰ytet‰‰n konversio-ajossa
+	if (empty($request['toimitettuaika'])) {
+		$toimitettuaika_update = "toimitettuaika = NOW()";
+	}
+	else {
+		$toimitettuaika_update = "toimitettuaika = '{$request['toimitettuaika']}'";
+	}
+
 	$query = "	UPDATE tilausrivi
 				SET toimitettu = '{$kukarow['kuka']}',
-				toimitettuaika = NOW()
+				{$toimitettuaika_update}
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND otunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
 	pupe_query($query);

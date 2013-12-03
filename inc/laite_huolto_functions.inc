@@ -190,11 +190,12 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 
 /**
  *
- * @global type $kukarow
- * @global type $yhtiorow
- * @global type $debug
- * @param type $huollettavan_laitteen_huoltosyklirivi
- * @param type $laitteiden_huoltosyklirivit_joita_ei_huolleta
+ * @global array $kukarow
+ * @global array $yhtiorow
+ * @global boolean $debug
+ * @param array $huollettavan_laitteen_huoltosyklirivi
+ * @param array $laitteiden_huoltosyklirivit_joita_ei_huolleta
+ * @param string $poikkeus_paiva Jos halutaan generoida tyˆm‰‰r‰yksi‰ jollekkin muulle p‰iv‰lle kuin CURRENT_DATE (konversio)
  *
  * param tarvittavia tietoja:
  * asiakas_tunnus
@@ -208,7 +209,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
  * tyojono
  * viimeinen_tapahtuma (optional)
  */
-function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array()) {
+function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $poikkeus_paiva = '') {
 	global $kukarow, $yhtiorow, $debug;
 
 	$kukarow['kesken'] = 0;
@@ -218,7 +219,15 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 	//jos uusi laite, niin laitetaan tyˆm‰‰r‰yksen toimitusajankohta NOW
 	//HUOM jos huoltosyklirivin toimenpide_tuotteen_tyyppi = koeponnistus niin viimeinen_tapahtuma ei ole ikin‰ tyhj‰. Luonti vaiheessa sinne asetetaan laite.valm_pvm
 	if (empty($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']) and $huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi'] != 'koeponnistus') {
-		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", rand(strtotime('now + 1 month'), strtotime('now - 7 day'))));
+		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime('now')));
+	}
+	else {
+		//merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
+		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")));
+	}
+
+	if ($poikkeus_paiva != '') {
+		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($poikkeus_paiva)));
 	}
 
 	if ($debug and !empty($tyomaarays_tunnus)) {
@@ -228,42 +237,42 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 
 	if (empty($tyomaarays_tunnus)) {
 		echo t("Joku meni pieleen");
-		continue;
+		return false;
 	}
-	else {
 
-		$laskurow = hae_tyomaarays($tyomaarays_tunnus);
+	$laskurow = hae_tyomaarays($tyomaarays_tunnus);
 
-		$kukarow['kesken'] = $laskurow['tunnus'];
+	$kukarow['kesken'] = $laskurow['tunnus'];
 
-		//lis‰t‰‰n sammuttimen toimenpiteen palvelurivi
-		$trow = hae_tuote($huollettavan_laitteen_huoltosyklirivi['toimenpide']);
-		$parametrit = array(
-			'trow'		 => $trow,
-			'laskurow'	 => $laskurow,
-			'kpl'		 => 1,
-			'tuoteno'	 => $trow['tuoteno'],
-			'hinta'		 => $trow['hinta'],
-			'netto'		 => '',
-		);
-		$rivit = lisaa_rivi($parametrit);
+	//lis‰t‰‰n sammuttimen toimenpiteen palvelurivi
+	$trow = hae_tuote($huollettavan_laitteen_huoltosyklirivi['toimenpide']);
+	$parametrit = array(
+		'trow'		 => $trow,
+		'laskurow'	 => $laskurow,
+		'kpl'		 => 1,
+		'tuoteno'	 => $trow['tuoteno'],
+		'hinta'		 => $trow['hinta'],
+		'netto'		 => '',
+	);
+	$rivit = lisaa_rivi($parametrit);
 
-		paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
-		paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
-		paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus']);
+	paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
+	paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
+	paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus']);
 
-		if (!empty($laitteiden_huoltosyklirivit_joita_ei_huolleta)) {
-			paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva($laitteiden_huoltosyklirivit_joita_ei_huolleta, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
-		}
-
-		if ($debug) {
-			echo "Lis‰t‰‰n palvelutuoterivi";
-			echo "<br/>";
-			var_dump($rivit);
-			echo "<br/>";
-			echo "<br/>";
-		}
+	if (!empty($laitteiden_huoltosyklirivit_joita_ei_huolleta)) {
+		paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva($laitteiden_huoltosyklirivit_joita_ei_huolleta, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
 	}
+
+	if ($debug) {
+		echo "Lis‰t‰‰n palvelutuoterivi";
+		echo "<br/>";
+		var_dump($rivit);
+		echo "<br/>";
+		echo "<br/>";
+	}
+
+	return $tyomaarays_tunnus;
 }
 
 function paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($laite, $tilausrivit) {
@@ -297,11 +306,19 @@ function paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $laite
 	pupe_query($query);
 }
 
-function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosykli_tunnus) {
+function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosykli_tunnus, $viimeinen_tapahtuma = '') {
 	global $kukarow, $yhtiorow;
 
+	//Viimeisen tapahtuman manual setti‰ k‰ytet‰‰n konversio-ajossa.
+	if (empty($viimeinen_tapahtuma)) {
+		$huoltosyklit_laitteet_update = "viimeinen_tapahtuma = CURRENT_DATE";
+	}
+	else {
+		$huoltosyklit_laitteet_update = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}'";
+	}
+
 	$query = "	UPDATE huoltosyklit_laitteet
-				SET viimeinen_tapahtuma = CURRENT_DATE
+				SET {$huoltosyklit_laitteet_update}
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND laite_tunnus = '{$laite_tunnus}'
 				AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";

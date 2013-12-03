@@ -128,7 +128,14 @@ class PaikkaCSVDumper extends CSVDumper {
 	}
 
 	protected function tarkistukset() {
-		echo "Ei tarkistuksia";
+		$query = "	SELECT count(*) as kpl
+					FROM paikka
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND olosuhde = ''";
+		$result = pupe_query($query);
+		$ilman_olosuhdetta = mysql_fetch_assoc($result);
+
+		echo "{$ilman_olosuhdetta['kpl']} paikkaa ilman olosuhdetta!!";
 	}
 
 }

@@ -119,4 +119,8 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 		pupe_query($query);
 	}
 
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
+	}
+
 }

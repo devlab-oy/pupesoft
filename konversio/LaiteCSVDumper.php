@@ -217,4 +217,8 @@ class LaiteCSVDumper extends CSVDumper {
 		return 0;
 	}
 
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
+	}
+
 }

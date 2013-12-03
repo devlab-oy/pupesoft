@@ -131,6 +131,10 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
 		}
 	}
 
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
+	}
+
 }
 
 ?>

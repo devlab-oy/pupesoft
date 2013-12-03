@@ -104,6 +104,10 @@ abstract class CSVDumper {
 				echo "<br/>";
 			}
 		}
+
+		echo "<br/>";
+		
+		$this->tarkistukset();
 	}
 
 	protected function lue_csv_tiedosto() {
@@ -203,4 +207,6 @@ abstract class CSVDumper {
 	abstract protected function konvertoi_rivi($rivi);
 
 	abstract protected function validoi_rivi(&$rivi, $index);
+
+	abstract protected function tarkistukset();
 }

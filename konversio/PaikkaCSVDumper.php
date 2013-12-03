@@ -10,10 +10,11 @@ class PaikkaCSVDumper extends CSVDumper {
 		parent::__construct($kukarow);
 
 		$konversio_array = array(
-			'kohde'	 => 'SIJAINTI',
-			'nimi'	 => 'LISASIJAINTI',
-			'osoite' => 'SIJAINTI',
-			'kuvaus' => 'SIJAINTI',
+			'kohde'		 => 'SIJAINTI',
+			'nimi'		 => 'LISASIJAINTI',
+			'osoite'	 => 'SIJAINTI',
+			'kuvaus'	 => 'SIJAINTI',
+			'olosuhde'	 => 'DATA7',
 		);
 		$required_fields = array(
 			'kohde',
@@ -50,7 +51,20 @@ class PaikkaCSVDumper extends CSVDumper {
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
-				$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+				if ($konvertoitu_header == 'olosuhde') {
+					if ($rivi[$csv_header] == '12') {
+						$rivi_temp[$konvertoitu_header] = 'X';
+					}
+					else if ($rivi[$csv_header] == '24') {
+						$rivi_temp[$konvertoitu_header] = 'A';
+					}
+					else {
+						$rivi_temp[$konvertoitu_header] = '';
+					}
+				}
+				else {
+					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+				}
 			}
 		}
 
@@ -111,6 +125,10 @@ class PaikkaCSVDumper extends CSVDumper {
 		}
 
 		return 0;
+	}
+
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
 	}
 
 }

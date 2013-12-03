@@ -90,4 +90,8 @@ class TarkastuksetKantaCSVDumper extends CSVDumper {
 		return $rivi;
 	}
 
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
+	}
+
 }

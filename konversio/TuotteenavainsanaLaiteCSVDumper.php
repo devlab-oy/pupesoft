@@ -157,4 +157,8 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 		}
 	}
 
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
+	}
+
 }

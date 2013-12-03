@@ -111,4 +111,8 @@ class TuoteCSVDumper extends CSVDumper {
 		return $valid;
 	}
 
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
+	}
+
 }

@@ -82,4 +82,8 @@ class AsiakasCSVDumper extends CSVDumper {
 		return $valid;
 	}
 
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
+	}
+
 }

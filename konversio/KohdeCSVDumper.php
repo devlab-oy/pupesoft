@@ -119,4 +119,8 @@ class KohdeCSVDumper extends CSVDumper {
 		pupe_query($query);
 	}
 
+	protected function tarkistukset() {
+		echo "Ei tarkistuksia";
+	}
+
 }

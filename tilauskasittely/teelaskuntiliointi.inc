@@ -545,7 +545,7 @@ else {
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$tunnus',
 					tilino 				= '$yhtiorow[pyoristys]',
-					kustp 				= 0,
+					kustp 				= $kustp_ins,
 					kohde 				= 0,
 					projekti 			= 0,
 					tapvm 				= '$tapvm',

@@ -706,7 +706,7 @@
 				}
 			}
 
-			echo "<form action='kayttajat.php' method='post' autocomplete='off'>";
+			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 
 			if ($toim == 'extranet') {
 				echo "<table>";

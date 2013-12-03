@@ -2720,7 +2720,7 @@ if ($tee == '') {
 		}
 	}
 
-	if ($yhtiorow['pakollinen_varasto'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO','TARJOUS')) and isset($laskurow) and $laskurow['varasto'] == 0) {
+	if ($yhtiorow['pakollinen_varasto'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO','TARJOUS')) and isset($laskurow) and $laskurow['liitostunnus'] != 0 and $laskurow['varasto'] == 0) {
 		echo "<font class='error'>".t("VIRHE: Varaston valinta on pakollinen")."!</font><br><br>";
 		$tilausok++;
 	}
@@ -5564,8 +5564,8 @@ if ($tee == '') {
 						$pklisa = " and (tilausrivi.perheid = '$row[perheid]' or tilausrivi.perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT 
-								sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)), 
+					$query = "	SELECT
+								sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
 								count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)

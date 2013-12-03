@@ -307,7 +307,7 @@
 						if (tuotepaikat.tilausmaara = 0, 1, tuotepaikat.tilausmaara) tilausmaara,
 						if (tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era
 						FROM tuotepaikat
-						JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
+						JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ostoehdotus != 'E' {$lisa})
 						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
 						{$abcjoin}
 						{$keraysvyohykelisa}
@@ -381,7 +381,7 @@
 															tuotepaikat.hyllyvali,
 															tuotepaikat.hyllytaso
 															FROM tuotepaikat
-															JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
+															JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ostoehdotus != 'E' {$lisa})
 															{$abcjoin}
 															{$keraysvyohykelisa}
 															WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'

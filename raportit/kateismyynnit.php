@@ -323,8 +323,6 @@
 			-->
 	</script>";
 
-	$vahennetty = "";
-
 	// Jos tullaan takaisin muutosite.phpn lopeta:sta
 	if (is_string($kassavalinnat)) {
 		$kassakone = unserialize(base64_decode($kassavalinnat));
@@ -1276,6 +1274,7 @@
 			$tilinumero 		= array();
 			$kassalippaat 		= array();
 			$kassalipas_tunnus 	= array();
+			$vahennetty 		= array();
 
 			if (isset($tasmays) and $tasmays != '') {
 				if (mysql_num_rows($result) > 0) {
@@ -1908,8 +1907,10 @@
 							echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
 							echo "<td>{$kateisotto['summa']}</td>";
 							echo "</tr>";
-							$vahennetty[$kateisotto['tunnus']] = "{$kateisotto['tunnus']}";
+
+							$vahennetty[$kateisotto['tunnus']] = $kateisotto['tunnus'];
 						}
+
 						$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
 						$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
 						$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
@@ -2026,7 +2027,6 @@
 				$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
 				$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
 				$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
-
 
 				if ($edkassa != '') {
 					echo "</table><table width='100%'>";

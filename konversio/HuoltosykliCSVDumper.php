@@ -194,7 +194,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 	}
 
 	private function liita_laitteet_huoltosykliin($laite_tuoteno, $huoltosykli_huoltovali_sisalla, $huoltosykli_huoltovali_ulkona, $huoltosykli_tunnus_sisalla, $huoltosykli_tunnus_ulkona) {
-		$query = "	SELECT laite.tunnus
+		$query = "	SELECT laite.tunnus,
 					paikka.olosuhde
 					FROM laite
 					JOIN paikka
@@ -241,7 +241,34 @@ class HuoltosykliCSVDumper extends CSVDumper {
 	}
 
 	protected function tarkistukset() {
-		echo "Ei tarkistuksia";
+		$query = "	SELECT laite.tunnus,
+					Count(*) AS kpl
+					FROM   laite
+					JOIN tuote
+					ON ( tuote.yhtio = laite.yhtio
+						AND tuote.tuoteno = laite.tuoteno
+						AND tuote.try IN ( '21', '23', '30', '70', '80' ) )
+					JOIN huoltosyklit_laitteet
+					ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
+						AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
+					WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
+					GROUP  BY laite.tunnus
+					HAVING kpl != 3;";
+		$result = pupe_query($query);
+		$kpl = mysql_num_rows($result);
+		echo "Sammuttimia joilla on enemm‰n tai v‰hemm‰n kuin 3 huoltosykli‰ liitettyn‰ {$kpl}";
+
+		$query = "	SELECT *
+					FROM   laite
+					WHERE  yhtio = '{$this->kukarow['yhtio']}'
+					AND tunnus NOT IN (	SELECT DISTINCT laite_tunnus
+										FROM   huoltosyklit_laitteet
+										WHERE  yhtio = '{$this->kukarow['yhtio']}')
+					AND laite.tuoteno != 'A990001';";
+		$result = pupe_query($query);
+		$kpl = mysql_num_rows($result);
+
+		echo "Sammuttimia joilla ei ole yht‰‰n huoltosykli‰ liitettyn‰ {$kpl}";
 	}
 
 }

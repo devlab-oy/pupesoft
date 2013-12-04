@@ -8,8 +8,8 @@ if (php_sapi_name() != 'cli' and !$debug) {
 }
 
 require ("inc/parametrit.inc");
-require ("tilauskasittely/luo_myyntitilausotsikko.inc");
-require ("inc/laite_huolto_functions.inc");
+require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+require_once("inc/laite_huolto_functions.inc");
 
 if (trim(empty($argv[1])) and !$debug) {
 	echo "Et antanut yhtiötä!\n";

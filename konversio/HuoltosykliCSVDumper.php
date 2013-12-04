@@ -80,6 +80,10 @@ class HuoltosykliCSVDumper extends CSVDumper {
 				}
 				else if ($attrs == 0) {
 					$this->errors[$index][] = t('Huoltosyklin laitteelle')." <b>{$rivi[$key]}</b> ".t('löytyi 0 laitteen koko tai tyyppiä');
+					$loytyyko_laite_tuote = $this->loytyyko_tuote($rivi[$key]);
+					if (!$loytyyko_laite_tuote) {
+						$this->errors[$index][] = t('Laitetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
+					}
 					$valid = false;
 				}
 				else {
@@ -88,7 +92,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 				}
 			}
 			else if ($key == 'toimenpide') {
-				$valid_temp = $this->loytyyko_toimenpide_tuote($rivi[$key]);
+				$valid_temp = $this->loytyyko_tuote($rivi[$key]);
 				if (!$valid_temp) {
 					$this->errors[$index][] = t('Toimenpide tuotetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
 					if ($valid) {
@@ -179,7 +183,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		return $attrs;
 	}
 
-	private function loytyyko_toimenpide_tuote($tuoteno) {
+	private function loytyyko_tuote($tuoteno) {
 		$query = "	SELECT *
 					FROM tuote
 					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
@@ -257,6 +261,8 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$result = pupe_query($query);
 		$kpl = mysql_num_rows($result);
 		echo "Sammuttimia joilla on enemmän tai vähemmän kuin 3 huoltosykliä liitettynä {$kpl}";
+
+		echo "<br/>";
 
 		$query = "	SELECT *
 					FROM   laite

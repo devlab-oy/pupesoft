@@ -172,8 +172,8 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					JOIN asiakas
 					ON ( asiakas.yhtio = kohde.yhtio
 						AND asiakas.tunnus = kohde.asiakas )
-					WHERE yhtio = '{$this->kukarow['yhtio']}'
-					AND koodi = '{$koodi}'";
+					WHERE laite.yhtio = '{$this->kukarow['yhtio']}'
+					AND laite.koodi = '{$koodi}'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -188,15 +188,15 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			return true;
 		}
 
-		$query = "	SELECT tuoteno,
+		$query = "	SELECT tuote.tuoteno,
 					tuotteen_avainsanat.selite
 					FROM tuote
 					JOIN tuotteen_avainsanat
 					ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
 						AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
 						AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
-					WHERE yhtio = '{$this->kukarow['yhtio']}'
-					AND tuoteno = '{$tuoteno}'";
+					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
+					AND tuote.tuoteno = '{$tuoteno}'";
 		$result = pupe_query($query);
 		if (mysql_num_rows($result) == 1) {
 			$tuote = mysql_fetch_assoc($result);
@@ -213,7 +213,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					JOIN huoltosyklit_laitteet
 					ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
 						AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
-						AND huoltosykli_laitteet.laite_tunnus = '{$laite_tunnus}' )
+						AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}' )
 					WHERE huoltosykli.yhtio = '{$this->kukarow['yhtio']}'
 					AND huoltosykli.toimenpide = '{$toimenpide_tuoteno}'";
 		$result = pupe_query($query);

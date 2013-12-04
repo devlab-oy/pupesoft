@@ -22,14 +22,15 @@ class LaiteCSVDumper extends CSVDumper {
 			'koodi'			 => 'KOODI',
 			'kohde'			 => 'SIJAINTI', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
 			'paikka_tark'	 => 'TASO3', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
+			'asiakas_nimi'	 => 'KUSTPAIKKA', //koska paikan ja kohteen nimien yhdistelmä ei ole uniikki pitää aineistosta lukea myös asiakkaan nimi, jonka avulla laite saadaa lisättyä paikkaan. nämä pitää unsettaa ennen dumppia
 		);
 		$required_fields = array(
 			'tuoteno',
 			'paikka',
 		);
 
-		$this->setFilepath("/tmp/konversio/LAITE_s.csv");
-		$this->setSeparator(';');
+		$this->setFilepath("/tmp/konversio/LAITE.csv");
+		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('laite');
@@ -74,6 +75,8 @@ class LaiteCSVDumper extends CSVDumper {
 			}
 		}
 
+		$rivi_temp['tila'] = 'N';
+
 		return $rivi_temp;
 	}
 
@@ -82,13 +85,15 @@ class LaiteCSVDumper extends CSVDumper {
 		foreach ($rivi as $key => $value) {
 			if ($key == 'paikka') {
 				if ($value != '') {
-					$paikka_tunnus = $this->hae_paikka_tunnus($value, $rivi['kohde']);
+					$paikka_tunnus = $this->hae_paikka_tunnus($value, $rivi['kohde'], $rivi['asiakas_nimi']);
+					$paikan_nimi = $value;
 				}
 				else {
-					$paikka_tunnus = $this->hae_paikka_tunnus($rivi['kohde'] . ' - '. $rivi['paikka_tark'], $rivi['kohde']);
+					$paikka_tunnus = $this->hae_paikka_tunnus($rivi['kohde'].' - '.$rivi['paikka_tark'], $rivi['kohde'], $rivi['asiakas_nimi']);
+					$paikan_nimi = $rivi['kohde'].' - '.$rivi['paikka_tark'];
 				}
 				if ($paikka_tunnus == 0 and in_array($key, $this->required_fields)) {
-					$this->errors[$index][] = t('Paikkaa')." <b>{$value}</b> ".t('ei löydy');
+					$this->errors[$index][] = t('Paikkaa')." <b>{$paikan_nimi}</b> ".t('ei löydy');
 					$valid = false;
 				}
 				else {
@@ -122,6 +127,7 @@ class LaiteCSVDumper extends CSVDumper {
 		unset($rivi['nimitys']);
 		unset($rivi['kohde']);
 		unset($rivi['paikka_tark']);
+		unset($rivi['asiakas_nimi']);
 
 		return $valid;
 	}
@@ -211,16 +217,39 @@ class LaiteCSVDumper extends CSVDumper {
 		pupe_query($query);
 	}
 
-	private function hae_paikka_tunnus($paikan_nimi, $kohde_nimi) {
-		$query = '	SELECT tunnus
+	private function hae_paikka_tunnus($paikan_nimi, $kohde_nimi, $asiakas_nimi) {
+		$asiakas_join = '	JOIN asiakas
+							ON ( asiakas.yhtio = kohde.yhtio
+								AND asiakas.tunnus = kohde.asiakas
+								AND asiakas.nimi = "'.$asiakas_nimi.'" )';
+		$query = '	SELECT paikka.tunnus
 					FROM paikka
 					JOIN kohde
 					ON ( kohde.yhtio = paikka.yhtio
 						AND kohde.tunnus = paikka.kohde
-						AND kohde.nimi = "'.$kohde_nimi.'")
-					WHERE yhtio = "'.$this->kukarow['yhtio'].'"
-					AND nimi = "'.$paikan_nimi.'"';
+						AND kohde.nimi = "'.$kohde_nimi.'" )
+					WHERE paikka.yhtio = "'.$this->kukarow['yhtio'].'"
+					AND paikka.nimi = "'.$paikan_nimi.'"';
 		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			return 0;
+		}
+
+		//jos paikan ja kohteen nimen yhdistelmä ei ole uniikki niin, kokeillaan lisätä asiakkaan nimi
+		if (mysql_num_rows($result) != 1) {
+			$query = '	SELECT paikka.tunnus
+						FROM paikka
+						JOIN kohde
+						ON ( kohde.yhtio = paikka.yhtio
+							AND kohde.tunnus = paikka.kohde
+							AND kohde.nimi = "'.$kohde_nimi.'" )
+						'.$asiakas_join.'
+						WHERE paikka.yhtio = "'.$this->kukarow['yhtio'].'"
+						AND paikka.nimi = "'.$paikan_nimi.'"';
+			$result = pupe_query($query);
+		}
+
 		$paikkarow = mysql_fetch_assoc($result);
 
 		if (!empty($paikkarow)) {
@@ -231,18 +260,28 @@ class LaiteCSVDumper extends CSVDumper {
 	}
 
 	protected function tarkistukset() {
-		$query = "	SELECT count(*) as kpl
+		$query = "	SELECT paikka.tunnus
 					FROM paikka
-					LEFT JOIN laite
-					ON ( laite.yhtio = paikka.yhtio
-						AND laite.paikka = paikka.tunnus )
-					WHERE paikka.yhtio = '{$this->kukarow['yhtio']}'
-					AND laite.paikka IS NULL;";
-
+					WHERE yhtio = '{$this->kukarow['yhtio']}'";
 		$result = pupe_query($query);
-		$kpl = mysql_fetch_assoc($result);
 
-		echo "{$kpl['kpl']} paikkaa ilman laitetta!!!!";
+		$paikat = array();
+		while($paikka = mysql_fetch_assoc($result)) {
+			$paikat[] = $paikka;
+		}
+
+		$query = "	SELECT DISTINCT laite.paikka
+					FROM laite
+					WHERE yhtio = '{$this->kukarow['yhtio']}'";
+  		$result = pupe_query($query);
+		$laitteiden_paikat = array();
+		while($laitteen_paikka = mysql_fetch_assoc($result)) {
+			$laitteiden_paikat[] = $laitteen_paikka;
+		}
+
+		$kpl = count($paikat) - count($laitteiden_paikat);;
+
+		echo "{$kpl} paikkaa ilman laitetta!!!!";
 	}
 
 }

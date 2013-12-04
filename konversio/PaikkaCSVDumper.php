@@ -138,6 +138,20 @@ class PaikkaCSVDumper extends CSVDumper {
 			return $kohderow['tunnus'];
 		}
 
+		//Kokeillaan hakea suoraan kohteen nimellä, jos se olisi uniikki
+
+		$query = "	SELECT kohde.tunnus
+					FROM kohde
+					WHERE kohde.yhtio = '{$this->kukarow['yhtio']}'
+					AND kohde.nimi = '{$kohde_nimi}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 1) {
+			$kohderow = mysql_fetch_assoc($result);
+			
+			return $kohderow['tunnus'];
+		}
+
 		return 0;
 	}
 

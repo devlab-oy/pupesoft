@@ -62,6 +62,14 @@ class PaikkaCSVDumper extends CSVDumper {
 						$rivi_temp[$konvertoitu_header] = '';
 					}
 				}
+				else if ($konvertoitu_header == 'nimi') {
+					if ($rivi[$csv_header] == '') {
+						$rivi_temp[$konvertoitu_header] = $rivi['SIJAINTI'].' - '.$rivi['TASO3'];
+					}
+					else {
+						$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
+					}
+				}
 				else {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
 				}
@@ -95,15 +103,14 @@ class PaikkaCSVDumper extends CSVDumper {
 		$paikat = $this->unique_values[$rivi['kohde']];
 		if (!empty($paikat)) {
 			foreach ($paikat as $paikka) {
-				if ($paikka == $rivi['nimi']) {
+				if (trim(strtolower($paikka)) == trim(strtolower($rivi['nimi']))) {
 					//kyseinen paikka on jo kohteella
 					$valid = false;
 					break;
 				}
 			}
 		}
-
-		//Jos paikka on validi niin se voidaan lisätä kohteen paikkoihin
+//		Jos paikka on validi niin se voidaan lisätä kohteen paikkoihin
 		if ($valid) {
 			$this->unique_values[$rivi['kohde']][] = $rivi['nimi'];
 		}
@@ -136,6 +143,17 @@ class PaikkaCSVDumper extends CSVDumper {
 		$ilman_olosuhdetta = mysql_fetch_assoc($result);
 
 		echo "{$ilman_olosuhdetta['kpl']} paikkaa ilman olosuhdetta!!";
+
+		echo "<br/>";
+
+		$query = "	SELECT count(*) as kpl
+					FROM paikka
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND nimi = ''";
+		$result = pupe_query($query);
+		$ilman_nimea = mysql_fetch_assoc($result);
+
+		echo "{$ilman_nimea['kpl']} paikkaa ilman nimeä!!";
 	}
 
 }

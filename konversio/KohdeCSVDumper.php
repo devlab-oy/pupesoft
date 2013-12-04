@@ -12,7 +12,6 @@ class KohdeCSVDumper extends CSVDumper {
 		$konversio_array = array(
 			'asiakas'	 => 'ASIAKAS',
 			'nimi'		 => 'LINJA',
-			//'nimi'		 => 'NIMI',
 			'nimitark'	 => 'KOODI',
 			'osoite'	 => 'KATUOS',
 			'postitp'	 => 'POSTIOS',

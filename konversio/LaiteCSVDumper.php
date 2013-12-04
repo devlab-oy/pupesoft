@@ -10,16 +10,18 @@ class LaiteCSVDumper extends CSVDumper {
 		parent::__construct($kukarow);
 
 		$konversio_array = array(
-			'tuoteno'	 => 'MALLI',
-			'nimitys'	 => 'NIMI',
-			'tyyppi'	 => 'TYYPPI',
-			'koko'		 => 'PAINO',
-			'sarjanro'	 => 'MITAT',
-			'valm_pvm'	 => 'TOIMPVM', //?? sarake on kauttaaltaan tyhjä
-			'oma_numero' => 'DATA20',
-			'paikka'	 => 'LISASIJAINTI',
-			'sijainti'	 => 'LISASIJAINTI',
-			'koodi'		 => 'KOODI',
+			'tuoteno'		 => 'MALLI',
+			'nimitys'		 => 'NIMI',
+			'tyyppi'		 => 'TYYPPI',
+			'koko'			 => 'PAINO',
+			'sarjanro'		 => 'MITAT',
+			'valm_pvm'		 => 'DATA10',
+			'oma_numero'	 => 'DATA20',
+			'paikka'		 => 'LISASIJAINTI',
+			'sijainti'		 => 'LISASIJAINTI',
+			'koodi'			 => 'KOODI',
+			'kohde'			 => 'SIJAINTI', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
+			'paikka_tark'	 => 'TASO3', //jos paikalla ei ole nimeä, muodostetaan nimi SIJAINTI - TASO3, nämä pitää unsettaa ennen dumppia
 		);
 		$required_fields = array(
 			'tuoteno',
@@ -79,7 +81,12 @@ class LaiteCSVDumper extends CSVDumper {
 		$valid = true;
 		foreach ($rivi as $key => $value) {
 			if ($key == 'paikka') {
-				$paikka_tunnus = $this->hae_paikka_tunnus($value);
+				if ($value != '') {
+					$paikka_tunnus = $this->hae_paikka_tunnus($value);
+				}
+				else {
+					$paikka_tunnus = $this->hae_paikka_tunnus($rivi['kohde'] . ' - '. $rivi['paikka_tark']);
+				}
 				if ($paikka_tunnus == 0 and in_array($key, $this->required_fields)) {
 					$this->errors[$index][] = t('Paikkaa')." <b>{$value}</b> ".t('ei löydy');
 					$valid = false;
@@ -113,6 +120,8 @@ class LaiteCSVDumper extends CSVDumper {
 		unset($rivi['tyyppi']);
 		unset($rivi['koko']);
 		unset($rivi['nimitys']);
+		unset($rivi['kohde']);
+		unset($rivi['paikka_tark']);
 
 		return $valid;
 	}

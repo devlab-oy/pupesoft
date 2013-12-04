@@ -540,14 +540,16 @@ else {
 	$vastasumma = round($vastasumma,2);
 	$vastasumma_valuutassa = round($vastasumma_valuutassa,2);
 
+	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"], $maksimisumma_kustp, $maksimisumma_kohde, $maksimisumma_projekti);
+
 	if ($vastasumma != $loppusumma or ($lasku['valkoodi'] != $yhtiorow['valkoodi'] and $vastasumma_valuutassa != $loppusumma_valuutassa)) {
 		$query = "	INSERT into tiliointi set
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$tunnus',
 					tilino 				= '$yhtiorow[pyoristys]',
 					kustp 				= $kustp_ins,
-					kohde 				= 0,
-					projekti 			= 0,
+					kohde 				= $kohde_ins,
+					projekti 			= $projekti_ins,
 					tapvm 				= '$tapvm',
 					summa 				= $vastasumma - $loppusumma,
 					summa_valuutassa 	= $vastasumma_valuutassa - $loppusumma_valuutassa,

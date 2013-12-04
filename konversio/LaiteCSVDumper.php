@@ -82,10 +82,10 @@ class LaiteCSVDumper extends CSVDumper {
 		foreach ($rivi as $key => $value) {
 			if ($key == 'paikka') {
 				if ($value != '') {
-					$paikka_tunnus = $this->hae_paikka_tunnus($value);
+					$paikka_tunnus = $this->hae_paikka_tunnus($value, $rivi['kohde']);
 				}
 				else {
-					$paikka_tunnus = $this->hae_paikka_tunnus($rivi['kohde'] . ' - '. $rivi['paikka_tark']);
+					$paikka_tunnus = $this->hae_paikka_tunnus($rivi['kohde'] . ' - '. $rivi['paikka_tark'], $rivi['kohde']);
 				}
 				if ($paikka_tunnus == 0 and in_array($key, $this->required_fields)) {
 					$this->errors[$index][] = t('Paikkaa')." <b>{$value}</b> ".t('ei löydy');
@@ -211,9 +211,13 @@ class LaiteCSVDumper extends CSVDumper {
 		pupe_query($query);
 	}
 
-	private function hae_paikka_tunnus($paikan_nimi) {
+	private function hae_paikka_tunnus($paikan_nimi, $kohde_nimi) {
 		$query = '	SELECT tunnus
 					FROM paikka
+					JOIN kohde
+					ON ( kohde.yhtio = paikka.yhtio
+						AND kohde.tunnus = paikka.kohde
+						AND kohde.nimi = "'.$kohde_nimi.'")
 					WHERE yhtio = "'.$this->kukarow['yhtio'].'"
 					AND nimi = "'.$paikan_nimi.'"';
 		$result = pupe_query($query);
@@ -227,7 +231,18 @@ class LaiteCSVDumper extends CSVDumper {
 	}
 
 	protected function tarkistukset() {
-		echo "Ei tarkistuksia";
+		$query = "	SELECT count(*) as kpl
+					FROM paikka
+					LEFT JOIN laite
+					ON ( laite.yhtio = paikka.yhtio
+						AND laite.paikka = paikka.tunnus )
+					WHERE paikka.yhtio = '{$this->kukarow['yhtio']}'
+					AND laite.paikka IS NULL;";
+
+		$result = pupe_query($query);
+		$kpl = mysql_fetch_assoc($result);
+
+		echo "{$kpl['kpl']} paikkaa ilman laitetta!!!!";
 	}
 
 }

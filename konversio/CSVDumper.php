@@ -126,6 +126,7 @@ abstract class CSVDumper {
 			$rivi = $this->to_assoc($rivi, $csv_headerit);
 
 			array_walk($rivi, array($this, 'escape_single_quotes'));
+			array_walk($rivi, 'trim');
 
 			$rivit[] = $rivi;
 
@@ -154,6 +155,8 @@ abstract class CSVDumper {
 		}
 		$header_rivi = explode($this->separator, $header_rivi);
 		fclose($file);
+
+		array_walk($header_rivi, 'trim');
 
 		return $header_rivi;
 	}
@@ -200,6 +203,14 @@ abstract class CSVDumper {
 
 	private function escape_single_quotes(&$item, $key) {
 		$item = str_replace("'", "\'", $item);
+	}
+
+	protected function all_required_keys_found($rivi) {
+		if(count(array_intersect_key(array_flip($this->required_fields), $rivi)) !== count($this->required_fields)) {
+			return false;
+		}
+
+		return true;
 	}
 
 	abstract protected function konvertoi_rivit();

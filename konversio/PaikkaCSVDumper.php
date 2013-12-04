@@ -11,6 +11,7 @@ class PaikkaCSVDumper extends CSVDumper {
 
 		$konversio_array = array(
 			'kohde'		 => 'SIJAINTI',
+			'kohde_tark' => 'KUSTPAIKKA', //koska kohteen nimi ei ole uniikki niin paikka pitää liittää kohteeseen asiakkaan ja kohteen nimien avulla, unsettaa tämä ennen dumppia
 			'nimi'		 => 'LISASIJAINTI',
 			'osoite'	 => 'SIJAINTI',
 			'kuvaus'	 => 'SIJAINTI',
@@ -83,7 +84,7 @@ class PaikkaCSVDumper extends CSVDumper {
 		$valid = true;
 		foreach ($rivi as $key => $value) {
 			if ($key == 'kohde') {
-				$kohde_tunnus = $this->hae_kohde_tunnus($value);
+				$kohde_tunnus = $this->hae_kohde_tunnus($value, $rivi['kohde_tark']);
 				if ($kohde_tunnus == 0 and in_array($key, $this->required_fields)) {
 					$this->errors[$index][] = t('Kohdetta')." <b>{$value}</b> ".t('ei löydy');
 					$valid = false;
@@ -115,14 +116,20 @@ class PaikkaCSVDumper extends CSVDumper {
 			$this->unique_values[$rivi['kohde']][] = $rivi['nimi'];
 		}
 
+		unset($rivi['kohde_tark']);
+
 		return $valid;
 	}
 
-	private function hae_kohde_tunnus($kohde_nimi) {
-		$query = '	SELECT tunnus
+	private function hae_kohde_tunnus($kohde_nimi, $asiakas_nimi) {
+		$query = '	SELECT kohde.tunnus
 					FROM kohde
-					WHERE yhtio = "'.$this->kukarow['yhtio'].'"
-					AND nimi = "'.$kohde_nimi.'"
+					JOIN asiakas
+					ON ( asiakas.yhtio = kohde.yhtio
+						AND asiakas.tunnus = kohde.asiakas
+						AND asiakas.nimi = "'.$asiakas_nimi.'" )
+					WHERE kohde.yhtio = "'.$this->kukarow['yhtio'].'"
+					AND kohde.nimi = "'.$kohde_nimi.'"
 					LIMIT 1';
 		$result = pupe_query($query);
 		$kohderow = mysql_fetch_assoc($result);

@@ -2048,6 +2048,30 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
+
+			$query = "	SELECT DISTINCT kuka.kuka, kuka.nimi
+						FROM kuka
+						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.oletus_asiakas = {$trow["tunnus"]}
+						ORDER BY kuka.nimi";
+			$extkukares = pupe_query($query);
+
+			if (mysql_num_rows($extkukares) > 0) {
+				
+				echo "<br><font class='head'>".t("Extranet-k‰ytt‰j‰t")."</font><hr>";
+				echo "<table>";
+				echo "<tr><th>".t("K‰ytt‰j‰tunnus")."</th><th>".t("Nimi")."</th></tr>";
+				
+				while ($extkukarow = mysql_fetch_assoc($extkukares)) {
+					echo "<tr><td>{$extkukarow["kuka"]}</td><td>{$extkukarow["nimi"]}</td></tr>";
+				}
+
+				echo "</table>";
+			}
+		}
+
 		echo "</td></tr>";
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa

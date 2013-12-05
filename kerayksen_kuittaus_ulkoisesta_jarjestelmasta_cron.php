@@ -15,6 +15,10 @@
 		die ("Et antanut luettavien tiedostojen polkua!\n");
 	}
 
+	if (trim($argv[3]) == '') {
+		die ("Et antanut sähköpostiosoitetta!\n");
+	}
+
 	// lisätään includepathiin pupe-root
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 	error_reporting(E_ALL);
@@ -47,6 +51,8 @@
 	$path = trim($argv[2]);
 	$path = substr($path, -1) != '/' ? $path.'/' : $path;
 
+	$error_email = trim($argv[3]);
+
 	if ($handle = opendir($path)) {
 
 		while (false !== ($file = readdir($handle))) {
@@ -74,11 +80,29 @@
 
 						$tuotteiden_paino = 0;
 
+						$kerayspoikkeama = array();
+
 						foreach ($xml->CustPackingSlip->Lines as $line) {
 
 							$tilausrivin_tunnus = (int) $line->TransId;
 							$eankoodi = mysql_real_escape_string($line->ItemNumber);
 							$keratty = (float) $line->DeliveredQuantity;
+
+							$query = "	SELECT varattu, tuoteno
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$tilausrivin_tunnus}'";
+							$tilausrivi_res = pupe_query($query);
+							$tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
+
+							$a = (int) ($tilausrivi_row['varattu'] * 10000);
+							$b = (int) ($keratty * 10000);
+
+							if ($a != $b) {
+								$kerayspoikkeama[$tilausrivi_row['tuoteno']['tilauksella'] = $tilausrivi_row['varattu'];
+								$kerayspoikkeama[$tilausrivi_row['tuoteno']['keratty'] = $keratty;
+								$keratty = $tilausrivi_row['varattu'];
+							}
 
 							$query = "	UPDATE tilausrivi
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -127,6 +151,30 @@
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$laskurow['tunnus']}'";
 						$upd_res = pupe_query($query);
+
+						if (count($kerayspoikkeama) != 0) {
+
+							$body = t("Tilauksen %d keräyksessä on havaittu poikkeamia", "", $otunnus).":<br><br>\n\n";
+
+							$body .= t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella")."<br>\n";
+
+							foreach ($kerayspoikkeama as $tuoteno) {
+
+								foreach ($tuoteno as $key => $_arr) {
+									$body .= "{$key} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
+								}
+							}
+
+							$params = array(
+								'to' => $error_email,
+								'cc' => '',
+								'subject' => t("Posten keräyspoikkeama")." - {$otunnus}",
+								'ctype' => 'html',
+								'body' => $body,
+							);
+
+							pupesoft_sahkoposti($params);
+						}
 
 						unlink($path.$file);
 					}

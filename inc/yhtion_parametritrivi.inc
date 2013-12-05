@@ -552,7 +552,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "alv_kasittely_hintamuunnos") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -567,8 +567,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value='' $sel1>".t("Tuotteiden myyntihintoja ei muunneta")."</option>";
-		$ulos .= "<option value='o' $sel2>".t("Tuotteiden myyntihinnat muunnetaan verollisuuden mukaan")."</option>";
+		$ulos .= "<option value='' $sel1>".t("Tuotteiden myyntihinnat syötetään alv_kasittely-parametrin mukaisesti verollisina/verottomina")."</option>";
+		$ulos .= "<option value='o' $sel2>".t("Tuotteiden myyntihinnat syötetään myyntitilauksella verollisina/verottomina sen mukaan näytetäänkö tilauksella verolliset vai verottomat hinnat")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

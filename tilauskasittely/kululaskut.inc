@@ -678,7 +678,7 @@ if ($silent == "") {
 		$kentta   = "haku";
 	}
 
-	if(!isset($hakutapa) and !isset($tee_kululaskut) and $keikanalatila == "") {
+	if (((!isset($hakutapa) and !isset($tee_kululaskut)) or ($haku == '' and $tee_kululaskut == 'haku')) and $keikanalatila == "") {
 		$hakutapa 		= "N";
 		$haku 			= substr($laskurow["nimi"], 0, 25);
 		$tee_kululaskut = "haku";

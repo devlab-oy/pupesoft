@@ -121,6 +121,8 @@ class KohdeCSVDumper extends CSVDumper {
 					SET ytunnus = 'Kaato-asiakas',
 					nimi = '{$asiakas_nimi}',
 					asiakasnro = '{$asiakasnumero}',
+					toimitustapa = 'Nouto',
+					maa = 'FI',
 					laatija = 'import',
 					luontiaika = NOW(),
 					yhtio = '{$this->kukarow['yhtio']}'";

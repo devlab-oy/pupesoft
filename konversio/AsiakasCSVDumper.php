@@ -82,6 +82,14 @@ class AsiakasCSVDumper extends CSVDumper {
 		return $valid;
 	}
 
+	protected function lisaa_pakolliset_kentat($rivi) {
+		$rivi = parent::lisaa_pakolliset_kentat($rivi);
+		$rivi['maa'] = 'FI';
+		$rivi['toimitustapa'] = 'Nouto';
+
+		return $rivi;
+	}
+
 	protected function tarkistukset() {
 		echo "Ei tarkistuksia";
 	}

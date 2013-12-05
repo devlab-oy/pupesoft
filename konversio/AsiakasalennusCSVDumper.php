@@ -110,12 +110,15 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 	}
 	
 	private function luo_asiakas($asiakas_tunnus) {
-		$query = "	INSERT INTO asiakas "
-				. "SET nimi = 'Kaato-asiakas',"
-				. "asiakasnro = '{$asiakas_tunnus}',"
-				. "laatija = 'import',"
-				. "luontiaika = NOW(),"
-				. "yhtio = '{$this->kukarow['yhtio']}'";
+		$query = "	INSERT INTO asiakas
+					SET ytunnus = 'Kaato-asiakas',
+					nimi = 'Kaato-asiakas',
+					asiakasnro = '{$asiakas_tunnus}',
+					toimitustapa = 'Nouto',
+					maa = 'FI',
+					laatija = 'import',
+					luontiaika = NOW(),
+					yhtio = '{$this->kukarow['yhtio']}'";
 		pupe_query($query);
 	}
 

@@ -409,6 +409,44 @@ function aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $ajankohta) {
 	pupe_query($query);
 }
 
+function aseta_tyomaaraysten_status($lasku_tunnukset, $status) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE tyomaarays
+				SET tyostatus = '{$status}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tyomaarays.otunnus IN ('".implode("','", $lasku_tunnukset)."')";
+	pupe_query($query);
+}
+
+function merkkaa_tyomaarays_tehdyksi($request) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE lasku
+				SET tila = 'L',
+				alatila = 'D'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+	pupe_query($query);
+
+	//Toimitettuaika manual setti‰ k‰ytet‰‰n konversio-ajossa
+	if (empty($request['toimitettuaika'])) {
+		$toimitettuaika_update = "toimitettuaika = NOW()";
+	}
+	else {
+		$toimitettuaika_update = "toimitettuaika = '{$request['toimitettuaika']}'";
+	}
+
+	$query = "	UPDATE tilausrivi
+				SET toimitettu = '{$kukarow['kuka']}',
+				{$toimitettuaika_update}
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+	pupe_query($query);
+
+	aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'X');
+}
+
 function hae_tyomaarays($tyomaarays_tunnus) {
 	global $kukarow;
 

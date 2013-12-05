@@ -259,11 +259,11 @@
 	$hinta	= str_replace(',', '.', $hinta);
 
 	// lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
-	if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
 		$hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
 	}
 	// poistetaan alvit (jos hintamuunnos p‰‰ll‰)
-	if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
 		$hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
 	}
 

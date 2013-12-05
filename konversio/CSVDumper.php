@@ -1,6 +1,6 @@
 <?php
 
-require_once('inc/ProgressBar.class.php');
+//require_once('inc/ProgressBar.class.php');
 
 abstract class CSVDumper {
 
@@ -111,15 +111,14 @@ abstract class CSVDumper {
 		}
 
 		echo "<br/>";
-		
+
 		$this->tarkistukset();
 	}
 
 	protected function lue_csv_tiedosto() {
-		$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
-
-		$progress_bar = new ProgressBar(t('Luetaan rivit'));
-		$progress_bar->initialize(count($number_of_lines));
+//		$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
+//		$progress_bar = new ProgressBar(t('Luetaan rivit'));
+//		$progress_bar->initialize(count($number_of_lines));
 
 		$csv_headerit = $this->lue_csv_tiedoston_otsikot();
 		$file = fopen($this->filepath, "r") or die("Ei aukea!\n");
@@ -136,7 +135,7 @@ abstract class CSVDumper {
 
 			if (isset($this->column_count) and count($rivi) != $this->column_count) {
 				$i++;
-				$progress_bar->increase();
+//				$progress_bar->increase();
 				continue;
 			}
 
@@ -149,7 +148,7 @@ abstract class CSVDumper {
 
 			$i++;
 
-			$progress_bar->increase();
+//			$progress_bar->increase();
 		}
 
 		fclose($file);
@@ -227,7 +226,7 @@ abstract class CSVDumper {
 	}
 
 	protected function all_required_keys_found($rivi) {
-		if(count(array_intersect_key(array_flip($this->required_fields), $rivi)) !== count($this->required_fields)) {
+		if (count(array_intersect_key(array_flip($this->required_fields), $rivi)) !== count($this->required_fields)) {
 			return false;
 		}
 

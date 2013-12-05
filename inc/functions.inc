@@ -1269,7 +1269,6 @@ if (!function_exists("saldo_myytavissa")) {
 		// Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
 		global $kukarow, $yhtiorow;
 
-
 		$varaako_jt_saldoa = "";
 
 		if ($tyyppi == "JTSPEC" and $yhtiorow["varaako_jt_saldoa"] != "") {
@@ -1318,11 +1317,21 @@ if (!function_exists("saldo_myytavissa")) {
 			$myytavissa		= 0;
 		}
 		else {
-
-			if ($yhtio != "") {
+			if ($yhtio != "" and $yhtio != $kukarow["yhtio"]) {
 				// Jos yhtiö tulee parametrinä niin katsotaan, ettei se ole ihan mitä sattuu ja lasketaan sen yhtiön saldo
-				// (TÄMÄ OMINAISUUS DEPRECATED!)
-				$yhtiolisa = $kukarow["yhtio"];
+				$query	= "	SELECT yhtio
+							FROM yhtio
+							WHERE konserni = '$yhtiorow[konserni]'
+							AND konserni != ''
+							AND yhtio = '$yhtio'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtiolisa = $yhtio;
+				}
+				else {
+					$yhtiolisa = $kukarow["yhtio"];
+				}
 			}
 			else {
 				$yhtiolisa = $kukarow["yhtio"];

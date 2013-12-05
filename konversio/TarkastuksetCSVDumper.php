@@ -7,6 +7,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 	protected $unique_values = array();
 	protected $products = array();
+	protected $laitteet = array();
 
 	public function __construct($kukarow) {
 		parent::__construct($kukarow);
@@ -23,6 +24,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			'toimaika'	 => 'ED',
 			'toimitettu' => 'SEUR',
 			'status'	 => 'STATUS',
+			'id'		 => 'ID' // for debug reasons, unset
 		);
 		$required_fields = array(
 			'laite',
@@ -34,11 +36,15 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('tyomaarays');
+		$this->setColumnCount(26);
 	}
 
 	protected function konvertoi_rivit() {
 		$progressbar = new ProgressBar(t('Konvertoidaan rivit'));
 		$progressbar->initialize(count($this->rivit));
+
+		$this->hae_kaikki_laitteet();
+		$this->hae_tuotteet();
 
 		foreach ($this->rivit as $index => &$rivi) {
 			$rivi = $this->konvertoi_rivi($rivi);
@@ -81,7 +87,8 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			}
 
 			if ($key == 'laite') {
-				$laite = $this->hae_laite_koodilla($rivi[$key]);
+				$laite = $this->laitteet[$rivi[$key]];
+				//$laite = $this->hae_laite_koodilla($rivi[$key]);
 
 				if (isset($laite['laite_tunnus']) and is_numeric($laite['laite_tunnus'])) {
 					$rivi[$key] = $laite['laite_tunnus'];
@@ -128,6 +135,9 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
 		$progress_bar->initialize(count($this->rivit));
 		foreach ($this->rivit as $rivi) {
+			if (empty($rivi['laite'])) {
+				continue;
+			}
 			$params = array(
 				'asiakas_tunnus'			 => $rivi['liitostunnus'],
 				'toimenpide_tuotteen_tyyppi' => $rivi['toimenpide_tuotteen_tyyppi'],
@@ -142,18 +152,47 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			);
 			$tyomaarays_tunnus = generoi_tyomaarays($params);
 
-			$params = array(
-				'lasku_tunnukset' => array($tyomaarays_tunnus),
-				'toimitettuaika' => $rivi['toimitettu'],
-			);
-			merkkaa_tyomaarays_tehdyksi($params);
-			paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $rivi['huoltosykli_tunnus'], $rivi['toimitettu']);
+			if (!empty($tyomaarays_tunnus)) {
+				$params = array(
+					'lasku_tunnukset'	 => array($tyomaarays_tunnus),
+					'toimitettuaika'	 => $rivi['toimitettu'],
+				);
+				merkkaa_tyomaarays_tehdyksi($params);
+				paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $rivi['huoltosykli_tunnus'], $rivi['toimitettu']);
+			}
 
 			//TODO jos kyseessä on koeponnistus niin pitäisi osata merkata huollon ja tarkastuksen viimeinen tapahtuma oikein
 			//TODO poikkeukset pitää merkata historiaan.
-			
+
 			$progress_bar->increase();
 		}
+	}
+
+	private function hae_kaikki_laitteet() {
+		$query = "	SELECT laite.tunnus AS laite_tunnus,
+					laite.tuoteno,
+					laite.koodi,
+					paikka.nimi AS paikka_nimi,
+					kohde.nimi AS kohde_nimi,
+					asiakas.tunnus AS asiakas_tunnus
+					FROM laite
+					JOIN paikka
+					ON ( paikka.yhtio = laite.yhtio
+						AND paikka.tunnus = laite.paikka )
+					JOIN kohde
+					ON ( kohde.yhtio = paikka.yhtio
+						AND kohde.tunnus = paikka.kohde )
+					JOIN asiakas
+					ON ( asiakas.yhtio = kohde.yhtio
+						AND asiakas.tunnus = kohde.asiakas )
+					WHERE laite.yhtio = '{$this->kukarow['yhtio']}'";
+		$result = pupe_query($query);
+
+		while ($laite = mysql_fetch_assoc($result)) {
+			$this->laitteet[$laite['koodi']] = $laite;
+		}
+
+		return true;
 	}
 
 	private function hae_laite_koodilla($koodi) {
@@ -183,11 +222,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		return mysql_fetch_assoc($result);
 	}
 
-	private function loytyyko_tuote($tuoteno) {
-		if (array_key_exists($tuoteno, $this->products)) {
-			return true;
-		}
-
+	private function hae_tuotteet() {
 		$query = "	SELECT tuote.tuoteno,
 					tuotteen_avainsanat.selite
 					FROM tuote
@@ -195,12 +230,15 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
 						AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
 						AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
-					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
-					AND tuote.tuoteno = '{$tuoteno}'";
+					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'";
 		$result = pupe_query($query);
-		if (mysql_num_rows($result) == 1) {
-			$tuote = mysql_fetch_assoc($result);
+		while ($tuote = mysql_fetch_assoc($result)) {
 			$this->products[$tuote['tuoteno']] = $tuote;
+		}
+	}
+
+	private function loytyyko_tuote($tuoteno) {
+		if (array_key_exists($tuoteno, $this->products)) {
 			return true;
 		}
 

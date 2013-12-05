@@ -144,8 +144,8 @@ if ($request['action'] == 'aja_konversio') {
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Tarkastukset').':';
-			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
-			$dumper->aja();
+//			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
+//			$dumper->aja();
 			break;
 
 		default:
@@ -167,17 +167,17 @@ if ($request['action'] == 'aja_konversio') {
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 	$query_array = array(
-		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
-		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
+//		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',

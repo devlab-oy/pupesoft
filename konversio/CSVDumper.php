@@ -12,6 +12,7 @@ abstract class CSVDumper {
 	protected $rivit = array();
 	protected $kukarow = array();
 	protected $errors = array();
+	protected $column_count = 0;
 	private $mandatory_fields = array();
 
 	public function __construct($kukarow) {
@@ -54,6 +55,10 @@ abstract class CSVDumper {
 
 	protected function getErrors() {
 		return $this->errors;
+	}
+
+	protected function setColumnCount($column_count) {
+		$this->column_count = $column_count;
 	}
 
 	public function aja() {
@@ -111,6 +116,11 @@ abstract class CSVDumper {
 	}
 
 	protected function lue_csv_tiedosto() {
+		$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
+
+		$progress_bar = new ProgressBar(t('Luetaan rivit'));
+		$progress_bar->initialize(count($number_of_lines));
+
 		$csv_headerit = $this->lue_csv_tiedoston_otsikot();
 		$file = fopen($this->filepath, "r") or die("Ei aukea!\n");
 
@@ -123,6 +133,13 @@ abstract class CSVDumper {
 			}
 
 			$rivi = explode($this->separator, $rivi);
+
+			if (isset($this->column_count) and count($rivi) != $this->column_count) {
+				$i++;
+				$progress_bar->increase();
+				continue;
+			}
+
 			$rivi = $this->to_assoc($rivi, $csv_headerit);
 
 			array_walk($rivi, array($this, 'escape_single_quotes'));
@@ -131,11 +148,15 @@ abstract class CSVDumper {
 			$rivit[] = $rivi;
 
 			$i++;
+
+			$progress_bar->increase();
 		}
 
 		fclose($file);
 
 		$this->rivit = $rivit;
+
+		echo "<br/>";
 	}
 
 	private function to_assoc($rivi, $csv_headerit) {

@@ -3,6 +3,7 @@
 require_once('../inc/parametrit.inc');
 require_once('inc/tyojono2_functions.inc');
 require_once('validation/Validation.php');
+require_once('inc/laite_huolto_functions.inc');
 
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;

@@ -99,8 +99,8 @@
 							$b = (int) ($keratty * 10000);
 
 							if ($a != $b) {
-								$kerayspoikkeama[$tilausrivi_row['tuoteno']['tilauksella'] = $tilausrivi_row['varattu'];
-								$kerayspoikkeama[$tilausrivi_row['tuoteno']['keratty'] = $keratty;
+								$kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = $tilausrivi_row['varattu'];
+								$kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
 								$keratty = $tilausrivi_row['varattu'];
 							}
 

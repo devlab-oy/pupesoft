@@ -158,11 +158,8 @@
 
 							$body .= t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella")."<br>\n";
 
-							foreach ($kerayspoikkeama as $tuoteno => $arr) {
-
-								foreach ($arr as $key => $_arr) {
-									$body .= "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
-								}
+							foreach ($kerayspoikkeama as $tuoteno => $_arr) {
+								$body .= "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
 							}
 
 							$params = array(

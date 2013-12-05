@@ -258,6 +258,17 @@
 	$kpl	= str_replace(',', '.', $kpl);
 	$hinta	= str_replace(',', '.', $hinta);
 
+	// lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
+	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+		if (!isset($alv) or $alv == '') $alv = $trow['alv'];
+		$hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
+	}
+	// poistetaan alvit (jos hintamuunnos p‰‰ll‰)
+	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+		if (!isset($alv) or $alv == '') $alv = $trow['alv'];
+		$hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
+	}
+
 	if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 			${'ale'.$alepostfix} = str_replace(',', '.', ${'ale'.$alepostfix});

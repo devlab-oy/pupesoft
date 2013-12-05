@@ -84,7 +84,12 @@ if ($request['action'] == 'aja_konversio') {
 			break;
 
 		case 'tarkastukset':
-			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
+//			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
+			$tiedostot = lue_tiedostot('/tmp/konversio/tarkastukset/');
+			foreach ($tiedostot as $tiedosto) {
+				echo $tiedosto.'<br/>';
+				passthru("php tarkastukset.php {$tiedosto}");
+			}
 			break;
 
 		case 'kaikki':
@@ -153,7 +158,7 @@ if ($request['action'] == 'aja_konversio') {
 			break;
 	}
 
-	if ($request['konversio_tyyppi'] != 'kaikki') {
+	if ($request['konversio_tyyppi'] != 'kaikki' and isset($dumper)) {
 		$dumper->aja();
 	}
 
@@ -236,4 +241,21 @@ function echo_kayttoliittyma($request) {
 	echo "<input type='hidden' name='action' value='poista_konversio_aineisto_kannasta' />";
 	echo "<input type='submit' value='".t('Poista koko konversio aineisto')."' />";
 	echo "</form>";
+}
+
+function lue_tiedostot($polku) {
+	$tiedostot = array();
+	$handle = opendir($polku);
+	if ($handle) {
+		while (false !== ($tiedosto = readdir($handle))) {
+			if ($tiedosto != "." && $tiedosto != "..") {
+				if (is_file($polku.$tiedosto)) {
+					$tiedostot[] = $polku.$tiedosto;
+				}
+			}
+		}
+		closedir($handle);
+	}
+
+	return $tiedostot;
 }

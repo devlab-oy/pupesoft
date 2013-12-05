@@ -1,7 +1,7 @@
 <?php
 
 require_once('CSVDumper.php');
-require_once('inc/laite_huolto_functions.inc');
+require_once('/Users/joonas/Dropbox/Sites/pupesoft/inc/laite_huolto_functions.inc');
 
 class TarkastuksetCSVDumper extends CSVDumper {
 
@@ -9,7 +9,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	protected $products = array();
 	protected $laitteet = array();
 
-	public function __construct($kukarow) {
+	public function __construct($kukarow, $filepath) {
 		parent::__construct($kukarow);
 
 		$konversio_array = array(
@@ -31,7 +31,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			'toimenpide',
 		);
 
-		$this->setFilepath("/tmp/konversio/TARKASTUKSET.csv");
+		$this->setFilepath($filepath);
 		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
@@ -40,8 +40,8 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	}
 
 	protected function konvertoi_rivit() {
-		$progressbar = new ProgressBar(t('Konvertoidaan rivit'));
-		$progressbar->initialize(count($this->rivit));
+//		$progressbar = new ProgressBar(t('Konvertoidaan rivit'));
+//		$progressbar->initialize(count($this->rivit));
 
 		$this->hae_kaikki_laitteet();
 		$this->hae_tuotteet();
@@ -57,7 +57,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 				unset($this->rivit[$index]);
 			}
 
-			$progressbar->increase();
+//			$progressbar->increase();
 		}
 	}
 
@@ -132,9 +132,12 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	}
 
 	protected function dump_data() {
-		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
-		$progress_bar->initialize(count($this->rivit));
+//		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
+//		$progress_bar->initialize(count($this->rivit));
 		foreach ($this->rivit as $rivi) {
+			if (!empty($rivi['laite'])) {
+				echo $rivi['laite'].'<br/>';
+			}
 			if (empty($rivi['laite'])) {
 				continue;
 			}
@@ -164,7 +167,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			//TODO jos kyseessä on koeponnistus niin pitäisi osata merkata huollon ja tarkastuksen viimeinen tapahtuma oikein
 			//TODO poikkeukset pitää merkata historiaan.
 
-			$progress_bar->increase();
+//			$progress_bar->increase();
 		}
 	}
 
@@ -270,7 +273,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	}
 
 	protected function tarkistukset() {
-		echo "Ei tarkistuksia";
+//		echo "Ei tarkistuksia";
 	}
 
 }

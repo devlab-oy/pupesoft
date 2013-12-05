@@ -161,7 +161,7 @@
 							foreach ($kerayspoikkeama as $tuoteno) {
 
 								foreach ($tuoteno as $key => $_arr) {
-									$body .= "{$key} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
+									$body .= "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
 								}
 							}
 

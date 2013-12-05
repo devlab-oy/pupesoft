@@ -158,9 +158,9 @@
 
 							$body .= t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella")."<br>\n";
 
-							foreach ($kerayspoikkeama as $tuoteno) {
+							foreach ($kerayspoikkeama as $tuoteno => $arr) {
 
-								foreach ($tuoteno as $key => $_arr) {
+								foreach ($arr as $key => $_arr) {
 									$body .= "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
 								}
 							}

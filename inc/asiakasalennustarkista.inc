@@ -11,8 +11,8 @@ if(!function_exists("asiakasalennustarkista")) {
 				$virhe[$i] = t("Tieto puuttuu!");
 			}
 
-			if (abs(trim($t[$i])) > 100 AND abs(trim($t[$i])) != 999.99) {
-				$virhe[$i] = t("Alennus ei voi olla yli 100%");
+			if (abs(trim($t[$i])) > 100 AND (float)trim($t[$i]) != 999.99) {
+				$virhe[$i] = t("Alennus ei voi olla yli 100% (poikkeuksena 999.99, joka tarkoittaa ett‰ asiakkaalle myyd‰‰n myym‰l‰hinnalla)");
 			}
 		}
 

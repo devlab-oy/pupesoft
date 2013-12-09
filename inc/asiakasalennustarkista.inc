@@ -12,7 +12,7 @@ if(!function_exists("asiakasalennustarkista")) {
 			}
 
 			if (abs(trim($t[$i])) > 100 AND (float)trim($t[$i]) != 999.99) {
-				$virhe[$i] = t("Alennus ei voi olla yli 100% (poikkeuksena 999.99, joka tarkoittaa ett‰ asiakkaalle myyd‰‰n myym‰l‰hinnalla)");
+				$virhe[$i] = t("Alennus ei voi olla yli 100%");
 			}
 		}
 

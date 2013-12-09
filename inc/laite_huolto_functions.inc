@@ -224,8 +224,11 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime('now')));
 	}
 	else {
-		//merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
-		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")));
+		//poikkeus_paiva annetaan importissa. Normi generoinnissa t‰h‰n iffiin menn‰‰n.
+		if ($poikkeus_paiva == '') {
+			//merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
+			aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")));
+		}
 	}
 
 	if ($poikkeus_paiva != '') {

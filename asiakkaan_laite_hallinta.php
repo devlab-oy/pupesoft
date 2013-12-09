@@ -270,6 +270,11 @@ function echo_kohde_tr($kohde_index, $kohde) {
 	}
 	echo "&nbsp";
 	echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
+
+	if ($kohde['kohde_poistettu'] == 1) {
+		echo "<br/>";
+		echo '<font class="error">'.t('Poistettu').'</font>';
+	}
 	echo "</td>";
 
 	echo "<td>";
@@ -321,6 +326,11 @@ function echo_paikka_tr($kohde_index, $paikat = array()) {
 			echo "<br/>";
 			if (empty($kukarow['extranet'])) {
 				echo "<button class='poista_paikka'>".t("Poista paikka")."</button>";
+			}
+
+			if ($paikka['paikka_poistettu'] == 1) {
+				echo "<br/>";
+				echo '<font class="error">'.t('Poistettu').'</font>';
 			}
 			echo "</td>";
 
@@ -454,8 +464,10 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 	$query = "	SELECT asiakas.tunnus as asiakas_tunnus,
 				kohde.tunnus as kohde_tunnus,
 				kohde.nimi as kohde_nimi,
+				kohde.poistettu as kohde_poistettu,
 				paikka.tunnus as paikka_tunnus,
 				paikka.nimi as paikka_nimi,
+				paikka.poistettu as paikka_poistettu,
 				tuote.nimitys as tuote_nimi,
 				laite.tunnus as laite_tunnus,
 				{$select}
@@ -486,6 +498,7 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 		$kohde['tilan_selite'] = $laitteen_tila[0]['selitetark'];
 		$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_nimi'] = $kohde['kohde_nimi'];
 		$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_tunnus'] = $kohde['kohde_tunnus'];
+		$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_poistettu'] = $kohde['kohde_poistettu'];
 
 		if ($request['ala_tee'] == 'tulosta_kalustoraportti' and !empty($kohde['laite_tunnus'])) {
 			$kohde['viimeiset_tapahtumat'] = hae_laitteen_viimeiset_tapahtumat($kohde['laite_tunnus']);
@@ -494,6 +507,7 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 		if (!empty($kohde['paikka_tunnus']) and $request['ala_tee'] != 'tulosta_kalustoraportti') {
 			$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
 			$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
+			$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_poistettu'] = $kohde['paikka_poistettu'];
 		}
 		else if (!empty($kohde['paikka_tunnus']) and $request['ala_tee'] == 'tulosta_kalustoraportti') {
 			if (!empty($kohde['laite_tunnus'])) {
@@ -505,6 +519,7 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 				}
 				$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
 				$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
+				$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_poistettu'] = $kohde['paikka_poistettu'];
 			}
 		}
 	}

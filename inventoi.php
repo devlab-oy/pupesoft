@@ -701,19 +701,19 @@
 									$varcheckres = pupe_query($query);
 									$varcheckrow = mysql_fetch_assoc($varcheckres);
 
-									if ($varcheckrow['toimipaikka'] == "") $varcheckrow['toimipaikka'] = 0;
-
-									$query = "	SELECT kustp, kohde, projekti
-												FROM yhtion_toimipaikat
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus  = {$varcheckrow['toimipaikka']}";
-									$toimipaikkares = pupe_query($query);
-									$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+									if ($varcheckrow['toimipaikka'] != "") {
+										$query = "	SELECT kustp, kohde, projekti
+													FROM yhtion_toimipaikat
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus  = {$varcheckrow['toimipaikka']}";
+										$toimipaikkares = pupe_query($query);
+										$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+									}
 
 									// Otetaan ensisijaisesti kustannuspaikka toimipaikan takaa
-									$kustp_ins 		= $toimipaikkarow["kustp"] > 0 ? $toimipaikkarow["kustp"] : $tuote_row["kustp"];
-									$kohde_ins 		= $toimipaikkarow["kohde"] > 0 ? $toimipaikkarow["kohde"] : $tuote_row["kohde"];
-									$projekti_ins 	= $toimipaikkarow["projekti"] > 0 ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
+									$kustp_ins 		= isset($toimipaikkarow) and $toimipaikkarow["kustp"] > 0 ? $toimipaikkarow["kustp"] : $tuote_row["kustp"];
+									$kohde_ins 		= isset($toimipaikkarow) and $toimipaikkarow["kohde"] > 0 ? $toimipaikkarow["kohde"] : $tuote_row["kohde"];
+									$projekti_ins 	= isset($toimipaikkarow) and $toimipaikkarow["projekti"] > 0 ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
 								}
 								else {
 									// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa

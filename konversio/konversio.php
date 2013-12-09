@@ -86,8 +86,10 @@ if ($request['action'] == 'aja_konversio') {
 		case 'tarkastukset':
 			$tiedostot = lue_tiedostot('/tmp/konversio/tarkastukset/');
 			foreach ($tiedostot as $tiedosto) {
+				$tiedosto = "/tmp/konversio/tarkastukset/xba";
 				echo $tiedosto.'<br/>';
 				passthru("php tarkastukset.php {$tiedosto}");
+				die();
 			}
 			break;
 
@@ -143,8 +145,8 @@ if ($request['action'] == 'aja_konversio') {
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Huoltosyklit').':';
-//			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
-//			$dumper->aja();
+			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
+			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Tarkastukset').':';

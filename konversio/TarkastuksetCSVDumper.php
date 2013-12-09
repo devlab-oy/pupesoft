@@ -144,10 +144,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$i = 1;
 		echo "rivit: ".count($this->rivit).'<br/>';
 		foreach ($this->rivit as $rivi) {
-			if (empty($rivi['laite'])) {
-				echo "saatana <br/>";
-				continue;
-			}
 			$params = array(
 				'asiakas_tunnus'			 => $rivi['liitostunnus'],
 				'toimenpide_tuotteen_tyyppi' => $rivi['toimenpide_tuotteen_tyyppi'],
@@ -160,7 +156,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 				'tyojono'					 => 'joonas',
 				'viimeinen_tapahtuma'		 => $rivi['toimitettu'],
 			);
-			$tyomaarays_tunnus = generoi_tyomaarays($params);
+			$tyomaarays_tunnus = generoi_tyomaarays($params, array(), $rivi['toimaika']);
 
 			if (empty($tyomaarays_tunnus)) {
 				echo "<pre>";

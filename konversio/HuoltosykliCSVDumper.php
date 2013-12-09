@@ -442,6 +442,8 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$kpl = $laitetta - $laitetta_joilla_huoltosykli;
 		echo "Sammuttimia joilla ei ole yht‰‰n huoltosykli‰ liitettyn‰ {$kpl}";
 
+		echo "<br/>";
+
 		$query = "	SELECT tuote.tuoteno,
 					tuote.nimitys
 					FROM   tuote
@@ -458,6 +460,8 @@ class HuoltosykliCSVDumper extends CSVDumper {
 			echo $toimenpide_tuote['tuoteno'].' - '.$toimenpide_tuote['nimitys'].'<br/>';
 		}
 
+		echo "<br/>";
+		
 		$query = "	SELECT tuote.tuoteno,
 					tuote.nimitys
 					FROM   tuote

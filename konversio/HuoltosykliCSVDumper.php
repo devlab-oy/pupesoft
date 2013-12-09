@@ -79,12 +79,14 @@ class HuoltosykliCSVDumper extends CSVDumper {
 					$valid = false;
 				}
 				else if ($attrs == 0) {
-					$this->errors[$index][] = t('Huoltosyklin laitteelle')." <b>{$rivi[$key]}</b> ".t('löytyi 0 laitteen koko tai tyyppiä');
 					$loytyyko_laite_tuote = $this->loytyyko_tuote($rivi[$key]);
 					if (!$loytyyko_laite_tuote) {
-						$this->errors[$index][] = t('Laitetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
+						list($tyyppi, $koko) = $this->luo_tuote($rivi['toimenpide'], $rivi['nimitys'], $rivi[$key]);
+						$rivi['tyyppi'] = $tyyppi;
+						$rivi['koko'] = $koko;
+
+						$this->errors[$index][] = t('Laite tuote')." <b>{$rivi[$key]}</b> ".t('perustettiin');
 					}
-					$valid = false;
 				}
 				else {
 					$rivi['tyyppi'] = $attrs['tyyppi'];
@@ -94,10 +96,8 @@ class HuoltosykliCSVDumper extends CSVDumper {
 			else if ($key == 'toimenpide') {
 				$valid_temp = $this->loytyyko_tuote($rivi[$key]);
 				if (!$valid_temp) {
-					$this->errors[$index][] = t('Toimenpide tuotetta')." <b>{$rivi[$key]}</b> ".t('ei löytynyt');
-					if ($valid) {
-						$valid = false;
-					}
+					$nimitys = $this->luo_tuote($rivi[$key], $rivi['nimitys']);
+					$this->errors[$index][] = t('Luotiin toimenpide tuote')." <b>{$nimitys}</b> ";
 				}
 			}
 		}
@@ -244,6 +244,168 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		}
 	}
 
+	private function luo_tuote($toimenpide_tuoteno, $nimitys, $laite_tuoteno = '') {
+		$nimitys = strtolower($nimitys);
+
+
+		//Yritetään päätellä tuotenumerosta koko ja tyyppi
+		$koko = preg_replace('/[^1-9]/', '', $toimenpide_tuoteno);
+
+		//Tuotenumeron nimestä voidaan ottaa huollon tyyppi (2 merkkiä) sekä huollon kohteen koko (2 merkkiä) alusta ja lopusta pois
+		$tuoteno_temp = substr($toimenpide_tuoteno, 2);
+		$tuoteno_temp = substr($tuoteno_temp, 0, -2);
+
+		//Jos tuoteno_temp on 4 merkkiä kyseessä on paineellinen huoltosykli
+		if (strlen($tuoteno_temp) == 4) {
+			//Tyyppi on viimeiset 2
+			$tyyppi = substr($tuoteno_temp, 2, 4);
+			if ($tyyppi == 'ja') {
+				$tyyppi = 'jauhesammutin';
+			}
+			$tyyppi2 = substr($tuoteno_temp, 0, 2);
+			if ($tyyppi2 == 'pa') {
+				$tyyppi2 = 'paineellinen';
+			}
+			else if ($tyyppi2 == 'ep') {
+				$tyyppi2 = 'paineeton';
+			}
+		}
+		else {
+			if ($tuoteno_temp == 'co') {
+				$tyyppi = 'hiilidioksidisammutin';
+			}
+		}
+
+		if (!empty($tyyppi2)) {
+			$nimitys = $nimitys.' '.$tyyppi2.' '.$tyyppi.' '.$koko;
+		}
+		else {
+			$nimitys = $nimitys.' '.$tyyppi.' '.$koko;
+		}
+
+		if (!empty($laite_tuoteno)) {
+			$this->luo_laite_tuote($laite_tuoteno, $laite_tuoteno, $koko, $tyyppi);
+
+			return array($tyyppi, $koko);
+		}
+		else {
+			if ($nimitys == 'tarkastus') {
+				$tarkastustyyppi = 'tarkastus';
+				$prioriteetti = 3;
+			}
+			else if ($nimitys == 'huolto') {
+				$tarkastustyyppi = 'huolto';
+				$prioriteetti = 2;
+			}
+			else {
+				$tarkastustyyppi = 'koeponnistus';
+				$prioriteetti = 1;
+			}
+
+			$this->luo_toimenpide_tuote($toimenpide_tuoteno, $nimitys, $tarkastustyyppi, $prioriteetti);
+
+			return $nimitys;
+		}
+	}
+
+	private function luo_laite_tuote($tuoteno, $nimitys, $koko, $tyyppi) {
+		$query = "	INSERT INTO tuote
+					SET yhtio = '{$this->kukarow['yhtio']}',
+					tuoteno = '{$tuoteno}',
+					nimitys = '{$nimitys}',
+					try = '80',
+					tuotetyyppi = '',
+					ei_saldoa = '',
+					laatija = 'import',
+					luontiaika = NOW()";
+		pupe_query($query);
+
+		$query = '	INSERT INTO tuotteen_avainsanat
+						(
+							yhtio,
+							tuoteno,
+							kieli,
+							laji,
+							selite,
+							laatija,
+							luontiaika
+						)
+						VALUES
+						(
+							"'.$this->kukarow['yhtio'].'",
+							"'.$tuoteno.'",
+							"fi",
+							"sammutin_tyyppi",
+							"'.$tyyppi.'",
+							"import",
+							NOW()
+						)';
+		pupe_query($query);
+
+		$query = '	INSERT INTO tuotteen_avainsanat
+						(
+							yhtio,
+							tuoteno,
+							kieli,
+							laji,
+							selite,
+							laatija,
+							luontiaika
+						)
+						VALUES
+						(
+							"'.$this->kukarow['yhtio'].'",
+							"'.$tuoteno.'",
+							"fi",
+							"sammutin_koko",
+							"'.$koko.'",
+							"import",
+							NOW()
+						)';
+		pupe_query($query);
+
+		return $nimitys;
+	}
+
+	private function luo_toimenpide_tuote($tuoteno, $nimitys, $tyyppi, $prioriteetti) {
+		$query = "	INSERT INTO tuote
+					SET yhtio = '{$this->kukarow['yhtio']}',
+					tuoteno = '{$tuoteno}',
+					nimitys = '{$nimitys}',
+					try = '10',
+					tuotetyyppi = 'K',
+					ei_saldoa = 'o',
+					laatija = 'import',
+					luontiaika = NOW()";
+		pupe_query($query);
+
+		$query = '	INSERT INTO tuotteen_avainsanat
+						(
+							yhtio,
+							tuoteno,
+							kieli,
+							laji,
+							selite,
+							selitetark,
+							laatija,
+							luontiaika
+						)
+						VALUES
+						(
+							"'.$this->kukarow['yhtio'].'",
+							"'.$tuoteno.'",
+							"fi",
+							"tyomaarayksen_ryhmittely",
+							"'.$tyyppi.'",
+							"'.$prioriteetti.'",
+							"import",
+							NOW()
+						)';
+		pupe_query($query);
+
+		return $nimitys;
+	}
+
 	protected function tarkistukset() {
 		$query = "	SELECT laite.tunnus,
 					COUNT(*) AS kpl
@@ -279,6 +441,38 @@ class HuoltosykliCSVDumper extends CSVDumper {
 
 		$kpl = $laitetta - $laitetta_joilla_huoltosykli;
 		echo "Sammuttimia joilla ei ole yhtään huoltosykliä liitettynä {$kpl}";
+
+		$query = "	SELECT tuote.tuoteno,
+					tuote.nimitys
+					FROM   tuote
+					LEFT JOIN tuotteen_avainsanat
+					ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
+						AND tuotteen_avainsanat.tuoteno = tuote.tuoteno )
+					WHERE  tuote.yhtio = '{$this->kukarow['yhtio']}'
+					AND tuote.ei_saldoa = 'o'
+					AND tuotteen_avainsanat.tuoteno IS NULL";
+		$result = pupe_query($query);
+
+		echo "Seuraavilta toimenpide tuotteilta puuttuu tuotteen_avainsana ".mysql_num_rows($result)."<br/>";
+		while($toimenpide_tuote = mysql_fetch_assoc($result)) {
+			echo $toimenpide_tuote['tuoteno'].' - '.$toimenpide_tuote['nimitys'].'<br/>';
+		}
+
+		$query = "	SELECT tuote.tuoteno,
+					tuote.nimitys
+					FROM   tuote
+					LEFT JOIN tuotteen_avainsanat
+					ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
+						AND tuotteen_avainsanat.tuoteno = tuote.tuoteno )
+					WHERE  tuote.yhtio = '{$this->kukarow['yhtio']}'
+					AND tuote.ei_saldoa = ''
+					AND tuotteen_avainsanat.tuoteno IS NULL";
+		$result = pupe_query($query);
+
+		echo "Seuraavilta normi tuotteilta puuttuu tuotteen_avainsana ".mysql_num_rows($result)."<br/>";
+		while($toimenpide_tuote = mysql_fetch_assoc($result)) {
+			echo $toimenpide_tuote['tuoteno'].' - '.$toimenpide_tuote['nimitys'].'<br/>';
+		}
 	}
 
 }

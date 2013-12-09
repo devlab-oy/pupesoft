@@ -9,6 +9,19 @@ $hakukentat = "tunnus, nimi, kohde";
 
 $jarjestys = 'tunnus, nimi, kohde';
 
+if (!function_exists('paikka_poista_relaatiot')) {
+
+	function paikka_poista_relaatiot($toim, $tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	UPDATE laite
+					SET tila = 'P'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND paikka = '{$tunnus}'";
+		pupe_query($query);
+	}
+}
+
 if (!function_exists('echo_laite_redirect')) {
 	function echo_laite_redirect($params) {
 		global $palvelin2;

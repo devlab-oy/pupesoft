@@ -66,7 +66,7 @@
 					$.ajax({
 						async: true,
 						type: 'GET',
-						url: 'yllapito.php?toim=kohde&del=1&del_relaatiot=1&tunnus=' + kohde_tunnus
+						url: 'yllapito.php?toim=kohde&del=3&del_relaatiot=1&tunnus=' + kohde_tunnus
 					}).done(function() {
 						if (console && console.log) {
 							console.log('Kohteen poisto onnistui');
@@ -97,7 +97,7 @@
 					$.ajax({
 						async: true,
 						type: 'GET',
-						url: 'yllapito.php?toim=paikka&del=1&del_relaatiot=1&tunnus=' + paikka_tunnus
+						url: 'yllapito.php?toim=paikka&del=3&del_relaatiot=1&tunnus=' + paikka_tunnus
 					}).done(function() {
 						if (console && console.log) {
 							console.log('Paikan poisto onnistui');
@@ -124,7 +124,7 @@
 					$.ajax({
 						async: true,
 						type: 'GET',
-						url: 'yllapito.php?toim=laite&del=1&del_relaatiot=1&tunnus=' + laite_tunnus
+						url: 'yllapito.php?toim=laite&del=3&del_relaatiot=1&tunnus=' + laite_tunnus
 					}).done(function() {
 						if (console && console.log) {
 							console.log('Laitteen poisto onnistui');

@@ -17,9 +17,6 @@ $jarjestys = 'asiakas, nimi';
 if (!function_exists('kohde_poista_relaatiot')) {
 
 	function kohde_poista_relaatiot($toim, $tunnus) {
-		//kun kohde poistetaan, poistetaan myös kohteen paikat
-		//TODO poistetaanko paikkojen laitteet myös vai nollataanko laitteden relaatio?
-
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT group_concat(tunnus) as paikka_tunnukset
@@ -31,13 +28,13 @@ if (!function_exists('kohde_poista_relaatiot')) {
 
 		if (!empty($paikka_tunnukset['paikka_tunnukset'])) {
 			$query = "	UPDATE laite
-						SET paikka = 0
+						SET tila = 'P'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND paikka IN ({$paikka_tunnukset['paikka_tunnukset']})";
 			pupe_query($query);
 
-			$query = "	DELETE
-						FROM paikka
+			$query = "	UPDATE paikka
+						SET poistettu = 1
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND kohde = '{$tunnus}'";
 			pupe_query($query);

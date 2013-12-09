@@ -272,6 +272,28 @@
 		}
 	}
 
+	if ($del == 3) {
+		if (!empty($del_relaatiot)) {
+			$funktio = $toim . '_poista_relaatiot';
+			if(function_exists($funktio)) {
+				$funktio($toim, $tunnus);
+			}
+		}
+
+		if ($toim != 'laite') {
+			$delete_query = "SET poistettu = 1";
+		}
+		else {
+			$delete_query = "SET tila = 'P'";
+		}
+
+		$query = "	UPDATE $toim
+					{$delete_query}
+					WHERE tunnus = '{$tunnus}'";
+		
+		$result = pupe_query($query);
+	}
+
 	// Jotain p‰ivitet‰‰n tietokontaan
 	if ($upd == 1) {
 

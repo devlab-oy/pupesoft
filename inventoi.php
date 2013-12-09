@@ -701,7 +701,8 @@
 									$varcheckres = pupe_query($query);
 									$varcheckrow = mysql_fetch_assoc($varcheckres);
 
-									if ($varcheckrow['toimipaikka'] != "") {
+									unset($toimipaikkarow);
+									if ($varcheckrow['toimipaikka'] > 0) {
 										$query = "	SELECT kustp, kohde, projekti
 													FROM yhtion_toimipaikat
 													WHERE yhtio = '{$kukarow['yhtio']}'

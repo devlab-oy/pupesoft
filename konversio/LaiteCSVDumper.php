@@ -162,15 +162,15 @@ class LaiteCSVDumper extends CSVDumper {
 	}
 
 	private function luo_tuote($tuoteno, $tyyppi, $koko) {
-		$query = "	INSERT INTO tuote "
-				."SET yhtio = '{$this->kukarow['yhtio']}', "
-				."tuoteno = '{$tuoteno}', "
-				."nimitys = '{$tuoteno}', "
-				."try = '80', "
-				."tuotetyyppi = '', "
-				."ei_saldoa = '',"
-				."laatija = 'import',"
-				."luontiaika = NOW()";
+		$query = "	INSERT INTO tuote
+					SET yhtio = '{$this->kukarow['yhtio']}',
+					tuoteno = '{$tuoteno}',
+					nimitys = '{$tuoteno}',
+					try = '80',
+					tuotetyyppi = '',
+					ei_saldoa = '',
+					laatija = 'import',
+					luontiaika = NOW()";
 		pupe_query($query);
 
 		$query = '	INSERT INTO tuotteen_avainsanat
@@ -189,7 +189,7 @@ class LaiteCSVDumper extends CSVDumper {
 							"'.$tuoteno.'",
 							"fi",
 							"sammutin_tyyppi",
-							"'.$tyyppi.'",
+							"'.strtolower($tyyppi).'",
 							"import",
 							NOW()
 						)';

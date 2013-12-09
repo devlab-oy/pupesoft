@@ -37,11 +37,14 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setRequiredFields($required_fields);
 		$this->setTable('tyomaarays');
 		$this->setColumnCount(26);
+		$this->setProggressBar(false);
 	}
 
 	protected function konvertoi_rivit() {
-//		$progressbar = new ProgressBar(t('Konvertoidaan rivit'));
-//		$progressbar->initialize(count($this->rivit));
+		if ($this->is_proggressbar_on) {
+			$progressbar = new ProgressBar(t('Konvertoidaan rivit'));
+			$progressbar->initialize(count($this->rivit));
+		}
 
 		$this->hae_kaikki_laitteet();
 		$this->hae_tuotteet();
@@ -57,7 +60,9 @@ class TarkastuksetCSVDumper extends CSVDumper {
 				unset($this->rivit[$index]);
 			}
 
-//			$progressbar->increase();
+			if ($this->is_proggressbar_on) {
+				$progressbar->increase();
+			}
 		}
 	}
 
@@ -132,13 +137,18 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	}
 
 	protected function dump_data() {
-//		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
-//		$progress_bar->initialize(count($this->rivit));
+		if ($this->is_proggressbar_on) {
+			$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
+			$progress_bar->initialize(count($this->rivit));
+		}
+		$i = 1;
+		echo "rivit: ".count($this->rivit).'<br/>';
 		foreach ($this->rivit as $rivi) {
 			if (!empty($rivi['laite'])) {
-				echo $rivi['laite'].'<br/>';
+				echo $i.'<br/>';
 			}
 			if (empty($rivi['laite'])) {
+				echo "saatana <br/>";
 				continue;
 			}
 			$params = array(
@@ -155,6 +165,12 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			);
 			$tyomaarays_tunnus = generoi_tyomaarays($params);
 
+			if (empty($tyomaarays_tunnus)) {
+				echo "<pre>";
+				var_dump($params);
+				echo "</pre>";
+			}
+
 			if (!empty($tyomaarays_tunnus)) {
 				$params = array(
 					'lasku_tunnukset'	 => array($tyomaarays_tunnus),
@@ -167,7 +183,11 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			//TODO jos kyseessä on koeponnistus niin pitäisi osata merkata huollon ja tarkastuksen viimeinen tapahtuma oikein
 			//TODO poikkeukset pitää merkata historiaan.
 
-//			$progress_bar->increase();
+			if ($this->is_proggressbar_on) {
+				$progress_bar->increase();
+			}
+
+			$i++;
 		}
 	}
 

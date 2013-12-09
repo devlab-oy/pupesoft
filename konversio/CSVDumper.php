@@ -1,6 +1,6 @@
 <?php
 
-//require_once('inc/ProgressBar.class.php');
+require_once('/Users/joonas/Dropbox/Sites/pupesoft/inc/ProgressBar.class.php');
 
 abstract class CSVDumper {
 
@@ -12,7 +12,8 @@ abstract class CSVDumper {
 	protected $rivit = array();
 	protected $kukarow = array();
 	protected $errors = array();
-	protected $column_count = 0;
+	protected $column_count = null;
+	protected $is_proggressbar_on = true;
 	private $mandatory_fields = array();
 
 	public function __construct($kukarow) {
@@ -59,6 +60,10 @@ abstract class CSVDumper {
 
 	protected function setColumnCount($column_count) {
 		$this->column_count = $column_count;
+	}
+
+	protected function setProggressBar($is_on) {
+		$this->is_proggressbar_on = $is_on;
 	}
 
 	public function aja() {
@@ -116,15 +121,19 @@ abstract class CSVDumper {
 	}
 
 	protected function lue_csv_tiedosto() {
-//		$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
-//		$progress_bar = new ProgressBar(t('Luetaan rivit'));
-//		$progress_bar->initialize(count($number_of_lines));
+		if ($this->is_proggressbar_on) {
+			$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
+			$progress_bar = new ProgressBar(t('Luetaan rivit'));
+			$progress_bar->initialize(count($number_of_lines));
+		}
 
 		$csv_headerit = $this->lue_csv_tiedoston_otsikot();
 		$file = fopen($this->filepath, "r") or die("Ei aukea!\n");
 
 		$rivit = array();
 		$i = 1;
+		$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
+		echo $number_of_lines;
 		while ($rivi = fgets($file)) {
 			if ($i == 1) {
 				$i++;
@@ -133,9 +142,12 @@ abstract class CSVDumper {
 
 			$rivi = explode($this->separator, $rivi);
 
-			if (isset($this->column_count) and count($rivi) != $this->column_count) {
+			if (!empty($this->column_count) and count($rivi) != $this->column_count) {
 				$i++;
-//				$progress_bar->increase();
+				echo "Rivi: {$i} Aineisto viallinen riviä ei konvertoida <br/>";
+				if ($this->is_proggressbar_on) {
+					$progress_bar->increase();
+				}
 				continue;
 			}
 
@@ -148,7 +160,9 @@ abstract class CSVDumper {
 
 			$i++;
 
-//			$progress_bar->increase();
+			if ($this->is_proggressbar_on) {
+				$progress_bar->increase();
+			}
 		}
 
 		fclose($file);
@@ -190,8 +204,10 @@ abstract class CSVDumper {
 	}
 
 	protected function dump_data() {
-		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
-		$progress_bar->initialize(count($this->rivit));
+		if ($this->is_proggressbar_on) {
+			$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
+			$progress_bar->initialize(count($this->rivit));
+		}
 		foreach ($this->rivit as $rivi) {
 			$query = "	INSERT INTO {$this->table}
 						(".implode(", ", array_keys($rivi)).")
@@ -201,7 +217,10 @@ abstract class CSVDumper {
 			//Purkka fix
 			$query = str_replace("'now()'", 'now()', $query);
 			pupe_query($query);
-			$progress_bar->increase();
+
+			if ($this->is_proggressbar_on) {
+				$progress_bar->increase();
+			}
 		}
 	}
 

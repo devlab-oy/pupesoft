@@ -132,8 +132,6 @@ abstract class CSVDumper {
 
 		$rivit = array();
 		$i = 1;
-		$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
-		echo $number_of_lines;
 		while ($rivi = fgets($file)) {
 			if ($i == 1) {
 				$i++;

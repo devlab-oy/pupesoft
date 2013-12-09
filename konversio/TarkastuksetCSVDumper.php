@@ -144,9 +144,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$i = 1;
 		echo "rivit: ".count($this->rivit).'<br/>';
 		foreach ($this->rivit as $rivi) {
-			if (!empty($rivi['laite'])) {
-				echo $i.'<br/>';
-			}
 			if (empty($rivi['laite'])) {
 				echo "saatana <br/>";
 				continue;

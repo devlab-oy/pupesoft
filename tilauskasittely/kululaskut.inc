@@ -770,8 +770,13 @@ if ($silent == "") {
 		else {
 
 			echo "<br><table>";
-			echo "<tr>
-					<th>".t("Nimi")."</th>
+			echo "<tr>";
+			
+			if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikka == 'kaikki') {
+				echo "<th>".t("Toimipaikka")."</th>";
+			}
+
+			echo "<th>".t("Nimi")."</th>
 					<th>".t("Pvm")."</th>
 					<th>".t("Summa")."</th>
 					<th>".t("Veroton")."</th>
@@ -867,7 +872,22 @@ if ($silent == "") {
 					continue;
 				}
 
-				echo "<tr><td valign='top'><strong>$llrow[nimi]</strong>";
+				echo "<tr>";
+
+				if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikka == 'kaikki') {
+
+					if ($llrow['yhtio_toimipaikka'] != 0) {
+						$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $llrow['yhtio_toimipaikka']);
+						$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
+					}
+					else {
+						$toimipaikat_row['nimi'] = "";
+					}
+
+					echo "<td valign='top'><strong>{$toimipaikat_row['nimi']}</strong>";
+				}
+
+				echo "<td valign='top'><strong>$llrow[nimi]</strong>";
 
 				if ($llrow["comments"] != '') {
 					echo "<br><i>$llrow[comments]</i>";

@@ -162,6 +162,10 @@
 		$riviok++;
 		$tilausok++;
 	}
+	
+	if (in_array($row['var'], array('U','T')) and $trow['epakurantti25pvm'] != '0000-00-00') { 
+		$varaosavirhe .= t("HUOM: tuote on epäkurantti!")."<br>";
+	}
 
 	if ($row["hinta"] < 0) {
 		$varaosavirhe .= t("VIRHE: Hinta ei voi olla negatiivinen!")."<br>";

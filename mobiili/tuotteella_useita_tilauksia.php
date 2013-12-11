@@ -327,10 +327,13 @@ echo "</div>";
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
 
+	// katotaan onko mobile
+	var is_mobile = navigator.userAgent.match(/Opera Mob/i) != null;
+
 	$(document).ready(function() {
 		$('#viivakoodi').on('keyup', function() {
 			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
-			if ($('#viivakoodi').val().length > 8) {
+			if (is_mobile && $('#viivakoodi').val().length > 8) {
 				document.getElementById('valitse_nappi').click();
 			}
 		});

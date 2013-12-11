@@ -1,6 +1,19 @@
 <?php
 
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta JA master kantaa *//
+	$useslave = 1;
+
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
+
 	require ("../inc/parametrit.inc");
+
+	if (isset($tee) and $tee == "lataa_tiedosto") {
+		readfile("/tmp/".$tmpfilenimi);
+		exit;
+	}
 
 	if ($toim == "SUPER") {
 		echo "<font class='head'>".t("Inventointien korjaus").":</font><hr>";
@@ -35,11 +48,15 @@
 	if (isset($tila) and $tila == "tulosta") {
 		$seltul = "SELECTED";
 	}
+	elseif (isset($tila) and $tila == "tulosta_excel") {
+		$seltule = "SELECTED";
+	}
 
 	echo "<tr><th>".t("Valitse toiminto")."</th><td colspan='3'>
 			<select name='tila'>
 			<option value='inventoi'>".t("N‰yt‰ ruudulla")."</option>
 			<option value='tulosta' $seltul>".t("Tulosta inventointipoikkeamalista")."</option>
+			<option value='tulosta_excel' $seltule>".t("Tulosta inventointipoikkeamalista Excel-tiedostoon")."</option>
 			</select></td></tr>";
 
 	echo "<tr><th valign='top'>".t('Rajaus')."</th>";
@@ -366,7 +383,7 @@
 			$tee  = '';
 			$tila = '';
 		}
-		elseif ($tila != 'tulosta'){
+		elseif ($tila != 'tulosta' and $tila != 'tulosta_excel') {
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("M‰‰r‰")."</th><th>".t("Poikkeamaprosentti")." %</th>";
@@ -472,125 +489,185 @@
 		if ($tila == 'tulosta') {
 			$tee = 'TULOSTA';
 		}
+		elseif ($tila == 'tulosta_excel') {
+			$tee = 'TULOSTAEXCEL';
+		}
 	}
 
-	if ($tee == "TULOSTA") {
-		if (mysql_num_rows($saldoresult) > 0 ) {
+	if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
 
-			if ($prosmuutos == 0) {
-				$muutos = $kplmuutos;
-				$yks = t("yks");
+		if ($prosmuutos == 0) {
+			$muutos = $kplmuutos;
+			$yks = t("yks");
+		}
+		else {
+			$muutos = $prosmuutos;
+			$yks = "%";
+		}
+
+		//kirjoitetaan  faili levylle..
+		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$filenimi = "/tmp/Inventointilista-".md5(uniqid(mt_rand(), true)).".txt";
+		$fh = fopen($filenimi, "w+");
+
+		$pp = date('d');
+		$kk = date('m');
+		$vv = date('Y');
+
+		$ots  = t("Inventointipoikkeamalista, poikkeama ")." $muutos $yks $pp.$kk.$vv $yhtiorow[nimi]\n\n";
+		$ots .= sprintf ('%-14.14s', 	t("Paikka"));
+		$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
+		$ots .= sprintf ('%-21.21s', 	t("Toim.Tuoteno"));
+		$ots .= sprintf ('%-10.10s',	t("Poikkeama"));
+		$ots .= sprintf ('%-9.9s', 		t("Yksikkˆ"));
+		$ots .= sprintf ('%-20.20', 	t("Inv.pvm"));
+		$ots .= "\n";
+		$ots .= "-------------------------------------------------------------------------------------------------------\n\n";
+		fwrite($fh, $ots);
+		$ots = chr(12).$ots;
+
+		$rivit = 1;
+		$arvoyht = 0;
+
+		while ($row = mysql_fetch_assoc($saldoresult)) {
+			if ($rivit >= 19) {
+				fwrite($fh, $ots);
+				$rivit = 1;
 			}
-			else {
-				$muutos = $prosmuutos;
-				$yks = "%";
+			if ($yks == '%') {
+				$row["yksikko"] = "%";
+				$row["kpl"] = $row["inventointipoikkeama"];
 			}
 
-			//kirjoitetaan  faili levylle..
-			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$filenimi = "/tmp/Inventointilista-".md5(uniqid(mt_rand(), true)).".txt";
-			$fh = fopen($filenimi, "w+");
+			if ($row["inventointiaika"] == '0000-00-00 00:00:00') {
+				$row["inventointiaika"] = t("Ei inventoitu");
+			}
 
-			$pp = date('d');
-			$kk = date('m');
-			$vv = date('Y');
+			$prn  = sprintf ('%-14.14s', 	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+			$prn .= sprintf ('%-21.21s', 	$row["tuoteno"]);
+			$prn .= sprintf ('%-21.21s', 	$row["toim_tuoteno"]);
+			$prn .= sprintf ('%-10.10s',	$row["kpl"]);
+			$prn .= sprintf ('%-9.9s', 		t_avainsana("Y", "", "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
+			$prn .= sprintf ('%-16.16s', 	$row["inventointiaika"]);
 
-			$ots  = t("Inventointipoikkeamalista, poikkeama ")." $muutos $yks $pp.$kk.$vv $yhtiorow[nimi]\n\n";
-			$ots .= sprintf ('%-14.14s', 	t("Paikka"));
-			$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
-			$ots .= sprintf ('%-21.21s', 	t("Toim.Tuoteno"));
-			$ots .= sprintf ('%-10.10s',	t("Poikkeama"));
-			$ots .= sprintf ('%-9.9s', 		t("Yksikkˆ"));
-			$ots .= sprintf ('%-20.20', 	t("Inv.pvm"));
-			$ots .= "\n";
-			$ots .= "-------------------------------------------------------------------------------------------------------\n\n";
-			fwrite($fh, $ots);
-			$ots = chr(12).$ots;
+			if ($naytanimitys != '') {
 
-			$rivit = 1;
-			$arvoyht = 0;
+				preg_match("/ \(([0-9\.\-]*?)\) /", $row["selite"], $invkpl);
 
-			while ($row = mysql_fetch_assoc($saldoresult)) {
-				if ($rivit >= 19) {
-					fwrite($fh, $ots);
-					$rivit = 1;
-				}
-				if ($yks == '%') {
-					$row["yksikko"] = "%";
-					$row["kpl"] = $row["inventointipoikkeama"];
-				}
+				$vararvo_ennen = round((float) $invkpl[1] * $row["hinta"],2);
 
-				//katsotaan onko tuotetta tilauksessa
-				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
-							FROM tilausrivi
-							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
-				$result1 = pupe_query($query);
-				$prow    = mysql_fetch_assoc($result1);
-
-				if ($row["inventointiaika"]=='0000-00-00 00:00:00') {
-					$row["inventointiaika"] = t("Ei inventoitu");
-				}
-
-				$prn  = sprintf ('%-14.14s', 	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
-				$prn .= sprintf ('%-21.21s', 	$row["tuoteno"]);
-				$prn .= sprintf ('%-21.21s', 	$row["toim_tuoteno"]);
-				$prn .= sprintf ('%-10.10s',	$row["kpl"]);
-				$prn .= sprintf ('%-9.9s', 		t_avainsana("Y", "", "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
-				$prn .= sprintf ('%-16.16s', 	$row["inventointiaika"]);
-
-				if ($naytanimitys != '') {
-
-					preg_match("/ \(([0-9\.\-]*?)\) /", $row["selite"], $invkpl);
-
-					$vararvo_ennen = round((float) $invkpl[1] * $row["hinta"],2);
-
-					$prn .= "\n".sprintf ('%-54.54s', 		$row["nimitys"]);
-					$prn .= "  ".t("Varastonarvo ennen inventointia").": ".sprintf ('%-21.21s',	$vararvo_ennen);
-					$prn .= "\n".sprintf ('%-54.54s', 		"");
-					$prn .= "  ".t("Arvonmuutos").": ".sprintf ('%-21.21s',	round($row["arvo"],2));
-					$arvoyht += $row["arvo"];
-					$rivit++;
-				}
-
-				$prn .= "\n-------------------------------------------------------------------------------------------------------\n";
-				fwrite($fh, $prn);
+				$prn .= "\n".sprintf ('%-54.54s', 		$row["nimitys"]);
+				$prn .= "  ".t("Varastonarvo ennen inventointia").": ".sprintf ('%-21.21s',	$vararvo_ennen);
+				$prn .= "\n".sprintf ('%-54.54s', 		"");
+				$prn .= "  ".t("Arvonmuutos").": ".sprintf ('%-21.21s',	round($row["arvo"],2));
+				$arvoyht += $row["arvo"];
 				$rivit++;
 			}
 
-			if ($naytanimitys != '') {
-				$prn = t("Arvonmuutos yhteens‰").": ".sprintf ('%-21.21s', round($arvoyht,2));
-				fwrite($fh, $prn);
-			}
-
-			fclose($fh);
-
-			$line = exec("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=115 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
-
-			//itse print komento...
-			if ($komento["Inventointipoikkeamat"] == 'email') {
-
-				$line = exec("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
-
-				$liite = $filenimi.".pdf";
-				$ctype = "PDF";
-				$kutsu = "inventointipoikkeamat-".date("Y-m-d");
-				require("inc/sahkoposti.inc");
-
-				system("rm -f ".$filenimi.".pdf");
-			}
-			else {
-				//k‰‰nnet‰‰n kaunniksi
-				$line2 = exec("$komento[Inventointipoikkeamat] ".$filenimi.".ps");
-			}
-
-			echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";
-
-			//poistetaan tmp file samantien kuleksimasta...
-			system("rm -f ".$filenimi.".ps");
-			system("rm -f $filenimi");
+			$prn .= "\n-------------------------------------------------------------------------------------------------------\n";
+			fwrite($fh, $prn);
+			$rivit++;
 		}
+
+		if ($naytanimitys != '') {
+			$prn = t("Arvonmuutos yhteens‰").": ".sprintf ('%-21.21s', round($arvoyht,2));
+			fwrite($fh, $prn);
+		}
+
+		fclose($fh);
+
+		$line = exec("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=115 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
+
+		//itse print komento...
+		if ($komento["Inventointipoikkeamat"] == 'email') {
+
+			$line = exec("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+
+			$liite = $filenimi.".pdf";
+			$ctype = "PDF";
+			$kutsu = "inventointipoikkeamat-".date("Y-m-d");
+			require("inc/sahkoposti.inc");
+
+			system("rm -f ".$filenimi.".pdf");
+		}
+		else {
+			//k‰‰nnet‰‰n kaunniksi
+			$line2 = exec("$komento[Inventointipoikkeamat] ".$filenimi.".ps");
+		}
+
+		echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";
+
+		//poistetaan tmp file samantien kuleksimasta...
+		system("rm -f ".$filenimi.".ps");
+		system("rm -f $filenimi");
+	}
+
+	if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
+
+		if ($prosmuutos == 0) {
+			$muutos = $kplmuutos;
+			$yks = t("yks");
+		}
+		else {
+			$muutos = $prosmuutos;
+			$yks = "%";
+		}
+
+		include('inc/pupeExcel.inc');
+
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
+		$excelrivi 	 = 0;
+
+		$worksheet->write($excelrivi, 0, t("Tuoteno"), 							$format_bold);
+		$worksheet->write($excelrivi, 1, t("Nimitys"), 							$format_bold);
+		$worksheet->write($excelrivi, 2, t("Toim.Tuoteno"), 					$format_bold);
+		$worksheet->write($excelrivi, 3, t("Paikka"), 							$format_bold);
+		$worksheet->write($excelrivi, 4, t("Poikkeama"), 						$format_bold);
+		$worksheet->write($excelrivi, 5, t("Poikkeama")." %", 					$format_bold);
+		$worksheet->write($excelrivi, 6, t("Yksikkˆ"), 							$format_bold);
+		$worksheet->write($excelrivi, 7, t("Inv.pvm"), 							$format_bold);
+		$worksheet->write($excelrivi, 8, t("Varastonarvo ennen inventointia"), 	$format_bold);
+		$worksheet->write($excelrivi, 9, t("Arvonmuutos"), 						$format_bold);
+		$excelrivi++;
+
+		while ($row = mysql_fetch_assoc($saldoresult)) {
+
+			if ($row["inventointiaika"] == '0000-00-00 00:00:00') {
+				$row["inventointiaika"] = t("Ei inventoitu");
+			}
+
+			preg_match("/ \(([0-9\.\-]*?)\) /", $row["selite"], $invkpl);
+
+			$vararvo_ennen = round((float) $invkpl[1] * $row["hinta"],2);
+
+			$worksheet->writeString($excelrivi, 0, $row["tuoteno"]);
+			$worksheet->writeString($excelrivi, 1, t_tuotteen_avainsanat($row, 'nimitys'));
+			$worksheet->writeString($excelrivi, 2, $row["toim_tuoteno"]);
+			$worksheet->writeString($excelrivi, 3, $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+			$worksheet->writeNumber($excelrivi, 4, $row["kpl"]);
+			$worksheet->writeNumber($excelrivi, 5, $row["inventointipoikkeama"]);
+			$worksheet->writeString($excelrivi, 6, t_avainsana("Y", "", "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
+			$worksheet->writeDate($excelrivi, 7, $row["inventointiaika"]);
+			$worksheet->writeNumber($excelrivi, 8, $vararvo_ennen);
+			$worksheet->writeNumber($excelrivi, 9, round($row["arvo"],2));
+
+			$excelrivi++;
+		}
+
+		$excelnimi = $worksheet->close();
+
+		echo "<br><br><table>";
+		echo "<tr><th>".t("Tallenna Excel").":</th>";
+		echo "<form method='post' class='multisubmit'>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='kaunisnimi' value='".t("Inventointipoikkeamat").".xlsx'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+		echo "</table><br>";
+
 	}
 
 	require ("inc/footer.inc");

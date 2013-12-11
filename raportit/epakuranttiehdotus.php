@@ -218,6 +218,7 @@ else {
 					epakurantti25pvm,
 					epakurantti50pvm,
 					epakurantti75pvm,
+					epakurantti100pvm,
 					tuote.tuotemerkki,
 					tuote.myyjanro,
 					sum(saldo) saldo
@@ -297,11 +298,13 @@ else {
 			$excelsarake++;
 		}
 
-		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epäkurantti 25 pvm")), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti25pvm")), $format_bold);
 		$excelsarake++;
-		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epäkurantti 50 pvm")), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti50pvm")), $format_bold);
 		$excelsarake++;
-		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epäkurantti 75 pvm")), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti75pvm")), $format_bold);
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti100pvm")), $format_bold);
 		$excelsarake++;
 
 		if ($elements > 0) {
@@ -491,15 +494,52 @@ else {
 						$excelsarake++;
 					}
 
-					if ($row['epakurantti25pvm'] == '0000-00-00') $row['epakurantti25pvm'] = "";
-					if ($row['epakurantti50pvm'] == '0000-00-00') $row['epakurantti50pvm'] = "";
-					if ($row['epakurantti75pvm'] == '0000-00-00') $row['epakurantti75pvm'] = "";
+					$today = date("Y-m-d");
+
+					if ($row['epakurantti25pvm'] == '0000-00-00') {
+						if ($tyyppi == '25' OR $tyyppi == 'puoli' OR $tyyppi == '75' OR $tyyppi == 'taysi') {
+							$row['epakurantti25pvm'] = $today;
+						}
+						else {
+							$row['epakurantti25pvm'] = "";
+						}
+					}
+
+					if ($row['epakurantti50pvm'] == '0000-00-00') {
+						if ($tyyppi == 'puoli' OR $tyyppi == '75' OR $tyyppi == 'taysi') {
+							$row['epakurantti50pvm'] = $today;
+						}
+						else {
+							$row['epakurantti50pvm'] = "";
+						}
+					}
+
+					if ($row['epakurantti75pvm'] == '0000-00-00') {
+						if ($tyyppi == '75' OR $tyyppi == 'taysi') {
+							$row['epakurantti75pvm'] = $today;
+						}
+						else {
+							$row['epakurantti75pvm'] = "";
+						}
+					}
+
+					if ($row['epakurantti100pvm'] == '0000-00-00') {
+					 	if ($tyyppi == 'taysi') {
+							$row['epakurantti100pvm'] = $today;
+						}
+						else {
+							$row['epakurantti100pvm'] = "";
+						}
+					}
+
 
 					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti25pvm']);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti50pvm']);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti75pvm']);
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti100pvm']);
 					$excelsarake++;
 
 					$excelsarake = 0;

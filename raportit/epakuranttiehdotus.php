@@ -213,7 +213,6 @@ else {
 					epakurantti25pvm,
 					epakurantti50pvm,
 					epakurantti75pvm,
-					epakurantti100pvm,
 					tuote.tuotemerkki,
 					tuote.myyjanro,
 					sum(saldo) saldo
@@ -481,20 +480,15 @@ else {
 						$excelsarake++;
 					}
 
-					$today = date("Y-m-d");
-
 					if ($row['epakurantti25pvm'] == '0000-00-00') $row['epakurantti25pvm'] = "";
 					if ($row['epakurantti50pvm'] == '0000-00-00') $row['epakurantti50pvm'] = "";
 					if ($row['epakurantti75pvm'] == '0000-00-00') $row['epakurantti75pvm'] = "";
-					if ($row['epakurantti100pvm'] == '0000-00-00') $row['epakurantti100pvm'] = "";
 
 					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti25pvm']);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti50pvm']);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti75pvm']);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti100pvm']);
 					$excelsarake++;
 
 					$excelsarake = 0;

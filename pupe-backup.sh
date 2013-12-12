@@ -296,7 +296,7 @@ if test -f "etc/cups/lpoptions" -a -r "etc/cups/lpoptions"; then
 	BACKUPFILET="${BACKUPFILET} etc/cups/lpoptions"
 fi
 
-if test -f "etc/cups/printers.co" -a -r "etc/cups/printers.conf"; then
+if test -f "etc/cups/printers.conf" -a -r "etc/cups/printers.conf"; then
 	BACKUPFILET="${BACKUPFILET} etc/cups/printers.conf"
 fi
 

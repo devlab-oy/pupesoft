@@ -438,6 +438,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			if (isset($lapsituotteet)) {
 				setcookie('lapsituotteet', $lapsituotteet, time()+60*60*24*90, "/");
 			}
+			if (isset($myyntiera)) {
+				setcookie('myyntiera', $myyntiera, time()+60*60*24*90, "/");
+			}
 		}
 
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista

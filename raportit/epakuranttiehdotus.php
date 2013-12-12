@@ -135,11 +135,6 @@ else {
 
 	if (isset($subnappi) and $subnappi != '') {
 
-		if (!@include('Spreadsheet/Excel/Writer.php')) {
-			echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
-			exit;
-		}
-
 		$msg  = "";
 
 		if (isset($lisa) and $lisa != '') {
@@ -243,18 +238,10 @@ else {
 
 		$elements = mysql_num_rows($result); // total number of elements to process
 
-		//keksitään failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+		include('inc/pupeExcel.inc');
 
-		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$workbook->setVersion(8);
-		$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-		$format_bold =& $workbook->addFormat();
-		$format_bold->setBold();
-
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
 		$excelrivi 	 = 0;
 		$excelsarake = 0;
 
@@ -548,7 +535,7 @@ else {
 			} // end saapunut ennen alarajaa
 		}
 
-		$workbook->close();
+		$excelnimi = $worksheet->close();
 
 		echo "<br/>";
 		echo "<font class='message'>".t("Ehdotuksessa %s tuotetta.", "", $laskuri)."</font>";
@@ -556,10 +543,10 @@ else {
 		echo "<br/>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
+		echo "<tr><th>".t("Tallenna raportti (xlsx)").":</th>";
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Epakuranttiraportti.xls'>";
+		echo "<input type='hidden' name='kaunisnimi' value='".t("Epakuranttiraportti").".xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 		echo "</table><br>";

@@ -292,6 +292,8 @@ else {
 		$excelsarake++;
 		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti100pvm")), $format_bold);
 		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("toiminto")), $format_bold);
+		$excelsarake++;
 
 		if ($elements > 0) {
 			require_once ('inc/ProgressBar.class.php');
@@ -490,6 +492,9 @@ else {
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti75pvm']);
 					$excelsarake++;
+
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, "muuta");
 
 					$excelsarake = 0;
 					$excelrivi++;

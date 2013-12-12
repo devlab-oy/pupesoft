@@ -434,6 +434,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 		}
 
+		if ($phpnimi == 'generoi_siirtolista.php') {
+			if (isset($lapsituotteet)) {
+				setcookie('lapsituotteet', $lapsituotteet, time()+60*60*24*90, "/");
+			}
+		}
+
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
 		if (isset($pupe_DataTables) and isset($indexvas) and $indexvas == 1) {
 

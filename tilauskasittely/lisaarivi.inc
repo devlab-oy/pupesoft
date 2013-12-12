@@ -2099,24 +2099,29 @@
 					and $toim != "SIIRTOTYOMAARAYS"
 				) {
 
-					// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
-					$query = "	SELECT tilausrivin_lisatiedot.toimittajan_tunnus
-								FROM tilausrivi
-								JOIN tilausrivin_lisatiedot
-								ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-									AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-									AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-								AND tilausrivi.tyyppi != 'D'
-								AND tilausrivi.var in ('J','T','U')
-								ORDER BY tilausrivi.tunnus ASC
-								LIMIT 1";
-					$toimittaja_result = pupe_query($query);
-					$toimittaja = mysql_fetch_assoc($toimittaja_result);
+					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J'))) {
+						// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
+						$query = "	SELECT tilausrivin_lisatiedot.toimittajan_tunnus
+									FROM tilausrivi
+									JOIN tilausrivin_lisatiedot
+									ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+										AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+										AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+									AND tilausrivi.tyyppi != 'D'
+									AND tilausrivi.var in ('J','T','U')
+									ORDER BY tilausrivi.tunnus ASC
+									LIMIT 1";
+						$toimittaja_result = pupe_query($query);
+						$toimittaja = mysql_fetch_assoc($toimittaja_result);
 
-					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J')) and !empty($toimittaja['toimittajan_tunnus'])) {
-						$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
+						if (!empty($toimittaja['toimittajan_tunnus'])) {
+							$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
+						}
+						else {
+							$yksi_suoratoimittaja_join = "";
+						}
 					}
 					else {
 						$yksi_suoratoimittaja_join = "";
@@ -2480,7 +2485,7 @@
 							$p_hyllyvali	= $olerow["hyllyvali"];
 							$p_hyllytaso	= $olerow["hyllytaso"];
 						}
-					}	
+					}
 				}
 			}
 

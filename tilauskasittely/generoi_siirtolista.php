@@ -542,7 +542,11 @@
 							$rarresult = pupe_query($query);
 
 							if (mysql_num_rows($rarresult) == 1) {
+
 								$trow = mysql_fetch_assoc($rarresult);
+
+								$tuoteno_echo 		= $trow['tuoteno'];
+								$yksikko_echo		= $trow['yksikko'];
 								$toimaika 			= $laskurow["toimaika"];
 								$kerayspvm			= $laskurow["kerayspvm"];
 								$tuoteno			= $pairow["tuoteno"];
@@ -583,7 +587,7 @@
 
 								$tehtyriveja++;
 
-								echo "<font class='info'>",t("Siirtolistalle lisättiin %s tuotetta %s", "", $siirretaan." ".$trow["yksikko"], $trow["tuoteno"]),"</font><br />";
+								echo "<font class='info'>",t("Siirtolistalle lisättiin %s tuotetta %s", "", $siirretaan." ".$yksikko_echo, $tuoteno_echo),"</font><br />";
 
 							}
 							else {

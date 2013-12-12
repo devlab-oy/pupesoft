@@ -86,10 +86,13 @@ if ($request['action'] == 'aja_konversio') {
 		case 'tarkastukset':
 			$tiedostot = lue_tiedostot('/tmp/konversio/tarkastukset/');
 			foreach ($tiedostot as $tiedosto) {
-				$tiedosto = "/tmp/konversio/tarkastukset/xba";
 				echo $tiedosto.'<br/>';
-				passthru("php tarkastukset.php {$tiedosto}");
-				die();
+//				//passthru("php tarkastukset.php {$tiedosto}");
+//                exec("php tarkastukset.php {$tiedosto}");
+                
+                $dumper = new TarkastuksetCSVDumper($kukarow, $tiedosto);
+                
+                $dumper->aja();
 			}
 			break;
 
@@ -145,8 +148,8 @@ if ($request['action'] == 'aja_konversio') {
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Huoltosyklit').':';
-			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
-			$dumper->aja();
+//			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
+//			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Tarkastukset').':';
@@ -173,17 +176,17 @@ if ($request['action'] == 'aja_konversio') {
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 	$query_array = array(
-		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
-		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
+//		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
@@ -249,7 +252,7 @@ function lue_tiedostot($polku) {
 	$handle = opendir($polku);
 	if ($handle) {
 		while (false !== ($tiedosto = readdir($handle))) {
-			if ($tiedosto != "." && $tiedosto != "..") {
+			if ($tiedosto != "." && $tiedosto != ".." && $tiedosto != '.DS_Store') {
 				if (is_file($polku.$tiedosto)) {
 					$tiedostot[] = $polku.$tiedosto;
 				}

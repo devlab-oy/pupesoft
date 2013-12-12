@@ -60,7 +60,7 @@ class PaikkaCSVDumper extends CSVDumper {
 						$rivi_temp[$konvertoitu_header] = 'A';
 					}
 					else {
-						$rivi_temp[$konvertoitu_header] = '';
+						$rivi_temp[$konvertoitu_header] = 'A';
 					}
 				}
 				else if ($konvertoitu_header == 'nimi') {
@@ -104,7 +104,7 @@ class PaikkaCSVDumper extends CSVDumper {
 		$paikat = $this->unique_values[$rivi['kohde']];
 		if (!empty($paikat)) {
 			foreach ($paikat as $paikka) {
-				if (trim(strtolower($paikka)) == trim(strtolower($rivi['nimi']))) {
+				if (trim(strtolower($paikka)) === trim(strtolower($rivi['nimi']))) {
 					//kyseinen paikka on jo kohteella
 					$valid = false;
 					break;

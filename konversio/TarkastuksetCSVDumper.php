@@ -1,7 +1,8 @@
 <?php
 
 require_once('CSVDumper.php');
-require_once('/Users/joonas/Dropbox/Sites/pupesoft/inc/laite_huolto_functions.inc');
+//require_once('/Users/joonas/Dropbox/Sites/pupesoft/inc/laite_huolto_functions.inc');
+require_once("/Users/harjukallio/Dropbox/Sites/pupesoft/inc/laite_huolto_functions.inc");
 
 class TarkastuksetCSVDumper extends CSVDumper {
 
@@ -37,7 +38,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setRequiredFields($required_fields);
 		$this->setTable('tyomaarays');
 		$this->setColumnCount(26);
-		$this->setProggressBar(false);
+		$this->setProggressBar(true);
 	}
 
 	protected function konvertoi_rivit() {
@@ -142,8 +143,10 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			$progress_bar->initialize(count($this->rivit));
 		}
 		$i = 1;
-		echo "rivit: ".count($this->rivit).'<br/>';
 		foreach ($this->rivit as $rivi) {
+            if (empty($rivi['laite'])) {
+                $s = "";
+            }
 			$params = array(
 				'asiakas_tunnus'			 => $rivi['liitostunnus'],
 				'toimenpide_tuotteen_tyyppi' => $rivi['toimenpide_tuotteen_tyyppi'],

@@ -1,6 +1,8 @@
 <?php
 
-require_once("/Users/joonas/Dropbox/Sites/pupesoft/tilauskasittely/luo_myyntitilausotsikko.inc");
+//require_once("/Users/joonas/Dropbox/Sites/pupesoft/tilauskasittely/luo_myyntitilausotsikko.inc");
+require_once("/Users/harjukallio/Dropbox/Sites/pupesoft/tilauskasittely/luo_myyntitilausotsikko.inc");
+
 
 function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko = '', $paikan_olosuhde = '') {
 	global $kukarow, $yhtiorow;

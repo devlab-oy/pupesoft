@@ -11,7 +11,7 @@
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
 	if (!isset($lahdekeraysvyohyke)) $lahdekeraysvyohyke = array();
-
+	if (!isset($lapsituotteet)) $lapsituotteet = "";
 
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
@@ -97,7 +97,7 @@
 			echo "</table></td></tr>";
 		}
 	}
-	
+
 	echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
 	echo "<tr><th>",t("Kohdevarasto, eli varasto jonne lähetetään"),":</th>";
@@ -118,7 +118,7 @@
 	}
 
 	echo "</select></td></tr>";
-	
+
 	if ($yhtiorow['kerayserat'] == 'K') {
 		if (mysql_num_rows($keraysvyohyke_res) > 0) {
 			mysql_data_seek($keraysvyohyke_res, 0);
@@ -153,7 +153,7 @@
 			echo "</table></td></tr>";
 		}
 	}
-	
+
 	echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
 	echo "<tr><th>",t("Lisärajaukset"),"</th><td>";
@@ -238,7 +238,10 @@
 		$c = "";
 	}
 
-	echo "<tr><th>",t("Jätä siirtolista kesken"),":</th><td><input type='checkbox' name = 'kesken' value='X' {$c}></td>";
+	$lapsituote_chk = $lapsituotteet != "" ? "checked" : "";
+
+	echo "<tr><th>",t("Jätä siirtolista kesken"),":</th><td><input type='checkbox' name = 'kesken' value='X' {$c}></td></tr>";
+	echo "<tr><th>",t("Siirrä myös tuoteperheen lapsituotteet"),":</th><td><input type='checkbox' name = 'lapsituotteet' value='X' {$lapsituote_chk}></td></tr>";
 	echo "<tr><th>",t("Rivejä per siirtolista (tyhjä = 20)"),":</th><td><input type='text' size='8' value='{$olliriveja}' name='olliriveja'></td>";
 	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi siirtolista"),"'></form>";
 
@@ -347,7 +350,7 @@
 						{$kohdepaikkalisa}
 						ORDER BY tuotepaikat.tuoteno";
 			$resultti = pupe_query($query);
-			
+
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;
 			}
@@ -550,7 +553,7 @@
 								$netto 				= "";
 								$var				= "";
 								$korvaavakielto		= 1;
-								$perhekielto		= 1;
+								$perhekielto		= $lapsituotteet == "" ? 1 : 0;
 								$orvoteikiinnosta	= "EITOD";
 
 								// Tallennetaan riville minne se on menossa

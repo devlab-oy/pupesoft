@@ -31,19 +31,6 @@ $oikeurow = array(
     'paivitys' => 1
 );
 $yhtiorow = hae_yhtion_parametrit($yhtio);
-
-// Haetaan käyttäjän tiedot
-$query = "	SELECT *
-            FROM kuka
-            WHERE yhtio = '{$yhtio}'
-            AND kuka = 'admin'";
-$result = pupe_query($query);
-
-if (mysql_num_rows($result) == 0) {
-    die("User admin not found");
-}
-
-// Adminin oletus
-$kukarow = mysql_fetch_assoc($result);
+$kukarow = hae_kukarow('admin', $yhtio);
 
 jt_toimita('', '', $varastot, array(), array(), 'tosi_automaaginen', '', '', '', '', '', 'j');

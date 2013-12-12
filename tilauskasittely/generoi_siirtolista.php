@@ -11,7 +11,7 @@
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
 	if (!isset($lahdekeraysvyohyke)) $lahdekeraysvyohyke = array();
-	if (!isset($lapsituotteet)) $lapsituotteet = "";
+	if (!isset($lapsituotteet)) $lapsituotteet = isset($_COOKIE["lapsituotteet"]) ? $_COOKIE["lapsituotteet"] : "";
 
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 

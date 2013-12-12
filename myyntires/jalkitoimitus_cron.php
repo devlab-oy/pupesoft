@@ -20,14 +20,16 @@ require("inc/connect.inc");
 require("inc/functions.inc");
 
 $yhtio = $argv[1];
-
 $varastot = array_slice($argv, 2);
 
 if (empty($yhtio) or empty($varastot)) {
     echo "\nUsage: php " . basename($argv[0]) . " yhtio varasto varasto\n\n";
-    die;
+    die();
 }
 
+$oikeurow = array(
+    'paivitys' => 1
+);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 
 // Haetaan käyttäjän tiedot
@@ -43,6 +45,5 @@ if (mysql_num_rows($result) == 0) {
 
 // Adminin oletus
 $kukarow = mysql_fetch_assoc($result);
-
 
 jt_toimita('', '', $varastot, array(), array(), 'tosi_automaaginen', '', '', '', '', '', 'j');

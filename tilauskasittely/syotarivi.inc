@@ -23,6 +23,17 @@
 		require ("syota_variaatiorivi.inc");
 	}
 
+	if ($tila == "MUUTA" and $tapa == "MUOKKAA" and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+		// valittu ei näytetä alveja vaikka hinnat alvillisina	
+		if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
+			$hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
+		}
+		// valittu näytetään alvit vaikka hinnat alvittomia
+		if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o') {
+			$hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
+		}
+	}	
+	
 	if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
 		// Pikatilauksen syöttörivi
 		echo "<table><tr>$jarjlisa";

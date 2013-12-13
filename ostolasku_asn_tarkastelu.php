@@ -2078,7 +2078,7 @@
 						ORDER BY asn_sanomat.asn_numero, asn_sanomat.paketintunniste";
 			$result = pupe_query($query);
 
-			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=asn&tee=' id='formi'>";
+			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=asn//toimipaikka={$toimipaikka}&tee=' id='formi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='nayta' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 			echo "<input type='hidden' id='kolli' name='kolli' value='' />";
@@ -2215,7 +2215,7 @@
 						ORDER BY toimi.nimi, toimi.ytunnus, asn_sanomat.saapumispvm, asn_sanomat.asn_numero";
 			$result = pupe_query($query);
 
-			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse={$valitse}&tee=' id='formi'>";
+			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse={$valitse}//toimipaikka={$toimipaikka}&tee=' id='formi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='nayta' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 			echo "<input type='hidden' id='lasku' name='lasku' value='' />";

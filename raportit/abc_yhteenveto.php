@@ -45,7 +45,7 @@
 	else {
 		$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "TUOTEMYYJA", "TUOTEOSTAJA");
 	}
-	
+
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	echo "<br>";
@@ -327,7 +327,7 @@
 		// n‰m‰ m‰‰ritt‰‰ kumpaan tauluun Joinataan, asiakas vai tuote
 		$asiakas_join_array = array('AK','AM','AP','AR');
 		$tuote_join_array = array('TK','TM','TP','TR','TV');
-		
+
 		if (in_array($abcchar,$asiakas_join_array)) {
 			$analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus) ";
 		}
@@ -411,7 +411,7 @@
 
 				$keyosa = mysql_fetch_assoc($keyres);
 
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_osasto[]=$row[osasto]&lisatiedot=$lisatiedot&status=$status'>$row[osasto] $keyosa[selitetark]</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&$ulisa&lisatiedot=$lisatiedot&status=$status'>$row[osasto] $keyosa[selitetark]</a></td>";
 			}
 
 			if ($try == 'KAIKKI') {
@@ -425,7 +425,7 @@
 
 				$keytry = mysql_fetch_assoc($keyres);
 
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_try[]=$row[try]&lisatiedot=$lisatiedot&status=$status'>$row[try] $keytry[selitetark]</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&$ulisa&lisatiedot=$lisatiedot&status=$status'>$row[try] $keytry[selitetark]</a></td>";
 			}
 
 			if ($tuotemerkki == 'KAIKKI') {

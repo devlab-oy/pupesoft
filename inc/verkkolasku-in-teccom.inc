@@ -224,7 +224,7 @@
 			$query = "	SELECT tt.*
 						FROM tuotteen_toimittajat AS tt
 						JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
-						JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno AND tuote.status != 'P') 
+						JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno AND tuote.status != 'P')
 						WHERE tt.yhtio = 'artr'
 						AND tt.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
 			$chk_res = pupe_query($query);
@@ -232,11 +232,11 @@
 			if (mysql_num_rows($chk_res) == 0) {
 				// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että
 				$chk_res = tuotteen_toimittajat_tuotenumerot_haku($rtuoteno[$i]['tuoteno'], $laskuttajan_toimittajanumero);
-				
+
 				if (mysql_num_rows($chk_res) != 0) {
 					$chk_row = mysql_fetch_assoc($chk_res);
 					$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
-				}											
+				}
 			}
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {

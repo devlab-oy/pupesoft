@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 	require ("../inc/parametrit.inc");
 
@@ -11,7 +11,8 @@
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
 	if (!isset($lahdekeraysvyohyke)) $lahdekeraysvyohyke = array();
-
+	if (!isset($lapsituotteet)) $lapsituotteet = isset($_COOKIE["lapsituotteet"]) ? $_COOKIE["lapsituotteet"] : "";
+	if (!isset($myyntiera)) $myyntiera = isset($_COOKIE["myyntiera"]) ? $_COOKIE["myyntiera"] : "";
 
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
@@ -97,7 +98,7 @@
 			echo "</table></td></tr>";
 		}
 	}
-	
+
 	echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
 	echo "<tr><th>",t("Kohdevarasto, eli varasto jonne lähetetään"),":</th>";
@@ -118,7 +119,7 @@
 	}
 
 	echo "</select></td></tr>";
-	
+
 	if ($yhtiorow['kerayserat'] == 'K') {
 		if (mysql_num_rows($keraysvyohyke_res) > 0) {
 			mysql_data_seek($keraysvyohyke_res, 0);
@@ -153,7 +154,7 @@
 			echo "</table></td></tr>";
 		}
 	}
-	
+
 	echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
 	echo "<tr><th>",t("Lisärajaukset"),"</th><td>";
@@ -238,7 +239,12 @@
 		$c = "";
 	}
 
-	echo "<tr><th>",t("Jätä siirtolista kesken"),":</th><td><input type='checkbox' name = 'kesken' value='X' {$c}></td>";
+	$lapsituote_chk = $lapsituotteet != "" ? "checked" : "";
+	$myyntiera_chk = $myyntiera != "" ? "checked" : "";
+
+	echo "<tr><th>",t("Jätä siirtolista kesken"),":</th><td><input type='checkbox' name = 'kesken' value='X' {$c}></td></tr>";
+	echo "<tr><th>",t("Siirrä myös tuoteperheen lapsituotteet"),":</th><td><input type='checkbox' name = 'lapsituotteet' value='X' {$lapsituote_chk}></td></tr>";
+	echo "<tr><th>",t("Huomioi siirrettävän tuotteen myyntierä"),":</th><td><input type='checkbox' name = 'myyntiera' value='X' {$myyntiera_chk}></td></tr>";
 	echo "<tr><th>",t("Rivejä per siirtolista (tyhjä = 20)"),":</th><td><input type='text' size='8' value='{$olliriveja}' name='olliriveja'></td>";
 	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi siirtolista"),"'></form>";
 
@@ -335,7 +341,8 @@
 						tuotepaikat.halytysraja,
 						if (tuotepaikat.tilausmaara = 0, 1, tuotepaikat.tilausmaara) tilausmaara,
 						CONCAT_WS('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) hyllypaikka,
-						tuote.nimitys
+						tuote.nimitys,
+						if (tuote.myynti_era = 0, 1, tuote.myynti_era) myynti_era
 						FROM tuotepaikat
 						JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
 						{$abcjoin}
@@ -347,7 +354,7 @@
 						{$kohdepaikkalisa}
 						ORDER BY tuotepaikat.tuoteno";
 			$resultti = pupe_query($query);
-			
+
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;
 			}
@@ -432,6 +439,13 @@
 
 							$tarve_kohdevarasto = (float) $test;
 						}
+						
+						if ($myyntiera == 'X') {
+							$kokonaisluku = ceil($tarve_kohdevarasto / $pairow['myynti_era']);
+							$test = $kokonaisluku * $pairow['myynti_era'];
+							$tarve_kohdevarasto = (float) $test;
+						}
+						
 					}
 
 					if ($tarve_kohdevarasto <= 0) {
@@ -539,7 +553,11 @@
 							$rarresult = pupe_query($query);
 
 							if (mysql_num_rows($rarresult) == 1) {
+
 								$trow = mysql_fetch_assoc($rarresult);
+
+								$tuoteno_echo 		= $trow['tuoteno'];
+								$yksikko_echo		= $trow['yksikko'];
 								$toimaika 			= $laskurow["toimaika"];
 								$kerayspvm			= $laskurow["kerayspvm"];
 								$tuoteno			= $pairow["tuoteno"];
@@ -550,7 +568,7 @@
 								$netto 				= "";
 								$var				= "";
 								$korvaavakielto		= 1;
-								$perhekielto		= 1;
+								$perhekielto		= $lapsituotteet == "" ? 1 : 0;
 								$orvoteikiinnosta	= "EITOD";
 
 								// Tallennetaan riville minne se on menossa
@@ -580,7 +598,7 @@
 
 								$tehtyriveja++;
 
-								echo "<font class='info'>",t("Siirtolistalle lisättiin %s tuotetta %s", "", $siirretaan." ".$trow["yksikko"], $trow["tuoteno"]),"</font><br />";
+								echo "<font class='info'>",t("Siirtolistalle lisättiin %s tuotetta %s", "", $siirretaan." ".$yksikko_echo, $tuoteno_echo),"</font><br />";
 
 							}
 							else {

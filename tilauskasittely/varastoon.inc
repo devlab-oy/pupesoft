@@ -87,6 +87,10 @@ if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 
 	if ($toiminto == "kalkyyli" and $tee == "") {
 		$varastoon_msg .= "<th valign='top'>".t("Vanha")." ".t("saldo")."<br>".t("Uusi")." ".t("saldo")."</th>";
+
+		if ($yhtiorow['toimipaikkakasittely'] == 'L' and $laskurow['yhtio_toimipaikka'] != 0) {
+			$varastoon_msg .= "<th valign='top'>".t("Toimipaikan vanha saldo")."<br>".t("Toimipaikan uusi saldo")."</th>";
+		}
 	}
 
 	$varastoon_msg .= "</tr>";
@@ -1197,6 +1201,41 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 
 		$varastoon_msg .= "<td align='right'>$varastoon_saldo<br><font class='$varastoon_fontti'>$varastoon_saldo_uusi$varastoon_saldo_viesti</font></td>";
+
+		if ($yhtiorow['toimipaikkakasittely'] == 'L' and $laskurow['yhtio_toimipaikka'] != 0) {
+
+			$varastoon_msg .= "<td align='right'>";
+
+			$toimipaikan_saldo = 0;
+
+			$query  = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi != 'P'
+						AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
+			$vares = pupe_query($query);
+
+			while ($varow = mysql_fetch_assoc($vares)) {
+
+				list($varastoon_saldo, $dummy1, $dummy2, $dummy3) = saldo_myytavissa($tuorow["tuoteno"], '', $varow['tunnus']);
+
+				$toimipaikan_saldo += $varastoon_saldo;
+			}
+
+			$varastoon_saldo_uusi = $toimipaikan_saldo + $tilrivirow["varattu"];
+
+			$varastoon_fontti = "";
+			$varastoon_saldo_viesti = "";
+
+			if ($varastoon_saldo_uusi <= 0) {
+				$varastoon_fontti = "error";
+				$varastoon_saldo_viesti = "<br>".t("HUOM: Saldo j‰‰ negatiiviseksi!");
+			}
+
+			$varastoon_msg .= "{$toimipaikan_saldo}<br><font class='{$varastoon_fontti}'>{$varastoon_saldo_uusi}{$varastoon_saldo_viesti}</font>";
+
+			$varastoon_msg .= "</td>";
+		}
 	}
 
 	$varastoon_msg .= "</tr>";
@@ -1353,7 +1392,11 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 
 if ($toiminto == "kalkyyli" and $tee == "") {
 	if ($tv_kaytossa) $cspani = 11;
-	else $cspani = 9;
+	else $cspani = 10;
+
+	if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+		$cspani++;
+	}
 
 	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 		$cspani++;
@@ -1590,12 +1633,14 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tull
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
 	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+	echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 	echo "<input type='submit' value='".t("Takaisin saapumisen valintaan")."'>";
 	echo "</form>&nbsp;";
 	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value=''>";
 	echo "<input type='hidden' name='ytunnus' value=''>";
+	echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 	echo "<input type='submit' value='".t("Takaisin toimittajan valintaan")."'>";
 	echo "</form>";
 }

@@ -29,13 +29,16 @@
 					// Katotaan onko rahtivapaa
 					var rvcb_ch = document.getElementById('rahtivapaa').checked;
 
+					// katotaan onks iPadkäyttäjä
+					var isiPad = navigator.userAgent.match(/iPad/i) != null;
+
 					if (merahti == 'K' && mrdd_sel != 1) {
 						mrdd_id.options[1].selected = '1';
-						alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+						if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
 					}
 					else if (merahti != 'K' && mrdd_sel != 2 && rvcb_ch != true) {
 						mrdd_id.options[2].selected = '1';
-						alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+						if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
 					}
 				}
 
@@ -1934,6 +1937,8 @@
 				$varastot_lisa_query = " and varastopaikat.tunnus in ($varastot_lista) ";
 			}
 
+			$selectoitu_varasto_toimipaikka = 0;
+
 			$query  = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -1959,6 +1964,8 @@
 					elseif ($varow['tunnus'] == $srow["varasto"]) {
 						$sel = 'selected';
 					}
+
+					if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
 
 					$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
@@ -2005,6 +2012,11 @@
 					}
 
 					if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
+
+					if ($yhtiorow['pakollinen_varasto'] == 'K' and $predefined_yhtiotoimipaikka == 0 and $selectoitu_varasto_toimipaikka == $yht_toimpaik_row['tunnus']) {
+						$sel = "selected";
+						$predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
+					}
 
 					$oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
 				}
@@ -3393,6 +3405,20 @@
 			$alhiro = mysql_fetch_assoc($alhire);
 
 			$kukarow['toimipaikka'] = $alhiro['tunnus'];
+		}
+
+		if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($varasto) and $varasto != 0 and isset($yhtiotoimipaikka) and (trim($yhtiotoimipaikka) == '' or $yhtiotoimipaikka == 0)) {
+
+			$_query  = "SELECT toimipaikka
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$varasto}'";
+			$vares = pupe_query($_query);
+			$varow = mysql_fetch_assoc($vares);
+
+			if ($varow['toimipaikka'] != 0) {
+				$yhtiotoimipaikka = $varow['toimipaikka'];
+			}
 		}
 
 		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta

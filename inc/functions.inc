@@ -1269,7 +1269,6 @@ if (!function_exists("saldo_myytavissa")) {
 		// Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
 		global $kukarow, $yhtiorow;
 
-
 		$varaako_jt_saldoa = "";
 
 		if ($tyyppi == "JTSPEC" and $yhtiorow["varaako_jt_saldoa"] != "") {
@@ -1318,11 +1317,21 @@ if (!function_exists("saldo_myytavissa")) {
 			$myytavissa		= 0;
 		}
 		else {
-
-			if ($yhtio != "") {
+			if ($yhtio != "" and $yhtio != $kukarow["yhtio"]) {
 				// Jos yhtiö tulee parametrinä niin katsotaan, ettei se ole ihan mitä sattuu ja lasketaan sen yhtiön saldo
-				// (TÄMÄ OMINAISUUS DEPRECATED!)
-				$yhtiolisa = $kukarow["yhtio"];
+				$query	= "	SELECT yhtio
+							FROM yhtio
+							WHERE konserni = '$yhtiorow[konserni]'
+							AND konserni != ''
+							AND yhtio = '$yhtio'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtiolisa = $yhtio;
+				}
+				else {
+					$yhtiolisa = $kukarow["yhtio"];
+				}
 			}
 			else {
 				$yhtiolisa = $kukarow["yhtio"];
@@ -8653,12 +8662,28 @@ if (!function_exists("livesearch_tuotehaku")) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
-			$haku_array = explode(" ", $haku);
-			$haku_query = "";
+			$haku_array 		= explode(" ", $haku);
+			$tuoteno_haku_query = "";
+			$nimitys_haku_query = "";
+			$tuoteindex 		= "";
+			$nimitindex			= "";
+
+			if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
+				$tuoteindex = "USE INDEX (tuoteno)";
+				$nimitindex = "USE INDEX (nimitys)";
+			}
 
 			foreach ($haku_array as $haku) {
 				$haku = mysql_real_escape_string($haku);
-				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
+
+				if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
+					$tuoteno_haku_query .= " and match (tuote.tuoteno) against ('$haku*' IN BOOLEAN MODE) ";
+					$nimitys_haku_query .= " and match (tuote.nimitys) against ('$haku*' IN BOOLEAN MODE) ";
+				}
+				else {
+					$tuoteno_haku_query .= " and tuote.tuoteno like ('%$haku%') ";
+					$nimitys_haku_query .= " and tuote.nimitys like ('%$haku%') ";
+				}
 			}
 
 			// vientikieltokäsittely:
@@ -8712,14 +8737,23 @@ if (!function_exists("livesearch_tuotehaku")) {
 			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
 			}
-			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
+
+			$query = "	(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
 						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
-						FROM tuote
+						FROM tuote $tuoteindex
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						$naytetaanko_poistetut
 						$kieltolisa
-						$haku_query
-						ORDER BY jarjestys, tuote.tuoteno
+						$tuoteno_haku_query)
+						UNION
+						(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
+						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
+						FROM tuote $nimitindex
+						WHERE tuote.yhtio = '$kukarow[yhtio]'
+						$naytetaanko_poistetut
+						$kieltolisa
+						$nimitys_haku_query)
+						ORDER BY jarjestys, tuoteno
 						LIMIT 500";
 			$result = pupe_query($query);
 
@@ -18675,7 +18709,7 @@ if (!function_exists("pupeFileReader")) {
 if (!function_exists('pupeFileReaderXLSRows')) {
 	function pupeFileReaderXLSRows($foldername, $i, $savefile) {
 		$excelrivit = array();
-		
+
 		$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet{$i}.xml";
 		$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
 
@@ -18738,7 +18772,7 @@ if (!function_exists('pupeFileReaderXLSRows')) {
 if (!function_exists('pupeFileReaderXLSRow')) {
 	function pupeFileReaderXLSRow(&$objPHPExcel, $i) {
 		$excelrivit = array();
-		
+
 		/** Aktivoidaan eka sheetti**/
 		$objPHPExcel->setActiveSheetIndex($i);
 
@@ -24929,6 +24963,80 @@ if (!function_exists('hae_asiakashinnat')) {
 		}
 
 		return $tuote_hinnat;
+	}
+}
+
+if (!function_exists('hae_ostolaskun_tyypin_oletustili')) {
+	function hae_ostolaskun_tyypin_oletustili($ostolasku_tyyppi, $toimittaja_tunnus = '') {
+		global $kukarow, $yhtiorow;
+
+		$oletustili = false;
+
+		if ($toimittaja_tunnus != '') {
+			$toimittajarow = hae_toimittaja($toimittaja_tunnus);
+
+			if ($toimittajarow['oletus_vienti'] == $ostolasku_tyyppi) {
+				$oletustili = $toimittajarow['tilino'];
+			}
+		}
+
+		if ($toimittaja_tunnus == '' or ($toimittaja_tunnus != '' and !$oletustili)) {
+			switch ($ostolasku_tyyppi) {
+				case 'A':
+					//Kotimaa
+					$oletustili = $yhtiorow['ostolasku_kotimaa_kulu'];
+					break;
+				case 'B':
+					//Kotimaa huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_kotimaa_rahti'];
+					break;
+				case 'C':
+					//Kotimaa vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_kotimaa_vaihto_omaisuus'];
+					break;
+				case 'J':
+					//Kotimaa raaka-aine
+					$oletustili = $yhtiorow['ostolasku_kotimaa_raaka_aine'];
+					break;
+				case 'D':
+					//EU
+					$oletustili = $yhtiorow['ostolasku_eu_kulu'];
+					break;
+				case 'E':
+					//EU huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_eu_rahti'];
+					break;
+				case 'F':
+					//EU vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_eu_vaihto_omaisuus'];
+					break;
+				case 'K':
+					//EU raaka-aine
+					$oletustili = $yhtiorow['ostolasku_eu_raaka_aine'];
+					break;
+				case 'G':
+					//ei-EU
+					$oletustili = $yhtiorow['ostolasku_ei_eu_kulu'];
+					break;
+				case 'H':
+					//ei-EU huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_ei_eu_rahti'];
+					break;
+				case 'I':
+					//ei-EU vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_ei_eu_vaihto_omaisuus'];
+					break;
+				case 'L':
+					//ei-EU raaka-aine
+					$oletustili = $yhtiorow['ostolasku_ei_eu_raaka_aine'];
+					break;
+				default:
+					//ERROR
+					break;
+			}
+		}
+
+		return $oletustili;
 	}
 }
 

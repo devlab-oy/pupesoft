@@ -36,9 +36,7 @@
 			if (mysql_field_name($result, $i) == 'kayttoprosentti') {
 				$t[$i] = (int) $t[$i];
 
-				if (trim($t[$i]) == 0) $virhe[$i] .= t("Käyttöprosentti pitää olla kokonaisluku ja sen pitää olla suurempi kuin nolla");
+				if ($t[$i] == 0) $t[$i] = 100;
 			}
 		}
 	}
-
-?>

@@ -3862,7 +3862,7 @@ if ($tee == '') {
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				${'ale'.$alepostfix} = $tilausrivi["ale{$alepostfix}"];
 			}
-
+			
 			$netto					= $tilausrivi['netto'];
 			$alv 					= $tilausrivi['alv'];
 			$kommentti				= $tilausrivi['kommentti'];
@@ -3879,6 +3879,17 @@ if ($tee == '') {
 			$sopimuksen_lisatieto2	= $tilausrivi["sopimuksen_lisatieto2"];
 			$omalle_tilaukselle		= $tilausrivi['omalle_tilaukselle'];
 			$valmistuslinja			= $tilausrivi['positio'];
+
+			if ($yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+				// valittu ei näytetä alveja vaikka hinnat alvillisina	
+				if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
+					$hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
+				}
+				// valittu näytetään alvit vaikka hinnat alvittomia
+				if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o') {
+					$hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
+				}
+			}
 
 			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and stristr($kommentti, $tilausrivi['rekisterinumero'])) {
 				$kommentti = str_replace("\n" . $tilausrivi['rekisterinumero'], '', $kommentti);
@@ -5984,7 +5995,6 @@ if ($tee == '') {
 										<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
 										<input type='hidden' name='tila' 			value = 'MUUTA'>
 										<input type='hidden' name='tapa' 			value = 'VAIHDA'>
-										<input type='hidden' name='vaihdetaan_paikkaa' value = 'JOO'>
 										$paikat
 									</form>";
 					}

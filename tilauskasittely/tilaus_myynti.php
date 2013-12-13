@@ -5984,6 +5984,7 @@ if ($tee == '') {
 										<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
 										<input type='hidden' name='tila' 			value = 'MUUTA'>
 										<input type='hidden' name='tapa' 			value = 'VAIHDA'>
+										<input type='hidden' name='vaihdetaan_paikkaa' value = 'JOO'>
 										$paikat
 									</form>";
 					}

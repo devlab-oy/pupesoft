@@ -1175,7 +1175,7 @@
 
 					if ($mukaan == "tilaustyyppi") {
 						$group .= ",lasku.clearing";
-						$select .= "lasku.clearing tilaustyyppi, ";
+						$select .= "if (lasku.clearing = '', 'MYYNTITILAUS', lasku.clearing) tilaustyyppi, ";
 						$order  .= "lasku.clearing,";
 						$gluku++;
 

@@ -23771,11 +23771,11 @@ if (!function_exists('hyllysiirto')) {
 			$mista_kohde    = 0;
 			$mista_projekti = 0;
 
-			if ($mistavarasto_row['toimipaikka'] > 0) {
+			if ($mistavarasto['toimipaikka'] > 0) {
 				$query = "	SELECT kustp, kohde, projekti
 							FROM yhtion_toimipaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$mistavarasto_row['toimipaikka']}'";
+							AND tunnus = '{$mistavarasto['toimipaikka']}'";
 				$mistatoimipaikka_res = pupe_query($query);
 				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
 
@@ -23789,11 +23789,11 @@ if (!function_exists('hyllysiirto')) {
 				$minne_kohde    = 0;
 				$minne_projekti = 0;
 
-				if ($minnevarasto_row['toimipaikka'] > 0) {
+				if ($minnevarasto['toimipaikka'] > 0) {
 					$query = "	SELECT kustp, kohde, projekti
-								FROM varastopaikat
+								FROM yhtion_toimipaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$minnevarasto_row['toimipaikka']}'";
+								AND tunnus = '{$minnevarasto['toimipaikka']}'";
 					$minnetoimipaikka_res = pupe_query($query);
 					$minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
 

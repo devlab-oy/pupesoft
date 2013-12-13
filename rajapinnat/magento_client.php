@@ -459,6 +459,9 @@ class MagentoClient {
 		// Uusia voi hakea? state => 'new'
 		#$filter = array(array('state' => array('eq' => 'new')));
 
+		// Näin voi hakea yhden tilauksen tiedot
+		//return array($this->_proxy->call($this->_session, 'sales_order.info', '100019914'));
+
 		// Haetaan tilaukset (orders.status = 'processing')
 		$fetched_orders = $this->_proxy->call($this->_session, 'sales_order.list', $filter);
 

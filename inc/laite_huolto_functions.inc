@@ -473,3 +473,19 @@ function hae_kohde($kohde_tunnus) {
 	$kohde_result = pupe_query($query);
 	return mysql_fetch_assoc($kohde_result);
 }
+
+function onko_huoltosyklilla_laitteita($huoltosykli_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT *
+				FROM huoltosyklit_laitteet
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) > 0) {
+		return true;
+	}
+
+	return false;
+}

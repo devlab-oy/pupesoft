@@ -31,6 +31,10 @@
 		require ("inc/{$toim}_ajax.inc");
 	}
 
+	if (file_exists("inc/laite_huolto_functions.inc")) {
+		require_once('inc/laite_huolto_functions.inc');
+	}
+
 	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
@@ -204,6 +208,12 @@
 			$uusi = 0;
 			$tunnus = 0;
 			exit;
+		}
+	}
+
+	if ($del == 1 and $toim == 'huoltosykli') {
+		if (onko_huoltosyklilla_laitteita()) {
+			unset($del);
 		}
 	}
 
@@ -2239,6 +2249,7 @@
 			$toim == "kohde" or
 			$toim == "paikka" or
 			$toim == "laite" or
+			$toim == "huoltosykli" or
 			$toim == "huoltosyklit_laitteet" or
 			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $poistolukko == "") or

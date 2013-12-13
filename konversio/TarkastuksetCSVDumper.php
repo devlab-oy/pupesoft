@@ -1,8 +1,9 @@
 <?php
 
 require_once('CSVDumper.php');
-//require_once('/Users/joonas/Dropbox/Sites/pupesoft/inc/laite_huolto_functions.inc');
-require_once("/Users/harjukallio/Dropbox/Sites/pupesoft/inc/laite_huolto_functions.inc");
+
+$filepath = dirname(__FILE__);
+require_once("{$filepath}/../inc/laite_huolto_functions.inc");
 
 class TarkastuksetCSVDumper extends CSVDumper {
 

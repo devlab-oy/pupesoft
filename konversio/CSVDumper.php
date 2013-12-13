@@ -1,7 +1,8 @@
 <?php
 
-//require_once('/Users/joonas/Dropbox/Sites/pupesoft/inc/ProgressBar.class.php');
-require_once("/Users/harjukallio/Dropbox/Sites/pupesoft/inc/ProgressBar.class.php");
+$filepath = dirname(__FILE__);
+require_once("{$filepath}/../inc/ProgressBar.class.php");
+
 abstract class CSVDumper {
 
 	protected $filepath = "";

@@ -1175,7 +1175,7 @@
 
 					if ($mukaan == "tilaustyyppi") {
 						$group .= ",tilauksentyyppi";
-						$select .= "concat(if(lasku.tilaustyyppi='', 'N', lasku.tilaustyyppi),'##', lasku.clearing) tilauksentyyppi, ";
+						$select .= "concat(if(lasku.tilaustyyppi='','N',lasku.tilaustyyppi),'##',lasku.clearing) tilauksentyyppi, ";
 						$order  .= "tilauksentyyppi,";
 						$gluku++;
 

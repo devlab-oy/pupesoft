@@ -53,7 +53,7 @@
 			$path_parts = pathinfo($file);
 			$ext = strtoupper($path_parts['extension']);
 
-			if ($ext == 'TC') {
+			if ($ext == 'TC' or $ext == 'TXT') {
 
 				$filehandle = fopen($path.$file, "r");
 
@@ -62,10 +62,17 @@
 					// Tyhjät rivit skipataan
 					if (trim($tietue) == "") continue;
 
-					list($seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
+					if ($ext == 'TC') {
+						list($seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
+					}
+					else {
+						list($devnull, $seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
+					}
+
+					if (trim($seurantakoodi) == '') continue;
 
 					$tilausnumero = (int) $tilausnumero;
-					$seurantakoodi = mysql_fetch_assoc($seurantakoodi);
+					$seurantakoodi = mysql_real_escape_string($seurantakoodi);
 
 					if ($tilausnumero == 0 or trim($seurantakoodi) == '') continue;
 

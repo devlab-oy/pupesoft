@@ -118,9 +118,21 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					//loytyyko_tuote metodi populoi products arrayta
 					$rivi['toimenpide_tuotteen_tyyppi'] = $this->products[$rivi[$key]]['selite'];
 					//HUOM tarvitseeko hae_huoltosykli $rivi['toimenpide_tuotteen_tyyppi'] ??
-					$rivi['huoltosykli_tunnus'] = $this->hae_huoltosykli($rivi['laite'], $rivi['toimenpide']);
 
 					$huoltosyklit = $this->hae_huoltosyklit($rivi['laite']);
+
+					$tehtava_huolto = search_array_key_for_value_recursive($huoltosyklit, 'toimenpide', $rivi['toimenpide']);
+					$tehtava_huolto = $tehtava_huolto[0];
+
+					$muut_huollot = array();
+					foreach ($huoltosyklit as $huoltosykli) {
+						if ($huoltosykli['tunnus'] != $tehtava_huolto['tunnus']) {
+							$muut_huollot[] = $huoltosykli;
+						}
+					}
+
+					$rivi['tehtava_huolto'] = $tehtava_huolto;
+					$rivi['muut_huollot'] = $muut_huollot;
 				}
 			}
 			else if ($key == 'status') {
@@ -238,13 +250,16 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	}
 
 	private function hae_huoltosyklit($laite_tunnus) {
-		$query = "	SELECT huoltosykli.tunnus,
-					huoltosykli.toimenpide
+		$query = "	SELECT huoltosykli.tunnus AS huoltosykli_tunnus,
+					huoltosykli.toimenpide AS toimenpide
 					FROM huoltosykli
 					JOIN huoltosyklit_laitteet
 					ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
 						AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
 						AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}' )
+					JOIN tuotteen_avainsanat
+					ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio
+						AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide)
 					WHERE huoltosykli.yhtio = '{$this->kukarow['yhtio']}'";
 		$result = pupe_query($query);
 
@@ -258,30 +273,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		}
 
 		return $huoltosyklit;
-	}
-
-	private function hae_huoltosykli($laite_tunnus, $toimenpide_tuoteno) {
-		$query = "	SELECT huoltosykli.tunnus
-					FROM huoltosykli
-					JOIN huoltosyklit_laitteet
-					ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
-						AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
-						AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}' )
-					WHERE huoltosykli.yhtio = '{$this->kukarow['yhtio']}'
-					AND huoltosykli.toimenpide = '{$toimenpide_tuoteno}'";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) > 1) {
-			die('Viduks meni huoltosykli haku');
-		}
-
-		if (mysql_num_rows($result) == 0) {
-			return false;
-		}
-
-		$huoltosykli = mysql_fetch_assoc($result);
-
-		return $huoltosykli['tunnus'];
 	}
 
 	protected function tarkistukset() {

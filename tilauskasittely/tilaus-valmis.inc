@@ -1677,7 +1677,7 @@ else {
 
 			foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
 
-				if ($_ulkoinen_jarjestelma == 'P') {
+				if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == '' and $_ulkoinen_jarjestelma == 'P') {
 					posten_outbounddelivery($_otunnus);
 				}
 			}

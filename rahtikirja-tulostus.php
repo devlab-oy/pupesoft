@@ -814,7 +814,7 @@
 							require("tilauskasittely/rahtikirja_pdf.inc");
 						}
 
-						if ($toitarow['erittely'] == 'k') {
+						if ($toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
 							require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 						}
 
@@ -1049,7 +1049,7 @@
 			if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
 		} // end while haetaan kaikki distinct rahtikirjat..
 
-		if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "") {
+		if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
 			$kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2); //poistetaan pilkku ja välilyönti viimosen perästä
 			$otunnukset_temp = $otunnukset;
 			$otunnukset = $kaikki_lotsikot_per_toimitus;

@@ -3,6 +3,7 @@
 	require("inc/parametrit.inc");
 
 	if (!isset($tee)) $tee = '';
+	if (!isset($osasto)) $osasto = 0;
 
 	echo "<font class='head'>",t("Synkronoi tuotteet ulkoiseen j‰rjestelm‰‰n"),"</font><hr><br />";
 
@@ -14,6 +15,27 @@
 		exit;
 	}
 
+	echo "<form method='post' action=''>";
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>",t("Valitse osasto"),"</th>";
+	echo "<td>";
+	echo "<select name='osasto'>";
+	echo "<option value='0'>",t("Ei osastoa"),"</option>";
+
+	$osastores = t_avainsana("OSASTO");
+
+	while ($osastorow = mysql_fetch_assoc($osastores)) {
+		$sel = $osastorow['selite'] == $osasto ? "selected" : "";
+		echo "<option value='{$osastorow['selite']}' {$sel}>{$osastorow['selitetark']}</option>";
+	}
+
+	echo "</select>";
+	echo "</td>";
+	echo "<td class='back'><input type='submit' value='",t("Hae"),"' /></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</form>";
 
 	$query = "	SELECT tuote.*, ta.selite AS synkronointi
 				FROM tuote
@@ -22,7 +44,7 @@
 				AND tuote.status != 'P'
 				AND tuote.ei_saldoa = ''
 				AND tuote.eankoodi != ''
-				AND tuote.osasto = '141'
+				AND tuote.osasto = '{$osasto}'
 				AND ta.selite IS NULL";
 	$res = pupe_query($query);
 

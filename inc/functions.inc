@@ -24948,7 +24948,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
 		$messageheader = $xml->addChild('MessageHeader');
 		$messageheader->addChild('MessageType', 'OutboundDelivery');
-		$messageheader->addChild('Sender', 'Makia');
+		$messageheader->addChild('Sender', $yhtiorow['nimi']);
 		$messageheader->addChild('Receiver', 'Posten');
 
 		$custpickinglist = $xml->addChild('CustPickingList');

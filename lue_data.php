@@ -1401,6 +1401,9 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						// tehd‰‰n riville oikeellisuustsekkej‰
+
+						KORJATAAN
+
 						if ($table_mysql == 'tuotteen_toimittajat' and $otsikko == 'TOIMITTAJA' and !in_array("LIITOSTUNNUS", $taulunotsikot[$taulu])) {
 
 							$tpque = "	SELECT tunnus

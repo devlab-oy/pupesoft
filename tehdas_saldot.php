@@ -231,11 +231,12 @@
 
 		echo "<tr><th colspan='2'>",t("Toimittajan valinnat"),"</th></tr>";
 
-		$query = "	SELECT DISTINCT tuotteen_toimittajat.toimittaja, toimi.nimi, toimi.nimitark
+		KORJATAAN
+
+		$query = "	SELECT DISTINCT toimi.tunnus, toimi.nimi, toimi.nimitark
 					FROM tuotteen_toimittajat
-					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
-					WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-					AND tuotteen_toimittajat.toimittaja != 'FI'";
+					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+					WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'";
 		$tuotteen_toimittajat_result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr><td>",t("Tuotteen toimittaja"),"</td>";
@@ -243,7 +244,7 @@
 
 		while ($tuotteen_toimittajat_row = mysql_fetch_assoc($tuotteen_toimittajat_result)) {
 
-			$sel = $tuotteen_toimittaja == $tuotteen_toimittajat_row['toimittaja'] ? ' SELECTED' : '';
+			$sel = $tuotteen_toimittaja == $tuotteen_toimittajat_row[''] ? ' SELECTED' : '';
 
 			echo "<option value='$tuotteen_toimittajat_row[toimittaja]'$sel>$tuotteen_toimittajat_row[nimi] $tuotteen_toimittajat_row[nimitark]</option>";
 		}

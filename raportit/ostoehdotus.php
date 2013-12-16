@@ -585,18 +585,19 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	while ($row = mysql_fetch_array($res)) {
 
 		$toimilisa = "";
-		if ($toimittajaid != '') $toimilisa = " and liitostunnus = '$toimittajaid' ";
+		if ($toimittajaid != '') $toimilisa = " and tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
 
 		// haetaan tuotteen toimittajatietoa
-		$query = "	SELECT group_concat(tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
-					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '/') osto_era,
+		$query = "	SELECT group_concat(toimi.ytunnus 						order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
+					group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
 					group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-					group_concat(distinct tuotteen_toimittajat.ostohinta order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
+					group_concat(distinct tuotteen_toimittajat.ostohinta 	order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
 					FROM tuotteen_toimittajat
-					WHERE yhtio in ($yhtiot)
-					and tuoteno = '$row[tuoteno]'
+					JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+					WHERE tuotteen_toimittajat.yhtio in ($yhtiot)
+					and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
 					$toimilisa";
 		$result   = pupe_query($query);
 		$toimirow = mysql_fetch_array($result);

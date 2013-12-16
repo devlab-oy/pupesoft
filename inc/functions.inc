@@ -2359,6 +2359,8 @@ if (!function_exists("synkronoi")) {
 				}
 				elseif ($table == "tuotteen_toimittajat") {
 
+					KORJATAAN
+
 					$query = "SELECT * from tuote where yhtio='$yhtio' and tuoteno='$abuhaku[tuoteno]'";
 					$abures = pupe_query($query);
 

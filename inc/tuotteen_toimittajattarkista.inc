@@ -36,6 +36,9 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "toimittaja") {
+			
+			KORJATAAN
+			
 			if ($t[$i] != '') {
 
 				$t[$i] = trim($t[$i]);

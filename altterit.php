@@ -11,6 +11,8 @@
 	$timeparts		= explode(" ",microtime());
 	$starttime		= $timeparts[1].substr($timeparts[0],1);
 
+	echo "\nSTART: $hname :$dbkanta\n";
+
 	//$dbkanta --> tulee salasanat.php:stä
 	$query  = "SHOW TABLES FROM $dbkanta";
 	$tabresult = pupe_query($query);
@@ -41,7 +43,7 @@
 
 		$sql = substr($sql, 0, -2).";\n";
 
-		echo "$sql\n";
+		#echo "$sql\n";
 
 		$result = pupe_query($sql);
 	}
@@ -50,4 +52,6 @@
 	$endtime   = $timeparts[1].substr($timeparts[0],1);
 	$aika      = round($endtime-$starttime,4);
 
-	echo "\n$aika\n";
+	$hname = gethostname();
+
+	echo "\nFINISH: $hname :$dbkanta: $aika\n";

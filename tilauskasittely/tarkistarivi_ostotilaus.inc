@@ -49,6 +49,10 @@
 		$prow["kommentti"] .= "<br>".t("HUOM: Toimittajan tehtaan saldo on")." {$trow['tehdas_saldo']}.<br>";
 	}
 
+	if ($trow['ostoehdotus'] == 'E') {
+		$varaosavirhe .= t("HUOM: Tuotetta ei ehdoteta ostoehdotus ohjelmissa tilattavaksi")."!<br>";
+	}
+
 	if ($yhtiorow['ostoera_pyoristys'] == 'K' and isset($ostoerahuom) and is_array($ostoerahuom) and in_array($prow['tunnus'], $ostoerahuom) and $kpl_st != $org_kpl) {
 		$varaosavirhe .= "<font class='message'>".t("HUOM: Rivin määrä on pyöristetty täyteen ostoerään!")."<br></font>";
 	}

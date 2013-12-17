@@ -10,6 +10,8 @@
 
 	require("../inc/parametrit.inc");
 
+	if (!isset($valitut["EIVIENTEJA"])) $valitut["EIVIENTEJA"] = isset($_COOKIE["valitut_EIVIENTEJA"]) ? $_COOKIE["valitut_EIVIENTEJA"] : $valitut["EIVIENTEJA"];
+
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
@@ -2534,6 +2536,23 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
+						and selitetark = 'EIVIENTEJA'";
+			$sresult = pupe_query($query);
+			$srow = mysql_fetch_assoc($sresult);
+
+			$chk = "";
+			if (($srow["selitetark"] == "EIVIENTEJA" and $tee == "JATKA") or $valitut["EIVIENTEJA"] != '') {
+				$chk = "CHECKED";
+			}
+
+			echo "<tr><th>".t("Älä näytä vientitilauksien myyntejä")."</th><td colspan='3'><input type='checkbox' name='valitut[EIVIENTEJA]' value='EIVIENTEJA' $chk></td></tr>";
+
+			//Näytetäänkö poistuvat tuotteet
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji = 'KKOSTOT'
+						and selite	= '$rappari'
 						and selitetark = 'EHDOTETTAVAT'";
 			$sresult = pupe_query($query);
 			$srow = mysql_fetch_assoc($sresult);
@@ -2542,8 +2561,6 @@
 			if (($srow["selitetark"] == "EHDOTETTAVAT" and $tee == "JATKA") or $valitut["EHDOTETTAVAT"] != '') {
 				$chk = "CHECKED";
 			}
-
-			echo "<tr><th>".t("Älä näytä vientitilauksien myyntejä")."</th><td colspan='3'><input type='checkbox' name='valitut[EIVIENTEJA]' value='EIVIENTEJA' $chk></td></tr>";
 
 			echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
 

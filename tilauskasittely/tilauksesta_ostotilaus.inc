@@ -160,7 +160,10 @@
 							$tilaustyyppi = 2;
 						}
 
-						if ($myytilrow['varasto'] != 0) {
+						if ($yhtiorow['suoratoimitusvarasto'] != 0) {
+							$oletusostovarasto = $yhtiorow['suoratoimitusvarasto'];
+						}
+						elseif ($myytilrow['varasto'] != 0) {
 							$oletusostovarasto = $myytilrow['varasto'];
 						}
 						elseif ($kukarow['oletus_ostovarasto'] != 0) {

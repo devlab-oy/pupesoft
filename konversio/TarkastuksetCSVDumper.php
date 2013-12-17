@@ -126,7 +126,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 					$muut_huollot = array();
 					foreach ($huoltosyklit as $huoltosykli) {
-						if ($huoltosykli['tunnus'] != $tehtava_huolto['tunnus']) {
+						if ($huoltosykli['huoltosykli_tunnus'] != $tehtava_huolto['huoltosykli_tunnus']) {
 							$muut_huollot[] = $huoltosykli;
 						}
 					}
@@ -188,8 +188,21 @@ class TarkastuksetCSVDumper extends CSVDumper {
 				paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $rivi['huoltosykli_tunnus'], $rivi['toimitettu']);
 			}
 
-			//TODO jos kyseessä on koeponnistus niin pitäisi osata merkata huollon ja tarkastuksen viimeinen tapahtuma oikein
-			//TODO poikkeukset pitää merkata historiaan.
+			//jos kyseessä on koeponnistus tai huolto niin pitäisi osata merkata huollon/koeponnistuksen ja tarkastuksen viimeinen tapahtuma oikein
+			if ($rivi['tehtava_huolto']['selite'] == 'huolto' or $rivi['tehtava_huolto']['selite'] == 'koeponnistus') {
+				foreach ($rivi['muut_huollot'] as $muu_huolto) {
+					paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $muu_huolto['huoltosykli_tunnus'], $rivi['toimitettu']);
+				}
+			}
+
+			//poikkeukset pitää merkata historiaan.
+			if (!empty($rivi['poikkeus'])) {
+
+			}
+
+			if (!empty($rivi['kommentti'])) {
+				$this->paivita_tyomaarayksen_kommentti($tyomaarays_tunnus, $rivi['kommentti']);
+			}
 
 			if ($this->is_proggressbar_on) {
 				$progress_bar->increase();
@@ -251,7 +264,8 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 	private function hae_huoltosyklit($laite_tunnus) {
 		$query = "	SELECT huoltosykli.tunnus AS huoltosykli_tunnus,
-					huoltosykli.toimenpide AS toimenpide
+					huoltosykli.toimenpide AS toimenpide,
+					tuotteen_avainsanat.selite
 					FROM huoltosykli
 					JOIN huoltosyklit_laitteet
 					ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
@@ -259,7 +273,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 						AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}' )
 					JOIN tuotteen_avainsanat
 					ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio
-						AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide)
+						AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide )
 					WHERE huoltosykli.yhtio = '{$this->kukarow['yhtio']}'";
 		$result = pupe_query($query);
 
@@ -273,6 +287,14 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		}
 
 		return $huoltosyklit;
+	}
+
+	private function paivita_tyomaarayksen_kommentti($tunnus, $kommentti) {
+		$query = "	UPDATE tilausrivi
+					SET kommentti = '{$kommentti}'
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND otunnus = '{$tunnus}'";
+		pupe_query($query);
 	}
 
 	protected function tarkistukset() {

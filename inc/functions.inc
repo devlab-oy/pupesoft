@@ -25195,6 +25195,169 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 	}
 }
 
+/**
+ * Hakee laskuja joilla on avoin saldo
+ *
+	$request = array(
+		'ryhmittely_tyyppi'		 => $ryhmittely_tyyppi,
+		'ryhmittely_arvo'		 => $ryhmittely_arvo,
+		'paiva'					 => $paiva,
+		'lasku_tunnukset'		 => $lasku_tunnukset,
+		'lahetetyt'				 => $lahetetyt (boolean)
+	);
+ *
+ * @global array $kukarow
+ * @global array $yhtiorow
+ * @param array $request
+ * @param boolean $valitut
+ * @return array
+ */
+if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
+	function hae_myyntilaskuja_joilla_avoin_saldo($request, $valitut = false) {
+		global $kukarow, $yhtiorow;
+
+		$asiakas_join = "";
+		if (!$valitut) {
+			if ($request['ryhmittely_tyyppi'] == 'ytunnus' and $request['ryhmittely_arvo'] != '') {
+				$asiakas_join = "	AND asiakas.ytunnus LIKE '%{$request['ryhmittely_arvo']}%'";
+			}
+			else if ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
+				$asiakas_join = "	AND asiakas.asiakasnro LIKE '%{$request['ryhmittely_arvo']}%'";
+			}
+			else if ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
+				$asiakas_join = "	AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
+			}
+		}
+
+		$lasku_where = "";
+		if (!empty($request['lasku_tunnukset'])) {
+			$lasku_where = " AND lasku.tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+		}
+
+		$karhu_lasku_select = "";
+		$karhu_lasku_join = "";
+		if ($request['lahetetyt']) {
+			$karhu_lasku_select = "	karhukierros.pvm as lahetys_paiva,
+									karhukierros.viesti as saldovahvistus_viesti,
+									karhukierros.avoin_saldo_pvm,";
+			$karhu_lasku_join = "	JOIN karhu_lasku
+									ON ( karhu_lasku.ltunnus = lasku.tunnus)
+									JOIN karhukierros
+									ON ( karhukierros.yhtio = lasku.yhtio
+										AND karhukierros.tyyppi = 'S'
+										AND karhukierros.tunnus = karhu_lasku.ktunnus";
+			if (isset($request['alku_paiva']) and isset($request['loppu_paiva'])) {
+				$karhu_lasku_join .= " AND karhukierros.pvm >= '{$request['alku_paiva']}' AND karhukierros.pvm <= '{$request['loppu_paiva']}'";
+			}
+			$karhu_lasku_join .= ' )';
+		}
+
+		//lasku.tunnus ASC koska sessioon tallennetaan implode tunnus ja tunnukset pit‰‰ olla tietyss‰ j‰rjestyksess‰, koska muuten rivi‰ ei lˆydy.
+		$query = "	SELECT lasku.tunnus,
+					asiakas.ytunnus,
+					asiakas.toim_ovttunnus,
+					lasku.nimi,
+					lasku.liitostunnus,
+					lasku.laskunro,
+					lasku.tapvm,
+					lasku.erpcm,
+					lasku.valkoodi,
+					asiakas.asiakasnro AS asiakasnumero,
+					asiakas.tunnus AS asiakas_tunnus,
+					lasku.summa,
+					lasku.saldo_maksettu,
+					{$karhu_lasku_select}
+					ROUND((lasku.summa - lasku.saldo_maksettu), 2) AS avoin_saldo
+					FROM lasku USE INDEX (yhtio_tila_mapvm)
+					JOIN asiakas
+					ON ( asiakas.yhtio = lasku.yhtio
+						AND asiakas.tunnus = lasku.liitostunnus
+						{$asiakas_join} )
+					{$karhu_lasku_join}
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND (
+						lasku.mapvm > '{$request['paiva']}'
+						OR lasku.mapvm = '0000-00-00'
+						)
+					AND lasku.tila = 'U'
+					AND lasku.alatila = 'X'
+					{$lasku_where}
+					HAVING avoin_saldo != 0
+					ORDER BY asiakas.toim_ovttunnus ASC,
+					asiakas.ytunnus ASC,
+					lasku.tunnus ASC";
+		$result = pupe_query($query);
+
+		$laskut = array();
+		while ($lasku = mysql_fetch_assoc($result)) {
+			$ytunnus_temp = $lasku['ytunnus'];
+			if (!isset($laskut[$lasku['ytunnus']]['avoin_saldo_summa'])) {
+				$laskut[$lasku['ytunnus']]['avoin_saldo_summa'] = 0;
+			}
+			if (!isset($laskut[$lasku['ytunnus']]['asiakas_nimi'])) {
+				//asiakkaan nimeen tulee ensimm‰isen laskun asiakkaan nimi, eli p‰‰asiakkaan nimi
+				$laskut[$lasku['ytunnus']]['asiakas_nimi'] = $lasku['nimi'];
+				$laskut[$lasku['ytunnus']]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+			}
+
+			$asiakasnumerot = search_array_key_for_value_recursive($laskut[$lasku['ytunnus']]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
+			if (!is_array($laskut[$lasku['ytunnus']]['asiakasnumerot']) or empty($asiakasnumerot)) {
+				$laskut[$lasku['ytunnus']]['asiakasnumerot'][] = array(
+					'asiakasnumero'	 => $lasku['asiakasnumero'],
+					'asiakas_tunnus' => $lasku['asiakas_tunnus'],
+				);
+			}
+			if ($request['lahetetyt']) {
+				$laskut[$lasku['ytunnus']]['lahetys_paiva'] = $lasku['lahetys_paiva'];
+				$laskut[$lasku['ytunnus']]['saldovahvistus_viesti'] = $lasku['saldovahvistus_viesti'];
+				$laskut[$lasku['ytunnus']]['avoin_saldo_pvm'] = $lasku['avoin_saldo_pvm'];
+			}
+
+			$laskut[$lasku['ytunnus']]['lasku_tunnukset'][] = $lasku['tunnus'];
+			$laskut[$lasku['ytunnus']]['avoin_saldo_summa'] += $lasku['avoin_saldo'];
+			$laskut[$lasku['ytunnus']]['ytunnus'] = $lasku['ytunnus'];
+			$laskut[$lasku['ytunnus']]['valkoodi'] = $lasku['valkoodi'];
+			$laskut[$lasku['ytunnus']]['laskut'][] = $lasku;
+		}
+
+		//Purkahko. Jos lasku_tunnukset on annettu, halutaan n‰ytt‰‰ tietyn asiakkaan(ytunnus) saldovahvistus pdf:n‰.
+		if (!empty($request['lasku_tunnukset'])) {
+			return $laskut[$ytunnus_temp];
+		}
+
+		return $laskut;
+	}
+}
+
+if (!function_exists('hae_saldovahvistus_viestit')) {
+	function hae_saldovahvistus_viestit() {
+		global $kukarow, $yhtiorow;
+
+		$result = t_avainsana('SALDOVAHVISTUS');
+		$saldovahvistus_viestit = array();
+		while ($saldovahvistus_viesti = mysql_fetch_assoc($result)) {
+			$saldovahvistus_viestit[] = $saldovahvistus_viesti;
+		}
+
+		return $saldovahvistus_viestit;
+	}
+}
+
+if (!function_exists('hae_kayttajan_kirjoitin')) {
+	function hae_kayttajan_kirjoitin() {
+		global $kukarow, $yhtiorow;
+
+		//Haetaan kirjoitin
+		$query = "	SELECT *
+					FROM kirjoittimet
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$kukarow['kirjoitin']}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

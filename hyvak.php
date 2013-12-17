@@ -623,13 +623,34 @@
 
 			//	Päivitetään tapvm ja viesti laskulle
 			$viesti = t("Matkalasku")." ".date("d").".".date("m").".".date("Y");
-			$query = " UPDATE lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL $erpaivia DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
-			$updres = pupe_query($query);
 
-			//	Päivitetään tiliöintien tapvm as well
-			$query = " UPDATE tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
-			$updres = pupe_query($query);
+			// Otetaan yhtiön tiedoista ostoreskontran sallittu tilikauden ajankohta
+			$tilalk = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
+			$tillop = (int) str_replace("-", "", $yhtiorow["tilikausi_loppu"]);
+			$latapv = (int) str_replace("-", "", $laskurow["tapvm"]);
 
+			// Jos lasku on suljetulla kaudella, niin ei kosketa tapvm:iin
+			if ($latapv >= $tilalk and $latapv <= $tillop) {
+				$query = "	UPDATE lasku
+							SET tapvm 	= now(),
+							erpcm 		= DATE_ADD(now(), INTERVAL $erpaivia DAY),
+							viesti 		= '$viesti'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus  = '$tunnus'";
+				$updres = pupe_query($query);
+
+				//	Päivitetään tiliöintien tapvm as well
+				$query = " UPDATE tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
+				$updres = pupe_query($query);
+			}
+			else {
+				$query = "	UPDATE lasku
+							SET erpcm	= DATE_ADD(now(), INTERVAL $erpaivia DAY),
+							viesti 		= '$viesti'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus  = '$tunnus'";
+				$updres = pupe_query($query);
+			}
 		}
 
 		// Kuka hyväksyi??

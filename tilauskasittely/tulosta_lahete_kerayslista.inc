@@ -696,7 +696,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
 if (!function_exists('rivi_kerayslista')) {
 	function rivi_kerayslista($params) {
-		global $kukarow, $yhtiorow, $asrow;
+		global $kukarow, $yhtiorow, $asrow, $onkolaajattoimipaikat;
 
 		// Luodaan muuttujat
 		foreach ($params as $key => $val) {
@@ -934,6 +934,21 @@ if (!function_exists('rivi_kerayslista')) {
 					//katotaan mihin varastooon tilausrivillä tuotepaikka kuuluu
 					$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
+					if ($onkolaajattoimipaikat and $laskurow['yhtio_toimipaikka'] != 0) {
+
+						$query  = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
+									FROM varastopaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tyyppi != 'P'
+									AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
+						$vares = pupe_query($query);
+						$varow = mysql_fetch_assoc($vares);
+
+						if (!empty($varow['tunnukset'])) {
+							$rivipaikka = $varow['tunnukset'];
+						}
+					}
+
 					//saldot per varastopaikka
 					if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
 						$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
@@ -946,7 +961,7 @@ if (!function_exists('rivi_kerayslista')) {
 									JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 									and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 									and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-									and varastopaikat.tunnus = '$rivipaikka'
+									and varastopaikat.tunnus IN ({$rivipaikka})
 									JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
 									and sarjanumeroseuranta.tuoteno = tuote.tuoteno
 									and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
@@ -971,7 +986,7 @@ if (!function_exists('rivi_kerayslista')) {
 									JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 									and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 									and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-									and varastopaikat.tunnus = '$rivipaikka'
+									and varastopaikat.tunnus IN ({$rivipaikka})
 									WHERE tuote.yhtio = '$kukarow[yhtio]'
 									and tuote.tuoteno = '$row[tuoteno]'
 									ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";

@@ -678,7 +678,7 @@ if ($silent == "") {
 		$kentta   = "haku";
 	}
 
-	if(!isset($hakutapa) and !isset($tee_kululaskut) and $keikanalatila == "") {
+	if (((!isset($hakutapa) and !isset($tee_kululaskut)) or ($haku == '' and $tee_kululaskut == 'haku')) and $keikanalatila == "") {
 		$hakutapa 		= "N";
 		$haku 			= substr($laskurow["nimi"], 0, 25);
 		$tee_kululaskut = "haku";
@@ -743,7 +743,7 @@ if ($silent == "") {
 			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
 		}
 
-		if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+		if ($yhtiorow['toimipaikkakasittely'] == "L" and isset($toimipaikka) and $toimipaikka != 'kaikki') {
 			$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
 		}
 		else {
@@ -770,8 +770,13 @@ if ($silent == "") {
 		else {
 
 			echo "<br><table>";
-			echo "<tr>
-					<th>".t("Nimi")."</th>
+			echo "<tr>";
+			
+			if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikka == 'kaikki') {
+				echo "<th>".t("Toimipaikka")."</th>";
+			}
+
+			echo "<th>".t("Nimi")."</th>
 					<th>".t("Pvm")."</th>
 					<th>".t("Summa")."</th>
 					<th>".t("Veroton")."</th>
@@ -867,7 +872,22 @@ if ($silent == "") {
 					continue;
 				}
 
-				echo "<tr><td valign='top'><strong>$llrow[nimi]</strong>";
+				echo "<tr>";
+
+				if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikka == 'kaikki') {
+
+					if ($llrow['yhtio_toimipaikka'] != 0) {
+						$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $llrow['yhtio_toimipaikka']);
+						$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
+					}
+					else {
+						$toimipaikat_row['nimi'] = "";
+					}
+
+					echo "<td valign='top'><strong>{$toimipaikat_row['nimi']}</strong>";
+				}
+
+				echo "<td valign='top'><strong>$llrow[nimi]</strong>";
 
 				if ($llrow["comments"] != '') {
 					echo "<br><i>$llrow[comments]</i>";
@@ -1041,6 +1061,7 @@ if ($silent == "") {
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='otunnus' value='$otunnus'>";

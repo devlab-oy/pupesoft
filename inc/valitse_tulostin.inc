@@ -67,6 +67,10 @@
 		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 	}
 
+	if (isset($generoi_sahkoinen_lahete)) {
+		echo "<input type='hidden' name='generoi_sahkoinen_lahete' value='{$generoi_sahkoinen_lahete}' />";
+	}
+
 	echo "<table>";
 
 	$mista = 'asiakas';

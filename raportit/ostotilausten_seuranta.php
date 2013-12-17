@@ -202,7 +202,7 @@
 					$result = pupe_query($query);
 
 					$i = 1;
-					$x = mysql_num_rows($result);
+					$x = mysql_num_rows($result) != 0 ? mysql_num_rows($result) : 1;
 
 					$rows = array();
 

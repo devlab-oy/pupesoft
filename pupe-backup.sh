@@ -296,6 +296,10 @@ if test -f "etc/cups/lpoptions" -a -r "etc/cups/lpoptions"; then
 	BACKUPFILET="${BACKUPFILET} etc/cups/lpoptions"
 fi
 
+if test -f "etc/cups/printers.conf" -a -r "etc/cups/printers.conf"; then
+	BACKUPFILET="${BACKUPFILET} etc/cups/printers.conf"
+fi
+
 if test -f "etc/my.cnf" -a -r "etc/my.cnf"; then
 	BACKUPFILET="${BACKUPFILET} etc/my.cnf"
 fi

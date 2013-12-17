@@ -750,6 +750,7 @@ if ($tee == "") {
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='otunnus' value='$otunnus'>";

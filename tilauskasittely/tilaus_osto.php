@@ -1075,6 +1075,13 @@
 			echo "</tr>";
 			echo "</table><br>";
 
+			$tilausok = 0;
+
+			if ($yhtiorow['pakollinen_varasto'] == 'K' and $laskurow['varasto'] == 0) {
+				echo "<font class='error'>".t("VIRHE: Varaston valinta on pakollinen")."!</font><br><br>";
+				$tilausok++;
+			}
+
 			echo "<table>";
 			echo "<tr><th>".t("Ytunnus")."</th><th colspan='3'>".t("Toimittaja")."</th></tr>";
 			echo "<tr><td>".tarkistahetu($laskurow["ytunnus"])."</td><td colspan='3'>$laskurow[nimi] $laskurow[nimitark]<br>$laskurow[osoite] $laskurow[postino] $laskurow[postitp]</td></tr>";
@@ -1265,7 +1272,6 @@
 				$nettoyhteensa 		  = 0;
 				$eimitatoi 			  = '';
 				$lask 				  = mysql_num_rows($presult);
-				$tilausok 			  = 0;
 				$divnolla			  = 0;
 				$erikoisale_summa	  = 0;
 				$myyntitilaus_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////tee=AKTIVOI//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}//tilausnumero={$tilausnumero}//from=tilaus_myynti";
@@ -1317,6 +1323,8 @@
 							$pkres = pupe_query($query);
 							$pkrow = mysql_fetch_assoc($pkres);
 
+							$lisays = 0;
+
 							if ($prow["perheid2"] == 0 or $prow["perheid2"] == -1) {
 								$query  = "	SELECT tuoteperhe.tunnus
 											FROM tuoteperhe
@@ -1325,10 +1333,9 @@
 											and tuoteperhe.tyyppi 		= 'L'";
 								$lisaresult = pupe_query($query);
 
-								$lisays = mysql_num_rows($lisaresult)+1;
-							}
-							else {
-								$lisays = 0;
+								if (mysql_num_rows($lisaresult) > 0) {
+									$lisays = mysql_num_rows($lisaresult)+1;
+								}
 							}
 
 							$pkrow['kpl2'] += $lisays;
@@ -1395,13 +1402,54 @@
 
 						// tehd‰‰n pop-up divi jos keikalla on kommentti...
 						if ($prow["tunnus"] != "") {
-							list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"]);
+
+							$_varastot = array($laskurow['varasto']);
+
+							if ($laskurow['vanhatunnus'] != 0) {
+
+								$query  = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
+											FROM varastopaikat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tyyppi != 'P'
+											AND toimipaikka = '{$laskurow['vanhatunnus']}'";
+								$vares = pupe_query($query);
+								$varow = mysql_fetch_assoc($vares);
+
+								$saldo = $hyllyssa = $myytavissa = 0;
+
+								if (!empty($varow['tunnukset'])) {
+									$_varastot_tmp = explode(",", $varow['tunnukset']);
+									$_varastot = array_merge($_varastot, $_varastot_tmp);
+								}
+							}
+
+							list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"], '', $_varastot);
+
 							$pop_yks = t_avainsana("Y", "", "and avainsana.selite='$prow[yksikko]'", "", "", "selite");
 
 							echo "<div id='div_$prow[tunnus]' class='popup' style='width: 400px;'>";
 							echo "<ul>";
 							echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyss‰").": $hyllyssa $pop_yks</li><li>".t("Myyt‰viss‰").": $myytavissa $pop_yks</li>";
 							echo "<li>".t("Tilattu").": $prow[tilattu] $pop_yks</li><li>".t("Varattu").": $prow[varattukpl] $pop_yks</li>";
+
+							if ($prow['paikka'] != '') {
+
+								list($_hyllyalue, $_hyllynro, $_hyllyvali, $_hyllytaso) = explode(" ", $prow['paikka']);
+
+								$query = "	SELECT halytysraja
+											FROM tuotepaikat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tuoteno = '{$prow['tuoteno']}'
+											AND hyllyalue = '{$_hyllyalue}'
+											AND hyllynro = '{$_hyllynro}'
+											AND hyllyvali = '{$_hyllyvali}'
+											AND hyllytaso = '{$_hyllytaso}'";
+								$halyraja_chk_res = pupe_query($query);
+								$halyraja_chk_row = mysql_fetch_assoc($halyraja_chk_res);
+
+								echo "<li>",t("H‰lytysraja"),": {$halyraja_chk_row['halytysraja']} {$pop_yks}</li>";
+							}
+
 							echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
 							echo "</ul>";
 							echo "</div>";

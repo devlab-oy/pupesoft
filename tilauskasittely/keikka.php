@@ -34,6 +34,8 @@ if (!isset($toimittajaid)) 		$toimittajaid = "";
 if (!isset($kauttalaskutus)) 	$kauttalaskutus = "";
 if (!isset($mobiili_keikka)) 	$mobiili_keikka = "";
 
+$onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
+
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
 if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
@@ -544,7 +546,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	echo "</tr>";
 
-	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
+	if ($onkolaajattoimipaikat) {
 
 		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
@@ -677,7 +679,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		$havinglisa = "HAVING liitetty_lasku_kpl = 0";
 	}
 
-	if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+	if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') {
 		$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
 	}
 	else {
@@ -768,6 +770,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<input type='hidden' name='lisarajaus' value='{$lisarajaus}' />";
 			echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
+			echo "<input type='hidden' name='lopetus' value='$PHP_SELF////toimipaikka=$toimipaikka//lisarajaus=$lisarajaus//indexvas=1' />";
 
 			if ($keikkarajaus == '' and $row['keikat'] != '' and strpos($row['keikat'], ',') === FALSE) {
 				echo "<input type='hidden' name='keikkarajaus' value='{$row['keikat']}' />";
@@ -868,7 +871,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	echo "<form method='post'>";
 
-	if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
+	if ($onkolaajattoimipaikat) {
 
 		$sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
@@ -954,13 +957,17 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		}
 	}
 
-	if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+	if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') {
 		$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
 	}
 	else {
 		$toimipaikkalisa = "";
 	}
 
+	if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
+		$joinlisa .= " JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = lasku.yhtio AND yhtion_toimipaikat.tunnus = lasku.yhtio_toimipaikka)";
+		$selectlisa .= ", yhtion_toimipaikat.nimi as toimipaikka_nimi";
+	}
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	SELECT lasku.tunnus,
 				lasku.laskunro,
@@ -990,11 +997,18 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	if (mysql_num_rows($result) > 0) {
 
-		pupe_DataTables(array(array($pupe_DataTables, 9, 9, false)));
+		$maara = 9;
+		if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
+			$maara = 10;
+		}
+		pupe_DataTables(array(array($pupe_DataTables, $maara, $maara, false)));
 
 		echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 		echo "<thead>";
 		echo "<tr>";
+		if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
+			echo "<th valign='top'>".t("toimipaikka")."</th>";
+		}
 		echo "<th valign='top'>".t("saapuminen")."</th>";
 		echo "<th valign='top'>&nbsp;</th>";
 		echo "<th valign='top'>".t("laadittu")." /<br>".t("viety varastoon")."</th>";
@@ -1007,6 +1021,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		echo "</tr>";
 
 		echo "<tr>";
+		if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
+			echo "<td><input type='text'   class='search_field' name='search_toimipaikka'></td>";
+		}
 		echo "<td><input type='text'   class='search_field' name='search_saapuminen'></td>";
 		echo "<td><input type='hidden' class='search_field' name='search_eimitaan'></td>";
 		echo "<td><input type='text'   class='search_field' name='search_pvm'></td>";
@@ -1049,7 +1066,10 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 			}
 
 			echo "<tr class='aktiivi'>";
-
+			
+			if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
+				echo "<td valign='top'>$row[toimipaikka_nimi]</td>";
+			}
 			echo "<td valign='top'>$row[laskunro]</td>";
 
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
@@ -1299,6 +1319,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$formalku .= "<input type='hidden' name='tunnus' value='$tsekkirow[tunnus]'>";
 	$formalku .= "<input type='hidden' name='laskunro' value='$tsekkirow[laskunro]'>";
 	$formalku .= "<input type='hidden' name='nappikeikalle' value='menossa'>";
+	$formalku .= "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 
 	$formloppu = "</form></td>";
 
@@ -1416,7 +1437,7 @@ function echo_yhteenveto_table($params) {
 }
 
 function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $onkolaajattoimipaikat;
 
 	if ($toimittajaid == null) {
 		$toimittaja_where = '';
@@ -1425,7 +1446,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 		$toimittaja_where = "AND lasku.liitostunnus = '{$toimittajaid}'";
 	}
 
-	$toimipaikka = isset($toimipaikka) and $toimipaikka != 'kaikki' ? (int) $toimipaikka : 'kaikki';
+	$toimipaikkalisa = ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') ? "AND lasku.yhtio_toimipaikka = '".(int) $toimipaikka."'" : "";
 
 	// haetaan vaihto-omaisuus- ja huolinta/rahti- laskut joita ei oo liitetty saapumisiin
 	$query = "	SELECT
@@ -1513,7 +1534,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 				AND lasku.alatila 	  = ''
 				AND lasku.mapvm 	  = '0000-00-00'
 				AND lasku.vanhatunnus = 0
-				AND lasku.yhtio_toimipaikka = '{$toimipaikka}'
+				{$toimipaikkalisa}
 				{$toimittaja_where}
 				GROUP BY 1,2,3,4";
 	$result = pupe_query($query);

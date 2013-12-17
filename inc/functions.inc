@@ -1269,7 +1269,6 @@ if (!function_exists("saldo_myytavissa")) {
 		// Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
 		global $kukarow, $yhtiorow;
 
-
 		$varaako_jt_saldoa = "";
 
 		if ($tyyppi == "JTSPEC" and $yhtiorow["varaako_jt_saldoa"] != "") {
@@ -1318,11 +1317,21 @@ if (!function_exists("saldo_myytavissa")) {
 			$myytavissa		= 0;
 		}
 		else {
-
-			if ($yhtio != "") {
+			if ($yhtio != "" and $yhtio != $kukarow["yhtio"]) {
 				// Jos yhtiö tulee parametrinä niin katsotaan, ettei se ole ihan mitä sattuu ja lasketaan sen yhtiön saldo
-				// (TÄMÄ OMINAISUUS DEPRECATED!)
-				$yhtiolisa = $kukarow["yhtio"];
+				$query	= "	SELECT yhtio
+							FROM yhtio
+							WHERE konserni = '$yhtiorow[konserni]'
+							AND konserni != ''
+							AND yhtio = '$yhtio'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtiolisa = $yhtio;
+				}
+				else {
+					$yhtiolisa = $kukarow["yhtio"];
+				}
 			}
 			else {
 				$yhtiolisa = $kukarow["yhtio"];
@@ -8653,12 +8662,28 @@ if (!function_exists("livesearch_tuotehaku")) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
-			$haku_array = explode(" ", $haku);
-			$haku_query = "";
+			$haku_array 		= explode(" ", $haku);
+			$tuoteno_haku_query = "";
+			$nimitys_haku_query = "";
+			$tuoteindex 		= "";
+			$nimitindex			= "";
+
+			if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
+				$tuoteindex = "USE INDEX (tuoteno)";
+				$nimitindex = "USE INDEX (nimitys)";
+			}
 
 			foreach ($haku_array as $haku) {
 				$haku = mysql_real_escape_string($haku);
-				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
+
+				if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
+					$tuoteno_haku_query .= " and match (tuote.tuoteno) against ('$haku*' IN BOOLEAN MODE) ";
+					$nimitys_haku_query .= " and match (tuote.nimitys) against ('$haku*' IN BOOLEAN MODE) ";
+				}
+				else {
+					$tuoteno_haku_query .= " and tuote.tuoteno like ('%$haku%') ";
+					$nimitys_haku_query .= " and tuote.nimitys like ('%$haku%') ";
+				}
 			}
 
 			// vientikieltokäsittely:
@@ -8712,14 +8737,23 @@ if (!function_exists("livesearch_tuotehaku")) {
 			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
 			}
-			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
+
+			$query = "	(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
 						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
-						FROM tuote
+						FROM tuote $tuoteindex
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						$naytetaanko_poistetut
 						$kieltolisa
-						$haku_query
-						ORDER BY jarjestys, tuote.tuoteno
+						$tuoteno_haku_query)
+						UNION
+						(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
+						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
+						FROM tuote $nimitindex
+						WHERE tuote.yhtio = '$kukarow[yhtio]'
+						$naytetaanko_poistetut
+						$kieltolisa
+						$nimitys_haku_query)
+						ORDER BY jarjestys, tuoteno
 						LIMIT 500";
 			$result = pupe_query($query);
 
@@ -18534,7 +18568,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 }
 
 if (!function_exists("pupeFileReader")) {
-	function pupeFileReader($file, $extension = "", $saveintocsvfile = "") {
+	function pupeFileReader($file, $extension = "", $saveintocsvfile = "", $multiple_sheet = false) {
 
         /** Laitetaan rivit arrayseen **/
     	$excelrivit = array();
@@ -18606,63 +18640,26 @@ if (!function_exists("pupeFileReader")) {
         	// Avataan XLSX Zippi
         	exec("cp $file /tmp/$foldername.zip; unzip /tmp/$foldername.zip -d /tmp/$foldername;");
 
-        	$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet1.xml";
-        	$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+			if ($multiple_sheet) {
+				$sheets_dir = "/tmp/$foldername/xl/worksheets/";
+				$number_of_sheets = 0;
+				if ($handle = opendir($sheets_dir)) {
+					while (($file = readdir($handle)) !== false) {
+						if (!in_array($file, array('.', '..')) && !is_dir($sheets_dir.$file))
+							$number_of_sheets++;
+					}
+				}
 
-        	$sheetData		= simplexml_load_file($workSheetFile);
-        	$sharedStrings	= simplexml_load_file($sharedStringsFile);
+				for($i = 1; $i <= $number_of_sheets; $i++) {
+					$excelrivit[$i] = pupeFileReaderXLSRows($foldername, $i, $savefile);
+				}
+			}
+			else {
+				$excelrivit = pupeFileReaderXLSRows($foldername, 1, $savefile);
+			}
 
-        	$sharedStringsArray = array();
-
-        	foreach ($sharedStrings->si as $string) {
-        		$sharedStringsArray[] = utf8_decode($string->t);
-        	}
-
-        	foreach ($sheetData->sheetData->row as $row) {
-
-        		$rowIndex = ($row->attributes()->r)-1;
-
-        		foreach ($row->c as $cell) {
-
-        			if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
-        				$value = $sharedStringsArray[(int) $cell->v];
-        			}
-        			else {
-        				$value = $cell->v;
-        			}
-
-        			$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
-
-        			$excelrivit[$rowIndex][$colIndex] = trim($value);
-        			$colIndex++;
-        		}
-        	}
-
-        	// XLSX failisssa ei ole ollenkaan tyhjiä soluja, injisoidaan ne tässä...
-        	foreach ($excelrivit as $rowIndex => $row) {
-        		$edindex = 0;
-
-        		foreach ($row as $colIndex => $column) {
-
-        			if ($colIndex > 0 and $colIndex > $edindex+1) {
-        				for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
-        					$excelrivit[$rowIndex][$inj] = "";
-        				}
-        			}
-
-        			$edindex = $colIndex;
-        		}
-
-                // Laitetaan solut vielä indeksien mukaan järjestykseen jotta implode toimisi
-        		ksort($excelrivit[$rowIndex]);
-
-        		if (isset($savefile)) {
-        		    fwrite($savefile, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
-        		}
-        	}
-
-        	// Poistetaan zipppi ja purettu zippi
-        	exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
+			// Poistetaan zipppi ja purettu zippi
+			exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
         }
         else {
         	/** PHPExcel kirjasto **/
@@ -18684,22 +18681,14 @@ if (!function_exists("pupeFileReader")) {
         	/** Ladataan file halutuilla parametreilla **/
         	$objPHPExcel = $objReader->load($file);
 
-        	/** Aktivoidaan eka sheetti**/
-        	$objPHPExcel->setActiveSheetIndex(0);
-
-        	/** Loopataan tiedoston rivit **/
-        	foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
-        	    $cellIterator = $row->getCellIterator();
-        	    $cellIterator->setIterateOnlyExistingCells(false);
-
-        		$rowIndex = ($row->getRowIndex())-1;
-
-        	    foreach ($cellIterator as $cell) {
-        	        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
-
-        			$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
-        	    }
-        	}
+			if ($multiple_sheet) {
+				for ($i = 0; $i <= $objPHPExcel->getSheetCount() - 1; $i++) {
+					$excelrivit[$i] = pupeFileReaderXLSRow($objPHPExcel, $i);
+				}
+			}
+			else {
+				$excelrivit = pupeFileReaderXLSRow($objPHPExcel, 0);
+			}
 
         	/** Tuhotaan excel oliot **/
         	unset($objReader);
@@ -18715,6 +18704,94 @@ if (!function_exists("pupeFileReader")) {
             return $excelrivit;
         }
     }
+}
+
+if (!function_exists('pupeFileReaderXLSRows')) {
+	function pupeFileReaderXLSRows($foldername, $i, $savefile) {
+		$excelrivit = array();
+
+		$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet{$i}.xml";
+		$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+
+		$sheetData		= simplexml_load_file($workSheetFile);
+		$sharedStrings	= simplexml_load_file($sharedStringsFile);
+
+		$sharedStringsArray = array();
+
+		foreach ($sharedStrings->si as $string) {
+			$sharedStringsArray[] = utf8_decode($string->t);
+		}
+
+		foreach ($sheetData->sheetData->row as $row) {
+
+			$rowIndex = ($row->attributes()->r)-1;
+
+			foreach ($row->c as $cell) {
+
+				if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
+					$value = $sharedStringsArray[(int) $cell->v];
+				}
+				else {
+					$value = $cell->v;
+				}
+
+				$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
+
+				$excelrivit[$rowIndex][$colIndex] = trim($value);
+				$colIndex++;
+			}
+		}
+
+		// XLSX failisssa ei ole ollenkaan tyhjiä soluja, injisoidaan ne tässä...
+		foreach ($excelrivit as $rowIndex => $row) {
+			$edindex = 0;
+
+			foreach ($row as $colIndex => $column) {
+
+				if ($colIndex > 0 and $colIndex > $edindex+1) {
+					for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
+						$excelrivit[$rowIndex][$inj] = "";
+					}
+				}
+
+				$edindex = $colIndex;
+			}
+
+			// Laitetaan solut vielä indeksien mukaan järjestykseen jotta implode toimisi
+			ksort($excelrivit[$rowIndex]);
+
+			if (isset($savefile)) {
+				fwrite($savefile, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
+			}
+		}
+
+		return $excelrivit;
+	}
+}
+
+if (!function_exists('pupeFileReaderXLSRow')) {
+	function pupeFileReaderXLSRow(&$objPHPExcel, $i) {
+		$excelrivit = array();
+
+		/** Aktivoidaan eka sheetti**/
+		$objPHPExcel->setActiveSheetIndex($i);
+
+		/** Loopataan tiedoston rivit **/
+		foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+			$cellIterator = $row->getCellIterator();
+			$cellIterator->setIterateOnlyExistingCells(false);
+
+			$rowIndex = ($row->getRowIndex())-1;
+
+			foreach ($cellIterator as $cell) {
+				$colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+				$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+			}
+		}
+
+		return $excelrivit;
+	}
 }
 
 if (!function_exists("kustannuspaikka_kohde_projekti")) {
@@ -20016,6 +20093,20 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
 	}
 }
 
+if (!function_exists('onko_varaston_hyllypaikat_kaytossa')) {
+	function onko_varaston_hyllypaikat_kaytossa() {
+		global $kukarow;
+
+		# Haetaan varastopaikka
+		$query = "	SELECT tunnus
+					FROM varaston_hyllypaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					LIMIT 1";
+		$result = pupe_query($query);
+		return (mysql_num_rows($result) == 0) ? false : true;
+	}
+}
+
 /**
  * Päivittää tilausrivin kpl määrän
  *
@@ -20530,13 +20621,16 @@ if (!function_exists('uusi_saapuminen')) {
 }
 
 if (!function_exists('hae_yhtion_toimipaikat')) {
-	function hae_yhtion_toimipaikat($yhtio) {
+	function hae_yhtion_toimipaikat($yhtio, $tunnus = 0) {
 
 		$yhtio = mysql_real_escape_string($yhtio);
+
+		$tunnuslisa = (trim($tunnus) != '' and $tunnus != 0) ? " AND tunnus = '{$tunnus}'" : "";
 
 		$query = "	SELECT *
 					FROM yhtion_toimipaikat
 					WHERE yhtio = '{$yhtio}'
+					{$tunnuslisa}
 					ORDER BY nimi";
 		$res = pupe_query($query);
 		return $res;
@@ -23677,11 +23771,11 @@ if (!function_exists('hyllysiirto')) {
 			$mista_kohde    = 0;
 			$mista_projekti = 0;
 
-			if ($mistavarasto_row['toimipaikka'] > 0) {
+			if ($mistavarasto['toimipaikka'] > 0) {
 				$query = "	SELECT kustp, kohde, projekti
 							FROM yhtion_toimipaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$mistavarasto_row['toimipaikka']}'";
+							AND tunnus = '{$mistavarasto['toimipaikka']}'";
 				$mistatoimipaikka_res = pupe_query($query);
 				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
 
@@ -23695,11 +23789,11 @@ if (!function_exists('hyllysiirto')) {
 				$minne_kohde    = 0;
 				$minne_projekti = 0;
 
-				if ($minnevarasto_row['toimipaikka'] > 0) {
+				if ($minnevarasto['toimipaikka'] > 0) {
 					$query = "	SELECT kustp, kohde, projekti
-								FROM varastopaikat
+								FROM yhtion_toimipaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$minnevarasto_row['toimipaikka']}'";
+								AND tunnus = '{$minnevarasto['toimipaikka']}'";
 					$minnetoimipaikka_res = pupe_query($query);
 					$minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
 
@@ -25051,6 +25145,80 @@ if (!function_exists('posten_outbounddelivery')) {
 
 			require ("inc/ftp-send.inc");
 		}
+	}
+}
+
+if (!function_exists('hae_ostolaskun_tyypin_oletustili')) {
+	function hae_ostolaskun_tyypin_oletustili($ostolasku_tyyppi, $toimittaja_tunnus = '') {
+		global $kukarow, $yhtiorow;
+
+		$oletustili = false;
+
+		if ($toimittaja_tunnus != '') {
+			$toimittajarow = hae_toimittaja($toimittaja_tunnus);
+
+			if ($toimittajarow['oletus_vienti'] == $ostolasku_tyyppi) {
+				$oletustili = $toimittajarow['tilino'];
+			}
+		}
+
+		if ($toimittaja_tunnus == '' or ($toimittaja_tunnus != '' and !$oletustili)) {
+			switch ($ostolasku_tyyppi) {
+				case 'A':
+					//Kotimaa
+					$oletustili = $yhtiorow['ostolasku_kotimaa_kulu'];
+					break;
+				case 'B':
+					//Kotimaa huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_kotimaa_rahti'];
+					break;
+				case 'C':
+					//Kotimaa vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_kotimaa_vaihto_omaisuus'];
+					break;
+				case 'J':
+					//Kotimaa raaka-aine
+					$oletustili = $yhtiorow['ostolasku_kotimaa_raaka_aine'];
+					break;
+				case 'D':
+					//EU
+					$oletustili = $yhtiorow['ostolasku_eu_kulu'];
+					break;
+				case 'E':
+					//EU huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_eu_rahti'];
+					break;
+				case 'F':
+					//EU vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_eu_vaihto_omaisuus'];
+					break;
+				case 'K':
+					//EU raaka-aine
+					$oletustili = $yhtiorow['ostolasku_eu_raaka_aine'];
+					break;
+				case 'G':
+					//ei-EU
+					$oletustili = $yhtiorow['ostolasku_ei_eu_kulu'];
+					break;
+				case 'H':
+					//ei-EU huolinta/rahti
+					$oletustili = $yhtiorow['ostolasku_ei_eu_rahti'];
+					break;
+				case 'I':
+					//ei-EU vaihto-omaisuus
+					$oletustili = $yhtiorow['ostolasku_ei_eu_vaihto_omaisuus'];
+					break;
+				case 'L':
+					//ei-EU raaka-aine
+					$oletustili = $yhtiorow['ostolasku_ei_eu_raaka_aine'];
+					break;
+				default:
+					//ERROR
+					break;
+			}
+		}
+
+		return $oletustili;
 	}
 }
 

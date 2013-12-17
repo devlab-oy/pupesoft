@@ -485,6 +485,7 @@ if ($error == 0 and $tee == "file") {
 										alv				= '$alv',
 										status			= '$status',
 										hinnastoon		= '$hinnastoon',
+										ostoehdotus		= '$ostoehdotus',
 										yhtio			= '$kukarow[yhtio]'";
 							$result3 = pupe_query($query);
 						}
@@ -684,6 +685,13 @@ if ($tee == "") {
    			<option value=''>".t("Tuote n‰ytet‰‰n hinnastossa, mutta ei verkkokaupassa")."</option>
    			<option value='W'>".t("Tuote n‰kyy hinnastossa ja verkkokaupassa")."</option>
    			<option value='V'>".t("Tuote n‰kyy hinnastossa sek‰ verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>";
+
+	echo "	</select></td></tr>";
+	
+	echo "	<tr><th>".t("Valitse vanhan tuotteen ostoehdotus")."</th>";
+	echo "<td><select name='ostoehdotus' ".js_alasvetoMaxWidth("ostoehdotus", 200).">";
+	echo "	<option value='E'>".t("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi")."</option>
+   			<option value=''>".t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi")."</option>";
 
 	echo "	</select></td></tr>";
 

@@ -472,6 +472,13 @@ else {
 			$result = pupe_query($query);
 		}
 
+		if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+
+			require("inc/sahkoinen_lahete.class.inc");
+
+			sahkoinen_lahete($laskurow);
+		}
+
 		$tilaus_valmis_ulos .= "<font class='message'>".t("HUOM: Tilaus oli jo kerätty! Jos tarvitset keräyslistan, tulosta keräyslistan kopio").".</font><br><br>";
 
 		// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
@@ -873,6 +880,13 @@ else {
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
+
+				if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+
+					require("inc/sahkoinen_lahete.class.inc");
+
+					sahkoinen_lahete($laskurow);
+				}
 
 				if ($toim != "REKLAMAATIO") {
 					// Tulostetaan keräyslista
@@ -1722,6 +1736,13 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
+					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+
+						require("inc/sahkoinen_lahete.class.inc");
+
+						sahkoinen_lahete($laskurow);
+					}
+
 					$kutsuja = "tilaus-valmis.inc";
 
 					require("tilaus-valmis-valitsetila.inc");
@@ -1755,6 +1776,13 @@ else {
 						);
 
 						laheta_tilausvahvistus($params_tilausvahvistus);
+					}
+
+					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+
+						require("inc/sahkoinen_lahete.class.inc");
+
+						sahkoinen_lahete($laskurow);
 					}
 
 					///* Tässä katotaan onko lähetteellä tosiaan mitään kerättävää *///

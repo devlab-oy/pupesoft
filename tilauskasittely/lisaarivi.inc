@@ -258,6 +258,17 @@
 	$kpl	= str_replace(',', '.', $kpl);
 	$hinta	= str_replace(',', '.', $hinta);
 
+	// lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
+	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+		if (!isset($alv) or $alv == '') $alv = $trow['alv'];
+		$hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
+	}
+	// poistetaan alvit (jos hintamuunnos p‰‰ll‰)
+	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+		if (!isset($alv) or $alv == '') $alv = $trow['alv'];
+		$hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
+	}
+
 	if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 			${'ale'.$alepostfix} = str_replace(',', '.', ${'ale'.$alepostfix});
@@ -2088,24 +2099,29 @@
 					and $toim != "SIIRTOTYOMAARAYS"
 				) {
 
-					// Katsotaan onko t‰lle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
-					$query = "	SELECT tilausrivin_lisatiedot.toimittajan_tunnus
-								FROM tilausrivi
-								JOIN tilausrivin_lisatiedot
-								ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-									AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-									AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-								AND tilausrivi.tyyppi != 'D'
-								AND tilausrivi.var in ('J','T','U')
-								ORDER BY tilausrivi.tunnus ASC
-								LIMIT 1";
-					$toimittaja_result = pupe_query($query);
-					$toimittaja = mysql_fetch_assoc($toimittaja_result);
+					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J'))) {
+						// Katsotaan onko t‰lle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
+						$query = "	SELECT tilausrivin_lisatiedot.toimittajan_tunnus
+									FROM tilausrivi
+									JOIN tilausrivin_lisatiedot
+									ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+										AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+										AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+									AND tilausrivi.tyyppi != 'D'
+									AND tilausrivi.var in ('J','T','U')
+									ORDER BY tilausrivi.tunnus ASC
+									LIMIT 1";
+						$toimittaja_result = pupe_query($query);
+						$toimittaja = mysql_fetch_assoc($toimittaja_result);
 
-					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J')) and !empty($toimittaja['toimittajan_tunnus'])) {
-						$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
+						if (!empty($toimittaja['toimittajan_tunnus'])) {
+							$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
+						}
+						else {
+							$yksi_suoratoimittaja_join = "";
+						}
 					}
 					else {
 						$yksi_suoratoimittaja_join = "";
@@ -2429,32 +2445,46 @@
 						}
 					}
 
-					// lˆytyykˆ $kukarow["oletus_varasto"]?
-					if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
-						mysql_data_seek($result,0);
+					// ostotilaus
+					// jos otsikolle on setattu $varasto ja tuotepaikkaa ei lˆydy kyseisest‰ varastosta
+					// ostetaan tyhj‰lt‰ paikalta, koska ostotilauksen valmiiksi laittaminen perustaa kyseiseen varastoon uuden tuotepaikan
 
-						while ($olerow = mysql_fetch_assoc($result)) {
-							if ($olerow["varastotunnus"] == $kukarow["oletus_varasto"]) {
-								$p_hyllyalue	= $olerow["hyllyalue"];
-								$p_hyllynro		= $olerow["hyllynro"];
-								$p_hyllyvali	= $olerow["hyllyvali"];
-								$p_hyllytaso	= $olerow["hyllytaso"];
+					// keissit:
+					// jos $rivityyppi = 'O' ja setattu $varasto ja is_array($varasto)
+					if (!$loydetytpaikat and $rivityyppi == 'O' and isset($varasto) and is_array($varasto)) {
+						$p_hyllyalue	= "";
+						$p_hyllynro		= "";
+						$p_hyllyvali	= "";
+						$p_hyllytaso	= "";
+					}
+					else {
+						// lˆytyykˆ $kukarow["oletus_varasto"]?
+						if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
+							mysql_data_seek($result,0);
 
-								$loydetytpaikat = TRUE;
-								break;
+							while ($olerow = mysql_fetch_assoc($result)) {
+								if ($olerow["varastotunnus"] == $kukarow["oletus_varasto"]) {
+									$p_hyllyalue	= $olerow["hyllyalue"];
+									$p_hyllynro		= $olerow["hyllynro"];
+									$p_hyllyvali	= $olerow["hyllyvali"];
+									$p_hyllytaso	= $olerow["hyllytaso"];
+
+									$loydetytpaikat = TRUE;
+									break;
+								}
 							}
 						}
-					}
 
-					//Jos ei lˆytynyt niin myyd‰‰n oletuspaikalta
-					if (!$loydetytpaikat) {
-						mysql_data_seek($result,0);
-						$olerow = mysql_fetch_assoc($result);
+						//Jos ei lˆytynyt niin myyd‰‰n oletuspaikalta
+						if (!$loydetytpaikat) {
+							mysql_data_seek($result,0);
+							$olerow = mysql_fetch_assoc($result);
 
-						$p_hyllyalue	= $olerow["hyllyalue"];
-						$p_hyllynro		= $olerow["hyllynro"];
-						$p_hyllyvali	= $olerow["hyllyvali"];
-						$p_hyllytaso	= $olerow["hyllytaso"];
+							$p_hyllyalue	= $olerow["hyllyalue"];
+							$p_hyllynro		= $olerow["hyllynro"];
+							$p_hyllyvali	= $olerow["hyllyvali"];
+							$p_hyllytaso	= $olerow["hyllytaso"];
+						}
 					}
 				}
 			}

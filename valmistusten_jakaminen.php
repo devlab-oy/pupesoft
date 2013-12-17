@@ -34,10 +34,10 @@ foreach($valmistukset as $valmistus) {
 		echo "<table>";
 		echo "<tr>
 				<th>" . t("Valmistus") . "</th>
-				<th>" . t("Valmistuksen tila") . "</th>
+				<th>" . t("Tila") . "</th>
 				<th>" . t("Nimitys") . "</th>
 				<th>" . t("Viite") . "</th>
-				<th>" . t("Varattu") . "</th>
+				<th>" . t("M‰‰r‰") . "</th>
 				<th>" . t("Valmistettu") . "</th>
 			</tr>";
 

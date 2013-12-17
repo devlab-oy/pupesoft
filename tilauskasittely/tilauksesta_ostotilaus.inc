@@ -160,6 +160,16 @@
 							$tilaustyyppi = 2;
 						}
 
+						if ($myytilrow['varasto'] != 0) {
+							$oletusostovarasto = $myytilrow['varasto'];
+						}
+						elseif ($kukarow['oletus_ostovarasto'] != 0) {
+							$oletusostovarasto = $kukarow['oletus_ostovarasto'];
+						}
+						else {
+							$oletusostovarasto = 0;
+						}
+
 						$ostotilauksen_kasittely_wherelisa = "";
 
 						// K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
@@ -177,7 +187,7 @@
 								and toim_postino	= '{$toim_postino}'
 								and toim_postitp	= '{$toim_postitp}'
 								and toim_maa		= '{$toim_maa}'
-								and varasto 		= '{$kukarow['oletus_ostovarasto']}'
+								and varasto 		= '{$oletusostovarasto}'
 								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'
 								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
@@ -259,7 +269,7 @@
 										tunnusnippu			= '{$tunnusnippu}',
 										valkoodi 			= '$valkoodi',
 										vanhatunnus			= '{$myytilrow['yhtio_toimipaikka']}',
-										varasto 			= '{$kukarow['oletus_ostovarasto']}',
+										varasto 			= '{$oletusostovarasto}',
 										verkkotunnus		= '$myytilrow[liitostunnus]',
 									 	vienti_kurssi 		= '$vrow[kurssi]',
 										viesti 				= '$myytilrow[viesti]',
@@ -302,8 +312,29 @@
 
 							if ($tilrivirow['perheid'] == 0) $perheid = 0;
 
+							if ($oletusostovarasto != 0) {
+								$varastopaikat_lisa = "		JOIN varastopaikat ON 
+													   		 (
+													   		 	varastopaikat.yhtio = tuotepaikat.yhtio
+													   		 	AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+													   		 	AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+													   		 	AND varastopaikat.tunnus = '{$oletusostovarasto}'
+													   		 )";
+								$oletuspaikka_lisa = "";
+							}
+							else {
+								$varastopaikat_lisa = "";
+								$oletuspaikka_lisa = "AND tuotepaikat.oletus != ''";
+							}
+
 							// haetaan oletuspaikan tiedot niin laitetaan se riville
-							$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]' and oletus!=''";
+							$query = "	SELECT tuotepaikat.* 
+										FROM tuotepaikat
+										{$varastopaikat_lisa}
+										WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}' 
+										AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
+										{$oletuspaikka_lisa}
+										LIMIT 1";
 							$jtsre = pupe_query($query);
 							$jtstu = mysql_fetch_assoc($jtsre);
 

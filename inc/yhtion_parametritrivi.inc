@@ -284,20 +284,15 @@
 	}
 
 	if (mysql_field_name($result, $i) == "koontilaskut_yhdistetaan") {
-		$sel1 = "";
-		$sel2 = "";
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		if ($trow[$i] == '') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == 'T') {
-			$sel2 = "selected";
-		}
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('T' => '', 'U' => '', 'V' => '');
 
-		$ulos .= "<option value = '' $sel1>".t("Asiakkaan laskutusosoitteella")."</option>";
-		$ulos .= "<option value = 'T' $sel2>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
+		$ulos .= "<option value = ''>".t("Asiakkaan laskutusosoitteella")."</option>";
+		$ulos .= "<option value = 'T' {$sel['T']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
+		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot erikseen")."</option>";
+		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot erikseen")."</option>";
 
 		$ulos .= "</select></td>";
 
@@ -553,6 +548,27 @@
 
 		$ulos .= "<option value='' $sel1>".t("Tuotteiden myyntihinnat sisältävät arvonlisäveron")."</option>";
 		$ulos .= "<option value='o' $sel2>".t("Tuotteiden myyntihinnat ovat arvonlisäverottomia")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "alv_kasittely_hintamuunnos") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1="";
+		$sel2="";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value='' $sel1>".t("Tuotteiden myyntihinnat syötetään alv_kasittely-parametrin mukaisesti verollisina/verottomina")."</option>";
+		$ulos .= "<option value='o' $sel2>".t("Tuotteiden myyntihinnat syötetään myyntitilauksella verollisina/verottomina sen mukaan näytetäänkö tilauksella verolliset vai verottomat hinnat")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2063,6 +2079,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "myyntitilaus_tarjoukseksi") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksella ei näytetä /Tee tilauksesta tarjous/-nappia")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella näytetään /Tee tilauksesta tarjous/-nappi")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "myyntitilauksen_liitteet") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2580,6 +2609,21 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "livetuotehaku_hakutapa") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. (Hidas tapa)")."</option>";
+		$ulos .= "<option value = 'F' $sel[F]>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. (Nopea tapa)")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "naytetaanko_osaston_ja_tryn_selite") {
 
@@ -2927,6 +2971,19 @@
 		$ulos .= "<option value = '2'{$sel[2]}>".t("Varaston tunnisteena käytetään hyllyalueen 2 ensimmäistä merkkiä")."</option>";
 		$ulos .= "<option value = '3'{$sel[3]}>".t("Varaston tunnisteena käytetään hyllyalueen 3 ensimmäistä merkkiä")."</option>";
 		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "pakollinen_varasto") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen")."</option>";
+		$ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
+
 
 		$jatko = 0;
 	}

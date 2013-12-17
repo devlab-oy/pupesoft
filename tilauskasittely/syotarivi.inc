@@ -22,7 +22,7 @@
 	if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_array($tuoteno_array) or $tuoteno != "" or $variaatio_tuoteno) and $ulos == "" and $rivitunnus == "") {
 		require ("syota_variaatiorivi.inc");
 	}
-
+	
 	if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
 		// Pikatilauksen syöttörivi
 		echo "<table><tr>$jarjlisa";

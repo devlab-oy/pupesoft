@@ -49,7 +49,7 @@
 		$prow["kommentti"] .= "<br>".t("HUOM: Toimittajan tehtaan saldo on")." {$trow['tehdas_saldo']}.<br>";
 	}
 
-	if ($trow['ostoehdotus'] == 'E') {
+	if ($trow['ostoehdotus'] == 'E' and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE) {
 		$varaosavirhe .= t("HUOM: Tuotetta ei ehdoteta ostoehdotus ohjelmissa tilattavaksi")."!<br>";
 	}
 

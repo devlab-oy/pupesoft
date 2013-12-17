@@ -429,8 +429,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		}
 
 		if ($phpnimi == 'kuukautisostot.php') {
-			if (isset($valitut) and isset($valitut["EIVIENTEJA"])) {
-				setcookie('valitut_EIVIENTEJA', $valitut["EIVIENTEJA"], time()+60*60*24*90, "/");
+			if (isset($valitut)) {
+				if (isset($valitut["EIVIENTEJA"])) {
+					setcookie('valitut_EIVIENTEJA', $valitut["EIVIENTEJA"], time()+60*60*24*90, "/");
+				}
+				if (isset($valitut["EIPALAUTUKSIA"])) {
+					setcookie('valitut_EIPALAUTUKSIA', $valitut["EIPALAUTUKSIA"], time()+60*60*24*90, "/");
+				}
 			}
 		}
 

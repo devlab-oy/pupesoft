@@ -11,6 +11,7 @@
 	require("../inc/parametrit.inc");
 
 	if (!isset($valitut["EIVIENTEJA"])) $valitut["EIVIENTEJA"] = isset($_COOKIE["valitut_EIVIENTEJA"]) ? $_COOKIE["valitut_EIVIENTEJA"] : $valitut["EIVIENTEJA"];
+	if (!isset($valitut["EIPALAUTUKSIA"])) $valitut["EIPALAUTUKSIA"] = isset($_COOKIE["valitut_EIPALAUTUKSIA"]) ? $_COOKIE["valitut_EIPALAUTUKSIA"] : $valitut["EIPALAUTUKSIA"];
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
@@ -561,9 +562,22 @@
 			if ($valitut["EIVARASTOITAVA"] != '') {
 				$lisaa .= " and tuote.status != 'T' ";
 			}
-			if ($valitut["EIVIENTEJA"] != '') {
-				$ei_vienteja_lisa = " JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.vienti = '')";
-				$ei_vienteja_lisa2 = "	AND l.vienti = ''";
+			if ($valitut["EIVIENTEJA"] != '' or $valitut['EIPALAUTUKSIA'] != '') {
+
+				$ei_vienteja_lisa = " JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus ";
+				$ei_vienteja_lisa2 = "";
+
+				if ($valitut["EIVIENTEJA"] != '') {
+					$ei_vienteja_lisa .= "AND lasku.vienti = '' ";
+					$ei_vienteja_lisa2 .= "	AND l.vienti = ''";
+				}
+
+				if ($valitut['EIPALAUTUKSIA'] != '') {
+					$ei_vienteja_lisa .= "AND lasku.kauppatapahtuman_luonne != 21 ";
+					$ei_vienteja_lisa2 .= "	AND l.kauppatapahtuman_luonne != 21 ";
+				}
+
+				$ei_vienteja_lisa .= ")";
 			}
 			// Listaa vain äskettäin perustetut tuotteet:
 			if ($valitut["VAINUUDETTUOTTEET"] != '') {
@@ -2546,6 +2560,23 @@
 			}
 
 			echo "<tr><th>".t("Älä näytä vientitilauksien myyntejä")."</th><td colspan='3'><input type='checkbox' name='valitut[EIVIENTEJA]' value='EIVIENTEJA' $chk></td></tr>";
+
+			//Näytetäänkö palautukset
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji = 'KKOSTOT'
+						and selite	= '$rappari'
+						and selitetark = 'EIPALAUTUKSIA'";
+			$sresult = pupe_query($query);
+			$srow = mysql_fetch_assoc($sresult);
+
+			$chk = "";
+			if (($srow["selitetark"] == "EIPALAUTUKSIA" and $tee == "JATKA") or $valitut["EIPALAUTUKSIA"] != '') {
+				$chk = "CHECKED";
+			}
+
+			echo "<tr><th>".t("Älä näytä palautustilauksien myyntejä")."</th><td colspan='3'><input type='checkbox' name='valitut[EIPALAUTUKSIA]' value='EIPALAUTUKSIA' $chk></td></tr>";
 
 			//Näytetäänkö poistuvat tuotteet
 			$query = "	SELECT selitetark

@@ -455,6 +455,15 @@ if ($error == 0 and $tee == "file") {
 									}
 								}
 							}
+							elseif ($taulu == 'asn_sanomat') {
+								$query = "	UPDATE {$taulu}
+											SET {$sarake} = '{$uustuoteno}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											and {$sarake} = '{$vantuoteno}'
+											AND status not in ('E', 'D')";
+								$result2 = pupe_query($query);
+
+							}
 							else {
 								$query = "	UPDATE $taulu
 											SET $sarake	= '$uustuoteno'

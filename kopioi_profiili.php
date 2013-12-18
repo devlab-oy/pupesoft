@@ -17,8 +17,11 @@
 		$query = "SELECT * FROM oikeu where kuka='$fromkuka' and profiili='$fromkuka' and yhtio='$fromyhtio'";
 		$kukar = pupe_query($query);
 
-		//poistetaan se uudelya yhtiˆlt‰ jos se on olemassa
-		$query = "DELETE from oikeu where kuka='$fromkuka' and profiili='$fromkuka' and yhtio='$tokuka'";
+		//poistetaan se uudelta yhtiˆlt‰ jos se on olemassa
+		$query = "	DELETE from oikeu 
+					where kuka = '$fromkuka' 
+					and profiili = '$fromkuka' 
+					and yhtio = '$tokuka'";
 		$delre = pupe_query($query);
 
 		while ($row = mysql_fetch_array($kukar)) {
@@ -44,10 +47,14 @@
 		//p‰ivitet‰‰n myˆs k‰ytt‰jien tiedot joilla on t‰m‰ profiili
 		$query = "	SELECT *
 					FROM kuka
-					WHERE yhtio='$tokuka' and profiilit!=''";
+					WHERE yhtio = '$tokuka' 
+					and profiilit != ''";
 		$kres = pupe_query($query);
+		
 		while ($krow = mysql_fetch_array($kres)) {
+			
 			$profiilit = explode(',', $krow["profiilit"]);
+			
 			if (count($profiilit) > 0) {
 				//k‰yd‰‰n l‰pi k‰ytt‰j‰n kaikki profiilit
 				$triggeri = "";
@@ -61,14 +68,18 @@
 				if ($triggeri == "HAPPY") {
 					//poistetaan k‰ytt‰j‰n vanhat
 					$query = "	DELETE FROM oikeu
-								WHERE yhtio='$tokuka' and kuka='$krow[kuka]' and lukittu=''";
+								WHERE yhtio = '$tokuka' 
+								and kuka    = '$krow[kuka]' 
+								and lukittu = ''";
 					$pres = pupe_query($query);
 
 					//k‰yd‰‰n uudestaan profiili l‰pi
 					foreach ($profiilit as $prof) {
 						$query = "	SELECT *
 									FROM oikeu
-									WHERE yhtio='$tokuka' and kuka='$prof' and profiili='$prof'";
+									WHERE yhtio  = '$tokuka' 
+									and kuka     = '$prof' 
+									and profiili = '$prof'";
 						$pres = pupe_query($query);
 
 						while ($trow = mysql_fetch_array($pres)) {
@@ -108,6 +119,10 @@
 			}
 		}
 
+		// p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+		paivita_aktiiviset_kayttajat();
+		paivita_aktiiviset_kayttajat("", $tokuka);
+		
 		$fromkuka='';
 		$tokuka='';
 		$fromyhtio='';

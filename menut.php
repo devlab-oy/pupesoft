@@ -481,7 +481,9 @@
 
 		if (mysql_num_rows($result) == 1) {
 
-			$row    = mysql_fetch_array($result);
+			$row = mysql_fetch_array($result);
+
+			$yarray = explode(",", $yht);
 
 			$yht = str_replace(",","','",$yht);
 			$yht = "'".$yht."'";
@@ -497,6 +499,11 @@
 						and yhtio in ($yht)";
 			$result = pupe_query($query);
 			$num1 = mysql_affected_rows();
+
+			foreach ($yarray as $yhtio) {
+				// p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+				paivita_aktiiviset_kayttajat("", $yhtio);
+			}
 
 			echo "<font class='message'>$num1 ".t("rivi‰ poistettu")."!<br></font>";
 		}

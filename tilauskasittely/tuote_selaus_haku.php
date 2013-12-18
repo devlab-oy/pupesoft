@@ -35,6 +35,26 @@
 				}
 			//-->
 			</SCRIPT>";
+
+	echo "	<script type='text/javascript'>
+
+				$(function() {
+
+					$('.tuote_submit').on('click', function(e) {
+						e.preventDefault();
+						var id = $(this).attr('id'),
+							form_action = $('#lisaaformi').attr('action'),
+							anchor = '#' + $('#anchor_'+id).attr('name');
+
+						$('#lisaaformi').attr('action', '$PHP_SELF' + form_action + anchor);
+						$('#lisaaformi').submit();
+					});
+
+				});
+
+			</script>";
+
+
 	// Jos tullaan sivuvalikosta extranetiss‰ tyhj‰t‰‰n kesken ettei lis‰t‰ tuotteita v‰‰r‰lle tilaukselle
 	if((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and $verkkokauppa == "") {
 		$kukarow['kesken'] = '';
@@ -89,7 +109,7 @@
 					and yhtio	 = '$kukarow[yhtio]'";
 	$result   = pupe_query($query);
 	$laskurow = mysql_fetch_assoc($result);
-	
+
 	if ($verkkokauppa == "") {
 		if (!isset($ostoskori)) {
 			$ostoskori = '';
@@ -126,7 +146,7 @@
 			if ($kukarow["extranet"] != "") {
 				if ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO') {
 					$toim_kutsu = "EXTRANET_REKLAMAATIO";
-				}					
+				}
 				else {
 					$toim_kutsu = "EXTRANET";
 				}
@@ -1102,7 +1122,7 @@
 				}
 			}
 			else {
-				echo "<form action='?submit_button=1&sort=$edsort&ojarj=$ojarj$ulisa' name='lisaa' method='post' autocomplete='off'>";
+				echo "<form action='?submit_button=1&sort=$edsort&ojarj=$ojarj$ulisa' name='lisaa' method='post' autocomplete='off' id='lisaaformi'>";
 			}
 
 			echo "<input type='hidden' name='tee' value = 'TI'>";
@@ -1645,7 +1665,7 @@
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
 				}
- 
+
 				if ($toim_kutsu != "EXTENNAKKO" and ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk))) {
 					// Tuoteperheen is‰t, mutta ei sarjanumerollisisa isi‰ (Normi, Extranet ja Verkkokauppa)
 					if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
@@ -1952,7 +1972,9 @@
 						echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
 						echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 						echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
-						echo "<input type='submit' value = '".t("Lis‰‰")."'>";
+						echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'>";
+						echo "<input class='tuote_submit' id='{$yht_i}' type='button' value = '".t("Lis‰‰")."'>";
+						echo "</a>";
 						echo "</td>";
 						$yht_i++;
 					}

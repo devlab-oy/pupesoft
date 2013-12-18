@@ -143,13 +143,18 @@
 	if ($tee == 'deloikeu') {
 		$query = "	UPDATE kuka
 					SET profiilit 	= '',
+					aktiivinen 		= 0,
 					muuttaja		= '{$kukarow['kuka']}',
 					muutospvm		= now()
 					WHERE kuka = '{$selkuka}'
 					AND yhtio = '{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
 
-		$query = "DELETE from oikeu WHERE kuka = '{$selkuka}' and kuka != '' and profiili = '' and yhtio = '{$kukarow['yhtio']}'";
+		$query = "	DELETE from oikeu
+					WHERE kuka = '{$selkuka}'
+					and kuka != ''
+					and profiili = ''
+					and yhtio = '{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
 
 		echo "<b>",t("Käyttäjän")," {$selkuka} ",t("käyttöoikeudet")," ",t("poistettu"),"!</b><br>";
@@ -380,7 +385,6 @@
 			$selkuka = mysql_insert_id();
 
 			echo "<font class='message'>",t("Käyttäjä perustettu"),"! ({$selkuka})</font><br><br>";
-
 			echo "<font class='error'>",t("Valitse nyt käyttäjän oletusasiakas"),"!</font><br><br>";
 
 			if ($yhtio != $kukarow["yhtio"]) {
@@ -459,6 +463,9 @@
 					}
 				}
 			}
+
+			// päiviteään kuka-tauluun mitkä käyttäjät on aktiivisia ja mitkä poistettuja
+			paivita_aktiiviset_kayttajat($ktunnus);
 
 			if ($toim == "extranet") {
 				$tee     = "MUUTA";
@@ -680,6 +687,9 @@
 					}
 				}
 			}
+
+			// päiviteään kuka-tauluun mitkä käyttäjät on aktiivisia ja mitkä poistettuja
+			paivita_aktiiviset_kayttajat($kuka);
 
 			$tee = "";
 		}
@@ -1597,7 +1607,6 @@
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='KOPSAAUUSI'>";
 		echo "<tr><th>",t("Kopioi käyttäjä toisesta yrityksestä"),":</th><td></td><td><input type='submit' value='",t("Luo uusi käyttäjä"),"'></td></tr></form>";
-
 
 		echo "</table>";
 	}

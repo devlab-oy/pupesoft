@@ -36,6 +36,9 @@
 							muuttaja 	= '{$kukarow['kuka']}'";
 				$upres = pupe_query($query);
 			}
+			
+			// p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+			paivita_aktiiviset_kayttajat($tokuka, $toyhtio);
 
 			$fromkuka	= '';
 			$tokuka		= '';

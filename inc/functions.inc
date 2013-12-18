@@ -275,6 +275,51 @@ if (!function_exists("query_dump")) {
 	}
 }
 
+if (!function_exists("paivita_aktiiviset_kayttajat")) {
+	function paivita_aktiiviset_kayttajat($selkuka = "", $selyhtio = "") {
+		global $kukarow;
+
+		$klisa = "";
+
+		if ($selkuka != "") {
+			$klisa = " and kuka.kuka = '{$selkuka}' ";
+		}
+
+		$ylisa = " kuka.yhtio = '{$kukarow['yhtio']}' ";
+
+		if ($selyhtio != "") {
+			$ylisa = " kuka.yhtio = '{$selyhtio}' ";
+		}
+
+		$query = "	SELECT group_concat(DISTINCT kuka.tunnus) tunnukset
+					FROM kuka
+					JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+					WHERE {$ylisa}
+					{$klisa}";
+		$aktikukares = pupe_query($query);
+		$aktikukarow = mysql_fetch_assoc($aktikukares);
+
+		echo "$query<br>";
+
+		if ($aktikukarow['tunnukset'] != "") {
+			$query = "	UPDATE kuka
+						SET aktiivinen = 1
+						WHERE {$ylisa}
+						{$klisa}
+						AND tunnus in ({$aktikukarow['tunnukset']})";
+			pupe_query($query);
+
+			$query = "	UPDATE kuka
+						SET aktiivinen = 1
+						WHERE {$ylisa}
+						{$klisa}
+						AND tunnus not in ({$aktikukarow['tunnukset']})";
+			pupe_query($query);
+		}
+	}
+}
+
+
 // flock lockfilekäsittely
 if (!function_exists("pupesoft_flock")) {
 	// otetaan parametriksi query

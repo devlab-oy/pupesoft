@@ -161,7 +161,7 @@
 		}
 		else {
 
-			$filename = $pupe_root_polku."/dataout/materialmaster_testi_".md5(uniqid()).".xml";
+			$filename = $pupe_root_polku."/dataout/materialmaster_".md5(uniqid()).".xml";
 
 			if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
 				echo "<br /><font class='message'>",t("Tiedoston luonti onnistui"),"</font><br />";

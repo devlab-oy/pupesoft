@@ -299,20 +299,32 @@ if (!function_exists("paivita_aktiiviset_kayttajat")) {
 		$aktikukares = pupe_query($query);
 		$aktikukarow = mysql_fetch_assoc($aktikukares);
 
-		echo "$query<br>";
-
-		if ($aktikukarow['tunnukset'] != "") {
+		if ($klisa != "") {
+			if ($aktikukarow['tunnukset'] != "") {
+				$query = "	UPDATE kuka
+							SET aktiivinen = 1
+							WHERE {$ylisa}
+							{$klisa}";
+				pupe_query($query);
+			}
+			else {
+				$query = "	UPDATE kuka
+							SET aktiivinen = 0
+							WHERE {$ylisa}
+							{$klisa}";
+				pupe_query($query);
+			}
+		}
+		elseif ($aktikukarow['tunnukset'] != "") {
 			$query = "	UPDATE kuka
 						SET aktiivinen = 1
 						WHERE {$ylisa}
-						{$klisa}
 						AND tunnus in ({$aktikukarow['tunnukset']})";
 			pupe_query($query);
 
 			$query = "	UPDATE kuka
-						SET aktiivinen = 1
+						SET aktiivinen = 0
 						WHERE {$ylisa}
-						{$klisa}
 						AND tunnus not in ({$aktikukarow['tunnukset']})";
 			pupe_query($query);
 		}

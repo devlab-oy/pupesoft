@@ -627,6 +627,7 @@
 								FROM kuka
 								JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
 								WHERE kuka.yhtio = '$kukarow[yhtio]'
+								AND kuka.aktiivinen = 1
 								and kuka.kuka != '$kukarow[kuka]'
 								ORDER BY kuka.nimi";
 					$result = pupe_query($query);
@@ -684,6 +685,7 @@
 								FROM kuka
 								JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
 								WHERE kuka.yhtio = '$kukarow[yhtio]'
+								AND kuka.aktiivinen = 1
 								and kuka.asema like '%MP%'
 								ORDER BY kuka.nimi";
 					$result = pupe_query($query);
@@ -710,6 +712,7 @@
 								FROM kuka
 								JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
 								WHERE kuka.yhtio = '$kukarow[yhtio]'
+								AND kuka.aktiivinen = 1
 								and kuka.kuka != '$kukarow[kuka]'
 								ORDER BY kuka.nimi";
 					$result = pupe_query($query);
@@ -881,8 +884,8 @@
 
 						$query  = "	SELECT DISTINCT kuka.kuka, kuka.nimi, kuka.eposti
 									FROM kuka
-									JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka)
 									WHERE $lisa2
+									AND kuka.aktiivinen = 1
 									and kuka.extranet = ''
 									and kuka.eposti != ''
 									ORDER BY kuka.nimi";

@@ -109,7 +109,9 @@ if ($tee == 'T') {
 				FROM kuka
 				JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
 				WHERE kuka.yhtio = '$kukarow[yhtio]'
-				and kuka.hyvaksyja = 'o'
+				AND kuka.aktiivinen = 1
+				AND kuka.extranet   = ''
+				AND kuka.hyvaksyja  = 'o'
 				ORDER BY kuka.nimi";
 	$result = mysql_query($query) or pupe_error($query);
 

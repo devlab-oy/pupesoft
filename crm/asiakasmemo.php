@@ -882,7 +882,7 @@
 
 						$lisa2 = " kuka.yhtio in (".substr($konsernit, 0, -1).") ";
 
-						$query  = "	SELECT DISTINCT kuka.kuka, kuka.nimi, kuka.eposti
+						$query  = "	SELECT kuka.kuka, kuka.nimi, kuka.eposti
 									FROM kuka
 									WHERE $lisa2
 									AND kuka.aktiivinen = 1

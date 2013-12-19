@@ -946,10 +946,10 @@
 
 			echo "<td valign='top'>";
 
-			$query = "	SELECT distinct kuka, nimi
+			$query = "	SELECT kuka, nimi
 						FROM kuka
-						WHERE yhtio='$kukarow[yhtio]'
-						and nimi != ''
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND aktiivinen = 1
 						and extranet = ''
 						ORDER BY nimi";
 			$sresult = mysql_query($query) or pupe_error($query);

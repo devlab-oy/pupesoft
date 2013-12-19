@@ -3165,10 +3165,10 @@ if ($tee == '') {
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
 						AND kuka.tunnus  = '$laskurow[myyja]')
 						UNION
-					   (SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+					   (SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.aktiivinen = 1
 						AND kuka.extranet = '')
 						ORDER BY nimi";
 			$yresult = pupe_query($query);

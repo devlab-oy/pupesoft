@@ -36,9 +36,11 @@
 	echo "<tr><th>".t("Käyttäjä")."</th>
 			<td colspan='3'><select name='kuka'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-	$query  = "	SELECT distinct kuka, nimi, eposti
+	$query  = "	SELECT kuka, nimi, eposti
 				FROM kuka
 				WHERE yhtio = '$kukarow[yhtio]'
+				and aktiivinen in (1,0)
+				and nimi != ''
 				and extranet = ''
 				ORDER BY nimi";
 	$res = mysql_query($query) or pupe_error($query);

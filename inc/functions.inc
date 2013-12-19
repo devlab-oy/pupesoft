@@ -23771,14 +23771,23 @@ if (!function_exists('hyllysiirto')) {
 			$mista_kohde    = 0;
 			$mista_projekti = 0;
 
-			if ($mistavarasto['toimipaikka'] > 0) {
-				$query = "	SELECT kustp, kohde, projekti
+			$query = "	SELECT toimipaikka
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '$mistavarasto'";
+			$mistavarasto_res = pupe_query($query);
+			$mistavarasto_row = mysql_fetch_assoc($mistavarasto_res);
+				
+			if ($mistavarasto_row['toimipaikka'] > 0) {
+				$query = "	SELECT kustp, kohde, projekti, tunnus
 							FROM yhtion_toimipaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$mistavarasto['toimipaikka']}'";
+							AND tunnus = '{$mistavarasto_row['toimipaikka']}'";
 				$mistatoimipaikka_res = pupe_query($query);
 				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
-
+			}
+				
+			if ($mistatoimipaikka_row['tunnus'] > 0) {
 				if ($mista_kustp == 0)    $mista_kustp    = $mistatoimipaikka_row['kustp'];
 				if ($mista_kohde == 0)    $mista_kohde    = $mistatoimipaikka_row['kohde'];
 				if ($mista_projekti == 0) $mista_projekti = $mistatoimipaikka_row['projekti'];
@@ -23789,13 +23798,22 @@ if (!function_exists('hyllysiirto')) {
 				$minne_kohde    = 0;
 				$minne_projekti = 0;
 
-				if ($minnevarasto['toimipaikka'] > 0) {
-					$query = "	SELECT kustp, kohde, projekti
-								FROM yhtion_toimipaikat
+				if ($minnevarasto > 0) {
+					$query = "	SELECT toimipaikka
+								FROM varastopaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$minnevarasto['toimipaikka']}'";
-					$minnetoimipaikka_res = pupe_query($query);
-					$minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
+								AND tunnus = '$minnevarasto'";
+					$minnevarasto_res = pupe_query($query);
+					$minnevarasto_row = mysql_fetch_assoc($minnevarasto_res);
+					
+					if ($minnevarasto_row['toimipaikka'] > 0) {
+						$query = "	SELECT kustp, kohde, projekti
+									FROM yhtion_toimipaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$minnevarasto_row['toimipaikka']}'";
+						$minnetoimipaikka_res = pupe_query($query);
+						$minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
+					}
 
 					if ($minne_kustp == 0)    $minne_kustp    = $minnetoimipaikka_row['kustp'];
 					if ($minne_kohde == 0)    $minne_kohde    = $minnetoimipaikka_row['kohde'];

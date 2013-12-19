@@ -73,6 +73,7 @@
 					if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin,
 					tuote.kehahin bruttokehahin,
 					tuote.luontiaika,
+					tuote.sarjanumeroseuranta,
 					sum(tuotepaikat.saldo) saldo
 					FROM tuote
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
@@ -80,7 +81,7 @@
 					AND tuote.ei_saldoa = ''
 					AND tuote.epakurantti100pvm = '0000-00-00'
 					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
-					GROUP BY 1,2,3,4,5,6,7,8,9
+					GROUP BY 1,2,3,4,5,6,7,8,9,10
 					HAVING saldo > 0
 					ORDER BY tuoteno";
 		$epakurantti_result = mysql_query($query) or pupe_error($query);
@@ -251,6 +252,11 @@
 
 					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['tuoteno']);
 
+					// Näytetään varastossa olevat erät/sarjanumerot
+					if ($epakurantti_row["sarjanumeroseuranta"] != "") {
+						
+					}										
+					
 					$try = t_avainsana("TRY", '', "and selite = '{$epakurantti_row['try']}'", '', '', "selitetark");
 
 					$try_teksti = $try != "" ? "{$epakurantti_row['try']} - $try" : $epakurantti_row['try'];

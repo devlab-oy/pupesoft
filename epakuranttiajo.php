@@ -80,9 +80,6 @@
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					AND tuote.ei_saldoa = ''
-
-					AND tuote.osasto = '3'
-
 					AND tuote.epakurantti100pvm = '0000-00-00'
 					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
 					GROUP BY 1,2,3,4,5,6,7,8,9,10

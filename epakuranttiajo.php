@@ -56,7 +56,7 @@
 	if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "EPAKURANTOI"))) {
 
 		// Viimeisimm‰st‰ tulosta ja laskutuksesta n‰in monta p‰iv‰‰ HOUM: t‰n voi laittaa myˆs salasanat.php:seen.
-		if (!isset($epakurtasot_array)) $epakurtasot_array = array("100%" => 8, "75%" => 7, "50%" => 6, "25%" => 1);
+		if (!isset($epakurtasot_array)) $epakurtasot_array = array("100%" => 913, "75%" => 820, "50%" => 730, "25%" => 547);
 
 		// Tehd‰‰n kaikki tapahtumat samalle tositteelle!
 		$tapahtumat_samalle_tositteelle = "kylla";
@@ -80,9 +80,9 @@
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					AND tuote.ei_saldoa = ''
-					
+
 					AND tuote.osasto = '3'
-					
+
 					AND tuote.epakurantti100pvm = '0000-00-00'
 					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
 					GROUP BY 1,2,3,4,5,6,7,8,9,10
@@ -255,7 +255,7 @@
 				if ($mikataso > 0) {
 
 					if (!$php_cli) echo "<tr><td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a>";
-					
+
 					// N‰ytet‰‰n varastossa olevat er‰t/sarjanumerot
 					if ($epakurantti_row["sarjanumeroseuranta"] == "V" or $epakurantti_row['sarjanumeroseuranta'] == 'T') {
 
@@ -303,10 +303,10 @@
 					if (!$php_cli) echo "</td>";
 
 					$tuotensarake = $excelsarake;
-					
+
 					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['tuoteno']);
-					
-					
+
+
 					if (!$php_cli) echo "<td>{$epakurantti_row['nimitys']}</td>";
 					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['nimitys']);
 
@@ -392,9 +392,9 @@
 
 					$excelrivi++;
 					$excelsarake = 0;
-					
+
 					if ($epakurantti_row["sarjanumeroseuranta"] == "V" or $epakurantti_row['sarjanumeroseuranta'] == 'T') {
-						
+
 						mysql_data_seek($sarjares, 0);
 
 						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
@@ -405,14 +405,14 @@
 					}
 					elseif ($epakurantti_row["sarjanumeroseuranta"] == "E" or $epakurantti_row["sarjanumeroseuranta"] == "F") {
 						mysql_data_seek($sarjares, 0);
-						
+
 						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 							$worksheet->writeString($excelrivi, $tuotensarake, t("E:nro"));
 							$worksheet->writeString($excelrivi, $tuotensarake+1, "$sarjarow[sarjanumero] ($sarjarow[kpl])");
 							$excelrivi++;
-						}						
+						}
 					}
-					
+
 					$vararvot_nyt += $vararvo_nyt;
 					$vararvot_sit += $vararvo_sit;
 

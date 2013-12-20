@@ -433,8 +433,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				if (isset($valitut["EIVIENTEJA"])) {
 					setcookie('valitut_EIVIENTEJA', $valitut["EIVIENTEJA"], time()+60*60*24*90, "/");
 				}
-				if (isset($valitut["EIPALAUTUKSIA"])) {
-					setcookie('valitut_EIPALAUTUKSIA', $valitut["EIPALAUTUKSIA"], time()+60*60*24*90, "/");
+				if (isset($valitut["EIASIAKKAANMYYNTEJA"])) {
+					setcookie('valitut_EIASIAKKAANMYYNTEJA', $valitut["EIASIAKKAANMYYNTEJA"], time()+60*60*24*90, "/");
 				}
 			}
 		}

@@ -635,7 +635,8 @@
 			// Haetaan yhtiön tulostili
 			$query = "	SELECT tunnus, tilino
 						FROM tili
-						WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$yhtiorow["tilikauden_tulos"]}'";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
 			$tulostilires = pupe_query($query);
 
 			if (mysql_num_rows($tulostilires) == 1) {
@@ -816,30 +817,39 @@
 
 				$tulokset = array();
 
-				// Haetaan firman tulos
-				$query = "	SELECT $groupsarake groupsarake, $alkuquery1
-			 	            FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
-				            $laskujoini
-				            $asiakasjoini
-				            $konsernijoini
-							JOIN tili ON tiliointi.yhtio=tili.yhtio and tiliointi.tilino=tili.tilino and LEFT(tili.ulkoinen_taso, 1) = BINARY '3'
-				            WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-				            and tiliointi.korjattu = ''
-				            and tiliointi.tapvm >= '$totalalku'
-				            and tiliointi.tapvm <= '$totalloppu'
-				            $konsernilisa
-				            $lisa
-				            GROUP BY groupsarake
-							ORDER BY groupsarake";
+				$query = "	SELECT group_concat(concat('\'',tilino,'\'')) tilit
+						 	FROM tili
+							WHERE yhtio = '$kukarow[yhtio]'
+							and LEFT(tili.ulkoinen_taso, 1) = BINARY '3'";
 				$tulosres = pupe_query($query);
+				$tulosrow = mysql_fetch_assoc($tulosres);
 
-				while ($tulosrow = mysql_fetch_assoc($tulosres)) {
-					// Jos tiliöintejä ei ole, niin laitetaan tulos suoraan tähän, muuten summataan yhteen myöhemmin
-					if (!isset($tilioinnit[(string) $tulostilirow["tilino"]][(string) $tulosrow["groupsarake"]])) {
-						$tilioinnit[(string) $tulostilirow["tilino"]][(string) $tulosrow["groupsarake"]] = $tulosrow;
-					}
-					else {
-						$tulokset[(string) $tulosrow["groupsarake"]] = $tulosrow;
+				if ($tulosrow['tilit'] != '') {
+					// Haetaan firman tulos
+					$query = "	SELECT $groupsarake groupsarake, $alkuquery1
+				 	            FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
+					            $laskujoini
+					            $asiakasjoini
+					            $konsernijoini
+					            WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+					            and tiliointi.korjattu = ''
+					            and tiliointi.tapvm >= '$totalalku'
+					            and tiliointi.tapvm <= '$totalloppu'
+								and tiliointi.tilino in ({$tulosrow['tilit']})
+					            $konsernilisa
+					            $lisa
+					            GROUP BY groupsarake
+								ORDER BY groupsarake";
+					$tulosres = pupe_query($query);
+
+					while ($tulosrow = mysql_fetch_assoc($tulosres)) {
+						// Jos tiliöintejä ei ole, niin laitetaan tulos suoraan tähän, muuten summataan yhteen myöhemmin
+						if (!isset($tilioinnit[(string) $tulostilirow["tilino"]][(string) $tulosrow["groupsarake"]])) {
+							$tilioinnit[(string) $tulostilirow["tilino"]][(string) $tulosrow["groupsarake"]] = $tulosrow;
+						}
+						else {
+							$tulokset[(string) $tulosrow["groupsarake"]] = $tulosrow;
+						}
 					}
 				}
 			}

@@ -19,8 +19,13 @@
 		$lisa .= " and tuote.nimitys like '%$nimitys%' ";
 	}
 
-	$kukarow["yhtio"] = 'jokuyhtiö';
-	$varastot = array(varastonnunnus1, varastontunnus2);
+	if (isset($tuotehaku_params)) {
+		$kukarow["yhtio"] = $tuotehaku_params["yhtio"];
+		$varastot = $tuotehaku_params["varastot"];
+	}
+	else {
+		exit;
+	}
 
 	$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 

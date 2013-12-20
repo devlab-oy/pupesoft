@@ -1429,7 +1429,7 @@ if (!function_exists("saldo_myytavissa")) {
 			// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 			if ((is_numeric($varasto) and $varasto > 0) or (!is_numeric($varasto) and $varasto != "")) {
 
-				if ($keraysvyohyke > 0) {
+				if (isset($keraysvyohyke) and $keraysvyohyke > 0) {
 					$kvjoini = " JOIN varaston_hyllypaikat AS vh ON (
 									vh.yhtio = tuotepaikat.yhtio
 									AND vh.hyllyalue = tuotepaikat.hyllyalue
@@ -23834,7 +23834,7 @@ if (!function_exists('hyllysiirto')) {
 						AND tunnus = '$mistavarasto'";
 			$mistavarasto_res = pupe_query($query);
 			$mistavarasto_row = mysql_fetch_assoc($mistavarasto_res);
-				
+
 			if ($mistavarasto_row['toimipaikka'] > 0) {
 				$query = "	SELECT kustp, kohde, projekti, tunnus
 							FROM yhtion_toimipaikat
@@ -23843,7 +23843,7 @@ if (!function_exists('hyllysiirto')) {
 				$mistatoimipaikka_res = pupe_query($query);
 				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
 			}
-				
+
 			if ($mistatoimipaikka_row['tunnus'] > 0) {
 				if ($mista_kustp == 0)    $mista_kustp    = $mistatoimipaikka_row['kustp'];
 				if ($mista_kohde == 0)    $mista_kohde    = $mistatoimipaikka_row['kohde'];
@@ -23862,7 +23862,7 @@ if (!function_exists('hyllysiirto')) {
 								AND tunnus = '$minnevarasto'";
 					$minnevarasto_res = pupe_query($query);
 					$minnevarasto_row = mysql_fetch_assoc($minnevarasto_res);
-					
+
 					if ($minnevarasto_row['toimipaikka'] > 0) {
 						$query = "	SELECT kustp, kohde, projekti
 									FROM yhtion_toimipaikat

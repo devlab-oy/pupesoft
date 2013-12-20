@@ -52,6 +52,8 @@
 
 				while ($rivi = mysql_fetch_assoc($result)) {
 
+					$ostotilauksen_kasittely = $myytilrow['ostotilauksen_kasittely'];
+
 					if ($rivi['ei_saldoa'] != '' and $rivi['perheid'] == $rivi['rivitunnus']) {
 						// saldottomat tuotteet laitetaan jälkkäriin jos ne on tuoteperheen isiä ja skipataan loopissa
 						$query = "	UPDATE tilausrivi
@@ -137,10 +139,10 @@
 						}
 						//jos toimittajalla joku muu kuin oletus ostotilauksen_kasittely niin käytetään sitä
 						if ($tiltoi['ostotilauksen_kasittely'] != '') {
-							$myytilrow['ostotilauksen_kasittely'] = $tiltoi['ostotilauksen_kasittely'];
+							$ostotilauksen_kasittely = $tiltoi['ostotilauksen_kasittely'];
 						}
 						// Pikatilaus menee aina omalle otsikolle per myyntitilaus
-						$tunnusnippu = ($myytilrow['ostotilauksen_kasittely'] == 5) ? $myytilrow['tunnus'] : 0;
+						$tunnusnippu = ($ostotilauksen_kasittely == 5) ? $myytilrow['tunnus'] : 0;
 
 						$vquery = "	SELECT nimi, kurssi, tunnus
 									FROM valuu
@@ -179,7 +181,7 @@
 						$ostotilauksen_kasittely_wherelisa = "";
 
 						// Käsitellään myyntitilauksen otsikolla setattu "ostotilauksen käsittely"
-						switch($myytilrow['ostotilauksen_kasittely']) {
+						switch($ostotilauksen_kasittely) {
 							case '5':
 								# Pikaostotilaus aina omalle otsikolle
 								$ostotilauksen_kasittely_wherelisa .= "
@@ -502,7 +504,7 @@
 				$upd_res = pupe_query($query);
 
 				// "Lähetetään heti"-ominaisuus
-				if (in_array($myytilrow['ostotilauksen_kasittely'], array('1','3','5')) and count($tunnukset) > 0) {
+				if (in_array($ostotilauksen_kasittely, array('1','3','5')) and count($tunnukset) > 0) {
 
 					foreach ($tunnukset as $otunnus) {
 

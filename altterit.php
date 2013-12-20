@@ -8,8 +8,9 @@
 	require('inc/connect.inc');
 	require('inc/functions.inc');
 
-	$timeparts		= explode(" ",microtime());
-	$starttime		= $timeparts[1].substr($timeparts[0],1);
+	$hname 		= gethostname();
+	$timeparts	= explode(" ",microtime());
+	$starttime	= $timeparts[1].substr($timeparts[0],1);
 
 	echo "\nSTART: $hname :$dbkanta\n";
 
@@ -53,7 +54,5 @@
 	$timeparts = explode(" ",microtime());
 	$endtime   = $timeparts[1].substr($timeparts[0],1);
 	$aika      = round($endtime-$starttime,4);
-
-	$hname = gethostname();
 
 	echo "FINISH: $hname :$dbkanta: $aika\n";

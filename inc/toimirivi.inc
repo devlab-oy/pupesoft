@@ -644,7 +644,7 @@
 		if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
 
 			$ulos  = "<td><select name='{$nimi}'>";
-			$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
+			$ulos .= "<option value=''>".t("Yhtiön / toimipaikan oletus")."</option>";
 
 			while ($myynnista_osto_avainsanat_row = mysql_fetch_assoc($myynnista_osto_avainsanat)) {
 
@@ -654,7 +654,9 @@
 			}
 
 			$ulos .= "</select></td>";
+			$jatko = 0;
 		}
-
-		$jatko = 0;
+		else {
+			$tyyppi = 0;
+		}
 	}

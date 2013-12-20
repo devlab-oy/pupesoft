@@ -36,26 +36,27 @@
 			//-->
 			</SCRIPT>";
 
-	echo "	<script type='text/javascript'>
+	if ($kukarow['extranet'] == '' and $verkkokauppa == "") {
+		echo "	<script type='text/javascript'>
 
-				$(function() {
+					$(function() {
 
-					$('.tuote_submit').on('click', function(e) {
-						if ($('#lisaaformi')) {
-							e.preventDefault();
-							var id = $(this).attr('id'),
-								form_action = $('#lisaaformi').attr('action'),
-								anchor = '#' + $('#anchor_'+id).attr('name');
+						$('.tuote_submit').on('click', function(e) {
+							if ($('#lisaaformi')) {
+								e.preventDefault();
+								var id = $(this).attr('id'),
+									form_action = $('#lisaaformi').attr('action'),
+									anchor = '#' + $('#anchor_'+id).attr('name');
 
-							$('#lisaaformi').attr('action', '$PHP_SELF' + form_action + anchor);
-							$('#lisaaformi').submit();
-						}
+								$('#lisaaformi').attr('action', '$PHP_SELF' + form_action + anchor);
+								$('#lisaaformi').submit();
+							}
+						});
+
 					});
 
-				});
-
-			</script>";
-
+				</script>";
+	}
 
 	// Jos tullaan sivuvalikosta extranetiss‰ tyhj‰t‰‰n kesken ettei lis‰t‰ tuotteita v‰‰r‰lle tilaukselle
 	if((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and $verkkokauppa == "") {

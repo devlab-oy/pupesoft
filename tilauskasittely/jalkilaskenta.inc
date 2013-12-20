@@ -539,7 +539,6 @@ if (!function_exists('korjaatapahtuma')) {
 			kopioitapahtuma($tapahtuma_tunnus, $params);
 		}
 		else {
-
 			$selitelisa = $selite_txt != "" ? ", selite = concat(selite, '{$selite_txt}')" : "";
 			$kplhintalisa = $upd_kplhinta !== FALSE ? ", kplhinta = '{$upd_kplhinta}'" : "";
 
@@ -1311,9 +1310,8 @@ if ($tuoteno != '') {
 										// Insertoitavan valmistuksen valmistusaika
 										$query = "	SELECT avg(if(tilausrivi.toimitettuaika='0000-00-00 00:00:00' or tilausrivi.tyyppi not in ('V','W'), NULL, date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s'))) toimitettuaika
 													FROM tilausrivi
-													JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-													AND lasku.tunnus = '$invrow[otunnus]'";
+													AND tilausrivi.otunnus = '$invrow[otunnus]'";
 										$tilre = pupe_query($query);
 										$insaika = mysql_fetch_assoc($tilre);
 
@@ -1323,18 +1321,16 @@ if ($tuoteno != '') {
 
 											$query = "	SELECT avg(if(tilausrivi.toimitettuaika='0000-00-00 00:00:00' or tilausrivi.tyyppi not in ('V','W'), NULL, date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s'))) toimitettuaika
 														FROM tilausrivi
-														JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 														WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-														AND lasku.tunnus = '".$korjattavat_valmistukset[$xx_ind]."'";
+														AND tilausrivi.otunnus = '".$korjattavat_valmistukset[$xx_ind]."'";
 											$tilre = pupe_query($query);
 											$thisaika = mysql_fetch_assoc($tilre);
 
 											if (isset($korjattavat_valmistukset[($xx_ind+1)])) {
 												$query = "	SELECT avg(if(tilausrivi.toimitettuaika='0000-00-00 00:00:00' or tilausrivi.tyyppi not in ('V','W'), NULL, date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s'))) toimitettuaika
 															FROM tilausrivi
-															JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 															WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-															AND lasku.tunnus = '".$korjattavat_valmistukset[($xx_ind+1)]."'";
+															AND tilausrivi.otunnus = '".$korjattavat_valmistukset[($xx_ind+1)]."'";
 												$tilre = pupe_query($query);
 												$nextaika = mysql_fetch_assoc($tilre);
 											}

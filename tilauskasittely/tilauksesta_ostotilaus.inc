@@ -135,7 +135,10 @@
 						if ($valkoodi == '') {
 							$valkoodi = $yhtiorow["valkoodi"];
 						}
-
+						//jos toimittajalla joku muu kuin oletus ostotilauksen_kasittely niin k‰ytet‰‰n sit‰
+						if ($tiltoi['ostotilauksen_kasittely'] != '') {
+							$myytilrow['ostotilauksen_kasittely'] = $tiltoi['ostotilauksen_kasittely'];
+						}
 						// Pikatilaus menee aina omalle otsikolle per myyntitilaus
 						$tunnusnippu = ($myytilrow['ostotilauksen_kasittely'] == 5) ? $myytilrow['tunnus'] : 0;
 

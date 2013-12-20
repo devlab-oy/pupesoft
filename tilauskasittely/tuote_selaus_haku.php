@@ -41,13 +41,15 @@
 				$(function() {
 
 					$('.tuote_submit').on('click', function(e) {
-						e.preventDefault();
-						var id = $(this).attr('id'),
-							form_action = $('#lisaaformi').attr('action'),
-							anchor = '#' + $('#anchor_'+id).attr('name');
+						if ($('#lisaaformi')) {
+							e.preventDefault();
+							var id = $(this).attr('id'),
+								form_action = $('#lisaaformi').attr('action'),
+								anchor = '#' + $('#anchor_'+id).attr('name');
 
-						$('#lisaaformi').attr('action', '$PHP_SELF' + form_action + anchor);
-						$('#lisaaformi').submit();
+							$('#lisaaformi').attr('action', '$PHP_SELF' + form_action + anchor);
+							$('#lisaaformi').submit();
+						}
 					});
 
 				});
@@ -1973,7 +1975,7 @@
 						echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 						echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
 						echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'>";
-						echo "<input class='tuote_submit' id='{$yht_i}' type='button' value = '".t("Lisää")."'>";
+						echo "<input class='tuote_submit' id='{$yht_i}' type='submit' value = '".t("Lisää")."'>";
 						echo "</a>";
 						echo "</td>";
 						$yht_i++;

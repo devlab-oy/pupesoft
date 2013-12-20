@@ -13,6 +13,8 @@ error_reporting(E_ERROR);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);
 
+apache_get_modules();
+
 $alkumem		= memory_get_usage();
 $timeparts		= explode(" ",microtime());
 $starttime		= $timeparts[1].substr($timeparts[0],1);

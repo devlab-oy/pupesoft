@@ -38,6 +38,8 @@
 		    $default = stripos($type, "text")    !== FALSE ? "null default null" : $default;
 		    $default = stripos($type, "blob")    !== FALSE ? "null default null" : $default;
 
+			$default = $fields["Key"] == "PRI" ? "auto_increment" : $default;
+
 			if ($default != "") $sql .= "MODIFY COLUMN $column_name $type $default,\n";
 		}
 
@@ -54,4 +56,4 @@
 
 	$hname = gethostname();
 
-	echo "\nFINISH: $hname :$dbkanta: $aika\n";
+	echo "FINISH: $hname :$dbkanta: $aika\n";

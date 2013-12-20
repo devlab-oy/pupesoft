@@ -301,7 +301,7 @@
 							$tunnus = $jtsro["tunnus"];
 						}
 
-						$tunnukset[$tunnus] = $tunnus;
+						if (in_array($ostotilauksen_kasittely, array('1','3','5'))) $tunnukset[$tunnus] = $tunnus;
 
 						//Haetaan myös ns. lisävarusteperheet.
 						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
@@ -504,7 +504,7 @@
 				$upd_res = pupe_query($query);
 
 				// "Lähetetään heti"-ominaisuus
-				if (in_array($ostotilauksen_kasittely, array('1','3','5')) and count($tunnukset) > 0) {
+				if (count($tunnukset) > 0) {
 
 					foreach ($tunnukset as $otunnus) {
 

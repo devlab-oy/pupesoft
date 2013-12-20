@@ -3822,3 +3822,24 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'suoratoimitusvarasto') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$ulos .= "<option value = '0'>".t("Ei valittu")."</option>";
+
+		$query  = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+					ORDER BY tyyppi, nimitys";
+		$vares = pupe_query($query);
+
+		while ($varow = mysql_fetch_assoc($vares)) {
+			$sel = $trow[$i] == $varow['tunnus'] ? "selected" : "";
+			$ulos .= "<option value = '{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

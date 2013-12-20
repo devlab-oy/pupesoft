@@ -23,11 +23,28 @@
 	if (!isset($toimittajaid)) 	   $toimittajaid = "";
 	if (!isset($livesearch_tee))   $livesearch_tee = "";
 	if (!isset($saako_hyvaksya))   $saako_hyvaksya = FALSE;
+	if (!isset($lisaselite)) $lisaselite = "";
 
 	if ($livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
 	}
+	
+	echo "	<script language='javascript'> 
+ 
+				$(function() {
+
+					$('.hae_lisaselite').on('click', function() {
+						$('.lisaselite').val($('#lisaselite').val());
+					});
+				});
+
+				$(document).ready(function() {
+					$('#lisaselite').on('keyup change blur', function() {
+						$('.selite').val($('#lisaselite').val());
+					});
+				});
+			</script>";
 
 	$lopetus = "{$palvelin2}hyvak.php////kutsuja=";
 
@@ -1267,6 +1284,8 @@
 
 			echo "</table></td><td width='30px' class='back'></td>";
 		}
+
+		echo "<tr><th colspan='3'>".t("Selite tiliöinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
 
 		echo "</tr></table>";
 

@@ -58,7 +58,7 @@
 						ORDER BY 1";
 			$toimitustapares = pupe_query($query);
 
-			$ulos .= "<option value='x' selected>".t("Oletus")."</option>";
+			$ulos .= "<option value='x'>".t("Oletus")."</option>";
 
 			while ($toimitustaparow = mysql_fetch_assoc($toimitustapares)) {
 

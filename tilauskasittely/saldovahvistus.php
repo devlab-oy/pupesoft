@@ -106,6 +106,7 @@ echo "<br/>";
 echo "<br/>";
 
 if (!empty($_SESSION['valitut_laskut'])) {
+	$lasku_tunnukset_temp = $request['lasku_tunnukset'];
 	foreach ($_SESSION['valitut_laskut'] as $valittu_lasku) {
 		$request['lasku_tunnukset'] = $valittu_lasku['lasku_tunnukset'];
 		$lasku_temp = hae_myyntilaskuja_joilla_avoin_saldo($request, true);
@@ -113,7 +114,7 @@ if (!empty($_SESSION['valitut_laskut'])) {
 		$lasku_temp['laskun_avoin_paiva'] = $valittu_lasku['laskun_avoin_paiva'];
 		$request['valitut_laskut'][] = $lasku_temp;
 	}
-	unset($request['lasku_tunnukset']);
+	$request['lasku_tunnukset'] = $lasku_tunnukset_temp;
 }
 
 if ($request['tee'] == 'aja_saldovahvistus') {

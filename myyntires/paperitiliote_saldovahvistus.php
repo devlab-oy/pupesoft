@@ -99,7 +99,7 @@ function alku($saldovahvistus) {
 	$pdf->draw_text(380, 730, t("Sähköposti", $kieli).':', $firstpage, $norm);
 	$pdf->draw_text(440, 730, $kukarow["eposti"], $firstpage, $norm);
 
-	$pdf->draw_text(30, 650, t('Ilmoitamme että avoin saldo ', $kieli)." ".date('d.m.Y', strtotime($saldovahvistus['saldovahvistus_ajopaiva']))." ".t('on', $kieli), $firstpage, $norm);
+	$pdf->draw_text(30, 650, t('Ilmoitamme että avoin saldo ', $kieli)." ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva']))." ".t('on', $kieli), $firstpage, $norm);
 	$pdf->draw_text(300, 650, $saldovahvistus['avoin_saldo_summa'], $firstpage, $norm);
 	$pdf->draw_text(350, 650, $saldovahvistus['valkoodi'], $firstpage, $norm);
 
@@ -224,7 +224,7 @@ function loppu($firstpage, $saldovahvistus) {
 
 	$pdf->draw_text(30, $kala - 20, t('Saldovahvistus', $kieli), $firstpage, $bold);
 
-	$pdf->draw_text(30, $kala - 40, t('Todistamme että', $kieli)." {$asiakastiedot['nimi']} ".t('velka', $kieli).'/'.t('ennakkomaksu', $kieli)." {$yhtiorow['nimi']} ".date('d.m.Y', strtotime($saldovahvistus['saldovahvistus_ajopaiva'])).' '.t('on', $kieli), $firstpage, $bold);
+	$pdf->draw_text(30, $kala - 40, t('Todistamme että', $kieli)." {$asiakastiedot['nimi']} ".t('velka', $kieli).'/'.t('ennakkomaksu', $kieli)." {$yhtiorow['nimi']} ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva'])).' '.t('on', $kieli), $firstpage, $bold);
 
 	$x[0] = 30;
 	$x[1] = 230;

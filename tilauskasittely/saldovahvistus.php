@@ -5,6 +5,7 @@ $pupe_DataTables = "saldovahvistus";
 $useslave = 1;
 session_start();
 
+//Tällä pystyy tyhjentämään valitut laskut.
 //session_unset();
 //die();
 
@@ -135,7 +136,7 @@ else if ($request['tee'] == 'nayta_saldovahvistus_pdf' or $request['tee'] == 'tu
 	//Valittu saldovahvistusviesti
 	$laskut['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $request['saldovahvistus_viesti']);
 	$laskut['saldovahvistus_viesti'] = $laskut['saldovahvistus_viesti'][0];
-	$laskut['saldovahvistus_ajopaiva'] = $request['paiva'];
+	$laskut['laskun_avoin_paiva'] = $request['paiva'];
 	$pdf_filepath = hae_saldovahvistus_pdf($laskut);
 
 	if ($request['tee'] == 'nayta_saldovahvistus_pdf') {
@@ -230,7 +231,7 @@ function generoi_sahkopostit($request) {
 
 		//Valittu saldovahvistusviesti
 		$saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $valittu_saldovahvistus['saldovahvistus_viesti']);
-		$saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0]['selite'];
+		$saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
 		$saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
 
 		if ($saldovahvistus['asiakas']['talhal_email'] != '') {
@@ -342,12 +343,6 @@ function echo_saldovahvistukset($request) {
 function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = false, $viimeinen = false) {
 	global $kukarow, $yhtiorow, $palvelin2;
 
-	//@TODO UNCOMMENT THIS KUN TEHTY TESTAAMISESSA HOMMA HOIDETAAN REVERSENÄ
-//	if (!$valitut) {
-//		$lasku_tunnukset_key = implode('', $saldovahvistusrivi['lasku_tunnukset']);
-//		lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
-//	}
-
 	$lopetus = $palvelin2."tilauskasittely/saldovahvistus.php////tee={$request['tee']}//ryhmittely_tyyppi={$request['ryhmittely_tyyppi']}//ryhmittely_arvo={$request['ryhmittely_arvo']}//pp={$request['pp']}//kk={$request['kk']}//vv={$request['vv']}//saldovahvistus_viesti={$request['saldovahvistus_viesti']}";
 
 	$tr_class = "";
@@ -359,10 +354,10 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 
 	echo "<td valign='top'>";
 	if ($valitut) {
-		$laskun_avoin_paiva = $saldovahvistusrivi['laskun_avoin_paiva'];
+		$saldovahvistusrivi['laskun_avoin_paiva'] = $saldovahvistusrivi['laskun_avoin_paiva'];
 	}
 	else {
-		$laskun_avoin_paiva = date('Y-m-d', strtotime($request['paiva']));
+		$saldovahvistusrivi['laskun_avoin_paiva'] = date('Y-m-d', strtotime($request['paiva']));
 	}
 	echo "<input type='hidden' class='laskun_avoin_paiva' value='{$laskun_avoin_paiva}' />";
 	echo date('d.m.Y', strtotime($laskun_avoin_paiva));
@@ -390,14 +385,14 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	echo "</td>";
 
 	if ($valitut) {
-		$saldovahvistus_viesti = $saldovahvistusrivi['saldovahvistus_viesti'];
+		$saldovahvistusrivi['saldovahvistus_viesti'] = $saldovahvistusrivi['saldovahvistus_viesti'];
 	}
 	else {
-		$saldovahvistus_viesti = $request['saldovahvistus_viesti'];
+		$saldovahvistusrivi['saldovahvistus_viesti'] = $request['saldovahvistus_viesti'];
 	}
 
 	echo "<td class='saldovahvistus_viesti' valign='top'>";
-	echo $saldovahvistus_viesti;
+	echo $saldovahvistusrivi['saldovahvistus_viesti'];
 	if ($saldovahvistusrivi['asiakas']['talhal_email'] == '') {
 		echo "<br/>";
 		echo "<font class='error'>".t('Email puuttuu')."</font>";
@@ -405,11 +400,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	echo "</td>";
 
 	echo "<td>";
-	$chk = "";
-	if ($valitut) {
-		$chk = "CHECKED";
-	}
-	echo "<input type='checkbox' class='saldovahvistus_rivi' {$chk}/>";
+	echo "<input type='checkbox' class='saldovahvistus_rivi' CHECKED/>";
 	echo "</td>";
 
 	// .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi löytää lasku_tunnukset, jotka lähtee ajaxin mukana
@@ -418,7 +409,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	echo "<input type='submit' value='".t('Näytä pdf')."' />";
 	echo "<input type='hidden' name='tee' value='nayta_saldovahvistus_pdf' />";
 	echo "<input type='hidden' name='nayta_pdf' value='1' />";
-	echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistus_viesti}' />";
+	echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
 	echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
 	echo "<input type='hidden' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}' />";
 	foreach ($saldovahvistusrivi['lasku_tunnukset'] as $lasku_tunnus) {
@@ -431,7 +422,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	echo "<form method='POST' action=''>";
 	echo "<input type='submit' value='".t('Tulosta pdf')."' />";
 	echo "<input type='hidden' name='tee' value='tulosta_saldovahvistus_pdf' />";
-	echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistus_viesti}' />";
+	echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
 	echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
 	echo "<input type='hidden' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}' />";
 	foreach ($saldovahvistusrivi['lasku_tunnukset'] as $lasku_tunnus) {
@@ -441,6 +432,11 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	echo "</td>";
 
 	echo "</tr>";
+
+	if (!$valitut) {
+		$lasku_tunnukset_key = implode('', $saldovahvistusrivi['lasku_tunnukset']);
+		lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
+	}
 }
 
 function echo_kayttoliittyma($request) {

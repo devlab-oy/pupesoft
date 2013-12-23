@@ -25282,7 +25282,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 					AND lasku.tila = 'U'
 					AND lasku.alatila = 'X'
 					{$lasku_where}
-					HAVING avoin_saldo != 0
+					AND ( lasku.summa - lasku.saldo_maksettu ) != 0
 					ORDER BY asiakas.toim_ovttunnus ASC,
 					asiakas.ytunnus ASC,
 					lasku.tunnus ASC";

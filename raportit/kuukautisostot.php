@@ -573,9 +573,9 @@
 				}
 
 				if ($valitut['EIASIAKKAANMYYNTEJA'] != '') {
-					$ei_asiakkaan_myynteja_lisa = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = 'E')";
-					$ei_asiakkaan_myynteja_lisa2 = "AND a.myynninseuranta = 'E'";
-					$ei_asiakkaan_myynteja_lisa3 = "JOIN asiakas ON (asiakas.yhtio = l.yhtio AND asiakas.tunnus = l.liitostunnus AND asiakas.myynninseuranta = 'E'";
+					$ei_asiakkaan_myynteja_lisa = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta != 'E')";
+					$ei_asiakkaan_myynteja_lisa2 = "AND a.myynninseuranta != 'E'";
+					$ei_asiakkaan_myynteja_lisa3 = "JOIN asiakas ON (asiakas.yhtio = l.yhtio AND asiakas.tunnus = l.liitostunnus AND asiakas.myynninseuranta != 'E'";
 				}
 				else {
 					$ei_asiakkaan_myynteja_lisa = "";

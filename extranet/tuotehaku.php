@@ -19,9 +19,12 @@
 		$lisa .= " and tuote.nimitys like '%$nimitys%' ";
 	}
 
+	$ei_try = '';
+
 	if (isset($tuotehaku_params)) {
 		$kukarow["yhtio"] = $tuotehaku_params["yhtio"];
 		$varastot = $tuotehaku_params["varastot"];
+		$ei_try = " and try not in ('".implode("','", $tuotehaku_params["ei_try"])."')";
 	}
 	else {
 		exit;
@@ -52,7 +55,10 @@
 					AND (status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 					and tuotetyyppi NOT IN ('A', 'B')
 					and ei_saldoa = ''
-					ORDER BY tuoteno, nimitys";
+					and hinnastoon != 'E'
+					{$ei_try}
+					ORDER BY tuoteno, nimitys
+					Limit 500";
 		$tuoteres = pupe_query($query);
 
 		if (mysql_num_rows($tuoteres) > 0) {
@@ -70,7 +76,7 @@
 				echo "<tr>";
 				echo "<td>{$tuoterow["tuoteno"]}</td>";
 				echo "<td>{$tuoterow["nimitys"]}</td>";
-				echo "<td>".round($tuoterow["myyntihinta"], $yhtiorow["hintapyoristys"])."</td>";
+				echo "<td align='right'>".sprintf('%0.2f', round($tuoterow["myyntihinta"], $yhtiorow["hintapyoristys"]))."</td>";
 				echo "<td align='right'>{$myytavissa}</td>";
 				echo "</tr>";
 			}

@@ -359,8 +359,8 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	else {
 		$saldovahvistusrivi['laskun_avoin_paiva'] = date('Y-m-d', strtotime($request['paiva']));
 	}
-	echo "<input type='hidden' class='laskun_avoin_paiva' value='{$laskun_avoin_paiva}' />";
-	echo date('d.m.Y', strtotime($laskun_avoin_paiva));
+	echo "<input type='hidden' class='laskun_avoin_paiva' value='{$saldovahvistusrivi['laskun_avoin_paiva']}' />";
+	echo date('d.m.Y', strtotime($saldovahvistusrivi['laskun_avoin_paiva']));
 	echo "</td>";
 
 	echo "<td valign='top'>{$saldovahvistusrivi['ytunnus']}</td>";

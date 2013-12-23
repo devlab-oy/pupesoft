@@ -574,6 +574,12 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 			else {
 				$pdf_tarjous->draw_text(330, $kala+15, t("Määrä", $kieli),			$page_tarjous, $norm);
 				$pdf_tarjous->draw_text(380, $kala+15, t("Yks.hinta", $kieli),		$page_tarjous, $norm);
+				if ($yhtiorow['alv_kasittely'] == '' and strtolower($alv) == 'veroton') {
+					$pdf_tarjous->draw_text(380, $kala+5, t("Verollinen", $kieli),	$page_tarjous, $norm);
+				}
+				elseif ($yhtiorow['alv_kasittely'] == 'o' and strtolower($alv) == 'verollinen') {
+					$pdf_tarjous->draw_text(380, $kala+5, t("Veroton", $kieli),		$page_tarjous, $norm);
+				}
 				$pdf_tarjous->draw_text(450, $kala+15, t("Alennus", $kieli),		$page_tarjous, $norm);
 			}
 

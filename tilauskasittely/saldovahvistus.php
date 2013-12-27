@@ -170,8 +170,14 @@ else if ($request['tee'] == 'nayta_saldovahvistus_pdf' or $request['tee'] == 'tu
 	echo_saldovahvistukset($request);
 }
 else if ($request['tee'] == 'laheta_sahkopostit') {
-	generoi_sahkopostit($request);
+	list($lahetetyt_count, $ei_lahetetty_count) = generoi_saldovahvistus_sahkopostit($request);
 	unset($_SESSION['valitut_laskut']);
+
+	echo "<br/>";
+	echo "<br/>";
+	echo '<font class="message">'.$lahetetyt_count.' '.t('sähköpostia lähetetty').'</font>';
+	echo "<br/>";
+	echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostia ei lähetetty').'</font>';
 }
 ?>
 <style>
@@ -212,13 +218,8 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 	function bind_valitse_kaikki_checkbox_click() {
 		$('#valitse_kaikki').click(function() {
 			var $table = $(this).parent().parent().parent().parent();
-			var lasku_tunnukset = $table.find('.nayta_pdf_td .lasku_tunnus').map(function() {
-				return $(this).val();
-			}).get();
-			var laskun_avoin_paiva = $(this).parent().parent().find('.laskun_avoin_paiva').val();
-			var saldovahvistus_viesti = $(this).parent().parent().find('.saldovahvistus_viesti').html();
-
 			var lisays;
+
 			if ($(this).is(':checked')) {
 				lisays = true;
 				$table.find('.saldovahvistus_rivi_valinta').attr('checked', 'checked');
@@ -275,64 +276,6 @@ function lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistu
 	}
 
 	return false;
-}
-
-function generoi_sahkopostit($request) {
-	global $kukarow, $yhtiorow;
-
-	foreach ($_SESSION['valitut_laskut'] as $valittu_saldovahvistus) {
-		$request['lasku_tunnukset'] = $valittu_saldovahvistus['lasku_tunnukset'];
-		$saldovahvistus = hae_myyntilaskuja_joilla_avoin_saldo($request);
-
-		//Valittu saldovahvistusviesti
-		$saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $valittu_saldovahvistus['saldovahvistus_viesti']);
-		$saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
-		$saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
-
-		if ($saldovahvistus['asiakas']['talhal_email'] != '') {
-			$pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
-
-			$params = array(
-				"to"			 => $saldovahvistus['asiakas']['talhal_email'],
-				"subject"		 => t('Saldovahvistus', $saldovahvistus['asiakas']['kieli']),
-				"ctype"			 => "text",
-				"body"			 => t('Oheessa avoinsaldotilanteenne pdf-liitteenä', $saldovahvistus['asiakas']['kieli']),
-				"attachements"	 => array(
-					array(
-						"filename"		 => $pdf_filepath,
-						"newfilename"	 => t('Saldovahvistus', $saldovahvistus['asiakas']['kieli']).".pdf",
-						"ctype"			 => "pdf"
-					)
-				)
-			);
-
-			$onko_sahkoposti_lahetetty = pupesoft_sahkoposti($params);
-
-			if ($onko_sahkoposti_lahetetty) {
-				merkkaa_saldovahvistus_lahetetyksi($saldovahvistus);
-			}
-		}
-	}
-}
-
-function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
-	global $kukarow, $yhtiorow;
-
-	$query = "	INSERT INTO karhukierros
-				SET tyyppi = 'S',
-				pvm = CURRENT_DATE,
-				viesti = '{$saldovahvistus['saldovahvistus_viesti']}',
-				avoin_saldo_pvm = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
-				yhtio = '{$kukarow['yhtio']}'";
-	pupe_query($query);
-	$karhukierros_tunnus = mysql_insert_id();
-
-	foreach ($saldovahvistus['lasku_tunnukset'] as $lasku_tunnus) {
-		$query = "	INSERT INTO karhu_lasku
-					SET ktunnus = '{$karhukierros_tunnus}',
-					ltunnus = '{$lasku_tunnus}'";
-		pupe_query($query);
-	}
 }
 
 function echo_saldovahvistukset($request) {

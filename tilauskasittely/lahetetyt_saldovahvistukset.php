@@ -53,6 +53,7 @@ $request = array(
 	'ryhmittely_tyyppi'	 => $ryhmittely_tyyppi,
 	'ryhmittely_arvo'	 => $ryhmittely_arvo,
 	'lasku_tunnukset'	 => $lasku_tunnukset,
+	'laskut'			 => $laskut,
 	'ppa'				 => $ppa,
 	'kka'				 => $kka,
 	'vva'				 => $vva,
@@ -98,6 +99,10 @@ else if ($request['tee'] == 'nayta_saldovahvistus_pdf' or $request['tee'] == 'tu
 	$request['saldovahvistukset'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
 	echo_lahetetyt_saldovahvistukset($request);
 }
+else if ($request['tee'] == 'laheta_sahkoposti') {
+	list($lahetetyt_count, $ei_lahetetty_count) = generoi_saldovahvistus_sahkopostit($request, true);
+	unset($_SESSION['valitut_laskut']);
+}
 
 echo "<br/>";
 echo "<br/>";
@@ -111,6 +116,14 @@ if ($request['tee'] == 'hae_lahetetyt_saldovahvistukset_aikavali') {
 	$request['saldovahvistukset'] = kasittele_saldovahvistukset($request['saldovahvistukset']);
 
 	echo_lahetetyt_saldovahvistukset_aika_vali($request);
+}
+
+if (isset($lahetetyt_count) and isset($ei_lahetetty_count)) {
+	echo "<br/>";
+	echo "<br/>";
+	echo '<font class="message">'.$lahetetyt_count.' '.t('sähköpostia lähetetty').'</font>';
+	echo "<br/>";
+	echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostia ei lähetetty').'</font>';
 }
 ?>
 <style>
@@ -183,7 +196,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
 
 	$tr_class = "saldovahvistusrivi_not_hidden";
 	if ($hidden) {
-		$group_class = "laskut_".str_replace('-', '', $saldovahvistusrivi['avoin_saldo_pvm']);
+		$group_class = "laskut_".str_replace('-', '', $saldovahvistusrivi['lahetys_paiva']);
 		$tr_class = "saldovahvistusrivi_hidden {$group_class}";
 	}
 	echo "<tr class='{$tr_class}'>";
@@ -191,8 +204,9 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
 	echo "<td valign='top'>";
 	$i = 0;
 	$asiakasnumerot_string = "";
-	foreach ($saldovahvistusrivi['asiakasnumerot'] as $asiakasnumero) {
-		$asiakasnumerot_string .= $asiakasnumero.' / ';
+	//asiakasnumerot array:ssä on asiakasnumero ja tunnus, jotta uusi saldovahvistusnäkymässä asiakasnumero linkki osaa ohjata oikeaan asiakkaaseen
+	foreach ($saldovahvistusrivi['asiakasnumerot'] as $asiakasnumero_ja_tunnus) {
+		$asiakasnumerot_string .= $asiakasnumero_ja_tunnus['asiakasnumero'].' / ';
 		if ($i != 0 and $i % 10 == 0) {
 			$asiakasnumerot_string = substr($asiakasnumerot_string, 0, -3);
 			$asiakasnumerot_string .= '<br/>';
@@ -234,6 +248,18 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
 	echo "<input type='hidden' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}' />";
 	foreach ($saldovahvistusrivi['lasku_tunnukset'] as $lasku_tunnus) {
 		echo "<input type='hidden' name='lasku_tunnukset[]' value='{$lasku_tunnus}' />";
+	}
+	echo "</form>";
+
+	echo "<br/>";
+
+	echo "<form method='POST' action=''>";
+	echo "<input type='submit' value='".t('Lähetä pdf')."' />";
+	echo "<input type='hidden' name='tee' value='laheta_sahkoposti' />";
+	echo "<input type='hidden' name='laskut[saldovahvistus_viesti]' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
+	echo "<input type='hidden' name='laskut[laskun_avoin_paiva]' value='{$saldovahvistusrivi['avoin_saldo_pvm']}' />";
+	foreach ($saldovahvistusrivi['lasku_tunnukset'] as $lasku_tunnus) {
+		echo "<input type='hidden' name='laskut[lasku_tunnukset][]' value='{$lasku_tunnus}' />";
 	}
 	echo "</form>";
 	echo "</td>";

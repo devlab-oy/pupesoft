@@ -25362,6 +25362,84 @@ if (!function_exists('hae_kayttajan_kirjoitin')) {
 	}
 }
 
+if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
+	function generoi_saldovahvistus_sahkopostit($request, $lahetetyt = false) {
+		global $kukarow, $yhtiorow;
+
+		if ($lahetetyt) {
+			//Purkkakikka, uusi_saldovahvistus käyttöliittymästä voi antaa monta saldovahvistusta ja lähetetyt_saldovahvistukset näkymästä vain yhden. Tästä syystä pitää antaa arrayn sisällä
+			$valitut_laskut = array($request['laskut']);
+		}
+		else {
+			$valitut_laskut = $_SESSION['valitut_laskut'];
+		}
+
+		$lahetetyt_count = 0;
+		$ei_lahetetty_count = 0;
+		foreach ($valitut_laskut as $valittu_saldovahvistus) {
+			$request['lasku_tunnukset'] = $valittu_saldovahvistus['lasku_tunnukset'];
+			$saldovahvistus = hae_myyntilaskuja_joilla_avoin_saldo($request);
+
+			//Valittu saldovahvistusviesti
+			$saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $valittu_saldovahvistus['saldovahvistus_viesti']);
+			$saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
+			$saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
+
+			if ($saldovahvistus['asiakas']['talhal_email'] != '') {
+				$pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
+
+				$params = array(
+					"to"			 => $saldovahvistus['asiakas']['talhal_email'],
+					"subject"		 => t('Saldovahvistus', $saldovahvistus['asiakas']['kieli']),
+					"ctype"			 => "text",
+					"body"			 => t('Oheessa avoinsaldotilanteenne pdf-liitteenä', $saldovahvistus['asiakas']['kieli']),
+					"attachements"	 => array(
+						array(
+							"filename"		 => $pdf_filepath,
+							"newfilename"	 => t('Saldovahvistus', $saldovahvistus['asiakas']['kieli']).".pdf",
+							"ctype"			 => "pdf"
+						)
+					)
+				);
+
+				$onko_sahkoposti_lahetetty = pupesoft_sahkoposti($params);
+
+				if ($onko_sahkoposti_lahetetty) {
+					merkkaa_saldovahvistus_lahetetyksi($saldovahvistus);
+					$lahetetyt_count++;
+				}
+				else {
+					$ei_lahetetty_count++;
+				}
+			}
+		}
+
+		return array($lahetetyt_count, $ei_lahetetty_count);
+	}
+}
+
+if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
+	function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	INSERT INTO karhukierros
+					SET tyyppi = 'S',
+					pvm = CURRENT_DATE,
+					viesti = '{$saldovahvistus['saldovahvistus_viesti']['selite']}',
+					avoin_saldo_pvm = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
+					yhtio = '{$kukarow['yhtio']}'";
+		pupe_query($query);
+		$karhukierros_tunnus = mysql_insert_id();
+
+		foreach ($saldovahvistus['lasku_tunnukset'] as $lasku_tunnus) {
+			$query = "	INSERT INTO karhu_lasku
+						SET ktunnus = '{$karhukierros_tunnus}',
+						ltunnus = '{$lasku_tunnus}'";
+			pupe_query($query);
+		}
+	}
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

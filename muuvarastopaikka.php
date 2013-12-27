@@ -6,8 +6,8 @@
 
 	if ($tee != '') {
 		$query  = "	LOCK TABLE tuotepaikat WRITE,
-					tuotteen_toimittajat WRITE,
-					toimi WRITE,
+					tuotteen_toimittajat READ,
+					toimi READ,
 					tiliointi WRITE,
 					tapahtuma WRITE,
 					sanakirja WRITE,

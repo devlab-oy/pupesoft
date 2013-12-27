@@ -23939,6 +23939,16 @@ if (!function_exists('hyllysiirto')) {
 						$laskuid = mysql_insert_id();
 					}
 
+					$query = "	SELECT toimi.tilino
+								FROM tuotteen_toimittajat
+								JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND toimi.tyyppi != 'P')
+								WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+								AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
+								ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+								LIMIT 1";
+					$result = pupe_query($query);
+					$toimirow = mysql_fetch_assoc($result);
+
 					// Mistä varasto
 					$query = "	INSERT into tiliointi set
 								yhtio    		= '$kukarow[yhtio]',
@@ -23974,6 +23984,45 @@ if (!function_exists('hyllysiirto')) {
 								laatija  		= '$kukarow[kuka]',
 								laadittu 		= now()";
 					$result = pupe_query($query);
+
+					// jos ostotili löytyy, tehdään sinne kirjaukset kanssa
+					if ($toimirow['tilino'] != '') {
+						// Mistä ostotili
+						$query = "	INSERT into tiliointi set
+									yhtio    		= '$kukarow[yhtio]',
+									ltunnus  		= '$laskuid',
+									tilino   		= '{$toimirow['tilino']}',
+									kustp    		= '{$mista_kustp}',
+									kohde	 		= '{$mista_kohde}',
+									projekti 		= '{$mista_projekti}',
+									tapvm    		= current_date,
+									summa    		= {$varastonmuutos_neg},
+									vero     		= 0,
+									lukko    		= '',
+									tapahtumatunnus = $mista_tapa_tunnus,
+									selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+									laatija  		= '$kukarow[kuka]',
+									laadittu 		= now()";
+						$result = pupe_query($query);
+
+						// Minne ostotili
+						$query = "	INSERT into tiliointi set
+									yhtio    		= '$kukarow[yhtio]',
+									ltunnus  		= '$laskuid',
+									tilino   		= '{$toimirow['tilino']}',
+									kustp    		= '{$minne_kustp}',
+									kohde	 		= '{$minne_kohde}',
+									projekti 		= '{$minne_projekti}',
+									tapvm    		= current_date,
+									summa    		= {$varastonmuutos},
+									vero     		= 0,
+									lukko    		= '',
+									tapahtumatunnus = $minne_tapa_tunnus,
+									selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+									laatija  		= '$kukarow[kuka]',
+									laadittu 		= now()";
+						$result = pupe_query($query);
+					}
 
 					// Minne varasto
 					$query = "	INSERT into tiliointi set

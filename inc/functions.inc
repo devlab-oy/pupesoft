@@ -25250,6 +25250,16 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 				$karhu_lasku_join .= " AND karhukierros.pvm >= '{$request['alku_paiva']}' AND karhukierros.pvm <= '{$request['loppu_paiva']}'";
 			}
 			$karhu_lasku_join .= ' )';
+
+			$lasku_where .= "	AND lasku.tila = 'U'";
+		}
+		else {
+			$lasku_where .= "	AND (
+									lasku.mapvm > '{$request['paiva']}'
+									OR lasku.mapvm = '0000-00-00'
+								)
+								AND lasku.tila = 'U'
+								AND lasku.alatila = 'X'";
 		}
 
 		//lasku.tunnus ASC koska sessioon tallennetaan implode tunnus ja tunnukset pitää olla tietyssä järjestyksessä, koska muuten riviä ei löydy.
@@ -25275,12 +25285,6 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 						{$asiakas_join} )
 					{$karhu_lasku_join}
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					AND (
-						lasku.mapvm > '{$request['paiva']}'
-						OR lasku.mapvm = '0000-00-00'
-						)
-					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'
 					{$lasku_where}
 					AND ( lasku.summa - lasku.saldo_maksettu ) != 0
 					ORDER BY asiakas.toim_ovttunnus ASC,

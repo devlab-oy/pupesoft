@@ -441,12 +441,6 @@ if(!function_exists("tuotetarkista")) {
 					$_counter = 0;
 
 					foreach ($kaikki_oletuspaikat as $_tuotepaikka) {
-						if ($trow["luedata_from"] == "LUEDATA") { // jos tullaan lue datasta voidaan ja pit‰‰ k‰ytt‰‰ lue datan omaa echo funkkaria!
-							lue_data_echo("<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>");
-						}
-						else {
-							echo "<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>";
-						}
 						list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", trim($_tuotepaikka));
 
 						if ($hyllyalue == "" or !isset($hyllyalue)) {
@@ -464,38 +458,58 @@ if(!function_exists("tuotetarkista")) {
 
 						$oletus_x = $_counter == 0 ? 'X' : '';
 
-						$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
-						 						yhtio			= '{$kukarow['yhtio']}',
-									 			tuoteno     	= '{$tem_tuoteno}',
-									 			oletus      	= '{$oletus_x}',
-							   		 			saldoaika   	= now(),
-												hyllyalue   	= '{$hyllyalue}',
-												hyllynro    	= '{$hyllynro}',
-												hyllyvali   	= '{$hyllyvali}',
-												hyllytaso   	= '{$hyllytaso}',
-												luontiaika		= now(),
-												laatija			= '{$kukarow['kuka']}',
-												muutospvm		= now(),
-												muuttaja		= '{$kukarow['kuka']}'";
-						$tuotepaikka_result = pupe_query($tuotepaikka_query);
+						$query = "	SELECT *
+									FROM tuotepaikat
+									WHERE yhtio   = '{$kukarow['yhtio']}'
+									AND tuoteno   = '{$tem_tuoteno}'
+									AND hyllyalue = '{$hyllyalue}'
+									AND hyllynro  = '{$hyllynro}'
+									AND hyllytaso = '{$hyllytaso}'
+									AND hyllyvali = '{$hyllyvali}'";
+						$paikka_chk_res = pupe_query($query);
 
-						$tapahtumaquery = "	INSERT into tapahtuma set
-											yhtio 		= '{$kukarow['yhtio']}',
-											tuoteno 	= '{$tem_tuoteno}',
-											kpl 		= 0,
-											kplhinta	= 0,
-											hinta 		= 0,
-											laji 		= 'uusipaikka',
-											hyllyalue   = '{$hyllyalue}',
-											hyllynro    = '{$hyllynro}',
-											hyllyvali   = '{$hyllyvali}',
-											hyllytaso   = '{$hyllytaso}',
-											selite 		= '".t("Tuoteyll‰pidossa lis‰ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now()";
-						$tapahtumaresult = pupe_query($tapahtumaquery);
+						if (mysql_num_rows($paikka_chk_res) == 0) {
 
-						$_counter++;
+							$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
+							 						yhtio			= '{$kukarow['yhtio']}',
+										 			tuoteno     	= '{$tem_tuoteno}',
+										 			oletus      	= '{$oletus_x}',
+								   		 			saldoaika   	= now(),
+													hyllyalue   	= '{$hyllyalue}',
+													hyllynro    	= '{$hyllynro}',
+													hyllyvali   	= '{$hyllyvali}',
+													hyllytaso   	= '{$hyllytaso}',
+													luontiaika		= now(),
+													laatija			= '{$kukarow['kuka']}',
+													muutospvm		= now(),
+													muuttaja		= '{$kukarow['kuka']}'";
+							$tuotepaikka_result = pupe_query($tuotepaikka_query);
+
+							$tapahtumaquery = "	INSERT into tapahtuma set
+												yhtio 		= '{$kukarow['yhtio']}',
+												tuoteno 	= '{$tem_tuoteno}',
+												kpl 		= 0,
+												kplhinta	= 0,
+												hinta 		= 0,
+												laji 		= 'uusipaikka',
+												hyllyalue   = '{$hyllyalue}',
+												hyllynro    = '{$hyllynro}',
+												hyllyvali   = '{$hyllyvali}',
+												hyllytaso   = '{$hyllytaso}',
+												selite 		= '".t("Tuoteyll‰pidossa lis‰ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+												laatija 	= '$kukarow[kuka]',
+												laadittu 	= now()";
+							$tapahtumaresult = pupe_query($tapahtumaquery);
+
+							if ($trow["luedata_from"] == "LUEDATA") { // jos tullaan lue datasta voidaan ja pit‰‰ k‰ytt‰‰ lue datan omaa echo funkkaria!
+								lue_data_echo("<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>");
+							}
+							else {
+								echo "<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>";
+							}
+
+							$_counter++;
+						}
 					}
 				}
 			}

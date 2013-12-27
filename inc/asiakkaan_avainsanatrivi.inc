@@ -58,10 +58,9 @@
 						ORDER BY 1";
 			$toimitustapares = pupe_query($query);
 
-			$ulos .= "<option value='x'>".t("Oletus")."</option>";
+			$ulos .= "<option value='OLETUS'>".t("Oletus")."</option>";
 
 			while ($toimitustaparow = mysql_fetch_assoc($toimitustapares)) {
-
 				$sel = $trow[$i] == $toimitustaparow['selite'] ? " selected" : "";
 
 				$ulos .= "<option value='{$toimitustaparow['selite']}'{$sel}>{$toimitustaparow['selite']}</option>";
@@ -136,7 +135,7 @@
 
 				$ulos .= "<option value='{$paikallisrow['tunnus']}'{$sel}>{$paikallisrow['selitetark']}</option>";
 			}
-			
+
 			$ulos .= "</select></td>";
 			$jatko = 0;
 		}

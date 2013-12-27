@@ -24188,10 +24188,11 @@ if (!function_exists('paivita_ohjausmerkki')) {
 						WHERE yhtio 	 = '{$kukarow['yhtio']}'
 						AND laji 		 = 'OHJAUSMERKKI'
 						AND liitostunnus = '{$laskurow['liitostunnus']}'
-						AND avainsana = 'x'
+						AND avainsana 	 = 'OLETUS'
 						LIMIT 1";
 			$ohjausmerkki_check_res = pupe_query($query);
 		}
+		
 		$ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
 
 		if ($ohjausmerkki_check_row['tarkenne'] != "") {

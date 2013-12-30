@@ -42,8 +42,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setProggressBar(true);
 
 		$this->splitFile('/tmp/konversio/tarkastukset/TARKASTUKSET.csv');
-
-		die();
 	}
 
 	protected function konvertoi_rivit() {
@@ -313,8 +311,8 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		file_put_contents($header_file, $header_rivi);
 
 		// Splitataan tiedosto 10000 rivin osiin datain -hakemistoon
-		chdir($filepath);
-		system("/usr/bin/split -l 10000 ");
+		chdir($folder);
+		system("split -l 10000 $filepath");
 
 		// Poistetaan alkuperäinen
 		unlink($filepath);
@@ -322,21 +320,24 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		// Loopataan läpi kaikki splitatut tiedostot
 		if ($handle = opendir($folder)) {
 			while (false !== ($file = readdir($handle))) {
+				if (!in_array($file, array('.', '..', '.DS_Store', 'header_file')) and is_file($file)) {
+					// Jos kyseessä on eka file (loppuu "aa"), ei laiteta headeriä
+					if (substr($file, -2) != "aa") {
+						// Keksitään temp file
+						$temp_file = $folder."/{$file}_s";
 
-				// Jos kyseessä on eka file (loppuu "aa"), ei laiteta headeriä
-				if (substr($file, -2) != "aa") {
-					// Keksitään temp file
-					$temp_file = $folder."/{$file}_s";
+						// Concatenoidaan headerifile ja tämä file temppi fileen
+						system("cat ".escapeshellarg($header_file)." ".escapeshellarg($file)." > ".escapeshellarg($temp_file));
 
-					// Concatenoidaan headerifile ja tämä file temppi fileen
-					system("cat ".escapeshellarg($header_file)." ".escapeshellarg($file)." > ".escapeshellarg($temp_file));
-
-					// Poistetaan alkuperäinen file
-					unlink($file);
+						// Poistetaan alkuperäinen file
+						unlink($file);
+					}
 				}
 			}
 			closedir($handle);
 		}
+
+		unlink($header_file);
 	}
 
 	protected function tarkistukset() {

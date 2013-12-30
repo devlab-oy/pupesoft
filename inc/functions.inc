@@ -25297,6 +25297,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 		while ($lasku = mysql_fetch_assoc($result)) {
 			$ytunnus_temp = $lasku['ytunnus'];
 			$lahetys_paiva_temp = $lasku['lahetys_paiva'];
+			$karhukierros_tunnus_temp = $lasku['karhukierros_tunnus'];
 
 			if ($request['lahetetyt']) {
 				keraa_saldovahvistusrivit_ktunnus_ytunnus($request, $laskut, $lasku);
@@ -25309,7 +25310,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 		//Purkahko. Jos lasku_tunnukset on annettu, halutaan n‰ytt‰‰ tietyn asiakkaan(ytunnus) saldovahvistus pdf:n‰.
 		if (!empty($request['lasku_tunnukset'])) {
 			if ($request['lahetetyt']) {
-				return $laskut[$lahetys_paiva_temp][$ytunnus_temp];
+				return $laskut[$lahetys_paiva_temp][$karhukierros_tunnus_temp][$ytunnus_temp];
 			}
 			else {
 				return $laskut[$ytunnus_temp];

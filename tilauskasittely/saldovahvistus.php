@@ -176,8 +176,10 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 	echo "<br/>";
 	echo "<br/>";
 	echo '<font class="message">'.$lahetetyt_count.' '.t('sähköpostia lähetetty').'</font>';
-	echo "<br/>";
-	echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostia ei lähetetty').'</font>';
+	if ($ei_lahetetty_count > 0) {
+		echo "<br/>";
+		echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostin lähettäminen epäonnistui').'</font>';
+	}
 }
 ?>
 <style>

@@ -121,8 +121,10 @@ if (isset($lahetetyt_count) and isset($ei_lahetetty_count)) {
 	echo "<br/>";
 	echo "<br/>";
 	echo '<font class="message">'.$lahetetyt_count.' '.t('sähköpostia lähetetty').'</font>';
-	echo "<br/>";
-	echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostia ei lähetetty').'</font>';
+	if ($ei_lahetetty_count > 0) {
+		echo "<br/>";
+		echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostin lähettäminen epäonnistui').'</font>';
+	}
 }
 ?>
 <style>
@@ -183,12 +185,19 @@ function echo_lahetetyt_saldovahvistukset($request) {
 	global $kukarow, $yhtiorow;
 
 	echo "<table>";
-	foreach ($request['saldovahvistukset'] as $saldovahvistus_per_ktunnus_ytunnus) {
-		foreach ($saldovahvistus_per_ktunnus_ytunnus as $saldovahvistus_per_ytunnus) {
-			foreach ($saldovahvistus_per_ytunnus as $saldovahvistus) {
-				echo_lahetetty_saldovahvistus_rivi($saldovahvistus, $request);
+	if (!empty($request['saldovahvistukset'])) {
+		foreach ($request['saldovahvistukset'] as $saldovahvistus_per_ktunnus_ytunnus) {
+			foreach ($saldovahvistus_per_ktunnus_ytunnus as $saldovahvistus_per_ytunnus) {
+				foreach ($saldovahvistus_per_ytunnus as $saldovahvistus) {
+					echo_lahetetty_saldovahvistus_rivi($saldovahvistus, $request);
+				}
 			}
 		}
+	}
+	else {
+		echo "<tr>";
+		echo "<td>".t('Ei lähetettyjä saldovahvistuksia')."</td>";
+		echo "</tr>";
 	}
 
 	echo "</table>";
@@ -349,25 +358,32 @@ function echo_lahetetyt_saldovahvistukset_aika_vali($request) {
 	echo "<th>".t('Lähetetyt saldovahvistukset')."</th>";
 	echo "</tr>";
 
-	foreach ($request['saldovahvistukset'] as $paiva => $saldovahvistukset_per_paiva) {
-		echo "<tr class='saldovahvistus_paiva_tr saldovahvistukset_per_paiva_hidden'>";
+	if (!empty($request['saldovahvistukset'])) {
+		foreach ($request['saldovahvistukset'] as $paiva => $saldovahvistukset_per_paiva) {
+			echo "<tr class='saldovahvistus_paiva_tr saldovahvistukset_per_paiva_hidden'>";
 
-		echo "<td>";
-		echo date('d.m.Y', strtotime($paiva));
-		echo "<input type='hidden' class='group_class' value='laskut_".str_replace('-', '', $paiva)."' />";
-		echo "<img class='arrow_img' src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' />";
-		echo "</td>";
+			echo "<td>";
+			echo date('d.m.Y', strtotime($paiva));
+			echo "<input type='hidden' class='group_class' value='laskut_".str_replace('-', '', $paiva)."' />";
+			echo "<img class='arrow_img' src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' />";
+			echo "</td>";
 
-		echo "<td>";
-		echo count($saldovahvistukset_per_paiva);
-		echo "</td>";
+			echo "<td>";
+			echo count($saldovahvistukset_per_paiva);
+			echo "</td>";
 
-		foreach ($saldovahvistukset_per_paiva as $saldovahvistusrivi_ktunnus) {
-			foreach ($saldovahvistusrivi_ktunnus as $saldovahvistusrivi) {
-				echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, true);
+			foreach ($saldovahvistukset_per_paiva as $saldovahvistusrivi_ktunnus) {
+				foreach ($saldovahvistusrivi_ktunnus as $saldovahvistusrivi) {
+					echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, true);
+				}
 			}
-		}
 
+			echo "</tr>";
+		}
+	}
+	else {
+		echo "<tr>";
+		echo "<td>".t('Ei lähetettyjä saldovahvistuksia')."</td>";
 		echo "</tr>";
 	}
 

@@ -59,6 +59,7 @@ if ($ajax_request) {
 	exit;
 }
 
+
 if (!isset($nayta_pdf)) {
 	$nayta_pdf = 0;
 }
@@ -125,6 +126,7 @@ if (!empty($_SESSION['valitut_laskut'])) {
 }
 
 if ($request['tee'] == 'aja_saldovahvistus') {
+	js_openFormInNewWindow();
 	$request['laskut'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
 
 	if (!empty($request['tallenna_exceliin'])) {
@@ -135,7 +137,7 @@ if ($request['tee'] == 'aja_saldovahvistus') {
 
 	echo_saldovahvistukset($request);
 }
-else if ($request['tee'] == 'nayta_saldovahvistus_pdf' or $request['tee'] == 'tulosta_saldovahvistus_pdf') {
+else if ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovahvistus_pdf') {
 	//requestissa tulee tietyn ytunnuksen lasku_tunnuksia. Tällöin $laskut arrayssa on vain yksi solu
 	$laskut = hae_myyntilaskuja_joilla_avoin_saldo($request);
 
@@ -154,7 +156,7 @@ else if ($request['tee'] == 'nayta_saldovahvistus_pdf' or $request['tee'] == 'tu
 	//Valittu saldovahvistusviesti
 	$pdf_filepath = hae_saldovahvistus_pdf($laskut);
 
-	if ($request['tee'] == 'nayta_saldovahvistus_pdf') {
+	if ($request['tee'] == 'NAYTATILAUS') {
 		echo file_get_contents($pdf_filepath);
 	}
 	else if ($request['tee'] == 'tulosta_saldovahvistus_pdf') {
@@ -408,9 +410,9 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 
 	// .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi_valinta löytää lasku_tunnukset, jotka lähtee ajaxin mukana
 	echo "<td class='back nayta_pdf_td'>";
-	echo "<form method='POST' action=''>";
-	echo "<input type='submit' value='".t('Näytä pdf')."' />";
-	echo "<input type='hidden' name='tee' value='nayta_saldovahvistus_pdf' />";
+	echo "<form method='POST' action='' id='".implode('', $saldovahvistusrivi['lasku_tunnukset'])."' name='".implode('', $saldovahvistusrivi['lasku_tunnukset'])."' autocomplete='off'>";
+	echo "<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('".implode('', $saldovahvistusrivi['lasku_tunnukset'])."', '".implode('', $saldovahvistusrivi['lasku_tunnukset'])."'); return false;\">";
+	echo "<input type='hidden' name='tee' value='NAYTATILAUS' />";
 	echo "<input type='hidden' name='nayta_pdf' value='1' />";
 	echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
 	echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";

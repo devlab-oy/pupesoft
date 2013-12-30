@@ -93,6 +93,11 @@ else if ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldova
 	if ($request['tee'] == 'NAYTATILAUS') {
 		echo file_get_contents($pdf_filepath);
 	}
+	else if ($request['tee'] == 'tulosta_saldovahvistus_pdf') {
+		$kirjoitin_komento = hae_kayttajan_kirjoitin();
+
+		exec($kirjoitin_komento['komento'].' '.$pdf_filepath);
+	}
 
 	//unset, jotta käyttöliittymään tulisi rajausten mukaiset laskut.
 	unset($request['lasku_tunnukset']);

@@ -40,6 +40,10 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setTable('tyomaarays');
 		$this->setColumnCount(26);
 		$this->setProggressBar(true);
+
+		$this->splitFile('/tmp/konversio/tarkastukset/TARKASTUKSET.csv');
+
+		die();
 	}
 
 	protected function konvertoi_rivit() {
@@ -295,6 +299,44 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					WHERE yhtio = '{$this->kukarow['yhtio']}'
 					AND otunnus = '{$tunnus}'";
 		pupe_query($query);
+	}
+
+	private function splitFile($filepath) {
+		$folder = dirname($filepath);
+		// Otetaan tiedostosta ensimmäinen rivi talteen, siinä on headerit
+		$file = fopen($filepath, "r") or die(t("Tiedoston avaus epäonnistui")."!");
+		$header_rivi = fgets($file);
+		fclose($file);
+
+		$header_file = "{$folder}/header_file";
+		// Laitetaan header fileen, koska filejen mergettäminen on nopeempaa komentoriviltä
+		file_put_contents($header_file, $header_rivi);
+
+		// Splitataan tiedosto 10000 rivin osiin datain -hakemistoon
+		chdir($filepath);
+		system("/usr/bin/split -l 10000 ");
+
+		// Poistetaan alkuperäinen
+		unlink($filepath);
+
+		// Loopataan läpi kaikki splitatut tiedostot
+		if ($handle = opendir($folder)) {
+			while (false !== ($file = readdir($handle))) {
+
+				// Jos kyseessä on eka file (loppuu "aa"), ei laiteta headeriä
+				if (substr($file, -2) != "aa") {
+					// Keksitään temp file
+					$temp_file = $folder."/{$file}_s";
+
+					// Concatenoidaan headerifile ja tämä file temppi fileen
+					system("cat ".escapeshellarg($header_file)." ".escapeshellarg($file)." > ".escapeshellarg($temp_file));
+
+					// Poistetaan alkuperäinen file
+					unlink($file);
+				}
+			}
+			closedir($handle);
+		}
 	}
 
 	protected function tarkistukset() {

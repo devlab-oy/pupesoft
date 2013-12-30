@@ -24143,6 +24143,8 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
 		$otunnukset = isset($params['otunnukset']) ? $params['otunnukset'] : '';
 		$kilotyht = isset($params['kilotyht']) ? $params['kilotyht'] : '';
 
+		if ($otunnukset == '') return false;
+
 		// kotimaan myynti menee alatilaan D
 		$query = "UPDATE lasku SET alatila = 'D' WHERE tunnus IN ({$otunnukset}) AND vienti = '' AND yhtio = '{$kukarow['yhtio']}'";
 		$ures  = pupe_query($query);

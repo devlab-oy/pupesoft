@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta JA master kantaa *//
+	$useslave = 1;
+
 	if (isset($_POST["teetiedosto"])) {
 		if ($_POST["teetiedosto"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);

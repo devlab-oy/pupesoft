@@ -125,7 +125,7 @@ function alku($saldovahvistus) {
 function rivi($tyyppi, $firstpage, $row, $saldovahvistus) {
 	global $pdf, $kala, $sivu, $lask, $norm, $pieni, $yhtiorow;
 
-	if ($lask == 19) {
+	if ($lask == 17) {
 		$sivu++;
 		loppu($firstpage, array());
 		$firstpage = alku($saldovahvistus);

@@ -53,7 +53,7 @@
 				while ($rivi = mysql_fetch_assoc($result)) {
 
 					$ostotilauksen_kasittely = $myytilrow['ostotilauksen_kasittely'];
-
+					
 					if ($rivi['ei_saldoa'] != '' and $rivi['perheid'] == $rivi['rivitunnus']) {
 						// saldottomat tuotteet laitetaan jälkkäriin jos ne on tuoteperheen isiä ja skipataan loopissa
 						$query = "	UPDATE tilausrivi
@@ -105,13 +105,16 @@
 					// tehdään aluksi vähän oikeellisuustarkastuksia
 					$query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$ttrow[liitostunnus]'";
 					$erres = pupe_query($query);
-
+					
 					if (mysql_num_rows($erres) != 1) {
 						$tilauksesta_ostotilaus .= "<font class='error'>".t("VIRHE: Toimittajan tietoja ei löytynyt tuotteelta").": $rivi[tuoteno]!<br>";
 					}
 					else {
 						// toimittaja löytyi, tehdään tästä ostotilaus
 						$tiltoi = mysql_fetch_assoc($erres);
+						
+						$ohjausmerkki = ($tiltoi['ostotilauksen_kasittely'] == 4) ? '' : $myytilrow['ohjausmerkki'] ;
+							
 
 						// Katsotaan onko toimittajalla avoimia ostotilauksia
 						// Pitää olla myös oikeat osoitetiedot
@@ -196,7 +199,7 @@
 								and toim_postitp	= '{$toim_postitp}'
 								and toim_maa		= '{$toim_maa}'
 								and varasto 		= '{$oletusostovarasto}'
-								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'
+								and ohjausmerkki 	= '{$ohjausmerkki}'
 								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 							case '2':
@@ -255,7 +258,7 @@
 										myyja 				= '$myytilrow[myyja]',
 										nimi 				= '$tiltoi[nimi]',
 										nimitark 			= '$tiltoi[nimitark]',
-										ohjausmerkki 		= '{$myytilrow['ohjausmerkki']}',
+										ohjausmerkki 		= '$ohjausmerkki',
 										osoite 				= '$tiltoi[osoite]',
 										ovttunnus 			= '$tiltoi[ovttunnus]',
 										postino 			= '$tiltoi[postino]',

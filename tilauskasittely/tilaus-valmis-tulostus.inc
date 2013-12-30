@@ -7,7 +7,7 @@
 	$prires = pupe_query($query);
 
 	if (mysql_num_rows($prires) != 0) {
-		$prirow = mysql_fetch_array($prires);
+		$prirow = mysql_fetch_assoc($prires);
 
 		$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
 		$kirres = pupe_query($query);
@@ -46,7 +46,7 @@
 	}
 
 	$chk_result = pupe_query($queryc);
-	$chk_row = mysql_fetch_array($chk_result);
+	$chk_row = mysql_fetch_assoc($chk_result);
 
 	// Katsotaan, että tämä keräyslista ei ole jo tulostettu
 	if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] != 0) {
@@ -153,7 +153,7 @@
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$riresult = pupe_query($query);
-		$asrow = mysql_fetch_array($riresult);
+		$asrow = mysql_fetch_assoc($riresult);
 
 		if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
 			$kerayseran_numero = tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita);
@@ -355,7 +355,7 @@
 		$prires = pupe_query($query);
 
 		if (mysql_num_rows($prires) > 0) {
-			$prirow = mysql_fetch_array($prires);
+			$prirow = mysql_fetch_assoc($prires);
 
 			$apuprintteri = $prirow['printteri1']; // läheteprintteri
 

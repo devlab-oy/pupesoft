@@ -113,7 +113,6 @@ echo_lahetettyjen_saldovahvistusten_selaaminen_kayttoliittyma($request);
 
 if ($request['tee'] == 'hae_lahetetyt_saldovahvistukset_aikavali') {
 	$request['saldovahvistukset'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
-	$request['saldovahvistukset'] = kasittele_saldovahvistukset($request['saldovahvistukset']);
 
 	echo_lahetetyt_saldovahvistukset_aika_vali($request);
 }
@@ -184,8 +183,12 @@ function echo_lahetetyt_saldovahvistukset($request) {
 	global $kukarow, $yhtiorow;
 
 	echo "<table>";
-	foreach ($request['saldovahvistukset'] as $saldovahvistus) {
-		echo_lahetetty_saldovahvistus_rivi($saldovahvistus, $request);
+	foreach ($request['saldovahvistukset'] as $saldovahvistus_per_ktunnus_ytunnus) {
+		foreach ($saldovahvistus_per_ktunnus_ytunnus as $saldovahvistus_per_ytunnus) {
+			foreach ($saldovahvistus_per_ytunnus as $saldovahvistus) {
+				echo_lahetetty_saldovahvistus_rivi($saldovahvistus, $request);
+			}
+		}
 	}
 
 	echo "</table>";
@@ -225,7 +228,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
 	echo $saldovahvistusrivi['avoin_saldo_summa'];
 	echo "</td>";
 
-	echo "<td valign='top'>";
+	echo "<td valign='top' class='back'>";
 	echo "<form method='POST' action=''>";
 	echo "<input type='submit' value='".t('Näytä pdf')."' />";
 	echo "<input type='hidden' name='tee' value='nayta_saldovahvistus_pdf' />";
@@ -283,7 +286,7 @@ function echo_lahetetyt_saldovahvistukset_kayttoliittyma($request) {
 	echo "<select name='ryhmittely_tyyppi'>";
 	$sel = "";
 	foreach ($request['haku_tyypit'] as $ryhmittely_tyyppi_key => $ryhmittely_tyyppi) {
-		if ($request['ryhmittely_tyyppi'] == $ryhmittely_tyyppi) {
+		if ($request['ryhmittely_tyyppi'] == $ryhmittely_tyyppi_key) {
 			$sel = "SELECTED";
 		}
 		echo "<option value='{$ryhmittely_tyyppi_key}' {$sel}>{$ryhmittely_tyyppi}</option>";
@@ -337,18 +340,6 @@ function echo_lahetettyjen_saldovahvistusten_selaaminen_kayttoliittyma($request)
 	echo "</form>";
 }
 
-function kasittele_saldovahvistukset($saldovahvistukset) {
-	global $kukarow, $yhtiorow;
-
-	$saldovahvistukset_temp = array();
-
-	foreach ($saldovahvistukset as $saldovahvistus) {
-		$saldovahvistukset_temp[$saldovahvistus['lahetys_paiva']][] = $saldovahvistus;
-	}
-
-	return $saldovahvistukset_temp;
-}
-
 function echo_lahetetyt_saldovahvistukset_aika_vali($request) {
 	global $kukarow, $yhtiorow, $palvelin2;
 
@@ -371,8 +362,10 @@ function echo_lahetetyt_saldovahvistukset_aika_vali($request) {
 		echo count($saldovahvistukset_per_paiva);
 		echo "</td>";
 
-		foreach ($saldovahvistukset_per_paiva as $saldovahvistusrivi) {
-			echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, true);
+		foreach ($saldovahvistukset_per_paiva as $saldovahvistusrivi_ktunnus) {
+			foreach ($saldovahvistusrivi_ktunnus as $saldovahvistusrivi) {
+				echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, true);
+			}
 		}
 
 		echo "</tr>";

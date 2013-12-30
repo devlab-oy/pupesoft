@@ -308,8 +308,7 @@ function echo_saldovahvistukset($request) {
 	echo "<td><input type='text' class='search_field' name='search_nimi'></td>";
 	echo "<td><input type='text' class='search_field' name='search_saldo'></td>";
 	echo "<td><input type='text' class='search_field' name='search_viesti'></td>";
-	//@TODO LAITA TÄMÄ CHECKED
-	echo "<td><input type='checkbox' id='valitse_kaikki' /></td>";
+	echo "<td><input type='checkbox' id='valitse_kaikki' CHECKED /></td>";
 	echo "<td class='hidden'></td>";
 	echo "</tr>";
 
@@ -402,12 +401,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	echo "</td>";
 
 	echo "<td>";
-	//@TODO POISTA $valitut iffi ja $chk muuttuja kun siirrytään tuotantoon
-	$chk = "";
-	if ($valitut) {
-		$chk = "CHECKED";
-	}
-	echo "<input type='checkbox' class='saldovahvistus_rivi_valinta' {$chk}/>";
+	echo "<input type='checkbox' class='saldovahvistus_rivi_valinta' CHECKED />";
 	echo "</td>";
 
 	// .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi_valinta löytää lasku_tunnukset, jotka lähtee ajaxin mukana
@@ -440,10 +434,11 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 
 	echo "</tr>";
 
-//	if (!$valitut) {
-//		$lasku_tunnukset_key = implode('', $saldovahvistusrivi['lasku_tunnukset']);
-//		lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
-//	}
+	if (!$valitut) {
+		//Oletuksena lisätään kaikki haetut saldovahvistusrivit valituiksi
+		$lasku_tunnukset_key = implode('', $saldovahvistusrivi['lasku_tunnukset']);
+		lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
+	}
 }
 
 function echo_kayttoliittyma($request) {

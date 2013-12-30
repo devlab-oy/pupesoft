@@ -25239,7 +25239,8 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 		if ($request['lahetetyt']) {
 			$karhu_lasku_select = "	karhukierros.pvm as lahetys_paiva,
 									karhukierros.viesti as saldovahvistus_viesti,
-									karhukierros.avoin_saldo_pvm,";
+									karhukierros.avoin_saldo_pvm,
+									karhukierros.tunnus as karhukierros_tunnus,";
 			$karhu_lasku_join = "	JOIN karhu_lasku
 									ON ( karhu_lasku.ltunnus = lasku.tunnus)
 									JOIN karhukierros
@@ -25295,41 +25296,91 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 		$laskut = array();
 		while ($lasku = mysql_fetch_assoc($result)) {
 			$ytunnus_temp = $lasku['ytunnus'];
-			if (!isset($laskut[$lasku['ytunnus']]['avoin_saldo_summa'])) {
-				$laskut[$lasku['ytunnus']]['avoin_saldo_summa'] = 0;
-			}
-			if (!isset($laskut[$lasku['ytunnus']]['asiakas_nimi'])) {
-				//asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
-				$laskut[$lasku['ytunnus']]['asiakas_nimi'] = $lasku['nimi'];
-				$laskut[$lasku['ytunnus']]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
-			}
+			$lahetys_paiva_temp = $lasku['lahetys_paiva'];
 
-			$asiakasnumerot = search_array_key_for_value_recursive($laskut[$lasku['ytunnus']]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
-			if (!is_array($laskut[$lasku['ytunnus']]['asiakasnumerot']) or empty($asiakasnumerot)) {
-				$laskut[$lasku['ytunnus']]['asiakasnumerot'][] = array(
-					'asiakasnumero'	 => $lasku['asiakasnumero'],
-					'asiakas_tunnus' => $lasku['asiakas_tunnus'],
-				);
-			}
 			if ($request['lahetetyt']) {
-				$laskut[$lasku['ytunnus']]['lahetys_paiva'] = $lasku['lahetys_paiva'];
-				$laskut[$lasku['ytunnus']]['saldovahvistus_viesti'] = $lasku['saldovahvistus_viesti'];
-				$laskut[$lasku['ytunnus']]['avoin_saldo_pvm'] = $lasku['avoin_saldo_pvm'];
+				keraa_saldovahvistusrivit_ktunnus_ytunnus($request, $laskut, $lasku);
 			}
-
-			$laskut[$lasku['ytunnus']]['lasku_tunnukset'][] = $lasku['tunnus'];
-			$laskut[$lasku['ytunnus']]['avoin_saldo_summa'] += $lasku['avoin_saldo'];
-			$laskut[$lasku['ytunnus']]['ytunnus'] = $lasku['ytunnus'];
-			$laskut[$lasku['ytunnus']]['valkoodi'] = $lasku['valkoodi'];
-			$laskut[$lasku['ytunnus']]['laskut'][] = $lasku;
+			else {
+				keraa_saldovahvistusrivit_ytunnus($request, $laskut, $lasku);
+			}
 		}
 
 		//Purkahko. Jos lasku_tunnukset on annettu, halutaan näyttää tietyn asiakkaan(ytunnus) saldovahvistus pdf:nä.
 		if (!empty($request['lasku_tunnukset'])) {
-			return $laskut[$ytunnus_temp];
+			if ($request['lahetetyt']) {
+				return $laskut[$lahetys_paiva_temp][$ytunnus_temp];
+			}
+			else {
+				return $laskut[$ytunnus_temp];
+			}
 		}
 
 		return $laskut;
+	}
+}
+
+if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
+	function keraa_saldovahvistusrivit_ytunnus($request, &$laskut, $lasku) {
+		if (!isset($laskut[$lasku['ytunnus']]['avoin_saldo_summa'])) {
+			$laskut[$lasku['ytunnus']]['avoin_saldo_summa'] = 0;
+		}
+		if (!isset($laskut[$lasku['ytunnus']]['asiakas_nimi'])) {
+			//asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
+			$laskut[$lasku['ytunnus']]['asiakas_nimi'] = $lasku['nimi'];
+			$laskut[$lasku['ytunnus']]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+		}
+
+		$asiakasnumerot = search_array_key_for_value_recursive($laskut[$lasku['ytunnus']]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
+		if (!is_array($laskut[$lasku['ytunnus']]['asiakasnumerot']) or empty($asiakasnumerot)) {
+			$laskut[$lasku['ytunnus']]['asiakasnumerot'][] = array(
+				'asiakasnumero'	 => $lasku['asiakasnumero'],
+				'asiakas_tunnus' => $lasku['asiakas_tunnus'],
+			);
+		}
+		if ($request['lahetetyt']) {
+			$laskut[$lasku['ytunnus']]['lahetys_paiva'] = $lasku['lahetys_paiva'];
+			$laskut[$lasku['ytunnus']]['saldovahvistus_viesti'] = $lasku['saldovahvistus_viesti'];
+			$laskut[$lasku['ytunnus']]['avoin_saldo_pvm'] = $lasku['avoin_saldo_pvm'];
+		}
+
+		$laskut[$lasku['ytunnus']]['lasku_tunnukset'][] = $lasku['tunnus'];
+		$laskut[$lasku['ytunnus']]['avoin_saldo_summa'] += $lasku['avoin_saldo'];
+		$laskut[$lasku['ytunnus']]['ytunnus'] = $lasku['ytunnus'];
+		$laskut[$lasku['ytunnus']]['valkoodi'] = $lasku['valkoodi'];
+		$laskut[$lasku['ytunnus']]['laskut'][] = $lasku;
+	}
+}
+
+if (!function_exists('keraa_saldovahvistusrivit_lahetyspaiva_ytunnus')) {
+	function keraa_saldovahvistusrivit_ktunnus_ytunnus($request, &$laskut, $lasku) {
+		if (!isset($laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['avoin_saldo_summa'])) {
+			$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['avoin_saldo_summa'] = 0;
+		}
+		if (!isset($laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['asiakas_nimi'])) {
+			//asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
+			$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['asiakas_nimi'] = $lasku['nimi'];
+			$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+		}
+
+		$asiakasnumerot = search_array_key_for_value_recursive($laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
+		if (!is_array($laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['asiakasnumerot']) or empty($asiakasnumerot)) {
+			$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['asiakasnumerot'][] = array(
+				'asiakasnumero'	 => $lasku['asiakasnumero'],
+				'asiakas_tunnus' => $lasku['asiakas_tunnus'],
+			);
+		}
+		if ($request['lahetetyt']) {
+			$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['lahetys_paiva'] = $lasku['lahetys_paiva'];
+			$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['saldovahvistus_viesti'] = $lasku['saldovahvistus_viesti'];
+			$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['avoin_saldo_pvm'] = $lasku['avoin_saldo_pvm'];
+		}
+
+		$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['lasku_tunnukset'][] = $lasku['tunnus'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['avoin_saldo_summa'] += $lasku['avoin_saldo'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['ytunnus'] = $lasku['ytunnus'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['valkoodi'] = $lasku['valkoodi'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['laskut'][] = $lasku;
 	}
 }
 

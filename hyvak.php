@@ -1387,9 +1387,11 @@
 		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
 		if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
 
-			echo "<br><table>";
-			echo "<tr><th colspan='3'>".t("Selite tiliöinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
-			echo "</table>";
+			if ($kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
+				echo "<br><table>";
+				echo "<tr><th colspan='3'>".t("Selite tiliöinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
+				echo "</table>";
+			}
 
 			// Tositteen tiliöintirivit...
 			require ("inc/tiliointirivit.inc");

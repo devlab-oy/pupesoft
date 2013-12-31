@@ -10872,6 +10872,10 @@ if (!function_exists("hae_yhtion_parametrit")) {
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
 
+				if (trim($yhtion_toimipaikkarow['postittaja_email']) == '') {
+					$yhtion_toimipaikkarow['postittaja_email'] = $yhtion_parametritrow['postittaja_email'];
+				}
+
 				// lisätään kaikki yhtiorow arrayseen
 				foreach ($yhtion_toimipaikkarow as $parametrit_nimi => $parametrit_arvo) {
 					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;

@@ -101,9 +101,6 @@ function hae_tyomaaraykset($request) {
 				JOIN tyomaarays
 				ON ( tyomaarays.yhtio = lasku.yhtio
 					AND tyomaarays.otunnus = lasku.tunnus )
-				JOIN laskun_lisatiedot
-				ON ( laskun_lisatiedot.yhtio = lasku.yhtio
-					AND laskun_lisatiedot.otunnus = lasku.tunnus )
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
 					AND tilausrivi.otunnus = lasku.tunnus

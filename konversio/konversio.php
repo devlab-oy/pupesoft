@@ -177,23 +177,23 @@ if ($request['action'] == 'aja_konversio') {
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 	$query_array = array(
-		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
-		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tilausrivi WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tilausrivin_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tiliointi WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
+//		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
+//		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'" AND otunnus != "-1"',
+		'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
+		'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
+		'DELETE FROM tilausrivi WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
+		'DELETE FROM tilausrivin_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
+		'DELETE FROM tiliointi WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
 	);
 	foreach ($query_array as $query) {
 		pupe_query($query);
@@ -275,7 +275,7 @@ function luo_kaato_tiedot() {
 			('{$kukarow['yhtio']}', 'kaato-tuote', 'Kaato-tuote', 0, 80, '', '', '', NULL, NULL, '', '', '', '', '', '', 0.000000, 0, 0.000000, 0.000000, '0000-00-00', '', '', NULL, '', '', '', '', '', '', '', 0, '', '', '', '', '', '', '', '', 0, 0, 0, 'import', '2013-12-16 15:15:21', '0000-00-00 00:00:00', '', '', '0000-00-00', '0000-00-00', '0000-00-00', '0000-00-00', 0.000000, 0.000000, 0.00, 0.00, 0.00, '', '', 0.00, 0, 0.00, 0.00, '', '', '', '', 0.00, '', 0.0000, 0.0000, 0.0000, 0.0000, '', '', 0.000, '', '', '', '', 0, '', '', 0.00, 0, 0, 0, -1);",
 		"	INSERT INTO `laite` (`yhtio`, `tuoteno`, `sarjanro`, `valm_pvm`, `oma_numero`, `omistaja`, `paikka`, `sijainti`, `tila`, `koodi`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`, `tunnus`)
 			VALUES
-			('{$kukarow['yhtio']}', 'kaato-tuoteno', '', '0000-00-00', '', NULL, 0, '2 krs', 'N', 28130, 'import', '2013-12-16 15:00:34', NULL, NULL, -1);",
+			('{$kukarow['yhtio']}', 'kaato-tuoteno', '', '0000-00-00', '', 'kaato-omistaja', -1, '2 krs', 'N', 28130, 'import', '2013-12-16 15:00:34', NULL, NULL, -1);",
 		"	INSERT INTO `asiakas` (`yhtio`, `laji`, `tila`, `ytunnus`, `ovttunnus`, `nimi`, `nimitark`, `osoite`, `postino`, `postitp`, `kunta`, `laani`, `maa`, `kansalaisuus`, `tyonantaja`, `ammatti`, `email`, `lasku_email`, `puhelin`, `gsm`, `tyopuhelin`, `fax`, `toim_ovttunnus`, `toim_nimi`, `toim_nimitark`, `toim_osoite`, `toim_postino`, `toim_postitp`, `toim_maa`, `kolm_ovttunnus`, `kolm_nimi`, `kolm_nimitark`, `kolm_osoite`, `kolm_postino`, `kolm_postitp`, `kolm_maa`, `laskutus_nimi`, `laskutus_nimitark`, `laskutus_osoite`, `laskutus_postino`, `laskutus_postitp`, `laskutus_maa`, `maksukehotuksen_osoitetiedot`, `konserni`, `asiakasnro`, `piiri`, `ryhma`, `osasto`, `verkkotunnus`, `kieli`, `chn`, `konserniyhtio`, `fakta`, `sisviesti1`, `myynti_kommentti1`, `kuljetusohje`, `selaus`, `alv`, `valkoodi`, `maksuehto`, `toimitustapa`, `rahtivapaa`, `rahtivapaa_alarajasumma`, `kuljetusvakuutus_tyyppi`, `toimitusehto`, `tilausvahvistus`, `tilausvahvistus_jttoimituksista`, `jt_toimitusaika_email_vahvistus`, `toimitusvahvistus`, `kerayspoikkeama`, `keraysvahvistus_lahetys`, `keraysvahvistus_email`, `kerayserat`, `lahetetyyppi`, `lahetteen_jarjestys`, `lahetteen_jarjestys_suunta`, `laskutyyppi`, `laskutusvkopv`, `maksusopimus_toimitus`, `laskun_jarjestys`, `laskun_jarjestys_suunta`, `extranet_tilaus_varaa_saldoa`, `vienti`, `ketjutus`, `luokka`, `jtkielto`, `jtrivit`, `myyjanro`, `erikoisale`, `myyntikielto`, `myynninseuranta`, `luottoraja`, `luottovakuutettu`, `kuluprosentti`, `tuntihinta`, `tuntikerroin`, `hintakerroin`, `pientarvikelisa`, `laskunsummapyoristys`, `laskutuslisa`, `panttitili`, `tilino`, `tilino_eu`, `tilino_ei_eu`, `tilino_kaanteinen`, `tilino_marginaali`, `tilino_osto_marginaali`, `tilino_triang`, `kustannuspaikka`, `kohde`, `projekti`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`, `flag_1`, `flag_2`, `flag_3`, `flag_4`, `maa_maara`, `sisamaan_kuljetus`, `sisamaan_kuljetus_kansallisuus`, `sisamaan_kuljetusmuoto`, `kontti`, `aktiivinen_kuljetus`, `aktiivinen_kuljetus_kansallisuus`, `kauppatapahtuman_luonne`, `kuljetusmuoto`, `poistumistoimipaikka_koodi`, `tunnus`)
 			VALUES
 			('{$kukarow['yhtio']}', '', '', 'Kaato-asiakas', '', 'Kaato-asiakas', '', '', '', '', '', '', 'FI', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '2306', '', '', '', '', '', '', '', NULL, '', '', '', '', 0.00, '', 0, 'Nouto', '', 0.00, '', '', NULL, '', '', '', 0, '', '', '', '', '', '', 0, 0, '', '', '', '', '', '', '', '', 0, 0, 0.00, '', '', 0.00, '', 0.000, 0.00, 0.00, 0.00, 0.00, '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 'import', '2013-12-16 14:57:36', '0000-00-00 00:00:00', '', '', '', '', '', '', '', '', 0, 0, '', '', 0, 0, '', -1);",

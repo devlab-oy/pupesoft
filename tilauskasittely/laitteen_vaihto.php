@@ -203,32 +203,6 @@ function liita_huoltosykli_laitteeseen($laite_tunnus, $huoltosykli) {
 	pupe_query($query);
 }
 
-function aseta_tyomaarays_var($tilausrivi_tunnus, $var) {
-	global $kukarow, $yhtiorow;
-
-	$query = "	UPDATE tilausrivi
-				SET var = '{$var}'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$tilausrivi_tunnus}'";
-	pupe_query($query);
-}
-
-function aseta_tyomaarays_status($tilausrivi_tunnus, $status) {
-	global $kukarow, $yhtiorow;
-
-	$query = "	UPDATE tyomaarays
-				JOIN lasku
-				ON ( lasku.yhtio = tyomaarays.yhtio
-					AND lasku.tunnus = tyomaarays.otunnus )
-				JOIN tilausrivi
-				ON ( tilausrivi.yhtio = lasku.yhtio
-					AND tilausrivi.otunnus = lasku.tunnus
-					AND tilausrivi.tunnus = '{$tilausrivi_tunnus}')
-				SET tyomaarays.tyostatus = '{$status}'
-				WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'";
-	pupe_query($query);
-}
-
 function aseta_uuden_tyomaarays_rivin_kommentti($tilausrivi_tunnus, $kommentti) {
 	global $kukarow, $yhtiorow;
 

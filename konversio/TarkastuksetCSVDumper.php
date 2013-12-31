@@ -10,6 +10,8 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	protected $unique_values = array();
 	protected $products = array();
 	protected $laitteet = array();
+	private $kaato_tilausrivi = array();
+	private $kaato_tilausrivin_lisatiedot = array();
 
 	public function __construct($kukarow, $filepath) {
 		parent::__construct($kukarow);
@@ -41,7 +43,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setColumnCount(26);
 		$this->setProggressBar(true);
 
-		$this->splitFile('/tmp/konversio/tarkastukset/TARKASTUKSET.csv');
+//		$this->splitFile('/tmp/konversio/tarkastukset/TARKASTUKSET.csv');
 	}
 
 	protected function konvertoi_rivit() {
@@ -199,7 +201,22 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 			//poikkeukset pitää merkata historiaan.
 			if (!empty($rivi['poikkeus'])) {
+				$tekematon_tilausrivi = $this->hae_tyomaarayksen_tilausrivi($tyomaarays_tunnus);
+				$kaato_tilausrivi = $this->hae_kaato_tilausrivi();
+				$kaato_tilausrivin_lisatiedot = $this->hae_kaato_tilausrivin_lisatiedot();
 
+				aseta_tyomaarays_var($tekematon_tilausrivi['tunnus'], 'P');
+				aseta_tyomaarays_status($tekematon_tilausrivi['tunnus'], 'V');
+
+				$kaato_tilausrivi['kommentti'] = $rivi['kommentti'];
+				$kaato_tilausrivi['otunnus'] = $tyomaarays_tunnus;
+
+				$kaato_tilausrivin_lisatiedot['tilausrivilinkki'] = $tekematon_tilausrivi['tunnus'];
+				$kaato_tilausrivin_lisatiedot['vanha_otunnus'] = $tyomaarays_tunnus;
+				$kaato_tilausrivin_lisatiedot['asiakkaan_positio'] = $tekematon_tilausrivi['asiakkaan_positio'];
+
+				$kaato_tilausrivin_lisatiedot['tilausrivitunnus'] = $this->tallenna_poikkeus_rivi($kaato_tilausrivi, false);
+				$this->tallenna_poikkeus_rivi($kaato_tilausrivin_lisatiedot, true);
 			}
 
 			if (!empty($rivi['kommentti'])) {
@@ -297,6 +314,81 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					WHERE yhtio = '{$this->kukarow['yhtio']}'
 					AND otunnus = '{$tunnus}'";
 		pupe_query($query);
+	}
+
+	private function hae_tyomaarayksen_tilausrivi($tyomaarays_tunnus) {
+		//Työmääräyksien generointi vaiheessa tiedetään, että yhdellä työmääräyksellä voi olla vian yksi tilausrivi
+		$query = "	SELECT tilausrivi.*,
+					tilausrivin_lisatiedot.asiakkaan_positio
+					FROM tilausrivi
+					JOIN tilausrivin_lisatiedot
+					ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+						AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+					WHERE tilausrivi.yhtio = '{$this->kukarow['yhtio']}'
+					AND tilausrivi.var != 'P'
+					AND tilausrivi.otunnus = '{$tyomaarays_tunnus}'";
+		$result = pupe_query($query);
+
+		$tilausrivi = mysql_fetch_assoc($result);
+
+		return $tilausrivi;
+	}
+
+	private function hae_kaato_tilausrivi() {
+		if (!empty($this->kaato_tilausrivi)) {
+			return $this->kaato_tilausrivi;
+		}
+
+		$query = "	SELECT tilausrivi.*
+					FROM tilausrivi
+					WHERE tilausrivi.yhtio = '{$this->kukarow['yhtio']}'
+					AND tilausrivi.tunnus = '-1'";
+		$result = pupe_query($query);
+
+		$kaato_tilausrivi = mysql_fetch_assoc($result);
+
+		$this->kaato_tilausrivi = $kaato_tilausrivi;
+
+		return $this->kaato_tilausrivi;
+	}
+
+	private function hae_kaato_tilausrivin_lisatiedot() {
+		if (!empty($this->kaato_tilausrivin_lisatiedot)) {
+			return $this->kaato_tilausrivin_lisatiedot;
+		}
+
+		$query = "	SELECT tilausrivin_lisatiedot.*
+					FROM tilausrivin_lisatiedot
+					WHERE tilausrivin_lisatiedot.yhtio = '{$this->kukarow['yhtio']}'
+					AND tilausrivin_lisatiedot.tunnus = '-1'";
+		$result = pupe_query($query);
+
+		$kaato_tilausrivi = mysql_fetch_assoc($result);
+
+		$this->kaato_tilausrivin_lisatiedot = $kaato_tilausrivi;
+
+		return $this->kaato_tilausrivin_lisatiedot;
+	}
+
+	private function tallenna_poikkeus_rivi($rivi, $onko_lisatieto_rivi = false) {
+		unset($rivi['laatija']);
+		unset($rivi['luontiaika']);
+		unset($rivi['laadittu']);
+		unset($rivi['tunnus']);
+
+		$taulu = 'tilausrivi';
+		$laadittu = 'laadittu';
+		if ($onko_lisatieto_rivi) {
+			$taulu = 'tilausrivin_lisatiedot';
+			$laadittu = 'luontiaika';
+		}
+
+		$query = "	INSERT INTO
+					{$taulu} (".implode(", ", array_keys($rivi)).", {$laadittu}, laatija)
+					VALUES('".implode("', '", array_values($rivi))."', now(), 'import')";
+		pupe_query($query);
+
+		return mysql_insert_id();
 	}
 
 	private function splitFile($filepath) {

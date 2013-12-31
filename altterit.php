@@ -28,20 +28,30 @@
 
 		    $type = $fields["Type"];
 		    $column_name = $fields["Field"];
+			$column_default = $fields["Default"];
 
 			$default = "";
-		    $default = stripos($type, "char")    !== FALSE ? "not null default ''" : $default;
-		    $default = stripos($type, "decimal") !== FALSE ? "not null default 0.0" : $default;
-		    $default = stripos($type, "float")   !== FALSE ? "not null default 0.0" : $default;
-		    $default = stripos($type, "int")     !== FALSE ? "not null default 0" : $default;
-		    $default = stripos($type, "date")    !== FALSE ? "not null default 0" : $default;
-		    $default = stripos($type, "time")    !== FALSE ? "not null default 0" : $default;
-		    $default = stripos($type, "text")    !== FALSE ? "null default null" : $default;
-		    $default = stripos($type, "blob")    !== FALSE ? "null default null" : $default;
+
+			if ($tables[0] == "taso" and $column_name == "taso") {
+				$default = " CHARACTER SET latin1 COLLATE latin1_bin NOT NULL default ''";
+			}
+			elseif ($column_default != "" and $column_default != "0" and $column_default != "0000-00-00 00:00:00" and $column_default != "0000-00-00" and $column_default != "00:00:00") {
+				$default = (!is_numeric($column_default) and $column_default != "CURRENT_TIMESTAMP") ? " default '".$column_default."'" : "default ".$column_default;
+			}
+			else {
+				$default = stripos($type, "char")    !== FALSE ? "not null default ''" : $default;
+		    	$default = stripos($type, "decimal") !== FALSE ? "not null default 0.0" : $default;
+		    	$default = stripos($type, "float")   !== FALSE ? "not null default 0.0" : $default;
+		    	$default = stripos($type, "int")     !== FALSE ? "not null default 0" : $default;
+		    	$default = stripos($type, "date")    !== FALSE ? "not null default 0" : $default;
+		    	$default = stripos($type, "time")    !== FALSE ? "not null default 0" : $default;
+		    	$default = stripos($type, "text")    !== FALSE ? "null default null" : $default;
+		    	$default = stripos($type, "blob")    !== FALSE ? "null default null" : $default;
+			}
 
 			$default = $fields["Key"] == "PRI" ? "auto_increment" : $default;
 
-			if ($default != "") $sql .= "MODIFY COLUMN $column_name $type $default,\n";
+			if ($default != "") $sql .= " MODIFY COLUMN $column_name $type $default,\n";
 		}
 
 		$sql = substr($sql, 0, -2).";\n";

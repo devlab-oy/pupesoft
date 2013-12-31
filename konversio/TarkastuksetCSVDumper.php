@@ -129,9 +129,11 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					$tehtava_huolto = $tehtava_huolto[0];
 
 					$muut_huollot = array();
-					foreach ($huoltosyklit as $huoltosykli) {
-						if ($huoltosykli['huoltosykli_tunnus'] != $tehtava_huolto['huoltosykli_tunnus']) {
-							$muut_huollot[] = $huoltosykli;
+					if (!empty($huoltosyklit)) {
+						foreach ($huoltosyklit as $huoltosykli) {
+							if ($huoltosykli['huoltosykli_tunnus'] != $tehtava_huolto['huoltosykli_tunnus']) {
+								$muut_huollot[] = $huoltosykli;
+							}
 						}
 					}
 

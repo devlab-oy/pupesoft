@@ -251,9 +251,9 @@
 					$query  = "	SELECT tunnus
 								FROM varastopaikat
 								WHERE yhtio	= '$kukarow[yhtio]'
-								and tunnus	= '$varasto'
-								and alkuhyllyalue <= '$t1[$tun]'
-								and loppuhyllyalue >= '$t1[$tun]'";
+								AND tunnus	= '$varasto'
+								AND concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper('$t1[$tun]'), 5, '0'),lpad(upper('$t2[$tun]'), 5, '0'))
+								AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$t1[$tun]'), 5, '0'),lpad(upper('$t2[$tun]'), 5, '0'))";
 					$vares = pupe_query($query);
 
 					if (mysql_num_rows($vares) == 1) {

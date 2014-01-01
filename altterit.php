@@ -8,7 +8,7 @@
 	require('inc/connect.inc');
 	require('inc/functions.inc');
 
-	$hname 		= gethostname();
+	$hname 		= php_uname('n');
 	$timeparts	= explode(" ",microtime());
 	$starttime	= $timeparts[1].substr($timeparts[0],1);
 

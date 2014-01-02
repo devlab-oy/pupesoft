@@ -15950,7 +15950,7 @@ if (!function_exists("splittaa_tilaus")) {
 
 				switch ($fieldname) {
 					case "kate_korjattu":
-						$values .= ", NULL";
+						$values .= ", 0";
 						break;
 					default:
 						$values .= ", '".$laskusplitrow[$fieldname]."'";

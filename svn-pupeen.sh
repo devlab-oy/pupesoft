@@ -69,7 +69,7 @@ else
 	rm -f /tmp/_mysqlkuvays.tmp
 fi
 
-if [[ ! -z "${JATKETAAN}" && "${JATKETAAN}" = "auto" ]]; then
+if [[ ! -z "${JATKETAAN}" && ("${JATKETAAN}" = "auto" || "${JATKETAAN}" = "autopupe") ]]; then
 	jatketaanko="k"
 else
 	echo

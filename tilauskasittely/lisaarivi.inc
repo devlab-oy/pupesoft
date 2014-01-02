@@ -37,7 +37,7 @@
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 
 	// debuggia varten, laita 1 jos haluut messuja
-	$lisaarivi_debug = 0;
+	$lisaarivi_debug = 1;
 
 	if (!isset($rivitunnus)) $rivitunnus = 0;
 	else $rivitunnus = (int) $rivitunnus;
@@ -559,7 +559,7 @@
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
 		// Etsit‰‰n korvaavia tuotteita
-		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA" and $laskurow['tilaustyyppi'] != '9') {
+		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA" and $laskurow['tilaustyyppi'] != '9' and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W'))) {
 			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myyd‰‰n, vastaavia ei
 			$krkaikkimyytavissa	= 0;
 
@@ -646,7 +646,7 @@
 				$korvaavat_tuotteet[$kindeksi]["myytavissa"] = $krmyytavissa;
 				$krkaikkimyytavissa += $krmyytavissa;
 			}
-
+			
 			// Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰
 			if ($korvaavat_kiellot == "KORVAAVAT" and $krkaikkimyytavissa < $kpl) {
 				// Skipataan kaikki korvaavat
@@ -1260,7 +1260,7 @@
 
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
 		if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($kko_laji == "" and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta) {
-
+		
 			if ($lisaarivi_debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
 
 			// nyt meill‰ on $myy_ arrayperheess‰ kaikki tuotteet ja varastopaikat jolta voidaan myyd‰ jotain..
@@ -2008,7 +2008,7 @@
 			$var = $puu_var[$i];
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS')))) {
+			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W'))) {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -2024,7 +2024,7 @@
 				}
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS')))) {
+			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W'))) {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
@@ -2174,13 +2174,13 @@
 							)
 						) {
 
-							if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('X', 'Y'))) {
+							if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('X', 'Y', 'H'))) {
 								$var 		 		= "T";
 								$toimittajan_tunnus	= $krow['liitostunnus'];
 								$paikka		 		= "";
 							}
 
-							if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('U', 'V'))) {
+							if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('U', 'V', 'W'))) {
 								$var 		 		= "U";
 								$toimittajan_tunnus	= $krow['liitostunnus'];
 								$paikka		 		= "";
@@ -2202,6 +2202,13 @@
 						}
 						$toimittajan_tunnus	= '';
 						$paikka		 		= '';
+					}
+					// Jos tehtaan saldo riitt‰‰ niin ei merkata puutteeksi vaan esivalitaan paikka
+					if (in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W')) and $krow['tehdas_saldo'] >= $kpl) {
+						echo "MENTIIN TƒNNE auto: {$yhtiorow['tee_automaattinen_osto_myyntitilaukselta']}";
+						$toimittajan_tunnus	= $krow['liitostunnus'];
+						$var = "T";
+
 					}
 				}
 			}

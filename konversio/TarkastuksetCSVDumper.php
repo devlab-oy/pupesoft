@@ -99,7 +99,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 			if ($key == 'laite') {
 				$laite = $this->laitteet[$rivi[$key]];
-				//$laite = $this->hae_laite_koodilla($rivi[$key]);
 
 				if (isset($laite['laite_tunnus']) and is_numeric($laite['laite_tunnus'])) {
 					$rivi[$key] = $laite['laite_tunnus'];
@@ -121,7 +120,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 				else {
 					//loytyyko_tuote metodi populoi products arrayta
 					$rivi['toimenpide_tuotteen_tyyppi'] = $this->products[$rivi[$key]]['selite'];
-					//HUOM tarvitseeko hae_huoltosykli $rivi['toimenpide_tuotteen_tyyppi'] ??
 
 					$huoltosyklit = $this->hae_huoltosyklit($rivi['laite']);
 

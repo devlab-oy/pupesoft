@@ -174,7 +174,13 @@ class LaiteCSVDumper extends CSVDumper {
 					luontiaika = NOW()";
 		pupe_query($query);
 
-		$query = '	INSERT INTO tuotteen_avainsanat
+		$query = "	SELECT *
+					FROM tuotteen_avainsanat
+					WHERE tuoteno = '{$tuoteno}'
+					AND selite = '".strtolower($tyyppi)."'";
+		$result = pupe_query($query);
+		if (mysql_num_rows($result) == 0) {
+			$query = '	INSERT INTO tuotteen_avainsanat
 						(
 							yhtio,
 							tuoteno,
@@ -194,9 +200,16 @@ class LaiteCSVDumper extends CSVDumper {
 							"import",
 							NOW()
 						)';
-		pupe_query($query);
+			pupe_query($query);
+		}
 
-		$query = '	INSERT INTO tuotteen_avainsanat
+		$query = "	SELECT *
+					FROM tuotteen_avainsanat
+					WHERE tuoteno = '{$tuoteno}'
+					AND selite = '{$koko}'";
+		$result = pupe_query($query);
+		if (mysql_num_rows($result) == 0) {
+			$query = '	INSERT INTO tuotteen_avainsanat
 						(
 							yhtio,
 							tuoteno,
@@ -217,6 +230,8 @@ class LaiteCSVDumper extends CSVDumper {
 							NOW()
 						)';
 		pupe_query($query);
+		}
+		
 	}
 
 	private function hae_paikka_tunnus($paikan_nimi, $kohde_nimi, $asiakas_nimi) {
@@ -290,7 +305,7 @@ class LaiteCSVDumper extends CSVDumper {
 			$laitteiden_paikat[] = $laitteen_paikka;
 		}
 
-		$kpl = count($paikat) - count($laitteiden_paikat);;
+		$kpl = count($paikat) - count($laitteiden_paikat);
 
 		echo "{$kpl} paikkaa ilman laitetta!!!!";
 	}

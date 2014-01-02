@@ -230,12 +230,12 @@ class HuoltosykliCSVDumper extends CSVDumper {
 							luontiaika = NOW()";
 			}
 			else {
-				//JOS ONGELMIA LAITETAAN ULOS
+				//JOS ONGELMIA LAITETAAN SISÄLLE
 				$query = "	INSERT INTO huoltosyklit_laitteet
 							SET yhtio = '{$this->kukarow['yhtio']}',
-							huoltosykli_tunnus = '{$huoltosykli_tunnus_ulkona}',
+							huoltosykli_tunnus = '{$huoltosykli_tunnus_sisalla}',
 							laite_tunnus = '{$laite['tunnus']}',
-							huoltovali = '{$huoltosykli_huoltovali_ulkona}',
+							huoltovali = '{$huoltosykli_huoltovali_sisalla}',
 							pakollisuus = '1',
 							laatija = 'import',
 							luontiaika = NOW()";
@@ -477,6 +477,16 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		while($toimenpide_tuote = mysql_fetch_assoc($result)) {
 			echo $toimenpide_tuote['tuoteno'].' - '.$toimenpide_tuote['nimitys'].'<br/>';
 		}
+
+		$query = "	SELECT tuoteno, laji, selite, COUNT(*) AS kpl
+					FROM   tuotteen_avainsanat
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					GROUP  BY tuoteno, laji,selite
+					HAVING kpl != 1
+					ORDER  BY kpl DESC";
+		$result = pupe_query($query);
+
+		echo mysql_num_rows($result)." tuotteella on avainsana ongelma";
 	}
 
 }

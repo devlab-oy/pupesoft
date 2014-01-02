@@ -173,21 +173,24 @@ if ($request['action'] == 'aja_konversio') {
 
 		$dumper = new TuoteryhmaCSVDumper($request['kukarow']);
 		$dumper->aja();
+
+		$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
+		$dumper->aja();
 	}
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 	$query_array = array(
-//		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
-//		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
-//		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM asiakas WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM yhteyshenkilo WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tuote WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM kohde WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM paikka WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM laite WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM asiakasalennus WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tuotteen_avainsanat WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
+		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'" AND otunnus != "-1"',
 		'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
 		'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',

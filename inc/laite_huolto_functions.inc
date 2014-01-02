@@ -340,7 +340,9 @@ function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huol
 	}
 
 	$query = "	UPDATE huoltosyklit_laitteet
-				SET {$huoltosyklit_laitteet_update}
+				SET {$huoltosyklit_laitteet_update},
+				muutospvm = NOW(),
+				muuttaja = '{$kukarow['kuka']}'
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND laite_tunnus = '{$laite_tunnus}'
 				AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";

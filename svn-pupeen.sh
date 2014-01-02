@@ -44,8 +44,13 @@ else
 		fi
 	done < "/tmp/_mysqlkuvaus.tmp"
 
-	if [[ ! -z "${JATKETAAN}" && "${JATKETAAN}" = "auto" ]]; then
-		jatketaanko="k"
+	if [[ ! -z "${JATKETAAN}" && ("${JATKETAAN}" = "auto" || "${JATKETAAN}" = "autopupe") ]]; then
+
+		if [[ "${JATKETAAN}" = "autopupe" ]]; then
+			jatketaanko="e"
+		else
+			jatketaanko="k"
+		fi
 	else
 		echo
 		echo -n "${white}Tehdäänkö tietokantamuutokset (k/e)? ${normal}"
@@ -71,6 +76,7 @@ fi
 
 if [[ ! -z "${JATKETAAN}" && ("${JATKETAAN}" = "auto" || "${JATKETAAN}" = "autopupe") ]]; then
 	jatketaanko="k"
+	echo
 else
 	echo
 	echo

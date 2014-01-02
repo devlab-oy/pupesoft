@@ -15201,7 +15201,7 @@ if (!function_exists("kopioi_tilausrivi")) {
 						}
 						break;
 					case 'kate_korjattu':
-						$rvalues .= "NULL,";
+						$rvalues .= "0,";
 						break;
 					case 'poikkeava_tulliprosentti':
 					case 'vahvistettu_maara':
@@ -16025,7 +16025,7 @@ if (!function_exists("splittaa_tilaus")) {
 								$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
 								break;
 							case 'kate_korjattu':
-								$values .= ", NULL";
+								$values .= ", 0";
 								break;
 							default:
 								$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
@@ -16109,7 +16109,7 @@ if (!function_exists("splittaa_tilaus")) {
 										$values .= ", {$uusitunnus_tilausrivi}";
 										break;
 									case 'kate_korjattu':
-										$values .= ", NULL";
+										$values .= ", 0";
 										break;
 									default:
 										$values .= ", '{$lapsirow[$fieldname]}'";
@@ -24245,7 +24245,7 @@ if (!function_exists('paivita_ohjausmerkki')) {
 						LIMIT 1";
 			$ohjausmerkki_check_res = pupe_query($query);
 		}
-		
+
 		$ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
 
 		if ($ohjausmerkki_check_row['tarkenne'] != "") {

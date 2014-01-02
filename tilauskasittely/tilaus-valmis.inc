@@ -1080,7 +1080,7 @@ else {
 									$values .= ", 1";
 									break;
 								case 'kate_korjattu':
-									$values .= ", NULL";
+									$values .= ", 0";
 									break;
 								default:
 									$values .= ", '{$splitrow[$fieldname]}'";
@@ -1157,7 +1157,7 @@ else {
 											$values .= ", {$split_tilausrivin_tunnus}";
 											break;
 										case 'kate_korjattu':
-											$values .= ", NULL";
+											$values .= ", 0";
 											break;
 										default:
 											$values .= ", '{$lapsirow[$fieldname]}'";
@@ -1436,7 +1436,7 @@ else {
 								$values .= ", '$split_toimitustapa'";
 								break;
 							case 'kate_korjattu':
-								$values .= ", NULL";
+								$values .= ", 0";
 								break;
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";

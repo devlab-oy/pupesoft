@@ -1511,7 +1511,7 @@
 									$values .= ", '0000-00-00'";
 									break;
 								case 'kate_korjattu':
-									$values .= ", NULL";
+									$values .= ", 0";
 									break;
 								default:
 									$values .= ", '".$tilausrivirow[$fieldname]."'";

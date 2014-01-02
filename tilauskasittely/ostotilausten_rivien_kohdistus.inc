@@ -605,7 +605,7 @@ if ($tila == 'tee_siirto') {
 										$rvalues .= ", '$jaljelle_jaa'";
 										break;
 									case 'kate_korjattu':
-										$rvalues .= ", NULL";
+										$rvalues .= ", 0";
 										break;
 									default:
 										$rvalues .= ", '".$rivirow[$fieldname]."'";

@@ -54,7 +54,8 @@
 				$default = "CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP ";
 			}
 			elseif ($tables[0] == "taso" and $column_name == "taso") {
-				$default = "CHARACTER SET latin1 COLLATE latin1_bin NOT NULL default ''";
+				$null    = "CHARACTER SET latin1 COLLATE latin1_bin NOT NULL";
+				$default = "''";
 			}
 			elseif ($column_default != "null" and $column_default != "" and $column_default != "0" and $column_default != "0000-00-00 00:00:00" and $column_default != "0000-00-00" and $column_default != "00:00:00") {
 				$default = (!is_numeric($column_default) and $column_default != "CURRENT_TIMESTAMP") ? "'".$column_default."'" : $column_default;
@@ -65,15 +66,15 @@
 		    	$default = stripos($column_type, "float")   !== FALSE ? "0.0"  : $default;
 		    	$default = stripos($column_type, "int")     !== FALSE ? "0"    : $default;
 		    	$default = stripos($column_type, "date")    !== FALSE ? "0"    : $default;
-		    	$default = stripos($column_type, "time")    !== FALSE ? "0"    : $default;
 		    	$default = stripos($column_type, "text")    !== FALSE ? "null" : $default;
 		    	$default = stripos($column_type, "blob")    !== FALSE ? "null" : $default;
+				$default = $column_type == "timestamp"	? "'0000-00-00 00:00:00'"   : $default;
 				$default = $column_type == "datetime"	? "'0000-00-00 00:00:00'"   : $default;
 				$default = $column_type == "date"		? "'0000-00-00'"   : $default;
 				$default = $column_type == "time"		? "'00:00:00'"   : $default;
 			}
 
-			if (stripos($column_type, "text") !== FALSE or stripos($column_type, "text") !== FALSE) {
+			if (stripos($column_type, "text") !== FALSE or stripos($column_type, "blob") !== FALSE) {
 				$null = "null";
 			}
 
@@ -82,9 +83,6 @@
 			// Päivitetään vain jos on päivitettävää
 			if ($default != "" and ($column_null != $null or $column_default != str_replace("'", "", $default))) {
 				#echo "$tables[0]: $column_name $column_type $column_null default $column_default -->  MODIFY COLUMN $column_name $column_type $null default $default\n";
-			}
-
-			if ($default != "" and ($column_null != $null or $column_default != str_replace("'", "", $default))) {
 				$sql .= " MODIFY COLUMN $column_name $column_type $null default $default,\n";
 				$paivitetaanko = TRUE;
 			}

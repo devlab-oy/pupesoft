@@ -20,6 +20,11 @@ if (!isset($ppa)) {
 }
 if (!isset($kka)) {
 	$kka = date('m', strtotime('now - 1 month'));
+
+	//vuoden vaihde bugfix
+	if ($kka == 12) {
+		$vva = date('Y', strtotime('now - 1 year'));
+	}
 }
 if (!isset($vva)) {
 	$vva = date('Y');

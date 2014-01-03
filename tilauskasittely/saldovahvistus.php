@@ -5,10 +5,6 @@ $pupe_DataTables = "saldovahvistus";
 $useslave = 1;
 session_start();
 
-//Tällä pystyy tyhjentämään valitut laskut.
-//session_unset();
-//die();
-
 if (isset($_POST["tee"])) {
 	if ($_POST["tee"] == 'lataa_tiedosto') {
 		$lataa_tiedosto = 1;
@@ -36,21 +32,23 @@ if ($tee == 'lataa_tiedosto') {
 
 if ($ajax_request) {
 	if ($merkkaa_lahetettavaksi == '1') {
-		$lasku_tunnukset_key = implode('', $lasku_tunnukset);
-		if ($lisays == 'true') {
-			$saldovahvistusrivi = array(
-				'laskun_avoin_paiva'	 => $laskun_avoin_paiva,
-				'saldovahvistus_viesti'	 => $saldovahvistus_viesti,
-				'lasku_tunnukset'		 => $lasku_tunnukset,
-			);
-			lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
+		foreach ($saldovahvistus_rivit as $saldovahvistus_rivi) {
+			$lasku_tunnukset_key = implode('', $saldovahvistus_rivi['lasku_tunnukset']);
+			if ($lisays == 'true') {
+				$saldovahvistusrivi = array(
+					'laskun_avoin_paiva'	 => $saldovahvistus_rivi['laskun_avoin_paiva'],
+					'saldovahvistus_viesti'	 => $saldovahvistus_rivi['saldovahvistus_viesti'],
+					'lasku_tunnukset'		 => $saldovahvistus_rivi['lasku_tunnukset'],
+				);
+				lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
 
-			echo true;
-		}
-		else {
-			unset($_SESSION['valitut_laskut'][$lasku_tunnukset_key]);
+				echo true;
+			}
+			else {
+				unset($_SESSION['valitut_laskut'][$lasku_tunnukset_key]);
 
-			echo true;
+				echo true;
+			}
 		}
 	}
 
@@ -108,10 +106,12 @@ $request['ryhmittely_tyypit'] = array(
 
 $request['saldovahvistus_viestit'] = hae_saldovahvistus_viestit();
 
-echo_kayttoliittyma($request);
+if ($nayta_pdf != 1) {
+	echo_kayttoliittyma($request);
 
-echo "<br/>";
-echo "<br/>";
+	echo "<br/>";
+	echo "<br/>";
+}
 
 if (!empty($_SESSION['valitut_laskut'])) {
 	$lasku_tunnukset_temp = $request['lasku_tunnukset'];
@@ -168,6 +168,8 @@ else if ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldova
 	//unset, jotta käyttöliittymään tulisi rajausten mukaiset laskut.
 	unset($request['lasku_tunnukset']);
 
+	echo_kayttoliittyma($request);
+
 	$request['laskut'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
 	echo_saldovahvistukset($request);
 }
@@ -182,6 +184,9 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 		echo "<br/>";
 		echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostin lähettäminen epäonnistui').'</font>';
 	}
+}
+else if ($request['tee'] == 'poista_valinnat') {
+	session_unset();
 }
 ?>
 <style>
@@ -200,7 +205,7 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 	});
 
 	function bind_saldovahvistus_rivi_valinta_checkbox_click() {
-		$('.saldovahvistus_rivi_valinta').change(function() {
+		$('.saldovahvistus_rivi_valinta .saldovahvistus_rivi_valinta_valittu').change(function() {
 			var lisays;
 			if ($(this).is(':checked')) {
 				lisays = true;
@@ -212,10 +217,17 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 			var lasku_tunnukset = $(this).parent().parent().find('.nayta_pdf_td .lasku_tunnus').map(function() {
 				return $(this).val();
 			}).get();
-			var laskun_avoin_paiva = $(this).parent().parent().find('.laskun_avoin_paiva').val();
-			var saldovahvistus_viesti = $(this).parent().parent().find('.saldovahvistus_viesti').html();
 
-			tallenna_sessioon(lasku_tunnukset, lisays, laskun_avoin_paiva, saldovahvistus_viesti);
+			var saldovahvistus_rivit = [];
+
+			var saldovahvistus_rivi = {
+				lasku_tunnukset: lasku_tunnukset,
+				laskun_avoin_paiva: $(this).parent().parent().find('.laskun_avoin_paiva').val(),
+				saldovahvistus_viesti: $(this).parent().parent().find('.saldovahvistus_viesti').html()
+			};
+
+			saldovahvistus_rivit.push(saldovahvistus_rivi);
+			tallenna_sessioon(saldovahvistus_rivit, lisays);
 		});
 	}
 
@@ -233,19 +245,23 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 				$table.find('.saldovahvistus_rivi_valinta').removeAttr('checked');
 			}
 
+			var saldovahvistus_rivit = [];
 			$table.find('.saldovahvistus_rivi').each(function() {
 				var lasku_tunnukset = $(this).find('.nayta_pdf_td .lasku_tunnus').map(function() {
 					return $(this).val();
 				}).get();
-				var laskun_avoin_paiva = $(this).parent().parent().find('.laskun_avoin_paiva').val();
-				var saldovahvistus_viesti = $(this).parent().parent().find('.saldovahvistus_viesti').html();
-
-				tallenna_sessioon(lasku_tunnukset, lisays, laskun_avoin_paiva, saldovahvistus_viesti);
+				saldovahvistus_rivit.push({
+					lasku_tunnukset: lasku_tunnukset,
+					laskun_avoin_paiva: $(this).parent().parent().find('.laskun_avoin_paiva').val(),
+					saldovahvistus_viesti: $(this).parent().parent().find('.saldovahvistus_viesti').html()
+				});
 			});
+
+			tallenna_sessioon(saldovahvistus_rivit, lisays);
 		});
 	}
 
-	function tallenna_sessioon(lasku_tunnukset, lisays, laskun_avoin_paiva, saldovahvistus_viesti) {
+	function tallenna_sessioon(saldovahvistus_rivit, lisays) {
 		$.ajax({
 			async: true,
 			type: 'POST',
@@ -254,9 +270,7 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 				no_head: 'yes',
 				merkkaa_lahetettavaksi: 1,
 				lisays: lisays,
-				laskun_avoin_paiva: laskun_avoin_paiva,
-				saldovahvistus_viesti: saldovahvistus_viesti,
-				lasku_tunnukset: lasku_tunnukset
+				saldovahvistus_rivit: saldovahvistus_rivit
 			},
 			url: 'saldovahvistus.php'
 		}).done(function(data) {
@@ -265,6 +279,13 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 				console.log(data);
 			}
 		});
+	}
+
+	function tarkista(message) {
+		var ok = true;
+		ok = confirm(message);
+
+		return ok;
 	}
 </script>
 <?php
@@ -285,11 +306,9 @@ function lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistu
 function echo_saldovahvistukset($request) {
 	global $kukarow, $yhtiorow, $pupe_DataTables, $palvelin2;
 
-//	pupe_DataTables(array(array($pupe_DataTables, 6, 8, false, false, true)));
 //	echo "<table class='display'>";
 
 	pupe_DataTables(array(array($pupe_DataTables, 6, 8, false, false, true)));
-
 	echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
 	echo "<thead>";
@@ -320,19 +339,19 @@ function echo_saldovahvistukset($request) {
 
 	echo "<tbody>";
 
-	$kpl = count($request['valitut_laskut']);
+	$kpl = count($request['laskut']);
 	$i = 1;
 	$viimeinen = false;
-	foreach ($request['valitut_laskut'] as $lasku) {
+	foreach ($request['laskut'] as $lasku) {
 		if ($i == $kpl) {
 			$viimeinen = true;
 		}
-		echo_saldovahvistus_rivi($lasku, $request, true, $viimeinen);
+		echo_saldovahvistus_rivi($lasku, $request, false, $viimeinen);
 		$i++;
 	}
 
-	foreach ($request['laskut'] as $lasku) {
-		echo_saldovahvistus_rivi($lasku, $request, false);
+	foreach ($request['valitut_laskut'] as $lasku) {
+		echo_saldovahvistus_rivi($lasku, $request, true);
 	}
 
 	echo "</tbody>";
@@ -405,7 +424,13 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='checkbox' class='saldovahvistus_rivi_valinta' CHECKED />";
+	if ($valitut) {
+		$checkbox_class = "saldovahvistus_rivi_valinta_valittu";
+	}
+	else {
+		$checkbox_class = "saldovahvistus_rivi_valinta";
+	}
+	echo "<input type='checkbox' class='{$checkbox_class}' CHECKED />";
 	echo "</td>";
 
 	// .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi_valinta löytää lasku_tunnukset, jotka lähtee ajaxin mukana
@@ -511,6 +536,11 @@ function echo_kayttoliittyma($request) {
 
 	echo "<input type='submit' value='".t('Aja')."' />";
 
+	echo "</form>";
+
+	echo "<form method='POST' action=''>";
+	echo "<input type='hidden' name='tee' value='poista_valinnat' />";
+	echo "<input type='submit' value='".t('Poista kaikki valinnat')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
 	echo "</form>";
 }
 

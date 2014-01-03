@@ -25219,10 +25219,10 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 		$asiakas_join = "";
 		if (!$valitut) {
 			if ($request['ryhmittely_tyyppi'] == 'ytunnus' and $request['ryhmittely_arvo'] != '') {
-				$asiakas_join = "	AND asiakas.ytunnus LIKE '%{$request['ryhmittely_arvo']}%'";
+				$asiakas_join = "	AND asiakas.ytunnus = '{$request['ryhmittely_arvo']}'";
 			}
 			else if ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
-				$asiakas_join = "	AND asiakas.asiakasnro LIKE '%{$request['ryhmittely_arvo']}%'";
+				$asiakas_join = "	AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
 			}
 			else if ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
 				$asiakas_join = "	AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";

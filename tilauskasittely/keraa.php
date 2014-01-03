@@ -978,7 +978,7 @@
 													$values .= ", 'N'";
 													break;
 												case 'kate_korjattu':
-													$values .= ", NULL";
+													$values .= ", 0";
 													break;
 												default:
 													$values .= ", '".$laskusplitrow[$fieldname]."'";

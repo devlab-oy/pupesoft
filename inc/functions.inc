@@ -1429,7 +1429,7 @@ if (!function_exists("saldo_myytavissa")) {
 			// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 			if ((is_numeric($varasto) and $varasto > 0) or (!is_numeric($varasto) and $varasto != "")) {
 
-				if ($keraysvyohyke > 0) {
+				if (isset($keraysvyohyke) and $keraysvyohyke > 0) {
 					$kvjoini = " JOIN varaston_hyllypaikat AS vh ON (
 									vh.yhtio = tuotepaikat.yhtio
 									AND vh.hyllyalue = tuotepaikat.hyllyalue
@@ -10872,6 +10872,10 @@ if (!function_exists("hae_yhtion_parametrit")) {
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
 
+				if (trim($yhtion_toimipaikkarow['postittaja_email']) == '') {
+					$yhtion_toimipaikkarow['postittaja_email'] = $yhtion_parametritrow['postittaja_email'];
+				}
+
 				// lisätään kaikki yhtiorow arrayseen
 				foreach ($yhtion_toimipaikkarow as $parametrit_nimi => $parametrit_arvo) {
 					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
@@ -15197,7 +15201,7 @@ if (!function_exists("kopioi_tilausrivi")) {
 						}
 						break;
 					case 'kate_korjattu':
-						$rvalues .= "NULL,";
+						$rvalues .= "0,";
 						break;
 					case 'poikkeava_tulliprosentti':
 					case 'vahvistettu_maara':
@@ -15946,7 +15950,7 @@ if (!function_exists("splittaa_tilaus")) {
 
 				switch ($fieldname) {
 					case "kate_korjattu":
-						$values .= ", NULL";
+						$values .= ", 0";
 						break;
 					default:
 						$values .= ", '".$laskusplitrow[$fieldname]."'";
@@ -16021,7 +16025,7 @@ if (!function_exists("splittaa_tilaus")) {
 								$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
 								break;
 							case 'kate_korjattu':
-								$values .= ", NULL";
+								$values .= ", 0";
 								break;
 							default:
 								$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
@@ -16105,7 +16109,7 @@ if (!function_exists("splittaa_tilaus")) {
 										$values .= ", {$uusitunnus_tilausrivi}";
 										break;
 									case 'kate_korjattu':
-										$values .= ", NULL";
+										$values .= ", 0";
 										break;
 									default:
 										$values .= ", '{$lapsirow[$fieldname]}'";
@@ -23834,7 +23838,7 @@ if (!function_exists('hyllysiirto')) {
 						AND tunnus = '$mistavarasto'";
 			$mistavarasto_res = pupe_query($query);
 			$mistavarasto_row = mysql_fetch_assoc($mistavarasto_res);
-				
+
 			if ($mistavarasto_row['toimipaikka'] > 0) {
 				$query = "	SELECT kustp, kohde, projekti, tunnus
 							FROM yhtion_toimipaikat
@@ -23843,7 +23847,7 @@ if (!function_exists('hyllysiirto')) {
 				$mistatoimipaikka_res = pupe_query($query);
 				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
 			}
-				
+
 			if ($mistatoimipaikka_row['tunnus'] > 0) {
 				if ($mista_kustp == 0)    $mista_kustp    = $mistatoimipaikka_row['kustp'];
 				if ($mista_kohde == 0)    $mista_kohde    = $mistatoimipaikka_row['kohde'];
@@ -23862,7 +23866,7 @@ if (!function_exists('hyllysiirto')) {
 								AND tunnus = '$minnevarasto'";
 					$minnevarasto_res = pupe_query($query);
 					$minnevarasto_row = mysql_fetch_assoc($minnevarasto_res);
-					
+
 					if ($minnevarasto_row['toimipaikka'] > 0) {
 						$query = "	SELECT kustp, kohde, projekti
 									FROM yhtion_toimipaikat
@@ -23939,6 +23943,16 @@ if (!function_exists('hyllysiirto')) {
 						$laskuid = mysql_insert_id();
 					}
 
+					$query = "	SELECT toimi.tilino
+								FROM tuotteen_toimittajat
+								JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND toimi.tyyppi != 'P')
+								WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+								AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
+								ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+								LIMIT 1";
+					$result = pupe_query($query);
+					$toimirow = mysql_fetch_assoc($result);
+
 					// Mistä varasto
 					$query = "	INSERT into tiliointi set
 								yhtio    		= '$kukarow[yhtio]',
@@ -23974,6 +23988,45 @@ if (!function_exists('hyllysiirto')) {
 								laatija  		= '$kukarow[kuka]',
 								laadittu 		= now()";
 					$result = pupe_query($query);
+
+					// jos ostotili löytyy, tehdään sinne kirjaukset kanssa
+					if ($toimirow['tilino'] != '') {
+						// Mistä ostotili
+						$query = "	INSERT into tiliointi set
+									yhtio    		= '$kukarow[yhtio]',
+									ltunnus  		= '$laskuid',
+									tilino   		= '{$toimirow['tilino']}',
+									kustp    		= '{$mista_kustp}',
+									kohde	 		= '{$mista_kohde}',
+									projekti 		= '{$mista_projekti}',
+									tapvm    		= current_date,
+									summa    		= {$varastonmuutos_neg},
+									vero     		= 0,
+									lukko    		= '',
+									tapahtumatunnus = $mista_tapa_tunnus,
+									selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+									laatija  		= '$kukarow[kuka]',
+									laadittu 		= now()";
+						$result = pupe_query($query);
+
+						// Minne ostotili
+						$query = "	INSERT into tiliointi set
+									yhtio    		= '$kukarow[yhtio]',
+									ltunnus  		= '$laskuid',
+									tilino   		= '{$toimirow['tilino']}',
+									kustp    		= '{$minne_kustp}',
+									kohde	 		= '{$minne_kohde}',
+									projekti 		= '{$minne_projekti}',
+									tapvm    		= current_date,
+									summa    		= {$varastonmuutos},
+									vero     		= 0,
+									lukko    		= '',
+									tapahtumatunnus = $minne_tapa_tunnus,
+									selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+									laatija  		= '$kukarow[kuka]',
+									laadittu 		= now()";
+						$result = pupe_query($query);
+					}
 
 					// Minne varasto
 					$query = "	INSERT into tiliointi set
@@ -24094,7 +24147,7 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
 		$otunnukset = isset($params['otunnukset']) ? $params['otunnukset'] : '';
 		$kilotyht = isset($params['kilotyht']) ? $params['kilotyht'] : '';
 
-		if ($otunnukset == '' or $kilotyht == '') return false;
+		if ($otunnukset == '') return false;
 
 		// kotimaan myynti menee alatilaan D
 		$query = "UPDATE lasku SET alatila = 'D' WHERE tunnus IN ({$otunnukset}) AND vienti = '' AND yhtio = '{$kukarow['yhtio']}'";
@@ -24173,14 +24226,26 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
 if (!function_exists('paivita_ohjausmerkki')) {
 	function paivita_ohjausmerkki($laskurow) {
 		global $kukarow;
-
 		$query = "	SELECT tarkenne
 					FROM asiakkaan_avainsanat
 					WHERE yhtio 	 = '{$kukarow['yhtio']}'
 					AND laji 		 = 'OHJAUSMERKKI'
 					AND liitostunnus = '{$laskurow['liitostunnus']}'
-					AND avainsana 	 = '{$laskurow['toimitustapa']}'";
+					AND avainsana    = '{$laskurow['toimitustapa']}'
+					LIMIT 1";
 		$ohjausmerkki_check_res = pupe_query($query);
+
+		if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
+			$query = "	SELECT tarkenne
+						FROM asiakkaan_avainsanat
+						WHERE yhtio 	 = '{$kukarow['yhtio']}'
+						AND laji 		 = 'OHJAUSMERKKI'
+						AND liitostunnus = '{$laskurow['liitostunnus']}'
+						AND avainsana 	 = 'OLETUS'
+						LIMIT 1";
+			$ohjausmerkki_check_res = pupe_query($query);
+		}
+
 		$ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
 
 		if ($ohjausmerkki_check_row['tarkenne'] != "") {

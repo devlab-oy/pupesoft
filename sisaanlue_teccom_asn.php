@@ -39,7 +39,7 @@
 	$tiedosto_sisalto			= "";
 	$toimituspvm				= "";
 	$vastaanottaja				= "";
-	$_yhtion_toimipaikka		= "0";
+	$_yhtion_toimipaikka		= 0;
 
 	function loop_packet($xml_element, $parameters) {
 		global $kukarow;

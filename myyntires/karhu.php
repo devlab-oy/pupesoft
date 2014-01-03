@@ -605,13 +605,14 @@ if ($tee == "") {
 	echo "</tr>";
 
 	$apuqu = "	SELECT kuka, nimi, puhno, eposti, tunnus
-				from kuka
-				where yhtio = '$kukarow[yhtio]'
-				and nimi    != ''
-				and puhno   != ''
-				and eposti  != ''
-				and extranet = ''
-				order by nimi";
+				FROM kuka
+				WHERE yhtio    = '$kukarow[yhtio]'
+				AND aktiivinen = 1
+				AND nimi      != ''
+				AND puhno     != ''
+				AND eposti    != ''
+				AND extranet  = ''
+				ORDER BY nimi";
 	$meapu = pupe_query($apuqu);
 
 	echo "<tr><th>".t("Yhteyshenkilö")."</th>";
@@ -636,7 +637,7 @@ if ($tee == "") {
 				WHERE yhtio  = '{$kukarow['yhtio']}'
 				AND komento != 'edi'
 				ORDER BY kirjoitin";
-	$kires = mysql_query($query) or pupe_error($query);
+	$kires = pupe_query($query);
 
 	while ($kirow = mysql_fetch_assoc($kires)) {
 		if ($kirow['tunnus'] == $kukarow["kirjoitin"]) $select = ' selected';

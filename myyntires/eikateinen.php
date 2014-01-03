@@ -292,6 +292,10 @@ function tee_kirjanpito_muutokset($params) {
 			$summalisa = "summa";
 		}
 
+		if ($params['toim'] == 'KATEINEN' and $vanharow['summa'] < 0) {
+			$summalisa = $summalisa * -1;
+		}
+
 		$query = "	UPDATE tiliointi
 					SET summa 	= {$summalisa} * -1,
 					laatija 	= '{$kukarow['kuka']}',

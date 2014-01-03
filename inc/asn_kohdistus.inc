@@ -2,7 +2,7 @@
 
 	if (!function_exists("asn_kohdistus")) {
 		function asn_kohdistus($tavarantoimittajanumero = '') {
-			global $yhtiorow, $kukarow;
+			global $yhtiorow, $kukarow, $_yhtion_toimipaikka;
 
 			$php_cli = FALSE;
 

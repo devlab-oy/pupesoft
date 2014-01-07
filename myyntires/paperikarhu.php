@@ -173,6 +173,10 @@
 
 			// lisätään karhuviesti kirjeeseen
 			if ($sivu == 1) {
+				
+				//otsikko
+				$pdf->draw_text(30, $kala+30, t("Avoimet laskut", $kieli), $firstpage, $bold);
+
 				// tehdään riveistä max 90 merkkiä
 				$viesti = wordwrap($viesti, 90, "\n");
 
@@ -202,7 +206,11 @@
 			$pdf->draw_text(180, $kala, t("Laskun pvm", $kieli),									$firstpage, $pieni);
 			$pdf->draw_text(240, $kala, t("Eräpäivä", $kieli),										$firstpage, $pieni);
 			$pdf->draw_text(295, $kala, t("Myöhässä pv", $kieli),									$firstpage, $pieni);
-			$pdf->draw_text(455, $kala, t("Laskun summa", $kieli),									$firstpage, $pieni);
+			
+			$pdf->draw_text(390, $kala, t("Laskun summa", $kieli),									$firstpage, $pieni);
+			$pdf->draw_text(485, $kala, t("Korko", $kieli),											$firstpage, $pieni);
+			$pdf->draw_text(545, $kala, t("Yhteensä", $kieli),										$firstpage, $pieni);
+			
 
 			if ($yhtiorow["maksukehotus_kentat"] == "") {
 				$pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
@@ -225,7 +233,7 @@
 	}
 
 	if(!function_exists("rivi")) {
-		function rivi ($firstpage, $summa) {
+		function rivi ($firstpage, $summa, $korkosumma) {
 			global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro;
 
 			// siirrytäänkö uudelle sivulle?
@@ -261,6 +269,13 @@
 				$oikpos = $pdf->strlen($karhukertanro, $norm);
 				$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, $firstpage, $norm);
 			}
+			
+			$oikpos = $pdf->strlen($row["summa"], $norm);
+			$pdf->draw_text(455-$oikpos, $kala, $row["summa"],               $firstpage, $norm);
+			$oikpos = $pdf->strlen($row["korkosumma"], $norm);
+			$pdf->draw_text(505-$oikpos, $kala, $row["korkosumma"],           $firstpage, $norm);
+			$oikpos = $pdf->strlen(sprintf('%.2f', $row["summa"] + $row["korkosumma"]), $norm);
+			$pdf->draw_text(565-$oikpos, $kala, sprintf('%.2f', $row["summa"] + $row["korkosumma"]),  $firstpage, $norm);
 
 			$kala = $kala - 13;
 
@@ -666,7 +681,7 @@
 		}
 
 		$rivit[] = $row;
-		$summa = rivi($firstpage, $summa);
+		$summa = rivi($firstpage, $summa, $korkosumma);
 	}
 
 	// loppusumma

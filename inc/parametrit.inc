@@ -430,6 +430,17 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 		}
 
+		if ($phpnimi == 'kuukautisostot.php') {
+			if (isset($valitut)) {
+				if (isset($valitut["EIVIENTEJA"])) {
+					setcookie('valitut_EIVIENTEJA', $valitut["EIVIENTEJA"], time()+60*60*24*90, "/");
+				}
+				if (isset($valitut["EIASIAKKAANMYYNTEJA"])) {
+					setcookie('valitut_EIASIAKKAANMYYNTEJA', $valitut["EIASIAKKAANMYYNTEJA"], time()+60*60*24*90, "/");
+				}
+			}
+		}
+
 		if ($phpnimi == 'tilaus_myynti.php') {
 			if (isset($tilausrivi_alvillisuus)) {
 				setcookie('tilausrivi_alvillisuus', $tilausrivi_alvillisuus, time()+60*60*24*90, "/");

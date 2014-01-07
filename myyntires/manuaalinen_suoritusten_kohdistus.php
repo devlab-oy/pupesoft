@@ -1478,7 +1478,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 
 	$query = "	SELECT suoritus.summa,
 				suoritus.valkoodi valkoodi,
-				concat(viite, viesti) tieto,
+				concat(viite, ifnull(viesti,'')) tieto,
 				suoritus.tilino,
 				maksupvm,
 				kirjpvm,
@@ -2017,7 +2017,7 @@ if ($tila == '') {
 				min(asiakas.toim_osoite) toim_osoite,
 				min(asiakas.toim_postitp) toim_postitp,
 				count(suoritus.asiakas_tunnus) maara,
-				sum(if (suoritus.viite>0, 1,0)) viitteita
+				sum(if(suoritus.viite != '', 1, 0)) viitteita
 				FROM suoritus use index (yhtio_kohdpvm)
 				JOIN asiakas ON asiakas.yhtio=suoritus.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus
 				WHERE suoritus.yhtio = '$kukarow[yhtio]'

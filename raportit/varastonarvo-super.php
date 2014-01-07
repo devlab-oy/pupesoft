@@ -19,8 +19,8 @@
 
 	if (!$php_cli) {
 		require("../inc/parametrit.inc");
-		
-		ini_set("memory_limit", "2G");		
+
+		ini_set("memory_limit", "2G");
 	}
 	else {
 		require_once("../inc/functions.inc");
@@ -461,7 +461,7 @@
 				}
 			}
 
-			$tuote_lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+			if ($tuoterajaus != "") $tuote_lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
 		}
 
 		if (isset($status) and $status != '') {

@@ -4,11 +4,14 @@
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
+
 	ini_set("memory_limit", "5G");
 	ini_set('zlib.output_compression', 0);
 
 	require("../inc/parametrit.inc");
+
+	if (!isset($valitut["EIVIENTEJA"])) $valitut["EIVIENTEJA"] = isset($_COOKIE["valitut_EIVIENTEJA"]) ? $_COOKIE["valitut_EIVIENTEJA"] : $valitut["EIVIENTEJA"];
+	if (!isset($valitut["EIASIAKKAANMYYNTEJA"])) $valitut["EIASIAKKAANMYYNTEJA"] = isset($_COOKIE["valitut_EIASIAKKAANMYYNTEJA"]) ? $_COOKIE["valitut_EIASIAKKAANMYYNTEJA"] : $valitut["EIASIAKKAANMYYNTEJA"];
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
@@ -559,10 +562,30 @@
 			if ($valitut["EIVARASTOITAVA"] != '') {
 				$lisaa .= " and tuote.status != 'T' ";
 			}
-			if ($valitut["EIVIENTEJA"] != '') {
-				$ei_vienteja_lisa = " JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.vienti = '')";
-				$ei_vienteja_lisa2 = "	AND l.vienti = ''";
+			if ($valitut["EIVIENTEJA"] != '' or $valitut['EIASIAKKAANMYYNTEJA'] != '') {
+
+				$ei_vienteja_lisa = " JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus ";
+				$ei_vienteja_lisa2 = "";
+
+				if ($valitut["EIVIENTEJA"] != '') {
+					$ei_vienteja_lisa .= "AND lasku.vienti = '' ";
+					$ei_vienteja_lisa2 .= "	AND l.vienti = ''";
+				}
+
+				if ($valitut['EIASIAKKAANMYYNTEJA'] != '') {
+					$ei_asiakkaan_myynteja_lisa = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta != 'E')";
+					$ei_asiakkaan_myynteja_lisa2 = "AND a.myynninseuranta != 'E'";
+					$ei_asiakkaan_myynteja_lisa3 = "JOIN asiakas ON (asiakas.yhtio = l.yhtio AND asiakas.tunnus = l.liitostunnus AND asiakas.myynninseuranta != 'E'";
+				}
+				else {
+					$ei_asiakkaan_myynteja_lisa = "";
+					$ei_asiakkaan_myynteja_lisa2 = "";
+					$ei_asiakkaan_myynteja_lisa3 = "";
+				}
+
+				$ei_vienteja_lisa .= ")";
 			}
+
 			// Listaa vain äskettäin perustetut tuotteet:
 			if ($valitut["VAINUUDETTUOTTEET"] != '') {
 				$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
@@ -966,6 +989,7 @@
 							{$selectlisa}
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 							{$ei_vienteja_lisa}
+							{$ei_asiakkaan_myynteja_lisa}
 							WHERE tilausrivi.yhtio = '$row[yhtio]'
 							and tilausrivi.tyyppi	= 'L'
 							and tilausrivi.tuoteno = '$row[tuoteno]'
@@ -988,6 +1012,7 @@
 							{$selectlisa}
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laadittu)
 							{$ei_vienteja_lisa}
+							{$ei_asiakkaan_myynteja_lisa}
 							WHERE tilausrivi.yhtio = '$row[yhtio]'
 							and tilausrivi.tyyppi='L'
 							and tilausrivi.tuoteno = '$row[tuoteno]'
@@ -1021,6 +1046,7 @@
 							{$selectlisa}
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laadittu)
 							{$ei_vienteja_lisa}
+							{$ei_asiakkaan_myynteja_lisa}
 							WHERE tilausrivi.yhtio = '$row[yhtio]'
 							and tilausrivi.tyyppi='V'
 							and tilausrivi.tuoteno = '$row[tuoteno]'
@@ -1028,8 +1054,8 @@
 							$lisa";
 				$result   = pupe_query($query);
 				$kulutrow = mysql_fetch_assoc($result);
-				
-				$ennp = kappaleet_tila($row['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa);
+
+				$ennp = kappaleet_tila($row['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
 
 				$saldo = array();
 				$saldo = saldo_funktio($row['tuoteno'], $varastot_yhtiot, $varastot, $paikoittain, $lisa, $row['yhtio']);
@@ -1071,6 +1097,7 @@
 								and l.yhtio = t.yhtio
 								and l.tunnus = t.uusiotunnus
 								{$ei_vienteja_lisa2}
+								{$ei_asiakkaan_myynteja_lisa2}
 								and a.ytunnus = l.ytunnus
 								and a.yhtio = l.yhtio
 								and a.osasto = '$asiakasosasto'";
@@ -1101,6 +1128,7 @@
 								and l.yhtio = t.yhtio
 								and l.tunnus = t.otunnus
 								{$ei_vienteja_lisa2}
+								{$ei_asiakkaan_myynteja_lisa3}
 								and l.liitostunnus 	= '$asiakasid'";
 					$asresult = pupe_query($query);
 					$asrow = mysql_fetch_assoc($asresult);
@@ -1717,6 +1745,7 @@
 										sum(if(tyyppi in ('L','V'), varattu, 0)) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 										{$ei_vienteja_lisa}
+										{$ei_asiakkaan_myynteja_lisa}
 										WHERE tilausrivi.yhtio='$row[yhtio]'
 										and tilausrivi.tyyppi in ('L','V','O','W','M')
 										and tilausrivi.tuoteno='$korvarow[tuoteno]'
@@ -1732,6 +1761,7 @@
 										sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 										{$ei_vienteja_lisa}
+										{$ei_asiakkaan_myynteja_lisa}
 										WHERE tilausrivi.yhtio = '$row[yhtio]'
 										and tilausrivi.tyyppi = 'L'
 										and tilausrivi.tuoteno = '$korvarow[tuoteno]'
@@ -1823,14 +1853,14 @@
 
 								$vastaava_saldo = saldo_funktio($_tuoteno_arr['tuoteno'], $varastot_yhtiot, $varastot, $paikoittain, $lisa, $row['yhtio']);
 
-								$vastaava_myydy_kappaleet = myydyt_kappaleet($row['yhtio'], $_tuoteno_arr['tuoteno'], $apvm, $lpvm, $lisa, $ei_vienteja_lisa);
+								$vastaava_myydy_kappaleet = myydyt_kappaleet($row['yhtio'], $_tuoteno_arr['tuoteno'], $apvm, $lpvm, $lisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
 
 								$tuotteen_toimittajat = hae_tuotteen_toimittajat($_tuoteno_arr['tuoteno']);
 								$trow = hae_tuote($_tuoteno_arr['tuoteno']);
 
 								$ostohinta = "";
 								$tuotteen_toimittajat_string = "";
-								
+
 								foreach ($tuotteen_toimittajat as $tuotteen_toimittaja) {
 									$laskurow_temp = array(
 										'liitostunnus' => $tuotteen_toimittaja['liitostunnus'],
@@ -1850,7 +1880,7 @@
 								$ostohinta = substr($ostohinta, 0, -3);
 								$tuotteen_toimittajat_string = substr($tuotteen_toimittajat_string, 0, -3);
 
-								$vastaava_ennp = kappaleet_tila($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa);
+								$vastaava_ennp = kappaleet_tila($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
 
 								if ($valitut["SARAKE{$_x}"] != '') {
 									//tuoteno
@@ -2534,6 +2564,40 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
+						and selitetark = 'EIVIENTEJA'";
+			$sresult = pupe_query($query);
+			$srow = mysql_fetch_assoc($sresult);
+
+			$chk = "";
+			if (($srow["selitetark"] == "EIVIENTEJA" and $tee == "JATKA") or $valitut["EIVIENTEJA"] != '') {
+				$chk = "CHECKED";
+			}
+
+			echo "<tr><th>".t("Älä näytä vientitilauksien myyntejä")."</th><td colspan='3'><input type='checkbox' name='valitut[EIVIENTEJA]' value='EIVIENTEJA' $chk></td></tr>";
+
+			//Näytetäänkö palautukset
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji = 'KKOSTOT'
+						and selite	= '$rappari'
+						and selitetark = 'EIASIAKKAANMYYNTEJA'";
+			$sresult = pupe_query($query);
+			$srow = mysql_fetch_assoc($sresult);
+
+			$chk = "";
+			if (($srow["selitetark"] == "EIASIAKKAANMYYNTEJA" and $tee == "JATKA") or $valitut["EIASIAKKAANMYYNTEJA"] != '') {
+				$chk = "CHECKED";
+			}
+
+			echo "<tr><th>",t("Älä Näytä asiakkaiden myyntejä joita ei huomioida myynninseurannassa"),"</th><td colspan='3'><input type='checkbox' name='valitut[EIASIAKKAANMYYNTEJA]' value='EIASIAKKAANMYYNTEJA' {$chk}></td></tr>";
+
+			//Näytetäänkö poistuvat tuotteet
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji = 'KKOSTOT'
+						and selite	= '$rappari'
 						and selitetark = 'EHDOTETTAVAT'";
 			$sresult = pupe_query($query);
 			$srow = mysql_fetch_assoc($sresult);
@@ -2542,8 +2606,6 @@
 			if (($srow["selitetark"] == "EHDOTETTAVAT" and $tee == "JATKA") or $valitut["EHDOTETTAVAT"] != '') {
 				$chk = "CHECKED";
 			}
-
-			echo "<tr><th>".t("Älä näytä vientitilauksien myyntejä")."</th><td colspan='3'><input type='checkbox' name='valitut[EIVIENTEJA]' value='EIVIENTEJA' $chk></td></tr>";
 
 			echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
 
@@ -2764,7 +2826,7 @@
 		return $saldo;
 	}
 
-	function myydyt_kappaleet($row_yhtio, $tuoteno, $apvm, $lpvm, $lisa, $ei_vienteja_lisa) {
+	function myydyt_kappaleet($row_yhtio, $tuoteno, $apvm, $lpvm, $lisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa) {
 		global $kukarow, $yhtiorow;
 
 		$selectlisa = "";
@@ -2788,12 +2850,13 @@
 		$selectlisa .= "sum(if (laskutettuaika >= '{$q2['alku']}' and laskutettuaika <= '{$q2['loppu']}', kpl, 0)) as kpl_q2, ";
 		$selectlisa .= "sum(if (laskutettuaika >= '{$q3['alku']}' and laskutettuaika <= '{$q3['loppu']}', kpl, 0)) as kpl_q3, ";
 		$selectlisa .= "sum(if (laskutettuaika >= '{$q4['alku']}' and laskutettuaika <= '{$q4['loppu']}', kpl, 0)) as kpl_q4";
-		
+
 		///* Myydyt kappaleet *///
 		$query = "	SELECT
 					{$selectlisa}
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 					{$ei_vienteja_lisa}
+					{$ei_asiakkaan_myynteja_lisa}
 					WHERE tilausrivi.yhtio = '{$row_yhtio}'
 					and tilausrivi.tyyppi	= 'L'
 					and tilausrivi.tuoteno = '{$tuoteno}'
@@ -2801,7 +2864,7 @@
 					and tilausrivi.laskutettuaika <= '$lpvm'
 					$lisa";
 		$result   = pupe_query($query);
-		
+
 		return mysql_fetch_assoc($result);
 	}
 
@@ -2832,7 +2895,7 @@
 		return $tuotteen_toimittajat;
 	}
 
-	function kappaleet_tila($tuoteno, $row_yhtio, $lisavarattu, $varastolisa, $ei_vienteja_lisa) {
+	function kappaleet_tila($tuoteno, $row_yhtio, $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT
@@ -2845,12 +2908,13 @@
 					$varastolisa
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 					{$ei_vienteja_lisa}
+					{$ei_asiakkaan_myynteja_lisa}
 					WHERE tilausrivi.yhtio = '{$row_yhtio}'
 					and tilausrivi.tyyppi in ('L','V','O','G','E','W','M')
 					and tilausrivi.tuoteno = '{$tuoteno}'
 					and tilausrivi.laskutettuaika = '0000-00-00'
 					and (tilausrivi.varattu+tilausrivi.jt > 0)";
 		$result = pupe_query($query);
-		
+
 		return mysql_fetch_assoc($result);
 	}

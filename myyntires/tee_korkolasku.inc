@@ -201,7 +201,7 @@
 			require ("tilauskasittely/lisaarivi.inc");
 		}
 
-		$valittu_tulostin = $kukarow["kirjoitin"];
+		$valittu_tulostin = $kirjoitin;
 
 		require ("../tilauskasittely/tilaus-valmis.inc");
 	}
@@ -209,4 +209,3 @@
 		echo "<br><br><font class='error'>Korko-tuotetta ei löydy! Ole hyvä ja perusta tuote tuotenumerolla 'korko'.</font>";
 		exit;
 	}
-?>

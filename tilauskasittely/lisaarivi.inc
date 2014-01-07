@@ -648,7 +648,7 @@
 				$korvaavat_tuotteet[$kindeksi]["myytavissa"] = $krmyytavissa;
 				$krkaikkimyytavissa += $krmyytavissa;
 			}
-			
+
 			// Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰
 			if ($korvaavat_kiellot == "KORVAAVAT" and $krkaikkimyytavissa < $kpl) {
 				// Skipataan kaikki korvaavat
@@ -1262,7 +1262,7 @@
 
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
 		if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($kko_laji == "" and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta) {
-		
+
 			if ($lisaarivi_debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
 
 			// nyt meill‰ on $myy_ arrayperheess‰ kaikki tuotteet ja varastopaikat jolta voidaan myyd‰ jotain..
@@ -2030,7 +2030,6 @@
 				}		
 			}
 
-			
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
 			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
 				require_once 'korvaavat.class.php';

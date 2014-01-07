@@ -37,7 +37,7 @@
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 
 	// debuggia varten, laita 1 jos haluut messuja
-	$lisaarivi_debug = 1;
+	$lisaarivi_debug = 0;
 
 	if (!isset($rivitunnus)) $rivitunnus = 0;
 	else $rivitunnus = (int) $rivitunnus;
@@ -2145,7 +2145,7 @@
 					$toimpaikres = pupe_query($query);
 					$krow = mysql_fetch_assoc($toimpaikres);
 
-					if (!empty($krow) and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('Y', 'V')) or ($krow['tehdas_saldo'] >= $kpl)) {
+					if (!empty($krow) and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('Y', 'V', 'W', 'H')) or ($krow['tehdas_saldo'] >= $kpl)) {
 						// tarkistetaan voiko tuotteen tilata suoraan asiakkaalle tai varastoon. oletuksena voi...
 						$tmp_varastoon   = 1;
 						$tmp_asiakkaalle = 1;
@@ -2204,12 +2204,12 @@
 						$paikka		 		= '';
 					}
 					// Jos tehtaan saldo riittää niin ei merkata puutteeksi vaan esivalitaan paikka
-					if (in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W')) and $krow['tehdas_saldo'] >= $kpl) {
-						echo "MENTIIN TÄNNE auto: {$yhtiorow['tee_automaattinen_osto_myyntitilaukselta']}";
-						$toimittajan_tunnus	= $krow['liitostunnus'];
-						$var = "T";
-
-					}
+					// if (in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W')) and $krow['tehdas_saldo'] >= $kpl) {
+					// 	echo "MENTIIN TÄNNE auto: {$yhtiorow['tee_automaattinen_osto_myyntitilaukselta']}";
+					// 	$toimittajan_tunnus	= $krow['liitostunnus'];
+					// 	$var = "T";
+					// 
+					// }
 				}
 			}
 

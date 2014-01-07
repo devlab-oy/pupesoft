@@ -2219,6 +2219,7 @@
 			echo "<input type='hidden' id='tee' name='tee' value='nayta' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 			echo "<input type='hidden' id='lasku' name='lasku' value='' />";
+			echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}' />";
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>",t("Ytunnus"),"</th>";

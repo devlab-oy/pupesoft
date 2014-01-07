@@ -49,15 +49,11 @@ $_POST		= pupe_register_globals($_POST);
 $_REQUEST	= pupe_register_globals($_REQUEST);
 
 // Hoidetaan pakkaus
-$modules = apache_get_modules();
-
-if (in_array("zlib.output_compression", $modules)) {
-	if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
-		ini_set('zlib.output_compression', 'Off');
-	}
-	else {
-		ini_set('zlib.output_compression', 'On');
-	}
+if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {		
+	ini_set('zlib.output_compression', 'Off');
+}
+else {
+	ini_set('zlib.output_compression', 'On');
 }
 
 // Nollataan kaikki muuttujat joita voi setata salasanat.php:ssä

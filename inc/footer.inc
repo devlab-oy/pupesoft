@@ -1,5 +1,12 @@
 <?php
 
+	if (ini_get('zlib.output_compression') == 1 or ini_get('zlib.output_compression') == "On") {
+		echo "<br>PAKATTU ON!<br>";
+	}
+	else {
+		echo "<br>EI OO PAKATTU!<br>";
+	}
+
 	if (php_sapi_name() == "cli") {
 		mysql_close($link);
 		exit;

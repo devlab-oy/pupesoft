@@ -36,6 +36,8 @@ else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 		'DELETE FROM tyomaarays',
 		'DELETE FROM lasku',
 		'DELETE FROM laskun_lisatiedot',
+		'DELETE FROM tilausrivi',
+		'DELETE FROM tilausrivin_lisatiedot',
 	);
 	foreach ($query_array as $query) {
 		pupe_query($query);

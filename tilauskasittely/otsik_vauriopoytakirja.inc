@@ -1005,11 +1005,13 @@ function vauriopoytakirja_yleiset_kentat() {
 	echo "</td>";
 
 	echo "<td>";
-	echo t('ALV');
+	//@TODO function tyomaarays_toimintavarmuus($kiireellisyys, $paivat); pitäisi ehkä toimia ajaxilla
+	echo '-';
 	echo "</td>";
 
 	echo "<td>";
-	echo t('Palautusvarmuus');
+	//@TODO function function tyomaarays_palautusvarmuus($palautus_pvm); pitäisi ehkä toimia ajaxilla
+	echo '-';
 	echo "</td>";
 
 	echo "<td>";

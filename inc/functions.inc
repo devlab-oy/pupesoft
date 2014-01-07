@@ -10366,18 +10366,7 @@ if (!function_exists("laheta_tilausvahvistus")) {
 if (!function_exists("t")) {
 	function t($stringi, $kieli = "") {
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
-		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa, $kaannetyt_sanat;
-
-		require("salasanat.php");
-
-		if (isset($slavedb) and isset($useslave) and $useslave > 0) {
-			if (!isset($slavedb[$useslave]) or $slavedb[$useslave] == '') {
-				$useslave = 0;
-			}
-		}
-		else {
-			$useslave = 0;
-		}
+		global $yhtiorow, $kukarow, $link, $masterlink, $verkkokauppa, $kaannetyt_sanat;
 
 		if (trim($kieli) != '') {
 			$indeksi = trim(strtolower($kieli));
@@ -10387,13 +10376,6 @@ if (!function_exists("t")) {
 		}
 		else {
 			$indeksi = "fi";
-		}
-
-		// Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
-		if ($useslave > 0 and $indeksi != 'fi') {
-			unset($link);
-			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-			mysql_select_db ($dbkanta,$link) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
 		}
 
 		if ($indeksi != 'fi') {
@@ -10429,22 +10411,16 @@ if (!function_exists("t")) {
 				//Päivitetään aikaleima
 				if ($verkkokauppa == "") {
 					$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
-					$sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $link);
+					$sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $masterlink);
 				}
 			}
 			elseif ($verkkokauppa == "") {
 				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
-				$sanakirjaresult = pupe_query($sanakirjaquery, $link);
+				$sanakirjaresult = pupe_query($sanakirjaquery, $masterlink);
 			}
 		}
 		elseif (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) {
 			$kaannetyt_sanat[] = $stringi;
-		}
-
-		if ($useslave > 0) { //Palautetaan slave käyttöön
-			unset($link);
-			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
-			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 2)!");
 		}
 
 		//	Palautetaan muotoiltu stringi!!!

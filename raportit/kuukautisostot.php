@@ -6,7 +6,9 @@
 	}
 
 	ini_set("memory_limit", "5G");
-	ini_set('zlib.output_compression', 0);
+
+	// Ei käytetä pakkausta
+	$compression = FALSE;
 
 	require("../inc/parametrit.inc");
 

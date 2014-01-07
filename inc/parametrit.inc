@@ -13,8 +13,6 @@ error_reporting(E_ERROR);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);
 
-apache_get_modules();
-
 $alkumem		= memory_get_usage();
 $timeparts		= explode(" ",microtime());
 $starttime		= $timeparts[1].substr($timeparts[0],1);
@@ -49,6 +47,18 @@ if (!function_exists("pupe_register_globals")) {
 $_GET		= pupe_register_globals($_GET);
 $_POST		= pupe_register_globals($_POST);
 $_REQUEST	= pupe_register_globals($_REQUEST);
+
+// Hoidetaan pakkaus
+$modules = apache_get_modules();
+
+if (in_array("zlib.output_compression", $modules)) {
+	if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
+		ini_set('zlib.output_compression', 'Off');
+	}
+	else {
+		ini_set('zlib.output_compression', 'On');
+	}
+}
 
 // Nollataan kaikki muuttujat joita voi setata salasanat.php:ssä
 unset($palvelin);
@@ -521,10 +531,6 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 	if ((isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
 		// Kerrotaan selaimelle, että tämä on tiedosto
-		if (ini_get('zlib.output_compression')) {
-			ini_set('zlib.output_compression', 'Off');
-		}
-
 		header("Pragma: public");
 		header("Expires: 0");
 		header("HTTP/1.1 200 OK");

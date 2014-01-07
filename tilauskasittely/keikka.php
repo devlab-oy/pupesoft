@@ -3,6 +3,12 @@
 $pupe_DataTables = 'keikka';
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
+
+	if ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok") {
+		// Ei käytetä pakkausta
+		$compression = FALSE;
+	}
+
 	require ("../inc/parametrit.inc");
 }
 
@@ -1066,7 +1072,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 			}
 
 			echo "<tr class='aktiivi'>";
-			
+
 			if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
 				echo "<td valign='top'>$row[toimipaikka_nimi]</td>";
 			}

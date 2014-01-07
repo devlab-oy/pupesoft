@@ -11,7 +11,8 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	ini_set('zlib.output_compression', 0);
+	// Ei käytetä pakkausta
+	$compression = FALSE;
 
 	require("../inc/parametrit.inc");
 

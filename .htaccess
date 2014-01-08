@@ -12,8 +12,3 @@ php_value max_input_vars 10000
 
 </IfModule>
 
-<ifModule mod_deflate.c>
-    <filesMatch "\.(js|css|html|php|inc)$">
-        SetOutputFilter DEFLATE
-    </filesMatch>
-</ifModule>

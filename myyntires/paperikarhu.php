@@ -203,18 +203,18 @@
 			//Laskurivien otsikkotiedot
 			//eka rivi
 			$pdf->draw_text(30,  $kala, t("Laskun numero", $kieli)." / ".t("Viite", $kieli),		$firstpage, $pieni);
-			$pdf->draw_text(180, $kala, t("Laskun pvm", $kieli),									$firstpage, $pieni);
-			$pdf->draw_text(240, $kala, t("Eräpäivä", $kieli),										$firstpage, $pieni);
-			$pdf->draw_text(295, $kala, t("Myöhässä pv", $kieli),									$firstpage, $pieni);
+			$pdf->draw_text(130, $kala, t("Laskun pvm", $kieli),									$firstpage, $pieni);
+			$pdf->draw_text(190, $kala, t("Eräpäivä", $kieli),										$firstpage, $pieni);
+			$pdf->draw_text(245, $kala, t("Myöhässä pv", $kieli),									$firstpage, $pieni);
 			
-			$pdf->draw_text(390, $kala, t("Laskun summa", $kieli),									$firstpage, $pieni);
-			$pdf->draw_text(485, $kala, t("Korko", $kieli),											$firstpage, $pieni);
+			$pdf->draw_text(410, $kala, t("Laskun summa", $kieli),									$firstpage, $pieni);
+			$pdf->draw_text(495, $kala, t("Korko", $kieli),											$firstpage, $pieni);
 			$pdf->draw_text(545, $kala, t("Yhteensä", $kieli),										$firstpage, $pieni);
 			
 
 			if ($yhtiorow["maksukehotus_kentat"] == "") {
-				$pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
-				$pdf->draw_text(525, $kala, t("Perintäkerta", $kieli),									$firstpage, $pieni);
+				$pdf->draw_text(295, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
+				$pdf->draw_text(365, $kala, t("Perintäkerta", $kieli),									$firstpage, $pieni);
 			}
 
 			$kala -= 15;
@@ -233,31 +233,34 @@
 	}
 
 	if(!function_exists("rivi")) {
-		function rivi ($firstpage, $summa, $korkosumma) {
+		function rivi ($firstpage, $summa, $korko) {
 			global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro;
 
 			// siirrytäänkö uudelle sivulle?
-			if ($kala < 133) {
+			if ($kala < 153) {
 				$sivu++;
-				loppu($firstpage,'');
+				loppu($firstpage, '', '');
 				$firstpage = alku();
 				$lask = 1;
 			}
+			
+			// ei anneta negatiivisia korkoja
+			$row['korko'] = ($row['summa'] >= 0) ? $row['korko'] : 0.0;
 
 			$pdf->draw_text(30,  $kala, $row["laskunro"]." / ".$row["viite"],	$firstpage, $norm);
-			$pdf->draw_text(180, $kala, tv1dateconv($row["tapvm"]), 			$firstpage, $norm);
-			$pdf->draw_text(240, $kala, tv1dateconv($row["erpcm"]), 			$firstpage, $norm);
+			$pdf->draw_text(130, $kala, tv1dateconv($row["tapvm"]), 			$firstpage, $norm);
+			$pdf->draw_text(190, $kala, tv1dateconv($row["erpcm"]), 			$firstpage, $norm);
 
 			$oikpos = $pdf->strlen($row["ika"], $norm);
-			$pdf->draw_text(338-$oikpos, $kala, $row["ika"], 					$firstpage, $norm);
+			$pdf->draw_text(270-$oikpos, $kala, $row["ika"], 					$firstpage, $norm);
 
 			if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
 				$oikpos = $pdf->strlen($row["summa_valuutassa"], $norm);
-				$pdf->draw_text(500-$oikpos, $kala, $row["summa_valuutassa"]." ".$row["valkoodi"], 	$firstpage, $norm);
+				$pdf->draw_text(460-$oikpos, $kala, $row["summa_valuutassa"], 	$firstpage, $norm);
 			}
 			else {
 				$oikpos = $pdf->strlen($row["summa"], $norm);
-				$pdf->draw_text(500-$oikpos, $kala, $row["summa"]." ".$row["valkoodi"], 				$firstpage, $norm);
+				$pdf->draw_text(460-$oikpos, $kala, $row["summa"],				$firstpage, $norm);
 			}
 
 			if ($karhukertanro == "") {
@@ -265,17 +268,14 @@
 			}
 
 			if ($yhtiorow["maksukehotus_kentat"] == "") {
-				$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]), $firstpage, $norm);
+				$pdf->draw_text(295, $kala, tv1dateconv($row["kpvm"]), $firstpage, $norm);
 				$oikpos = $pdf->strlen($karhukertanro, $norm);
-				$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, $firstpage, $norm);
+				$pdf->draw_text(385-$oikpos, $kala, $karhukertanro, $firstpage, $norm);
 			}
-			
-			$oikpos = $pdf->strlen($row["summa"], $norm);
-			$pdf->draw_text(455-$oikpos, $kala, $row["summa"],               $firstpage, $norm);
-			$oikpos = $pdf->strlen($row["korkosumma"], $norm);
-			$pdf->draw_text(505-$oikpos, $kala, $row["korkosumma"],           $firstpage, $norm);
-			$oikpos = $pdf->strlen(sprintf('%.2f', $row["summa"] + $row["korkosumma"]), $norm);
-			$pdf->draw_text(565-$oikpos, $kala, sprintf('%.2f', $row["summa"] + $row["korkosumma"]),  $firstpage, $norm);
+
+			$pdf->draw_text(495, $kala, $row["korko"],           $firstpage, $norm);
+			$oikpos = $pdf->strlen(sprintf('%.2f', $row["summa"] + $row["korko"]), $norm);
+			$pdf->draw_text(565-$oikpos, $kala, sprintf('%.2f', $row["summa"] + $row["korko"]),  $firstpage, $norm);
 
 			$kala = $kala - 13;
 
@@ -286,26 +286,51 @@
 			} else {
 				$summa += $row["summa"];
 			}
-			return($summa);
+			$korko += $row["korko"];
+
+			$palautus = array(
+				"korko" 	=> $korko,
+				"summa" 	=> $summa,
+			);
+			return($palautus);
 		}
 	}
 
 	if(!function_exists("loppu")) {
-		function loppu ($firstpage, $summa) {
+		function loppu ($firstpage, $summa, $korko) {
 
 			global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $maksuehtotiedot, $toimipaikkarow, $laskutiedot, $karhut_samalle_laskulle, $karhukertanro;
-/*
+
+			/*
 			//yhteensärivi
 			$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
 			$pdf->draw_rectangle(110, 207, 90, 580,	$firstpage, $rectparam);
 			$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
 			$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
-*/
-			if ($karhut_samalle_laskulle == 1 or $karhukertanro != "") {
-				$pdf->draw_text(380, 118,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
+			*/
+
+			if (($karhut_samalle_laskulle == 1 or $karhukertanro != "") and ($summa != '' and $korko != '')) {
+				//Kokonaissummalaatikko + valuuttalaatikko
+				$pdf->draw_rectangle(115, 394, 148, 580,	$firstpage, $rectparam);
+				$pdf->draw_rectangle(115, 540, 148, 580,	$firstpage, $rectparam);
+				
+				$pdf->draw_text(400, 138,  t("LASKUN SUMMA", $kieli).":",	$firstpage, $norm);
+				$pdf->draw_text(400, 128,  t("KORKO", $kieli).":",	$firstpage, $norm);
+				$pdf->draw_text(400, 118,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
+				
+				$kokonaissumma = $korko+$summa;
 
 				$oikpos = $pdf->strlen(sprintf("%.2f", $summa), $norm);
-				$pdf->draw_text(500-$oikpos, 118, sprintf("%.2f", $summa)." ".$laskutiedot["valkoodi"],		$firstpage, $norm);
+				$pdf->draw_text(535-$oikpos, 138, sprintf("%.2f", $summa),	$firstpage, $norm);
+				$oikpos = $pdf->strlen(sprintf("%.2f", $korko), $norm);
+				$pdf->draw_text(535-$oikpos, 128, sprintf("%.2f", $korko),	$firstpage, $norm);
+				$oikpos = $pdf->strlen(sprintf("%.2f", $kokonaissumma), $norm);
+				$pdf->draw_text(535-$oikpos, 118, sprintf("%.2f", $kokonaissumma),	$firstpage, $norm);
+
+				$oikpos = $pdf->strlen($laskutiedot["valkoodi"], $norm);
+				$pdf->draw_text(575-$oikpos, 138, $laskutiedot["valkoodi"],	$firstpage, $norm);
+				$pdf->draw_text(575-$oikpos, 128, $laskutiedot["valkoodi"],	$firstpage, $norm);
+				$pdf->draw_text(576-$oikpos, 118, $laskutiedot["valkoodi"],	$firstpage, $norm);
 			}
 
 			$pankkitiedot = array();
@@ -480,6 +505,7 @@
 				l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa,
 				l.erpcm, l.laskunro, l.viite,
 				l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa,
+				round((l.viikorkopros * (TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm)) * summa / 36500),2) as korko,
 				$ikalaskenta
 				max(kk.pvm) as kpvm,
 				count(distinct kl.ktunnus) as karhuttu,
@@ -659,6 +685,7 @@
 	$firstpage = alku($karhuviesti, $karhutunnus);
 
 	$summa = 0.0;
+	$korko = 0.0;
 	$rivit = array();
 
 	while ($row = mysql_fetch_assoc($result)) {
@@ -681,14 +708,16 @@
 		}
 
 		$rivit[] = $row;
-		$summa = rivi($firstpage, $summa, $korkosumma);
+		$palautus = rivi($firstpage, $summa, $korko);
+		$summa = $palautus['summa'];
+		$korko = $palautus['korko'];
 	}
 
 	// loppusumma
 	$loppusumma = sprintf('%.2f', $summa+$kaatosumma);
 
 	// viimenen sivu
-	loppu($firstpage,$loppusumma);
+	loppu($firstpage, $loppusumma,  $korko);
 
 	//keksitään uudelle failille joku varmasti uniikki nimi:
 	$pdffilenimi = "/tmp/karhu_$kukarow[yhtio]_".date("Ymd")."_".$laskutiedot['laskunro'].".pdf";

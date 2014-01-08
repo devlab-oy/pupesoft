@@ -21763,24 +21763,20 @@ if (!function_exists('hae_maa')) {
 	}
 }
 
-//etsii halutun array keyn arraysta ja palauttaa kyseisen keyn parentit arrayssa jos key löytyy
-//esim voit etsiä funktiolla order ja funktio palauttaa kaikki ensimmäisen tason (tuoteno) arrayt jos order löytyy
-/**
- * $header_values = array(
-		'tuoteno' => array(
-			'header' => t('Tuoteno'),
-			'order' => 0
-		),
- * );
- *
- */
 if (!function_exists('search_array_key_recursive')) {
+	/**
+	 * Palauttaa kaikki $key mukaiset alkiot
+	 *
+	 * @param array $array haystack
+	 * @param string $key etsittävä key
+	 * @return array
+	 */
 	function search_array_key_recursive($array, $key) {
 		$results = array();
 
 		if (is_array($array)) {
 			if (isset($array[$key])) {
-				$results[] = $array;
+				$results[] = $array[$key];
 			}
 
 			foreach ($array as $subarray) {
@@ -25213,6 +25209,7 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
  * @return array
  */
 if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
+
 	function hae_myyntilaskuja_joilla_avoin_saldo($request, $valitut = false) {
 		global $kukarow, $yhtiorow;
 
@@ -25307,6 +25304,13 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 			}
 		}
 
+		if ($request['lahetetyt']) {
+			$laskut = keraa_kohdistamattomat($request, $laskut, true);
+		}
+		else {
+			$laskut = keraa_kohdistamattomat($request, $laskut, false);
+		}
+
 		//Purkahko. Jos lasku_tunnukset on annettu, halutaan näyttää tietyn asiakkaan(ytunnus) saldovahvistus pdf:nä.
 		if (!empty($request['lasku_tunnukset'])) {
 			if ($request['lahetetyt']) {
@@ -25319,6 +25323,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 
 		return $laskut;
 	}
+
 }
 
 if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
@@ -25383,6 +25388,141 @@ if (!function_exists('keraa_saldovahvistusrivit_lahetyspaiva_ytunnus')) {
 		$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['valkoodi'] = $lasku['valkoodi'];
 		$laskut[$lasku['lahetys_paiva']][$lasku['karhukierros_tunnus']][$lasku['ytunnus']]['laskut'][] = $lasku;
 	}
+}
+
+if (!function_exists('hae_kohdistamattomat_suoritukset')) {
+	function hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($asiakas_tunnukset)) {
+			return false;
+		}
+
+		$query = "	SELECT '' AS laskunro,
+					maksupvm AS erpcm,
+					summa * -1 AS avoin_saldo,
+					valkoodi
+					FROM suoritus
+					WHERE suoritus.yhtio = '{$kukarow['yhtio']}'
+					AND (
+						suoritus.kohdpvm = '0000-00-00'
+						OR suoritus.maksupvm > '{$pvm}'
+						)
+					AND suoritus.kirjpvm <= '{$pvm}'
+					AND suoritus.ltunnus  > 0
+					AND suoritus.asiakas_tunnus IN (".implode(', ', $asiakas_tunnukset).")";
+		$result = pupe_query($query);
+
+		$kohdistamattomat_suoritukset = array();
+		while($kohdistamaton_suoritus = mysql_fetch_assoc($result)) {
+			$kohdistamaton_suoritus['laskunro'] = t('Kohdistamaton_suoritus');
+			$kohdistamattomat_suoritukset[] = $kohdistamaton_suoritus;
+		}
+
+		return $kohdistamattomat_suoritukset;
+	}
+}
+
+if (!function_exists('keraa_kohdistamattomat')) {
+
+	function keraa_kohdistamattomat($request, $laskut, $lahetetyt = true) {
+		global $kukarow, $yhtiorow;
+
+		if ($lahetetyt) {
+			foreach ($laskut as $lahetys_paiva => &$lasku_karhukierros) {
+				foreach ($lasku_karhukierros as $karhukierros_tunnus => &$lasku_ytunnus) {
+					foreach ($lasku_ytunnus as $ytunnus => &$lasku) {
+						$pvm = $lahetys_paiva;
+						$asiakasnumerot_ja_tunnukset = $lasku['asiakasnumerot'];
+
+						$asiakas_tunnukset = search_array_key_recursive($asiakasnumerot_ja_tunnukset, 'asiakas_tunnus');
+						$kohdistamattomat_suoritukset = hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm);
+
+						if (!empty($kohdistamattomat_suoritukset)) {
+							$params = array(
+								'direction'	 => 'y',
+								'key'		 => 'avoin_saldo'
+							);
+							$kohdistamattomien_summa = sum_array($kohdistamattomat_suoritukset, $params);
+
+							$laskut_temp = array_merge($laskut[$lahetys_paiva][$karhukierros_tunnus][$ytunnus]['laskut'], $kohdistamattomat_suoritukset);
+							$laskut[$lahetys_paiva][$karhukierros_tunnus][$ytunnus]['laskut'] = $laskut_temp;
+							$laskut[$lahetys_paiva][$karhukierros_tunnus][$ytunnus]['avoin_saldo_summa'] += $kohdistamattomien_summa;
+						}
+					}
+				}
+			}
+		}
+		else {
+			foreach ($laskut as &$lasku) {
+				$pvm = $request['paiva'];
+				$asiakasnumerot_ja_tunnukset = $lasku['asiakasnumerot'];
+
+				$asiakas_tunnukset = search_array_key_recursive($asiakasnumerot_ja_tunnukset, 'asiakas_tunnus');
+				$kohdistamattomat_suoritukset = hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm);
+
+				if (!empty($kohdistamattomat_suoritukset)) {
+					$params = array(
+						'direction'	 => 'y',
+						'key'		 => 'avoin_saldo'
+					);
+					$kohdistamattomien_summa = sum_array($kohdistamattomat_suoritukset, $params);
+					$lasku['laskut'] = array_merge($lasku['laskut'], $kohdistamattomat_suoritukset);
+					$lasku['avoin_saldo_summa'] += $kohdistamattomien_summa;
+				}
+			}
+		}
+
+		return $laskut;
+	}
+
+}
+
+if (!function_exists('sum_array')) {
+	function sum_array($array, $params = array('direction' => 'x', 'key' => 'xxx'), $exclusions = array()) {
+		if (!empty($array)) {
+
+			$sum = 0;
+
+			if ($params['direction'] == 'x') {
+
+				$keys = array_keys($array);
+
+				for ($x = 0; $x < count($keys); $x++) {
+
+					if (!in_array($keys[$x], $exclusions)) {
+						$sum += $array[$keys[$x]];
+					}
+				}
+
+				return $sum;
+			}
+			else if ($params['direction'] == 'y') {
+
+				$keys = array_keys($array);
+
+				if (array_key_exists($params['key'], $array[$keys[0]])) {
+					for ($x = 0; $x < count($keys); $x++) {
+						if (!in_array($keys[$x], $exclusions)) {
+							$sum += $array[$keys[$x]][$params['key']];
+						}
+					}
+
+					return $sum;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+
 }
 
 if (!function_exists('hae_saldovahvistus_viestit')) {

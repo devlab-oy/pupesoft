@@ -71,7 +71,7 @@
 				$apure  = pupe_query($query);
 
 				$laskurow["tila"] 			= "N";
-				$laskurow["alatila"] 		= "A";
+				$laskurow["alatila"] 		= "";
 				$laskurow["clearing"] 		= "ENNAKKOTILAUS";
 				$laskurow["tilaustyyppi"] 	= "";
 

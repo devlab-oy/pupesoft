@@ -814,7 +814,7 @@
 							require("tilauskasittely/rahtikirja_pdf.inc");
 						}
 
-						if ($toitarow['erittely'] == 'k') {
+						if ($toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
 							require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 						}
 
@@ -939,40 +939,7 @@
 
 				// jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin E-tyyppiset Unifaunit merkataan toimitetuiksi close_with_printer-haarassa..
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] == '' and !$unifaun_era_vainkollitarra) {
-
-					// kotimaan myynti menee alatilaan D
-					$query = "UPDATE lasku set alatila = 'D' where tunnus in ($otunnukset) and vienti = '' and yhtio='$kukarow[yhtio]'";
-					$ures  = pupe_query($query);
-
-					// vientilaskut menee alatilaan B
-					$query = "UPDATE lasku set alatila = 'B' where tunnus in ($otunnukset) and vienti != '' and yhtio='$kukarow[yhtio]'";
-					$ures  = pupe_query($query);
-
-					// jos laskulla on maksupositioita, menee ne alatilaan J
-					$query = "UPDATE lasku set alatila = 'J' where tunnus in ($otunnukset) and jaksotettu != 0 and yhtio='$kukarow[yhtio]'";
-					$ures  = pupe_query($query);
-
-					// verkkolaskutettavat EU-viennit menee alatilaan D, jos niillä on tarpeeksi lisätietoja
-					$query = "	UPDATE lasku set
-								alatila = 'D',
-								bruttopaino = '$kilotyht'
-								where yhtio = '$kukarow[yhtio]'
-								and tunnus in ($otunnukset)
-								and vienti = 'E'
-								and chn in ('020', '030')
-								and maa_maara != ''
-								and kauppatapahtuman_luonne > 0
-								and kuljetusmuoto != ''";
-					$ures  = pupe_query($query);
-
-					// Etukäteen maksetut tilaukset pitää muuttaa takaisin "maksettu"-tilaan
-					$query = "	UPDATE lasku SET
-								alatila = 'X'
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus in ($otunnukset)
-								AND mapvm != '0000-00-00'
-								AND chn = '999'";
-					$ures  = pupe_query($query);
+					paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $otunnukset, 'kilotyht' => $kilotyht));
 				}
 
 				// Tulostetaan osoitelappu
@@ -1049,7 +1016,7 @@
 			if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
 		} // end while haetaan kaikki distinct rahtikirjat..
 
-		if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "") {
+		if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
 			$kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2); //poistetaan pilkku ja välilyönti viimosen perästä
 			$otunnukset_temp = $otunnukset;
 			$otunnukset = $kaikki_lotsikot_per_toimitus;

@@ -52,6 +52,8 @@
 
 				while ($rivi = mysql_fetch_assoc($result)) {
 
+					$ostotilauksen_kasittely = $myytilrow['ostotilauksen_kasittely'];
+					
 					if ($rivi['ei_saldoa'] != '' and $rivi['perheid'] == $rivi['rivitunnus']) {
 						// saldottomat tuotteet laitetaan jälkkäriin jos ne on tuoteperheen isiä ja skipataan loopissa
 						$query = "	UPDATE tilausrivi
@@ -103,13 +105,16 @@
 					// tehdään aluksi vähän oikeellisuustarkastuksia
 					$query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$ttrow[liitostunnus]'";
 					$erres = pupe_query($query);
-
+					
 					if (mysql_num_rows($erres) != 1) {
 						$tilauksesta_ostotilaus .= "<font class='error'>".t("VIRHE: Toimittajan tietoja ei löytynyt tuotteelta").": $rivi[tuoteno]!<br>";
 					}
 					else {
 						// toimittaja löytyi, tehdään tästä ostotilaus
 						$tiltoi = mysql_fetch_assoc($erres);
+						
+						$ohjausmerkki = ($tiltoi['ostotilauksen_kasittely'] == 4) ? '' : $myytilrow['ohjausmerkki'] ;
+							
 
 						// Katsotaan onko toimittajalla avoimia ostotilauksia
 						// Pitää olla myös oikeat osoitetiedot
@@ -135,9 +140,12 @@
 						if ($valkoodi == '') {
 							$valkoodi = $yhtiorow["valkoodi"];
 						}
-
+						//jos toimittajalla joku muu kuin oletus ostotilauksen_kasittely niin käytetään sitä
+						if ($tiltoi['ostotilauksen_kasittely'] != '') {
+							$ostotilauksen_kasittely = $tiltoi['ostotilauksen_kasittely'];
+						}
 						// Pikatilaus menee aina omalle otsikolle per myyntitilaus
-						$tunnusnippu = ($myytilrow['ostotilauksen_kasittely'] == 5) ? $myytilrow['tunnus'] : 0;
+						$tunnusnippu = ($ostotilauksen_kasittely == 5) ? $myytilrow['tunnus'] : 0;
 
 						$vquery = "	SELECT nimi, kurssi, tunnus
 									FROM valuu
@@ -160,7 +168,10 @@
 							$tilaustyyppi = 2;
 						}
 
-						if ($myytilrow['varasto'] != 0) {
+						if ($yhtiorow['suoratoimitusvarasto'] != 0) {
+							$oletusostovarasto = $yhtiorow['suoratoimitusvarasto'];
+						}
+						elseif ($myytilrow['varasto'] != 0) {
 							$oletusostovarasto = $myytilrow['varasto'];
 						}
 						elseif ($kukarow['oletus_ostovarasto'] != 0) {
@@ -173,7 +184,7 @@
 						$ostotilauksen_kasittely_wherelisa = "";
 
 						// Käsitellään myyntitilauksen otsikolla setattu "ostotilauksen käsittely"
-						switch($myytilrow['ostotilauksen_kasittely']) {
+						switch($ostotilauksen_kasittely) {
 							case '5':
 								# Pikaostotilaus aina omalle otsikolle
 								$ostotilauksen_kasittely_wherelisa .= "
@@ -188,7 +199,7 @@
 								and toim_postitp	= '{$toim_postitp}'
 								and toim_maa		= '{$toim_maa}'
 								and varasto 		= '{$oletusostovarasto}'
-								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'
+								and ohjausmerkki 	= '{$ohjausmerkki}'
 								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 							case '2':
@@ -247,7 +258,7 @@
 										myyja 				= '$myytilrow[myyja]',
 										nimi 				= '$tiltoi[nimi]',
 										nimitark 			= '$tiltoi[nimitark]',
-										ohjausmerkki 		= '{$myytilrow['ohjausmerkki']}',
+										ohjausmerkki 		= '$ohjausmerkki',
 										osoite 				= '$tiltoi[osoite]',
 										ovttunnus 			= '$tiltoi[ovttunnus]',
 										postino 			= '$tiltoi[postino]',
@@ -293,7 +304,7 @@
 							$tunnus = $jtsro["tunnus"];
 						}
 
-						$tunnukset[$tunnus] = $tunnus;
+						if (in_array($ostotilauksen_kasittely, array('1','3','5'))) $tunnukset[$tunnus] = $tunnus;
 
 						//Haetaan myös ns. lisävarusteperheet.
 						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
@@ -496,7 +507,7 @@
 				$upd_res = pupe_query($query);
 
 				// "Lähetetään heti"-ominaisuus
-				if (in_array($myytilrow['ostotilauksen_kasittely'], array('1','3','5')) and count($tunnukset) > 0) {
+				if (count($tunnukset) > 0) {
 
 					foreach ($tunnukset as $otunnus) {
 

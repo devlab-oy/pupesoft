@@ -595,8 +595,8 @@
 		// Poistetaan tuotteet jota ei ole kaupassa
 		if (count($kaikki_tuotteet) > 0) {
 			echo date("d.m.Y @ G:i:s")." - Poistetaan ylimääräiset tuotteet\n";
-			// HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut dellataan!
-			$count = $magento_client->poista_poistetut($kaikki_tuotteet);
+			// HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
+			$count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
 			echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
 		}
 

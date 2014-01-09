@@ -1160,6 +1160,9 @@
 
 				$lisa = substr($lisa, 0, -3).")";
 			}
+			elseif ($yhtiorow['livetuotehaku_hakutapa'] == "F" and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys")) {
+				 $lisa .= " and match ($array[$i]) against ('{$haku[$i]}*' IN BOOLEAN MODE) ";
+			}
 			else {
 				$lisa .= " and {$array[$i]} {$hakuehto} ";
 			}
@@ -1299,7 +1302,7 @@
 					<input type = 'submit' value = '".t("Näytä erääntyneet")."'></form>";
 		}
 
-		if ($toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
+		if ($yhtiorow['livetuotehaku_hakutapa'] != "F" and $toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
 
 			$query = "	SELECT *
 						FROM tuote
@@ -2050,20 +2053,20 @@
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
 
-			$query = "	SELECT DISTINCT kuka.kuka, kuka.nimi
+			$query = "	SELECT kuka.kuka, kuka.nimi
 						FROM kuka
-						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.aktiivinen = 1
 						AND kuka.oletus_asiakas = {$trow["tunnus"]}
 						ORDER BY kuka.nimi";
 			$extkukares = pupe_query($query);
 
 			if (mysql_num_rows($extkukares) > 0) {
-				
+
 				echo "<br><font class='head'>".t("Extranet-käyttäjät")."</font><hr>";
 				echo "<table>";
 				echo "<tr><th>".t("Käyttäjätunnus")."</th><th>".t("Nimi")."</th></tr>";
-				
+
 				while ($extkukarow = mysql_fetch_assoc($extkukares)) {
 					echo "<tr><td>{$extkukarow["kuka"]}</td><td>{$extkukarow["nimi"]}</td></tr>";
 				}

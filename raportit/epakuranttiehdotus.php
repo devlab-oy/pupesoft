@@ -215,16 +215,18 @@ else {
 					epakurantti75pvm,
 					tuote.tuotemerkki,
 					tuote.myyjanro,
+					tuote.sarjanumeroseuranta,
 					sum(saldo) saldo
 					FROM tuote
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					AND tuote.ei_saldoa = ''
 					AND tuote.tuotetyyppi NOT IN ('A', 'B')
+					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
 					$epakuranttipvm
 					$tuote_epa_rajaus
 					$lisa
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 					HAVING saldo != 0
 					ORDER BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
@@ -461,6 +463,9 @@ else {
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['kehahin']));
 					$excelsarake++;
+
+					$tuotensarake = $excelsarake;
+
 					$worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno']);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
@@ -498,6 +503,56 @@ else {
 
 					$excelsarake = 0;
 					$excelrivi++;
+
+					// Näytetään varastossa olevat erät/sarjanumerot
+					if ($row["sarjanumeroseuranta"] == "V" or $row['sarjanumeroseuranta'] == 'T') {
+
+						$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
+									tilausrivi_osto.tunnus osto_rivitunnus,
+									tilausrivi_osto.perheid2 osto_perheid2,
+									tilausrivi_osto.nimitys nimitys,
+									lasku_myynti.nimi myynimi
+									FROM sarjanumeroseuranta
+									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+									LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+									LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+									and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+									and sarjanumeroseuranta.myyntirivitunnus != -1
+									and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+									and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+						$sarjares = pupe_query($query);
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							$worksheet->writeString($excelrivi, $tuotensarake, t("S:nro"));
+							$worksheet->writeString($excelrivi, $tuotensarake+1, $sarjarow["sarjanumero"]);
+							$excelrivi++;
+						}
+					}
+					elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
+
+						$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto,
+									sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso,
+									sarjanumeroseuranta.era_kpl kpl,
+									sarjanumeroseuranta.tunnus sarjatunnus
+									FROM sarjanumeroseuranta
+									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+									and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+									and sarjanumeroseuranta.myyntirivitunnus = 0
+									and sarjanumeroseuranta.era_kpl != 0
+									and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+						$sarjares = pupe_query($query);
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							$worksheet->writeString($excelrivi, $tuotensarake, t("E:nro"));
+							$worksheet->writeString($excelrivi, $tuotensarake+1, "$sarjarow[sarjanumero] ($sarjarow[kpl])");
+							$excelrivi++;
+						}
+					}
+
+
 				}
 			} // end saapunut ennen alarajaa
 		}

@@ -8,11 +8,6 @@ echo "<font class='head'>".t("Korkolaskut")."</font><hr>";
 //laskut huomioidaan näkymässsä
 $min_myoh = 3;
 
-if ($kukarow["kirjoitin"] == 0) {
-	echo "<font class='error'>".t("Sinulla pitää olla henkilökohtainen tulostin valittuna, jotta voit tulostaa korkolaskuja").".</font><br>";
-	$tee = "";
-}
-
 $query = "	SELECT tuoteno
 			FROM tuote
 			WHERE yhtio = '$kukarow[yhtio]'
@@ -244,6 +239,7 @@ if ($tee == "KOROTA")  {
 
 	echo "<input name='tee' type='hidden' value='LAHETA'>";
 	echo "<input name='kasittelykulu' type='hidden' value='$kasittelykulu'>";
+	echo "<input name='kirjoitin' type='hidden' value='$kirjoitin'>";
 
 	foreach($korotettavat as $tunnukset) {
 		echo "\n<input type='hidden' name='korotettavat[]' value='$tunnukset'>";
@@ -270,6 +266,7 @@ if ($tee == "KOROTA")  {
 	}
 
 	echo "<input name='kasittelykulu' type='hidden' value='$kasittelykulu'>";
+	echo "<input name='kirjoitin' type='hidden' value='$kirjoitin'>";
 	echo "<input name='korkosumma' type='hidden' value='$korkosumma'>";
 	echo "<input name='vmehto' type='hidden' value='$vmehto'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
@@ -292,7 +289,6 @@ if ($tee == "") {
 	echo t("Syötä ytunnus jos haluat lähettää korkolaskun tietylle asiakkaalle").".<br>";
 	echo t("Jätä kenttä tyhjäksi jos haluat aloittaa ensimmäisestä asiakkaasta").".<br>";
 	echo t("Minimi korkosumma on summa euroissa, jonka yli korkolaskun loppusumman on oltava, että sitä edes ehdotetaan. (tyhjä=kaikki laskut)")."<br>";
-	echo t("Käsittelykulun myyntihinta").".<br>";
 	echo t("Korkoa lasketaan laskuille jotka on maksettu alku- ja loppupäivämäärän välillä").".<br><br>";
 	echo "<table>";
 
@@ -314,6 +310,7 @@ if ($tee == "") {
 				FROM maksuehto
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa = ''
+				and jaksotettu = ''
 				ORDER BY jarjestys, teksti";
 	$vresult = pupe_query($query);
 
@@ -373,10 +370,31 @@ if ($tee == "") {
 		echo "<td colspan='3'><input type='text' name='kasittelykulu' value='$kasittelykulu'> $valuutta</td></tr>";
 	}
 
+	echo "<tr><th>",t("Valitse tulostin"),"</th><td colspan='3'><select name='kirjoitin'>";
+
+	$query = "	SELECT *
+				FROM kirjoittimet
+				WHERE yhtio  = '{$kukarow['yhtio']}'
+				AND komento != 'edi'
+				ORDER BY kirjoitin";
+	$kires = pupe_query($query);
+
+	while ($kirow = mysql_fetch_assoc($kires)) {
+		if ($kirow['tunnus'] == $kukarow["kirjoitin"]) $select = ' selected';
+		else $select = '';
+		echo "<option value='{$kirow['tunnus']}'{$select}>{$kirow['kirjoitin']}</option>";
+	}
+
+	echo "</select></td></tr>";
 
 	$apuqu = "	SELECT kuka, nimi, puhno, eposti, tunnus
-				from kuka
-				where yhtio='$kukarow[yhtio]' and nimi!='' and puhno!='' and eposti!='' and extranet=''";
+				FROM kuka
+				WHERE yhtio    = '$kukarow[yhtio]'
+				AND aktiivinen = 1
+				AND nimi      != ''
+				AND puhno     != ''
+				AND eposti    != ''
+				AND extranet   = ''";
 	$meapu = pupe_query($apuqu);
 
 	echo "<tr><th>".t("Yhteyshenkilö").":</th>";

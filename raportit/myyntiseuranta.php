@@ -1174,9 +1174,9 @@
 					}
 
 					if ($mukaan == "tilaustyyppi") {
-						$group .= ",lasku.clearing";
-						$select .= "lasku.clearing tilaustyyppi, ";
-						$order  .= "lasku.clearing,";
+						$group .= ",tilauksentyyppi";
+						$select .= "concat(if(lasku.tilaustyyppi='','N',lasku.tilaustyyppi),'##',lasku.clearing) tilauksentyyppi, ";
+						$order  .= "tilauksentyyppi,";
 						$gluku++;
 
 						if ($rajaus[$i] != "") {
@@ -2376,6 +2376,25 @@
 							$bar->initialize($elements); // print the empty bar
 						}
 
+						$tilaustyypit_array = array(
+						'0' => t("Ylläpitosopimus"),
+						'2' => t("Varastotäydennys"),
+						'7' => t("Tehdastilaus"),
+						'8' => t("Muiden mukana"),
+						'9' => t("Tehdaspalautus"),
+						'A' => t("Työmääräys"),
+						'E' => t("Ennakkotilaus"),
+						'M' => t("Myyntitili"),
+						'N' => t("Normaalitilaus"),
+						'P' => t("Projekti"),
+						'R' => t("Reklamaatio"),
+						'S' => t("Sarjatilaus"),
+						'T' => t("Tarjous"),
+						'T' => t("Tarjoustilaus"),
+						'U' => t("Takuu"),
+						'U' => t("Takuutilaus"),
+						'V' => t("Valmistus-Tilaus"));
+
 						// Indeksien nimet
 						$row_keys = array_keys($rows[0]);
 
@@ -2475,6 +2494,12 @@
 										$koskematon_tuoteno = $row["tuoteno"];
 
 										$row[$ken_nimi] = "<a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$row[$ken_nimi]}</a>";
+									}
+
+									if ($ken_nimi == "tilauksentyyppi") {
+										list($tils_tyyppi1, $tils_tyyppi2) = explode("##", $row[$ken_nimi]);
+
+										$row[$ken_nimi] = $tilaustyypit_array[$tils_tyyppi1]." ".$tils_tyyppi2;
 									}
 
 									if ($ken_nimi == "laskutuspvm") {

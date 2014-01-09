@@ -841,7 +841,7 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array_fill_keys(array('X','U','V','Y'), '');
+		$sel = array_fill_keys(array('X','U','V','Y','H','W'), '');
 		$sel[$trow[$i]] = " SELECTED";
 
 		$ulos .= "<option value=''>".t("Myyntitilauksella ei voi luoda automaattisesti ostorivej‰")."</option>";
@@ -849,6 +849,8 @@
 		$ulos .= "<option value='U' {$sel['U']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen")."</option>";
 		$ulos .= "<option value='Y' {$sel['Y']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ varastoon jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰")."</option>";
 		$ulos .= "<option value='V' {$sel['V']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰")."</option>";
+		$ulos .= "<option value='H' {$sel['H']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ varastoon jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰ (tilattava tuote ensisijaisesti)")."</option>";
+		$ulos .= "<option value='W' {$sel['W']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰ (tilattava tuote ensisijaisesti)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2609,7 +2611,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "livetuotehaku_hakutapa") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3818,6 +3820,27 @@
 
 		$ulos .= "<option value = ''>".t("Suppeampi toimipaikkak‰sittely. K‰ytt‰j‰n toimipaikka tallennetaan tilauksille.")."</option>";
 		$ulos .= "<option value = 'L' {$sel}>".t("Laajempi toimipaikkak‰sittely. K‰ytt‰j‰n toimipaikka talennetaan tilauksille ja toimipaikka rajaa tilaus-/saapumislistauksia")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'suoratoimitusvarasto') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$ulos .= "<option value = '0'>".t("Ei valittu")."</option>";
+
+		$query  = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+					ORDER BY tyyppi, nimitys";
+		$vares = pupe_query($query);
+
+		while ($varow = mysql_fetch_assoc($vares)) {
+			$sel = $trow[$i] == $varow['tunnus'] ? "selected" : "";
+			$ulos .= "<option value = '{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
+		}
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

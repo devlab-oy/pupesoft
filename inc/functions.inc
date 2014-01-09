@@ -15349,11 +15349,14 @@ if (!function_exists("hae_hyvityshinta")) {
 					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laskutettuaika) 
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = tilausrivi.otunnus
+						AND lasku.tila = 'L'
+						AND lasku.alatila IN ('D','X')
 						AND lasku.liitostunnus = '{$liitostunnus}')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.tuoteno = '{$tuoteno}'
 					AND tilausrivi.varattu + tilausrivi.kpl > 0
+					AND tilausrivi.var not in ('P','J')
 					AND (tilausrivi.laskutettuaika > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR) or tilausrivi.laskutettuaika = '0000-00-00')
 					GROUP BY ika, hinta
 					HAVING kpl != 0
@@ -15366,11 +15369,14 @@ if (!function_exists("hae_hyvityshinta")) {
 					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laskutettuaika) 
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = tilausrivi.otunnus
+						AND lasku.tila = 'L'
+						AND lasku.alatila IN ('D','X')
 						AND lasku.liitostunnus = '{$liitostunnus}')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.tuoteno = '{$tuoteno}'
 					AND tilausrivi.varattu + tilausrivi.kpl < 0
+					AND tilausrivi.var not in ('P','J')
 					AND (tilausrivi.laskutettuaika > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR) or tilausrivi.laskutettuaika = '0000-00-00')
 					GROUP BY ika, hinta
 					HAVING kpl != 0

@@ -358,12 +358,12 @@
 				if ($yhtiorow['karhu_korko'] != '') {
  
 					//Kokonaissummalaatikko + valuuttalaatikko
-					$pdf->draw_rectangle(115, 394, 148, 580,	$firstpage, $rectparam);
+					$pdf->draw_rectangle(115, 364, 148, 580,	$firstpage, $rectparam);
 					$pdf->draw_rectangle(115, 540, 148, 580,	$firstpage, $rectparam);
 				
-					$pdf->draw_text(400, 138,  t("LASKUN SUMMA", $kieli).":",	$firstpage, $norm);
-					$pdf->draw_text(400, 128,  t("KORKO", $kieli).":",	$firstpage, $norm);
-					$pdf->draw_text(400, 118,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
+					$pdf->draw_text(370, 138,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
+					$pdf->draw_text(370, 128,  t("KORKO", $kieli).":",	$firstpage, $norm);
+					$pdf->draw_text(370, 118,  t("YHTEENSÄ + KORKO", $kieli).":",	$firstpage, $norm);
 
 					$kokonaissumma = $korko+$summa;
 

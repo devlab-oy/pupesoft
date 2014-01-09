@@ -1608,6 +1608,9 @@
 					}
 				}
 			}
+			else if ($rtuoteno[$i]['tuoteno'] == "A-100" or $rtuoteno[$i]['tuoteno'] == "A-200") {
+				continue;
+			}	
 			else {
 				if ($debug == 1) {
 					echo "<br>Ei löytynyt rivejä!!!! Debug tuotteelle {$rtuoteno[$i]['tuoteno']}<br><pre>",var_dump($rtuoteno[$i]),"</pre><br><br>";

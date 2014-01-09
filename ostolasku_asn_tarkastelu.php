@@ -1835,7 +1835,7 @@
 
 			echo "<form method='post' action='?valitse={$valitse}' id='kolliformi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='etsi' />";
-			echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}' />";
+			echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}//toimipaikka={$toimipaikka}' />";
 			echo "<input type='hidden' id='lasku' name='lasku' value='{$lasku}' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 			echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}' />";

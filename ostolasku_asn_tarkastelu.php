@@ -264,6 +264,7 @@
 						FROM lasku
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tila IN ('H','Y','M','P','Q')
+						AND vienti in ('B', 'C', 'E', 'F', 'H', 'I')
 						AND laskunro = '".mysql_real_escape_string($lasku)."'";
 			$ostolasku_chk_res = pupe_query($query);
 
@@ -633,7 +634,8 @@
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laskunro = '{$lasku}'
-							AND tila IN ('H','Y','M','P','Q')";
+							AND tila IN ('H','Y','M','P','Q')
+							AND vienti in ('B', 'C', 'E', 'F', 'H', 'I')";
 				$tunnus_fetch_res = pupe_query($query);
 				$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
 

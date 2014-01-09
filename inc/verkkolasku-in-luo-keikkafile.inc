@@ -25,7 +25,7 @@
 					$query = "	SELECT tunnus
 								FROM asn_sanomat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND laji = 'asn'
+								AND laji in ('asn', 'fin', 'mav')
 								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'
 								AND status = 'X'";
 					$chk_res = pupe_query($query);

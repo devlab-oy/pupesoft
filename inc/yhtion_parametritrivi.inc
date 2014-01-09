@@ -574,6 +574,27 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "karhu_korko") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1="";
+		$sel2="";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value='' $sel1>".t("Karhulaskulla ei n‰ytet‰ korkoja eik‰ lis‰t‰ niit‰ laskun summaan")."</option>";
+		$ulos .= "<option value='o' $sel2>".t("Karhulaskulla n‰ytet‰‰n korot ja lis‰t‰‰n ne laskun summaan")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "asiakashinta_netto") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

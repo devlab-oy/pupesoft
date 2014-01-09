@@ -1857,7 +1857,8 @@
 						FROM lasku
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND laskunro = '{$lasku}'
-						AND tila in ('H','Y','M','P','Q')";
+						AND tila in ('H','Y','M','P','Q')
+						AND vienti in ('B', 'C', 'E', 'F', 'H', 'I')";
 			$laskures = pupe_query($query);
 
 			if (mysql_num_rows($laskures) == 0) {
@@ -1865,7 +1866,8 @@
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND comments = '{$lasku}'
-							AND tila in ('H','Y','M','P','Q')";
+							AND tila in ('H','Y','M','P','Q')
+							AND vienti in ('B', 'C', 'E', 'F', 'H', 'I')";
 				$laskures = pupe_query($query);
 			}
 

@@ -186,6 +186,7 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 	}
 }
 else if ($request['tee'] == 'poista_valinnat') {
+	unset($_SESSION['valitut_laskut']);
 	session_unset();
 }
 ?>
@@ -306,10 +307,10 @@ function lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistu
 function echo_saldovahvistukset($request) {
 	global $kukarow, $yhtiorow, $pupe_DataTables, $palvelin2;
 
-//	echo "<table class='display'>";
+	echo "<table class='display'>";
 
-	pupe_DataTables(array(array($pupe_DataTables, 6, 8, false, false, true)));
-	echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
+//	pupe_DataTables(array(array($pupe_DataTables, 6, 8, false, false, true)));
+//	echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
 	echo "<thead>";
 
@@ -360,6 +361,7 @@ function echo_saldovahvistukset($request) {
 
 	echo "<form method='POST' action = ''>";
 	echo "<input type='hidden' name='tee' value='laheta_sahkopostit' />";
+	echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
 	echo "<input type='submit' value='".t('Lähetä')."' />";
 	echo "</form>";
 }

@@ -39,6 +39,7 @@ if ($ajax_request) {
 					'laskun_avoin_paiva'	 => $saldovahvistus_rivi['laskun_avoin_paiva'],
 					'saldovahvistus_viesti'	 => $saldovahvistus_rivi['saldovahvistus_viesti'],
 					'lasku_tunnukset'		 => $saldovahvistus_rivi['lasku_tunnukset'],
+					'ryhmittely_tyyppi'		 => $saldovahvistus_rivi['ryhmittely_tyyppi'],
 				);
 				lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
 
@@ -117,6 +118,7 @@ if (!empty($_SESSION['valitut_laskut'])) {
 	$lasku_tunnukset_temp = $request['lasku_tunnukset'];
 	foreach ($_SESSION['valitut_laskut'] as $valittu_lasku) {
 		$request['lasku_tunnukset'] = $valittu_lasku['lasku_tunnukset'];
+		$request['ryhmittely_tyyppi_temp'] = $valittu_lasku['ryhmittely_tyyppi'];
 		$lasku_temp = hae_myyntilaskuja_joilla_avoin_saldo($request, true);
 		$lasku_temp['saldovahvistus_viesti'] = $valittu_lasku['saldovahvistus_viesti'];
 		$lasku_temp['laskun_avoin_paiva'] = $valittu_lasku['laskun_avoin_paiva'];
@@ -187,7 +189,6 @@ else if ($request['tee'] == 'laheta_sahkopostit') {
 }
 else if ($request['tee'] == 'poista_valinnat') {
 	unset($_SESSION['valitut_laskut']);
-	session_unset();
 }
 ?>
 <style>
@@ -206,7 +207,7 @@ else if ($request['tee'] == 'poista_valinnat') {
 	});
 
 	function bind_saldovahvistus_rivi_valinta_checkbox_click() {
-		$('.saldovahvistus_rivi_valinta .saldovahvistus_rivi_valinta_valittu').change(function() {
+		$('.saldovahvistus_rivi_valinta').click(function() {
 			var lisays;
 			if ($(this).is(':checked')) {
 				lisays = true;
@@ -224,7 +225,8 @@ else if ($request['tee'] == 'poista_valinnat') {
 			var saldovahvistus_rivi = {
 				lasku_tunnukset: lasku_tunnukset,
 				laskun_avoin_paiva: $(this).parent().parent().find('.laskun_avoin_paiva').val(),
-				saldovahvistus_viesti: $(this).parent().parent().find('.saldovahvistus_viesti').html()
+				saldovahvistus_viesti: $(this).parent().parent().find('.saldovahvistus_viesti').html(),
+				ryhmittely_tyyppi: $(this).parent().parent().find('.ryhmittely_tyyppi').val()
 			};
 
 			saldovahvistus_rivit.push(saldovahvistus_rivi);
@@ -239,11 +241,11 @@ else if ($request['tee'] == 'poista_valinnat') {
 
 			if ($(this).is(':checked')) {
 				lisays = true;
-				$table.find('.saldovahvistus_rivi_valinta').attr('checked', 'checked');
+				$table.find('.saldovahvistus_rivi').find('.saldovahvistus_rivi_valinta').attr('checked', 'checked');
 			}
 			else {
 				lisays = false;
-				$table.find('.saldovahvistus_rivi_valinta').removeAttr('checked');
+				$table.find('.saldovahvistus_rivi').find('.saldovahvistus_rivi_valinta').removeAttr('checked');
 			}
 
 			var saldovahvistus_rivit = [];
@@ -254,7 +256,8 @@ else if ($request['tee'] == 'poista_valinnat') {
 				saldovahvistus_rivit.push({
 					lasku_tunnukset: lasku_tunnukset,
 					laskun_avoin_paiva: $(this).parent().parent().find('.laskun_avoin_paiva').val(),
-					saldovahvistus_viesti: $(this).parent().parent().find('.saldovahvistus_viesti').html()
+					saldovahvistus_viesti: $(this).parent().parent().find('.saldovahvistus_viesti').html(),
+					ryhmittely_tyyppi: $(this).parent().parent().find('.ryhmittely_tyyppi').val()
 				});
 			});
 
@@ -376,16 +379,20 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 		$tr_class = "border_bottom";
 	}
 
-	echo "<tr class='saldovahvistus_rivi aktiivi {$tr_class}'>";
-
-	echo "<td valign='top'>";
 	if ($valitut) {
 		$saldovahvistusrivi['laskun_avoin_paiva'] = $saldovahvistusrivi['laskun_avoin_paiva'];
+		$saldovahvistusrivi_class = "saldovahvistus_rivi_valittu";
 	}
 	else {
 		$saldovahvistusrivi['laskun_avoin_paiva'] = date('Y-m-d', strtotime($request['paiva']));
+		$saldovahvistusrivi_class = "saldovahvistus_rivi";
 	}
+
+	echo "<tr class='{$saldovahvistusrivi_class} aktiivi {$tr_class}'>";
+
+	echo "<td valign='top'>";
 	echo "<input type='hidden' class='laskun_avoin_paiva' value='{$saldovahvistusrivi['laskun_avoin_paiva']}' />";
+	echo "<input type='hidden' class='ryhmittely_tyyppi' value='{$saldovahvistusrivi['ryhmittely_tyyppi']}' />";
 	echo date('d.m.Y', strtotime($saldovahvistusrivi['laskun_avoin_paiva']));
 	echo "</td>";
 
@@ -426,13 +433,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
 	echo "</td>";
 
 	echo "<td>";
-	if ($valitut) {
-		$checkbox_class = "saldovahvistus_rivi_valinta_valittu";
-	}
-	else {
-		$checkbox_class = "saldovahvistus_rivi_valinta";
-	}
-	echo "<input type='checkbox' class='{$checkbox_class}' CHECKED />";
+	echo "<input type='checkbox' class='saldovahvistus_rivi_valinta' CHECKED />";
 	echo "</td>";
 
 	// .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi_valinta löytää lasku_tunnukset, jotka lähtee ajaxin mukana

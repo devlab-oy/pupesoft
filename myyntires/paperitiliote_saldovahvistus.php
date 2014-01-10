@@ -69,20 +69,11 @@ function alku($saldovahvistus) {
 	$pdf->draw_text(280, 815, t("Saldovahvistus", $kieli), $firstpage);
 	$pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, $firstpage, $norm);
 
-	if ($saldovahvistus['asiakas']["laskutus_nimi"] != "") {
-		$pdf->draw_text(30, 750, $saldovahvistus['asiakas']['laskutus_nimi'], $firstpage, $bold);
-		$pdf->draw_text(30, 740, $saldovahvistus['asiakas']["laskutus_nimitark"], $firstpage, $bold);
-		$pdf->draw_text(30, 730, $saldovahvistus['asiakas']["laskutus_osoite"], $firstpage, $bold);
-		$pdf->draw_text(30, 720, $saldovahvistus['asiakas']["laskutus_postino"]." ".$saldovahvistus['asiakas']["laskutus_postitp"], $firstpage, $bold);
-		$pdf->draw_text(30, 710, $saldovahvistus['asiakas']["laskutus_maa"], $firstpage, $bold);
-	}
-	else {
-		$pdf->draw_text(30, 750, $saldovahvistus['asiakas']["nimi"], $firstpage, $bold);
-		$pdf->draw_text(30, 740, $saldovahvistus['asiakas']["nimitark"], $firstpage, $bold);
-		$pdf->draw_text(30, 730, $saldovahvistus['asiakas']["osoite"], $firstpage, $bold);
-		$pdf->draw_text(30, 720, $saldovahvistus['asiakas']["postino"]." ".$saldovahvistus['asiakas']["postitp"], $firstpage, $bold);
-		$pdf->draw_text(30, 710, $saldovahvistus['asiakas']["maa"], $firstpage, $bold);
-	}
+	$pdf->draw_text(30, 750, $saldovahvistus['asiakas']["nimi"], $firstpage, $bold);
+	$pdf->draw_text(30, 740, $saldovahvistus['asiakas']["nimitark"], $firstpage, $bold);
+	$pdf->draw_text(30, 730, $saldovahvistus['asiakas']["osoite"], $firstpage, $bold);
+	$pdf->draw_text(30, 720, $saldovahvistus['asiakas']["postino"]." ".$saldovahvistus['asiakas']["postitp"], $firstpage, $bold);
+	$pdf->draw_text(30, 710, $saldovahvistus['asiakas']["maa"], $firstpage, $bold);
 
 	$pdf->draw_text(380, 780, t("Päivämäärä", $kieli).': '.date('d.m.Y'), $firstpage, $norm);
 
@@ -125,7 +116,7 @@ function alku($saldovahvistus) {
 function rivi($tyyppi, $firstpage, $row, $saldovahvistus) {
 	global $pdf, $kala, $sivu, $lask, $norm, $pieni, $yhtiorow;
 
-	if ($lask == 17) {
+	if ($lask == 38) {
 		$sivu++;
 		loppu($firstpage, array());
 		$firstpage = alku($saldovahvistus);
@@ -148,12 +139,11 @@ function rivi($tyyppi, $firstpage, $row, $saldovahvistus) {
 function loppu($firstpage, $saldovahvistus) {
 	global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala, $bold;
 
-	if ($lask > 35) {
+	if ($lask > 38) {
 		$sivu++;
-		loppu($firstpage, array());
-		$firstpage = alku();
-		$kala = 605;
 		$lask = 1;
+		loppu($firstpage, $saldovahvistus);
+		$firstpage = alku();
 	}
 
 	if (!empty($saldovahvistus)) {
@@ -161,92 +151,92 @@ function loppu($firstpage, $saldovahvistus) {
 		$pdf->draw_text(250, $kala, t('Avoin saldo yhteensä', $kieli).'('.t('alv mukana', $kieli).')', $firstpage, $bold);
 		$pdf->draw_text(452.5, $kala, $saldovahvistus['avoin_saldo_summa'], $firstpage, $bold);
 		$pdf->draw_text(500, $kala, $saldovahvistus['valkoodi'], $firstpage, $bold);
-	}
 
-	$kala = 270;
+		$kala = 270;
 
-	//Pankkiyhteystiedot
-	$pdf->draw_rectangle($kala, 30, ($kala - 45), 565, $firstpage, $rectparam);
+		//Pankkiyhteystiedot
+		$pdf->draw_rectangle($kala, 30, ($kala - 45), 565, $firstpage, $rectparam);
 
-	$pdf->draw_text(40, $kala - 8, t("Pankkiyhteys", $kieli), $firstpage, $pieni);
-	$pdf->draw_text(40, $kala - 18, $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"], $firstpage, $norm);
-	$pdf->draw_text(40, $kala - 28, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"], $firstpage, $norm);
-	$pdf->draw_text(40, $kala - 38, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"], $firstpage, $norm);
+		$pdf->draw_text(40, $kala - 8, t("Pankkiyhteys", $kieli), $firstpage, $pieni);
+		$pdf->draw_text(40, $kala - 18, $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"], $firstpage, $norm);
+		$pdf->draw_text(40, $kala - 28, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"], $firstpage, $norm);
+		$pdf->draw_text(40, $kala - 38, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"], $firstpage, $norm);
 
-	$pdf->draw_text(230, $kala - 18, (empty($yhtiorow["pankkiiban1"])) ? '' : 'IBAN: '.$yhtiorow["pankkiiban1"], $firstpage, $norm);
-	$pdf->draw_text(230, $kala - 28, (empty($yhtiorow["pankkiiban2"])) ? '' : 'IBAN: '.$yhtiorow["pankkiiban1"], $firstpage, $norm);
-	$pdf->draw_text(230, $kala - 38, (empty($yhtiorow["pankkiiban3"])) ? '' : 'IBAN: '.$yhtiorow["pankkiiban1"], $firstpage, $norm);
+		$pdf->draw_text(230, $kala - 18, (empty($yhtiorow["pankkiiban1"])) ? '' : 'IBAN: '.$yhtiorow["pankkiiban1"], $firstpage, $norm);
+		$pdf->draw_text(230, $kala - 28, (empty($yhtiorow["pankkiiban2"])) ? '' : 'IBAN: '.$yhtiorow["pankkiiban1"], $firstpage, $norm);
+		$pdf->draw_text(230, $kala - 38, (empty($yhtiorow["pankkiiban3"])) ? '' : 'IBAN: '.$yhtiorow["pankkiiban1"], $firstpage, $norm);
 
-	$pdf->draw_text(430, $kala - 18, (empty($yhtiorow["pankkiswift1"])) ? '' : 'SWIFT: '.$yhtiorow["pankkiswift1"], $firstpage, $norm);
-	$pdf->draw_text(430, $kala - 28, (empty($yhtiorow["pankkiswift2"])) ? '' : 'SWIFT: '.$yhtiorow["pankkiswift2"], $firstpage, $norm);
-	$pdf->draw_text(430, $kala - 38, (empty($yhtiorow["pankkiswift3"])) ? '' : 'SWIFT: '.$yhtiorow["pankkiswift3"], $firstpage, $norm);
+		$pdf->draw_text(430, $kala - 18, (empty($yhtiorow["pankkiswift1"])) ? '' : 'SWIFT: '.$yhtiorow["pankkiswift1"], $firstpage, $norm);
+		$pdf->draw_text(430, $kala - 28, (empty($yhtiorow["pankkiswift2"])) ? '' : 'SWIFT: '.$yhtiorow["pankkiswift2"], $firstpage, $norm);
+		$pdf->draw_text(430, $kala - 38, (empty($yhtiorow["pankkiswift3"])) ? '' : 'SWIFT: '.$yhtiorow["pankkiswift3"], $firstpage, $norm);
 
-	$kala = 225;
+		$kala = 225;
 
-	//Alimmat kolme laatikkoa, yhtiötietoja
-	$pdf->draw_rectangle($kala, 30, ($kala - 50), 565, $firstpage, $rectparam);
-	$pdf->draw_rectangle($kala, 207, ($kala - 50), 565, $firstpage, $rectparam);
-	$pdf->draw_rectangle($kala, 394, ($kala - 50), 565, $firstpage, $rectparam);
-	$pdf->draw_text(40, $kala - 13, $yhtiorow["nimi"], $firstpage, $pieni);
-	$pdf->draw_text(40, $kala - 23, $yhtiorow["osoite"], $firstpage, $pieni);
-	$pdf->draw_text(40, $kala - 33, $yhtiorow["postino"]."  ".$yhtiorow["postitp"], $firstpage, $pieni);
-	$pdf->draw_text(40, $kala - 43, $yhtiorow["maa"], $firstpage, $pieni);
+		//Alimmat kolme laatikkoa, yhtiötietoja
+		$pdf->draw_rectangle($kala, 30, ($kala - 50), 565, $firstpage, $rectparam);
+		$pdf->draw_rectangle($kala, 207, ($kala - 50), 565, $firstpage, $rectparam);
+		$pdf->draw_rectangle($kala, 394, ($kala - 50), 565, $firstpage, $rectparam);
+		$pdf->draw_text(40, $kala - 13, $yhtiorow["nimi"], $firstpage, $pieni);
+		$pdf->draw_text(40, $kala - 23, $yhtiorow["osoite"], $firstpage, $pieni);
+		$pdf->draw_text(40, $kala - 33, $yhtiorow["postino"]."  ".$yhtiorow["postitp"], $firstpage, $pieni);
+		$pdf->draw_text(40, $kala - 43, $yhtiorow["maa"], $firstpage, $pieni);
 
-	$pdf->draw_text(217, $kala - 13, t("Puhelin", $kieli).":", $firstpage, $pieni);
-	$pdf->draw_text(247, $kala - 13, $yhtiorow["puhelin"], $firstpage, $pieni);
-	$pdf->draw_text(217, $kala - 23, t("Fax", $kieli).":", $firstpage, $pieni);
-	$pdf->draw_text(247, $kala - 23, $yhtiorow["fax"], $firstpage, $pieni);
-	$pdf->draw_text(217, $kala - 33, t("Email", $kieli).":", $firstpage, $pieni);
-	$pdf->draw_text(247, $kala - 33, $yhtiorow["email"], $firstpage, $pieni);
+		$pdf->draw_text(217, $kala - 13, t("Puhelin", $kieli).":", $firstpage, $pieni);
+		$pdf->draw_text(247, $kala - 13, $yhtiorow["puhelin"], $firstpage, $pieni);
+		$pdf->draw_text(217, $kala - 23, t("Fax", $kieli).":", $firstpage, $pieni);
+		$pdf->draw_text(247, $kala - 23, $yhtiorow["fax"], $firstpage, $pieni);
+		$pdf->draw_text(217, $kala - 33, t("Email", $kieli).":", $firstpage, $pieni);
+		$pdf->draw_text(247, $kala - 33, $yhtiorow["email"], $firstpage, $pieni);
 
-	$pdf->draw_text(404, $kala - 13, t("Y-tunnus", $kieli).":", $firstpage, $pieni);
-	$pdf->draw_text(444, $kala - 13, $yhtiorow["ytunnus"], $firstpage, $pieni);
-	$pdf->draw_text(404, $kala - 23, t("Kotipaikka", $kieli).":", $firstpage, $pieni);
-	$pdf->draw_text(444, $kala - 23, $yhtiorow["kotipaikka"], $firstpage, $pieni);
-	$pdf->draw_text(404, $kala - 33, t("Enn.per.rek", $kieli), $firstpage, $pieni);
-	$pdf->draw_text(404, $kala - 43, t("Alv.rek", $kieli), $firstpage, $pieni);
+		$pdf->draw_text(404, $kala - 13, t("Y-tunnus", $kieli).":", $firstpage, $pieni);
+		$pdf->draw_text(444, $kala - 13, $yhtiorow["ytunnus"], $firstpage, $pieni);
+		$pdf->draw_text(404, $kala - 23, t("Kotipaikka", $kieli).":", $firstpage, $pieni);
+		$pdf->draw_text(444, $kala - 23, $yhtiorow["kotipaikka"], $firstpage, $pieni);
+		$pdf->draw_text(404, $kala - 33, t("Enn.per.rek", $kieli), $firstpage, $pieni);
+		$pdf->draw_text(404, $kala - 43, t("Alv.rek", $kieli), $firstpage, $pieni);
 
 
-	$kala = 162;
-	//Katkoviiva
-	$y = array();
-	$y[0] = $y[1] = $kala;
-	$how_many_lines = 70;
-	$page_width = $pdf->currentPage['width'];
-	$margin_width = 30;
-	$line_and_empty_space_width = ($page_width - ($margin_width * 2)) / $how_many_lines;
-	for ($i = $margin_width; $i <= ($page_width - $margin_width); $i = $i + $line_and_empty_space_width) {
-		$x[0] = $i;
-		$line_width = $line_and_empty_space_width * 0.75;
-		$x[1] = $i + $line_width;
+		$kala = 162;
+		//Katkoviiva
+		$y = array();
+		$y[0] = $y[1] = $kala;
+		$how_many_lines = 70;
+		$page_width = $pdf->currentPage['width'];
+		$margin_width = 30;
+		$line_and_empty_space_width = ($page_width - ($margin_width * 2)) / $how_many_lines;
+		for ($i = $margin_width; $i <= ($page_width - $margin_width); $i = $i + $line_and_empty_space_width) {
+			$x[0] = $i;
+			$line_width = $line_and_empty_space_width * 0.75;
+			$x[1] = $i + $line_width;
+			$pdf->draw_line($x, $y, $firstpage, $rectparam);
+		}
+
+		$pdf->draw_text(30, $kala - 20, t('Saldovahvistus', $kieli), $firstpage, $bold);
+
+		$pdf->draw_text(30, $kala - 40, t('Todistamme että', $kieli)." {$saldovahvistus['asiakas']['nimi']} ".t('velka', $kieli).'/'.t('ennakkomaksu', $kieli)." {$yhtiorow['nimi']} ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva'])).' '.t('on', $kieli), $firstpage, $bold);
+
+		$x[0] = 30;
+		$x[1] = 230;
+		$y[0] = $y[1] = $kala - 70;
+		$pdf->draw_line($x, $y, $firstpage, $rectparam);
+		$pdf->draw_text(235, $kala - 70, 'EUROT', $firstpage, $bold);
+
+		$pdf->draw_text(30, $kala - 90, t('Nimi', $kieli).':', $firstpage, $bold);
+		$y[0] = $y[1] = $kala - 90;
+		$x[0] = 100;
+		$x[1] = 320;
+		$pdf->draw_line($x, $y, $firstpage, $rectparam);
+
+		$pdf->draw_text(30, $kala - 110, t('Allekirjoitus', $kieli).':', $firstpage, $bold);
+		$y[0] = $y[1] = $kala - 110;
+		$x[0] = 100;
+		$x[1] = 320;
+		$pdf->draw_line($x, $y, $firstpage, $rectparam);
+
+		$pdf->draw_text(30, $kala - 130, t('Puhelin', $kieli).':', $firstpage, $bold);
+		$y[0] = $y[1] = $kala - 130;
+		$x[0] = 100;
+		$x[1] = 320;
 		$pdf->draw_line($x, $y, $firstpage, $rectparam);
 	}
-
-	$pdf->draw_text(30, $kala - 20, t('Saldovahvistus', $kieli), $firstpage, $bold);
-
-	$pdf->draw_text(30, $kala - 40, t('Todistamme että', $kieli)." {$saldovahvistus['asiakas']['nimi']} ".t('velka', $kieli).'/'.t('ennakkomaksu', $kieli)." {$yhtiorow['nimi']} ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva'])).' '.t('on', $kieli), $firstpage, $bold);
-
-	$x[0] = 30;
-	$x[1] = 230;
-	$y[0] = $y[1] = $kala - 70;
-	$pdf->draw_line($x, $y, $firstpage, $rectparam);
-	$pdf->draw_text(235, $kala - 70, 'EUROT', $firstpage, $bold);
-
-	$pdf->draw_text(30, $kala - 90, t('Nimi', $kieli).':', $firstpage, $bold);
-	$y[0] = $y[1] = $kala - 90;
-	$x[0] = 100;
-	$x[1] = 320;
-	$pdf->draw_line($x, $y, $firstpage, $rectparam);
-
-	$pdf->draw_text(30, $kala - 110, t('Allekirjoitus', $kieli).':', $firstpage, $bold);
-	$y[0] = $y[1] = $kala - 110;
-	$x[0] = 100;
-	$x[1] = 320;
-	$pdf->draw_line($x, $y, $firstpage, $rectparam);
-
-	$pdf->draw_text(30, $kala - 130, t('Puhelin', $kieli).':', $firstpage, $bold);
-	$y[0] = $y[1] = $kala - 130;
-	$x[0] = 100;
-	$x[1] = 320;
-	$pdf->draw_line($x, $y, $firstpage, $rectparam);
 }

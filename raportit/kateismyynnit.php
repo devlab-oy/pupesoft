@@ -1290,6 +1290,13 @@
 						$luottokortti = true;
 					}
 
+					if ($row['tilsumma'] < $row['summa']) {
+						$echolisa = "({$row['summa']}) ";
+					}
+					else {
+						$echolisa = "";
+					}
+
 					if (stristr($row["tyyppi"], 'kateinen')) {
 
 						$solu = "kateinen";
@@ -1495,13 +1502,6 @@
 
 							$kassayhteensa = 0;
 							$kateismaksuyhteensa = 0;
-						}
-
-						if ($row['tilsumma'] < $row['summa']) {
-							$echolisa = "({$row['summa']}) ";
-						}
-						else {
-							$echolisa = "";
 						}
 
 						echo "<tr class='aktiivi'>";
@@ -1734,6 +1734,13 @@
 
 					while ($row = mysql_fetch_assoc($result)) {
 
+						if ($row['tilsumma'] < $row['summa']) {
+							$echolisa = "({$row['summa']}) ";
+						}
+						else {
+							$echolisa = "";
+						}
+
 						if ($row["tyyppi"] == 'Pankkikortti') {
 
 							if ($row["tilino"] != '') {
@@ -1825,6 +1832,13 @@
 
 					while ($row = mysql_fetch_assoc($result)) {
 
+						if ($row['tilsumma'] < $row['summa']) {
+							$echolisa = "({$row['summa']}) ";
+						}
+						else {
+							$echolisa = "";
+						}
+						
 						if ($row["tyyppi"] == 'Luottokortti') {
 
 							if ($row["tilino"] != '') {
@@ -1843,7 +1857,7 @@
 							echo "<td>$row[ytunnus]</td>";
 							echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-							echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
+							echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
 							$kateinen    		  = $row["tilino"];
 							$edkassa 	 		  = $row["kassa"];
@@ -1900,6 +1914,13 @@
 			}
 			else {
 				while ($row = mysql_fetch_assoc($result)) {
+
+					if ($row['tilsumma'] < $row['summa']) {
+						$echolisa = "({$row['summa']}) ";
+					}
+					else {
+						$echolisa = "";
+					}
 
 					if ((($edkassa != $row["kassa"] and $edkassa != '') or ($kateinen != $row["tilino"] and $kateinen != ''))) {
 						$kassalippaan_kateisotot_yhteensa = 0;
@@ -1982,7 +2003,7 @@
 					echo "<td>$row[ytunnus]</td>";
 					echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 					echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-					echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
+					echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
 					$kateinen    		= $row["tilino"];
 					$edkassa 	 		= $row["kassa"];

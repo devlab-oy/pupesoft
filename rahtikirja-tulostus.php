@@ -361,7 +361,7 @@
 					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
 					asiakas.toimitusvahvistus, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) as asiakas_email, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
 					FROM rahtikirjat
-					JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
+					JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G')) ";
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 			$query .= " and lasku.alatila = 'B' ";
@@ -432,7 +432,7 @@
 				// haetaan tälle rahtikirjalle kuuluvat tunnukset
 				$query = "	SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
 							FROM rahtikirjat
-							JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
+							JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G')) ";
 
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 					$query .= " and lasku.alatila = 'B' ";
@@ -1186,7 +1186,7 @@
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
 		$query = "	SELECT lasku.yhtio yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7, group_concat(distinct lasku.tunnus ORDER BY lasku.tunnus ASC) ltunnus
 					FROM rahtikirjat
-					JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
+					JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B')
 					JOIN toimitustapa on lasku.yhtio = toimitustapa.yhtio
 					AND lasku.toimitustapa = toimitustapa.selite
 					AND toimitustapa.tulostustapa in ('E','L')

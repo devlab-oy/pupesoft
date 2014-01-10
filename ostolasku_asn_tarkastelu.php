@@ -283,7 +283,7 @@
 
 					$query = "	UPDATE asn_sanomat SET
 								status = 'X',
-								tilausrivi = ''
+								tilausrivi = NULL
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND asn_numero = '{$lasku}'
 								AND status not in ('E', 'D')";
@@ -312,7 +312,7 @@
 			$laskuttajan_toimittajanumero = "";
 			$lasku_manuaalisesti_check = 0;
 
-			$tilausrivilisa = $tee == 'vahvistavakisinkolli' ? "" : "AND tilausrivi != ''";
+			$tilausrivilisa = $tee == 'vahvistavakisinkolli' ? "" : "AND tilausrivi != NULL";
 
 			$query = "	SELECT *
 						FROM asn_sanomat
@@ -345,7 +345,7 @@
 						}
 					}
 					else {
-						if ($kollirow['tilausrivi'] != '') $paketin_rivit[] = $kollirow['tilausrivi'];
+						if ($kollirow['tilausrivi'] != NULL) $paketin_rivit[] = $kollirow['tilausrivi'];
 					}
 
 					// Haetaan tuotteen lapset jotka ovat runkoveloituksia
@@ -590,7 +590,7 @@
 									$lasku_manuaalisesti_check = 1;
 
 									$query = "	UPDATE asn_sanomat SET
-												tilausrivi = ''
+												tilausrivi = NULL
 												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tunnus	= '{$kollirow['tunnus']}'";
 									$upd_res = pupe_query($query);
@@ -623,7 +623,7 @@
 
 					$query = "	UPDATE asn_sanomat SET
 								status = '',
-								tilausrivi = ''
+								tilausrivi = NULL
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laji = '{$lajilisa}'
 								AND asn_numero = '{$lasku}'
@@ -718,7 +718,7 @@
 		$rivi = mysql_fetch_assoc($kollires);
 
 		// poistetaan STATUS-täppä
-		$query = "UPDATE asn_sanomat SET status = '', tilausrivi= '' WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
+		$query = "UPDATE asn_sanomat SET status = '', tilausrivi= NULL WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
 		$kollires = pupe_query($query);
 
 		$tee = '';
@@ -1615,11 +1615,11 @@
 			echo "</form>";
 		}
 	}
-
+echo "1618: $tee, $valitse <br><br>";
 	if ($tee == 'nayta') {
 
 		if ($valitse == 'asn') {
-
+echo "1622:asn <br><br>";
 			if (strpos($kolli, "##") !== FALSE) list($kolli, $asn_numero, $toimittajanumero) = explode("##", $kolli);
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
@@ -1639,7 +1639,7 @@
 						AND asn_sanomat.paketintunniste = '{$kolli}'
 						AND asn_sanomat.asn_numero = '{$asn_numero}'
 						AND asn_sanomat.toimittajanumero = '{$toimittajanumero}'
-						AND asn_sanomat.tilausrivi != ''
+						#AND asn_sanomat.tilausrivi != NULL
 						AND asn_sanomat.laji = 'asn'
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
 			$result = pupe_query($query);
@@ -1709,7 +1709,7 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.paketintunniste = '{$kolli}'
-						AND asn_sanomat.tilausrivi = ''
+						AND asn_sanomat.tilausrivi is NULL
 						AND asn_sanomat.laji = 'asn'
 						AND asn_sanomat.asn_numero = '{$asn_numero}'
 						AND asn_sanomat.toimittajanumero = '{$toimittajanumero}'
@@ -1835,7 +1835,7 @@
 			echo "</form>";
 		}
 		else {
-
+echo "1838: automaattikohdistus <br><br>";
 			echo "<form method='post' action='?valitse={$valitse}' id='kolliformi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='etsi' />";
 			echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}//toimipaikka={$toimipaikka}' />";
@@ -1940,7 +1940,7 @@
 					$row['nimitys'] = $trow['nimitys'];
 				}
 
-				if ($row['tilausrivi'] != '') {
+				if ($row['tilausrivi'] != NULL) {
 					$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$row['tilausrivi']})";
 					$hinta_chk_res = pupe_query($query);
 					$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
@@ -1963,7 +1963,7 @@
 				if ($row['status'] == 'E') {
 					echo "<font class='message'>",t("Erolistalla"),"</font>";
 				}
-				elseif ($row['tilausrivi'] != '') {
+				elseif ($row['tilausrivi'] != NULL) {
 					echo "<font class='ok'>Ok</font>";
 					$ok++;
 
@@ -1979,7 +1979,7 @@
 
 				echo "<td class='back'>";
 
-				if ($row['tilausrivi'] == '' and $row['status'] != 'E') {
+				if ($row['tilausrivi'] == NULL and $row['status'] != 'E') {
 					echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}##{$toimipaikka}' value='",t("Etsi"),"' />";
 
 					if ($row['hinta'] == 0) {
@@ -2077,7 +2077,7 @@
 						asn_sanomat.toimittajanumero,
 						asn_sanomat.status,
 						count(asn_sanomat.tunnus) AS rivit,
-						sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
+						sum(if(asn_sanomat.tilausrivi is null, 0, 1)) AS ok
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
@@ -2212,7 +2212,7 @@
 						asn_sanomat.paketintunniste,
 						asn_sanomat.toimittajanumero,
 						count(asn_sanomat.tunnus) AS rivit,
-						sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
+						sum(if(asn_sanomat.tilausrivi is NULL, 0, 1)) AS ok
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 						JOIN lasku ON (lasku.yhtio = asn_sanomat.yhtio AND lasku.laskunro = asn_sanomat.asn_numero AND vienti in ('B', 'C', 'E', 'F', 'H', 'I') AND lasku.liitostunnus = toimi.tunnus {$toimipaikkalisa})

@@ -15346,7 +15346,7 @@ if (!function_exists("hae_hyvityshinta")) {
 		$query = "	SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
 					tilausrivi.hinta * {$query_ale_lisa} hinta,
 					sum(tilausrivi.kpl + tilausrivi.varattu) kpl
-					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laskutettuaika) 
+					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laadittu) 
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = tilausrivi.otunnus
 						AND lasku.tila = 'L'
@@ -15357,6 +15357,7 @@ if (!function_exists("hae_hyvityshinta")) {
 					AND tilausrivi.tuoteno = '{$tuoteno}'
 					AND tilausrivi.varattu + tilausrivi.kpl > 0
 					AND tilausrivi.var not in ('P','J')
+					AND tilausrivi.laadittu > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR)
 					AND (tilausrivi.laskutettuaika > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR) or tilausrivi.laskutettuaika = '0000-00-00')
 					GROUP BY ika, hinta
 					HAVING kpl != 0
@@ -15366,7 +15367,7 @@ if (!function_exists("hae_hyvityshinta")) {
 					SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
 					tilausrivi.hinta * {$query_ale_lisa} hinta,
 					sum(tilausrivi.kpl + tilausrivi.varattu) kpl
-					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laskutettuaika) 
+					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laadittu)
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = tilausrivi.otunnus
 						AND lasku.tila = 'L'
@@ -15377,6 +15378,7 @@ if (!function_exists("hae_hyvityshinta")) {
 					AND tilausrivi.tuoteno = '{$tuoteno}'
 					AND tilausrivi.varattu + tilausrivi.kpl < 0
 					AND tilausrivi.var not in ('P','J')
+					AND tilausrivi.laadittu > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR)
 					AND (tilausrivi.laskutettuaika > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR) or tilausrivi.laskutettuaika = '0000-00-00')
 					GROUP BY ika, hinta
 					HAVING kpl != 0

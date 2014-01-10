@@ -432,7 +432,7 @@
 				// haetaan tälle rahtikirjalle kuuluvat tunnukset
 				$query = "	SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
 							FROM rahtikirjat
-							JOIN lasku ON (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
+							JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
 
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 					$query .= " and lasku.alatila = 'B' ";
@@ -1185,16 +1185,16 @@
 
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
 		$query = "	SELECT lasku.yhtio yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7, group_concat(distinct lasku.tunnus ORDER BY lasku.tunnus ASC) ltunnus
-					from rahtikirjat
-					join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
-					join toimitustapa on lasku.yhtio = toimitustapa.yhtio
-					and lasku.toimitustapa = toimitustapa.selite
-					and toimitustapa.tulostustapa in ('E','L')
-					and toimitustapa.nouto = ''
-					left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
-					left join varastopaikat on varastopaikat.yhtio=rahtikirjat.yhtio and varastopaikat.tunnus=rahtikirjat.tulostuspaikka
-					where rahtikirjat.tulostettu = '0000-00-00 00:00:00'
-					and rahtikirjat.$logistiikka_yhtiolisa
+					FROM rahtikirjat
+					JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
+					JOIN toimitustapa on lasku.yhtio = toimitustapa.yhtio
+					AND lasku.toimitustapa = toimitustapa.selite
+					AND toimitustapa.tulostustapa in ('E','L')
+					AND toimitustapa.nouto = ''
+					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					LEFT JOIN varastopaikat on varastopaikat.yhtio=rahtikirjat.yhtio and varastopaikat.tunnus=rahtikirjat.tulostuspaikka
+					WHERE rahtikirjat.tulostettu = '0000-00-00 00:00:00'
+					AND rahtikirjat.$logistiikka_yhtiolisa
 					$wherelisa
 					GROUP BY lasku.yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7
 					ORDER BY varastopaikat.tunnus, lasku.toimitustapa";

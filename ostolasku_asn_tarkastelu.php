@@ -312,7 +312,7 @@
 			$laskuttajan_toimittajanumero = "";
 			$lasku_manuaalisesti_check = 0;
 
-			$tilausrivilisa = $tee == 'vahvistavakisinkolli' ? "" : "AND tilausrivi != NULL";
+			$tilausrivilisa = $tee == 'vahvistavakisinkolli' ? "" : "AND tilausrivi IS NOT NULL";
 
 			$query = "	SELECT *
 						FROM asn_sanomat
@@ -771,6 +771,7 @@
 							AND tila = 'O'
 							AND alatila = 'A'
 							AND liitostunnus = '{$toimirow['tunnus']}'
+							AND vanhatunnus = '{$toimipaikka}'
 							ORDER BY tunnus
 							DESC LIMIT 1";
 				$res = pupe_query($query);
@@ -1615,11 +1616,11 @@
 			echo "</form>";
 		}
 	}
-echo "1618: $tee, $valitse <br><br>";
+
 	if ($tee == 'nayta') {
 
 		if ($valitse == 'asn') {
-echo "1622:asn <br><br>";
+
 			if (strpos($kolli, "##") !== FALSE) list($kolli, $asn_numero, $toimittajanumero) = explode("##", $kolli);
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
@@ -1835,7 +1836,7 @@ echo "1622:asn <br><br>";
 			echo "</form>";
 		}
 		else {
-echo "1838: automaattikohdistus <br><br>";
+
 			echo "<form method='post' action='?valitse={$valitse}' id='kolliformi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='etsi' />";
 			echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}//toimipaikka={$toimipaikka}' />";
@@ -2077,7 +2078,7 @@ echo "1838: automaattikohdistus <br><br>";
 						asn_sanomat.toimittajanumero,
 						asn_sanomat.status,
 						count(asn_sanomat.tunnus) AS rivit,
-						sum(if(asn_sanomat.tilausrivi is null, 0, 1)) AS ok
+						sum(if(asn_sanomat.tilausrivi is NULL, 0, 1)) AS ok
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'

@@ -481,6 +481,25 @@
 			echo "</select>";
 			echo "</td>";
 			echo "</tr>";
+
+			$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+						FROM kirjoittimet
+						WHERE {$logistiikka_yhtiolisa}
+						AND komento != 'EDI'
+						GROUP BY komento
+						ORDER BY kirjoitin";
+			$kires = pupe_query($query);
+
+			echo "<tr><th>",t("Valitse tulostin"),":</th>";
+			echo "<td><select name='komento'>";
+			echo "<option value='' SELECTED>",t("Oletustulostimelle"),"</option>";
+
+			while ($kirow = mysql_fetch_assoc($kires)) {
+				$sel = (isset($komento) and trim($komento) != "") ? "selected" : "";
+				echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
+			}
+
+			echo "</select></td></tr>";
 		}
 
 		echo "</table><br>";

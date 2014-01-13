@@ -1761,6 +1761,9 @@
 					case "printteri9":
 						$otsikko = t("Reklamaatioiden ja siirtolistojen vastaanoton purkulista");
 						break;
+					case "printteri10":
+						$otsikko = t("Lämpösiirto");
+						break;
 					default:
 						if (isset($mysqlaliasarraysetti) and isset($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)])) {
 							$otsikko = t($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)]);

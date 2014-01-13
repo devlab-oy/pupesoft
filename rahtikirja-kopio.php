@@ -29,6 +29,11 @@
 
 	if (!isset($nayta_pdf)) echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
 
+	if ($yhtiorow['kerayserat'] == 'K' and $real_submit != "" and $tee == 'valitse' and $toimitustapa == "" and $lahto == "") {
+		echo "<font class='error'>",t("Valitse toimitustapa tai lähtö"),"</font><br />";
+		$real_submit = $tee = "";
+	}
+
 	if ($tee == 'erittelykopsu') {
 
 		$query = "	SELECT *

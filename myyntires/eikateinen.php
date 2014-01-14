@@ -2,27 +2,36 @@
 
 require ("../inc/parametrit.inc");
 
-if (!isset($toim)) $toim = "";
-if (!isset($maksuehto)) $maksuehto = 0;
-if (!isset($laskuno)) $laskuno = 0;
-if (!isset($tunnus)) $tunnus = 0;
+if (!isset($toim)) {
+	$toim = "";
+}
+if (!isset($maksuehto)) {
+	$maksuehto = 0;
+}
+if (!isset($laskuno)) {
+	$laskuno = 0;
+}
+if (!isset($tunnus)) {
+	$tunnus = 0;
+}
+
 
 if ($toim == 'KATEINEN') {
-	echo "<font class='head'>",t("Lasku halutaankin maksaa käteisellä"),"</font><hr />";
+	echo "<font class='head'>", t("Lasku halutaankin maksaa käteisellä"), "</font><hr />";
 }
 else {
-	echo "<font class='head'>",t("Lasku ei ollutkaan käteistä"),"</font><hr />";
+	echo "<font class='head'>", t("Lasku ei ollutkaan käteistä"), "</font><hr />";
 }
 
-if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
-	$laskupvmerror      = FALSE;
+if ((int)$maksuehto != 0 and (int)$tunnus != 0) {
+	$laskupvmerror = FALSE;
 	$laskumaksettuerror = FALSE;
 
 	if ($toim == 'KATEINEN') {
-		$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
+		$tapahtumapaiva = date('Y-m-d', mktime(0, 0, 0, $tapahtumapaiva_kk, $tapahtumapaiva_pp, $tapahtumapaiva_vv));
 	}
 	else {
-		$tapahtumapaiva  = date('Y-m-d');
+		$tapahtumapaiva = date('Y-m-d');
 	}
 
 	// Haetaan laskun tiedot
@@ -36,47 +45,50 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		$laskumaksettuerror = TRUE;
 	}
 
-	$tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
+	$saako_muuttaa = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
 
-	if (empty($tilikausi) and !$laskupvmerror and !$laskumaksettuerror) {
-		$mehtorow 		= hae_maksuehto($maksuehto);
-		$konsrow  		= hae_asiakas($laskurow);
-		$kassalipasrow 	= hae_kassalipas($kassalipas);
+	if ($saako_muuttaa and !$laskupvmerror and !$laskumaksettuerror) {
+		$maksuehtorow = hae_maksuehto($maksuehto);
+		$konsrow = hae_asiakas($laskurow);
+		$kassalipasrow = hae_kassalipas($kassalipas);
 
 		$params = array(
 			'konsrow'		 => $konsrow,
-			'mehtorow'		 => $mehtorow,
+			'mehtorow'		 => $maksuehtorow,
 			'laskurow'		 => $laskurow,
 			'maksuehto'		 => $maksuehto,
 			'tunnus'		 => $tunnus,
 			'toim'			 => $toim,
 			'tapahtumapaiva' => $tapahtumapaiva,
-			'kassalipas'	 => $kassalipas
-		);
-
-		if ($toim == 'KATEINEN' and $kateinen != '') {
-			// Lasku oli ennestään käteinen ja nyt päivitetään sille joku toinen käteismaksuehto
-			list($myysaatili, $_tmp) = hae_kassalippaan_tiedot($laskurow['kassalipas'], hae_maksuehto($laskurow['maksuehto']), $laskurow);
-			$_tmp = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
-		}
-		else {
-			$myysaatili = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
-		}
-
-		list($_kassalipas, $kustp) = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
-
-		$params = array(
-			'laskurow'		 => $laskurow,
-			'tunnus'		 => $tunnus,
-			'myysaatili'	 => $myysaatili,
-			'tapahtumapaiva' => $tapahtumapaiva,
-			'toim'			 => $toim,
-			'_kassalipas'	 => $_kassalipas,
+			'kassalipas'	 => $kassalipas,
 			'kateinen'		 => $kateinen,
-			'kustp'			 => $kustp
 		);
 
-		tee_kirjanpito_muutokset($params);
+		$myyntisaamis_tili = hae_myyntisaamis_tili($params);
+		korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+
+		//Haetaan requestista tulevan kassalippaan tiedot. L -> K kyseessä on siis se kassalipas, josta käteinen halutaan ottaa
+		if ($toim == 'KATEINEN') {
+			list($valitun_maksuehdon_tili, $valitun_maksuehdon_kustannuspaikka) = hae_kassalippaan_tiedot2($kassalipas, $maksuehtorow);
+		}
+
+		//Tässä ollu ennen tämmöi iffi. En niinkö tajuu miten tonne iffiin on voitu mennä.
+//		if ($toim == 'KATEINEN' and $kateinen != '') {
+//			// Lasku oli ennestään käteinen ja nyt päivitetään sille joku toinen käteismaksuehto
+//			list($myysaatili, $_tmp) = hae_kassalippaan_tiedot($laskurow['kassalipas'], hae_maksuehto($laskurow['maksuehto']), $laskurow);
+//			$_tmp = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+//		}
+//		else {
+//			$myysaatili = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+//		}
+
+		$params['myyntisaamis_tili'] = $myyntisaamis_tili;
+		$params['valitun_maksuehdon_tili'] = $valitun_maksuehdon_tili;
+		$params['valitun_maksuehdon_kustannuspaikka'] = $valitun_maksuehdon_kustannuspaikka;
+		$params['kassalippaan_kateistilit'] = hae_kassalippaan_kateistilit($laskurow);
+		$params['kassalippaiden_kateistilit'] = hae_kateistilit();
+
+		tee_kirjanpito_muutokset2($params);
 		yliviivaa_alet_ja_pyoristykset($tunnus);
 		tarkista_pyoristys_erotukset($laskurow, $tunnus);
 
@@ -84,10 +96,10 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 			vapauta_kateistasmaytys($kassalipasrow, $tapahtumapaiva);
 		}
 
-		if (empty($mehtorow) and empty($laskurow)) {
-			$laskuno 	= 0;
-			$tunnus 	= 0;
-			$maksuehto 	= 0;
+		if (empty($maksuehtorow) and empty($laskurow)) {
+			$laskuno = 0;
+			$tunnus = 0;
+			$maksuehto = 0;
 		}
 
 		$laskuno = 0;
@@ -100,11 +112,11 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		echo "<font class='error'>".t("VIRHE: Syötetty päivämäärä on pienempi kuin laskun päivämäärä %s", "", $laskurow['tapvm'])."!</font>";
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE: Tilikausi on päättynyt %s. Et voi merkitä laskua maksetuksi päivälle %s", "", $tilikausi['tilikausi_alku'], $tapahtumapaiva)."!</font>";
+		echo "<font class='error'>".t("VIRHE: Tilikausi on päättynyt %s. Et voi merkitä laskua maksetuksi päivälle %s", "", $yhtiorow['tilikausi_alku'], $tapahtumapaiva)."!</font>";
 	}
 }
 
-if ((int) $laskuno != 0) {
+if ((int)$laskuno != 0) {
 	$laskurow = hae_lasku2($laskuno, $toim);
 
 	if (empty($laskurow)) {
@@ -175,17 +187,16 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 	global $kukarow, $yhtiorow;
 
 	if ($params['toim'] == 'KATEINEN') {
-		$query	 = "	UPDATE lasku set
-						erpcm      = '{$params['tapahtumapaiva']}',
-						mapvm      = '{$params['tapahtumapaiva']}',
-						maksuehto  = '{$params['maksuehto']}',
-						kassalipas = '{$params['kassalipas']}'
-						where yhtio = '{$kukarow['yhtio']}'
-						and tunnus  = '{$params['tunnus']}'";
-		$result = pupe_query($query);
+		$query = "	UPDATE lasku set
+					erpcm = '{$params['tapahtumapaiva']}',
+					mapvm = '{$params['tapahtumapaiva']}',
+					maksuehto = '{$params['maksuehto']}',
+					kassalipas = '{$params['kassalipas']}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = {$params['tunnus']}";
+		pupe_query($query);
 
 		echo "<font class='message'>".t("Muutettin laskun")." {$params['laskurow']['laskunro']} ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")."!</font><br>";
-
 	}
 	else {
 		// korjaillaan eräpäivät ja kassa-alet
@@ -220,7 +231,7 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 					kassalipas = 0
 					where yhtio = '$kukarow[yhtio]'
 					and tunnus  = '{$params['tunnus']}'";
-		$result = pupe_query($query);
+		pupe_query($query);
 
 		if (mysql_affected_rows() > 0) {
 			echo "<font class='message'>".t("Muutettin laskun")." {$params['laskurow']['laskunro']} ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")." ".t("ja merkattiin maksu avoimeksi")."!</font><br>";
@@ -229,18 +240,20 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 			echo "<font class='error'>".t("Laskua")." {$params['laskurow']['laskunro']} ".t("ei pystytty muuttamaan")."!</font><br>";
 		}
 	}
+}
+
+function hae_myyntisaamis_tili($params) {
+	global $yhtiorow;
 
 	if ($params['mehtorow']["factoring"] != "") {
-		$myysaatili = $yhtiorow['factoringsaamiset'];
+		return $yhtiorow['factoringsaamiset'];
 	}
 	elseif ($params['konsrow']["konserniyhtio"] != "") {
-		$myysaatili = $yhtiorow['konsernimyyntisaamiset'];
+		return $yhtiorow['konsernimyyntisaamiset'];
 	}
 	else {
-		$myysaatili = $yhtiorow['myyntisaamiset'];
+		return $yhtiorow['myyntisaamiset'];
 	}
-
-	return $myysaatili;
 }
 
 function hae_kassalipas($kassalipas_tunnus) {
@@ -255,78 +268,223 @@ function hae_kassalipas($kassalipas_tunnus) {
 	return mysql_fetch_assoc($result);
 }
 
-function tee_kirjanpito_muutokset($params) {
+function tee_kirjanpito_muutokset2($params) {
 	global $kukarow, $yhtiorow;
 
-	if ($params['toim'] == 'KATEINEN') {
-		$uusitili  = $params['_kassalipas'];
-		$vanhatili = '(' . $params['myysaatili'] . ')';
-		$tapvmlisa = ", tapvm = '{$params['tapahtumapaiva']}' ";
-	}
-	else {
-		$uusitili  = $params['myysaatili'];
-		$vanhatili = '('.implode(',', $params['_kassalipas']).')';
-		$tapvmlisa = "";
+	$kateistilit_temp = array();
+	foreach ($params['kassalippaiden_kateistilit'] as $kassalippaan_kateistilit) {
+		foreach ($kassalippaan_kateistilit as $kassalippaan_kateistili) {
+			if (!in_array($kassalippaan_kateistili, $kateistilit_temp)) {
+				$kateistilit_temp[] = $kassalippaan_kateistili;
+			}
+		}
 	}
 
-	$query = "	SELECT tunnus, summa
+	$kateistiliointi = hae_tiliointi($params['tunnus'], $kateistilit_temp);
+	$myyntisaamistiliointi = hae_tiliointi($params['tunnus'], array($params['myyntisaamis_tili']));
+
+	$loytyiko_kateistiliointi = true;
+	if (empty($kateistiliointi)) {
+		//Jos laskulle ei ole tehty käteistiliöintiä niin haetaan myyntisaamis tiliöinti, koska se on käteistiliöinnin vastatiliöinti
+		$kateistiliointi = hae_tiliointi($params['tunnus'], array($params['myyntisaamis_tili']));
+		$kateistiliointi['summa'] = $kateistiliointi['summa'] * -1;
+		$loytyiko_kateistiliointi = false;
+	}
+
+	//Tehdään käteistiliöinti, joka on myyntisaamistiliöinnin vastatiliöinti
+	$tiliointi_tunnus = kopioitiliointi($kateistiliointi['tunnus'], "");
+
+	$tiliointi = array(
+		'tunnus' => $tiliointi_tunnus,
+		'summa'	 => $kateistiliointi['summa'] * -1,
+		'tilino' => $params['valitun_maksuehdon_tili'],
+	);
+
+	$muutettuja_tiliointeja_kpl = paivita_tilioinnin_tiedot($tiliointi, $params['kustp']);
+
+	//Tehdään myyntisaamistiliöinti, joka on käteistiliöinnin vastatiliöinti
+	$tiliointi_tunnus = kopioitiliointi($myyntisaamistiliointi['tunnus'], "");
+	$tiliointi = array(
+		'tunnus' => $tiliointi_tunnus,
+		'summa'	 => $myyntisaamistiliointi['summa'] * -1,
+		'tilino' => $params['myyntisaamis_tili'],
+	);
+
+	$muutettuja_tiliointeja_kpl = paivita_tilioinnin_tiedot($tiliointi, $params['kustp']);
+
+	if ($params['toim'] == 'KATEINEN') {
+		$lasku_saldo_maksettu = $params['laskurow']['summa'];
+	}
+	else {
+		$lasku_saldo_maksettu = $params['laskurow']['summa'] - ($myyntisaamistiliointi['summa'] * -1);
+	}
+
+	$query = "	UPDATE lasku SET
+				saldo_maksettu = {$lasku_saldo_maksettu}
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$params['laskurow']['tunnus']}'";
+	pupe_query($query);
+}
+
+function hae_tiliointi($lasku_tunnus, $tilinumerot) {
+	global $kukarow, $yhtiorow;
+
+	// Haetaan kassatiliöinti
+	$query = "	SELECT tunnus,
+				summa,
+				tilino
 				FROM tiliointi
-				WHERE yhtio	 = '$kukarow[yhtio]'
-				AND ltunnus	 = '{$params['tunnus']}'
-				AND tilino	 IN {$vanhatili}
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND ltunnus = '{$lasku_tunnus}'
+				AND tilino IN (".implode(',', $tilinumerot).")
 				AND korjattu = ''
 				ORDER BY tapvm DESC, tunnus DESC
 				LIMIT 1";
 	$result = pupe_query($query);
 
-	if (mysql_num_rows($result) == 1) {
-		$vanharow = mysql_fetch_assoc($result);
+	return mysql_fetch_assoc($result);
+}
 
-		// Tehdään vastakirjaus alkuperäiselle tiliöinnille
-		$tilid = kopioitiliointi($vanharow['tunnus'], "");
+function paivita_tilioinnin_tiedot($tiliointi, $params) {
+	global $kukarow, $yhtiorow;
 
-		if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
-			$summalisa = $params['laskurow']['summa'] - $params['laskurow']['saldo_maksettu'];
+	if ($params['toim'] == 'KATEINEN') {
+		$tapvmlisa = "tapvm = '{$params['tapahtumapaiva']}',";
+	}
+	else {
+		$tapvmlisa = '';
+	}
+
+	$kustplisa = $params['kustp'] != '' ? "kustp = '{$params['kustp']}'," : "";
+
+	$tiliointi_lisa = "";
+	if (!empty($tiliointi['tilino'])) {
+		$tiliointi_lisa = "tilino = '{$tiliointi['tilino']}',";
+	}
+
+	$query = "	UPDATE tiliointi
+				SET summa = {$tiliointi['summa']},
+				summa_valuutassa = {$tiliointi['summa']},
+				laatija = '{$kukarow['kuka']}',
+				{$tiliointi_lisa}
+				{$tapvmlisa}
+				{$kustplisa}
+				laadittu = NOW()
+				WHERE yhtio	= '{$kukarow['yhtio']}'
+				AND tunnus = '{$tiliointi['tunnus']}'";
+	pupe_query($query);
+
+	return mysql_affected_rows();
+}
+
+function tee_kirjanpito_muutokset($params) {
+	global $kukarow, $yhtiorow;
+
+	if ($params['toim'] == 'KATEINEN') {
+		$tapvmlisa = ", tapvm = '{$params['tapahtumapaiva']}' ";
+	}
+	else {
+		$tapvmlisa = '';
+	}
+
+	// Haetaan kassatiliöinti
+	$query = "	SELECT tunnus,
+				summa,
+				tilino
+				FROM tiliointi
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND ltunnus = '{$params['tunnus']}'
+				AND tilino IN (".implode(',', $params['_kassalipas']).")
+				AND korjattu = ''
+				ORDER BY tapvm DESC, tunnus DESC
+				LIMIT 1";
+	$kassatili_result = pupe_query($query);
+
+	// Haetaan myyntisaamistiliönti
+	$query = "	SELECT tunnus,
+				summa,
+				tilino
+				FROM tiliointi
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND ltunnus = '{$params['tunnus']}'
+				AND tilino IN ({$params['myysaatili']})
+				AND korjattu = ''
+				ORDER BY tapvm DESC, tunnus DESC
+				LIMIT 1";
+	$myyntisaamis_result = pupe_query($query);
+
+	if (mysql_num_rows($myyntisaamis_result) == 1) {
+
+		if (mysql_num_rows($kassatili_result) == 0) {
+			$query = "	SELECT tunnus,
+						summa,
+						tilino
+						FROM tiliointi
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND ltunnus = '{$params['tunnus']}'
+						AND tilino IN ({$params['myysaatili']})
+						AND korjattu = ''
+						ORDER BY tapvm DESC, tunnus DESC
+						LIMIT 1";
+			$kassatili_result = pupe_query($query);
+			$kassatilirow = mysql_fetch_assoc($kassatili_result);
+			$kassatilirow['summa'] = $kassatilirow['summa'] * -1;
+			$loytyiko_kassa_tiliointi = false;
 		}
 		else {
-			$summalisa = "summa";
+			$kassatilirow = mysql_fetch_assoc($kassatili_result);
+			$loytyiko_kassa_tiliointi = true;
 		}
-
-		if ($params['toim'] == 'KATEINEN' and $vanharow['summa'] < 0) {
-			$summalisa = $summalisa * -1;
-		}
-
-		$query = "	UPDATE tiliointi
-					SET summa 	= {$summalisa} * -1,
-					laatija 	= '{$kukarow['kuka']}',
-					laadittu 	= now()
-					{$tapvmlisa}
-					WHERE yhtio	= '$kukarow[yhtio]'
-					and tunnus	= '{$tilid}'";
-		$result = pupe_query($query);
-
-		// Kopsataan alkuperäinen ja päivitetään siille uudet tiedot
-		$tilid = kopioitiliointi($vanharow['tunnus'], "");
-
+		$myyntisaamisrow = mysql_fetch_assoc($myyntisaamis_result);
 		$kustplisa = $params['kustp'] != '' ? ", kustp = '{$params['kustp']}'" : "";
 
+		// Tehdään vastakirjaus alkuperäiselle tiliöinnille
+		$tilid = kopioitiliointi($kassatilirow['tunnus'], "");
+
 		if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
-			$summalisa = $params['laskurow']['summa'] - $params['laskurow']['saldo_maksettu'];
+			$summalisa = ($params['laskurow']['summa'] - $params['laskurow']['saldo_maksettu'])." * -1";
 		}
 		else {
-			$summalisa = $vanharow['summa'];
+			if ($loytyiko_kassa_tiliointi) {
+				$uusitili = $kassatilirow['tilino'];
+				$summalisa = "summa * -1";
+			}
+			else {
+				$uusitili = $params['_kassalipas'][0];
+				$summalisa = "summa";
+			}
 		}
 
 		$query = "	UPDATE tiliointi
-					SET tilino 	= '{$uusitili}',
-					summa 		= '{$summalisa}',
-					laatija 	= '{$kukarow['kuka']}',
-					laadittu 	= now()
+					SET tilino = '{$uusitili}',
+					summa = {$summalisa},
+					laatija = '{$kukarow['kuka']}',
+					laadittu = now()
 					{$tapvmlisa}
 					{$kustplisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
-					and tunnus	= '{$tilid}'";
-		$result = pupe_query($query);
+					and tunnus = '{$tilid}'";
+		pupe_query($query);
+
+		// Kopsataan alkuperäinen ja päivitetään siille uudet tiedot
+		$tilid = kopioitiliointi($myyntisaamisrow['tunnus'], "");
+
+		if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+			$summalisa = $params['laskurow']['summa'] - $params['laskurow']['saldo_maksettu'];
+		}
+		else {
+			$summalisa = $myyntisaamisrow['summa'];
+		}
+
+		$query = "	UPDATE tiliointi
+					SET	summa = {$summalisa} * -1,
+					laatija = '{$kukarow['kuka']}',
+					laadittu = now()
+					{$tapvmlisa}
+					{$kustplisa}
+					WHERE yhtio	= '$kukarow[yhtio]'
+					and tunnus = '{$tilid}'";
+		pupe_query($query);
 
 		if (mysql_affected_rows() > 0) {
 			echo "<font class='message'>".t("Korjattiin kirjanpitoviennit")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";
@@ -335,17 +493,17 @@ function tee_kirjanpito_muutokset($params) {
 			echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
 		}
 		if ($params['laskurow']['summa'] > 0) {
-			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $vanharow['summa']);
+			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $kassatilirow['summa']);
 		}
 		else {
-			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] + $vanharow['summa']);
+			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] + $kassatilirow['summa']);
 		}
 
 		$query = "	UPDATE lasku SET
 					saldo_maksettu = {$summalisa}
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$params['laskurow']['tunnus']}'";
-		$updres = pupe_query($query);
+		pupe_query($query);
 	}
 }
 
@@ -367,7 +525,7 @@ function yliviivaa_alet_ja_pyoristykset($tunnus) {
 }
 
 function tarkista_pyoristys_erotukset($laskurow, $tunnus) {
-	global $kukarow , $yhtiorow;
+	global $kukarow, $yhtiorow;
 
 	$query = "	SELECT sum(summa) summa, sum(summa_valuutassa) summa_valuutassa
 				FROM tiliointi
@@ -394,7 +552,7 @@ function tarkista_pyoristys_erotukset($laskurow, $tunnus) {
 					lukko 				= '',
 					laatija 			= '$kukarow[kuka]',
 					laadittu 			= now()";
-		$laskutusres = pupe_query($query);
+		pupe_query($query);
 	}
 }
 
@@ -499,17 +657,17 @@ function echo_lasku_table($laskurow, $toim) {
 	}
 
 	echo "<table>";
-	echo "<tr><th>",t("Laskutusosoite"),"</th><th>",t("Toimitusosoite"),"</th></tr>";
+	echo "<tr><th>", t("Laskutusosoite"), "</th><th>", t("Toimitusosoite"), "</th></tr>";
 	echo $asiakas_string;
-	echo "<tr><th>",t("Laskunumero"),"</th><td>{$laskurow['laskunro']}</td></tr>";
-	echo "<tr><th>",t("Laskun summa"),"</th><td>{$laskurow['summa']}</td></tr>";
-	echo "<tr><th>",t("Laskun summa (veroton)"),"</th><td>{$laskurow['arvo']}</td></tr>";
+	echo "<tr><th>", t("Laskunumero"), "</th><td>{$laskurow['laskunro']}</td></tr>";
+	echo "<tr><th>", t("Laskun summa"), "</th><td>{$laskurow['summa']}</td></tr>";
+	echo "<tr><th>", t("Laskun summa (veroton)"), "</th><td>{$laskurow['arvo']}</td></tr>";
 	echo $osasuoritus_string;
-	echo "<tr><th>",t("Maksuehto"),"</th><td>",t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV"),"</td></tr>";
+	echo "<tr><th>", t("Maksuehto"), "</th><td>", t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV"), "</td></tr>";
 
 	if ($toim == 'KATEINEN') {
 		$now = date('Y-m-d');
-		$now = explode('-' , $now);
+		$now = explode('-', $now);
 		// haetaan kaikki käteisen maksuehdot
 		$query = "	SELECT *
 					FROM kassalipas
@@ -578,12 +736,97 @@ function echo_lasku_search() {
 	echo "</form>";
 }
 
-function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
+function hae_kassalippaan_tiedot2($kassalipas, $maksuehtorow) {
+	global $kukarow, $yhtiorow;
+
+	$kassalipas = hae_kassalipas($kassalipas);
+
+	if ($maksuehtorow['kateinen'] == "n") {
+		if ($kassalipas["pankkikortti"] != "") {
+			$valitun_maksuehdon_kustannuspaikka = $kassalipas['kustp'];
+			$valitun_maksuehdon_tili = $kassalipas['pankkikortti'];
+		}
+		else {
+			$valitun_maksuehdon_tili = $yhtiorow['pankkikortti'];
+		}
+	}
+
+	if ($maksuehtorow['kateinen'] == "o") {
+		if ($kassalipas["luottokortti"] != "") {
+			$valitun_maksuehdon_kustannuspaikka = $kassalipas['kustp'];
+			$valitun_maksuehdon_tili = $kassalipas['luottokortti'];
+		}
+		else {
+			$valitun_maksuehdon_tili = $yhtiorow['luottokortti'];
+		}
+	}
+
+	if ($maksuehtorow['kateinen'] == 'p') {
+		if ($kassalipas['kassa'] != '') {
+			$valitun_maksuehdon_kustannuspaikka = $kassalipas['kustp'];
+			$valitun_maksuehdon_tili = $kassalipas['kassa'];
+		}
+		else {
+			$valitun_maksuehdon_tili = $yhtiorow['kassa'];
+		}
+	}
+
+	if ($valitun_maksuehdon_tili == "") {
+		if ($kassalipas["kassa"] != "") {
+			$valitun_maksuehdon_kustannuspaikka = $kassalipas['kustp'];
+			$valitun_maksuehdon_tili = $kassalipas['kassa'];
+		}
+		else {
+			$valitun_maksuehdon_tili = $yhtiorow['kassa'];
+		}
+	}
+
+	return array($valitun_maksuehdon_tili, $valitun_maksuehdon_kustannuspaikka);
+}
+
+function hae_kassalippaan_kateistilit($laskurow) {
+	global $kukarow, $yhtiorow;
+
+	if ($laskurow['kassalipas'] != '') {
+		//haetaan kassalippaan tilit kassalippaan takaa
+		$kassalipas_query = "	SELECT kassa,
+								pankkikortti,
+								luottokortti
+								FROM kassalipas
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$laskurow['kassalipas']}'";
+		$kassalipas_result = pupe_query($kassalipas_query);
+
+		$kassalippaat = mysql_fetch_assoc($kassalipas_result);
+
+		if (!empty($kassalippaat)) {
+			$kateis_tilit = $kassalippaat;
+		}
+		else {
+			$kateis_tilit = array(
+				'kassa'			 => $yhtiorow['kassa'],
+				'pankkikortti'	 => $yhtiorow['pankkikortti'],
+				'luottokortti'	 => $yhtiorow['luottokortti']
+			);
+		}
+	}
+	else {
+		$kateis_tilit = array(
+			'kassa'			 => $yhtiorow['kassa'],
+			'pankkikortti'	 => $yhtiorow['pankkikortti'],
+			'luottokortti'	 => $yhtiorow['luottokortti']
+		);
+	}
+
+	return $kateis_tilit;
+}
+
+function hae_kassalippaan_tiedot($kassalipas, $maksuehtorow, $laskurow) {
 	global $yhtiorow, $kukarow;
 
 	$kustp = "";
 
-	if ($mehtorow['kateinen'] != '') {
+	if ($maksuehtorow['kateinen'] != '') {
 
 		$query = "	SELECT *
 					FROM kassalipas
@@ -592,44 +835,33 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 		$kateisresult = pupe_query($query);
 		$kateisrow = mysql_fetch_assoc($kateisresult);
 
-		if ($mehtorow['kateinen'] == "n") {
+		if ($maksuehtorow['kateinen'] == "n") {
 			if ($kateisrow["pankkikortti"] != "") {
-				$kustp 		= $kateisrow['kustp'];
-				$myysaatili = $kateisrow['pankkikortti'];
+				$kustp = $kateisrow['kustp'];
+				$kateis_tilit = $kateisrow['pankkikortti'];
 			}
-			else {
-				$myysaatili = $yhtiorow['pankkikortti'];
-			}
+			$kateis_tilit = array($yhtiorow['pankkikortti']);
 		}
 
-		if ($mehtorow['kateinen'] == "o") {
+		if ($maksuehtorow['kateinen'] == "o") {
 			if ($kateisrow["luottokortti"] != "") {
-				$kustp 		= $kateisrow['kustp'];
-				$myysaatili = $kateisrow['luottokortti'];
+				$kustp = $kateisrow['kustp'];
 			}
-			else {
-				$myysaatili = $yhtiorow['luottokortti'];
-			}
+			$kateis_tilit = array($kateisrow['luottokortti']);
 		}
 
-		if ($mehtorow['kateinen'] == 'p') {
+		if ($maksuehtorow['kateinen'] == 'p') {
 			if ($kateisrow['kassa'] != '') {
-				$kustp 		= $kateisrow['kustp'];
-				$myysaatili = $kateisrow['kassa'];
+				$kustp = $kateisrow['kustp'];
 			}
-			else {
-				$myysaatili = $yhtiorow['kassa'];
-			}
+			$kateis_tilit = array($kateisrow['kassa']);
 		}
 
-		if ($myysaatili == "") {
+		if ($kateis_tilit == "") {
 			if ($kateisrow["kassa"] != "") {
-				$kustp 		= $kateisrow['kustp'];
-				$myysaatili = $kateisrow['kassa'];
+				$kustp = $kateisrow['kustp'];
 			}
-			else {
-				$myysaatili = $yhtiorow['kassa'];
-			}
+			$kateis_tilit = array($kateisrow['kassa']);
 		}
 	}
 	else {
@@ -646,38 +878,55 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 			$kassalippaat = mysql_fetch_assoc($kassalipas_result);
 
 			if (!empty($kassalippaat)) {
-				$myysaatili = $kassalippaat;
+				$kateis_tilit = $kassalippaat;
 			}
 			else {
-				$myysaatili = array(
-					'kassa' => $yhtiorow['kassa'],
-					'pankkikortti' => $yhtiorow['pankkikortti'],
-					'luottokortti' => $yhtiorow['luottokortti']
+				$kateis_tilit = array(
+					'kassa'			 => $yhtiorow['kassa'],
+					'pankkikortti'	 => $yhtiorow['pankkikortti'],
+					'luottokortti'	 => $yhtiorow['luottokortti']
 				);
 			}
 		}
 		else {
-			$myysaatili = array(
-				'kassa' => $yhtiorow['kassa'],
-				'pankkikortti' => $yhtiorow['pankkikortti'],
-				'luottokortti' => $yhtiorow['luottokortti']
+			$kateis_tilit = array(
+				'kassa'			 => $yhtiorow['kassa'],
+				'pankkikortti'	 => $yhtiorow['pankkikortti'],
+				'luottokortti'	 => $yhtiorow['luottokortti']
 			);
 		}
 	}
 
-	return array($myysaatili, $kustp);
+	return array($kateis_tilit, $kustp);
+}
+
+function hae_kateistilit() {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT kassa,
+				pankkikortti,
+				luottokortti
+				FROM kassalipas
+				WHERE yhtio = '{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+
+	$kateistilit = array();
+	while ($kateistili = mysql_fetch_assoc($result)) {
+		$kateistilit[] = $kateistili;
+	}
+
+	return $kateistilit;
 }
 
 function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
 	global $kukarow, $yhtiorow;
 
 	if (strtotime($yhtiorow['tilikausi_alku']) < strtotime($tapahtumapaiva) and strtotime($yhtiorow['tilikausi_loppu']) > strtotime($tapahtumapaiva)) {
-		return false;
+		return true;
 	}
 	else {
-		return $yhtiorow['tilikausi_alku'];
+		return false;
 	}
-
 }
 
 require ("inc/footer.inc");

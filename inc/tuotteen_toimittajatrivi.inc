@@ -15,12 +15,15 @@
 		}
 	}
 
-	if (mysql_field_name($result, $i) == "toimittaja") {
-		if(isset($alasveto[$i])) {
-			$ulos = "<td>".$alasveto[$i]."</td>";
+	if (mysql_field_name($result, $i) == "liitostunnus") {
+		if (isset($alasveto[$i])) {
+			$ulos   = "<td>".$alasveto[$i]."</td>";
 			$jatko = 0;
 		}
 		else {
+			$toim_tuoteno_tunnus = $tunnus; // otetaan t‰‰ talteen
+			$liitostunnus = $trow["liitostunnus"];
+
 			$query = "	SELECT *
 						from toimi
 						where yhtio = '$kukarow[yhtio]'
@@ -30,21 +33,13 @@
 
 			if (mysql_num_rows($sresult) == 1) {
 				$srow = mysql_fetch_assoc($sresult);
-
-				$ulos = "<td>
-						<input type='hidden' name='toimi_liitostunnus' value='$srow[tunnus]'>
-						<input type='hidden' name='toimi_ytunnus' value='$srow[ytunnus]'>
-						<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'> $srow[nimi] $srow[nimitark]</td>";
-				$jatko=0;
+				
+				$ssize = strlen($trow[$i])+2;
+				
+				$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$ssize' maxlength='$maxsize'><br><br>$srow[ytunnus] $srow[nimi] $srow[nimitark]</td>";
+				$jatko = 0;
 			}
 		}
-	}
-
-	if (mysql_field_name($result, $i) == "liitostunnus") {
-		$toim_tuoteno_tunnus = $tunnus; // otetaan t‰‰ talteen
-
-		$liitostunnus = $trow[$i];
-		$tyyppi = 4;
 	}
 
 	if (mysql_field_name($result, $i) == "alkuperamaa") {

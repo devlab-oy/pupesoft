@@ -588,8 +588,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value='' $sel1>".t("Karhulaskulla ei n‰ytet‰ korkoja eik‰ lis‰t‰ niit‰ laskun summaan")."</option>";
-		$ulos .= "<option value='o' $sel2>".t("Karhulaskulla n‰ytet‰‰n korot ja lis‰t‰‰n ne laskun summaan")."</option>";
+		$ulos .= "<option value='' $sel1>".t("Maksukehotuksella ei n‰ytet‰ korkoja eik‰ lis‰t‰ niit‰ maksukehotuksen summaan")."</option>";
+		$ulos .= "<option value='o' $sel2>".t("Maksukehotuksella n‰ytet‰‰n korot ja lis‰t‰‰n ne maksukehotuksen summaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

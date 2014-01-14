@@ -783,7 +783,23 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 		echo "</table>";
 
-		if (isset($naytalaskelma) and $naytalaskelma != "") {
+		echo "<br><form name='toimi' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+		echo "<input type='hidden' name='naytalaskelma' value='JOO'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
+
+		$naytalaskelma_pp = isset($naytalaskelma_pp) ? (int) $naytalaskelma_pp : date('d');
+		$naytalaskelma_kk = isset($naytalaskelma_kk) ? (int) $naytalaskelma_kk : date('m');
+		$naytalaskelma_vv = isset($naytalaskelma_vv) ? (int) $naytalaskelma_vv : date('Y');
+
+		echo "<input type='text' name='naytalaskelma_pp' value='{$naytalaskelma_pp}' size='3' />";
+		echo "<input type='text' name='naytalaskelma_kk' value='{$naytalaskelma_kk}' size='3' />";
+		echo "<input type='text' name='naytalaskelma_vv' value='{$naytalaskelma_vv}' size='5' />";
+
+		echo "<input type='submit' value='".t("Näytä varastonarvolaskelma")."'>";
+		echo "</form>";
+
+		if (isset($naytalaskelma) and $naytalaskelma != "" and checkdate($naytalaskelma_kk, $naytalaskelma_pp, $naytalaskelma_vv)) {
 			list (	$liitetty_lasku_viety_summa,
 					$ei_liitetty_lasku_viety_summa,
 					$liitetty_lasku_ei_viety_summa,
@@ -794,7 +810,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 					$laskut_viety,
 					$laskut_osittain_viety,
 					$row_vaihto
-					) = hae_yhteenveto_tiedot($toimittajaid, $toimipaikka);
+					) = hae_yhteenveto_tiedot($toimittajaid, $toimipaikka, $naytalaskelma_pp, $naytalaskelma_kk, $naytalaskelma_vv);
 
 			$params = array(
 				'kaikkivarastossayhteensa'				 => $kaikkivarastossayhteensa,
@@ -814,14 +830,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			);
 
 			echo_yhteenveto_table($params);
-		}
-		else {
-			echo "<br><form name='toimi' method='post' autocomplete='off'>";
-			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-			echo "<input type='hidden' name='naytalaskelma' value='JOO'>";
-			echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
-			echo "<input type='submit' value='".t("Näytä varastonarvolaskelma")."'>";
-			echo "</form>";
 		}
 	}
 }
@@ -1066,7 +1074,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 			}
 
 			echo "<tr class='aktiivi'>";
-			
+
 			if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
 				echo "<td valign='top'>$row[toimipaikka_nimi]</td>";
 			}
@@ -1436,8 +1444,12 @@ function echo_yhteenveto_table($params) {
 	echo "</table>";
 }
 
-function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
+function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = null, $kk = null, $vv = null) {
 	global $kukarow, $yhtiorow, $onkolaajattoimipaikat;
+
+	if (!$pp) $pp = date('d');
+	if (!$kk) $kk = date('m');
+	if (!$vv) $vv = date('Y');
 
 	if ($toimittajaid == null) {
 		$toimittaja_where = '';
@@ -1462,10 +1474,12 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 				AND lasku.tila IN ('H','Y','M','P','Q')
 				AND lasku.vienti in ('B','C','J','E','F','K','H','I','L')
 				AND liitos.tunnus IS NULL
-				AND lasku.tapvm >= date_sub(current_date, interval 12 month)
+				AND (lasku.tapvm <= '{$vv}-{$kk}-{$pp}' AND lasku.tapvm >= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month))
 				{$toimittaja_where}
 				GROUP BY lasku.tunnus";
 	$result_vaihto_omaisuus = pupe_query($query);
+
+	query_dump($query);
 
 	$rv_vosumma = 0;
 	$rv_voalvit = 0;
@@ -1496,11 +1510,13 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				AND lasku.tila in ('H','Y','M','P','Q')
 				AND lasku.vienti in ('B','E','H')
-				AND lasku.tapvm >= date_sub(current_date, interval 12 month)
+				AND (lasku.tapvm <= '{$vv}-{$kk}-{$pp}' AND lasku.tapvm >= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month))
 				{$toimittaja_where}
 				GROUP BY lasku.tunnus
 				HAVING varastossa != kohdistettu";
 	$result_huolintarahdit = pupe_query($query);
+
+	query_dump($query);
 
 	$row_vaihto["kuosasumma"] = 0;
 
@@ -1532,12 +1548,14 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 				WHERE  lasku.yhtio 	  = '{$kukarow['yhtio']}'
 				AND lasku.tila 		  = 'K'
 				AND lasku.alatila 	  = ''
-				AND lasku.mapvm 	  = '0000-00-00'
+				AND (lasku.tapvm = '0000-00-00' OR lasku.tapvm >= '{$vv}-{$kk}-{$pp}')
 				AND lasku.vanhatunnus = 0
 				{$toimipaikkalisa}
 				{$toimittaja_where}
 				GROUP BY 1,2,3,4";
 	$result = pupe_query($query);
+
+	query_dump($query);
 
 	$query_ale_lisa = generoi_alekentta("O");
 

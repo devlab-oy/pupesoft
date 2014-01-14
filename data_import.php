@@ -412,6 +412,16 @@
 		</tr>";
 	}
 
+	if ($table == "tuotteen_toimittajat") {
+		echo "<tr><th>".t("Toimittajan valinta").":</th>
+					<td><select name='toimittajavalinta'>
+					<option value='1'>".t("Käytetään toimittajan tunnusta")."</option>
+					<option value='2'>".t("Käytetään toimittajan ytunnusta")."</option>
+					<option value='3'>".t("Käytetään toimittajan toimittajanumeroa")."</option>
+					</select></td>
+			</tr>";
+	}
+
 	if ($table == "extranet_kayttajan_lisatiedot") {
 		echo "<tr><th>".t("Liitostunnus").":</th>
 				<td><select name='liitostunnusvalinta'>

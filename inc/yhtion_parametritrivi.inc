@@ -574,27 +574,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "karhu_korko") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel1="";
-		$sel2="";
-
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
-		}
-		else {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value='' $sel1>".t("Maksukehotuksella ei n‰ytet‰ korkoja eik‰ lis‰t‰ niit‰ maksukehotuksen summaan")."</option>";
-		$ulos .= "<option value='o' $sel2>".t("Maksukehotuksella n‰ytet‰‰n korot ja lis‰t‰‰n ne maksukehotuksen summaan")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "asiakashinta_netto") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3453,10 +3432,13 @@
 	if (mysql_field_name($result, $i) == 'maksukehotus_kentat') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
 
 		$ulos .= "<option value = ''>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja")."</option>";
+		$ulos .= "<option value = 'J' $sel[J]>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat sek‰ korot ja lis‰t‰‰n ne maksukehotuksen summaan")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja eik‰ korkoja")."</option>";
+		$ulos .= "<option value = 'L' $sel[L]>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja. N‰ytet‰‰n korot ja lis‰t‰‰n ne maksukehotuksen summaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

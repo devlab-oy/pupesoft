@@ -173,7 +173,7 @@
 
 			// lisätään karhuviesti kirjeeseen
 			if ($sivu == 1) {
-				
+
 				//otsikko
 				$pdf->draw_text(30, $kala+30, t("Avoimet laskut", $kieli), $firstpage, $bold);
 
@@ -203,8 +203,8 @@
 			//Laskurivien otsikkotiedot
 			//eka rivi
 			$pdf->draw_text(30,  $kala, t("Laskun numero", $kieli)." / ".t("Viite", $kieli),		$firstpage, $pieni);
-										
-			if ($yhtiorow['karhu_korko'] != '') {
+
+			if ($yhtiorow['maksukehotus_kentat'] == 'J' or $yhtiorow['maksukehotus_kentat'] == 'L') {
 				//eka rivi lisäkentillä
 				$pdf->draw_text(130, $kala, t("Laskun pvm", $kieli),									$firstpage, $pieni);
 				$pdf->draw_text(190, $kala, t("Eräpäivä", $kieli),										$firstpage, $pieni);
@@ -213,7 +213,7 @@
 				$pdf->draw_text(495, $kala, t("Korko", $kieli),											$firstpage, $pieni);
 				$pdf->draw_text(545, $kala, t("Yhteensä", $kieli),										$firstpage, $pieni);
 
-				if ($yhtiorow["maksukehotus_kentat"] == "") {
+				if ($yhtiorow['maksukehotus_kentat'] == 'J') {
 					$pdf->draw_text(295, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
 					$pdf->draw_text(365, $kala, t("Perintäkerta", $kieli),									$firstpage, $pieni);
 				}
@@ -237,8 +237,16 @@
 			if ($kaatosumma != 0 and $sivu == 1) {
 				$pdf->draw_text(30,  $kala, t("Kohdistamattomia suorituksia", $kieli),	$firstpage, $norm);
 
-				$oikpos = $pdf->strlen(sprintf("%.2f", $kaatosumma), $norm);
-				$pdf->draw_text(500-$oikpos, $kala, sprintf("%.2f", $kaatosumma),		$firstpage, $norm);
+				if ($yhtiorow['maksukehotus_kentat'] == 'J' or $yhtiorow['maksukehotus_kentat'] == 'L') {
+					$oikpos = $pdf->strlen(sprintf("%.2f", $kaatosumma), $norm);
+					$pdf->draw_text(565-$oikpos, $kala, sprintf("%.2f", $kaatosumma),		$firstpage, $norm);
+				}
+				else {
+					$oikpos = $pdf->strlen(sprintf("%.2f", $kaatosumma), $norm);
+					$pdf->draw_text(500-$oikpos, $kala, sprintf("%.2f", $kaatosumma),		$firstpage, $norm);
+				}
+
+				
 				$kala -= 13;
 			}
 
@@ -261,8 +269,8 @@
 			$row['korko'] = ($row['summa'] >= 0) ? $row['korko'] : 0.0;
 
 			$pdf->draw_text(30,  $kala, $row["laskunro"]." / ".$row["viite"],	$firstpage, $norm);
-			
-			if ($yhtiorow['karhu_korko'] != '') {
+
+			if ($yhtiorow['maksukehotus_kentat'] == 'J' or $yhtiorow['maksukehotus_kentat'] == 'L') {
 
 				$pdf->draw_text(130, $kala, tv1dateconv($row["tapvm"]), 			$firstpage, $norm);
 				$pdf->draw_text(190, $kala, tv1dateconv($row["erpcm"]), 			$firstpage, $norm);
@@ -278,7 +286,7 @@
 					$oikpos = $pdf->strlen($row["summa"], $norm);
 					$pdf->draw_text(460-$oikpos, $kala, $row["summa"],				$firstpage, $norm);
 				}
-				if ($yhtiorow["maksukehotus_kentat"] == "") {
+				if ($yhtiorow["maksukehotus_kentat"] == "" or $yhtiorow["maksukehotus_kentat"] == "J") {
 					$pdf->draw_text(295, $kala, tv1dateconv($row["kpvm"]), 			$firstpage, $norm);
 					$oikpos = $pdf->strlen($karhukertanro, $norm);
 					$pdf->draw_text(385-$oikpos, $kala, $karhukertanro, 			$firstpage, $norm);
@@ -310,7 +318,7 @@
 					$karhukertanro = $row["karhuttu"] + 1;
 				}
 
-				if ($yhtiorow["maksukehotus_kentat"] == "") {
+				if ($yhtiorow["maksukehotus_kentat"] == "" or $yhtiorow["maksukehotus_kentat"] == "J") {
 					$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]), 	$firstpage, $norm);
 					$oikpos = $pdf->strlen($karhukertanro, $norm);
 					$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, 	$firstpage, $norm);
@@ -355,12 +363,12 @@
 
 			if (($karhut_samalle_laskulle == 1 or $karhukertanro != "") and ($summa != '' and $korko != '')) {
 
-				if ($yhtiorow['karhu_korko'] != '') {
- 
+				if ($yhtiorow['maksukehotus_kentat'] == 'J' or $yhtiorow['maksukehotus_kentat'] == 'L') {
+
 					//Kokonaissummalaatikko + valuuttalaatikko
 					$pdf->draw_rectangle(115, 364, 148, 580,	$firstpage, $rectparam);
 					$pdf->draw_rectangle(115, 540, 148, 580,	$firstpage, $rectparam);
-				
+
 					$pdf->draw_text(370, 138,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
 					$pdf->draw_text(370, 128,  t("KORKO", $kieli).":",	$firstpage, $norm);
 					$pdf->draw_text(370, 118,  t("YHTEENSÄ + KORKO", $kieli).":",	$firstpage, $norm);

@@ -257,7 +257,7 @@
 			$apure = pupe_query($query);
 
 			// Kaikki rivit toimitettu:
-			if (mysql_num_rows($apure) == 0) {
+			if (mysql_num_rows($apure) == 0 or $laskurow['eilahetetta'] == 'o') {
 				$kateisohitus = "";
 				$laskurow['eilahetetta'] = 'o';
 			}

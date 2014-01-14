@@ -240,10 +240,10 @@
 
 	echo "<tr><th>".t("Vain käsin viedyt")."</th><td colspan='3'><input type='checkbox' name='kasin' $sel>";
 
-	$query = "	SELECT distinct kuka.kuka, kuka.nimi
+	$query = "	SELECT kuka.kuka, kuka.nimi
 				FROM kuka
-				JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 				WHERE kuka.yhtio = '{$kukarow["yhtio"]}'
+				AND kuka.aktiivinen = 1
 				and kuka.extranet = ''
 				ORDER BY kuka.nimi";
 	$vresult = pupe_query($query);

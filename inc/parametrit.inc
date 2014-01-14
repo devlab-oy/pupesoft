@@ -342,6 +342,9 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 		if ($browkieli == 'sv') {
 			$browkieli = 'se';
 		}
+		elseif ($browkieli == 'ee') {
+			$browkieli = 'ee';
+		}
 		else {
 			$browkieli = 'fi';
 		}
@@ -425,6 +428,17 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			elseif (isset($tallenna_keksiin) and !isset($ohita_kerays)) {
 				setcookie("pupesoft_tuoteperhe", "ei", time()+60*60*24*90, "/");
 				$_COOKIE["pupesoft_tuoteperhe"] = "ei";
+			}
+		}
+
+		if ($phpnimi == 'kuukautisostot.php') {
+			if (isset($valitut)) {
+				if (isset($valitut["EIVIENTEJA"])) {
+					setcookie('valitut_EIVIENTEJA', $valitut["EIVIENTEJA"], time()+60*60*24*90, "/");
+				}
+				if (isset($valitut["EIASIAKKAANMYYNTEJA"])) {
+					setcookie('valitut_EIASIAKKAANMYYNTEJA', $valitut["EIASIAKKAANMYYNTEJA"], time()+60*60*24*90, "/");
+				}
 			}
 		}
 

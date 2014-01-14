@@ -5,7 +5,7 @@
 	Määrä (pakollinen)
 	Arvioitu toimituspäivä vvvv-kk-pp
 	Hinta
-	Ale
+	Ale1 - Ale3 (lasketaan yhtiön parametreistä monta myynnin alekenttää on käytössä)
 	Netto
 	Var
 	Kommentti
@@ -17,7 +17,7 @@
 	Arvioitu toimituspäivä vvvv-kk-pp
 	Nimitys
 	Hinta
-	Ale
+	Ale1 - Ale3 (lasketaan yhtiön parametreistä monta myynnin alekenttää on käytössä)
 	Netto
 	Var
 	Kommentti
@@ -29,7 +29,7 @@
 	Arvioitu toimituspäivä vvvv-kk-pp
 	Nimitys
 	Hinta
-	Ale
+	Ale1 - Ale3 (lasketaan yhtiön parametreistä monta myynnin alekenttää on käytössä)
 	Netto
 	Var
 	Kommentti
@@ -97,6 +97,7 @@
 
 			if (!empty($lue_useammalta_valilehdelta)) {
 				foreach ($excelrivi as $sheet) {
+
 					# Tiedostosta päivitys
 					foreach ($sheet as $rivi) {
 						$rivilask1++;
@@ -169,12 +170,23 @@
 								$ind_Maara                   = 1;
 								$ind_Arvioitu                = 2;
 								$ind_Hinta                   = 3;
-								$ind_Ale                     = 4;
-								$ind_Netto                   = 5;
-								$ind_Var                     = 6;
-								$ind_Kommentti               = 7;
-								$ind_Valmistuslinja          = 8;
-								$ind_ToivottuKeraysajankohta = 9;
+
+								$_indx = 4;
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									${'ind_Ale'.$alepostfix} = $_indx;
+									$_indx++;
+								}
+
+								$ind_Netto                   = $_indx;
+								$_indx++;
+								$ind_Var                     = $_indx;
+								$_indx++;
+								$ind_Kommentti               = $_indx;
+								$_indx++;
+								$ind_Valmistuslinja          = $_indx;
+								$_indx++;
+								$ind_ToivottuKeraysajankohta = $_indx;
 
 								// Jos ensimmäisestä solusta löytyy sana "tuote", niin käyttäjä on antanu sarakeotsikot
 								if (stripos($rivi[0], "tuote") !== FALSE) {
@@ -194,10 +206,19 @@
 								$ind_Maara 		= 1;
 								$ind_Arvioitu 	= 2;
 								$ind_Hinta 		= 4;
-								$ind_Ale 		= 5;
-								$ind_Netto 		= 6;
-								$ind_Var 		= 7;
-								$ind_Kommentti	= 8;
+
+								$_indx = 5;
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									${'ind_Ale'.$alepostfix} = $_indx;
+									$_indx++;
+								}
+
+								$ind_Netto 		= $_indx;
+								$_indx++;
+								$ind_Var 		= $_indx;
+								$_indx++;
+								$ind_Kommentti	= $_indx;
 
 								// Skipataan otsikot
 								continue;
@@ -214,10 +235,19 @@
 								$ind_Maara 		= 1;
 								$ind_Arvioitu 	= 2;
 								$ind_Hinta 		= 3;
-								$ind_Ale 		= 4;
-								$ind_Netto 		= 5;
-								$ind_Var 		= 6;
-								$ind_Kommentti	= 7;
+
+								$_indx = 4;
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									${'ind_Ale'.$alepostfix} = $_indx;
+									$_indx++;
+								}
+
+								$ind_Netto 		= $_indx;
+								$_indx++;
+								$ind_Var 		= $_indx;
+								$_indx++;
+								$ind_Kommentti	= $_indx;
 
 								// Skipataan otsikot
 								continue;
@@ -230,10 +260,19 @@
 								$ind_Maara 		= 1;
 								$ind_Arvioitu 	= 2;
 								$ind_Hinta 		= 3;
-								$ind_Ale 		= 4;
-								$ind_Netto 		= 5;
-								$ind_Var 		= 6;
-								$ind_Kommentti	= 7;
+
+								$_indx = 4;
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									${'ind_Ale'.$alepostfix} = $_indx;
+									$_indx++;
+								}
+
+								$ind_Netto 		= $_indx;
+								$_indx++;
+								$ind_Var 		= $_indx;
+								$_indx++;
+								$ind_Kommentti	= $_indx;
 							}
 
 							$tuoteno = trim($rivi[$ind_Tuoteno]);
@@ -262,7 +301,11 @@
 								$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
 								$kerayspvm		= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
 								$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
-								$ale1	  		= str_replace(",", ".", $rivi[$ind_Ale]);
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									${'ale'.$alepostfix} = str_replace(",", ".", $rivi[${'ind_Ale'.$alepostfix}]);
+								}
+
 								$netto 	  		= strtoupper(trim($rivi[$ind_Netto]));
 								$var  			= strtoupper(trim($rivi[$ind_Var]));
 								$kommentti		= trim($rivi[$ind_Kommentti]);
@@ -471,11 +514,22 @@
 							$ind_Maara                   = 1;
 							$ind_Arvioitu                = 2;
 							$ind_Hinta                   = 3;
-							$ind_Ale                     = 4;
-							$ind_Netto                   = 5;
-							$ind_Var                     = 6;
-							$ind_Kommentti               = 7;
-							$ind_Valmistuslinja          = 8;
+
+							$_indx = 4;
+
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								${'ind_Ale'.$alepostfix} = $_indx;
+								$_indx++;
+							}
+
+							$ind_Netto                   = $_indx;
+							$_indx++;
+							$ind_Var                     = $_indx;
+							$_indx++;
+							$ind_Kommentti               = $_indx;
+							$_indx++;
+							$ind_Valmistuslinja          = $_indx;
+							$_indx++;
 							$ind_ToivottuKeraysajankohta = 9;
 
 							// Jos ensimmäisestä solusta löytyy sana "tuote", niin käyttäjä on antanu sarakeotsikot
@@ -496,10 +550,19 @@
 							$ind_Maara 		= 1;
 							$ind_Arvioitu 	= 2;
 							$ind_Hinta 		= 4;
-							$ind_Ale 		= 5;
-							$ind_Netto 		= 6;
-							$ind_Var 		= 7;
-							$ind_Kommentti	= 8;
+
+							$_indx = 5;
+
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								${'ind_Ale'.$alepostfix} = $_indx;
+								$_indx++;
+							}
+
+							$ind_Netto 		= $_indx;
+							$_indx++;
+							$ind_Var 		= $_indx;
+							$_indx++;
+							$ind_Kommentti	= $_indx;
 
 							// Skipataan otsikot
 							continue;
@@ -516,10 +579,19 @@
 							$ind_Maara 		= 1;
 							$ind_Arvioitu 	= 2;
 							$ind_Hinta 		= 3;
-							$ind_Ale 		= 4;
-							$ind_Netto 		= 5;
-							$ind_Var 		= 6;
-							$ind_Kommentti	= 7;
+
+							$_indx = 4;
+
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								${'ind_Ale'.$alepostfix} = $_indx;
+								$_indx++;
+							}
+
+							$ind_Netto 		= $_indx;
+							$_indx++;
+							$ind_Var 		= $_indx;
+							$_indx++;
+							$ind_Kommentti	= $_indx;
 
 							// Skipataan otsikot
 							continue;
@@ -532,10 +604,19 @@
 							$ind_Maara 		= 1;
 							$ind_Arvioitu 	= 2;
 							$ind_Hinta 		= 3;
-							$ind_Ale 		= 4;
-							$ind_Netto 		= 5;
-							$ind_Var 		= 6;
-							$ind_Kommentti	= 7;
+
+							$_indx = 4;
+
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								${'ind_Ale'.$alepostfix} = $_indx;
+								$_indx++;
+							}
+
+							$ind_Netto 		= $_indx;
+							$_indx++;
+							$ind_Var 		= $_indx;
+							$_indx++;
+							$ind_Kommentti	= $_indx;
 						}
 
 						$tuoteno = trim($rivi[$ind_Tuoteno]);
@@ -564,7 +645,11 @@
 							$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
 							$kerayspvm		= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
 							$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
-							$ale1	  		= str_replace(",", ".", $rivi[$ind_Ale]);
+
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								${'ale'.$alepostfix} = str_replace(",", ".", $rivi[${'ind_Ale'.$alepostfix}]);
+							}
+
 							$netto 	  		= strtoupper(trim($rivi[$ind_Netto]));
 							$var  			= strtoupper(trim($rivi[$ind_Var]));
 							$kommentti		= trim($rivi[$ind_Kommentti]);
@@ -751,6 +836,9 @@
 		else {
 			$colspan = 8;
 		}
+
+		$colspan += $yhtiorow['myynnin_alekentat'];
+
 		echo "<font class='head'>$otsikko</font><hr>";
 
 		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
@@ -772,7 +860,11 @@
 			if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
 				echo "<td>".t("Valmistusajankohta")." ".t("(vvvv-kk-pp)")."</td>";
 				echo "<td>".t("Hinta")."</td>";
-				echo "<td>".t("Ale")."</td>";
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					echo "<td>".t("Ale{$alepostfix}")."</td>";
+				}
+
 				echo "<td>".t("Netto")."</td>";
 				echo "<td>".t("Var")."</td>";
 				echo "<td>".t("Kommentti")."</td>";
@@ -782,7 +874,11 @@
 			else {
 				echo "<td>".t("Arvioitu toimituspäivä")." ".t("(vvvv-kk-pp)")."</td>";
 				echo "<td>".t("Hinta")."</td>";
-				echo "<td>".t("Ale")."</td>";
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					echo "<td>".t("Ale{$alepostfix}")."</td>";
+				}
+
 				echo "<td>".t("Netto")."</td>";
 				echo "<td>".t("Var")."</td>";
 				echo "<td>".t("Kommentti")."</td>";

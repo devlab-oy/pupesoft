@@ -174,7 +174,7 @@ if ($kukarow["extranet"] == "") {
 	echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
 }
 
-if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
+if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) $kukarow["kesken"] > 0) {
 	$query = "	UPDATE lasku
 				SET tunnusnippu = tunnus
 				where yhtio		= '$kukarow[yhtio]'
@@ -321,7 +321,7 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 	$tee = '';
 }
 
-if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $kukarow['kesken'] > 0 and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
+if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and (int) $kukarow["kesken"] > 0 and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
 
 	$kukarow['kesken'] = (int) $kukarow['kesken'];
 
@@ -527,7 +527,7 @@ if (
 			(
 				($toim == "PIKATILAUS" and
 					((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or
-					((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")
+					((int) $kukarow["kesken"] > 0 and $asiakasid != '' and $kukarow["extranet"] == "")
 				) or
 				($from == "CRM" and $asiakasid != '')
 			 )
@@ -715,7 +715,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS" and $muokkauslukko =
 if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko == "") {
 
 	///* Reload ja back-nappulatsekki *///
-	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
+	if ((int) $kukarow["kesken"] == 0) {
 		echo "<font class='error'> ".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font>";
 		exit;
 	}
@@ -848,7 +848,7 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 }
 
 // Poistetaan tilaus
-if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] == "") {
+if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] == "" and (int) $kukarow['kesken'] > 0) {
 
 	// tilausta mitätöidessä laitetaan kaikki poimitut jt-rivit takaisin omille tilauksille
 	$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus
@@ -1272,7 +1272,7 @@ if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow["kassamyyja"] 
 if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 	///* Reload ja back-nappulatsekki *///
-	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
+	if ((int) $kukarow["kesken"] == 0) {
 		echo "<font class='error'> ".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font><br>";
 		exit;
 	}
@@ -3165,10 +3165,10 @@ if ($tee == '') {
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
 						AND kuka.tunnus  = '$laskurow[myyja]')
 						UNION
-					   (SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+					   (SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.aktiivinen = 1
 						AND kuka.extranet = '')
 						ORDER BY nimi";
 			$yresult = pupe_query($query);
@@ -3422,15 +3422,20 @@ if ($tee == '') {
 
 	echo "</table>";
 
-	//Näytetäänko asiakkaan saatavat!
-	$query  = "	SELECT yhtio
-				FROM tilausrivi
-				WHERE yhtio	= '$kukarow[yhtio]'
-				AND otunnus = '$kukarow[kesken]'
-				AND tyyppi != 'D'";
-	$numres = pupe_query($query);
+	$numres_saatavt  = 0;
 
-	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
+	if ((int) $kukarow["kesken"] > 0) {
+		//Näytetäänko asiakkaan saatavat!
+		$query  = "	SELECT yhtio
+					FROM tilausrivi
+					WHERE yhtio	= '$kukarow[yhtio]'
+					AND otunnus = '$kukarow[kesken]'
+					AND tyyppi != 'D'";
+		$numres = pupe_query($query);
+		$numres_saatavt = mysql_num_rows($numres);
+	}
+
+	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
 
 		js_popup();
 
@@ -3637,7 +3642,7 @@ if ($tee == '') {
 	}
 
 	//Muokataan tilausrivin lisätietoa
-	if ($kukarow["extranet"] == "" and ($tila == "LISATIETOJA_RIVILLE" or $tila == "ASPOSITIO_RIVILLE")) {
+	if ($kukarow["extranet"] == "" and ($tila == "LISATIETOJA_RIVILLE" or $tila == "ASPOSITIO_RIVILLE") and (int) $kukarow["kesken"] > 0) {
 
 		$query = "	SELECT tilausrivi.tunnus
 					FROM tilausrivi use index (yhtio_otunnus)
@@ -3701,7 +3706,7 @@ if ($tee == '') {
 	}
 
 	// ollaan muokkaamassa rivin tietoja, haetaan rivin tiedot ja poistetaan rivi..
-	if ($tila == 'MUUTA') {
+	if ($tila == 'MUUTA' and (int) $kukarow["kesken"] > 0) {
 
 		$query	= "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tuote.sarjanumeroseuranta
 					FROM tilausrivi use index (PRIMARY)
@@ -3862,7 +3867,7 @@ if ($tee == '') {
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				${'ale'.$alepostfix} = $tilausrivi["ale{$alepostfix}"];
 			}
-			
+
 			$netto					= $tilausrivi['netto'];
 			$alv 					= $tilausrivi['alv'];
 			$kommentti				= $tilausrivi['kommentti'];
@@ -3881,7 +3886,7 @@ if ($tee == '') {
 			$valmistuslinja			= $tilausrivi['positio'];
 
 			if ($yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
-				// valittu ei näytetä alveja vaikka hinnat alvillisina	
+				// valittu ei näytetä alveja vaikka hinnat alvillisina
 				if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
 					$hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
 				}
@@ -4828,7 +4833,7 @@ if ($tee == '') {
 	}
 
 	// jos ollaan jo saatu tilausnumero aikaan listataan kaikki tilauksen rivit..
-	if ((int) $kukarow["kesken"] != 0) {
+	if ((int) $kukarow["kesken"] > 0) {
 
 		$laskentalisa_riveille = "";
 
@@ -8016,7 +8021,7 @@ if ($tee == '') {
 	}
 
 	// tulostetaan loppuun parit napit..
-	if ((int) $kukarow["kesken"] != 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
+	if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
 		echo "<br><table width='100%'><tr>$jarjlisa";
 
 		if ($kukarow["extranet"] == "" and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {

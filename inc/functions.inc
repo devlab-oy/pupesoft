@@ -3540,6 +3540,7 @@ if (!function_exists("hae_alehinta_minkpl")) {
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					$nettohinta *= (1 - $ale["ale{$alepostfix}"] / 100);
 				}
+				$nettohinta = round($nettohinta, $yhtiorow['hintapyoristys']);
 			}
 			else {
 				$nettohinta = "";

@@ -32,34 +32,18 @@ class Unifaun {
 	}
 
 	public function setYhtioRow($yhtiorow) {
-		foreach ($yhtiorow as $ind => $kentta) {
-			$yhtiorow[$ind] = htmlentities($kentta);
-		}
-
 		$this->yhtiorow = $yhtiorow;
 	}
 
 	public function setKukaRow($kukarow) {
-		foreach ($kukarow as $ind => $kentta) {
-			$kukarow[$ind] = htmlentities($kentta);
-		}
-
 		$this->kukarow = $kukarow;
 	}
 
 	public function setToimitustapaRow($toitarow) {
-		foreach ($toitarow as $ind => $kentta) {
-			$toitarow[$ind] = htmlentities($kentta);
-		}
-
 		$this->toitarow = $toitarow;
 	}
 
 	public function setRahtikirjaRow($rakir_row) {
-		foreach ($rakir_row as $ind => $kentta) {
-			$rakir_row[$ind] = htmlentities($kentta);
-		}
-
 		$this->rakir_row = $rakir_row;
 	}
 
@@ -82,21 +66,10 @@ class Unifaun {
 					WHERE yhtio = '{$this->kukarow['yhtio']}'
 					and tunnus  = '{$this->postirow['liitostunnus']}'";
 		$asres = mysql_query($query);
-		$asiakasrow = mysql_fetch_assoc($asres);
-
-		foreach ($asiakasrow as $ind => $kentta) {
-			$asiakasrow[$ind] = htmlentities($kentta);
-		}
-
-		$this->asiakasrow = $asiakasrow;
+		$this->asiakasrow = mysql_fetch_assoc($asres);
 	}
 
 	public function setPostiRow($postirow) {
-
-		foreach ($postirow as $ind => $kentta) {
-			$postirow[$ind] = htmlentities($kentta);
-		}
-
 		$this->postirow = $postirow;
 
 		// haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
@@ -111,12 +84,12 @@ class Unifaun {
 
 		// jos varastolle on annettu joku osoite, käytetään sitä
 		if ($postirow_varasto["nimi"] != "") {
-			$this->postirow["yhtio_nimi"]     = htmlentities($postirow_varasto["nimi"]);
-			$this->postirow['yhtio_nimitark'] = htmlentities($postirow_varasto["nimitark"]);
-			$this->postirow["yhtio_osoite"]   = htmlentities($postirow_varasto["osoite"]);
-			$this->postirow["yhtio_postino"]  = htmlentities($postirow_varasto["postino"]);
-			$this->postirow["yhtio_postitp"]  = htmlentities($postirow_varasto["postitp"]);
-			$this->postirow["yhtio_maa"]      = htmlentities($postirow_varasto["maa"]);
+			$this->postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
+			$this->postirow['yhtio_nimitark'] = $postirow_varasto["nimitark"];
+			$this->postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
+			$this->postirow["yhtio_postino"]  = $postirow_varasto["postino"];
+			$this->postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
+			$this->postirow["yhtio_maa"]      = $postirow_varasto["maa"];
 		}
 
 		$this->setAsiakasRow();

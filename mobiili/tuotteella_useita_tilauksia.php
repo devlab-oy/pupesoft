@@ -40,12 +40,20 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 			$param_viivakoodi = array();
 
 			foreach ($tuotenumerot as $_tuoteno => $_arr) {
-				foreach ($_arr as $_liitostunnus) {
-					array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
+
+				if (!empty($_arr[0])) {
+					foreach ($_arr as $_liitostunnus) {
+						array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
+					}
 				}
 			}
 
-			$params['viivakoodi'] = "(".implode($param_viivakoodi, " OR ").")";
+			if (empty($param_viivakoodi)) {
+				$params['viivakoodi'] = "tuote.tuoteno IN ('".implode(array_keys($tuotenumerot), "','")."')";
+			}
+			else {
+				$params['viivakoodi'] = "(".implode($param_viivakoodi, " OR ").")";
+			}
 		}
 		else {
 			$errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";

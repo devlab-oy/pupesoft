@@ -841,7 +841,7 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array_fill_keys(array('X','U','V','Y'), '');
+		$sel = array_fill_keys(array('X','U','V','Y','H','W'), '');
 		$sel[$trow[$i]] = " SELECTED";
 
 		$ulos .= "<option value=''>".t("Myyntitilauksella ei voi luoda automaattisesti ostorivej‰")."</option>";
@@ -849,6 +849,8 @@
 		$ulos .= "<option value='U' {$sel['U']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen")."</option>";
 		$ulos .= "<option value='Y' {$sel['Y']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ varastoon jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰")."</option>";
 		$ulos .= "<option value='V' {$sel['V']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰")."</option>";
+		$ulos .= "<option value='H' {$sel['H']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ varastoon jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰ (tilattava tuote ensisijaisesti)")."</option>";
+		$ulos .= "<option value='W' {$sel['W']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰ (tilattava tuote ensisijaisesti)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3432,10 +3434,13 @@
 	if (mysql_field_name($result, $i) == 'maksukehotus_kentat') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
 
 		$ulos .= "<option value = ''>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja")."</option>";
+		$ulos .= "<option value = 'J' $sel[J]>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat sek‰ korot ja lis‰t‰‰n ne maksukehotuksen summaan")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja eik‰ korkoja")."</option>";
+		$ulos .= "<option value = 'L' $sel[L]>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja. N‰ytet‰‰n korot ja lis‰t‰‰n ne maksukehotuksen summaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

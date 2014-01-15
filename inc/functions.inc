@@ -3533,6 +3533,17 @@ if (!function_exists("hae_alehinta_minkpl")) {
 
 			list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $loop_kpl, '', '', array());
 
+			if ($netto == "") {
+				$nettohinta = $hinta;
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$nettohinta *= (1 - $ale["ale{$alepostfix}"] / 100);
+				}
+				$nettohinta = round($nettohinta, $yhtiorow['hintapyoristys']);
+			}
+			else {
+				$nettohinta = "";
+			}
+
 			$ei_loydy = TRUE;
 
 			foreach ($hinnasto as $_arr) {
@@ -3547,13 +3558,13 @@ if (!function_exists("hae_alehinta_minkpl")) {
 					'hinta' => $hinta,
 					'netto' => $netto,
 					'ale' => $ale,
+					'nettohinta' => $nettohinta,
 					'alehinta_alv' => $alehinta_alv,
 					'alehinta_val' => $alehinta_val,
 				);
-
 			}
 
-			unset($hinta, $netto, $ale, $alehinta_alv, $alehinta_val);
+			unset($hinta, $netto, $ale, $alehinta_alv, $alehinta_val, $nettohinta);
 		}
 
 		return $hinnasto;

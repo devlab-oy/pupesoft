@@ -872,7 +872,7 @@ else {
 			}
 
 			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
-			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $tilausvalmiskutsuja != "JTSELAUS") {
 
 				$query = "	UPDATE lasku
 							SET tila = 'N',

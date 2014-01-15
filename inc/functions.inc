@@ -23462,7 +23462,7 @@ if (!function_exists("hae_viivakoodilla")) {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND eankoodi = '{$viivakoodi}')
 					UNION
-					(SELECT tuoteno, '' liitostunnus
+					(SELECT tuoteno, liitostunnus
 					FROM tuotteen_toimittajat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND viivakoodi = '{$viivakoodi}')

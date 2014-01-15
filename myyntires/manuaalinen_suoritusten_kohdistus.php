@@ -1600,7 +1600,6 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	if ($osasuoritus == '1') $osacheck = 'checked';
 	if ($pyoristys_virhe_ok == '1') $pyocheck = 'checked';
 
-
 	echo "<form method = 'post' action='manuaalinen_suoritusten_kohdistus.php' name='summat'>";
 	echo "<table>";
 	echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='0.0' readonly></td>";
@@ -1609,7 +1608,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	echo "</form>";
 
 	//N‰ytet‰‰n laskut!
-	$kentat = 'summa, kasumma, laskunro, erpvm, kapvm, viite, ytunnus';
+	$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
 	$kentankoko = array(10,10,15,10,10,15);
 	$array 	= explode(",", $kentat);
 	$count 	= count($array);

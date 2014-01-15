@@ -3871,6 +3871,7 @@ if ($tee == '') {
 			$netto					= $tilausrivi['netto'];
 			$alv 					= $tilausrivi['alv'];
 			$kommentti				= $tilausrivi['kommentti'];
+			$patukka				= $tilausrivi['ale_peruste'];
 			$kerayspvm				= $tilausrivi['kerayspvm'];
 			$toimaika				= $tilausrivi['toimaika'];
 			$hyllyalue				= $tilausrivi['hyllyalue'];
@@ -4558,12 +4559,11 @@ if ($tee == '') {
 				foreach ($myyntierahinnat as $myyntiera => $myyntierahinta) {
 					if ($myyntiera > 1) echo "<tr><th>".t("Hinta")." > $myyntiera $tuote[yksikko]</th><td align='right'>".hintapyoristys($myyntierahinta["hinta"])." $yhtiorow[valkoodi]</td></tr>";
 				}
-				
-				
+
 				$haettu_alehinta = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
-				 
-				if (isset($aperuste) and $haettu_alehinta > 1) {
-					echo "<tr><th>".t("{$aperuste}")."</th><td align='right'>".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</td></tr>";
+
+				if (isset($patukka) and !empty($patukka) and $haettu_alehinta > 1) {
+					echo "<tr><th>".t("{$patukka}")."</th><td align='right'>".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</td></tr>";
 				}
 
 				if ($tuote["nettohinta"] != 0) {
@@ -4977,6 +4977,7 @@ if ($tee == '') {
 					tuote.status,
 					tuote.ei_saldoa,
 					tuote.vakkoodi,
+					tilausrivi.ale_peruste,
 					tuote.tunnus as tuote_tunnus,
 					$kommentti_select
 					$sorttauskentta
@@ -6997,7 +6998,8 @@ if ($tee == '') {
 				}
 
 				echo "</td></tr>";
-
+				//KISSA
+				if (!empty($row['ale_peruste'])) $row['kommentti'] .="\n".t("Alennusperuste").": ".$row['ale_peruste'];
 				if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) {
 					$query = "	SELECT *
 								FROM tuote

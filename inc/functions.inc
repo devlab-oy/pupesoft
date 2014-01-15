@@ -5561,7 +5561,7 @@ if (!function_exists("alehinta")) {
 
 		$debug = 0;
 		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ",var_dump($ale),"% ".t("HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
-		$GLOBALS['aperuste'] = $aperuste;
+		$GLOBALS['patukka'] = $aperuste;
 		if ($yhtio != '') {
 			$yhtiorow = hae_yhtion_parametrit($vanha_yhtio);
 			$kukarow['yhtio'] 			= $vanha_yhtio;

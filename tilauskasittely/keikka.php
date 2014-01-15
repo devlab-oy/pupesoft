@@ -1475,6 +1475,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 				AND lasku.vienti in ('B','C','J','E','F','K','H','I','L')
 				AND liitos.tunnus IS NULL
 				AND (lasku.tapvm <= '{$vv}-{$kk}-{$pp}' AND lasku.tapvm >= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month))
+				#AND lasku.tapvm >= date_sub(current_date, interval 12 month)
 				{$toimittaja_where}
 				GROUP BY lasku.tunnus";
 	$result_vaihto_omaisuus = pupe_query($query);
@@ -1511,6 +1512,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 				AND lasku.tila in ('H','Y','M','P','Q')
 				AND lasku.vienti in ('B','E','H')
 				AND (lasku.tapvm <= '{$vv}-{$kk}-{$pp}' AND lasku.tapvm >= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month))
+				#AND lasku.tapvm >= date_sub(current_date, interval 12 month)
 				{$toimittaja_where}
 				GROUP BY lasku.tunnus
 				HAVING varastossa != kohdistettu";
@@ -1537,22 +1539,51 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 	$laskut_viety		   = 0;
 	$laskut_osittain_viety = 0;
 
-	$query = "	SELECT lasku.laskunro,
-				lasku.tila,
-				lasku.vanhatunnus,
-				lasku.tunnus,
-				count(DISTINCT liitos.tunnus) liitetty,
-				group_concat(liitos.vanhatunnus) tunnukset
-				FROM lasku
-				LEFT JOIN lasku AS liitos ON liitos.yhtio = lasku.yhtio AND liitos.laskunro = lasku.laskunro AND liitos.vanhatunnus > 0 AND liitos.vienti IN ('C','F','I','J','K','L') AND liitos.tila = 'K'
-				WHERE  lasku.yhtio 	  = '{$kukarow['yhtio']}'
-				AND lasku.tila 		  = 'K'
-				AND lasku.alatila 	  = ''
-				AND (lasku.tapvm = '0000-00-00' OR lasku.tapvm >= '{$vv}-{$kk}-{$pp}')
-				AND lasku.vanhatunnus = 0
-				{$toimipaikkalisa}
-				{$toimittaja_where}
-				GROUP BY 1,2,3,4";
+	$compare_date1 = new DateTime("now");
+	$compare_date2 = new DateTime("{$vv}-{$kk}-{$pp}");
+
+	$comp = $compare_date1->format('Y-m-d') != $compare_date2->format('Y-m-d');
+
+	if ($comp) {
+
+		$query = "	SELECT lasku.laskunro,
+					lasku.tila,
+					lasku.vanhatunnus,
+					lasku.tunnus,
+					count(DISTINCT liitos.tunnus) liitetty,
+					group_concat(liitos.vanhatunnus) tunnukset
+					FROM lasku
+					LEFT JOIN lasku AS liitos ON liitos.yhtio = lasku.yhtio AND liitos.laskunro = lasku.laskunro AND liitos.vanhatunnus > 0 AND liitos.vienti IN ('C','F','I','J','K','L') AND liitos.tila = 'K'
+						AND liitos.luontiaika <= '{$vv}-{$kk}-{$pp} 00:00:00'
+					WHERE  lasku.yhtio 	  = '{$kukarow['yhtio']}'
+					AND lasku.tila 		  = 'K'
+					AND ((lasku.alatila = '' AND lasku.mapvm = '0000-00-00' AND lasku.kohdistettu = '')
+						OR
+						(lasku.alatila = 'X' AND lasku.mapvm >= '{$vv}-{$kk}-{$pp}' AND lasku.kohdistettu = 'X'))
+					AND lasku.vanhatunnus = 0
+					{$toimipaikkalisa}
+					{$toimittaja_where}
+					GROUP BY 1,2,3,4";
+	}
+	else {
+		$query = "	SELECT lasku.laskunro,
+					lasku.tila,
+					lasku.vanhatunnus,
+					lasku.tunnus,
+					count(DISTINCT liitos.tunnus) liitetty,
+					group_concat(liitos.vanhatunnus) tunnukset
+					FROM lasku
+					LEFT JOIN lasku AS liitos ON liitos.yhtio = lasku.yhtio AND liitos.laskunro = lasku.laskunro AND liitos.vanhatunnus > 0 AND liitos.vienti IN ('C','F','I','J','K','L') AND liitos.tila = 'K'
+					WHERE  lasku.yhtio 	  = '{$kukarow['yhtio']}'
+					AND lasku.tila 		  = 'K'
+					AND lasku.alatila 	  = ''
+					AND lasku.mapvm 	  = '0000-00-00'
+					AND lasku.vanhatunnus = 0
+					{$toimipaikkalisa}
+					{$toimittaja_where}
+					GROUP BY 1,2,3,4";
+	}
+
 	$result = pupe_query($query);
 
 	query_dump($query);
@@ -1562,13 +1593,25 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 	//haetaan saapuvia ostotilauksia, joihin liitetty tai ei liitetty lasku (kts. liitetty)
 	while ($row = mysql_fetch_assoc($result)) {
 
-		$query = "	SELECT
-					sum(kpl * hinta * {$query_ale_lisa}) viety,
-					sum(varattu * hinta * {$query_ale_lisa}) ei_viety
-					FROM tilausrivi
-					WHERE yhtio 	= '{$kukarow['yhtio']}'
-					AND uusiotunnus = {$row['tunnus']}
-					AND tyyppi 		= 'O'";
+		if ($comp) {
+			$query = "	SELECT
+						sum(IF(laskutettuaika < '{$vv}-{$kk}-{$pp}', kpl, 0) * hinta * {$query_ale_lisa}) viety,
+						sum(IF(laskutettuaika >= '{$vv}-{$kk}-{$pp}', varattu, 0) * hinta * {$query_ale_lisa}) ei_viety
+						FROM tilausrivi
+						WHERE yhtio 	= '{$kukarow['yhtio']}'
+						AND uusiotunnus = {$row['tunnus']}
+						AND tyyppi 		= 'O'";
+		}
+		else {
+			$query = "	SELECT
+						sum(kpl * hinta * {$query_ale_lisa}) viety,
+						sum(varattu * hinta * {$query_ale_lisa}) ei_viety
+						FROM tilausrivi
+						WHERE yhtio 	= '{$kukarow['yhtio']}'
+						AND uusiotunnus = {$row['tunnus']}
+						AND tyyppi 		= 'O'";
+		}
+
 		$result2 = pupe_query($query);
 		$tilausrivirow = mysql_fetch_assoc($result2);
 

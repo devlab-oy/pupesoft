@@ -4558,6 +4558,13 @@ if ($tee == '') {
 				foreach ($myyntierahinnat as $myyntiera => $myyntierahinta) {
 					if ($myyntiera > 1) echo "<tr><th>".t("Hinta")." > $myyntiera $tuote[yksikko]</th><td align='right'>".hintapyoristys($myyntierahinta["hinta"])." $yhtiorow[valkoodi]</td></tr>";
 				}
+				
+				
+				$haettu_alehinta = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
+				 
+				if (isset($aperuste) and $haettu_alehinta > 1) {
+					echo "<tr><th>".t("{$aperuste}")."</th><td align='right'>".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</td></tr>";
+				}
 
 				if ($tuote["nettohinta"] != 0) {
 					echo "<tr><th>".t("Nettohinta")."</th><td align='right'>".hintapyoristys($tuote['nettohinta'])." $yhtiorow[valkoodi]</td></tr>";

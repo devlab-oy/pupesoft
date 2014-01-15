@@ -1,9 +1,11 @@
 <?php
 
 	// Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-	ini_set('zlib.output_compression', 0);
 	ini_set('implicit_flush', 1);
 	ob_implicit_flush(1);
+
+	// Ei käytetä pakkausta
+	$compression = FALSE;
 
 	// Ladataan tiedosto
 	if (isset($_POST["tee"])) {

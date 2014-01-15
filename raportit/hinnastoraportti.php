@@ -3,6 +3,9 @@
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
+	// Ei k‰ytet‰ pakkausta
+	$compression = FALSE;
+
 	if (isset($_REQUEST["tee"])) {
 		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
 	 	if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);

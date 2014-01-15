@@ -246,7 +246,7 @@
 					$pdf->draw_text(500-$oikpos, $kala, sprintf("%.2f", $kaatosumma),		$firstpage, $norm);
 				}
 
-				
+
 				$kala -= 13;
 			}
 
@@ -619,15 +619,21 @@
 		$laskutiedot["kpvm"] = date("Y-m-d");
 	}
 
-	$query = "	SELECT sum(summa) summa
-				FROM suoritus
-				WHERE yhtio  = '$kukarow[yhtio]'
-				and (kohdpvm = '0000-00-00' or kohdpvm > '$laskutiedot[kpvm]')
-				and ltunnus  > 0
-				and kirjpvm <= '$laskutiedot[kpvm]'
-				and asiakas_tunnus in ($lirow[liitokset])";
-	$summaresult = pupe_query($query);
-	$kaato = mysql_fetch_assoc($summaresult);
+	if ($lirow["liitokset"] != "") {
+		$query = "	SELECT sum(summa) summa
+					FROM suoritus
+					WHERE yhtio  = '$kukarow[yhtio]'
+					and (kohdpvm = '0000-00-00' or kohdpvm > '$laskutiedot[kpvm]')
+					and ltunnus  > 0
+					and kirjpvm <= '$laskutiedot[kpvm]'
+					and asiakas_tunnus in ($lirow[liitokset])";
+		$summaresult = pupe_query($query);
+		$kaato = mysql_fetch_assoc($summaresult);
+	}
+	else {
+		$kaato = array();
+		$kaato["summa"] = 0;
+	}
 
 	// haetaan yhtiön toimipaikkojen yhteystiedot
 	if ($laskutiedot["yhtio_toimipaikka"] != '' and $laskutiedot["yhtio_toimipaikka"] != 0) {
@@ -651,8 +657,8 @@
 		$toimipaikkarow["kotipaikka"] 	= $yhtiorow["kotipaikka"];
 	}
 
-	$kaatosumma=$kaato["summa"] * -1;
-	if (!$kaatosumma) $kaatosumma='0.00';
+	$kaatosumma = $kaato["summa"] * -1;
+	if (!$kaatosumma) $kaatosumma = '0.00';
 
     //	Arvotaan oikea karhuviesti
 	if (!isset($karhuviesti)) {

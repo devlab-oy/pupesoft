@@ -257,10 +257,13 @@
 			$apure = pupe_query($query);
 
 			// Kaikki rivit toimitettu:
-			if (mysql_num_rows($apure) == 0 or $laskurow['eilahetetta'] == 'o') {
+			if (mysql_num_rows($apure) == 0) {
 				$kateisohitus = "";
 				$laskurow['eilahetetta'] = 'o';
 			}
+			
+			// Jos tilaus on osatoimituskiellossa ja on täpätty suoraan laskutukseen, pitää tällöinkin laittaa $kateisohitus tyhjäksi
+			if ($laskurow['eilahetetta'] == 'o' and $laskurow['osatoimitus'] == 'o') $kateisohitus = "";
 
 			if ($laskurow['tila']== 'G') {
 				$vanhatoim = $toim;

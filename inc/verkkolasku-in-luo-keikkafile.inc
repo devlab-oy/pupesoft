@@ -1239,7 +1239,7 @@
 
 						// jos skipattiin vähänkin niin nollataan kaikki kohdistukset
 						$updatequery = "UPDATE asn_sanomat SET
-										tilausrivi = '',
+										tilausrivi = NULL,
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
@@ -1258,7 +1258,7 @@
 
 							// jos skipattiin vähänkin niin nollataan kaikki kohdistukset
 							$updatequery = "UPDATE asn_sanomat SET
-											tilausrivi = ''
+											tilausrivi = NULL
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
 							$upd_res = pupe_query($updatequery);

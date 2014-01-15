@@ -345,7 +345,7 @@
 						}
 					}
 					else {
-						if ($kollirow['tilausrivi'] != NULL) $paketin_rivit[] = $kollirow['tilausrivi'];
+						if (!is_null($kollirow['tilausrivi'])) $paketin_rivit[] = $kollirow['tilausrivi'];
 					}
 
 					// Haetaan tuotteen lapset jotka ovat runkoveloituksia
@@ -358,7 +358,7 @@
 					$lapset = mysql_fetch_assoc($result);
 
 					// Lapsia löytyi, tämä on isätuote
-					if ($lapset["lapset"] != NULL) {
+					if (!is_null($lapset["lapset"])) {
 
 						// Haetaan tilausnumerot joilla tämä tuote on
 						$query = "	SELECT group_concat(otunnus) tilaukset
@@ -1640,7 +1640,6 @@
 						AND asn_sanomat.paketintunniste = '{$kolli}'
 						AND asn_sanomat.asn_numero = '{$asn_numero}'
 						AND asn_sanomat.toimittajanumero = '{$toimittajanumero}'
-						#AND asn_sanomat.tilausrivi != NULL
 						AND asn_sanomat.laji = 'asn'
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
 			$result = pupe_query($query);
@@ -1941,7 +1940,7 @@
 					$row['nimitys'] = $trow['nimitys'];
 				}
 
-				if ($row['tilausrivi'] != NULL) {
+				if (!is_null($row['tilausrivi'])) {
 					$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$row['tilausrivi']})";
 					$hinta_chk_res = pupe_query($query);
 					$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
@@ -1964,7 +1963,7 @@
 				if ($row['status'] == 'E') {
 					echo "<font class='message'>",t("Erolistalla"),"</font>";
 				}
-				elseif ($row['tilausrivi'] != NULL) {
+				elseif (!is_null($row['tilausrivi'])) {
 					echo "<font class='ok'>Ok</font>";
 					$ok++;
 
@@ -1980,7 +1979,7 @@
 
 				echo "<td class='back'>";
 
-				if ($row['tilausrivi'] == NULL and $row['status'] != 'E') {
+				if (is_null($row['tilausrivi']) and $row['status'] != 'E') {
 					echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}##{$toimipaikka}' value='",t("Etsi"),"' />";
 
 					if ($row['hinta'] == 0) {

@@ -2002,7 +2002,6 @@
 				$puu_ein[] 		= $perherow["ei_nayteta"];
 				$puu_ohiker[] 	= $perherow["ohita_kerays"];
 				$puu_var[]		= $var;
-				$puu_perhe[]	= "X";
 			}
 		}
 
@@ -2032,7 +2031,7 @@
 			}
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($puu_perhe[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
+			if ($puu_hintake[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -2048,7 +2047,7 @@
 				}
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			elseif ($puu_perhe[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
+			elseif ($puu_hintake[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);

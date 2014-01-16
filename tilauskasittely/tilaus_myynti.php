@@ -5607,11 +5607,12 @@ if ($tee == '') {
 						$lisaresult = pupe_query($query);
 						$lisays = mysql_num_rows($lisaresult);
 					}
-					elseif($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['kommentti'] == '' and $row['ale_peruste'] != '') {
-						$lisays = 1;
-					}
 					else {
 						$lisays = 0;
+					}
+
+					if($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['kommentti'] == '' and $row['ale_peruste'] != '') {
+						$lisays = 1;
 					}
 
 					$pkrow[1] += $lisays;
@@ -5738,7 +5739,7 @@ if ($tee == '') {
 
 					echo "<tr>";
 
-					if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) or $vastaavattuotteet == 1 or ($row['kommentti'] == '' and $row['ale_peruste'] != '')) {
+					if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) or $vastaavattuotteet == 1 or ($row['kommentti'] == '' and $row['ale_peruste'] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'])) {
 						if ($jarjlisa != "") {
 							echo "<td rowspan = '2' class='back' style='width:10px; padding:0px; margin:0px;'>$buttonit</td>";
 						}
@@ -7034,7 +7035,7 @@ if ($tee == '') {
 
 					echo "<tr>";
 
-					if ($row['kommentti'] == '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
+					if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['kommentti'] == '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
 						$borderlask--;
 					}
 
@@ -7050,7 +7051,7 @@ if ($tee == '') {
 						$kommclass1 = "";
 						$kommclass2 = " ";
 					}
-				
+
 					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
 
 					$font_color = "";
@@ -7063,7 +7064,7 @@ if ($tee == '') {
 						if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') $row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
 						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
-					elseif($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
+					elseif($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
 						echo t("Alennusperuste").":<br><font {$font_color} style='font-weight: bold;'>".$row["ale_peruste"]."</font><br>";
 					}
 

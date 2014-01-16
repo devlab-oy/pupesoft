@@ -5704,7 +5704,7 @@ if ($tee == '') {
 						if ($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5')) {
 							$tuoteperhe_kayty = $row['perheid'];
 						}
-						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino kepakko";
+						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino";
 
 
 						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
@@ -7034,6 +7034,10 @@ if ($tee == '') {
 
 					echo "<tr>";
 
+					if ($row['kommentti'] == '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
+						$borderlask--;
+					}
+
 					if ($borderlask == 0 and $pknum > 1) {
 						$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
 						$kommclass2 = " style='border-bottom: 1px solid;'";
@@ -7048,7 +7052,7 @@ if ($tee == '') {
 					}
 				
 					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
-					
+
 					$font_color = "";
 					if ($row['kommentti'] != '') {
 

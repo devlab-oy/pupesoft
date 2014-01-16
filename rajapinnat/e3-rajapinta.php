@@ -58,6 +58,8 @@
 		echo "Voidaan ajaa vain komentorivilt‰!!!\n";
 		die;
 	}
+	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+	$useslave = 1;
 
 	//monenko p‰iv‰n takaa haetaan mm myynnit ja ostot skriptin ajohetkell‰, ‰l‰ aseta isommaksi kuin 2
 	$ajopaiva = 1;

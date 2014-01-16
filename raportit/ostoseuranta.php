@@ -6,6 +6,9 @@
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "ostoseuranta.php") !== FALSE) {
+		// Ei käytetä pakkausta
+		$compression = FALSE;
+
 		require ("../inc/parametrit.inc");
 	}
 

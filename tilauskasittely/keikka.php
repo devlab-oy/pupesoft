@@ -3,6 +3,12 @@
 $pupe_DataTables = 'keikka';
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
+
+	if ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok") {
+		// Ei käytetä pakkausta
+		$compression = FALSE;
+	}
+
 	require ("../inc/parametrit.inc");
 }
 

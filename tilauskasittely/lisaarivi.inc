@@ -557,7 +557,7 @@
 		}
 
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
-		
+
 		$kvkasittely = in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W')) ? false : true;
 
 		// Etsit‰‰n korvaavia tuotteita
@@ -2021,17 +2021,17 @@
 								AND tuotteen_toimittajat.tuoteno = '$tuoteno'
 							ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
 							LIMIT 1";
-	
+
 				$toimpaikres = pupe_query($query);
 				$krow = mysql_fetch_assoc($toimpaikres);
-					
+
 				if ($kpl > $krow['tehdas_saldo']) {
 					$kvkasittely = true;
-				}		
+				}
 			}
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
+			if ($puu_hintake[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -2047,7 +2047,7 @@
 				}
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
+			elseif ($puu_hintake[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);

@@ -1,5 +1,8 @@
 <?php
 
+// Ei käytetä pakkausta
+$compression = FALSE;
+
 require "../inc/parametrit.inc";
 require_once '../inc/pupeExcel.inc';
 require '../inc/ProgressBar.class.php';
@@ -174,7 +177,7 @@ function generoi_matkalaskuraportti_rivit($request_params) {
 	}
 
 	$rivit = array();
-	
+
 	while ($rivi = mysql_fetch_assoc($result)) {
 		if (isset($rivi['tuotetyyppi'])) {
 			korvaa_tuotetyyppi_selitteella($rivi);

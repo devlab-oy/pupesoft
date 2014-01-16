@@ -1,4 +1,4 @@
- <?php
+<?php
 
 	require ("../inc/parametrit.inc");
 

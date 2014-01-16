@@ -2,7 +2,10 @@
 
 	// Kutsutaanko CLI:st‰
 	$php_cli = FALSE;
-
+	
+	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+	$useslave = 1;
+	
 	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
 		$php_cli = TRUE;
 	}
@@ -58,8 +61,7 @@
 		echo "Voidaan ajaa vain komentorivilt‰!!!\n";
 		die;
 	}
-	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
-	$useslave = 1;
+	
 
 	//monenko p‰iv‰n takaa haetaan mm myynnit ja ostot skriptin ajohetkell‰, ‰l‰ aseta isommaksi kuin 2
 	$ajopaiva = 1;

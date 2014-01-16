@@ -224,7 +224,7 @@
 		$sarakkeet = array(	"os", "try", "tme", "malli", "mallitark",
 							"sta", "tah",
 							"abc", "abc os", "abc try", "abc tme",
-							"luontiaika",
+							"created_at",
 							"saldo", "reaalisaldo", "saldo2",
 							"haly", "til", "valmistuksessa", "ennpois", "jt", "siirtojt", "ennakot",
 							"1kk", "3kk", "6kk", "12kk", "ke", "1x2",
@@ -262,7 +262,7 @@
 								"abc os"		=> "abcluokka_osasto",
 								"abc try"		=> "abcluokka_try",
 								"abc tme" 		=> "abcluokka_tuotemerkki",
-								"luontiaika"	=> "luontiaika",
+								"created_at"	=> "created_at",
 								"saldo" 		=> "saldo",
 								"saldo2" 		=> "saldo2",
 								"reaalisaldo"	=> "reaalisaldo",
@@ -605,44 +605,44 @@
 					$jt_tuotteet = $vrow[0];
 				}
 
-				$abc_luontiaikarajaus = "";
+				$abc_created_atrajaus = "";
 
 				if ($abc_laadittuaika == "alle_12kk") {
 					# N‰m‰ menee lis‰‰ -muuttujaan, koska on AND ja pit‰‰ rajata koko query‰
-					$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
+					$lisaa .= " and tuote.created_at >= date_sub(current_date, interval 12 month) ";
 				}
 				elseif ($abc_laadittuaika == "yli_12kk") {
 					# N‰m‰ menee lis‰‰ -muuttujaan, koska on AND ja pit‰‰ rajata koko query‰
-					$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
+					$lisaa .= " and tuote.created_at < date_sub(current_date, interval 12 month) ";
 				}
 				elseif ($abc_laadittuaika == "yli_annettu" and $naytauudet_pp != '' and $naytauudet_kk != '' and $naytauudet_vv != '') {
-					# N‰m‰ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
-					$abc_luontiaikarajaus = " or tuote.luontiaika >= '$naytauudet_vv-$naytauudet_kk-$naytauudet_pp' ";
+					# N‰m‰ menee abc_created_atrajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
+					$abc_created_atrajaus = " or tuote.created_at >= '$naytauudet_vv-$naytauudet_kk-$naytauudet_pp' ";
 				}
 				else {
-					# N‰m‰ menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
-					$abc_luontiaikarajaus = " or tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
+					# N‰m‰ menee abc_created_atrajaus -muuttujaan, koska on OR ja pit‰‰ rajata ehdollisesti abc rajausta
+					$abc_created_atrajaus = " or tuote.created_at >= date_sub(current_date, interval 12 month) ";
 				}
 
 				// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
 				if ($abcrajausluokka == 'y') {
 					$abcwhere .= " and (abc_aputaulu.luokka <= '$abcrajaus'
-									$abc_luontiaikarajaus
+									$abc_created_atrajaus
 									or abc_aputaulu.tuoteno in ($jt_tuotteet))";
 				}
 				elseif ($abcrajausluokka == 'os') {
 					$abcwhere .= " and (abc_aputaulu.luokka_osasto <= '$abcrajaus'
-									$abc_luontiaikarajaus
+									$abc_created_atrajaus
 									or abc_aputaulu.tuoteno in ($jt_tuotteet))";
 				}
 				elseif ($abcrajausluokka == 'try') {
 					$abcwhere .= " and (abc_aputaulu.luokka_try <= '$abcrajaus'
-									$abc_luontiaikarajaus
+									$abc_created_atrajaus
 									or abc_aputaulu.tuoteno in ($jt_tuotteet))";
 				}
 				elseif ($abcrajausluokka == 'tme') {
 					$abcwhere .= " and (abc_aputaulu.luokka_tuotemerkki <= '$abcrajaus'
-									$abc_luontiaikarajaus
+									$abc_created_atrajaus
 									or abc_aputaulu.tuoteno in ($jt_tuotteet))";
 				}
 				else {
@@ -650,7 +650,7 @@
 									or abc_aputaulu.luokka_osasto <= '$abcrajaus'
 									or abc_aputaulu.luokka_try <= '$abcrajaus'
 									or abc_aputaulu.luokka_tuotemerkki <= '$abcrajaus'
-									$abc_luontiaikarajaus
+									$abc_created_atrajaus
 									or abc_aputaulu.tuoteno in ($jt_tuotteet)) ";
 				}
 			}
@@ -754,7 +754,7 @@
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
 							abc_aputaulu.luokka_tuotemerkki abcluokka_tuotemerkki,
-							tuote.luontiaika,
+							tuote.created_at,
 							tuote.sarjanumeroseuranta,
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
@@ -806,7 +806,7 @@
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
 							abc_aputaulu.luokka_tuotemerkki abcluokka_tuotemerkki,
-							tuote.luontiaika,
+							tuote.created_at,
 							tuote.sarjanumeroseuranta,
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
@@ -1438,7 +1438,7 @@
 							elseif ($sarake == 'nimitys') {
 								$value = t_tuotteen_avainsanat($row, 'nimitys');
 							}
-							elseif ($sarake == 'epa25pvm' or $sarake == 'epa50pvm' or $sarake == 'epa75pvm' or $sarake == 'epa100pvm' or $sarake == 'luontiaika') {
+							elseif ($sarake == 'epa25pvm' or $sarake == 'epa50pvm' or $sarake == 'epa75pvm' or $sarake == 'epa100pvm' or $sarake == 'created_at') {
 								$value = tv1dateconv($row[$sarake_keyt[$sarake]]);
 							}
 							// puute 1 tarvitaan oma taustav‰ri, muuten haetaan tiedot puuterow-muuttujasta

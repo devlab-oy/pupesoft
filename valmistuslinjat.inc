@@ -149,10 +149,10 @@ function lisaa_valmistus($valmistus, $linja) {
                         tyyppi      = 'valmistus',
 						konserni	= '',
 						myyntipaallikko = '',
-						laatija		= '{$kukarow['kuka']}',
-						luontiaika	= NOW(),
-						muutospvm	= '0000-00-00 00:00:00',
-						muuttaja	= '',
+						created_by		= '{$kukarow['kuka']}',
+						created_at	= NOW(),
+						updated_at	= '0000-00-00 00:00:00',
+						updated_by	= '',
 						asiakas		= '',
 						tapa		= '',
 						kuittaus	= '',
@@ -670,22 +670,22 @@ function jaa_valmistus($tunnus, $params) {
 
 				// P‰ivitet‰‰n kopiolle tulevat tiedot
 				$copy = $original;
-				$copy['laatija'] = $kukarow['kuka'];
-				unset($copy['luontiaika']); // now() ilman hipsukoita, setataan viimeisen‰
-				$copy['muutospvm'] = '';
+				$copy['created_by'] = $kukarow['kuka'];
+				unset($copy['created_at']); // now() ilman hipsukoita, setataan viimeisen‰
+				$copy['updated_at'] = '';
 				unset($copy['tunnus']);
 
 				if ((isset($copy['kate_korjattu']) and $copy['kate_korjattu'] == '') or !isset($copy['kate_korjattu'])) {
 					$copy['kate_korjattu'] = 0.00;
 				}
 
-				if ((isset($copy['muutospvm']) and $copy['muutospvm'] == '') or !isset($copy['muutospvm'])) {
-					$copy['muutospvm'] = '0000-00-00 00:00:00';
+				if ((isset($copy['updated_at']) and $copy['updated_at'] == '') or !isset($copy['updated_at'])) {
+					$copy['updated_at'] = '0000-00-00 00:00:00';
 				}
 
 				// Luodaan otsikon kopio
 				$copy_query = "INSERT INTO
-                                          lasku (".implode(", ", array_keys($copy)).", luontiaika)
+                                          lasku (".implode(", ", array_keys($copy)).", created_at)
                                           VALUES('".implode("', '", array_values($copy))."', now())";
 
 				if (!pupe_query($copy_query)) {

@@ -125,7 +125,7 @@
 			# Myyntisaamiset
 			$query = "	INSERT INTO tiliointi SET
 						yhtio				= '$kukarow[yhtio]',
-						laatija				= 'automaatti',
+						created_by				= 'automaatti',
 						laadittu			= now(),
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '$row[laskutunnus]',
@@ -153,7 +153,7 @@
 			# Kassatili
 			$query = "	INSERT INTO tiliointi SET
 						yhtio				= '$kukarow[yhtio]',
-						laatija				= 'automaatti',
+						created_by				= 'automaatti',
 						laadittu			= now(),
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '$row[laskutunnus]',
@@ -194,7 +194,7 @@
 
 					$query = "	INSERT INTO tiliointi
 								SET yhtio			= '$kukarow[yhtio]',
-								laatija 			= 'automaatti',
+								created_by 			= 'automaatti',
 								laadittu 			= now(),
 								tapvm 				= '$row[kirjpvm]',
 								ltunnus 			= '$row[laskutunnus]',
@@ -241,7 +241,7 @@
 						# Lis‰t‰‰n myynnin kassa-alennuskirjaus ilman veroa
 						$query = "	INSERT INTO tiliointi
 									SET yhtio			= '$kukarow[yhtio]',
-									laatija 			= 'automaatti',
+									created_by 			= 'automaatti',
 									laadittu 			= now(),
 									tilino 				= '$row[alennustili]',
 									kustp    			= '{$kustp_ins}',
@@ -274,7 +274,7 @@
 										vero 				= 0,
 										selite 				= 'Automaattikohdistettu asiakkaan suoritus (Kassa-alennuksen alv)',
 										lukko 				= '1',
-										laatija 			= 'automaatti',
+										created_by 			= 'automaatti',
 										laadittu 			= now(),
 										aputunnus 			= '$aputunnus'";
 							$insres = pupe_query($query);
@@ -327,7 +327,7 @@
 
 						$query = "	INSERT INTO tiliointi SET
 									yhtio		= '$kukarow[yhtio]',
-									laatija		= 'automaatti',
+									created_by		= 'automaatti',
 									laadittu	= now(),
 									tapvm		= '$row[kirjpvm]',
 									ltunnus		= '$row[laskutunnus]',
@@ -350,7 +350,7 @@
 
 							$query = "	INSERT INTO tiliointi SET
 										yhtio		= '$kukarow[yhtio]',
-										laatija		= 'automaatti',
+										created_by		= 'automaatti',
 										laadittu	= now(),
 										tapvm		= '$row[kirjpvm]',
 										ltunnus		= '$row[laskutunnus]',
@@ -444,8 +444,8 @@
 						SET yhtio 	= '$kukarow[yhtio]',
 						tapvm 		= now(),
 						tila 		= 'X',
-						laatija 	= 'viitesiirrot',
-						luontiaika 	= now()";
+						created_by 	= 'viitesiirrot',
+						created_at 	= now()";
 			$insres = pupe_query($query);
 
 			$laskut[$row["yhtio"]] = mysql_insert_id();
@@ -470,7 +470,7 @@
 			# Myyntisaamiset tai selvittely
 			$query = "	INSERT INTO tiliointi SET
 						yhtio				= '$kukarow[yhtio]',
-						laatija				= 'automaattikohdistus',
+						created_by				= 'automaattikohdistus',
 						laadittu			= now(),
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '{$laskut[$row["yhtio"]]}',
@@ -491,7 +491,7 @@
 			# Kassatili
 			$query = "	INSERT INTO tiliointi SET
 						yhtio				= '$kukarow[yhtio]',
-						laatija				= 'automaattikohdistus',
+						created_by				= 'automaattikohdistus',
 						laadittu			= now(),
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '{$laskut[$row["yhtio"]]}',

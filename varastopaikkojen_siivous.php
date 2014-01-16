@@ -35,7 +35,7 @@
 							hyllyvali 	= '$tuoterow[hyllyvali]',
 							laji 		= 'poistettupaikka',
 							selite 		= '".t("Poistettiin tuotepaikka")." $tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= now()";
 				$result = pupe_query($query);
 
@@ -49,8 +49,8 @@
 					if ($prow["kaikkipaikat"] > 0 and $prow["oletuspaikat"] == 0) {
 						$query = "	UPDATE tuotepaikat
 									SET oletus = 'X',
-									muuttaja = '$kukarow[kuka]',
-									muutospvm = now()
+									updated_by = '$kukarow[kuka]',
+									updated_at = now()
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$tuoterow[tuoteno]'
 									ORDER BY hyllyalue
@@ -90,8 +90,8 @@
 				//Otetaan tuotenumero talteen
 				$query = "	UPDATE tuotepaikat
 				 			SET saldo='$lrow[saldo]',
-							muuttaja = '$kukarow[kuka]',
-							muutospvm = now()
+							updated_by = '$kukarow[kuka]',
+							updated_at = now()
 							WHERE yhtio='$kukarow[yhtio]'
 							and tunnus = '$lrow[mintunnus]'";
 				$presult = pupe_query($query);
@@ -116,7 +116,7 @@
 							hyllyvali 	= '$lrow[hyllyvali]',
 							laji 		= 'poistettupaikka',
 							selite 		= '".t("Poistettiin tuotepaikka")." $lrow[paikka]',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= now()";
 				$presult = pupe_query($query);
 			}
@@ -146,8 +146,8 @@
 				if ($lrow["oletukset"] == 0) {
 					$query = "	UPDATE tuotepaikat
 					 			SET oletus  = 'X',
-								muuttaja = '$kukarow[kuka]',
-								muutospvm = now()
+								updated_by = '$kukarow[kuka]',
+								updated_at = now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus  = '$lrow[mintunnus]'";
 					$presult = pupe_query($query);
@@ -155,16 +155,16 @@
 				else {
 					$query = "	UPDATE tuotepaikat
 					 			SET oletus  = '',
-								muuttaja = '$kukarow[kuka]',
-								muutospvm = now()
+								updated_by = '$kukarow[kuka]',
+								updated_at = now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus in ($lrow[tunnukset])";
 					$presult = pupe_query($query);
 
 					$query = "	UPDATE tuotepaikat
 					 			SET oletus  = 'X',
-								muuttaja = '$kukarow[kuka]',
-								muutospvm = now()
+								updated_by = '$kukarow[kuka]',
+								updated_at = now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus  = '$lrow[mintunnus]'";
 					$presult = pupe_query($query);
@@ -218,8 +218,8 @@
 							SET saldo = saldo + $paikkarow[saldo],
 							saldo_varattu = saldo_varattu + $paikkarow[saldo_varattu],
 							saldoaika = now(),
-							muuttaja = '$kukarow[kuka]',
-							muutospvm = now()
+							updated_by = '$kukarow[kuka]',
+							updated_at = now()
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$vanharow[tunnus]'";
 		 		$presult = pupe_query($query);
@@ -236,8 +236,8 @@
 							hyllynro = '$hyllynro',
 							hyllyvali = '$hyllyvali',
 							hyllytaso = '$hyllytaso',
-							muuttaja = '$kukarow[kuka]',
-							muutospvm = now()
+							updated_by = '$kukarow[kuka]',
+							updated_at = now()
 		 					WHERE yhtio = '$kukarow[yhtio]'
 		 					and tunnus = '$tunnus'";
 		 		$presult = pupe_query($query);

@@ -220,7 +220,7 @@
 				$pdf->draw_text(310, 719, $ff_string, $thispage, $ff_font);
 
 				$pdf->draw_text(430, 729, t("Laadittu", $kieli), $thispage, $pieni);
-				$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"]),	$thispage, $norm);
+				$pdf->draw_text(430, 719, tv1dateconv($laskurow["created_at"]),	$thispage, $norm);
 
 				$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 				$pdf->draw_text(310, 708, t("Toimitusehto", $kieli), $thispage, $pieni);

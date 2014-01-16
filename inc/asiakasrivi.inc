@@ -123,9 +123,9 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "laatija" or
-		mysql_field_name($result, $i) == "muutospvm" or
-		mysql_field_name($result, $i) == "luontiaika") {
+	if (mysql_field_name($result, $i) == "created_by" or
+		mysql_field_name($result, $i) == "updated_at" or
+		mysql_field_name($result, $i) == "created_at") {
 		$tyyppi = 2;
 	}
 

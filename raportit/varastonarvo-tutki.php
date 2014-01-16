@@ -383,7 +383,7 @@
 
 		// haetaan kaikki ajanjakson keikat
 		$query  = "	SELECT *
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.mapvm >= '$vv-$kk-$pp'
 					and lasku.mapvm <= '$vv1-$kk1-$pp1'

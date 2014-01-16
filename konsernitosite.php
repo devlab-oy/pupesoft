@@ -45,8 +45,8 @@
 			$query = "	INSERT INTO liitetiedostot set
 						yhtio      = '{$kukarow['yhtio']}',
 						liitos     = 'lasku',
-						laatija    = '{$kukarow['kuka']}',
-						luontiaika = now(),
+						created_by    = '{$kukarow['kuka']}',
+						created_at = now(),
 						data       = '$data',
 						filename   = '$filename',
 						filesize   = '$filesize',
@@ -157,8 +157,8 @@
 					yhtio = '$kukarow[yhtio]',
 					tapvm = '$tpv-$tpk-$tpp',
 					tila = 'X',
-					laatija = '$kukarow[kuka]',
-					luontiaika = now()";
+					created_by = '$kukarow[kuka]',
+					created_at = now()";
 		$result = pupe_query($query);
 		$tunnus = mysql_insert_id($link);
 		$turvatunnus = $tunnus;
@@ -205,8 +205,8 @@
 							yhtio = '$kukarow[yhtio]',
 							tapvm = '$tpv-$tpk-$tpp',
 							tila = 'X',
-							laatija = '$kukarow[kuka]',
-							luontiaika = now()";
+							created_by = '$kukarow[kuka]',
+							created_at = now()";
 				$result = pupe_query($query);
 				$tunnus = mysql_insert_id ($link);
 

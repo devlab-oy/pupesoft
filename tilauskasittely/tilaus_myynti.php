@@ -299,8 +299,8 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 
 	$query = "	UPDATE sarjanumeroseuranta SET
 				myyntirivitunnus = 0,
-				muuttaja = '{$kukarow['kuka']}',
-				muutospvm = now()
+				updated_by = '{$kukarow['kuka']}',
+				updated_at = now()
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND myyntirivitunnus = '{$rivitunnus}'
 				AND tuoteno = '{$sarjanumero_dropdown_tuoteno}'";
@@ -310,8 +310,8 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 
 		$query = "	UPDATE sarjanumeroseuranta SET
 					myyntirivitunnus = '{$rivitunnus}',
-					muuttaja = '{$kukarow['kuka']}',
-					muutospvm = now()
+					updated_by = '{$kukarow['kuka']}',
+					updated_at = now()
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND myyntirivitunnus = 0
 					AND tunnus = '{$sarjanumero_dropdown}'";
@@ -406,7 +406,7 @@ if ($kukarow["extranet"] != '') {
 						AND liitostunnus = '$asiakasid'
 						AND tila 		 = '$ex_tila'
 						AND alatila 	 = ''
-						AND laatija 	 = '{$kukarow['kuka']}'
+						AND created_by 	 = '{$kukarow['kuka']}'
 						AND clearing != 'EXTENNAKKO'";
 			$result = pupe_query($query);
 
@@ -1895,10 +1895,10 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 						hinta		= round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys]),
 						valkoodi	= '$laskurow[valkoodi]',
 						alkupvm		= now(),
-						laatija		= '$kukarow[kuka]',
-						luontiaika	= now(),
-						muuttaja	= '$kukarow[kuka]',
-						muutospvm	= now()";
+						created_by		= '$kukarow[kuka]',
+						created_at	= now(),
+						updated_by	= '$kukarow[kuka]',
+						updated_at	= now()";
 			$insert_result = pupe_query($query);
 
 			echo t("Lis‰ttin tuote")." $tilausrivi[tuoteno] ".t("asiakkaan hinnastoon hinnalla").": ".hintapyoristys($hintapyoristys_echo)." $laskurow[valkoodi]<br>";
@@ -2679,12 +2679,12 @@ if ($tee == '') {
 						<input type='hidden' name='tyojono' value='$tyojono'>
 						<input type='hidden' name='asiakasid' value='$laskurow[liitostunnus]'>
 						<input type='hidden' name='tyom_nro' value='$laskurow[tunnus]'>
-						<input type='hidden' name='vva' value='".substr($laskurow['luontiaika'], 0, 4)."'>
-						<input type='hidden' name='kka' value='".substr($laskurow['luontiaika'], 5, 2)."'>
-						<input type='hidden' name='ppa' value='".substr($laskurow['luontiaika'], 8, 2)."'>
-						<input type='hidden' name='vvl' value='".substr($laskurow['luontiaika'], 0, 4)."'>
-						<input type='hidden' name='kkl' value='".substr($laskurow['luontiaika'], 5, 2)."'>
-						<input type='hidden' name='ppl' value='".substr($laskurow['luontiaika'], 8, 2)."'>
+						<input type='hidden' name='vva' value='".substr($laskurow['created_at'], 0, 4)."'>
+						<input type='hidden' name='kka' value='".substr($laskurow['created_at'], 5, 2)."'>
+						<input type='hidden' name='ppa' value='".substr($laskurow['created_at'], 8, 2)."'>
+						<input type='hidden' name='vvl' value='".substr($laskurow['created_at'], 0, 4)."'>
+						<input type='hidden' name='kkl' value='".substr($laskurow['created_at'], 5, 2)."'>
+						<input type='hidden' name='ppl' value='".substr($laskurow['created_at'], 8, 2)."'>
 						<input type='submit' value='" . t('Tuntiraportti')."'>
 						</form>";
 			}
@@ -3556,8 +3556,8 @@ if ($tee == '') {
 								tyyppi   		= 'Memo',
 								pvmalku  		= now(),
 								kentta01 		= '$smsnumero\n$smsviesti',
-								laatija			= '$kukarow[kuka]',
-								luontiaika		= now()";
+								created_by			= '$kukarow[kuka]',
+								created_at		= now()";
 					$result = pupe_query($kysely);
 				}
 
@@ -3630,8 +3630,8 @@ if ($tee == '') {
 	if ($kukarow["extranet"] == "" and $tila == "LISATIETOJA_RIVILLE_OSTO_VAI_HYVITYS") {
 		$query = "	UPDATE tilausrivin_lisatiedot
 					SET osto_vai_hyvitys 	= '$osto_vai_hyvitys',
-					muutospvm				= now(),
-					muuttaja				= '$kukarow[kuka]'
+					updated_at				= now(),
+					updated_by				= '$kukarow[kuka]'
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tilausrivitunnus = '$rivitunnus'";
 		$result = pupe_query($query);
@@ -3665,8 +3665,8 @@ if ($tee == '') {
 			//	P‰ivitet‰‰n positio
 			$query = "	UPDATE tilausrivin_lisatiedot SET
 						{$updlisa}
-						muutospvm = now(),
-						muuttaja = '{$kukarow["kuka"]}'
+						updated_at = now(),
+						updated_by = '{$kukarow["kuka"]}'
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivitunnus = '{$lapsi["tunnus"]}'";
 			$result = pupe_query($query);
@@ -4771,7 +4771,7 @@ if ($tee == '') {
 
 				if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
 					$query = "	SELECT tapahtuma.*,
-								if (kuka.nimi is not null and kuka.nimi != '', kuka.nimi, tapahtuma.laatija) laatija,
+								if (kuka.nimi is not null and kuka.nimi != '', kuka.nimi, tapahtuma.created_by) created_by,
 								tilausrivi.alv
 								FROM tapahtuma
 								JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
@@ -4803,7 +4803,7 @@ if ($tee == '') {
 
 						while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
 							echo "<tr>";
-							echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
+							echo "<td>{$tapahtuma_chk_row['created_by']}</td>";
 							echo "<td>",tv1dateconv($tapahtuma_chk_row['laadittu']),"</td>";
 							echo "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)." {$tapahtuma_chk_row['yksikko']}</td>";
 

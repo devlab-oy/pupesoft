@@ -3177,7 +3177,7 @@
 
 		if ($kukarow["kesken"] == 0) {
 			$query = "INSERT into ";
-			$postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			$postquery = ",created_by = '$kukarow[kuka]', created_at=NOW()";
 
 			if (isset($ohjelmamoduli) and $ohjelmamoduli != "") {
 				$postquery .= ",ohjelma_moduli = '$ohjelmamoduli'";
@@ -3190,10 +3190,10 @@
 			}
 
 			$query2 = "INSERT into ";
-			$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			$postquery2 = ",created_by = '$kukarow[kuka]', created_at=NOW()";
 
 			$query3 = "INSERT into ";
-			$postquery3 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			$postquery3 = ",created_by = '$kukarow[kuka]', created_at=NOW()";
 
 			//Kun tehd‰‰n uusi tilaus niin nollataan aina tilat ja alatilat
 			$alatila = "";
@@ -3225,7 +3225,7 @@
 
 			if (mysql_num_rows($mexapu) == 0) {
 				$query2 = "INSERT into ";
-				$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+				$postquery2 = ",created_by = '$kukarow[kuka]', created_at=NOW()";
 			}
 			else {
 				$query2 = "UPDATE ";
@@ -3238,7 +3238,7 @@
 
 			if (mysql_num_rows($mexapu) == 0) {
 				$query3 = "INSERT into ";
-				$postquery3 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+				$postquery3 = ",created_by = '$kukarow[kuka]', created_at=NOW()";
 			}
 			else {
 				$query3 = "UPDATE ";
@@ -3779,10 +3779,10 @@
 								case "otunnus";
 									$values .= ", '$tilausnumero'";
 									break;
-								case "laatija";
+								case "created_by";
 									$values .= ", '$kukarow[kuka]'";
 									break;
-								case "luontiaika";
+								case "created_at";
 								case "laadittu";
 									$values .= ", now()";
 									break;
@@ -3841,10 +3841,10 @@
 									$fieldname = mysql_field_name($monistares2,$i);
 
 									switch (mysql_field_name($monistares2,$i)) {
-										case "laatija";
+										case "created_by";
 											$values2 .= ", '$kukarow2[kuka]'";
 											break;
-										case "luontiaika";
+										case "created_at";
 											$values2 .= ", now()";
 											break;
 										case "tilausrivitunnus";
@@ -3894,7 +3894,7 @@
 
 				if ($toim == "PROJEKTI") {
 					// avataan projekti kirjanpitoon
-					$query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '$kukarow[kuka]'";
+					$query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o', created_at = now(), created_by = '$kukarow[kuka]'";
 					$result = pupe_query($query);
 					$projekti = mysql_insert_id();
 

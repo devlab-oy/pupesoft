@@ -204,10 +204,10 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		$lisaa .= " and tuote.hinnastoon != 'E' ";
 	}
 	if ($uudettuotteet == "vainuudet") {
-		$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval $uusienika month) ";
+		$lisaa .= " and tuote.created_at >= date_sub(current_date, interval $uusienika month) ";
 	}
 	if ($uudettuotteet == "eiuusia") {
-		$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval $uusienika month) ";
+		$lisaa .= " and tuote.created_at < date_sub(current_date, interval $uusienika month) ";
 	}
 	if ($toimittajaid != '') {
 		$lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
@@ -318,7 +318,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		$b = $row["abcluokka_osasto"];
 		$c = $row["abcluokka_try"];
 
-		if ($row["luontiaika"] == '0000-00-00') $row["luontiaika"] = "";
+		if ($row["created_at"] == '0000-00-00') $row["created_at"] = "";
 
 		echo "<tr>";
 		echo "<td>$row[tuoteno]</td>";

@@ -451,7 +451,7 @@
 									hyllytaso 	= '0',
 									hyllyvali 	= '0',
 									selite 		= '".t("Lisättiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
-									laatija 	= '$kukarow[kuka]',
+									created_by 	= '$kukarow[kuka]',
 									laadittu 	= now()";
 						$updres = pupe_query($query);
 
@@ -654,7 +654,7 @@
 					$myyntitilausrivi_tunnus_temp = $tilausrivirow['tilausrivitunnus'];
 
 					unset($tilausrivirow['laadittu']);
-					unset($tilausrivirow['laatija']);
+					unset($tilausrivirow['created_by']);
 					unset($tilausrivirow['sarjanumeroseuranta']);
 					unset($tilausrivirow['myyntihinta_maara']);
 					unset($tilausrivirow['tilausrivilinkki']);
@@ -677,7 +677,7 @@
 					$tilausrivirow['nimitys'] = $trow['nimitys'];
 
 					$copy_query = "	INSERT INTO
-									tilausrivi (".implode(", ", array_keys($tilausrivirow)).", laadittu, laatija)
+									tilausrivi (".implode(", ", array_keys($tilausrivirow)).", laadittu, created_by)
 									VALUES('".implode("', '", array_values($tilausrivirow)). "', now(), '{$kukarow['kuka']}')";
 					pupe_query($copy_query);
 
@@ -1090,7 +1090,7 @@
 			echo "<tr><td colspan='4'>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>$laskurow[toim_osoite] $laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>";
 
 			echo "<tr><th>".t("Tilausnumero")."</th><th>".t("Laadittu")."</th><th>".t("Toimaika")."</th><th>".t("Valuutta")."</th><td class='back'></td></tr>";
-			echo "<tr><td>$laskurow[tunnus]</td><td>".tv1dateconv($laskurow["luontiaika"])."</td><td>".tv1dateconv($laskurow["toimaika"])."</td><td>{$laskurow["valkoodi"]}</td></tr>";
+			echo "<tr><td>$laskurow[tunnus]</td><td>".tv1dateconv($laskurow["created_at"])."</td><td>".tv1dateconv($laskurow["toimaika"])."</td><td>{$laskurow["valkoodi"]}</td></tr>";
 
 			if ($toimittajarow["fakta"] != "") {
 				echo "<tr><th>".t("Fakta")."</th><td colspan='3'>$toimittajarow[fakta]&nbsp;</td></tr>";

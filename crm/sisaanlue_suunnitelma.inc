@@ -207,8 +207,8 @@ if ($tee == "FILE") {
 								kentta04	 = '$pvrahat',
 								kokopaiva	 = 'x',
 								tyyppi 		 = 'kalenteri',
-								laatija		 = '$kukarow[kuka]',
-								luontiaika	 =  now()";
+								created_by		 = '$kukarow[kuka]',
+								created_at	 =  now()";
 					$result = pupe_query($query);
 				}
 				elseif ($kumpi == "Asiakaskäynti") {
@@ -226,8 +226,8 @@ if ($tee == "FILE") {
 								kentta03	 = '$kilsat',
 								kentta04	 = '$pvrahat',
 								tyyppi 		 = 'kalenteri',
-								muuttaja	 = '$kukarow[kuka]',
-								muutospvm	 = now()
+								updated_by	 = '$kukarow[kuka]',
+								updated_at	 = now()
 								WHERE yhtio  	 = '$yhtio'
 								and kuka 	 	 = '$kukarow[kuka]'
 								and pvmalku  	 = '$kpvm $lahto'

@@ -6,10 +6,10 @@
 
 			static $chk_hyllyalue, $chk_hyllynro, $chk_hyllyvali, $chk_hyllytaso;
 
-			if (mysql_field_name($result, $i) != 'laatija' and
-				mysql_field_name($result, $i) != 'luontiaika' and
-				mysql_field_name($result, $i) != 'muutospvm' and
-				mysql_field_name($result, $i) != 'muuttaja' and
+			if (mysql_field_name($result, $i) != 'created_by' and
+				mysql_field_name($result, $i) != 'created_at' and
+				mysql_field_name($result, $i) != 'updated_at' and
+				mysql_field_name($result, $i) != 'updated_by' and
 				mysql_field_name($result, $i) != 'tunnus') {
 
 				if (trim($t[$i]) != '') {

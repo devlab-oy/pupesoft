@@ -73,16 +73,16 @@
 					elseif (mysql_field_name($stresult, $i) == 'tuoteno') {
 						$query .= "tuoteno='$uustuoteno',";
 					}
-					// laatijaksi klikkaaja
-					elseif (mysql_field_name($stresult,$i) == 'laatija') {
-						$query .= "laatija='$kukarow[kuka]',";
+					// created_byksi klikkaaja
+					elseif (mysql_field_name($stresult,$i) == 'created_by') {
+						$query .= "created_by='$kukarow[kuka]',";
 					}
-					// muuttajaksi klikkaaja
-					elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
-						$query .= "muuttaja='$kukarow[kuka]',";
+					// updated_byksi klikkaaja
+					elseif (mysql_field_name($stresult,$i) == 'updated_by') {
+						$query .= "updated_by='$kukarow[kuka]',";
 					}
-					// luontiaika
-					elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
+					// created_at
+					elseif (mysql_field_name($stresult,$i) == 'created_at' or mysql_field_name($stresult,$i) == 'updated_at') {
 						$query .= mysql_field_name($stresult,$i)."=now(),";
 					}
 					// n‰m‰ kent‰t tyhjennet‰‰n
@@ -129,16 +129,16 @@
 							elseif (mysql_field_name($stresult,$i) == 'tuoteno') {
 								$query_fields .= "tuoteno='$uustuoteno',";
 							}
-							// laatijaksi klikkaaja
-							elseif (mysql_field_name($stresult,$i) == 'laatija') {
-								$query_fields .= "laatija='$kukarow[kuka]',";
+							// created_byksi klikkaaja
+							elseif (mysql_field_name($stresult,$i) == 'created_by') {
+								$query_fields .= "created_by='$kukarow[kuka]',";
 							}
-							// muuttajaksi klikkaaja
-							elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
-								$query_fields .= "muuttaja='$kukarow[kuka]',";
+							// updated_byksi klikkaaja
+							elseif (mysql_field_name($stresult,$i) == 'updated_by') {
+								$query_fields .= "updated_by='$kukarow[kuka]',";
 							}
-							// luontiaika
-							elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
+							// created_at
+							elseif (mysql_field_name($stresult,$i) == 'created_at' or mysql_field_name($stresult,$i) == 'updated_at') {
 								$query_fields .= mysql_field_name($stresult,$i)."=now(),";
 							}
 							// ja kaikki muut paitsi tunnus sellaisenaan
@@ -183,16 +183,16 @@
 							elseif (mysql_field_name($stresult,$i) == 'liitos') {
 								$query_fields .= "liitos='$uustuoteno',";
 							}
-							// laatijaksi klikkaaja
-							elseif (mysql_field_name($stresult,$i) == 'laatija') {
-								$query_fields .= "laatija='$kukarow[kuka]',";
+							// created_byksi klikkaaja
+							elseif (mysql_field_name($stresult,$i) == 'created_by') {
+								$query_fields .= "created_by='$kukarow[kuka]',";
 							}
-							// muuttajaksi klikkaaja
-							elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
-								$query_fields .= "muuttaja='$kukarow[kuka]',";
+							// updated_byksi klikkaaja
+							elseif (mysql_field_name($stresult,$i) == 'updated_by') {
+								$query_fields .= "updated_by='$kukarow[kuka]',";
 							}
-							// luontiaika
-							elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
+							// created_at
+							elseif (mysql_field_name($stresult,$i) == 'created_at' or mysql_field_name($stresult,$i) == 'updated_at') {
 								$query_fields .= mysql_field_name($stresult,$i)."=now(),";
 							}
 							// ja kaikki muut paitsi tunnus sellaisenaan

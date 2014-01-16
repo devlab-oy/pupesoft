@@ -345,7 +345,7 @@
 												hyllytaso	= '$srow[hyllytaso]',
 												laji 		= 'uusipaikka',
 												selite 		= '".t("Lisättiin tuotepaikka")." $srow[hyllyalue] $srow[hyllynro] $srow[hyllyvali] $srow[hyllytaso]. ".t("Sisäinen työmääräys")."',
-												laatija 	= '$kukarow[kuka]',
+												created_by 	= '$kukarow[kuka]',
 												laadittu 	= now()";
 									$sarjares = pupe_query($query);
 								}
@@ -393,7 +393,7 @@
 											hyllyvali	= '$lisarow[hyllyvali]',
 											hyllytaso	= '$lisarow[hyllytaso]',
 											selite 		= '".t("Paikasta")." $lisarow[hyllyalue] $lisarow[hyllynro] $lisarow[hyllyvali] $lisarow[hyllytaso] ".t("vähennettiin")." $lisarow[varattu]. ".t("Sisäinen työmääräys")."',
-											laatija 	= '$kukarow[kuka]',
+											created_by 	= '$kukarow[kuka]',
 											laadittu 	= now()";
 								$sarjares = pupe_query($query);
 
@@ -420,7 +420,7 @@
 											hyllyvali 	= '$minnerow[hyllyvali]',
 											hyllytaso 	= '$minnerow[hyllytaso]',
 											selite 		= '".t("Paikalle")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso] ".t("lisättiin")." $lisarow[varattu]. ".t("Sisäinen työmääräys")."',
-											laatija 	= '$kukarow[kuka]',
+											created_by 	= '$kukarow[kuka]',
 											laadittu 	= now()";
 								$sarjares = pupe_query($query);
 
@@ -495,8 +495,8 @@
 												liitostunnus = '$sarjarow[tunnus]',
 												tila         = 'K',
 												alatila      = 'S',
-												luontiaika	 = now(),
-												laatija		 = '$kukarow[kuka]'";
+												created_at	 = now(),
+												created_by		 = '$kukarow[kuka]'";
 									$result = pupe_query($query);
 									$otunnus = mysql_insert_id();
 								}
@@ -508,12 +508,12 @@
 											laskunro    	= '$id',
 											maksu_kurssi 	= '1',
 											vienti_kurssi	= '1',
-											laatija    		= '$kukarow[kuka]',
+											created_by    		= '$kukarow[kuka]',
 											vanhatunnus		= '$otunnus',
 											arvo	   		= $tyokulut,
 											summa	   		= $tyokulut,
 											vienti	   		= 'B',
-											luontiaika 		= now()";
+											created_at 		= now()";
 								$result = pupe_query($query);
 								$laskuid = mysql_insert_id($link);
 
@@ -531,7 +531,7 @@
 											vero     = 0,
 											lukko    = '',
 											selite   = 'Varastonmuutos sisäinen työmääräys $tilausnumero: $srow[tuoteno] ($sarjarow[sarjanumero])',
-											laatija  = '$kukarow[kuka]',
+											created_by  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);
 
@@ -549,7 +549,7 @@
 											vero     = 0,
 											lukko    = '',
 											selite   = 'Varastonmuutos sisäinen työmääräys $tilausnumero: $srow[tuoteno] ($sarjarow[sarjanumero])',
-											laatija  = '$kukarow[kuka]',
+											created_by  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);
 							}
@@ -606,7 +606,7 @@
 		echo "<br><form method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<font class='head'>".t("Etsi sisäinen työmääräys").":<hr></font>
-				".t("Syötä tilausnumero, nimen tai laatijan osa").":
+				".t("Syötä tilausnumero, nimen tai created_byn osa").":
 				<input type='text' name='etsi'>
 				<input type='Submit' value = '".t("Etsi")."'>
 				</form>";
@@ -617,16 +617,16 @@
 		$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 
 		$haku='';
-		if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%')";
+		if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.created_by like '%$etsi%')";
 		if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
 
-		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
+		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, created_at, created_by, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tila	= 'S'
 					and alatila = 'C'
 					$haku
-					order by luontiaika desc";
+					order by created_at desc";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result)!=0) {

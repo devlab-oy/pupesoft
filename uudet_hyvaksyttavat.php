@@ -49,7 +49,7 @@
 	}
 
 	$query = "	SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti, lasku.hyvaksyja_nyt,
-					UNIX_TIMESTAMP(lasku.luontiaika) luontiaika,
+					UNIX_TIMESTAMP(lasku.created_at) created_at,
 					UNIX_TIMESTAMP(h1time) h1time,
 					UNIX_TIMESTAMP(h2time) h2time,
 					UNIX_TIMESTAMP(h3time) h3time,
@@ -73,9 +73,9 @@
 		for($i=1;$i<=5;$i++) {
 			if ($trow["hyvak$i"] == $trow["hyvaksyja_nyt"]) {
 
-				//	Verrataan luontiaikaan..
+				//	Verrataan created_atan..
 				if ($i == 1) {
-					if ($trow["luontiaika"]>=strtotime("00:00:00 -$ajalta days")) {
+					if ($trow["created_at"]>=strtotime("00:00:00 -$ajalta days")) {
 						$muistuta = 1;
 					}
 				}

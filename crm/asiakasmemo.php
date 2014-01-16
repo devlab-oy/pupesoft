@@ -90,8 +90,8 @@
 						pvmalku  		= now(),
 						kentta01 		= '$eviesti',
 						perheid 		= '$row[tunnus]',
-						laatija			= '$kukarow[kuka]',
-						luontiaika		= now()";
+						created_by			= '$kukarow[kuka]',
+						created_at		= now()";
 			$result = pupe_query($kysely);
 
 			if ($row["tyyppi"] == "Lead") {
@@ -107,8 +107,8 @@
 							pvmalku  		= '$row[pvmalku]',
 							kentta01 		= '$row[kentta01]',
 							kuittaus 		= '$row[kuittaus]',
-							laatija			= '$kukarow[kuka]',
-							luontiaika		= now()";
+							created_by			= '$kukarow[kuka]',
+							created_at		= now()";
 				$result = pupe_query($kysely);
 			}
 			//echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
@@ -184,8 +184,8 @@
 								pvmalku  		= $pvmalku,
 								kentta01 		= '$viesti',
 								kuittaus 		= '$kuittaus',
-								laatija			= '$kukarow[kuka]',
-								luontiaika		= now()";
+								created_by			= '$kukarow[kuka]',
+								created_at		= now()";
 					$result = pupe_query($kysely);
 					$muist = mysql_insert_id();
 
@@ -247,8 +247,8 @@
 							pvmalku  		= $pvmalku,
 							kentta01 		= '$viesti',
 							kuittaus 		= '$kuittaus',
-							muuttaja		= '$kukarow[kuka]',
-							muutospvm		= now()
+							updated_by		= '$kukarow[kuka]',
+							updated_at		= now()
 							WHERE tunnus = '$korjaus'";
 				$result = pupe_query($kysely);
 
@@ -790,9 +790,9 @@
 			}
 
 			$query = "	SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo,
-						if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
+						if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) created_by, kentta01 viesti, left(pvmalku,10) paivamaara,
 						kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08,
-						lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
+						lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.updated_at laskumpvm,
 						kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
 						FROM kalenteri
 						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
@@ -817,7 +817,7 @@
 			while ($memorow = mysql_fetch_array($res)) {
 				if ($memorow["tapa"] == "asiakasanalyysi") {
 					echo "<tr>
-						<th>$memorow[tyyppi]</th><th>$memorow[laatija]</th><th>$memorow[laatija]@$memorow[paivamaara]
+						<th>$memorow[tyyppi]</th><th>$memorow[created_by]</th><th>$memorow[created_by]@$memorow[paivamaara]
 						</th><th>".t("Tapa").": $memorow[tapa]</th><th>".t("Yhteyshenkilö").": $memorow[yhteyshenkilo]</th>
 						</tr>
 						<tr>
@@ -828,7 +828,7 @@
 					if ($memorow["perheid"] == 0) {
 						echo "<tr>";
 						echo "	<th>$memorow[tyyppi]</th>
-								<th>$memorow[laatija]</th>
+								<th>$memorow[created_by]</th>
 								<th>".tv1dateconv($memorow["paivamaara"])."</th>
 								<th>".t("Tapa").": $memorow[tapa]</th>
 								<th>".t("Yhteyshenkilö").": $memorow[yhteyshenkilo]</th>";

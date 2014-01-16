@@ -73,7 +73,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
 				if ($rivi[$sync_otsikot["fi"]] != "") {
 
-					$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm
+					$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,updated_at
 										FROM sanakirja
 										WHERE fi = BINARY '".$rivi[$sync_otsikot["fi"]]."'";
 					$sanakirjaresult = pupe_query($sanakirjaquery);
@@ -138,8 +138,8 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 												ee = '".$rivi[$sync_otsikot["ee"]]."',
 												aikaleima	= now(),
 												kysytty		= 1,
-												laatija		= '$kukarow[kuka]',
-												luontiaika	= now()";
+												created_by		= '$kukarow[kuka]',
+												created_at	= now()";
 							$sanakirjaresult = pupe_query($sanakirjaquery);
 
 							echo "<td>".$rivi[$sync_otsikot["fi"]]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
@@ -161,7 +161,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 				}
 			}
 
-			$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm
+			$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,updated_at
 								FROM sanakirja
 								WHERE synkronoi = ''
 								and (se !='' or no !='' or en !='' or de !='' or dk !='' or ee !='')

@@ -273,7 +273,7 @@
 						}
 
 						if ($t1[$tun] != '' and $t2[$tun] != '' and $t3[$tun] != '' and $t4[$tun] != '') {
-							$query = "	INSERT into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, laatija, luontiaika)
+							$query = "	INSERT into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, created_by, created_at)
 										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 							$ynsre = pupe_query($query);
 							$uusipaikka = mysql_insert_id();
@@ -290,7 +290,7 @@
 												hyllyvali 	= '$t3[$tun]',
 												hyllytaso 	= '$t4[$tun]',
 												selite 		= '".t("Tuotteella ei varastopaikkaa, luotiin uusi paikka ")." $t1[$tun] $t2[$tun] $t3[$tun] $t4[$tun]',
-												laatija 	= '$kukarow[kuka]',
+												created_by 	= '$kukarow[kuka]',
 												laadittu 	= now()";
 							$tapahtumaresult = pupe_query($tapahtumaquery);
 
@@ -342,8 +342,8 @@
 			if ($eankoodi[$tun]!= '') {
 				$query = "	UPDATE tuote
 							SET eankoodi = '$eankoodi[$tun]',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
+							updated_by	= '$kukarow[kuka]',
+							updated_at	= now()
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$tilausrivirow[tuoteno]'";
 				$resulteankoodi = pupe_query($query);
@@ -527,15 +527,15 @@
 
 							$query = "	UPDATE tuotepaikat
 										SET oletus 	= '',
-										muuttaja	= '$kukarow[kuka]',
-										muutospvm	= now()
+										updated_by	= '$kukarow[kuka]',
+										updated_at	= now()
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
 							$rresult = pupe_query($query);
 
 							$query = "	UPDATE tuotepaikat
 										SET oletus = 'X',
-										muuttaja	= '$kukarow[kuka]',
-										muutospvm	= now()
+										updated_by	= '$kukarow[kuka]',
+										updated_at	= now()
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$uusiol'";
 							$rresult = pupe_query($query);
 						}
@@ -757,7 +757,7 @@
 			}
 
 			// etsit‰‰n sopivia tilauksia
-			$query = "	SELECT tunnus '$qnimi1', nimi '$qnimi2' {$selectlisa} , date_format(luontiaika, '%Y-%m-%d') Laadittu, Laatija
+			$query = "	SELECT tunnus '$qnimi1', nimi '$qnimi2' {$selectlisa} , date_format(created_at, '%Y-%m-%d') Laadittu, Laatija
 						FROM lasku
 						WHERE tunnus = '$tilrow[otunnus]'
 						and tila = 'G'
@@ -838,9 +838,9 @@
 		//t‰ss‰ on valittu tilaus
 		$query = "	SELECT tunnus '$qnimi1',
 					nimi '$qnimi2',
-					date_format(luontiaika, '%Y-%m-%d')
+					date_format(created_at, '%Y-%m-%d')
 					laadittu,
-					laatija,
+					created_by,
 					clearing,
 					if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, '<br>', toim_nimi)) asiakkaan_nimi,
 					liitostunnus asiakkaan_tunnus

@@ -639,8 +639,8 @@
 					tapvm      = '$vv-$kk-$pp',
 					tila       = 'X',
 					alatila    = 'K',
-					laatija    = '$kukarow[kuka]',
-					luontiaika = now()";
+					created_by    = '$kukarow[kuka]',
+					created_at = now()";
 		$result = pupe_query($query);
 		$laskuid = mysql_insert_id();
 
@@ -811,7 +811,7 @@
 							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas $maksutapa$selitelisa',
-							laatija  = '$kukarow[kuka]',
+							created_by  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
 			}
@@ -839,7 +839,7 @@
 							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas ".t("Käteistilitys pankkiin kassasta")."',
-							laatija  = '$kukarow[kuka]',
+							created_by  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
 
@@ -861,7 +861,7 @@
 							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas ".t("Käteistilitys pankkiin kassasta")."',
-							laatija  = '$kukarow[kuka]',
+							created_by  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
 			}
@@ -886,7 +886,7 @@
 							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas ".t("Käteisotto kassasta")."',
-							laatija  = '$kukarow[kuka]',
+							created_by  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
 
@@ -906,7 +906,7 @@
 							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas ".t("Käteisotto kassasta")."',
-							laatija  = '$kukarow[kuka]',
+							created_by  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
 			}
@@ -977,7 +977,7 @@
 			$lisa = " and lasku.myyja='$row[tunnus]' ";
 		}
 		elseif ($myyja != '') {
-			$lisa = " and lasku.laatija='$myyja' ";
+			$lisa = " and lasku.created_by='$myyja' ";
 		}
 
 		$lisa .= " and lasku.vienti in (";
@@ -1180,7 +1180,7 @@
 										AND alatila		= 'X'
 										AND comments   != ''
 										AND sisviesti2 != ''
-										ORDER BY luontiaika DESC
+										ORDER BY created_at DESC
 										LIMIT 1";
 				$tasmaytys_result = pupe_query($tasmaytys_query);
 				$tasmaytys_row = mysql_fetch_assoc($tasmaytys_result);
@@ -2087,7 +2087,7 @@
 							FROM lasku use index (yhtio_tila_mapvm)
 							JOIN tiliointi use index (tositerivit_index) ON (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino = '$yhtiorow[kassa]')
 							JOIN suoritus use index (tositerivit_index) ON (suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.aputunnus)
-							LEFT JOIN kuka ON (lasku.laatija=kuka.kuka and lasku.yhtio=kuka.yhtio)
+							LEFT JOIN kuka ON (lasku.created_by=kuka.kuka and lasku.yhtio=kuka.yhtio)
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							AND lasku.tila	  = 'X'
 							AND lasku.alatila = ''
@@ -2604,7 +2604,7 @@
 								FROM lasku
 								JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.summa < 0 AND tiliointi.korjattu = '')
 								JOIN kassalipas ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
-								JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
+								JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.created_by)
 								WHERE  lasku.yhtio = '{$kukarow['yhtio']}'
 								{$tapvm_where}
 								AND lasku.tila     = 'X'

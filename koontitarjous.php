@@ -134,12 +134,12 @@
 			$tarjouslisa = '';
 
 			if (is_numeric($ppa) and is_numeric($kka) and is_numeric($vva) and is_numeric($ppl) and is_numeric($kkl) and is_numeric($vvl)) {
-				$tarjouslisa .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00' and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+				$tarjouslisa .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00' and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 			}
 
 			$query_ale_lisa = generoi_alekentta('M');
 
-			$query = "	SELECT lasku.tunnus, lasku.luontiaika, lasku.valkoodi,
+			$query = "	SELECT lasku.tunnus, lasku.created_at, lasku.valkoodi,
 						sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
@@ -166,7 +166,7 @@
 
 					if (isset($tunnukset) and in_array($tarjousrow['tunnus'], $tunnukset)) $chk = ' CHECKED';
 
-					echo "<tr><td>{$tarjousrow['tunnus']}</td><td>{$tarjousrow['rivihinta']} {$tarjousrow['valkoodi']}</td><td>",tv1dateconv($tarjousrow['luontiaika'], "pitka"),"</td><td align='center'><input type='checkbox' name='otunnukset_array[]' value='{$tarjousrow['tunnus']}'{$chk} /></td></tr>";
+					echo "<tr><td>{$tarjousrow['tunnus']}</td><td>{$tarjousrow['rivihinta']} {$tarjousrow['valkoodi']}</td><td>",tv1dateconv($tarjousrow['created_at'], "pitka"),"</td><td align='center'><input type='checkbox' name='otunnukset_array[]' value='{$tarjousrow['tunnus']}'{$chk} /></td></tr>";
 				}
 
 				echo "</table>";

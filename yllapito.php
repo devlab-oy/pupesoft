@@ -211,18 +211,18 @@
 					WHERE tunnus='$tunnus'";
 		$result = pupe_query($query);
 
-		// Jos poistamme ifamesta tietoja niin päivitetään varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
+		// Jos poistamme ifamesta tietoja niin päivitetään varsinaisen tietueen updated_at, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
 		if ($lukitse_avaimeen != "") {
 			if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
 				$query = "	UPDATE tuote
-							SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+							SET updated_by = '$kukarow[kuka]', updated_at=now()
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$lukitse_avaimeen'";
 				$result = pupe_query($query);
 			}
 			elseif ($toim == "liitetiedostot" and $lukitse_laji == "tuote") {
 				$query = "	UPDATE tuote
-							SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+							SET updated_by = '$kukarow[kuka]', updated_at=now()
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$lukitse_avaimeen'";
 				$result = pupe_query($query);
@@ -361,7 +361,7 @@
 			if ($onko_tama_insert) {
 
 				// Taulun ensimmäinen kenttä on aina yhtiö
-				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
+				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', created_by='$kukarow[kuka]', created_at=now(), updated_by='$kukarow[kuka]', updated_at=now() ";
 
 				if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
 
@@ -425,7 +425,7 @@
 				}
 
 				// Taulun ensimmäinen kenttä on aina yhtiö
-				$query = "UPDATE $toim SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
+				$query = "UPDATE $toim SET updated_by='$kukarow[kuka]', updated_at=now() ";
 
 				if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
 
@@ -524,12 +524,12 @@
 								liitostunnus = '{$liitostunnus}',
 								toimittaja = '{$toimi_chk_row['ytunnus']}',
 								alkuperamaa = '{$toimi_chk_row['maa']}',
-								laatija = '{$kukarow['kuka']}',
+								created_by = '{$kukarow['kuka']}',
 								ostohinta = '$toimittaja_liitos_ostohinta',
 								toim_tuoteno = '$toimittaja_liitos_tuoteno',
-								luontiaika = now(),
-								muutospvm = now(),
-								muuttaja = '{$kukarow['kuka']}'";
+								created_at = now(),
+								updated_at = now(),
+								updated_by = '{$kukarow['kuka']}'";
 					$tuotteen_toimittaja_insertti = pupe_query($query);
 				}
 			}
@@ -891,18 +891,18 @@
 				}
 			}
 
-			// Jos päivitämme ifamesta tietoja niin päivitetään varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
+			// Jos päivitämme ifamesta tietoja niin päivitetään varsinaisen tietueen updated_at, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
 			if (isset($lukitse_avaimeen) and $lukitse_avaimeen != "") {
 				if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
 					$query = "	UPDATE tuote
-								SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+								SET updated_by = '$kukarow[kuka]', updated_at=now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$lukitse_avaimeen'";
 					$result = pupe_query($query);
 				}
 				elseif ($toim == "liitetiedostot" and $lukitse_laji == "tuote") {
 					$query = "	UPDATE tuote
-								SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+								SET updated_by = '$kukarow[kuka]', updated_at=now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$lukitse_avaimeen'";
 					$result = pupe_query($query);
@@ -1779,10 +1779,10 @@
 			}
 
 			// Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
-			if (mysql_field_name($result, $i) == "laatija" or
-				mysql_field_name($result, $i) == "muutospvm" or
-				mysql_field_name($result, $i) == "muuttaja" or
-				mysql_field_name($result, $i) == "luontiaika") {
+			if (mysql_field_name($result, $i) == "created_by" or
+				mysql_field_name($result, $i) == "updated_at" or
+				mysql_field_name($result, $i) == "updated_by" or
+				mysql_field_name($result, $i) == "created_at") {
 				$tyyppi = 2;
 			}
 

@@ -79,7 +79,7 @@
 						$varastores = pupe_query($query);
 						$varastorow = mysql_fetch_assoc($varastores);
 
-						$luontiaika = $xml->InvCounting->TransDate;
+						$created_at = $xml->InvCounting->TransDate;
 
 						unset($xml->InvCounting->TransDate);
 
@@ -125,7 +125,7 @@
 							$params = array(
 								'to' => $error_email,
 								'cc' => '',
-								'subject' => t("Posten saldovertailu")." - {$luontiaika}",
+								'subject' => t("Posten saldovertailu")." - {$created_at}",
 								'ctype' => 'html',
 								'body' => $body,
 							);

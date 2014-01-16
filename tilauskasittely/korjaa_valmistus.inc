@@ -64,7 +64,7 @@
 						hyllyvali	= '$raakaainerow[hyllyvali]',
 						hyllytaso	= '$raakaainerow[hyllytaso]',
 						selite   	= '".t("K‰ytettiin tuotteen")." $tilrivirow[tuoteno] ".t("valmistamiseen")." ".t("tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus]',
-						laatija  	= '$kukarow[kuka]',
+						created_by  	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$tapahtumaresult = pupe_query($query);
 			$tapahtumaid = mysql_insert_id();
@@ -177,8 +177,8 @@
 				if (in_array($raakaainerow["sarjanumeroseuranta"], array("E","F","G"))) {
 					$query = "	UPDATE sarjanumeroseuranta
 								SET myyntirivitunnus = 0,
-								muutospvm			 = now(),
-								muuttaja			 = '$kukarow[kuka]'
+								updated_at			 = now(),
+								updated_by			 = '$kukarow[kuka]'
 								WHERE yhtio 		 = '$kukarow[yhtio]'
 								and tuoteno			 = '$raakaainerow[tuoteno]'
 								and myyntirivitunnus = '$raakaainerow[tunnus]'";
@@ -195,8 +195,8 @@
 					// P‰vitet‰‰n raaka-aineen er‰numeron era_kpl-kentt‰‰n oikea luku
 					$query = "	UPDATE sarjanumeroseuranta
 								SET era_kpl = era_kpl+$mtos,
-								muutospvm	= now(),
-								muuttaja	= '$kukarow[kuka]'
+								updated_at	= now(),
+								updated_by	= '$kukarow[kuka]'
 								WHERE yhtio 		 = '$kukarow[yhtio]'
 								and tuoteno			 = '$raakaainerow[tuoteno]'
 								and myyntirivitunnus = '$raakaainerow[tunnus]'
@@ -219,8 +219,8 @@
 									myyntirivitunnus = 0,
 									ostorivitunnus 	 = $erarow[tunnus],
 									era_kpl			 = $mtos*-1,
-									laatija			 = '$kukarow[kuka]',
-									luontiaika		 = now(),
+									created_by			 = '$kukarow[kuka]',
+									created_at		 = now(),
 									hyllyalue   	 = '$erarow[hyllyalue]',
 									hyllynro    	 = '$erarow[hyllynro]',
 									hyllyvali   	 = '$erarow[hyllyvali]',
@@ -333,8 +333,8 @@
 			while ($rowvalm = mysql_fetch_assoc($resvalm)) {
 				$query = "	UPDATE sarjanumeroseuranta
 							SET era_kpl	= 0,
-							muutospvm	= now(),
-							muuttaja	= '$kukarow[kuka]'
+							updated_at	= now(),
+							updated_by	= '$kukarow[kuka]'
 							WHERE yhtio 		 = '$kukarow[yhtio]'
 							and tuoteno			 = '$tilrivirow[tuoteno]'
 							and ostorivitunnus 	 = '$rowvalm[tunnus]'
@@ -487,8 +487,8 @@
 						// P‰vitet‰‰n valmisteen er‰numeron era_kpl-kentt‰‰n oikea luku
 						$query = "	UPDATE sarjanumeroseuranta
 									SET era_kpl = era_kpl+$kaantopisteen_saldomuutos,
-									muutospvm	= now(),
-									muuttaja	= '$kukarow[kuka]'
+									updated_at	= now(),
+									updated_by	= '$kukarow[kuka]'
 									WHERE yhtio 		 = '$kukarow[yhtio]'
 									and tuoteno			 = '$raakaainerow[tuoteno]'
 									and myyntirivitunnus = '$raakaainerow[tunnus]'

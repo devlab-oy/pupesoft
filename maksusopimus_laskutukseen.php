@@ -100,16 +100,16 @@
 						$query .= "tilaustyyppi='L',";
 					}
 				}
-				// laatijaksi klikkaaja
-				elseif ($fieldname == 'laatija') {
-					$query .= "laatija='$kukarow[kuka]',";
+				// created_byksi klikkaaja
+				elseif ($fieldname == 'created_by') {
+					$query .= "created_by='$kukarow[kuka]',";
 				}
 				elseif ($fieldname == 'eilahetetta') {
 					$query .= "eilahetetta='',";
 				}
-				// keräysaika, luontiaika ja toimitusaikaan now
+				// keräysaika, created_at ja toimitusaikaan now
 				elseif ($fieldname == 'kerayspvm' or
-						$fieldname == 'luontiaika' or
+						$fieldname == 'created_at' or
 						$fieldname == 'toimaika') {
 					$query .= $fieldname."=now(),";
 				}
@@ -198,10 +198,10 @@
 
 				$fieldname = mysql_field_name($lisatiedot_result, $i);
 
-				if ($fieldname == 'laatija') {
+				if ($fieldname == 'created_by') {
 					$query .= $fieldname."='$kukarow[kuka]',";
 				}
-				elseif ($fieldname == 'luontiaika') {
+				elseif ($fieldname == 'created_at') {
 					$query .= $fieldname."=now(),";
 				}
 				elseif ($fieldname == 'otunnus') {
@@ -228,10 +228,10 @@
 			for ($i = 0; $i < mysql_num_fields($lisatiedot_result); $i++) {
 				$fieldname = mysql_field_name($lisatiedot_result, $i);
 
-				if ($fieldname == 'laatija') {
+				if ($fieldname == 'created_by') {
 					$query .= $fieldname."='$kukarow[kuka]',";
 				}
-				elseif ($fieldname == 'luontiaika') {
+				elseif ($fieldname == 'created_at') {
 					$query .= $fieldname."=now(),";
 				}
 				elseif ($fieldname == 'otunnus') {
@@ -309,7 +309,7 @@
 				echo "<font class = 'message'>".t("Käy tekemässä ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
 				echo "<font class = 'message'>".t("Ennakkolaskutuksen tuotenumero on")." $yhtiorow[ennakkomaksu_tuotenumero]</font><br><br>";
 
-				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
+				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, created_by, laadittu) values
 							('0', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '{$laskurow['alv']}', '$rivikommentti', '$kukarow[kuka]', now())";
 				$addtil = pupe_query($query);
 			}
@@ -348,7 +348,7 @@
 
 					$laitetaanko_netto = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? "" : "N";
 
-					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu {$ale_kentat}) values
+					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, created_by, laadittu {$ale_kentat}) values
 							('$summa', '{$laitetaanko_netto}', '{$varattu}', '{$tilkpl}', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now() {$ale_arvot})";
 					$addtil = pupe_query($query);
 
@@ -499,7 +499,7 @@
 
 			while ($row = mysql_fetch_assoc($sresult)) {
 
-				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu)
+				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, created_by, laadittu)
 							values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
 				$addtil = pupe_query($query);
 

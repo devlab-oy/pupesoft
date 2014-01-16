@@ -135,8 +135,8 @@ if (!function_exists('luo_ostotilausotsikko')) {
 					and toim_postino	= '{$toim_postino}'
 					and toim_postitp	= '{$toim_postitp}'
 					and toim_maa		= '{$toim_maa}'
-					and left(luontiaika,10) = left(now(),10)
-					and laatija 		= '{$kukarow['kuka']}'
+					and left(created_at,10) = left(now(),10)
+					and created_by 		= '{$kukarow['kuka']}'
 					and chn				= '$chn'
 					and tilaustyyppi	= '{$params['tilaustyyppi']}'";
 				break;
@@ -161,9 +161,9 @@ if (!function_exists('luo_ostotilausotsikko')) {
 						jakelu 				= '{$params['jakelu']}',
 						kerayspvm 			= '{$params['myyntitil_kerayspvm']}',
 						kuljetus 			= '{$tiltoi['kuljetus']}',
-						laatija 			= '{$kukarow['kuka']}',
+						created_by 			= '{$kukarow['kuka']}',
 						liitostunnus		= '{$tiltoi['tunnus']}',
-						luontiaika			= now(),
+						created_at			= now(),
 						maa 				= '{$tiltoi['maa']}',
 						maksuteksti 		= '{$tiltoi['maksuteksti']}',
 						myyja 				= '{$params['myytil_myyja']}',

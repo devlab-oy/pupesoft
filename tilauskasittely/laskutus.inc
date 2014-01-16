@@ -532,8 +532,8 @@
 										// v‰hennet‰‰n ostorivilt‰ tarvittava m‰‰r‰
 										$query = "	UPDATE sarjanumeroseuranta
 													SET era_kpl 			= era_kpl-$eravahennetaan,
-													muutospvm				= now(),
-													muuttaja				= '$kukarow[kuka]'
+													updated_at				= now(),
+													updated_by				= '$kukarow[kuka]'
 													WHERE yhtio 			= '$kukarow[yhtio]'
 													and tuoteno				= '$trow[tuoteno]'
 													and ostorivitunnus 		= '$erajaljella_row[ostorivitunnus]'
@@ -557,8 +557,8 @@
 										$query = "	UPDATE sarjanumeroseuranta
 													SET era_kpl			 = era_kpl+$eravahennetaan,
 													ostorivitunnus		 = '$erajaljella_row[ostorivitunnus]',
-													muutospvm			 = now(),
-													muuttaja			 = '$kukarow[kuka]'
+													updated_at			 = now(),
+													updated_by			 = '$kukarow[kuka]'
 													WHERE yhtio			 = '$kukarow[yhtio]'
 													and tunnus 			 = '$erahakurow[tunnus]'
 													LIMIT 1";
@@ -572,10 +572,10 @@
 
 												$fieldname = mysql_field_name($erahakures, $ikentta);
 
-												if ($fieldname == 'laatija') {
+												if ($fieldname == 'created_by') {
 													$query .= "'".$kukarow["kuka"]."',";
 												}
-												elseif ($fieldname == 'luontiaika') {
+												elseif ($fieldname == 'created_at') {
 													$query .= "now(),";
 												}
 												else {
@@ -599,8 +599,8 @@
 													myyntirivitunnus= 0,
 													ostorivitunnus 	= '$trow[tunnus]',
 													era_kpl			= '0',
-													laatija			= '$kukarow[kuka]',
-													luontiaika		= now(),
+													created_by			= '$kukarow[kuka]',
+													created_at		= now(),
 													hyllyalue   	= '$trow[hyllyalue]',
 													hyllynro    	= '$trow[hyllynro]',
 													hyllyvali   	= '$trow[hyllyvali]',
@@ -611,8 +611,8 @@
 										$query = "	UPDATE sarjanumeroseuranta
 													SET era_kpl			 = $eraayht,
 													ostorivitunnus		 = '$trow[tunnus]',
-													muutospvm			 = now(),
-													muuttaja			 = '$kukarow[kuka]'
+													updated_at			 = now(),
+													updated_by			 = '$kukarow[kuka]'
 													WHERE yhtio			 = '$kukarow[yhtio]'
 													and tuoteno			 = '$trow[tuoteno]'
 													and myyntirivitunnus = '$trow[tunnus]'
@@ -710,7 +710,7 @@
 													hyllyvali 	= '$hyllyvali',
 													hyllytaso 	= '$hyllytaso',
 													selite 		= '".t("Tuotteella ei ole yht‰‰n varastopaikkaa, perustettiin uusi").": Z 99 99 99',
-													laatija 	= '$kukarow[kuka]',
+													created_by 	= '$kukarow[kuka]',
 													laadittu 	= now()";
 								$tapahtumaresult = pupe_query($tapahtumaquery);
 
@@ -813,7 +813,7 @@
 							}
 
 							$query = "	INSERT into sarjanumeroseuranta
-										(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, parasta_ennen, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+										(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, era_kpl, created_by, created_at, takuu_alku, takuu_loppu, parasta_ennen, hyllyalue, hyllynro, hyllyvali, hyllytaso)
 										VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]', '$eraKpl', '$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow1[parasta_ennen]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
 							$sarjares1 = pupe_query($query);
 						}
@@ -849,7 +849,7 @@
 							hyllytaso  = '$trow[hyllytaso]',
 							hyllyvali  = '$trow[hyllyvali]',
 							selite     = '$orow[nimi] $orow[nimitark] ($hinta) [$rivihinta]',
-							laatija    = '$kukarow[kuka]',
+							created_by    = '$kukarow[kuka]',
 							rivitunnus = '$trow[tunnus]',
 							laadittu   = '$laskutus_tapahtumapvm'";
 				$updlaskutusres = pupe_query($query);

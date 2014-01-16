@@ -26,8 +26,8 @@
 
 				$query = "	UPDATE rahtimaksut SET
 							rahtihinta = '$rahtimaksu',
-							muutospvm = now(),
-							muuttaja = '{$kukarow['kuka']}'
+							updated_at = now(),
+							updated_by = '{$kukarow['kuka']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$rahtimaksut_row['tunnus']}'";
 				$update_res = mysql_query($query) or pupe_error($query);

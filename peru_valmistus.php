@@ -161,7 +161,7 @@
 					echo "<td class='back' valign='top'><table>";
 					echo "<tr><th>".t("Tuoteno").":</th><td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($taparow["tuoteno"])."'>$taparow[tuoteno]</a></td></tr>";
 					echo "<tr><th>".t("Kpl").":</th><td>$taparow[kpl]</td></tr>";
-					echo "<tr><th>".t("Laatija")." ".t("Laadittu").":</th><td>$taparow[laatija] $taparow[laadittu]</td></tr>";
+					echo "<tr><th>".t("Laatija")." ".t("Laadittu").":</th><td>$taparow[created_by] $taparow[laadittu]</td></tr>";
 					echo "<tr><th>".t("Selite").":</th><td>$taparow[selite]</td></tr>";
 
 					if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M") {
@@ -344,7 +344,7 @@
 											hinta 		= '0',
 											laji 		= 'uusipaikka',
 											selite 		= '".t("Lisättiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
-											laatija 	= '$kukarow[kuka]',
+											created_by 	= '$kukarow[kuka]',
 											hyllyalue   = '$hyllyrow[alkuhyllyalue]',
 											hyllynro    = '$hyllyrow[alkuhyllynro]',
 											hyllytaso   = '0',

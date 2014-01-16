@@ -135,7 +135,7 @@
 		// Etsitään kaikki myyntitili-/siirtolistarivit, joissa on jotain keskeneräistä
 		$query = "	SELECT lasku.tilaustyyppi,
 					lasku.tunnus,
-					left(lasku.luontiaika, 10) luontiaika,
+					left(lasku.created_at, 10) created_at,
 					lasku.ytunnus,
 					lasku.nimi,
 					tuote.osasto,
@@ -152,10 +152,10 @@
 						{$lisa})
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila = 'G'
-					AND lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-					AND lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+					AND lasku.created_at >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+					AND lasku.created_at <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 					{$rajaus}
-					ORDER BY lasku.liitostunnus, lasku.luontiaika DESC";
+					ORDER BY lasku.liitostunnus, lasku.created_at DESC";
 		$result = pupe_query($query);
 		$total_rows = mysql_num_rows($result);
 
@@ -180,7 +180,7 @@
 				$table_data .= "<tr class='aktiivi'>";
 				$table_data .= "<td>{$row["tilaustyyppi"]}</td>";
 				$table_data .= "<td>{$row["tunnus"]}</td>";
-				$table_data .= "<td>{$row["luontiaika"]}</td>";
+				$table_data .= "<td>{$row["created_at"]}</td>";
 				$table_data .= "<td>{$row["ytunnus"]}</td>";
 				$table_data .= "<td>{$row["nimi"]}</td>";
 				$table_data .= "<td>{$row["osasto"]}</td>";
@@ -194,7 +194,7 @@
 					$excelsarake = 0;
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["tilaustyyppi"]);
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["tunnus"]);
-					$worksheet->writeString($excelrivi, $excelsarake++, $row["luontiaika"]);
+					$worksheet->writeString($excelrivi, $excelsarake++, $row["created_at"]);
 					$worksheet->writeString($excelrivi, $excelsarake++, $row["ytunnus"]);
 					$worksheet->writeString($excelrivi, $excelsarake++, $row["nimi"]);
 					$worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);

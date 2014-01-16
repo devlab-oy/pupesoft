@@ -40,7 +40,7 @@
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
 		}
 
-		$query = "	(SELECT tilausrivi.otunnus, lasku.laatija, concat('vastuuostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
+		$query = "	(SELECT tilausrivi.otunnus, lasku.created_by, concat('vastuuostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
 					FROM tilausrivi
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '' AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY))
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ostajanro > 0)
@@ -53,11 +53,11 @@
 					AND tilausrivi.jaksotettu = 0
 					GROUP BY 1,2,3,4,5)
 					UNION
-					(SELECT tilausrivi.otunnus, lasku.laatija, concat('ostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
+					(SELECT tilausrivi.otunnus, lasku.created_by, concat('ostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
 					FROM tilausrivi
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '' AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY))
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija AND kuka.eposti != '')
+					JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.created_by AND kuka.eposti != '')
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.toimitettu = ''
 					AND tilausrivi.tyyppi = 'O'

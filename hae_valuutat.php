@@ -34,8 +34,8 @@
 			if ($tee == "PAIVITA") {
 		    	$query = "	UPDATE valuu SET
 							kurssi = round(1 / $kurssi, 9),
-							muutospvm = now(),
-							muuttaja = '$kukarow[kuka]'
+							updated_at = now(),
+							updated_by = '$kukarow[kuka]'
 							WHERE yhtio	= '$kukarow[yhtio]'
 							AND nimi	= '$valkoodi'";
 				$result = mysql_query($query) or pupe_error($query);

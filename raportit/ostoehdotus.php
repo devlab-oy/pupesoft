@@ -467,10 +467,10 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$lisaa .= " and tuote.hinnastoon != 'E' ";
 	}
 	if ($vainuudet != '') {
-		$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
+		$lisaa .= " and tuote.created_at >= date_sub(current_date, interval 12 month) ";
 	}
 	if ($eiuusia != '') {
-		$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
+		$lisaa .= " and tuote.created_at < date_sub(current_date, interval 12 month) ";
 	}
 	if ($toimittajaid != '') {
 		$lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
@@ -532,7 +532,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
 					and abc_aputaulu.tuoteno = tuote.tuoteno
 					and abc_aputaulu.tyyppi = '$abcrajaustapa'
-					and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
+					and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_created_at >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
 	}
 	else {
 		$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa') ";
@@ -560,7 +560,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				abc_aputaulu.luokka abcluokka,
 				abc_aputaulu.luokka_osasto abcluokka_osasto,
 				abc_aputaulu.luokka_try abcluokka_try,
-				tuote.luontiaika
+				tuote.created_at
 				FROM tuote
 				$lisaa2
 				$abcjoin
@@ -605,7 +605,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$toimirow = mysql_fetch_array($result);
 
 		// kaunistellaan kenttiä
-		if ($row["luontiaika"] == "0000-00-00 00:00:00") $row["luontiaika"] = "";
+		if ($row["created_at"] == "0000-00-00 00:00:00") $row["created_at"] = "";
 		if ($row['epakurantti25pvm'] == '0000-00-00')     $row['epakurantti25pvm'] = "";
 		if ($row['epakurantti50pvm'] == '0000-00-00')     $row['epakurantti50pvm'] = "";
 		if ($row['epakurantti75pvm'] == '0000-00-00')     $row['epakurantti75pvm'] = "";
@@ -643,8 +643,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$tuoterivi .= "\"$abcnimi2\"\t";
 		$headerivi .= t("abc try")."\t";
 		$tuoterivi .= "\"$abcnimi3\"\t";
-		$headerivi .= t("luontiaika")."\t";
-		$tuoterivi .= "\"$row[luontiaika]\"\t";
+		$headerivi .= t("created_at")."\t";
+		$tuoterivi .= "\"$row[created_at]\"\t";
 		$headerivi .= t("tuotteen hälytysraja")."\t";
 		$tuoterivi .= str_replace(".",",",$row['halytysraja'])."\t";
 		$headerivi .= t("ostoerä")."\t";

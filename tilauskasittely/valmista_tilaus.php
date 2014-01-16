@@ -282,8 +282,8 @@
 									$oslisa
 									kaytetty		= '$lisa_row[kaytetty]',
 									era_kpl			= '',
-									laatija			= '$kukarow[kuka]',
-									luontiaika		= now(),
+									created_by			= '$kukarow[kuka]',
+									created_at		= now(),
 									takuu_alku 		= '$lisa_row[takuu_alku]',
 									takuu_loppu		= '$lisa_row[takuu_loppu]',
 									parasta_ennen	= '$lisa_row[parasta_ennen]',
@@ -1578,8 +1578,8 @@
 				$rivilisat  = " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi in ('D','O')) ";
 
 				if ($haku == "") {
-					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY) ";
-					$laskuindex = "yhtio_tila_luontiaika";
+					$lisa .= " and lasku.created_at >= date_sub(curdate(), INTERVAL 90 DAY) ";
+					$laskuindex = "yhtio_tila_created_at";
 				}
 			}
 			elseif ($toim == "TUTKAA") {
@@ -1596,8 +1596,8 @@
 				$rivilisat  = " ";
 
 				if ($haku == "") {
-					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY) ";
-					$laskuindex = "yhtio_tila_luontiaika";
+					$lisa .= " and lasku.created_at >= date_sub(curdate(), INTERVAL 90 DAY) ";
+					$laskuindex = "yhtio_tila_created_at";
 				}
 			}
 			else {
@@ -1614,8 +1614,8 @@
 				$rivilisat  = " ";
 
 				if ($haku == "") {
-					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 180 DAY) ";
-					$laskuindex = "yhtio_tila_luontiaika";
+					$lisa .= " and lasku.created_at >= date_sub(curdate(), INTERVAL 180 DAY) ";
+					$laskuindex = "yhtio_tila_created_at";
 				}
 
 				// Jos valmistuksessa k‰ytet‰‰n tilakoodeja, n‰ytet‰‰n pelk‰st‰‰n tarkistettu

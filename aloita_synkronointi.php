@@ -102,7 +102,7 @@ if ($tee == "SYNK") {
 			$query = "	SELECT *
 						FROM $table
 						WHERE tunnus in ($aburow[tunnukset])
-						ORDER BY if(muutospvm = '0000-00-00 00:00:00', luontiaika, muutospvm) DESC
+						ORDER BY if(updated_at = '0000-00-00 00:00:00', created_at, updated_at) DESC
 						LIMIT 1";
 			$abures1 = pupe_query($query);
 

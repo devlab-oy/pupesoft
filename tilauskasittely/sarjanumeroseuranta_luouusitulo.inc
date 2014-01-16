@@ -116,8 +116,8 @@
 						tila         = 'K',
 						alatila      = 'I',
 						tapvm		 = '$tanaan',
-						luontiaika	 = now(),
-						laatija		 = 'Invent'";
+						created_at	 = now(),
+						created_by		 = 'Invent'";
 			$result = mysql_query($query) or pupe_error($query);
 			$lid = mysql_insert_id();
 
@@ -175,7 +175,7 @@
 					keratty			= 'Invent',
 					kerattyaika		= '',
 					kerayspvm 		= '',
-					laatija			= 'Invent',
+					created_by			= 'Invent',
 					laadittu		= now(),
 					toimaika 		= now(),
 					laskutettu		= 'Invent',

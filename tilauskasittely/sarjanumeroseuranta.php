@@ -168,8 +168,8 @@
 							SET lisatieto 	= '$lisatieto',
 							sarjanumero 	= '$sarjanumero',
 							kaytetty		= '$kaytetty',
-							muuttaja		= '$kukarow[kuka]',
-							muutospvm		= now(),
+							updated_by		= '$kukarow[kuka]',
+							updated_at		= now(),
 							era_kpl			= '$era_kpl',
 							parasta_ennen 	= '$pevva-$pekka-$peppa'
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -181,8 +181,8 @@
 							SET lisatieto 	= '$lisatieto',
 							sarjanumero 	= '$sarjanumero',
 							kaytetty		= '$kaytetty',
-							muuttaja		= '$kukarow[kuka]',
-							muutospvm		= now(),
+							updated_by		= '$kukarow[kuka]',
+							updated_at		= now(),
 							takuu_alku		= '$tvva-$tkka-$tppa',
 							takuu_loppu		= '$tvvl-$tkkl-$tppl'
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -459,7 +459,7 @@
 
 			//jos ollaan syötetty kokonaan uusi sarjanuero
 			$query = "	INSERT into sarjanumeroseuranta
-						(yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso, parasta_ennen)
+						(yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, era_kpl, created_by, created_at, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso, parasta_ennen)
 						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$era_kpl','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]', '$pevva-$pekka-$peppa')";
 			$sarjares = pupe_query($query);
 			$tun = mysql_insert_id();
@@ -485,8 +485,8 @@
 				$query = "	INSERT INTO sarjanumeron_lisatiedot
 							SET yhtio			= '$kukarow[yhtio]',
 							liitostunnus		= '$tun',
-							laatija 			= '$kukarow[kuka]',
-							luontiaika 			= now(),
+							created_by 			= '$kukarow[kuka]',
+							created_at 			= now(),
 							Leveys				= '$tuoterow[tuoteleveys]',
 							Pituus				= '$tuoterow[tuotepituus]',
 							Varirunko			= '$tuoterow[vari]',
@@ -617,8 +617,8 @@
 
 				$query = "	UPDATE sarjanumeroseuranta
 							set $tunnuskentta = '',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
+							updated_by	= '$kukarow[kuka]',
+							updated_at	= now()
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus in ($sarjatun)";
 				$sarjares = pupe_query($query);
@@ -661,8 +661,8 @@
 
 				$query = "	UPDATE sarjanumeroseuranta
 							SET $tunnuskentta = '$rivitunnus',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
+							updated_by	= '$kukarow[kuka]',
+							updated_at	= now()
 							$paikkalisa
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$sarjatun'";
@@ -730,8 +730,8 @@
 											ostorivitunnus	 	= '$sarjarow[rivitunnus]',
 											kaytetty			= '$sarjarow[kaytetty]',
 											era_kpl				= '',
-											laatija				= '$kukarow[kuka]',
-											luontiaika			= now(),
+											created_by				= '$kukarow[kuka]',
+											created_at			= now(),
 											takuu_alku 			= '$sarjarow[takuu_alku]',
 											takuu_loppu			= '$sarjarow[takuu_loppu]',
 											parasta_ennen		= '$sarjarow[parasta_ennen]',
@@ -746,8 +746,8 @@
 						else {
 							$query = "	UPDATE sarjanumeroseuranta
 										SET myyntirivitunnus = '$varastoon_row[tunnus]',
-										muuttaja	= '$kukarow[kuka]',
-										muutospvm	= now()
+										updated_by	= '$kukarow[kuka]',
+										updated_at	= now()
 										WHERE yhtio	= '$kukarow[yhtio]'
 										and tunnus	= '$sarjatun'
 										and myyntirivitunnus = 0";
@@ -769,8 +769,8 @@
 
 							$query = "	UPDATE sarjanumeroseuranta
 										SET $tunnuskentta='',
-										muuttaja	= '$kukarow[kuka]',
-										muutospvm	= now()
+										updated_by	= '$kukarow[kuka]',
+										updated_at	= now()
 										$paikkalisa
 										WHERE yhtio='$kukarow[yhtio]'
 										and tunnus='$sarjatun'";
@@ -839,7 +839,7 @@
 	}
 
 	if (isset($tervetuloa_haku) and $tervetuloa_haku != "") {
-		$lisa .= " 	and (lasku_osto.laatija='$kukarow[kuka]' or lasku_myynti.laatija='$kukarow[kuka]' or lasku_myynti.myyja='$kukarow[tunnus]')
+		$lisa .= " 	and (lasku_osto.created_by='$kukarow[kuka]' or lasku_myynti.created_by='$kukarow[kuka]' or lasku_myynti.myyja='$kukarow[tunnus]')
 					and (lasku_myynti.tila is null or lasku_myynti.tila != 'D')
 				  	and (lasku_osto.tila is null or lasku_osto.tila != 'D')";
 	}
@@ -874,7 +874,7 @@
 				tilausrivi_osto.tunnus								osto_rivitunnus,
 				tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
 				tilausrivi_osto.laskutettuaika						osto_laskaika,
-				tilausrivi_osto.laatija								osto_rivilaatija,
+				tilausrivi_osto.created_by								osto_rivicreated_by,
 				tilausrivi_osto.toimitettuaika						osto_toimitettuaika,
 				tilausrivi_myynti.laskutettuaika					myynti_laskaika,
 				tilausrivi_myynti.toimitettuaika					myynti_toimitettuaika,
@@ -1211,7 +1211,7 @@
 				$echoostuns = $ostuns;
 			}
 
-			if ($sarjarow["osto_rivilaatija"] == "Invent" and $sarjarow["osto_nimi"] == "") {
+			if ($sarjarow["osto_rivicreated_by"] == "Invent" and $sarjarow["osto_nimi"] == "") {
 				$ostoekotus = "$echoostuns ".t("Inventointi");
 			}
 			else {

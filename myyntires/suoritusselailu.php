@@ -145,7 +145,7 @@
 							projekti 	= '$tiliointi1_row[projekti]',
 							selite		= '$selite',
 							lukko		= 0,
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now(),
 							summa_valuutassa = $tiliointi1_row[summa_valuutassa],
 							valkoodi	= '$tiliointi1_row[valkoodi]'";
@@ -162,7 +162,7 @@
 							projekti 	= '$tiliointi1_row[projekti]',
 							selite		= '$selite',
 							lukko		= 1,
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now(),
 							summa_valuutassa = $tiliointi1_row[summa_valuutassa] * -1,
 							valkoodi	= '$tiliointi1_row[valkoodi]'";

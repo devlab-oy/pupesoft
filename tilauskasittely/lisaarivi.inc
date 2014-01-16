@@ -1610,7 +1610,7 @@
 											hyllytaso 		= '$myy_hyllytaso[$indeksi]',
 											hyllyvali 		= '$myy_hyllyvali[$indeksi]',
 											tilaajanrivinro = '$rivinumero',
-											laatija 		= '$kukarow[kuka]',
+											created_by 		= '$kukarow[kuka]',
 											laadittu 		= $vanharivilaadittu,
 											yhtio 			= '$kukarow[yhtio]',
 											tuoteno 		= '$myy_tuoteno[$indeksi]',
@@ -1694,8 +1694,8 @@
 												positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 												toimittajan_tunnus		= '$toimittajan_tunnus',
 												rekisterinumero			= '{$rekisterinumero}',
-												muutospvm				= now(),
-												muuttaja				= '$kukarow[kuka]',
+												updated_at				= now(),
+												updated_by				= '$kukarow[kuka]',
 												erikoistoimitus_myynti	= '$myy_erikoistoimitus[$indeksi]'
 												{$tlisatied_lisa}
 												{$tlisatied_lisa2}
@@ -1722,8 +1722,8 @@
 												vanha_otunnus			= '$kukarow[kesken]',
 												rekisterinumero			= '{$rekisterinumero}',
 												jarjestys				= '$jarjestys',
-												luontiaika				= now(),
-												laatija 				= '$kukarow[kuka]'
+												created_at				= now(),
+												created_by 				= '$kukarow[kuka]'
 												{$tlisatied_lisa}
 												{$tlisatied_lisa2}";
 
@@ -1825,8 +1825,8 @@
 												$oslisa
 												kaytetty		= '$lisa_row[kaytetty]',
 												era_kpl			= '',
-												laatija			= '$kukarow[kuka]',
-												luontiaika		= now(),
+												created_by			= '$kukarow[kuka]',
+												created_at		= now(),
 												takuu_alku 		= '$lisa_row[takuu_alku]',
 												takuu_loppu		= '$lisa_row[takuu_loppu]',
 												parasta_ennen	= '$lisa_row[parasta_ennen]',
@@ -2743,7 +2743,7 @@
 						hyllyvali 		= '$p_hyllyvali',
 						hyllytaso 		= '$p_hyllytaso',
 						tilaajanrivinro = '$rivinumero',
-						laatija 		= '$kukarow[kuka]',
+						created_by 		= '$kukarow[kuka]',
 						laadittu 		= $vanharivilaadittu,
 						yhtio 			= '$kukarow[yhtio]',
 						tuoteno 		= '$trow[tuoteno]',
@@ -2853,8 +2853,8 @@
 							positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							rekisterinumero		= '{$rekisterinumero}',
-							muutospvm			= now(),
-							muuttaja			= '$kukarow[kuka]',
+							updated_at			= now(),
+							updated_by			= '$kukarow[kuka]',
 							ei_nayteta			= '{$puu_ein[$i]}'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}
@@ -2881,8 +2881,8 @@
 							ei_nayteta			= '{$puu_ein[$i]}',
 							ohita_kerays 		= '{$puu_ohiker[$i]}',
 							rekisterinumero		= '{$rekisterinumero}',
-							luontiaika			= now(),
-							laatija 			= '$kukarow[kuka]'
+							created_at			= now(),
+							created_by 			= '$kukarow[kuka]'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}
 							{$jt_manual_lisa}";

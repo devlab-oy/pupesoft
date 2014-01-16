@@ -450,7 +450,7 @@ if (!function_exists("uutiset")) {
 		$query = "	SELECT *
 					FROM kalenteri
 					WHERE yhtio = '$kukarow[yhtio]'  $lisa
-					ORDER BY kokopaiva DESC, luontiaika DESC
+					ORDER BY kokopaiva DESC, created_at DESC
 					LIMIT 8";
 		$result = pupe_query($query);
 
@@ -944,11 +944,11 @@ if ($tee == "asiakastiedot") {
 		$tilaukset  = array();
 		$where 		= "";
 
-		if ($vainomat != "") $vainlisa = " and laatija = '$kukarow[kuka]'";
+		if ($vainomat != "") $vainlisa = " and created_by = '$kukarow[kuka]'";
 		else $vainlisa = "";
 
 		if ($tila == "haku") {
-			$aika = "luontiaika";
+			$aika = "created_at";
 
 			if (strlen($tilaushaku) > 2 or $tilaustila != "") {
 				$where = " and tila in ('N','L') ";
@@ -973,15 +973,15 @@ if ($tee == "asiakastiedot") {
 			}
 		}
 		elseif ($tila == "kesken") {
-			$aika = "luontiaika";
+			$aika = "created_at";
 			$where = " and tila = 'N' and alatila = '' ";
 		}
 		elseif ($tila == "kasittely") {
-			$aika = "luontiaika";
+			$aika = "created_at";
 			$where = " and tila = 'N' and alatila = 'F' ";
 		}
 		elseif ($tila == "odottaa") {
-			$aika = "luontiaika";
+			$aika = "created_at";
 			$where = " and tila = 'N' and alatila NOT IN ('', 'F') ";
 		}
 		elseif ($tila == "toimituksessa") {

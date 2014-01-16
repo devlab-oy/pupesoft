@@ -271,8 +271,8 @@
 							hyllytaso	= '$thyllytaso',
 							oletus		= '',
 							tuoteno		= '$tuoteno',
-							laatija		= '$kukarow[kuka]',
-							luontiaika	= now()";
+							created_by		= '$kukarow[kuka]',
+							created_at	= now()";
 				$result = mysql_query($query) or pupe_error($query);
 				$minne = mysql_insert_id();
 
@@ -288,7 +288,7 @@
 							hyllyvali	= '$thyllyvali',
 							hyllytaso	= '$thyllytaso',
 							selite 		= '".t("Lisättiin tuotepaikka")." $thyllyalue $thyllynro $thyllyvali $thyllytaso',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}

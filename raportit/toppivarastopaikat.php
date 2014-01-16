@@ -99,7 +99,7 @@ $kaikki_lisa_kentat = array(
 		'checked'	 => '',
 	),
 	5	 => array(
-		'kolumni'	 => 'tuote.luontiaika',
+		'kolumni'	 => 'tuote.created_at',
 		'header'	 => t('Luontiaika'),
 		'checked'	 => '',
 	),
@@ -221,7 +221,7 @@ if ($tee != '') {
 			'header' => t('Status'),
 			'order'	 => 15
 		),
-		'luontiaika'				 => array(
+		'created_at'				 => array(
 			'header' => t('Tuotteen Luontiaika'),
 			'order'	 => 16
 		),

@@ -123,7 +123,7 @@
 												hyllyvali 	= '$sarjarow[hyllyvali]',
 												hyllytaso 	= '$sarjarow[hyllytaso]',
 												selite  	= '".t("Varastonarvon muutos").": $edarvo -> $uuarvo. $lisaselite',
-												laatija    	= '$kukarow[kuka]',
+												created_by    	= '$kukarow[kuka]',
 												laadittu 	= now()";
 									$result = pupe_query($query);
 									$tapahtumaid = mysql_insert_id();
@@ -132,9 +132,9 @@
 												yhtio      = '$kukarow[yhtio]',
 												tapvm      = now(),
 												tila       = 'X',
-												laatija    = '$kukarow[kuka]',
+												created_by    = '$kukarow[kuka]',
 												viite      = '$tapahtumaid',
-												luontiaika = now()";
+												created_at = now()";
 									$result = pupe_query($query);
 									$laskuid = mysql_insert_id($link);
 
@@ -186,7 +186,7 @@
 												vero     = 0,
 												lukko    = '',
 												selite   = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo',
-												laatija  = '$kukarow[kuka]',
+												created_by  = '$kukarow[kuka]',
 												laadittu = now()";
 									$result = pupe_query($query);
 
@@ -202,7 +202,7 @@
 												vero     = 0,
 												lukko    = '',
 												selite   = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo',
-												laatija  = '$kukarow[kuka]',
+												created_by  = '$kukarow[kuka]',
 												laadittu = now()";
 									$result = pupe_query($query);
 

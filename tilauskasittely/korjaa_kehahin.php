@@ -74,7 +74,7 @@
 			echo "<th>kplhinta</th>";
 			echo "<th>kehahin</th>";
 			echo "<th>selite</th>";
-			echo "<th>laatija</th>";
+			echo "<th>created_by</th>";
 			echo "<th>laadittu</th>";
 			echo "<th>kääntöpiste</th>";
 			echo "</tr>";
@@ -90,7 +90,7 @@
 				echo "<td>{$rivi["kplhinta"]}</td>";
 				echo "<td>{$rivi["hinta"]}</td>";
 				echo "<td width='300'>{$rivi["selite"]}</td>";
-				echo "<td>{$rivi["laatija"]}</td>";
+				echo "<td>{$rivi["created_by"]}</td>";
 				echo "<td>{$rivi["laadittu"]}</td>";
 				echo "<td>";
 

@@ -234,7 +234,7 @@
 											hyllyvali 	= '$khyllyvali',
 											hyllytaso 	= '$khyllytaso',
 											selite 		= '".t("Siirräsaldoissa lisättiin tuotepaikka")." $khyllyalue $khyllynro $khyllyvali $khyllytaso',
-											laatija 	= '$kukarow[kuka]',
+											created_by 	= '$kukarow[kuka]',
 											laadittu 	= now()";
 						$tapahtumaresult = pupe_query($tapahtumaquery);
 
@@ -274,7 +274,7 @@
 									hyllyvali = '$lhyllyvali',
 									hyllytaso = '$lhyllytaso',
 									selite = '".t("Paikasta")." $lhyllyalue $lhyllynro $lhyllyvali $lhyllytaso ".t("vähennettiin")." $maara',
-									laatija = '$kukarow[kuka]',
+									created_by = '$kukarow[kuka]',
 									laadittu = now()";
 					$result = pupe_query($query);
 
@@ -289,7 +289,7 @@
 									hyllyvali = '$khyllyvali',
 									hyllytaso = '$khyllytaso',
 									selite = '".t("Paikalle")." $khyllyalue $khyllynro $khyllyvali $khyllytaso ".t("lisättiin")." $maara',
-									laatija = '$kukarow[kuka]',
+									created_by = '$kukarow[kuka]',
 									laadittu = now()";
 					$result = pupe_query($query);
 

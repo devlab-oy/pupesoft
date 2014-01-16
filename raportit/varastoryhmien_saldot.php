@@ -71,10 +71,10 @@
 								kieli = '{$avainsana_row['kieli']}',
 								laji = 'VARASTORYHMA_$avainsana_row[selite]',
 								selite = '$myytavissa',
-								laatija = '{$kukarow['kuka']}',
-								luontiaika = now(),
-								muutospvm = now(),
-								muuttaja = '{$kukarow['kuka']}'";
+								created_by = '{$kukarow['kuka']}',
+								created_at = now(),
+								updated_at = now(),
+								updated_by = '{$kukarow['kuka']}'";
 					$tuotteen_avainsana_res = mysql_query($query) or die("Virhe lisattaessa tuotteen avainsanoja!\n".mysql_error($query)."\n\n");
 				}
 			}

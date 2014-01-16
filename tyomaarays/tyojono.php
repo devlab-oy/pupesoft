@@ -219,7 +219,7 @@
 				yhtio.yhtio yhtioyhtio,
 				a3.nimi suorittajanimi,
 				a5.selitetark tyom_prioriteetti,
-				lasku.luontiaika,
+				lasku.created_at,
 				group_concat(a4.selitetark_2) asekalsuorittajanimi,
 				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
 				FROM lasku

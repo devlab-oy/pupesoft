@@ -2444,7 +2444,7 @@ if (!function_exists("tulosta_lasku")) {
 					lasku.vienti_kurssi,
 					lasku.viesti laskuviesti,
 					lasku.asiakkaan_tilausnumero,
-					lasku.luontiaika tilauspaiva,
+					lasku.created_at tilauspaiva,
 					CONCAT(tuote.tullinimike1, IF(tuote.tullinimike2 NOT IN ('', '00', '0'), tuote.tullinimike2, '')) AS tullinimike,
 					if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
 					if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,

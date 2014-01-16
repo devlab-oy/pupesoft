@@ -53,8 +53,8 @@
 								and toimaika		= '$myytilrow[toimaika]'
 								and kerayspvm		= '$myytilrow[kerayspvm]'
 								and viesti			= '$viesti'
-								and left(luontiaika,10) = left(now(),10)
-								and laatija 		= '$kukarow[kuka]'";
+								and left(created_at,10) = left(now(),10)
+								and created_by 		= '$kukarow[kuka]'";
 					$jtsre = mysql_query($query) or pupe_error($query);
 
 					// ei löydy, tehdään uus otsikko
@@ -160,8 +160,8 @@
 					$query = "	UPDATE tilausrivin_lisatiedot SET
 									tilausrivilinkki 		= '$perheid_lisaarivi',
 									suoraan_laskutukseen	= '{$suoraan_laskutukseen_lisa}',
-									muutospvm				= now(),
-									muuttaja				= '$kukarow[kuka]'
+									updated_at				= now(),
+									updated_by				= '$kukarow[kuka]'
 								WHERE yhtio	= '$kukarow[yhtio]' and tilausrivitunnus = '$valmlisaarivi[tunnus]'";
 					$updres = mysql_query($query) or pupe_error($query);
 

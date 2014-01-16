@@ -122,7 +122,7 @@ if (isset($submitnappi)) {
 	if (isset($_POST['pp']) and isset($_POST['kk']) and isset($_POST['vv'])) {
 		if (strlen(trim($_POST['vv'])) > 0 and strlen(trim($_POST['kk'])) > 0 and strlen(trim($_POST['pp'])) > 0) {
 			$pvm = mysql_real_escape_string("$_POST[vv]-$_POST[kk]-$_POST[pp]");
-			$lisa .= " and tuote.muutospvm >= '" . $pvm . "' ";
+			$lisa .= " and tuote.updated_at >= '" . $pvm . "' ";
 		}
 	}
 

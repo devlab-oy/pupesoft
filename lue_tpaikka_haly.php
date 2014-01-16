@@ -114,8 +114,8 @@ if ($korjataan != '') {
 							oletus		= '$oletus',
 							halytysraja	= '$halytysraja[$id]',
 							tilausmaara	= '$tilattava[$id]',
-							laatija 	= '$kukarow[kuka]',
-							luontiaika 	= now()";
+							created_by 	= '$kukarow[kuka]',
+							created_at 	= now()";
 				$result = pupe_query($query);
 
 				// tehd‰‰n tapahtuma
@@ -131,7 +131,7 @@ if ($korjataan != '') {
 							hyllyvali	= '$hyllyvali[$id]',
 							hyllytaso	= '$hyllytaso[$id]',
 							selite 		= '".t("Lis‰ttiin tuotepaikka")." $hyllyalue[$id] $hyllynro[$id] $hyllyvali[$id] $hyllytaso[$id]',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= now()";
 				$korjres = pupe_query($query);
 			}

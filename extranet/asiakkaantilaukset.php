@@ -98,7 +98,7 @@
 	}
 
 	if ($otunnus > 0 or $laskunro > 0) {
-		$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+		$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, created_by, summa, tila, alatila
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					and liitostunnus  = '$asiakastunnus'
@@ -114,13 +114,13 @@
 		$query .=	"$jarj";
 	}
 	else {
-		$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
-					FROM lasku use index (yhtio_tila_luontiaika)
+		$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, created_by, summa, tila, alatila
+					FROM lasku use index (yhtio_tila_created_at)
 					WHERE yhtio = '$kukarow[yhtio]'
 					and liitostunnus  = '$asiakastunnus'
 					and tila in ('L','N')
-					and luontiaika >='$vva-$kka-$ppa 00:00:00'
-					and luontiaika <='$vvl-$kkl-$ppl 23:59:59'
+					and created_at >='$vva-$kka-$ppa 00:00:00'
+					and created_at <='$vvl-$kkl-$ppl 23:59:59'
 					$jarj , tila";
 	}
 	$result = mysql_query($query) or pupe_error($query);

@@ -611,7 +611,7 @@
 			if ($tapa == "tuonti") $tila = " and lasku.tila='K' and lasku.vanhatunnus=0 ";
 			else $tila = " and lasku.tila in ('L','U') and lasku.alatila IN ('X', 'J') ";
 
-			$query = "	SELECT lasku.laskunro, lasku.nimi, lasku.luontiaika, kuka.nimi laatija, lasku.vienti, lasku.tapvm, group_concat(lasku.tunnus) tunnus
+			$query = "	SELECT lasku.laskunro, lasku.nimi, lasku.created_at, kuka.nimi created_by, lasku.vienti, lasku.tapvm, group_concat(lasku.tunnus) tunnus
 						FROM lasku 
 						LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
 						WHERE lasku.yhtio = '$kukarow[yhtio]' 
@@ -644,8 +644,8 @@
 
 					echo "<td>$tilrow[laskunro]</td>";
 					echo "<td>$tilrow[nimi]</td>";
-					echo "<td>".tv1dateconv($tilrow["luontiaika"], "P")."</td>";
-					echo "<td>$tilrow[laatija]</td>";
+					echo "<td>".tv1dateconv($tilrow["created_at"], "P")."</td>";
+					echo "<td>$tilrow[created_by]</td>";
 					echo "<td>$tilrow[vienti]</td>";
 					echo "<td>".tv1dateconv($tilrow["tapvm"])."</td>";
 
@@ -685,7 +685,7 @@
 		if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
 
 		//listataan laskuttamattomat tilausket
-		$query = "	SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
+		$query = "	SELECT tunnus tilaus, nimi asiakas, created_at laadittu, created_by, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
 					maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'

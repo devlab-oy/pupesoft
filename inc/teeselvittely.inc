@@ -17,8 +17,8 @@
 						yhtio 		= '$yritirow[yhtio]',
 						tapvm 		= '$tpv-$tpk-$tpp',
 						tila 		= 'X',
-						laatija 	= 'tiliote',
-						luontiaika 	= now()";
+						created_by 	= 'tiliote',
+						created_at 	= now()";
 			$result = pupe_query($query);
 			$laskuid = mysql_insert_id ($link);
 
@@ -45,7 +45,7 @@
 		                vero 				= 0,
 		                lukko 				= '',
 						selite 				= 'Vastavienti rahatilille',
-		                laatija 			= 'tiliote',
+		                created_by 			= 'tiliote',
 		                laadittu 			= now()";
 			$result = pupe_query($query);
 
@@ -90,7 +90,7 @@
 			                vero 				= 0,
 			                lukko 				= '',
 							selite 				= '$vientiselite',
-			                laatija 			= 'tiliote',
+			                created_by 			= 'tiliote',
 			                laadittu 			= now()";
 				$result = pupe_query($query);
 
@@ -111,7 +111,7 @@
 			                vero 				= 0,
 			                lukko 				= '',
 							selite 				= '$vientiselite',
-			                laatija 			= 'tiliote',
+			                created_by 			= 'tiliote',
 			                laadittu 			= now()";
 				$result = pupe_query($query);
 			}
@@ -134,7 +134,7 @@
 			                vero 				= 0,
 			                lukko 				= '',
 							selite 				= '$vientiselite',
-			                laatija 			= 'tiliote',
+			                created_by 			= 'tiliote',
 			                laadittu 			= now()";
 				$result = pupe_query($query);
 			}
@@ -180,7 +180,7 @@
 			                vero 				= 0,
 			                lukko 				= '',
 							selite 				= 'Vastavienti rahatilille',
-			                laatija 			= 'tiliote',
+			                created_by 			= 'tiliote',
 			                laadittu 			= now()";
 				$result = pupe_query($query);
 

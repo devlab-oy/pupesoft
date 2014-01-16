@@ -13,8 +13,8 @@
                 hyvaksyja_nyt 	= '$yritirow[hyvak]',
                 tapvm 			= '$tpv-$tpk-$tpp',
                 tila 			= 'X',
-                laatija 		= 'tiliote',
-                luontiaika 		= now()";
+                created_by 		= 'tiliote',
+                created_at 		= now()";
 	$result = pupe_query($query);
 	$kulutunnus = mysql_insert_id($link);
 
@@ -33,7 +33,7 @@
                 vero 		= 0,
                 lukko 		= '',
 				selite 		= '$selite',
-                laatija 	= 'tiliote',
+                created_by 	= 'tiliote',
                 laadittu	= now()";
 	$result = pupe_query($query);
 	$vasumma = $maara * -1;
@@ -53,7 +53,7 @@
                 vero 		= 0,
                 lukko 		= '',
 				selite 		= '$selite',
-                laatija 	= 'tiliote',
+                created_by 	= 'tiliote',
                 laadittu 	= now()";
 	$result = pupe_query($query);
 

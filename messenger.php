@@ -17,7 +17,7 @@
 
 	if (isset($messenger) and $message != "") {
 		$query = "	INSERT INTO messenger
-					SET yhtio='$kukarow[yhtio]', kuka='$kukarow[kuka]', vastaanottaja='$vastaanottaja', viesti='$message', status='$status', luontiaika=now()";
+					SET yhtio='$kukarow[yhtio]', kuka='$kukarow[kuka]', vastaanottaja='$vastaanottaja', viesti='$message', status='$status', created_at=now()";
 		$messenger_result = pupe_query($query);
 	}
 
@@ -76,13 +76,13 @@
 		$sel3 = "selected";
 	}
 
-	$query = "	SELECT messenger.tunnus, messenger.status, messenger.viesti, (SELECT nimi FROM kuka WHERE kuka.yhtio $konsyhtiot AND kuka.kuka = messenger.vastaanottaja LIMIT 1) vastaanottaja, kuka.nimi, messenger.luontiaika
+	$query = "	SELECT messenger.tunnus, messenger.status, messenger.viesti, (SELECT nimi FROM kuka WHERE kuka.yhtio $konsyhtiot AND kuka.kuka = messenger.vastaanottaja LIMIT 1) vastaanottaja, kuka.nimi, messenger.created_at
 				FROM messenger
 				JOIN kuka ON (kuka.yhtio=messenger.yhtio AND kuka.kuka=messenger.kuka)
 				WHERE messenger.yhtio $konsyhtiot
 				AND messenger.$kuka='$kukarow[kuka]'
 				AND extranet=''
-				ORDER BY messenger.luontiaika
+				ORDER BY messenger.created_at
 				DESC LIMIT $kpl";
 	$result = pupe_query($query);
 
@@ -136,7 +136,7 @@
 		echo "</td>";
 
 		echo "<td>";
-		echo tv1dateconv($row['luontiaika'],'yes');
+		echo tv1dateconv($row['created_at'],'yes');
 		echo "</td>";
 
 		echo "<td>";

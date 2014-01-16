@@ -135,8 +135,8 @@
 									fakta	 		= '$kop_fakta[$kop_index]',
 									{$insert_lisa}
 									yhtio 			= '$kukarow[yhtio]',
-									laatija			= '$kukarow[kuka]',
-									luontiaika		= now(),
+									created_by			= '$kukarow[kuka]',
+									created_at		= now(),
 									tyyppi 			= '$hakutyyppi'";
 						$result = pupe_query($query);
 					}
@@ -329,13 +329,13 @@
 
 					if ($tunnus == "") {
 						$query = "	INSERT INTO ";
-						$postq = " , laatija	= '$kukarow[kuka]',
-								 	 luontiaika	= now()";
+						$postq = " , created_by	= '$kukarow[kuka]',
+								 	 created_at	= now()";
 					}
 					else {
 						$query = " 	UPDATE ";
-						$postq = " 	, muuttaja='$kukarow[kuka]',
-									muutospvm=now()
+						$postq = " 	, updated_by='$kukarow[kuka]',
+									updated_at=now()
 									WHERE tunnus='$tunnus' ";
 					}
 

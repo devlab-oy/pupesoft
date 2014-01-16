@@ -248,9 +248,9 @@
 				ORDER BY kuka.nimi";
 	$vresult = pupe_query($query);
 
-	echo " <select name='laatija'><option value = '' >".t("Valitse laatija")."</option>";
+	echo " <select name='created_by'><option value = '' >".t("Valitse created_by")."</option>";
 
-	if (isset($laatija)) $sel[$laatija] = "SELECTED";
+	if (isset($created_by)) $sel[$created_by] = "SELECTED";
 
 	while ($vrow = mysql_fetch_assoc($vresult)) {
 		echo "<option value = '{$vrow['kuka']}' {$sel[$vrow['kuka']]}>{$vrow['nimi']}</option>";
@@ -471,8 +471,8 @@
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
 
-		if ($laatija != '') {
-			$lisa1 .= " and tiliointi.laatija = '$laatija' ";
+		if ($created_by != '') {
+			$lisa1 .= " and tiliointi.created_by = '$created_by' ";
 		}
 
 		if ($maarajaus != '') $lisa .= " and if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus'  ";

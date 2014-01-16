@@ -174,8 +174,8 @@ if ($tee == "SYOTTO") {
 				SET yhtio 	= '$kukarow[yhtio]',
 				tapvm 		= '$tapvm',
 				tila 		= 'X',
-				laatija 	= '$kukarow[kuka]',
-				luontiaika 	= now()";
+				created_by 	= '$kukarow[kuka]',
+				created_at 	= now()";
 	$result = pupe_query($query);
 	$ltunnus = mysql_insert_id($link);
 
@@ -186,7 +186,7 @@ if ($tee == "SYOTTO") {
 	// Myyntisaamiset
 	$query = "	INSERT INTO tiliointi SET
 				yhtio				= '$kukarow[yhtio]',
-				laatija				= '$kukarow[kuka]',
+				created_by				= '$kukarow[kuka]',
 				laadittu			= now(),
 				tapvm				= '$tapvm',
 				ltunnus				= '$ltunnus',
@@ -207,7 +207,7 @@ if ($tee == "SYOTTO") {
 	// Rahatili
 	$query = "	INSERT INTO tiliointi SET
 				yhtio				= '$kukarow[yhtio]',
-				laatija				= '$kukarow[kuka]',
+				created_by				= '$kukarow[kuka]',
 				laadittu			= now(),
 				tapvm				= '$tapvm',
 				ltunnus				= '$ltunnus',

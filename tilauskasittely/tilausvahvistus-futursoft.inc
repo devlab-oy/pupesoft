@@ -79,7 +79,7 @@ if (!file_exists($tilvahvfilenimi)) {
 				if(tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
 				tilausrivi.toimaika, tilausrivi.tilkpl, tilausrivi.alv,
-				tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
+				tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.created_by, tilausrivi.tilaajanrivinro
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -97,8 +97,8 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "TILVAHV.TLV_NRO:" . $tulostettava_tunnus . "\n";
 		$ulos .= "TILVAHV.TLV_AS_TILAUSNRO:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
 		$ulos .= "TILVAHV.TLV_TOIM_TILAUSNRO:" . $tulostettava_tunnus . "\n";
-		$ulos .= "TILVAHV.TLV_PVM:" . tv1dateconv($laskurow['luontiaika']) . "\n";
-		$ulos .= "TILVAHV.TLV_KLO:" . substr($laskurow['luontiaika'],-8,8) . "\n";
+		$ulos .= "TILVAHV.TLV_PVM:" . tv1dateconv($laskurow['created_at']) . "\n";
+		$ulos .= "TILVAHV.TLV_KLO:" . substr($laskurow['created_at'],-8,8) . "\n";
 		$ulos .= "TILVAHV.TLV_TILAAJA_OVT:" . $laskurow['ovttunnus'] . "\n";
 		$ulos .= "TILVAHV.TLV_MYYJA_OVT:" . $yhtiorow['ovttunnus'] . "\n";
 		$ulos .= "TILVAHV.TLV_VIITE:" . $laskurow['viesti'] . "\n";

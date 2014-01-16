@@ -54,7 +54,7 @@
 
 		// haetaan kaikki vuoden tapahtumat.. uh
 		$query  = "	SELECT tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti,
-					tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija,
+					tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.created_by,
 					tiliointi.laadittu, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.osoitetark, lasku.postino, lasku.postitp, lasku.alatila, lasku.tila
 					FROM tiliointi
 					JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
@@ -74,7 +74,7 @@
 			$rivi .= sprintf("%13.13s",  $row['summa']);		// summa 13 merkkiä (desimaalierotin piste)
 			$rivi .= sprintf("%7.7s",    $row['vero']);			// vero 7 merkkiä (desimaalierotin piste)
 			$rivi .= sprintf("%-50.50s", $row['selite']);		// selite 50 merkkiä
-			$rivi .= sprintf("%-10.10s", $row['laatija']);		// laatijan nimi 10 merkkiä
+			$rivi .= sprintf("%-10.10s", $row['created_by']);		// created_byn nimi 10 merkkiä
 			$rivi .= sprintf("%-19.19s", $row['laadittu']);		// laadittuaika 19 merkkiä (vvvv-kk-pp hh:mm:ss)
 			$rivi .= sprintf("%-15.15s", $row['ytunnus']);		// asiakkaan/toimittajan tunniste 15 merkkiä
 			$rivi .= sprintf("%-45.45s", $row['nimi']);			// asiakkaan/toimittajan nimi 45 merkkiä

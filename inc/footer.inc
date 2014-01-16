@@ -23,8 +23,8 @@
 					suoritusalku	= '".date("Y-m-d H:i:s", $starttime)."',
 					suoritusloppu	= '".date("Y-m-d H:i:s", $endtime)."',
 					suoritusaika 	= '$aika',
-					laatija      	= '$kukarow[kuka]',
-					luontiaika   	= now()";
+					created_by      	= '$kukarow[kuka]',
+					created_at   	= now()";
 		$suores = mysql_query($suoque) or pupe_error($suoque);
 	}
 

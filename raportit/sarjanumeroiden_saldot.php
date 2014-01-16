@@ -24,8 +24,8 @@
 		$query = "	UPDATE tuotepaikat, tuote SET
 					tuotepaikat.saldo		= '0',
 					tuotepaikat.saldoaika	= now(),
-					tuotepaikat.muuttaja	= '$kukarow[kuka]',
-					tuotepaikat.muutospvm	= now()
+					tuotepaikat.updated_by	= '$kukarow[kuka]',
+					tuotepaikat.updated_at	= now()
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 					and tuote.yhtio			= tuotepaikat.yhtio
 					and tuote.tuoteno		= tuotepaikat.tuoteno
@@ -138,10 +138,10 @@
 								hyllytaso	= '$hyllytaso',
 								saldo		= '$kpl',
 								saldoaika	= now(),
-								laatija		= '$kukarow[kuka]',
-								luontiaika	= now(),
-								muuttaja	= '$kukarow[kuka]',
-								muutospvm	= now(),
+								created_by		= '$kukarow[kuka]',
+								created_at	= now(),
+								updated_by	= '$kukarow[kuka]',
+								updated_at	= now(),
 								oletus		= '$oletus'";
 					$paikres = pupe_query($query);
 					
@@ -157,7 +157,7 @@
 										hyllyvali 	= '$hyllyvali',
 										hyllytaso 	= '$hyllytaso',
 										selite 		= '".t("Sarjanumeroiden saldoissa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
-										laatija 	= '$kukarow[kuka]',
+										created_by 	= '$kukarow[kuka]',
 										laadittu 	= now()";
 					$tapahtumaresult = pupe_query($tapahtumaquery);
 				}
@@ -165,8 +165,8 @@
 					$query = "	UPDATE tuotepaikat SET
 								saldo			= '$kpl',
 								saldoaika		= now(),
-								muuttaja		= '$kukarow[kuka]',
-								muutospvm		= now()
+								updated_by		= '$kukarow[kuka]',
+								updated_at		= now()
 								WHERE tuoteno	= '$tuoteno'
 								and yhtio		= '$kukarow[yhtio]'
 								and hyllyalue	= '$hyllyalue'
@@ -192,8 +192,8 @@
 		$query = "	UPDATE tuotepaikat SET
 					saldo_varattu	= '0',
 					saldoaika		= now(),
-					muuttaja		= '$kukarow[kuka]',
-					muutospvm		= now()
+					updated_by		= '$kukarow[kuka]',
+					updated_at		= now()
 					WHERE yhtio		= '$kukarow[yhtio]'";
 		$paikres = pupe_query($query);
 
@@ -250,10 +250,10 @@
 								hyllytaso	= '$hyllytaso',
 								saldo_varattu = '$kpl',
 								saldoaika	= now(),
-								laatija		= '$kukarow[kuka]',
-								luontiaika	= now(),
-								muuttaja	= '$kukarow[kuka]',
-								muutospvm	= now(),
+								created_by		= '$kukarow[kuka]',
+								created_at	= now(),
+								updated_by	= '$kukarow[kuka]',
+								updated_at	= now(),
 								oletus		= '$oletus'";
 					$paikres = pupe_query($query);
 					
@@ -269,7 +269,7 @@
 										hyllyvali 	= '$hyllyvali',
 										hyllytaso 	= '$hyllytaso',
 										selite 		= '".t("Sarjanumeroiden saldoissa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
-										laatija 	= '$kukarow[kuka]',
+										created_by 	= '$kukarow[kuka]',
 										laadittu 	= now()";
 					$result = pupe_query($tapahtumaquery);
 					
@@ -278,8 +278,8 @@
 					$query = "	UPDATE tuotepaikat SET
 								saldo_varattu	= '$kpl',
 								saldoaika		= now(),
-								muuttaja		= '$kukarow[kuka]',
-								muutospvm		= now()
+								updated_by		= '$kukarow[kuka]',
+								updated_at		= now()
 								WHERE tuoteno	= '$tuoteno'
 								and yhtio		= '$kukarow[yhtio]'
 								and hyllyalue	= '$hyllyalue'

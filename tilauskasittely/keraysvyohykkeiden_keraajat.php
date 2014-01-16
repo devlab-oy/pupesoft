@@ -290,12 +290,12 @@
 		$query = "	SELECT kuka.nimi AS 'keraaja',
 					GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
 					GROUP_CONCAT(DISTINCT kerayserat.otunnus) AS 'otunnukset',
-					MIN(SUBSTRING(kerayserat.luontiaika, 12, 5)) AS 'aloitusaika',
+					MIN(SUBSTRING(kerayserat.created_at, 12, 5)) AS 'aloitusaika',
 					ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg',
 					COUNT(DISTINCT kerayserat.tilausrivi) AS 'rivit',
 					COUNT(DISTINCT kerayserat.otunnus) AS 'tilaukset'
 					FROM kerayserat
-					JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
+					JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.created_by)
 					JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
@@ -700,7 +700,7 @@
 				$past_date_kk_loppu = (int) $past_date_kk_loppu;
 				$past_date_vv_loppu = (int) $past_date_vv_loppu;
 
-				$luontiaikalisa = " AND lahdot.pvm >= '{$past_date_vv_alku}-{$past_date_kk_alku}-{$past_date_pp_alku} 00:00:00' AND lahdot.pvm <= '{$past_date_vv_loppu}-{$past_date_kk_loppu}-{$past_date_pp_loppu} 23:59:59' ";
+				$created_atlisa = " AND lahdot.pvm >= '{$past_date_vv_alku}-{$past_date_kk_alku}-{$past_date_pp_alku} 00:00:00' AND lahdot.pvm <= '{$past_date_vv_loppu}-{$past_date_kk_loppu}-{$past_date_pp_loppu} 23:59:59' ";
 			}
 			elseif ($ajankohta == 'future') {
 				$future_date_pp_alku = (int) $future_date_pp_alku;
@@ -711,10 +711,10 @@
 				$future_date_kk_loppu = (int) $future_date_kk_loppu;
 				$future_date_vv_loppu = (int) $future_date_vv_loppu;
 
-				$luontiaikalisa = " AND lahdot.pvm >= '{$future_date_vv_alku}-{$future_date_kk_alku}-{$future_date_pp_alku} 00:00:00' AND lahdot.pvm <= '{$future_date_vv_loppu}-{$future_date_kk_loppu}-{$future_date_pp_loppu} 23:59:59' ";
+				$created_atlisa = " AND lahdot.pvm >= '{$future_date_vv_alku}-{$future_date_kk_alku}-{$future_date_pp_alku} 00:00:00' AND lahdot.pvm <= '{$future_date_vv_loppu}-{$future_date_kk_loppu}-{$future_date_pp_loppu} 23:59:59' ";
 			}
 			else {
-				$luontiaikalisa = " AND lahdot.pvm >= '".date("Y-m-d")." 00:00:00' AND lahdot.pvm <= '".date("Y-m-d")." 23:59:59' ";
+				$created_atlisa = " AND lahdot.pvm >= '".date("Y-m-d")." 00:00:00' AND lahdot.pvm <= '".date("Y-m-d")." 23:59:59' ";
 			}
 
 			$query = "	SELECT SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'klo', GROUP_CONCAT(lasku.tunnus) tunnukset
@@ -725,7 +725,7 @@
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var NOT IN ('P', 'J') AND tilausrivi.varattu > 0)
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso {$vhlisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T') {$luontiaikalisa})
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T') {$created_atlisa})
 						{$keraysvyohykelisa}
 						{$toimitustapalisa}
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'

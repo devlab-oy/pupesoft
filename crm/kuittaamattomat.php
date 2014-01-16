@@ -305,7 +305,7 @@
 
 		//* listataan muistutukset *///
 		$query = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kuka1.nimi nimi1, kuka2.nimi nimi2,
-					lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka3.nimi laskumyyja, lasku.muutospvm laskumpvm,
+					lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka3.nimi laskumyyja, lasku.updated_at laskumpvm,
 					kalenteri.*,
 					date_format(pvmalku, '%Y%m%d%H%i%s') voimassa
 					FROM kalenteri
@@ -354,7 +354,7 @@
 
 				echo "<tr>";
 				echo "<td valign='top'>$prow[nimi1]</td>";
-				echo "<td valign='top'>".tv1dateconv($prow["luontiaika"], "P")."<br>";
+				echo "<td valign='top'>".tv1dateconv($prow["created_at"], "P")."<br>";
 
 
 				if (date("YmdHis") > $prow["voimassa"]) {

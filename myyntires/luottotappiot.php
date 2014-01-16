@@ -64,7 +64,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
 							selite		= '$lasku[selite]',
 							lukko		= '',
 							tosite		= '$lasku[tosite]',
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now()";
 				$result = pupe_query($query);
 				$isa = mysql_insert_id ($link);
@@ -93,7 +93,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
 								selite		= '$lasku[selite]',
 								lukko		= '1',
 								tosite		= '$lasku[tosite]',
-								laatija		= '$kukarow[kuka]',
+								created_by		= '$kukarow[kuka]',
 								laadittu	= now(),
 								aputunnus	= '$isa'";
 					$result = pupe_query($query);
@@ -117,7 +117,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
 							selite		= '$lasku[selite]',
 							lukko		= '',
 							tosite		= '$lasku[tosite]',
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now()";
 				$result = pupe_query($query);
 			}

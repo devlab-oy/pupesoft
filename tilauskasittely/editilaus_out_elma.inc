@@ -33,8 +33,8 @@ else {
 	$ulos .= "OBGMITYPE:220\n";
 	$ulos .= "OBGMINUMB:" . $laskurow['tunnus'] . "\n";
 	$ulos .= "OBGMIACKR:NA\n";
-	$ulos .= "ODTM4__DT:" . tv2dateconv($laskurow['luontiaika']) . "\n";
-	$ulos .= "ODTM137DT:" . tv2dateconv($laskurow['luontiaika']) . "\n";
+	$ulos .= "ODTM4__DT:" . tv2dateconv($laskurow['created_at']) . "\n";
+	$ulos .= "ODTM137DT:" . tv2dateconv($laskurow['created_at']) . "\n";
 	$ulos .= "OFTXDELTX:" . $laskurow['huolitsija'] . "\n";
 	$ulos .= "ONADSE_NA:" . $laskurow['nimi'] . "\n";
 	$ulos .= "ONADSE_NX:" . $laskurow['nimitark'] . "\n";

@@ -2045,11 +2045,11 @@ if ($tee == 'I') {
 				pankki3 			= '$trow[pankki3]',
 				pankki4 			= '$trow[pankki4]',
 				vienti_kurssi 		= '$vrow[kurssi]',
-				laatija 			= '$kukarow[kuka]',
+				created_by 			= '$kukarow[kuka]',
 				liitostunnus 		= '$toimittajaid',
 				hyvaksynnanmuutos 	= '$ohyvaksynnanmuutos',
 				suoraveloitus 		= '$osuoraveloitus',
-				luontiaika 			= now(),
+				created_at 			= now(),
 				comments 			= '$komm',
 				laskunro 			= '$toimittajan_laskunumero',
 				sisviesti1 			= '$ohjeitapankille',
@@ -2150,7 +2150,7 @@ if ($tee == 'I') {
 				vero				= 0,
 				lukko				= '1',
 				tosite				= '$tositenro',
-				laatija 			= '$kukarow[kuka]',
+				created_by 			= '$kukarow[kuka]',
 				laadittu 			= now()";
 	$result = pupe_query($query);
 
@@ -2221,7 +2221,7 @@ if ($tee == 'I') {
 						selite 				= '$iselite[$i]',
 						lukko 				= '',
 						tosite 				= '$tositenro',
-						laatija 			= '$kukarow[kuka]',
+						created_by 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$result = pupe_query($query);
 
@@ -2245,7 +2245,7 @@ if ($tee == 'I') {
 							selite 				= '$iselite[$i]',
 							lukko 				= '1',
 							tosite 				= '$tositenro',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now(),
 							aputunnus 			= '$isa'";
 				$result = pupe_query($query);
@@ -2291,7 +2291,7 @@ if ($tee == 'I') {
 							vero 				= 0,
 							lukko 				= '',
 							tosite 				= '$tositenro',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$result = pupe_query($query);
 
@@ -2310,7 +2310,7 @@ if ($tee == 'I') {
 							vero 				= 0,
 							lukko 				= '',
 							tosite 				= '$tositenro',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu			= now()";
 				$result = pupe_query($query);
 			}
@@ -2364,7 +2364,7 @@ if ($tee == 'I') {
 						vero 				= 0,
 						lukko 				= '',
 						tosite				= '$tositenro',
-						laatija 			= '$kukarow[kuka]',
+						created_by 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$xresult = pupe_query($query);
 
@@ -2385,7 +2385,7 @@ if ($tee == 'I') {
 						vero 				= 0,
 						lukko 				= '',
 						tosite 				= '$tositenro',
-						laatija 			= '$kukarow[kuka]',
+						created_by 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$xresult = pupe_query($query);
 

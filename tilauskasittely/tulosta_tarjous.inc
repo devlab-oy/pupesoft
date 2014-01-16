@@ -95,8 +95,8 @@ if (!function_exists('alku_tarjous')) {
 				$valekala -= 7;
 			}
 
-			$pvm_len = $pdf_tarjous->strlen(tv1dateconv($laskurow["luontiaika"]), $pieni);
-			$pdf_tarjous->draw_text((595 / 2) - ($pvm_len / 2), 750, tv1dateconv($laskurow["luontiaika"]), $page_tarjous[$sivu], $pieni);
+			$pvm_len = $pdf_tarjous->strlen(tv1dateconv($laskurow["created_at"]), $pieni);
+			$pdf_tarjous->draw_text((595 / 2) - ($pvm_len / 2), 750, tv1dateconv($laskurow["created_at"]), $page_tarjous[$sivu], $pieni);
 
 			$pdf_tarjous->draw_text(50, 730, t("Myyjä", $kieli), $page_tarjous[$sivu], $boldi);
 
@@ -213,7 +213,7 @@ if (!function_exists('alku_tarjous')) {
 			$pdf_tarjous->draw_text(310, 771, t("Asiakkaan Y-tunnus", $kieli), 									$page_tarjous[$sivu], $pieni);
 			$pdf_tarjous->draw_text(310, 761, tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]),	$page_tarjous[$sivu], $norm);
 			$pdf_tarjous->draw_text(430, 771, t("Päiväys", $kieli), 											$page_tarjous[$sivu], $pieni);
-			$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]), 								$page_tarjous[$sivu], $norm);
+			$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["updated_at"]), 								$page_tarjous[$sivu], $norm);
 
 			$pdf_tarjous->draw_rectangle(758, 300, 737, 580, $page_tarjous[$sivu], $rectparam);
 			$pdf_tarjous->draw_text(310, 750, t("Myyjä", $kieli), 												$page_tarjous[$sivu], $pieni);
@@ -452,8 +452,8 @@ if (!function_exists('uusi_sivu_tarjous')) {
 				$valekala -= 7;
 			}
 
-			$pvm_len = $pdf_tarjous->strlen(tv1dateconv($laskurow["luontiaika"]), $pieni);
-			$pdf_tarjous->draw_text((595 / 2) - ($pvm_len / 2), 750, tv1dateconv($laskurow["luontiaika"]), $page_tarjous, $pieni);
+			$pvm_len = $pdf_tarjous->strlen(tv1dateconv($laskurow["created_at"]), $pieni);
+			$pdf_tarjous->draw_text((595 / 2) - ($pvm_len / 2), 750, tv1dateconv($laskurow["created_at"]), $page_tarjous, $pieni);
 		}
 		else {
 			$pdf_tarjous->draw_text(310,815, t("Tarjous", $kieli), 		$page_tarjous, $iso);
@@ -491,7 +491,7 @@ if (!function_exists('uusi_sivu_tarjous')) {
 			$pdf_tarjous->draw_text(310, 761, tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]),	$page_tarjous, $norm);
 
 			$pdf_tarjous->draw_text(430, 771, t("Päiväys", $kieli), 						$page_tarjous, $pieni);
-			$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]),	 		$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["updated_at"]),	 		$page_tarjous, $norm);
 
 			//viivakoodi
 			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
@@ -1251,9 +1251,9 @@ if (!function_exists('loppu_tarjous')) {
 					$tppa = date("d",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
 				}
 				else {
-					$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
-					$tkka = date("m",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
-					$tppa = date("d",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
+					$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["updated_at"],5,2), substr($laskurow["updated_at"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["updated_at"],0,4)));
+					$tkka = date("m",mktime(0, 0, 0, substr($laskurow["updated_at"],5,2), substr($laskurow["updated_at"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["updated_at"],0,4)));
+					$tppa = date("d",mktime(0, 0, 0, substr($laskurow["updated_at"],5,2), substr($laskurow["updated_at"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["updated_at"],0,4)));
 				}
 
 				$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
@@ -1418,9 +1418,9 @@ if (!function_exists('loppu_tarjous')) {
 						$tppa = date("d",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
 					}
 					else {
-						$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
-						$tkka = date("m",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
-						$tppa = date("d",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
+						$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["updated_at"],5,2), substr($laskurow["updated_at"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["updated_at"],0,4)));
+						$tkka = date("m",mktime(0, 0, 0, substr($laskurow["updated_at"],5,2), substr($laskurow["updated_at"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["updated_at"],0,4)));
+						$tppa = date("d",mktime(0, 0, 0, substr($laskurow["updated_at"],5,2), substr($laskurow["updated_at"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["updated_at"],0,4)));
 					}
 
 					$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
@@ -1542,7 +1542,7 @@ if (!function_exists('tulosta_tarjous')) {
 		global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus;
 
 		// Haetaan laskun tiedot
-		$query = "	SELECT *, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.muutospvm muutospvm
+		$query = "	SELECT *, lasku.created_by created_by, lasku.created_at created_at, lasku.updated_at updated_at
 					FROM lasku
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'

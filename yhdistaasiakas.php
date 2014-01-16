@@ -89,8 +89,8 @@
 										alkupvm          	= '$ahrow[alkupvm]',
 										loppupvm         	= '$ahrow[loppupvm]',
 										laji             	= '$ahrow[laji]',
-										laatija          	= '$kukarow[kuka]',
-										luontiaika       	= now()";
+										created_by          	= '$kukarow[kuka]',
+										created_at       	= now()";
 							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
@@ -151,8 +151,8 @@
 										alkupvm          	= '$ahrow[alkupvm]',
 										loppupvm         	= '$ahrow[loppupvm]',
 										laji             	= '$ahrow[laji]',
-										laatija          	= '$kukarow[kuka]',
-										luontiaika       	= now()";
+										created_by          	= '$kukarow[kuka]',
+										created_at       	= now()";
 							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
@@ -207,8 +207,8 @@
 									minkpl           	= '$alrow[minkpl]',
 									alkupvm          	= '$alrow[alkupvm]',
 									loppupvm         	= '$alrow[loppupvm]',
-									laatija          	= '$kukarow[kuka]',
-									luontiaika       	= now()";
+									created_by          	= '$kukarow[kuka]',
+									created_at       	= now()";
 							$alinsertresult = pupe_query($alinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
@@ -265,8 +265,8 @@
 										monikerta          	= '$alrow[monikerta]',
 										alkupvm          	= '$alrow[alkupvm]',
 										loppupvm         	= '$alrow[loppupvm]',
-										laatija          	= '$kukarow[kuka]',
-										luontiaika       	= now()";
+										created_by          	= '$kukarow[kuka]',
+										created_at       	= now()";
 							$alinsertresult = pupe_query($alinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
@@ -303,8 +303,8 @@
 									 	kommentti 	= '$ahrow[kommentti]',
 									 	tuoteno   	= '$ahrow[tuoteno]',
 									 	ytunnus   	= '$jrow[ytunnus]',
-									 	laatija     = '$kukarow[kuka]',
-										luontiaika  = now()";
+									 	created_by     = '$kukarow[kuka]',
+										created_at  = now()";
 							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakaskommentti", mysql_insert_id(), "", "");
@@ -348,8 +348,8 @@
 										rahtisopimus	= '$ahrow[rahtisopimus]',
 										selite			= '$ahrow[selite]',
 										muumaksaja		= '$ahrow[muumaksaja]',
-									 	laatija     	= '$kukarow[kuka]',
-										luontiaika  	= now()";
+									 	created_by     	= '$kukarow[kuka]',
+										created_at  	= now()";
 							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
@@ -392,8 +392,8 @@
 										rahtisopimus	= '$ahrow[rahtisopimus]',
 										selite			= '$ahrow[selite]',
 										muumaksaja		= '$ahrow[muumaksaja]',
-									 	laatija     	= '$kukarow[kuka]',
-										luontiaika  	= now()";
+									 	created_by     	= '$kukarow[kuka]',
+										created_at  	= now()";
 							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
@@ -453,8 +453,8 @@
 										fakta				= '$ahrow[fakta]',
 										tilausyhteyshenkilo	= '$ahrow[tilausyhteyshenkilo]',
 										oletusyhteyshenkilo	= '$ahrow[oletusyhteyshenkilo]',
-										laatija     		= '$kukarow[kuka]',
-										luontiaika  		= now()";
+										created_by     		= '$kukarow[kuka]',
+										created_at  		= now()";
 							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "yhteyshenkilo", mysql_insert_id(), "", "");
@@ -493,8 +493,8 @@
 										kieli    		= '$ahrow[kieli]',
 										laji  			= '$ahrow[laji]',
 										avainsana		= '$ahrow[avainsana]',
-										laatija     	= '$kukarow[kuka]',
-										luontiaika  	= now()";
+										created_by     	= '$kukarow[kuka]',
+										created_at  	= now()";
 							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakkaan_avainsanat", mysql_insert_id(), "", "");
@@ -554,8 +554,8 @@
 										image_channels 	= '$ahrow[image_channels]',
 										kayttotarkoitus = '$ahrow[kayttotarkoitus]',
 										jarjestys 		= '$ahrow[jarjestys]',
-										laatija     	= '$kukarow[kuka]',
-										luontiaika  	= now()";
+										created_by     	= '$kukarow[kuka]',
+										created_at  	= now()";
 							$ahinsertresult = pupe_query($ahinsert);
 						}
 					}
@@ -594,8 +594,8 @@
 										laji 		= '$ahrow[laji]',
 										puun_tunnus = '$ahrow[puun_tunnus]',
 										jarjestys 	= '$ahrow[jarjestys]',
-										laatija     = '$kukarow[kuka]',
-										luontiaika  = now()";
+										created_by     = '$kukarow[kuka]',
+										created_at  = now()";
 							$ahinsertresult = pupe_query($ahinsert);
 						}
 					}
@@ -654,8 +654,8 @@
 					tyyppi   		= 'Memo',
 					kentta01 		= '$historia',
 					pvmalku  		= now(),
-					laatija			= '$kukarow[kuka]',
-					luontiaika		= now()";
+					created_by			= '$kukarow[kuka]',
+					created_at		= now()";
 		$result = pupe_query($kysely);
 		$historia = "";
 	}

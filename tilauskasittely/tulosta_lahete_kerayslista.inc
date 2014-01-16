@@ -140,7 +140,7 @@ if (!function_exists('alku_kerayslista')) {
 					$laskurow['toim_maa']		= "";
 
 					$laskurow['myyja']			= "";
-					$laskurow['laatija']		= "";
+					$laskurow['created_by']		= "";
 					$laskurow['maksuehto']		= "";
 					$laskurow['toimitusehto']	= "";
 					$laskurow['toimitustapa']	= "";
@@ -273,7 +273,7 @@ if (!function_exists('alku_kerayslista')) {
 				//etsit‰‰n myyj‰n nimi
 				$query  = "	SELECT kuka.nimi
 							FROM kerayserat
-							JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
+							JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.created_by)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.nro = '{$kerayseran_numero}'
 							LIMIT 1";
@@ -298,7 +298,7 @@ if (!function_exists('alku_kerayslista')) {
 			}
 
 			$pdf->draw_text(430, 729, t("Tilauspvm", $kieli),							 	$thispage, $pieni);
-			$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$thispage, $norm);
+			$pdf->draw_text(430, 719, tv1dateconv($laskurow["created_at"], "pitka"), 		$thispage, $norm);
 
 			$ttapae = $laskurow["toimitustapa"];
 
@@ -331,11 +331,11 @@ if (!function_exists('alku_kerayslista')) {
 
 			$pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
 
-			if ($myyrow['kuka'] != $laskurow['laatija']) {
-				//etsit‰‰n laatijan nimi
+			if ($myyrow['kuka'] != $laskurow['created_by']) {
+				//etsit‰‰n created_byn nimi
 				$query  = "	SELECT nimi
 							from kuka
-							where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
+							where kuka='$laskurow[created_by]' and yhtio='$kukarow[yhtio]'";
 				$laaresult = pupe_query($query);
 				$laarow = mysql_fetch_assoc($laaresult);
 

@@ -1181,25 +1181,25 @@ if ($kasitellaan_tiedosto) {
 			if ($tila != 'ohita') {
 				if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
 					if ($eiyhtiota == "") {
-						$query = "INSERT LOW_PRIORITY into {$table_mysql} SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
+						$query = "INSERT LOW_PRIORITY into {$table_mysql} SET yhtio='$kukarow[yhtio]', created_by='$kukarow[kuka]', created_at=now(), updated_by='$kukarow[kuka]', updated_at=now() ";
 					}
 					elseif ($eiyhtiota == "EILAATIJAA") {
 						$query = "INSERT LOW_PRIORITY INTO {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
 					}
 					elseif ($eiyhtiota == "TRIP") {
-						$query = "INSERT LOW_PRIORITY into {$table_mysql} SET laatija='$kukarow[kuka]', luontiaika=now() ";
+						$query = "INSERT LOW_PRIORITY into {$table_mysql} SET created_by='$kukarow[kuka]', created_at=now() ";
 					}
 				}
 
 				if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
 					if ($eiyhtiota == "") {
-						$query = "UPDATE LOW_PRIORITY {$table_mysql} SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
+						$query = "UPDATE LOW_PRIORITY {$table_mysql} SET yhtio='$kukarow[yhtio]', updated_by='$kukarow[kuka]', updated_at=now() ";
 	      			}
 					elseif ($eiyhtiota == "EILAATIJAA") {
 						$query = "UPDATE LOW_PRIORITY {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
 					}
 					elseif ($eiyhtiota == "TRIP") {
-						$query = "UPDATE LOW_PRIORITY {$table_mysql} SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
+						$query = "UPDATE LOW_PRIORITY {$table_mysql} SET updated_by='$kukarow[kuka]', updated_at=now() ";
 	      			}
 				}
 
@@ -2162,7 +2162,7 @@ if ($kasitellaan_tiedosto) {
 										hyllyvali 	= '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]}',
 										laji 		= '$tapahtumalaji',
 										selite 		= '$tapahtumaselite',
-										laatija 	= '$kukarow[kuka]',
+										created_by 	= '$kukarow[kuka]',
 										laadittu 	= now()";
 							$resulttapahtuma = pupe_query($querytapahtuma);
 						}

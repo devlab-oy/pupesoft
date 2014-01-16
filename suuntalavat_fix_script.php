@@ -5,10 +5,10 @@
 		yhtio VARCHAR(5) NOT NULL,
 		suuntalava INT NOT NULL DEFAULT 0,
 		saapuminen INT NOT NULL DEFAULT 0,
-		laatija VARCHAR(10) NOT NULL DEFAULT '',
-		luontiaika DATETIME,
-		muutospvm DATETIME,
-		muuttaja VARCHAR(10) NOT NULL DEFAULT '',
+		created_by VARCHAR(10) NOT NULL DEFAULT '',
+		created_at DATETIME,
+		updated_at DATETIME,
+		updated_by VARCHAR(10) NOT NULL DEFAULT '',
 		tunnus INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY	
 	);
 
@@ -50,10 +50,10 @@
 						yhtio = '{$kukarow['yhtio']}',
 						suuntalava = '{$suuntalavat_fetch_row['tunnus']}',
 						saapuminen = '{$saapuminen}',
-						laatija = 'cron',
-						luontiaika = now(),
-						muutospvm = now(),
-						muuttaja = 'cron'";
+						created_by = 'cron',
+						created_at = now(),
+						updated_at = now(),
+						updated_by = 'cron'";
 			// echo str_replace("\t", "", $query),"\n\n";
 			$insert_res = pupe_query($query);
 		}

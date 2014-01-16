@@ -670,7 +670,7 @@ if ($request['tee'] == 'aja_raportti') {
 				'header' => t('Hyllypaikka'),
 				'order'	 => 30
 			),
-			'laatija'					 => array(
+			'created_by'					 => array(
 				'header' => t('Inventoija'),
 				'order'	 => 89
 			),
@@ -978,7 +978,7 @@ function echo_table_third_layer($inventointilaji) {
 		echo "<td>{$tapahtuma['kpl']}</td>";
 		echo "<td>".round($tapahtuma['inventointi_poikkeama_eur'], 2)."</td>";
 		echo "<td>{$tapahtuma['selite']}</td>";
-		echo "<td>{$tapahtuma['laatija']}</td>";
+		echo "<td>{$tapahtuma['created_by']}</td>";
 		echo "<td>{$tapahtuma['laadittu']}</td>";
 		echo "</tr>";
 	}
@@ -1393,7 +1393,7 @@ function hae_inventoinnit(&$request) {
 				tuote.try AS tuoteryhma,
 				tapahtuma.kpl,
 				Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
-				IFNULL(kuka.nimi, '".t("Poistettu käyttäjä")."') as laatija,
+				IFNULL(kuka.nimi, '".t("Poistettu käyttäjä")."') as created_by,
 				IFNULL(keraysvyohyke.nimitys, '".t("Poistettu")."') AS keraysvyohyke_nimitys
 				FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
 				JOIN tuote
@@ -1413,7 +1413,7 @@ function hae_inventoinnit(&$request) {
 				  AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
 				LEFT JOIN kuka
 				ON ( kuka.yhtio = tapahtuma.yhtio
-					AND kuka.kuka = tapahtuma.laatija )
+					AND kuka.kuka = tapahtuma.created_by )
 				LEFT JOIN varaston_hyllypaikat AS vh
 				ON ( vh.yhtio = tapahtuma.yhtio
 					AND vh.hyllyalue = tapahtuma.hyllyalue

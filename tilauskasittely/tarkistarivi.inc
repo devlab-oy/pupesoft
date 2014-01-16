@@ -1017,8 +1017,8 @@
 		            lasku.toim_postino,
 		            lasku.toim_postitp,
 		            lasku.toim_maa,
-	            	left(lasku.luontiaika, 10) luontiaika,
-		            lasku.laatija
+	            	left(lasku.created_at, 10) created_at,
+		            lasku.created_by
 					FROM tilausrivi
 					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -1034,10 +1034,10 @@
 			if ($suoratoimostorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
 
-				if ($suoratoimostorow["luontiaika"] == date("Y-m-d") and
+				if ($suoratoimostorow["created_at"] == date("Y-m-d") and
 					$suoratoimostorow["tila"]    	== 'O' and
 					$suoratoimostorow["alatila"]    == '' and
-					$suoratoimostorow["laatija"]    == $kukarow['kuka']
+					$suoratoimostorow["created_by"]    == $kukarow['kuka']
 				) {
 					$nayta_sostolisateksti = "TOTTA";
 				}

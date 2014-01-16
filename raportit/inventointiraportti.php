@@ -174,8 +174,8 @@
 					}
 
 					if ($mukaan == "invaaja") {
-						if ($group!="") $group .= ",tapahtuma.laatija";
-						else $group  .= "tapahtuma.laatija";
+						if ($group!="") $group .= ",tapahtuma.created_by";
+						else $group  .= "tapahtuma.created_by";
 						$select .= "kuka.nimi as 'henkilö', ";
 						$order  .= "kuka.nimi,";
 						$gluku++;
@@ -266,7 +266,7 @@
 
 				if (is_array($mul_invaaja) and count($mul_invaaja) > 0) {
 					$sel_invaaja = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_invaaja))."')";
-					$lisa .= " and tapahtuma.laatija in $sel_invaaja";
+					$lisa .= " and tapahtuma.created_by in $sel_invaaja";
 				}
 
 				if ($kaikkirivit != "" and $vararvoennen != "") {
@@ -297,7 +297,7 @@
 												and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
 												and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0')))
 							LEFT JOIN kuka ON (tapahtuma.yhtio = kuka.yhtio
-												and tapahtuma.laatija = kuka.kuka)
+												and tapahtuma.created_by = kuka.kuka)
 							WHERE tuote.yhtio in ($yhtio)
 							$lisa
 							group by $group

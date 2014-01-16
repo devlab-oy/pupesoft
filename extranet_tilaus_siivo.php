@@ -29,7 +29,7 @@
 
 		$query = "	SELECT lasku.tunnus laskutunnus, asiakas.extranet_tilaus_varaa_saldoa
 					FROM lasku
-					JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija AND kuka.extranet != '')
+					JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.created_by AND kuka.extranet != '')
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tila = 'N'

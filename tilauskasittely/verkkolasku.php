@@ -1112,7 +1112,7 @@
 								}
 							}
 
-							$query  = " INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+							$query  = " INSERT INTO tilausrivi (created_by, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 										values ('automaatti', now(), '$rah_hinta', {$ale_lisa_insert_query_2} '$rah_netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$rah_alv', '$kommentti')";
 							$addtil = pupe_query($query);
 
@@ -1300,7 +1300,7 @@
 												hyllyvali       = '',
 												hyllytaso       = '',
 												tilaajanrivinro = '',
-												laatija         = '$kukarow[kuka]',
+												created_by         = '$kukarow[kuka]',
 												laadittu        = now(),
 												yhtio           = '$kukarow[yhtio]',
 												tuoteno         = '$trow[tuoteno]',
@@ -1339,8 +1339,8 @@
 												jarjestys           = '',
 												vanha_otunnus       = '$laskurow[tunnus]',
 												ei_nayteta          = '',
-												luontiaika          = now(),
-												laatija             = '$kukarow[kuka]'";
+												created_at          = now(),
+												created_by             = '$kukarow[kuka]'";
 									$addtil = pupe_query($query);
 
 									if ($silent == "") {
@@ -1539,7 +1539,7 @@
 											hyllyvali       = '',
 											hyllytaso       = '',
 											tilaajanrivinro = '',
-											laatija         = '$kukarow[kuka]',
+											created_by         = '$kukarow[kuka]',
 											laadittu        = now(),
 											yhtio           = '$kukarow[yhtio]',
 											tuoteno         = '$trow[tuoteno]',
@@ -1577,8 +1577,8 @@
 											jarjestys           = '',
 											vanha_otunnus       = '$laskurow[tunnus]',
 											ei_nayteta          = '',
-											luontiaika          = now(),
-											laatija             = '$kukarow[kuka]'";
+											created_at          = now(),
+											created_by             = '$kukarow[kuka]'";
 								$addtil = pupe_query($query);
 
 								if ($silent == "") {
@@ -2190,7 +2190,7 @@
 										lasku.vienti_kurssi,
 										lasku.viesti laskuviesti,
 										lasku.asiakkaan_tilausnumero,
-										lasku.luontiaika tilauspaiva,
+										lasku.created_at tilauspaiva,
 										if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
 										if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
 										if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,

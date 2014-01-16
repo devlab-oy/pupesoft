@@ -466,13 +466,13 @@ if ($tee == 'GO') {
 								image_channels		= '$image_channels',
 								kayttotarkoitus		= '$kayttotarkoitus',
 								jarjestys			= '$jarjestys',
-								laatija				= '$kukarow[kuka]',
-								luontiaika			= now()";
+								created_by				= '$kukarow[kuka]',
+								created_at			= now()";
 					$insre = pupe_query($query);
 
 					$query = "	UPDATE $taulu
-								SET muutospvm = now(),
-								muuttaja = '$kukarow[kuka]'
+								SET updated_at = now(),
+								updated_by = '$kukarow[kuka]'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$apurow[tunnus]'";
 					$insre = pupe_query($query);

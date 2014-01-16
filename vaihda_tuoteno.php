@@ -277,7 +277,7 @@ if ($error == 0 and $tee == "file") {
 								yhtio = '$kukarow[yhtio]',
 								tuoteno = '$uustuoteno',
 								alkup_tuoteno = '$vantuoteno',
-								muutospvm = now(),
+								updated_at = now(),
 								kuka = '$kukarow[kuka]'";
 					$result2 = pupe_query($query);
 
@@ -522,10 +522,10 @@ if ($error == 0 and $tee == "file") {
 									id			= '$korvid[maxi]',
 									jarjestys	= '$jarjestys',
 									yhtio		= '$kukarow[yhtio]',
-									laatija 	= '$kukarow[kuka]',
-									luontiaika	= now(),
-									muuttaja 	= '$kukarow[kuka]',
-									muutospvm 	= now()";
+									created_by 	= '$kukarow[kuka]',
+									created_at	= now(),
+									updated_by 	= '$kukarow[kuka]',
+									updated_at 	= now()";
 						$result4 = pupe_query($query);
 
 						if ($loytyikorv != '1') {
@@ -535,10 +535,10 @@ if ($error == 0 and $tee == "file") {
 										id			= '$korvid[maxi]',
 										jarjestys	= '1',
 										yhtio		= '$kukarow[yhtio]',
-										laatija 	= '$kukarow[kuka]',
-										luontiaika	= now(),
-										muuttaja 	= '$kukarow[kuka]',
-										muutospvm 	= now()";
+										created_by 	= '$kukarow[kuka]',
+										created_at	= now(),
+										updated_by 	= '$kukarow[kuka]',
+										updated_at 	= now()";
 							$result4 = pupe_query($query);
 						}
 

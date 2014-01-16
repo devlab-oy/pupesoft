@@ -82,9 +82,9 @@
 	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = array();
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
-							OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
-							OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
+		$muutoslisa = "AND (tuote.updated_at >= '{$datetime_checkpoint}'
+							OR ta_nimitys_se.updated_at >= '{$datetime_checkpoint}'
+							OR ta_nimitys_en.updated_at >= '{$datetime_checkpoint}'
 							)";
 	}
 	else {
@@ -207,7 +207,7 @@
 	if ($ajetaanko_kaikki == "NO") {
 		$muutoslisa1 = "AND tapahtuma.laadittu >= '{$datetime_checkpoint}'";
 		$muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
-		$muutoslisa3 = "AND tuote.muutospvm >= '{$datetime_checkpoint}'";
+		$muutoslisa3 = "AND tuote.updated_at >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa1 = "";
@@ -266,12 +266,12 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND (try_fi.muutospvm >= '{$datetime_checkpoint}'
-			OR try_se.muutospvm >= '{$datetime_checkpoint}'
-			OR try_en.muutospvm >= '{$datetime_checkpoint}'
-			OR osasto_fi.muutospvm >= '{$datetime_checkpoint}'
-			OR osasto_se.muutospvm >= '{$datetime_checkpoint}'
-			OR osasto_en.muutospvm >= '{$datetime_checkpoint}')";
+		$muutoslisa = "AND (try_fi.updated_at >= '{$datetime_checkpoint}'
+			OR try_se.updated_at >= '{$datetime_checkpoint}'
+			OR try_en.updated_at >= '{$datetime_checkpoint}'
+			OR osasto_fi.updated_at >= '{$datetime_checkpoint}'
+			OR osasto_se.updated_at >= '{$datetime_checkpoint}'
+			OR osasto_en.updated_at >= '{$datetime_checkpoint}')";
 	}
 	else {
 		$muutoslisa = "";
@@ -326,7 +326,7 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
+		$muutoslisa = "AND asiakas.updated_at >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa = "";
@@ -357,7 +357,7 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND hinnasto.muutospvm >= '{$datetime_checkpoint}'";
+		$muutoslisa = "AND hinnasto.updated_at >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa = "";
@@ -426,11 +426,11 @@
 	$resselite = pupe_query($query);
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = " AND (tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
-							OR try_fi.muutospvm  >= '{$datetime_checkpoint}'
-							OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
-							OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
-							OR tuote.muutospvm  >= '{$datetime_checkpoint}')";
+		$muutoslisa = " AND (tuotteen_avainsanat.updated_at >= '{$datetime_checkpoint}'
+							OR try_fi.updated_at  >= '{$datetime_checkpoint}'
+							OR ta_nimitys_se.updated_at >= '{$datetime_checkpoint}'
+							OR ta_nimitys_en.updated_at >= '{$datetime_checkpoint}'
+							OR tuote.updated_at  >= '{$datetime_checkpoint}')";
 	}
 	else {
 		$muutoslisa = "";

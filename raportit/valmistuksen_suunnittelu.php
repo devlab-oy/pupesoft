@@ -431,8 +431,8 @@
 								ytunnus				= '{$vtrow["nimitys"]}',
 								toimaika            = '$valmistus_ajankohta',
 								kerayspvm			= '$valmistus_ajankohta',
-								laatija             = '{$kukarow["kuka"]}',
-								luontiaika          = now(),
+								created_by             = '{$kukarow["kuka"]}',
+								created_at          = now(),
 								tila                = 'V',
 								kohde				= '{$valmistuslinja}',
 								varasto				= '{$lahde_varasto}',
@@ -707,7 +707,7 @@
 			$abc_join = " 	JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
 							AND abc_aputaulu.tuoteno = tuote.tuoteno
 							AND abc_aputaulu.tyyppi = '{$abcrajaustapa}'
-							AND (luokka <= '{$abcrajaus}' or luokka_osasto <= '{$abcrajaus}' or luokka_try <= '{$abcrajaus}' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ({$jt_tuotteet}))) ";
+							AND (luokka <= '{$abcrajaus}' or luokka_osasto <= '{$abcrajaus}' or luokka_try <= '{$abcrajaus}' or tuote_created_at >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ({$jt_tuotteet}))) ";
 		}
 		else {
 			$abc_join = "	LEFT JOIN abc_aputaulu ON (abc_aputaulu.yhtio = tuote.yhtio
@@ -725,7 +725,7 @@
 					if (lasku.toimaika >= '{$nykyinen_alku}' AND lasku.toimaika <= '{$nykyinen_loppu}', varattu, 0) * tuote.valmistusaika_sekunneissa valmistusaika,
 					tilausrivi.varattu valmistuksessa_nyt,
 					tilausrivi.varattu * tuote.valmistusaika_sekunneissa valmistusaika_nyt,
-					DATE_FORMAT(lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) pvm,
+					DATE_FORMAT(lasku.created_at, GET_FORMAT(DATE, 'EUR')) pvm,
 					lasku.alatila tila
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio

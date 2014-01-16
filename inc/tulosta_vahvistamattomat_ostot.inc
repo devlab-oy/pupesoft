@@ -15,7 +15,7 @@
 			}
 
 			// Haetaan laskun tiedot
-			$query = "	SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lisätiedot,
+			$query = "	SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.created_at päiväys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lisätiedot,
 						concat_ws(' ', postino, postitp) postiosoite,
 						concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
 						SUBSTRING(lasku_maa.nimi FROM 5) maa,

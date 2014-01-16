@@ -342,7 +342,7 @@
 										ale1					= '{$tilausrivirow['ale1']}',
 										ale2					= '{$tilausrivirow['ale2']}',
 										ale3					= '{$tilausrivirow['ale3']}',
-										laatija					= 'extraa',
+										created_by					= 'extraa',
 										kommentti				= 'ASN-sanomalla 1: {$row['asn_numero']} tuli {$row['kappalemaara']} ja tilaukselta löytyi {$laskuri} Tehtiin tilausrivi {$ylimaaraista} määrälle',
 										laadittu				=  now(),
 										hyllyalue				= '{$tilausrivirow['hyllyalue']}',
@@ -495,7 +495,7 @@
 									ale1					= '{$split_row['ale1']}',
 									ale2					= '{$split_row['ale2']}',
 									ale3					= '{$split_row['ale3']}',
-									laatija					= 'split',
+									created_by					= 'split',
 									kommentti				= 'ASN-sanomalla 2: {$row['asn_numero']}. Tehtiin puuttuva tilausrivi määrälle {$positiivinen_arvo} tuotteelle {$split_row["tuoteno"]}',
 									laadittu				=  now(),
 									hyllyalue				= '{$split_row['hyllyalue']}',
@@ -524,7 +524,7 @@
 								'tilausrivi.varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),
 								'tilausrivi.tilkpl' => $positiivinen_arvo,
 								'tilausrivi.kpl' => ($split_row['kpl'] != 0 ? $positiivinen_arvo : 0),
-								'tilausrivi.laatija' => "split",
+								'tilausrivi.created_by' => "split",
 							);
 
 							$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
@@ -563,7 +563,7 @@
 									'tilausrivi.tilkpl' => $positiivinen_arvo,
 									'tilausrivi.kpl' => ($split_row['kpl'] != 0 ? $positiivinen_arvo : 0),
 									'tilausrivi.perheid' => $tilausrivi_id,
-									'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
+									'tilausrivi.created_at' => $lapsi_chk_row['created_at'],
 								);
 
 								$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
@@ -725,7 +725,7 @@
 								ale1					= '{$tilausrivirow['ale1']}',
 								ale2					= '{$tilausrivirow['ale2']}',
 								ale3					= '{$tilausrivirow['ale3']}',
-								laatija					= 'split',
+								created_by					= 'split',
 								kommentti				= 'ASN-sanomalla 3: {$row['asn_numero']} tuli {$row['kappalemaara']} ja tilaukselta löytyi {$tilausrivirow['tilkpl']} Tehtiin tilausrivi {$kappaleerotus} määrälle',
 								laadittu				=  now(),
 								hyllyalue				= '{$tilausrivirow['hyllyalue']}',
@@ -754,7 +754,7 @@
 							'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
 							'tilausrivi.tilkpl' => $kappaleerotus,
 							'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
-							'tilausrivi.laatija' => "split",
+							'tilausrivi.created_by' => "split",
 						);
 
 						$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
@@ -793,7 +793,7 @@
 								'tilausrivi.tilkpl' => $kappaleerotus,
 								'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
 								'tilausrivi.perheid' => $tilausrivi_id,
-								'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
+								'tilausrivi.created_at' => $lapsi_chk_row['created_at'],
 							);
 
 							$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
@@ -815,7 +815,7 @@
 									'tilausrivi.tilkpl' => $kappaleerotus,
 									'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
 									'tilausrivi.perheid' => $myynti_tilausrivi_id_isa,
-									'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
+									'tilausrivi.created_at' => $lapsi_chk_row['created_at'],
 								);
 
 								$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
@@ -1011,8 +1011,8 @@
 								swift					= '{$toimittajarow['swift']}',
 								liitostunnus 			= '{$toimittajarow['tunnus']}',
 								tila         			= 'K',
-								luontiaika	 			= now(),
-								laatija		 			= '{$kukarow['kuka']}'";
+								created_at	 			= now(),
+								created_by		 			= '{$kukarow['kuka']}'";
 					$insertres = pupe_query($query);
 					$keikan_tunnus = mysql_insert_id();
 

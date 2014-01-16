@@ -53,8 +53,8 @@
 					tila       			= 'N',
 					ytunnus	   			= '*',
 					alv	   				= '".alv_oletus()."',
-					laatija    			= 'verkkolas',
-					luontiaika 			= now()";
+					created_by    			= 'verkkolas',
+					created_at 			= now()";
 		$result = mysql_query($query) or pupe_error($query);
 		$tilausnumero = mysql_insert_id();
 	}
@@ -108,8 +108,8 @@
 						image_channels		= '',
 						kayttotarkoitus		= '',
 						jarjestys			= '1',
-						laatija				= 'verkkolas',
-						luontiaika			= now()";
+						created_by				= 'verkkolas',
+						created_at			= now()";
 			$Xresult = mysql_query($query) or pupe_error($query);
 		}
 	}
@@ -193,7 +193,7 @@
 					hyllyvali 		= '$olparow[hyllyvali]',
 					hyllytaso 		= '$olparow[hyllytaso]',
 					tilaajanrivinro = '".$rtuoteno[$i]["tilaajanrivinro"]."',
-					laatija 		= 'verkkolas',
+					created_by 		= 'verkkolas',
 					laadittu 		= now(),
 					yhtio 			= '$kukarow[yhtio]',
 					tuoteno 		= '".$rtuoteno[$i]["tuoteno"]."',

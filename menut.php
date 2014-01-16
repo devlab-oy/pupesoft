@@ -78,10 +78,10 @@
 							jarjestys2	= '$jarj2',
 							hidden		= '$row[hidden]',
 							yhtio		= '$uusiyhtio',
-							laatija 	= '{$kukarow['kuka']}',
-							luontiaika 	= now(),
-							muutospvm 	= now(),
-							muuttaja 	= '{$kukarow['kuka']}'";
+							created_by 	= '{$kukarow['kuka']}',
+							created_at 	= now(),
+							updated_at 	= now(),
+							updated_by 	= '{$kukarow['kuka']}'";
 				$insresult = pupe_query($query);
 
 				//päivitettän käyttäjien oikeudet
@@ -89,8 +89,8 @@
 							SET nimitys	= '$row[nimitys]',
 							jarjestys 	= '$jarj',
 							jarjestys2	= '$jarj2',
-							muutospvm 	= now(),
-							muuttaja 	= '{$kukarow['kuka']}'
+							updated_at 	= now(),
+							updated_by 	= '{$kukarow['kuka']}'
 							WHERE yhtio 	= '$uusiyhtio'
 							and sovellus	= '$row[sovellus]'
 							and nimi 		= '$row[nimi]'
@@ -227,10 +227,10 @@
 								jarjestys2	= '$jarj2',
 								hidden		= '$row[hidden]',
 								yhtio		= '$yhtio',
-								laatija 	= '{$kukarow['kuka']}',
-								luontiaika 	= now(),
-								muutospvm 	= now(),
-								muuttaja 	= '{$kukarow['kuka']}'";
+								created_by 	= '{$kukarow['kuka']}',
+								created_at 	= now(),
+								updated_at 	= now(),
+								updated_by 	= '{$kukarow['kuka']}'";
 					$insresult = pupe_query($query);
 					$insid = mysql_insert_id();
 
@@ -238,8 +238,8 @@
 						// Jos lisätään uusi väliin, niin loput pitää työntää vähän eteenpäin
 						$query = "	UPDATE oikeu
 									SET jarjestys	= jarjestys+10,
-									muutospvm 		= now(),
-									muuttaja 		= '{$kukarow['kuka']}'
+									updated_at 		= now(),
+									updated_by 		= '{$kukarow['kuka']}'
 									WHERE yhtio 	= '$yhtio'
 									and sovellus	= '$row[sovellus]'
 									and jarjestys  >= $jarj
@@ -254,8 +254,8 @@
 								SET nimitys	= '$row[nimitys]',
 								jarjestys	= '$jarj',
 								jarjestys2	= '$jarj2',
-								muutospvm 	= now(),
-								muuttaja 	= '{$kukarow['kuka']}'
+								updated_at 	= now(),
+								updated_by 	= '{$kukarow['kuka']}'
 								WHERE yhtio 	= '$yhtio'
 								and sovellus	= '$row[sovellus]'
 								and nimi 		= '$row[nimi]'
@@ -287,8 +287,8 @@
 				$query = "	UPDATE oikeu
 							SET jarjestys	= '$jarj',
 							jarjestys2		= '$jarjestys2[$tun]',
-							muutospvm		= now(),
-							muuttaja		= '{$kukarow['kuka']}'
+							updated_at		= now(),
+							updated_by		= '{$kukarow['kuka']}'
 							WHERE yhtio		= '$row[yhtio]'
 							and sovellus	= '$row[sovellus]'
 							and nimi		= '$row[nimi]'
@@ -343,8 +343,8 @@
 							jarjestys	 = '$jarjestys',
 							jarjestys2	 = '$jarjestys2',
 							hidden		 = '$hidden',
-							muutospvm 	 = now(),
-							muuttaja 	 = '{$kukarow['kuka']}'
+							updated_at 	 = now(),
+							updated_by 	 = '{$kukarow['kuka']}'
 							WHERE
 							sovellus		= '$row[sovellus]'
 							and nimi		= '$row[nimi]'
@@ -391,10 +391,10 @@
 								profiili	= '',
 								yhtio		= '$yhtio',
 								hidden		= '$hidden',
-								laatija 	= '{$kukarow['kuka']}',
-								luontiaika 	= now(),
-								muutospvm 	= now(),
-								muuttaja 	= '{$kukarow['kuka']}'";
+								created_by 	= '{$kukarow['kuka']}',
+								created_at 	= now(),
+								updated_at 	= now(),
+								updated_by 	= '{$kukarow['kuka']}'";
 					$result = pupe_query($query);
 					$num = mysql_affected_rows();
 

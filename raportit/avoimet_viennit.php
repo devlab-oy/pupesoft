@@ -24,7 +24,7 @@
 		$query_ale_lisa = generoi_alekentta('M');
 
 		//listataan tuoreet tilausket
-		$query = "	SELECT lasku.tunnus tilaus, lasku.vienti, lasku.luontiaika laadittu, lasku.laatija, lasku.ytunnus, lasku.nimi, lasku.nimitark, round(sum(varattu * tilausrivi.hinta * {$query_ale_lisa}), 2) summa
+		$query = "	SELECT lasku.tunnus tilaus, lasku.vienti, lasku.created_at laadittu, lasku.created_by, lasku.ytunnus, lasku.nimi, lasku.nimitark, round(sum(varattu * tilausrivi.hinta * {$query_ale_lisa}), 2) summa
 					FROM lasku, tilausrivi
 					WHERE lasku.yhtio='$kukarow[yhtio]'
 					AND lasku.yhtio=tilausrivi.yhtio
@@ -59,7 +59,7 @@
 			echo "<td>$tulrow[nimi]</td>";
 			echo "<td>$tulrow[nimitark]</td>";
 			echo "<td>$tulrow[laadittu]</td>";
-			echo "<td>$tulrow[laatija]</td>";
+			echo "<td>$tulrow[created_by]</td>";
 			echo "<td>$tulrow[summa]</td>";
 			echo "</tr>";
 

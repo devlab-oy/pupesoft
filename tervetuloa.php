@@ -99,7 +99,7 @@ if (!isset($tee) or $tee == '') {
 			echo "</table><br><br>";
 		}
 
-		$query = "	SELECT tunnus, nimi, luontiaika
+		$query = "	SELECT tunnus, nimi, created_at
 					FROM lasku use index (tila_index)
 					WHERE yhtio = '$kukrow[yhtio]'
 					and myyja = '$kukarow[tunnus]'
@@ -121,14 +121,14 @@ if (!isset($tee) or $tee == '') {
 			echo "<tr>";
 			echo "<th>".t("tunnus")."</a></th>";
 			echo "<th>".t("nimi")."</th>";
-			echo "<th>".t("luontiaika")."</th>";
+			echo "<th>".t("created_at")."</th>";
 			echo "</tr>";
 
 			while ($trow = mysql_fetch_array($result)) {
 				echo "<tr>";
 				echo "<td><a href='muokkaatilaus.php?toim=LASKUTUSKIELTO&etsi=$trow[tunnus]'>$trow[tunnus]</a></td>";
 				echo "<td>$trow[nimi]</td>";
-				echo "<td>".tv1dateconv($trow["luontiaika"])."</td>";
+				echo "<td>".tv1dateconv($trow["created_at"])."</td>";
 				echo "</tr>";
 			}
 

@@ -30,10 +30,10 @@
 							jarjestys2	= '{$row['jarjestys2']}',
 							hidden		= '{$row['hidden']}',
 							yhtio		= '{$toyhtio}',
-							laatija 	= '{$kukarow['kuka']}',
-							luontiaika 	= now(),
-							muutospvm 	= now(),
-							muuttaja 	= '{$kukarow['kuka']}'";
+							created_by 	= '{$kukarow['kuka']}',
+							created_at 	= now(),
+							updated_at 	= now(),
+							updated_by 	= '{$kukarow['kuka']}'";
 				$upres = pupe_query($query);
 			}
 

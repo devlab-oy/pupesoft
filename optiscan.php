@@ -169,7 +169,7 @@
 		$query = "	SELECT nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
 					FROM kerayserat
 					WHERE yhtio 		= '{$kukarow['yhtio']}'
-					AND laatija 		= '{$kukarow['kuka']}'
+					AND created_by 		= '{$kukarow['kuka']}'
 					AND ohjelma_moduli 	= 'OPTISCAN'
 					AND tila    		= 'K'
 					AND keratty 		= ''
@@ -224,7 +224,7 @@
 						$query = "	SELECT min(nro) nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
 									FROM kerayserat
 									WHERE yhtio 		= '{$kukarow['yhtio']}'
-									AND laatija 		= '{$kukarow['kuka']}'
+									AND created_by 		= '{$kukarow['kuka']}'
 									AND ohjelma_moduli 	= 'OPTISCAN'
 									AND tila    		= 'K'
 									AND nro 			= '$kerayseran_numero'
@@ -687,7 +687,7 @@
 		$yhtiorow = hae_yhtion_parametrit("artr");
 		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
-		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND laatija = '{$kukarow['kuka']}' AND tila = 'K'";
+		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND created_by = '{$kukarow['kuka']}' AND tila = 'K'";
 		$chkres = pupe_query($query);
 
 		if (mysql_num_rows($chkres) > 0) {

@@ -170,7 +170,7 @@
 			$query  = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND laatija = '$kukarow[kuka]'
+						AND created_by = '$kukarow[kuka]'
 						AND alatila = 'E'
 						AND tila = 'N'";
 		}
@@ -210,14 +210,14 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tila 	= 'N'
 						and alatila = 'J'
-						and laatija = '$kukarow[kuka]')
+						and created_by = '$kukarow[kuka]')
 						UNION
 						(SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tila 	= 'G'
 						and alatila = 'P'
-						and laatija = '$kukarow[kuka]')
+						and created_by = '$kukarow[kuka]')
 						$ostok";
 		}
 
@@ -367,7 +367,7 @@
 			$query = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laatija	= '$kukarow[kuka]'
+						and created_by	= '$kukarow[kuka]'
 						and alatila	= 'E'
 						and tila 	= 'N'";
 		}
@@ -406,14 +406,14 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tila 	= 'N'
 						and alatila = 'J'
-						and laatija = '$kukarow[kuka]')
+						and created_by = '$kukarow[kuka]')
 						UNION
 						(SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tila 	= 'G'
 						and alatila = 'P'
-						and laatija = '$kukarow[kuka]')
+						and created_by = '$kukarow[kuka]')
 						$ostok";
 		}
 
@@ -788,8 +788,8 @@
 			case "tuoteno":
 				$order = " ORDER BY tuote.tuoteno, lasku.ytunnus";
 				break;
-			case "luontiaika":
-				$order = " ORDER BY lasku.luontiaika, tuote.tuoteno, lasku.ytunnus";
+			case "created_at":
+				$order = " ORDER BY lasku.created_at, tuote.tuoteno, lasku.ytunnus";
 				break;
 			case "toimaika":
 				$order = " ORDER BY lasku.toimaika, tuote.tuoteno, lasku.ytunnus";
@@ -817,7 +817,7 @@
 		$summarajausfail = '';
 		$query_ale_lisa = generoi_alekentta('M');
 
-		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika"))) {
+		if (in_array($jarj, array("ytunnus","tuoteno","created_at","toimaika"))) {
 			if (isset($summarajaus) and $summarajaus != '') {
 				$summarajaus = (float) $summarajaus;
 
@@ -882,7 +882,7 @@
 			}
 		}
 
-		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika")) and $summarajausfail == '') {
+		if (in_array($jarj, array("ytunnus","tuoteno","created_at","toimaika")) and $summarajausfail == '') {
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
@@ -1219,7 +1219,7 @@
 															AND ((tilausrivi.tunnus = tilausrivi.perheid AND tilausrivi.perheid2 = 0)
 																OR (tilausrivi.tunnus = tilausrivi.perheid2)
 																OR (tilausrivi.perheid = 0 AND tilausrivi.perheid2 = 0))
-															ORDER BY lasku.luontiaika";
+															ORDER BY lasku.created_at";
 								$jt_muiden_mukana_result = pupe_query($jt_muiden_mukana_query);
 
 								while ($jt_muiden_mukana_row = mysql_fetch_assoc($jt_muiden_mukana_result)) {
@@ -2317,7 +2317,7 @@
 					<select name='jarj'>
 					<option value='tuoteno' {$sel["tuoteno"]}>".t("Tuotteittain")."</option>
 					<option value='ytunnus' {$sel["ytunnus"]}>".t("Asiakkaittain")."</option>
-					<option value='luontiaika' {$sel["luontiaika"]}>".t("Tilausajankohdan mukaan")."</option>
+					<option value='created_at' {$sel["created_at"]}>".t("Tilausajankohdan mukaan")."</option>
 					<option value='toimaika' {$sel["toimaika"]}>".t("Toimitusajankohdan mukaan")."</option>
 					</select>
 				</td>

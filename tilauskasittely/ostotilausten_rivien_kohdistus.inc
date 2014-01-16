@@ -594,7 +594,7 @@ if ($tila == 'tee_siirto') {
 								$rfields .= ", $fieldname";
 
 								switch ($fieldname) {
-									case 'laatija':
+									case 'created_by':
 										$rvalues .= ", '$kukarow[kuka]'";
 										break;
 									case 'laadittu':
@@ -636,10 +636,10 @@ if ($tila == 'tee_siirto') {
 									$rfields .= ", $fieldname";
 
 									switch ($fieldname) {
-										case 'laatija':
+										case 'created_by':
 											$rvalues .= ", '$kukarow[kuka]'";
 											break;
-										case 'luontiaika':
+										case 'created_at':
 											$rvalues .= ", now()";
 											break;
 										case 'tilausrivitunnus':
@@ -764,7 +764,7 @@ if ($tila == 'tee_kohdistus') {
 					}
 
 					$query = "	INSERT into tilausrivi
-								(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, laatija, laadittu) values
+								(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, created_by, laadittu) values
 								('$perheid2','$hinta','$lisarow[nimitys]','$tuoteno', '$kpl', '$kpl', '$potunnus', '$kukarow[yhtio]', 'O', '$kukarow[kuka]', now())";
 					$updre = pupe_query($query);
 				}

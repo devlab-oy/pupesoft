@@ -79,8 +79,8 @@
 										pakkaus 		= '{$pakkaus_nro}',
 										pakkausnro 		= '{$juokseva_nro}',
 										kpl 			= '{$kpl}',
-										laatija 		= '{$kukarow['kuka']}',
-										luontiaika 		= now(),
+										created_by 		= '{$kukarow['kuka']}',
+										created_at 		= now(),
 										ohjelma_moduli	= '$modulilisa'";
 							$insert_res = pupe_query($query);
 						}

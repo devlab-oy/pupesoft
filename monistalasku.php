@@ -371,43 +371,43 @@ if ($tee == "ETSILASKU") {
 		if ($toim == 'SOPIMUS') {
 			$where = "	tila = '0'
 						and lasku.liitostunnus = '{$asiakasid}'
-						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
-						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
+						and lasku.created_at >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.created_at <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'TARJOUS') {
 			$where = "	tila in ('T','L','N')
 						and lasku.liitostunnus = '{$asiakasid}'
-						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
-						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
+						and lasku.created_at >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.created_at <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'TYOMAARAYS') {
 			$where 	= " tila in ('N','L','A')
 						and lasku.liitostunnus = '{$asiakasid}'
-						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
-						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
+						and lasku.created_at >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.created_at <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'TILAUS') {
 			$where 	= " tila in ('N','L')
 						and lasku.liitostunnus = '{$asiakasid}'
-						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
-						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
+						and lasku.created_at >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.created_at <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'ENNAKKOTILAUS') {
 			$where 	= " tila = 'E'
 						and lasku.liitostunnus = '{$asiakasid}'
-						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
-						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
+						and lasku.created_at >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.created_at <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'OSTOTILAUS') {
 			$where 	= " tila = 'O'
 						and lasku.liitostunnus = '{$toimittajaid}'
-						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
-						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
+						and lasku.created_at >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.created_at <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		else {
@@ -420,7 +420,7 @@ if ($tee == "ETSILASKU") {
 	}
 
 	// Etsitään muutettavaa tilausta
-	$query = "	SELECT yhtio, tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, luontiaika, laatija, tila, alatila
+	$query = "	SELECT yhtio, tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, created_at, created_by, tila, alatila
 				FROM lasku {$use}
 				WHERE {$where}
 				AND yhtio in ('".implode("','", $yhtiot)."')
@@ -473,8 +473,8 @@ if ($tee == "ETSILASKU") {
 			echo "<{$ero}>{$row['ytunnus']}</{$ero}>";
 			echo "<{$ero}>{$row['summa']}</{$ero}>";
 			echo "<{$ero}>".tv1dateconv($row["tapvm"])."</{$ero}>";
-			echo "<{$ero}>".tv1dateconv($row["luontiaika"])."</{$ero}>";
-			echo "<{$ero}>{$row['laatija']}</{$ero}>";
+			echo "<{$ero}>".tv1dateconv($row["created_at"])."</{$ero}>";
+			echo "<{$ero}>{$row['created_by']}</{$ero}>";
 
 			$laskutyyppi = $row["tila"];
 			$alatila	 = $row["alatila"];
@@ -740,7 +740,7 @@ if ($tee == 'MONISTA') {
 						}
 						break;
 					case 'kerayspvm':
-					case 'luontiaika':
+					case 'created_at':
 						$values .= ", now()";
 						break;
 					case 'alatila':
@@ -873,7 +873,7 @@ if ($tee == 'MONISTA') {
 							$values .= ", ''";
 						}
 						break;
-					case 'laatija':
+					case 'created_by':
 						$values .= ", '{$kukarow['kuka']}'";
 						break;
 					case 'tunnusnippu':
@@ -1263,7 +1263,7 @@ if ($tee == 'MONISTA') {
 						case 'otunnus':
 							$rvalues .= ", '{$utunnus}'";
 							break;
-						case 'laatija':
+						case 'created_by':
 							$rvalues .= ", '{$kukarow['kuka']}'";
 							break;
 						case 'varattu':
@@ -1365,22 +1365,22 @@ if ($tee == 'MONISTA') {
 
 					$kysely = "	INSERT INTO tilausrivin_lisatiedot
 								SET yhtio 			= '{$kukarow['yhtio']}',
-								laatija				= '{$kukarow['kuka']}',
-								luontiaika 			= now(),
+								created_by				= '{$kukarow['kuka']}',
+								created_at 			= now(),
 								tilausrivitunnus	= {$insid},";
 
 					for ($i = 0; $i < mysql_num_fields($monistares2) - 1; $i++) { // Ei monisteta tunnusta
 						switch (mysql_field_name($monistares2, $i)) {
 							case 'yhtio':
-							case 'laatija':
-							case 'luontiaika':
+							case 'created_by':
+							case 'created_at':
 							case 'tilausrivitunnus':
 							case 'tiliointirivitunnus':
 							case 'tilausrivilinkki':
 							case 'toimittajan_tunnus':
 							case 'tunnus':
-							case 'muutospvm':
-							case 'muuttaja':
+							case 'updated_at':
+							case 'updated_by':
 								break;
 							case 'osto_vai_hyvitys':
 								if ($monistarow2[$i] == "O" and ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA')) {
@@ -1459,8 +1459,8 @@ if ($tee == 'MONISTA') {
 											hyllyvali   = '{$rivirow['hyllyvali']}',";
 							}
 
-							$query .= "	laatija			= '{$kukarow['kuka']}',
-										luontiaika		= now()";
+							$query .= "	created_by			= '{$kukarow['kuka']}',
+										created_at		= now()";
 							$sres = pupe_query($query);
 						}
 						else {
@@ -1523,8 +1523,8 @@ if ($tee == 'MONISTA') {
 												hyllyvali   = '{$rivirow['hyllyvali']}',";
 								}
 
-								$query .= "	laatija			= '{$kukarow['kuka']}',
-											luontiaika		= now()";
+								$query .= "	created_by			= '{$kukarow['kuka']}',
+											created_at		= now()";
 								$sres = pupe_query($query);
 							}
 						}
@@ -1681,7 +1681,7 @@ if ($tee == 'MONISTA') {
 							}
 						}
 
-						$query  = " INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+						$query  = " INSERT INTO tilausrivi (created_by, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 									values ('automaatti', now(), '$rah_hinta', {$ale_lisa_insert_query_2} '$rah_netto', '1', '1', '$utunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$rah_alv', '')";
 						$addtil = pupe_query($query);
 					}

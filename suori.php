@@ -218,7 +218,7 @@
 							valkoodi			= '$tiliointirow[valkoodi]',
 							vero 				= '$tiliointirow[vero]',
 							lukko 				= '',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$xresult = pupe_query($query);
 				$isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
@@ -239,7 +239,7 @@
 								vero 				= 0,
 								selite 				= '$selite',
 								lukko 				= '1',
-								laatija 			= '$kukarow[kuka]',
+								created_by 			= '$kukarow[kuka]',
 								laadittu 			= now(),
 								aputunnus			= $isa";
 					$xresult = pupe_query($query);
@@ -314,7 +314,7 @@
 									summa 		= $summa,
 									vero 		= 0,
 									lukko 		= '',
-									laatija 	= '$kukarow[kuka]',
+									created_by 	= '$kukarow[kuka]',
 									laadittu 	= now()";
 						$xresult = pupe_query($query);
 						$isa = mysql_insert_id ($link);
@@ -349,7 +349,7 @@
 					valkoodi			= '$laskurow[valkoodi]',
 					vero 				= 0,
 					lukko 				= '',
-					laatija 			= '$kukarow[kuka]',
+					created_by 			= '$kukarow[kuka]',
 					laadittu 			= now()";
 		$xresult = pupe_query($query);
 
@@ -382,7 +382,7 @@
 					valkoodi			= '$laskurow[valkoodi]',
 					vero 				= 0,
 					lukko 				= '',
-					laatija 			= '$kukarow[kuka]',
+					created_by 			= '$kukarow[kuka]',
 					laadittu			= now()";
 		$xresult = pupe_query($query);
 

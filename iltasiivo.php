@@ -350,12 +350,12 @@
 
 			$query = "	SELECT lasku.tunnus laskutunnus
 						FROM lasku
-						JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija AND kuka.extranet != '')
+						JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.created_by AND kuka.extranet != '')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila = 'N'
 						AND lasku.alatila = ''
 						AND lasku.clearing NOT IN ('EXTENNAKKO','EXTTARJOUS')
-						AND lasku.luontiaika < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
+						AND lasku.created_at < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
 			$result = pupe_query($query);
 			
 			while ($row = mysql_fetch_assoc($result)) {
@@ -414,7 +414,7 @@
 		if (table_exists('suorituskykyloki')) {
 			$query = "	DELETE FROM suorituskykyloki
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND luontiaika < date_sub(now(), INTERVAL 1 YEAR)";
+						AND created_at < date_sub(now(), INTERVAL 1 YEAR)";
 			pupe_query($query);
 
 			if (mysql_affected_rows() > 0) {
@@ -606,7 +606,7 @@
 							hyllytaso	= '$tuotepaikkarow[hyllytaso]',
 							laji		= 'poistettupaikka',
 							selite		= '".t("Poistettiin tuotepaikka")." $tuotepaikkarow[hyllyalue] $tuotepaikkarow[hyllynro] $tuotepaikkarow[hyllyvali] $tuotepaikkarow[hyllytaso]',
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now()";
 				pupe_query($query);
 			}
@@ -651,7 +651,7 @@
 								hyllytaso	= '$tuotepaikka[hyllytaso]',
 								laji		= 'poistettupaikka',
 								selite		= '".t("Poistettiin tuotepaikka")." $tuotepaikka[hyllyalue] $tuotepaikka[hyllynro] $tuotepaikka[hyllyvali] $tuotepaikka[hyllytaso]',
-								laatija		= '$kukarow[kuka]',
+								created_by		= '$kukarow[kuka]',
 								laadittu	= now()";
 			pupe_query($tapahtuma_query);
 		}

@@ -40,8 +40,8 @@
                   laji        = 'ALV',
                   selite      = '10',
                   jarjestys   = '10',
-                  laatija     = 'devlab',
-                  luontiaika  = now()";
+                  created_by     = 'devlab',
+                  created_at  = now()";
       $result = pupe_query($query);
 
       // Lisätään 14 verokanta
@@ -51,8 +51,8 @@
                   laji        = 'ALV',
                   selite      = '14',
                   jarjestys   = '14',
-                  laatija     = 'devlab',
-                  luontiaika  = now()";
+                  created_by     = 'devlab',
+                  created_at  = now()";
       $result = pupe_query($query);
 
       // Lisätään 24 verokanta
@@ -62,8 +62,8 @@
                   laji        = 'ALV',
                   selite      = '24',
                   jarjestys   = '24',
-                  laatija     = 'devlab',
-                  luontiaika  = now()";
+                  created_by     = 'devlab',
+                  created_at  = now()";
       $result = pupe_query($query);
 
       // Poistetaan oletus verokanta ja päivitetään perheet

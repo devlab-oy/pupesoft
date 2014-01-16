@@ -63,8 +63,8 @@ else {
 								else {
 									$query	= "	UPDATE budjetti SET
 												summa = $solu,
-												muuttaja = '$kukarow[kuka]',
-												muutospvm = now()
+												updated_by = '$kukarow[kuka]',
+												updated_at = now()
 												WHERE yhtio  = '$kukarow[yhtio]'
 												AND tyyppi   = '$tasotyyppi'
 												AND kausi 	 = '$u_kausi'
@@ -89,8 +89,8 @@ else {
 										kustp 		= '$vkustp',
 										kohde 		= '$vkohde',
 										projekti 	= '$vproj',
-										laatija 	= '$kukarow[kuka]',
-										luontiaika  = now()";
+										created_by 	= '$kukarow[kuka]',
+										created_at  = now()";
 							$result = pupe_query($query);
 							$lisaa++;
 						}

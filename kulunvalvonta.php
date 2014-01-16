@@ -137,7 +137,7 @@
 				}
 				else {
 					//luodaan uutta, jos ollaan hyvaksyjia niin muokataan toisen omaa
-					$querylisa = "laatija = '$kukarow[kuka]', luontiaika = now(),";
+					$querylisa = "created_by = '$kukarow[kuka]', created_at = now(),";
 					$query = " INSERT INTO kulunvalvonta SET";
 					$query2 = "";
 				}
@@ -856,8 +856,8 @@
 				if (mysql_num_rows($kirjtarkres) == 0) {
 					$query  = "INSERT INTO kulunvalvonta SET
 								yhtio 	= '$user[yhtio]',
-								laatija	= '$kukarow[kuka]',
-								luontiaika = now(),
+								created_by	= '$kukarow[kuka]',
+								created_at = now(),
 								kuka 	= '$user[kuka]',
 								aika	= '".date("Y-m-d H:i:s", $sisaanaikaStr)."',
 								suunta 	= 'I'
@@ -868,8 +868,8 @@
 
 					$query  = "INSERT INTO kulunvalvonta SET
 								yhtio 	= '$user[yhtio]',
-								laatija	= '$kukarow[kuka]',
-								luontiaika = now(),
+								created_by	= '$kukarow[kuka]',
+								created_at = now(),
 								kuka 	= '$user[kuka]',
 								aika	= '".date("Y-m-d H:i:s", $ulosaikaStr)."',
 								suunta 	= 'O'
@@ -934,8 +934,8 @@
 					$query  = "INSERT INTO kulunvalvonta SET
 								yhtio 	= '$user[yhtio]',
 								kuka 	= '$user[kuka]',
-								laatija	= '$kukarow[kuka]',
-								luontiaika = now(),
+								created_by	= '$kukarow[kuka]',
+								created_at = now(),
 								aika	= '".date("Y-m-d H:i:s", $sisaanaikaStr)."',
 								suunta 	= 'I'";
 					$result = mysql_query($query) or pupe_error($query);
@@ -959,8 +959,8 @@
 					$query  = "INSERT INTO kulunvalvonta SET
 								yhtio 	= '$user[yhtio]',
 								kuka 	= '$user[kuka]',
-								laatija	= '$kukarow[kuka]',
-								luontiaika = now(),
+								created_by	= '$kukarow[kuka]',
+								created_at = now(),
 								aika	= '".date("Y-m-d H:i:s", $ulosaikaStr)."',
 								suunta 	= 'O'";
 					$result = mysql_query($query) or pupe_error($query);

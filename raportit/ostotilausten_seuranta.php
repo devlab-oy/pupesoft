@@ -243,10 +243,10 @@
 						echo "<th>",t("Rivim‰‰r‰"),"</th>";
 						echo "<th>",t("Tilauksen"),"<br/>",t("arvo"),"<br/>$tilrivi_row[valkoodi]</th>";
 						echo "<th>",t("Saapuminen"),"</th>";
-						echo "<th>",t("Tavaralaskun"),"<br/>",t("luontiaika"),"</th>";
+						echo "<th>",t("Tavaralaskun"),"<br/>",t("created_at"),"</th>";
 						echo "<th>",t("Summa"),"<br/>$yhtiorow[valkoodi]</th>";
 						echo "<th>",t("Viesti"),"</th>";
-						echo "<th>",t("Kululaskun"),"<br/>",t("luontiaika"),"</th>";
+						echo "<th>",t("Kululaskun"),"<br/>",t("created_at"),"</th>";
 						echo "<th>",t("Summa"),"<br/>$yhtiorow[valkoodi]</th>";
 						echo "<th>",t("Viesti"),"</th>";
 						echo "<th>",t("Eturahti"),"<br/>$yhtiorow[valkoodi]</th>";
@@ -323,7 +323,7 @@
 						echo "<td style='vertical-align: top;'><a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$keikkarow[tunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$keikkarow[laskunro]</a></td>";
 
 						$query  = "	SELECT liitosotsikko.arvo * if(ostoreskontran_lasku.maksu_kurssi <> 0, ostoreskontran_lasku.maksu_kurssi, ostoreskontran_lasku.vienti_kurssi) summa_euroissa,
-									ostoreskontran_lasku.luontiaika,
+									ostoreskontran_lasku.created_at,
 									concat(ostoreskontran_lasku.laskunro, ' ', ostoreskontran_lasku.viesti) numero,
 									ostoreskontran_lasku.tunnus,
 									liitosotsikko.tunnus litunn
@@ -339,7 +339,7 @@
 						if (mysql_num_rows($ostolaskures) > 0) {
 							echo "<td style='vertical-align: top;' nowrap>";
 							while ($ostolaskurow = mysql_fetch_assoc($ostolaskures)) {
-								echo tv1dateconv($ostolaskurow['luontiaika'])."<br>";
+								echo tv1dateconv($ostolaskurow['created_at'])."<br>";
 							}
 							echo "</td>";
 
@@ -372,7 +372,7 @@
 						}
 
 						$query  = "	SELECT liitosotsikko.arvo * if(ostoreskontran_lasku.maksu_kurssi <> 0, ostoreskontran_lasku.maksu_kurssi, ostoreskontran_lasku.vienti_kurssi) summa_euroissa,
-									ostoreskontran_lasku.luontiaika,
+									ostoreskontran_lasku.created_at,
 									concat(ostoreskontran_lasku.laskunro, ' ', ostoreskontran_lasku.viesti) numero,
 									ostoreskontran_lasku.tunnus,
 									liitosotsikko.tunnus litunn
@@ -389,7 +389,7 @@
 
 							echo "<td style='vertical-align: top; text-align: right;' nowrap>";
 							while ($ostolaskurow = mysql_fetch_assoc($ostolaskures)) {
-								echo tv1dateconv($ostolaskurow['luontiaika'])."<br>";
+								echo tv1dateconv($ostolaskurow['created_at'])."<br>";
 							}
 							echo "</td>";
 
@@ -488,7 +488,7 @@
 
 				// LASKUT JOITA EI OLE LIITETTY KEIKKOIHIN
 				$query = "	SELECT lasku.summa, lasku.maksu_kurssi, lasku.vienti_kurssi, lasku.valkoodi,
-							lasku.luontiaika,
+							lasku.created_at,
 							concat(lasku.laskunro, ' ', lasku.viesti) numero,
 							lasku.tunnus
 							FROM lasku
@@ -498,7 +498,7 @@
 							lasku.vienti in ('B','C','J','E','F','K','H','I','L') and
 							lasku.liitostunnus = '$toimittajarow[tunnus]' and
 							lasku2.tunnus IS NULL
-							ORDER BY lasku.luontiaika, lasku.summa";
+							ORDER BY lasku.created_at, lasku.summa";
 				$ei_liitetyt_res = pupe_query($query);
 
 				while ($ei_liitetyt_row = mysql_fetch_assoc($ei_liitetyt_res)) {
@@ -543,7 +543,7 @@
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'></td>";
-					echo "<td style='vertical-align: top;'>".tv1dateconv($ei_liitetyt_row['luontiaika'])."</td>";
+					echo "<td style='vertical-align: top;'>".tv1dateconv($ei_liitetyt_row['created_at'])."</td>";
 					echo "<td style='vertical-align: top; text-align: right;'><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$ei_liitetyt_row[tunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>".sprintf('%.02f', $ei_liitetyt_row['arvo'])."</a></td>";
 					$yht_tavara_summa[$ei_liitetyt_row['tunnus']] = $ei_liitetyt_row['arvo'];
 					echo "<td style='vertical-align: top;'>";

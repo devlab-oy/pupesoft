@@ -212,7 +212,7 @@
 				$query  = "	UPDATE lasku
 							SET tila 	= 'L',
 							alatila 	= 'D',
-							luontiaika 	= '$tapahtumapvm'
+							created_at 	= '$tapahtumapvm'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$ok'
 							and tila = 'L'";
@@ -413,7 +413,7 @@
 								and liitostunnus = '$row[liitostunnus]'
 								and tila         = 'L'
 								and alatila      in ('X','D')
-								and luontiaika   = '$pvmloop_vv-$pvmloop_kk-$pvmloop_pp'
+								and created_at   = '$pvmloop_vv-$pvmloop_kk-$pvmloop_pp'
 								and clearing     = 'sopimus'
 								and swift        = '$row[laskutunnus]'";
 					$chkres = pupe_query($query);

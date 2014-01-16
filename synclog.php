@@ -15,8 +15,8 @@ while($row=mysql_fetch_array($result)) {
 			<td>$row[taulu]</td>
 			<td>$row[tauluntunnus]</td>
 			<td>$row[tapa]</td>
-			<td>$row[luontiaika]</td>
-			<td>$row[laatija]</td>
+			<td>$row[created_at]</td>
+			<td>$row[created_by]</td>
 			<td>$row[viesti]</td>
 		</tr>";
 }

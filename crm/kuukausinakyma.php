@@ -229,7 +229,7 @@
 						date_format(pvmalku,'%H:%i') kello, date_format(pvmalku,'%d') paiva, date_format(pvmalku,'%m') kuu, date_format(pvmalku,'%Y') vuosi,
 						kalenteri.kuka, date_format(pvmloppu,'%H:%i') lkello,
 						kalenteri.kuittaus,
-						kalenteri.laatija,
+						kalenteri.created_by,
 						replace(kentta01,'\r\n',' ') kentta01
 						FROM kalenteri
 						LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
@@ -262,7 +262,7 @@
 				$aikanyt 	= (int) date('Ymd',mktime(0,0,0,date('m'),date('d'),date('Y')));
 
 				// Vanhoja kalenteritapahtumia ei saa enää muuttaa ja Hyväksyttyjä lomia ei saa ikinä muokata
-				if($krow['tunnus'] != '' and $krow["kuittaus"] == "" and $kaleloppu >= $aikanyt and ($krow['kuka'] == $kukarow["kuka"] or $krow['laatija'] == $kukarow["kuka"])) {
+				if($krow['tunnus'] != '' and $krow["kuittaus"] == "" and $kaleloppu >= $aikanyt and ($krow['kuka'] == $kukarow["kuka"] or $krow['created_by'] == $kukarow["kuka"])) {
 					echo "<div id='div_$krow[tunnus]' class='popup' style='width:200px;'>";
 
 					if (mysql_num_rows($kresult) > 0) {

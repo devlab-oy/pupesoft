@@ -72,13 +72,13 @@
 
 		echo "<br><br><font class='head'>".t("Tulostetut keräyserätarrat")."</font><hr>";
 
-		$query = "	SELECT DATE_FORMAT(lasku.luontiaika, '%Y-%m-%d %H:%i') luontiaika, lasku.toimaika, lasku.ytunnus, lasku.nimi, lasku.toim_nimi, group_concat(lasku.tunnus) laskutunnukset, count(tilausrivi.tunnus) riveja, sum(tilausrivi.tilkpl) myyntieria
+		$query = "	SELECT DATE_FORMAT(lasku.created_at, '%Y-%m-%d %H:%i') created_at, lasku.toimaika, lasku.ytunnus, lasku.nimi, lasku.toim_nimi, group_concat(lasku.tunnus) laskutunnukset, count(tilausrivi.tunnus) riveja, sum(tilausrivi.tilkpl) myyntieria
 					FROM lasku
 					JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'Z'
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'Z'
 					and lasku.alatila = 'X'
-					and lasku.luontiaika >= date_sub(now(), INTERVAL 30 DAY)
+					and lasku.created_at >= date_sub(now(), INTERVAL 30 DAY)
 					GROUP BY 1,2,3,4,5
 					ORDER BY 1 DESC,2 DESC,3,4,5";
 		$tarrares = mysql_query($query) or pupe_error($query);
@@ -100,7 +100,7 @@
 			$kires2 = mysql_query($query) or pupe_error($query);
 
 			while ($tarrarow = mysql_fetch_array($tarrares)) {
-				echo "<tr><td>".tv1dateconv($tarrarow["luontiaika"], "P")."</td><td>".tv1dateconv($tarrarow["toimaika"])."</td><td>$tarrarow[ytunnus]</td><td>$tarrarow[nimi]</td><td>$tarrarow[toim_nimi]</td><td align='right'>$tarrarow[riveja]</td><td align='right'>$tarrarow[myyntieria]</td>";
+				echo "<tr><td>".tv1dateconv($tarrarow["created_at"], "P")."</td><td>".tv1dateconv($tarrarow["toimaika"])."</td><td>$tarrarow[ytunnus]</td><td>$tarrarow[nimi]</td><td>$tarrarow[toim_nimi]</td><td align='right'>$tarrarow[riveja]</td><td align='right'>$tarrarow[myyntieria]</td>";
 				echo "<td align='center'><input type='checkbox' name='vanhatunnukset[]' value='$tarrarow[laskutunnukset]'></td></tr>";
 			}
 

@@ -126,7 +126,7 @@
 				AND (
 					(alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
 					(loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
-					muutospvm >= '{$datetime_checkpoint}'
+					updated_at >= '{$datetime_checkpoint}'
 					)";
 	$asiakashinta_res = pupe_query($query);
 
@@ -153,7 +153,7 @@
 				AND (
 					(alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
 					(loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
-					muutospvm >= '{$datetime_checkpoint}'
+					updated_at >= '{$datetime_checkpoint}'
 					)";
 	$asiakasalennus_res = pupe_query($query);
 
@@ -175,7 +175,7 @@
 				AND (
 					(alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
 					(loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
-					muutospvm >= '{$datetime_checkpoint}'
+					updated_at >= '{$datetime_checkpoint}'
 					)";
 	$hinnasto_res = pupe_query($query);
 
@@ -209,9 +209,9 @@
 				WHERE yhtio = '{$mista_yhtio}'
 				AND status != 'P'
 				AND tuotetyyppi NOT in ('A','B')
-				AND muutospvm >= '{$datetime_checkpoint}'
+				AND updated_at >= '{$datetime_checkpoint}'
 				AND tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
-				ORDER BY muutospvm, tuoteno";
+				ORDER BY updated_at, tuoteno";
 	$tuoteres = pupe_query($query);
 
 	while ($tuoterow = mysql_fetch_assoc($tuoteres)) {

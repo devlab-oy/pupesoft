@@ -315,8 +315,8 @@
 		switch ($tee) {
 			case "peru" :
 				$set_kehahin = "kehahin   = '{$uusi_keskihankintahinta}',
-								muutospvm = now(),
-								muuttaja  = '{$kukarow["kuka"]}', ";
+								updated_at = now(),
+								updated_by  = '{$kukarow["kuka"]}', ";
 
 			case "pois" :
 				$pvm25  = "0000-00-00";
@@ -459,7 +459,7 @@
 					hinta    = round($keskihankintahinta_muutos, 6),
 					kplhinta = round($keskihankintahinta_muutos, 6),
 					selite   = '$epakurantti_selite',
-					laatija  = '{$kukarow["kuka"]}',
+					created_by  = '{$kukarow["kuka"]}',
 					laadittu = $updatepvm";
 		$result = pupe_query($query);
 
@@ -548,8 +548,8 @@
 					AND saldo != 0";
 		$paikatres = pupe_query($query);
 
-		$luontiaika1 = date("Y-m-d H:i:s", mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y")));
-		$luontiaika2 = date("Y-m-d H:i:s", mktime(date("H"), date("i"), date("s")+1, date("m"), date("d"), date("Y")));
+		$created_at1 = date("Y-m-d H:i:s", mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y")));
+		$created_at2 = date("Y-m-d H:i:s", mktime(date("H"), date("i"), date("s")+1, date("m"), date("d"), date("Y")));
 
 		while ($paikatrow = mysql_fetch_assoc($paikatres)) {
 
@@ -568,16 +568,16 @@
     					hyllynro    = '{$paikatrow['hyllynro']}',
     					hyllyvali   = '{$paikatrow['hyllyvali']}',
     					hyllytaso   = '{$paikatrow['hyllytaso']}',
-    					laatija    	= '$kukarow[kuka]',
-    					laadittu 	= '$luontiaika1'";
+    					created_by    	= '$kukarow[kuka]',
+    					laadittu 	= '$created_at1'";
     		$result = pupe_query($query);
 		}
 
 		// vaihdetaan kehari tuotteelle
 		$query = "	UPDATE tuote SET
 					kehahin     = '{$uusi_keskihankintahinta}',
-					muutospvm   = '$luontiaika1',
-					muuttaja    = '$kukarow[kuka]'
+					updated_at   = '$created_at1',
+					updated_by    = '$kukarow[kuka]'
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoterow[tuoteno]'";
 		$result = pupe_query($query);
@@ -591,8 +591,8 @@
 					hinta   	= {$uusi_keskihankintahinta},
 					kplhinta	= {$tuoterow['kehahin']},
 					selite  	= '{$epakurantti_selite}',
-					laatija    	= '$kukarow[kuka]',
-					laadittu 	= '$luontiaika1'";
+					created_by    	= '$kukarow[kuka]',
+					laadittu 	= '$created_at1'";
 		$result = pupe_query($query);
 
         // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -617,8 +617,8 @@
     					hyllynro  = '{$paikatrow['hyllynro']}',
     					hyllyvali = '{$paikatrow['hyllyvali']}',
     					hyllytaso = '{$paikatrow['hyllytaso']}',
-    					laatija   = '$kukarow[kuka]',
-    					laadittu  = '$luontiaika2'";
+    					created_by   = '$kukarow[kuka]',
+    					laadittu  = '$created_at2'";
     		$result = pupe_query($query);
 		}
 
@@ -682,8 +682,8 @@
 					sarjanumerotunnus 	= '$sarjatunnus',
 					arvomuutos   		= round($keskihankintahinta_muutos, 6),
 					selite  			= '$epakurantti_selite',
-					laatija    			= '$kukarow[kuka]',
-					luontiaika 			= now()";
+					created_by    			= '$kukarow[kuka]',
+					created_at 			= now()";
 		$result = pupe_query($query);
 
 		// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -712,8 +712,8 @@
 						tila       = 'X',
 						alatila    = 'E',
 						viite      = '$tapahtumaid',
-						laatija    = '$kukarow[kuka]',
-						luontiaika = now()";
+						created_by    = '$kukarow[kuka]',
+						created_at = now()";
 			$result = pupe_query($query);
 			$laskuid = mysql_insert_id($link);
 		}
@@ -784,7 +784,7 @@
 							vero     = 0,
 							lukko    = '',
 							selite   = '$epakurantti_selite',
-							laatija  = '$kukarow[kuka]',
+							created_by  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
 
@@ -800,7 +800,7 @@
 							vero     = 0,
 							lukko    = '',
 							selite   = '$epakurantti_selite',
-							laatija  = '$kukarow[kuka]',
+							created_by  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
 			}
@@ -829,7 +829,7 @@
 						vero     = 0,
 						lukko    = '',
 						selite   = '$epakurantti_selite',
-						laatija  = '$kukarow[kuka]',
+						created_by  = '$kukarow[kuka]',
 						laadittu = now()";
 			$result = pupe_query($query);
 
@@ -845,7 +845,7 @@
 						vero     = 0,
 						lukko    = '',
 						selite   = '$epakurantti_selite',
-						laatija  = '$kukarow[kuka]',
+						created_by  = '$kukarow[kuka]',
 						laadittu = now()";
 			$result = pupe_query($query);
 		}

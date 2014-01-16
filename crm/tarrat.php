@@ -171,8 +171,8 @@
 							tyyppi   		= 'Memo',
 							pvmalku  		= now(),
 							kentta01 		= '$kukarow[nimi] tulosti osoitetarrat.\n$asmemo_viesti',
-							laatija			= '$kukarow[kuka]',
-							luontiaika		= now()";
+							created_by			= '$kukarow[kuka]',
+							created_at		= now()";
 				$result = mysql_query($kysely) or pupe_error($kysely);
 			}
 

@@ -122,17 +122,17 @@
 		}
 
 		if (isset($kuka) and $kuka != "") {
-			$skriptilisa .= " and suorituskykyloki.laatija = '$kuka' ";
+			$skriptilisa .= " and suorituskykyloki.created_by = '$kuka' ";
 		}
 
 		$query = "	SELECT suorituskykyloki.*, kuka.nimi kukanimi
 					FROM suorituskykyloki
-					LEFT JOIN kuka on suorituskykyloki.yhtio=kuka.yhtio and suorituskykyloki.laatija=kuka.kuka
+					LEFT JOIN kuka on suorituskykyloki.yhtio=kuka.yhtio and suorituskykyloki.created_by=kuka.kuka
 					WHERE suorituskykyloki.yhtio = '$kukarow[yhtio]'
 					$skriptilisa
-					and suorituskykyloki.luontiaika >= '$vva-$kka-$ppa 00:00:00'
-					and suorituskykyloki.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
-					ORDER BY suorituskykyloki.luontiaika
+					and suorituskykyloki.created_at >= '$vva-$kka-$ppa 00:00:00'
+					and suorituskykyloki.created_at <= '$vvl-$kkl-$ppl 23:59:59'
+					ORDER BY suorituskykyloki.created_at
 					LIMIT 500";
 		$res = mysql_query($query) or pupe_error($query);
 
@@ -143,7 +143,7 @@
 
 			$requrest = unserialize($row["request"]);
 
-			echo "<tr><td>".tv1dateconv($row["luontiaika"], "P")."</td><td>$row[kukanimi]</td><td>$row[skripti]</td><td>";
+			echo "<tr><td>".tv1dateconv($row["created_at"], "P")."</td><td>$row[kukanimi]</td><td>$row[skripti]</td><td>";
 
 			echo "<table>";
 

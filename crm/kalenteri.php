@@ -202,7 +202,7 @@ if ($tee == 'LISAA') {
 		$query = "	INSERT INTO kalenteri
 					SET
 					yhtio 		= '$kyhtio',
-					laatija		= '$kukarow[kuka]',
+					created_by		= '$kukarow[kuka]',
 					kuka 		= '$kenelle',
 					pvmalku 	= '$year-$kuu-$paiva $kello:00',
 					pvmloppu 	= '$lyear-$lkuu-$lpaiva $lkello',
@@ -784,7 +784,7 @@ while ($kello_nyt != $whileloppu) {
 				TIME_TO_SEC(if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00') or (pvmloppu = '$year-$kuu-$paiva 00:00:00'),'$vikaloppu:59', right(pvmloppu,8))) - TIME_TO_SEC(if(right(pvmalku,8) < '".$AIKA_ARRAY[0].":00' or pvmalku < '$year-$kuu-$paiva 00:00:00','".$AIKA_ARRAY[0].":00', right(pvmalku,8))) kesto,
 				kalenteri.yhtio yhtio,
 				kalenteri.kuka kuka,
-				kalenteri.laatija laatija,
+				kalenteri.created_by created_by,
 				kalenteri.kuittaus,
 				kalenteri.tyyppi
 				FROM kalenteri
@@ -877,7 +877,7 @@ while ($kello_nyt != $whileloppu) {
 				}
 
 				// Vanhoja kalenteritapahtumia ei saa enää muuttaa ja Hyväksyttyjä lomia ei saa ikinä muokata
-				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
+				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["created_by"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
 					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
 				}
 				elseif ($row['tyyppi'] == 'asennuskalenteri') {

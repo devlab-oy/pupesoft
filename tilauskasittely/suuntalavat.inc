@@ -160,8 +160,8 @@
 						usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
 						korkeus 			= '{$korkeus}',
 						paino 				= '{$paino}',
-						muuttaja 			= '{$kukarow['kuka']}',
-						muutospvm 			= now()
+						updated_by 			= '{$kukarow['kuka']}',
+						updated_at 			= now()
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus 	= '{$suuntalavan_tunnus}'";
 
@@ -188,10 +188,10 @@
 						usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
 						korkeus 			= '{$korkeus}',
 						paino 				= '{$paino}',
-						laatija 			= '{$kukarow['kuka']}',
-						luontiaika 			= now(),
-						muuttaja 			= '{$kukarow['kuka']}',
-						muutospvm 			= now()";
+						created_by 			= '{$kukarow['kuka']}',
+						created_at 			= now(),
+						updated_by 			= '{$kukarow['kuka']}',
+						updated_at 			= now()";
 
 			$insert_result = pupe_query($query);
 			$uusi_suuntalavan_tunnus = mysql_insert_id();
@@ -202,10 +202,10 @@
 							yhtio = '{$kukarow['yhtio']}',
 							suuntalava = '{$uusi_suuntalavan_tunnus}',
 							saapuminen = '{$otunnus}',
-							laatija = '{$kukarow['kuka']}',
-							luontiaika = now(),
-							muutospvm = now(),
-							muuttaja = '{$kukarow['kuka']}'";
+							created_by = '{$kukarow['kuka']}',
+							created_at = now(),
+							updated_at = now(),
+							updated_by = '{$kukarow['kuka']}'";
 
 				$insert_result = pupe_query($query);
 			}

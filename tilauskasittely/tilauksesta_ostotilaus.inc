@@ -84,8 +84,8 @@
 							$query = "	UPDATE tilausrivin_lisatiedot
 										SET
 										toimittajan_tunnus	= '$aburow[liitostunnus]',
-										muutospvm			= now(),
-										muuttaja			= '$kukarow[kuka]'
+										updated_at			= now(),
+										updated_by			= '$kukarow[kuka]'
 										WHERE yhtio		 	 = '$kukarow[yhtio]'
 										and tilausrivitunnus = '$rivi[rivitunnus]'";
 							$updres = pupe_query($query);
@@ -223,8 +223,8 @@
 								and toim_postino	= '{$toim_postino}'
 								and toim_postitp	= '{$toim_postitp}'
 								and toim_maa		= '{$toim_maa}'
-								and left(luontiaika,10) = left(now(),10)
-								and laatija 		= '{$kukarow['kuka']}'
+								and left(created_at,10) = left(now(),10)
+								and created_by 		= '{$kukarow['kuka']}'
 								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 						}
@@ -250,9 +250,9 @@
 										jakelu 				= '$jakelu',
 										kerayspvm 			= '$myytilrow[kerayspvm]',
 										kuljetus 			= '$tiltoi[kuljetus]',
-										laatija 			= '$kukarow[kuka]',
+										created_by 			= '$kukarow[kuka]',
 										liitostunnus		= '$tiltoi[tunnus]',
-										luontiaika			= now(),
+										created_at			= now(),
 										maa 				= '$tiltoi[maa]',
 										maksuteksti 		= '$tiltoi[maksuteksti]',
 										myyja 				= '$myytilrow[myyja]',
@@ -388,7 +388,7 @@
 											hyllyvali 		= '$jtstu[hyllyvali]',
 											hyllytaso 		= '$jtstu[hyllytaso]',
 											tilaajanrivinro = '',
-											laatija 		= '$kukarow[kuka]',
+											created_by 		= '$kukarow[kuka]',
 											laadittu 		= now(),
 											yhtio 			= '$kukarow[yhtio]',
 											tuoteno 		= '$tilrivirow[tuoteno]',
@@ -422,8 +422,8 @@
 								// Lis‰t‰‰n ostorivin lis‰tiedot
 								$query = "	INSERT INTO tilausrivin_lisatiedot
 											SET tilausrivitunnus 	= '$lisatty_tun',
-											luontiaika				= now(),
-											laatija 				= '$kukarow[kuka]',
+											created_at				= now(),
+											created_by 				= '$kukarow[kuka]',
 											yhtio		 	 		= '$kukarow[yhtio]'";
 								$updres = pupe_query($query);
 							}
@@ -441,8 +441,8 @@
 										SET tilausrivilinkki 	= '$lisatty_tun',
 										toimittajan_tunnus		= '$ttrow[liitostunnus]',
 										suoraan_laskutukseen	= '$suoraan_laskutukseen',
-										muutospvm				= now(),
-										muuttaja				= '$kukarow[kuka]'
+										updated_at				= now(),
+										updated_by				= '$kukarow[kuka]'
 										WHERE yhtio		 	 = '$kukarow[yhtio]'
 										and tilausrivitunnus = '$tilrivirow[rivitunnus]'";
 							$updres = pupe_query($query);

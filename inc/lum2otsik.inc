@@ -13,7 +13,7 @@
 	6 		Asiakastunnuksen lis‰osa					AN		5 		EP
 	7 		Varalla										AN 		2 		EP
 	8 		Hyv‰ksymiskoodi								N 		1 		P 	0=hyv‰ksytty 4=hyl‰tty
-	9 		Aineiston/palautteen luontiaika	* 			N 		10 		EP 	vvkkpphhmm
+	9 		Aineiston/palautteen created_at	* 			N 		10 		EP 	vvkkpphhmm
 	10 		Varalla  									N 		14 		EP
 	11 		Veloituksen p‰iv‰m‰‰r‰  					N 		8 		EP vvvvkkpp
 	12 		Varalla  									AN 		542 	EP
@@ -33,7 +33,7 @@
 	$luonti = getdate();
 
 	// Pvm 10 merkki‰
-	$ulos .= sprintf ('%02d', substr($luonti['year'], 2, 2));	// Aineiston/palautteen luontiaika
+	$ulos .= sprintf ('%02d', substr($luonti['year'], 2, 2));	// Aineiston/palautteen created_at
 	$ulos .= sprintf ('%02d', $luonti['mon']);
 	$ulos .= sprintf ('%02d', $luonti['mday']);
 	$ulos .= sprintf ('%02d', $luonti['hours']);

@@ -163,7 +163,7 @@
 	if ($tee == 'TULOSTA') {
 
 		$luontipvm	= date("ymd");
-		$luontiaika	= date("Hi");
+		$created_at	= date("Hi");
 
 		$query = "	SELECT *
 					FROM factoring
@@ -195,7 +195,7 @@
 		}
 
 		$ulos .= sprintf ('%06.6s',	 	$luontipvm);								//aineiston luontipvm
-		$ulos .= sprintf ('%04.4s',   	$luontiaika);								//luontikaika
+		$ulos .= sprintf ('%04.4s',   	$created_at);								//luontikaika
 		$ulos .= sprintf ('%06.6s',	 	$frow["sopimusnumero"]);					//sopimusnumero
 		$ulos .= sprintf ('%-3.3s', 	$valkoodi);									//valuutta
 
@@ -627,7 +627,7 @@
 				}
 
 				$ulos .= sprintf ('%06.6s', 		$luontipvm);
-				$ulos .= sprintf ('%04.4s',   		$luontiaika);
+				$ulos .= sprintf ('%04.4s',   		$created_at);
 				$ulos .= sprintf ('%06.6s', 		$laskukpl);
 				$ulos .= sprintf ('%06.6s', 		$vlaskukpl);
 				$ulos .= sprintf ('%013.13s', 		$vlaskusum);

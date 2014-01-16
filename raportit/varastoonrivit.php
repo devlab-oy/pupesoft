@@ -107,7 +107,7 @@
 
 			$groupby = $keraajanro_pakollinen != '' ? "GROUP BY 1,2,3,4" : "GROUP BY 1,2,3";
 
-			$query = "	SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
+			$query = "	SELECT IF(kuka.nimi IS NULL,tapahtuma.created_by, kuka.nimi) kuka,
 						tilausrivi.uusiotunnus keikka,
 						LEFT(tapahtuma.laadittu,10) laadittu,
 						{$keraajanrolisaselect}
@@ -116,7 +116,7 @@
 						FROM tapahtuma
 						JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
 						LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
-						LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+						LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.created_by)
 						WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 						AND tapahtuma.laji = 'tulo'
 						AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
@@ -241,7 +241,7 @@
 						FROM tapahtuma
 						JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
 						LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
-						{$lefti} JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija {$keraajanro_joinlisa})
+						{$lefti} JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.created_by {$keraajanro_joinlisa})
 						WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 						AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 						AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
@@ -297,15 +297,15 @@
 
 
 
-				$query = "	SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
-							IF(kuka.kuka IS NULL,tapahtuma.laatija, kuka.kuka) kuka_tunnus,
+				$query = "	SELECT IF(kuka.nimi IS NULL,tapahtuma.created_by, kuka.nimi) kuka,
+							IF(kuka.kuka IS NULL,tapahtuma.created_by, kuka.kuka) kuka_tunnus,
 							{$keraajanrolisaselect}
 							SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
 							COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 							FROM tapahtuma
 							JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
 							LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
-							LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+							LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.created_by)
 							WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 							AND tapahtuma.laji = 'tulo'
 							{$wherelisa}
@@ -338,11 +338,11 @@
 								FROM tapahtuma
 								JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
 								LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
-								LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+								LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.created_by)
 								WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 								AND tapahtuma.laji = 'tulo'
 								{$wherelisa}
-								AND tapahtuma.laatija = '{$kayttajittain_row['kuka_tunnus']}'
+								AND tapahtuma.created_by = '{$kayttajittain_row['kuka_tunnus']}'
 								{$groupby}
 								{$keraajanrolisa}
 								ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";

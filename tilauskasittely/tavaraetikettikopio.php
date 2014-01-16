@@ -79,16 +79,16 @@
 					lasku.ytunnus, lasku.tunnus AS otunnus,
 					TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi,
 					suuntalavat_saapuminen.saapuminen, lasku.laskunro,
-					lasku.luontiaika, IF(kuka.nimi != '', kuka.nimi, lasku.laatija) AS laatija
+					lasku.created_at, IF(kuka.nimi != '', kuka.nimi, lasku.created_by) AS created_by
 					FROM suuntalavat
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
 					JOIN lasku ON (lasku.yhtio = suuntalavat_saapuminen.yhtio AND lasku.tunnus = suuntalavat_saapuminen.saapuminen AND lasku.tila = 'K')
 					JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
-					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
+					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.created_by)
 					WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
 					AND suuntalavat.tila = 'P'
 					AND suuntalavat.sscc = '{$sscc}'
-					ORDER BY nimi, lasku.luontiaika";
+					ORDER BY nimi, lasku.created_at";
 		$suuntalava_res = pupe_query($query);
 
 		if (mysql_num_rows($suuntalava_res) > 0) {
@@ -112,8 +112,8 @@
 				echo "<td>{$suuntalava_row['ytunnus']}</td>";
 				echo "<td>{$suuntalava_row['nimi']}</td>";
 				echo "<td>{$suuntalava_row['laskunro']}</td>";
-				echo "<td>",tv1dateconv($suuntalava_row['luontiaika']),"</td>";
-				echo "<td>{$suuntalava_row['laatija']}</td>";
+				echo "<td>",tv1dateconv($suuntalava_row['created_at']),"</td>";
+				echo "<td>{$suuntalava_row['created_by']}</td>";
 
 				echo "<td>";
 				echo "<form action='' method='post'>";
@@ -143,9 +143,9 @@
 					laskun_lisatiedot.laskutus_postino,
 					laskun_lisatiedot.laskutus_postitp,
 					laskun_lisatiedot.laskutus_maa,
-					lasku.*, lasku.luontiaika lasku_luontiaika, lasku.laatija lasku_laatija, lasku.tunnus otunnus,
+					lasku.*, lasku.created_at lasku_created_at, lasku.created_by lasku_created_by, lasku.tunnus otunnus,
 					pakkaus.pakkaus, pakkaus.pakkauskuvaus, keraysvyohyke.nimitys ker_nimitys,
-					suuntalavat.laatija, suuntalavat.luontiaika, suuntalavat.muuttaja, suuntalavat.muutospvm, suuntalavat.tunnus
+					suuntalavat.created_by, suuntalavat.created_at, suuntalavat.updated_by, suuntalavat.updated_at, suuntalavat.tunnus
 					FROM suuntalavat
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
 					JOIN lasku ON (lasku.yhtio = suuntalavat_saapuminen.yhtio AND lasku.tunnus = suuntalavat_saapuminen.saapuminen AND lasku.tila = 'K' AND lasku.laskunro = '{$saapuminen}')
@@ -198,8 +198,8 @@
 
 			echo "<tr>";
 			echo "<td>{$row['laskunro']}</td>";
-			echo "<td>",tv1dateconv($row['lasku_luontiaika']),"</td>";
-			echo "<td>{$row['lasku_laatija']}</td>";
+			echo "<td>",tv1dateconv($row['lasku_created_at']),"</td>";
+			echo "<td>{$row['lasku_created_by']}</td>";
 			echo "<td>&nbsp;</td>";
 			echo "</tr>";
 
@@ -232,10 +232,10 @@
 				echo "<td>{$suuntalava_row['terminaalialue']}</td>";
 				echo "<td>{$suuntalava_row['korkeus']}</td>";
 				echo "<td>{$suuntalava_row['paino']}</td>";
-				echo "<td>{$suuntalava_row['laatija']}</td>";
-				echo "<td>",tv1dateconv($suuntalava_row['luontiaika']),"</td>";
-				echo "<td>{$suuntalava_row['muuttaja']}</td>";
-				echo "<td>",tv1dateconv($suuntalava_row['muutospvm']),"</td>";
+				echo "<td>{$suuntalava_row['created_by']}</td>";
+				echo "<td>",tv1dateconv($suuntalava_row['created_at']),"</td>";
+				echo "<td>{$suuntalava_row['updated_by']}</td>";
+				echo "<td>",tv1dateconv($suuntalava_row['updated_at']),"</td>";
 
 				echo "<td>";
 				echo "<form action='' method='post'>";

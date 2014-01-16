@@ -143,8 +143,8 @@ function hae_tilaukset($request) {
 
 	$lasku_where = "";
 	if ($request['alku_pvm'] and $request['loppu_pvm']) {
-		//loppu_pvm + 1 day, koska queryssä between ja luontiaika on datetime
-		$lasku_where = " AND lasku.luontiaika BETWEEN '".date('Y-m-d', strtotime($request['alku_pvm']))."' AND '".date('Y-m-d', strtotime($request['loppu_pvm'].' + 1 day'))."'";
+		//loppu_pvm + 1 day, koska queryssä between ja created_at on datetime
+		$lasku_where = " AND lasku.created_at BETWEEN '".date('Y-m-d', strtotime($request['alku_pvm']))."' AND '".date('Y-m-d', strtotime($request['loppu_pvm'].' + 1 day'))."'";
 	}
 
 	$queryt = array();
@@ -153,7 +153,7 @@ function hae_tilaukset($request) {
 		$queryt[] = "	(
 						SELECT lasku.tunnus,
 						toimi.nimi as nimi,
-						lasku.luontiaika,
+						lasku.created_at,
 						lasku.summa,
 						'A' as tyyppi,
 						sarjanumeroseuranta.sarjanumero as sarjanumero,
@@ -178,7 +178,7 @@ function hae_tilaukset($request) {
 		$queryt[] = "	(
 						SELECT lasku.tunnus,
 						asiakas.nimi as nimi,
-						lasku.luontiaika,
+						lasku.created_at,
 						lasku.summa,
 						'L' as tyyppi,
 						sarjanumeroseuranta.sarjanumero as sarjanumero,
@@ -207,7 +207,7 @@ function hae_tilaukset($request) {
 		$queryt[] = "	(
 						SELECT lasku.tunnus,
 						toimi.nimi as nimi,
-						lasku.luontiaika,
+						lasku.created_at,
 						lasku.summa,
 						'O' as tyyppi,
 						sarjanumeroseuranta.sarjanumero as sarjanumero,
@@ -243,7 +243,7 @@ function hae_tilaukset($request) {
 		$query = "	(
 						SELECT lasku.tunnus,
 						asiakas.nimi as nimi,
-						lasku.luontiaika,
+						lasku.created_at,
 						lasku.summa,
 						'L' as tyyppi,
 						sarjanumeroseuranta.sarjanumero as sarjanumero,
@@ -269,7 +269,7 @@ function hae_tilaukset($request) {
 						(
 						SELECT lasku.tunnus,
 						toimi.nimi as nimi,
-						lasku.luontiaika,
+						lasku.created_at,
 						lasku.summa,
 						'A' as tyyppi,
 						sarjanumeroseuranta.sarjanumero as sarjanumero,
@@ -295,7 +295,7 @@ function hae_tilaukset($request) {
 						(
 						SELECT lasku.tunnus,
 						toimi.nimi as nimi,
-						lasku.luontiaika,
+						lasku.created_at,
 						lasku.summa,
 						'O' as tyyppi,
 						sarjanumeroseuranta.sarjanumero as sarjanumero,
@@ -318,7 +318,7 @@ function hae_tilaukset($request) {
 						{$sarjanumero_where}
 						)";
 	}
-	$query = $query."ORDER BY tyyppi, luontiaika";
+	$query = $query."ORDER BY tyyppi, created_at";
 	$result = pupe_query($query);
 
 	$tilaukset = array();
@@ -354,7 +354,7 @@ function echo_tilaukset_raportti($tilaukset, $request = array()) {
 		echo "<td>";
 		echo "<a href='{$palvelin2}tilauskasittely/sarjanumeroseuranta.php?indexvas=1&sarjanumero_haku={$tilaus['sarjanumero']}&lopetus={$lopetus}'>{$tilaus['sarjanumero']}</a>";
 		echo "</td>";
-		echo "<td>".tv1dateconv($tilaus['luontiaika'])."</td>";
+		echo "<td>".tv1dateconv($tilaus['created_at'])."</td>";
 		echo "<td td align='right'>{$tilaus['summa']}</td>";
 		echo "<td>{$request['tyypit'][$tilaus['tyyppi']]}</td>";
 		echo "</tr>";

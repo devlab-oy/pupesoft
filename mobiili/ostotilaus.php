@@ -33,10 +33,10 @@ else {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laatija = '{$kukarow['kuka']}'
+					AND created_by = '{$kukarow['kuka']}'
 					AND tila = 'K'
 					AND alatila NOT IN ('X','I')
-					ORDER BY luontiaika DESC
+					ORDER BY created_at DESC
 					LIMIT 1";
 		$result = pupe_query($query);
 		$saapuminen_row = mysql_fetch_assoc($result);

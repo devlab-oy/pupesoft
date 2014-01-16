@@ -87,7 +87,7 @@
 							case 'tunnus':
 								$values .= ", ''";
 								break;
-							case 'laatija':
+							case 'created_by':
 								$values .= ", '$kukarow[kuka]'";
 								break;
 							case 'kpl':

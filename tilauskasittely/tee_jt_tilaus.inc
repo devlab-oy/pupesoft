@@ -219,7 +219,7 @@
 								FROM lasku
 								JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 								WHERE lasku.yhtio		= '$kukarow[yhtio]'
-								and lasku.laatija		= '$kukarow[kuka]'
+								and lasku.created_by		= '$kukarow[kuka]'
 								and lasku.alatila		= '$alatila'
 								and lasku.tila 			= '$tila'
 								and lasku.myyja			= '$otsikkorivi[myyja]'
@@ -309,9 +309,9 @@
 								$query .= "tilaustyyppi='".$otsikkorivi[$fieldname]."',";
 							}
 						}
-						// laatijaksi klikkaaja
-						elseif ($fieldname == 'laatija') {
-							$query .= "laatija='$kukarow[kuka]',";
+						// created_byksi klikkaaja
+						elseif ($fieldname == 'created_by') {
+							$query .= "created_by='$kukarow[kuka]',";
 						}
 						// keräysaika ja toimitusaikaan now
 						elseif ($fieldname == 'kerayspvm' or
@@ -518,10 +518,10 @@
 
 						$fieldname = mysql_field_name($lisatiedot_result, $i);
 
-						if ($fieldname == 'laatija') {
+						if ($fieldname == 'created_by') {
 							$query .= $fieldname."='$kukarow[kuka]',";
 						}
-						elseif ($fieldname == 'luontiaika') {
+						elseif ($fieldname == 'created_at') {
 							$query .= $fieldname."=now(),";
 						}
 						elseif ($fieldname == 'otunnus') {
@@ -889,8 +889,8 @@
 												case 'tilausrivitunnus':
 												case 'tiliointirivitunnus':
 												case 'toimittajan_tunnus':
-												case 'luontiaika':
-												case 'laatija':
+												case 'created_at':
+												case 'created_by':
 													$values .= "";
 													break;
 												case 'positio':

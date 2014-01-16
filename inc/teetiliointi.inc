@@ -115,7 +115,7 @@
 						lukko 			 = '',
 						tosite 			 = '{$tositenro}',
 						tapahtumatunnus  = '{$tapahtumatunnus}',
-						laatija 		 = '{$kukarow['kuka']}',
+						created_by 		 = '{$kukarow['kuka']}',
 						laadittu 		 = now()";
 		}
 	}
@@ -138,7 +138,7 @@
 					lukko 			 = '',
 					tosite 			 = '{$tositenro}',
 					tapahtumatunnus  = '{$tapahtumatunnus}',
-					laatija 		 = '{$kukarow['kuka']}',
+					created_by 		 = '{$kukarow['kuka']}',
 					laadittu 		 = now()";
 	}
 
@@ -166,7 +166,7 @@
 					vero 			 = 0,
 					selite 			 = '{$selite}',
 					lukko 			 = '1',
-					laatija 		 = '{$kukarow['kuka']}',
+					created_by 		 = '{$kukarow['kuka']}',
 					laadittu 		 = now(),
 					aputunnus 		 = {$isa}";
 		$result = pupe_query($query);

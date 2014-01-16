@@ -72,7 +72,7 @@ if ($tee == "KORJAA") {
 			$updres = mysql_query($query) or pupe_error($query);
 		}
 		else {
-			$query = "INSERT INTO laskun_lisatiedot set yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), otunnus='$tunnus', seuranta='$uusi_seuranta'";
+			$query = "INSERT INTO laskun_lisatiedot set yhtio='$kukarow[yhtio]', created_by='$kukarow[kuka]', created_at=now(), otunnus='$tunnus', seuranta='$uusi_seuranta'";
 			$updres = mysql_query($query) or pupe_error($query);
 		}
 
@@ -135,7 +135,7 @@ if ($tee=="") {
 							$updres = mysql_query($query) or pupe_error($query);
 						}
 						else {
-							$query = "INSERT INTO laskun_lisatiedot set yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), otunnus='$row[tunnus]', seuranta='$tarkrow[seuranta]'";
+							$query = "INSERT INTO laskun_lisatiedot set yhtio='$kukarow[yhtio]', created_by='$kukarow[kuka]', created_at=now(), otunnus='$row[tunnus]', seuranta='$tarkrow[seuranta]'";
 							$updres = mysql_query($query) or pupe_error($query);
 						}
 
@@ -373,10 +373,10 @@ if ($tee=="" or $tee=="LASKE") {
 				}
 
 				if ($nayta_tilaukset!="") {
-					$tilaukset .= ", GROUP_CONCAT(distinct(if (left(lasku.luontiaika,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.luontiaika,7)<='$vv-".sprintf("%02s",$kk)."', if (tunnusnippu>0,concat('*',lasku.tunnus),lasku.tunnus), NULL)))  tilaukset_$sarake\n";
+					$tilaukset .= ", GROUP_CONCAT(distinct(if (left(lasku.created_at,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.created_at,7)<='$vv-".sprintf("%02s",$kk)."', if (tunnusnippu>0,concat('*',lasku.tunnus),lasku.tunnus), NULL)))  tilaukset_$sarake\n";
 				}
 
-				$summasarake .= ", sum(if (left(lasku.luontiaika,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.luontiaika,7)<='$vv-".sprintf("%02s",$kk)."',
+				$summasarake .= ", sum(if (left(lasku.created_at,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.created_at,7)<='$vv-".sprintf("%02s",$kk)."',
 										if (lasku.tunnusnippu=0,
 											(
 												SELECT sum(if (t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * {$query_ale_lisa},rivihinta))
@@ -408,11 +408,11 @@ if ($tee=="" or $tee=="LASKE") {
 			$query = "	SELECT concat_ws(' - ', avainsana.selite, avainsana.selitetark) seuranta
 						$summasarake
 						$tilaukset
-						FROM lasku USE INDEX(yhtio_tila_luontiaika)
+						FROM lasku USE INDEX(yhtio_tila_created_at)
 						LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus
 						LEFT JOIN avainsana ON laskun_lisatiedot.yhtio=avainsana.yhtio and laskun_lisatiedot.seuranta=avainsana.selite and avainsana.laji='SEURANTA'
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and left(lasku.luontiaika,7)>='$alku_vv-$alku_kk' and left(lasku.luontiaika,7)<='$loppu_vv-$loppu_kk'
+						and left(lasku.created_at,7)>='$alku_vv-$alku_kk' and left(lasku.created_at,7)<='$loppu_vv-$loppu_kk'
 						and lasku.tila IN ($sallitut_tilat)
 						and (lasku.tunnusnippu=0 or lasku.tunnusnippu=lasku.tunnus)
 						$lisa

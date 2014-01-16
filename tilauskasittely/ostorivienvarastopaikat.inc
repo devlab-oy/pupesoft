@@ -111,8 +111,8 @@ if ($tee == "valmis") {
 									case 'varattu':
 										$insert_query .= "varattu='{$paljon_pitaa_mahtua_muualle}',";
 										break;
-									case 'laatija':
-										$insert_query .= "laatija='{$kukarow['kuka']}',";
+									case 'created_by':
+										$insert_query .= "created_by='{$kukarow['kuka']}',";
 										break;
 									case 'laadittu':
 										$insert_query .= "laadittu=now(),";
@@ -215,7 +215,7 @@ if ($tee == "valmis") {
 
 								if (!$varaston_hyllypaikat_kaytossa or (isset($hyllyp) and mysql_num_rows($hyllyp) != 0)) {
 
-									$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio,laatija,luontiaika)
+									$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio,created_by,created_at)
 												values ('".$t1[$tilausrivirow["tunnus"]]."','".$t2[$tilausrivirow["tunnus"]]."','".$t3[$tilausrivirow["tunnus"]]."','".$t4[$tilausrivirow["tunnus"]]."','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 									$insre = pupe_query($query);
 
@@ -242,7 +242,7 @@ if ($tee == "valmis") {
 												hyllyvali	= '{$t3[$tilausrivirow["tunnus"]]}',
 												hyllytaso	= '{$t4[$tilausrivirow["tunnus"]]}',
 												selite		= '".t("Saavutettaessa lisättiin tuotepaikka")." ".$t1[$tilausrivirow["tunnus"]]." ".$t2[$tilausrivirow["tunnus"]]." ".$t3[$tilausrivirow["tunnus"]]." ".$t4[$tilausrivirow["tunnus"]]."',
-												laatija 	= '$kukarow[kuka]',
+												created_by 	= '$kukarow[kuka]',
 												laadittu	= now()";
 									$result2 = pupe_query($query2);
 
@@ -301,8 +301,8 @@ if ($tee == "valmis") {
 								hyllynro		= '$paikkarow[hyllynro]',
 								hyllyvali		= '$paikkarow[hyllyvali]',
 								hyllytaso		= '$paikkarow[hyllytaso]',
-								muuttaja		= '$kukarow[kuka]',
-								muutospvm		= now()
+								updated_by		= '$kukarow[kuka]',
+								updated_at		= now()
 								WHERE yhtio			= '$kukarow[yhtio]'
 								and tuoteno 		= '$tilausrivirow[tuoteno]'
 								and ostorivitunnus	= '$tilausrivirow[tunnus]'";
@@ -313,16 +313,16 @@ if ($tee == "valmis") {
 				if ($oletusbox[$tunnus]!= '' and $virheita == 0) {
 					$query = "	UPDATE tuotepaikat
 								SET oletus 		= '',
-								muuttaja		= '$kukarow[kuka]',
-								muutospvm		= now()
+								updated_by		= '$kukarow[kuka]',
+								updated_at		= now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$paikkarow[tuoteno]'";
 					$upresult = pupe_query($query);
 
 					$query = "	UPDATE tuotepaikat
 								SET oletus 	= 'X',
-								muuttaja	= '$kukarow[kuka]',
-								muutospvm	= now()
+								updated_by	= '$kukarow[kuka]',
+								updated_at	= now()
 								WHERE yhtio 	= '$kukarow[yhtio]'
 								and tuoteno 	= '$paikkarow[tuoteno]'
 								and hyllyalue	= '$paikkarow[hyllyalue]'
@@ -342,8 +342,8 @@ if ($tee == "valmis") {
 					if (mysql_num_rows($upresult) == 0) {
 						$query = "	UPDATE tuotepaikat
 									SET oletus 	= 'X',
-									muuttaja	= '$kukarow[kuka]',
-									muutospvm	= now()
+									updated_by	= '$kukarow[kuka]',
+									updated_at	= now()
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$paikkarow[tuoteno]'
 									ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";

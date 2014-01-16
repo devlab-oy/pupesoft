@@ -113,7 +113,7 @@
 		$sarakkeet["SARAKE4C"] 	= t("abc")."\t";
 		$sarakkeet["SARAKE4CA"] = t("abc osasto")."\t";
 		$sarakkeet["SARAKE4CB"] = t("abc try")."\t";
-		$sarakkeet["SARAKE4D"] 	= t("luontiaika")."\t";
+		$sarakkeet["SARAKE4D"] 	= t("created_at")."\t";
 		$sarakkeet["SARAKE5"] 	= t("saldo")."\t";
 		$sarakkeet["SARAKE6"] 	= t("halytysraja")."\t";
 		$sarakkeet["SARAKE6B"] 	= t("tilausmaara")."\t";
@@ -590,11 +590,11 @@
 
 			// Listaa vain äskettäin perustetut tuotteet:
 			if ($valitut["VAINUUDETTUOTTEET"] != '') {
-				$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
+				$lisaa .= " and tuote.created_at >= date_sub(current_date, interval 12 month) ";
 			}
 			// Älä listaa äskettäin perustettuja tuotteita:
 			if ($valitut["UUDETTUOTTEET"] != '') {
-				$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
+				$lisaa .= " and tuote.created_at < date_sub(current_date, interval 12 month) ";
 			}
 
 			if ($toimittajaid != '') {
@@ -693,7 +693,7 @@
 								abc_aputaulu.yhtio = tuote.yhtio
 								and abc_aputaulu.tuoteno = tuote.tuoteno
 								and abc_aputaulu.tyyppi = '$abcrajaustapa'
-								and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
+								and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_created_at >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
 			}
 			else {
 				$abcjoin = "	LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (
@@ -765,7 +765,7 @@
 							abc_aputaulu.luokka abcluokka,
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
-							tuote.luontiaika,
+							tuote.created_at,
 							tuote.sarjanumeroseuranta,
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
@@ -813,7 +813,7 @@
 							abc_aputaulu.luokka abcluokka,
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
-							tuote.luontiaika,
+							tuote.created_at,
 							tuote.sarjanumeroseuranta,
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
@@ -1222,11 +1222,11 @@
 					}
 
 					if ($valitut["SARAKE4D"] != '') {
-						if ($row["luontiaika"] == "0000-00-00 00:00:00") $row["luontiaika"] = "";
+						if ($row["created_at"] == "0000-00-00 00:00:00") $row["created_at"] = "";
 
-						$rivi .= "\"$row[luontiaika]\"\t";
+						$rivi .= "\"$row[created_at]\"\t";
 
-						$worksheet->writeString($excelrivi, $excelsarake, $row["luontiaika"]);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["created_at"]);
 						$excelsarake++;
 					}
 

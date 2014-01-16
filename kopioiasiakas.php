@@ -85,23 +85,23 @@
 
 			require "inc/asiakasrivi.inc";
 
-			if (mysql_field_name($result, $i) == "muutospvm") {
+			if (mysql_field_name($result, $i) == "updated_at") {
 				$tyyppi = 0;
 				$jatko = 0;
 				$ulos = '';
 			}
 
-			if (mysql_field_name($result, $i) == "muuttaja") {
+			if (mysql_field_name($result, $i) == "updated_by") {
 				$tyyppi = 0;
 				$jatko = 0;
 				$ulos = '';
 			}
 
-			if(mysql_field_name($result, $i) == 'laatija') {	//speciaali tapaukset
+			if(mysql_field_name($result, $i) == 'created_by') {	//speciaali tapaukset
 				$tyyppi = 2;
 				$trow[$i] = $kukarow["kuka"];
 			}
-			if(mysql_field_name($result, $i) == 'luontiaika') {	//speciaali tapaukset
+			if(mysql_field_name($result, $i) == 'created_at') {	//speciaali tapaukset
 				$tyyppi = 2;
 				$trow[$i] = date('Y-m-d H:i:s');
 			}

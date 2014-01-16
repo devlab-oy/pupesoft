@@ -56,8 +56,8 @@ if ($tee == 'PERUSTA') {
 					tilino 			= '$tilino',
 					vienti          = '$maa[$riviindex]',
 					yhtio			= '$kukarow[yhtio]',
-					laatija			= '$kukarow[kuka]',
-					luontiaika		= now()
+					created_by			= '$kukarow[kuka]',
+					created_at		= now()
 					ON DUPLICATE KEY UPDATE
 					nimitys         = '$tuotenimitys',
 					malli			= '$tuotenimitys_osa',
@@ -70,8 +70,8 @@ if ($tee == 'PERUSTA') {
 					status			= 'A',
 					tilino 			= '$tilino',
 					vienti          = '$maa[$riviindex]',
-					muuttaja		= '$kukarow[kuka]',
-					muutospvm		= now()";
+					updated_by		= '$kukarow[kuka]',
+					updated_at		= now()";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
@@ -286,8 +286,8 @@ if ($tee == "synkronoi") {
 					malli      	    = '$malli',
 					myymalahinta    = '$myymalahinta',
 					yhtio			= '$kukarow[yhtio]',
-					laatija			= '$kukarow[kuka]',
-					luontiaika		= now()
+					created_by			= '$kukarow[kuka]',
+					created_at		= now()
 					ON DUPLICATE KEY UPDATE
 					nimitys         = '$nimitys',
 					alv             = '$alv',
@@ -300,8 +300,8 @@ if ($tee == "synkronoi") {
 					vienti          = '$vienti',
 					malli      	    = '$malli',
 					myymalahinta    = '$myymalahinta',
-					muuttaja		= '$kukarow[kuka]',
-					muutospvm		= now()";
+					updated_by		= '$kukarow[kuka]',
+					updated_at		= now()";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 

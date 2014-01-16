@@ -121,7 +121,7 @@ foreach ($keissit as $keissi) {
 			$query =	"SELECT 'Myynti' as Tapahtumalaji";
 			break;
 		case "Myyntitil" :
-			$query =	"SELECT left(lasku.luontiaika,10) AS 'paivays',
+			$query =	"SELECT left(lasku.created_at,10) AS 'paivays',
 						tilausrivi.tilkpl AS 'maara',
 						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
 						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
@@ -136,7 +136,7 @@ foreach ($keissit as $keissi) {
 						LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila IN ('N','L')
-						and lasku.luontiaika != '0000-00-00 00:00:00'
+						and lasku.created_at != '0000-00-00 00:00:00'
 						ORDER BY lasku.tunnus, tilausrivi.tunnus";
 			break;
 		case "Avointil" :
@@ -155,7 +155,7 @@ foreach ($keissit as $keissi) {
 						LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila IN ('N','L')
-						and lasku.luontiaika != '0000-00-00 00:00:00'
+						and lasku.created_at != '0000-00-00 00:00:00'
 						and lasku.laskunro = 0
 						and tilausrivi.kpl = 0
 						and lasku.alatila != 'X'

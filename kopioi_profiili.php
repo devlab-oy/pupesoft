@@ -37,10 +37,10 @@
 						profiili	= '{$fromkuka}',
 						yhtio		= '{$tokuka}',
 						hidden		= '{$row['hidden']}',
-						laatija 	= '{$kukarow['kuka']}',
-						luontiaika 	= now(),
-						muutospvm 	= now(),
-						muuttaja 	= '{$kukarow['kuka']}'";
+						created_by 	= '{$kukarow['kuka']}',
+						created_at 	= now(),
+						updated_at 	= now(),
+						updated_by 	= '{$kukarow['kuka']}'";
 			$upres = pupe_query($query);
 		}
 
@@ -106,10 +106,10 @@
 											jarjestys 	= '$trow[jarjestys]',
 											jarjestys2	= '$trow[jarjestys2]',
 											yhtio		= '$tokuka'
-											laatija 	= '{$kukarow['kuka']}',
-											luontiaika 	= now(),
-											muutospvm 	= now(),
-											muuttaja 	= '{$kukarow['kuka']}'";
+											created_by 	= '{$kukarow['kuka']}',
+											created_at 	= now(),
+											updated_at 	= now(),
+											updated_by 	= '{$kukarow['kuka']}'";
 								$rresult = pupe_query($query);
 							}
 						}

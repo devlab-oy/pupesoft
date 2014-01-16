@@ -126,7 +126,7 @@
 							vero		= 0,
 							selite		= 'Jaksotus $tiliointirow[selite]',
 							lukko		= '',
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now()";
 				$result = pupe_query($query);
 				$jisa = mysql_insert_id($link);
@@ -147,7 +147,7 @@
 							selite		= 'Jaksotus $tiliointirow[selite]',
 							lukko		= '1',
 							aputunnus	= '$jisa',
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now()";
 				$result = pupe_query($query);
 				$viimeinen2 = mysql_insert_id($link);
@@ -182,7 +182,7 @@
 							selite		= 'Jaksotus $tiliointirow[selite]',
 							lukko		= '1',
 							aputunnus	= '$jisa',
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now()";
 				$result = pupe_query($query);
 				$viimeinen1 = mysql_insert_id($link);
@@ -200,7 +200,7 @@
 							selite		= 'Jaksotus $tiliointirow[selite]',
 							lukko		= '1',
 							aputunnus	= '$jisa',
-							laatija		= '$kukarow[kuka]',
+							created_by		= '$kukarow[kuka]',
 							laadittu	= now()";
 				$result = pupe_query($query);
 				$viimeinen2 = mysql_insert_id($link);

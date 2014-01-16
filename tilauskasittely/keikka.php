@@ -355,7 +355,7 @@ if (isset($messenger) and $messenger == 'X' and isset($message) and trim($messag
 				vastaanottaja = '{$vastaanottaja}',
 				viesti = '{$message}',
 				status = '{$status}',
-				luontiaika = now()";
+				created_at = now()";
 	$messenger_result = pupe_query($query);
 
 	echo "<font class='message'>",sprintf(t('Viesti lähetetty onnistuneesti käyttäjälle %s.'), $vastaanottaja)."</font><br />";
@@ -495,7 +495,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 		if (mysql_num_rows($keraysvyohyke_result) > 0) {
 			echo "</tr><tr>";
-			echo "<th>",t("Rajaa laatijaa keräysvyöhykkeellä"),"</th>";
+			echo "<th>",t("Rajaa created_bya keräysvyöhykkeellä"),"</th>";
 			echo "<td><select name='keraysvyohyke' onchange='submit();'>";
 			echo "<option value=''>",t("Valitse"),"</option>";
 
@@ -510,7 +510,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		}
 
 		echo "</tr><tr>";
-		echo "<th>",t("Etsi saapumisen laatijalla"),"</th>";
+		echo "<th>",t("Etsi saapumisen created_bylla"),"</th>";
 
 		$kukalisa = trim($keraysvyohyke) != '' ? " and keraysvyohyke = '{$keraysvyohyke}' " : '';
 
@@ -520,16 +520,16 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 					AND extranet = ''
 					$kukalisa
 					ORDER BY nimi";
-		$keikan_laatija_res = pupe_query($query);
+		$keikan_created_by_res = pupe_query($query);
 
-		echo "<td><select name='keikan_laatija' onchange='submit();'>";
+		echo "<td><select name='keikan_created_by' onchange='submit();'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
 
-		while ($keikan_laatija_row = mysql_fetch_assoc($keikan_laatija_res)) {
+		while ($keikan_created_by_row = mysql_fetch_assoc($keikan_created_by_res)) {
 
-			$sel = $keikan_laatija_row['kuka'] == $keikan_laatija ? ' selected' : '';
+			$sel = $keikan_created_by_row['kuka'] == $keikan_created_by ? ' selected' : '';
 
-			echo "<option value='{$keikan_laatija_row['kuka']}'{$sel}>{$keikan_laatija_row['nimi']} ({$keikan_laatija_row['kuka']})</option>";
+			echo "<option value='{$keikan_created_by_row['kuka']}'{$sel}>{$keikan_created_by_row['nimi']} ({$keikan_created_by_row['kuka']})</option>";
 		}
 
 		echo "</select></td>";
@@ -632,10 +632,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	$kaikkiliitettyyhteensa			= 0;
 	$vaihtoomaisuuslaskujayhteensa 	= 0;
 	$kululaskujayhteensa 			= 0;
-	$laatijalisa 					= '';
+	$created_bylisa 					= '';
 
-	if (isset($keikan_laatija) and trim($keikan_laatija) != '') {
-		$laatijalisa = " and lasku.laatija = '$keikan_laatija' ";
+	if (isset($keikan_created_by) and trim($keikan_created_by) != '') {
+		$created_bylisa = " and lasku.created_by = '$keikan_created_by' ";
 	}
 
 	$suuntalavajoin = '';
@@ -717,7 +717,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				and lasku.alatila 	  = ''
 				and lasku.vanhatunnus = 0
 				and lasku.mapvm 	  = '0000-00-00'
-				$laatijalisa
+				$created_bylisa
 				{$kohdistuslisa}
 				{$toimipaikkalisa}
 				GROUP BY lasku.liitostunnus
@@ -980,8 +980,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				lasku.comments,
 				lasku.nimi,
 				lasku.ytunnus,
-				lasku.luontiaika,
-				lasku.laatija,
+				lasku.created_at,
+				lasku.created_by,
 				lasku.rahti_etu,
 				lasku.kohdistettu
 				{$selectlisa}
@@ -1084,7 +1084,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				$query = "	SELECT nimi
 							FROM kuka
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND kuka = '{$row['laatija']}'";
+							AND kuka = '{$row['created_by']}'";
 				$kuka_chk_res = pupe_query($query);
 				$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
 
@@ -1092,7 +1092,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				echo "<div id='div_$row[laskunro]' class='popup' style='width:500px;'>";
 				echo t("Saapuminen").": $row[laskunro] / $row[nimi]<br><br>";
 				echo t("Laatija"),": {$kuka_chk_row['nimi']}<br />";
-				echo t("Luontiaika"),": ",tv1dateconv($row['luontiaika'], "pitkä"),"<br /><br />";
+				echo t("Luontiaika"),": ",tv1dateconv($row['created_at'], "pitkä"),"<br /><br />";
 				echo $row["comments"];
 				echo "</div>";
 				echo "<img src='$palvelin2/pics/lullacons/info.png'></td>";
@@ -1109,7 +1109,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 			$result2 = pupe_query($query);
 			$tilausrivirow = mysql_fetch_assoc($result2);
 
-			echo "<td valign='top'>".pupe_DataTablesEchoSort($row['luontiaika']).tv1dateconv($row['luontiaika']),"<br>",tv1dateconv($tilausrivirow['laskutettuaika']),"</td>";
+			echo "<td valign='top'>".pupe_DataTablesEchoSort($row['created_at']).tv1dateconv($row['created_at']),"<br>",tv1dateconv($tilausrivirow['laskutettuaika']),"</td>";
 			echo "<td valign='top'>$kohdistus<br>$lisatiedot</td>";
 			echo "<td valign='top'>$varastopaikat<br>$sarjanrot</td>";
 			echo "<td valign='top'>".pupe_DataTablesEchoSort($kplyhteensa)."$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";

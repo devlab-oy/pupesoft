@@ -357,8 +357,8 @@
 								maa                 = '{$toimittajarow["maa"]}',
 								valkoodi            = '{$toimittajarow["oletus_valkoodi"]}',
 								toimaika            = now(),
-								laatija             = '{$kukarow["kuka"]}',
-								luontiaika          = now(),
+								created_by             = '{$kukarow["kuka"]}',
+								created_at          = now(),
 								tila                = 'O',
 								toimitusehto        = '{$toimittajarow["toimitusehto"]}',
 								liitostunnus        = '{$toimittajarow["tunnus"]}',
@@ -400,7 +400,7 @@
 							yksikko   = '{$tuoterow["yksikko"]}',
 							varattu   = '$maara',
 							hinta     = '{$tuoterow["ostohinta"]}',
-							laatija   = '{$kukarow["kuka"]}',
+							created_by   = '{$kukarow["kuka"]}',
 							laadittu  = now()";
 				$result = pupe_query($query);
 			}
@@ -477,7 +477,7 @@
 			$abc_join = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
 						AND abc_aputaulu.tuoteno = tuote.tuoteno
 						AND abc_aputaulu.tyyppi = '$abcrajaustapa'
-						AND (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
+						AND (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_created_at >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
 		}
 
 		// Haetaan raaka-aineet, jotka osuvat hakuehtoihin

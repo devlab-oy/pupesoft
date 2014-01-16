@@ -108,8 +108,8 @@ if ($tee == "lisaalisaa") {
 					tyyppi	 		= '$tyyppi',
 					summattava_taso = '$summattava_taso',
 					nimi	 		= '$nimi',
-					laatija			= '$kukarow[kuka]',
-					luontiaika		= now(),
+					created_by			= '$kukarow[kuka]',
+					created_at		= now(),
 					yhtio 			= '$kukarow[yhtio]'";
 		$res = mysql_query($query) or pupe_error($query);
 

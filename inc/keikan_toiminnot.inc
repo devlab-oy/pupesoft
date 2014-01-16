@@ -265,10 +265,10 @@
 	                            yhtio = '{$kukarow['yhtio']}',
 	                            suuntalava = '{$suuntalavan_tunnus}',
 	                            saapuminen = '{$otunnus}',
-	                            laatija = '{$kukarow['kuka']}',
-	                            luontiaika = now(),
-	                            muutospvm = now(),
-	                            muuttaja = '{$kukarow['kuka']}'";
+	                            created_by = '{$kukarow['kuka']}',
+	                            created_at = now(),
+	                            updated_at = now(),
+	                            updated_by = '{$kukarow['kuka']}'";
 	                $insert_res = pupe_query($query);
 	            }
 	        }
@@ -325,10 +325,10 @@
 								yhtio = '{$kukarow['yhtio']}',
 								suuntalava = '{$suuntalava}',
 								saapuminen = '{$uusiotunnus}',
-								laatija = '{$kukarow['kuka']}',
-								luontiaika = now(),
-								muutospvm = now(),
-								muuttaja = '{$kukarow['kuka']}'";
+								created_by = '{$kukarow['kuka']}',
+								created_at = now(),
+								updated_at = now(),
+								updated_by = '{$kukarow['kuka']}'";
 					$insert_res = pupe_query($query);
 				}
 			}

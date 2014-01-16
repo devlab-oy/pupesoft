@@ -25,8 +25,8 @@
 
 			$query = "	UPDATE tilausrivin_lisatiedot
 						SET osto_vai_hyvitys 	= '$osto_vai_hyvitys',
-						muutospvm				= now(),
-						muuttaja				= '$kukarow[kuka]'
+						updated_at				= now(),
+						updated_by				= '$kukarow[kuka]'
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tilausrivitunnus = '$rivitunnus'
 						and tunnus 	= '$lisatied_row[tunnus]'";
@@ -37,8 +37,8 @@
 						SET yhtio 		 = '$kukarow[yhtio]',
 						tilausrivitunnus = '$rivitunnus',
 						osto_vai_hyvitys = '$osto_vai_hyvitys',
-						luontiaika		 = now(),
-						laatija 		 = '$kukarow[kuka]'";
+						created_at		 = now(),
+						created_by 		 = '$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 

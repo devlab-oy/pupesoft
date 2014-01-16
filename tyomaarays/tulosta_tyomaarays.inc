@@ -164,7 +164,7 @@ if (!function_exists('tyomaarays_alku')) {
 		$pdf->draw_text(310, 719, $myyrow["nimi"], 										$thispage, $norm);
 
 		$pdf->draw_text(430, 729, t("Tilauspvm", $kieli),							 	$thispage, $pieni);
-		$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$thispage, $norm);
+		$pdf->draw_text(430, 719, tv1dateconv($laskurow["created_at"], "pitka"), 		$thispage, $norm);
 
 		$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), 		$thispage, $pieni);

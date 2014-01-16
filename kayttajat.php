@@ -144,8 +144,8 @@
 		$query = "	UPDATE kuka
 					SET profiilit 	= '',
 					aktiivinen 		= 0,
-					muuttaja		= '{$kukarow['kuka']}',
-					muutospvm		= now()
+					updated_by		= '{$kukarow['kuka']}',
+					updated_at		= now()
 					WHERE kuka = '{$selkuka}'
 					AND yhtio = '{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
@@ -167,8 +167,8 @@
 	if ($tee == 'delpsw') {
 		$query = "	UPDATE kuka
 					SET salasana = '',
-					muuttaja	 = '{$kukarow['kuka']}',
-					muutospvm	 = now()
+					updated_by	 = '{$kukarow['kuka']}',
+					updated_at	 = now()
 					WHERE kuka = '{$selkuka}'";
 		$result = pupe_query($query);
 
@@ -377,8 +377,8 @@
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
 						max_keraysera_alustat			= '{$max_keraysera_alustat}',
-						laatija							= '{$kukarow['kuka']}',
-						luontiaika						= now(),
+						created_by							= '{$kukarow['kuka']}',
+						created_at						= now(),
 						budjetti						= '{$budjetti}',
 						yhtio 							= '{$yhtio}'";
 			$result = pupe_query($query);
@@ -438,17 +438,17 @@
 										jarjestys2	= '{$trow['jarjestys2']}',
 										hidden		= '{$trow['hidden']}',
 										yhtio		= '{$yhtio}',
-										laatija 	= '{$kukarow['kuka']}',
-										luontiaika 	= now(),
-										muutospvm 	= now(),
-										muuttaja 	= '{$kukarow['kuka']}'";
+										created_by 	= '{$kukarow['kuka']}',
+										created_at 	= now(),
+										updated_at 	= now(),
+										updated_by 	= '{$kukarow['kuka']}'";
 							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
 							$query = "	UPDATE oikeu
 										SET paivitys = '1',
-										muutospvm 	 = now(),
-										muuttaja 	 = '{$kukarow['kuka']}'
+										updated_at 	 = now(),
+										updated_by 	 = '{$kukarow['kuka']}'
 										WHERE kuka		= '{$ktunnus}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'
@@ -529,8 +529,8 @@
 				$query = "	UPDATE kuka
 							SET salasana = '{$password}',
 							api_key		 = md5(concat(yhtio, kuka, '{$password}')),
-							muuttaja	 = '{$kukarow['kuka']}',
-							muutospvm	 = now()
+							updated_by	 = '{$kukarow['kuka']}',
+							updated_at	 = now()
 							WHERE kuka = '{$kuka}'";
 				$result = pupe_query($query);
 			}
@@ -602,8 +602,8 @@
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
 						max_keraysera_alustat			= '{$max_keraysera_alustat}',
-						muuttaja						= '{$kukarow['kuka']}',
-						muutospvm						= now(),
+						updated_by						= '{$kukarow['kuka']}',
+						updated_at						= now(),
 						budjetti						= '{$budjetti}'
 						WHERE kuka	= '{$kuka}'
 						AND yhtio	= '{$yhtio}'";
@@ -662,17 +662,17 @@
 										jarjestys2	= '{$trow['jarjestys2']}',
 										hidden		= '{$trow['hidden']}',
 										yhtio		= '{$kukarow['yhtio']}',
-										laatija 	= '{$kukarow['kuka']}',
-										luontiaika 	= now(),
-										muutospvm 	= now(),
-										muuttaja 	= '{$kukarow['kuka']}'";
+										created_by 	= '{$kukarow['kuka']}',
+										created_at 	= now(),
+										updated_at 	= now(),
+										updated_by 	= '{$kukarow['kuka']}'";
 							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
 							$query = "	UPDATE oikeu
 										SET paivitys = '1',
-										muutospvm 	 = now(),
-										muuttaja 	 = '{$kukarow['kuka']}'
+										updated_at 	 = now(),
+										updated_by 	 = '{$kukarow['kuka']}'
 										WHERE kuka		= '{$kuka}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'

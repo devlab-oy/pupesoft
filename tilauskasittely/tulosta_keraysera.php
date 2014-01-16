@@ -137,8 +137,8 @@
 						pakkaus 		= 0,
 						pakkausnro 		= '{$uusi_paknro_row['uusi_pakkauskirjain']}',
 						kpl 			= 0,
-						laatija 		= '{$kukarow['kuka']}',
-						luontiaika 		= now()";
+						created_by 		= '{$kukarow['kuka']}',
+						created_at 		= now()";
 			$ins_uusi_pak_res = pupe_query($query);
 
 			echo "<br /><font class='message'>",t("Uusi pakkaus lisätty"),"!</font><br />";
@@ -170,7 +170,7 @@
 			$query = "	SELECT tunnus
 						FROM kerayserat
 						WHERE yhtio 		= '{$kukarow['yhtio']}'
-						AND laatija 		= '{$kayttaja}'
+						AND created_by 		= '{$kayttaja}'
 						AND tila    		= 'K'
 						AND ohjelma_moduli	= 'OPTISCAN'";
 			$kerkeskres = pupe_query($query);
@@ -184,7 +184,7 @@
 			}
 			else {
 				$query = "	UPDATE kerayserat
-							SET laatija = '{$kayttaja}'
+							SET created_by = '{$kayttaja}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND nro 	= '{$kerayseranro}'";
 				$update_res = pupe_query($query);
@@ -322,8 +322,8 @@
 												pakkaus 		= '{$kpl_chk_row['pakkaus']}',
 												pakkausnro 		= '{$mihin_siirretaan}',
 												kpl 			= '{$paljon_siirretaan}',
-												laatija 		= '{$keraajarow['kuka']}',
-												luontiaika 		= now()
+												created_by 		= '{$keraajarow['kuka']}',
+												created_at 		= now()
 												{$kerattylisa1}";
 									$ins_res = pupe_query($query);
 								}
@@ -351,7 +351,7 @@
 
 				if (isset($tulostettavat_reittietiketit[$pak_nro]) and count($tulostettavat_reittietiketit) > 0 and trim($tulostettavat_reittietiketit[$pak_nro]) != '') {
 
-					$query = "	SELECT nro, sscc, laatija
+					$query = "	SELECT nro, sscc, created_by
 								FROM kerayserat
 								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND pakkausnro 	= '{$pak_nro}'
@@ -362,11 +362,11 @@
 					$query = "	SELECT *
 								FROM kuka
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND kuka = '{$reittietiketti_row['laatija']}'";
+								AND kuka = '{$reittietiketti_row['created_by']}'";
 					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 0) {
-						echo "<font class='error'>",t("Kerääjää")," {$reittietiketti_row['laatija']} ",t("ei löydy"),"!</font><br>";
+						echo "<font class='error'>",t("Kerääjää")," {$reittietiketti_row['created_by']} ",t("ei löydy"),"!</font><br>";
 					}
 					else {
 
@@ -597,8 +597,8 @@
 
 			$query = "	SELECT kerayserat.nro,
 						keraysvyohyke.nimitys AS keraysvyohyke,
-						kerayserat.laatija AS kayttaja,
-						max(kerayserat.luontiaika) luontiaika,
+						kerayserat.created_by AS kayttaja,
+						max(kerayserat.created_at) created_at,
 						max(kerayserat.kerattyaika) kerattyaika,
 						COUNT(DISTINCT lasku.liitostunnus) AS asiakasmaara,
 						COUNT(*) AS rivimaara
@@ -609,8 +609,8 @@
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke IN ({$keraajarow['keraysvyohyke']}))
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-						AND kerayserat.laatija = '{$keraajarow['kuka']}'
-						AND (kerayserat.luontiaika >= DATE_SUB(NOW(), INTERVAL 2 DAY) OR kerayserat.tila in ('K','X'))
+						AND kerayserat.created_by = '{$keraajarow['kuka']}'
+						AND (kerayserat.created_at >= DATE_SUB(NOW(), INTERVAL 2 DAY) OR kerayserat.tila in ('K','X'))
 						{$ker_lisa}
 						GROUP BY 1,2,3
 						ORDER BY 1 desc";
@@ -635,7 +635,7 @@
 					echo "<td>{$kerayserat_row['keraysvyohyke']}</td>";
 					echo "<td>{$kerayserat_row['rivimaara']}</td>";
 					echo "<td>{$kerayserat_row['asiakasmaara']}</td>";
-					echo "<td>".tv1dateconv($kerayserat_row["luontiaika"], "PITKA", "LYHYT")."<br>".tv1dateconv($kerayserat_row["kerattyaika"], "PITKA", "LYHYT")."</td>";
+					echo "<td>".tv1dateconv($kerayserat_row["created_at"], "PITKA", "LYHYT")."<br>".tv1dateconv($kerayserat_row["kerattyaika"], "PITKA", "LYHYT")."</td>";
 
 					echo "<td>";
 

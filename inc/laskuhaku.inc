@@ -92,7 +92,7 @@ if (isset($laskuntyyppi) and $laskuntyyppi != "" and $laskuntyyppi != "K") {
 if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or $tee == 'L') and isset($ehto) and trim($ehto) != '' and is_numeric($alkuvv) and is_numeric($alkukk) and is_numeric($alkupp) and is_numeric($loppuvv) and is_numeric($loppukk) and is_numeric($loppupp)) {
 
 	if ($pvm_rajaustyyppi == "luopvm") {
-		$ehto .= " and lasku.luontiaika >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.luontiaika <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
+		$ehto .= " and lasku.created_at >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.created_at <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
 	}
 	elseif ($pvm_rajaustyyppi == "laspvm") {
 		$ehto .= " and lasku.lapvm >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.lapvm <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";

@@ -25,7 +25,7 @@
 					AND lasku.tila 	in ('V', 'L')
 					AND lasku.alatila  in ('V', 'K', 'X')
 					AND (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') and lasku.tilaustyyppi in ('V','W')
-					AND lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
+					AND lasku.created_at >= '$vva-$kka-$ppa 00:00:00'
 					GROUP BY lasku.tunnus
 					HAVING valmistusriveja > 0
 					$havlisa

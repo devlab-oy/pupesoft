@@ -139,8 +139,8 @@
 						viesteja = '".$credits."',
 						vastaanottaja = '".addslashes($vastaanottaja)."',
 						viesti = '".addslashes($viesti)."',
-						luontiaika = now(),
-						laatija = '$kuka'";
+						created_at = now(),
+						created_by = '$kuka'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
@@ -213,8 +213,8 @@
 					viesteja = '".$credits."',
 					vastaanottaja = '".addslashes($vastaanottaja)."',
 					viesti = '".addslashes($viesti)."',
-					luontiaika = now(),
-					laatija = '$kuka'";
+					created_at = now(),
+					created_by = '$kuka'";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		return false;
@@ -270,8 +270,8 @@
 					viesteja = '".$credits."',
 					vastaanottaja = '".addslashes($vastaanottaja)."',
 					viesti = '".addslashes($viesti)."',
-					luontiaika = now(),
-					laatija = '$kuka'";
+					created_at = now(),
+					created_by = '$kuka'";
 		$result = mysql_query($query) or pupe_error($query);
 		
 	}

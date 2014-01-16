@@ -71,8 +71,8 @@
 							tila				= 'V',
 							alatila				= 'J',
 							ytunnus				= 'Valmistusajo',
-							laatija 			= '$kukarow[kuka]',
-							luontiaika			= NOW()";
+							created_by 			= '$kukarow[kuka]',
+							created_at			= NOW()";
 				$result = mysql_query($query) or pupe_error($query);
 				$otunnus = mysql_insert_id();
 

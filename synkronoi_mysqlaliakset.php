@@ -94,8 +94,8 @@ if ($tee == "TEE") {
 								selitetark_3	= '$selitetark_3',
 								selitetark_4	= '$selitetark_4',
 								jarjestys		= '$jarjestys',
-								laatija			= '$kukarow[kuka]',
-								luontiaika		= now()";
+								created_by			= '$kukarow[kuka]',
+								created_at		= now()";
 			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 
 			echo "<tr><th>".t("Lisätään mysqlalias")."</th><td>$selite</td><td>".htmlentities($selitetark)."</td><td>$selitetark_2</td></tr>";

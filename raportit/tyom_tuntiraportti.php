@@ -61,11 +61,11 @@
 				$kkl = (int) $kkl;
 				$ppl = (int) $ppl;
 
-				$lisa = " and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00' and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59' ";
+				$lisa = " and lasku.created_at >= '$vva-$kka-$ppa 00:00:00' and lasku.created_at <= '$vvl-$kkl-$ppl 23:59:59' ";
 			}
 
 			$query = "	SELECT
-						lasku.tunnus, lasku.nimi, lasku.nimitark, lasku.ytunnus, lasku.luontiaika,
+						lasku.tunnus, lasku.nimi, lasku.nimitark, lasku.ytunnus, lasku.created_at,
 						(SELECT selitetark FROM avainsana WHERE avainsana.yhtio = lasku.yhtio AND avainsana.selite = tyomaarays.tyostatus AND avainsana.laji = 'TYOM_TYOSTATUS') tyostatus,
 						lasku.erikoisale, lasku.valkoodi,
 						group_concat(DISTINCT concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', kuka.nimi, '##', kuka.kuka) ORDER BY kalenteri.pvmalku) asennuskalenteri

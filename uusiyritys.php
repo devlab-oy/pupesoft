@@ -39,15 +39,15 @@
 			$query = "	INSERT into yhtio
 						SET yhtio	= '$yhtio',
 						nimi		= '$nimi',
-						laatija 	= '$kukarow[kuka]',
-						luontiaika 	= now()";
+						created_by 	= '$kukarow[kuka]',
+						created_at 	= now()";
 			$result = pupe_query($query);
 
 			// Tehdään parametrit
 			$query = "	INSERT into yhtion_parametrit
 						SET yhtio	= '$yhtio',
-						laatija 	= '$kukarow[kuka]',
-						luontiaika 	= now()";
+						created_by 	= '$kukarow[kuka]',
+						created_at 	= now()";
 			$result = pupe_query($query);
 
 			// Tehdään haluttu valuutta
@@ -56,8 +56,8 @@
 						nimi		= '$valuutta',
 						kurssi		= 1,
 						jarjestys	= 1,
-						laatija 	= '$kukarow[kuka]',
-						luontiaika 	= now()";
+						created_by 	= '$kukarow[kuka]',
+						created_at 	= now()";
 			$result = pupe_query($query);
 		}
 		else {
@@ -90,10 +90,10 @@
 									"yhtio",
 									"konserni",
 									"nimi",
-									"laatija",
-									"luontiaika",
-									"muuttaja",
-									"muutospvm");
+									"created_by",
+									"created_at",
+									"updated_by",
+									"updated_at");
 
 				foreach ($row as $ind => $val) {
 
@@ -140,10 +140,10 @@
 									"lasku_logo",
 									"lasku_logo_positio",
 									"lasku_logo_koko",
-									"laatija",
-									"luontiaika",
-									"muutospvm",
-									"muuttaja",
+									"created_by",
+									"created_at",
+									"updated_at",
+									"updated_by",
 									"css",
 									"css_extranet",
 									"css_verkkokauppa",
@@ -199,7 +199,7 @@
 
 	if ($tila == 'menut') {
 		if ($fromyhtio != '') {
-			$query = "	INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,laatija,luontiaika,muutospvm,muuttaja)
+			$query = "	INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,created_by,created_at,updated_at,updated_by)
 						SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio','{$kukarow['kuka']}',now(),now(),'{$kukarow['kuka']}'
 						FROM oikeu
 						WHERE yhtio  = '$fromyhtio'
@@ -233,10 +233,10 @@
 								profiili	= '$trow[profiili]',
 								yhtio		= '$yhtio',
 								hidden		= '$trow[hidden]',
-								laatija 	= '{$kukarow['kuka']}',
-								luontiaika 	= now(),
-								muutospvm 	= now(),
-								muuttaja 	= '{$kukarow['kuka']}'";
+								created_by 	= '{$kukarow['kuka']}',
+								created_at 	= now(),
+								updated_at 	= now(),
+								updated_by 	= '{$kukarow['kuka']}'";
 					$rresult = pupe_query($query);
 				}
 			}
@@ -327,18 +327,18 @@
 									jarjestys2	= '{$trow['jarjestys2']}',
 									yhtio		= '$yhtio',
 									hidden		= '{$trow['hidden']}',
-									laatija 	= '{$kukarow['kuka']}',
-									luontiaika 	= now(),
-									muutospvm 	= now(),
-									muuttaja 	= '{$kukarow['kuka']}'";
+									created_by 	= '{$kukarow['kuka']}',
+									created_at 	= now(),
+									updated_at 	= now(),
+									updated_by 	= '{$kukarow['kuka']}'";
 						$rresult = pupe_query($query);
 					}
 					elseif ($trow["paivitys"] == '1' AND $tarkesultrow["paivitys"] != '1') {
 						$query = "	UPDATE oikeu
 									SET
 									paivitys 		= '1',
-									muutospvm 	 	= now(),
-									muuttaja 	 	= '{$kukarow['kuka']}'
+									updated_at 	 	= now(),
+									updated_by 	 	= '{$kukarow['kuka']}'
 									WHERE kuka		= '$kuka'
 									AND sovellus	= '{$trow['sovellus']}'
 									AND nimi		= '{$trow['nimi']}'
@@ -389,8 +389,8 @@
 								SET
 								jarjestys		= '$trow[jarjestys]',
 								laji			= '$trow[laji]',
-								laatija 		= '$kukarow[kuka]',
-								luontiaika 		=  now(),
+								created_by 		= '$kukarow[kuka]',
+								created_at 		=  now(),
 								selite			= '$trow[selite]',
 								selitetark		= '$trow[selitetark]',
 								selitetark_2	= '$trow[selitetark_2]',
@@ -422,8 +422,8 @@
 							puhelin 	= '$row[puhelin]',
 							yhteyshenkilo = '$row[yhteyshenkilo]',
 							ip 			= '$row[ip]',
-							laatija 	= '$kukarow[kuka]',
-							luontiaika	= now()";
+							created_by 	= '$kukarow[kuka]',
+							created_at	= now()";
 				$upres = pupe_query($query);
 			}
 		}
@@ -457,8 +457,8 @@
 							sallitut_maat 		= '$row[sallitut_maat]',
 							kaytossa 			= '$row[kaytossa]',
 							jarjestys 			= '$row[jarjestys]',
-							laatija 			= '$kukarow[kuka]',
-							luontiaika 			= now()";
+							created_by 			= '$kukarow[kuka]',
+							created_at 			= now()";
 				$upres = pupe_query($query);
 			}
 		}
@@ -509,8 +509,8 @@
 							sallitut_alustat		= '$row[sallitut_alustat]',
 							virallinen_selite		= '$row[virallinen_selite]',
 							jarjestys 				= '$row[jarjestys]',
-							laatija 				= '$kukarow[kuka]',
-							luontiaika				= now()";
+							created_by 				= '$kukarow[kuka]',
+							created_at				= now()";
 				$upres = pupe_query($query);
 			}
 		}
@@ -557,8 +557,8 @@
 						kuljetusmuoto	= 0,
 						poistumistoimipaikka_koodi = '',
 						sallitut_maat 	= '',
-						laatija 		= '$kukarow[kuka]',
-						luontiaika		= now()";
+						created_by 		= '$kukarow[kuka]',
+						created_at		= now()";
 			$upres = pupe_query($query);
 		}
 		unset($tila);

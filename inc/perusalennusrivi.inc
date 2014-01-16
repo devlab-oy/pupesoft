@@ -6,7 +6,7 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0; 
 	}
-	if (mysql_field_name($result, $i) == "muutospvm") {
+	if (mysql_field_name($result, $i) == "updated_at") {
 		$tyyppi = 2;
 	}
 	

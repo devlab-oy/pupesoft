@@ -49,7 +49,7 @@ if ($tee == 'V') {
 				summa 		= '$laskurow[summa]',
 				vero 		= 0,
 				lukko 		= '',
-				laatija 	= '$kukarow[kuka]',
+				created_by 	= '$kukarow[kuka]',
 				laadittu 	= now()";
 	$xresult = pupe_query($query);
 
@@ -67,7 +67,7 @@ if ($tee == 'V') {
 				summa 		= -1 * $laskurow[summa],
 				vero 		= 0,
 				lukko 		= '',
-				laatija 	= '$kukarow[kuka]',
+				created_by 	= '$kukarow[kuka]',
 				laadittu 	= now()";
 	$xresult = pupe_query($query);
 

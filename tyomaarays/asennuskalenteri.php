@@ -172,8 +172,8 @@
 		if ($tee == "LISAA" and $tyotunnus > 0) {
 			$query = "	UPDATE kalenteri
 						SET
-						muuttaja	= '$kukarow[kuka]',
-						muutospvm	= now(),
+						updated_by	= '$kukarow[kuka]',
+						updated_at	= now(),
 						tapa		= '$tyojono',
 						kuka 		= '$asentaja',
 						pvmalku 	= '$year-$month-$day $aika',
@@ -225,8 +225,8 @@
 			$query = "	INSERT INTO kalenteri
 						SET
 						yhtio 		= '$kukarow[yhtio]',
-						laatija		= '$kukarow[kuka]',
-						luontiaika	= now(),
+						created_by		= '$kukarow[kuka]',
+						created_at	= now(),
 						tapa		= '$tyojono',
 						kuka 		= '$asentaja',
 						pvmalku 	= '$year-$month-$day $aika',

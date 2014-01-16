@@ -294,7 +294,7 @@ function tee_kirjanpito_muutokset($params) {
 
 		$query = "	UPDATE tiliointi
 					SET summa 	= {$summalisa} * -1,
-					laatija 	= '{$kukarow['kuka']}',
+					created_by 	= '{$kukarow['kuka']}',
 					laadittu 	= now()
 					{$tapvmlisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
@@ -316,7 +316,7 @@ function tee_kirjanpito_muutokset($params) {
 		$query = "	UPDATE tiliointi
 					SET tilino 	= '{$uusitili}',
 					summa 		= '{$summalisa}',
-					laatija 	= '{$kukarow['kuka']}',
+					created_by 	= '{$kukarow['kuka']}',
 					laadittu 	= now()
 					{$tapvmlisa}
 					{$kustplisa}
@@ -388,7 +388,7 @@ function tarkista_pyoristys_erotukset($laskurow, $tunnus) {
 					vero 				= 0,
 					selite 				= '".t("Pyöristysero")."',
 					lukko 				= '',
-					laatija 			= '$kukarow[kuka]',
+					created_by 			= '$kukarow[kuka]',
 					laadittu 			= now()";
 		$laskutusres = pupe_query($query);
 	}

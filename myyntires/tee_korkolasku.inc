@@ -110,11 +110,11 @@
 					valkoodi 		= '$valkoodi',
 					vienti_kurssi	= '$kurssi',
 					viikorkopros 	= '0',
-					laatija 		= '$kukarow[kuka]',
+					created_by 		= '$kukarow[kuka]',
 					liitostunnus    = '$asrow[tunnus]',
 					piiri			= '$asrow[piiri]',
 					olmapvm			= now(),
-					luontiaika		= now()";
+					created_at		= now()";
 		$result = mysql_query($query) or pupe_error($query);
 		$otunnus = mysql_insert_id();
 
@@ -134,14 +134,14 @@
 					laskutus_postino	= '$asrow[laskutus_postino]',
 					laskutus_postitp	= '$asrow[laskutus_postitp]',
 					laskutus_maa		= '$asrow[laskutus_maa]',
-					laatija				= '$kukarow[kuka]',
-					luontiaika			= now(),
+					created_by				= '$kukarow[kuka]',
+					created_at			= now(),
 					otunnus				= '$otunnus',
 					yhtio				= '$kukarow[yhtio]'";
 		$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
 		$query = "	INSERT INTO tilausrivi SET
-					laatija 		= '$kukarow[kuka]',
+					created_by 		= '$kukarow[kuka]',
 					laadittu 		= now(),
 					toimaika		= now(),
 					yhtio 			= '$kukarow[yhtio]',

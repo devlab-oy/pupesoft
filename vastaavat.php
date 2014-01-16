@@ -34,7 +34,7 @@ function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
             }
             // Lisätään tuote haluttuun ketjuun
             elseif ($paatuote == false) {
-                $query  = "INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                $query  = "INSERT INTO vastaavat (id, tuoteno, yhtio, created_by, created_at, updated_at, updated_by)
                             VALUES ('$ketju_id', '{$tuote['tuoteno']}', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
                 $result = pupe_query($query);
             }
@@ -74,12 +74,12 @@ function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
                 $id     = $row[0]+1;
 
                 //lisätään "isä tuote"...
-                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, created_by, created_at, updated_at, updated_by)
                             VALUES ('$id', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
                 $result = pupe_query($query);
 
                 // lisätään vastaava tuote...
-                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, created_by, created_at, updated_at, updated_by)
                             VALUES ('$id', '$vastaava', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
                 $result = pupe_query($query);
             }
@@ -87,7 +87,7 @@ function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
             //lapsi on löytynyt, isää ei
             if (($cid != "") and ($fid == "")) {
                 //lisätään "isä tuote"...
-                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, created_by, created_at, updated_at, updated_by)
                             VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
                 $result = pupe_query($query);
             }
@@ -101,7 +101,7 @@ function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
 
                 # Lisätään uusi aina päätuotteeksi jarjestys=1
                 //lisätään vastaava päätuotteeksi
-                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, jarjestys, laatija, luontiaika, muutospvm, muuttaja)
+                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, jarjestys, created_by, created_at, updated_at, updated_by)
                             VALUES ('$fid', '$vastaava', '$kukarow[yhtio]', '1', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
                 $result = pupe_query($query);
             }
@@ -230,7 +230,7 @@ if ($tee == 'muutaprio') {
 
     // Siirretään ketjun muita eteenpäin, jarjestys + 1
     if ($prio != 0 and $prio != $row['jarjestys']) {
-        $query = "UPDATE vastaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
+        $query = "UPDATE vastaavat SET jarjestys=jarjestys+1, updated_by='{$kukarow['kuka']}', updated_at=now()
                     WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND tunnus!=$tunnus AND jarjestys >= $prio";
         $result = pupe_query($query);
     }
@@ -238,8 +238,8 @@ if ($tee == 'muutaprio') {
     // muutetaan prioriteetti
     $query  = "     UPDATE vastaavat SET
                     jarjestys = '$prio',
-                    muutospvm = now(),
-                    muuttaja = '$kukarow[kuka]'
+                    updated_at = now(),
+                    updated_by = '$kukarow[kuka]'
                     WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 

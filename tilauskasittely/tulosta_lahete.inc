@@ -208,8 +208,8 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(530, 785, t("Numero", $kieli), $thispage, $pieni);
 			$pdf->draw_text(530, 775, $laskurow["tunnus"], $thispage, $pieni);
 
-			$pvm_len = $pdf->strlen(tv1dateconv($laskurow["luontiaika"]), $pieni);
-			$pdf->draw_text((595 / 2) - ($pvm_len / 2), 750, tv1dateconv($laskurow["luontiaika"]), 		$thispage, $pieni);
+			$pvm_len = $pdf->strlen(tv1dateconv($laskurow["created_at"]), $pieni);
+			$pdf->draw_text((595 / 2) - ($pvm_len / 2), 750, tv1dateconv($laskurow["created_at"]), 		$thispage, $pieni);
 		}
 		else {
 			//Oikea sarake
@@ -292,10 +292,10 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(430, 771, t("Vastaanotettu", $kieli),						$thispage, $pieni);
 
 			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
-				$pdf->draw_text(430, 761, tv1dateconv($laskurow["luontiaika"]), $thispage, $norm);
+				$pdf->draw_text(430, 761, tv1dateconv($laskurow["created_at"]), $thispage, $norm);
 			}
 			else {
-				$pdf->draw_text(430, 761, tv1dateconv($laskurow["luontiaika"], "pitka"), $thispage, $norm);
+				$pdf->draw_text(430, 761, tv1dateconv($laskurow["created_at"], "pitka"), $thispage, $norm);
 			}
 		}
 
@@ -350,11 +350,11 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_rectangle(737, 300, 716, 420, $thispage, $rectparam);
 			$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
 
-			if ($myyrow['kuka'] != $laskurow['laatija']) {
-				//etsitään laatijan nimi
+			if ($myyrow['kuka'] != $laskurow['created_by']) {
+				//etsitään created_byn nimi
 				$query  = "	SELECT nimi
 							from kuka
-							where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
+							where kuka='$laskurow[created_by]' and yhtio='$kukarow[yhtio]'";
 				$laaresult = pupe_query($query);
 				$laarow = mysql_fetch_assoc($laaresult);
 
@@ -771,8 +771,8 @@ if (!function_exists('uusi_sivu_lahete')) {
 			$pdf->draw_text(530, 785, t("Numero", $kieli), $thispage, $pieni);
 			$pdf->draw_text(530, 775, $laskurow["tunnus"], $thispage, $pieni);
 
-			$pvm_len = $pdf->strlen(tv1dateconv($laskurow["luontiaika"]), $pieni);
-			$pdf->draw_text((595 / 2) - ($pvm_len / 2), 750, tv1dateconv($laskurow["luontiaika"]), 		$thispage, $pieni);
+			$pvm_len = $pdf->strlen(tv1dateconv($laskurow["created_at"]), $pieni);
+			$pdf->draw_text((595 / 2) - ($pvm_len / 2), 750, tv1dateconv($laskurow["created_at"]), 		$thispage, $pieni);
 		}
 		else {
 			//Oikea sarake

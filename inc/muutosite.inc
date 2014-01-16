@@ -286,7 +286,7 @@
 				kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 			}
 
-			$query = "	UPDATE tiliointi SET tapvm = '$vv-$kk-$pp', laadittu=now(), laatija='$kukarow[kuka]'
+			$query = "	UPDATE tiliointi SET tapvm = '$vv-$kk-$pp', laadittu=now(), created_by='$kukarow[kuka]'
 						WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]' and korjattu=''";
 			$result = pupe_query($query);
 
@@ -691,7 +691,7 @@
 					summa = round(-1 * $summa * $trow[vienti_kurssi],2),
 					summa_valuutassa = -1 * $summa,
 					laadittu = now(),
-					laatija = '$kukarow[kuka]'
+					created_by = '$kukarow[kuka]'
 					WHERE tilino   in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
 					and ltunnus 	= '$tunnus'
 					and yhtio 		= '$kukarow[yhtio]'
@@ -765,7 +765,7 @@
 				kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 			}
 
-			$query = "UPDATE tiliointi SET tapvm = '$pvm', laadittu=now(), laatija='$kukarow[kuka]' WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[mapvm]' and korjattu=''";
+			$query = "UPDATE tiliointi SET tapvm = '$pvm', laadittu=now(), created_by='$kukarow[kuka]' WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[mapvm]' and korjattu=''";
 			$result = pupe_query($query);
 
 			$query = "UNLOCK table";
@@ -796,7 +796,7 @@
 				$query = "	UPDATE tiliointi SET
 							tapvm = '$pvm',
 							laadittu = now(),
-							laatija = '$kukarow[kuka]'
+							created_by = '$kukarow[kuka]'
 							WHERE ltunnus = '$tunnus'
 							and yhtio = '$kukarow[yhtio]'
 							and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
@@ -821,7 +821,7 @@
 				$query = "	UPDATE tiliointi SET
 							tapvm = '$pvm',
 							laadittu = now(),
-							laatija = '$kukarow[kuka]'
+							created_by = '$kukarow[kuka]'
 							WHERE ltunnus = '$tunnus'
 							and yhtio = '$kukarow[yhtio]'
 							and tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
@@ -924,7 +924,7 @@
 							vero 				= 0,
 							lukko 				= '',
 							tosite 				= '$tiliointirow[tosite]',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$xresult = pupe_query($query);
 
@@ -947,7 +947,7 @@
 							vero 				= 0,
 							lukko 				= '',
 							tosite 				= '$tiliointirow[tosite]',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$xresult = pupe_query($query);
 			}
@@ -1085,7 +1085,7 @@
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND tunnus = '$tunnus'
 						AND laskuttaja = ''
-						AND laatija = 'konversio'
+						AND created_by = 'konversio'
 						AND tila = 'U'
 						AND alatila = 'X'
 						AND valkoodi = 'EUR'";
@@ -1125,7 +1125,7 @@
 				// Lisätään myyntisaamiset-tiliöinti
 				$query1 = "	INSERT INTO tiliointi SET
 							yhtio            = '{$kukarow["yhtio"]}',
-							laatija          = 'konversio',
+							created_by          = 'konversio',
 							laadittu         = now(),
 							ltunnus          = '{$laskurow["tunnus"]}',
 							tilino           = '{$yhtiorow["myyntisaamiset"]}',
@@ -1141,7 +1141,7 @@
 				// Lisätään dummy vastatiliöinti
 				$query1 = "	INSERT INTO tiliointi SET
 							yhtio            = '{$kukarow["yhtio"]}',
-							laatija          = 'konversio',
+							created_by          = 'konversio',
 							laadittu         = now(),
 							ltunnus          = '{$laskurow["tunnus"]}',
 							tilino           = '{$yhtiorow["muutkulut"]}',
@@ -1439,7 +1439,7 @@
 								vero 				= 0,
 								lukko 				= '',
 								tosite 				= '$tiliointirow[tosite]',
-								laatija 			= '$kukarow[kuka]',
+								created_by 			= '$kukarow[kuka]',
 								laadittu 			= now()";
 					$xresult = pupe_query($query);
 
@@ -1456,7 +1456,7 @@
 								vero 				= 0,
 								lukko 				= '',
 								tosite 				= '$tiliointirow[tosite]',
-								laatija 			= '$kukarow[kuka]',
+								created_by 			= '$kukarow[kuka]',
 								laadittu 			= now()";
 					$xresult = pupe_query($query);
 
@@ -1587,7 +1587,7 @@
 							vero 				= 0,
 							lukko 				= '',
 							tosite 				= '$tiliointirow[tosite]',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$xresult = pupe_query($query);
 
@@ -1604,7 +1604,7 @@
 							vero 				= 0,
 							lukko 				= '',
 							tosite 				= '$tiliointirow[tosite]',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$xresult = pupe_query($query);
 			}
@@ -2270,7 +2270,7 @@
 			}
 		}
 
-		if ($trow['tila'] == 'U' and $trow['alatila'] == 'X' and $trow['laatija'] == 'konversio' and $trow['laskuttaja'] == '')  {
+		if ($trow['tila'] == 'U' and $trow['alatila'] == 'X' and $trow['created_by'] == 'konversio' and $trow['laskuttaja'] == '')  {
 
 			$konversio_check = "SELECT count(*) kpl from tiliointi where yhtio = '$kukarow[yhtio]' and ltunnus = '$trow[tunnus]'";
 			$konversio_check_res = pupe_query($konversio_check);

@@ -38,7 +38,7 @@
 		echo "<font class='head'>".t("Laskuta tilaus").":</font><hr>";
 
 		$alatilat = " 	and (lasku.alatila = 'D' or (lasku.alatila = 'C' and lasku.eilahetetta != ''))";
-		$vientilisa = " and lasku.vienti = '' and (lasku.laatija = '$kukarow[kuka]' or lasku.myyja = '$kukarow[tunnus]')";
+		$vientilisa = " and lasku.vienti = '' and (lasku.created_by = '$kukarow[kuka]' or lasku.myyja = '$kukarow[tunnus]')";
 	}
 	elseif ($toim == "VIENTI") {
 		echo "<font class='head'>".t("Tulosta vientilaskuja").":</font><hr>";
@@ -332,7 +332,7 @@
 					if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
 					if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 					lasku.tunnus,
-					lasku.luontiaika,
+					lasku.created_at,
 					lasku.chn,
 					lasku.ytunnus,
 					lasku.nimi,
@@ -352,7 +352,7 @@
 					maksuehto.teksti meh,
 					maksuehto.itsetulostus,
 					maksuehto.kateinen,
-					ifnull(kuka.nimi, lasku.laatija) kukanimi,
+					ifnull(kuka.nimi, lasku.created_by) kukanimi,
 					lasku.valkoodi,
 					lasku.liitostunnus,
 					lasku.tila,
@@ -369,7 +369,7 @@
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
-					LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija
+					LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.created_by
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
 					and lasku.tunnus in ($tunnukset)
@@ -377,7 +377,7 @@
 					and tilausrivi.varattu  != 0
 					$alatilat
 					$vientilisa
-					GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
+					GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus,lasku.created_at,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
 					ORDER BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus";
@@ -538,7 +538,7 @@
 				}
 				echo "<td>".t("$teksti")."</td>";
 
-				echo "<td>$row[kukanimi]<br>".tv1dateconv($row["luontiaika"], "P")."</td>";
+				echo "<td>$row[kukanimi]<br>".tv1dateconv($row["created_at"], "P")."</td>";
 
 				$js_laskutusvkopv = $row["laskutusvkopv"];
 

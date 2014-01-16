@@ -467,12 +467,12 @@
 
 			$where2 .= " and lasku.alatila in('C','D','X')";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'
 						 and lasku.ytunnus = '$ytunnus'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == '') {
@@ -486,11 +486,11 @@
 
 			$where2 .= " and lasku.alatila in ('','A','B','C','J','D') ";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "OSTO") {
@@ -499,11 +499,11 @@
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "HAAMU") {
@@ -512,11 +512,11 @@
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "PURKU") {
@@ -525,22 +525,22 @@
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "VASTAANOTETUT") {
 
 			$where1 = " lasku.tila = 'G' and alatila in ('V','X') ";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "VASTAANOTTORAPORTTI") {
@@ -553,11 +553,11 @@
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "TARIFFI") {
@@ -566,11 +566,11 @@
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "TUOTETARRA") {
@@ -579,11 +579,11 @@
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "TILAUSTUOTETARRA") {
@@ -592,19 +592,19 @@
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "SIIRTOLISTA") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa siirtolista
 			$where1 .= " lasku.tila = 'G' ";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-					     and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+					     and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if ($lahettava_varasto != '') {
 				$where2 .= " and lasku.varasto = '$lahettava_varasto'";
@@ -614,7 +614,7 @@
 			}
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "VALMISTUS") {
@@ -628,11 +628,11 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "LASKU" or $toim == "VIENTILASKU") {
@@ -686,11 +686,11 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "KERAYSLISTA") {
@@ -705,11 +705,11 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "OSOITELAPPU") {
@@ -723,11 +723,11 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "VIENTIERITTELY") {
@@ -759,11 +759,11 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "TILAUSVAHVISTUS") {
@@ -777,11 +777,11 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "YLLAPITOSOPIMUS") {
@@ -795,11 +795,11 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
@@ -813,11 +813,11 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
@@ -833,11 +833,11 @@
 
 			$where2 .= " and lasku.tilaustyyppi in ('A')";
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 		if ($toim == "VAKADR") {
@@ -851,15 +851,15 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where3 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59'";
 
 			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'O')
 						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
 						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
-			$use = " use index (yhtio_tila_luontiaika) ";
+			$use = " use index (yhtio_tila_created_at) ";
 		}
 
 
@@ -957,9 +957,9 @@
 					lasku.ytunnus,
 					lasku.nimi,
 					lasku.nimitark,
-					if (lasku.tapvm = '0000-00-00', left(lasku.luontiaika,10), lasku.tapvm) pvm,
+					if (lasku.tapvm = '0000-00-00', left(lasku.created_at,10), lasku.tapvm) pvm,
 					lasku.toimaika,
-					if (kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija,
+					if (kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.created_by) created_by,
 					lasku.summa,
 					lasku.toimaika Toimitusaika,
 					lasku.tila,
@@ -970,7 +970,7 @@
 					lasku.liitostunnus,
 					lasku.viesti
 					FROM lasku {$use}
-					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
+					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.created_by)
 					{$joinlisa}
 					WHERE {$where1} {$where2} {$where3} {$where5}
 					and lasku.{$logistiikka_yhtiolisa}
@@ -1045,7 +1045,7 @@
 			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tunnus'>",t("Tilausnro"),"</a><br><a href='{$hreffi}&jarj=lasku.laskunro'>",t("Laskunro"),"</a></th>";
 			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.ytunnus'>",t("Ytunnus"),"</a><br><a href='{$hreffi}&jarj=lasku.nimi'>",t("Nimi"),"</a></th>";
 			echo "<th valign='top'><a href='{$hreffi}&jarj=pvm'>",t("Pvm"),"</a><br><a href='{$hreffi}&jarj=lasku.toimaika'>",t("Toimaika"),"</a></th>";
-			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.laatija'>",t("Laatija"),"</a></th>";
+			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.created_by'>",t("Laatija"),"</a></th>";
 
 			if ($toim == "SIIRTOLISTA") {
 				echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.viesti'>",t("Viite"),"</a></th>";
@@ -1094,7 +1094,7 @@
 				echo "</$ero>";
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
 				echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
-				echo "<$ero valign='top'>$row[laatija]</$ero>";
+				echo "<$ero valign='top'>$row[created_by]</$ero>";
 
 				if ($toim == "SIIRTOLISTA") {
 					echo "<{$ero} valign='top'>{$row['viesti']}</{$ero}>";

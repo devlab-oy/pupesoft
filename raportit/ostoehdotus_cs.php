@@ -21,8 +21,8 @@
 		$query = "	UPDATE tuotteen_toimittajat SET
 					pakkauskoko  = '$pakkauskoot',
 					toimitusaika = '$toimitusajat',
-					muuttaja	 = '$kukarow[kuka]',
-					muutospvm	 = now()
+					updated_by	 = '$kukarow[kuka]',
+					updated_at	 = now()
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoteno'
 					and liitostunnus  = '$toimittaja'";
@@ -31,8 +31,8 @@
 		$query = "	UPDATE tuote SET
 					varmuus_varasto = '$varmuusvarastot',
 					status 			= '$varastoitavat',
-					muuttaja		= '$kukarow[kuka]',
-					muutospvm		= now()
+					updated_by		= '$kukarow[kuka]',
+					updated_at		= now()
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoteno'";
 		$result   = pupe_query($query);
@@ -455,10 +455,10 @@
 			$lisaa .= " and tuote.status = 'T' ";
 		}
 		if ($vainuudet != '') {
-			$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
+			$lisaa .= " and tuote.created_at >= date_sub(current_date, interval 12 month) ";
 		}
 		if ($eiuusia != '') {
-			$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
+			$lisaa .= " and tuote.created_at < date_sub(current_date, interval 12 month) ";
 		}
 		if ($toimittajaid != '') {
 			$lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
@@ -495,7 +495,7 @@
 			$abcjoin = " 	JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
 							and abc_aputaulu.tuoteno = tuote.tuoteno
 							and abc_aputaulu.tyyppi = '$abcrajaustapa'
-							and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
+							and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_created_at >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
 		}
 		else {
 			$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa') ";
@@ -523,7 +523,7 @@
 					tuote.varmuus_varasto,
 					if(tuote.status != 'T', '".t("Varastoitava")."','".t("Ei varastoida")."') ei_varastoida,
 					abc_aputaulu.luokka abcluokka,
-					tuote.luontiaika ";
+					tuote.created_at ";
 
 		if ($toim == "KK") {
 			$query .= " , sum(tuotepaikat.halytysraja) tpaikka_halyraja
@@ -625,7 +625,7 @@
 			$toimirow = mysql_fetch_assoc($result);
 
 			// kaunistellaan kenttiä
-			if ($row["luontiaika"] == "0000-00-00 00:00:00") $row["luontiaika"] = "";
+			if ($row["created_at"] == "0000-00-00 00:00:00") $row["created_at"] = "";
 			if ($row['epakurantti25pvm'] == '0000-00-00')    $row['epakurantti25pvm'] = "";
 			if ($row['epakurantti50pvm'] == '0000-00-00')    $row['epakurantti50pvm'] = "";
 			if ($row['epakurantti75pvm'] == '0000-00-00')    $row['epakurantti75pvm'] = "";

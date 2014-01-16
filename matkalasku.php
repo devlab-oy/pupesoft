@@ -173,8 +173,8 @@ if ($tee == "UUSI") {
 						pankki3 		= '$trow[pankki3]',
 						pankki4 		= '$trow[pankki4]',
 						vienti_kurssi 	= '1',
-						laatija 		= '$kukarow[kuka]',
-						luontiaika 		= now(),
+						created_by 		= '$kukarow[kuka]',
+						created_at 		= now(),
 						tapvm			= current_date,
 						erpcm			= date_add(current_date, INTERVAL $erpaivia day),
 						liitostunnus 	= '$trow[tunnus]',
@@ -667,7 +667,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT' and !$muokkauslukko) {
 		$query = "	UPDATE tiliointi
 					SET summa = '{$rivihinta}',
 					laadittu  = now(),
-					laatija   = '$kukarow[kuka]'
+					created_by   = '$kukarow[kuka]'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus  = '{$tiliointi_tilausrivi_row['tiliointirivitunnus']}'";
 		pupe_query($query);
@@ -1729,7 +1729,7 @@ if ($tee == "") {
 				and lasku.toim_ovttunnus = '$listaa_kayttaja'
 				and lasku.h1time 		!= '0000-00-00 00:00:00'
 				and lasku.tilaustyyppi 	 = 'M'
-				ORDER BY luontiaika DESC";
+				ORDER BY created_at DESC";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result)) {
@@ -2556,7 +2556,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 								hyllynro    	= '0',
 								hyllytaso   	= '0',
 								hyllyvali   	= '0',
-								laatija 		= '$kukarow[kuka]',
+								created_by 		= '$kukarow[kuka]',
 								laadittu 		= now(),
 								yhtio 			= '$kukarow[yhtio]',
 								tuoteno 		= '$lisaa_tuoteno',
@@ -2644,7 +2644,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 								selite 		= '".mysql_real_escape_string($selite_array[$indeksi])."',
 								lukko 		= '',
 								tosite 		= '$tositenro',
-								laatija 	= '$kukarow[kuka]',
+								created_by 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					$result = pupe_query($query);
 					$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
@@ -2663,7 +2663,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 									vero 		= 0,
 									selite 		= '".mysql_real_escape_string($selite_array[$indeksi])."',
 									lukko 		= '1',
-									laatija 	= '$kukarow[kuka]',
+									created_by 	= '$kukarow[kuka]',
 									laadittu 	= now(),
 									aputunnus 	= $isa";
 						$result = pupe_query($query);
@@ -2673,14 +2673,14 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					// jotta pystymme linkkaamaan tilausrivin sekä sen tiliointirivin
 					$query = "	INSERT INTO tilausrivin_lisatiedot SET
 								yhtio				= '$kukarow[yhtio]',
-								luontiaika			= now(),
+								created_at			= now(),
 								tilausrivitunnus	= '$lisatty_tun',
-								laatija 			= '$kukarow[kuka]',
+								created_by 			= '$kukarow[kuka]',
 								tiliointirivitunnus = '$isa',
 								kulun_kohdemaa		= '$maa',
 								kulun_kohdemaan_alv	= '$alvulk',
-								muutospvm			= now(),
-								muuttaja			= '$kukarow[kuka]'";
+								updated_at			= now(),
+								updated_by			= '$kukarow[kuka]'";
 					$updres = pupe_query($query);
 				}
 			}
@@ -2796,7 +2796,7 @@ function korjaa_ostovelka($tilausnumero) {
 					vero 		= 0,
 					tosite 		= '$tositenro',
 					selite		= '".t("Ostovelka")."',
-					laatija 	= '$kukarow[kuka]',
+					created_by 	= '$kukarow[kuka]',
 					laadittu 	= now()";
 		$updres = pupe_query($query);
 	}
@@ -2938,7 +2938,7 @@ function erittele_rivit($tilausnumero) {
 								hyllynro    = '0',
 								hyllytaso   = '0',
 								hyllyvali   = '0',
-								laatija 	= '$kukarow[kuka]',
+								created_by 	= '$kukarow[kuka]',
 								laadittu 	= now(),
 								yhtio 		= '$kukarow[yhtio]',
 								tuoteno 	= '$tno',
@@ -2988,21 +2988,21 @@ function erittele_rivit($tilausnumero) {
 								selite 		= 'EC selvittely',
 								lukko 		= '1',
 								tosite 		= '$tositenro',
-								laatija 	= '$kukarow[kuka]',
+								created_by 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					$result = pupe_query($query);
 					$isa = mysql_insert_id();
 
 					$query = "	INSERT INTO tilausrivin_lisatiedot SET
 								yhtio				= '$kukarow[yhtio]',
-								luontiaika			= now(),
+								created_at			= now(),
 								tilausrivitunnus	= '$lisatty_tun',
-								laatija 			= '$kukarow[kuka]',
+								created_by 			= '$kukarow[kuka]',
 								tiliointirivitunnus = '$isa',
 								kulun_kohdemaa		= '$yhtiorow[maa]',
 								kulun_kohdemaan_alv	= '',
-								muutospvm			= now(),
-								muuttaja			= '$kukarow[kuka]'";
+								updated_at			= now(),
+								updated_by			= '$kukarow[kuka]'";
 					$updres = pupe_query($query);
 
 					korjaa_ostovelka($tilausnumero);

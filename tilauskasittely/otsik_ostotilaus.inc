@@ -528,7 +528,7 @@
 			$vresult = mysql_query($vquery) or pupe_error($vquery);
 			$vrow = mysql_fetch_array($vresult);
 
-			$postquery = ", vienti_kurssi = '$vrow[kurssi]', laatija = '$kukarow[kuka]', luontiaika=now()";
+			$postquery = ", vienti_kurssi = '$vrow[kurssi]', created_by = '$kukarow[kuka]', created_at=now()";
 		}
 		else {
 			// Pidet‰‰n huolta tilausrivien toimitusp‰ivist‰ ja kerayspaivasta

@@ -77,7 +77,7 @@
 					$fields .= ", ".mysql_field_name($monistares,$i);
 
 					switch (mysql_field_name($monistares,$i)) {
-						case 'luontiaika':
+						case 'created_at':
 							$values .= ", now()";
 							break;
 						case 'alatila':
@@ -140,7 +140,7 @@
 						case 'poistumistoimipaikka_koodi':
 							$values .= ", ''";
 							break;
-						case 'laatija':
+						case 'created_by':
 							$values .= ", '$kukarow[kuka]'";
 							break;
 						case 'kate_korjattu':
@@ -167,7 +167,7 @@
 					$updres=pupe_query($kysely);
 
 					// avataan projekti kirjanpitoon
-					$query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$ptunnus - $monistarow[nimi]', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '$kukarow[kuka]'";
+					$query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$ptunnus - $monistarow[nimi]', tyyppi = 'P', kaytossa = 'o', created_at = now(), created_by = '$kukarow[kuka]'";
 					$result = pupe_query($query);
 					$projekti = mysql_insert_id();
 
@@ -192,13 +192,13 @@
 						$fields .= ", ".mysql_field_name($monistatyomres,$i);
 
 						switch (mysql_field_name($monistatyomres,$i)) {
-							case 'luontiaika':
+							case 'created_at':
 								$values .= ", now()";
 								break;
 							case 'otunnus':
 								$values .= ", $utunnus";
 								break;
-							case 'laatija':
+							case 'created_by':
 								$values .= ", '$kukarow[kuka]'";
 								break;
 							default:
@@ -339,8 +339,8 @@
 								  	image_channels	= '$liiterow[image_channels]',
 								  	kayttotarkoitus	= '$liiterow[kayttotarkoitus]',
 								  	jarjestys		= '$liiterow[jarjestys]',
-								  	laatija			= '$kukarow[kuka]',
-								  	luontiaika		= now()";
+								  	created_by			= '$kukarow[kuka]',
+								  	created_at		= now()";
 						$liiteinsres = pupe_query($query);
 					}
 				}
@@ -625,8 +625,8 @@
 									case 'tilausrivitunnus':
 									case 'tiliointirivitunnus':
 									case 'tilausrivilinkki':
-									case 'luontiaika':
-									case 'laatija':
+									case 'created_at':
+									case 'created_by':
 										$values .= "";
 										break;
 									default:

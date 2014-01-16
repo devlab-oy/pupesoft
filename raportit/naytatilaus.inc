@@ -355,7 +355,7 @@
 				<th>".t("Laskutettu")."</th>
 			</tr>";
 		echo "<tr>
-				<td>".tv1dateconv($laskurow["luontiaika"], "P", "")."</td>
+				<td>".tv1dateconv($laskurow["created_at"], "P", "")."</td>
 				<td>".tv1dateconv($laskurow["h1time"], "P", "")."</td>
 				<td>".tv1dateconv($laskurow["lahetepvm"], "P", "")."</td>
 				<td>".tv1dateconv($aikarow["kerattyaika"], "P", "")."</td>
@@ -382,16 +382,16 @@
 		}
 	}
 
-	if (!isset($myyrow) or $myyrow['kuka'] != $laskurow['laatija']) {
-		//etsit‰‰n laatijan nimi
+	if (!isset($myyrow) or $myyrow['kuka'] != $laskurow['created_by']) {
+		//etsit‰‰n created_byn nimi
 		$query  = "	SELECT nimi
 					from kuka
-					where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
+					where kuka='$laskurow[created_by]' and yhtio='$kukarow[yhtio]'";
 		$laaresult = pupe_query($query);
 		$laarow = mysql_fetch_assoc($laaresult);
 
 		if ($laarow["nimi"] == "") {
-			$laarow["nimi"] = $laskurow["laatija"];
+			$laarow["nimi"] = $laskurow["created_by"];
 		}
 
 		$komm .= "\n".t("Laatija").":###".$laarow['nimi'];
@@ -1927,7 +1927,7 @@
 			if ($kukarow['hinnat'] == 0) $summaselli = " summa, ";
 			else $summaselli = "";
 
-			$query = "	SELECT tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, $summaselli tila, alatila
+			$query = "	SELECT tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, created_by, $summaselli tila, alatila
 						FROM lasku use index (yhtio_tunnusnippu)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnusnippu = '$laskurow[tunnusnippu]'

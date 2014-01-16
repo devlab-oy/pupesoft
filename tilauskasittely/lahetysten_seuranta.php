@@ -224,7 +224,7 @@
 						$query = "	SELECT kerayserat.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, kuka.nimi AS keraaja, ROUND(kerayserat.kpl_keratty, 0) kpl_keratty
 									FROM kerayserat
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-									JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
+									JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.created_by)
 									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 									AND (kerayserat.sscc = '{$era_row['sscc']}' OR kerayserat.sscc_ulkoinen = '{$era_row['sscc']}')";
 						$sscc_res = pupe_query($query);

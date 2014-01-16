@@ -89,7 +89,7 @@
 		$vvl = date("Y");
 		$ppl = date("d");
 
-		$query = "	SELECT distinct lasku.yhtio yhtio, lasku.tunnus, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija
+		$query = "	SELECT distinct lasku.yhtio yhtio, lasku.tunnus, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, date_format(lasku.created_at, '%Y-%m-%d') laadittu, lasku.created_by
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
 										and tilausrivi.otunnus = lasku.tunnus
@@ -118,7 +118,7 @@
 				echo "<td>$tilrow[tunnus]</td>";
 				echo "<td>$tilrow[asiakas]</td>";
 				echo "<td>$tilrow[laadittu]</td>";
-				echo "<td>$tilrow[laatija]</td>";
+				echo "<td>$tilrow[created_by]</td>";
 				echo "<td class='back'><form method='post'>
 						<input type='hidden' name='tee' value='KORJAA'>
 						<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>

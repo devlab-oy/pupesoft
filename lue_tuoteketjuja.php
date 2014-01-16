@@ -357,8 +357,8 @@ if ($kasitellaan_tiedosto) {
 									if ($jarjestys != 0) {
 										$uquery = "	UPDATE $table SET
 													jarjestys = jarjestys+1,
-													muuttaja  = '{$kukarow['kuka']}',
-													muutospvm = now()
+													updated_by  = '{$kukarow['kuka']}',
+													updated_at = now()
 													WHERE jarjestys != 0
 													AND id          = '$id'
 													AND yhtio       = '{$kukarow['yhtio']}'
@@ -368,7 +368,7 @@ if ($kasitellaan_tiedosto) {
 
 									if ($vastaava_paatuote == $rivi[$j]) $jarjestys = 1;
 
-									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', $vaihtoehtoinen_lisa laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
+									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', $vaihtoehtoinen_lisa created_by='$kukarow[kuka]', created_at=now(), updated_by='$kukarow[kuka]', updated_at=now() ";
 									$query = $alku.$kysely.$loppu;
 									$iresult = pupe_query($query);
 
@@ -428,8 +428,8 @@ if ($kasitellaan_tiedosto) {
 										while ($irow = mysql_fetch_assoc($iresult)) {
 											$kquery = "	UPDATE $table
 														SET jarjestys = $siirtojarj,
-														muuttaja = '$kukarow[kuka]',
-														muutospvm = now()
+														updated_by = '$kukarow[kuka]',
+														updated_at = now()
 														WHERE tunnus = '$irow[tunnus]'
 														and jarjestys != 0";
 											$updres = pupe_query($kquery);
@@ -443,8 +443,8 @@ if ($kasitellaan_tiedosto) {
 									$kquery = "	UPDATE $table
 												SET {$jupdate}
 												{$vaihtoehtoinen_lisa}
-												muuttaja = '$kukarow[kuka]',
-												muutospvm = now()
+												updated_by = '$kukarow[kuka]',
+												updated_at = now()
 												WHERE tuoteno = '$rivi[$j]'
 												and id = '$id'
 												and yhtio = '{$kukarow['yhtio']}'";
@@ -554,10 +554,10 @@ if ($kasitellaan_tiedosto) {
 									isatuoteno 	= '$isatuote',
 									tuoteno 	= '{$rivi[$r]}',
 									tyyppi 		= '$tyyppi',
-									laatija 	= '$kukarow[kuka]',
-									luontiaika 	= now(),
-									muuttaja 	= '$kukarow[kuka]',
-									muutospvm 	= now()";
+									created_by 	= '$kukarow[kuka]',
+									created_at 	= now(),
+									updated_by 	= '$kukarow[kuka]',
+									updated_at 	= now()";
 						$result = pupe_query($query);
 						$lask++;
 					}

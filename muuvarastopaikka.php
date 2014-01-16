@@ -185,7 +185,7 @@
 								hyllyvali	= '$hyllyvali[$poistetaan]',
 								hyllytaso	= '$hyllytaso[$poistetaan]',
 								selite 		= '$poisto_texti',
-								laatija 	= '$kukarow[kuka]',
+								created_by 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					pupe_query($query);
 
@@ -263,8 +263,8 @@
 			foreach ($halyraja2 as $tunnus => $halyraja) {
 				$query = "	UPDATE tuotepaikat
 							SET halytysraja = '$halyraja',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
+							updated_by	= '$kukarow[kuka]',
+							updated_at	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 				pupe_query($query);
 			}
@@ -274,8 +274,8 @@
 			foreach ($tilausmaara2 as $tunnus => $tilausmaara) {
 				$query = "	UPDATE tuotepaikat
 							SET tilausmaara = '$tilausmaara',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
+							updated_by	= '$kukarow[kuka]',
+							updated_at	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 				pupe_query($query);
 			}
@@ -285,8 +285,8 @@
 			foreach ($prio2 as $tunnus => $prio) {
 				$query = "	UPDATE tuotepaikat
 							SET prio = '{$prio}',
-							muuttaja	= '{$kukarow['kuka']}',
-							muutospvm	= now()
+							updated_by	= '{$kukarow['kuka']}',
+							updated_at	= now()
 							WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
 				pupe_query($query);
 			}
@@ -533,7 +533,7 @@
 
 				// Vastaanottavaa paikkaa ei löydy, perustetaan se
 				if (mysql_num_rows($result) == 0) {
-					$query = "	INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, laatija, luontiaika)
+					$query = "	INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, created_by, created_at)
 							  	VALUES (
 								'$kukarow[yhtio]',
 								'$minnerow[hyllyalue]',
@@ -563,7 +563,7 @@
 								hyllyvali	= '$minnerow[hyllyvali]',
 								hyllytaso	= '$minnerow[hyllytaso]',
 								selite 		= '".t("Lisättiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
-								laatija 	= '$kukarow[kuka]',
+								created_by 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					$result = pupe_query($query);
 
@@ -617,8 +617,8 @@
 								hyllynro 		= '$minnerow[hyllynro]',
 								hyllyvali 		= '$minnerow[hyllyvali]',
 								hyllytaso		= '$minnerow[hyllytaso]',
-								muuttaja		= '$kukarow[kuka]',
-								muutospvm		= now()
+								updated_by		= '$kukarow[kuka]',
+								updated_at		= now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$sarjano'";
 					$result = pupe_query($query);
@@ -645,8 +645,8 @@
 					$query = "	UPDATE sarjanumeroseuranta
 								set era_kpl		= era_kpl - $asaldo,
 								$sarjaquerylisa
-								muuttaja		= '$kukarow[kuka]',
-								muutospvm		= now()
+								updated_by		= '$kukarow[kuka]',
+								updated_at		= now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$sarjano'";
 					$result = pupe_query($query);
@@ -670,8 +670,8 @@
 
 						$query = "	UPDATE sarjanumeroseuranta
 									set era_kpl		= era_kpl + $asaldo,
-									muuttaja		= '$kukarow[kuka]',
-									muutospvm		= now()
+									updated_by		= '$kukarow[kuka]',
+									updated_at		= now()
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$sarrr_row2[tunnus]'";
 						$result = pupe_query($query);
@@ -690,10 +690,10 @@
 									hyllynro 		= '$minnerow[hyllynro]',
 									hyllyvali 		= '$minnerow[hyllyvali]',
 									hyllytaso		= '$minnerow[hyllytaso]',
-									muuttaja		= '$kukarow[kuka]',
-									muutospvm		= now(),
-									laatija 		= '$kukarow[kuka]',
-									luontiaika		= now()";
+									updated_by		= '$kukarow[kuka]',
+									updated_at		= now(),
+									created_by 		= '$kukarow[kuka]',
+									created_at		= now()";
 						$result = pupe_query($query);
 					}
 				}
@@ -710,8 +710,8 @@
 								hyllynro 		= '$minnerow[hyllynro]',
 								hyllyvali 		= '$minnerow[hyllyvali]',
 								hyllytaso		= '$minnerow[hyllytaso]',
-								muuttaja		= '$kukarow[kuka]',
-								muutospvm		= now()
+								updated_by		= '$kukarow[kuka]',
+								updated_at		= now()
 								WHERE yhtio		= '$kukarow[yhtio]'
 								and tunnus		= '$sarjano'";
 					$result = pupe_query($query);
@@ -783,7 +783,7 @@
 					}
 
 
-					$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, laatija, luontiaika)
+					$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, created_by, created_at)
 							  VALUES (
 								'$kukarow[yhtio]',
 								'$ahyllyalue',
@@ -808,7 +808,7 @@
 								hyllyvali	= '$ahyllyvali',
 								hyllytaso	= '$ahyllytaso',
 								selite 		= '".t("Lisättiin tuotepaikka")." $ahyllyalue $ahyllynro $ahyllyvali $ahyllytaso',
-								laatija 	= '$kukarow[kuka]',
+								created_by 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					$result = pupe_query($query);
 				}

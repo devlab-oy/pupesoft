@@ -106,7 +106,7 @@ if ($tila == "vaihdasuorituksentili") {
 					echo "<th>".t("summa")."</th>";
 					echo "<th>".t("alv")."</th>";
 					echo "<th>".t("tapvm")."</th>";
-					echo "<th>".t("laatija")."</th>";
+					echo "<th>".t("created_by")."</th>";
 					echo "</tr>";
 
 					echo "<form method='post' action='manuaalinen_suoritusten_kohdistus.php'>";
@@ -133,7 +133,7 @@ if ($tila == "vaihdasuorituksentili") {
 						echo "<td>$tilioinnit[summa]</td>";
 						echo "<td>$tilioinnit[alv]</td>";
 						echo "<td>$tilioinnit[tapvm]</td>";
-						echo "<td>$tilioinnit[laatija] @ $tilioinnit[laadittu]</td>";
+						echo "<td>$tilioinnit[created_by] @ $tilioinnit[laadittu]</td>";
 						echo "</tr>";
 					}
 					echo "</table>";
@@ -524,7 +524,7 @@ if ($tila == 'tee_kohdistus') {
 		// Rahatili
 		$query = "	INSERT INTO tiliointi SET
 					yhtio				= '$kukarow[yhtio]',
-					laatija				= '$kukarow[kuka]',
+					created_by				= '$kukarow[kuka]',
 					laadittu			= now(),
 					tapvm				= '$laskun_maksupvm',
 					tilino				= '$suoritus[kassatilino]',
@@ -556,7 +556,7 @@ if ($tila == 'tee_kohdistus') {
 		// Myyntisaamiset
 		$query = "	INSERT INTO tiliointi SET
 					yhtio				= '$kukarow[yhtio]',
-					laatija				= '$kukarow[kuka]',
+					created_by				= '$kukarow[kuka]',
 					laadittu			= now(),
 					tapvm				= '$laskun_maksupvm',
 					ltunnus				= '$ltunnus',
@@ -619,7 +619,7 @@ if ($tila == 'tee_kohdistus') {
 					// Valuuttaero
 					$query = "	INSERT INTO tiliointi SET
 								yhtio		= '$kukarow[yhtio]',
-								laatija		= '$kukarow[kuka]',
+								created_by		= '$kukarow[kuka]',
 								laadittu	= now(),
 								tapvm		= '$laskun_maksupvm',
 								ltunnus		= '$ltunnus',
@@ -640,7 +640,7 @@ if ($tila == 'tee_kohdistus') {
 						// Valuuttaero
 						$query = "	INSERT INTO tiliointi SET
 									yhtio		= '$kukarow[yhtio]',
-									laatija		= '$kukarow[kuka]',
+									created_by		= '$kukarow[kuka]',
 									laadittu	= now(),
 									tapvm		= '$laskun_maksupvm',
 									ltunnus		= '$ltunnus',
@@ -726,7 +726,7 @@ if ($tila == 'tee_kohdistus') {
 			'summa' 			=> ($tiliointi1['summa'] * -1),
 			'summa_valuutassa' 	=> ($tiliointi1['summa_valuutassa'] * -1),
 			'tapvm'				=> $laskun_maksupvm,
-			'laatija' 			=> $kukarow['kuka'],
+			'created_by' 			=> $kukarow['kuka'],
 			'laadittu' 			=> date('Y-m-d H:i:s'),
 			'aputunnus'			=> 0,
 			'selite' 			=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
@@ -738,7 +738,7 @@ if ($tila == 'tee_kohdistus') {
 			'summa' 			=> ($tiliointi2['summa'] * -1),
 			'summa_valuutassa' 	=> ($tiliointi2['summa_valuutassa'] * -1),
 			'tapvm'				=> $laskun_maksupvm,
-			'laatija' 			=> $kukarow['kuka'],
+			'created_by' 			=> $kukarow['kuka'],
 			'laadittu' 			=> date('Y-m-d H:i:s'),
 			'aputunnus'			=> 0,
 			'selite' 			=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
@@ -969,7 +969,7 @@ if ($tila == 'tee_kohdistus') {
 						// Kassa-ale
 						$query = "	INSERT INTO tiliointi SET
 									yhtio				= '$kukarow[yhtio]',
-									laatija				= '$kukarow[kuka]',
+									created_by				= '$kukarow[kuka]',
 									laadittu			= now(),
 									tapvm				= '$laskun_maksupvm',
 									ltunnus				= '$lasku[tunnus]',
@@ -1013,7 +1013,7 @@ if ($tila == 'tee_kohdistus') {
 							// Kassa-ale
 							$query = "	INSERT INTO tiliointi SET
 										yhtio				= '$kukarow[yhtio]',
-										laatija				= '$kukarow[kuka]',
+										created_by				= '$kukarow[kuka]',
 										laadittu			= now(),
 										tapvm				= '$laskun_maksupvm',
 										ltunnus				= '$lasku[tunnus]',
@@ -1045,7 +1045,7 @@ if ($tila == 'tee_kohdistus') {
 											vero 				= 0,
 											selite 				= '$selite',
 											lukko 				= '1',
-											laatija 			= '$kukarow[kuka]',
+											created_by 			= '$kukarow[kuka]',
 											laadittu 			= now(),
 											aputunnus 			= $isa";
 								$xresult = pupe_query($query);
@@ -1085,7 +1085,7 @@ if ($tila == 'tee_kohdistus') {
 				// Rahatili
 				$query = "	INSERT INTO tiliointi SET
 							yhtio				= '$kukarow[yhtio]',
-							laatija				= '$kukarow[kuka]',
+							created_by				= '$kukarow[kuka]',
 							laadittu			= now(),
 							tapvm				= '$laskun_maksupvm',
 							tilino				= '$suoritus[kassatilino]',
@@ -1119,7 +1119,7 @@ if ($tila == 'tee_kohdistus') {
 				// Myyntisaamiset
 				$query = "	INSERT INTO tiliointi SET
 							yhtio				= '$kukarow[yhtio]',
-							laatija				= '$kukarow[kuka]',
+							created_by				= '$kukarow[kuka]',
 							laadittu			= now(),
 							tapvm				= '$laskun_maksupvm',
 							ltunnus				= '$lasku[tunnus]',
@@ -1182,7 +1182,7 @@ if ($tila == 'tee_kohdistus') {
 							// Valuuttaero
 							$query = "	INSERT INTO tiliointi SET
 										yhtio		= '$kukarow[yhtio]',
-										laatija		= '$kukarow[kuka]',
+										created_by		= '$kukarow[kuka]',
 										laadittu	= now(),
 										tapvm		= '$laskun_maksupvm',
 										ltunnus		= '$lasku[tunnus]',
@@ -1203,7 +1203,7 @@ if ($tila == 'tee_kohdistus') {
 								// Valuuttaero
 								$query = "	INSERT INTO tiliointi SET
 											yhtio		= '$kukarow[yhtio]',
-											laatija		= '$kukarow[kuka]',
+											created_by		= '$kukarow[kuka]',
 											laadittu	= now(),
 											tapvm		= '$laskun_maksupvm',
 											ltunnus		= '$ltunnus',
@@ -1294,7 +1294,7 @@ if ($tila == 'tee_kohdistus') {
 				$params = array(
 					'summa' 			=> $erotus,
 					'summa_valuutassa' 	=> round($erotus / $suoritus['kurssi'], 2),
-					'laatija' 			=> $kukarow['kuka'],
+					'created_by' 			=> $kukarow['kuka'],
 					'laadittu' 			=> date('Y-m-d H:i:s'),
 					'aputunnus'			=> 0,
 					'selite' 			=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
@@ -1328,7 +1328,7 @@ if ($tila == 'tee_kohdistus') {
 				$params = array(
 					'summa' 			=> ($erotus * -1),
 					'summa_valuutassa' 	=> round($erotus * -1 / $suoritus['kurssi'], 2),
-					'laatija' 			=> $kukarow['kuka'],
+					'created_by' 			=> $kukarow['kuka'],
 					'laadittu' 			=> date('Y-m-d H:i:s'),
 					'aputunnus'			=> $ttunnus,
 					'selite' 			=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
@@ -1342,7 +1342,7 @@ if ($tila == 'tee_kohdistus') {
 					'summa' 			=> $kassaan,
 					'summa_valuutassa' 	=> round($kassaan / $suoritus['kurssi'], 2),
 					'tapvm'				=> $laskun_maksupvm,
-					'laatija' 			=> $kukarow['kuka'],
+					'created_by' 			=> $kukarow['kuka'],
 					'laadittu' 			=> date('Y-m-d H:i:s'),
 					'aputunnus'			=> 0,
 					'selite' 			=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
@@ -1354,7 +1354,7 @@ if ($tila == 'tee_kohdistus') {
 					'summa' 			=> ($kassaan * -1),
 					'summa_valuutassa' 	=> round($kassaan * -1 / $suoritus['kurssi'], 2),
 					'tapvm'				=> $laskun_maksupvm,
-					'laatija' 			=> $kukarow['kuka'],
+					'created_by' 			=> $kukarow['kuka'],
 					'laadittu' 			=> date('Y-m-d H:i:s'),
 					'aputunnus'			=> 0,
 					'selite' 			=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
@@ -1376,7 +1376,7 @@ if ($tila == 'tee_kohdistus') {
 					'summa' 			=> ($tiliointi1['summa'] * -1),
 					'summa_valuutassa' 	=> ($tiliointi1['summa_valuutassa'] * -1),
 					'tapvm'				=> $laskun_maksupvm,
-					'laatija' 			=> $kukarow['kuka'],
+					'created_by' 			=> $kukarow['kuka'],
 					'laadittu' 			=> date('Y-m-d H:i:s'),
 					'aputunnus'			=> 0,
 					'selite' 			=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
@@ -1388,7 +1388,7 @@ if ($tila == 'tee_kohdistus') {
 					'summa' 			=> ($tiliointi2['summa'] * -1),
 					'summa_valuutassa' 	=> ($tiliointi2['summa_valuutassa'] * -1),
 					'tapvm'				=> $laskun_maksupvm,
-					'laatija' 			=> $kukarow['kuka'],
+					'created_by' 			=> $kukarow['kuka'],
 					'laadittu' 			=> date('Y-m-d H:i:s'),
 					'aputunnus'			=> 0,
 					'selite' 			=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",

@@ -68,7 +68,7 @@
 		$tee = "";
 	}
 
-	// LN = Etsit‰‰n myyj‰n tai laatijan nimell‰
+	// LN = Etsit‰‰n myyj‰n tai created_byn nimell‰
 	if ($tee == 'LN') {
 		// haetaan vain aktiivisia k‰ytt‰ji‰
 		$query = "	SELECT
@@ -92,7 +92,7 @@
 		}
 
 		$index = " use index (tila_index) ";
-		$ehto = "tila = 'U' and (laatija in ({$row["kuka"]}) $myyja)";
+		$ehto = "tila = 'U' and (created_by in ({$row["kuka"]}) $myyja)";
 		$jarj = "nimi, tapvm desc";
 	}
 
@@ -186,7 +186,7 @@
 	if ($tee != '') {
 		$query = "	SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
 					summa, valkoodi, ebid, tila, alatila, tunnus,
-					mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
+					mapvm, saldo_maksettu, ytunnus, liitostunnus, created_by
 					FROM lasku {$index}
 					WHERE {$ehto} and yhtio = '{$kukarow['yhtio']}'
 					ORDER BY {$jarj}";
@@ -223,7 +223,7 @@
 					<td><input type='text' class='search_field' name='search_valuutta'></td>
 					<td><input type='text' class='search_field' name='search_ebid'></td>
 					<td><input type='text' class='search_field' name='search_tila'></td>
-					<td><input type='text' class='search_field' name='search_laatija'></td>
+					<td><input type='text' class='search_field' name='search_created_by'></td>
 					</tr>
 				</thead>";
 
@@ -268,7 +268,7 @@
 				}
 
 				echo "<td>$maksuviesti</td>";
-				echo "<td>".kuka_kayttaja($trow["laatija"])."</td>";
+				echo "<td>".kuka_kayttaja($trow["created_by"])."</td>";
 				echo "</tr>";
 			}
 

@@ -564,7 +564,7 @@
 							lasku.vienti_kurssi,
 							lasku.viesti laskuviesti,
 							lasku.asiakkaan_tilausnumero,
-							lasku.luontiaika tilauspaiva,
+							lasku.created_at tilauspaiva,
 							if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
 							if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
 							if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,

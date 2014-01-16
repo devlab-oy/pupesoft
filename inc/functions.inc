@@ -2203,8 +2203,8 @@ if (!function_exists("synclog")) {
 					tauluntunnus= '$tunnus',
 					tapa		= '$tapa',
 					viesti		= '".addslashes($viesti)."',
-					laatija		= '$kukarow[kuka]',
-					luontiaika	= now()";
+					created_by		= '$kukarow[kuka]',
+					created_at	= now()";
 		$insres = pupe_query($query);
 	}
 }
@@ -2275,7 +2275,7 @@ if (!function_exists("synkronoi")) {
 					if (count($diff) > 0) {
 
 						foreach($diff as $key => $value) {
-							if (is_string($key) and !in_array($key, array("tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
+							if (is_string($key) and !in_array($key, array("tunnus","updated_by","updated_at","created_by","created_at"))) {
 							    if (isset($synkronoi_kiellot[$table]) and in_array($key, $synkronoi_kiellot[$table])) {
 							        // Ohitetaan tämä koska se on synkronoi kielloissa
 							    }
@@ -2589,7 +2589,7 @@ if (!function_exists("synkronoi")) {
 					$ok = 1;
 
 					if (mysql_num_rows($abures)==0) {
-						$query 	= "INSERT into $table SET yhtio='$kohderow[yhtio]', laatija='$yhtio', luontiaika=now() ";
+						$query 	= "INSERT into $table SET yhtio='$kohderow[yhtio]', created_by='$yhtio', created_at=now() ";
 						$query2	= "";
 					}
 					elseif (mysql_num_rows($abures)==1) {
@@ -2606,7 +2606,7 @@ if (!function_exists("synkronoi")) {
 					if ($ok == 1) {
 						//	Duunataan itse päivitys/insert kysely!!!
 						for ($i=1; $i < mysql_num_fields($masterres); $i++) {
-							if (isset($masterrow[mysql_field_name($masterres, $i)]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
+							if (isset($masterrow[mysql_field_name($masterres, $i)]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","updated_by","updated_at","created_by","created_at"))) {
 							    if (isset($synkronoi_kiellot[$table]) and in_array(mysql_field_name($masterres, $i), $synkronoi_kiellot[$table])) {
 							        // Ohitetaan tämä koska se on synkronoi kielloissa
 							    }
@@ -2642,7 +2642,7 @@ if (!function_exists("synkronoi")) {
 							}
 							else {
 								//	Annetaan aikaleima tässä, koska muuten affected row ei koskaan toimi oikein!
-								$query = "UPDATE $table SET yhtio='$kohderow[yhtio]', muuttaja='$yhtio', muutospvm=now() WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";
+								$query = "UPDATE $table SET yhtio='$kohderow[yhtio]', updated_by='$yhtio', updated_at=now() WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";
 								$updres = pupe_query($query);
 
 								synclog($kohderow["yhtio"], $table, "Tietue ($vanhatunnus) päivitetty.".$muutos.$erot, $utunnus);
@@ -6559,7 +6559,7 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 						FROM sarjanumeroseuranta_arvomuutos
 						WHERE yhtio		= '$kukarow[yhtio]'
 						and sarjanumerotunnus IN ({$ostorow['sarjatunnukset']})
-						and luontiaika <= $pvmlisa";
+						and created_at <= $pvmlisa";
 			$result = pupe_query($query);
 			$epakurrow = mysql_fetch_assoc($result);
 
@@ -6614,10 +6614,10 @@ if (!function_exists("remove_duplicates")) {
 
 		while ($fields = mysql_fetch_array($fieldresult)) {
 			if ($fields[0] != "tunnus" and
-				$fields[0] != "laatija"	and
-				$fields[0] != "luontiaika" and
-				$fields[0] != "muutospvm" and
-				$fields[0] != "muuttaja") {
+				$fields[0] != "created_by"	and
+				$fields[0] != "created_at" and
+				$fields[0] != "updated_at" and
+				$fields[0] != "updated_by") {
 
 				$group .= $fields[0].",";
 			}
@@ -6759,7 +6759,7 @@ if (!function_exists("paivita_toimitukset")) {
 					//	Poistetaan numeeriset avaimet
 					$diff = array();
 					foreach($diffi as $key => $value) {
-						if (!is_numeric($key) and !in_array($key, array("tila", "alatila", "muutospvm"))) {
+						if (!is_numeric($key) and !in_array($key, array("tila", "alatila", "updated_at"))) {
 							$diff[$key] = $value;
 						}
 					}
@@ -7837,8 +7837,8 @@ if (!function_exists("tallenna_muisti")) {
 					nimitys		= '$nimitys',
 					sovellus	= '$_SERVER[SCRIPT_NAME]',
 					data		= '$data',
-					laatija		= '$kukarow[kuka]',
-					luontiaika  = now()";
+					created_by		= '$kukarow[kuka]',
+					created_at  = now()";
 		$result = pupe_query($query);
 
 		return true;
@@ -7918,8 +7918,8 @@ if (!function_exists("muistiin")) {
 							var			= '$key',
 							value		= '$value',
 							array 		= '$array',
-							luontiaika	= now(),
-							laatija		= '$kukarow[kuka]',
+							created_at	= now(),
+							created_by		= '$kukarow[kuka]',
 							muokattu	= now(),
 							muokannut	= '$kukarow[kuka]'";
 				$result = pupe_query($query);
@@ -8042,8 +8042,8 @@ if (!function_exists("aja_kysely")) {
 										var			= '$key',
 										value		= '$value',
 										array 		= '$array',
-										luontiaika	= now(),
-										laatija		= '$kukarow[kuka]',
+										created_at	= now(),
+										created_by		= '$kukarow[kuka]',
 										muokattu	= now(),
 										muokannut	= '$kukarow[kuka]'";
 						$result = pupe_query($query);
@@ -8058,8 +8058,8 @@ if (!function_exists("aja_kysely")) {
 											var			= '$key',
 											value		= '$value',
 											array 		= '$array',
-											luontiaika	= now(),
-											laatija		= '$kukarow[kuka]',
+											created_at	= now(),
+											created_by		= '$kukarow[kuka]',
 											muokattu	= now(),
 											muokannut	= '$kukarow[kuka]'";
 							$result = pupe_query($query);
@@ -8349,8 +8349,8 @@ if (!function_exists('tallenna_liite')) {
 						image_channels	= '$image_channels',
 						kayttotarkoitus	= '$kayttotarkoitus',
 						jarjestys		= '$jarjestys',
-						laatija			= '$kukarow[kuka]',
-						luontiaika		= now()
+						created_by			= '$kukarow[kuka]',
+						created_at		= now()
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 			$result = pupe_query($query);
 			$id = $tunnus;
@@ -8384,8 +8384,8 @@ if (!function_exists('tallenna_liite')) {
 					  	image_channels	= '$image_channels',
 					  	kayttotarkoitus	= '$kayttotarkoitus',
 					  	jarjestys		= '$jarjestys',
-					  	laatija			= '$kukarow[kuka]',
-					  	luontiaika		= now()";
+					  	created_by			= '$kukarow[kuka]',
+					  	created_at		= now()";
 			$result = pupe_query($query);
 			$id = mysql_insert_id();
 		}
@@ -10426,7 +10426,7 @@ if (!function_exists("t")) {
 				}
 			}
 			elseif ($verkkokauppa == "") {
-				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
+				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, created_by='$kukarow[kuka]', created_at=now()";
 				$sanakirjaresult = pupe_query($sanakirjaquery, $masterlink);
 			}
 		}
@@ -10732,7 +10732,7 @@ if (!function_exists("jt_toimita")) {
 			$asiakasid			  = $toimittajaid;
 			$toimittajaid		  = "";
 			$asiakasmaa 		  = "";
-			$jarj	 			  = "luontiaika";
+			$jarj	 			  = "created_at";
 			$tilaus				  = "";
 			$toimi				  = "";
 			$suoratoimit		  = "";
@@ -10746,7 +10746,7 @@ if (!function_exists("jt_toimita")) {
 			$asiakasno 			  = "";
 			$asiakasid			  = "";
 			$asiakasmaa 		  = "";
-			$jarj	 			  = "luontiaika";
+			$jarj	 			  = "created_at";
 			$tilaus				  = "";
 			$toimi				  = "";
 			$suoratoimit		  = "";
@@ -11205,8 +11205,8 @@ if (!function_exists("lue_kurssit")) {
 
 			$query = "	UPDATE valuu SET
 						kurssi = round(1 / $kurssi, 9),
-						muutospvm = now(),
-						muuttaja = '{$kukarow['kuka']}'
+						updated_at = now(),
+						updated_by = '{$kukarow['kuka']}'
 						WHERE yhtio = '{$kukarow['yhtio']}' AND
 						nimi = '$valuutta'";
 			$result = pupe_query($query);
@@ -11985,8 +11985,8 @@ if (!function_exists('liita_tilaus_laskun_liitetiedostoksi')) {
 									image_channels		= '',
 									kayttotarkoitus		= 'EDI',
 									jarjestys			= '1',
-									laatija				= '$kukarow[kuka]',
-									luontiaika			= now()";
+									created_by				= '$kukarow[kuka]',
+									created_at			= now()";
 						$editilaus_laskulle_result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 						return TRUE;
@@ -12460,11 +12460,11 @@ if (!function_exists("TuotteenAlkiot")) {
 				laji 		= '$laji',
 				puun_tunnus = '$puun_tunnus',
 				kieli 		= '$kieli',
-				laatija 	= '$kukarow[kuka]',
-				luontiaika 	= now()
+				created_by 	= '$kukarow[kuka]',
+				created_at 	= now()
 				ON DUPLICATE KEY UPDATE
-				muuttaja = '$kukarow[kuka]',
-				muutospvm = now()";
+				updated_by = '$kukarow[kuka]',
+				updated_at = now()";
 		$r = pupe_query($qu);
 	}
 }
@@ -12487,7 +12487,7 @@ if (!function_exists("LisaaTaso")) {
 
 		// Pävitetään kaikki nodet, jotka on uuden noden oikealla puolella kaksi pykälää oikealle (vasen puoli)
 		$qu = "	UPDATE dynaaminen_puu
-				set lft = lft + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				set lft = lft + 2, updated_at = now(), updated_by = '$kukarow[kuka]'
 				WHERE yhtio	= '{$kukarow["yhtio"]}'
 				AND laji	= '$laji'
 				AND lft 	> @myRight
@@ -12496,7 +12496,7 @@ if (!function_exists("LisaaTaso")) {
 
 		// Pävitetään kaikki nodet joiden oikea laita on uuden noden oikealla puolella kaksi pykälää oikealle (oikea puoli)
 		$qu = "	UPDATE dynaaminen_puu
-				set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				set rgt = rgt + 2, updated_at = now(), updated_by = '$kukarow[kuka]'
 				WHERE yhtio	= '{$kukarow["yhtio"]}'
 				AND laji	= '$laji'
 				AND rgt    >= @myRight
@@ -12505,7 +12505,7 @@ if (!function_exists("LisaaTaso")) {
 
 		// Päivitetään valitun tason leftit pykälää oikealle, jotta uusi taso mahtuu mukaan
 		$qu = "	UPDATE dynaaminen_puu
-				set lft = lft + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				set lft = lft + 1, updated_at = now(), updated_by = '$kukarow[kuka]'
 				WHERE yhtio	= '{$kukarow["yhtio"]}'
 				AND laji	= '$laji'
 				AND lft 	> @myLeft
@@ -12515,7 +12515,7 @@ if (!function_exists("LisaaTaso")) {
 
 		// Päivitetään valitun tason rightit pykälää oikealle, jotta uusi taso mahtuu mukaan
 		$qu = "	UPDATE dynaaminen_puu
-				set rgt = rgt + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				set rgt = rgt + 1, updated_at = now(), updated_by = '$kukarow[kuka]'
 				WHERE yhtio	= '{$kukarow["yhtio"]}'
 				AND laji	= '$laji'
 				AND lft 	> @myLeft
@@ -12523,7 +12523,7 @@ if (!function_exists("LisaaTaso")) {
 				ORDER BY rgt desc";
 		$re = pupe_query($qu);
 
-		$qu = "INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,laatija,luontiaika) values ('$kukarow[yhtio]', '{$koodi}', '{$nimi}', @myLeft + 1 , @myRight + 1, '$laji', '$kukarow[kuka]', now())";
+		$qu = "INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,created_by,created_at) values ('$kukarow[yhtio]', '{$koodi}', '{$nimi}', @myLeft + 1 , @myRight + 1, '$laji', '$kukarow[kuka]', now())";
 		$re = pupe_query($qu);
 
 		$qu = "UNLOCK TABLES";
@@ -12536,7 +12536,7 @@ if (!function_exists("LisaaPaaKat")) {
 	function LisaaPaaKat($laji, $nimi) {
 		global $kukarow;
 
-		$qu = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]', '$nimi', 1, 2, '$laji', '$kukarow[kuka]', now())";
+		$qu = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, created_by, created_at) VALUES('$kukarow[yhtio]', '$nimi', 1, 2, '$laji', '$kukarow[kuka]', now())";
 		$re = pupe_query($qu);
 	}
 }
@@ -12578,7 +12578,7 @@ if (!function_exists("LisaaLapsi")) {
 		$re = pupe_query($qu);
 
 		$qu = "	UPDATE dynaaminen_puu
-				SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				SET rgt = rgt + 2, updated_at = now(), updated_by = '$kukarow[kuka]'
 				WHERE yhtio	= '{$kukarow["yhtio"]}'
 				AND laji 	= '$laji'
 				$apu
@@ -12586,14 +12586,14 @@ if (!function_exists("LisaaLapsi")) {
 		$re = pupe_query($qu);
 
 		$qu = "	UPDATE dynaaminen_puu
-				SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				SET lft = lft + 2,updated_at = now(), updated_by = '$kukarow[kuka]'
 				WHERE yhtio = '{$kukarow["yhtio"]}'
 				AND laji 	= '$laji'
 				$apu4
 				ORDER BY lft desc";
 		$re = pupe_query($qu);
 
-		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, syvyys, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, $syvyys + 1, '$laji', '$kukarow[kuka]', now())";
+		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, syvyys, laji, created_by, created_at) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, $syvyys + 1, '$laji', '$kukarow[kuka]', now())";
 		$re = pupe_query($qu);
 
 		$qu = "UNLOCK TABLES";
@@ -12644,7 +12644,7 @@ if (!function_exists("PoistaLapset")) {
 
 			// Päivitetään poistettavan noden lapset pykälää vasemmalle
 			$qu = "	UPDATE dynaaminen_puu
-					SET lft = lft - 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+					SET lft = lft - 1, updated_at = now(), updated_by = '$kukarow[kuka]'
 					WHERE yhtio	= '{$kukarow["yhtio"]}'
 					AND laji = '$laji'
 					AND lft between @myLeft and @myRight
@@ -12653,7 +12653,7 @@ if (!function_exists("PoistaLapset")) {
 
 			// Päivitetään poistetun noden oikealta puolelta löytyvät nodet vasemalle
 			$qu = "	UPDATE dynaaminen_puu
-					SET rgt = rgt - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+					SET rgt = rgt - 2, updated_at = now(), updated_by = '$kukarow[kuka]'
 					WHERE yhtio	= '{$kukarow["yhtio"]}'
 					AND laji = '$laji'
 					AND rgt > @myRight
@@ -12662,7 +12662,7 @@ if (!function_exists("PoistaLapset")) {
 
 			// Päivitetään poistetun noden oikealta puolelta löytyvät nodet vasemalle
 			$qu = "	UPDATE dynaaminen_puu
-					SET lft = lft - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+					SET lft = lft - 2, updated_at = now(), updated_by = '$kukarow[kuka]'
 					WHERE yhtio	= '{$kukarow["yhtio"]}'
 					AND laji = '$laji'
 					AND lft > @myRight
@@ -12711,7 +12711,7 @@ if (!function_exists("paivitakat")) {
 		$re = pupe_query($qu);
 
 		$qu = "	UPDATE dynaaminen_puu
-				set nimi='{$nimi}', koodi='{$koodi}', muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				set nimi='{$nimi}', koodi='{$koodi}', updated_at = now(), updated_by = '$kukarow[kuka]'
 				where yhtio	= '{$kukarow["yhtio"]}'
 				AND laji	= '{$laji}'
 				AND tunnus	= '{$kategoriaid}'";
@@ -15110,14 +15110,14 @@ if (!function_exists("hae_tuotemuutokset")) {
 			$lisa = "";
 
 			if ($muutos != "") {
-				$lisa = " AND tuote_muutokset.muutospvm < '$muutos' ORDER BY tuote_muutokset.muutospvm DESC";
+				$lisa = " AND tuote_muutokset.updated_at < '$muutos' ORDER BY tuote_muutokset.updated_at DESC";
 			}
 
 			if ($pvm != "") {
-				$lisa .= " AND tuote_muutokset.muutospvm > '$pvm'";
+				$lisa .= " AND tuote_muutokset.updated_at > '$pvm'";
 			}
 
-			$query = "	SELECT tuote_muutokset.alkup_tuoteno, tuote_muutokset.muutospvm, ifnull(kuka.nimi, tuote_muutokset.kuka) kuka
+			$query = "	SELECT tuote_muutokset.alkup_tuoteno, tuote_muutokset.updated_at, ifnull(kuka.nimi, tuote_muutokset.kuka) kuka
 						FROM tuote_muutokset
 						LEFT JOIN kuka on (kuka.yhtio = tuote_muutokset.yhtio AND kuka.kuka = tuote_muutokset.kuka)
 						WHERE tuote_muutokset.yhtio = '$kukarow[yhtio]'
@@ -15128,10 +15128,10 @@ if (!function_exists("hae_tuotemuutokset")) {
 
 			if (mysql_num_rows($result) > 0) {
 				$row = mysql_fetch_assoc($result);
-				$muutos = $row['muutospvm'];
+				$muutos = $row['updated_at'];
 				$tuoteno = $row['alkup_tuoteno'];
 				$lista[$lask]['tuoteno'] = $tuoteno;
-				$lista[$lask]['muutospvm'] = $muutos;
+				$lista[$lask]['updated_at'] = $muutos;
 				$lista[$lask]['kuka'] = $row["kuka"];
 			}
 			else {
@@ -15172,11 +15172,11 @@ if (!function_exists("kopioi_tilausrivi")) {
 				$rfields .= mysql_field_name($rivires,$i).",";
 
 				switch (mysql_field_name($rivires, $i)) {
-					case 'muuttaja':
-					case 'muutospvm':
+					case 'updated_by':
+					case 'updated_at':
 						$rvalues .= "'',";
 						break;
-					case 'laatija':
+					case 'created_by':
 						$rvalues .= "'$kukarow[kuka]',";
 						break;
 					case 'laadittu':
@@ -15254,16 +15254,16 @@ if (!function_exists("kopioi_tilausrivi")) {
 					$rfields .= mysql_field_name($lisrivires,$i).",";
 
 					switch (mysql_field_name($lisrivires, $i)) {
-						case 'muuttaja':
+						case 'updated_by':
 							$rvalues .= "'',";
 							break;
-						case 'muutospvm':
+						case 'updated_at':
 							$rvalues .= "'0000-00-00 00:00:00',";
 							break;
-						case 'laatija':
+						case 'created_by':
 							$rvalues .= "'$kukarow[kuka]',";
 							break;
-						case 'luontiaika':
+						case 'created_at':
 							$rvalues .= "now(),";
 							break;
 						case 'poikkeava_tulliprosentti':
@@ -17955,7 +17955,7 @@ if (!function_exists("tee_keraysera")) {
 								vastaanottaja 	= '{$admini}',
 								viesti 			= '{$message}',
 								status 			= 'X',
-								luontiaika 		= now()";
+								created_at 		= now()";
 					$messenger_result = pupe_query($query);
 				}
 			}
@@ -19954,8 +19954,8 @@ if (!function_exists('splittaa_tilausrivi')) {
 					}
 
 					break;
-				case 'laatija':
-					$query .= " laatija = '{$kukarow['kuka']}',";
+				case 'created_by':
+					$query .= " created_by = '{$kukarow['kuka']}',";
 					break;
 				case 'laadittu':
 					$query .= " laadittu = now(),";
@@ -20085,8 +20085,8 @@ if (!function_exists('lisaa_tuotepaikka')) {
 					oletus    = '{$oletus}',
 					halytysraja = '{$halytysraja}',
 					tilausmaara = '{$tilausmaara}',
-					laatija	  = '{$kukarow['kuka']}',
-					luontiaika= now()";
+					created_by	  = '{$kukarow['kuka']}',
+					created_at= now()";
 		$result = pupe_query($query);
 
 		$query = "	INSERT INTO tapahtuma SET
@@ -20101,7 +20101,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
 					hyllyvali 	= '{$hyllyvali}',
 					hyllytaso 	= '{$hyllytaso}',
 					selite 		= '".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}',
-					laatija 	= '{$kukarow['kuka']}',
+					created_by 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
 	}
@@ -20474,8 +20474,8 @@ if (!function_exists('paivita_oletuspaikka')) {
 		# ostorivienvarastopaikat.inc, rivi 281
 		$query = "	UPDATE tuotepaikat
 					SET oletus 		= '',
-					muuttaja		= '$kukarow[kuka]',
-					muutospvm		= now()
+					updated_by		= '$kukarow[kuka]',
+					updated_at		= now()
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoteno'";
 		$upresult = pupe_query($query);
@@ -20484,8 +20484,8 @@ if (!function_exists('paivita_oletuspaikka')) {
 		# ostorivienvarastopaikat.inc, rivi 289
 		$query = "	UPDATE tuotepaikat
 					SET oletus 	= 'X',
-					muuttaja	= '$kukarow[kuka]',
-					muutospvm	= now(),
+					updated_by	= '$kukarow[kuka]',
+					updated_at	= now(),
 					poistettava = ''
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tuoteno 	= '$tuoteno'
@@ -20509,8 +20509,8 @@ if (!function_exists('paivita_oletuspaikka')) {
 
 			$query = "	UPDATE tuotepaikat
 						SET oletus 	= 'X',
-						muuttaja	= '$kukarow[kuka]',
-						muutospvm	= now(),
+						updated_by	= '$kukarow[kuka]',
+						updated_at	= now(),
 						poistettava = ''
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'
@@ -20654,8 +20654,8 @@ if (!function_exists('uusi_saapuminen')) {
                     liitostunnus    = '$toimittajarow[tunnus]',
                     yhtio_toimipaikka = '{$toimipaikka}',
                     tila            = 'K',
-                    luontiaika      = now(),
-                    laatija         = '$kukarow[kuka]'";
+                    created_at      = now(),
+                    created_by         = '$kukarow[kuka]'";
         $result = pupe_query($query);
 
         $return = mysql_insert_id();
@@ -20728,10 +20728,10 @@ if (!function_exists('uusi_sscc_nro')) {
 						selitetark_2 	= '',
 						selitetark_3 	= '',
 						jarjestys 		= 0,
-						laatija 		= '{$kukarow['kuka']}',
-						luontiaika 		= now(),
-						muutospvm 		= now(),
-						muuttaja 		= '{$kukarow['kuka']}'";
+						created_by 		= '{$kukarow['kuka']}',
+						created_at 		= now(),
+						updated_at 		= now(),
+						updated_by 		= '{$kukarow['kuka']}'";
 			$insert_res = pupe_query($query);
 		}
 		else {
@@ -20939,10 +20939,10 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							kpl_keratty 	= 0,
 							keratty 		= '',
 							kerattyaika 	= '0000-00-00 00:00:00',
-							laatija 		= '{$kukarow['kuka']}',
-							luontiaika 		= now(),
-							muutospvm 		= now(),
-							muuttaja 		= ''";
+							created_by 		= '{$kukarow['kuka']}',
+							created_at 		= now(),
+							updated_at 		= now(),
+							updated_by 		= ''";
 				$keraysera_ins = pupe_query($query);
 			}
 			elseif ($rivi['data']['upd_varattu'] != 0 and $rivi['data']['varattu'] != $rivi['data']['upd_varattu']) {
@@ -20970,10 +20970,10 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							kpl_keratty 	= 0,
 							keratty 		= '',
 							kerattyaika 	= '0000-00-00 00:00:00',
-							laatija 		= '{$kukarow['kuka']}',
-							luontiaika		= now(),
-							muutospvm 		= now(),
-							muuttaja 		= ''";
+							created_by 		= '{$kukarow['kuka']}',
+							created_at		= now(),
+							updated_at 		= now(),
+							updated_by 		= ''";
 				$keraysera_ins = pupe_query($query);
 			}
 			else {
@@ -21006,10 +21006,10 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 								kpl_keratty 	= 0,
 								keratty 		= '',
 								kerattyaika 	= '0000-00-00 00:00:00',
-								laatija 		= '{$kukarow['kuka']}',
-								luontiaika 		= now(),
-								muutospvm 		= now(),
-								muuttaja 		= ''";
+								created_by 		= '{$kukarow['kuka']}',
+								created_at 		= now(),
+								updated_at 		= now(),
+								updated_by 		= ''";
 					$keraysera_ins = pupe_query($query);
 				}
 			}
@@ -22780,7 +22780,7 @@ if (!function_exists('tiivista_vastaavat_tuoteketju')) {
 	        // Ei päivitetä järjestystä turhaan. Jos järjestys on sama
 	        if ($tuote['jarjestys'] <> $uusi_jarjestys) {
 	            $query = "UPDATE vastaavat
-	                        SET jarjestys = $uusi_jarjestys, muutospvm = now()
+	                        SET jarjestys = $uusi_jarjestys, updated_at = now()
 	                        WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
 	            if( ! pupe_query($query) ) {
 	                exit("Virhe ketjujen uudelleenjärjestelyssä");
@@ -22845,7 +22845,7 @@ if (!function_exists('poista_lasku')) {
 		$query = "	UPDATE lasku
 					SET alatila = tila,
 					tila 		= 'D',
-					muutospvm   = now()
+					updated_at   = now()
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus  = '{$tilausnumero}'";
 		pupe_query($query);
@@ -23460,10 +23460,10 @@ if (!function_exists("splittaa_valmistukset")) {
 		// Otetaan laskurow talteen, ja nollataan sieltä kentät jota ei monisteta
 		$laskurow_temp = $laskurow;
 		unset($laskurow_temp['tunnus']);
-		unset($laskurow_temp['muutospvm']);
-		unset($laskurow_temp['muuttaja']);
-		unset($laskurow_temp['luontiaika']);
-		unset($laskurow_temp['laatija']);
+		unset($laskurow_temp['updated_at']);
+		unset($laskurow_temp['updated_by']);
+		unset($laskurow_temp['created_at']);
+		unset($laskurow_temp['created_by']);
 		unset($laskurow_temp['toimaika']);
 		unset($laskurow_temp['kerayspvm']);
 		unset($laskurow_temp['kohde']);
@@ -23496,8 +23496,8 @@ if (!function_exists("splittaa_valmistukset")) {
 							SET kohde = '{$_kohde}',
 							toimaika = '{$_toimaika}',
 							kerayspvm = '{$_kerayspvm}',
-							muutospvm = now(),
-							muuttaja = '{$kukarow['kuka']}'
+							updated_at = now(),
+							updated_by = '{$kukarow['kuka']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$tilausrivi_split_row['otunnus']}'";
 				pupe_query($query);
@@ -23508,10 +23508,10 @@ if (!function_exists("splittaa_valmistukset")) {
 
 			$query = "	INSERT INTO lasku (
 								".implode(", ", array_keys($laskurow_temp)).",
-								luontiaika,
-								laatija,
-								muutospvm,
-								muuttaja,
+								created_at,
+								created_by,
+								updated_at,
+								updated_by,
 								toimaika,
 								kerayspvm,
 								kohde,
@@ -23689,8 +23689,8 @@ if (!function_exists('hyllysiirto')) {
 					set saldo 	= saldo - {$kappaleet},
 					{$lisavarlisa1}
 					saldoaika	= now(),
-					muuttaja	= '{$kukarow['kuka']}',
-					muutospvm	= now()
+					updated_by	= '{$kukarow['kuka']}',
+					updated_at	= now()
                   	WHERE tuoteno 	= '{$tuoteno}'
 					and yhtio 		= '{$kukarow['yhtio']}'
 					and tunnus		= {$tuotepaikat_tunnus_otetaan}";
@@ -23701,8 +23701,8 @@ if (!function_exists('hyllysiirto')) {
 					set saldo 	= saldo + {$kappaleet},
 					{$lisavarlisa2}
 					saldoaika	= now(),
-					muuttaja	= '{$kukarow['kuka']}',
-					muutospvm	= now()
+					updated_by	= '{$kukarow['kuka']}',
+					updated_at	= now()
 					WHERE tuoteno 	= '{$tuoteno}'
 					and yhtio 		= '{$kukarow['yhtio']}'
 					and tunnus		= {$tuotepaikat_tunnus_siirretaan}";
@@ -23787,7 +23787,7 @@ if (!function_exists('hyllysiirto')) {
 					hyllytaso	= '{$mistarow['hyllytaso']}',
 					rivitunnus	= {$tun},
 					selite 		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." {$kappaleet}{$selite}',
-					laatija 	= '{$kukarow['kuka']}',
+					created_by 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
 		$mista_tapa_tunnus = mysql_insert_id();
@@ -23804,7 +23804,7 @@ if (!function_exists('hyllysiirto')) {
 					hyllytaso	= '{$minnerow['hyllytaso']}',
 					rivitunnus	= {$tun},
 					selite 		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." {$kappaleet}{$selite}',
-					laatija 	= '{$kukarow['kuka']}',
+					created_by 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
 		$minne_tapa_tunnus = mysql_insert_id();
@@ -23924,8 +23924,8 @@ if (!function_exists('hyllysiirto')) {
 									tapvm      = now(),
 									tila       = 'X',
 									alatila    = 'G',
-									laatija    = '$kukarow[kuka]',
-									luontiaika = current_date";
+									created_by    = '$kukarow[kuka]',
+									created_at = current_date";
 						$result = pupe_query($query);
 						$laskuid = mysql_insert_id();
 					}
@@ -23954,7 +23954,7 @@ if (!function_exists('hyllysiirto')) {
 								lukko    		= '',
 								tapahtumatunnus = $mista_tapa_tunnus,
 								selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-								laatija  		= '$kukarow[kuka]',
+								created_by  		= '$kukarow[kuka]',
 								laadittu 		= now()";
 					$result = pupe_query($query);
 
@@ -23972,7 +23972,7 @@ if (!function_exists('hyllysiirto')) {
 								lukko    		= '',
 								tapahtumatunnus = $mista_tapa_tunnus,
 								selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-								laatija  		= '$kukarow[kuka]',
+								created_by  		= '$kukarow[kuka]',
 								laadittu 		= now()";
 					$result = pupe_query($query);
 
@@ -23992,7 +23992,7 @@ if (!function_exists('hyllysiirto')) {
 									lukko    		= '',
 									tapahtumatunnus = $mista_tapa_tunnus,
 									selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-									laatija  		= '$kukarow[kuka]',
+									created_by  		= '$kukarow[kuka]',
 									laadittu 		= now()";
 						$result = pupe_query($query);
 
@@ -24010,7 +24010,7 @@ if (!function_exists('hyllysiirto')) {
 									lukko    		= '',
 									tapahtumatunnus = $minne_tapa_tunnus,
 									selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-									laatija  		= '$kukarow[kuka]',
+									created_by  		= '$kukarow[kuka]',
 									laadittu 		= now()";
 						$result = pupe_query($query);
 					}
@@ -24029,7 +24029,7 @@ if (!function_exists('hyllysiirto')) {
 								lukko    		= '',
 								tapahtumatunnus = $minne_tapa_tunnus,
 								selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-								laatija  		= '$kukarow[kuka]',
+								created_by  		= '$kukarow[kuka]',
 								laadittu 		= now()";
 					$result = pupe_query($query);
 
@@ -24047,7 +24047,7 @@ if (!function_exists('hyllysiirto')) {
 								lukko    		= '',
 								tapahtumatunnus = $minne_tapa_tunnus,
 								selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-								laatija  		= '$kukarow[kuka]',
+								created_by  		= '$kukarow[kuka]',
 								laadittu 		= now()";
 					$result = pupe_query($query);
 				}

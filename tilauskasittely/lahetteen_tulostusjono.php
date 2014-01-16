@@ -964,7 +964,7 @@
 					min(if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
 					max(if (lasku.clearing = '', 'N', if (lasku.clearing = 'JT-TILAUS', 'J', if (lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
 					$selectlisa
-					min(lasku.luontiaika) laadittu,
+					min(lasku.created_at) laadittu,
 					min(lasku.h1time) h1time,
 					min(lasku.kerayspvm) kerayspvm,
 					min(lasku.toimaika) toimaika,
@@ -1017,7 +1017,7 @@
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='lasku.ytunnus'; document.forms['find'].submit();\">".t("Asiakas")."</a><br>
 					  <a href='#' onclick=\"getElementById('jarj').value='lasku.nimi'; document.forms['find'].submit();\">".t("Nimi")."</a></th>";
 
-			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='lasku.luontiaika'; document.forms['find'].submit();\">".t("Laadittu")."</a><br>
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='lasku.created_at'; document.forms['find'].submit();\">".t("Laadittu")."</a><br>
 				  	  <a href='#' onclick=\"getElementById('jarj').value='lasku.h1time'; document.forms['find'].submit();\">".t("Valmis")."</a></th>";
 
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">".t("Keräysaika")."</a><br>

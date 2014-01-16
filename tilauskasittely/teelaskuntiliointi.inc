@@ -132,7 +132,7 @@ else {
 						vero 				= 0,
 						selite 				= '$selite',
 						lukko 				= '1',
-						laatija 			= '$kukarow[kuka]',
+						created_by 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$laskutusres = pupe_query($query);
 
@@ -236,7 +236,7 @@ else {
 						vero 				= '$xrow[alv]',
 						selite 				= '$selite',
 						lukko 				= '$lukko',
-						laatija 			= '$kukarow[kuka]',
+						created_by 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$laskutusres = pupe_query($query);
 			$isa = mysql_insert_id ($link);
@@ -259,7 +259,7 @@ else {
 							vero 				= 0,
 							selite 				= '$selite',
 							lukko 				= '1',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now(),
 							aputunnus			= '$isa'";
 				$laskutusres = pupe_query($query);
@@ -286,7 +286,7 @@ else {
 							vero 				= '$xrow[alv]',
 							selite 				= '$selite',
 							lukko 				= '$lukko',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$laskutusres = pupe_query($query);
 				$isa = mysql_insert_id ($link);
@@ -315,7 +315,7 @@ else {
 								vero 				= 0,
 								selite 				= '$selite',
 								lukko 				= '1',
-								laatija 			= '$kukarow[kuka]',
+								created_by 			= '$kukarow[kuka]',
 								laadittu 			= now(),
 								aputunnus 			= $isa";
 					$laskutusres = pupe_query($query);
@@ -366,7 +366,7 @@ else {
 						vero 				= '$vero',
 						selite 				= '$selite',
 						lukko 				= '',
-						laatija 			= '$kukarow[kuka]',
+						created_by 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$laskutusres = pupe_query($query);
 
@@ -388,7 +388,7 @@ else {
 						vero 				= '$vero',
 						selite 				= '$selite',
 						lukko 				= '',
-						laatija 			= '$kukarow[kuka]',
+						created_by 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$laskutusres = pupe_query($query);
 		}
@@ -505,7 +505,7 @@ else {
 							vero 				= 0,
 							selite 				= '$selite',
 							lukko 				= '1',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$laskutusres = pupe_query($query);
 
@@ -531,7 +531,7 @@ else {
 					vero 				= 0,
 					selite 				= '$selite',
 					lukko 				= '1',
-					laatija 			= '$kukarow[kuka]',
+					created_by 			= '$kukarow[kuka]',
 					laadittu 			= now()";
 		$laskutusres = pupe_query($query);
 	}
@@ -557,7 +557,7 @@ else {
 					vero 				= 0,
 					selite 				= '$selite',
 					lukko 				= '',
-					laatija 			= '$kukarow[kuka]',
+					created_by 			= '$kukarow[kuka]',
 					laadittu 			= now()";
 		$laskutusres = pupe_query($query);
 	}

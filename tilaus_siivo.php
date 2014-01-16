@@ -149,19 +149,19 @@
 	//keskenolevat tilaukset
 	$query = "	SELECT lasku.*,
 				tilausrivi.otunnus otunnus, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja,
-				if(lasku.luontiaika <= date_sub(now(),interval 30 day), 0, 1) kkorder,
-				concat(if(lasku.luontiaika <= date_sub(now(),interval 30 day), 0, 1), if(lasku.vienti='', ' ', lasku.vienti), lasku.valkoodi) grouppi,
-				concat(if(lasku.luontiaika <= date_sub(now(),interval 30 day), '".t("Yli 30 päivää vanhat")."', '".t("Alle 30 päivää vanhat")."'), ', ', if(lasku.vienti='', '".t("Kotimaan myynti")."', if(lasku.vienti='K','".t("Ei-EU vienti")."','".t("EU vienti")."')), ', ', lasku.valkoodi) grouppi_nimi
+				if(lasku.created_at <= date_sub(now(),interval 30 day), 0, 1) kkorder,
+				concat(if(lasku.created_at <= date_sub(now(),interval 30 day), 0, 1), if(lasku.vienti='', ' ', lasku.vienti), lasku.valkoodi) grouppi,
+				concat(if(lasku.created_at <= date_sub(now(),interval 30 day), '".t("Yli 30 päivää vanhat")."', '".t("Alle 30 päivää vanhat")."'), ', ', if(lasku.vienti='', '".t("Kotimaan myynti")."', if(lasku.vienti='K','".t("Ei-EU vienti")."','".t("EU vienti")."')), ', ', lasku.valkoodi) grouppi_nimi
 				FROM lasku
-				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija=kuka.kuka
+				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.created_by=kuka.kuka
 				LEFT JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tila = 'N'
 				and lasku.alatila = ''
-				and lasku.luontiaika < date_sub(now(),interval 1 day)
+				and lasku.created_at < date_sub(now(),interval 1 day)
 				and otunnus is not null
 				GROUP BY lasku.tunnus
-				ORDER BY kkorder, lasku.vienti, lasku.valkoodi, lasku.luontiaika";
+				ORDER BY kkorder, lasku.vienti, lasku.valkoodi, lasku.created_at";
 	$res = pupe_query($query);
 
 	echo "<table>";
@@ -194,7 +194,7 @@
 			echo "<$ero>$laskurow[vienti]</$ero>";
 			echo "<$ero>$laskurow[valkoodi]</$ero>";
 			echo "<$ero>$laskurow[kassamyyja]</$ero>";
-			echo "<$ero>".tv1dateconv($laskurow["luontiaika"], "P")."</$ero>";
+			echo "<$ero>".tv1dateconv($laskurow["created_at"], "P")."</$ero>";
 			echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='valittutil[]' id='$laskurow[grouppi]$lask'></$ero></tr>";
 
 			$edgrouppi = $laskurow["grouppi"];
@@ -207,14 +207,14 @@
 
 	//rivittömät otsikot
 	$query = "	SELECT lasku.*, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja
-				FROM lasku use index (yhtio_tila_luontiaika)
-				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija = kuka.kuka
+				FROM lasku use index (yhtio_tila_created_at)
+				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.created_by = kuka.kuka
 				LEFT JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tila in ('L','N')
 				and alatila != 'X'
 				and tilausrivi.tunnus is null
-				ORDER BY lasku.luontiaika";
+				ORDER BY lasku.created_at";
 	$res = pupe_query($query);
 
 	if (mysql_num_rows($res) > 0) {
@@ -235,7 +235,7 @@
 			echo "<$ero>$laskurow[vienti]</$ero>";
 			echo "<$ero>$laskurow[valkoodi]</$ero>";
 			echo "<$ero>$laskurow[kassamyyja]</$ero>";
-			echo "<$ero>$laskurow[luontiaika]</$ero>";
+			echo "<$ero>$laskurow[created_at]</$ero>";
 			echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='valitturiv[]' id='EIRIV$lask'></$ero></tr>";
 
 		}
@@ -251,19 +251,19 @@
 	}
 
 	//Odottaa JT-tuotteita
-	$query = "	SELECT lasku.tunnus, lasku.tila, lasku.alatila, lasku.nimi, lasku.vienti, lasku.valkoodi, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja, lasku.luontiaika,
+	$query = "	SELECT lasku.tunnus, lasku.tila, lasku.alatila, lasku.nimi, lasku.vienti, lasku.valkoodi, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja, lasku.created_at,
 				count(tilausrivi.tunnus) tilausrivi1,
 				sum(if(tilausrivi.var != 'P', 1, 0)) tilausrivi2,
 				sum(if($kpl != 0 and tilausrivi.var in ('J','S'), 1, 0)) tilausrivi3
-				FROM lasku use index (yhtio_tila_luontiaika)
-				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija = kuka.kuka
+				FROM lasku use index (yhtio_tila_created_at)
+				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.created_by = kuka.kuka
 				LEFT JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and tilausrivi.tyyppi != 'D'
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tila = 'N'
 				and lasku.alatila = 'T'
 				GROUP BY 1,2,3,4,5,6,7,8
 				HAVING tilausrivi2 != tilausrivi3 or (tilausrivi1 > 0 and tilausrivi2 = 0)
-				ORDER BY lasku.luontiaika";
+				ORDER BY lasku.created_at";
 	$res = pupe_query($query);
 
 	if (mysql_num_rows($res) > 0) {
@@ -287,7 +287,7 @@
 			echo "<$ero>$laskurow[vienti]</$ero>";
 			echo "<$ero>$laskurow[valkoodi]</$ero>";
 			echo "<$ero>$laskurow[kassamyyja]</$ero>";
-			echo "<$ero>$laskurow[luontiaika]</$ero>";
+			echo "<$ero>$laskurow[created_at]</$ero>";
 
 			echo "<$ero>$laskurow[tilausrivi1]</$ero>";
 			echo "<$ero>$laskurow[tilausrivi3]</$ero>";
@@ -302,14 +302,14 @@
 
 	//Vanhentuneet tarjoukset
 	$query = "	SELECT lasku.*,
-				DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva
+				DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.updated_at, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva
 				FROM lasku
-				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija=kuka.kuka
+				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.created_by=kuka.kuka
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				AND lasku.tila = 'T'
 				AND lasku.tilaustyyppi = 'T'
 				AND lasku.alatila in ('','A')
-				AND DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) < -365
+				AND DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.updated_at, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) < -365
 				ORDER BY pva";
 	$res = pupe_query($query);
 
@@ -331,7 +331,7 @@
 			echo "<$ero>$laskurow[alatila]</$ero>";
 			echo "<$ero>$laskurow[nimi]</$ero>";
 			echo "<$ero>$laskurow[pva]</$ero>";
-			echo "<$ero>".tv1dateconv($laskurow["luontiaika"], "P")."</$ero>";
+			echo "<$ero>".tv1dateconv($laskurow["created_at"], "P")."</$ero>";
 			echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='mtarjarit[]' id='MTARJ$lask'></$ero></tr>";
 			$lask++;
 		}

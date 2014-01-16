@@ -163,12 +163,12 @@
 			$where2 = " and lasku.liitostunnus  = '$asiakasid'";
 		}
 
-		$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-					 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+		$where2 .= " and lasku.created_at >='$vva-$kka-$ppa 00:00:00'
+					 and lasku.created_at <='$vvl-$kkl-$ppl 23:59:59' ";
 
 		if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 		
-		$use = " use index (yhtio_tila_luontiaika) ";
+		$use = " use index (yhtio_tila_created_at) ";
 		
 		if ($laskunro > 0) {
 			$where2 = " and lasku.laskunro = '$laskunro' ";
@@ -202,12 +202,12 @@
 		// Etsit‰‰n muutettavaa tilausta
 		$query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro, 
 					concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus, 
-					if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm, 
-					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija, 
+					if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.created_at, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm, 
+					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.created_by) Laatija, 
 					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa, 
 					lasku.tila, lasku.alatila
 					FROM lasku $use
-					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
+					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.created_by
 					WHERE $where1 $where2
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila != 'D'

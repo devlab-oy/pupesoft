@@ -50,7 +50,7 @@
 			$default = "";
 			$null    = "not null";
 
-			if ($tables[0] == "lasku" and $column_name == "muutospvm") {
+			if ($tables[0] == "lasku" and $column_name == "updated_at") {
 				$default = "CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP ";
 			}
 			elseif ($tables[0] == "taso" and $column_name == "taso") {

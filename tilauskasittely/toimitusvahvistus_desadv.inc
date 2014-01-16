@@ -90,7 +90,7 @@
 				$x++;
 				// DTM - despatch and/or delivery date/time
 				// 171 = tilauspäivä
-				list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
+				list($date, $time) = explode(" ", $desadv_laskurow['created_at']);
 				list($year, $month, $day) = explode("-", $date);
 				list($hour, $minute, $second) = explode(":", $time);
 				$desadv_message .= "DTM+171:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
@@ -365,7 +365,7 @@
 
 							// DTM - despatch and/or delivery date/time
 							// 171 = tilauspäivä
-							list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
+							list($date, $time) = explode(" ", $desadv_laskurow['created_at']);
 							list($year, $month, $day) = explode("-", $date);
 							$desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
 							$x++;
@@ -485,7 +485,7 @@
 
 						// DTM - despatch and/or delivery date/time
 						// 171 = tilauspäivä
-						list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
+						list($date, $time) = explode(" ", $desadv_laskurow['created_at']);
 						list($year, $month, $day) = explode("-", $date);
 						$desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
 						$x++;

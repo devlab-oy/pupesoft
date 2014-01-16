@@ -170,7 +170,7 @@
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila IN ('N','L')
 						AND lasku.alatila not in ('D','X')
-						AND lasku.luontiaika > '2012-04-01 00:00:00'";
+						AND lasku.created_at > '2012-04-01 00:00:00'";
 			$lasku_res = pupe_query($query);
 			$laskurow = mysql_fetch_assoc($lasku_res);
 
@@ -193,7 +193,7 @@
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila IN ('N','L')
 						AND lasku.alatila = 'A'
-						AND lasku.luontiaika > '2012-04-01 00:00:00'";
+						AND lasku.created_at > '2012-04-01 00:00:00'";
 			$lasku_res = pupe_query($query);
 			$laskurow = mysql_fetch_assoc($lasku_res);
 
@@ -359,7 +359,7 @@
 				$edotunnus = $tilausrivirow["otunnus"];
 
 				// Kerayserä/erät
-				$query = "	SELECT group_concat(luontiaika) luontiaika,
+				$query = "	SELECT group_concat(created_at) created_at,
 							group_concat(distinct nro) nro,
 							group_concat(pakkausnro) pakkausnro,
 							round(sum(kpl)) kpl,
@@ -412,7 +412,7 @@
 				$rivi .= "<td>$pakkaus_kirjain</td>";
 				$rivi .= "<td>$tilausrivirow[kervyohyke]</td>";
 				$rivi .= "<td>".tv1dateconv($tilausrivirow["laadittu"], "PITKA", "LYHYT")."</td>";
-				$rivi .= "<td>".tv1dateconv($kerayserarow["luontiaika"], "PITKA", "LYHYT")."</td>";
+				$rivi .= "<td>".tv1dateconv($kerayserarow["created_at"], "PITKA", "LYHYT")."</td>";
 				$rivi .= "<td>$tilausrivirow[keratty]</td>";
 				$rivi .= "<td>".tv1dateconv($tilausrivirow["kerattyaika"], "PITKA", "LYHYT")."</td>";
 				$rivi .= "<td align='right'>$kerayserarow[kpl]</td>";

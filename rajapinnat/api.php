@@ -107,7 +107,7 @@
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio 		= '{$kukarow["yhtio"]}'
-					AND laatija 		= '{$kukarow["kuka"]}'
+					AND created_by 		= '{$kukarow["kuka"]}'
 					AND liitostunnus 	= '{$tunnus}'
 					AND tila 			= 'N'
 					AND tunnus 			= '{$tilausnumero}'";

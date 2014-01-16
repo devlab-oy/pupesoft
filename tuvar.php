@@ -170,7 +170,7 @@
 
 	//tuotteen varastostatus
 	if ($tee == 'Z') {
-		$query = "	SELECT tuote.*, date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
+		$query = "	SELECT tuote.*, date_format(tuote.updated_at, '%Y-%m-%d') muutos, date_format(tuote.created_at, '%Y-%m-%d') luonti,
 					group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
@@ -639,7 +639,7 @@
 			
 			$lajilisa = ($toim == "EDUSTAJA") ? "" : " and tapahtuma.laji = 'siirto' ";
 			
-			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
+			$query = "	SELECT concat_ws('@', tapahtuma.created_by, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
 						LEFT JOIN tilausrivi use index (primary) ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus

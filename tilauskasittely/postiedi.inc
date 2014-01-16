@@ -12,7 +12,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 	$ulos  = "";
 	$ulos .= "ICHGSTART:$postirow[tunnus]\n";										// tilauksen numero
 	$ulos .= "ICHG_DATA:EIH-1.4.1\n";
-	$ulos .= "ICHG_INFO:$postirow[laatija]\n";										// laatija
+	$ulos .= "ICHG_INFO:$postirow[created_by]\n";										// created_by
 	$ulos .= "SMSGSTART:$postirow[tunnus]\n";										// rahtikirjan numero
 	$ulos .= "SBGMITYPE:700\n";
 	$ulos .= "SBGMINUMB:$postirow[ytunnus]\n";										// pelkkä ytunnus, niin niputtuu paremmin

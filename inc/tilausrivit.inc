@@ -24,7 +24,7 @@
 			$laskresult = mysql_query($query) or pupe_error($query);
 			$laskrow = mysql_fetch_array($laskresult);
 			
-			$query = "	SELECT nimitys Nimitys, tuoteno Tuotenumero, kpl, yksikko Yksikkö, tilausrivi.hinta Hinta, rivihinta Rivihinta, tilausrivi.laatija Laatija, otunnus Tilaukselta
+			$query = "	SELECT nimitys Nimitys, tuoteno Tuotenumero, kpl, yksikko Yksikkö, tilausrivi.hinta Hinta, rivihinta Rivihinta, tilausrivi.created_by Laatija, otunnus Tilaukselta
 						FROM lasku, tilausrivi
 						WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus and lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'K' and lasku.vanhatunnus = 0 and laskunro = '$laskrow[laskunro]'

@@ -302,8 +302,8 @@ function luo_kampanja_otsikko($kampanja_nimi) {
 	$query = "	INSERT INTO kampanjat
 				SET yhtio = '{$kukarow['yhtio']}',
 				nimi = '{$kampanja_nimi}',
-				laatija = '{$kukarow['kuka']}',
-				luontiaika = CURRENT_DATE";
+				created_by = '{$kukarow['kuka']}',
+				created_at = CURRENT_DATE";
 	pupe_query($query);
 
 	return mysql_insert_id();
@@ -319,8 +319,8 @@ function luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus) {
 				kohde = '{$kampanja_ehto['kohde']}',
 				rajoitin = '{$kampanja_ehto['rajoitin']}',
 				arvo = '{$kampanja_ehto['arvo']}',
-				laatija = '{$kukarow['kuka']}',
-				luontiaika = CURRENT_DATE";
+				created_by = '{$kukarow['kuka']}',
+				created_at = CURRENT_DATE";
 	pupe_query($query);
 
 	return mysql_insert_id();
@@ -336,8 +336,8 @@ function luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus) {
 				kohde = '{$kampanja_aliehto['kohde']}',
 				rajoitin = '{$kampanja_aliehto['rajoitin']}',
 				arvo = '{$kampanja_aliehto['arvo']}',
-				laatija = '{$kukarow['kuka']}',
-				luontiaika = CURRENT_DATE";
+				created_by = '{$kukarow['kuka']}',
+				created_at = CURRENT_DATE";
 	pupe_query($query);
 
 	return mysql_insert_id();
@@ -351,8 +351,8 @@ function luo_palkinto_rivi($palkinto_rivi, $kampanja_tunnus) {
 				kampanja = '{$kampanja_tunnus}',
 				tuoteno = '{$palkinto_rivi['tuoteno']}',
 				kpl = '{$palkinto_rivi['kpl']}',
-				laatija = '{$kukarow['kuka']}',
-				luontiaika = CURRENT_DATE";
+				created_by = '{$kukarow['kuka']}',
+				created_at = CURRENT_DATE";
 	pupe_query($query);
 }
 
@@ -386,8 +386,8 @@ function muokkaa_kampanjaa($request) {
 
 	$query = "	UPDATE kampanjat
 				SET nimi = '{$request['kampanja_nimi']}',
-				muuttaja = '{$kukarow['kuka']}',
-				muutospvm = CURRENT_DATE
+				updated_by = '{$kukarow['kuka']}',
+				updated_at = CURRENT_DATE
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus = '{$request['kampanja_tunnus']}'";
 	pupe_query($query);

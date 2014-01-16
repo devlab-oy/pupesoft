@@ -173,16 +173,16 @@ $mailfile = $filename;
 
 if ($edi_tyyppi == "futursoft") {
 	$edi_subj = "Sis‰‰ntuleva Futursoft-tilaus";
-	$edi_laatija = "FuturSoft";
+	$edi_created_by = "FuturSoft";
 }
 elseif ($edi_tyyppi == "magento") {
 	$edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
-	$edi_laatija = "Magento";
+	$edi_created_by = "Magento";
 	$editilaus_rahtivapaa = "o";
 }
 elseif ($edi_tyyppi == "edifact911") {
 	$edi_subj = "Sis‰‰ntuleva Orders 91.1 tilaus";
-	$edi_laatija = "Orders911";
+	$edi_created_by = "Orders911";
 
 	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
@@ -220,7 +220,7 @@ elseif ($edi_tyyppi == "edifact911") {
 }
 else {
 	$edi_subj = t("Sis‰‰ntuleva EIH 1.4 EDI-tilaus");
-	$edi_laatija = "EDI";
+	$edi_created_by = "EDI";
 }
 
 $edi_ulos .= "$edi_subj\n";
@@ -342,7 +342,7 @@ while ($tietue = fgets($fd)) {
 			$yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
 
 			$kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
-			$kukarow['kuka'] = $edi_laatija;
+			$kukarow['kuka'] = $edi_created_by;
 
 			// nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
 			$argv 		= array();
@@ -544,7 +544,7 @@ while ($tietue = fgets($fd)) {
 
 				// Copy pastettu ylh‰‰lt‰ koko setti. :(
 				$kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
-				$kukarow['kuka'] = $edi_laatija;
+				$kukarow['kuka'] = $edi_created_by;
 
 				// nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
 				$argv 		= array();
@@ -972,7 +972,7 @@ while ($tietue = fgets($fd)) {
 								AND tarkenne != ''
 								AND avainsana != ''
 								AND liitostunnus = '{$arow['tunnus']}'
-								ORDER BY muutospvm DESC
+								ORDER BY updated_at DESC
 								LIMIT 1";
 					$toimitustapa_chk_res = pupe_query($query);
 
@@ -1156,10 +1156,10 @@ while ($tietue = fgets($fd)) {
 							kohdistettu 	   					= '$maksaja',
 							kuljetus 							= '',
 							kuljetusmuoto						= '$arow[kuljetusmuoto]',
-							laatija 		   					= '$edi_laatija',
+							created_by 		   					= '$edi_created_by',
 							laskutusvkopv	   					= '$arow[laskutusvkopv]',
 							liitostunnus       					= '$arow[tunnus]',
-							luontiaika		   					=  now(),
+							created_at		   					=  now(),
 							maa 			   					= '$arow[maa]',
 							maa_maara							= '$arow[maa_maara]',
 							maksuehto 		   					= '$editilaus_maksuehto',
@@ -1226,8 +1226,8 @@ while ($tietue = fgets($fd)) {
 							laskutus_postitp	= '$arow[laskutus_postitp]',
 							laskutus_postino	= '$arow[laskutus_postino]',
 							laskutus_maa		= '$arow[laskutus_maa]',
-							laatija				= '$edi_laatija',
-							luontiaika			= now(),
+							created_by				= '$edi_created_by',
+							created_at			= now(),
 							yhtio				= '$kukarow[yhtio]',
 							otunnus				= '$id'";
 				$lisatiedot_result = mysql_query($query) or die($query);
@@ -1284,8 +1284,8 @@ while ($tietue = fgets($fd)) {
 							image_channels		= '',
 							kayttotarkoitus		= 'EDI',
 							jarjestys			= '1',
-							laatija				= '$edi_laatija',
-							luontiaika			= now()";
+							created_by				= '$edi_created_by',
+							created_at			= now()";
 				$Xresult = pupe_query($query);
 
 				// HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meid‰n kannassa on eri kuin tilaukselta tullut nimi
@@ -1828,7 +1828,7 @@ while ($tietue = fgets($fd)) {
 
 					$query = "	INSERT into tilausrivi set
 								tilaajanrivinro = '$rivinumero',
-								laatija 	= 'edi',
+								created_by 	= 'edi',
 								laadittu 	= now(),
 								yhtio 		= '$kukarow[yhtio]',
 								tuoteno 	= '$virhetuoteno',

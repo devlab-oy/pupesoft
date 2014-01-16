@@ -20,7 +20,7 @@
 		echo "<table>";
 		echo "<tr><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus$vii_lopetus'>&laquo; ".t("Edellinen")."</td><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus$vii_lopetus'>".t("Seuraava")." &raquo;</a></td></tr>";
 		echo "<tr><th>".t("Aineiston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
-		echo "<tr><th>".t("Aineiston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
+		echo "<tr><th>".t("Aineiston created_at")."</th><td>".substr($tietue,7,4)."</td></tr>";
 		echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";
 		echo "<tr><th>".t("Aineisto käsitelty")."</th><td>".tv1dateconv($tiliotedatarow["kasitelty"])."</td></tr>";
 

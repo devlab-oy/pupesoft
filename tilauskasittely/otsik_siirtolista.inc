@@ -399,14 +399,14 @@
 
 		if ($kukarow["kesken"] == 0) {
 			$query = "INSERT into ";
-			$postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			$postquery = ",created_by = '$kukarow[kuka]', created_at=NOW()";
 
 			// Jos valmistuksessa k‰ytet‰‰n tilakoodeja, setataan valmistuksen_tila oletusarvoksi
 			// OV = Odottaa Valmistusta
 			if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K') $postquery .= ", valmistuksen_tila = 'OV'";
 
 			$query2 = "INSERT into ";
-			$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			$postquery2 = ",created_by = '$kukarow[kuka]', created_at=NOW()";
 		}
 		else {
 			// Pidet‰‰n huolta tilausrivien toimitusp‰ivist‰ ja kerayspaivasta

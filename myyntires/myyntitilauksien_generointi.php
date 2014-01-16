@@ -120,7 +120,7 @@ function hae_tamanpaivan_webstore_myyntitilaukset() {
 					AND asiakas.tunnus = lasku.liitostunnus
 					AND asiakas.ytunnus = 'WEBSTORE')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.luontiaika > '{$now}'
+				AND lasku.created_at > '{$now}'
                 AND noutaja != 'X'";
 	$result = pupe_query($query);
 

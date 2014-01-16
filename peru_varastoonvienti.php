@@ -118,7 +118,7 @@
 					echo "<td class='back' valign='top'><table>";
 					echo "<tr><th>".t("Tuoteno").":</th><td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($taparow["tuoteno"])."'>$taparow[tuoteno]</a></td></tr>";
 					echo "<tr><th>".t("Kpl").":</th><td>$taparow[kpl]</td></tr>";
-					echo "<tr><th>".t("Laatija").":</th><td>$taparow[laatija]</td></tr>";
+					echo "<tr><th>".t("Laatija").":</th><td>$taparow[created_by]</td></tr>";
 					echo "<tr><th>".t("Laadittu").":</th><td>$taparow[laadittu]</td></tr>";
 					echo "<tr><th>".t("Selite").":</th><td>$taparow[selite]</td></tr>";
 					echo "<tr><th>".t("Kehahinta").":</th><td>$taparow[hinta]</td></tr>";
@@ -255,7 +255,7 @@
 										hyllytaso   = '0',
 										hyllyvali   = '0',
 										selite 		= '".t("Lisättiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
-										laatija 	= '$kukarow[kuka]',
+										created_by 	= '$kukarow[kuka]',
 										laadittu 	= now()";
 							$korjres = mysql_query($query) or pupe_error($query);
 						}

@@ -172,7 +172,7 @@ if (!function_exists("korjaalaskut")) {
 							vero		= 0,
 							selite 		= 'Varastostamyynti $lasku[nimi]',
 							lukko 		= '',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= now()";
 				$laskutusres = pupe_query($query);
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
@@ -192,7 +192,7 @@ if (!function_exists("korjaalaskut")) {
 							vero 		= 0,
 							selite 		= 'Varastostamyynti $lasku[nimi]',
 							lukko 		= '',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= now()";
 				$laskutusres = pupe_query($query);
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
@@ -307,7 +307,7 @@ if (!function_exists("korjaalaskut")) {
 						'summa' 		=> ($tiliointi1['summa'] + $muutos),
 						'korjattu' 		=> '',
 						'korjausaika' 	=> '',
-						'laatija' 		=> $kukarow['kuka'],
+						'created_by' 		=> $kukarow['kuka'],
 						'laadittu' 		=> date('Y-m-d H:i:s'),
 						'selite' 		=> $tiliointi1['selite'],
 					);
@@ -330,7 +330,7 @@ if (!function_exists("korjaalaskut")) {
 						'summa' 		=> ($tiliointi2['summa'] - $muutos),
 						'korjattu' 		=> '',
 						'korjausaika' 	=> '',
-						'laatija' 		=> $kukarow['kuka'],
+						'created_by' 		=> $kukarow['kuka'],
 						'laadittu' 		=> date('Y-m-d H:i:s'),
 						'selite' 		=> $tiliointi2['selite'],
 					);
@@ -368,7 +368,7 @@ if (!function_exists("korjaalaskut")) {
 						'summa_valuutassa' => 0,
 						'korjattu' => '',
 						'korjausaika' => '',
-						'laatija' => $kukarow['kuka'],
+						'created_by' => $kukarow['kuka'],
 						'laadittu' => date('Y-m-d H:i:s'),
 						'selite' => "{$tiliointi1['selite']} ".t("Jälkilaskennan korjaus"),
 					);
@@ -382,7 +382,7 @@ if (!function_exists("korjaalaskut")) {
 						'summa_valuutassa' => 0,
 						'korjattu' => '',
 						'korjausaika' => '',
-						'laatija' => $kukarow['kuka'],
+						'created_by' => $kukarow['kuka'],
 						'laadittu' => date('Y-m-d H:i:s'),
 						'selite' => "{$tiliointi1['selite']} ".t("Jälkilaskennan korjaus"),
 					);
@@ -400,7 +400,7 @@ if (!function_exists("korjaalaskut")) {
 						'summa_valuutassa' => 0,
 						'korjattu' => '',
 						'korjausaika' => '',
-						'laatija' => $kukarow['kuka'],
+						'created_by' => $kukarow['kuka'],
 						'laadittu' => date('Y-m-d H:i:s'),
 						'selite' => "{$tiliointi2['selite']} ".t("Jälkilaskennan korjaus"),
 					);
@@ -414,7 +414,7 @@ if (!function_exists("korjaalaskut")) {
 						'summa_valuutassa' => 0,
 						'korjattu' => '',
 						'korjausaika' => '',
-						'laatija' => $kukarow['kuka'],
+						'created_by' => $kukarow['kuka'],
 						'laadittu' => date('Y-m-d H:i:s'),
 						'selite' => "{$tiliointi2['selite']} ".t("Jälkilaskennan korjaus"),
 					);
@@ -511,7 +511,7 @@ if (!function_exists('korjaatapahtuma')) {
 				'kpl' 		=> ($tun_chk_row['kpl'] * -1),
 				'selite' 	=> "{$tun_chk_row['selite']}{$selite_txt}",
 				'laadittu' 	=> "{$yhtiorow['tilikausi_alku']} 00:00:00",
-				'laatija' 	=> $kukarow['kuka'],
+				'created_by' 	=> $kukarow['kuka'],
 				'laji'		=> "korjaus",
 			);
 
@@ -526,7 +526,7 @@ if (!function_exists('korjaatapahtuma')) {
 			$params = array(
 				'selite' 	=> "{$tun_chk_row['selite']}{$selite_txt}",
 				'laadittu'	=> "{$yhtiorow['tilikausi_alku']} 00:00:00",
-				'laatija' 	=> $kukarow['kuka'],
+				'created_by' 	=> $kukarow['kuka'],
 				'laji' 		=> "korjaus",
 			);
 
@@ -979,7 +979,7 @@ if ($tuoteno != '') {
 										$params = array(
 											'summa' 			=> $vasisum,
 											'summa_valuutassa' 	=> $vasisum,
-											'laatija' 			=> $kukarow['kuka'],
+											'created_by' 			=> $kukarow['kuka'],
 											'laadittu' 			=> date('Y-m-d H:i:s'),
 										);
 
@@ -1003,7 +1003,7 @@ if ($tuoteno != '') {
 											'tapahtumatunnus'	=> 0,
 											'summa' 			=> round($sum_chk_row["summa"] * -1, 2),
 											'summa_valuutassa' 	=> round($sum_chk_row["summa"] * -1, 2),
-											'laatija' 			=> $kukarow['kuka'],
+											'created_by' 			=> $kukarow['kuka'],
 											'laadittu' 			=> date('Y-m-d H:i:s'),
 										);
 
@@ -1014,7 +1014,7 @@ if ($tuoteno != '') {
 											'tapvm' 			=> $yhtiorow['tilikausi_alku'],
 											'summa' 			=> $vasisum,
 											'summa_valuutassa' 	=> $vasisum,
-											'laatija' 			=> $kukarow['kuka'],
+											'created_by' 			=> $kukarow['kuka'],
 											'laadittu' 			=> date('Y-m-d H:i:s'),
 										);
 
@@ -1123,7 +1123,7 @@ if ($tuoteno != '') {
 												$params = array(
 													'summa' 			=> round($trow["kpl"] * $uusikehahin * -1, 2),
 													'summa_valuutassa' 	=> round($trow["kpl"] * $uusikehahin * -1, 2),
-													'laatija' 			=> $kukarow['kuka'],
+													'created_by' 			=> $kukarow['kuka'],
 													'laadittu' 			=> date('Y-m-d H:i:s'),
 												);
 
@@ -1133,7 +1133,7 @@ if ($tuoteno != '') {
 												$params = array(
 													'summa' 			=> round($trow["kpl"] * $uusikehahin, 2),
 													'summa_valuutassa' 	=> round($trow["kpl"] * $uusikehahin, 2),
-													'laatija' 			=> $kukarow['kuka'],
+													'created_by' 			=> $kukarow['kuka'],
 													'laadittu' 			=> date('Y-m-d H:i:s'),
 												);
 
@@ -1170,7 +1170,7 @@ if ($tuoteno != '') {
 													'tapvm' 			=> $yhtiorow['tilikausi_alku'],
 													'summa' 			=> round($sum_chk_row['summa'] * -1, 2),
 													'summa_valuutassa' 	=> round($sum_chk_row['summa_valuutassa'] * -1, 2),
-													'laatija' 			=> $kukarow['kuka'],
+													'created_by' 			=> $kukarow['kuka'],
 													'laadittu' 			=> date('Y-m-d H:i:s'),
 												);
 
@@ -1181,7 +1181,7 @@ if ($tuoteno != '') {
 													'tapvm' 			=> $yhtiorow['tilikausi_alku'],
 													'summa' 			=> round($trow['kpl'] * $uusikehahin * -1, 2),
 													'summa_valuutassa' 	=> round($trow['kpl'] * $uusikehahin * -1, 2),
-													'laatija' 			=> $kukarow['kuka'],
+													'created_by' 			=> $kukarow['kuka'],
 													'laadittu' 			=> date('Y-m-d H:i:s'),
 												);
 
@@ -1192,7 +1192,7 @@ if ($tuoteno != '') {
 													'tapvm' 			=> $yhtiorow['tilikausi_alku'],
 													'summa' 			=> round($invrow['summa'] * -1, 2),
 													'summa_valuutassa' 	=> round($invrow['summa_valuutassa'] * -1, 2),
-													'laatija' 			=> $kukarow['kuka'],
+													'created_by' 			=> $kukarow['kuka'],
 													'laadittu' 			=> date('Y-m-d H:i:s'),
 												);
 
@@ -1203,7 +1203,7 @@ if ($tuoteno != '') {
 													'tapvm' 			=> $yhtiorow['tilikausi_alku'],
 													'summa' 			=> round($trow['kpl'] * $uusikehahin, 2),
 													'summa_valuutassa' 	=> round($trow['kpl'] * $uusikehahin, 2),
-													'laatija' 			=> $kukarow['kuka'],
+													'created_by' 			=> $kukarow['kuka'],
 													'laadittu' 			=> date('Y-m-d H:i:s'),
 												);
 
@@ -1242,7 +1242,7 @@ if ($tuoteno != '') {
 															vero     = 0,
 															lukko    = '',
 															selite   = '$invrow[selite]',
-															laatija  = '$kukarow[kuka]',
+															created_by  = '$kukarow[kuka]',
 															laadittu = now()";
 												if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 												$invupd = pupe_query($query);
@@ -1253,7 +1253,7 @@ if ($tuoteno != '') {
 													'tapvm' 			=> $yhtiorow['tilikausi_alku'],
 													'summa' 			=> round($invrow['summa'] * -1, 2),
 													'summa_valuutassa' 	=> round($invrow['summa_valuutassa'] * -1, 2),
-													'laatija' 			=> $kukarow['kuka'],
+													'created_by' 			=> $kukarow['kuka'],
 													'laadittu' 			=> date('Y-m-d H:i:s'),
 												);
 
@@ -1264,7 +1264,7 @@ if ($tuoteno != '') {
 													'tapvm' 			=> $yhtiorow['tilikausi_alku'],
 													'summa' 			=> round($trow['kpl'] * $uusikehahin, 2),
 													'summa_valuutassa' 	=> round($trow['kpl'] * $uusikehahin, 2),
-													'laatija' 			=> $kukarow['kuka'],
+													'created_by' 			=> $kukarow['kuka'],
 													'laadittu' 			=> date('Y-m-d H:i:s'),
 												);
 

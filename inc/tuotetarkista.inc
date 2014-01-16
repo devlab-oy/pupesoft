@@ -423,7 +423,7 @@ if(!function_exists("tuotetarkista")) {
 							hyllyvali	= '',
 							hyllytaso	= '',
 							selite 		= '".t("Tuotteen kehahinta vaihdettiin")." $trow[kehahin] --> $tem_kehahin',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= now()";
 				$chkressires = pupe_query($query);
 			}
@@ -479,10 +479,10 @@ if(!function_exists("tuotetarkista")) {
 													hyllynro    	= '{$hyllynro}',
 													hyllyvali   	= '{$hyllyvali}',
 													hyllytaso   	= '{$hyllytaso}',
-													luontiaika		= now(),
-													laatija			= '{$kukarow['kuka']}',
-													muutospvm		= now(),
-													muuttaja		= '{$kukarow['kuka']}'";
+													created_at		= now(),
+													created_by			= '{$kukarow['kuka']}',
+													updated_at		= now(),
+													updated_by		= '{$kukarow['kuka']}'";
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
 
 							$tapahtumaquery = "	INSERT into tapahtuma set
@@ -497,7 +497,7 @@ if(!function_exists("tuotetarkista")) {
 												hyllyvali   = '{$hyllyvali}',
 												hyllytaso   = '{$hyllytaso}',
 												selite 		= '".t("Tuoteylläpidossa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
-												laatija 	= '$kukarow[kuka]',
+												created_by 	= '$kukarow[kuka]',
 												laadittu 	= now()";
 							$tapahtumaresult = pupe_query($tapahtumaquery);
 

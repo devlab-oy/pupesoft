@@ -75,7 +75,7 @@ while ($row = mysql_fetch_assoc($result)) {
 				hinta    = 0,
 				kplhinta = 0,
 				selite   = '$selite',
-				laatija  = '{$kukarow["kuka"]}',
+				created_by  = '{$kukarow["kuka"]}',
 				laadittu = now()";
     $t_result = pupe_query($t_query);
 }

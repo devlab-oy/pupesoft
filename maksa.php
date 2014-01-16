@@ -410,7 +410,7 @@
 							vero 				= 0,
 							selite 				= '$selite',
 							lukko 				= '',
-							laatija 			= '$kukarow[kuka]',
+							created_by 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$xresult = pupe_query($query);
 
@@ -430,7 +430,7 @@
 							vero 				= 0,
 							selite 				= '$selite',
 							lukko 				= '',
-							laatija				= '$kukarow[kuka]',
+							created_by				= '$kukarow[kuka]',
 							laadittu			= now()";
 				$xresult = pupe_query($query);
 
@@ -481,7 +481,7 @@
 									vero 				= '$tiliointirow[vero]',
 									selite 				= '$selite',
 									lukko 				= '',
-									laatija 			= '$kukarow[kuka]',
+									created_by 			= '$kukarow[kuka]',
 									laadittu			= now()";
 						$xresult = pupe_query($query);
 						$isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
@@ -501,7 +501,7 @@
 										vero 				= 0,
 										selite 				= '$selite',
 										lukko 				= '1',
-										laatija 			= '$kukarow[kuka]',
+										created_by 			= '$kukarow[kuka]',
 										laadittu 			= now(),
 										aputunnus 			= $isa";
 							$xresult = pupe_query($query);
@@ -561,7 +561,7 @@
 											vero 		= 0,
 											selite 		= '$selite',
 											lukko 		= '',
-											laatija 	= '$kukarow[kuka]',
+											created_by 	= '$kukarow[kuka]',
 											laadittu 	= now()";
 								$xresult = pupe_query($query);
 								$isa = mysql_insert_id ($link);

@@ -97,10 +97,10 @@
 							jarjestys2	= '$trow[jarjestys2]',
 							hidden		= '$trow[hidden]',
 							yhtio		= '$kukarow[yhtio]',
-							laatija 	= '{$kukarow['kuka']}',
-							luontiaika 	= now(),
-							muutospvm 	= now(),
-							muuttaja 	= '{$kukarow['kuka']}'";
+							created_by 	= '{$kukarow['kuka']}',
+							created_at 	= now(),
+							updated_at 	= now(),
+							updated_by 	= '{$kukarow['kuka']}'";
 				$result = pupe_query($query);
 			}
 			echo "<font class='message'>".t("Käyttöoikeudet päivitetty")."!</font><br>";
@@ -169,10 +169,10 @@
 											jarjestys2	= '$trow[jarjestys2]',
 											hidden		= '$trow[hidden]',
 											yhtio		= '$kukarow[yhtio]',
-											laatija 	= '{$kukarow['kuka']}',
-											luontiaika 	= now(),
-											muutospvm 	= now(),
-											muuttaja 	= '{$kukarow['kuka']}'";
+											created_by 	= '{$kukarow['kuka']}',
+											created_at 	= now(),
+											updated_at 	= now(),
+											updated_by 	= '{$kukarow['kuka']}'";
 								$rresult = pupe_query($query);
 							}
 							else {
@@ -182,8 +182,8 @@
 									// Meillä ei välttämättä ollut päivitysoikeutta, koska aiempi checki ei huomio sitä. Lisätään päivitysoikeus.
 									$query = "	UPDATE oikeu
 												SET paivitys 	= 1,
-												muutospvm 		= now(),
-												muuttaja 		= '{$kukarow['kuka']}'
+												updated_at 		= now(),
+												updated_by 		= '{$kukarow['kuka']}'
 												WHERE yhtio		= '$kukarow[yhtio]'
 												AND kuka		= '$krow[kuka]'
 												AND sovellus	= '$trow[sovellus]'

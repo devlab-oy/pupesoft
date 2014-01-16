@@ -429,10 +429,10 @@
 
 		$fieldname = mysql_field_name($lisatiedot_result, $i);
 
-		if ($fieldname == 'laatija') {
+		if ($fieldname == 'created_by') {
 			$query .= $fieldname."='$kukarow[kuka]',";
 		}
-		elseif ($fieldname == 'luontiaika') {
+		elseif ($fieldname == 'created_at') {
 			$query .= $fieldname."=now(),";
 		}
 		elseif ($fieldname == 'otunnus') {

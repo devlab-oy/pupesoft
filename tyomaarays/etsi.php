@@ -11,7 +11,7 @@
 		echo "<table>";
 
 		if ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != ''){
-			$muu1 = "lasku.luontiaika >= '$vva-$kka-$ppa' and lasku.luontiaika <= ";
+			$muu1 = "lasku.created_at >= '$vva-$kka-$ppa' and lasku.created_at <= ";
 			$muu2 = "$vvl-$kkl-$ppl";
 		}
 
@@ -68,7 +68,7 @@
 						<td valign='top'>$row[laskutunnus]</td>
 						<td valign='top'>$row[nimi]</td>
 						<td valign='top'>$row[rekno]</td>
-						<td valign='top'>".tv1dateconv(substr($row["luontiaika"],0,10))."</td>
+						<td valign='top'>".tv1dateconv(substr($row["created_at"],0,10))."</td>
 						<td>".str_replace("\n", "<br>", $row["komm1"])."".str_replace("\n", "<br>", $row["komm2"])."</td>";
 
 				if ($row["alatila"] == '' or $row["alatila"] == 'A' or $row["alatila"] == 'B' or $row["alatila"] == 'C' or $row["alatila"] == 'J') {

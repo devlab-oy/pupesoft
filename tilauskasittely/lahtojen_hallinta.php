@@ -2792,7 +2792,7 @@ function hae_yhdistettavat_tilaukset() {
 							ROUND(IFNULL(kerayserat.kpl, tilausrivi.varattu), 0) AS 'suunniteltu',
 							tilausrivi.yksikko,
 							CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS 'hyllypaikka',
-							kerayserat.laatija AS 'keraaja',
+							kerayserat.created_by AS 'keraaja',
 							tilausrivi.kerattyaika,
 							#IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0) AS 'keratyt'
 							ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
@@ -2862,7 +2862,7 @@ function hae_yhdistettavat_tilaukset() {
 								ROUND(IFNULL(kerayserat.kpl, tilausrivi.varattu), 0) AS 'suunniteltu',
 								tilausrivi.yksikko,
 								CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
-								kerayserat.laatija AS keraaja,
+								kerayserat.created_by AS keraaja,
 								tilausrivi.kerattyaika,
 								ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
 								FROM kerayserat

@@ -427,7 +427,7 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
 						GROUP BY 1,2,3,4";
 		}
 	}
-	elseif((int) $tav > 0 or strlen($selite) > 0 or strlen($tilino) > 0 or strlen($summa) > 0 or strlen($laatija) > 0 or ($kpexport == 1 and strlen($tositenro) > 0)) {
+	elseif((int) $tav > 0 or strlen($selite) > 0 or strlen($tilino) > 0 or strlen($summa) > 0 or strlen($created_by) > 0 or ($kpexport == 1 and strlen($tositenro) > 0)) {
 
 		$plisa = "";
 		$lisa  = "";
@@ -467,8 +467,8 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
 			$lisa .= " and abs(tiliointi.summa) = $summa";
 		}
 
-		if (strlen($laatija) > 0) {
-			$lisa .= " and tiliointi.laatija = '" . $laatija . "'";
+		if (strlen($created_by) > 0) {
+			$lisa .= " and tiliointi.created_by = '" . $created_by . "'";
 		}
 
 		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
@@ -517,7 +517,7 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
 	else {
 
 		// Tehdään lopetusmuuttuja kaikkiin urleihin
-		$lopetus = "{$palvelin2}muutosite.php////tee=$tee//tap=$tap//tak=$tak//tav=$tav//summa=$summa//tilino=$tilino//selite=$selite//laatija=$laatija";
+		$lopetus = "{$palvelin2}muutosite.php////tee=$tee//tap=$tap//tak=$tak//tav=$tav//summa=$summa//tilino=$tilino//selite=$selite//created_by=$created_by";
 
 		$miinusta = 0;
 
@@ -954,7 +954,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 	// Näytetään laskun tai tositteen tiedot....
 	$query = "	SELECT lasku.*,
-				ifnull(la.nimi, lasku.laatija) laatija_nimi,
+				ifnull(la.nimi, lasku.created_by) created_by_nimi,
 				ifnull(h1.nimi, lasku.hyvak1) hyvak1_nimi,
 				ifnull(h2.nimi, lasku.hyvak2) hyvak2_nimi,
 				ifnull(h3.nimi, lasku.hyvak3) hyvak3_nimi,
@@ -965,7 +965,7 @@ if ($tee == 'E' or $tee == 'F') {
 				yriti.tilino maksajanpankkitilinro
 				FROM lasku
 				LEFT JOIN yriti ON (lasku.yhtio = yriti.yhtio and maksu_tili = yriti.tunnus)
-				LEFT JOIN kuka la ON (lasku.yhtio = la.yhtio and lasku.laatija = la.kuka)
+				LEFT JOIN kuka la ON (lasku.yhtio = la.yhtio and lasku.created_by = la.kuka)
 				LEFT JOIN kuka h1 ON (lasku.yhtio = h1.yhtio and lasku.hyvak1 = h1.kuka)
 				LEFT JOIN kuka h2 ON (lasku.yhtio = h2.yhtio and lasku.hyvak2 = h2.kuka)
 				LEFT JOIN kuka h3 ON (lasku.yhtio = h3.yhtio and lasku.hyvak3 = h3.kuka)
@@ -1066,7 +1066,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 		echo "<table>";
 
-		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["luontiaika"], "PITKÄ")." &raquo; $trow[laatija_nimi]</td></tr>";
+		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["created_at"], "PITKÄ")." &raquo; $trow[created_by_nimi]</td></tr>";
 
 		// Onko laskua karhuttu?
 		$karhu_query = "	SELECT liitostunnus
@@ -1237,7 +1237,7 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 
 		echo "<table>";
-		echo "<tr><th>".t("Laatija")."</th><td nowrap>$trow[laatija_nimi] @ ".tv1dateconv($trow["luontiaika"], "PITKÄ")."</td></tr>";
+		echo "<tr><th>".t("Laatija")."</th><td nowrap>$trow[created_by_nimi] @ ".tv1dateconv($trow["created_at"], "PITKÄ")."</td></tr>";
 		echo "<tr><th>".t("Tapvm")."</th><td>".tv1dateconv($trow["tapvm"])."</td></tr>";
 		echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]</td></tr>";
 		echo "<tr><th>".t("Liitetiedostot")."</th><td>".ebid($tunnus) ."</td></tr>";
@@ -1352,7 +1352,7 @@ if ($tee == 'E' or $tee == 'F') {
 		require ("inc/laskutyyppi.inc");
 
 		echo "<tr><th>".t("Tila")."</th><td nowrap>$laskutyyppi $alatila</td></tr>";
-		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["luontiaika"], "PITKÄ")." &raquo; $trow[laatija_nimi]</td></tr>";
+		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["created_at"], "PITKÄ")." &raquo; $trow[created_by_nimi]</td></tr>";
 		echo "<tr><th>".t("Hyväksyjä1")."</th><td nowrap>".tv1dateconv($trow["h1time"], "PITKÄ")." &raquo; $trow[hyvak1_nimi]</td></tr>";
 		if ($trow["hyvak2"] != "") echo "<tr><th>".t("Hyväksyjä2")."</th><td nowrap>".tv1dateconv($trow["h2time"], "PITKÄ")." &raquo; $trow[hyvak2_nimi]</td></tr>";
 		if ($trow["hyvak3"] != "") echo "<tr><th>".t("Hyväksyjä3")."</th><td nowrap>".tv1dateconv($trow["h3time"], "PITKÄ")." &raquo; $trow[hyvak3_nimi]</td></tr>";
@@ -1591,7 +1591,7 @@ if ($tee == "") {
 		  </tr>
 		  <tr>
 		  <td>".t("Laatija")."</td>
-		  <td><input type='text' name='laatija' size=10></td>
+		  <td><input type='text' name='created_by' size=10></td>
 		  <td></td>
 		  </tr>";
 

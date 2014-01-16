@@ -396,8 +396,8 @@
 										$oslisa
 										kaytetty		= '$lisa_row[kaytetty]',
 										era_kpl			= '',
-										laatija			= '$kukarow[kuka]',
-										luontiaika		= now(),
+										created_by			= '$kukarow[kuka]',
+										created_at		= now(),
 										takuu_alku 		= '$lisa_row[takuu_alku]',
 										takuu_loppu		= '$lisa_row[takuu_loppu]',
 										parasta_ennen	= '$lisa_row[parasta_ennen]',
@@ -965,10 +965,10 @@
 												case 'vanhatunnus':
 													$values .= ", '$tilrivirow[otunnus]'";
 													break;
-												case 'laatija':
+												case 'created_by':
 													$values .= ", '$kukarow[kuka]'";
 													break;
-												case 'luontiaika':
+												case 'created_at':
 													$values .= ", now()";
 													break;
 												case 'alatila':
@@ -989,7 +989,7 @@
 										$insres  = pupe_query($kysely);
 										$tilausnumerot[$tilrivirow["otunnus"]] = mysql_insert_id();
 
-										$kysely2 = "	SELECT laskutus_nimi, laskutus_nimitark, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa, laatija, luontiaika, otunnus
+										$kysely2 = "	SELECT laskutus_nimi, laskutus_nimitark, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa, created_by, created_at, otunnus
 														FROM laskun_lisatiedot
 														WHERE yhtio = '$kukarow[yhtio]'
 														AND otunnus = '$tilrivirow[otunnus]'";
@@ -1010,10 +1010,10 @@
 												case 'otunnus':
 													$values .= ", '".$tilausnumerot[$tilrivirow["otunnus"]]."'";
 													break;
-												case 'laatija':
+												case 'created_by':
 													$values .= ", '$kukarow[kuka]'";
 													break;
-												case 'luontiaika':
+												case 'created_at':
 													$values .= ", now()";
 													break;
 												default:
@@ -1055,7 +1055,7 @@
 											hyllytaso   = '$tilrivirow[hyllyvali]',
 											hyllyvali   = '$tilrivirow[hyllytaso]',
 											tilaajanrivinro = '$tilrivirow[tilaajanrivinro]',
-											laatija 	= '$kukarow[kuka]',
+											created_by 	= '$kukarow[kuka]',
 											laadittu 	= now(),
 											yhtio 		= '$kukarow[yhtio]',
 											tuoteno 	= '$tilrivirow[tuoteno]',
@@ -1104,8 +1104,8 @@
 												erikoistoimitus_myynti 	= '$monistarow2[erikoistoimitus_myynti]',
 												vanha_otunnus			= '$monistarow2[vanha_otunnus]',
 												jarjestys				= '$monistarow2[jarjestys]',
-												luontiaika				= now(),
-												laatija 				= '$kukarow[kuka]'";
+												created_at				= now(),
+												created_by 				= '$kukarow[kuka]'";
 									$riviresult = pupe_query($querys);
 								}
 
@@ -1293,10 +1293,10 @@
 											hyllynro	= '$reklahyllynro',
 											hyllyvali	= '$reklahyllyvali',
 											hyllytaso	= '$reklahyllytaso',
-											laatija 	= '$kukarow[kuka]',
-											luontiaika 	= now(),
-											muutospvm 	= now(),
-											muuttaja	= '$kukarow[kuka]' ";
+											created_by 	= '$kukarow[kuka]',
+											created_at 	= now(),
+											updated_at 	= now(),
+											updated_by	= '$kukarow[kuka]' ";
 								$result = pupe_query($select);
 
 								// tehd‰‰n tapahtuma
@@ -1312,7 +1312,7 @@
 											hyllyvali	= '$reklahyllyvali',
 											hyllytaso	= '$reklahyllytaso',
 											selite 		= '".t("Lis‰ttiin tuotepaikka")." $reklahyllyalue $reklahyllynro $reklahyllyvali $reklahyllytaso',
-											laatija 	= '$kukarow[kuka]',
+											created_by 	= '$kukarow[kuka]',
 											laadittu 	= now()";
 								$result = pupe_query($select);
 							}
@@ -1390,7 +1390,7 @@
 				$ulos .= "</table><br><br>";
 
 				$ulos .= "<table>";
-				$ulos .= "<tr><th>".t("Laadittu", $kieli).":</th><td>".tv1dateconv($laskurow['luontiaika'])."</td></tr>";
+				$ulos .= "<tr><th>".t("Laadittu", $kieli).":</th><td>".tv1dateconv($laskurow['created_at'])."</td></tr>";
 				$ulos .= "<tr><th>".t("Tilausnumero", $kieli).":</th><td>$laskurow[tunnus]</td></tr>";
 				$ulos .= "<tr><th>".t("Tilausviite", $kieli).":</th><td>$laskurow[viesti]</td></tr>";
 				$ulos .= "<tr><th>".t("Toimitustapa", $kieli).":</th><td>".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)."</td></tr>";
@@ -2296,12 +2296,12 @@
 							group_concat(DISTINCT lasku.tunnus SEPARATOR '<br>') tunnukset,
 							min(lasku.ytunnus) ytunnus,
 							min(concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark)) asiakas,
-							min(lasku.luontiaika) laadittu,
+							min(lasku.created_at) laadittu,
 							min(lasku.h1time) h1time,
 							min(lasku.lahetepvm) lahetepvm,
 							min(lasku.kerayspvm) kerayspvm,
 							min(lasku.toimaika) toimaika,
-							group_concat(DISTINCT lasku.laatija) laatija,
+							group_concat(DISTINCT lasku.created_by) created_by,
 							group_concat(DISTINCT lasku.toimitustapa SEPARATOR '<br>') toimitustapa,
 							group_concat(DISTINCT concat_ws('\n\n', if (comments!='',concat('".t("L‰hetteen lis‰tiedot").":\n',comments),NULL), if (sisviesti2!='',concat('".t("Ker‰yslistan lis‰tiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
 							min(if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
@@ -2405,7 +2405,7 @@
 					if (isset($row['ohjeet']) and trim($row["ohjeet"]) != "") {
 						echo "<div id='div_{$row['tunnus']}' class='popup' style='width: 500px;'>";
 						echo t("Tilaukset"),": {$row['tunnukset']}<br />";
-						echo t("Laatija"),": {$row['laatija']}<br /><br />";
+						echo t("Laatija"),": {$row['created_by']}<br /><br />";
 						echo str_replace("\n", "<br />", $row["ohjeet"]),"<br />";
 						echo "</div>";
 
@@ -2750,7 +2750,7 @@
 
 				if ($yhtiorow['kerayserat'] == 'K' and $keraajalist == "") {
 
-					$query = "	SELECT kerayserat.laatija
+					$query = "	SELECT kerayserat.created_by
 								FROM kerayserat
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.otunnus IN ({$tilausnumeroita})
@@ -2758,7 +2758,7 @@
 					$keraaja_res = pupe_query($query);
 					$keraaja_row = mysql_fetch_assoc($keraaja_res);
 
-					$keraajalist = $keraaja_row['laatija'];
+					$keraajalist = $keraaja_row['created_by'];
 				}
 
 				$query = "	SELECT *

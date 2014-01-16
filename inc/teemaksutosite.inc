@@ -89,7 +89,7 @@
 							summa 		= $summa * -1,
 							vero 		= '$tiliointirow[vero]',
 							lukko 		= '',
-							laatija 	= 'tiliote',
+							created_by 	= 'tiliote',
 							laadittu 	= now()";
 				$xresult = pupe_query($query);
 				$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
@@ -108,7 +108,7 @@
 								vero 		= 0,
 								selite 		= '$selite',
 								lukko 		= '1',
-								laatija 	= 'tiliote',
+								created_by 	= 'tiliote',
 								laadittu 	= now(),
 								aputunnus 	= $isa";
 					$xresult = pupe_query($query);
@@ -168,7 +168,7 @@
 									summa 		= $summa,
 									vero 		= 0,
 									lukko 		= '',
-									laatija 	= 'tiliote',
+									created_by 	= 'tiliote',
 									laadittu 	= now()";
 						$xresult = pupe_query($query);
 						$isa = mysql_insert_id ($link);
@@ -203,7 +203,7 @@
 					summa 		= '$maara',
 					vero 		= 0,
 					lukko 		= '',
-					laatija 	= 'tiliote',
+					created_by 	= 'tiliote',
 					laadittu 	= now()";
 		$result = pupe_query($query);
 
@@ -223,7 +223,7 @@
 					summa 		= '$trow[vietysumma]',
 					vero 		= 0,
 					lukko 		= '',
-					laatija 	= 'tiliote',
+					created_by 	= 'tiliote',
 					laadittu 	= now()";
 		$result = pupe_query($query);
 

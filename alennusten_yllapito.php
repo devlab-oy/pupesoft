@@ -236,8 +236,8 @@
 									monikerta   = '{$monikerta[$i]}',
 									alkupvm		= '{$alkupvm[$i]}',
 									loppupvm	= '{$loppupvm[$i]}',
-									muutospvm   = now(),
-									muuttaja	= '{$kukarow['kuka']}'
+									updated_at   = now(),
+									updated_by	= '{$kukarow['kuka']}'
 									WHERE tunnus = '{$tunnus[$j]}'";
 						$j++;
 						$update_query = pupe_query($query);
@@ -253,10 +253,10 @@
 									monikerta	= '{$monikerta[$i]}',
 									alkupvm		= '{$alkupvm[$i]}',
 									loppupvm	= '{$loppupvm[$i]}',
-									laatija		= '{$kukarow['kuka']}',
-									luontiaika	= now(),
-									muutospvm	= now(),
-									muuttaja	= '{$kukarow['kuka']}'";
+									created_by		= '{$kukarow['kuka']}',
+									created_at	= now(),
+									updated_at	= now(),
+									updated_by	= '{$kukarow['kuka']}'";
 						$lisaa_result = pupe_query($query);
 					}
 				}

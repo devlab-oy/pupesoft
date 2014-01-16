@@ -779,16 +779,16 @@
 											$budj_sarak		 	= '$liitostunnari',
 											try 				= '$try',
 											osasto 				= '$osasto',
-											laatija 			= '{$kukarow["kuka"]}',
-											luontiaika 			= now(),
-											muutospvm 			= now(),
-											muuttaja 			= '{$kukarow["kuka"]}'
+											created_by 			= '{$kukarow["kuka"]}',
+											created_at 			= now(),
+											updated_at 			= now(),
+											updated_by 			= '{$kukarow["kuka"]}'
 											ON DUPLICATE KEY UPDATE
 											summa 				= '$tall_summa',
 											maara				= '$tall_maara',
 											indeksi				= '$tall_index',
-											muutospvm 			= now(),
-											muuttaja 			= '{$kukarow["kuka"]}'";
+											updated_at 			= now(),
+											updated_by 			= '{$kukarow["kuka"]}'";
 								$result = pupe_query($query, $masterlink);
 								$lisaa++;
 							}

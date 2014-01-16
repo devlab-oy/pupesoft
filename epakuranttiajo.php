@@ -73,7 +73,7 @@
 					tuote.epakurantti100pvm,
 					if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin,
 					tuote.kehahin bruttokehahin,
-					tuote.luontiaika,
+					tuote.created_at,
 					tuote.sarjanumeroseuranta,
 					sum(tuotepaikat.saldo) saldo
 					FROM tuote
@@ -163,12 +163,12 @@
 
 				if (!$tulorow = mysql_fetch_assoc($tapres)) {
 
-					if ($epakurantti_row["luontiaika"] != "0000-00-00 00:00:00") {
-						// Jos ei löydy tuloa, laitetaan tuotteen luontiaika
-						$tulorow = array("laadittu" => substr($epakurantti_row["luontiaika"], 0, 10));
+					if ($epakurantti_row["created_at"] != "0000-00-00 00:00:00") {
+						// Jos ei löydy tuloa, laitetaan tuotteen created_at
+						$tulorow = array("laadittu" => substr($epakurantti_row["created_at"], 0, 10));
 					}
 					else {
-						// Jos ei löydy tuloa eikä tuotteen luontiaikaa, niin laitetaan jotain vanhaa
+						// Jos ei löydy tuloa eikä tuotteen created_ata, niin laitetaan jotain vanhaa
 						$tulorow = array("laadittu" => "1970-01-01");
 					}
 				}

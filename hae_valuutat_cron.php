@@ -22,8 +22,8 @@
 
 	    	$query = "	UPDATE valuu, yhtio SET
 						valuu.kurssi = round(1 / $kurssi, 9),
-						valuu.muutospvm = now(),
-						valuu.muuttaja = 'crond'
+						valuu.updated_at = now(),
+						valuu.updated_by = 'crond'
 						WHERE valuu.nimi = '$valkoodi'
 						AND yhtio.yhtio = valuu.yhtio
 						AND yhtio.valkoodi = 'EUR'";

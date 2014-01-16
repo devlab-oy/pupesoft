@@ -574,8 +574,8 @@
 						alatila 	= '$tositealatila',
 						alv_tili 	= '{$alv_tili}',
 						comments	= '{$comments}',
-						laatija 	= '{$kukarow['kuka']}',
-						luontiaika 	= now()";
+						created_by 	= '{$kukarow['kuka']}',
+						created_at 	= now()";
 			$result = pupe_query($query);
 			$tunnus = mysql_insert_id ($link);
 		}

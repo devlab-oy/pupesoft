@@ -130,10 +130,10 @@
 								kieli = '{$yhtiorow['kieli']}',
 								laji = 'synkronointi',
 								selite = 'x',
-								laatija = '{$kukarow['kuka']}',
-								luontiaika = now(),
-								muutospvm = now(),
-								muuttaja = '{$kukarow['kuka']}'";
+								created_by = '{$kukarow['kuka']}',
+								created_at = now(),
+								updated_at = now(),
+								updated_by = '{$kukarow['kuka']}'";
 					pupe_query($query);
 
 				}

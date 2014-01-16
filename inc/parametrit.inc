@@ -795,7 +795,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		// Messenger-viestit (X = ei luettu)
 		if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off")) {
 
-			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
+			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.created_at
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)
 								JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka)
 								WHERE messenger.yhtio in ($konserni_yhtiot)
@@ -810,7 +810,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 					while ($message_row = mysql_fetch_assoc($message_result)) {
 						echo "<div id='$message_row[tunnus]'>";
 						echo t("Viesti käyttäjältä").": ";
-						echo "$message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
+						echo "$message_row[nimi] @ ".tv1dateconv($message_row['created_at'],'yes').": ";
 						echo "$message_row[viesti] ";
 						echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
 						echo "</div>";

@@ -521,7 +521,7 @@
 								ale2			= '{$ale['ale2']}',
 								ale3			= '{$ale['ale3']}',
 								hinta			= '{$hinta}',
-								laatija			= 'lapset',
+								created_by			= 'lapset',
 								kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lisätään lapsituote: {$lapsitieto['tuoteno']}',
 								laadittu		=  now(),
 								hyllyalue		= '{$lapsitieto['hyllyalue']}',
@@ -662,7 +662,7 @@
 				'tilausrivi.varattu' => ($row['kpl'] == 0 ? $kappaleerotus : 0),
 				'tilausrivi.tilkpl' => $kappaleerotus,
 				'tilausrivi.kpl' => ($row['kpl'] != 0 ? $kappaleerotus : 0),
-				'tilausrivi.luontiaika' => $row['luontiaika'],
+				'tilausrivi.created_at' => $row['created_at'],
 				'tilausrivi.hinta_alkuperainen' => round(($row['hinta_alkuperainen'] / ($row['kpl']+$row['varattu'])) * $datan_kpl, 6),
 			);
 			if ($debug == 1) {
@@ -799,7 +799,7 @@
 						'tilausrivi.tilkpl' => $kappaleerotus,
 						'tilausrivi.kpl' => ($row['kpl'] != 0 ? $kappaleerotus : 0),
 						'tilausrivi.perheid' => $tilausrivi_id,
-						'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
+						'tilausrivi.created_at' => $lapsi_chk_row['created_at'],
 					);
 					if ($debug == 1) {
 						echo "<br>splitattavalle lapselle poikkeukset: <br>";
@@ -953,8 +953,8 @@
 					swift        = '{$trow['swift']}',
 					liitostunnus = '{$trow['tunnus']}',
 					tila         = 'K',
-					luontiaika	 = now(),
-					laatija		 = 'verkkolas'";
+					created_at	 = now(),
+					created_by		 = 'verkkolas'";
 		$result = pupe_query($query);
 
 		$keikantunnus = mysql_insert_id(); // tätä tarvitaan tilausrivien uusiotunnukseen
@@ -1493,7 +1493,7 @@
 								case 'varattu':
 									$values .= ", '{$ylimaaraista}'";
 									break;
-								case 'laatija':
+								case 'created_by':
 									$values .= ", 'extraa'";
 									break;
 								case 'kommentti':
@@ -1643,7 +1643,7 @@
 						hyllyvali 		= '',
 						hyllytaso 		= '',
 						tilaajanrivinro = '".$rtuoteno[$i]["tilaajanrivinro"]."',
-						laatija 		= 'verkkolas',
+						created_by 		= 'verkkolas',
 						laadittu 		= now(),
 						yhtio 			= '$kukarow[yhtio]',
 						tuoteno 		= '".$rtuoteno[$i]["tuoteno"]."',
@@ -1740,8 +1740,8 @@
 						liitostunnus 			= '$trow[tunnus]',
 						comments				= '".t("Saapuminen luotu laskusta")." $osrow[laskunro]',
 						tila         			= 'K',
-						luontiaika	 			= now(),
-						laatija		 			= '$kukarow[kuka]'";
+						created_at	 			= now(),
+						created_by		 			= '$kukarow[kuka]'";
 			$insertres = pupe_query($query);
 			$keikan_tunnus = mysql_insert_id();
 			if ($debug == 1) {
@@ -1839,8 +1839,8 @@
 							liitostunnus 			= '$trow[tunnus]',
 							comments				= '".t("Saapuminen luotu laskusta")." $osrow[laskunro]',
 							tila         			= 'K',
-							luontiaika	 			= now(),
-							laatija		 			= '$kukarow[kuka]'";
+							created_at	 			= now(),
+							created_by		 			= '$kukarow[kuka]'";
 				$insertres = pupe_query($query);
 				$keikan_tunnus = mysql_insert_id();
 				if ($debug == 1) {
@@ -1990,10 +1990,10 @@
 										yhtio = '{$kukarow['yhtio']}',
 										suuntalava = '{$hinta_chk_row['suuntalava']}',
 										saapuminen = '{$_uusiotunnus}',
-										laatija = '{$kukarow['kuka']}',
-										luontiaika = now(),
-										muutospvm = now(),
-										muuttaja = '{$kukarow['kuka']}'";
+										created_by = '{$kukarow['kuka']}',
+										created_at = now(),
+										updated_at = now(),
+										updated_by = '{$kukarow['kuka']}'";
 							$suuntalava_upd_res = pupe_query($query);
 						}
 

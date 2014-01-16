@@ -177,7 +177,7 @@
 						vero     = 0,
 						lukko    = '',
 						selite   = 'KORJATTU: $kpitorow[sel1]',
-						laatija  = '$kukarow[kuka]',
+						created_by  = '$kukarow[kuka]',
 						laadittu = now()";
 			$result = pupe_query($query);
 
@@ -193,7 +193,7 @@
 						vero     = 0,
 						lukko    = '',
 						selite   = 'KORJATTU: $kpitorow[sel2]',
-						laatija  = '$kukarow[kuka]',
+						created_by  = '$kukarow[kuka]',
 						laadittu = now()";
 			$result = pupe_query($query);
 
@@ -241,8 +241,8 @@
 			$query = "	UPDATE sarjanumeroseuranta
 						SET myyntirivitunnus = 0,
 						siirtorivitunnus 	 = 0,
-						muuttaja			 = '$kukarow[kuka]',
-						muutospvm			 = now(),
+						updated_by			 = '$kukarow[kuka]',
+						updated_at			 = now(),
 						inventointitunnus	 = 0
 						WHERE yhtio				= '$kukarow[yhtio]'
 						and inventointitunnus	= $ttunnus
@@ -346,7 +346,7 @@
 
 		$query = "	SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko,
 					tuotepaikat.inventointiaika, tuotepaikat.inventointipoikkeama, tapahtuma.selite, tapahtuma.kpl, tapahtuma.tunnus ttunnus, tapahtuma.hinta,
-					tuote.sarjanumeroseuranta, tapahtuma.laatija, tapahtuma.laadittu,
+					tuote.sarjanumeroseuranta, tapahtuma.created_by, tapahtuma.laadittu,
 					(tapahtuma.hinta * tapahtuma.kpl) arvo,
 					left(tapahtuma.laadittu, 10) tapvm,
 					(SELECT group_concat(toim_tuoteno) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno) as toim_tuoteno,

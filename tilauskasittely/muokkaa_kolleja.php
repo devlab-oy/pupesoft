@@ -206,8 +206,8 @@
 				$query = "	UPDATE kerayserat SET
 							sscc = '{$uusi_sscc}',
 							pakkaus = '{$pak}',
-							muuttaja = '{$kukarow['kuka']}',
-							muutospvm = now()
+							updated_by = '{$kukarow['kuka']}',
+							updated_at = now()
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND (sscc = '{$sscc}' or sscc_ulkoinen = '{$sscc}')";
 				$updres = pupe_query($query);

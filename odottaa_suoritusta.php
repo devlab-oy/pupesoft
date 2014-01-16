@@ -37,7 +37,7 @@ function hae_suoritusta_odottavat_tilaukset() {
 				WHERE yhtio = '{$yhtiorow['yhtio']}'
 				AND tila 	= 'N'
 				AND alatila = 'G'
-				ORDER BY luontiaika ASC";
+				ORDER BY created_at ASC";
 	$result = pupe_query($query);
 
 	$tilaukset = array();

@@ -193,7 +193,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 						korjausaika			= '$tiliointirow[korjausaika]',
 						tosite				= '$tiliointirow[tosite]',
 						aputunnus			= '',
-						laatija				= '$kukarow[kuka]',
+						created_by				= '$kukarow[kuka]',
 						laadittu			= now()";
 			$result = pupe_query($query);
 			$uusi_id = mysql_insert_id();
@@ -229,7 +229,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 						korjausaika			= '$tiliointirow[korjausaika]',
 						tosite				= '$tiliointirow[tosite]',
 						aputunnus			= '',
-						laatija				= '$kukarow[kuka]',
+						created_by				= '$kukarow[kuka]',
 						laadittu			= now()";
 			$result = pupe_query($query);
 			$uusi_id = mysql_insert_id();
@@ -288,7 +288,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 					vero 				= 0,
 					selite 				= '".t("Pyöristysero")."',
 					lukko 				= '',
-					laatija 			= '$kukarow[kuka]',
+					created_by 			= '$kukarow[kuka]',
 					laadittu 			= now()";
 		$laskutusres = pupe_query($query);
 	}
@@ -308,7 +308,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 					vero 				= 0,
 					selite 				= '".t("Pyöristysero")."',
 					lukko 				= '',
-					laatija 			= '$kukarow[kuka]',
+					created_by 			= '$kukarow[kuka]',
 					laadittu 			= now()";
 		$laskutusres = pupe_query($query);
 	}
@@ -349,8 +349,8 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 
 	// Tässä kopioidaan laskun liitetiedostot uudelle laskulle
 	$query = "	INSERT INTO liitetiedostot
-				(yhtio, data, filename, filesize, filetype, image_bits, image_channels, image_height, image_width, jarjestys, kayttotarkoitus, kieli, laatija, liitos, liitostunnus, luontiaika, muutospvm, muuttaja, selite)
-				SELECT yhtio, data, filename, filesize, filetype, image_bits, image_channels, image_height, image_width, jarjestys, kayttotarkoitus, kieli, laatija, liitos, '$utunnus', luontiaika, muutospvm, muuttaja, selite
+				(yhtio, data, filename, filesize, filetype, image_bits, image_channels, image_height, image_width, jarjestys, kayttotarkoitus, kieli, created_by, liitos, liitostunnus, created_at, updated_at, updated_by, selite)
+				SELECT yhtio, data, filename, filesize, filetype, image_bits, image_channels, image_height, image_width, jarjestys, kayttotarkoitus, kieli, created_by, liitos, '$utunnus', created_at, updated_at, updated_by, selite
 				FROM liitetiedostot
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND liitostunnus = '$jaettavalaskurow[tunnus]'

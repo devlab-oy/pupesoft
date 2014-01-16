@@ -149,7 +149,7 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
 					AND tilausrivi.tyyppi != 'D')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				GROUP BY lasku.tunnus
-				ORDER BY lasku.luontiaika ASC";
+				ORDER BY lasku.created_at ASC";
 	$result = pupe_query($query);
 
 	$myyntitilaukset = array();

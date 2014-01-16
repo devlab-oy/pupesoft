@@ -257,7 +257,7 @@ if (!function_exists("toimitarkista")) {
 
 			if ($toimtyyppi == "L" and $tunnus > 0 and $errori != 1) {
 				// injisoidaan tuotteen_toimittajat kaikille tuotteille
-				$query = "	INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, toimittaja, liitostunnus, valuutta, alkuperamaa, tuotekerroin, laatija, luontiaika)
+				$query = "	INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, toimittaja, liitostunnus, valuutta, alkuperamaa, tuotekerroin, created_by, created_at)
 							SELECT yhtio, tuoteno, tuoteno, '$tmp_ytunnus', '$tunnus', '$tmp_valkoodi', '$tmp_maakoodi', 1, '$kukarow[kuka]', now()
 							FROM tuote
 							WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' and tuote.status != 'P'

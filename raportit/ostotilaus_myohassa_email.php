@@ -88,7 +88,7 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
 				tilausrivi.tuoteno,
 				tilausrivi.tilkpl,
 				tilausrivi.jaksotettu as vahvistettu,
-				lasku.laatija as ostaja,
+				lasku.created_by as ostaja,
 				tuote.ostajanro as vastuuostaja
 				FROM lasku
 				JOIN tilausrivi

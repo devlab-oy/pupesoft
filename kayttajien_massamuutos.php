@@ -2,13 +2,13 @@
 
 	require ("inc/parametrit.inc");
 
-	function massamuuttaja ($taulu, $sarake, $korvattava, $korvaava) {
+	function massaupdated_by ($taulu, $sarake, $korvattava, $korvaava) {
 		global $yhtiorow, $kukarow;
 
 		$paivityslause  = " UPDATE $taulu SET
 							$sarake = '$korvaava',
-							muuttaja = '$kukarow[kuka]',
-							muutospvm = now()
+							updated_by = '$kukarow[kuka]',
+							updated_at = now()
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND $sarake = '$korvattava'";
 		$resultpaivitys	= mysql_query($paivityslause) or pupe_error($paivityslause);
@@ -52,13 +52,13 @@
 			echo "<font class='message'>".t("Korvataan k‰ytt‰j‰ ")." $tarkistusrow2[nimi] ".t("k‰ytt‰j‰ll‰")." $tarkistusrow1[nimi].</font><br><br>";
 
 			if ($tiliointi == 1) {
-				// k‰ytt‰m‰ll‰ massamuuttaja-funktiota voidaan massana ajaa muutoksia haluttuun tauluihin.
+				// k‰ytt‰m‰ll‰ massaupdated_by-funktiota voidaan massana ajaa muutoksia haluttuun tauluihin.
 				$laskuri = 0;
-				$laskuri += massamuuttaja("tiliointisaanto", "hyvak1", $fromkuka, $tokuka);
-				$laskuri += massamuuttaja("tiliointisaanto", "hyvak2", $fromkuka, $tokuka);
-				$laskuri += massamuuttaja("tiliointisaanto", "hyvak3", $fromkuka, $tokuka);
-				$laskuri += massamuuttaja("tiliointisaanto", "hyvak4", $fromkuka, $tokuka);
-				$laskuri += massamuuttaja("tiliointisaanto", "hyvak5", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("tiliointisaanto", "hyvak1", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("tiliointisaanto", "hyvak2", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("tiliointisaanto", "hyvak3", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("tiliointisaanto", "hyvak4", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("tiliointisaanto", "hyvak5", $fromkuka, $tokuka);
 
 				if ($laskuri > 0) {
 					echo "<font class='message'>".t("P‰ivitettiin %s tiliˆintis‰‰ntˆ‰", '', $laskuri).".</font><br>";
@@ -68,11 +68,11 @@
 
 			if ($toimittajan_oletus == 1) {
 				$laskuri = 0;
-				$laskuri += massamuuttaja("toimi", "oletus_hyvak1", $fromkuka, $tokuka);
-				$laskuri += massamuuttaja("toimi", "oletus_hyvak2", $fromkuka, $tokuka);
-				$laskuri += massamuuttaja("toimi", "oletus_hyvak3", $fromkuka, $tokuka);
-				$laskuri += massamuuttaja("toimi", "oletus_hyvak4", $fromkuka, $tokuka);
-				$laskuri += massamuuttaja("toimi", "oletus_hyvak5", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("toimi", "oletus_hyvak1", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("toimi", "oletus_hyvak2", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("toimi", "oletus_hyvak3", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("toimi", "oletus_hyvak4", $fromkuka, $tokuka);
+				$laskuri += massaupdated_by("toimi", "oletus_hyvak5", $fromkuka, $tokuka);
 
 				if ($laskuri > 0) {
 					echo "<font class='message'>".t("P‰ivitettiin %s toimittajan oletushyv‰ksyj‰‰", '', $laskuri).".</font><br>";
@@ -81,7 +81,7 @@
 			}
 
 			if ($tuote_myyja == 1) {
-				$laskuri = massamuuttaja("tuote", "myyjanro", $tarkistusrow2['myyja'], $tarkistusrow1['myyja']);
+				$laskuri = massaupdated_by("tuote", "myyjanro", $tarkistusrow2['myyja'], $tarkistusrow1['myyja']);
 
 				if ($laskuri > 0) {
 					echo "<font class='message'>".t("P‰ivitettiin %s tuotteen myyj‰‰", '', $laskuri).".</font><br>";
@@ -90,7 +90,7 @@
 			}
 
 			if ($tuote_ostaja == 1) {
-				$laskuri = massamuuttaja("tuote", "ostajanro", $tarkistusrow2['myyja'], $tarkistusrow1['myyja']);
+				$laskuri = massaupdated_by("tuote", "ostajanro", $tarkistusrow2['myyja'], $tarkistusrow1['myyja']);
 
 				if ($laskuri > 0) {
 					echo "<font class='message'>".t("P‰ivitettiin %s tuotteen ostajaa", '', $laskuri).".</font><br>";
@@ -99,7 +99,7 @@
 			}
 
 			if ($asiakas_myyja == 1)  {
-				$laskuri = massamuuttaja("asiakas", "myyjanro", $tarkistusrow2['myyja'], $tarkistusrow1['myyja']);
+				$laskuri = massaupdated_by("asiakas", "myyjanro", $tarkistusrow2['myyja'], $tarkistusrow1['myyja']);
 
 				if ($laskuri > 0) {
 					echo "<font class='message'>".t("P‰ivitettiin %s asiakkaan myyj‰‰", '', $laskuri).".</font><br>";

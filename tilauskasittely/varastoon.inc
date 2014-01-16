@@ -198,7 +198,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 								ale2			= '{$chk_ale['ale2']}',
 								ale3			= '{$chk_ale['ale3']}',
 								hinta			= '{$chk_hinta}',
-								laatija			= 'tuloutus',
+								created_by			= 'tuloutus',
 								kommentti		= '',
 								laadittu		=  now(),
 								hyllyalue		= '{$chk_row['hyllyalue']}',
@@ -277,8 +277,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 							hyllytaso   	= '{$chk_row['hyllytaso']}',
 							hyllyvali   	= '{$chk_row['hyllyvali']}',
 							tyyppi 			= '',
-							laatija			= '{$kukarow['kuka']}',
-							luontiaika		= now()";
+							created_by			= '{$kukarow['kuka']}',
+							created_at		= now()";
 				$result = pupe_query($query);
 
 				// Varastoonvientip‰iv‰
@@ -302,7 +302,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 							hyllytaso  	= '{$chk_row['hyllytaso']}',
 							hyllyvali  	= '{$chk_row['hyllyvali']}',
 							selite 		= '".t("Lis‰ttiin tuotepaikka")." {$chk_row['hyllyalue']} {$chk_row['hyllynro']} {$chk_row['hyllyvali']} {$chk_row['hyllytaso']}',
-							laatija 	= '{$kukarow['kuka']}',
+							created_by 	= '{$kukarow['kuka']}',
 							laadittu 	= date_sub('{$varastoonvientipva}', interval 1 SECOND)";
 				$result = pupe_query($query);
 			}
@@ -810,7 +810,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					hyllytaso  = '$tilrivirow[hyllytaso]',
 					hyllyvali  = '$tilrivirow[hyllyvali]',
 					selite     = '$laskurow[nimi] $laskurow[nimitark], ".t("Tilaus").": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta $lisavartlisa',
-					laatija    = '$kukarow[kuka]',
+					created_by    = '$kukarow[kuka]',
 					rivitunnus = '$tilrivirow[tunnus]',
 					laadittu   = '$varastoonvientipva'";
 		$result = pupe_query($query);
@@ -844,8 +844,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 							hyllytaso   	= '{$tilrivirow['hyllytaso']}',
 							hyllyvali   	= '{$tilrivirow['hyllyvali']}',
 							tyyppi 			= 'S',
-							laatija			= '{$kukarow['kuka']}',
-							luontiaika		= now()";
+							created_by			= '{$kukarow['kuka']}',
+							created_at		= now()";
 				$result = pupe_query($query);
 
 				// tehd‰‰n tapahtuma
@@ -861,7 +861,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 							hyllytaso  	= '{$tilrivirow['hyllytaso']}',
 							hyllyvali  	= '{$tilrivirow['hyllyvali']}',
 							selite 		= '".t("Lis‰ttiin tuotepaikka")." {$tilrivirow['hyllyalue']} {$tilrivirow['hyllynro']} {$tilrivirow['hyllyvali']} {$tilrivirow['hyllytaso']}',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= date_sub('$varastoonvientipva', interval 1 SECOND)";
 				$result = pupe_query($query);
 			}
@@ -990,7 +990,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 							hyllytaso   = '0',
 							hyllyvali   = '0',
 							selite 		= '".t("Lis‰ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= date_sub('$varastoonvientipva', interval 1 SECOND)";
 				$result = pupe_query($query);
 	   		}
@@ -1317,7 +1317,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 								summa		= $tiliointirow[summa] * -1,
 								selite		= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
 								lukko		= '',
-								laatija		= '$kukarow[kuka]',
+								created_by		= '$kukarow[kuka]',
 								laadittu	= now()";
 					$result2 = pupe_query($query);
 
@@ -1342,7 +1342,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 								summa		= '$tiliointirow[summa]',
 								selite		= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
 								lukko		= '',
-								laatija 	= '$kukarow[kuka]',
+								created_by 	= '$kukarow[kuka]',
 								laadittu	= now()";
 					$result3 = pupe_query($query);
 				}

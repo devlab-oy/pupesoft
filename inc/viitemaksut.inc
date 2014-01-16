@@ -17,7 +17,7 @@
 	if ($type == '0') {
 		#print "Tietuetunnus => $type\n";
 		#print "Aineston luontipv => ".substr($tietue,1,6)."\n";
-		#print "Aineston luontiaika => ".substr($tietue,7,4)."\n";
+		#print "Aineston created_at => ".substr($tietue,7,4)."\n";
 		#print "Rahalaitostunnus => ".substr($tietue,11,2)."\n";
 		#print "Laskuttajan palvelutunnus => ".substr($tietue,13,9)."\n";
 		#print "Rahayksikön koodi => ".substr($tietue,22,1)."\n";

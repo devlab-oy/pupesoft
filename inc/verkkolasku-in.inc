@@ -1152,9 +1152,9 @@
 							ebid 				= '$ebid',
 							tila 				= '$tila',
 							vienti_kurssi 		= '$vrow[kurssi]',
-							laatija 			= 'verkkolas',
+							created_by 			= 'verkkolas',
 							liitostunnus 		= '$trow[tunnus]',
-							luontiaika 			= now(),
+							created_at 			= now(),
 							pankki1				= '$trow[pankki1]',
 							pankki2				= '$trow[pankki2]',
 							pankki3				= '$trow[pankki3]',
@@ -1205,7 +1205,7 @@
 							selite 			 = '$selite',
 							vero 			 = 0,
 							lukko 			 = '1',
-							laatija 		 = 'verkkolas',
+							created_by 		 = 'verkkolas',
 							laadittu 		 = now()";
 				$result = pupe_query($query);
 				$ostovelkatiliointitunnus = mysql_insert_id();
@@ -1323,7 +1323,7 @@
 									selite 			 = '$selite',
 									vero 			 = 0,
 									lukko 			 = '',
-									laatija 		 = '$kukarow[kuka]',
+									created_by 		 = '$kukarow[kuka]',
 									laadittu 		 = now()";
 						$result = pupe_query($query);
 
@@ -1354,7 +1354,7 @@
 									selite 			 = '$selite',
 									vero 			 = 0,
 									lukko 			 = '',
-									laatija 		 = '$kukarow[kuka]',
+									created_by 		 = '$kukarow[kuka]',
 									laadittu 		 = now()";
 						$result = pupe_query($query);
 					}
@@ -1513,7 +1513,7 @@
 											selite 			 = '$selite',
 											vero 			 = 0,
 											lukko 			 = '',
-											laatija			 = '$kukarow[kuka]',
+											created_by			 = '$kukarow[kuka]',
 											laadittu		 = now()";
 								$result = pupe_query($query);
 
@@ -1544,7 +1544,7 @@
 											selite 			 = '$selite',
 											vero 			 = 0,
 											lukko 			 = '',
-											laatija 		 = '$kukarow[kuka]',
+											created_by 		 = '$kukarow[kuka]',
 											laadittu 		 = now()";
 								$result = pupe_query($query);
 							}
@@ -1606,14 +1606,14 @@
 												kappalemaara 		= '{$rtuoteno[$i]['kpl']}',
 												keikkarivinhinta	= 0,
 												kulu 				= '{$rtuoteno[$i]['kulu']}',
-												laatija 			= 'crond',
+												created_by 			= 'crond',
 												lahetyslistannro 	= '',
 												laji 				= '{$lajilisa}',
 												lasku_ale1			= '{$rtuoteno[$i]['ale1']}',
 												lasku_ale2			= '{$rtuoteno[$i]['ale2']}',
 												lasku_ale3			= '{$rtuoteno[$i]['ale3']}',
 												lisakulu 			= '{$rtuoteno[$i]['lisakulu']}',
-												luontiaika 			= now(),
+												created_at 			= now(),
 												paketinnumero 		= '',
 												paketintunniste 	= '',
 												pakkauskulu 		= '{$laskun_pakkauskulu}',
@@ -1725,7 +1725,7 @@
 									valkoodi 		 = '$valkoodi',
 									vero 			 = 0,
 									lukko 			 = '',
-									laatija 		 = '$kukarow[kuka]',
+									created_by 		 = '$kukarow[kuka]',
 									laadittu		 = now()";
 						$xresult = pupe_query($query);
 
@@ -1745,7 +1745,7 @@
 									valkoodi 		 = '$valkoodi',
 									vero 			 = 0,
 									lukko 			 = '',
-									laatija 		 = '$kukarow[kuka]',
+									created_by 		 = '$kukarow[kuka]',
 									laadittu 		 = now()";
 						$xresult = pupe_query($query);
 
@@ -1810,8 +1810,8 @@
 								image_channels		= '',
 								kayttotarkoitus		= '$kayttotarkoitus',
 								jarjestys			= '1',
-								laatija				= '$kukarow[kuka]',
-								luontiaika			= now()";
+								created_by				= '$kukarow[kuka]',
+								created_at			= now()";
 					$Xresult = pupe_query($query);
 
 					// Haetaan verkkolaskun visualisoitu versio
@@ -1854,8 +1854,8 @@
 										image_channels		= '',
 										kayttotarkoitus		= 'VERKKOLASKU',
 										jarjestys			= '1',
-										laatija				= '$kukarow[kuka]',
-										luontiaika			= now()";
+										created_by				= '$kukarow[kuka]',
+										created_at			= now()";
 							$Xresult = pupe_query($query);
 						}
 					}
@@ -1895,8 +1895,8 @@
 												image_channels		= '',
 												kayttotarkoitus		= 'VERKKOLASKU',
 												jarjestys			= '1',
-												laatija				= '$kukarow[kuka]',
-												luontiaika			= now()";
+												created_by				= '$kukarow[kuka]',
+												created_at			= now()";
 									$Xresult = pupe_query($query);
 								}
 							}
@@ -1937,8 +1937,8 @@
 												image_channels		= '',
 												kayttotarkoitus		= 'EDI',
 												jarjestys			= '1',
-												laatija				= '$kukarow[kuka]',
-												luontiaika			= now()";
+												created_by				= '$kukarow[kuka]',
+												created_at			= now()";
 									$editilaus_laskulle_result = pupe_query($query);
 
 									// Katotaan onko eroja vai onko ok

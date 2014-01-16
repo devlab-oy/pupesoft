@@ -635,7 +635,7 @@
 										hyllyvali 	= '$hyllyvali',
 										hyllytaso 	= '$hyllytaso',
 										selite  	= '$selite',
-										laatija  	= '$kukarow[kuka]',
+										created_by  	= '$kukarow[kuka]',
 										laadittu 	= now()";
 							$result = pupe_query($query);
 
@@ -659,8 +659,8 @@
 										inventointiaika 		= now(),
 										inventointipoikkeama 	= '$poikkeama',
 										inventointilista_aika	= '0000-00-00 00:00:00',
-										muuttaja			 	= '$kukarow[kuka]',
-										muutospvm			 	= now()
+										updated_by			 	= '$kukarow[kuka]',
+										updated_at			 	= now()
 										WHERE yhtio				= '$kukarow[yhtio]'
 										and tuoteno				= '$tuoteno'
 										and hyllyalue			= '$hyllyalue'
@@ -677,9 +677,9 @@
 											tapvm      = now(),
 											tila       = 'X',
 											alatila    = 'I',
-											laatija    = '$kukarow[kuka]',
+											created_by    = '$kukarow[kuka]',
 											viite      = '$tapahtumaid',
-											luontiaika = now()";
+											created_at = now()";
 								$result = pupe_query($query);
 								$laskuid = mysql_insert_id($link);
 
@@ -741,7 +741,7 @@
 											vero     = 0,
 											lukko    = '',
 											selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
-											laatija  = '$kukarow[kuka]',
+											created_by  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);
 
@@ -757,7 +757,7 @@
 											vero     = 0,
 											lukko    = '',
 											selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
-											laatija  = '$kukarow[kuka]',
+											created_by  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);
 							}
@@ -771,8 +771,8 @@
 											$query = "	UPDATE sarjanumeroseuranta
 														SET myyntirivitunnus = '-1',
 														siirtorivitunnus 	 = '-1',
-														muuttaja			 = '$kukarow[kuka]',
-														muutospvm			 = now(),
+														updated_by			 = '$kukarow[kuka]',
+														updated_at			 = now(),
 														inventointitunnus	 = $tapahtumaid
 														WHERE yhtio	= '$kukarow[yhtio]'
 														and tunnus = $snro_tun";
@@ -804,8 +804,8 @@
 										$query = "	UPDATE sarjanumeroseuranta
 													SET myyntirivitunnus = '-1',
 													siirtorivitunnus 	 = '-1',
-													muuttaja			 = '$kukarow[kuka]',
-													muutospvm			 = now(),
+													updated_by			 = '$kukarow[kuka]',
+													updated_at			 = now(),
 													inventointitunnus	 = $tapahtumaid
 													WHERE yhtio	= '$kukarow[yhtio]'
 													and tunnus = $snro_tun";
@@ -851,8 +851,8 @@
 										$query = "	UPDATE sarjanumeroseuranta
 													SET era_kpl = '$enro_val',
 													$sarjaquerylisa
-													muuttaja = '$kukarow[kuka]',
-													muutospvm = now()
+													updated_by = '$kukarow[kuka]',
+													updated_at = now()
 													WHERE yhtio	= '$kukarow[yhtio]'
 													and tunnus = $enro_key";
 										$sarjares = pupe_query($query);
@@ -886,8 +886,8 @@
 											$query = "	UPDATE sarjanumeroseuranta
 														SET era_kpl = '$mita_jaa',
 														$sarjaquerylisa
-														muuttaja = '$kukarow[kuka]',
-														muutospvm = now()
+														updated_by = '$kukarow[kuka]',
+														updated_at = now()
 														WHERE yhtio	= '$kukarow[yhtio]'
 														and tunnus = $enro_key";
 										}
@@ -895,8 +895,8 @@
 											$query = "	UPDATE sarjanumeroseuranta
 														SET myyntirivitunnus = '-1',
 														siirtorivitunnus 	 = '-1',
-														muuttaja			 = '$kukarow[kuka]',
-														muutospvm			 = now()
+														updated_by			 = '$kukarow[kuka]',
+														updated_at			 = now()
 														WHERE yhtio	= '$kukarow[yhtio]'
 														and tunnus = $enro_key";
 										}
@@ -1204,7 +1204,7 @@
 										FROM tuotepaikat tt
 										WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
 										and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
-							and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and (tilausrivi_osto.laskutettuaika != '0000-00-00' or (tilausrivi_osto.laatija = 'Invent' and tilausrivi_osto.laskutettuaika = '0000-00-00')))
+							and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and (tilausrivi_osto.laskutettuaika != '0000-00-00' or (tilausrivi_osto.created_by = 'Invent' and tilausrivi_osto.laskutettuaika = '0000-00-00')))
 							and ('$tuoterow[sarjanumeroseuranta]' not in ('E','F','G') or era_kpl != 0)
 							ORDER BY sarjanumero";
 				$sarjares = pupe_query($query);

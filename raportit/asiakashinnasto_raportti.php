@@ -325,7 +325,7 @@ function hae_asiakasalet($request) {
 			'tuote_nimi'		 => $tuote['nimitys'],
 			'kappalemaara'		 => 1,
 			'yksikko'			 => $tuote['yksikko'],
-			'paivitys_pvm'		 => $tuote['muutospvm'],
+			'paivitys_pvm'		 => $tuote['updated_at'],
 			'ostohinta'			 => number_format($tuotteen_toimittaja_row['ostohinta'], 2),
 			'kehahin'			 => number_format($tuote['kehahin'], 2),
 			'ovh_hinta'			 => number_format($tuote['myyntihinta'], 2),

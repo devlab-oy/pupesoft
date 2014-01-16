@@ -160,7 +160,7 @@
 							{$query_insert_lisa}
 							kate = 0,
 							kommentti = '".t("Panttituotteen hyvitys palauttamattomista panteista")."',
-							laatija = 'cron',
+							created_by = 'cron',
 							laadittu = now(),
 							keratty = 'cron',
 							kerattyaika = now(),
@@ -230,7 +230,7 @@
 							{$query_insert_lisa}
 							kate = 0,
 							kommentti = '".t("Panttituotteen veloitus palauttamattomista panteista")." $kommenttilisa',
-							laatija = 'cron',
+							created_by = 'cron',
 							laadittu = now(),
 							keratty = 'cron',
 							kerattyaika = now(),

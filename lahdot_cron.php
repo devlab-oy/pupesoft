@@ -74,7 +74,7 @@
 					WHERE yhtio  = '{$kukarow['yhtio']}'
 					AND aktiivi  = ''
 					AND pvm    	 > CURDATE()
-					AND laatija  = 'cron'
+					AND created_by  = 'cron'
 					ORDER BY tunnus";
 	}
 	else {
@@ -83,7 +83,7 @@
 					WHERE yhtio  = '{$kukarow['yhtio']}'
 					AND aktiivi  = ''
 					AND pvm     >= CURDATE()
-					AND laatija  = 'cron'
+					AND created_by  = 'cron'
 					ORDER BY tunnus";
 	}
 
@@ -246,10 +246,10 @@
 								aktiivi 			 = '',
 								liitostunnus 		 = '{$t_row['liitostunnus']}',
 								varasto 			 = '{$t_row['varasto']}',
-								laatija 			 = '{$kukarow['kuka']}',
-								luontiaika 			 = now(),
-								muutospvm 			 = now(),
-								muuttaja 			 = '{$kukarow['kuka']}'";
+								created_by 			 = '{$kukarow['kuka']}',
+								created_at 			 = now(),
+								updated_at 			 = now(),
+								updated_by 			 = '{$kukarow['kuka']}'";
 					$ins_res = pupe_query($query);
 				}
 			}

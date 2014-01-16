@@ -66,37 +66,37 @@
 		$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
 		// kuukausinäkymä
-		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query1 = "	SELECT DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					count(distinct lasku.tunnus) tilauksia,
 					count(distinct tilausrivi.tunnus) riveja,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
-					and lasku.luontiaika >= '$vv-$kk-01 00:00:00'
-					and lasku.luontiaika < '$nkv-$nkk-01 00:00:00'
+					and lasku.created_at >= '$vv-$kk-01 00:00:00'
+					and lasku.created_at < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
 					ORDER BY pvm";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
-					and lasku.luontiaika >= '$vv-$kk-$pp 00:00:00'
-					and lasku.luontiaika <= '$vv-$kk-$pp 23:59:59'
+					and lasku.created_at >= '$vv-$kk-$pp 00:00:00'
+					and lasku.created_at <= '$vv-$kk-$pp 23:59:59'
 					$etsi
 					GROUP BY lasku.tunnus
 					ORDER BY lasku.tunnus";
 
 		// tilausnäkymä
-		$query3 = "	SELECT otunnus tunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, concat(nimitys, if(kommentti!='', concat('<br>* ',kommentti),'')) nimitys, kpl+varattu kpl, tilausrivi.hinta, {$ale_query_select_lisa} lasku.erikoisale, tilausrivi.alv,
+		$query3 = "	SELECT otunnus tunnus, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, tuoteno, concat(nimitys, if(kommentti!='', concat('<br>* ',kommentti),'')) nimitys, kpl+varattu kpl, tilausrivi.hinta, {$ale_query_select_lisa} lasku.erikoisale, tilausrivi.alv,
 					round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') summa,
 					round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') arvo
 					FROM tilausrivi use index (yhtio_otunnus)
@@ -113,33 +113,33 @@
 		$query_ale_lisa = generoi_alekentta('O');
 
 		// kuukausinäkymä
-		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query1 = "	SELECT DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					count(distinct lasku.tunnus) tilauksia, count(distinct tilausrivi.tunnus) riveja
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('O') and
-					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 00:00:00'
+					created_at >= '$vv-$kk-01 00:00:00' and
+					created_at < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
-					ORDER BY luontiaika";
+					ORDER BY created_at";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query2 = "	SELECT lasku.tunnus, lasku.nimi, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					round(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl),2) summa, lasku.valkoodi
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('O') and
-					luontiaika >= '$vv-$kk-$pp 00:00:00' and
-					luontiaika <= '$vv-$kk-$pp 23:59:59'
+					created_at >= '$vv-$kk-$pp 00:00:00' and
+					created_at <= '$vv-$kk-$pp 23:59:59'
 					$etsi
 					GROUP BY lasku.tunnus
-					ORDER BY luontiaika";
+					ORDER BY created_at";
 
 		// tilausnäkymä
-		$query3 = "	SELECT otunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
+		$query3 = "	SELECT otunnus, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
 					round(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl),'$yhtiorow[hintapyoristys]') arvo, lasku.valkoodi
 					FROM tilausrivi use index (yhtio_otunnus)
 					JOIN lasku use index (PRIMARY) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
@@ -155,30 +155,30 @@
 		$query_ale_lisa = generoi_alekentta('O');
 
 		// kuukausinäkymä
-		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query1 = "	SELECT DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					count(distinct lasku.tunnus) keikkoja, count(distinct tilausrivi.tunnus) riveja
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (uusiotunnus_index) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('K') and
 					vanhatunnus = 0 and
-					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 00:00:00'
+					created_at >= '$vv-$kk-01 00:00:00' and
+					created_at < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
-					ORDER BY luontiaika";
+					ORDER BY created_at";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, if(lasku.mapvm='0000-00-00','',DATE_FORMAT(lasku.mapvm,'%d.%m.%Y')) jlaskenta,
+		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(lasku.created_at,'%d.%m.%Y') pvm, if(lasku.mapvm='0000-00-00','',DATE_FORMAT(lasku.mapvm,'%d.%m.%Y')) jlaskenta,
 					round(sum(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (uusiotunnus_index) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('K') and
 					vanhatunnus = 0 ";
 
 		if (!isset($keikkanrohaku) or $keikkanrohaku == "") {
-			$query2 .= " and lasku.luontiaika >= '$vv-$kk-$pp 00:00:00' and lasku.luontiaika <= '$vv-$kk-$pp 23:59:59' ";
+			$query2 .= " and lasku.created_at >= '$vv-$kk-$pp 00:00:00' and lasku.created_at <= '$vv-$kk-$pp 23:59:59' ";
 		}
 
 		$query2 .= "$etsi
@@ -186,7 +186,7 @@
 					ORDER BY lasku.laskunro";
 
 		// tilausnäkymä
-		$query3 = "	SELECT lasku.laskunro keikka, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, round(tilausrivi.hinta*vienti_kurssi, '$yhtiorow[hintapyoristys]') hinta,
+		$query3 = "	SELECT lasku.laskunro keikka, DATE_FORMAT(lasku.created_at,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, round(tilausrivi.hinta*vienti_kurssi, '$yhtiorow[hintapyoristys]') hinta,
 					round(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)*vienti_kurssi,'$yhtiorow[hintapyoristys]') arvo, '$yhtiorow[valkoodi]' valkoodi, round(tilausrivi.rivihinta, '$yhtiorow[hintapyoristys]') ostohinta, vienti_kurssi kurssi, tilausrivin_lisatiedot.hankintakulut
 					FROM tilausrivi use index (uusiotunnus_index)
 					JOIN lasku use index (PRIMARY) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.uusiotunnus)
@@ -197,7 +197,7 @@
 					ORDER BY tilausrivi.tunnus";
 
 		// tilausnumerohaku
-		$query4 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
+		$query4 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
 					round(sum(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
 					FROM tilausrivi use index (yhtio_otunnus)
 					JOIN lasku ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tila = 'K' and vanhatunnus = 0
@@ -205,7 +205,7 @@
 					and otunnus = '$tilhaku'
 					and tyyppi!='D'
 					GROUP BY lasku.tunnus
-					ORDER BY luontiaika";
+					ORDER BY created_at";
 	}
 
 	// tässä valmistusten queryt
@@ -214,37 +214,37 @@
 		$query_ale_lisa = generoi_alekentta('M');
 
 		// kuukausinäkymä
-		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query1 = "	SELECT DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					count(distinct lasku.tunnus) valmistuksia,
 					count(distinct tilausrivi.tunnus) riveja,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('V') and
-					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 00:00:00'
+					created_at >= '$vv-$kk-01 00:00:00' and
+					created_at < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
-					ORDER BY luontiaika";
+					ORDER BY created_at";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.tunnus valmistus, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query2 = "	SELECT lasku.tunnus valmistus, lasku.tunnus, lasku.nimi, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('V') and
-					luontiaika >= '$vv-$kk-$pp 00:00:00' and
-					luontiaika <= '$vv-$kk-$pp 23:59:59'
+					created_at >= '$vv-$kk-$pp 00:00:00' and
+					created_at <= '$vv-$kk-$pp 23:59:59'
 					$etsi
 					GROUP BY lasku.tunnus
-					ORDER BY luontiaika";
+					ORDER BY created_at";
 
 		// tilausnäkymä
-		$query3 = "	SELECT lasku.tunnus valmistus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
+		$query3 = "	SELECT lasku.tunnus valmistus, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
 					round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') summa,
 					round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') arvo
 					FROM tilausrivi use index (yhtio_otunnus)
@@ -261,37 +261,37 @@
 		$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
 		// kuukausinäkymä
-		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query1 = "	SELECT DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					count(distinct lasku.tunnus) tilauksia,
 					count(distinct tilausrivi.tunnus) riveja,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('T') and
-					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 00:00:00'
+					created_at >= '$vv-$kk-01 00:00:00' and
+					created_at < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
-					ORDER BY luontiaika";
+					ORDER BY created_at";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, DATE_FORMAT(created_at,'%a') vkpvm,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
-					FROM lasku use index (yhtio_tila_luontiaika)
+					FROM lasku use index (yhtio_tila_created_at)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('T') and
-					luontiaika >= '$vv-$kk-$pp 00:00:00' and
-					luontiaika <= '$vv-$kk-$pp 23:59:59'
+					created_at >= '$vv-$kk-$pp 00:00:00' and
+					created_at <= '$vv-$kk-$pp 23:59:59'
 					$etsi
 					GROUP BY lasku.tunnus
-					ORDER BY luontiaika";
+					ORDER BY created_at";
 
 		// tilausnäkymä
-		$query3 = "	SELECT otunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta, {$ale_query_select_lisa} lasku.erikoisale, tilausrivi.alv,
+		$query3 = "	SELECT otunnus, DATE_FORMAT(created_at,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta, {$ale_query_select_lisa} lasku.erikoisale, tilausrivi.alv,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') arvo
 					FROM tilausrivi use index (yhtio_otunnus)

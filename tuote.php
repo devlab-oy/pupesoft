@@ -201,7 +201,7 @@
 
 		$query = "	SELECT tuote.*,
 					if (tuote.status = '', 'A', tuote.status) status,
-					date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti
+					date_format(tuote.updated_at, '%Y-%m-%d') muutos, date_format(tuote.created_at, '%Y-%m-%d') luonti
 					FROM tuote
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.tuoteno = '$tuoteno'";
@@ -1090,7 +1090,7 @@
 				foreach ($lista as $muuttunut_tuote) {
 					echo "<tr>";
 					echo "<td>{$muuttunut_tuote["tuoteno"]}</td>";
-					echo "<td>".tv1dateconv($muuttunut_tuote['muutospvm'], 'X')."</td>";
+					echo "<td>".tv1dateconv($muuttunut_tuote['updated_at'], 'X')."</td>";
 					echo "<td>{$muuttunut_tuote["kuka"]}</td>";
 					echo "</tr>";
 				}
@@ -1153,8 +1153,8 @@
 						tilausrivi.jaksotettu,
 						tilausrivin_lisatiedot.osto_vai_hyvitys,
 						lasku2.comments,
-						lasku2.laatija,
-						lasku2.luontiaika
+						lasku2.created_by,
+						lasku2.created_at
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
@@ -1309,7 +1309,7 @@
 						$query = "	SELECT nimi
 									FROM kuka
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND kuka = '{$jtrow['laatija']}'";
+									AND kuka = '{$jtrow['created_by']}'";
 						$kuka_chk_res = pupe_query($query);
 						$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
 
@@ -1317,7 +1317,7 @@
 						echo "<div id='div_{$jtrow['tunnus']}{$jtrow['keikkanro']}' class='popup' style='width: 500px;'>";
 						echo t("Saapuminen"),": {$jtrow['keikkanro']} / {$jtrow['nimi']}<br /><br />";
 						echo t("Laatija"),": {$kuka_chk_row['nimi']}<br />";
-						echo t("Luontiaika"),": ",tv1dateconv($jtrow['luontiaika'], "pitkä"),"<br /><br />";
+						echo t("Luontiaika"),": ",tv1dateconv($jtrow['created_at'], "pitkä"),"<br /><br />";
 						echo $jtrow["comments"];
 						echo "</div>";
 					}
@@ -2009,7 +2009,7 @@
 					}
 				}
 
-				$query = "	SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
+				$query = "	SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.created_by) created_by, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 							if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
 							concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
 							tapahtuma.hyllyalue tapahtuma_hyllyalue,
@@ -2028,7 +2028,7 @@
 							LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							LEFT JOIN lasku use index (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 							LEFT JOIN lasku AS lasku2 use index (primary) ON (lasku2.yhtio = tilausrivi.yhtio AND lasku2.tunnus = tilausrivi.uusiotunnus)
-							LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+							LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.created_by)
 							WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 							and tapahtuma.tuoteno = '$tuoteno'
 							$ehto
@@ -2085,7 +2085,7 @@
 
 					if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
 						echo "<tr class='aktiivi'>";
-						echo "<td nowrap valign='top'>$prow[laatija]</td>";
+						echo "<td nowrap valign='top'>$prow[created_by]</td>";
 						echo "<td nowrap valign='top'>".tv1dateconv($prow["laadittu"], "pitka")."</td>";
 						echo "<td nowrap valign='top'>";
 

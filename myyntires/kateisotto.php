@@ -278,8 +278,8 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti, $date) {
 				comments 	 = '{$yleinen_kommentti}',
 				tila 		 = 'X',
 				alatila 	 = 'O',
-				laatija 	 = '{$kukarow['kuka']}',
-				luontiaika 	 = NOW(),
+				created_by 	 = '{$kukarow['kuka']}',
+				created_at 	 = NOW(),
 				tapvm 		 = '{$date}',
 				kassalipas   = '{$kassalipas['tunnus']}',
 				nimi 		 = '".t("Käteisotto kassalippaasta").": {$kassalipas['nimi']}'";
@@ -320,7 +320,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
 
 	$query = "	INSERT INTO tiliointi
                 SET yhtio 	= '{$kukarow['yhtio']}',
-                laatija 	= '{$kukarow['kuka']}',
+                created_by 	= '{$kukarow['kuka']}',
                 laadittu 	= NOW(),
                 ltunnus 	= '{$params['lasku_tunnus']}',
                 tilino 		= '{$kateisoton_luonne_row['tilino']}',

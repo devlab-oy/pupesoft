@@ -84,7 +84,7 @@
 							and lasku.liitostunnus = '$toimittajaid'
 							and lasku.vanhatunnus = 0
 							GROUP BY lasku.laskunro
-							ORDER BY lasku.luontiaika";
+							ORDER BY lasku.created_at";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
@@ -936,7 +936,7 @@
 
 		// Lasku on valittu ja sitä tiliöidään
 		$query = "	SELECT *,
-					concat_ws('@', laatija, luontiaika) kuka,
+					concat_ws('@', created_by, created_at) kuka,
 					round(summa * vienti_kurssi, 2) kotisumma
 					FROM lasku
 					WHERE tunnus = '$tunnus'
@@ -961,7 +961,7 @@
 		//	Tarkistetaan onko tälläistä laskua tältä toimittajalta jo kierrossa
 		if ($laskurow["laskunro"] != "") {
 			$query = "	SELECT *,
-						concat_ws('@', laatija, luontiaika) kuka,
+						concat_ws('@', created_by, created_at) kuka,
 						summa,
 						valkoodi
 						FROM lasku

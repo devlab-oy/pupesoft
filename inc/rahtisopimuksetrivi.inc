@@ -5,7 +5,7 @@
 	$tyyppi = 1; // oletetaan rivin näkyvyys
 
 	if (mysql_field_name($result, $i) == "tunnus" or
-		mysql_field_name($result, $i) == "muutospvm" or
+		mysql_field_name($result, $i) == "updated_at" or
 	    mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}

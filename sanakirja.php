@@ -96,7 +96,7 @@ if ($maxtunnus > 0) {
 			// eli etsitään kielen nimisesta arraysta indexillä $i
 			if (${$sanakirja_kieli}[$i] != "") {
 				$value = addslashes(trim(${$sanakirja_kieli}[$i])); // spacella pystyy tyhjentämään kentän, mutta ei tallenneta sitä
-				$query = "UPDATE sanakirja set $sanakirja_kieli='$value', muuttaja='$kukarow[kuka]', muutospvm=now() where tunnus='$i'";
+				$query = "UPDATE sanakirja set $sanakirja_kieli='$value', updated_by='$kukarow[kuka]', updated_at=now() where tunnus='$i'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -159,7 +159,7 @@ if (count($kieli) > 0) {
 		$query .= ")";
 	}
 
-	$query .= " ORDER BY luontiaika desc,fi ";
+	$query .= " ORDER BY created_at desc,fi ";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {

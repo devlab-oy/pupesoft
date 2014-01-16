@@ -129,8 +129,8 @@ if ($tee == "paivita") {
 				tekija           = '$seltekija',
 				asiakas          = '$asiakas',
 				kesto_toteutunut = '$kesto_toteutunut',
-				muuttaja		 = '$kukarow[kuka]',
-				muutospvm		 = now(),
+				updated_by		 = '$kukarow[kuka]',
+				updated_at		 = now(),
 				deadline         = '$deadline'
 				$lisa
 				WHERE yhtio = '$kukarow[yhtio]' and
@@ -140,7 +140,7 @@ if ($tee == "paivita") {
 }
 
 if ($tee == "uusi" and $kuvaus != "") {
-	$query  = "INSERT into todo (yhtio, kuvaus, aika, prioriteetti, projekti, pyytaja, kesto_arvio, laatija, luontiaika, deadline, tekija, asiakas) values ('$kukarow[yhtio]', '$kuvaus', now(), '$prioriteetti', '$projekti', '$pyytaja', '$kesto_arvio', '$kukarow[kuka]', now(), '$deadline', '$tekija', '$asiakas')";
+	$query  = "INSERT into todo (yhtio, kuvaus, aika, prioriteetti, projekti, pyytaja, kesto_arvio, created_by, created_at, deadline, tekija, asiakas) values ('$kukarow[yhtio]', '$kuvaus', now(), '$prioriteetti', '$projekti', '$pyytaja', '$kesto_arvio', '$kukarow[kuka]', now(), '$deadline', '$tekija', '$asiakas')";
 	$result = mysql_query($query) or pupe_error($query);
 	$tee = "";
 }
@@ -150,7 +150,7 @@ if ($tee == "uusi" and $kuvaus == "") {
 }
 
 if ($tee == "valmis") {
-	$query  = "UPDATE todo set kuittaus='$kuittaus', aika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$query  = "UPDATE todo set kuittaus='$kuittaus', aika=now(), updated_by='$kukarow[kuka]', updated_at=now() where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$tee = "";
 }
@@ -252,7 +252,7 @@ if ($tee == "") {
 	//***************** NYKYISET
 	if ($sort == "pyytaja")				$sort = "order by pyytaja,";
 	elseif ($sort == "projekti")		$sort = "order by projekti,";
-	elseif ($sort == "luontiaika")		$sort = "order by luontiaika_short,";
+	elseif ($sort == "created_at")		$sort = "order by created_at_short,";
 	elseif ($sort == "kesto_arvio")		$sort = "order by kesto_arvio,";
 	elseif ($sort == "kuvaus")			$sort = "order by kuvaus,";
 	elseif ($sort == "deadline")		$sort = "order by deadline,";
@@ -282,7 +282,7 @@ if ($tee == "") {
 		$lisa .= " and todo.deadline like '%$deadline_haku%' ";
 	}
 	if ($luonti_haku != "") {
-		$lisa .= " and todo.luontiaika like '%$luonti_haku%' ";
+		$lisa .= " and todo.created_at like '%$luonti_haku%' ";
 	}
 	if ($prioriteetti_haku != "") {
 		$lisa .= " and todo.prioriteetti = '$prioriteetti_haku' ";
@@ -346,7 +346,7 @@ if ($tee == "") {
 
 
 	//***************** VANHAT
-	$query = "	SELECT kuka.nimi, todo.*, left(todo.luontiaika, 10) luontiaika_short, if(deadline='0000-00-00', '9999-12-31', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
+	$query = "	SELECT kuka.nimi, todo.*, left(todo.created_at, 10) created_at_short, if(deadline='0000-00-00', '9999-12-31', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
 				FROM todo
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
 				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
@@ -408,7 +408,7 @@ if ($tee == "") {
 			echo "<td width='550'>$rivi[kuvaus]</td>";
 			echo "<td>$rivi[asiakasnimi] $rivi[pyytaja]</td>";
 			echo "<td>$rivi[projekti]</td>";
-			echo "<td>$rivi[luontiaika_short]</td>";
+			echo "<td>$rivi[created_at_short]</td>";
 			echo "<td>$rivi[prioriteetti]</td>";
 			echo "<td>$rivi[kesto_arvio]</td>";
 			echo "<td>$rivi[kesto_toteutunut]</td>";
@@ -419,7 +419,7 @@ if ($tee == "") {
 
 	echo "</table><br></div>";
 
-	$query = "	SELECT kuka.nimi, todo.*, left(todo.luontiaika, 10) luontiaika_short, if(deadline='0000-00-00', '9999-12-31', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
+	$query = "	SELECT kuka.nimi, todo.*, left(todo.created_at, 10) created_at_short, if(deadline='0000-00-00', '9999-12-31', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
 				FROM todo
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
 				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
@@ -440,7 +440,7 @@ if ($tee == "") {
 		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=pyytaja&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>pyytäjä</a></th>
 		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=tekija&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>tekijä</a></th>
 		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=projekti&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>projekti</a></th>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=luontiaika&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>lisätty</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=created_at&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>lisätty</a></th>
 		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=kesto_arvio&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>aika-arvio</a></th>
 		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=deadline&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>deadline</a></th>
 		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=prioriteetti&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>prio</a></th>
@@ -512,7 +512,7 @@ if ($tee == "") {
 		echo "<td>$rivi[asiakasnimi] $rivi[pyytaja]</td>";
 		echo "<td>$rivi[nimi]</td>";
 		echo "<td>$rivi[projekti]</td>";
-        echo "<td>$rivi[luontiaika_short]</td>";
+        echo "<td>$rivi[created_at_short]</td>";
         echo "<td>$rivi[kesto_arvio]</td>";
         echo "<td>$rivi[deadline]</td>";
         echo "<td>$rivi[prioriteetti]</td>";

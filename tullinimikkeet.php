@@ -183,8 +183,8 @@ if ($tee == "synkronoi") {
 					su				= '$su',
 					su_vientiilmo	= '$su_vientiilmo',
 					kieli			= '$kieli',
-					laatija			= '$kukarow[kuka]',
-					luontiaika		= now()";
+					created_by			= '$kukarow[kuka]',
+					created_at		= now()";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 

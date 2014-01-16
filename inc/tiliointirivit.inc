@@ -322,9 +322,9 @@
         $summaselect = "	tiliointi.korjattu,
 							ifnull(ko.nimi, tiliointi.korjattu) korjattu_nimi,
 							tiliointi.korjausaika,
-							tiliointi.laatija laatija,
+							tiliointi.created_by created_by,
 							tiliointi.laadittu laadittu,
-							ifnull(la.nimi, tiliointi.laatija) laatija_nimi,
+							ifnull(la.nimi, tiliointi.created_by) created_by_nimi,
 							tiliointi.selite selite,
 							tiliointi.tunnus tunnus,
 		                	tiliointi.summa summa,
@@ -350,7 +350,7 @@
 				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
 				LEFT JOIN kustannuspaikka b ON b.yhtio = '$kukarow[yhtio]' and b.tunnus = tiliointi.kohde and b.tyyppi = 'O'
 				LEFT JOIN kustannuspaikka c ON c.yhtio = '$kukarow[yhtio]' and c.tunnus = tiliointi.projekti and c.tyyppi = 'P'
-				LEFT JOIN kuka la ON (la.yhtio = tiliointi.yhtio and la.kuka = tiliointi.laatija)
+				LEFT JOIN kuka la ON (la.yhtio = tiliointi.yhtio and la.kuka = tiliointi.created_by)
 				LEFT JOIN kuka ko ON (ko.yhtio = tiliointi.yhtio and ko.kuka = tiliointi.korjattu)
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 				and tiliointi.ltunnus = '$tunnus'
@@ -417,7 +417,7 @@
 		echo "</td>";
 
 		if ($viivatut == "on") {
-			echo "<td class='$class' valign='top'>".tv1dateconv($trow["laadittu"], "pitkä")." &raquo; $trow[laatija_nimi]";
+			echo "<td class='$class' valign='top'>".tv1dateconv($trow["laadittu"], "pitkä")." &raquo; $trow[created_by_nimi]";
 			if ($trow["korjattu"] != "") {
 				echo "<br>".tv1dateconv($trow["korjausaika"], "pitkä")." &raquo; $trow[korjattu_nimi]";
 			}

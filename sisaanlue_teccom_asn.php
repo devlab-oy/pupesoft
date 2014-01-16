@@ -144,8 +144,8 @@
 									toim_tuoteno2		= '$tuote2',
 									kappalemaara		= '$kpl',
 									tilausrivinpositio	= '$tilausrivinpositio',
-									laatija 			= '$kukarow[kuka]',
-									luontiaika 			= now()";
+									created_by 			= '$kukarow[kuka]',
+									created_at 			= now()";
 					$result = pupe_query($sqlinsert);
 					$tunnus_liitetiedostoon = mysql_insert_id();
 				}
@@ -335,8 +335,8 @@
 											image_channels		= '',
 											kayttotarkoitus		= 'TECCOM-ASN',
 											jarjestys			= '1',
-											laatija				= '$kukarow[kuka]',
-											luontiaika			= now()";
+											created_by				= '$kukarow[kuka]',
+											created_at			= now()";
 							$Xresult = pupe_query($tecquery);
 							rename($teccomkansio."/".$file, $teccomkansio_valmis."/".$file);
 						}

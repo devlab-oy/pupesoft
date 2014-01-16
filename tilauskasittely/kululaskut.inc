@@ -36,8 +36,8 @@ else {
 					liitostunnus = '$liitostunnus',
 					tila         = 'K',
 					alatila      = '$keikanalatila',
-					luontiaika	 = now(),
-					laatija		 = '$kukarow[kuka]'";
+					created_at	 = now(),
+					created_by		 = '$kukarow[kuka]'";
 		$result = pupe_query($query);
 
 		$otunnus = mysql_insert_id();
@@ -202,8 +202,8 @@ if ($tee_kululaskut == "liita") {
 					osto_kulu_alv 		= '{$osto_kulu_alv}',
 					osto_rahti_alv 		= '{$osto_rahti_alv}',
 					osto_rivi_kulu_alv	= '{$osto_rivi_kulu_alv}',
-					laatija				= '$kukarow[kuka]',
-					luontiaika	 		= now(),
+					created_by				= '$kukarow[kuka]',
+					created_at	 		= now(),
 					tila         		= 'K'";
 		$result = pupe_query($query);
 

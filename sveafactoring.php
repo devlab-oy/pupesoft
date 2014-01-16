@@ -198,7 +198,7 @@
 	if ($tee == 'TULOSTA') {
 
 		$luontipvm	= date("Ymd");
-		$luontiaika	= date("Hi");
+		$created_at	= date("Hi");
 
 		$query = "	SELECT *
 					FROM factoring

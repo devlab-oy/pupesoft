@@ -39,8 +39,8 @@ if ($tyyppi == 'yct') {
 					yhtio_maa		= '$yhtiorow[maa]',
 					yhtio_ovttunnus	= '$yhtiorow[ovttunnus]',
 					yhtio_kotipaikka= '$yhtiorow[kotipaikka]',
-					laatija 		= '$kukarow[kuka]',
-					luontiaika		= NOW(),
+					created_by 		= '$kukarow[kuka]',
+					created_at		= NOW(),
 					ytunnus			= '$asiakasrow[ytunnus]',
 					nimi 			= '$asiakasrow[nimi]',
 					nimitark 		= '$asiakasrow[nimitark]',
@@ -98,8 +98,8 @@ if ($tyyppi == 'yct') {
 					laskutus_maa		= '$asiakasrow[laskutus_maa]',
 					yhtio				= '$kukarow[yhtio]',
 					otunnus				= '$id',
-					laatija				= '$kukarow[kuka]',
-					luontiaika			= now()";
+					created_by				= '$kukarow[kuka]',
+					created_at			= now()";
 		$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
 		$kukarow['kesken'] = $id;
@@ -281,7 +281,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 								hyllyvali 	= '$hyllyvali',
 								hyllytaso 	= '$hyllytaso',
 								selite 		= '".t("Perustettiin tuotepaikka tilauksen sis‰‰nluonnissa ")." $alue 0 0 0',
-								laatija 	= '$kukarow[kuka]',
+								created_by 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					$result = pupe_query($query);
 				}
@@ -294,7 +294,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 						otunnus 		= '$id',
 						var				= '',
 						kerayspvm 		= now(),
-						laatija			= '$kukarow[kuka]',
+						created_by			= '$kukarow[kuka]',
 						laadittu		= now(),
 						toimitettu		= '',
 						toimitettuaika	= '',
@@ -374,8 +374,8 @@ while ((!feof ($fd)) and ($error!=1)) {
 							yhtio_maa 			= '$yhtiorow[maa]',
 							yhtio_ovttunnus		= '$yhtiorow[ovttunnus]',
 							yhtio_kotipaikka	= '$yhtiorow[kotipaikka]',
-							laatija 			= '$kukarow[kuka]',
-							luontiaika			= now(),
+							created_by 			= '$kukarow[kuka]',
+							created_at			= now(),
 							ytunnus				= '$asiakasrow[ytunnus]',
 							nimi 				= '$asiakasrow[nimi]',
 							nimitark 			= '$asiakasrow[nimitark]',
@@ -427,8 +427,8 @@ while ((!feof ($fd)) and ($error!=1)) {
 							laskutus_maa		= '$asiakasrow[laskutus_maa]',
 							yhtio				= '$kukarow[yhtio]',
 							otunnus				= '$id',
-							laatija				= '$kukarow[kuka]',
-							luontiaika			= now()";
+							created_by				= '$kukarow[kuka]',
+							created_at			= now()";
 				$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
 				echo t("nro")." $id ";
@@ -466,7 +466,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 				$trow = mysql_fetch_array($result);
 
 				$query = "	INSERT INTO tilausrivi SET
-							laatija 	= '$kukarow[kuka]',
+							created_by 	= '$kukarow[kuka]',
 							laadittu 	= now(),
 							yhtio 		= '$kukarow[yhtio]',
 							tuoteno 	= '$tuoteno',
@@ -533,8 +533,8 @@ while ((!feof ($fd)) and ($error!=1)) {
 							yhtio_maa			= '$yhtiorow[maa]',
 							yhtio_ovttunnus		= '$yhtiorow[ovttunnus]',
 							yhtio_kotipaikka	= '$yhtiorow[kotipaikka]',
-							laatija 			= '$kukarow[kuka]',
-							luontiaika			= NOW(),
+							created_by 			= '$kukarow[kuka]',
+							created_at			= NOW(),
 							ytunnus				= '$asiakasrow[ytunnus]',
 							nimi 				= '$asiakasrow[nimi]',
 							nimitark 			= '$asiakasrow[nimitark]',
@@ -586,8 +586,8 @@ while ((!feof ($fd)) and ($error!=1)) {
 							laskutus_maa		= '$asiakasrow[laskutus_maa]',
 							yhtio				= '$kukarow[yhtio]',
 							otunnus				= '$id',
-							laatija				= '$kukarow[kuka]',
-							luontiaika			= now()";
+							created_by				= '$kukarow[kuka]',
+							created_at			= now()";
 				$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
 				echo t("nro")." $id ";

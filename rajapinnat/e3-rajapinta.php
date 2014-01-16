@@ -401,7 +401,7 @@
 				   	LIMIT 1
 				   ) korvaavatuoteno
 				   FROM tuote
-				   JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.luontiaika) = '$tanaan')
+				   JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.created_at) = '$tanaan')
 				   WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset  AND tuote.ostoehdotus = ''
 				   HAVING tuote.tuoteno = korvaavatuoteno";
 		$rest = mysql_query($query) or pupe_error($query);

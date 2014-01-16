@@ -1429,7 +1429,7 @@
 					$selectmaksuehto
 					$selecttoimitustapaehto
 					lasku.vienti,
-					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
+					date_format(lasku.created_at, '%Y-%m-%d') laadittux,
 					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,
 					min(lasku.vanhatunnus) vanhatunnus,
 					min(lasku.pakkaamo) pakkaamo,
@@ -1438,13 +1438,13 @@
 					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus) tunnukset,
 					GROUP_CONCAT(distinct ytunnus) ytunnus,
 					min(tilausrivi.kerattyaika) kerattyaika,
-					min(lasku.luontiaika) luontiaika,
+					min(lasku.created_at) created_at,
 					min(lasku.h1time) h1time,
 					min(lasku.lahetepvm) lahetepvm,
 					min(lasku.kerayspvm) kerayspvm,
 					min(lasku.tunnus) mintunnus,
 					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'), GROUP_CONCAT(distinct lasku.nimi)) nimi,
-					GROUP_CONCAT(distinct lasku.laatija order by lasku.laatija SEPARATOR '<br>') laatija,
+					GROUP_CONCAT(distinct lasku.created_by order by lasku.created_by SEPARATOR '<br>') created_by,
 					group_concat(DISTINCT concat_ws('\n\n', if(comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if(sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
 					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
 					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
@@ -1491,7 +1491,7 @@
 
 
 			echo "<th valign='top'>
-					<a href='#' onclick=\"getElementById('jarj').value='luontiaika'; document.forms['find'].submit();\">".t("Laadittu")."<br>
+					<a href='#' onclick=\"getElementById('jarj').value='created_at'; document.forms['find'].submit();\">".t("Laadittu")."<br>
 					<a href='#' onclick=\"getElementById('jarj').value='h1time'; document.forms['find'].submit();\">".t("Valmis")."<br>
 					<a href='#' onclick=\"getElementById('jarj').value='lahetepvm'; document.forms['find'].submit();\">".t("Tulostettu")."<br>
 					<a href='#' onclick=\"getElementById('jarj').value='kerattyaika'; document.forms['find'].submit();\">".t("Kerätty")."</th>";
@@ -1541,7 +1541,7 @@
 					if(trim($row["ohjeet"]) != "") {
 						echo "<div id='div_$row[mintunnus]' class='popup' style='width: 500px;'>";
 						echo t("Tilaukset").": ".$row["tunnukset"]."<br>";
-						echo t("Laatija").": ".$row["laatija"]."<br><br>";
+						echo t("Laatija").": ".$row["created_by"]."<br><br>";
 						echo str_replace("\n", "<br>", $row["ohjeet"])."<br>";
 						echo "</div>";
 
@@ -1556,7 +1556,7 @@
 					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
 					echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
 
-					$laadittu_e 	= tv1dateconv($row["luontiaika"], "P", "LYHYT");
+					$laadittu_e 	= tv1dateconv($row["created_at"], "P", "LYHYT");
 					$h1time_e		= tv1dateconv($row["h1time"], "P", "LYHYT");
 					$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");
 					$kerattyaika_e	= tv1dateconv($row["kerattyaika"], "P", "LYHYT");
@@ -1657,7 +1657,7 @@
 					if(trim($row["ohjeet"]) != "") {
 						$temp_osittaiset .= "<div id='div_$row[mintunnus]' class='popup' style='width: 500px;'>";
 						$temp_osittaiset .= t("Tilaukset").": ".$row["tunnukset"]."<br>";
-						$temp_osittaiset .= t("Laatija").": ".$row["laatija"]."<br><br>";
+						$temp_osittaiset .= t("Laatija").": ".$row["created_by"]."<br><br>";
 						$temp_osittaiset .= str_replace("\n", "<br>", $row["ohjeet"])."<br>";
 						$temp_osittaiset .= "</div>";
 
@@ -1681,7 +1681,7 @@
 					$temp_osittaiset .= "</td>";
 					$temp_osittaiset .= "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
 
-					$laadittu_e 	= tv1dateconv($row["luontiaika"], "P", "LYHYT");
+					$laadittu_e 	= tv1dateconv($row["created_at"], "P", "LYHYT");
 					$h1time_e		= tv1dateconv($row["h1time"], "P", "LYHYT");
 					$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");
 					$kerattyaika_e	= tv1dateconv($row["kerattyaika"], "P", "LYHYT");
@@ -2003,8 +2003,8 @@
 					group_concat(distinct lasku.liitostunnus) asiakkaat,
 					max(lasku.nimi) asiakas,
 					max(concat_ws(' ', lasku.toimitustapa, vienti, ' ', varastopaikat.nimitys)) toimitustapa,
-					max(date_format(lasku.luontiaika, '%Y-%m-%d')) laadittu,
-					max(lasku.laatija) laatija,
+					max(date_format(lasku.created_at, '%Y-%m-%d')) laadittu,
+					max(lasku.created_by) created_by,
 					sum(kilot) kilot,
 					sum(kollit) kollit,
 					sum(kuutiot) kuutiot,
@@ -2019,7 +2019,7 @@
 					$haku
 					$tilaustyyppi
 					GROUP BY 1,2,3
-					ORDER BY lasku.toimitustapa, lasku.luontiaika desc";
+					ORDER BY lasku.toimitustapa, lasku.created_at desc";
 		$tilre = pupe_query($query);
 
 		if (mysql_num_rows($tilre) != 0) {

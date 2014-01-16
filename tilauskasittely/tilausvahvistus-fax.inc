@@ -124,7 +124,7 @@ else {
 		}
 
 		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\n";
-		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
+		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['created_at'])."\n";
 		$ulos .= "\r\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")							.t("Toimitusosoite", $kieli).":\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";

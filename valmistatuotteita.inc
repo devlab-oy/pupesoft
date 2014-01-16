@@ -315,7 +315,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 					hyllytaso 	= '$tuoterow[hyllytaso]',
 					hyllyvali 	= '$tuoterow[hyllyvali]',
 					selite   	= '".t("K‰ytettiin tuotteen")." $isatuoteno ".t("valmistamiseen")." ".t("tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus]',
-					laatija  	= '$kukarow[kuka]',
+					created_by  	= '$kukarow[kuka]',
 					laadittu 	= now()";
 		$result = pupe_query($query);
 
@@ -378,8 +378,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 					// v‰hennet‰‰n ostorivilt‰ tarvittava m‰‰r‰
 					$query = "	UPDATE sarjanumeroseuranta
 								SET era_kpl = era_kpl-$eravahennetaan,
-								muutospvm   = now(),
-								muuttaja    = '$kukarow[kuka]'
+								updated_at   = now(),
+								updated_by    = '$kukarow[kuka]'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus  = '$erajaljella_row[tunnus]'";
 					$lisa_res = pupe_query($query);
@@ -408,8 +408,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						$query = "	UPDATE sarjanumeroseuranta
 									SET era_kpl	    = era_kpl+$eravahennetaan,
 									ostorivitunnus  = '$erajaljella_row[ostorivitunnus]',
-									muutospvm	    = now(),
-									muuttaja	    = '$kukarow[kuka]'
+									updated_at	    = now(),
+									updated_by	    = '$kukarow[kuka]'
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tunnus  = '$raakaerarow[tunnus]'";
 						$lisa_res = pupe_query($query);
@@ -424,8 +424,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 									ostorivitunnus   = '$erajaljella_row[ostorivitunnus]',
 									kaytetty		 = '$lisa_row[kaytetty]',
 									era_kpl			 = $eravahennetaan,
-									laatija			 = '$kukarow[kuka]',
-									luontiaika		 = now(),
+									created_by			 = '$kukarow[kuka]',
+									created_at		 = now(),
 									takuu_alku 		 = '$lisa_row[takuu_alku]',
 									takuu_loppu		 = '$lisa_row[takuu_loppu]',
 									parasta_ennen	 = '$lisa_row[parasta_ennen]',
@@ -458,8 +458,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								myyntirivitunnus = $raakaainerow[tunnus],
 								ostorivitunnus 	 = 0,
 								era_kpl			 = 0,
-								laatija			 = '$kukarow[kuka]',
-								luontiaika		 = now(),
+								created_by			 = '$kukarow[kuka]',
+								created_at		 = now(),
 								hyllyalue   	 = '$tuoterow[hyllyalue]',
 								hyllynro    	 = '$tuoterow[hyllynro]',
 								hyllyvali   	 = '$tuoterow[hyllyvali]',
@@ -470,8 +470,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 					$query = "	UPDATE sarjanumeroseuranta
 								SET era_kpl	   = $eraayht,
 								ostorivitunnus = '$raakaainerow[tunnus]',
-								muutospvm	   = now(),
-								muuttaja	   = '$kukarow[kuka]'
+								updated_at	   = now(),
+								updated_by	   = '$kukarow[kuka]'
 								WHERE yhtio			 = '$kukarow[yhtio]'
 								and tuoteno			 = '$raakaainerow[tuoteno]'
 								and myyntirivitunnus = '$raakaainerow[tunnus]'
@@ -547,7 +547,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						hyllytaso 	= '$valmisterow[hyllytaso]',
 						hyllyvali 	= '$valmisterow[hyllyvali]',
 						selite  	= '$selite',
-						laatija 	= '$kukarow[kuka]',
+						created_by 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = pupe_query($query);
 			$tapahtumaid = mysql_insert_id();
@@ -582,7 +582,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 					//luodaan toimitettu valmisterivi
 					$query = "	INSERT into tilausrivi set
-								laatija			= '$kukarow[kuka]',
+								created_by			= '$kukarow[kuka]',
 								laadittu 		= now(),
 								yhtio 			= '$kukarow[yhtio]',
 								tuoteno 		= '$tilrivirow[tuoteno]',
@@ -630,7 +630,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 				// luodaan toimitettu valmisterivi
 				$query = "	INSERT into tilausrivi set
-							laatija			= '$kukarow[kuka]',
+							created_by			= '$kukarow[kuka]',
 							laadittu 		= now(),
 							yhtio 			= '$kukarow[yhtio]',
 							tuoteno 		= '$tilrivirow[tuoteno]',
@@ -734,7 +734,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 							}
 
 							$query = "	INSERT INTO sarjanumeroseuranta
-										(yhtio, tuoteno, sarjanumero, ostorivitunnus, myyntirivitunnus, laatija, luontiaika, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+										(yhtio, tuoteno, sarjanumero, ostorivitunnus, myyntirivitunnus, created_by, created_at, hyllyalue, hyllynro, hyllyvali, hyllytaso)
 										VALUES ('$kukarow[yhtio]', '$tilrivirow[tuoteno]', '$sarjanro', '$uusrivitunnus', 0, '$kuka[kuka]', now(), '$tilrivirow[hyllyalue]', '$tilrivirow[hyllynro]', '$tilrivirow[hyllyvali]', '$tilrivirow[hyllytaso]')";
 							$sarjares1 = pupe_query($query);
 							$uusisarjatunnus = mysql_insert_id();
@@ -794,8 +794,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 									myyntirivitunnus = 0,
 									ostorivitunnus 	 = $tilrivirow[tunnus],
 									era_kpl			 = $eraa_tarvitaan_viela,
-									laatija			 = '$kukarow[kuka]',
-									luontiaika		 = now(),
+									created_by			 = '$kukarow[kuka]',
+									created_at		 = now(),
 									hyllyalue   	 = '$valmisterow[hyllyalue]',
 									hyllynro    	 = '$valmisterow[hyllynro]',
 									hyllyvali   	 = '$valmisterow[hyllyvali]',

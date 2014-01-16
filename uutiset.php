@@ -119,7 +119,7 @@ if ($tee == 'LISAA') {
 							tyyppi 		= '$tyyppi',
 							yhtio 		= '$kukarow[yhtio]',
 							pvmalku 	= now(),
-							luontiaika	= now(),";
+							created_at	= now(),";
 					$postquery = "";
 			}
 
@@ -241,7 +241,7 @@ if ($tee == "SYOTA") {
 	while ($apurow = mysql_fetch_array($fields)) {
 		$sel = "";
 
-		if ($tunnus == 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "laatija" and $apurow[0] != "luontiaika" and $apurow[0] != "muutospvm" and $apurow[0] != "muuttaja" and $apurow[0] != "synkronoi") {
+		if ($tunnus == 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "created_by" and $apurow[0] != "created_at" and $apurow[0] != "updated_at" and $apurow[0] != "updated_by" and $apurow[0] != "synkronoi") {
 			if ($rivi["kieli"] == $apurow[0] or ($rivi["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"]) and count($lang) == 0) $sel = "CHECKED";
 			if (in_array($apurow[0], $lang)) $sel = "CHECKED";
 
@@ -252,7 +252,7 @@ if ($tee == "SYOTA") {
 			if ($maa=="") $maa = $apurow[0];
 			echo "<input type='checkbox' name='lang[]' value='$apurow[0]' $sel>".t($maa)."<br>";
 		}
-		elseif($tunnus > 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "laatija" and $apurow[0] != "luontiaika" and $apurow[0] != "muutospvm" and $apurow[0] != "muuttaja" and $apurow[0] != "synkronoi") {
+		elseif($tunnus > 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "created_by" and $apurow[0] != "created_at" and $apurow[0] != "updated_at" and $apurow[0] != "updated_by" and $apurow[0] != "synkronoi") {
 			if ($rivi["kieli"] == $apurow[0]) {
 				$sel = "CHECKED";
 			}

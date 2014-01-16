@@ -908,7 +908,7 @@
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus  IN ($otunnukset)
-								AND laatija = 'Magento'
+								AND created_by = 'Magento'
 								AND asiakkaan_tilausnumero != ''";
 					$mageres = pupe_query($query);
 

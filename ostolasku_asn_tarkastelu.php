@@ -440,7 +440,7 @@
 													ale3			= '{$ale['ale3']}',
 													kpl				= '{$isa_chk_row['kpl']}',
 													hinta			= '{$hinta}',
-													laatija			= 'lapset',
+													created_by			= 'lapset',
 													kommentti		= 'ASN-sanomalta: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
 													laadittu		=  now(),
 													hyllyalue		= '{$lapsitieto['hyllyalue']}',
@@ -1260,8 +1260,8 @@
 
 				$query = "	UPDATE asn_sanomat SET
 							tilausrivi = '".implode(",", $tunnukset)."',
-							muuttaja = '{$kukarow['kuka']}',
-							muutospvm = now(),
+							updated_by = '{$kukarow['kuka']}',
+							updated_at = now(),
 							tuoteno = '{$ostotilausrivirow['tuoteno']}'
 							{$toim_tuotenolisa}
 							WHERE yhtio = '{$kukarow['yhtio']}'

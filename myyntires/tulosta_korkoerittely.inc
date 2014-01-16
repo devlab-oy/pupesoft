@@ -249,7 +249,7 @@
 		$query = "	SELECT tunnus
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]'
-					and kuka = '$trow[laatija]'";
+					and kuka = '$trow[created_by]'";
 		$result = pupe_query($query);
 		$yrow = mysql_fetch_assoc($result);
 		$yhteyshenkilo = $yrow['tunnus'];

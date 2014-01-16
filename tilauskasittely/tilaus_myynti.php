@@ -5607,6 +5607,9 @@ if ($tee == '') {
 						$lisaresult = pupe_query($query);
 						$lisays = mysql_num_rows($lisaresult);
 					}
+					elseif($row['kommentti'] == '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
+						$lisays = 1;
+					}
 					else {
 						$lisays = 0;
 					}
@@ -7026,10 +7029,8 @@ if ($tee == '') {
 
 					$row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
 				}
-				/*if ($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
-					$row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
-				}*/
-				if ($row['kommentti'] != '' or $vastaavattuotteet == 1 or ($row['kommentti'] == '' and $row['ale_peruste'] != '')) {
+
+				if ($row['kommentti'] != '' or $vastaavattuotteet == 1 or ($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus']))) {
 
 					echo "<tr>";
 
@@ -7045,21 +7046,21 @@ if ($tee == '') {
 						$kommclass1 = "";
 						$kommclass2 = " ";
 					}
+				
 					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
-
+					
+					$font_color = "";
 					if ($row['kommentti'] != '') {
-						$font_color = "";
+
 						if ($row['vanha_otunnus'] != $tilausnumero) {
 							$font_color = "color='green'";
 						}
 
-						//if (!empty($row['ale_peruste'])) $row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
+						if (!empty($row['ale_peruste'])) $row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
 						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
-					elseif ($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
-						$font_color = '';
-						//$row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
-						echo t("Alennusperuste").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["ale_peruste"])."</font><br>";
+					elseif($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
+						echo t("Alennusperuste").":<br><font {$font_color} style='font-weight: bold;'>".$row["ale_peruste"]."</font><br>";
 					}
 
 					// tähän se taulu
@@ -7074,19 +7075,7 @@ if ($tee == '') {
 					echo "</tr>";
 
 				}
-				/*elseif (!empty($row['ale_peruste']) and empty($row['kommentti']) and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus']) ) {
-					
-					//$font_color = "color='black'";
-					echo "<tr>";
-					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
-					echo "<font style='font-weight: normal;'>".t("Alennusperuste")."</font>:<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["ale_peruste"])."</font><br>";
-					echo "</td>";
-					echo "<td class='back' valign='top' nowrap></td>";
-					echo "</tr>";
-				}
-				else {
-					echo "kissa";
-				}*/
+
 			}
 
 			$summa 					= 0; 	// Tilauksen verollinen loppusumma tilauksen valuutassa

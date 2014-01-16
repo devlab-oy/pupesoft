@@ -17598,6 +17598,12 @@ if (!function_exists("tee_keraysera")) {
 								}
 
 								if (!$yksin_kerailyalustalle_normi_tuote_trigger) {
+
+									if ($max_tuoterivit == $ii and $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] > 0) {
+										$eran_koko += $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'];
+										$eran_koko_pintaala += ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys']);
+									}
+
 									$kaytettava_pakkaus = "";
 								}
 							}

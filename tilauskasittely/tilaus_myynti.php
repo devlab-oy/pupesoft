@@ -5607,7 +5607,7 @@ if ($tee == '') {
 						$lisaresult = pupe_query($query);
 						$lisays = mysql_num_rows($lisaresult);
 					}
-					elseif($row['kommentti'] == '' and $row['ale_peruste'] != '') {
+					elseif($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['kommentti'] == '' and $row['ale_peruste'] != '') {
 						$lisays = 1;
 					}
 					else {
@@ -7030,7 +7030,7 @@ if ($tee == '') {
 					$row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
 				}
 
-				if ($row['kommentti'] != '' or $vastaavattuotteet == 1 or ($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus']))) {
+				if ($row['kommentti'] != '' or $vastaavattuotteet == 1 or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus']))) {
 
 					echo "<tr>";
 
@@ -7060,7 +7060,7 @@ if ($tee == '') {
 							$font_color = "color='green'";
 						}
 
-						if (!empty($row['ale_peruste'])) $row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
+						if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') $row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
 						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
 					elseif($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {

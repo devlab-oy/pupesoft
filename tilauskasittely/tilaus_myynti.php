@@ -3871,7 +3871,7 @@ if ($tee == '') {
 			$netto					= $tilausrivi['netto'];
 			$alv 					= $tilausrivi['alv'];
 			$kommentti				= $tilausrivi['kommentti'];
-			$patukka				= $tilausrivi['ale_peruste'];
+			$ale_peruste			= $tilausrivi['ale_peruste'];
 			$kerayspvm				= $tilausrivi['kerayspvm'];
 			$toimaika				= $tilausrivi['toimaika'];
 			$hyllyalue				= $tilausrivi['hyllyalue'];
@@ -4562,8 +4562,8 @@ if ($tee == '') {
 
 				$haettu_alehinta = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 
-				if (isset($patukka) and !empty($patukka) and $haettu_alehinta > 1) {
-					echo "<tr><th>".t("{$patukka}")."</th><td align='right'>".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</td></tr>";
+				if (isset($ale_peruste) and !empty($ale_peruste) and $haettu_alehinta > 1) {
+					echo "<tr><th>".t("{$ale_peruste}")."</th><td align='right'>".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</td></tr>";
 				}
 
 				if ($tuote["nettohinta"] != 0) {
@@ -4965,7 +4965,6 @@ if ($tee == '') {
 		else {
 			$kehahin_select = " round(if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0),6) ";
 		}
-
 		// Tilausrivit
 		$query  = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
 					if (tilausrivi.laskutettuaika!='0000-00-00', kpl, varattu) varattu,
@@ -6998,8 +6997,7 @@ if ($tee == '') {
 				}
 
 				echo "</td></tr>";
-				//KISSA
-				if (!empty($row['ale_peruste'])) $row['kommentti'] .="\n".t("Alennusperuste").": ".$row['ale_peruste'];
+
 				if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) {
 					$query = "	SELECT *
 								FROM tuote
@@ -7028,8 +7026,10 @@ if ($tee == '') {
 
 					$row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
 				}
-
-				if ($row['kommentti'] != '' or $vastaavattuotteet == 1) {
+				/*if ($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
+					$row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
+				}*/
+				if ($row['kommentti'] != '' or $vastaavattuotteet == 1 or ($row['kommentti'] == '' and $row['ale_peruste'] != '')) {
 
 					echo "<tr>";
 
@@ -7045,7 +7045,6 @@ if ($tee == '') {
 						$kommclass1 = "";
 						$kommclass2 = " ";
 					}
-
 					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
 
 					if ($row['kommentti'] != '') {
@@ -7053,7 +7052,14 @@ if ($tee == '') {
 						if ($row['vanha_otunnus'] != $tilausnumero) {
 							$font_color = "color='green'";
 						}
+
+						//if (!empty($row['ale_peruste'])) $row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
 						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
+					}
+					elseif ($row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
+						$font_color = '';
+						//$row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
+						echo t("Alennusperuste").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["ale_peruste"])."</font><br>";
 					}
 
 					// tähän se taulu
@@ -7068,6 +7074,19 @@ if ($tee == '') {
 					echo "</tr>";
 
 				}
+				/*elseif (!empty($row['ale_peruste']) and empty($row['kommentti']) and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus']) ) {
+					
+					//$font_color = "color='black'";
+					echo "<tr>";
+					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
+					echo "<font style='font-weight: normal;'>".t("Alennusperuste")."</font>:<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["ale_peruste"])."</font><br>";
+					echo "</td>";
+					echo "<td class='back' valign='top' nowrap></td>";
+					echo "</tr>";
+				}
+				else {
+					echo "kissa";
+				}*/
 			}
 
 			$summa 					= 0; 	// Tilauksen verollinen loppusumma tilauksen valuutassa

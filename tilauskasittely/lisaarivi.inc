@@ -50,7 +50,7 @@
 
 	if (!isset($rivilaadittu)) 		$rivilaadittu = "";
 	if (!isset($kommentti)) 		$kommentti = "";
-	if (!isset($patukka))			$patukka = "";
+	if (!isset($ale_peruste))		$ale_peruste = "";
 	if (!isset($jaksotettu)) 		$jaksotettu = "";
 	if (!isset($korvaavakielto))	$korvaavakielto = "";
 	if (!isset($orvoteikiinnosta)) 	$orvoteikiinnosta = "";
@@ -1630,7 +1630,7 @@
 											tyyppi 			= '$rivityyppi',
 											toimaika 		= '$toimaika',
 											kommentti 		= '$kommentti',
-											ale_peruste		= '$patukka',
+											ale_peruste		= '$ale_peruste',
 											var 			= '',
 											var2			= '{$var2}',
 											try				= '$trow[try]',
@@ -2766,7 +2766,7 @@
 						tyyppi 			= '$rivityyppi',
 						toimaika 		= '$toimaika',
 						kommentti 		= '$kommentti',
-						ale_peruste		= '$patukka',
+						ale_peruste		= '$ale_peruste',
 						var 			= '$var',
 						var2 			= '{$var2}',
 						try				= '$trow[try]',

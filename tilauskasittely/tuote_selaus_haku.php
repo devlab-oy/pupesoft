@@ -482,6 +482,7 @@
 		$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
 		$oleasres = pupe_query($query);
 		$oleasrow = mysql_fetch_assoc($oleasres);
+		$oleasrow["liitostunnus"] = $oleasrow["tunnus"];
 
 		$query = "SELECT * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
 		$olhires = pupe_query($query);

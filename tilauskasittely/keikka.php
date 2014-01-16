@@ -1502,7 +1502,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 		// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
 		$query = "	SELECT
 					group_concat(distinct lasku.laskunro SEPARATOR ', ') keikat,
-					round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta, 0)),2) varastossaarvo,
+					round(sum(IF((tilausrivi.laskutettuaika < '{$vv}-{$kk}-{$pp}' AND tilausrivi.laskutettuaika != '0000-00-00' AND tilausrivi.kpl != 0), tilausrivi.rivihinta, 0)),2) varastossaarvo,
 					ROUND(SUM(IF((tilausrivi.laskutettuaika < '{$vv}-{$kk}-{$pp}' AND tilausrivi.laskutettuaika != '0000-00-00'), tilausrivi.kpl, 0) * tilausrivi.hinta * {$query_ale_lisa}), 2) varastoonvietyarvo,
 					round(sum((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa}),2) kohdistettuarvo
 					FROM lasku USE INDEX (yhtio_tila_mapvm)

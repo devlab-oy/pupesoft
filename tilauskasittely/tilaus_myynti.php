@@ -5585,9 +5585,14 @@ if ($tee == '') {
 					else {
 						$pklisa = " and (tilausrivi.perheid = '$row[perheid]' or tilausrivi.perheid2 = '$row[perheid]')";
 					}
+					
+					$patukka = '';
+					if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') {
+						$patukka = " or ale_peruste != ''";
+					}
 
 					$query = "	SELECT
-								sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
+								sum(if(kommentti != '' {$patukka} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
 								count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -5609,10 +5614,6 @@ if ($tee == '') {
 					}
 					else {
 						$lisays = 0;
-					}
-
-					if($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['kommentti'] == '' and $row['ale_peruste'] != '') {
-						$lisays = 1;
 					}
 
 					$pkrow[1] += $lisays;
@@ -5739,7 +5740,7 @@ if ($tee == '') {
 
 					echo "<tr>";
 
-					if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) or $vastaavattuotteet == 1 or ($row['kommentti'] == '' and $row['ale_peruste'] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'])) {
+					if ($row["kommentti"] != "" or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) or $vastaavattuotteet == 1) {
 						if ($jarjlisa != "") {
 							echo "<td rowspan = '2' class='back' style='width:10px; padding:0px; margin:0px;'>$buttonit</td>";
 						}
@@ -7031,13 +7032,9 @@ if ($tee == '') {
 					$row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
 				}
 
-				if ($row['kommentti'] != '' or $vastaavattuotteet == 1 or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus']))) {
+				if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['kommentti'] == '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
 
 					echo "<tr>";
-
-					if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['kommentti'] == '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
-						$borderlask--;
-					}
 
 					if ($borderlask == 0 and $pknum > 1) {
 						$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
@@ -7064,7 +7061,7 @@ if ($tee == '') {
 						if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') $row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
 						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
-					elseif($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '' and ($row['perheid'] == 0 or $row['perheid'] == $row['tunnus'])) {
+					elseif($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') {
 						echo t("Alennusperuste").":<br><font {$font_color} style='font-weight: bold;'>".$row["ale_peruste"]."</font><br>";
 					}
 

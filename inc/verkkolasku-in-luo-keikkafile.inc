@@ -25,7 +25,7 @@
 					$query = "	SELECT tunnus
 								FROM asn_sanomat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND laji = 'asn'
+								AND laji in ('asn', 'fin', 'mav')
 								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'
 								AND status = 'X'";
 					$chk_res = pupe_query($query);
@@ -1239,7 +1239,7 @@
 
 						// jos skipattiin vähänkin niin nollataan kaikki kohdistukset
 						$updatequery = "UPDATE asn_sanomat SET
-										tilausrivi = '',
+										tilausrivi = NULL,
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
@@ -1258,7 +1258,7 @@
 
 							// jos skipattiin vähänkin niin nollataan kaikki kohdistukset
 							$updatequery = "UPDATE asn_sanomat SET
-											tilausrivi = ''
+											tilausrivi = NULL
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
 							$upd_res = pupe_query($updatequery);
@@ -1608,6 +1608,9 @@
 					}
 				}
 			}
+			else if ($rtuoteno[$i]['tuoteno'] == "A-100" or $rtuoteno[$i]['tuoteno'] == "A-200") {
+				continue;
+			}	
 			else {
 				if ($debug == 1) {
 					echo "<br>Ei löytynyt rivejä!!!! Debug tuotteelle {$rtuoteno[$i]['tuoteno']}<br><pre>",var_dump($rtuoteno[$i]),"</pre><br><br>";

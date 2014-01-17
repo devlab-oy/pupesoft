@@ -7,9 +7,10 @@ $lue_data_virheelliset_rivit = array();
 $api_output = "";
 $api_status = TRUE;
 
+// Ei käytetä pakkausta
+$compression = FALSE;
+
 // Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-//apache_setenv('no-gzip', 1);
-ini_set('zlib.output_compression', 0);
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
 

@@ -1,12 +1,14 @@
 <?php
 
 // Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-ini_set('zlib.output_compression', 0);
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
+
+// Ei käytetä pakkausta
+$compression = FALSE;
 
 if (isset($_POST["tee"])) {
 	if ($_POST["tee"] == 'lataa_tiedosto') {

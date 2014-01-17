@@ -7032,7 +7032,7 @@ if ($tee == '') {
 					$row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
 				}
 
-				if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['kommentti'] == '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
+				if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
 
 					echo "<tr>";
 

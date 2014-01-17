@@ -14486,7 +14486,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 						TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM r1.kollit)) AS kollit,
 						round(r1.kilot,1) kilot
 						FROM rahtikirjat r1
-						WHERE r1.pakkaustieto_tunnukset = ''
+						WHERE (r1.pakkaustieto_tunnukset = '' OR r1.pakkaustieto_tunnukset IS NULL)
 						AND r1.otsikkonro in ({$otunnus})
 						AND r1.yhtio = '{$kukarow['yhtio']}'";
 			$riresult2 = pupe_query($query);

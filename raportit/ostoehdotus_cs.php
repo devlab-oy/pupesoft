@@ -603,11 +603,11 @@
 		while ($row = mysql_fetch_assoc($res)) {
 
 			$toimilisa = "";
-			if ($toimittajaid != '') $toimilisa = " and liitostunnus = '$toimittajaid' ";
+			if ($toimittajaid != '') $toimilisa = " and tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
 
 			//hae liitostunnukset
 			// haetaan tuotteen toimittajatietoa
-			$query = "	SELECT group_concat(tuotteen_toimittajat.toimittaja     order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
+			$query = "	SELECT group_concat(toimi.ytunnus                       order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
 						group_concat(distinct tuotteen_toimittajat.osto_era     order by tuotteen_toimittajat.tunnus separator '/') osto_era,
 						group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
 						group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
@@ -618,8 +618,9 @@
 						group_concat(distinct tuotteen_toimittajat.tunnus 		order by tuotteen_toimittajat.tunnus separator '/') tunnukset,
 						group_concat(distinct tuotteen_toimittajat.liitostunnus order by tuotteen_toimittajat.tunnus separator '/') liitostunnukset
 						FROM tuotteen_toimittajat
-						WHERE yhtio in ($yhtiot)
-						and tuoteno = '$row[tuoteno]'
+						JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+						WHERE tuotteen_toimittajat.yhtio in ($yhtiot)
+						and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
 						$toimilisa";
 			$result   = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($result);

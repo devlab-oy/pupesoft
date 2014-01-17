@@ -522,7 +522,6 @@
 								yhtio = '{$kukarow['yhtio']}',
 								tuoteno = '{$tuote_chk_row['tuoteno']}',
 								liitostunnus = '{$liitostunnus}',
-								toimittaja = '{$toimi_chk_row['ytunnus']}',
 								alkuperamaa = '{$toimi_chk_row['maa']}',
 								laatija = '{$kukarow['kuka']}',
 								ostohinta = '$toimittaja_liitos_ostohinta',
@@ -1100,7 +1099,7 @@
 			}
 			elseif ($from == "" and $toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {
 				if (!is_numeric($haku[$i])) {
-					$ashak = "	SELECT group_concat(concat(\"'\",ytunnus,\"'\")) tunnukset
+					$ashak = "	SELECT group_concat(tunnus) tunnukset
 								FROM toimi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and nimi {$hakuehto}";
@@ -1108,14 +1107,14 @@
 					$ashakrow = mysql_fetch_assoc($ashakres);
 
 					if ($ashakrow["tunnukset"] != "") {
-						$lisa .= " and toimittaja in ({$ashakrow["tunnukset"]})";
+						$lisa .= " and liitostunnus in ({$ashakrow["tunnukset"]})";
 					}
 					else {
-						$lisa .= " and toimittaja = NULL ";
+						$lisa .= " and liitostunnus = NULL ";
 					}
 				}
 				else {
-					$lisa .= " and toimittaja = '{$haku[$i]}'";
+					$lisa .= " and liitostunnus = '{$haku[$i]}'";
 				}
 			}
 			elseif ($from == "" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {

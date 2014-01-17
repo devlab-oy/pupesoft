@@ -307,10 +307,11 @@
 			}
 
 			if ($toimittaja != "") {
-				$query = "	SELECT GROUP_CONCAT(DISTINCT CONCAT('\'',tuoteno,'\'')) tuotteet
-							FROM tuotteen_toimittajat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND toimittaja = '{$toimittaja}'";
+				$query = "	SELECT GROUP_CONCAT(DISTINCT CONCAT('\'',tuotteen_toimittajat.tuoteno,'\'')) tuotteet
+							FROM toimi
+							JOIN tuotteen_toimittajat ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+							AND toimi.ytunnus = '{$toimittaja}'";
 				$result = pupe_query($query);
 				$toimirow = mysql_fetch_assoc($result);
 
@@ -439,13 +440,13 @@
 
 							$tarve_kohdevarasto = (float) $test;
 						}
-						
+
 						if ($myyntiera == 'X') {
 							$kokonaisluku = ceil($tarve_kohdevarasto / $pairow['myynti_era']);
 							$test = $kokonaisluku * $pairow['myynti_era'];
 							$tarve_kohdevarasto = (float) $test;
 						}
-						
+
 					}
 
 					if ($tarve_kohdevarasto <= 0) {

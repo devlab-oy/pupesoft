@@ -171,12 +171,13 @@
 	//tuotteen varastostatus
 	if ($tee == 'Z') {
 		$query = "	SELECT tuote.*, date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
-					group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
+					group_concat(distinct toimi.nimi order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin
 					FROM tuote
 					LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
+					LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.tuoteno = '$tuoteno'
 					GROUP BY tuote.tuoteno";
@@ -596,7 +597,7 @@
 
 			if ($historia == "") $historia=1;
 			$chk[$historia] = "SELECTED";
-			
+
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -636,9 +637,9 @@
 				$maara = "LIMIT 2500";
 				$ehto = "";
 			}
-			
+
 			$lajilisa = ($toim == "EDUSTAJA") ? "" : " and tapahtuma.laji = 'siirto' ";
-			
+
 			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
@@ -659,13 +660,13 @@
 				echo t("$prow[laji]");
 				echo "</td>";
 				echo "<td nowrap align='right'>$prow[kpl]</td>";
-				
+
 				$selite = preg_replace("/(\([0-9\.]*\)|\[[0-9\.]*\])/", "", $prow["selite"]);
-				
+
 				echo "<td>$selite</td>";
 				echo "</tr>";
 			}
-			
+
 			echo "</table>";
 		}
 		else {

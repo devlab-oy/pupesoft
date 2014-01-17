@@ -2415,7 +2415,6 @@ if (!function_exists("synkronoi")) {
 					}
 				}
 				elseif ($table == "tuotteen_toimittajat") {
-
 					$query = "SELECT * from tuote where yhtio='$yhtio' and tuoteno='$abuhaku[tuoteno]'";
 					$abures = pupe_query($query);
 
@@ -2429,7 +2428,7 @@ if (!function_exists("synkronoi")) {
 						$tarkquery = "SELECT tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
 						$tarkres = pupe_query($tarkquery);
 
-						if (mysql_num_rows($tarkres)==1) {
+						if (mysql_num_rows($tarkres) == 1) {
 							//	Ylikirjoitetaan liitostunnus
 							$tarkrow = mysql_fetch_assoc($tarkres);
 							$override["liitostunnus"] = $tarkrow["tunnus"];
@@ -2448,7 +2447,6 @@ if (!function_exists("synkronoi")) {
 						$ok=0;
 					}
 				}
-
 
 				//	Poistetaan tietue jos masteria ei löydetty mutta originaali on tallessa.. olisiko tässä selvempi tapa?
 				if (!isset($masterrow) and is_array($orig) and count($orig) > 0) {

@@ -5304,7 +5304,12 @@ if ($tee == '') {
 			$tuoteperhe_kayty 			= '';
 			$edotunnus 					= 0;
 			$tuotekyslinkki				= "";
-			$tuotekyslinkkilisa			= "";
+			$tuotekyslinkkilisa			= "";			
+			$aleperustelisa 			= '';
+			
+			if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') {
+				$aleperustelisa = " or ale_peruste != ''";
+			}
 
 			if ($kukarow["extranet"] == "") {
 				$query = "	SELECT tunnus, alanimi
@@ -5584,15 +5589,10 @@ if ($tee == '') {
 					}
 					else {
 						$pklisa = " and (tilausrivi.perheid = '$row[perheid]' or tilausrivi.perheid2 = '$row[perheid]')";
-					}
-					
-					$patukka = '';
-					if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') {
-						$patukka = " or ale_peruste != ''";
-					}
+					}										
 
 					$query = "	SELECT
-								sum(if(kommentti != '' {$patukka} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
+								sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
 								count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -5602,7 +5602,9 @@ if ($tee == '') {
 								and tilausrivi.tyyppi != 'D'";
 					$pkres = pupe_query($query);
 					$pkrow = mysql_fetch_row($pkres);
-
+					
+					echo "$query<br>";
+					
 					if ($row["perheid2"] == -1) {
 						$query  = "	SELECT tuoteperhe.tunnus
 									FROM tuoteperhe
@@ -5683,7 +5685,7 @@ if ($tee == '') {
 						$pknum = 0;
 						$borderlask = 0;
 
-						if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
+						if ($row["kommentti"] != "" or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
 							echo "<td valign='top' rowspan = '2' $class>$echorivino";
 
 							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S" or ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] == 'S')) {
@@ -5830,7 +5832,7 @@ if ($tee == '') {
 					$borderlask--;
 				}
 				elseif ($borderlask == 1) {
-					if ($row["kommentti"] != '') {
+					if ($row["kommentti"] != '' or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '')) {
 						$classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
 						$class    .= " style='font-style:italic; ' ";
 					}
@@ -7057,12 +7059,13 @@ if ($tee == '') {
 						if ($row['vanha_otunnus'] != $tilausnumero) {
 							$font_color = "color='green'";
 						}
-
-						if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') $row['kommentti'] .="\n <font style='font-weight: normal;'>".t("Alennusperuste")."</font>: \n".$row['ale_peruste'];
+						
 						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
-					elseif($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') {
-						echo t("Alennusperuste").":<br><font {$font_color} style='font-weight: bold;'>".$row["ale_peruste"]."</font><br>";
+					
+					if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') {
+						if ($row['kommentti'] != '') echo "<br>";
+						echo t("Alennusperuste").": <font {$font_color} style='font-weight: bold;'>".$row["ale_peruste"]."</font><br>";
 					}
 
 					// tähän se taulu

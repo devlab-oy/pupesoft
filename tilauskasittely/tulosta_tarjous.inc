@@ -1650,17 +1650,21 @@ if (!function_exists('tulosta_tarjous')) {
 			#$yhtiorow['tarjouksen_alv_kasittely'] == 'X'	- Tuotteiden myyntihinnat ovat arvonlisäverottomia
 
 			if ($yhtiorow['alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) == 'verolliset') {
+				$row["hinta"] = $row["hinta"] * (1+$row["alv"]/100);
 				$row["rivihinta"] = $row["rivihinta"] * (1+$row["alv"]/100);
 			}
 			elseif ($yhtiorow['alv_kasittely'] == '' and trim($verolliset_verottomat_hinnat) == 'verottomat') {
+				$row["hinta"] = $row["hinta"] / (1+$row["alv"]/100);
 				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
 			}
 			elseif ($yhtiorow['tarjouksen_alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) == '') {
 
 				if ($yhtiorow['alv_kasittely'] == '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
+					$row["hinta"] = $row["hinta"] / (1+$row["alv"]/100);
 		        	$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
 				}
 				elseif ($yhtiorow['alv_kasittely'] != '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'S') {
+					$row["hinta"] = $row["hinta"] * (1+$row["alv"]/100);
 					$row["rivihinta"] = $row["rivihinta"] * (1+$row["alv"]/100);
 				}
 			}

@@ -261,7 +261,7 @@
 	}
 	else {
 		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno,
-					tuotteen_toimittajat.toimittaja as toim_ytunnu,
+					toimi.ytunnus as toim_ytunnu,
 					tuote.tullinimike1 as tullinimike1,
 					tuote.tullinimike2 as tullinimike2,
 					tilausrivi.hinta as ostohinta,
@@ -291,6 +291,7 @@
 					$suuntalavajoin
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno $eanlisa
 					LEFT JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+					LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus
 					WHERE {$otunnuslisa}
 					and tilausrivi.yhtio='$kukarow[yhtio]'

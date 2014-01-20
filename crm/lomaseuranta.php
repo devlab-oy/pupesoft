@@ -24,7 +24,11 @@
 	echo "<form method='POST'>";
 	echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-	$query  = "SELECT distinct kuka, nimi FROM kuka WHERE $lisa2 and extranet=''";
+	$query  = "	SELECT distinct kuka, nimi
+				FROM kuka
+				WHERE $lisa2
+				AND aktiivinen = 1
+				AND extranet = ''";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	while ($varow = mysql_fetch_array($vares)) {

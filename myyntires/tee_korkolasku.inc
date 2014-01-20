@@ -4,7 +4,7 @@
 
 	//sis‰‰n otetaan $liitostunnus. $liitostunnus tulee paperikorkolasku.php-failista
 	//ja maksuehdon tunnus $vmehto
-	//ja $loppusumma jossa on maksettavan koron m‰‰r‰. $loppusumma tulee paperikorkolasku.php-failista
+	//ja $loppukorkosumma jossa on maksettavan koron m‰‰r‰. $loppukorkosumma tulee paperikorkolasku.php-failista
 
 	//Haetaan asiakkaan tiedot
 	$query = "SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$liitostunnus'";
@@ -156,7 +156,7 @@
 					osasto 			= '$tuorow[osasto]',
 					kpl 			= 0,
 					alv 			= '0',
-					hinta 			= '$loppusumma',
+					hinta 			= '$loppukorkosumma',
 					nimitys 		= '$tuorow[nimitys]',
 					otunnus 		= '$otunnus',
 					tyyppi 			= 'L',
@@ -201,7 +201,7 @@
 			require ("tilauskasittely/lisaarivi.inc");
 		}
 
-		$valittu_tulostin = $kukarow["kirjoitin"];
+		$valittu_tulostin = $kirjoitin;
 
 		require ("../tilauskasittely/tilaus-valmis.inc");
 	}
@@ -209,4 +209,3 @@
 		echo "<br><br><font class='error'>Korko-tuotetta ei lˆydy! Ole hyv‰ ja perusta tuote tuotenumerolla 'korko'.</font>";
 		exit;
 	}
-?>

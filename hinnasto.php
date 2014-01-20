@@ -3,6 +3,9 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
+// Ei k‰ytet‰ pakkausta
+$compression = FALSE;
+
 if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 	header("Content-type: application/force-download");
 	header("Content-Disposition: attachment; filename=".$_POST['kaunisnimi'].".zip");

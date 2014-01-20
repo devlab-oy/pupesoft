@@ -547,7 +547,7 @@
 		$joinlisa = "";
 
 		# Resrvipaikka ja keräysvyöhyke rajaus vain jos keräyserät parametri on asetettu.
-		if ($yhtiorow["varastopaikkojen_maarittely"] != '' and (isset($reservipaikka) or isset($keraysvyohyke) and $yhtiorow["kerayserat"] != '')) {
+		if (($yhtiorow["varastopaikkojen_maarittely"] != '' and isset($reservipaikka)) or (isset($keraysvyohyke) and $yhtiorow["kerayserat"] != '')) {
 			$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
 			$vyohykelisa = $keraysvyohyke != '' ? "varaston_hyllypaikat.keraysvyohyke = '".mysql_real_escape_string($keraysvyohyke)."' AND " : "";
 
@@ -624,13 +624,16 @@
 
 				if ($from == '') {
 					$yhtiotaulu = "tuotteen_toimittajat";
-					$from 		= " FROM tuotteen_toimittajat ";
+					$from 		= " FROM tuotteen_toimittajat
+							 		JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus";
+
 					$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra
 									JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
-					$where		= " and tuotteen_toimittajat.toimittaja = '$toimittaja'";
+					$where		= " and toimi.ytunnus = '$toimittaja'";
 				}
 				else {
-					$join 	   .= " JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno and tuotteen_toimittajat.toimittaja = '$toimittaja' ";
+					$join 	   .= " JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
+									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus and toimi.ytunnus = '$toimittaja' ";
 				}
 
 				$lefttoimi = "";

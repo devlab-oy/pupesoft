@@ -48,6 +48,14 @@ $_GET		= pupe_register_globals($_GET);
 $_POST		= pupe_register_globals($_POST);
 $_REQUEST	= pupe_register_globals($_REQUEST);
 
+// Hoidetaan pakkaus
+if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {		
+	ini_set('zlib.output_compression', 'Off');
+}
+else {
+	ini_set('zlib.output_compression', 'On');
+}
+
 // Nollataan kaikki muuttujat joita voi setata salasanat.php:ssä
 unset($palvelin);
 unset($palvelin_ip);
@@ -342,6 +350,9 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 		if ($browkieli == 'sv') {
 			$browkieli = 'se';
 		}
+		elseif ($browkieli == 'ee') {
+			$browkieli = 'ee';
+		}
 		else {
 			$browkieli = 'fi';
 		}
@@ -428,6 +439,17 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 		}
 
+		if ($phpnimi == 'kuukautisostot.php') {
+			if (isset($valitut)) {
+				if (isset($valitut["EIVIENTEJA"])) {
+					setcookie('valitut_EIVIENTEJA', $valitut["EIVIENTEJA"], time()+60*60*24*90, "/");
+				}
+				if (isset($valitut["EIASIAKKAANMYYNTEJA"])) {
+					setcookie('valitut_EIASIAKKAANMYYNTEJA', $valitut["EIASIAKKAANMYYNTEJA"], time()+60*60*24*90, "/");
+				}
+			}
+		}
+
 		if ($phpnimi == 'tilaus_myynti.php') {
 			if (isset($tilausrivi_alvillisuus)) {
 				setcookie('tilausrivi_alvillisuus', $tilausrivi_alvillisuus, time()+60*60*24*90, "/");
@@ -508,10 +530,6 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 	if ((isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
 		// Kerrotaan selaimelle, että tämä on tiedosto
-		if (ini_get('zlib.output_compression')) {
-			ini_set('zlib.output_compression', 'Off');
-		}
-
 		header("Pragma: public");
 		header("Expires: 0");
 		header("HTTP/1.1 200 OK");

@@ -1666,10 +1666,10 @@
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
 						AND kuka.tunnus  = '$srow[myyja]')
 						UNION
-					   (SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+					   (SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.aktiivinen = 1
 						AND kuka.extranet = '')
 						ORDER BY nimi";
 			$yresult = pupe_query($query);
@@ -1731,10 +1731,10 @@
 
 				$oikea_sarake[$oikea] .= "<option value=''>".t("Ei projektipäällikköä")."</option>";
 
-				$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+				$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 							FROM kuka
-							JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 							WHERE kuka.yhtio  = '$kukarow[yhtio]'
+							AND kuka.aktiivinen = 1
 							AND kuka.extranet = ''
 							AND kuka.asema	  = 'PP'
 							ORDER BY kuka.nimi";
@@ -2407,10 +2407,10 @@
 				$vasen_sarake[$vasen] = "<td>".t("Allekirjoittaja")."</td>";
 				$vasen_sarake[$vasen] .= "<td><select name='allekirjoittaja'>";
 
-				$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi
+				$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi
 							FROM kuka
-							JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 							WHERE kuka.yhtio  = '$kukarow[yhtio]'
+							AND kuka.aktiivinen = 1
 							AND kuka.nimi    != ''
 							AND kuka.extranet = ''
 							ORDER BY kuka.nimi";
@@ -2614,11 +2614,11 @@
 					}
 					elseif ($kentta == "suorittaja") {
 
-						$query = "	SELECT DISTINCT if (avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
+						$query = "	SELECT if(avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
 									FROM kuka
-									JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 									LEFT JOIN avainsana ON (avainsana.yhtio=kuka.yhtio and avainsana.laji='TYOM_TYOLINJA' and avainsana.selitetark=kuka.kuka)
 									WHERE kuka.yhtio  = '$kukarow[yhtio]'
+									AND kuka.aktiivinen = 1
 									and kuka.extranet = ''
 									ORDER BY sort, kuka.nimi";
 						$yresult = pupe_query($query);

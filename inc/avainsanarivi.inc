@@ -713,11 +713,11 @@
 
 	if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
 
-		$query = "	SELECT distinct kuka, nimi
+		$query = "	SELECT kuka, nimi
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]'
-					and nimi != ''
-					and extranet=''
+					AND aktiivinen = 1
+					AND extranet = ''
 					ORDER BY nimi";
 		$vresult = pupe_query($query);
 

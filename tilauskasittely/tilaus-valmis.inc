@@ -872,7 +872,7 @@ else {
 			}
 
 			// Jos yhtiˆn parametreiss‰ halutaaan, ett‰ tulostetaan l‰hete ja ker‰yslista aina
-			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $tilausvalmiskutsuja != "JTSELAUS") {
 
 				$query = "	UPDATE lasku
 							SET tila = 'N',
@@ -1080,7 +1080,7 @@ else {
 									$values .= ", 1";
 									break;
 								case 'kate_korjattu':
-									$values .= ", NULL";
+									$values .= ", 0";
 									break;
 								default:
 									$values .= ", '{$splitrow[$fieldname]}'";
@@ -1157,7 +1157,7 @@ else {
 											$values .= ", {$split_tilausrivin_tunnus}";
 											break;
 										case 'kate_korjattu':
-											$values .= ", NULL";
+											$values .= ", 0";
 											break;
 										default:
 											$values .= ", '{$lapsirow[$fieldname]}'";
@@ -1436,7 +1436,7 @@ else {
 								$values .= ", '$split_toimitustapa'";
 								break;
 							case 'kate_korjattu':
-								$values .= ", NULL";
+								$values .= ", 0";
 								break;
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
@@ -1689,6 +1689,12 @@ else {
 				}
 			}
 
+			foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
+
+				if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == '' and $_ulkoinen_jarjestelma == 'P') {
+					posten_outbounddelivery($_otunnus);
+				}
+			}
 
 			//tyhjennet‰‰n muuttujat
 			$varasto 	= '';

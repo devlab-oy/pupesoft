@@ -7,12 +7,12 @@
 	$prires = pupe_query($query);
 
 	if (mysql_num_rows($prires) != 0) {
-		$prirow = mysql_fetch_array($prires);
+		$prirow = mysql_fetch_assoc($prires);
 
 		$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
 		$kirres = pupe_query($query);
 
-		if (mysql_num_rows($kirres)==0)
+		if (mysql_num_rows($kirres) == 0)
 			die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei löydy. Lähetteitä ei voida tulostaa...</font>");
 	}
 	else {
@@ -27,92 +27,8 @@
 	$onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 	if (!isset($lukotetaan) or $lukotetaan) {
-		$query = "LOCK TABLES
-					asiakas READ,
-					asiakasalennus asale1 READ,
-					asiakasalennus asale2 READ,
-					asiakasalennus READ,
-					asiakashinta AS ashin1 READ,
-					asiakashinta AS ashin2 READ,
-					asiakashinta READ,
-					asiakaskommentti READ,
-					asn_sanomat READ,
-					avainsana as a READ,
-					avainsana as avainsana_kieli READ,
-					avainsana as b READ,
-					avainsana WRITE,
-					dynaaminen_puu AS node READ,
-					dynaaminen_puu AS parent READ,
-					hinnasto READ,
-					kirjoittimet READ,
-					kuka WRITE,
-					lasku as vanha_lasku READ,
-					lasku WRITE,
-					liitetiedostot READ,
-					maat READ,
-					maksuehto READ,
-					pakkaamo WRITE,
-					pankkiyhteystiedot READ,
-					perusalennus READ,
-					puun_alkio READ,
-					rahtisopimukset READ,
-					rahtisopimukset AS rahtisopimukset2 READ,
-					rahtisopimukset AS rahtisopimukset3 READ,
-					rahtisopimukset AS rahtisopimukset4 READ,
-					sanakirja WRITE,
-					sarjanumeroseuranta READ,
-					sarjanumeroseuranta_arvomuutos READ,
-					tilausrivi AS t2 READ,
-					tilausrivi AS t3 READ,
-					tilausrivi AS tilausrivi_myynti READ,
-					tilausrivi AS tilausrivi_osto READ,
-					tilausrivi WRITE,
-					tilausrivin_lisatiedot AS tlt2 READ,
-					tilausrivin_lisatiedot AS tlt3 READ,
-					tilausrivin_lisatiedot WRITE,
-					toimitustapa READ,
-					tuote READ,
-					tuotepaikat READ,
-					tuoteperhe READ,
-					tuotteen_alv READ,
-					tuotteen_avainsanat READ,
-					tuotteen_toimittajat READ,
-					varaston_tulostimet as vanha_varaston_tulostimet READ,
-					varaston_tulostimet READ,
-					varastopaikat READ,
-					yhtio READ,
-					yhtion_parametrit READ,
-					yhtion_toimipaikat READ";
-
-		if ($yhtiorow['kerayserat'] != '') {
-			$query .= ",pakkaus READ,
-						kerayserat WRITE";
-		}
-
-		if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
-			$query .= ",asiakas AS asiakas1 READ,
-						asiakas AS asiakas2 READ,
-						keraysvyohyke AS keraysvyohyke1 READ,
-						keraysvyohyke AS keraysvyohyke2 READ,
-						keraysvyohyke READ,
-						lahdot AS lahdot1 READ,
-						lahdot AS lahdot2 READ,
-						lahdot AS lahdot3 READ,
-						lahdot READ,
-						lasku AS lasku1 WRITE,
-						lasku AS lasku2 WRITE,
-						laskun_lisatiedot WRITE,
-						tilausrivi AS tilausrivi1 READ,
-						tilausrivi AS tilausrivi2 READ,
-						toimitustapa AS toimitustapa1 READ,
-						toimitustapa AS toimitustapa2 READ,
-						tuote AS tuote1 READ,
-						tuote AS tuote2 READ,
-						varaston_hyllypaikat AS vh READ,
-						varaston_hyllypaikat AS vh1 READ,
-						varaston_hyllypaikat AS vh2 READ";
-		}
-
+		$query = "	LOCK TABLE
+					lasku WRITE";
 		$res = pupe_query($query);
 	}
 
@@ -128,11 +44,36 @@
 					WHERE tunnus in ($tilausnumeroita)
 					and yhtio	= '$kukarow[yhtio]'";
 	}
+
 	$chk_result = pupe_query($queryc);
-	$chk_row = mysql_fetch_array($chk_result);
+	$chk_row = mysql_fetch_assoc($chk_result);
 
 	// Katsotaan, että tämä keräyslista ei ole jo tulostettu
 	if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] != 0) {
+
+		// Päivitetään tilaus pois jonosta ja avataan lukot
+		if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+			$query = "	UPDATE lasku SET
+						alatila = 'C'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tila = 'C'
+						and alatila = 'B'
+						and tunnus in ($tilausnumeroita)";
+		}
+		else {
+			$query = "	UPDATE lasku SET
+						tila = 'L'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus in ($tilausnumeroita)";
+		}
+
+		$result = pupe_query($query);
+
+		if (!isset($lukotetaan) or $lukotetaan) {
+			// poistetaan lukot
+			$query = "UNLOCK TABLES";
+			$res   = pupe_query($query);
+		}
 
 		if ($yhtiorow['saldotarkistus_tulostusjonossa'] != '') {
 
@@ -212,7 +153,7 @@
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$riresult = pupe_query($query);
-		$asrow = mysql_fetch_array($riresult);
+		$asrow = mysql_fetch_assoc($riresult);
 
 		if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
 			$kerayseran_numero = tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita);
@@ -414,7 +355,7 @@
 		$prires = pupe_query($query);
 
 		if (mysql_num_rows($prires) > 0) {
-			$prirow = mysql_fetch_array($prires);
+			$prirow = mysql_fetch_assoc($prires);
 
 			$apuprintteri = $prirow['printteri1']; // läheteprintteri
 
@@ -482,9 +423,27 @@
 			$returnvalue = 1;
 		}
 
+		//Merkataan epäonnistuneeksi ja palautetaan tulostusjonoon
 		if ($returnvalue != 0) {
 			echo "<br><font class='error'>".t("Lähetteen tulostus epäonnistui")."! ".t("Tilaus")." $laskurow[tunnus] ".t("siirrettiin tulostusjonoon").". ".t("Käy tulostamassa lähete tulostusjonosta").": <a href='lahetteen_tulostusjono.php'>".t("Tulostusjono")."</a>.</font><br><br>";
-			$virheellinen = "X"; //Merkataan epäonnistuneeksi
+			$virheellinen = "X";
+
+			if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+				$query = "	UPDATE lasku SET
+							alatila = 'B'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tila = 'C'
+							and alatila = 'C'
+							and tunnus in ($tilausnumeroita)";
+			}
+			else {
+				$query = "	UPDATE lasku SET
+							tila = 'N'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tila = 'L'
+							and tunnus in ($tilausnumeroita)";
+			}
+			$result = pupe_query($query);
 		}
 
 		// jos meillä oli lähetteen tulostusongelmia
@@ -534,10 +493,10 @@
 	}
 	else {
 		echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";
-	}
 
-	if (!isset($lukotetaan) or $lukotetaan) {
-		// poistetaan lukot
-		$query = "UNLOCK TABLES";
-		$res   = pupe_query($query);
+		if (!isset($lukotetaan) or $lukotetaan) {
+			// poistetaan lukot
+			$query = "UNLOCK TABLES";
+			$res   = pupe_query($query);
+		}
 	}

@@ -1,4 +1,4 @@
- <?php
+<?php
  	//tarvitsemme $laskurow:n jossa on laskun tiedot
  	// ja $masrown jossa on maksuehdon tiedot
 

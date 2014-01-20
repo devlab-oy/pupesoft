@@ -855,7 +855,7 @@ if ($tee == 'MONISTA') {
 						$values .= ", ''";
 						break;
 					case 'kate_korjattu':
-						$values .= ", NULL";
+						$values .= ", 0";
 						break;
 					case 'clearing':
 						if ($kumpi == 'HYVITA') {
@@ -1250,7 +1250,7 @@ if ($tee == 'MONISTA') {
 							$rvalues .= ", ''";
 							break;
 						case 'kate_korjattu':
-							$rvalues .= ", NULL";
+							$rvalues .= ", 0";
 							break;
 						case 'kommentti':
 							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {

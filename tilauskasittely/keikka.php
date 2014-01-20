@@ -1774,7 +1774,8 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 		if ($comp) {
 			$query = "	SELECT
 						sum(IF((laskutettuaika < '{$vv}-{$kk}-{$pp}' AND laskutettuaika != '0000-00-00'), kpl, 0) * hinta * {$query_ale_lisa}) viety,
-						sum(IF(laskutettuaika >= '{$vv}-{$kk}-{$pp}', kpl, IF(laskutettuaika = '0000-00-00', varattu, 0)) * hinta * {$query_ale_lisa}) ei_viety
+						sum(IF(laskutettuaika >= '{$vv}-{$kk}-{$pp}', kpl, IF(laskutettuaika = '0000-00-00', varattu, 0)) * hinta * {$query_ale_lisa}) ei_viety,
+						sum(rivihinta) tuloutettu
 						FROM tilausrivi
 						WHERE yhtio 	= '{$kukarow['yhtio']}'
 						AND uusiotunnus = {$row['tunnus']}

@@ -2304,6 +2304,12 @@ if ($tee == '') {
 		}
 
 		if ($kukarow["extranet"] == "") {
+			if ($toim == 'VAURIOPOYTAKIRJA') {
+				$muuta_otsikko_teksit = "Muuta perustietoja";
+			}
+			else {
+				$muuta_otsikko_teksit = "Muuta Otsikkoa";
+			}
 			echo "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='mista' value='$mista'>
@@ -2317,7 +2323,7 @@ if ($tee == '') {
 					<input type='hidden' name='tyojono' value='$tyojono'>
 					<input type='hidden' name='orig_tila' value='$orig_tila'>
 					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
-					<input type='submit' ACCESSKEY='m' value='".t("Muuta Otsikkoa")."'>
+					<input type='submit' ACCESSKEY='m' value='".t($muuta_otsikko_teksit)."'>
 					</form>";
 
 			if ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO') {
@@ -2867,7 +2873,7 @@ if ($tee == '') {
 	$myyntikielto = '';
 
 	// jos asiakasnumero on annettu
-	if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
+	if ($laskurow["liitostunnus"] != 0 and $toim != 'VAURIOPOYTAKIRJA' or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != 'PIKATILAUS')) {
 
 		$query = "	SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn
 					FROM asiakas
@@ -3461,7 +3467,7 @@ if ($tee == '') {
 			echo "</tr>";
 		}
 	}
-	elseif ($kukarow["extranet"] == "") {
+	elseif ($kukarow["extranet"] == "" AND $toim != 'VAURIOPOYTAKIRJA') {
 		// asiakasnumeroa ei ole viel‰ annettu, n‰ytet‰‰n t‰yttˆkent‰t
 		if ($kukarow["oletus_asiakas"] != 0) {
 			$query  = "	SELECT *
@@ -3491,6 +3497,12 @@ if ($tee == '') {
 				<td><input type='text' size='10' name='myyjanumero' value='$my'></td>
 				</tr>";
 		}
+	}
+	else if ($toim == 'VAURIOPOYTAKIRJA') {
+		echo "	<tr>$jarjlisa
+					<th align='left'>".t("Operaattorin tikettinumero")."</th>
+					<td>123321</td>
+				</tr>";
 	}
 
 	echo "</table>";
@@ -5192,8 +5204,14 @@ if ($tee == '') {
 				$sarakkeet++;
 			}
 
-			$headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
-			$sarakkeet += 3;
+			if ($kukarow['naytetaan_var_tilauksella'] == 'E') {
+				$headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th>";
+				$sarakkeet += 2;
+			}
+			else {
+				$headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
+				$sarakkeet += 3;
+			}
 
 			if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
@@ -8167,13 +8185,35 @@ if ($tee == '') {
 					</form></td>";
 		}
 
-		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA") {
+		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA" and $toim_kuka == 'urakoitsija') {
 			$lopetus_temp = lopetus($lopetus, '', true);
 
 			echo "	<td class='back' valign='top'>
-					<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
-					<input type='submit' value='* ".t("Vauriopˆyt‰kirja lep‰‰m‰‰n")." *'>
-					</form></td>";
+						<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+							<input type='hidden' name='tee' value='siirra_tarkastajalle' />
+							<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
+							<input type='submit' value='".t("Siirr‰ tarkastajalle")."' />
+						</form>
+					</td>";
+		}
+		else if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA" and $toim_kuka == 'tarkastaja') {
+			$lopetus_temp = lopetus($lopetus, '', true);
+
+			echo "	<td class='back' valign='top'>
+						<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+							<input type='hidden' name='tee' value='anna_laskutuslupa' />
+							<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
+							<input type='submit' value='".t("Anna laskutus lupa")."' />
+						</form>
+					</td>";
+
+			echo "	<td class='back' valign='top'>
+						<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+							<input type='hidden' name='tee' value='siirra_urakoitsijalle' />
+							<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
+							<input type='submit' value='".t("Siirr‰ takaisin urakoitsijalle")."' />
+						</form>
+					</td>";
 		}
 
 		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {
@@ -8700,7 +8740,7 @@ if ($tee == '') {
 					</form> ";
 		}
 
-		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "") {
+		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $toim != 'VAURIOPOYTAKIRJA' and $kukarow["mitatoi_tilauksia"] == "") {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
 							msg = '".t("Haluatko todella poistaa t‰m‰n tietueen?")."';

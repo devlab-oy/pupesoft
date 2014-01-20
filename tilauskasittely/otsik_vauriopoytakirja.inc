@@ -38,48 +38,133 @@ if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_a
 	}
 }
 
-if ($asiakasid != "" and $tiedot_laskulta == "") {
-	// asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
-	if ($toim == 'VAURIOPOYTAKIRJA') {
-		$puhlisa = " if (asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) kotipuh, asiakas.tyopuhelin tyopuh,";
+//Pakollisten kenttien tarkastus
+if (isset($jatka)) {
+	$pakolliset_errors = array();
+	if (empty($tyo_alku_paiva) or empty($tyo_alku_aika)) {
+		$pakolliset_errors['tyo_alku'] = t('Työ alkoi puuttuu');
 	}
-	else {
-		$puhlisa = "";
+	if (empty($tyo_loppu_paiva) or empty($tyo_loppu_aika)) {
+		$pakolliset_errors['tyo_loppu'] = t('Työ päättyi puuttuu');
+	}
+	if (empty($ohjausmerkki)) {
+		$pakolliset_errors['kaupunki_kunta'] = t('Kaupunki').'/'.t('kunta puuttuu');
+	}
+	if (empty($kohde)) {
+		$pakolliset_errors['paikka_osoite'] = t('Paikka').'/'.t('osoite puuttuu');
+	}
+	if (empty($jalleenmyyja)) {
+		$pakolliset_errors['verkostoalue'] = t('Verkostoalue puuttuu');
+	}
+	if (empty($tyomaarays_viite)) {
+		$pakolliset_errors['tla'] = t('TLA puuttuu');
+	}
+	if (empty($vikakoodi)) {
+		$pakolliset_errors['vaurio_kohde'] = t('Vaurion kohde puuttuu');
+	}
+	if (empty($merkki)) {
+		$pakolliset_errors['vaurio_kohde_tyyppi'] = t('Vaurion kohteen tyyppi puuttuu');
+	}
+	if (empty($takuunumero)) {
+		$pakolliset_errors['tikettinumero'] = t('Operaattorin tikettinumero puuttuu');
+	}
+	if (empty($prioriteetti)) {
+		$pakolliset_errors['prioriteetti'] = t('Kiireellisyys puuttuu');
+	}
+	if (!isset($kotipuh)) {
+		$pakolliset_errors['kotipuh'] = t('Tieto puuttuu');
+	}
+	if (empty($comments)) {
+		$pakolliset_errors['comments'] = t('Tieto puuttuu');
+	}
+	if (empty($nimi)) {
+		$pakolliset_errors['nimi'] = t('Nimi puuttuu');
+	}
+	if (empty($osoite)) {
+		$pakolliset_errors['osoite'] = t('Osoite puuttuu');
+	}
+	if (empty($nimitark)) {
+		$pakolliset_errors['postilokero'] = t('Postilokero puuttuu');
+	}
+	if (empty($postino)) {
+		$pakolliset_errors['postino'] = t('Postinumero puuttuu');
+	}
+	if (empty($gsm)) {
+		$pakolliset_errors['gsm'] = t('Matkapuhelin puuttuu');
+	}
+	if (empty($ytunnus)) {
+		$pakolliset_errors['ytunnus'] = t('Ytunnus puuttuu');
+	}
+	if (!isset($hyvaksy)) {
+		$pakolliset_errors['hyvaksy'] = t('Tieto puuttuu');
+	}
+	if (!isset($mallivari)) {
+		$pakolliset_errors['mallivari'] = t('Tieto puuttuu');
+	}
+	//pakollinen tieto jos kaapelinäyttö (mallivari) on suoritettu
+	if (!empty($mallivari) and empty($tilausyhteyshenkilo)) {
+		$pakolliset_errors['nayttaja'] = t('Näyttäjä puuttuu');
+	}
+	if (!empty($mallivari) and empty($kuljetus)) {
+		$pakolliset_errors['kuljetus'] = t('Näyttäjän yhteystiedot puuttuu');
+	}
+	if (empty($sisviesti1)) {
+		$pakolliset_errors['sisviesti1'] = t('Tieto puuttuu');
+	}
+	if (empty($suorittaja)) {
+		$pakolliset_errors['suorittaja'] = t('Selvityksen antaja puuttuu');
+	}
+	if (empty($noutaja)) {
+		$pakolliset_errors['suorittaja_puhelin'] = t('Selvityksen antajan puhelin puuttuu');
+	}
+	if (empty($huolitsija)) {
+		$pakolliset_errors['huolitsija'] = t('Selvitykseestä vastaava puuttuu');
+	}
+	if (empty($jakelu)) {
+		$pakolliset_errors['jakelu'] = t('Selvityksestä vastaavat puhelin puuttuu');
 	}
 
-	$squery = "	SELECT asiakas.*,
-				$puhlisa
-				asiakas.tunnus liitostunnus,
-				'O' kohdistettu,
-				'' kohde,
-				'' kauppatapahtuman_luonne
-				FROM asiakas
-				WHERE tunnus = '$asiakasid'";
-	$srow_from = "ASIAKAS";
+	if (!empty($pakolliset_errors)) {
+		unset($jatka);
+		$tila = '';
+	}
 }
-else {
-	//tyomaarays.viite as tyomaarays_viite, selectoidaan erikseen koska resultista löytyy 2 viite kenttää: tyomaarays.viite ja lasku.viite. mysql driveri yliajaa tyomaarays.viiteen lasku.viitteellä
-	//kts. n rivi. 2717 Dynaaminen osio
-	$squery = "	SELECT tyomaarays.viite as tyomaarays_viite,
-				tyomaarays.*,
-				laskun_lisatiedot.*,
-				lasku.*,
-				lasku.hyvaksynnanmuutos as luokka
-				FROM lasku
-				LEFT JOIN laskun_lisatiedot
-				ON ( laskun_lisatiedot.yhtio = lasku.yhtio
-					AND laskun_lisatiedot.otunnus = lasku.tunnus )
-				LEFT JOIN tyomaarays
-				ON ( tyomaarays.yhtio = lasku.yhtio
-					AND tyomaarays.otunnus = lasku.tunnus )
-				WHERE lasku.tunnus = '{$kukarow['kesken']}'";
-	$srow_from = "LASKU";
-}
+
+//tyomaarays.viite as tyomaarays_viite, selectoidaan erikseen koska resultista löytyy 2 viite kenttää: tyomaarays.viite ja lasku.viite. mysql driveri yliajaa tyomaarays.viiteen lasku.viitteellä
+//kts. n rivi. 2717 Dynaaminen osio
+$squery = "	SELECT tyomaarays.viite as tyomaarays_viite,
+			tyomaarays.*,
+			laskun_lisatiedot.*,
+			lasku.*,
+			lasku.hyvaksynnanmuutos as luokka,
+			asiakas.*
+			FROM lasku
+			JOIN asiakas
+			ON ( asiakas.yhtio = lasku.yhtio
+				AND asiakas.tunnus = lasku.liitostunnus )
+			LEFT JOIN laskun_lisatiedot
+			ON ( laskun_lisatiedot.yhtio = lasku.yhtio
+				AND laskun_lisatiedot.otunnus = lasku.tunnus )
+			LEFT JOIN tyomaarays
+			ON ( tyomaarays.yhtio = lasku.yhtio
+				AND tyomaarays.otunnus = lasku.tunnus )
+			WHERE lasku.tunnus = '{$kukarow['kesken']}'";
+$srow_from = "LASKU";
 
 $sresult = pupe_query($squery);
 $srow = mysql_fetch_assoc($sresult);
 
 if ($tila == "" and !isset($jatka)) {
+	foreach ($_REQUEST as $key => $request_value) {
+		if (array_key_exists($key, $srow)) {
+			if (is_array($request_value)) {
+				$srow[$key] = implode('#', $request_value);
+			}
+			else {
+				$srow[$key] = $request_value;
+			}
+		}
+	}
 	if (!empty($srow)) {
 		$aiheuttaja = array(
 			'nimi'		 => $srow['nimi'],
@@ -92,14 +177,26 @@ if ($tila == "" and !isset($jatka)) {
 			'gsm'		 => $srow['gsm'],
 			'ytunnus'	 => $srow['ytunnus'],
 		);
+		$aiheuttaja_laskutus = array(
+			'nimi'		 => $srow['nimi'],
+			'nimitark'	 => $srow['nimitark'],
+			'osoite'	 => $srow['osoite'],
+			'postino'	 => $srow['postino'],
+			'postitp'	 => $srow['postitp'],
+			'maa'		 => $srow['maa'],
+			'puhelin'	 => $srow['puhelin'],
+			'gsm'		 => $srow['gsm'],
+			'ytunnus'	 => $srow['ytunnus'],
+		);
 
-		$poistui_array = explode(' ', $srow['poistui']);
-		if (count($poistui_array) > 1) {
-			$poistui_array['paiva'] = date('d.m.Y', strtotime($poistui_array[0]));
-			$poistui_array['aika'] = $poistui_array[1];
+
+		$tyo_alku_array = explode(' ', $srow['tyo_alku']);
+		if (count($tyo_alku_array) > 1) {
+			$tyo_alku_array['paiva'] = date('d.m.Y', strtotime($tyo_alku_array[0]));
+			$tyo_alku_array['aika'] = $tyo_alku_array[1];
 		}
 
-		$valmis_array = explode(' ', $srow['valmis']);
+		$valmis_array = explode(' ', $srow['tyo_loppu']);
 		if (count($valmis_array) > 1) {
 			$valmis_array['paiva'] = date('d.m.Y', strtotime($valmis_array[0]));
 			$valmis_array['aika'] = $valmis_array[1];
@@ -158,7 +255,8 @@ if ($tila == "" and !isset($jatka)) {
 		echo "</td>";
 
 		echo "<td>";
-		echo "<input type='text' name='poistui_paiva' value='{$poistui_array['paiva']}' /> <input type='text' name='poistui_aika' value='{$poistui_array['aika']}' />";
+		echo "<input type='text' name='tyo_alku_paiva' value='{$tyo_alku_array['paiva']}' /> <input type='text' name='tyo_alku_aika' value='{$tyo_alku_array['aika']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['tyo_alku'].'</font>';
 		echo "</td>";
 
 		echo "<td>";
@@ -166,7 +264,8 @@ if ($tila == "" and !isset($jatka)) {
 		echo "</td>";
 
 		echo "<td>";
-		echo "<input type='text' name='valmis_paiva' value='{$valmis_array['paiva']}' /> <input type='text' name='valmis_aika' value='{$valmis_array['aika']}' />";
+		echo "<input type='text' name='tyo_loppu_paiva' value='{$valmis_array['paiva']}' /> <input type='text' name='tyo_loppu_aika' value='{$valmis_array['aika']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['tyo_loppu'].'</font>';
 		echo "</td>";
 
 		echo "</tr>";
@@ -186,18 +285,21 @@ if ($tila == "" and !isset($jatka)) {
 
 		echo "<td>";
 		echo "<input type='text' name='ohjausmerkki' value='{$srow['ohjausmerkki']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['kaupunki_kunta'].'</font>';
 		echo "</td>";
 
 		echo "<td rowspan='2' align='center'>";
 		echo t('Verkostoalue');
 		echo "<br/>";
 		echo "<input type='text' name='jalleenmyyja' value='{$srow['jalleenmyyja']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['verkostoalue'].'</font>';
 		echo "</td>";
 
 		echo "<td rowspan='2' align='center'>";
 		echo t('TLA');
 		echo "<br/>";
-		echo "<input type='text' name='viite' value='{$srow['tyomaarays_viite']}' />";
+		echo "<input type='text' name='tyomaarays_viite' value='{$srow['tyomaarays_viite']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['tla'].'</font>';
 		echo "</td>";
 
 		echo "</tr>";
@@ -209,7 +311,9 @@ if ($tila == "" and !isset($jatka)) {
 		echo "</td>";
 
 		echo "<td>";
+		$a = $srow['kohde'];
 		echo "<input type='text' name='kohde' value='{$srow['kohde']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['paikka_osoite'].'</font>';
 		echo "</td>";
 
 		echo "</tr>";
@@ -237,6 +341,7 @@ if ($tila == "" and !isset($jatka)) {
 				echo "</tr>";
 		}
 		echo "</table>";
+		echo '<br/><font class="error">'.$pakolliset_errors['vaurio_kohde'].'</font>';
 		echo "</td>";
 
 		$kaapelin_tyyppi = search_array_key_for_value_recursive($dynaamiset_kentat, 'selite', 'merkki');
@@ -257,12 +362,14 @@ if ($tila == "" and !isset($jatka)) {
 				echo "</tr>"; // Joka kolmanella rivillä break
 		}
 		echo "</table>";
+		echo '<br/><font class="error">'.$pakolliset_errors['vaurio_kohde_tyyppi'].'</font>';
 		echo "</td>";
 
 		echo "<td align='center'>";
 		echo t('Operaattorin tiketti numero');
 		echo "<br/>";
 		echo "<input type='text' name='takuunumero' value='{$srow['takuunumero']}' readonly />";
+		echo '<br/><font class="error">'.$pakolliset_errors['tikettinumero'].'</font>';
 		echo "</td>";
 
 		$kiireellisyys = search_array_key_for_value_recursive($dynaamiset_kentat, 'selite', 'prioriteetti');
@@ -283,6 +390,7 @@ if ($tila == "" and !isset($jatka)) {
 				echo "</tr>";
 		}
 		echo "</table>";
+		echo '<br/><font class="error">'.$pakolliset_errors['prioriteetti'].'</font>';
 		echo "</td>";
 
 		echo "</tr>";
@@ -290,6 +398,13 @@ if ($tila == "" and !isset($jatka)) {
 		echo "</table>";
 
 		echo "<table class='vauriopoytakirja_otsikko'>";
+
+		echo "<tr>";
+		echo "<th>".t('SAP-numero').":</th>";
+		echo "<td>";
+		echo "<input type='text' name='sap_numero' value='{$srow['sap_numero']}' />";
+		echo "</td>";
+		echo "</tr>";
 
 		echo "<tr>";
 		echo "<th>".t('Ilmoitettu poliisiviranoimaiselle').":</th>";
@@ -302,7 +417,8 @@ if ($tila == "" and !isset($jatka)) {
 			$checked1 = "";
 			$checked2 = "CHECKED";
 		}
-		echo "<input type='radio' name='kotipuh' {$checked1} /> ".t('Kyllä')." <input type='radio' name='kotipuh' {$checked2} /> ".t('Ei');
+		echo "<input type='radio' name='kotipuh' value='1' {$checked1} /> ".t('Kyllä')." <input type='radio' name='kotipuh' value='0' {$checked2} /> ".t('Ei');
+		echo '<br/><font class="error">'.$pakolliset_errors['kotipuh'].'</font>';
 		echo "</td>";
 		echo "</tr>";
 
@@ -324,13 +440,16 @@ if ($tila == "" and !isset($jatka)) {
 		echo "<textarea class='vahinkotapahtuma_textarea' name='comments' />";
 		echo $srow['comments'];
 		echo "</textarea>";
+		if (!empty($pakolliset_errors['comments'])) {
+			echo '<br/><font class="error">'.$pakolliset_errors['comments'].'</font>';
+		}
 		echo "</td>";
 		echo "</tr>";
 
 		echo "</table>";
 
 		aiheuttaja($aiheuttaja);
-		aiheuttaja(array(), 'laskutusosoite');
+		aiheuttaja($aiheuttaja_laskutus, 'laskutusosoite');
 
 		echo "<table class='vauriopoytakirja_otsikko'>";
 
@@ -369,7 +488,8 @@ if ($tila == "" and !isset($jatka)) {
 			$checked1 = "";
 			$checked2 = "CHECKED";
 		}
-		echo "<input type='radio' name='hyvaksy' {$checked1}/> ".t('Kyllä')."<input type='radio' name='hyvaksy' {$checked2}/> ".t('Ei');
+		echo "<input type='radio' name='hyvaksy' value='1' {$checked1}/> ".t('Kyllä')."<input type='radio' name='hyvaksy' value='0' {$checked2}/> ".t('Ei');
+		echo '<br/><font class="error">'.$pakolliset_errors['hyvaksy'].'</font>';
 		echo "</td>";
 
 		echo "</tr>";
@@ -389,7 +509,8 @@ if ($tila == "" and !isset($jatka)) {
 			$checked1 = "";
 			$checked2 = "CHECKED";
 		}
-		echo "<input type='radio' name='mallivari' {$checked1}/> ".t('Kyllä')."<input type='radio' name='mallivari' {$checked2}/> ".t('Ei');
+		echo "<input type='radio' name='mallivari' value='1' {$checked1}/> ".t('Kyllä')."<input type='radio' name='mallivari' value='0' {$checked2}/> ".t('Ei');
+		echo '<br/><font class="error">'.$pakolliset_errors['mallivari'].'</font>';
 		echo "</td>";
 
 		echo "<td>";
@@ -432,8 +553,10 @@ if ($tila == "" and !isset($jatka)) {
 
 		echo "<td>";
 		echo "<input type='text' name='tilausyhteyshenkilo' value='{$srow['tilausyhteyshenkilo']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['nayttaja'].'</font>';
 		echo "<br/>";
 		echo "<input type='text' name='kuljetus' value='{$srow['kuljetus']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['kuljetus'].'</font>';
 		echo "</td>";
 
 		echo "</tr>";
@@ -451,6 +574,7 @@ if ($tila == "" and !isset($jatka)) {
 		echo "<textarea class='vahinkotapahtuma_textarea' name='sisviesti1'>";
 		echo $srow['sisviesti1'];
 		echo "</textarea>";
+		echo '<br/><font class="error">'.$pakolliset_errors['sisviesti1'].'</font>';
 		echo "</td>";
 		echo "</tr>";
 
@@ -460,12 +584,14 @@ if ($tila == "" and !isset($jatka)) {
 
 		echo "<td>";
 		echo "<input type='text' name='suorittaja' value='{$srow['suorittaja']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['suorittaja'].'</font>';
 		echo "</td>";
 
 		echo "<th>".t('Puhelin')."</th>";
 
 		echo "<td>";
 		echo "<input type='text' name='noutaja' value='{$srow['noutaja']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['suorittaja_puhelin'].'</font>';
 		echo "</td>";
 
 		echo "</tr>";
@@ -488,12 +614,14 @@ if ($tila == "" and !isset($jatka)) {
 
 		echo "<td>";
 		echo "<input type='text' name='huolitsija' value='{$srow['huolitsija']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['huolitsija'].'</font>';
 		echo "</td>";
 
 		echo "<th>".t('Puhelin')."</th>";
 
 		echo "<td>";
 		echo "<input type='text' name='jakelu' value='{$srow['jakelu']}' />";
+		echo '<br/><font class="error">'.$pakolliset_errors['jakelu'].'</font>';
 		echo "</td>";
 
 		echo "</tr>";
@@ -653,7 +781,7 @@ if (isset($jatka)) {
 	}
 
 	if ((int)$kukarow["kesken"] != 0) {
-		$poistui = date('Y-m-d', strtotime($poistui_paiva)).' '.$poistui_aika;
+		$tyo_alku = date('Y-m-d', strtotime($tyo_alku_paiva)).' '.$tyo_alku_aika;
 		$valmis = date('Y-m-d', strtotime($valmis_paiva)).' '.$valmis_aika;
 
 		if ($kotipuh != '') {
@@ -745,8 +873,8 @@ if (isset($jatka)) {
 					tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
 					luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
 					valmis			= '$valmis',
-					poistui			= '$poistui',
-					vpk_valmis		= '$vpk_valmis',
+					tyo_alku			= '$tyo_alku',
+					tyo_loppu		= '$tyo_loppu',
 					komm1 			= '$komm1',
 					komm2 			= '$komm2',
 					suorittaja 		= '$suorittaja',
@@ -758,6 +886,7 @@ if (isset($jatka)) {
 					tilno			= '$tilno',
 					vikakoodi		= '$vikakoodi',
 					takuunumero		= '$takuunumero',
+					sap_numero		= '$sap_numero',
 					tyokoodi		= '$tyokoodi',
 					hyvaksy			= '$hyvaksy',
 					lisakuluprosentti = '{$yhtiorow['lisakuluprosentti']}',
@@ -843,6 +972,8 @@ function asiakkaan_valinta_formi() {
 }
 
 function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
+	global $pakolliset_errors;
+
 	if ($tyyppi == 'aiheuttaja') {
 		$otsikko = t('Aiheuttaja');
 		$prefix = "";
@@ -875,6 +1006,9 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	echo "<td>";
 	echo "<input type='text' name='{$prefix}nimi' value='{$params['nimi']}' />";
+	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['nimi'])) {
+		echo '<br/><font class="error">'.$pakolliset_errors['nimi'].'</font>';
+	}
 	echo "</td>";
 
 	echo "<td>";
@@ -883,6 +1017,9 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	echo "<td>";
 	echo "<input type='text' name='{$prefix}puhelin' value='{$params['puhelin']}' />";
+	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['puhelin'])) {
+		echo '<br/><font class="error">'.$pakolliset_errors['puhelin'].'</font>';
+	}
 	echo "</td>";
 	echo "</tr>";
 
@@ -893,6 +1030,9 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	echo "<td>";
 	echo "<input type='text' name='{$prefix}osoite' value='{$params['osoite']}' />";
+	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['osoite'])) {
+		echo '<br/><font class="error">'.$pakolliset_errors['osoite'].'</font>';
+	}
 	echo "</td>";
 
 	echo "<td>";
@@ -901,6 +1041,9 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	echo "<td>";
 	echo "<input type='text' name='{$prefix}gsm' value='{$params['gsm']}' />";
+	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['gsm'])) {
+		echo '<br/><font class="error">'.$pakolliset_errors['gsm'].'</font>';
+	}
 	echo "</td>";
 	echo "</tr>";
 
@@ -910,7 +1053,10 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}postilokero' />";
+	echo "<input type='text' name='{$prefix}nimitark' value='{$params['nimitark']}'/>";
+	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['postilokero'])) {
+		echo '<br/><font class="error">'.$pakolliset_errors['postilokero'].'</font>';
+	}
 	echo "</td>";
 
 	echo "<td>";
@@ -919,6 +1065,9 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	echo "<td>";
 	echo "<input type='text' name='{$prefix}ytunnus' value='{$params['ytunnus']}' />";
+	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['ytunnus'])) {
+		echo '<br/><font class="error">'.$pakolliset_errors['ytunnus'].'</font>';
+	}
 	echo "</td>";
 	echo "</tr>";
 
@@ -929,6 +1078,9 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	echo "<td>";
 	echo "<input type='text' name='{$prefix}postino' value='{$params['postino']}' />";
+	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['postino'])) {
+		echo '<br/><font class="error">'.$pakolliset_errors['postino'].'</font>';
+	}
 	echo "</td>";
 
 	echo "<td>";
@@ -937,6 +1089,9 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	echo "<td>";
 	echo "<input type='text' name='{$prefix}postitp' value='{$params['postitp']}' />";
+	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['postitp'])) {
+		echo '<br/><font class="error">'.$pakolliset_errors['postitp'].'</font>';
+	}
 	echo "</td>";
 	echo "</tr>";
 

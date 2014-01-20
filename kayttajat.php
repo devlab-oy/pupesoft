@@ -273,6 +273,7 @@
 			$extranet 						= $monta['extranet'];
 			$hyvaksyja 						= $monta['hyvaksyja'];
 			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
+			$naytetaan_var_tilauksella		= $monta['naytetaan_var_tilauksella'];
 			$naytetaan_asiakashinta			= $monta['naytetaan_asiakashinta'];
 			$naytetaan_tuotteet				= $monta['naytetaan_tuotteet'];
 			$naytetaan_tilaukset			= $monta['naytetaan_tilaukset'];
@@ -304,6 +305,10 @@
 
 			if (count($varasto) > 0) {
 				$varasto = implode(",", $varasto);
+			}
+
+			if (count($try) > 0) {
+				$try = implode(",", $try);
 			}
 
 			if (count($kassalipas_otto) > 0) {
@@ -342,6 +347,7 @@
 						myyja 							= '{$myyja}',
 						tuuraaja						= '{$tuuraaja}',
 						varasto 						= '{$varasto}',
+						try								= '{$try}',
 						oletus_varasto					= '{$oletus_varasto}',
 						oletus_ostovarasto				= '{$oletus_ostovarasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
@@ -364,6 +370,7 @@
 						toimipaikka						= '{$toimipaikka}',
 						mitatoi_tilauksia				= '{$mitatoi_tilauksia}',
 						naytetaan_katteet_tilauksella 	= '{$naytetaan_katteet_tilauksella}',
+						naytetaan_var_tilauksella		= '{$naytetaan_var_tilauksella}',
 						naytetaan_asiakashinta 			= '{$naytetaan_asiakashinta}',
 						naytetaan_tuotteet				= '{$naytetaan_tuotteet}',
 						naytetaan_tilaukset				= '{$naytetaan_tilaukset}',
@@ -531,6 +538,10 @@
 			if (count($varasto) > 0) {
 				$varasto = implode(",", $varasto);
 			}
+			
+			if (count($try) > 0) {
+				$try = implode(",", $try);
+			}
 
 			if (count($kassalipas_otto) > 0) {
 				$kassalipas_otto = implode(",", $kassalipas_otto);
@@ -565,6 +576,7 @@
 						tuuraaja						= '{$tuuraaja}',
 						osasto							= '{$osasto}',
 						varasto 						= '{$varasto}',
+						try								= '{$try}',
 						oletus_varasto 					= '{$oletus_varasto}',
 						oletus_ostovarasto				= '{$oletus_ostovarasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
@@ -587,6 +599,7 @@
 						jyvitys							= '{$jyvitys}',
 						oletus_ohjelma 					= '{$oletus_ohjelma}',
 						naytetaan_katteet_tilauksella 	= '{$naytetaan_katteet_tilauksella}',
+						naytetaan_var_tilauksella		= '{$naytetaan_var_tilauksella}',
 						naytetaan_asiakashinta 			= '{$naytetaan_asiakashinta}',
 						naytetaan_tuotteet				= '{$naytetaan_tuotteet}',
 						naytetaan_tilaukset				= '{$naytetaan_tilaukset}',
@@ -1024,6 +1037,25 @@
 
 				echo "</td><td class='back'>",t("Ilman rajausta saa myyd‰ kaikista normaalivarastoista"),"</td></tr>";
 
+				echo "<tr><th align='left'>",t("Valitse tuoteryhm‰t, joista k‰ytt‰j‰ saa myyd‰"),":</td>";
+				echo "<td>";
+
+				$query  = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'TRY'";
+				$tryres = pupe_query($query);
+
+				$try_array = explode(",", $krow["try"]);
+
+				while ($tryrow = mysql_fetch_assoc($tryres)) {
+					$sel = $eri = '';
+					if (in_array($tryrow['tunnus'], $try_array)) $sel = 'CHECKED';
+					echo "<input type='checkbox' name='try[]' value='{$tryrow['selite']}' {$sel}> {$tryrow['selitetark']} {$eri}<br>";
+				}
+
+				echo "</td><td class='back'>",t("Ilman rajausta saa myyd‰ kaikista tuoteryhmist‰"),"</td></tr>";
+
 				if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] != '') {
 					echo "<tr><th align='left'>",t("Oletus pakkaamo"),":</td>";
 					echo "<td><select name='oletus_pakkaamo'><option value=''>",t("Ei pakkaamoa"),"</option>";
@@ -1328,6 +1360,12 @@
 							<option value='Y' {$sel2}>",t("Kate n‰ytet‰‰n"),"</option>
 							<option value='N' {$sel3}>",t("Katetta ei n‰ytet‰"),"</option>
 							<option value='B' {$sel4}>",t("Bruttokate n‰ytet‰‰n tilauksentekovaiheessa ja tuotekyselyss‰"),"</option>
+							</select></td></tr>";
+
+					echo "<tr><th align='left'>",t("N‰ytet‰‰n var myyntitilauksella"),":</th>
+							<td><select name='naytetaan_var_tilauksella'>
+							<option value=''  {$sel1}>",t("Kyll‰"),"</option>
+							<option value='E' {$sel2}>",t("Ei"),"</option>
 							</select></td></tr>";
 
 					echo "<tr><th align='left'>",t("Lomaoikeus"),":</th>

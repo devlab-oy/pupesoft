@@ -33,6 +33,45 @@ enable_ajax();
 
 echo "<font class='head'>".t("Vauriopöytäkirja")."</font><hr>";
 
+//Nämä requestit tulee tilaus_myynti.php puolelta
+if ($tee == 'siirra_tarkastajalle') {
+	$query = "	UPDATE tyomaarays
+				SET tyostatus = 2
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$tyomaarays_tunnus}'";
+	pupe_query($query);
+	unset($tee);
+	unset($tyomaarays_tunnus);
+}
+else if ($tee == 'anna_laskutuslupa') {
+	$query = "	UPDATE tyomaarays
+				SET tyostatus = 3
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$tyomaarays_tunnus}'";
+	pupe_query($query);
+	unset($tee);
+	unset($tyomaarays_tunnus);
+}
+else if ($tee == 'siirra_urakoitsijalle') {
+	$query = "	UPDATE tyomaarays
+				SET tyostatus = 1
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$tyomaarays_tunnus}'";
+	pupe_query($query);
+	unset($tee);
+	unset($tyomaarays_tunnus);
+}
+else if ($tee == 'merkitse_maksetuksi') {
+	$query = "	UPDATE tyomaarays
+				SET tyostatus = 4
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$tyomaarays_tunnus}'";
+	pupe_query($query);
+	unset($tee);
+	unset($tyomaarays_tunnus);
+}
+
+
 $request = array(
 	'toim'					 => $toim,
 	'action'				 => $action,
@@ -90,6 +129,7 @@ function echo_vauriopoytakirjat($request) {
 
 	echo "<thead>";
 	echo "<tr>";
+	echo "<th>".t('SAP-numero')."</th>";
 	echo "<th>".t('Tapahtumapaikka')."</th>";
 	echo "<th>".t('Verkostoalue')."</th>";
 	echo "<th>".t('TLA')."</th>";
@@ -102,6 +142,10 @@ function echo_vauriopoytakirjat($request) {
 	echo "<tbody>";
 	foreach ($request['vauriopoytakirjat'] as $vauriopoytakirja) {
 		echo "<tr>";
+
+		echo "<td>";
+		echo $vauriopoytakirja['sap_numero'];
+		echo "</td>";
 
 		echo "<td>";
 		echo "</td>";
@@ -129,19 +173,25 @@ function echo_vauriopoytakirjat($request) {
 		echo "</td>";
 
 		echo "<td class='back' nowrap>";
-		echo "<form method='POST' action='../tilauskasittely/tilaus_myynti.php' />";
-		echo "<input type='hidden' name='lopetus' 	 value='{$lopetus}' />";
-		echo "<input type='hidden' name='mista'		 value='vauriopoytakirja' />";
-		echo "<input type='hidden' name='toim'		 value='VAURIOPOYTAKIRJA' />";
-		echo "<input type='hidden' name='orig_tila'	 value='{$vauriopoytakirja["tila"]}' />";
-		echo "<input type='hidden' name='orig_alatila' value='{$vauriopoytakirja["alatila"]}' />";
+		echo '<form method="post" action="http://localhost/~joonas/pupesoft/tilauskasittely/tilaus_myynti.php">';
 		echo "<input type='hidden' name='tilausnumero' value='{$vauriopoytakirja['tunnus']}' />";
 
-		echo "<input type='submit' value='".t('Valitse')."' >";
-		echo "</form>";
+		echo '<input type="hidden" name="mista" value="vauriopoytakirja">';
+		echo '<input type="hidden" name="tee" value="OTSIK">';
+		echo '<input type="hidden" name="toim" value="VAURIOPOYTAKIRJA">';
+		echo "<input type='hidden' name='lopetus' 	 value='{$lopetus}' />";
+		//echo '<input type="hidden" name="lopetus" value="http://localhost/~joonas/pupesoft/tyomaarays/vauriopoytakirja.php////toim=tarkastaja//action=hae_vauriopoytakirjat//tilausnumero=//tunnus=//vauriokohteen_osoite=//asiakkaan_nimi=//urakoitsija=//vauriopoytakirjan_tila=//selvityksen_antaja=">';
+		echo '<input type="hidden" name="ruutulimit" value="">';
+		echo '<input type="hidden" name="projektilla" value="">';
+		echo '<input type="hidden" name="tiedot_laskulta" value="YES">';
+		echo '<input type="hidden" name="asiakasid" value="">';
+		echo '<input type="hidden" name="tyojono" value="">';
+		echo "<input type='hidden' name='orig_tila'	 value='{$vauriopoytakirja["tila"]}' />";
+		echo "<input type='hidden' name='orig_alatila' value='{$vauriopoytakirja["alatila"]}' />";
+		echo '<input type="submit" accesskey="m" value="'.t('Valitse').'">';
+		echo '</form>';
 		echo "</td>";
 
-		$pask = $vauriopoytakirja['takuunumero'];
 		echo "<td class='back' nowrap>";
 		echo "<form method='POST' action='' />";
 		echo "<input type='hidden' name='action' value='generoi_excel' />";
@@ -181,12 +231,22 @@ function hae_vauriopöytäkirjat($request) {
 		$tyomaarays_where .= "	AND ( lasku.ohjausmerkki LIKE '%{$request['vauriokohteen_osoite']}%' OR lasku.kohde LIKE '%{$request['vauriokohteen_osoite']}%' )";
 	}
 
-	if ($request['toim'] == 'asentaja') {
+	if ($request['toim'] == 'urakoitsija') {
 		$tyomaarays_where .= "	AND tyomaarays.tyostatus = '1'";
 	}
 
 	if ($request['action'] == 'generoi_excel') {
 		$tyomaarays_where .= "	AND tyomaarays.otunnus = '{$request['tunnus']}'";
+	}
+
+	if (!empty($kukarow['try'])) {
+		$tuoteryhmat_result = t_avainsana('TRY', '', "AND selite IN ({$kukarow['try']})");
+		$tuoteryhmat = array();
+		while ($tuoteryhma = mysql_fetch_assoc($tuoteryhmat_result)) {
+			$tuoteryhmat[] = $tuoteryhma['selitetark_2'];
+		}
+
+		$tyomaarays_where .= "	AND tyomaarays.suorittaja IN ('".implode("','", $tuoteryhmat)."')";
 	}
 
 	$query = "	SELECT tyomaarays.*,
@@ -397,9 +457,9 @@ function generoi_custom_excel($request) {
 function excel_otsikko(&$xls, &$excelrivi, &$excelsarake, $request) {
 	global $kukarow, $yhtiorow, $bold;
 
-	$shiit = $request['tulostettava_vauriopoytakirja']['poistui'];
+	$shiit = $request['tulostettava_vauriopoytakirja']['tyo_alku'];
 	$xls->write($excelrivi, $excelsarake++, t('Työ alkoi'), $bold);
-	$xls->write($excelrivi, $excelsarake++, date('d.m.Y H:i:s', strtotime($request['tulostettava_vauriopoytakirja']['poistui'])));
+	$xls->write($excelrivi, $excelsarake++, date('d.m.Y H:i:s', strtotime($request['tulostettava_vauriopoytakirja']['tyo_alku'])));
 	$xls->write($excelrivi, $excelsarake++, t('Työ päättyi'), $bold);
 	$xls->write($excelrivi, $excelsarake, date('d.m.Y H:i:s', strtotime($request['tulostettava_vauriopoytakirja']['valmis'])));
 
@@ -470,7 +530,7 @@ function excel_aiheuttajat(&$xls, &$excelrivi, &$excelsarake, $request) {
 	$xls->write($excelrivi, $excelsarake, t('Aiheuttaja').':', $bold);
 	$excelsarake = $excelsarake + 2;
 	if ($request['tulostettava_vauriopoytakirja']['nimi'] == '') {
-		
+
 		$xls->write($excelrivi, $excelsarake, t('Kyllä'));
 	}
 	else {

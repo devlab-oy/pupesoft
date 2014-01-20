@@ -65,7 +65,7 @@ if (!function_exists('tyomaarays_palautusvarmuus')) {
 	 * Jos palautus on alle 7 päivässä niin palautusvarmuus on 100%
 	 * muuten prosentti lasketaan kaavalla 7 / palautus-päivät.
 	 *
-	 * @param int		$palautus_pvm		Päivien lukumäärä (vpk_valmis-häiriö_päättyi)
+	 * @param int		$palautus_pvm		Päivien lukumäärä (tyo_loppu-häiriö_päättyi)
 	 * @return float
 	 */
 	function tyomaarays_palautusvarmuus($palautus_pvm) {

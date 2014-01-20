@@ -2759,7 +2759,7 @@
 					}
 					// Laskennallinen kenttä
 					elseif ($kentta == "palautusvarmuus") {
-						$_paivat = (strtotime($srow['vpk_valmis']) - strtotime($srow['poistui'])) / 3600 / 24;
+						$_paivat = (strtotime($srow['tyo_loppu']) - strtotime($srow['tyo_alku'])) / 3600 / 24;
 						echo "<td>$al_row[selitetark]</td>";
 						echo "<td>";
 						echo round(tyomaarays_palautusvarmuus($_paivat) * 100, 2) . " %";
@@ -4046,8 +4046,8 @@
 							tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
 							luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
 							valmis			= '$valmisvv-$valmiskk-$valmispp',
-							poistui			= '$poistuivv-$poistuikk-$poistuipp',
-							vpk_valmis		= '$vpk_valmisvv-$vpk_valmiskk-$vpk_valmispp',
+							tyo_alku			= '$tyo_alkuvv-$tyo_alkukk-$tyo_alkupp',
+							tyo_loppu		= '$tyo_loppuvv-$tyo_loppukk-$tyo_loppupp',
 							komm1 			= '$komm1',
 							komm2 			= '$komm2',
 							suorittaja 		= '$suorittaja',

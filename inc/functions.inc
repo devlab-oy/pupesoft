@@ -8705,6 +8705,10 @@ if (!function_exists("livesearch_tuotehaku")) {
 				}
 			}
 
+			if (!empty($kukarow['try'])) {
+				$kieltolisa .= tuoteryhma_rajaus();
+			}
+
 			// Näytetään poistuvat tuotteet mutta ei poistettuja
 			if ($yhtiorow['livetuotehaku_poistetut'] == 'X' or $yhtiorow['livetuotehaku_poistetut'] == 'Y') {
 				$naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
@@ -9564,10 +9568,22 @@ if (!function_exists('livesearch_vauriopoytakirjahaku')) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
+			$tyomaarays_where = "";
+			if (!empty($kukarow['try'])) {
+				$tuoteryhma_result = t_avainsana('TRY','', " AND selite IN ({$kukarow['try']})");
+				$tuoteryhmat = array();
+				while($tuoteryhma = mysql_fetch_assoc($tuoteryhma_result)) {
+					$tuoteryhmat[] = $tuoteryhma['selitetark_2'];
+				}
+
+				$tyomaarays_where = "	AND tyomaarays.suorittaja IN ('".implode("','", $tuoteryhmat)."')";
+			}
+
 			$query = "	SELECT DISTINCT takuunumero
 						FROM tyomaarays
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND takuunumero LIKE '%{$haku}%'
+						{$tyomaarays_where}
 						GROUP BY takuunumero";
 			$result = pupe_query($query);
 
@@ -25281,6 +25297,14 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 		}
 
 		return array($budjetoitu_myynti, $budjetin_peruste);
+	}
+}
+
+if (!function_exists('tuoteryhma_rajaus')) {
+	function tuoteryhma_rajaus() {
+		global $kukarow, $yhtiorow;
+
+		return "	AND tuote.try IN ({$kukarow['try']})";
 	}
 }
 

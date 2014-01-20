@@ -18,8 +18,8 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 			'viite'			 => 4, //teleliikennealue (TLA): char(3)
 			'suorittaja'	 => 5, //työalue: char(10) selvityksen antaja/urakoitsija
 			'jalleenmyyja'	 => 6, //verkostoalue: char(6)
-			'poistui'		 => 7, //aloitettupvm: char(12) työ alkoi
-			'vpk_valmis'	 => 8, //valmistumispvm (tekn. valmis, työ päättyi): char(12) vvvvkkpphhmi
+			'tyo_alku'		 => 7, //aloitettupvm: char(12) työ alkoi
+			'tyo_loppu'	 => 8, //valmistumispvm (tekn. valmis, työ päättyi): char(12) vvvvkkpphhmi
 			'komm1'			 => 10, //lisatieto: char(80) lisätietoja soneralla ja tapahtumapaikka
 		);
 		$required_fields = array(
@@ -64,7 +64,7 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
-				if (in_array($konvertoitu_header, array('valmis', 'poistui', 'vpk_valmis'))) {
+				if (in_array($konvertoitu_header, array('valmis', 'tyo_alku', 'tyo_loppu'))) {
 					$year = substr($rivi[$csv_header], 0, 4);
 					$month = substr($rivi[$csv_header], 4, 2);
 					$day = substr($rivi[$csv_header], 6, 2);
@@ -72,6 +72,9 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 					$minutes = substr($rivi[$csv_header], 10, 2);
 
 					$rivi_temp[$konvertoitu_header] = "$year-$month-$day $hour:$minutes:00";
+				}
+				else if ($konvertoitu_header == 'prioriteetti') {
+					$rivi_temp[$konvertoitu_header] = 'A'.$rivi[$csv_header];
 				}
 				else {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];

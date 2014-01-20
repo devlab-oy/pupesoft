@@ -71,6 +71,43 @@ else if ($tee == 'merkitse_maksetuksi') {
 	unset($tyomaarays_tunnus);
 }
 
+if (!isset($ppa)) {
+	$ppa = date('d');
+}
+if (!isset($kka)) {
+	$kka = date('m', strtotime('now - 1 month'));
+
+	//vuoden vaihde bugfix
+	if ($kka == 12) {
+		$vva = date('Y', strtotime('now - 1 year'));
+	}
+}
+if (!isset($vva)) {
+	$vva = date('Y');
+}
+if (!isset($ppl)) {
+	$ppl = date('d');
+}
+if (!isset($kkl)) {
+	$kkl = date('m');
+}
+if (!isset($vvl)) {
+	$vvl = date('Y');
+}
+
+if (checkdate($kka, $ppa, $vva)) {
+	$alku_paiva = date('Y-m-d', strtotime("{$vva}-{$kka}-{$ppa}"));
+}
+else {
+	$alku_paiva = date('Y-m-d', strtotime("now - 1 month"));
+}
+
+if (checkdate($kkl, $ppl, $vvl)) {
+	$loppu_paiva = date('Y-m-d', strtotime("{$vvl}-{$kkl}-{$ppl}"));
+}
+else {
+	$loppu_paiva = date('Y-m-d', strtotime("now"));
+}
 
 $request = array(
 	'toim'					 => $toim,
@@ -81,7 +118,15 @@ $request = array(
 	'asiakkaan_nimi'		 => $asiakkaan_nimi,
 	'urakoitsija'			 => $urakoitsija,
 	'vauriopoytakirjan_tila' => $vauriopoytakirjan_tila,
-	'selvityksen_antaja'	 => $selvityksen_antaja
+	'selvityksen_antaja'	 => $selvityksen_antaja,
+	'ppa'					 => $ppa,
+	'kka'					 => $kka,
+	'vva'					 => $vva,
+	'ppl'					 => $ppl,
+	'kkl'					 => $kkl,
+	'vvl'					 => $vvl,
+	'alku_paiva'			 => $alku_paiva,
+	'loppu_paiva'			 => $loppu_paiva,
 );
 
 $request['tyomaarays_statukset'] = hae_tyomaarayksen_statukset();
@@ -172,10 +217,13 @@ function echo_vauriopoytakirjat($request) {
 		echo $status['selitetark'];
 		echo "</td>";
 
+		$disabled = '';
+		if ($request['toim'] == 'urakoitija' and $vauriopoytakirja['tyostatus'] != 1) {
+			$disabled = 'disabled';
+		}
 		echo "<td class='back' nowrap>";
 		echo '<form method="post" action="http://localhost/~joonas/pupesoft/tilauskasittely/tilaus_myynti.php">';
 		echo "<input type='hidden' name='tilausnumero' value='{$vauriopoytakirja['tunnus']}' />";
-
 		echo '<input type="hidden" name="mista" value="vauriopoytakirja">';
 		echo '<input type="hidden" name="tee" value="OTSIK">';
 		echo '<input type="hidden" name="toim" value="VAURIOPOYTAKIRJA">';
@@ -188,7 +236,7 @@ function echo_vauriopoytakirjat($request) {
 		echo '<input type="hidden" name="tyojono" value="">';
 		echo "<input type='hidden' name='orig_tila'	 value='{$vauriopoytakirja["tila"]}' />";
 		echo "<input type='hidden' name='orig_alatila' value='{$vauriopoytakirja["alatila"]}' />";
-		echo '<input type="submit" accesskey="m" value="'.t('Valitse').'">';
+		echo '<input type="submit" accesskey="m" value="'.t('Valitse').'" '.$disabled.'>';
 		echo '</form>';
 		echo "</td>";
 
@@ -231,12 +279,12 @@ function hae_vauriopöytäkirjat($request) {
 		$tyomaarays_where .= "	AND ( lasku.ohjausmerkki LIKE '%{$request['vauriokohteen_osoite']}%' OR lasku.kohde LIKE '%{$request['vauriokohteen_osoite']}%' )";
 	}
 
-	if ($request['toim'] == 'urakoitsija') {
-		$tyomaarays_where .= "	AND tyomaarays.tyostatus = '1'";
-	}
-
 	if ($request['action'] == 'generoi_excel') {
 		$tyomaarays_where .= "	AND tyomaarays.otunnus = '{$request['tunnus']}'";
+	}
+
+	if (isset($request['alku_paiva']) and isset($request['loppu_paiva'])) {
+		$tyomaarays_where .= "  AND tyomaarays.luontiaika >= '".date('Y-m-d', strtotime($request['alku_paiva']))." 00:00:00' AND tyomaarays.luontiaika <= '".date('Y-m-d', strtotime($request['loppu_paiva']))." 23:59:59'";
 	}
 
 	if (!empty($kukarow['try'])) {
@@ -325,52 +373,70 @@ function echo_kayttoliittyma($request) {
 	echo "</td>";
 	echo "</tr>";
 
+	echo "<tr>";
+	echo "<th>".t('Vauriokohteen osoite')."/".t('kunta')."</th>";
+	echo "<td>";
+	echo "<input type='text' name='vauriokohteen_osoite' value='{$request['vauriokohteen_osoite']}' />";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Asiakkaan nimi')."</th>";
+	echo "<td>";
+	echo "<input type='text' name='asiakkaan_nimi' value='{$request['asiakkaan_nimi']}' />";
+	echo "</td>";
+	echo "</tr>";
+
 	if ($request['toim'] == 'tarkastaja') {
-		echo "<tr>";
-		echo "<th>".t('Vauriokohteen osoite')."/".t('kunta')."</th>";
-		echo "<td>";
-		echo "<input type='text' name='vauriokohteen_osoite' value='{$request['vauriokohteen_osoite']}' />";
-		echo "</td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th>".t('Asiakkaan nimi')."</th>";
-		echo "<td>";
-		echo "<input type='text' name='asiakkaan_nimi' value='{$request['asiakkaan_nimi']}' />";
-		echo "</td>";
-		echo "</tr>";
-
 		echo "<tr>";
 		echo "<th>".t('Urakoitsija')."</th>";
 		echo "<td>";
 		echo "<input type='text' name='urakoitsija' value='{$request['urakoitsija']}' />";
 		echo "</td>";
 		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th>".t('Tila')."</th>";
-		echo "<td>";
-		echo "<select name='vauriopoytakirjan_tila'>";
-		echo "<option value=''>".t('Kaikki')."</option>";
-		$sel = "";
-		foreach ($request['tyomaarays_statukset'] as $tyomaarays_status) {
-			if ($request['vauriopoytakirjan_tila'] == $tyomaarays_status['selite']) {
-				$sel = "SELECTED";
-			}
-			echo "<option value='{$tyomaarays_status['selite']}' {$sel}>{$tyomaarays_status['selitetark']}</option>";
-			$sel = "";
-		}
-		echo "</select>";
-		echo "</td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th>".t('Selvityksen_antaja')."</th>";
-		echo "<td>";
-		echo "<input type='text' name='selvityksen_antaja' value='{$request['selvityksen_antaja']}' />";
-		echo "</td>";
-		echo "</tr>";
 	}
+
+	echo "<tr>";
+	echo "<th>".t('Tila')."</th>";
+	echo "<td>";
+	echo "<select name='vauriopoytakirjan_tila'>";
+	echo "<option value=''>".t('Kaikki')."</option>";
+	$sel = "";
+	foreach ($request['tyomaarays_statukset'] as $tyomaarays_status) {
+		if ($request['vauriopoytakirjan_tila'] == $tyomaarays_status['selite']) {
+			$sel = "SELECTED";
+		}
+		echo "<option value='{$tyomaarays_status['selite']}' {$sel}>{$tyomaarays_status['selitetark']}</option>";
+		$sel = "";
+	}
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Selvityksen_antaja')."</th>";
+	echo "<td>";
+	echo "<input type='text' name='selvityksen_antaja' value='{$request['selvityksen_antaja']}' />";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Luontipäivä alkaen pp-kk-vvvv')."</th>";
+	echo "<td>";
+	echo "<input type='text' name='ppa' value='{$request['ppa']}' size='3' />";
+	echo "<input type='text' name='kka' value='{$request['kka']}' size='3'/>";
+	echo "<input type='text' name='vva' value='{$request['vva']}' size='5'/>";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Luontipäivä loppuen pp-kk-vvvv')."</th>";
+	echo "<td>";
+	echo "<input type='text' name='ppl' value='{$request['ppl']}' size='3' />";
+	echo "<input type='text' name='kkl' value='{$request['kkl']}' size='3'/>";
+	echo "<input type='text' name='vvl' value='{$request['vvl']}' size='5'/>";
+	echo "</td>";
+	echo "</tr>";
 
 	echo "</table>";
 

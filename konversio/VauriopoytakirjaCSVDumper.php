@@ -102,8 +102,7 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 		$progress_bar->initialize(count($this->rivit));
 		$this->kukarow['kesken'] = 0;
 		foreach ($this->rivit as $rivi) {
-			//@TODO työmääräykset liitetään toistaiseksi kaato-asiakkaalle. muuta tämä. aineistossa tulee vahingon aiheuttaja
-			$asiakas = hae_asiakas(100);
+			$asiakas = hae_asiakas(104);
 			$lasku_tunnus = luo_myyntitilausotsikko('TYOMAARAYS', $asiakas['tunnus']);
 
 			$query = "	UPDATE {$this->table}\nSET ";

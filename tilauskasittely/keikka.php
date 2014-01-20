@@ -374,7 +374,7 @@ if ($toiminto == "kohdista") {
 		unset($rivitunnus);
 	}
 
-	require('ostotilausten_rivien_kohdistus.inc');
+	require('ostotilausten_rivien_kohdistus_new.inc');
 }
 
 // Haku

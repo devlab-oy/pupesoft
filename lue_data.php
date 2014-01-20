@@ -361,7 +361,6 @@ if ($kasitellaan_tiedosto) {
 		$chk_toim_tuoteno = $chk_ytunnus = "x";
 
 		foreach ($taulunotsikot["tuotteen_toimittajat_tuotenumerot"] as $key => $column) {
-
 			if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
 			if ($column == "YTUNNUS") $chk_ytunnus = $key;
 		}
@@ -971,6 +970,49 @@ if ($kasitellaan_tiedosto) {
 						$valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
 					}
 				}
+				elseif ($table_mysql == 'tuotteen_toimittajat' and $taulunotsikot[$taulu][$j] == 'LIITOSTUNNUS') {
+					if (isset($toimittajavalinta) and $toimittajavalinta == 3) {
+						$tpque = "	SELECT tunnus
+									FROM toimi
+									WHERE yhtio	       = '{$kukarow['yhtio']}'
+									AND toimittajanro  = '{$taulunrivit[$taulu][$eriviindex][$j]}'
+									AND toimittajanro != ''
+									AND tyyppi != 'P'";
+						$tpres = pupe_query($tpque);
+					}
+					elseif (isset($toimittajavalinta) and $toimittajavalinta == 2) {
+						$tpque = "	SELECT tunnus
+									FROM toimi
+									WHERE yhtio	 = '{$kukarow['yhtio']}'
+									AND ytunnus  = '{$taulunrivit[$taulu][$eriviindex][$j]}'
+									AND ytunnus != ''
+									AND tyyppi  != 'P'";
+						$tpres = pupe_query($tpque);
+					}
+					else {
+						$tpque = "	SELECT tunnus
+									FROM toimi
+									WHERE yhtio	= '{$kukarow['yhtio']}'
+									AND tunnus	= '{$taulunrivit[$taulu][$eriviindex][$j]}'
+									AND tyyppi != 'P'";
+						$tpres = pupe_query($tpque);
+					}
+
+					if (mysql_num_rows($tpres) != 1) {
+						lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$j]}' ".t("ei löydy! Tai samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen. Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>");
+						$tila = 'ohita';
+					}
+					else {
+						$tpttrow = mysql_fetch_array($tpres);
+
+						// Tarvitaan tarkista.inc failissa
+						$toimi_liitostunnus = $tpttrow["tunnus"];
+
+						$taulunrivit[$taulu][$eriviindex][$j] = $tpttrow["tunnus"];
+
+						$valinta .= " and {$taulunotsikot[$taulu][$j]} = '$tpttrow[tunnus]' ";
+					}
+				}				
 				else {
 					$valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
 				}
@@ -1398,75 +1440,6 @@ if ($kasitellaan_tiedosto) {
 							// jos ollaan mulkkaamassa RU ni tehdään utf-8 -> latin-1 konversio FI kentällä
 							 if (in_array("RU", $taulunotsikot[$taulu])) {
 								$taulunrivit[$taulu][$eriviindex][$r] = iconv("UTF-8", "ISO-8859-1", $taulunrivit[$taulu][$eriviindex][$r]);
-							}
-						}
-
-						// tehdään riville oikeellisuustsekkejä
-						if ($table_mysql == 'tuotteen_toimittajat' and $otsikko == 'TOIMITTAJA' and !in_array("LIITOSTUNNUS", $taulunotsikot[$taulu])) {
-
-							$tpque = "	SELECT tunnus
-										from toimi
-										where yhtio	= '{$kukarow['yhtio']}'
-										and ytunnus	= '{$taulunrivit[$taulu][$eriviindex][$r]}'
-										and tyyppi != 'P'";
-							$tpres = pupe_query($tpque);
-
-							if (mysql_num_rows($tpres) != 1) {
-								$tpque = "	SELECT tunnus
-											from toimi
-											where yhtio	= '{$kukarow['yhtio']}'
-											and ovttunnus = '{$taulunrivit[$taulu][$eriviindex][$r]}'
-											and ovttunnus != ''
-											and tyyppi != 'P'";
-								$tpres = pupe_query($tpque);
-							}
-
-							if (mysql_num_rows($tpres) != 1) {
-								$tpque = "	SELECT tunnus
-											from toimi
-											where yhtio	= '{$kukarow['yhtio']}'
-											and toimittajanro = '{$taulunrivit[$taulu][$eriviindex][$r]}'
-											and toimittajanro != ''
-											and tyyppi != 'P'";
-								$tpres = pupe_query($tpque);
-							}
-
-							if (mysql_num_rows($tpres) != 1) {
-								lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Tai samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen. Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>");
-								$hylkaa++; // ei päivitetä tätä riviä
-							}
-							else {
-								$tpttrow = mysql_fetch_array($tpres);
-
-								// Tarvitaan tarkista.inc failissa
-								$toimi_liitostunnus = $tpttrow["tunnus"];
-
-								if ($taulunrivit[$taulu][$eriviindex][$postoiminto] != 'POISTA') {
-									$query .= ", liitostunnus='$tpttrow[tunnus]' ";
-								}
-
-								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
-							}
-						}
-						elseif (($table_mysql == 'tuotteen_toimittajat' or $table_mysql == 'tuotteen_toimittajat_tuotenumerot') and $otsikko == 'LIITOSTUNNUS') {
-							$tpque = "	SELECT tunnus
-										from toimi
-										where yhtio	= '$kukarow[yhtio]'
-										and tunnus	= '{$taulunrivit[$taulu][$eriviindex][$r]}'
-										and tyyppi != 'P'";
-							$tpres = pupe_query($tpque);
-
-							if (mysql_num_rows($tpres) != 1) {
-								if ($table_mysql == 'tuotteen_toimittajat_tuotenumerot') lue_data_echo(t("Virhe rivillä").": {$rivilaskuri} ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TOIM_TUOTENO")." = {$toim_tuoteno}<br>");
-								else lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>");
-								$hylkaa++; // ei päivitetä tätä riviä
-							}
-							else {
-								$tpttrow = mysql_fetch_array($tpres);
-
-								// Tarvitaan tarkista.inc failissa
-								$toimi_liitostunnus = $tpttrow["tunnus"];
-								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 							}
 						}
 
@@ -2378,6 +2351,16 @@ if (!$cli and !isset($api_kentat)) {
 					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
 					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
 					<option value='3'>".t("Asiakas-sarakkeessa asiakkaan asiakasnumero")."</option>
+					</select></td>
+			</tr>";
+	}
+
+	if ($table == "tuotteen_toimittajat") {
+		echo "<tr><th>".t("Toimittajan valinta").":</th>
+					<td><select name='toimittajavalinta'>
+					<option value='1'>".t("Käytetään toimittajan tunnusta")."</option>
+					<option value='2'>".t("Käytetään toimittajan ytunnusta")."</option>
+					<option value='3'>".t("Käytetään toimittajan toimittajanumeroa")."</option>
 					</select></td>
 			</tr>";
 	}

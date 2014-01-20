@@ -371,8 +371,9 @@ else {
 			// Lis‰ksi jos kyseess‰ on joku muu kuin 25% ep‰kuranttiajo, pit‰‰ viimeisin ep‰kuranttipvm olla pienempi kuin t‰ysep‰kuranttisuuden alaraja pvm
  			if (($saapunut < $alaraja) and ($epaku1pv < $epa2raja or $tyyppi == '25')) {
 
-				$query = "	SELECT group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') toimittaja
+				$query = "	SELECT group_concat(distinct toimi.ytunnus separator '/') toimittaja
 							FROM tuotteen_toimittajat
+							JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 							and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'";
 				$toimittajares = mysql_query($query) or pupe_error($query);

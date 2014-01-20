@@ -228,7 +228,7 @@
 			}
 			else {
 				//toimittajalla ei ole toimittaja numeroa, sitä ei voida laittaa asn_sanomien toimittajaksi
-				echo "<font class='error'>".t("Toimittajalta puutttuu toimittaja numero").". ".t("Sitä ei voida laittaa asn_sanomien toimittajaksi")."</font>";
+				echo "<font class='error'>".t("Toimittajalta puuttuu toimittajanumero").". ".t("Sitä ei voida laittaa asn_sanomien toimittajaksi")."</font>";
 				echo "<br/>";
 				$tee = 'vaihdatoimittaja';
 				$tila = '';

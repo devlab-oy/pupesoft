@@ -1931,7 +1931,10 @@
 			$varastot_array = array();
 			$varastot_lisa_query = "";
 
-			if ($kukarow["varasto"] != "") {
+			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
+
+			}
+			elseif ($kukarow["varasto"] != "") {
 				$varastot_array = explode(",", $kukarow["varasto"]);
 				$varastot_lista = mysql_real_escape_string($kukarow["varasto"]);
 				$varastot_lisa_query = " and varastopaikat.tunnus in ($varastot_lista) ";

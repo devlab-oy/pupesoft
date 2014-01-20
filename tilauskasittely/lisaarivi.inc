@@ -60,6 +60,8 @@
 	if (!isset($rekisterinumero))	$rekisterinumero = "";
 	if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
 
+	$reklamaatiohyvitys = false;
+
 	if ($rekisterinumero == '') {
 		//Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.
 		//Käyttöliittymässä on 2 valintaa. input rekisterinumero ja dropdown jo_syotetty_rekisterinumero. Jos rekisterinumero on syötetty, yliajaa se dropdownin
@@ -2378,6 +2380,10 @@
 						elseif ($kpl < 0) {
 							$var 	= "";
 							$varattu = $kpl;
+
+							if ($toim == "REKLAMAATIO" and $laskurow['tilaustyyppi'] == 'U') {
+								$reklamaatiohyvitys = true;
+							}
 						}
 						// Normaalisti kaikki menee puutteeksi.
 						else {
@@ -2465,6 +2471,11 @@
 								$loydetytpaikat = TRUE;
 								break;
 							}
+						}
+
+						if (!$loydetytpaikat AND $reklamaatiohyvitys and $laskurow['varasto'] != 0) {
+
+							$loydetytpaikat = TRUE;
 						}
 					}
 

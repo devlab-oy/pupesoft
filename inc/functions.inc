@@ -11202,11 +11202,12 @@ if (!function_exists("lue_kurssit")) {
 			}
 
 			$query = "	UPDATE valuu SET
-						kurssi = round(1 / $kurssi, 9),
+						kurssi    = round(1 / $kurssi, 9),
 						muutospvm = now(),
-						muuttaja = '{$kukarow['kuka']}'
-						WHERE yhtio = '{$kukarow['yhtio']}' AND
-						nimi = '$valuutta'";
+						muuttaja  = '{$kukarow['kuka']}'
+						WHERE yhtio 		   = '{$kukarow['yhtio']}'
+						AND nimi 			   = '$valuutta'
+						AND automaattipaivitys = ''";
 			$result = pupe_query($query);
 
 			// tämä valuutta on nyt päivitetty!
@@ -11218,7 +11219,7 @@ if (!function_exists("lue_kurssit")) {
 
 			$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
 						VALUES ('$vastavaluutta', '$valuutta', round(1 / $kurssi, 9), '$kurssipvm')
-			  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
+	  					ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
 			$result = pupe_query($query);
 
 		}

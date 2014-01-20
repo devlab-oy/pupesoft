@@ -22,14 +22,15 @@
 		}
 		else {
 			$toim_tuoteno_tunnus = $tunnus; // otetaan tää talteen
-			$liitostunnus = $trow["liitostunnus"];
+			
+			$liitostunnus = $trow["liitostunnus"] > 0 ? $trow["liitostunnus"] : (int) $t[$i];
 
 			$query = "	SELECT *
 						from toimi
 						where yhtio = '$kukarow[yhtio]'
 						and tyyppi != 'P'
-						and tunnus = ".(int) $trow["liitostunnus"];
-			$sresult = mysql_query($query) or pupe_error($query);
+						and tunnus = '$liitostunnus'";
+			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) == 1) {
 				$srow = mysql_fetch_assoc($sresult);
@@ -47,7 +48,7 @@
 					FROM maat
 					WHERE nimi != ''
 					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi'>";
 
 		$ulos .= "<option value = '' ></option>";
@@ -69,7 +70,7 @@
 					FROM valuu
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi'>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -90,7 +91,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and laji = 'ALV'
 					ORDER BY selite+0, laji, jarjestys, selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi'>";
 
 		$ulos .= "<option value = '-1'>".t("Tuotteen oletus")."</option>";

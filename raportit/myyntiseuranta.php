@@ -2,6 +2,9 @@
 
 	ini_set("memory_limit", "5G");
 
+	// Ei käytetä pakkausta
+	$compression = FALSE;
+
 	// katsotaan tuleeko kaikki muuttujat REQUEST:ssa serialisoituna
 	if (isset($_REQUEST['kaikki_parametrit_serialisoituna'])) {
 

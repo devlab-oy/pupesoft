@@ -107,8 +107,8 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				$values .= "'0.00',";
 				break;
 			case "kate_korjattu":
-				$values .= "NULL,";
-				break;				
+				$values .= "0,";
+				break;
 			default:
 				$values .= "'".$jaettavalaskurow[mysql_field_name($jaettavalaskures, $i)]."',";
 		}

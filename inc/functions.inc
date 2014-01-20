@@ -24263,7 +24263,7 @@ if (!function_exists('paivita_ohjausmerkki')) {
 if (!function_exists("tsekit")) {
 	function tsekit($row, $kaikkivarastossayhteensa, $kaikkiliitettyyhteensa) {
 
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $rahti_ja_kulut;
 
 		$tsekit = array();
 
@@ -24285,9 +24285,9 @@ if (!function_exists("tsekit")) {
 		$eipaikkoja  	= 0;
 		$eituotteet  	= "";
 		$varastossaarvo = 0;
-		$rahti_ja_kulut = 0;
 		$liitettyarvo	= 0;
 		$uusiot 		= array();
+		if ($rahti_ja_kulut == '') $rahti_ja_kulut = 0;
 
 		while ($rivirow = mysql_fetch_assoc($tilres)) {
 			$query = "	SELECT *

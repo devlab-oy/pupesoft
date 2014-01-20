@@ -1285,7 +1285,24 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 		$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
 
-		if (isset($naytalaskelma) and $naytalaskelma != "") {
+		echo "<br><br><form method='post'>";
+
+		$naytalaskelma_pp = isset($naytalaskelma_pp) ? (int) $naytalaskelma_pp : date('d');
+		$naytalaskelma_kk = isset($naytalaskelma_kk) ? (int) $naytalaskelma_kk : date('m');
+		$naytalaskelma_vv = isset($naytalaskelma_vv) ? (int) $naytalaskelma_vv : date('Y');
+
+		echo "<input type='text' name='naytalaskelma_pp' value='{$naytalaskelma_pp}' size='3' />";
+		echo "<input type='text' name='naytalaskelma_kk' value='{$naytalaskelma_kk}' size='3' />";
+		echo "<input type='text' name='naytalaskelma_vv' value='{$naytalaskelma_vv}' size='5' />";
+
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+		echo "<input type='hidden' name='naytalaskelma' value='JOO'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
+		echo "<input type='submit' value='".t("Näytä varastonarvolaskelma")."'>";
+		echo "</form>";
+
+		if (isset($naytalaskelma) and $naytalaskelma != "" and checkdate($naytalaskelma_kk, $naytalaskelma_pp, $naytalaskelma_vv)) {
 			list (	$liitetty_lasku_viety_summa,
 					$liitetty_lasku_viety_summa_tuloutettu,
 					$ei_liitetty_lasku_viety_summa,
@@ -1307,7 +1324,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 					$ei_liitetty_lasku_osittain_ei_viety_summa,
 					$ei_liitetty_lasku_osittain_ei_viety_summa_tuloutettu,
 					$liitetty_lasku_ei_viety_summa_tuloutettu
-					) = hae_yhteenveto_tiedot($toimittajaid, $toimipaikka);
+					) = hae_yhteenveto_tiedot($toimittajaid, $toimipaikka, $naytalaskelma_pp, $naytalaskelma_kk, $naytalaskelma_vv);
 
 			$params = array(
 				'kaikkivarastossayhteensa'				 => $kaikkivarastossayhteensa,
@@ -1340,15 +1357,6 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				'liitetty_lasku_ei_viety_summa_tuloutettu' => $liitetty_lasku_ei_viety_summa_tuloutettu
 			);
 			echo_yhteenveto_table($params);
-		}
-		else {
-			echo "<br><br><form method='post'>";
-			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-			echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
-			echo "<input type='hidden' name='naytalaskelma' value='JOO'>";
-			echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
-			echo "<input type='submit' value='".t("Näytä varastonarvolaskelma")."'>";
-			echo "</form>";
 		}
 
 		// Rajaukset
@@ -1602,7 +1610,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 					WHERE lasku.yhtio 	  = '{$kukarow['yhtio']}'
 					and lasku.tila 		  = 'K'
 					and lasku.vanhatunnus = 0
-					AND ((lasku.alatila = '' AND lasku.mapvm = '0000-00-00' AND lasku.kohdistettu = '')
+					AND ((lasku.alatila = '' AND lasku.mapvm = '0000-00-00' AND lasku.kohdistettu IN ('','K'))
 						OR
 						(lasku.alatila = 'X' AND lasku.mapvm >= '{$vv}-{$kk}-{$pp}' AND lasku.kohdistettu = 'X'))
 					GROUP BY lasku.liitostunnus";

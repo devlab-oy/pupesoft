@@ -1610,6 +1610,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 					WHERE lasku.yhtio 	  = '{$kukarow['yhtio']}'
 					and lasku.tila 		  = 'K'
 					and lasku.vanhatunnus = 0
+					AND lasku.luontiaika >= '{$vv}-{$kk}-{$pp}'
 					{$toimipaikkalisa}
 					{$toimittaja_where}
 					AND ((lasku.alatila = '' AND lasku.mapvm = '0000-00-00' AND lasku.kohdistettu IN ('','K'))

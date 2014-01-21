@@ -2219,7 +2219,7 @@
 					</tr>";
 		}
 
-		if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $trow["h1time"] != '0000-00-00 00:00:00' and $keikrow["alatila"] != "X") {
+		if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2 or $kukarow['taso'] == 3) and $trow["h1time"] != '0000-00-00 00:00:00' and $keikrow["alatila"] != "X") {
 			echo "<form method='post'>
 					<input type = 'hidden' name='tila' value='nollaahyvak'>
 					<input type = 'hidden' name='tee' value='M'>

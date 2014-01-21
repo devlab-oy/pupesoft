@@ -132,12 +132,12 @@ if (isset($jatka)) {
 
 //tyomaarays.viite as tyomaarays_viite, selectoidaan erikseen koska resultista löytyy 2 viite kenttää: tyomaarays.viite ja lasku.viite. mysql driveri yliajaa tyomaarays.viiteen lasku.viitteellä
 //kts. n rivi. 2717 Dynaaminen osio
-$squery = "	SELECT tyomaarays.viite as tyomaarays_viite,
+$squery = "	SELECT asiakas.*,
+			tyomaarays.viite as tyomaarays_viite,
 			tyomaarays.*,
 			laskun_lisatiedot.*,
 			lasku.*,
-			lasku.hyvaksynnanmuutos as luokka,
-			asiakas.*
+			lasku.hyvaksynnanmuutos as luokka
 			FROM lasku
 			JOIN asiakas
 			ON ( asiakas.yhtio = lasku.yhtio
@@ -178,15 +178,15 @@ if ($tila == "" and !isset($jatka)) {
 			'ytunnus'	 => $srow['ytunnus'],
 		);
 		$aiheuttaja_laskutus = array(
-			'nimi'		 => $srow['nimi'],
-			'nimitark'	 => $srow['nimitark'],
-			'osoite'	 => $srow['osoite'],
-			'postino'	 => $srow['postino'],
-			'postitp'	 => $srow['postitp'],
-			'maa'		 => $srow['maa'],
-			'puhelin'	 => $srow['puhelin'],
-			'gsm'		 => $srow['gsm'],
-			'ytunnus'	 => $srow['ytunnus'],
+			'nimi'		 => $srow['laskutus_nimi'],
+			'nimitark'	 => $srow['laskutus_nimitark'],
+			'osoite'	 => $srow['laskutus_osoite'],
+			'postino'	 => $srow['laskutus_postino'],
+			'postitp'	 => $srow['laskutus_postitp'],
+			'maa'		 => $srow['laskutus_maa'],
+			'puhelin'	 => $srow['laskutus_puhelin'],
+			'gsm'		 => $srow['laskutus_gsm'],
+			'ytunnus'	 => $srow['laskutus_ytunnus'],
 		);
 
 
@@ -311,7 +311,6 @@ if ($tila == "" and !isset($jatka)) {
 		echo "</td>";
 
 		echo "<td>";
-		$a = $srow['kohde'];
 		echo "<input type='text' name='kohde' value='{$srow['kohde']}' />";
 		echo '<br/><font class="error">'.$pakolliset_errors['paikka_osoite'].'</font>';
 		echo "</td>";
@@ -583,7 +582,7 @@ if ($tila == "" and !isset($jatka)) {
 		echo "<th>".t('Selvityksen antaja')."</th>";
 
 		echo "<td>";
-		echo "<input type='text' name='suorittaja' value='{$srow['suorittaja']}' />";
+		echo "<input type='text' name='suorittaja' value='{$srow['suorittaja']}' readonly />";
 		echo '<br/><font class="error">'.$pakolliset_errors['suorittaja'].'</font>';
 		echo "</td>";
 
@@ -782,28 +781,7 @@ if (isset($jatka)) {
 
 	if ((int)$kukarow["kesken"] != 0) {
 		$tyo_alku = date('Y-m-d', strtotime($tyo_alku_paiva)).' '.$tyo_alku_aika;
-		$valmis = date('Y-m-d', strtotime($valmis_paiva)).' '.$valmis_aika;
-
-		if ($kotipuh != '') {
-			$kotipuh = 1;
-		}
-		else {
-			$kotipuh = 0;
-		}
-
-		if ($hyvaksy != '') {
-			$hyvaksy = 1;
-		}
-		else {
-			$hyvaksy = 0;
-		}
-
-		if ($mallivari != '') {
-			$mallivari = 1;
-		}
-		else {
-			$mallivari = 0;
-		}
+		$tyo_loppu = date('Y-m-d', strtotime($tyo_loppu_paiva)).' '.$tyo_loppu_aika;
 
 		if ($valmnro != '') {
 			$valmnro = 1;
@@ -873,12 +851,12 @@ if (isset($jatka)) {
 					tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
 					luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
 					valmis			= '$valmis',
-					tyo_alku			= '$tyo_alku',
+					tyo_alku		= '$tyo_alku',
 					tyo_loppu		= '$tyo_loppu',
 					komm1 			= '$komm1',
 					komm2 			= '$komm2',
 					suorittaja 		= '$suorittaja',
-					viite	 		= '$viite',
+					viite	 		= '$tyomaarays_viite',
 					prioriteetti	= '$prioriteetti',
 					jalleenmyyja 	= '$jalleenmyyja',
 					tehdas			= '$tehdas',

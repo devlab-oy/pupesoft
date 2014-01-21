@@ -222,7 +222,7 @@ function echo_vauriopoytakirjat($request) {
 			$disabled = 'disabled';
 		}
 		echo "<td class='back' nowrap>";
-		echo '<form method="post" action="http://localhost/~joonas/pupesoft/tilauskasittely/tilaus_myynti.php">';
+		echo '<form method="post" action="'.$palvelin2.'tilauskasittely/tilaus_myynti.php">';
 		echo "<input type='hidden' name='tilausnumero' value='{$vauriopoytakirja['tunnus']}' />";
 		echo '<input type="hidden" name="mista" value="vauriopoytakirja">';
 		echo '<input type="hidden" name="tee" value="OTSIK">';

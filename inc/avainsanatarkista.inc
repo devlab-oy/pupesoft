@@ -154,7 +154,8 @@ if(!function_exists("avainsanatarkista")) {
 				$query = "	SELECT *
 							FROM avainsana
 							WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-							AND selite = '{$tem_selite}'";
+							AND selite = '{$tem_selite}'
+							AND laji = '{$tem_laji}'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {

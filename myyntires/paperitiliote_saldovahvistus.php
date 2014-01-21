@@ -3,7 +3,7 @@
 require('pdflib/phppdflib.class.php');
 
 function hae_saldovahvistus_pdf($saldovahvistus) {
-	global $kukarow, $yhtiorow, $pdf, $kala, $sivu, $norm, $pieni, $kieli, $bold, $lask, $rectparam;
+	global $kukarow, $yhtiorow, $pdf, $kala, $sivu, $norm, $pieni, $kieli, $bold, $lask, $rectparam, $rivi_y_temp;
 
 	//PDF parametrit
 	$pdf = new pdffile;
@@ -33,6 +33,8 @@ function hae_saldovahvistus_pdf($saldovahvistus) {
 	$x[1] = 565;
 	$y[0] = $y[1] = $kala + 25;
 	$pdf->draw_line($x, $y, $firstpage, $rectparam);
+
+	$rivi_y_temp = $y[0] - 25;
 
 	foreach ($saldovahvistus['laskut'] as $row) {
 		$firstpage = rivi(1, $firstpage, $row, $saldovahvistus);
@@ -114,13 +116,13 @@ function alku($saldovahvistus) {
 }
 
 function rivi($tyyppi, $firstpage, $row, $saldovahvistus) {
-	global $pdf, $kala, $sivu, $lask, $norm, $pieni, $yhtiorow;
+	global $pdf, $kala, $sivu, $lask, $norm, $pieni, $yhtiorow, $rivi_y_temp;
 
 	if ($lask == 38) {
 		$sivu++;
 		loppu($firstpage, array());
 		$firstpage = alku($saldovahvistus);
-		$kala = 510;
+		$kala = $rivi_y_temp;
 		$lask = 1;
 	}
 

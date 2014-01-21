@@ -25806,7 +25806,7 @@ if (!function_exists('hae_kohdistamattomat_suoritukset')) {
 					WHERE suoritus.yhtio = '{$kukarow['yhtio']}'
 					AND (
 						suoritus.kohdpvm = '0000-00-00'
-						OR suoritus.maksupvm > '{$pvm}'
+						OR suoritus.kohdpvm > '{$pvm}'
 						)
 					AND suoritus.kirjpvm <= '{$pvm}'
 					AND suoritus.ltunnus  > 0

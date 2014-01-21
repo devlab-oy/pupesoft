@@ -474,12 +474,14 @@
 						// Kopiotulostuksen tulostetut otsikot
 						$kopiotulostuksen_otsikot[$rivi["otunnus"]] = $rivi["otunnus"];
 
-						// P‰ivitet‰‰n tilausket "tulostetaan alatilaan".
-						$query = "	UPDATE lasku
-									SET alatila  = 'BD'
-									WHERE tunnus = $rivi[otunnus]
-									AND yhtio = '$kukarow[yhtio]'";
-						$result = pupe_query($query);
+						if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !$unifaun_era_vainkollitarra) {
+							// P‰ivitet‰‰n tilausket "tulostetaan alatilaan".
+							$query = "	UPDATE lasku
+										SET alatila  = 'BD'
+										WHERE tunnus = $rivi[otunnus]
+										AND yhtio = '$kukarow[yhtio]'";
+							$result = pupe_query($query);
+						}
 					}
 
 					// laitetaan arrayseen

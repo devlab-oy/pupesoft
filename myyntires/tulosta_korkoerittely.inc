@@ -85,19 +85,15 @@
 		$kala = 620;
 
 		//Laskurivien otsikkotiedot
-		//otsikko
-		$pdf->draw_text(30, $kala+30, t("Laskut", $kieli), $firstpage, $bold);
-
-		//eka rivi
 		$pdf->draw_text(30,  $kala, t("Laskunumero", $kieli),		$firstpage, $pieni);
 		$pdf->draw_text(100, $kala, t("Päivämäärä", $kieli),		$firstpage, $pieni);
 		$pdf->draw_text(160, $kala, t("Eräpäivä", $kieli),			$firstpage, $pieni);
 		$pdf->draw_text(220, $kala, t("Maksettu", $kieli),			$firstpage, $pieni);
 		$pdf->draw_text(280, $kala, t("Myöhässä pv.", $kieli),		$firstpage, $pieni);
 		$pdf->draw_text(340, $kala, t("Viivästykorko-%", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(390, $kala, t("Laskun summa", $kieli),		$firstpage, $pieni);
+		$pdf->draw_text(410, $kala, t("Laskun summa", $kieli),		$firstpage, $pieni);
 		$pdf->draw_text(485, $kala, t("Korko", $kieli),				$firstpage, $pieni);
-		$pdf->draw_text(545, $kala, t("Yhteensä", $kieli),	$firstpage, $pieni);
+		$pdf->draw_text(535, $kala, t("Yhteensä", $kieli),	$firstpage, $pieni);
 
 		$kala -= 15;
 
@@ -122,7 +118,7 @@
 
 		$oikpos = $pdf->strlen($row["ika"], $norm);
 		$pdf->draw_text(300-$oikpos, $kala, $row["ika"],							$firstpage, $norm);
-		
+
 		$pdf->draw_text(340, $kala, $row["viikorkopros"],							$firstpage, $norm);
 
 		$oikpos = $pdf->strlen($row["summa"], $norm);

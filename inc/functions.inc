@@ -13421,7 +13421,7 @@ if (!function_exists("pupe_DataTables")) {
 
 						$('input[name=\"search_'+searchbox+'\"]').val(tun).keyup();
 					});
-					// MASSANAPPI
+					// JOS PAINETAAN MASSATULOUTUSNAPPIA
 					$('input[id^=\"massasubmitti\"]').live('click', function() {
 
 						var keijo = $(this).attr('id').substring(14);
@@ -13430,38 +13430,46 @@ if (!function_exists("pupe_DataTables")) {
 						var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+keijo).val());
 						var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+keijo).val());
 						var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+keijo).val());
+						var rivi_kpl 	= parseFloat($('#rivi_kpl_'+keijo).val().replace(',','.'));
 						var massatyyppi = document.getElementById('tyyppi_'+keijo).value;
 						var massakeraysvyohyke = document.getElementById('keraysvyohyke_'+keijo).value;
 						var massakaytettavyys = document.getElementById('kaytettavyys_'+keijo).value;
 						var massaterminaalialue = document.getElementById('terminaalialue_'+keijo).value;
-						var massajakokplmaara = parseInt(document.getElementById('massajakokplmaara_'+keijo).value);
+						var massajakokplmaara = parseFloat(document.getElementById('massajakokplmaara_'+keijo).value.replace(',','.'));
 						
-						console.log('massasubmitti_' + keijo);
-						console.log('massatyyppi=' + massatyyppi);
-						console.log('massakeraysvyohyke='+ massakeraysvyohyke);
-						console.log('massakaytettavyys=' +massakaytettavyys);
-						console.log('massaterminaalialue=' +massaterminaalialue);
-						console.log('massajakokplmaara=' + massajakokplmaara);
-						console.log('rivi_hinta_value=' +rivi_hinta_value);
-						console.log('rivi_kpl_alkuperainen=' +rivi_kpl_alkuperainen);
-						console.log('rivi_hinta_alkup=' +rivi_hinta_alkup);
-						console.log('alerivi_hinta_alkup=' +alerivi_hinta_alkup);
-						console.log('otunnus='+ otunnus);
+						var valid_params = true;
+						if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara)) {
+							valid_params = false;
+						}
+						if (massatyyppi.length == 0 || massakeraysvyohyke.length == 0 || massaterminaalialue.length == 0) {
+							valid_params = false;
+						}
+						
+						if (valid_params) {
+							var ajokerta = rivi_kpl_alkuperainen / massajakokplmaara;
+
+							for(var i=1;i<ajokerta;i++) {
+								console.log('AJOKERTA:' + i)
+								console.log('massasubmitti_' + keijo);
+								console.log('massatyyppi=' + massatyyppi);
+								console.log('massakeraysvyohyke='+ massakeraysvyohyke);
+								console.log('massakaytettavyys=' +massakaytettavyys);
+								console.log('massaterminaalialue=' +massaterminaalialue);
+								console.log('massajakokplmaara=' + massajakokplmaara);
+								console.log('rivi_hinta_value=' +rivi_hinta_value);
+								console.log('rivi_kpl_alkuperainen=' +rivi_kpl_alkuperainen);
+								console.log('rivi_hinta_alkup=' +rivi_hinta_alkup);
+								console.log('alerivi_hinta_alkup=' +alerivi_hinta_alkup);
+								console.log('rivikappale=' +rivi_kpl);
+								console.log('otunnus='+ otunnus);
+							}
+						}
+						else {
+							console.log('kaarlo');
+						}
+
 					});
-					/*$('input['id^=\"massasubmitti_\"]').live('click', function() {
 
-						// OTETAAN TARVITTAVAT TUNNUKSET JA MUUTTUJAT TALTEEN
-						//var tun 					= $(this).attr('id').substring(9);
-						//var otunnus 				= $('input[name=\"otunnus\"]').val();
-						//var rivi_hinta_value 		= parseFloat($('#rivi_hinta_'+tun).val());
-						//var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+tun).val());
-						//var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+tun).val());
-						//var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
-						//var kpl 					= parseFloat(this.value.replace(',','.'));
-						
-						console.log('keijo');
-
-					});*/
 					// JOS PAINETAAN 'TALLENNA SIVUN MUUTOKSET'-NAPPIA
 					$('#submit_tallenna').live('click', function() {
 
@@ -13475,7 +13483,10 @@ if (!function_exists("pupe_DataTables")) {
 								var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+tun).val());
 								var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
 								var kpl 					= parseFloat(this.value.replace(',','.'));
-
+								
+								kissa();
+								
+								function kissa() {
 								// JOS HINTA * KPL ON ENEMMÄN KUIN 10,2 DESIMAALIA, NIIN HERJATAAN
 								if ((rivi_hinta_value * kpl) > 9999999999.99) {
 									var virhe = '".t('VIRHE: liian iso loppusumma')."!';
@@ -13607,6 +13618,8 @@ if (!function_exists("pupe_DataTables")) {
 											}
 										);
 
+								}
+								//kissa
 								}
 							}
 						}).ajaxComplete(function(){

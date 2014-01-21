@@ -757,7 +757,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 			$kaikkivarastossayhteensa 		+= $row["varastossaarvo"];
 			$kaikkiliitettyyhteensa 		+= $row["kohdistettuarvo"];
-			$rahti_ja_kulut 				+= ($row["varastossaarvo"] - $row['varastoonvietyarvo']);
+			$rahti_ja_kulut 				+= ($row["varastoonvietyarvo"] - $row['varastossaarvo']);
 			$vaihtoomaisuuslaskujayhteensa  += $laskuja_row["vosumma"];
 			$kululaskujayhteensa 			+= $laskuja_row["kusumma"];
 			$vaihtoomaisuuslaskujayhteensa_kulut += $laskuja_row['vosumma_kulut'];
@@ -1603,8 +1603,8 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 		// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
 		$query = "	SELECT
 					group_concat(distinct lasku.laskunro SEPARATOR ', ') keikat,
-					round(sum(IF((tilausrivi.laskutettuaika < '{$vv}-{$kk}-{$pp}' AND tilausrivi.laskutettuaika != '0000-00-00' AND tilausrivi.kpl != 0), tilausrivi.rivihinta, 0)),2) varastossaarvo,
-					ROUND(SUM(IF((tilausrivi.laskutettuaika < '{$vv}-{$kk}-{$pp}' AND tilausrivi.laskutettuaika != '0000-00-00'), tilausrivi.kpl, 0) * tilausrivi.hinta * {$query_ale_lisa}), 2) varastoonvietyarvo,
+					round(sum(IF((tilausrivi.laskutettuaika <= '{$vv}-{$kk}-{$pp}' AND tilausrivi.laskutettuaika != '0000-00-00' AND tilausrivi.kpl != 0), tilausrivi.rivihinta, 0)),2) varastossaarvo,
+					ROUND(SUM(IF((tilausrivi.laskutettuaika <= '{$vv}-{$kk}-{$pp}' AND tilausrivi.laskutettuaika != '0000-00-00'), tilausrivi.kpl, 0) * tilausrivi.hinta * {$query_ale_lisa}), 2) varastoonvietyarvo,
 					round(sum((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa}),2) kohdistettuarvo
 					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
@@ -1751,10 +1751,11 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 						AND liitos.luontiaika <= '{$vv}-{$kk}-{$pp} 00:00:00'
 					WHERE  lasku.yhtio 	  = '{$kukarow['yhtio']}'
 					AND lasku.tila 		  = 'K'
-					AND ((lasku.alatila = '' AND lasku.mapvm = '0000-00-00' AND lasku.kohdistettu = '')
+					AND ((lasku.alatila = '' AND lasku.mapvm = '0000-00-00' AND lasku.kohdistettu in ('', 'K'))
 						OR
 						(lasku.alatila = 'X' AND lasku.mapvm >= '{$vv}-{$kk}-{$pp}' AND lasku.kohdistettu = 'X'))
 					AND lasku.vanhatunnus = 0
+					AND lasku.luontiaika <= '{$vv}-{$kk}-{$pp} 00:00:00'
 					{$toimipaikkalisa}
 					{$toimittaja_where}
 					GROUP BY 1,2,3,4";
@@ -1785,9 +1786,9 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 
 		if ($comp) {
 			$query = "	SELECT
-						sum(IF((laskutettuaika < '{$vv}-{$kk}-{$pp}' AND laskutettuaika != '0000-00-00'), kpl, 0) * hinta * {$query_ale_lisa}) viety,
-						sum(IF(laskutettuaika >= '{$vv}-{$kk}-{$pp}', kpl, IF(laskutettuaika = '0000-00-00', varattu, 0)) * hinta * {$query_ale_lisa}) ei_viety,
-						sum(rivihinta) tuloutettu
+						sum(IF((laskutettuaika <= '{$vv}-{$kk}-{$pp}' AND laskutettuaika != '0000-00-00'), kpl, 0) * hinta * {$query_ale_lisa}) viety,
+						sum(IF(laskutettuaika > '{$vv}-{$kk}-{$pp}', kpl, IF(laskutettuaika = '0000-00-00', varattu, 0)) * hinta * {$query_ale_lisa}) ei_viety,
+						sum(IF((laskutettuaika <= '{$vv}-{$kk}-{$pp}' AND laskutettuaika != '0000-00-00'), rivihinta, 0)) tuloutettu
 						FROM tilausrivi
 						WHERE yhtio 	= '{$kukarow['yhtio']}'
 						AND uusiotunnus = {$row['tunnus']}
@@ -1860,10 +1861,10 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
 				$liitetty_lasku_osittain_viety_summa += $tilausrivirow['viety'];
 				$liitetty_lasku_osittain_viety_summa_tuloutettu += $tilausrivirow['tuloutettu'];
 				$liitetty_lasku_osittain_ei_viety_summa += $tilausrivirow['ei_viety'];
-				$liitetty_lasku_osittain_ei_viety_summa_tuloutettu += $tilausrivirow['tuloutettu'];
+				#$liitetty_lasku_osittain_ei_viety_summa_tuloutettu += $tilausrivirow['tuloutettu'];
 
 				$laskut_osittain_viety += $laskujensummat;
-				$laskut_ei_viety_osittain += $laskujensummat;
+				#$laskut_ei_viety_osittain += $laskujensummat;
 			}
 		}
 	}

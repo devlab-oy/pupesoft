@@ -150,25 +150,13 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($tem_laji == "SALDOVAHVISTUS" and empty($tunnus)) {
-				$query = "	SELECT *
-							FROM avainsana
-							WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-							AND selite = '{$tem_selite}'
-							AND laji = '{$tem_laji}'";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) > 0) {
-					$virhe[$i] = t("Saldovahvistuksen nimi pitää olla uniikki");
-				}
-			}
-			else if ($tem_laji == "SALDOVAHVISTUS" and !empty($tunnus)) {
+			if ($tem_laji == "SALDOVAHVISTUS") {
 				$query = "	SELECT *
 							FROM avainsana
 							WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
 							AND selite = '{$tem_selite}'
 							AND laji = '{$tem_laji}'
-							AND tunnus != {$tunnus}";
+							AND tunnus != '{$tunnus}'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {

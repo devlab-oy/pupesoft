@@ -882,6 +882,32 @@ if (isset($jatka)) {
 		pupe_query($query);
 
 		$ylatila = 'A';
+
+		if ($insert) {
+			$query = "	INSERT INTO laskun_lisatiedot
+						SET laatija = '{$kukarow['kuka']}',
+						luontiaika = NOW(),";
+		}
+		else {
+			$query = "	UPDATE laskun_lisatiedot
+						SET ";
+		}
+
+		$query .= "	laskutus_nimi = '{$laskutus_nimi}',
+					laskutus_nimitark = '{$laskutus_nimitark}',
+					laskutus_osoite = '{$laskutus_osoite}',
+					laskutus_postino = '{$laskutus_postino}',
+					laskutus_postitp = '{$laskutus_postitp}',
+					laskutus_maa = '{$laskutus_maa}'";
+
+		if ($insert) {
+			$query .= " otunnus = '{$kukarow['kesken']}'";
+		}
+		else {
+			$query .= " WHERE otunnus = '{$kukarow['kesken']}'";
+		}
+
+		pupe_query($query);
 	}
 
 	$tee = "";

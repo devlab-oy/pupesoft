@@ -11264,7 +11264,9 @@ if (!function_exists("progress_bar")) {
 }
 
 if (!function_exists("pupesoft_cleanstring")) {
-	function pupesoft_cleanstring($string, $exclude = array()) {
+	function pupesoft_cleanstring($string, Array $exclude = array()) {
+
+		if (!is_string($string)) return "";
 
 		$illegal = array("\"","'","<",">","\\", ";");
 

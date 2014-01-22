@@ -22,7 +22,7 @@
 	if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_array($tuoteno_array) or $tuoteno != "" or $variaatio_tuoteno) and $ulos == "" and $rivitunnus == "") {
 		require ("syota_variaatiorivi.inc");
 	}
-	
+
 	if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
 		// Pikatilauksen syöttörivi
 		echo "<table><tr>$jarjlisa";
@@ -247,6 +247,7 @@
 			}
 
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
@@ -608,6 +609,7 @@
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
@@ -782,6 +784,7 @@
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";

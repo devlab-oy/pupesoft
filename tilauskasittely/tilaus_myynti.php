@@ -5304,9 +5304,9 @@ if ($tee == '') {
 			$tuoteperhe_kayty 			= '';
 			$edotunnus 					= 0;
 			$tuotekyslinkki				= "";
-			$tuotekyslinkkilisa			= "";			
+			$tuotekyslinkkilisa			= "";
 			$aleperustelisa 			= '';
-			
+
 			if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') {
 				$aleperustelisa = " or ale_peruste != ''";
 			}
@@ -5589,7 +5589,7 @@ if ($tee == '') {
 					}
 					else {
 						$pklisa = " and (tilausrivi.perheid = '$row[perheid]' or tilausrivi.perheid2 = '$row[perheid]')";
-					}										
+					}
 
 					$query = "	SELECT
 								sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
@@ -5602,9 +5602,7 @@ if ($tee == '') {
 								and tilausrivi.tyyppi != 'D'";
 					$pkres = pupe_query($query);
 					$pkrow = mysql_fetch_row($pkres);
-					
-					echo "$query<br>";
-					
+
 					if ($row["perheid2"] == -1) {
 						$query  = "	SELECT tuoteperhe.tunnus
 									FROM tuoteperhe
@@ -7059,10 +7057,10 @@ if ($tee == '') {
 						if ($row['vanha_otunnus'] != $tilausnumero) {
 							$font_color = "color='green'";
 						}
-						
+
 						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
-					
+
 					if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') {
 						if ($row['kommentti'] != '') echo "<br>";
 						echo t("Alennusperuste").": <font {$font_color} style='font-weight: bold;'>".$row["ale_peruste"]."</font><br>";

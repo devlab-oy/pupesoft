@@ -12,13 +12,15 @@
 		date_default_timezone_set('Europe/Helsinki');
 
 		// otetaan includepath aina rootista
-		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+		// vaihdetaan roottiin
+		chdir("..");
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 		ini_set("display_errors", 0);
 
 		// otetaan tietokanta connect
-		require("../inc/connect.inc");
-		require("../inc/functions.inc");
+		require("inc/connect.inc");
+		require("inc/functions.inc");
 
 		if (trim($argv[1]) == '') {
 			die ("Et antanut lähettävää yhtiötä!\n");
@@ -100,9 +102,13 @@
 		$myyntiera = (isset($argv[14]) and trim($argv[14]) != "") ? "X" : "";
 		$olliriveja = (isset($argv[15]) and trim($argv[15]) != "") ? (int) trim($argv[15]) : 20;
 
-		require ("monivalintalaatikot.inc");
+		require ("tilauskasittely/monivalintalaatikot.inc");
+
+		array_unshift($keraysvyohyke, 'default');
+		array_unshift($lahdekeraysvyohyke, 'default');
 
 		$generoi = "Tee siirtolista";
+		$tee = 'M';
 	}
 	else {
 		require ("../inc/parametrit.inc");
@@ -110,7 +116,7 @@
 		echo "<font class='head'>",t("Luo siirtolista tuotepaikkojen hälytysrajojen perusteella"),"</font><hr /><br />";
 	}
 
-	if (!isset($abcrajaus)) {
+	if (!isset($abcrajaus) or $abcrajaus == "") {
 		$abcrajaus = "";
 		$org_rajaus = "";
 	}
@@ -499,7 +505,7 @@
 				$tehtyriveja = 0;
 
 				// mennään aina varmasti alkuun
-				mysql_data_seek($resultti, 0);
+				if (mysql_num_rows($resultti) > 0) mysql_data_seek($resultti, 0);
 
 				while ($pairow = mysql_fetch_assoc($resultti)) {
 

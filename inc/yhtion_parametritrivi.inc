@@ -2641,6 +2641,21 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "naytetaanko_ale_peruste_tilausrivilla") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Aleperustetta ei n‰ytet‰ tilausrivill‰")."</option>";
+		$ulos .= "<option value = 'o' $sel[o]>".t("Aleperuste n‰ytet‰‰n tilausrivill‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "tilausvahvistus_jttoimituksista") {
 

@@ -19,7 +19,7 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 			'suorittaja'	 => 5, //työalue: char(10) selvityksen antaja/urakoitsija
 			'jalleenmyyja'	 => 6, //verkostoalue: char(6)
 			'tyo_alku'		 => 7, //aloitettupvm: char(12) työ alkoi
-			'tyo_loppu'	 => 8, //valmistumispvm (tekn. valmis, työ päättyi): char(12) vvvvkkpphhmi
+			'tyo_loppu'		 => 8, //valmistumispvm (tekn. valmis, työ päättyi): char(12) vvvvkkpphhmi
 			'komm1'			 => 10, //lisatieto: char(80) lisätietoja soneralla ja tapahtumapaikka
 		);
 		$required_fields = array(
@@ -102,7 +102,7 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 		$progress_bar->initialize(count($this->rivit));
 		$this->kukarow['kesken'] = 0;
 		foreach ($this->rivit as $rivi) {
-			$asiakas = hae_asiakas(104);
+			$asiakas = $this->hae_asiakas($rivi['suorittaja']);
 			$lasku_tunnus = luo_myyntitilausotsikko('TYOMAARAYS', $asiakas['tunnus']);
 
 			$query = "	UPDATE {$this->table}\nSET ";
@@ -120,8 +120,38 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 			pupe_query($query);
 
 			$this->kukarow['kesken'] = 0;
+
+			$query = "	UPDATE laskun_lisatiedot
+						SET laskutus_nimi = '',
+						laskutus_nimitark = '',
+						laskutus_osoite = '',
+						laskutus_postino = '',
+						laskutus_postitp = ''
+						WHERE yhtio = '{$this->kukarow['yhtio']}'
+						AND otunnus = {$lasku_tunnus}";
+			pupe_query($query);
+
+			$query = "	UPDATE lasku
+						SET toim_nimi = '',
+						toim_nimitark = '',
+						toim_osoite = '',
+						toim_postino = '',
+						toim_postitp = ''
+						WHERE yhtio = '{$this->kukarow['yhtio']}'
+						AND tunnus = {$lasku_tunnus}";
+			pupe_query($query);
 			$progress_bar->increase();
 		}
+	}
+
+	private function hae_asiakas($tyonantaja) {
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND tyonantaja = '{$tyonantaja}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
 	}
 
 }

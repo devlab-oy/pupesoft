@@ -8185,7 +8185,7 @@ if ($tee == '') {
 					</form></td>";
 		}
 
-		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA" and $toim_kuka == 'urakoitsija') {
+		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA" and ($toim_kuka == 'urakoitsija' or ($toim_kuka == 'tarkastaja' and $vauriopoytakirjan_tila == 1))) {
 			$lopetus_temp = lopetus($lopetus, '', true);
 
 			echo "	<td class='back' valign='top'>
@@ -8196,7 +8196,7 @@ if ($tee == '') {
 						</form>
 					</td>";
 		}
-		else if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA" and $toim_kuka == 'tarkastaja') {
+		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA" and $toim_kuka == 'tarkastaja') {
 			$lopetus_temp = lopetus($lopetus, '', true);
 
 			echo "	<td class='back' valign='top'>

@@ -1050,7 +1050,7 @@
 
 				while ($tryrow = mysql_fetch_assoc($tryres)) {
 					$sel = $eri = '';
-					if (in_array($tryrow['tunnus'], $try_array)) $sel = 'CHECKED';
+					if (in_array($tryrow['selite'], $try_array)) $sel = 'CHECKED';
 					echo "<input type='checkbox' name='try[]' value='{$tryrow['selite']}' {$sel}> {$tryrow['selitetark']} {$eri}<br>";
 				}
 

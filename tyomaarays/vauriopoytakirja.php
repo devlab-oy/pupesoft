@@ -224,11 +224,12 @@ function echo_vauriopoytakirjat($request) {
 		echo "<td class='back' nowrap>";
 		echo '<form method="post" action="'.$palvelin2.'tilauskasittely/tilaus_myynti.php">';
 		echo "<input type='hidden' name='tilausnumero' value='{$vauriopoytakirja['tunnus']}' />";
+		echo "<input type='hidden' name='vauriopoytakirjan_tila' value='{$vauriopoytakirja['tyostatus']}' />";
 		echo '<input type="hidden" name="mista" value="vauriopoytakirja">';
 		echo '<input type="hidden" name="tee" value="OTSIK">';
 		echo '<input type="hidden" name="toim" value="VAURIOPOYTAKIRJA">';
+		echo '<input type="hidden" name="toim_kuka" value="'.$request['toim'].'" />';
 		echo "<input type='hidden' name='lopetus' 	 value='{$lopetus}' />";
-		//echo '<input type="hidden" name="lopetus" value="http://localhost/~joonas/pupesoft/tyomaarays/vauriopoytakirja.php////toim=tarkastaja//action=hae_vauriopoytakirjat//tilausnumero=//tunnus=//vauriokohteen_osoite=//asiakkaan_nimi=//urakoitsija=//vauriopoytakirjan_tila=//selvityksen_antaja=">';
 		echo '<input type="hidden" name="ruutulimit" value="">';
 		echo '<input type="hidden" name="projektilla" value="">';
 		echo '<input type="hidden" name="tiedot_laskulta" value="YES">';

@@ -6,8 +6,6 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or $kukarow["ke
 	exit;
 }
 
-echo otsikko($toim);
-
 // Etsitään asiakasta
 if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_asiakas)) or ($tnimi != '' and !isset($jatka) and isset($vaihdatoim_asiakas))) {
 
@@ -77,22 +75,25 @@ if (isset($jatka)) {
 	if (empty($comments)) {
 		$pakolliset_errors['comments'] = t('Tieto puuttuu');
 	}
-	if (empty($nimi)) {
+	if (empty($toim_nimi)) {
 		$pakolliset_errors['nimi'] = t('Nimi puuttuu');
 	}
-	if (empty($osoite)) {
+	if (empty($toim_osoite)) {
 		$pakolliset_errors['osoite'] = t('Osoite puuttuu');
 	}
-	if (empty($nimitark)) {
+	if (empty($toim_nimitark)) {
 		$pakolliset_errors['postilokero'] = t('Postilokero puuttuu');
 	}
-	if (empty($postino)) {
+	if (empty($toim_postino)) {
 		$pakolliset_errors['postino'] = t('Postinumero puuttuu');
 	}
-	if (empty($gsm)) {
+	if (empty($toim_postitp)) {
+		$pakolliset_errors['postitp'] = t('Postitoimipaikka puuttuu');
+	}
+	if (empty($sisamaan_kuljetus)) {
 		$pakolliset_errors['gsm'] = t('Matkapuhelin puuttuu');
 	}
-	if (empty($ytunnus)) {
+	if (empty($kirjoitin)) {
 		$pakolliset_errors['ytunnus'] = t('Ytunnus puuttuu');
 	}
 	if (!isset($hyvaksy)) {
@@ -167,15 +168,15 @@ if ($tila == "" and !isset($jatka)) {
 	}
 	if (!empty($srow)) {
 		$aiheuttaja = array(
-			'nimi'		 => $srow['nimi'],
-			'nimitark'	 => $srow['nimitark'],
-			'osoite'	 => $srow['osoite'],
-			'postino'	 => $srow['postino'],
-			'postitp'	 => $srow['postitp'],
-			'maa'		 => $srow['maa'],
-			'puhelin'	 => $srow['puhelin'],
-			'gsm'		 => $srow['gsm'],
-			'ytunnus'	 => $srow['ytunnus'],
+			'nimi'		 => $srow['toim_nimi'],
+			'nimitark'	 => $srow['toim_nimitark'],
+			'osoite'	 => $srow['toim_osoite'],
+			'postino'	 => $srow['toim_postino'],
+			'postitp'	 => $srow['toim_postitp'],
+			'maa'		 => $srow['toim_maa'],
+			'puhelin'	 => $srow['aktiivinen_kuljetus'],
+			'gsm'		 => $srow['sisamaan_kuljetus'],
+			'ytunnus'	 => $srow['kirjoitin'],
 		);
 		$aiheuttaja_laskutus = array(
 			'nimi'		 => $srow['laskutus_nimi'],
@@ -184,9 +185,9 @@ if ($tila == "" and !isset($jatka)) {
 			'postino'	 => $srow['laskutus_postino'],
 			'postitp'	 => $srow['laskutus_postitp'],
 			'maa'		 => $srow['laskutus_maa'],
-			'puhelin'	 => $srow['laskutus_puhelin'],
-			'gsm'		 => $srow['laskutus_gsm'],
-			'ytunnus'	 => $srow['laskutus_ytunnus'],
+			'puhelin'	 => $srow['rekisteilmo_rekisterinumero'],
+			'gsm'		 => $srow['rekisteilmo_paakayttokunta'],
+			'ytunnus'	 => $srow['rekisteilmo_kieli'],
 		);
 
 
@@ -208,6 +209,8 @@ if ($tila == "" and !isset($jatka)) {
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='toim_kuka' value='{$toim_kuka}'>";
+		echo "<input type='hidden' name='vauriopoytakirjan_tila' value='{$vauriopoytakirjan_tila}' />";
 		echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 		echo "<input type='hidden' name='from' value='$from'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -670,7 +673,8 @@ if (isset($jatka)) {
 					muutospvm = NOW(),";
 	}
 
-	$query .= "	aktiivinen_kuljetus					= '',
+	$query .= "	aktiivinen_kuljetus					= '{$aktiivinen_kuljetus}',
+				sisamaan_kuljetus					= '{$sisamaan_kuljetus}',
 				alatila 							= '$alatila',
 				alv 								= '$alv',
 				alv_tili							= '$yhtioalv_tilino',
@@ -703,23 +707,17 @@ if (isset($jatka)) {
 				label								= '{$label}',
 				laskutusvkopv 						= '$laskutusvkopv',
 				liitostunnus						= '$liitostunnus',
-				maa 								= '$maa',
 				maksuehto 							= '$maksuehto',
 				maksuteksti 						= '$maksuteksti',
 				myyja 								= '$myyja',
 				allekirjoittaja						= '$allekirjoittaja',
-				nimi 								= '$nimi',
-				nimitark 							= '$nimitark',
 				noutaja								= '$noutaja',
 				ohjausmerkki						= '$ohjausmerkki',
 				olmapvm								= '$voimaika_vv-$voimaika_kk-$voimaika_pp',
 				osatoimitus							= '$osatoimitus',
-				osoite 								= '$osoite',
 				ostotilauksen_kasittely 			= '{$ostotilauksen_kasittely}',
 				ovttunnus 							= '$ovttunnus',
 				piiri 								= '$piiri',
-				postino 							= '$postino',
-				postitp 							= '$postitp',
 				rahtivapaa							= '$rahtivapaa',
 				sisainen 							= '$sisainen',
 				sisviesti1 							= '$sisviesti1',
@@ -734,12 +732,12 @@ if (isset($jatka)) {
 				toimitustapa 						= '$toimitustapa',
 				toimvko	 							= '$toimvko',
 				toim_maa 							= '$toim_maa',
-				toim_nimi 							= '$tnimi',
-				toim_nimitark 						= '$tnimitark',
-				toim_osoite 						= '$tosoite',
+				toim_nimi 							= '$toim_nimi',
+				toim_nimitark 						= '$toim_nimitark',
+				toim_osoite 						= '$toim_osoite',
 				toim_ovttunnus 						= '$toim_ovttunnus',
-				toim_postino 						= '$tpostino',
-				toim_postitp 						= '$tpostitp',
+				toim_postino 						= '$toim_postino',
+				toim_postitp 						= '$toim_postitp',
 				tunnusnippu							= '$tunnusnippu',
 				valkoodi 							= '$valkoodi',
 				varasto 							= '$varasto',
@@ -898,7 +896,10 @@ if (isset($jatka)) {
 					laskutus_osoite = '{$laskutus_osoite}',
 					laskutus_postino = '{$laskutus_postino}',
 					laskutus_postitp = '{$laskutus_postitp}',
-					laskutus_maa = '{$laskutus_maa}'";
+					laskutus_maa = '{$laskutus_maa}',
+					rekisteilmo_rekisterinumero = '{$rekisteilmo_rekisterinumero}',
+					rekisteilmo_paakayttokunta = '{$rekisteilmo_paakayttokunta}',
+					rekisteilmo_kieli = '{$rekisteilmo_kieli}'";
 
 		if ($insert) {
 			$query .= " otunnus = '{$kukarow['kesken']}'";
@@ -980,11 +981,9 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	if ($tyyppi == 'aiheuttaja') {
 		$otsikko = t('Aiheuttaja');
-		$prefix = "";
 	}
 	else {
 		$otsikko = t('Laskutusosoite');
-		$prefix = "laskutus_";
 	}
 	echo "<table class='vauriopoytakirja_otsikko'>";
 
@@ -1003,13 +1002,52 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 		echo "</tr>";
 	}
 
+	$aiheuttaja_nimet = array(
+		'nimi'		 => array(
+			'aiheuttaja' => 'toim_nimi',
+			'laskutusosoite' => 'laskutus_nimi',
+		),
+		'nimitark'	 => array(
+			'aiheuttaja' => 'toim_nimitark',
+			'laskutusosoite' => 'laskutus_nimitark',
+		),
+		'osoite'	 => array(
+			'aiheuttaja' => 'toim_osoite',
+			'laskutusosoite' => 'laskutus_osoite',
+		),
+		'postino'	 => array(
+			'aiheuttaja' => 'toim_postino',
+			'laskutusosoite' => 'laskutus_postino',
+		),
+		'postitp'	 => array(
+			'aiheuttaja' => 'toim_postitp',
+			'laskutusosoite' => 'laskutus_postitp',
+		),
+		'maa'		 => array(
+			'aiheuttaja' => 'toim_maa',
+			'laskutusosoite' => 'laskutus_maa',
+		),
+		'puhelin'	 => array(
+			'aiheuttaja' => 'aktiivinen_kuljetus',
+			'laskutusosoite' => 'rekisteilmo_rekisterinumero',
+		),
+		'gsm'		 => array(
+			'aiheuttaja' => 'sisamaan_kuljetus',
+			'laskutusosoite' => 'rekisteilmo_paakayttokunta',
+		),
+		'ytunnus'	 => array(
+			'aiheuttaja' => 'kirjoitin',
+			'laskutusosoite' => 'rekisteilmo_kieli',
+		),
+	);
+
 	echo "<tr>";
 	echo "<td>";
 	echo t('Nimi');
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}nimi' value='{$params['nimi']}' />";
+	echo "<input type='text' name='{$aiheuttaja_nimet['nimi'][$tyyppi]}' value='{$params['nimi']}' />";
 	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['nimi'])) {
 		echo '<br/><font class="error">'.$pakolliset_errors['nimi'].'</font>';
 	}
@@ -1020,7 +1058,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}puhelin' value='{$params['puhelin']}' />";
+	echo "<input type='text' name='{$aiheuttaja_nimet['puhelin'][$tyyppi]}' value='{$params['puhelin']}' />";
 	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['puhelin'])) {
 		echo '<br/><font class="error">'.$pakolliset_errors['puhelin'].'</font>';
 	}
@@ -1033,7 +1071,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}osoite' value='{$params['osoite']}' />";
+	echo "<input type='text' name='{$aiheuttaja_nimet['osoite'][$tyyppi]}' value='{$params['osoite']}' />";
 	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['osoite'])) {
 		echo '<br/><font class="error">'.$pakolliset_errors['osoite'].'</font>';
 	}
@@ -1044,7 +1082,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}gsm' value='{$params['gsm']}' />";
+	echo "<input type='text' name='{$aiheuttaja_nimet['gsm'][$tyyppi]}' value='{$params['gsm']}' />";
 	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['gsm'])) {
 		echo '<br/><font class="error">'.$pakolliset_errors['gsm'].'</font>';
 	}
@@ -1057,7 +1095,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}nimitark' value='{$params['nimitark']}'/>";
+	echo "<input type='text' name='{$aiheuttaja_nimet['nimitark'][$tyyppi]}' value='{$params['nimitark']}'/>";
 	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['postilokero'])) {
 		echo '<br/><font class="error">'.$pakolliset_errors['postilokero'].'</font>';
 	}
@@ -1068,7 +1106,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}ytunnus' value='{$params['ytunnus']}' />";
+	echo "<input type='text' name='{$aiheuttaja_nimet['ytunnus'][$tyyppi]}' value='{$params['ytunnus']}' />";
 	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['ytunnus'])) {
 		echo '<br/><font class="error">'.$pakolliset_errors['ytunnus'].'</font>';
 	}
@@ -1081,7 +1119,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}postino' value='{$params['postino']}' />";
+	echo "<input type='text' name='{$aiheuttaja_nimet['postino'][$tyyppi]}' value='{$params['postino']}' />";
 	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['postino'])) {
 		echo '<br/><font class="error">'.$pakolliset_errors['postino'].'</font>';
 	}
@@ -1092,7 +1130,7 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='text' name='{$prefix}postitp' value='{$params['postitp']}' />";
+	echo "<input type='text' name='{$aiheuttaja_nimet['postitp'][$tyyppi]}' value='{$params['postitp']}' />";
 	if ($tyyppi == 'aiheuttaja' and !empty($pakolliset_errors['postitp'])) {
 		echo '<br/><font class="error">'.$pakolliset_errors['postitp'].'</font>';
 	}
@@ -1180,12 +1218,6 @@ function vauriopoytakirja_yleiset_kentat() {
 	echo "</tr>";
 
 	echo "</table>";
-}
-
-function otsikko($toim) {
-	if ($toim == "VAURIOPOYTAKIRJA") {
-		return "<font class='head'>".t("Vauriopöytäkirjan otsikko")."</font><hr>";
-	}
 }
 
 function hae_dynaamiset_kentat() {

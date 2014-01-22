@@ -5577,15 +5577,16 @@ if (!function_exists("alehinta")) {
 
 		$g_ale_peruste .= "\n".$hperuste." Hinta: ".sprintf('%.2f', $hinta)." $yhtiorow[valkoodi] M‰‰r‰: $kpl $trow[yksikko]. ";
 
-		preg_match("/Hinta: ([0-9\.]*) /", $GLOBALS['ale_peruste'], $edale_match);
+		if (isset($GLOBALS['ale_peruste']) and $GLOBALS['ale_peruste'] != "") {
+			preg_match("/Hinta: ([0-9\.]*) /", $GLOBALS['ale_peruste'], $edale_match);
 
-		if (isset($edale_match[1]) and $hinta != $edale_match[1]) {
-			$g_ale_peruste_update = TRUE;
+			if (isset($edale_match[1]) and $hinta != $edale_match[1]) {
+				$g_ale_peruste_update = TRUE;
+			}
 		}
 
 		if (!isset($GLOBALS['ale_peruste']) or $GLOBALS['ale_peruste'] == "" or $g_ale_peruste_update) {
-			$GLOBALS['ale_peruste'] = $g_ale_peruste;
-
+			$GLOBALS['ale_peruste']  = $g_ale_peruste;
 			$GLOBALS['ale_peruste'] .= " XXXHINTAPERUSTE:$hintaperuste ";
 
 			foreach($aleperuste as $aile) {

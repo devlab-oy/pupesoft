@@ -1,6 +1,7 @@
 <?php
 
-	ini_set('zlib.output_compression', 0);
+	// Ei käytetä pakkausta
+	$compression = FALSE;
 
 	// Kutsutaanko CLI:stä
 	$php_cli = FALSE;

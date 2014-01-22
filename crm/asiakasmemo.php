@@ -51,67 +51,70 @@
 
 		if ($tee == "SAHKOPOSTI") {
 
-			list($email, $ekuka) = explode("###", $email);
+			list($email, $ekuka, $enimi) = explode("###", $email);
 
-			// Haetaan muistiinpano
-			$query = "	SELECT kalenteri.*, asiakas.nimi, asiakas.nimitark, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.asiakasnro
-						FROM kalenteri
-						LEFT JOIN asiakas ON (kalenteri.yhtio = asiakas.yhtio and kalenteri.liitostunnus = asiakas.tunnus)
-						WHERE kalenteri.tunnus = '$tunnus'";
-			$res = pupe_query($query);
-			$row = mysql_fetch_array($res);
+			if ($email != "" and $ekuka != "") {
 
-			$meili = "\n$kukarow[nimi] ".t("lähetti sinulle asiakasmemon").".\n\n\n";
-			$meili .= t("Tapa").": $row[tapa]\n\n";
-			$meili .= t("Ytunnus").": $row[asiakas]\n";
-			$meili .= t("Asiakasnumero").": $row[asiakasnro]\n";
-			$meili .= t("Asiakas").": $row[nimi] $row[nimitark] $row[toim_nimi] $row[toim_nimitark]\n";
-			$meili .= t("Pävämäärä").": ".tv1dateconv($row["pvmalku"])."\n\n";
-			$meili .= t("Viesti").":\n".str_replace("\r\n","\n", $row["kentta01"])."\n\n";
-			$meili .= "-----------------------\n\n";
+				// Haetaan muistiinpano
+				$query = "	SELECT kalenteri.*, asiakas.nimi, asiakas.nimitark, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.asiakasnro
+							FROM kalenteri
+							LEFT JOIN asiakas ON (kalenteri.yhtio = asiakas.yhtio and kalenteri.liitostunnus = asiakas.tunnus)
+							WHERE kalenteri.tunnus = '$tunnus'";
+				$res = pupe_query($query);
+				$row = mysql_fetch_array($res);
 
-			$tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+				$meili = "\n$kukarow[nimi] ".t("lähetti sinulle asiakasmemon").".\n\n\n";
+				$meili .= t("Tapa").": $row[tapa]\n\n";
+				$meili .= t("Ytunnus").": $row[asiakas]\n";
+				$meili .= t("Asiakasnumero").": $row[asiakasnro]\n";
+				$meili .= t("Asiakas").": $row[nimi] $row[nimitark] $row[toim_nimi] $row[toim_nimitark]\n";
+				$meili .= t("Pävämäärä").": ".tv1dateconv($row["pvmalku"])."\n\n";
+				$meili .= t("Viesti").":\n".str_replace("\r\n","\n", $row["kentta01"])."\n\n";
+				$meili .= "-----------------------\n\n";
 
-			if ($row["tyyppi"] == "Lead") {
-				$eviesti = "$kukarow[nimi] lähetti leadin osoitteeseen: $email";
-			}
-			else {
-				$eviesti = "$kukarow[nimi] lähetti memon osoitteeseen: $email";
-			}
+				$tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
 
-			$kysely = "	INSERT INTO kalenteri
-						SET tapa 		= '$row[tapa]',
-						asiakas  		= '$row[asiakas]',
-						liitostunnus 	= '$row[liitostunnus]',
-						henkilo  		= '$row[henkilo]',
-						kuka     		= '$kukarow[kuka]',
-						yhtio    		= '$kukarow[yhtio]',
-						tyyppi   		= 'Memo',
-						pvmalku  		= now(),
-						kentta01 		= '$eviesti',
-						perheid 		= '$row[tunnus]',
-						laatija			= '$kukarow[kuka]',
-						luontiaika		= now()";
-			$result = pupe_query($kysely);
+				if ($row["tyyppi"] == "Lead") {
+					$eviesti = "$kukarow[nimi] lähetti leadin käyttäjälle: $enimi / $email";
+				}
+				else {
+					$eviesti = "$kukarow[nimi] lähetti memon käyttäjälle: $enimi / $email";
+				}
 
-			if ($row["tyyppi"] == "Lead") {
 				$kysely = "	INSERT INTO kalenteri
 							SET tapa 		= '$row[tapa]',
 							asiakas  		= '$row[asiakas]',
 							liitostunnus 	= '$row[liitostunnus]',
 							henkilo  		= '$row[henkilo]',
-							kuka     		= '$ekuka',
-							myyntipaallikko	= '$row[myyntipaallikko]',
+							kuka     		= '$kukarow[kuka]',
 							yhtio    		= '$kukarow[yhtio]',
-							tyyppi   		= '$row[tyyppi]',
-							pvmalku  		= '$row[pvmalku]',
-							kentta01 		= '$row[kentta01]',
-							kuittaus 		= '$row[kuittaus]',
+							tyyppi   		= 'Memo',
+							pvmalku  		= now(),
+							kentta01 		= '$eviesti',
+							perheid 		= '$row[tunnus]',
 							laatija			= '$kukarow[kuka]',
 							luontiaika		= now()";
 				$result = pupe_query($kysely);
+
+				if ($row["tyyppi"] == "Lead") {
+					$kysely = "	INSERT INTO kalenteri
+								SET tapa 		= '$row[tapa]',
+								asiakas  		= '$row[asiakas]',
+								liitostunnus 	= '$row[liitostunnus]',
+								henkilo  		= '$row[henkilo]',
+								kuka     		= '$ekuka',
+								myyntipaallikko	= '$row[myyntipaallikko]',
+								yhtio    		= '$kukarow[yhtio]',
+								tyyppi   		= '$row[tyyppi]',
+								pvmalku  		= '$row[pvmalku]',
+								kentta01 		= '$row[kentta01]',
+								kuittaus 		= '$row[kuittaus]',
+								laatija			= '$kukarow[kuka]',
+								luontiaika		= now()";
+					$result = pupe_query($kysely);
+				}
+				//echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
 			}
-			//echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
 
 			$tunnus = "";
 			$tee 	= "";
@@ -867,35 +870,24 @@
 						echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
 						echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 						echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
-						echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
+						echo "<select name='email'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-						$query = "	SELECT distinct yhtio
-									FROM yhtio
-									WHERE (konserni = '$yhtiorow[konserni]' and konserni != '')
-									OR (yhtio = '$yhtiorow[yhtio]')";
-						$result = pupe_query($query);
-						$konsernit = "";
-
-						while ($row = mysql_fetch_array($result)) {
-							$konsernit .= " '".$row["yhtio"]."' ,";
-						}
-
-						$lisa2 = " kuka.yhtio in (".substr($konsernit, 0, -1).") ";
-
-						$query  = "	SELECT kuka.kuka, kuka.nimi, kuka.eposti
+						$query  = "	SELECT kuka.nimi, kuka.eposti, min(kuka.kuka) kuka
 									FROM kuka
-									WHERE $lisa2
+									WHERE kuka.yhtio    = '$kukarow[yhtio]'
 									AND kuka.aktiivinen = 1
-									and kuka.extranet = ''
-									and kuka.eposti != ''
+									and kuka.extranet   = ''
+									and kuka.eposti    != ''
+									GROUP BY 1,2
 									ORDER BY kuka.nimi";
 						$vares = pupe_query($query);
 
 						while ($varow = mysql_fetch_array($vares)) {
-							echo "<option value='$varow[eposti]###$varow[kuka]'>$varow[nimi]</option>";
+							echo "<option value='$varow[eposti]###$varow[kuka]###$varow[nimi]'>$varow[nimi]</option>";
 						}
 
 						echo "</select>";
+						echo "<input type='submit' value='".t("Lähetä viesti")."'>";
 						echo "</form>";
 						echo "</td></tr>";
 					}
@@ -947,4 +939,3 @@
 		return $out;
 
 	}
-?>

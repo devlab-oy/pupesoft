@@ -2415,7 +2415,6 @@ if (!function_exists("synkronoi")) {
 					}
 				}
 				elseif ($table == "tuotteen_toimittajat") {
-
 					$query = "SELECT * from tuote where yhtio='$yhtio' and tuoteno='$abuhaku[tuoteno]'";
 					$abures = pupe_query($query);
 
@@ -2429,7 +2428,7 @@ if (!function_exists("synkronoi")) {
 						$tarkquery = "SELECT tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
 						$tarkres = pupe_query($tarkquery);
 
-						if (mysql_num_rows($tarkres)==1) {
+						if (mysql_num_rows($tarkres) == 1) {
 							//	Ylikirjoitetaan liitostunnus
 							$tarkrow = mysql_fetch_assoc($tarkres);
 							$override["liitostunnus"] = $tarkrow["tunnus"];
@@ -2448,7 +2447,6 @@ if (!function_exists("synkronoi")) {
 						$ok=0;
 					}
 				}
-
 
 				//	Poistetaan tietue jos masteria ei löydetty mutta originaali on tallessa.. olisiko tässä selvempi tapa?
 				if (!isset($masterrow) and is_array($orig) and count($orig) > 0) {
@@ -3535,6 +3533,17 @@ if (!function_exists("hae_alehinta_minkpl")) {
 
 			list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $loop_kpl, '', '', array());
 
+			if ($netto == "") {
+				$nettohinta = $hinta;
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$nettohinta *= (1 - $ale["ale{$alepostfix}"] / 100);
+				}
+				$nettohinta = round($nettohinta, $yhtiorow['hintapyoristys']);
+			}
+			else {
+				$nettohinta = "";
+			}
+
 			$ei_loydy = TRUE;
 
 			foreach ($hinnasto as $_arr) {
@@ -3549,13 +3558,13 @@ if (!function_exists("hae_alehinta_minkpl")) {
 					'hinta' => $hinta,
 					'netto' => $netto,
 					'ale' => $ale,
+					'nettohinta' => $nettohinta,
 					'alehinta_alv' => $alehinta_alv,
 					'alehinta_val' => $alehinta_val,
 				);
-
 			}
 
-			unset($hinta, $netto, $ale, $alehinta_alv, $alehinta_val);
+			unset($hinta, $netto, $ale, $alehinta_alv, $alehinta_val, $nettohinta);
 		}
 
 		return $hinnasto;
@@ -10366,18 +10375,7 @@ if (!function_exists("laheta_tilausvahvistus")) {
 if (!function_exists("t")) {
 	function t($stringi, $kieli = "") {
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
-		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa, $kaannetyt_sanat;
-
-		require("salasanat.php");
-
-		if (isset($slavedb) and isset($useslave) and $useslave > 0) {
-			if (!isset($slavedb[$useslave]) or $slavedb[$useslave] == '') {
-				$useslave = 0;
-			}
-		}
-		else {
-			$useslave = 0;
-		}
+		global $yhtiorow, $kukarow, $link, $masterlink, $verkkokauppa, $kaannetyt_sanat;
 
 		if (trim($kieli) != '') {
 			$indeksi = trim(strtolower($kieli));
@@ -10387,13 +10385,6 @@ if (!function_exists("t")) {
 		}
 		else {
 			$indeksi = "fi";
-		}
-
-		// Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
-		if ($useslave > 0 and $indeksi != 'fi') {
-			unset($link);
-			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-			mysql_select_db ($dbkanta,$link) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
 		}
 
 		if ($indeksi != 'fi') {
@@ -10429,22 +10420,16 @@ if (!function_exists("t")) {
 				//Päivitetään aikaleima
 				if ($verkkokauppa == "") {
 					$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
-					$sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $link);
+					$sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $masterlink);
 				}
 			}
 			elseif ($verkkokauppa == "") {
 				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
-				$sanakirjaresult = pupe_query($sanakirjaquery, $link);
+				$sanakirjaresult = pupe_query($sanakirjaquery, $masterlink);
 			}
 		}
 		elseif (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) {
 			$kaannetyt_sanat[] = $stringi;
-		}
-
-		if ($useslave > 0) { //Palautetaan slave käyttöön
-			unset($link);
-			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
-			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 2)!");
 		}
 
 		//	Palautetaan muotoiltu stringi!!!
@@ -11217,11 +11202,12 @@ if (!function_exists("lue_kurssit")) {
 			}
 
 			$query = "	UPDATE valuu SET
-						kurssi = round(1 / $kurssi, 9),
+						kurssi    = round(1 / $kurssi, 9),
 						muutospvm = now(),
-						muuttaja = '{$kukarow['kuka']}'
-						WHERE yhtio = '{$kukarow['yhtio']}' AND
-						nimi = '$valuutta'";
+						muuttaja  = '{$kukarow['kuka']}'
+						WHERE yhtio 		   = '{$kukarow['yhtio']}'
+						AND nimi 			   = '$valuutta'
+						AND automaattipaivitys = ''";
 			$result = pupe_query($query);
 
 			// tämä valuutta on nyt päivitetty!
@@ -11233,7 +11219,7 @@ if (!function_exists("lue_kurssit")) {
 
 			$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
 						VALUES ('$vastavaluutta', '$valuutta', round(1 / $kurssi, 9), '$kurssipvm')
-			  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
+	  					ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
 			$result = pupe_query($query);
 
 		}

@@ -2,7 +2,7 @@
 
 if(!function_exists("tuotteen_toimittajattarkista")) {
 	function tuotteen_toimittajattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $alasveto, $liitostunnus_static, $chtuoteno, $lue_datasta, $toimi_liitostunnus, $toimi_ytunnus;
+		global $kukarow, $yhtiorow, $alias_set, $alasveto, $liitostunnus_static, $chtuoteno, $lue_datasta, $toimi_liitostunnus;
 
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			$chtuoteno = $t[$i];
@@ -11,7 +11,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 				$query = "	SELECT tuoteno
 							FROM tuote
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) != 1) {
 
@@ -35,52 +35,43 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "toimittaja") {
+		if (mysql_field_name($result, $i) == "liitostunnus") {
+
+			$liitostunnus_static = 0;
+
+			if (isset($toimi_liitostunnus) and $toimi_liitostunnus > 0) {
+				$t[$i] = $toimi_liitostunnus;
+			}
+
 			if ($t[$i] != '') {
 
 				$t[$i] = trim($t[$i]);
 
-				if (isset($toimi_ytunnus) and $toimi_ytunnus != $t[$i]) {
-					$toimi_liitostunnus = 0;
-				}
+				if (is_numeric($t[$i]) and $t[$i] > 0) {
+					$query = "	SELECT *
+								FROM toimi
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tyyppi != 'P'
+								AND tunnus  = {$t[$i]}
+								ORDER by nimi";
+					$sresult = pupe_query($query);
 
-				$query = "	SELECT *
-							from toimi
-							where yhtio = '$kukarow[yhtio]'
-							and tyyppi != 'P'
-							and tunnus = ".(int) $toimi_liitostunnus."
-							ORDER by nimi";
-				$sresult = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($sresult) == 1) {
-					$srow = mysql_fetch_assoc($sresult);
-
-					$t[$i] = $srow["ytunnus"];
-					$liitostunnus_static = $srow["tunnus"];
-
-					if ((int) $tunnus == 0) {
-						$query = "	SELECT *
-									from tuotteen_toimittajat
-									where yhtio			= '$kukarow[yhtio]'
-									and liitostunnus	= '$liitostunnus_static'
-									and tuoteno			= '$chtuoteno'";
-						$sresult = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($sresult) > 0) {
-							$virhe[$i] = t("Tämä toimittaja on jo tällä tuotteella")."!";
-						}
+					if (mysql_num_rows($sresult) == 1) {
+						$srow = mysql_fetch_assoc($sresult);
+						$liitostunnus_static = $srow["tunnus"];
 					}
 				}
-				else {
+
+				if ($liitostunnus_static == 0) {
 
 					$toimittaja_haku = pupesoft_cleanstring($t[$i]);
 
 					// Kokeillaan ovttunnuksella
 					$query = "	SELECT *
 								FROM toimi
-								WHERE yhtio = '$yhtio'
-								AND tyyppi != 'P'
-								AND ovttunnus = '$toimittaja_haku'
+								WHERE yhtio    = '$kukarow[yhtio]'
+								AND tyyppi    != 'P'
+								AND ovttunnus  = '$toimittaja_haku'
 								AND ovttunnus != ''";
 					$sresult = pupe_query($query);
 
@@ -88,9 +79,9 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 					if (mysql_num_rows($sresult) != 1) {
 						$query = "	SELECT *
 									FROM toimi
-									WHERE yhtio = '$yhtio'
-									AND tyyppi != 'P'
-									AND ytunnus = '$toimittaja_haku'
+									WHERE yhtio  = '$kukarow[yhtio]'
+									AND tyyppi  != 'P'
+									AND ytunnus  = '$toimittaja_haku'
 									AND ytunnus != ''";
 						$sresult = pupe_query($query);
 					}
@@ -99,9 +90,9 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 					if (mysql_num_rows($sresult) != 1) {
 						$query = "	SELECT *
 									FROM toimi
-									WHERE yhtio = '$yhtio'
-									AND tyyppi != 'P'
-									AND toimittajanro = '$toimittaja_haku'
+									WHERE yhtio        = '$kukarow[yhtio]'
+									AND tyyppi        != 'P'
+									AND toimittajanro  = '$toimittaja_haku'
 									AND toimittajanro != ''";
 						$sresult = pupe_query($query);
 					}
@@ -112,34 +103,17 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 									from toimi
 									where yhtio = '$kukarow[yhtio]'
 									and tyyppi != 'P'
-									and (ytunnus like '%$t[$i]%' or nimi like '%$t[$i]%' or toimittajanro like '%$t[$i]%')
+									and (ytunnus like '%$toimittaja_haku%' or nimi like '%$toimittaja_haku%' or toimittajanro like '%$toimittaja_haku%')
 									order by nimi";
-						$sresult = mysql_query($query) or pupe_error($query);
+						$sresult = pupe_query($query);
 					}
 
-					if (mysql_num_rows($sresult) == 0) {
-						$virhe[$i] = t("Toimittaja puuttuu!");
-					}
-					elseif (mysql_num_rows($sresult) == 1) {
+					if (mysql_num_rows($sresult) == 1) {
 						$srow = mysql_fetch_assoc($sresult);
-
-						$t[$i] = $srow["ytunnus"];
 						$liitostunnus_static = $srow["tunnus"];
-
-						if ((int) $tunnus == 0) {
-							$query = "	SELECT *
-										from tuotteen_toimittajat
-										where yhtio			= '$kukarow[yhtio]'
-										and liitostunnus	= '$liitostunnus_static'
-										and tuoteno			= '$chtuoteno'";
-							$sresult = mysql_query($query) or pupe_error($query);
-
-							if (mysql_num_rows($sresult) > 0 and $lue_datasta != 'MUUTA') {
-								$virhe[$i] = t("Tämä toimittaja on jo tällä tuotteella")."!";
-							}
-						}
+						$t[$i] = $liitostunnus_static;
 					}
-					else {
+					elseif (mysql_num_rows($sresult) > 1) {
 
 						$alasveto[$i] = "<input type='hidden' name='t[$i]' value='XXX'>
 										<select name='toimi_liitostunnus'>";
@@ -156,13 +130,24 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 					}
 				}
 			}
-			else {
+
+			if ($liitostunnus_static > 0) {
+				$query = "	SELECT *
+							FROM tuotteen_toimittajat
+							WHERE yhtio			= '$kukarow[yhtio]'
+							AND liitostunnus	= '$liitostunnus_static'
+							AND tunnus 		   != '$tunnus'
+							AND tuoteno			= '$chtuoteno'";
+				$sresult = pupe_query($query);
+
+				if (mysql_num_rows($sresult) > 0) {
+					$virhe[$i] = t("Tämä toimittaja on jo tällä tuotteella")."!";
+				}
+			}
+
+			if ($liitostunnus_static == 0) {
 				$virhe[$i] = t("Toimittaja puuttuu!");
 			}
-		}
-
-		if (mysql_field_name($result, $i) == "liitostunnus") {
-			$t[$i] = $liitostunnus_static;
 		}
 
 		if (mysql_field_name($result, $i) == "alkuperamaa") {
@@ -174,7 +159,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 		if (mysql_field_name($result, $i) == "toim_tuoteno") {
 
 			$query = "SELECT tyyppi from toimi where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus_static'";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 			$tuotoimirow = mysql_fetch_assoc($sresult);
 
 			if ($t[$i] == "" and $tuotoimirow["tyyppi"] != "") {

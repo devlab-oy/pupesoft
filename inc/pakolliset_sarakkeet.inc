@@ -222,9 +222,8 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$eiyhtiota  = "TRIP";
 				break;
 			case "tuotteen_toimittajat" :
-				$pakolliset  = array("TUOTENO", "TOIMITTAJA");
+				$pakolliset  = array("TUOTENO", "LIITOSTUNNUS");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM", "TEHDAS_SALDO_PAIVITETTY");
-				$wherelliset = array("TUOTENO", "TOIMITTAJA");
 				$joinattavat = array("TUOTENO" => "tuote");
 				$saakopoistaa = TRUE;
 				break;

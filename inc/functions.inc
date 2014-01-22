@@ -5585,6 +5585,12 @@ if (!function_exists("alehinta")) {
 
 		if (!isset($GLOBALS['ale_peruste']) or $GLOBALS['ale_peruste'] == "" or $g_ale_peruste_update) {
 			$GLOBALS['ale_peruste'] = $g_ale_peruste;
+
+			$GLOBALS['ale_peruste'] .= " XXXHINTAPERUSTE:$hintaperuste ";
+
+			foreach($aleperuste as $aile) {
+				$GLOBALS['ale_peruste'] .= " XXXALEPERUSTE:$aile ";
+			}
 		}
 
 		$debug = 0;

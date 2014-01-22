@@ -1934,6 +1934,7 @@
 			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
 				$yhtiorow['takuuvarasto'] = (int) $yhtiorow['takuuvarasto'];
 				$varastot_lisa_query = " and varastopaikat.tunnus = '{$yhtiorow['takuuvarasto']}'";
+				$varastot_array = array($yhtiorow['takuuvarasto']);
 			}
 			elseif ($kukarow["varasto"] != "") {
 				$varastot_array = explode(",", $kukarow["varasto"]);

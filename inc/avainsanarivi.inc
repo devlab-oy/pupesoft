@@ -745,6 +745,7 @@
 		$ulos .= "<option value = '1' $sel[1]>".t("Tulostintyyppi")." - ".t("Laser A4")."</option>";
 		$ulos .= "<option value = '2' $sel[2]>".t("Tulostintyyppi")." - ".t("Laser A5")."</option>";
 		$ulos .= "<option value = '3' $sel[3]>".t("Tulostintyyppi")." - ".t("Matriisi")."</option>";
+		$ulos .= "<option value = 'hrx' {$sel['hrx']}>".t("Tulostintyyppi")." - ".t("HRX")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

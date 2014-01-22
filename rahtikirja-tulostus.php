@@ -116,7 +116,10 @@
 		$pres  = pupe_query($query);
 		$print = mysql_fetch_assoc($pres);
 
-		if ($komento == "PDF_RUUDULLE") {
+		if ($avainrow["selitetark_2"] == "hrx") {
+			$kirjoitin_tunnus = $print["printteri10"]; // Rahtikirja hrx
+		}
+		elseif ($komento == "PDF_RUUDULLE") {
 			$kirjoitin = "PDF_RUUDULLE";
 		}
 		elseif ($komento != "") {
@@ -130,9 +133,6 @@
 		}
 		elseif ($avainrow["selitetark_2"] == "3") {
 			$kirjoitin_tunnus = $print["printteri2"]; // Rahtikirja matriisi
-		}
-		elseif ($avainrow["selitetark_2"] == "hrx") {
-			$kirjoitin_tunnus = $print["printteri10"]; // Rahtikirja matriisi
 		}
 		elseif ($toitarow['tulostustapa'] == 'H') {
 			$kirjoitin_tunnus = $print["printteri4"]; // Rahtikirja A5

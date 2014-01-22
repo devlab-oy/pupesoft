@@ -431,6 +431,9 @@
 										vh.keraysvyohyke IN (".implode(",", $keraysvyohyke)."))
 										JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
 			}
+			else {
+				$keraysvyohykelisa = "";
+			}
 
 			if ($toimittaja != "") {
 				$query = "	SELECT GROUP_CONCAT(DISTINCT CONCAT('\'',tuotteen_toimittajat.tuoteno,'\'')) tuotteet

@@ -12943,10 +12943,7 @@ if (!function_exists("pupe_DataTables")) {
 			$(document).ready(function() {
 				
 				$('input[id^=\"massaesiin_\"]').live('click', function() {
-
 					var keijo = $(this).attr('id').substring(11);
-
-					console.log('massalisa_' + keijo);
 				    $('#massalisa_'+keijo).toggle();
 			    });
 
@@ -13437,13 +13434,8 @@ if (!function_exists("pupe_DataTables")) {
 								if (kpl == 0) {
 									$('#refresh_screen_ajaxille').val('true');
 								}
-								console.log('----'+rivi_kpl_alkuperainen+' > 1 && '+rivi_kpl_alkuperainen+' > '+kpl+' && '+kpl+' > 0');
 								if (rivi_kpl_alkuperainen > 1 && rivi_kpl_alkuperainen > kpl && kpl > 0) {
 									var uuden_rivin_kpl = rivi_kpl_alkuperainen - kpl;
-
-									console.log('KEK');
-
-									console.log(tun, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, kpl);
 
 									$.ajax({
 										async: false,
@@ -13461,9 +13453,6 @@ if (!function_exists("pupe_DataTables")) {
 											}
 										}).done(function(return_value) {
 
-											console.log('CALLBACK');
-
-											console.log(return_value);
 											var data = jQuery.parseJSON(return_value);
 
 											var uusi_rivi = $('tr[class*=\"'+tun+'\"]').clone();
@@ -13503,12 +13492,9 @@ if (!function_exists("pupe_DataTables")) {
 											$('#rivi_kpl_alkuperainen_'+data.tunnus).val(uuden_rivin_kpl);
 											
 											uuden_rivin_tunnus = data.tunnus;
-											console.log('KSSA'+uuden_rivin_tunnus);
 											$('#refresh_screen_ajaxille').val('true');
 										}
 									);
-									
-									console.log('JORMA'+uuden_rivin_tunnus);
 								}
 								else {
 									$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
@@ -13579,7 +13565,6 @@ if (!function_exists("pupe_DataTables")) {
 								
 							}
 						}
-						console.log('SPLIT'+uuden_rivin_tunnus);
 						return uuden_rivin_tunnus;
 					}
 					// JOS PAINETAAN MASSATULOUTUSNAPPIA
@@ -13616,23 +13601,11 @@ if (!function_exists("pupe_DataTables")) {
 							var uudenrivintunnus = 0;
 
 							(function loopperi(i) {
-								console.log('AJOKERTA:' + i)
-								console.log('massasubmitti_' + keijo);
-								console.log('massatyyppi=' + massatyyppi);
-								console.log('massakeraysvyohyke='+ massakeraysvyohyke);
-								console.log('massakaytettavyys=' +massakaytettavyys);
-								console.log('massaterminaalialue=' +massaterminaalialue);
-								console.log('massajakokplmaara=' + massajakokplmaara);
-								console.log('rivi_hinta_value=' +rivi_hinta_value);
-								console.log('rivi_kpl_alkuperainen=' +rivi_kpl_alkuperainen);
-								console.log('rivi_hinta_alkup=' +rivi_hinta_alkup);
-								console.log('alerivi_hinta_alkup=' +alerivi_hinta_alkup);
-								console.log('otunnus='+ otunnus);
-								
+
 								uudenrivintunnus = splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara);
 
 								rivi_kpl_alkuperainen = rivi_kpl_alkuperainen - massajakokplmaara;
-								console.log('uusirivitunnus='+ uudenrivintunnus);
+
 								$.ajax({
 									async: false,
 									type: 'POST',
@@ -13652,27 +13625,13 @@ if (!function_exists("pupe_DataTables")) {
 									}).done(function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										var uusilava = data.suuntalavan_tunnus;
-										console.log('lisatty uusi suuntalava: '+uusilava);
-										console.log('wtf '+i);
 										if (--i) loopperi(i);
 									});
 
 							})(Math.floor(ajokerta));
 
 							if (loput != 0) {
-								console.log('mentiin tänne');
-								console.log('massasubmitti_' + keijo);
-								console.log('massatyyppi=' + massatyyppi);
-								console.log('massakeraysvyohyke='+ massakeraysvyohyke);
-								console.log('massakaytettavyys=' +massakaytettavyys);
-								console.log('massaterminaalialue=' +massaterminaalialue);
-								console.log('massajakokplmaara=' + massajakokplmaara);
-								console.log('rivi_hinta_value=' +rivi_hinta_value);
-								console.log('rivi_kpl_alkuperainen=' +rivi_kpl_alkuperainen);
-								console.log('rivi_hinta_alkup=' +rivi_hinta_alkup);
-								console.log('alerivi_hinta_alkup=' +alerivi_hinta_alkup);
-								console.log('otunnus='+ otunnus);
-								console.log('loput='+ loput);
+
 								$.post('{$_SERVER['SCRIPT_NAME']}',
 									{ 	keikan_otunnus: otunnus,
 										otunnus: otunnus,

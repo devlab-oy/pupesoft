@@ -1387,8 +1387,15 @@
 					$hae_ja_selaa_asiakas = (int) $laskurow['liitostunnus'];
 				}
 
+				//jos ollaan verkkokaupassa ja n‰ytet‰‰n vain aletuotteet asetus on p‰‰ll‰ niin pakotetaan saako_myyda_private_label tarkistamaan alet kaikilta tuotteilta, jotta n‰ytet‰‰n vain aletuotteet
 				if ($hae_ja_selaa_asiakas != 0) {
-					if (!saako_myyda_private_label($hae_ja_selaa_asiakas, $row["tuoteno"])) {
+					$vainaletuotteet = FALSE;
+
+					if ($verkkokauppa != "" AND $kukarow["naytetaan_tuotteet"] == "A") {
+						$vainaletuotteet = TRUE;
+					}
+
+					if (!saako_myyda_private_label($hae_ja_selaa_asiakas, $row["tuoteno"], 1, $vainaletuotteet)) {
 						continue;
 					}
 				}

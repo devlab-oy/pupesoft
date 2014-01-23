@@ -13582,8 +13582,8 @@ if (!function_exists("pupe_DataTables")) {
 						
 						if (valid_params) {
 							var ajokerta = rivi_kpl_alkuperainen / massajakokplmaara;
-							//var jakob = rivi_kpl_alkuperainen % massajakokplmaara;
-							var loput = rivi_kpl_alkuperainen - (ajokerta * massajakokplmaara)
+							var loput = rivi_kpl_alkuperainen - (Math.floor(ajokerta) * massajakokplmaara)
+
 							for(var i=1;i<ajokerta;i++) {
 								console.log('AJOKERTA:' + i)
 								console.log('massasubmitti_' + keijo);
@@ -13596,9 +13596,8 @@ if (!function_exists("pupe_DataTables")) {
 								console.log('rivi_kpl_alkuperainen=' +rivi_kpl_alkuperainen);
 								console.log('rivi_hinta_alkup=' +rivi_hinta_alkup);
 								console.log('alerivi_hinta_alkup=' +alerivi_hinta_alkup);
-								//console.log('rivikappale=' +kpl);
 								console.log('otunnus='+ otunnus);
-								splittaus(keijo, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara);
+								splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara);
 								rivi_kpl_alkuperainen = rivi_kpl_alkuperainen - massajakokplmaara;
 							}
 							if (loput != 0) {
@@ -13613,10 +13612,24 @@ if (!function_exists("pupe_DataTables")) {
 								console.log('rivi_kpl_alkuperainen=' +rivi_kpl_alkuperainen);
 								console.log('rivi_hinta_alkup=' +rivi_hinta_alkup);
 								console.log('alerivi_hinta_alkup=' +alerivi_hinta_alkup);
-								//console.log('rivikappale=' +kpl);
 								console.log('otunnus='+ otunnus);
-								
-								splittaus(keijo,otunnus,rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, loput);
+								console.log('loput='+ loput)
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+								{ 	keikan_otunnus: otunnus,
+									otunnus: otunnus,
+									tunnus: keijo,
+									ajax_toiminto: 'rivi_kpl',
+									kpl: loput,
+									no_head: 'yes',
+									ohje: 'off'},
+								function(return_value) {
+									var data = jQuery.parseJSON(return_value);
+
+									$('#hinnat_'+keijo).html(data.rivihinta+'<br>'+data.alerivihinta);
+									$('#ulkkpl_'+keijo).html(data.ulkkpl);
+									$('#alerivihintaalkuperainen_'+keijo).val(data.alerivihinta);
+								}
+							);
 							}
 						}
 						else {

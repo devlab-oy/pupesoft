@@ -4,7 +4,7 @@
 
 	//sis‰‰n otetaan $liitostunnus. $liitostunnus tulee paperikorkolasku.php-failista
 	//ja maksuehdon tunnus $vmehto
-	//ja $loppukorkosumma jossa on maksettavan koron m‰‰r‰. $loppukorkosumma tulee paperikorkolasku.php-failista
+	//ja $loppusumma jossa on maksettavan koron m‰‰r‰. $loppusumma tulee paperikorkolasku.php-failista
 
 	//Haetaan asiakkaan tiedot
 	$query = "SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$liitostunnus'";
@@ -156,7 +156,7 @@
 					osasto 			= '$tuorow[osasto]',
 					kpl 			= 0,
 					alv 			= '0',
-					hinta 			= '$loppukorkosumma',
+					hinta 			= '$loppusumma',
 					nimitys 		= '$tuorow[nimitys]',
 					otunnus 		= '$otunnus',
 					tyyppi 			= 'L',

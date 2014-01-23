@@ -78,7 +78,7 @@
 				'alkuhyllyalue', 'alkuhyllynro', 'alkuhyllyvali', 'alkuhyllytaso',
 				'loppuhyllyalue', 'loppuhyllynro', 'loppuhyllyvali', 'loppuhyllynro', 'loppuhyllytaso',
 				'tyyppi', 'keraysvyohyke', 'usea_keraysvyohyke', 'kaytettavyys', 'terminaalialue',
-				'korkeus', 'paino', 'suuntalavan_tunnus'
+				'korkeus', 'paino', 'suuntalavan_tunnus', 'valittutunnus'
 				);
 
 		# Parametri tyhj‰ksi jos sit‰ ei ole setattu
@@ -118,7 +118,7 @@
 
 				$suuntalava_upd_res = pupe_query($query);
 
-				if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
+				if (trim($automaattinen_paivitys) == 'K' OR (trim($automaattinen_paivitys) == 'S' and $valittutunnus != '')) {
 
 					if (trim($automaattinen_paivitys) == 'K') {
 						$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";
@@ -211,7 +211,7 @@
 			}
 
 			// p‰ivitet‰‰n suuntalava automaattisesti niille riveille mihin se m‰ts‰‰
-			if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
+			if (trim($automaattinen_paivitys) == 'K' OR (trim($automaattinen_paivitys) == 'S' and $valittutunnus != '')) {
 
 				if (trim($automaattinen_paivitys) == 'K') {
 					$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";

@@ -13423,6 +13423,7 @@ if (!function_exists("pupe_DataTables")) {
 					});
 
 					function splittaus(tun, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, kpl) {
+						var uuden_rivin_tunnus = 0;
 						// JOS HINTA * KPL ON ENEMMÄN KUIN 10,2 DESIMAALIA, NIIN HERJATAAN
 						if ((rivi_hinta_value * kpl) > 9999999999.99) {
 							var virhe = '".t('VIRHE: liian iso loppusumma')."!';
@@ -13434,21 +13435,33 @@ if (!function_exists("pupe_DataTables")) {
 								if (kpl == 0) {
 									$('#refresh_screen_ajaxille').val('true');
 								}
-
+								console.log('----'+rivi_kpl_alkuperainen+' > 1 && '+rivi_kpl_alkuperainen+' > '+kpl+' && '+kpl+' > 0');
 								if (rivi_kpl_alkuperainen > 1 && rivi_kpl_alkuperainen > kpl && kpl > 0) {
 									var uuden_rivin_kpl = rivi_kpl_alkuperainen - kpl;
 
-									$.post('{$_SERVER['SCRIPT_NAME']}',
-										{ 	keikan_otunnus: otunnus,
+									console.log('KEK');
+
+									console.log(tun, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, kpl);
+
+									$.ajax({
+										async: false,
+										type: 'POST',
+										url: '{$_SERVER['SCRIPT_NAME']}',
+										data: {
+											keikan_otunnus: otunnus,
 											otunnus: otunnus,
 											tunnus: tun,
 											ajax_toiminto: 'rivi_kpl_splittaus',
 											no_head: 'yes',
 											ohje: 'off',
 											uuden_rivin_kpl: uuden_rivin_kpl,
-											vanhan_rivin_kpl: rivi_kpl_alkuperainen},
-										function(return_value) {
+											vanhan_rivin_kpl: rivi_kpl_alkuperainen
+											}
+										}).done(function(return_value) {
 
+											console.log('CALLBACK');
+
+											console.log(return_value);
 											var data = jQuery.parseJSON(return_value);
 
 											var uusi_rivi = $('tr[class*=\"'+tun+'\"]').clone();
@@ -13486,10 +13499,14 @@ if (!function_exists("pupe_DataTables")) {
 											$('#hinnat_'+data.tunnus).html(data.rivihinta+'<br>'+data.alerivihinta);
 											$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
 											$('#rivi_kpl_alkuperainen_'+data.tunnus).val(uuden_rivin_kpl);
-
+											
+											uuden_rivin_tunnus = data.tunnus;
+											console.log('KSSA'+uuden_rivin_tunnus);
 											$('#refresh_screen_ajaxille').val('true');
 										}
 									);
+									
+									console.log('JORMA'+uuden_rivin_tunnus);
 								}
 								else {
 									$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
@@ -13537,24 +13554,31 @@ if (!function_exists("pupe_DataTables")) {
 									}
 								}
 
-								$.post('{$_SERVER['SCRIPT_NAME']}',
-									{ 	keikan_otunnus: otunnus,
+								$.ajax({
+									async: false,
+									type: 'POST',
+									url: '{$_SERVER['SCRIPT_NAME']}',
+									data: {
+										keikan_otunnus: otunnus,
 										otunnus: otunnus,
 										tunnus: tun,
 										ajax_toiminto: 'rivi_kpl',
 										kpl: kpl,
 										no_head: 'yes',
-										ohje: 'off'},
-									function(return_value) {
+										ohje: 'off'
+										}
+									}).done(function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 
 										$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);
 										$('#ulkkpl_'+tun).html(data.ulkkpl);
 										$('#alerivihintaalkuperainen_'+tun).val(data.alerivihinta);
-									}
-								);
+									});
+								
 							}
 						}
+						console.log('SPLIT'+uuden_rivin_tunnus);
+						return uuden_rivin_tunnus;
 					}
 					// JOS PAINETAAN MASSATULOUTUSNAPPIA
 					$('input[id^=\"massasubmitti\"]').live('click', function() {
@@ -13573,18 +13597,23 @@ if (!function_exists("pupe_DataTables")) {
 						var massajakokplmaara = parseFloat(document.getElementById('massajakokplmaara_'+keijo).value.replace(',','.'));
 
 						var valid_params = true;
+						var suuntalava_ok = false;
 						if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara)) {
 							valid_params = false;
 						}
 						if (massatyyppi.length == 0 || massakeraysvyohyke.length == 0 || massaterminaalialue.length == 0) {
 							valid_params = false;
 						}
-						
-						if (valid_params) {
+						else {
+							suuntalava_ok = true;
+						}
+
+						if (valid_params && suuntalava_ok) {
 							var ajokerta = rivi_kpl_alkuperainen / massajakokplmaara;
 							var loput = rivi_kpl_alkuperainen - (Math.floor(ajokerta) * massajakokplmaara)
+							var uudenrivintunnus = 0;
 
-							for(var i=1;i<ajokerta;i++) {
+							(function loopperi(i) {
 								console.log('AJOKERTA:' + i)
 								console.log('massasubmitti_' + keijo);
 								console.log('massatyyppi=' + massatyyppi);
@@ -13597,9 +13626,40 @@ if (!function_exists("pupe_DataTables")) {
 								console.log('rivi_hinta_alkup=' +rivi_hinta_alkup);
 								console.log('alerivi_hinta_alkup=' +alerivi_hinta_alkup);
 								console.log('otunnus='+ otunnus);
-								splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara);
+								
+								uudenrivintunnus = splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara);
+
 								rivi_kpl_alkuperainen = rivi_kpl_alkuperainen - massajakokplmaara;
+								console.log('uusirivitunnus='+ uudenrivintunnus);
+								$.ajax({
+									async: false,
+									type: 'POST',
+									url: '{$_SERVER['SCRIPT_NAME']}',
+									data: { 	
+										keikan_otunnus: otunnus,
+										otunnus: otunnus,
+										tunnus: uudenrivintunnus,
+										ajax_toiminto: 'lisaa_suuntalava',
+										keraysvyohyke: massakeraysvyohyke,
+										kaytettavyys: massakaytettavyys,
+										terminaalialue: massaterminaalialue,
+										tyyppi: massatyyppi,
+										no_head: 'yes',
+										ohje: 'off'
+										}
+									}).done(function(return_value) {
+										var data = jQuery.parseJSON(return_value);
+										var uusilava = data.suuntalavan_tunnus;
+										console.log('lisatty uusi suuntalava: '+uusilava);
+										console.log('wtf '+i);
+										if (--i) loopperi(i);
+									});
+
+							})(Math.floor(ajokerta));
+
+							for(var i=1;i<ajokerta;i++) {
 							}
+
 							if (loput != 0) {
 								console.log('mentiin tänne');
 								console.log('massasubmitti_' + keijo);
@@ -13613,27 +13673,28 @@ if (!function_exists("pupe_DataTables")) {
 								console.log('rivi_hinta_alkup=' +rivi_hinta_alkup);
 								console.log('alerivi_hinta_alkup=' +alerivi_hinta_alkup);
 								console.log('otunnus='+ otunnus);
-								console.log('loput='+ loput)
+								console.log('loput='+ loput);
 								$.post('{$_SERVER['SCRIPT_NAME']}',
-								{ 	keikan_otunnus: otunnus,
-									otunnus: otunnus,
-									tunnus: keijo,
-									ajax_toiminto: 'rivi_kpl',
-									kpl: loput,
-									no_head: 'yes',
-									ohje: 'off'},
-								function(return_value) {
-									var data = jQuery.parseJSON(return_value);
+									{ 	keikan_otunnus: otunnus,
+										otunnus: otunnus,
+										tunnus: keijo,
+										ajax_toiminto: 'rivi_kpl',
+										kpl: loput,
+										no_head: 'yes',
+										ohje: 'off'},
+									function(return_value) {
+										var data = jQuery.parseJSON(return_value);
 
-									$('#hinnat_'+keijo).html(data.rivihinta+'<br>'+data.alerivihinta);
-									$('#ulkkpl_'+keijo).html(data.ulkkpl);
-									$('#alerivihintaalkuperainen_'+keijo).val(data.alerivihinta);
-								}
-							);
+										$('#hinnat_'+keijo).html(data.rivihinta+'<br>'+data.alerivihinta);
+										$('#ulkkpl_'+keijo).html(data.ulkkpl);
+										$('#alerivihintaalkuperainen_'+keijo).val(data.alerivihinta);
+									}
+								);
 							}
 						}
 						else {
-							alert('Virheelliset parametrit');
+							var slavavirhe = suuntalava_ok ? '' : ' - Suuntalavaa ei voitu luoda';
+							alert('Virheelliset parametrit'+ slavavirhe);
 						}
 
 					});
@@ -13655,10 +13716,10 @@ if (!function_exists("pupe_DataTables")) {
 								splittaus(tun, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, kpl);
 
 						}).ajaxComplete(function(){
-								/*if ($('#refresh_screen_ajaxille').val() == 'true') {
+								if ($('#refresh_screen_ajaxille').val() == 'true') {
 									$('#refresh_screen_ajaxille').val('false');
 									var t = setTimeout('document.formi1.submit()', 1000);
-								}*/
+								}
 						});
 
 						$('input[name^=\"rivi_ale\"]').each(function(){

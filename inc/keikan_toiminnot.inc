@@ -476,5 +476,38 @@
 
 		echo json_encode($rivi);
 	}
+	elseif ($_POST['ajax_toiminto'] == 'lisaa_suuntalava') {
+		$otunnus 		 = $_POST['otunnus'];
+		$suuntalavan_tunnus = 0;
+		$tee = "massakausi";
+		$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+        
+		require ("../tilauskasittely/suuntalavat.inc");
+		
+		$params = array(
+			"sscc" => $otunnus.$_POST['tunnus'],
+			"usea_keraysvyohyke" => "K",
+			"keraysvyohyke" => $_POST['keraysvyohyke'],
+			"kaytettavyys" => $_POST['kaytettavyys'],
+			"terminaalialue" => $_POST['terminaalialue'],
+			"automaattinen_paivitys" => "S",
+			"valittutunnus" => $_POST['tunnus'],
+			"tyyppi" => $_POST['tyyppi'],
+			        "korkeus" => 0,
+			        "paino" => 0,
+			"alkuhyllyalue" => "",
+			        "alkuhyllynro" => "",
+			        "alkuhyllyvali" => "",
+			        "alkuhyllytaso" => "",
+			"loppuhyllyalue" => "",
+			        "loppuhyllynro" => "",
+			        "loppuhyllyvali" => "",
+			        "loppuhyllytaso" => "",
+		);
+		
+		$suuntalavan_tunnus = lisaa_suuntalava($otunnus, $params);
+		
+		echo json_encode(array('suuntalavan_tunnus' => $suuntalavan_tunnus));
+	}
 
 	if (isset($_POST['ajax_toiminto'])) exit;

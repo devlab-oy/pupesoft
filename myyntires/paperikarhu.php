@@ -175,7 +175,9 @@
 			if ($sivu == 1) {
 
 				//otsikko
-				$pdf->draw_text(30, $kala+30, t("Avoimet laskut", $kieli), $firstpage, $bold);
+				if ($yhtiorow['maksukehotus_kentat'] == 'J' or $yhtiorow['maksukehotus_kentat'] == 'L') {
+					$pdf->draw_text(30, $kala+30, t("Avoimet laskut", $kieli), $firstpage, $bold);
+				}
 
 				// tehd‰‰n riveist‰ max 90 merkki‰
 				$viesti = wordwrap($viesti, 90, "\n");

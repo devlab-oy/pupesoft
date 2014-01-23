@@ -13338,6 +13338,7 @@ if (!function_exists("pupe_DataTables")) {
 									$('#kohdistettu_rivit').html(parseInt($('#kohdistettu_rivit').html()) + 1);
 									$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) + parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
 									$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+									$('#massalisanappi_'+rivi_ja_otsikko[0]).show();
 								}
 							);
 						}
@@ -13381,6 +13382,7 @@ if (!function_exists("pupe_DataTables")) {
 									$('#kohdistettu_rivit').html(parseInt($('#kohdistettu_rivit').html()) - 1);
 									$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) - parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
 									$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+									$('#massalisanappi_'+rivi_ja_otsikko[0]).hide();
 								}
 							);
 						}
@@ -13656,9 +13658,6 @@ if (!function_exists("pupe_DataTables")) {
 									});
 
 							})(Math.floor(ajokerta));
-
-							for(var i=1;i<ajokerta;i++) {
-							}
 
 							if (loput != 0) {
 								console.log('mentiin tänne');

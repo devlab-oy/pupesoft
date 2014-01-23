@@ -78,7 +78,7 @@
 				'alkuhyllyalue', 'alkuhyllynro', 'alkuhyllyvali', 'alkuhyllytaso',
 				'loppuhyllyalue', 'loppuhyllynro', 'loppuhyllyvali', 'loppuhyllynro', 'loppuhyllytaso',
 				'tyyppi', 'keraysvyohyke', 'usea_keraysvyohyke', 'kaytettavyys', 'terminaalialue',
-				'korkeus', 'paino', 'suuntalavan_tunnus', 'valittutunnus'
+				'korkeus', 'paino', 'suuntalavan_tunnus', 'valittutunnus', 'automaattinen_paivitys'
 				);
 
 		# Parametri tyhjäksi jos sitä ei ole setattu

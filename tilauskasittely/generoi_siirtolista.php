@@ -33,8 +33,8 @@
 				\r2. lähdevarastot pilkulla eroteltuna\n
 				\r3. kohdevarasto\n
 				\r4. toimitustavan selite-teksti\n
-				\r5. lähdevarastojen keräysvyöhykkeet pilkulla eroteltuna (ei ole pakollinen jos yhtiön parametreissa keräyserät ei ole K)\n
-				\r6. kohdevaraston keräysvyöhykkeet pilkulla eroteltuna (ei ole pakollinen jos yhtiön parametreissa keräyserät ei ole K)\n
+				\r5. lähdevarastojen keräysvyöhykkeet pilkulla eroteltuna\n
+				\r6. kohdevaraston keräysvyöhykkeet pilkulla eroteltuna\n
 				\r7. monivalintalaatikon osaston tunnukset pilkulla eroteltuna\n
 				\r8. monivalintalaatikon tuoteryhmän tunnukset pilkulla eroteltuna\n
 				\r9. monivalintalaatikon tuotemerkin tunnukset pilkulla eroteltuna\n
@@ -64,15 +64,7 @@
 			die ("Et antanut toimitustapaa!\n");
 		}
 
-		if (isset($argv[5]) and trim($argv[5]) == '' and $yhtiorow['kerayserat'] == 'K') {
-			die ("Et antanut lähdevarastojen keräysvyöhykkeitä!\n");
-		}
-
-		if (isset($argv[6]) and trim($argv[6]) == '' and $yhtiorow['kerayserat'] == 'K') {
-			die ("Et antanut kohdevaraston keräysvyöhykkeitä!\n");
-		}
-
-		// pupesoft_flock();
+		pupesoft_flock();
 
 		// Haetaan kukarow
 		$query = "	SELECT *

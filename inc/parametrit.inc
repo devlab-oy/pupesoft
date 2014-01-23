@@ -793,7 +793,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		}
 
 		// Messenger-viestit (X = ei luettu)
-		if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off")) {
+		if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off") and $no_head != "yes") {
 
 			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)

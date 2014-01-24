@@ -35,3 +35,5 @@
 	$mysqlaliasarray['OSTOTIL_TILTYYP']['selite']       = "Ostotilauksen tilaustyyppi";
 	$mysqlaliasarray['OSTOTIL_TILTYYP']['selitetark']   = "Ostotilauksen tilaustyypin nimi";
 	$mysqlaliasarray['OSTOTIL_TILTYYP']['selitetark_2'] = "Automaattituloutuksen esto";
+
+	$mysqlaliasarray['INVEN_LAJI']['selitetark_2'] = "Varastonmuutos tili";

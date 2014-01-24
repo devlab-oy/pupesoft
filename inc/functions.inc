@@ -23508,7 +23508,14 @@ if (!function_exists("splittaa_valmistukset")) {
 		global $yhtiorow, $kukarow;
 
 		// Otetaan laskurow talteen, ja nollataan sieltä kentät jota ei monisteta
-		$laskurow_temp = $laskurow;
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['tunnus']}'";
+		$laskurow_temp_res = pupe_query($query);
+		$laskurow_temp = mysql_fetch_assoc($laskurow_temp_res);
+
 		unset($laskurow_temp['tunnus']);
 		unset($laskurow_temp['muutospvm']);
 		unset($laskurow_temp['muuttaja']);

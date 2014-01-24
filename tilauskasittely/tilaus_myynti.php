@@ -4560,7 +4560,7 @@ if ($tee == '') {
 					if ($myyntiera > 1) echo "<tr><th>".t("Hinta")." > $myyntiera $tuote[yksikko]</th><td align='right'>".hintapyoristys($myyntierahinta["hinta"])." $yhtiorow[valkoodi]</td></tr>";
 				}
 
-				if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $ale_peruste != '') {
+				if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') {
 					$haettu_alehinta = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 					$ap_font = "<font class='ok'>";
 

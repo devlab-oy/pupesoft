@@ -557,21 +557,23 @@ if (
 if ((int) $kukarow["kesken"] > 0) {
 
 	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
-		$query  = "	SELECT lasku.*, tyomaarays.*
+		$query  = "	SELECT laskun_lisatiedot.*, lasku.*, tyomaarays.*
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
+					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 					WHERE lasku.tunnus = '$kukarow[kesken]'
 					AND lasku.yhtio	= '$kukarow[yhtio]'
 					AND lasku.tila != 'D'";
 	}
 	else {
 		// pitää olla: siirtolista, sisäinen työmääräys, reklamaatio, tarjous, valmistus, myyntitilaus, ennakko, myyntitilaus, ylläpitosopimus, projekti
-		$query 	= "	SELECT *
+		$query 	= "	SELECT laskun_lisatiedot.*, lasku.*
 					FROM lasku
-					WHERE tunnus = '$kukarow[kesken]'
-					AND yhtio = '$kukarow[yhtio]'
-					AND tila in ('G','S','C','T','V','N','E','L','0','R')
-					AND (alatila != 'X' or tila = '0')";
+					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+					WHERE lasku.tunnus = '$kukarow[kesken]'
+					AND lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.tila in ('G','S','C','T','V','N','E','L','0','R')
+					AND (lasku.alatila != 'X' or lasku.tila = '0')";
 	}
 	$result = pupe_query($query);
 
@@ -1801,21 +1803,23 @@ if ($uusitoimitus != "") {
 
 	//Tässä halutaan jo hakea uuden tilauksen tiedot
 	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
-		$query  = "	SELECT lasku.*, tyomaarays.*
+		$query  = "	SELECT laskun_lisatiedot.*, lasku.*, tyomaarays.*
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
+					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 					WHERE lasku.tunnus = '$kukarow[kesken]'
 					AND lasku.yhtio	= '$kukarow[yhtio]'
 					AND lasku.tila != 'D'";
 	}
 	else {
 		// pitää olla: siirtolista, sisäinen työmääräys, reklamaatio, tarjous, valmistus, myyntitilaus, ennakko, myyntitilaus, ylläpitosopimus, projekti
-		$query 	= "	SELECT *
+		$query 	= "	SELECT laskun_lisatiedot.*, lasku.*
 					FROM lasku
-					WHERE tunnus = '$kukarow[kesken]'
-					AND yhtio = '$kukarow[yhtio]'
-					AND tila in ('G','S','C','T','V','N','E','L','0','R')
-					AND (alatila != 'X' or tila = '0')";
+					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+					WHERE lasku.tunnus = '$kukarow[kesken]'
+					AND lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.tila in ('G','S','C','T','V','N','E','L','0','R')
+					AND (lasku.alatila != 'X' or lasku.tila = '0')";
 	}
 	$result = pupe_query($query);
 	$laskurow = mysql_fetch_assoc($result);
@@ -2159,21 +2163,23 @@ if ($tee == '') {
 
 		//Haetaan laskurow uudestaan
 		if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
-			$query  = "	SELECT lasku.*, tyomaarays.*
+			$query  = "	SELECT laskun_lisatiedot.*, lasku.*, tyomaarays.*
 						FROM lasku
 						JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
+						LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 						WHERE lasku.tunnus = '$kukarow[kesken]'
 						AND lasku.yhtio	= '$kukarow[yhtio]'
 						AND lasku.tila != 'D'";
 		}
 		else {
 			// pitää olla: siirtolista, sisäinen työmääräys, reklamaatio, tarjous, valmistus, myyntitilaus, ennakko, myyntitilaus, ylläpitosopimus, projekti
-			$query 	= "	SELECT *
+			$query 	= "	SELECT laskun_lisatiedot.*, lasku.*
 						FROM lasku
-						WHERE tunnus = '$kukarow[kesken]'
-						AND yhtio = '$kukarow[yhtio]'
-						AND tila in ('G','S','C','T','V','N','E','L','0','R')
-						AND (alatila != 'X' or tila = '0')";
+						LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+						WHERE lasku.tunnus = '$kukarow[kesken]'
+						AND lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tila in ('G','S','C','T','V','N','E','L','0','R')
+						AND (lasku.alatila != 'X' or lasku.tila = '0')";
 		}
 		$result = pupe_query($query);
 
@@ -2713,10 +2719,10 @@ if ($tee == '') {
 	$meapu = pupe_query($apuqu);
 	$meapurow = mysql_fetch_assoc($meapu);
 
-	if ($laskurow["liitostunnus"] != 0 and $meapurow["kateinen"] == "" and ($laskurow["nimi"] == '' or $laskurow["osoite"] == '' or $laskurow["postino"] == '' or $laskurow["postitp"] == '')) {
+	if ($laskurow["liitostunnus"] != 0 and $meapurow["kateinen"] == "" and ($laskurow["laskutus_nimi"] == '' or $laskurow["laskutus_osoite"] == '' or $laskurow["laskutus_postino"] == '' or $laskurow["laskutus_postitp"] == '')) {
 		if ($toim != 'VALMISTAVARASTOON' and $toim != 'SIIRTOLISTA' and $toim != 'SIIRTOTYOMAARAYS' and ($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
-			echo "<font class='error'>".t("VIRHE: Tilauksen laskutusosoitteen tiedot ovat puutteelliset")."!</font><br><br>";
-			$tilausok++;
+			#echo "<font class='error'>".t("VIRHE: Tilauksen laskutusosoitteen tiedot ovat puutteelliset")."!</font><br><br>";
+			#$tilausok++;
 		}
 	}
 

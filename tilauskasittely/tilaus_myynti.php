@@ -2175,8 +2175,8 @@ if ($tee == '') {
 			// pitää olla: siirtolista, sisäinen työmääräys, reklamaatio, tarjous, valmistus, myyntitilaus, ennakko, myyntitilaus, ylläpitosopimus, projekti
 			$query 	= "	SELECT laskun_lisatiedot.*, lasku.*
 						FROM lasku
-						WHERE tunnus = '$kukarow[kesken]'
 						LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+						WHERE tunnus = '$kukarow[kesken]'
 						AND lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila in ('G','S','C','T','V','N','E','L','0','R')
 						AND (lasku.alatila != 'X' or lasku.tila = '0')";

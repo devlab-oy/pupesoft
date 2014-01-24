@@ -2176,7 +2176,7 @@ if ($tee == '') {
 			$query 	= "	SELECT laskun_lisatiedot.*, lasku.*
 						FROM lasku
 						LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
-						WHERE tunnus = '$kukarow[kesken]'
+						WHERE lasku.tunnus = '$kukarow[kesken]'
 						AND lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila in ('G','S','C','T','V','N','E','L','0','R')
 						AND (lasku.alatila != 'X' or lasku.tila = '0')";

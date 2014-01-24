@@ -42,6 +42,7 @@
 				\r13. Siirrä myös tuoteperheen lapsituotteet, arvona X\n
 				\r14. Huomioi siirrettävän tuotteen myyntierä, arvona X\n
 				\r15. Rivejä per siirtolista (tyhjä = 20)\n
+				\r16. Ei siirretä jos tarve on suurempi tai yhtä suuri kuin saatavilla oleva määrä, arvona X\n
 			");
 			exit;
 		}
@@ -91,6 +92,7 @@
 		$lapsituotteet = (isset($argv[13]) and trim($argv[13]) != "") ? "X" : "";
 		$myyntiera = (isset($argv[14]) and trim($argv[14]) != "") ? "X" : "";
 		$olliriveja = (isset($argv[15]) and trim($argv[15]) != "") ? (int) trim($argv[15]) : 20;
+		$ei_siirreta_jos_tarve_ylittyy = (isset($argv[16]) and trim($argv[16]) != "") ? "X" : "";
 
 		require ("tilauskasittely/monivalintalaatikot.inc");
 
@@ -126,6 +128,7 @@
 	if (!isset($kohdevarasto)) $kohdevarasto = "";
 	if (!isset($toimittaja)) $toimittaja = "";
 	if (!isset($olliriveja)) $olliriveja = "";
+	if (!isset($ei_siirreta_jos_tarve_ylittyy)) $ei_siirreta_jos_tarve_ylittyy = "";
 
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
@@ -356,11 +359,14 @@
 
 		$lapsituote_chk = $lapsituotteet != "" ? "checked" : "";
 		$myyntiera_chk = $myyntiera != "" ? "checked" : "";
+		$ei_siirreta_jos_tarve_ylittyy_chk = $ei_siirreta_jos_tarve_ylittyy != "" ? "checked" : "";
 
 		echo "<tr><th>",t("Jätä siirtolista kesken"),":</th><td><input type='checkbox' name = 'kesken' value='X' {$c}></td></tr>";
 		echo "<tr><th>",t("Siirrä myös tuoteperheen lapsituotteet"),":</th><td><input type='checkbox' name = 'lapsituotteet' value='X' {$lapsituote_chk}></td></tr>";
 		echo "<tr><th>",t("Huomioi siirrettävän tuotteen myyntierä"),":</th><td><input type='checkbox' name = 'myyntiera' value='X' {$myyntiera_chk}></td></tr>";
-		echo "<tr><th>",t("Rivejä per siirtolista (tyhjä = 20)"),":</th><td><input type='text' size='8' value='{$olliriveja}' name='olliriveja'></td>";
+		echo "<tr><th>",t("Rivejä per siirtolista (tyhjä = 20)"),":</th><td><input type='text' size='8' value='{$olliriveja}' name='olliriveja'></td></tr>";
+		echo "<tr><th>",t("Ei siirretä jos tarve on suurempi tai yhtä suuri kuin saatavilla oleva määrä"),"</th>";
+		echo "<td><input type='checkbox' name='ei_siirreta_jos_tarve_ylittyy' value='X' {$ei_siirreta_jos_tarve_ylittyy_chk} /></td></tr>";
 		echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi siirtolista"),"'></form>";
 	}
 
@@ -599,9 +605,13 @@
 
 					if ($saldo_myytavissa_lahde > 0 and $tarve_kohdevarasto > 0) {
 
-						// Jos tarve on suurempi kuin saatavilla oleva määrä
+						// Jos tarve on suurempi tai yhtä suuri kuin saatavilla oleva määrä
 						if ($tarve_kohdevarasto >= $saldo_myytavissa_lahde) {
-							if ($saldo_myytavissa_lahde == 1) {
+
+							if ($ei_siirreta_jos_tarve_ylittyy == "X") {
+								$siirretaan = 0;
+							}
+							elseif ($saldo_myytavissa_lahde == 1) {
 								$siirretaan = $saldo_myytavissa_lahde;
 							}
 							else {

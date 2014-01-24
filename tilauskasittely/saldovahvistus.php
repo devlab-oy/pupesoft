@@ -369,7 +369,12 @@ function echo_saldovahvistukset($request) {
 	echo "<form method='POST' action = ''>";
 	echo "<input type='hidden' name='tee' value='laheta_sahkopostit' />";
 	echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
-	echo "<input type='submit' value='".t('Lähetä')."' />";
+	echo "<input type='submit' value='".t('Lähetä saldovahvistukset asiakkaille')."' />";
+	echo "</form><br><br>";
+
+	echo "<form method='POST' action=''>";
+	echo "<input type='hidden' name='tee' value='poista_valinnat' />";
+	echo "<input type='submit' value='".t('Poista kaikki kerätyt saldovahvistusrivit')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
 	echo "</form>";
 }
 
@@ -538,16 +543,8 @@ function echo_kayttoliittyma($request) {
 	echo "<input type='checkbox' name='tallenna_exceliin' {$chk} />";
 	echo "</td>";
 	echo "</tr>";
-
 	echo "</table>";
-
 	echo "<input type='submit' value='".t('Aja')."' />";
-
-	echo "</form>";
-
-	echo "<form method='POST' action=''>";
-	echo "<input type='hidden' name='tee' value='poista_valinnat' />";
-	echo "<input type='submit' value='".t('Poista kaikki kerätyt saldovahvistusrivit')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
 	echo "</form>";
 }
 

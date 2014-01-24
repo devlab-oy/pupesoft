@@ -274,7 +274,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
 	echo "<br/>";
 
 	echo "<form method='POST' action=''>";
-	echo "<input type='submit' value='".t('Lähetä pdf')."' />";
+	echo "<input type='submit' value='".t('Lähetä asiakkaalle')."' />";
 	echo "<input type='hidden' name='tee' value='laheta_sahkoposti' />";
 	echo "<input type='hidden' name='saldovahvistus[saldovahvistus_viesti]' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
 	echo "<input type='hidden' name='saldovahvistus[laskun_avoin_paiva]' value='{$saldovahvistusrivi['avoin_saldo_pvm']}' />";

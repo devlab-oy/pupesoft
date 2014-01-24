@@ -107,12 +107,40 @@
 	# HUOM:	Samalle vastaanottajalle osoitetun lähetyserän (MPS, edellyttää EDI-tietoja) tietoja ei tulosteta osoitekorttiin,
 	#		mutta ne ilmoitetaan EDI -sanomassa. Poikkeuksena Postiennakko, katso selite 13.
 
-	$x = array();
-	if ($yhteensa != '')				$x[]='1'; // Postiennakko
-	if ($kollityht>1)					$x[]='2'; // Monipakettilähetys
-	if ($rakir_row['merahti'] != 'K')	$x[]='3'; // Maksaja muu kuin lähettäjä
-	if ($toitarow['lauantai'] != '')	$x[]='6'; // lauantaijakelu
-	if ($toitarow['kuljyksikko'] != '')	$x[]='7'; // kuljetusyksikkökuljetus
+	$x = $x_tekstit = $x_tekstit_koko = array();
+
+	if ($yhteensa != '') {
+		$x[]='1'; // Postiennakko
+		$x_tekstit[1] = $x_tekstit_koko[1] = 'Postiennakko';
+	}
+
+	if ($kollityht>1) {
+		$x[]='2'; // Monipakettilähetys
+		$x_tekstit[2] = 'Monipakettiläh.';
+		$x_tekstit_koko[2] = 'Monipakettilähetys';
+	}
+
+	if ($rakir_row['merahti'] != 'K') {
+		$x[]='3'; // Maksaja muu kuin lähettäjä
+		$x_tekstit[3] = 'Maksaja muu';
+		$x_tekstit_koko[3] = 'Maksaja muu kuin lähettäjä';
+	}
+
+	if ($toitarow['erilliskasiteltavakulu'] != 0) {
+		$x[]='4'; // Erilliskäsiteltävä
+		$x_tekstit[4] = 'Erilliskäsit.'
+		$x_tekstit_koko[4] = 'Erilliskäsiteltävä';
+	}
+
+	if ($toitarow['lauantai'] != '') {
+		$x[]='6'; // lauantaijakelu
+		$x_tekstit[6] = $x_tekstit_koko[6] = 'Lauantaijakelu';
+	}
+
+	if ($toitarow['kuljyksikko'] != '')	{
+		$x[]='7'; // kuljetusyksikkökuljetus
+		$x_tekstit[7] = $x_tekstit_koko[7] = 'Kuljetusyksikkö';
+	}
 
 	$selite_chk = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
 
@@ -276,5 +304,3 @@
 
 	$toitarow['sopimusnro'] = sprintf("%06s",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitkä
 	$sopnro  = $toitarow['sopimusnro']; // käytetään edi sanomassa
-
-?>

@@ -206,7 +206,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 				$kaato_tilausrivin_lisatiedot = $this->hae_kaato_tilausrivin_lisatiedot();
 
 				aseta_tyomaarays_var($tekematon_tilausrivi['tunnus'], 'P');
-				aseta_tyomaarays_status($tekematon_tilausrivi['tunnus'], 'V');
+				aseta_tyomaarays_status('V', $tekematon_tilausrivi['tunnus']);
 
 				$kaato_tilausrivi['kommentti'] = $rivi['kommentti'];
 				$kaato_tilausrivi['otunnus'] = $tyomaarays_tunnus;

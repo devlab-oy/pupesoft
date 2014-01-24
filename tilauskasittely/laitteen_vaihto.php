@@ -64,7 +64,7 @@ if ($request['tee'] == 'vaihda_laite') {
 	//jotta tekemätön työmääräys rivi ei mene laskutukseen
 	//ja tyomaarayksen status Laite vaihdettu tilaan, jotta käyttöliittymä on selkeämpi
 	aseta_tyomaarays_var($request['tilausrivi_tunnus'], 'P');
-	aseta_tyomaarays_status($request['tilausrivi_tunnus'], 'V');
+	aseta_tyomaarays_status('V', $request['tilausrivi_tunnus']);
 
 	//pitää luoda uusi työmääräys rivi johon tulee laitteen vaihto tuote tjsp
 	$request['vaihto_toimenpide'] = hae_vaihtotoimenpide_tuote();
@@ -376,15 +376,7 @@ function hae_paikat() {
 	return $paikat;
 }
 
-function aseta_laitteen_tila($laite_tunnus, $tila) {
-	global $kukarow, $yhtiorow;
 
-	$query = "	UPDATE laite
-				SET tila = '{$tila}'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$laite_tunnus}'";
-	pupe_query($query);
-}
 
 function aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($vanha_laite_tunnus) {
 	global $kukarow, $yhtiorow;

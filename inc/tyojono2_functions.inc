@@ -75,28 +75,30 @@ function hae_tyomaaraykset($request) {
 	}
 
 	$query = "	SELECT
-				lasku.tunnus as lasku_tunnus,
-				lasku.ytunnus as asiakas_ytunnus,
-				lasku.nimi as asiakas_nimi,
-				kohde.tunnus as kohde_tunnus,
-				kohde.nimi as kohde_nimi,
-				paikka.nimi as paikka_nimi,
-				a3.selitetark as paikka_olosuhde,
+				lasku.tunnus AS lasku_tunnus,
+				lasku.ytunnus AS asiakas_ytunnus,
+				lasku.nimi AS asiakas_nimi,
+				kohde.tunnus AS kohde_tunnus,
+				kohde.nimi AS kohde_nimi,
+				paikka.nimi AS paikka_nimi,
+				a3.selitetark AS paikka_olosuhde,
 				laite.tuoteno,
 				laite.oma_numero,
-				laite.sarjanro as sarjanumero,
-				laite.sijainti as laite_sijainti,
+				laite.sarjanro AS sarjanumero,
+				laite.sijainti AS laite_sijainti,
+				laite.tunnus AS laite_tunnus,
 				lasku.toimaika,
-				a1.selite as tyojonokoodi,
-				a1.selitetark as tyojono,
-				a2.selite as tyostatus_koodi,
-				a2.selitetark as tyostatus,
-				a2.selitetark_2 as tyostatusvari,
-				tilausrivi.tunnus as tilausrivi_tunnus,
-				tilausrivi.nimitys as tehtava_tyo,
-				tilausrivin_lisatiedot.tilausrivilinkki as poikkeus_tunnus,
-				IF(tilausrivin_lisatiedot.tilausrivilinkki != 0, concat_ws(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys), '') as poikkeus_teksti,
-				poistettu_laite.tuoteno as poistettu_laite
+				a1.selite AS tyojonokoodi,
+				a1.selitetark AS tyojono,
+				a2.selite AS tyostatus_koodi,
+				a2.selitetark AS tyostatus,
+				a2.selitetark_2 AS tyostatusvari,
+				tilausrivi.tunnus AS tilausrivi_tunnus,
+				tilausrivi.nimitys AS tehtava_tyo,
+				tilausrivi.kommentti AS tilausrivi_kommentti,
+				tilausrivin_lisatiedot.tilausrivilinkki AS poikkeus_tunnus,
+				IF(tilausrivin_lisatiedot.tilausrivilinkki != 0, CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys), '') AS poikkeus_teksti,
+				poistettu_laite.tuoteno AS poistettu_laite
 				FROM lasku
 				JOIN tyomaarays
 				ON ( tyomaarays.yhtio = lasku.yhtio
@@ -108,13 +110,13 @@ function hae_tyomaaraykset($request) {
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-				LEFT JOIN tilausrivi as poikkeus_rivi
+				LEFT JOIN tilausrivi AS poikkeus_rivi
 				ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
 					AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
-				LEFT JOIN tilausrivin_lisatiedot as poikkeus_toimenpide_tilausrivi_lisatiedot
+				LEFT JOIN tilausrivin_lisatiedot AS poikkeus_toimenpide_tilausrivi_lisatiedot
 				ON ( poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio = poikkeus_rivi.yhtio
 					AND poikkeus_toimenpide_tilausrivi_lisatiedot.tilausrivitunnus = poikkeus_rivi.tunnus )
-				LEFT JOIN laite as poistettu_laite
+				LEFT JOIN laite AS poistettu_laite
 				ON ( poistettu_laite.yhtio = poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio
 					AND poistettu_laite.tunnus = poikkeus_toimenpide_tilausrivi_lisatiedot.asiakkaan_positio )
 				JOIN laite
@@ -224,7 +226,7 @@ function echo_tyomaaraykset_table($request = array()) {
 		28	 => t('4 viikon päästä erääntyvät'),
 	);
 
-	echo "<table class='display dataTable'>";
+	echo "<table>";
 	echo "<thead>";
 
 	$toimitus_string = "Toimitetaan";
@@ -395,6 +397,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 	echo "<th>".t("Paikka")."</th>";
 	echo "<th>".t("Sijainti")."</th>";
 	echo "<th>".t("Tehtävä työ")."</th>";
+	echo "<th>".t("Kommentti")."</th>";
 	echo "<th>".t("Poikkeus")."</th>";
 	echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
 	echo "<th>".t("Poikkeama")."</th>";
@@ -432,6 +435,10 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 
 		echo "<td>";
 		echo $laite['tehtava_tyo'];
+		echo "</td>";
+
+		echo "<td>";
+		echo '<font class="error">'.$laite['tilausrivi_kommentti'].'</font>';
 		echo "</td>";
 
 		echo "<td>";
@@ -484,10 +491,12 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 			echo "</td>";
 
 			echo "<td>";
-			//echo "<a href='{$palvelin2}asiakkaan_laite_hallinta.php?tee=hae_asiakas&ytunnus={$laite['asiakas_ytunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>".t("Laitteen vaihto")."</button></a>";
 			echo "<a href='{$palvelin2}tilauskasittely/laitteen_vaihto.php?tilausrivi_tunnus={$laite['tilausrivi_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>".t("Laitteen vaihto")."</button></a>";
 			echo "<br/>";
 			echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$laite['lasku_tunnus']}&lopetus={$palvelin2}tyomaarays/tyojono2.php'><button type='button'>".t("Muu")."</button></a>";
+			echo "<br/>";
+			//Vaikka lasku_tunnukset annetaan array:nä niin tarkoitus ei ole antaa ikinä enempää kuin yksi lasku_tunnus tämän linkin kautta
+			echo "<a href='{$palvelin2}tyomaarays/tyojono2.php?toim={$request['toim']}&ala_tee=merkkaa_kadonneeksi&lasku_tunnukset[]={$laite['lasku_tunnus']}&laite_tunnus={$laite['laite_tunnus']}'><button type='button'>".t("Kateissa")."</button></a>";
 			echo "</td>";
 		}
 
@@ -497,18 +506,22 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 	echo "</table>";
 	echo "</td>";
 
-	if ($request['toim'] == 'TEHDYT_TYOT') {
-		echo "<td>";
-		echo "</td>";
-	}
-	else {
-		echo "<td>";
+	echo "<td>";
+	if ($request['toim'] != 'TEHDYT_TYOT') {
 		echo "<input type='submit' value='".t("Merkkaa tehdyksi")."' />";
-		echo "</td>";
 	}
+	echo "</td>";
 
 	echo "</form>";
 	echo "</tr>";
+}
+
+function merkkaa_laite_kadonneeksi($request) {
+	global $kukarow, $yhtiorow;
+
+	//K = Kateissa
+	aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'K');
+	aseta_laitteen_tila($request['laite_tunnus'], 'K');
 }
 
 function hae_tyojonot($request = array()) {

@@ -4850,6 +4850,11 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
+					//jos alennus on -999.99 myyd‰‰n kehahinnalla
+					if ($hrow["alennus"] == -999.99) {
+						$hrow["alennus"] = 0;
+					}
+
 					// Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
@@ -4909,6 +4914,11 @@ if (!function_exists("alehinta")) {
 				if (mysql_num_rows($hresult) > 0) {
 
 					$hrow = mysql_fetch_assoc($hresult);
+
+					//jos alennus on -999.99 myyd‰‰n kehahinnalla
+					if ($hrow["alennus"] == -999.99) {
+						$hrow["alennus"] = 0;
+					}
 
 					// Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] <= 0) {
@@ -4971,6 +4981,11 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
+					//jos alennus on -999.99 myyd‰‰n kehahinnalla
+					if ($hrow["alennus"] == -999.99) {
+						$hrow["alennus"] = 0;
+					}
+
 					// Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
@@ -5031,6 +5046,11 @@ if (!function_exists("alehinta")) {
 				if (mysql_num_rows($hresult) > 0) {
 
 					$hrow = mysql_fetch_assoc($hresult);
+
+					//jos alennus on -999.99 myyd‰‰n kehahinnalla
+					if ($hrow["alennus"] == -999.99) {
+						$hrow["alennus"] = 0;
+					}
 
 					// Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] <= 0) {

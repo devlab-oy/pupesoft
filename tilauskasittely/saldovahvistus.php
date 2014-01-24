@@ -127,9 +127,13 @@ if (!empty($_SESSION['valitut_laskut'])) {
 	$request['lasku_tunnukset'] = $lasku_tunnukset_temp;
 }
 
-if ($request['tee'] == 'aja_saldovahvistus') {
+//Echotaan saldovahvistukset, kun tehdään käyttöliittymästä haku
+//tai jos sessioon on tallennettu saldovahvistusrivejä edellisellä hakukerroilla ja ollaan välissä käyty jossain muussa ohjelmassa.
+if ($request['tee'] == 'aja_saldovahvistus' or (!empty($request['valitut_laskut']) and $request['tee'] == '')) {
 	js_openFormInNewWindow();
-	$request['laskut'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
+	if ($request['tee'] == 'aja_saldovahvistus') {
+		$request['laskut'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
+	}
 
 	if (!empty($request['tallenna_exceliin'])) {
 		$excel_filepath = generoi_custom_excel_tiedosto($request);
@@ -543,7 +547,7 @@ function echo_kayttoliittyma($request) {
 
 	echo "<form method='POST' action=''>";
 	echo "<input type='hidden' name='tee' value='poista_valinnat' />";
-	echo "<input type='submit' value='".t('Poista kaikki valinnat')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
+	echo "<input type='submit' value='".t('Poista kaikki kerätyt saldovahvistusrivit')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
 	echo "</form>";
 }
 

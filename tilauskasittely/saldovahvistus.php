@@ -145,7 +145,7 @@ if ($request['tee'] == 'aja_saldovahvistus' or (!empty($request['valitut_laskut'
 }
 else if ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovahvistus_pdf') {
 	//requestissa tulee tietyn ytunnuksen lasku_tunnuksia. Tällöin $laskut arrayssa on vain yksi solu
-	$laskut = hae_myyntilaskuja_joilla_avoin_saldo($request);
+	$laskut = hae_myyntilaskuja_joilla_avoin_saldo($request, true);
 
 	//Jos saldovahvistus_rivi löytyy jo valittujen rivien joukosta, niin haetaan riville tallennetut viesti ja päivämäärä sessiosta
 	$lasku_tunnukset_temp = implode('', $laskut['lasku_tunnukset']);

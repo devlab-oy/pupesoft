@@ -12997,7 +12997,11 @@ if (!function_exists("pupe_DataTables")) {
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 			$(document).ready(function() {
-
+				
+				$('input[name^=\"rivi_valitut_tunnukset\"]').each(function() {
+					$(this).attr('disabled', false);
+				});
+				
 				var datatablesit = [];
 				var parametrit 	 = ".json_encode($json_pass).";
 				var spessusortit = [];

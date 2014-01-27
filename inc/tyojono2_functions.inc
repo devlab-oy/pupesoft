@@ -438,7 +438,8 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 		echo "</td>";
 
 		echo "<td>";
-		echo '<font class="error">'.$laite['tilausrivi_kommentti'].'</font>';
+		$kommentti = wordwrap($laite['tilausrivi_kommentti'], 40, '<br/>');
+		echo '<font class="error">'.$kommentti.'</font>';
 		echo "</td>";
 
 		echo "<td>";

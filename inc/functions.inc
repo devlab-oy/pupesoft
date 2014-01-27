@@ -25828,7 +25828,7 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
 	}
 }
 
-if (!function_exists('keraa_saldovahvistusrivit_lahetyspaiva_ytunnus')) {
+if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
 	function keraa_saldovahvistusrivit_ktunnus_ytunnus(&$laskut, $lasku, $ryhmittely) {
 		if (!isset($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'])) {
 			$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'] = 0;

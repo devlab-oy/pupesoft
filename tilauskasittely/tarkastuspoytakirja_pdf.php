@@ -3,13 +3,13 @@
 namespace PDF\Tarkastuspoytakirja;
 
 $filepath = dirname(__FILE__);
-if (file_exists($filepath . '/../inc/parametrit.inc')) {
-	require_once($filepath . '/../inc/parametrit.inc');
-	require_once($filepath . '/../inc/tyojono2_functions.inc');
+if (file_exists($filepath.'/../inc/parametrit.inc')) {
+	require_once($filepath.'/../inc/parametrit.inc');
+	require_once($filepath.'/../inc/tyojono2_functions.inc');
 }
 else {
-	require_once($filepath . '/parametrit.inc');
-	require_once($filepath . '/tyojono2_functions.inc');
+	require_once($filepath.'/parametrit.inc');
+	require_once($filepath.'/tyojono2_functions.inc');
 }
 
 function hae_tarkastuspoytakirjat($lasku_tunnukset) {
@@ -92,18 +92,19 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
 	$query = "	SELECT tilausrivi.*,
 				tilausrivin_lisatiedot.*,
-				toimenpiteen_tyyppi.selite as toimenpiteen_tyyppi,
-				huoltosyklit_laitteet.huoltovali as toimenpiteen_huoltovali,
-				poikkeamarivi.tunnus as poikkeamarivi_tunnus
+				tilausrivin_lisatiedot.asiakkaan_positio AS laite_tunnus,
+				toimenpiteen_tyyppi.selite AS toimenpiteen_tyyppi,
+				huoltosyklit_laitteet.huoltovali AS toimenpiteen_huoltovali,
+				poikkeamarivi.tunnus AS poikkeamarivi_tunnus
 				FROM tilausrivi
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 					AND tilausrivin_lisatiedot.asiakkaan_positio != 0 )
-				LEFT JOIN tilausrivi as poikkeamarivi
+				LEFT JOIN tilausrivi AS poikkeamarivi
 				ON ( poikkeamarivi.yhtio = tilausrivin_lisatiedot.yhtio
 					AND poikkeamarivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
-				LEFT JOIN tuotteen_avainsanat as toimenpiteen_tyyppi
+				LEFT JOIN tuotteen_avainsanat AS toimenpiteen_tyyppi
 				ON ( toimenpiteen_tyyppi.yhtio = tilausrivi.yhtio
 					AND toimenpiteen_tyyppi.tuoteno = tilausrivi.tuoteno
 					AND toimenpiteen_tyyppi.laji = 'tyomaarayksen_ryhmittely' )
@@ -116,11 +117,11 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 				JOIN tuote AS laite_tuote
 				ON ( laite_tuote.yhtio = laite.yhtio
 					AND laite_tuote.tuoteno = laite.tuoteno )
-				JOIN tuotteen_avainsanat sammutin_koko
+				JOIN tuotteen_avainsanat AS sammutin_koko
 				ON ( sammutin_koko.yhtio = laite_tuote.yhtio
 					AND sammutin_koko.tuoteno = laite_tuote.tuoteno
 					AND sammutin_koko.laji = 'sammutin_koko' )
-				JOIN tuotteen_avainsanat sammutin_tyyppi
+				JOIN tuotteen_avainsanat AS sammutin_tyyppi
 				ON ( sammutin_tyyppi.yhtio = laite_tuote.yhtio
 					AND sammutin_tyyppi.tuoteno = laite_tuote.tuoteno
 					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
@@ -145,6 +146,7 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 			$rivi['poikkeus'] = 'X';
 		}
 		else {
+			//Lisätään tyhjä space, jotta pdf-tulostus toimii
 			$rivi['poikkeus'] = ' ';
 		}
 
@@ -163,8 +165,18 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 			$rivi['huolto'] = ' ';
 			$rivi['tarkastus'] = date('my', strtotime($rivi['toimitettuaika']));
 		}
-		
+
 		$rivi['laite'] = \PDF\Tarkastuspoytakirja\hae_rivin_laite($rivi['asiakkaan_positio']);
+		$rivi['sisaltyvat_tyot'] = \PDF\Tarkastuspoytakirja\hae_riviin_sisaltyvat_tyot($rivi['laite_tunnus'], $rivi['tuoteno']);
+
+		if (search_array_key_for_value_recursive($rivi['sisaltyvat_tyot'], 'toimenpiteen_tyyppi', 'tarkastus')) {
+			$rivi['tarkastus'] = date('my', strtotime($rivi['toimitettuaika']));
+		}
+
+		if (search_array_key_for_value_recursive($rivi['sisaltyvat_tyot'], 'toimenpiteen_tyyppi', 'huolto')) {
+			$rivi['huolto'] = date('my', strtotime($rivi['toimitettuaika']));
+		}
+
 		$rivit[] = $rivi;
 	}
 
@@ -200,6 +212,50 @@ function hae_rivin_laite($laite_tunnus) {
 	$laite['viimeinen_painekoe'] = date('my', strtotime($laite['viimeinen_painekoe']['koeponnistus']));
 
 	return $laite;
+}
+
+function hae_riviin_sisaltyvat_tyot($laite_tunnus, $toimenpide_tuoteno) {
+	global $kukarow, $yhtiorow;
+
+	if (empty($laite_tunnus) or empty($toimenpide_tuoteno)) {
+		return false;
+	}
+
+	$query = "	SELECT toimenpide_tuote.*,
+				ta.selite AS toimenpiteen_tyyppi,
+				ta.selitetark AS toimenpiteen_jarjestys
+				FROM laite
+				JOIN huoltosyklit_laitteet AS hl
+				ON ( hl.yhtio = laite.yhtio
+					AND hl.laite_tunnus = laite.tunnus )
+				JOIN huoltosykli
+				ON ( huoltosykli.yhtio = hl.yhtio
+					AND huoltosykli.tunnus = hl.huoltosykli_tunnus )
+				JOIN tuote AS toimenpide_tuote
+				ON ( toimenpide_tuote.yhtio = huoltosykli.yhtio
+					AND toimenpide_tuote.tuoteno = huoltosykli.toimenpide )
+				JOIN tuotteen_avainsanat AS ta
+				ON ( ta.yhtio = toimenpide_tuote.yhtio
+					AND ta.tuoteno = toimenpide_tuote.tuoteno
+					AND ta.selitetark > (	SELECT ta1.selitetark
+											FROM tuote
+											JOIN tuotteen_avainsanat AS ta1
+											ON ( ta1.yhtio = tuote.yhtio
+												AND ta1.tuoteno = tuote.tuoteno )
+											WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+											AND tuote.tuoteno = '{$toimenpide_tuoteno}') )
+				WHERE laite.yhtio = '{$kukarow['yhtio']}'
+				AND laite.tunnus = {$laite_tunnus}
+				ORDER BY toimenpiteen_jarjestys ASC";
+	$result = pupe_query($query);
+
+	$toimenpide_tuotteet = array();
+	while($toimenpide_tuote = mysql_fetch_assoc($result)) {
+		$toimenpide_tuotteet[] = $toimenpide_tuote;
+	}
+
+	return $toimenpide_tuotteet;
+
 }
 
 function hae_tyomaarayksen_asiakas($asiakas_tunnus) {

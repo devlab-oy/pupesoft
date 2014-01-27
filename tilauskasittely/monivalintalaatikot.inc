@@ -2260,4 +2260,4 @@
 		}
 	}
 
-	echo "<div style='clear: both;'></div>";
+	if (!isset($php_cli) or !$php_cli) echo "<div style='clear: both;'></div>";

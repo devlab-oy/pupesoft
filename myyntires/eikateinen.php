@@ -334,7 +334,17 @@ function tee_kirjanpito_muutokset($params) {
 			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $vanharow['summa']);
 		}
 		else {
-			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] + $vanharow['summa']);
+			if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+				$summalisa = 0;
+			}
+			else {
+				if ($vanharow['summa'] > 0) {
+					$summalisa = $params['laskurow']['summa'] + $vanharow['summa'];
+				}
+				else {
+					$summalisa = $params['laskurow']['summa'] + abs($vanharow['summa']);
+				}
+			}
 		}
 
 		$query = "	UPDATE lasku SET

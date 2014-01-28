@@ -128,7 +128,7 @@
 
 	if ($toitarow['erilliskasiteltavakulu'] != 0) {
 		$x[]='4'; // Erilliskäsiteltävä
-		$x_tekstit[4] = 'Erilliskäsit.'
+		$x_tekstit[4] = 'Erilliskäsit.';
 		$x_tekstit_koko[4] = 'Erilliskäsiteltävä';
 	}
 

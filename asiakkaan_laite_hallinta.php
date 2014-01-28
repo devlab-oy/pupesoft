@@ -173,6 +173,7 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<input type='hidden' id='right_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />";
 	echo "<input type='hidden' id='oletko_varma_confirm_message' value='".t("Oletko varma")."' />";
 	echo "<input type='hidden' id='poisto_epaonnistui_message' value='".t("Poisto epäonnistui")."' />";
+	echo "<input type='hidden' id='poistettu_message' value='".t("Poistettu")."' />";
 
 	echo "<form method='POST' action='' name='asiakas_haku'>";
 
@@ -382,7 +383,7 @@ function echo_laitteet_table($laitteet = array()) {
 		echo $laite['sijainti'];
 		echo "</td>";
 
-		echo "<td>";
+		echo "<td class='tila'>";
 		echo $laite['tilan_selite'];
 		echo "</td>";
 

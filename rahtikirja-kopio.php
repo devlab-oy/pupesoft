@@ -454,28 +454,27 @@
 			echo "<select name='lahto'>";
 			echo "<option value=''>",t("Kaikki"),"</option>";
 
-			$toimitustapalisa = $toimitustapajoin = $toimitustapaselect = "";
+			$toimitustapajoin = $toimitustapaselect = "";
 
 			if (isset($toimitustapa_tunnus) and trim($toimitustapa_tunnus) != "") {
-				$toimitustapalisa = "AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'";
-			}
 
-			$query = "	SELECT lahdot.*, t.selite
-						FROM lahdot
-						JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)
-						WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-						AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
-						AND lahdot.varasto = '{$varasto}'
-						AND lahdot.aktiivi = 'S'
-						{$toimitustapalisa}
-						ORDER BY lahdot.lahdon_kellonaika";
-			$lahdot_res = pupe_query($query);
+				$query = "	SELECT lahdot.*, t.selite
+							FROM lahdot
+							JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+							AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
+							AND lahdot.varasto = '{$varasto}'
+							AND lahdot.aktiivi = 'S'
+							AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'
+							ORDER BY lahdot.lahdon_kellonaika";
+				$lahdot_res = pupe_query($query);
 
-			while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
+				while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
 
-				$sel = (isset($lahto) and $lahto == $lahdot_row['tunnus']) ? "selected" : "";
+					$sel = (isset($lahto) and $lahto == $lahdot_row['tunnus']) ? "selected" : "";
 
-				echo "<option value='{$lahdot_row['tunnus']}' {$sel}>{$lahdot_row['tunnus']} {$lahdot_row['lahdon_kellonaika']} {$lahdot_row['selite']}</option>";
+					echo "<option value='{$lahdot_row['tunnus']}' {$sel}>{$lahdot_row['tunnus']} {$lahdot_row['lahdon_kellonaika']} {$lahdot_row['selite']}</option>";
+				}
 			}
 
 			echo "</select>";

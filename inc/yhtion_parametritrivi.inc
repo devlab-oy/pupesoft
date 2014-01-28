@@ -2652,6 +2652,7 @@
 
 		$ulos .= "<option value = ''>".t("Aleperustetta ei n‰ytet‰ tilausrivill‰")."</option>";
 		$ulos .= "<option value = 'o' $sel[o]>".t("Aleperuste n‰ytet‰‰n tilausrivill‰")."</option>";
+		$ulos .= "<option value = 't' $sel[t]>".t("Aleperuste n‰ytet‰‰n tilausrivill‰ tiivistettyn‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

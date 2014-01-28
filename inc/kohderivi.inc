@@ -81,6 +81,10 @@ if (mysql_field_name($result, $i) == "tyyppi") {
 	}
 }
 
+if (mysql_field_name($result, $i) == "poistettu") {
+	$tyyppi = 0;
+}
+
 if(!isset($redirect_echoed)) {
 	$redirect_echoed = 1;
 	if(!empty($valittu_asiakas)) {

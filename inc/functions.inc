@@ -23353,7 +23353,6 @@ if (!function_exists('js_huoltosykli_dropdown_huoltovali_change')) {
 			function bind_huoltosykli_change() {
 				$('.huoltosykli_tunnus').on('change', function() {
 					var ajax_request_obj = hae_huoltosyklin_huoltovali($(this).val());
-
 					var huoltovali_input = $(this).parent().parent().parent().find('.huoltovali');
 					ajax_request_obj.done(function(huoltosykli) {
 						$(huoltovali_input).val(huoltosykli.huoltovali);
@@ -23370,9 +23369,14 @@ if (!function_exists('js_huoltosykli_dropdown_huoltovali_change')) {
 				}).done(function(data) {
 					if (console && console.log) {
 						console.log('Huoltoväli haku onnistui');
-						//console.log(data);
+						console.log(data);
 					}
 
+				}).fail(function(data){
+					if (console && console.log) {
+						console.log('Huoltoväli haku EPÄONNISTUI');
+						console.log(data);
+					}
 				});
 			}
 		</script>

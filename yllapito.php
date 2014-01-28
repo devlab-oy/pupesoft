@@ -19,16 +19,17 @@
 		require ("inc/parametrit.inc");
 	}
 
-	if (function_exists("js_popup")) {
+	//Huom ennen t‰t‰ rivi‰ ei saa olla mit‰‰n echoja!
+	if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
+		require ("inc/{$toim}_ajax.inc");
+	}
+	
+	if (function_exists("js_popup") and !isset($ajax_request)) {
 		echo js_popup(-100);
 	}
 
 	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana" or $toim == "laite") {
 		enable_ajax();
-	}
-
-	if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
-		require ("inc/{$toim}_ajax.inc");
 	}
 
 	if (file_exists("inc/laite_huolto_functions.inc")) {

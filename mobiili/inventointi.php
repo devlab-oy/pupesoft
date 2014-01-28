@@ -38,7 +38,14 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	// Viivakoodi case
 	if ($viivakoodi != '') {
 		$tuotenumerot = hae_viivakoodilla($viivakoodi);
-		$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+
+		$param_viivakoodi = array();
+
+		foreach ($tuotenumerot as $_tuoteno => $_arr) {
+			array_push($param_viivakoodi, $_tuoteno);
+		}
+
+		$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($param_viivakoodi, "','") . "')";
 	}
 
 	$osumat = array();

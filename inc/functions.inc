@@ -19920,7 +19920,14 @@ if (!function_exists("suuntalavan_tuotteet")) {
 		$eankoodi = mysql_real_escape_string($eankoodi);
 		if ($eankoodi != '') {
 			$tuotenumerot = hae_viivakoodilla($eankoodi);
-			$eankoodilisa = "and tilausrivi.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+
+			$param_viivakoodi = array();
+
+			foreach ($tuotenumerot as $_tuoteno => $_arr) {
+				array_push($param_viivakoodi, $_tuoteno);
+			}
+
+			$eankoodilisa = "and tilausrivi.tuoteno in ('" . implode($param_viivakoodi, "','") . "')";
 		}
 
 		$tilriv = (int) $tilriv;
@@ -23482,17 +23489,17 @@ if (!function_exists("hae_viivakoodilla")) {
 		global $kukarow, $yhtiorow;
 
 		// Haetaan eankoodilla tuotenumeroa kolmesta eri paikkaa
-		$query = "	(SELECT tuoteno
+		$query = "	(SELECT tuoteno, '' liitostunnus
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND eankoodi = '{$viivakoodi}')
 					UNION
-					(SELECT tuoteno
+					(SELECT tuoteno, liitostunnus
 					FROM tuotteen_toimittajat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND viivakoodi = '{$viivakoodi}')
 					UNION
-					(SELECT tuotteen_toimittajat.tuoteno
+					(SELECT tuotteen_toimittajat.tuoteno, tuotteen_toimittajat.liitostunnus
 					FROM tuotteen_toimittajat_tuotenumerot
 					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio
 					AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
@@ -23502,7 +23509,7 @@ if (!function_exists("hae_viivakoodilla")) {
 		$chk_res = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($chk_res)) {
-			$viivakoodit[$row['tuoteno']] = $row['tuoteno'];
+			$viivakoodit[$row['tuoteno']][] = $row['liitostunnus'];
 		}
 
 		return $viivakoodit;

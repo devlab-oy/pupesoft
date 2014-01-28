@@ -43,7 +43,14 @@ if (($hyllyalue != '' and $hyllynro != '' and $hyllyvali != '' and $hyllytaso !=
 		$tuotenumerot = hae_viivakoodilla($viivakoodi);
 
 		if (count($tuotenumerot) > 0) {
-			$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+
+			$param_viivakoodi = array();
+
+			foreach ($tuotenumerot as $_tuoteno => $_arr) {
+				array_push($param_viivakoodi, $_tuoteno);
+			}
+
+			$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($param_viivakoodi, "','") . "')";
 			$hae_viivakoodilla = true;
 		}
 		else {

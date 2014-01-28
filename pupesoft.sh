@@ -28,11 +28,11 @@ S3BUCKET=""
 # Backupataan kanta
 NOMYSQLBACKUP=""
 
+# Mysql slow queries logfile
+SLOWLOG=""
+
 # Komennot
 /bin/bash ${POLKU}pupe-backup.sh "$BACKUPDIR" "$BACKUPDB" "$BACKUPUSER" "$BACKUPPASS" "$BACKUPSAVEDAYS" "$SALAUSAVAIN" "$EXTRABACKUP" "$REMOTEHOST" "$REMOTEUSER" "$REMOTEPASS" "$REMOTEREMDIR" "$REMOTELOCALDIR" "$S3BUCKET" "$NOMYSQLBACKUP"
 /bin/bash ${POLKU}pupe-cron.sh "$YHTIO"
 /bin/bash ${POLKU}pupe-cron-server.sh "$BACKUPSAVEDAYS"
-
-# Jos haluat seurata hitaita kyselyitä
-#SLOWLOG="/var/lib/mysql/mysqld-slow.log"
-#sh ${POLKU}mysql-slow-log.sh "$SLOWLOG" "$BACKUPUSER" "$BACKUPPASS"
+/bin/bash ${POLKU}mysql-slow-log.sh "$SLOWLOG" "$BACKUPUSER" "$BACKUPPASS"

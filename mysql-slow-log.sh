@@ -4,8 +4,8 @@ SLOWLOG=$1
 SLOWKAYTTAJA=$2
 SLOWSALASANA=$3
 
-#Ekotetaan hitaat kyselyt
-if [ -f $SLOWLOG ]; then
+# Ekotetaan hitaat kyselyt
+if [[ ! -z $SLOWLOG && -f $SLOWLOG ]]; then
 	if [ -f /home/nagios/nagios-pupesoft.sh ]; then
 		    mysqldumpslow $SLOWLOG > /home/nagios/nagios-pupesoftslow.log 2> /dev/null
 		    chown nagios: /home/nagios/nagios-pupesoftslow.log

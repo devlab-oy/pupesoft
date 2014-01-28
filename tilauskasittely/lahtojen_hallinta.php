@@ -1,7 +1,5 @@
 <?php
 
-	ini_set('zlib.output_compression', 1);
-
 	require ("../inc/parametrit.inc");
 
 	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
@@ -23,7 +21,6 @@
 			exit;
 		}
 	}
-
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 

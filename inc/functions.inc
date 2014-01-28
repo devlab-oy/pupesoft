@@ -2415,7 +2415,6 @@ if (!function_exists("synkronoi")) {
 					}
 				}
 				elseif ($table == "tuotteen_toimittajat") {
-
 					$query = "SELECT * from tuote where yhtio='$yhtio' and tuoteno='$abuhaku[tuoteno]'";
 					$abures = pupe_query($query);
 
@@ -2429,7 +2428,7 @@ if (!function_exists("synkronoi")) {
 						$tarkquery = "SELECT tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
 						$tarkres = pupe_query($tarkquery);
 
-						if (mysql_num_rows($tarkres)==1) {
+						if (mysql_num_rows($tarkres) == 1) {
 							//	Ylikirjoitetaan liitostunnus
 							$tarkrow = mysql_fetch_assoc($tarkres);
 							$override["liitostunnus"] = $tarkrow["tunnus"];
@@ -2448,7 +2447,6 @@ if (!function_exists("synkronoi")) {
 						$ok=0;
 					}
 				}
-
 
 				//	Poistetaan tietue jos masteria ei löydetty mutta originaali on tallessa.. olisiko tässä selvempi tapa?
 				if (!isset($masterrow) and is_array($orig) and count($orig) > 0) {
@@ -3611,6 +3609,7 @@ if (!function_exists("alehinta")) {
 		if ($kpl == 0) $kpl = 1;
 
 		$aperuste 		= "";
+		$hperuste 		= "";
 		$alehinta_alv 	= 0;
 		$hintaperuste	= FALSE;
 		$aleperuste		= FALSE;
@@ -3729,13 +3728,13 @@ if (!function_exists("alehinta")) {
 
 			// nettohinta jos netto-kentässä tulee N tai E
 			if ($netto == 'N' or $netto == 'E') {
-				$aperuste .= "Käyttäjän antama nettohinta ";
+				$hperuste .= "Käyttäjän antama nettohinta. ";
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					$ale["ale".$alepostfix] = 0;
 				}
 			}
 			else {
-				$aperuste .= "Käyttäjän antama hinta ";
+				$hperuste .= "Käyttäjän antama hinta. ";
 			}
 
 			$alehinta_val = $laskurow["valkoodi"];
@@ -3817,7 +3816,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta         = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste     .= "Asiakkaan tuotteen nettohinta laskun valuutassa. ";
+					$hperuste     .= "Asiakkaan tuotteen nettohinta laskun valuutassa. ";
 					$alehinta_val  = $laskurow["valkoodi"];
 					$hintaperuste = 2;
 				}
@@ -3891,7 +3890,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta		 = $hrow["hinta"];
-					$aperuste	.= "Asiakkaan tuotteen nettohinta.".$hrow['laji'];
+					$hperuste	.= "Asiakkaan tuotteen nettohinta.".$hrow['laji'];
 					$hintaperuste = 2;
 				}
 			}
@@ -3964,7 +3963,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Asiakkaan tuotealeryhmän nettohinta laskun valuutassa. ";
+					$hperuste    .= "Asiakkaan tuotealeryhmän nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 3;
 				}
@@ -4038,7 +4037,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta		= $hrow["hinta"];
-					$aperuste	.= "Asiakkaan tuotealeryhmän nettohinta. ";
+					$hperuste	.= "Asiakkaan tuotealeryhmän nettohinta. ";
 					$hintaperuste = 3;
 				}
 			}
@@ -4102,7 +4101,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Asiakassegmentin tuotteen nettohinta laskun valuutassa. ";
+					$hperuste    .= "Asiakassegmentin tuotteen nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 4;
 				}
@@ -4167,7 +4166,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = $hrow["hinta"];
-					$aperuste    .= "Asiakassegmentin tuotteen nettohinta ";
+					$hperuste    .= "Asiakassegmentin tuotteen nettohinta. ";
 					$hintaperuste = 4;
 				}
 			}
@@ -4231,7 +4230,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Asiakasaleryhmän tuotteen nettohinta laskun valuutassa. ";
+					$hperuste    .= "Asiakasaleryhmän tuotteen nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 5;
 				}
@@ -4295,7 +4294,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta		= $hrow["hinta"];
-					$aperuste	.= "Asiakasaleryhmän tuotteen nettohinta. ";
+					$hperuste	.= "Asiakasaleryhmän tuotteen nettohinta. ";
 					$hintaperuste = 5;
 				}
 			}
@@ -4359,7 +4358,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Asiakaspiirin tuotteen nettohinta laskun valuutassa. ";
+					$hperuste    .= "Asiakaspiirin tuotteen nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 6;
 				}
@@ -4424,7 +4423,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = $hrow["hinta"];
-					$aperuste    .= "Asiakaspiirin tuotteen nettohinta. ";
+					$hperuste    .= "Asiakaspiirin tuotteen nettohinta. ";
 					$hintaperuste = 6;
 				}
 			}
@@ -4488,7 +4487,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Asiakassegmentin tuotealeryhmän nettohinta laskun valuutassa.";
+					$hperuste    .= "Asiakassegmentin tuotealeryhmän nettohinta laskun valuutassa.";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 7;
 				}
@@ -4553,7 +4552,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = $hrow["hinta"];
-					$aperuste    .= "Asiakassegmentin tuotealeryhmän nettohinta.";
+					$hperuste    .= "Asiakassegmentin tuotealeryhmän nettohinta.";
 					$hintaperuste = 7;
 				}
 			}
@@ -4617,7 +4616,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Asiakasaleryhmän tuotealeryhmän nettohinta laskun valuutassa. ";
+					$hperuste    .= "Asiakasaleryhmän tuotealeryhmän nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 8;
 				}
@@ -4682,7 +4681,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta		= $hrow["hinta"];
-					$aperuste	.= "Asiakasaleryhmän tuotealeryhmän nettohinta. ";
+					$hperuste	.= "Asiakasaleryhmän tuotealeryhmän nettohinta. ";
 					$hintaperuste = 9;
 				}
 			}
@@ -4746,7 +4745,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Asiakaspiirin tuotealeryhmän nettohinta laskun valuutassa. ";
+					$hperuste    .= "Asiakaspiirin tuotealeryhmän nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 9;
 				}
@@ -4811,7 +4810,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$hinta        = $hrow["hinta"];
-					$aperuste    .= "Asiakaspiirin tuotealeryhmän nettohinta. ";
+					$hperuste    .= "Asiakaspiirin tuotealeryhmän nettohinta. ";
 					$hintaperuste = 9;
 				}
 			}
@@ -4851,6 +4850,11 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
+					//jos alennus on -999.99 myydään kehahinnalla
+					if ($hrow["alennus"] == -999.99) {
+						$hrow["alennus"] = 0;
+					}
+
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
@@ -4858,7 +4862,7 @@ if (!function_exists("alehinta")) {
 							$ale["ale".$alepostfix] = 0;
 						}
 						$netto		= "";
-						$aperuste 	.= "Katemyyntihinta (kokoepäkurantti). ";
+						$hperuste 	.= "Katemyyntihinta (kokoepäkurantti). ";
 						$hintaperuste = 10;
 					}
 					elseif ($trow['kehahin'] > 0) {
@@ -4882,7 +4886,7 @@ if (!function_exists("alehinta")) {
 							$ale["ale".$alepostfix] = 0;
 						}
 						$netto		= "";
-						$aperuste 	.= "Katemyyntihinta. ";
+						$hperuste 	.= "Katemyyntihinta. ";
 						$hintaperuste = 10;
 					}
 				}
@@ -4911,6 +4915,11 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
+					//jos alennus on -999.99 myydään kehahinnalla
+					if ($hrow["alennus"] == -999.99) {
+						$hrow["alennus"] = 0;
+					}
+
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
@@ -4918,7 +4927,7 @@ if (!function_exists("alehinta")) {
 							$ale["ale".$alepostfix] = 0;
 						}
 						$netto		= "";
-						$aperuste 	.= "Asiakassegmentin Katemyyntihinta (kokoepäkurantti). ";
+						$hperuste 	.= "Asiakassegmentin Katemyyntihinta (kokoepäkurantti). ";
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
@@ -4943,7 +4952,7 @@ if (!function_exists("alehinta")) {
 						}
 
 						$netto		= "";
-						$aperuste 	.= "Asiakassegmentin Katemyyntihinta. ";
+						$hperuste 	.= "Asiakassegmentin Katemyyntihinta. ";
 						$hintaperuste = 11;
 					}
 				}
@@ -4972,6 +4981,11 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
+					//jos alennus on -999.99 myydään kehahinnalla
+					if ($hrow["alennus"] == -999.99) {
+						$hrow["alennus"] = 0;
+					}
+
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
@@ -4979,7 +4993,7 @@ if (!function_exists("alehinta")) {
 							$ale["ale".$alepostfix] = 0;
 						}
 						$netto		= "";
-						$aperuste 	.= "Asiakasryhmä Katemyyntihinta (kokoepäkurantti). ";
+						$hperuste 	.= "Asiakasryhmä Katemyyntihinta (kokoepäkurantti). ";
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
@@ -5004,7 +5018,7 @@ if (!function_exists("alehinta")) {
 						}
 
 						$netto		= "";
-						$aperuste 	.= "Asiakasryhmä Katemyyntihinta. ";
+						$hperuste 	.= "Asiakasryhmä Katemyyntihinta. ";
 						$hintaperuste = 12;
 					}
 				}
@@ -5033,6 +5047,11 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
+					//jos alennus on -999.99 myydään kehahinnalla
+					if ($hrow["alennus"] == -999.99) {
+						$hrow["alennus"] = 0;
+					}
+
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
@@ -5040,7 +5059,7 @@ if (!function_exists("alehinta")) {
 							$ale["ale".$alepostfix] = 0;
 						}
 						$netto		= "";
-						$aperuste 	.= "Asiakaspiirin Katemyyntihinta (kokoepäkurantti). ";
+						$hperuste 	.= "Asiakaspiirin Katemyyntihinta (kokoepäkurantti). ";
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
@@ -5065,7 +5084,7 @@ if (!function_exists("alehinta")) {
 						}
 
 						$netto		= "";
-						$aperuste 	.= "Asiakaspiirin Katemyyntihinta. ";
+						$hperuste 	.= "Asiakaspiirin Katemyyntihinta. ";
 						$hintaperuste = 13;
 					}
 				}
@@ -5124,7 +5143,7 @@ if (!function_exists("alehinta")) {
 					}
 
 					$netto		= "";
-					$aperuste 	.= "Myymälähinta. ";
+					$hperuste 	.= "Myymälähinta. ";
 					$hintaperuste = 14;
 				}
 			}
@@ -5150,7 +5169,7 @@ if (!function_exists("alehinta")) {
 					$hrow       	= mysql_fetch_assoc($hresult);
 					$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$netto			= $hrow["laji"];
-					$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
+					$hperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 					$alehinta_val	= $laskurow["valkoodi"];
 					$hintaperuste 	= 15;
 				}
@@ -5177,7 +5196,7 @@ if (!function_exists("alehinta")) {
 					$hrow       	= mysql_fetch_assoc($hresult);
 					$hinta 			= $hrow["hinta"];
 					$netto			= $hrow["laji"];
-					$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
+					$hperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
 					$hintaperuste = 15;
 				}
 			}
@@ -5186,7 +5205,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and $netto != 'E' and $trow['nettohinta'] > 0) {
 
 				$hinta 			= $trow['nettohinta'];
-				$aperuste 		.= "Tuotteen nettohinta. ";
+				$hperuste 		.= "Tuotteen nettohinta. ";
 				$netto 			= 'N';
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					$ale["ale".$alepostfix] = 0;
@@ -5215,7 +5234,7 @@ if (!function_exists("alehinta")) {
 					$hrow			= mysql_fetch_assoc($hresult);
 					$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$netto			= $hrow["laji"];
-					$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
+					$hperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 					$alehinta_val   = $laskurow["valkoodi"];
 					$hintaperuste = 17;
 				}
@@ -5242,7 +5261,7 @@ if (!function_exists("alehinta")) {
 					$hrow			= mysql_fetch_assoc($hresult);
 					$hinta 			= $hrow["hinta"];
 					$netto			= $hrow["laji"];
-					$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
+					$hperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
 					$hintaperuste = 17;
 				}
 			}
@@ -5250,7 +5269,7 @@ if (!function_exists("alehinta")) {
 			// 18. tuote.myyntihinta (tuotteen bruttohinta) yhtiön valuutassa
 			if ($hinta == 0) {
 				$hinta		 = $trow['myyntihinta'];
-				$aperuste	.= "Tuotteen myyntihinta. ";
+				$hperuste	.= "Tuotteen myyntihinta. ";
 				$hintaperuste = 18;
 			}
 		}
@@ -5545,6 +5564,9 @@ if (!function_exists("alehinta")) {
 			}
 		}
 
+		$g_ale_peruste        = $aperuste;
+		$g_ale_peruste_update = FALSE;
+
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			if (!isset($ale["ale".$alepostfix])) {
 				$ale["ale".$alepostfix] = 0;
@@ -5557,10 +5579,41 @@ if (!function_exists("alehinta")) {
 			if ($ale["ale".$alepostfix] < 0) {
 				$ale["ale".$alepostfix] = 0;
 			}
+
+			if ($ale["ale".$alepostfix] != 0) {
+				$g_ale_peruste .= " Ale$alepostfix: ".($ale["ale".$alepostfix]*1)."%. ";
+			}
+
+			if (isset($GLOBALS['ale_peruste']) and $GLOBALS['ale_peruste'] != "") {
+				preg_match("/Ale$alepostfix: ([0-9\.]*)%/", $GLOBALS['ale_peruste'], $edale_match);
+
+				if (isset($edale_match[1]) and $ale["ale".$alepostfix] != $edale_match[1]) {
+					$g_ale_peruste_update = TRUE;
+				}
+			}
+		}
+
+		$g_ale_peruste .= "\n".$hperuste." Hinta: ".sprintf('%.2f', $hinta)." $yhtiorow[valkoodi] Määrä: $kpl $trow[yksikko]. ";
+
+		if (isset($GLOBALS['ale_peruste']) and $GLOBALS['ale_peruste'] != "") {
+			preg_match("/Hinta: ([0-9\.]*) /", $GLOBALS['ale_peruste'], $edale_match);
+
+			if (isset($edale_match[1]) and $hinta != $edale_match[1]) {
+				$g_ale_peruste_update = TRUE;
+			}
+		}
+
+		if (!isset($GLOBALS['ale_peruste']) or $GLOBALS['ale_peruste'] == "" or $g_ale_peruste_update) {
+			$GLOBALS['ale_peruste']  = $g_ale_peruste;
+			$GLOBALS['ale_peruste'] .= " XXXHINTAPERUSTE:$hintaperuste ";
+
+			foreach($aleperuste as $aile) {
+				$GLOBALS['ale_peruste'] .= " XXXALEPERUSTE:$aile ";
+			}
 		}
 
 		$debug = 0;
-		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ",var_dump($ale),"% ".t("HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
+		if ($debug == 1) echo t("Tulin tulokseen").": $hperuste $aperuste.  ALE: ",var_dump($ale),"% ".t("Hinta")." $hinta $yhtiorow[valkoodi] Määrä:$kpl<br><br>";
 
 		if ($yhtio != '') {
 			$yhtiorow = hae_yhtion_parametrit($vanha_yhtio);
@@ -10377,18 +10430,7 @@ if (!function_exists("laheta_tilausvahvistus")) {
 if (!function_exists("t")) {
 	function t($stringi, $kieli = "") {
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
-		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa, $kaannetyt_sanat;
-
-		require("salasanat.php");
-
-		if (isset($slavedb) and isset($useslave) and $useslave > 0) {
-			if (!isset($slavedb[$useslave]) or $slavedb[$useslave] == '') {
-				$useslave = 0;
-			}
-		}
-		else {
-			$useslave = 0;
-		}
+		global $yhtiorow, $kukarow, $link, $masterlink, $verkkokauppa, $kaannetyt_sanat;
 
 		if (trim($kieli) != '') {
 			$indeksi = trim(strtolower($kieli));
@@ -10398,13 +10440,6 @@ if (!function_exists("t")) {
 		}
 		else {
 			$indeksi = "fi";
-		}
-
-		// Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
-		if ($useslave > 0 and $indeksi != 'fi') {
-			unset($link);
-			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-			mysql_select_db ($dbkanta,$link) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
 		}
 
 		if ($indeksi != 'fi') {
@@ -10440,22 +10475,16 @@ if (!function_exists("t")) {
 				//Päivitetään aikaleima
 				if ($verkkokauppa == "") {
 					$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
-					$sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $link);
+					$sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $masterlink);
 				}
 			}
 			elseif ($verkkokauppa == "") {
 				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
-				$sanakirjaresult = pupe_query($sanakirjaquery, $link);
+				$sanakirjaresult = pupe_query($sanakirjaquery, $masterlink);
 			}
 		}
 		elseif (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) {
 			$kaannetyt_sanat[] = $stringi;
-		}
-
-		if ($useslave > 0) { //Palautetaan slave käyttöön
-			unset($link);
-			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
-			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 2)!");
 		}
 
 		//	Palautetaan muotoiltu stringi!!!
@@ -11228,11 +11257,12 @@ if (!function_exists("lue_kurssit")) {
 			}
 
 			$query = "	UPDATE valuu SET
-						kurssi = round(1 / $kurssi, 9),
+						kurssi    = round(1 / $kurssi, 9),
 						muutospvm = now(),
-						muuttaja = '{$kukarow['kuka']}'
-						WHERE yhtio = '{$kukarow['yhtio']}' AND
-						nimi = '$valuutta'";
+						muuttaja  = '{$kukarow['kuka']}'
+						WHERE yhtio 		   = '{$kukarow['yhtio']}'
+						AND nimi 			   = '$valuutta'
+						AND automaattipaivitys = ''";
 			$result = pupe_query($query);
 
 			// tämä valuutta on nyt päivitetty!
@@ -11244,7 +11274,7 @@ if (!function_exists("lue_kurssit")) {
 
 			$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
 						VALUES ('$vastavaluutta', '$valuutta', round(1 / $kurssi, 9), '$kurssipvm')
-			  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
+	  					ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
 			$result = pupe_query($query);
 
 		}
@@ -11289,7 +11319,9 @@ if (!function_exists("progress_bar")) {
 }
 
 if (!function_exists("pupesoft_cleanstring")) {
-	function pupesoft_cleanstring($string, $exclude = array()) {
+	function pupesoft_cleanstring($string, Array $exclude = array()) {
+
+		if (!is_numeric($string) and !is_string($string)) return "";
 
 		$illegal = array("\"","'","<",">","\\", ";");
 
@@ -12967,7 +12999,11 @@ if (!function_exists("pupe_DataTables")) {
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 			$(document).ready(function() {
-
+				
+				$('input[name^=\"rivi_valitut_tunnukset\"]').each(function() {
+					$(this).attr('disabled', false);
+				});
+				
 				var datatablesit = [];
 				var parametrit 	 = ".json_encode($json_pass).";
 				var spessusortit = [];
@@ -14510,7 +14546,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 						TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM r1.kollit)) AS kollit,
 						round(r1.kilot,1) kilot
 						FROM rahtikirjat r1
-						WHERE r1.pakkaustieto_tunnukset = ''
+						WHERE (r1.pakkaustieto_tunnukset = '' OR r1.pakkaustieto_tunnukset IS NULL)
 						AND r1.otsikkonro in ({$otunnus})
 						AND r1.yhtio = '{$kukarow['yhtio']}'";
 			$riresult2 = pupe_query($query);
@@ -21842,24 +21878,20 @@ if (!function_exists('hae_maa')) {
 	}
 }
 
-//etsii halutun array keyn arraysta ja palauttaa kyseisen keyn parentit arrayssa jos key löytyy
-//esim voit etsiä funktiolla order ja funktio palauttaa kaikki ensimmäisen tason (tuoteno) arrayt jos order löytyy
-/**
- * $header_values = array(
-		'tuoteno' => array(
-			'header' => t('Tuoteno'),
-			'order' => 0
-		),
- * );
- *
- */
 if (!function_exists('search_array_key_recursive')) {
+	/**
+	 * Palauttaa kaikki $key mukaiset alkiot
+	 *
+	 * @param array $array haystack
+	 * @param string $key etsittävä key
+	 * @return array
+	 */
 	function search_array_key_recursive($array, $key) {
 		$results = array();
 
 		if (is_array($array)) {
 			if (isset($array[$key])) {
-				$results[] = $array;
+				$results[] = $array[$key];
 			}
 
 			foreach ($array as $subarray) {
@@ -23489,7 +23521,14 @@ if (!function_exists("splittaa_valmistukset")) {
 		global $yhtiorow, $kukarow;
 
 		// Otetaan laskurow talteen, ja nollataan sieltä kentät jota ei monisteta
-		$laskurow_temp = $laskurow;
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['tunnus']}'";
+		$laskurow_temp_res = pupe_query($query);
+		$laskurow_temp = mysql_fetch_assoc($laskurow_temp_res);
+
 		unset($laskurow_temp['tunnus']);
 		unset($laskurow_temp['muutospvm']);
 		unset($laskurow_temp['muuttaja']);
@@ -25532,6 +25571,596 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 		}
 
 		return array($budjetoitu_myynti, $budjetin_peruste);
+	}
+}
+
+if (!function_exists('hae_lahetetyt_saldovahvistukset')) {
+
+	function hae_lahetetyt_saldovahvistukset($request = array()) {
+		global $kukarow, $yhtiorow;
+
+		if ($request['ryhmittely_tyyppi'] == 'ytunnus' and $request['ryhmittely_arvo'] != '') {
+			$asiakas_join = "	AND asiakas.ytunnus = '{$request['ryhmittely_arvo']}'";
+		}
+		else if ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
+			$asiakas_join = "	AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
+		}
+		else if ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
+			$asiakas_join = "	AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
+		}
+
+		$saldovahvistus_where = "";
+		if (isset($request['alku_paiva']) and isset($request['loppu_paiva'])) {
+			$saldovahvistus_where .= "	AND saldovahvistukset.lahetys_pvm >= '{$request['alku_paiva']}'
+										AND saldovahvistukset.lahetys_pvm <= '{$request['loppu_paiva']}'";
+		}
+
+		if (isset($request['saldovahvistus_tunnus'])) {
+			$saldovahvistus_where .= "	AND saldovahvistukset.tunnus = '{$request['saldovahvistus_tunnus']}'";
+		}
+
+		//Ensin haetaan saldovahvistus otsikot ja niiden ryhmittely tyypit,
+		//jotka osuvat hakuehtoihin.
+		//Tämä sen takia, että enne tätä hakua emme tiedä minkälainen ryhmittely kullakin saldovahvistuksella on.
+		$query = "	SELECT saldovahvistukset.tunnus,
+					saldovahvistukset.ryhmittely_tyyppi,
+					asiakas.ytunnus
+					FROM saldovahvistukset
+					JOIN saldovahvistusrivit
+					ON ( saldovahvistusrivit.yhtio = saldovahvistukset.yhtio
+						AND saldovahvistusrivit.saldovahvistus_tunnus = saldovahvistukset.tunnus
+						AND saldovahvistusrivit.tyyppi = 'L' )
+					JOIN lasku
+					ON ( lasku.yhtio = saldovahvistusrivit.yhtio
+						AND lasku.tunnus = saldovahvistusrivit.lasku_tunnus )
+					JOIN asiakas
+					ON ( asiakas.yhtio = lasku.yhtio
+						AND asiakas.tunnus = lasku.liitostunnus
+						{$asiakas_join} )
+					WHERE saldovahvistukset.yhtio = '{$kukarow['yhtio']}'
+					{$saldovahvistus_where}
+					GROUP BY saldovahvistukset.tunnus,
+					saldovahvistukset.ryhmittely_tyyppi,
+					asiakas.ytunnus";
+		$result = pupe_query($query);
+
+		$lahetetyt_saldovahvistukset = array();
+		while ($saldovahvistus = mysql_fetch_assoc($result)) {
+			if ($saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+				//Jos ryhmittely on ytunnus, pitää hakea ytunnuksella kaikki muut asiakkaat,
+				//saldovahvistusrivien haku query palauttaa kaikkien asiakkaiden rivit.
+				$query = "	SELECT GROUP_CONCAT(tunnus) AS asiakas_tunnukset
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND ytunnus = '{$saldovahvistus['ytunnus']}'";
+				$asiakas_result = pupe_query($query);
+				$asiakasrow = mysql_fetch_assoc($asiakas_result);
+
+				$asiakas_join = "	AND asiakas.tunnus IN (".$asiakasrow['asiakas_tunnukset'].")";
+			}
+
+			//Jos ryhmittely tyyppi on saldovahvistuksella jotain muuta kuin ytunnus niin voidaan käyttää funktion alussa setatttua $asiakas_join muuttujaa, koska $saldovahvistus['tunnus'] ja $asiakas_join yhdessä rajaavat resulttia
+
+			//K tyypilliset saldovahvistusrivit hoidetaan eri queryllä, koska ne eivät liity mihinkään laskuun ja lähetettyjä saldovahvistuksia pitää pystyä rajaamaan asiakkaan tiedoilla eli JOIN lasku --> JOIN asiakas
+			$query = "	SELECT *,
+						lasku.tunnus AS lasku_tunnus,
+						asiakas.tunnus AS asiakas_tunnus,
+						asiakas.asiakasnro AS asiakasnumero,
+						saldovahvistukset.tunnus AS saldovahvistus_tunnus,
+						saldovahvistukset.lahetys_pvm AS lahetys_paiva,
+						saldovahvistusrivit.tyyppi AS saldovahvistusrivi_tyyppi,
+						saldovahvistusrivit.summa AS avoin_saldo
+						FROM saldovahvistukset
+						JOIN saldovahvistusrivit
+						ON ( saldovahvistusrivit.yhtio = saldovahvistukset.yhtio
+							AND saldovahvistusrivit.saldovahvistus_tunnus = saldovahvistukset.tunnus
+							AND saldovahvistusrivit.tyyppi = 'L' )
+						JOIN lasku
+						ON ( lasku.yhtio = saldovahvistusrivit.yhtio
+							AND lasku.tunnus = saldovahvistusrivit.lasku_tunnus )
+						JOIN asiakas
+						ON ( asiakas.yhtio = lasku.yhtio
+							AND asiakas.tunnus = lasku.liitostunnus
+							{$asiakas_join} )
+						WHERE saldovahvistukset.yhtio = '{$kukarow['yhtio']}'
+						AND saldovahvistukset.tunnus = '{$saldovahvistus['tunnus']}'";
+			$saldovahvistukset_result = pupe_query($query);
+
+			while ($lahetetty_saldovahvistus = mysql_fetch_assoc($saldovahvistukset_result)) {
+				$lahetys_paiva_temp = $lahetetty_saldovahvistus['lahetys_paiva'];
+				$saldovahvistus_tunnus_temp = $lahetetty_saldovahvistus['saldovahvistus_tunnus'];
+
+				if ($lahetetty_saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+					$ryhmittely = $lahetetty_saldovahvistus['ytunnus'];
+				}
+				else {
+					$ryhmittely = $lahetetty_saldovahvistus['asiakasnro'];
+				}
+				keraa_saldovahvistusrivit_ktunnus_ytunnus($lahetetyt_saldovahvistukset, $lahetetty_saldovahvistus, $ryhmittely);
+			}
+		}
+
+		$lahetetyt_saldovahvistukset = keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset);
+
+		//Jos saldovahvistus_tunnus setattu niin halutaan tietty saldovahvistus pdf:nä.
+		if (isset($request['saldovahvistus_tunnus'])) {
+			return $lahetetyt_saldovahvistukset[$lahetys_paiva_temp][$saldovahvistus_tunnus_temp][$ryhmittely];
+		}
+
+		return $lahetetyt_saldovahvistukset;
+	}
+
+}
+
+/**
+ * Hakee laskuja joilla on avoin saldo
+ *
+	$request = array(
+		'ryhmittely_tyyppi'		 => $ryhmittely_tyyppi,
+		'ryhmittely_arvo'		 => $ryhmittely_arvo,
+		'paiva'					 => $paiva,
+		'lasku_tunnukset'		 => $lasku_tunnukset,
+		'lahetetyt'				 => $lahetetyt (boolean)
+	);
+ *
+ * @global array $kukarow
+ * @global array $yhtiorow
+ * @param array $request
+ * @param boolean $valitut
+ * @return array
+ */
+if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
+
+	function hae_myyntilaskuja_joilla_avoin_saldo($request, $valitut = false) {
+		global $kukarow, $yhtiorow;
+
+		$asiakas_join = "";
+		if (!$valitut) {
+			if ($request['ryhmittely_tyyppi'] == 'ytunnus' and $request['ryhmittely_arvo'] != '') {
+				$asiakas_join = "	AND asiakas.ytunnus = '{$request['ryhmittely_arvo']}'";
+			}
+			else if ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
+				$asiakas_join = "	AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
+			}
+			else if ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
+				$asiakas_join = "	AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
+			}
+		}
+
+		$lasku_where = "";
+		if (!empty($request['lasku_tunnukset'])) {
+			$lasku_where = " AND lasku.tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+		}
+
+		//lasku.tunnus ASC koska sessioon tallennetaan implode tunnus ja tunnukset pitää olla tietyssä järjestyksessä, koska muuten riviä ei löydy.
+		$query = "	SELECT lasku.tunnus AS lasku_tunnus,
+					'L' AS saldovahvistusrivi_tyyppi,
+					asiakas.ytunnus,
+					asiakas.toim_ovttunnus,
+					lasku.nimi,
+					lasku.liitostunnus,
+					lasku.laskunro,
+					lasku.tapvm,
+					lasku.erpcm,
+					lasku.valkoodi,
+					asiakas.asiakasnro AS asiakasnumero,
+					asiakas.tunnus AS asiakas_tunnus,
+					lasku.summa,
+					ROUND(SUM(tiliointi.summa), 2) AS avoin_saldo
+					FROM lasku USE INDEX (yhtio_tila_mapvm)
+					JOIN asiakas
+					ON ( asiakas.yhtio = lasku.yhtio
+						AND asiakas.tunnus = lasku.liitostunnus
+						{$asiakas_join} )
+					JOIN tiliointi USE INDEX (tositerivit_index)
+					ON ( tiliointi.yhtio = lasku.yhtio
+						AND tiliointi.ltunnus = lasku.tunnus
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tapvm <= '{$request['paiva']}'
+						AND tiliointi.tilino IN ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}', '{$yhtiorow['konsernimyyntisaamiset']}') )
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					{$lasku_where}
+					AND (
+							lasku.mapvm > '{$request['paiva']}'
+							OR lasku.mapvm = '0000-00-00'
+						)
+					AND lasku.tapvm <= '{$request['paiva']}'
+					AND lasku.tapvm > '0000-00-00'
+					AND lasku.tila = 'U'
+					AND lasku.alatila = 'X'
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+					ORDER BY asiakas.toim_ovttunnus ASC,
+					asiakas.ytunnus ASC,
+					lasku.tunnus ASC";
+		$result = pupe_query($query);
+
+		$laskut = array();
+		while ($lasku = mysql_fetch_assoc($result)) {
+			if (!$valitut) {
+				if ($request['ryhmittely_tyyppi'] == 'ytunnus') {
+					$lasku['ryhmittely_tyyppi'] = 'ytunnus';
+					$ryhmittely = $lasku['ytunnus'];
+				}
+				else {
+					$lasku['ryhmittely_tyyppi'] = 'asiakasnro';
+					$ryhmittely = $lasku['asiakasnumero'];
+				}
+			}
+			else {
+				$lasku['ryhmittely_tyyppi'] = $request['ryhmittely_tyyppi_temp'];
+				if ($request['ryhmittely_tyyppi_temp'] == 'ytunnus') {
+					$ryhmittely = $lasku['ytunnus'];
+				}
+				else {
+					$ryhmittely = $lasku['asiakasnumero'];
+				}
+			}
+
+			keraa_saldovahvistusrivit_ytunnus($laskut, $lasku, $ryhmittely);
+		}
+
+		$laskut = keraa_kohdistamattomat($request, $laskut, false);
+
+		//Purkahko. Jos lasku_tunnukset on annettu, halutaan näyttää tietyn asiakkaan(ytunnus) saldovahvistus pdf:nä.
+		if (!empty($request['lasku_tunnukset'])) {
+			return $laskut[$ryhmittely];
+		}
+
+		return $laskut;
+	}
+
+}
+
+if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
+	function keraa_saldovahvistusrivit_ytunnus(&$laskut, $lasku, $ryhmittely) {
+		if (!isset($laskut[$ryhmittely]['avoin_saldo_summa'])) {
+			$laskut[$ryhmittely]['avoin_saldo_summa'] = 0;
+		}
+		if (!isset($laskut[$ryhmittely]['asiakas_nimi'])) {
+			//asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
+			$laskut[$ryhmittely]['asiakas_nimi'] = $lasku['nimi'];
+			$laskut[$ryhmittely]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+		}
+
+		$asiakasnumerot = search_array_key_for_value_recursive($laskut[$ryhmittely]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
+		if (!is_array($laskut[$ryhmittely]['asiakasnumerot']) or empty($asiakasnumerot)) {
+			$laskut[$ryhmittely]['asiakasnumerot'][] = array(
+				'asiakasnumero'	 => $lasku['asiakasnumero'],
+				'asiakas_tunnus' => $lasku['asiakas_tunnus'],
+			);
+		}
+
+		$laskut[$ryhmittely]['lasku_tunnukset'][] = $lasku['lasku_tunnus'];
+		$laskut[$ryhmittely]['avoin_saldo_summa'] += $lasku['avoin_saldo'];
+		$laskut[$ryhmittely]['ytunnus'] = $lasku['ytunnus'];
+		$laskut[$ryhmittely]['valkoodi'] = $lasku['valkoodi'];
+		$laskut[$ryhmittely]['ryhmittely_tyyppi'] = $lasku['ryhmittely_tyyppi'];
+		$laskut[$ryhmittely]['laskut'][] = $lasku;
+	}
+}
+
+if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
+	function keraa_saldovahvistusrivit_ktunnus_ytunnus(&$laskut, $lasku, $ryhmittely) {
+		if (!isset($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'])) {
+			$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'] = 0;
+		}
+		if (!isset($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas_nimi'])) {
+			//asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
+			$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas_nimi'] = $lasku['nimi'];
+			$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+		}
+
+		$asiakasnumerot = search_array_key_for_value_recursive($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
+		if (!is_array($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakasnumerot']) or empty($asiakasnumerot)) {
+			$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakasnumerot'][] = array(
+				'asiakasnumero'	 => $lasku['asiakasnumero'],
+				'asiakas_tunnus' => $lasku['asiakas_tunnus'],
+			);
+		}
+
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['saldovahvistus_tunnus'] = $lasku['saldovahvistus_tunnus'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['lahetys_paiva'] = $lasku['lahetys_paiva'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['saldovahvistus_viesti'] = $lasku['saldovahvistus_viesti'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_pvm'] = $lasku['avoin_saldo_pvm'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['lasku_tunnukset'][] = $lasku['lasku_tunnus'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'] += $lasku['avoin_saldo'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['ytunnus'] = $lasku['ytunnus'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['valkoodi'] = $lasku['valkoodi'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['ryhmittely_tyyppi'] = $lasku['ryhmittely_tyyppi'];
+		$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['laskut'][] = $lasku;
+	}
+}
+
+if (!function_exists('hae_kohdistamattomat_suoritukset')) {
+	function hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($asiakas_tunnukset)) {
+			return false;
+		}
+
+		$query = "	SELECT '' AS laskunro,
+					'K' AS saldovahvistusrivi_tyyppi,
+					maksupvm AS erpcm,
+					summa * -1 AS avoin_saldo,
+					valkoodi
+					FROM suoritus
+					WHERE suoritus.yhtio = '{$kukarow['yhtio']}'
+					AND (
+						suoritus.kohdpvm = '0000-00-00'
+						OR suoritus.kohdpvm > '{$pvm}'
+						)
+					AND suoritus.kirjpvm <= '{$pvm}'
+					AND suoritus.ltunnus  > 0
+					AND suoritus.asiakas_tunnus IN (".implode(', ', $asiakas_tunnukset).")";
+		$result = pupe_query($query);
+
+		$kohdistamattomat_suoritukset = array();
+		while($kohdistamaton_suoritus = mysql_fetch_assoc($result)) {
+			$kohdistamaton_suoritus['laskunro'] = t('Kohdistamaton_suoritus');
+			$kohdistamattomat_suoritukset[] = $kohdistamaton_suoritus;
+		}
+
+		return $kohdistamattomat_suoritukset;
+	}
+}
+
+if (!function_exists('hae_lahetetyt_kohdistamattomat_suoritukset')) {
+
+	function hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT saldovahvistusrivit.tyyppi AS saldovahvistusrivi_tyyppi,
+					saldovahvistusrivit.era_pvm AS erpcm,
+					saldovahvistusrivit.summa AS avoin_saldo
+					FROM saldovahvistusrivit
+					WHERE saldovahvistusrivit.yhtio = '{$kukarow['yhtio']}'
+					AND saldovahvistusrivit.saldovahvistus_tunnus = '{$saldovahvistus_tunnus}'
+					AND saldovahvistusrivit.tyyppi = 'K'";
+		$result = pupe_query($query);
+
+		$saldovahvistusrivit = array();
+		while ($saldovahvistusrivi = mysql_fetch_assoc($result)) {
+			$saldovahvistusrivi['laskunro'] = t('Kohdistamaton suoritus');
+			$saldovahvistusrivit[] = $saldovahvistusrivi;
+		}
+
+		return $saldovahvistusrivit;
+	}
+
+}
+
+if (!function_exists('keraa_kohdistamattomat')) {
+
+	function keraa_kohdistamattomat($request, $laskut) {
+		global $kukarow, $yhtiorow;
+
+		foreach ($laskut as &$lasku) {
+			$pvm = $request['paiva'];
+			$asiakasnumerot_ja_tunnukset = $lasku['asiakasnumerot'];
+
+			$asiakas_tunnukset = search_array_key_recursive($asiakasnumerot_ja_tunnukset, 'asiakas_tunnus');
+			$kohdistamattomat_suoritukset = hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm);
+
+			if (!empty($kohdistamattomat_suoritukset)) {
+				$params = array(
+					'direction'	 => 'y',
+					'key'		 => 'avoin_saldo'
+				);
+				$kohdistamattomien_summa = sum_array($kohdistamattomat_suoritukset, $params);
+				$lasku['laskut'] = array_merge($lasku['laskut'], $kohdistamattomat_suoritukset);
+				$lasku['avoin_saldo_summa'] += $kohdistamattomien_summa;
+			}
+		}
+
+		return $laskut;
+	}
+
+}
+
+if (!function_exists('keraa_kohdistamattomat_lahetetyista')) {
+
+	function keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset) {
+		foreach ($lahetetyt_saldovahvistukset as $lahetys_paiva => &$lasku_saldovahvistus) {
+			foreach ($lasku_saldovahvistus as $saldovahvistus_tunnus => &$lasku_ytunnus) {
+				foreach ($lasku_ytunnus as $ryhmittely => &$saldovahvistus) {
+					$lahetetyt_kohdistamattomat_suoritukset = hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus);
+
+					if (!empty($lahetetyt_kohdistamattomat_suoritukset)) {
+						$params = array(
+							'direction'	 => 'y',
+							'key'		 => 'avoin_saldo'
+						);
+						$kohdistamattomien_summa = sum_array($lahetetyt_kohdistamattomat_suoritukset, $params);
+
+						$laskut_temp = array_merge($saldovahvistus['laskut'], $lahetetyt_kohdistamattomat_suoritukset);
+						$saldovahvistus['laskut'] = $laskut_temp;
+						$saldovahvistus['avoin_saldo_summa'] += $kohdistamattomien_summa;
+					}
+				}
+			}
+		}
+
+		return $lahetetyt_saldovahvistukset;
+	}
+
+}
+
+if (!function_exists('sum_array')) {
+	function sum_array($array, $params = array('direction' => 'x', 'key' => 'xxx'), $exclusions = array()) {
+		if (!empty($array)) {
+
+			$sum = 0;
+
+			if ($params['direction'] == 'x') {
+
+				$keys = array_keys($array);
+
+				for ($x = 0; $x < count($keys); $x++) {
+
+					if (!in_array($keys[$x], $exclusions)) {
+						$sum += $array[$keys[$x]];
+					}
+				}
+
+				return $sum;
+			}
+			else if ($params['direction'] == 'y') {
+
+				$keys = array_keys($array);
+
+				if (array_key_exists($params['key'], $array[$keys[0]])) {
+					for ($x = 0; $x < count($keys); $x++) {
+						if (!in_array($keys[$x], $exclusions)) {
+							$sum += $array[$keys[$x]][$params['key']];
+						}
+					}
+
+					return $sum;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+
+}
+
+if (!function_exists('hae_saldovahvistus_viestit')) {
+	function hae_saldovahvistus_viestit() {
+		global $kukarow, $yhtiorow;
+
+		$result = t_avainsana('SALDOVAHVISTUS');
+		$saldovahvistus_viestit = array();
+		while ($saldovahvistus_viesti = mysql_fetch_assoc($result)) {
+			$saldovahvistus_viestit[] = $saldovahvistus_viesti;
+		}
+
+		return $saldovahvistus_viestit;
+	}
+}
+
+if (!function_exists('hae_kayttajan_kirjoitin')) {
+	function hae_kayttajan_kirjoitin() {
+		global $kukarow, $yhtiorow;
+
+		//Haetaan kirjoitin
+		$query = "	SELECT *
+					FROM kirjoittimet
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$kukarow['kirjoitin']}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
+	function generoi_saldovahvistus_sahkopostit($request, $lahetetyt = false) {
+		global $kukarow, $yhtiorow;
+
+		if ($lahetetyt) {
+			//uusi_saldovahvistus käyttöliittymästä voi antaa monta saldovahvistusta ja lähetetyt_saldovahvistukset näkymästä vain yhden. Tästä syystä pitää antaa arrayn sisällä
+			$valitut_saldovahvistukset = array($request['saldovahvistus']);
+		}
+		else {
+			$valitut_saldovahvistukset = $_SESSION['valitut_laskut'];
+		}
+
+		$lahetetyt_count = 0;
+		$ei_lahetetty_count = 0;
+		foreach ($valitut_saldovahvistukset as $valittu_saldovahvistus) {
+			$request['ryhmittely_tyyppi_temp'] = $valittu_saldovahvistus['ryhmittely_tyyppi'];
+
+			if ($lahetetyt) {
+				$request['saldovahvistus_tunnus'] = $valittu_saldovahvistus['saldovahvistus_tunnus'];
+				$saldovahvistus = hae_lahetetyt_saldovahvistukset($request);
+			}
+			else {
+				$request['lasku_tunnukset'] = $valittu_saldovahvistus['lasku_tunnukset'];
+				$saldovahvistus = hae_myyntilaskuja_joilla_avoin_saldo($request, true);
+			}
+
+			//Valittu saldovahvistusviesti
+			$saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $valittu_saldovahvistus['saldovahvistus_viesti']);
+			$saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
+			$saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
+
+			if ($saldovahvistus['asiakas']['talhal_email'] != '') {
+				$pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
+
+				$params = array(
+					"to"			 => $saldovahvistus['asiakas']['talhal_email'],
+					"subject"		 => t('Saldovahvistus', $saldovahvistus['asiakas']['kieli']),
+					"ctype"			 => "text",
+					"body"			 => t('Oheessa avoinsaldotilanteenne pdf-liitteenä', $saldovahvistus['asiakas']['kieli']),
+					"attachements"	 => array(
+						array(
+							"filename"		 => $pdf_filepath,
+							"newfilename"	 => t('Saldovahvistus', $saldovahvistus['asiakas']['kieli']).".pdf",
+							"ctype"			 => "pdf"
+						)
+					)
+				);
+
+				$onko_sahkoposti_lahetetty = pupesoft_sahkoposti($params);
+
+				if ($onko_sahkoposti_lahetetty) {
+					merkkaa_saldovahvistus_lahetetyksi($saldovahvistus);
+					$lahetetyt_count++;
+				}
+				else {
+					$ei_lahetetty_count++;
+				}
+			}
+			else {
+				$ei_lahetetty_count++;
+			}
+		}
+
+		return array($lahetetyt_count, $ei_lahetetty_count);
+	}
+}
+
+if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
+	function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	INSERT INTO saldovahvistukset
+					SET lahetys_pvm = CURRENT_DATE,
+					saldovahvistus_viesti = '{$saldovahvistus['saldovahvistus_viesti']['selite']}',
+					avoin_saldo_pvm = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
+					ryhmittely_tyyppi = '{$saldovahvistus['ryhmittely_tyyppi']}',
+					yhtio = '{$kukarow['yhtio']}'";
+		pupe_query($query);
+		$saldovahvistus_tunnus = mysql_insert_id();
+
+		foreach ($saldovahvistus['laskut'] as $lasku) {
+			if ($lasku['saldovahvistusrivi_tyyppi'] == 'K') {
+				//Noticet pois
+				$lasku['laskunro'] = 0;
+				$lasku['lasku_tunnus'] = 0;
+				$lasku['tapvm'] = null;
+			}
+
+			$query = "	INSERT INTO saldovahvistusrivit
+						SET saldovahvistus_tunnus = {$saldovahvistus_tunnus},
+						tyyppi = '{$lasku['saldovahvistusrivi_tyyppi']}',
+						lasku_tunnus = '{$lasku['lasku_tunnus']}',
+						laskunro = '{$lasku['laskunro']}',
+						tapahtuma_pvm = '{$lasku['tapvm']}',
+						era_pvm = '{$lasku['erpcm']}',
+						summa = {$lasku['avoin_saldo']},
+						yhtio = '{$kukarow['yhtio']}'";
+			pupe_query($query);
+		}
 	}
 }
 

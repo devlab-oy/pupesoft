@@ -171,7 +171,7 @@
 			echo "</select></td></tr>";
 
 			$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
-			
+
 			if ($toim == "VALMISTAVARASTOON" and mysql_num_rows($valmistuslinja_result) > 0) {
 				echo "<tr>";
 				echo "<th>".t("Valmistuslinja").":</th>";
@@ -543,6 +543,11 @@
 						session = '$session'";
 			$result = mysql_query($query) or pupe_error($query);
 
+			$kukarow["kesken"] = $id;
+			$tilausnumero = $id;
+		}
+		elseif ($php_cli and strpos($_SERVER['SCRIPT_NAME'], "generoi_siirtolista.php") !== FALSE) {
+			// generoidaan siirtolistoja komentoriviltä
 			$kukarow["kesken"] = $id;
 			$tilausnumero = $id;
 		}

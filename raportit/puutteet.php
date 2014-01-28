@@ -385,10 +385,12 @@
 
 				$query = "	SELECT tahtituote, hinnastoon, status, ostoehdotus,
 							group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
-							group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja
+							group_concat(distinct toimi.ytunnus order by toimi.ytunnus separator '<br>') toimittaja
 							FROM tuote
 							LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
-							WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno='$row[tuoteno]'
+							LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+							WHERE tuote.yhtio='$kukarow[yhtio]'
+							and tuote.tuoteno='$row[tuoteno]'
 							GROUP BY 1,2,3";
 				$tuoteresult = mysql_query($query) or pupe_error($query);
 				$tuoterow = mysql_fetch_array($tuoteresult);

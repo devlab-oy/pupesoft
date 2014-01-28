@@ -1622,7 +1622,7 @@
 												sscc_koodi			= '',
 												status				= '',
 												tilausnumero 		= '{$rtuoteno[$i]['ostotilausnro']}',
-												tilausrivi 			= '',
+												tilausrivi 			= NULL,
 												tilausrivinpositio 	= '{$rtuoteno[$i]['tilaajanrivinro']}',
 												toimittajanumero 	= '{$trow['toimittajanro']}',
 												toim_tuoteno 		= '{$rtuoteno[$i]['tuoteno']}',

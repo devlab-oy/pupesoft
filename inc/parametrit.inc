@@ -48,6 +48,14 @@ $_GET		= pupe_register_globals($_GET);
 $_POST		= pupe_register_globals($_POST);
 $_REQUEST	= pupe_register_globals($_REQUEST);
 
+// Hoidetaan pakkaus
+if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {		
+	ini_set('zlib.output_compression', 'Off');
+}
+else {
+	ini_set('zlib.output_compression', 'On');
+}
+
 // Nollataan kaikki muuttujat joita voi setata salasanat.php:ssä
 unset($palvelin);
 unset($palvelin_ip);
@@ -522,10 +530,6 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 	if ((isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
 		// Kerrotaan selaimelle, että tämä on tiedosto
-		if (ini_get('zlib.output_compression')) {
-			ini_set('zlib.output_compression', 'Off');
-		}
-
 		header("Pragma: public");
 		header("Expires: 0");
 		header("HTTP/1.1 200 OK");
@@ -789,7 +793,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		}
 
 		// Messenger-viestit (X = ei luettu)
-		if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off")) {
+		if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off") and $no_head != "yes") {
 
 			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)

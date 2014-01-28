@@ -56,7 +56,7 @@
 		}
 
 		if (trim($tuotenumeron_sarake) == '') {
-			echo "<font class='error'>",t("Et syöttänyt tuotenumeron sarakenumeroa"),"!</font><br/>";
+			echo "<font class='error'>",t("Et syättänyt tuotenumeron sarakenumeroa"),"!</font><br/>";
 			$tee = '';
 			$error++;
 		}
@@ -67,7 +67,7 @@
 		}
 
 		if (trim($tehtaan_saldon_sarake) == '') {
-			echo "<font class='error'>",t("Et syöttänyt tehtaan saldon sarakenumeroa"),"!</font><br/>";
+			echo "<font class='error'>",t("Et syättänyt tehtaan saldon sarakenumeroa"),"!</font><br/>";
 			$tee = '';
 			$error++;
 		}
@@ -193,7 +193,7 @@
 
 			if ($error == 0 and $tee == 'OK') {
 
-				$tuotteen_toimittaja = mysql_real_escape_string($tuotteen_toimittaja);
+				$tuotteen_toimittaja = (int) $tuotteen_toimittaja;
 				$tuotenumeron_sijainti_pupessa = mysql_real_escape_string($tuotenumeron_sijainti_pupessa);
 
 				if ($toiminto == 'paivita_ja_poista') {
@@ -201,8 +201,8 @@
 								tehdas_saldo = '0',
 								tehdas_saldo_paivitetty = now()
 								WHERE yhtio = '$kukarow[yhtio]'
-								AND toimittaja = '$tuotteen_toimittaja'";
-					$update_saldo_result = mysql_query($query) or pupe_error($query);
+								AND liitostunnus = '$tuotteen_toimittaja'";
+					$update_saldo_result = pupe_query($query);
 				}
 
 				foreach ($tuote as $index => $tuoteno) {
@@ -211,9 +211,9 @@
 								tehdas_saldo = '{$saldo[$index]}',
 								tehdas_saldo_paivitetty = now()
 								WHERE yhtio = '$kukarow[yhtio]'
-								AND toimittaja = '$tuotteen_toimittaja'
+								AND liitostunnus = '$tuotteen_toimittaja'
 								AND $tuotenumeron_sijainti_pupessa = '$tuoteno'";
-					$update_saldo_result = mysql_query($query) or pupe_error($query);
+					$update_saldo_result = pupe_query($query);
 				}
 
 				echo "<font class='message'>",t("Päivitettiin")," ",count($tuote)," ",t("tuotteen tehdas saldot"),".</font><br/>";
@@ -231,21 +231,21 @@
 
 		echo "<tr><th colspan='2'>",t("Toimittajan valinnat"),"</th></tr>";
 
-		$query = "	SELECT DISTINCT tuotteen_toimittajat.toimittaja, toimi.nimi, toimi.nimitark
-					FROM tuotteen_toimittajat
-					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
-					WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-					AND tuotteen_toimittajat.toimittaja != 'FI'";
-		$tuotteen_toimittajat_result = mysql_query($query) or pupe_error($query);
+		$query = "	SELECT DISTINCT toimi.tunnus, toimi.nimi, toimi.nimitark
+					FROM toimi
+					JOIN tuotteen_toimittajat ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+					WHERE toimi.yhtio = '$kukarow[yhtio]'
+					AND toimi.ytunnus != 'FI'";
+		$tuotteen_toimittajat_result = pupe_query($query);
 
 		echo "<tr><td>",t("Tuotteen toimittaja"),"</td>";
 		echo "<td><select name='tuotteen_toimittaja'><option value=''>",t("Valitse toimittaja"),"</option>";
 
 		while ($tuotteen_toimittajat_row = mysql_fetch_assoc($tuotteen_toimittajat_result)) {
 
-			$sel = $tuotteen_toimittaja == $tuotteen_toimittajat_row['toimittaja'] ? ' SELECTED' : '';
+			$sel = $tuotteen_toimittaja == $tuotteen_toimittajat_row['tunnus'] ? ' SELECTED' : '';
 
-			echo "<option value='$tuotteen_toimittajat_row[toimittaja]'$sel>$tuotteen_toimittajat_row[nimi] $tuotteen_toimittajat_row[nimitark]</option>";
+			echo "<option value='$tuotteen_toimittajat_row[tunnus]'$sel>$tuotteen_toimittajat_row[nimi] $tuotteen_toimittajat_row[nimitark]</option>";
 		}
 
 		echo "</td></tr>";
@@ -288,7 +288,7 @@
 					WHERE tallennetut_parametrit.yhtio = '$kukarow[yhtio]'
 					and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
 					ORDER BY tallennetut_parametrit.nimitys";
-		$sresult = mysql_query($query) or pupe_error($query);
+		$sresult = pupe_query($query);
 
 		echo "<tr><td>",t("Valitse raportti"),":</td>";
 		echo "<td><select name='kysely' onchange='document.getElementById(\"tee\").value = \"lataavanha\";submit();'>";
@@ -314,7 +314,7 @@
 		echo "</tr>";
 
 		echo "<tr><td class='back'>&nbsp;</td></tr>";
-		echo "<tr><th colspan='2'>",t("Tiedoston syöttö"),"</th></tr>";
+		echo "<tr><th colspan='2'>",t("Tiedoston syättä"),"</th></tr>";
 		echo "<tr><td>",t("Valitse tiedosto"),":</td><td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'><input name='userfile' type='file'></td></tr>";
 
 		echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Aja tehdas saldot"),"'></td></tr>";
@@ -323,6 +323,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-
-?>

@@ -235,7 +235,12 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='message'>$toimitustapa: $vv-$kk-$pp<br><br>".t("Yhtään rahtikirjaa ei löytynyt")."!</font><br><br>";
+
+			echo "<font class='message'>";
+
+			echo $toimitustapa != "" ? $toimitustapa.": " : "";
+
+			echo "{$vv}-{$kk}-{$pp}<br><br>".t("Yhtään rahtikirjaa ei löytynyt")."!</font><br><br>";
 			$tee = "";
 		}
 		else {
@@ -247,7 +252,9 @@
 			echo "<input type='hidden' name='vv' value='$vv'>";
 
 			if ($otunnus == "") {
-				echo "<font class='message'>$toimitustapa: $vv-$kk-$pp</font><br><br>";
+				echo "<font class='message'>";
+				echo $toimitustapa != "" ? $toimitustapa.": " : "";
+				echo "{$vv}-{$kk}-{$pp}</font><br><br>";
 				echo "<input type='hidden' name='varasto' value='$varasto'>";
 				echo "<input type='hidden' name='toimitustapa' value='$toimitustapa'>";
 			}
@@ -454,51 +461,36 @@
 			echo "<select name='lahto'>";
 			echo "<option value=''>",t("Kaikki"),"</option>";
 
-			$toimitustapajoin = $toimitustapaselect = "";
+			$toimitustapalisa = $toimitustapajoin = $toimitustapaselect = "";
 
 			if (isset($toimitustapa_tunnus) and trim($toimitustapa_tunnus) != "") {
+				$toimitustapalisa = "AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'";
+				$toimitustapajoin = "JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)";
+				$toimitustapaselect = ", t.selite";
+			}
 
-				$query = "	SELECT lahdot.*, t.selite
-							FROM lahdot
-							JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)
-							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-							AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
-							AND lahdot.varasto = '{$varasto}'
-							AND lahdot.aktiivi = 'S'
-							AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'
-							ORDER BY lahdot.lahdon_kellonaika";
-				$lahdot_res = pupe_query($query);
+			$query = "	SELECT lahdot.* {$toimitustapaselect}
+						FROM lahdot
+						{$toimitustapajoin}
+						WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+						AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
+						AND lahdot.varasto = '{$varasto}'
+						AND lahdot.aktiivi = 'S'
+						AND lahdot.liitostunnus != 0
+						{$toimitustapalisa}
+						ORDER BY lahdot.lahdon_kellonaika";
+			$lahdot_res = pupe_query($query);
 
-				while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
+			while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
 
-					$sel = (isset($lahto) and $lahto == $lahdot_row['tunnus']) ? "selected" : "";
+				$sel = (isset($lahto) and $lahto == $lahdot_row['tunnus']) ? "selected" : "";
 
-					echo "<option value='{$lahdot_row['tunnus']}' {$sel}>{$lahdot_row['tunnus']} {$lahdot_row['lahdon_kellonaika']} {$lahdot_row['selite']}</option>";
-				}
+				echo "<option value='{$lahdot_row['tunnus']}' {$sel}>{$lahdot_row['tunnus']} {$lahdot_row['lahdon_kellonaika']} {$lahdot_row['selite']}</option>";
 			}
 
 			echo "</select>";
 			echo "</td>";
 			echo "</tr>";
-
-			$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
-						FROM kirjoittimet
-						WHERE {$logistiikka_yhtiolisa}
-						AND komento != 'EDI'
-						GROUP BY komento
-						ORDER BY kirjoitin";
-			$kires = pupe_query($query);
-
-			echo "<tr><th>",t("Valitse tulostin"),":</th>";
-			echo "<td><select name='komento'>";
-			echo "<option value='' SELECTED>",t("Oletustulostimelle"),"</option>";
-
-			while ($kirow = mysql_fetch_assoc($kires)) {
-				$sel = (isset($komento) and trim($komento) != "") ? "selected" : "";
-				echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
-			}
-
-			echo "</select></td></tr>";
 		}
 
 		echo "</table><br>";
@@ -556,5 +548,3 @@
 	}
 
 	require("inc/footer.inc");
-
-?>

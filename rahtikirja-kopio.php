@@ -467,15 +467,24 @@
 				$toimitustapalisa = "AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'";
 			}
 
-			$query = "	SELECT lahdot.*, t.selite
+			$query = "	SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, t.selite, count(lasku.tunnus) AS cnt
 						FROM lahdot
 						JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)
+						JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+						JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
+							AND r.tulostuspaikka = '{$varasto}'
+							AND r.toimitustapa = lasku.toimitustapa
+							AND r.tulostettu > '{$vv}-{$kk}-{$pp} 00:00:00'
+							AND r.tulostettu < '{$vv}-{$kk}-{$pp} 23:59:59'
+							AND r.otsikkonro = lasku.tunnus)
 						WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 						AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
 						AND lahdot.varasto = '{$varasto}'
 						AND lahdot.aktiivi = 'S'
 						AND lahdot.liitostunnus != 0
 						{$toimitustapalisa}
+						GROUP BY 1,2,3
+						HAVING cnt > 0
 						ORDER BY lahdot.lahdon_kellonaika, t.selite";
 			$lahdot_res = pupe_query($query);
 

@@ -461,17 +461,15 @@
 			echo "<select name='lahto'>";
 			echo "<option value=''>",t("Kaikki"),"</option>";
 
-			$toimitustapalisa = $toimitustapajoin = $toimitustapaselect = "";
+			$toimitustapalisa = "";
 
 			if (isset($toimitustapa_tunnus) and trim($toimitustapa_tunnus) != "") {
 				$toimitustapalisa = "AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'";
-				$toimitustapajoin = "JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)";
-				$toimitustapaselect = ", t.selite";
 			}
 
-			$query = "	SELECT lahdot.* {$toimitustapaselect}
+			$query = "	SELECT lahdot.*, t.selite
 						FROM lahdot
-						{$toimitustapajoin}
+						JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)
 						WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 						AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
 						AND lahdot.varasto = '{$varasto}'

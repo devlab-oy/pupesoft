@@ -339,12 +339,7 @@ function tee_kirjanpito_muutokset($params) {
 				$summalisa = 0;
 			}
 			else {
-				if ($vanharow['summa'] > 0) {
-					$summalisa = $params['laskurow']['summa'] + $vanharow['summa'];
-				}
-				else {
-					$summalisa = $params['laskurow']['summa'] + abs($vanharow['summa']);
-				}
+				$summalisa = $params['laskurow']['summa'] + abs($vanharow['summa']);
 			}
 		}
 

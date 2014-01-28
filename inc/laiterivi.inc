@@ -14,7 +14,12 @@ if (mysql_field_type($result, $i) == "blob") {
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
-	$ulos = "<td>".livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT')."</td>";
+	$lopetus_temp = base64_encode(urlencode("{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakasid={$valittu_asiakas}"));
+	$lopetus = "yllapito.php////toim=laite//uusi=1//valittu_paikka={$valittu_paikka}//lopetus_temp={$lopetus_temp}";
+	$ulos = "<td>";
+	$ulos .= livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT');
+	$ulos .= "<a href='{$palvelin2}yllapito.php?uusi=1&toim=tuote!!!tuote_pikaperustus!!!true&lopetus={$lopetus}&js_open_yp=&limit=&nayta_poistetut=&nayta_eraantyneet=&laji=&'><button type='button'>".t('Tuote pikaperustus')."</button></a>";
+	$ulos .= "</td>";
 	$jatko = 0;
 }
 

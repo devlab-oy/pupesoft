@@ -15,6 +15,10 @@
 		unset($apuwebseuranta);
 	}
 
+	if (isset($_REQUEST['lopetus_temp'])) {
+		$lopetus = urldecode(base64_decode($_REQUEST['lopetus_temp']));
+	}
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}

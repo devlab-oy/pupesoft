@@ -476,7 +476,7 @@
 						AND lahdot.aktiivi = 'S'
 						AND lahdot.liitostunnus != 0
 						{$toimitustapalisa}
-						ORDER BY lahdot.lahdon_kellonaika";
+						ORDER BY lahdot.lahdon_kellonaika, t.selite";
 			$lahdot_res = pupe_query($query);
 
 			while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {

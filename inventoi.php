@@ -280,6 +280,8 @@
 								}
 							}
 
+							$erasyotetyt = round($erasyotetyt, 2);
+
 							if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and $onko_uusia > 0) {
 								echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
 								$virhe = 1;

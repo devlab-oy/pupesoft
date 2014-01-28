@@ -4562,7 +4562,8 @@ if ($tee == '') {
 
 				if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') {
 					$haettu_alehinta = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
-					$ap_font = "<font class='ok'>";
+					
+					$ap_font = "<font>";
 
 					// Onko asiakasalennusta?
 					preg_match_all("/XXXALEPERUSTE:([0-9]*)/", $ale_peruste, $ap_match);
@@ -4582,7 +4583,7 @@ if ($tee == '') {
 					}
 
 					if (isset($ale_peruste) and !empty($ale_peruste) and $haettu_alehinta > 1) {
-						echo "<tr><th>{$ap_font}".substr($ale_peruste, 0, strpos($ale_peruste, "Hinta: "))."<font></th><td align='right'>{$ap_font}".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</font></td></tr>";
+						echo "<tr><th>{$ap_font}".substr($ale_peruste, 0, strpos($ale_peruste, "Hinta: "))."</font></th><td align='right'>{$ap_font}".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</font></td></tr>";
 					}
 				}
 

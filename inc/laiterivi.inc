@@ -29,7 +29,7 @@ if (mysql_field_name($result, $i) == "paikka") {
 						AND asiakas.tunnus = kohde.asiakas
 						AND asiakas.tunnus = '{$asiakas_tunnus}')";
 	}
-	
+
 	$query = "	SELECT paikka.tunnus, concat_ws(' ', paikka.nimi, paikka.osoite) as dropdown_text
 				FROM paikka
 				{$join}
@@ -81,9 +81,19 @@ if (mysql_field_name($result, $i) == "oma_numero") {
 
 }
 
-//TODO omistaja. voi olla asiakas tai huoltofirma. ei ole relaatio. tekstikenttä johon voidaan syöttää poikkeava omistaja. tämän avulla saadaan esim. selville kuuluukoo joltain paikalta löytyvä laite ylipäätänsä huollon piiriin.
+//Jos omistaja kentässä on jotain niin kyseiselle laitteelle ei generoida työmääräyksiä. Laitteet, jotka eivät kuulu huollon piiriin halutaan kuitenkin lisätä asiakkaan laitepuuhun, jotta huoltomies ei ihmettele ylimääräisiä laitteita huoltokierroksellaan.
 if (mysql_field_name($result, $i) == "omistaja") {
+	$ulos = "<tr>";
+	$ulos .= "<th align='left'>";
+	$ulos .= t('Muu omistaja');
+	$ulos .= "</th>";
+	$ulos .= "<td>";
+	$ulos .= "<input type='text' class='omistaja' name='t[{$i}]' value='{$trow[$i]}' size='35' maxlength='60' />";
+	$ulos .= "</td>";
+	$ulos .= "</tr>";
 
+	$jatko = 0;
+	$tyyppi = 0;
 }
 
 if (mysql_field_name($result, $i) == "valm_pvm") {
@@ -98,7 +108,7 @@ if (mysql_field_name($result, $i) == "tila") {
 				ORDER BY jarjestys ASC";
 	$tuote_tila_result = pupe_query($query);
 	$tuote_tilat = array();
-	while($tuote_tila = mysql_fetch_assoc($tuote_tila_result)) {
+	while ($tuote_tila = mysql_fetch_assoc($tuote_tila_result)) {
 		$tuote_tilat[] = $tuote_tila;
 	}
 

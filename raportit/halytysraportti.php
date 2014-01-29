@@ -640,7 +640,7 @@
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon
 							FROM tuote
-							JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select tunnus from tuotteen_toimittajat where yhtio=$row[yhtio] and tuoteno=$row[tuoteno] ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
+							JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select tunnus from tuotteen_toimittajat where yhtio = '$row[yhtio]' and tuoteno = '$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
 							LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
 							$lisaa2
 							$abcjoin
@@ -805,7 +805,7 @@
 					}
 
 					//toimittajatiedot
-					if ($toimittajaid == '' and uusiruksi) {
+					if ($toimittajaid == '' and isset($nayta_vain_ykkostoimittaja)) {
 						$query = "	SELECT group_concat(toimi.ytunnus 						order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
 									group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
 									group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
@@ -816,8 +816,8 @@
 									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 									WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
 									and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-									ORDER BY if (jarjestys = 0, 9999, jarjestys) 
-									LIMTI 1
+									ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
+									LIMIT 1
 									";
 					}
 					elseif ($toimittajaid == '') {

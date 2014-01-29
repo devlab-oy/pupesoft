@@ -35,8 +35,13 @@ if (mysql_field_name($result, $i) == "paikka") {
 						AND asiakas.tunnus = '{$asiakas_tunnus}')";
 	}
 
-	$query = "	SELECT paikka.tunnus, concat_ws(' ', paikka.nimi, paikka.osoite) as dropdown_text
+	$query = "	SELECT paikka.tunnus,
+				concat_ws(' ', paikka.nimi, paikka.osoite, avainsana.selitetark) as dropdown_text
 				FROM paikka
+				JOIN avainsana
+				ON ( avainsana.yhtio = paikka.yhtio
+					AND avainsana.selite = paikka.olosuhde
+					AND avainsana.laji = 'OLOSUHDE' )
 				{$join}
 				WHERE paikka.yhtio = '{$kukarow['yhtio']}'";
 	$paikka_result = pupe_query($query);

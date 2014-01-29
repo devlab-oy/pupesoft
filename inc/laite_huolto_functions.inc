@@ -685,7 +685,7 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi) {
 
 	$result = pupe_query($query);
 
-	$laitteen_huoltosyklit = [];
+	$laitteen_huoltosyklit = array();
 
 	while ($huoltosykli = mysql_fetch_assoc($result)) {
 		$laitteen_huoltosyklit[] = $huoltosykli;
@@ -708,8 +708,6 @@ function hae_huoltosyklit($tunnus, $tyyppi) {
 	global $kukarow;
 
 	if ($tunnus != '') {
-
-
 		$tuoteno_query = "	SELECT tuoteno
 							FROM laite
 							WHERE tunnus = $tunnus

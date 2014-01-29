@@ -601,11 +601,13 @@ function aseta_tyomaarays_status($status, $tilausrivi_tunnus = '', $lasku_tunnus
 function huoltosykli_rivi($tyyppi) {
 	global $tunnus;
 
-	$laitteen_huoltosyklit = hae_laitteen_huoltosyklit($tunnus, $tyyppi);
+	$laite_tunnus = $tunnus;
+
+	$laitteen_huoltosyklit = hae_laitteen_huoltosyklit($laite_tunnus, $tyyppi);
 
 	$pakollisuus_chk = "";
 
-	$huoltosyklit = hae_huoltosyklit($tunnus, $tyyppi);
+	$huoltosyklit = hae_huoltosyklit($laite_tunnus, $tyyppi);
 
 	if ($laitteen_huoltosyklit[0]['pakollisuus'] == 1) {
 		$pakollisuus_chk = "CHECKED";
@@ -704,13 +706,13 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi) {
 }
 
 //haetaan sallitut huoltosyklit huoltosyklityypin ja laitenumeron perusteella
-function hae_huoltosyklit($tunnus, $tyyppi) {
+function hae_huoltosyklit($laite_tunnus, $tyyppi) {
 	global $kukarow;
 
-	if ($tunnus != '') {
+	if ($laite_tunnus != '') {
 		$tuoteno_query = "	SELECT tuoteno
 							FROM laite
-							WHERE tunnus = $tunnus
+							WHERE tunnus = $laite_tunnus
 							AND yhtio = '{$kukarow['yhtio']}'";
 		$tuoteno_result = pupe_query($tuoteno_query);
 		$tuoteno = mysql_result($tuoteno_result, 0);
@@ -754,7 +756,7 @@ function hae_huoltosyklit($tunnus, $tyyppi) {
 				WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
 				AND tuotteen_avainsanat.selite LIKE '%{$tyyppi}%'";
 
-	if ($tunnus != '') {
+	if ($laite_tunnus != '') {
 		$query .= " AND huoltosykli.tyyppi = '{$sammutin_tyyppi}' AND huoltosykli.koko = $sammutin_koko";
 	}
 

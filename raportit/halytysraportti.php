@@ -641,8 +641,6 @@
 							tuote.hinnastoon
 							FROM tuote
 							JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select tunnus from tuotteen_toimittajat where yhtio=$row[yhtio] and tuoteno=$row[tuoteno] ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
-							
-							
 							LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
 							$lisaa2
 							$abcjoin
@@ -2120,7 +2118,7 @@
 
 
 			echo "</td></tr>";
-			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
+			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'>".t("P‰‰toimittajarajaus")."<input type='checkbox' name='nayta_vain_ykkostoimittaja' value='JOO'/></td></tr>";
 
 			echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 

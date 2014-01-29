@@ -1,5 +1,4 @@
 <?php
-
 //Kun tehdyt_tyˆt n‰kym‰st‰ tulostetaan tarkastuspyˆt‰kirjoja tai poikkeamaraportteja,
 //tulee requestin mukana toim-muuttuja.
 //Koska kyseinen muuttuja ei ole t‰ss‰ tiedostossa k‰ytˆss‰ asetetaan se tyhj‰ksi,
@@ -18,13 +17,13 @@ if (isset($_POST["tee"])) {
 }
 
 $filepath = dirname(__FILE__);
-if (file_exists($filepath . '/inc/parametrit.inc')) {
-	require_once($filepath . '/inc/parametrit.inc');
-	require_once($filepath . '/inc/tyojono2_functions.inc');
+if (file_exists($filepath.'/inc/parametrit.inc')) {
+	require_once($filepath.'/inc/parametrit.inc');
+	require_once($filepath.'/inc/tyojono2_functions.inc');
 }
 else {
-	require_once($filepath . '/parametrit.inc');
-	require_once($filepath . '/tyojono2_functions.inc');
+	require_once($filepath.'/parametrit.inc');
+	require_once($filepath.'/tyojono2_functions.inc');
 }
 
 if (!empty($kukarow['extranet'])) {
@@ -83,14 +82,13 @@ echo "<font class='head'>".t("Laitehallinta")."</font><hr>";
 	});
 
 	function massapaivitys_select_all() {
-		$('#massapaivitys_select_all').on('click', function(){
-		    $('.massapaivitys_checkbox').prop('checked', this.checked);
+		$('#massapaivitys_select_all').on('click', function() {
+			$('.massapaivitys_checkbox').prop('checked', this.checked);
 		});
 	}
 
 </script>
 <?php
-
 $request = array(
 	'ytunnus'			 => $ytunnus,
 	'asiakasid'			 => $asiakasid,
@@ -124,8 +122,7 @@ if (!empty($request['haettu_asiakas'])) {
 
 	$pdf_tiedostot = array();
 
-	if ($request['ala_tee'] == 'tulosta_kalustoraportti')
-	{
+	if ($request['ala_tee'] == 'tulosta_kalustoraportti') {
 		$asiakkaan_kohteet['yhtio'] = $yhtiorow;
 		$asiakkaan_kohteet['asiakas'] = $request['haettu_asiakas'];
 		$asiakkaan_kohteet['logo'] = base64_encode(hae_yhtion_lasku_logo());
@@ -133,22 +130,17 @@ if (!empty($request['haettu_asiakas'])) {
 
 		unset($request['ala_tee']);
 		$asiakkaan_kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
-
 	}
-	else if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' or $request['ala_tee'] == 'tulosta_poikkeamaraportti')
-	{
+	else if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' or $request['ala_tee'] == 'tulosta_poikkeamaraportti') {
 		$pdf_tiedostot = ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirjat($request['lasku_tunnukset']) : PDF\Poikkeamaraportti\hae_poikkeamaraportit($request['lasku_tunnukset']));
 		//lasku_tunnukset pit‰‰ unsetata koska niit‰ k‰ytet‰‰n hae_tyomaarays funkkarissa
 		unset($request['lasku_tunnukset']);
-
 	}
-	else if( $request['ala_tee'] == 'echo_massapaivitys_form' )
-	{
+	else if ($request['ala_tee'] == 'echo_massapaivitys_form') {
 		$laitteiden_huoltosyklit = hae_laitteiden_huoltosyklit($request['haettu_asiakas']);
 		echo_massapaivitys_form($laitteiden_huoltosyklit, $request['haettu_asiakas']);
 	}
-	else if( $request['ala_tee'] == 'paivita_huoltosyklit' )
-	{
+	else if ($request['ala_tee'] == 'paivita_huoltosyklit') {
 		$updated = paivita_huoltosyklit();
 		echo "<font class='message'>".$updated." kpl p‰ivitetty onnistuneesti</font>";
 		echo "<br/>";
@@ -182,7 +174,7 @@ if (!empty($request['haettu_asiakas'])) {
 		echo "<br/>";
 	}
 
-	if( $request['ala_tee'] != 'echo_massapaivitys_form' ){
+	if ($request['ala_tee'] != 'echo_massapaivitys_form') {
 		echo "<div id='laite_puu_wrapper'>";
 		echo_kohteet_table($asiakkaan_kohteet, $request);
 		echo "</div>";
@@ -195,7 +187,7 @@ if (empty($kukarow['extranet']) and $request['ala_tee'] != 'echo_massapaivitys_f
 
 pupesoft_require("inc/footer.inc");
 
-function paivita_huoltosyklit(){
+function paivita_huoltosyklit() {
 	global $request;
 
 	$count = 0;
@@ -207,7 +199,7 @@ function paivita_huoltosyklit(){
 
 		$uusi_huoltovali = $sykli['huoltovali'];
 
-		if( $sykli['huoltovali'] <= $max_huoltovali and $sykli['update'] == 1){
+		if ($sykli['huoltovali'] <= $max_huoltovali and $sykli['update'] == 1) {
 			$query = "UPDATE huoltosyklit_laitteet SET huoltovali = {$uusi_huoltovali} WHERE tunnus IN ({$sykli['tunnukset']})";
 			$result = pupe_query($query);
 			$count = $count + mysql_affected_rows();
@@ -215,7 +207,6 @@ function paivita_huoltosyklit(){
 	}
 
 	return $count;
-
 }
 
 function echo_kayttoliittyma($request = array()) {
@@ -259,7 +250,7 @@ function echo_kalustoraportti_form($haettu_asiakas) {
 	echo "</form>";
 }
 
-function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas){
+function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas) {
 
 	echo "<form method='POST' action=''>";
 	echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
@@ -285,8 +276,8 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas){
 			echo "</td>";
 
 			echo "<td>";
-			echo "<input type='hidden' name='huoltosyklit[$index][tunnukset]' value='" . $sykli['tunnukset'] . "' />";
-			echo "<input type='hidden' name='huoltosyklit[$index][huoltosykli_tunnus]' value='" . $sykli['huoltosykli_tunnus'] . "' />";
+			echo "<input type='hidden' name='huoltosyklit[$index][tunnukset]' value='".$sykli['tunnukset']."' />";
+			echo "<input type='hidden' name='huoltosyklit[$index][huoltosykli_tunnus]' value='".$sykli['huoltosykli_tunnus']."' />";
 			echo $sykli['kuvaus'];
 			echo "</td>";
 
@@ -297,19 +288,16 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas){
 			echo "<td>";
 			echo "<select name='huoltosyklit[$index][huoltovali]'>";
 
-			$huoltovali_options = huoltovali_options( $sykli['huoltosykli_tunnus'] );
-			foreach($huoltovali_options  as $key => $val ){
+			$huoltovali_options = huoltovali_options($sykli['huoltosykli_tunnus']);
+			foreach ($huoltovali_options as $key => $val) {
 				echo "<option value='".$val."'>".$key."</option>";
 			}
 
-
 			echo "</select>";
-
 
 			echo "</td>";
 
 			echo "</tr>";
-
 		}
 	}
 	echo "</table>";
@@ -317,30 +305,43 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas){
 	echo "</form>";
 }
 
-
-function hae_laitteiden_huoltosyklit($asiakas){
+function hae_laitteiden_huoltosyklit($asiakas) {
 	global $kukarow, $yhtiorow;
 
-	$query = 	"	SELECT CONCAT(t6.tyyppi, ' ', t6.koko, 'kg ', t8.selitetark) AS kuvaus,
-					t6.huoltovali,
-					t5.huoltosykli_tunnus,
-					t7.nimitys,
-					GROUP_CONCAT(t5.tunnus) AS tunnukset
-					FROM asiakas t1
-					JOIN kohde t2 ON (t2.yhtio = t1.yhtio AND t2.asiakas = t1.tunnus)
-					JOIN paikka t3 ON (t3.yhtio = t2.yhtio AND t3.kohde = t2.tunnus)
-					JOIN laite t4 ON (t4.yhtio = t3.yhtio AND t4.paikka = t3.tunnus)
-					JOIN huoltosyklit_laitteet t5 ON (t5.yhtio = t4.yhtio AND t5.laite_tunnus = t4.tunnus)
-					JOIN huoltosykli t6 ON (t6.yhtio = t5.yhtio AND t6.tunnus = t5.huoltosykli_tunnus)
-					JOIN tuote t7 ON (t7.yhtio = t6.yhtio AND t7.tuoteno = t6.toimenpide)
-					JOIN avainsana t8 ON (t8.yhtio = t6.yhtio AND t8.selite = t6.olosuhde)
-					WHERE t1.yhtio = '{$kukarow['yhtio']}'
-					AND t1.tunnus = {$asiakas['tunnus']}
-					GROUP BY CONCAT(t6.tyyppi,t6.koko,t6.olosuhde,t6.toimenpide)";
+	$query = "	SELECT CONCAT(t6.tyyppi, ' ', t6.koko, 'kg ', t8.selitetark) AS kuvaus,
+				t6.huoltovali,
+				t5.huoltosykli_tunnus,
+				t7.nimitys,
+				GROUP_CONCAT(t5.tunnus) AS tunnukset
+				FROM asiakas t1
+				JOIN kohde t2
+				ON ( t2.yhtio = t1.yhtio
+					AND t2.asiakas = t1.tunnus )
+				JOIN paikka t3
+					ON ( t3.yhtio = t2.yhtio
+					AND t3.kohde = t2.tunnus )
+				JOIN laite t4
+				ON ( t4.yhtio = t3.yhtio
+					AND t4.paikka = t3.tunnus )
+				JOIN huoltosyklit_laitteet t5
+				ON ( t5.yhtio = t4.yhtio
+					AND t5.laite_tunnus = t4.tunnus )
+				JOIN huoltosykli t6
+				ON ( t6.yhtio = t5.yhtio
+					AND t6.tunnus = t5.huoltosykli_tunnus )
+				JOIN tuote t7
+				ON ( t7.yhtio = t6.yhtio
+					AND t7.tuoteno = t6.toimenpide )
+				JOIN avainsana t8
+				ON ( t8.yhtio = t6.yhtio
+					AND t8.selite = t6.olosuhde)
+				WHERE t1.yhtio = '{$kukarow['yhtio']}'
+				AND t1.tunnus = {$asiakas['tunnus']}
+				GROUP BY CONCAT(t6.tyyppi,t6.koko,t6.olosuhde,t6.toimenpide)";
 
 	$result = pupe_query($query);
 	$laitteiden_huoltosyklit = array();
-	while($laitteen_huoltosykli = mysql_fetch_assoc($result)) {
+	while ($laitteen_huoltosykli = mysql_fetch_assoc($result)) {
 		$laitteiden_huoltosyklit[] = $laitteen_huoltosykli;
 	}
 

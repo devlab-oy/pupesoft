@@ -2,7 +2,7 @@
 
 function hae_tyojono2_js() {
 	global $palvelin2;
-	
+
 	ob_start();
 	?>
 	<script src='<?php echo $palvelin2 ?>js/tyomaarays/tyojono2.js'></script>
@@ -20,7 +20,6 @@ function hae_tyojono2_js() {
 		});
 	</script>
 	<?php
-
 	$js = ob_get_clean();
 
 	return $js;
@@ -43,7 +42,6 @@ function hae_tyojono2_css() {
 		}
 	</style>
 	<?php
-
 	$js = ob_get_clean();
 
 	return $js;
@@ -582,7 +580,7 @@ function hae_laitteen_viimeiset_tapahtumat($laite_tunnus) {
 	$result = pupe_query($query);
 
 	$viimeiset_tapahtumat = array();
-	while($viimeinen_tapahtuma = mysql_fetch_assoc($result)) {
+	while ($viimeinen_tapahtuma = mysql_fetch_assoc($result)) {
 		$viimeiset_tapahtumat[$viimeinen_tapahtuma['tapahtuman_tyyppi']] = $viimeinen_tapahtuma['viimeinen_tapahtuma'];
 	}
 

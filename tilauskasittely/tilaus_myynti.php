@@ -4591,7 +4591,7 @@ if ($tee == '') {
 					if (isset($ale_peruste) and !empty($ale_peruste) and $haettu_alehinta > 1 and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 'o') {
 						echo "<tr><th>{$ap_font}".substr($ale_peruste, 0, strpos($ale_peruste, "Hinta: "))."</font></th><td align='right'>{$ap_font}".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</font></td></tr>";
 					}
-					elseif (isset($ale_peruste) and !empty($ale_peruste) and $haettu_alehinta > 1 and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 't') {
+					elseif (isset($ale_peruste) and !empty($ale_peruste) and $haettu_alehinta > 1 and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 't' and ($ap_match[1] > 1 and $ap_match[1] <= 13)) {
 						echo "<tr><th>{$ap_font}".t("Asiakashinta")."</font></th><td align='right'>{$ap_font}".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</font></td></tr>";
 					}
 				}
@@ -7138,7 +7138,7 @@ if ($tee == '') {
 						if($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 'o') {
 							echo $ap_font.substr($row["ale_peruste"], 0, strpos($row["ale_peruste"], "XXX"))."</font><br>";
 						}
-						elseif ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 't') {
+						elseif ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 't' and ($ap_match[1] > 1 and $ap_match[1] <= 13)) {
 							echo $ap_font.t("Asiakashinta")."</font><br>";
 						}
 					}

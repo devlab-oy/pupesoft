@@ -640,7 +640,7 @@
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon
 							FROM tuote
-							JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select tunnus from tuotteen_toimittajat where yhtio = '$row[yhtio]' and tuoteno = '$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
+							JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = '$yhtiorow[yhtio]' and tuoteno = tuote.tuoteno ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
 							LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
 							$lisaa2
 							$abcjoin
@@ -805,33 +805,30 @@
 					}
 
 					//toimittajatiedot
-					if ($toimittajaid == '' and isset($nayta_vain_ykkostoimittaja)) {
-						$query = "	SELECT group_concat(toimi.ytunnus 						order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
-									group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
-									group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-									group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-									group_concat(distinct tuotteen_toimittajat.ostohinta 	order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
-									group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
+					if ($toimittajaid == '') {
+						$ykkostoim_orderilisa = '';
+						$querylisake = '';
+						if (isset($nayta_vain_ykkostoimittaja)) {
+         					$querylisake = " toimi.ytunnus toimittaja, tuotteen_toimittajat.osto_era,
+ 										 	 tuotteen_toimittajat.toim_tuoteno,tuotteen_toimittajat.toim_nimitys,tuotteen_toimittajat.ostohinta,tuotteen_toimittajat.tuotekerroin";
+							$ykkostoim_orderilisa = " ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1";
+						}
+						else {
+							$querylisake = " group_concat(toimi.ytunnus 						order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
+											 group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
+											 group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+											 group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
+											 group_concat(distinct tuotteen_toimittajat.ostohinta 	order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
+											 group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin";
+						}
+						$query = "	SELECT 
+									{$querylisake}
 									FROM tuotteen_toimittajat
 									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 									WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
 									and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-									ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
-									LIMIT 1
+									{$ykkostoim_orderilisa}
 									";
-					}
-					elseif ($toimittajaid == '') {
-						$query = "	SELECT group_concat(toimi.ytunnus 						order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
-									group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
-									group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-									group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-									group_concat(distinct tuotteen_toimittajat.ostohinta 	order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
-									group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
-									FROM tuotteen_toimittajat
-									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-									WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
-									and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-									and ykks‰tyoimittajan tiedot";
 					}
 					else {
 						$query = "	SELECT toimi.ytunnus toimittaja,
@@ -943,9 +940,7 @@
 					//tilauksessa, ennakkopoistot ja jt	HUOM: varastolisa m‰‰ritelty jo aiemmin!
 					$query = "	SELECT
 								sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
-								
-								sum(if(tyyppi = 'O', varattu, 0)) tilattu, <-- JETMASTERS
-								
+								sum(if(tyyppi = 'O', varattu, 0)) tilattu,
 								sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
 								sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois,
 								sum(if(tyyppi in ('L','G') and var in ('J','S'), jt $lisavarattu, 0)) jt
@@ -958,18 +953,18 @@
 								and (varattu+jt > 0)";
 					$result = pupe_query($query);
 					$ennp   = mysql_fetch_assoc($result);
-					
+					/*
 					$query = "	SELECT								
-								sum(if(tyyppi = 'O', varattu, 0)) tilattu, <-- JETMASTERS
+								sum(if(tyyppi = 'O', varattu, 0)) tilattu,
 								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)								
-								JOIN LASKU ON yhtio=yhtio and liitostunnus = (select tunnus from tuotteen_toimittajat where yhtio=$row[yhtio] and tuoteno=$row[tuoteno] ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)																
+								JOIN LASKU ON yhtio='$row[yhtio]' and liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio=$row[yhtio] and tuoteno=$row[tuoteno] ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)																
 								WHERE yhtio = '$row[yhtio]'
 			 					and tyyppi in ('O')
 								and tuoteno = '$row[tuoteno]'
 								and laskutettuaika = '0000-00-00'";
 					$result = pupe_query($query);
 					$ennp   = mysql_fetch_assoc($result);
-
+*/
 					if ($paikoittain == '') {
 						// Kaikkien valittujen varastojen paikkojen saldo yhteens‰, mukaan tulee myˆs aina ne saldot jotka ei kuulu mihink‰‰n varastoalueeseen
 						$query = "	SELECT sum(saldo) saldo, varastopaikat.tunnus
@@ -2268,9 +2263,11 @@
 					<input type='hidden' name='asiakasosasto' value='$asiakasosasto'>
 					<input type='hidden' name='abcrajaus' value='$abcrajaus'>
 					<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>
-					<input type='hidden' name='KAIKKIJT' value='$KAIKKIJT'>
-
-					<table>
+					<input type='hidden' name='KAIKKIJT' value='$KAIKKIJT'>";
+					if (isset($nayta_vain_ykkostoimittaja)) { 
+						echo "<input type='hidden' name='nayta_vain_ykkostoimittaja' value='JOO'>";
+					}
+					echo "<table>
 					<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto $trow[selitetark]</td></tr>
 					<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>$tuoryh $srow[selitetark]</td></tr>
 					<tr><th>".t("Toimittaja")."</th><td colspan='3'>$ytunnus $trow1[nimi]</td></tr>
@@ -2733,8 +2730,9 @@
 
 			echo "</tr>";
 			echo "</table>";
-			echo "<br>
-				<input type='Submit' name='RAPORTOI' value = '".t("Aja h‰lytysraportti")."'>
+			echo "<br>";
+
+				echo "<input type='Submit' name='RAPORTOI' value = '".t("Aja h‰lytysraportti")."'>
 				</form>";
 		}
 		require ("../inc/footer.inc");

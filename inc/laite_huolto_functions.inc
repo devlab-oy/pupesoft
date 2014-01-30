@@ -597,7 +597,7 @@ function aseta_tyomaarays_status($status, $tilausrivi_tunnus = '', $lasku_tunnus
 	pupe_query($query);
 }
 
-//luodaan huoltosykli huoltosyklityypin perusteella
+//luodaan huoltosyklirivi huoltosyklityypin perusteella
 function huoltosykli_rivi($tyyppi) {
 	global $tunnus;
 
@@ -623,16 +623,19 @@ function huoltosykli_rivi($tyyppi) {
 	echo "<tr>";
 	echo "<th>".t('Huoltosykli')."</th>";
 	echo "<td>";
-	echo "<select name='huoltosyklit[{$tyyppi}][huoltosykli_tunnus]'>";
+	echo "<select class='huoltosykli_select' id='huoltosykli_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltosykli_tunnus]'>";
+
 	$sel = "";
 	echo "<option value='0'>Ei huoltosykliä</option>";
 
-	foreach ($huoltosyklit as $huoltosykli) {
-		if ($laitteen_huoltosyklit[0]['tunnus'] == $huoltosykli['tunnus']) {
-			$sel = "SELECTED";
+	if ($huoltosyklit) {
+		foreach ($huoltosyklit as $huoltosykli) {
+			if ($laitteen_huoltosyklit[0]['tunnus'] == $huoltosykli['tunnus']) {
+				$sel = "SELECTED";
+			}
+			echo "<option value='{$huoltosykli['tunnus']}' {$sel}>".$huoltosykli['dropdown_text']."</option>";
+			$sel = "";
 		}
-		echo "<option value='{$huoltosykli['tunnus']}' {$sel}>{$huoltosykli['dropdown_text']}";
-		$sel = "";
 	}
 
 	echo "</select>";
@@ -643,23 +646,27 @@ function huoltosykli_rivi($tyyppi) {
 	echo "<th>".t('Huoltovali')."</th>";
 	echo "<td>";
 
-	echo "<select name='huoltosyklit[{$tyyppi}][huoltovali]'>";
+	echo "<select class='huoltovali_select' id='huoltovali_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltovali]'>";
 
-	$huoltovali_options = huoltovali_options($huoltosykli['tunnus']);
+	if ($huoltosyklit) {
 
-	if ($val == $laitteen_huoltosyklit[0]['huoltovali']) {
-		$sel = "SELECTED";
+		$huoltovali_options = huoltovali_options($laitteen_huoltosyklit[0]['tunnus']);
+		foreach ($huoltovali_options as $key => $val) {
+			if ($val == $laitteen_huoltosyklit[0]['huoltovali']) {
+				$sel = "SELECTED";
+			}
+			echo "<option value='".$val."'>".$key."</option>";
+			$sel = "";
+		}
+	}
+	else {
+		echo "<option value='0'>Ei huoltoväliä</option>";
 	}
 
-	foreach ($huoltovali_options as $key => $val) {
-		echo "<option value='".$val."'>".$key."</option>";
-		$sel = "";
-	}
 	echo "</select>";
 
 	echo "</td>";
 	echo "</tr>";
-
 	echo "</table>";
 
 	echo "</td>";
@@ -667,7 +674,7 @@ function huoltosykli_rivi($tyyppi) {
 }
 
 //haetaan laitteeseen yhdistetyt huoltosyklit
-function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi) {
+function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
 	global $kukarow;
 
 	$query = "	SELECT huoltosykli.tunnus,
@@ -693,7 +700,7 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi) {
 		$laitteen_huoltosyklit[] = $huoltosykli;
 	}
 
-	if (count($laitteen_huoltosyklit) < 1) {
+	if( count($laitteen_huoltosyklit) < 1 ){
 		$laitteen_huoltosyklit[] = array(
 			'tunnus'		 => 0,
 			'huoltovali'	 => 0,

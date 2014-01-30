@@ -471,60 +471,58 @@
 			}
 			// Päivitetään
 			else {
-
 				if ($toim == 'laite') {
+					foreach ($huoltosyklit as $sykli) {
 
-				foreach ($huoltosyklit as $sykli) {
+							$huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
+							$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
+							$huoltovali = $sykli['huoltovali'];
+							$kuka = $kukarow['kuka'];
+							$yhtio = $kukarow['yhtio'];
 
-					$huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
-					$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
-					$huoltovali = $sykli['huoltovali'];
-					$kuka = $kukarow['kuka'];
-					$yhtio = $kukarow['yhtio'];
+							if( $huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0){
 
-					if ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0) {
+								$sykli_query = "UPDATE huoltosyklit_laitteet SET
+									huoltosykli_tunnus = $huoltosykli_tunnus,
+									huoltovali = $huoltovali,
+									muutospvm = now(),
+									muuttaja = '$kuka'
+									WHERE tunnus = $huoltosykli_laite_tunnus";
+						}
+						elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
 
-						$sykli_query = "UPDATE huoltosyklit_laitteet SET
-								huoltosykli_tunnus = $huoltosykli_tunnus,
-								huoltovali = $huoltovali,
-								muutospvm = now(),
-								muuttaja = '$kuka'
-								WHERE tunnus = $huoltosykli_laite_tunnus";
+								$sykli_query = "INSERT INTO
+									huoltosyklit_laitteet (
+									yhtio,
+									huoltosykli_tunnus,
+									laite_tunnus,
+									huoltovali,
+									pakollisuus,
+									laatija,
+									luontiaika,
+									muutospvm,
+									muuttaja)
+									VALUES(
+									'$yhtio',
+									$huoltosykli_tunnus,
+									$tunnus,
+									$huoltovali,
+									1,
+									'$kuka',
+									now(),
+									now(),
+									'$kuka')";
+							}
+						elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
+							$sykli_query = "DELETE FROM huoltosyklit_laitteet
+											WHERE tunnus = $huoltosykli_laite_tunnus";
+						}
+						if (isset($sykli_query)) {
+							pupe_query($sykli_query);
+						}
+							unset($sykli_query);
 					}
-					elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
-
-						$sykli_query = "INSERT INTO
-										huoltosyklit_laitteet (
-										yhtio,
-										huoltosykli_tunnus,
-										laite_tunnus,
-										huoltovali,
-										pakollisuus,
-										laatija,
-										luontiaika,
-										muutospvm,
-										muuttaja)
-										VALUES(
-										'$yhtio',
-										$huoltosykli_tunnus,
-										$tunnus,
-										$huoltovali,
-										1,
-										'$kuka',
-										now(),
-										now(),
-										'$kuka')";
-					}
-					elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
-						$sykli_query = "DELETE FROM huoltosyklit_laitteet
-										WHERE tunnus = $huoltosykli_laite_tunnus";
-					}
-					if (isset($sykli_query)) {
-						pupe_query($sykli_query);
-					}
-					unset($sykli_query);
 				}
-			}
 
 				//	Jos poistettiin jokin liite, poistetaan se nyt
 				if (isset($poista_liite) and is_array($poista_liite)) {
@@ -587,40 +585,40 @@
 				$tunnus = mysql_insert_id();
 
 				//lisätään myös huoltosyklit jos on kyse laitteesta
-				if (empty($kopioi_rivi) and $toim == 'laite') {
+				if (empty($kopioi_rivi) and $toim == 'laite'){
 
 					foreach ($huoltosyklit as $sykli) {
 
-						if ($sykli['huoltosykli_tunnus'] != 0) {
+						if( $sykli['huoltosykli_tunnus'] != 0 ){
 
 							$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
 							$huoltovali = $sykli['huoltovali'];
 							$kuka = $kukarow['kuka'];
 							$yhtio = $kukarow['yhtio'];
 
-							$sykli_query = "INSERT INTO
-											huoltosyklit_laitteet (
-											yhtio,
-											huoltosykli_tunnus,
-											laite_tunnus,
-											huoltovali,
-											pakollisuus,
-											laatija,
-											luontiaika,
-											muutospvm,
-											muuttaja)
-											VALUES(
-											'$yhtio',
-											$huoltosykli_tunnus,
-											$tunnus,
-											$huoltovali,
-											1,
-											'$kuka',
-											now(),
-											now(),
-											'$kuka')";
+						$sykli_query = "INSERT INTO
+								huoltosyklit_laitteet (
+								yhtio,
+								huoltosykli_tunnus,
+								laite_tunnus,
+								huoltovali,
+								pakollisuus,
+								laatija,
+								luontiaika,
+								muutospvm,
+								muuttaja)
+								VALUES(
+								'$yhtio',
+								$huoltosykli_tunnus,
+								$tunnus,
+								$huoltovali,
+								1,
+								'$kuka',
+								now(),
+								now(),
+								'$kuka')";
 
-							pupe_query($sykli_query);
+								pupe_query($sykli_query);
 						}
 					}
 				}
@@ -632,7 +630,7 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laite_tunnus = '{$kopioitavan_rivin_tunnus}'";
 					$result = pupe_query($query);
-					while ($huoltoskylit_laitteet_rivi = mysql_fetch_assoc($result)) {
+					while($huoltoskylit_laitteet_rivi = mysql_fetch_assoc($result)) {
 						unset($huoltoskylit_laitteet_rivi['tunnus']);
 						unset($huoltoskylit_laitteet_rivi['luontiaika']);
 						unset($huoltoskylit_laitteet_rivi['muuttaja']);
@@ -643,7 +641,7 @@
 
 						$copy_query = "	INSERT INTO
 										huoltosyklit_laitteet (".implode(", ", array_keys($huoltoskylit_laitteet_rivi)).", luontiaika)
-										VALUES('".implode("', '", array_values($huoltoskylit_laitteet_rivi))."', now())";
+										VALUES('".implode("', '", array_values($huoltoskylit_laitteet_rivi)). "', now())";
 						pupe_query($copy_query);
 					}
 				}
@@ -1797,9 +1795,12 @@
 		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
-		if ($toim == 'huoltosyklit_laitteet') {
-			js_huoltosykli_dropdown_huoltovali_change();
+		if ($toim == 'laite') {
+			js_huoltosykli_dropdown_huoltovali_options_change();
+			js_tuoteno_input_huoltosykli_options_change();
 		}
+
+
 		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
 
 		echo "<table>";
@@ -1994,7 +1995,7 @@
 				$infolinkki = "";
 
 				// Jos riviltä löytyy selitetark_5 niin piirretään otsikon perään tooltip-kysymysmerkki
-				if ($al_row['selitetark_5'] != '') {
+				if (isset($al_row) and $al_row['selitetark_5'] != '') {
 					$siistiselite = str_replace('.','_', $al_row['selite']);
 					$infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
 

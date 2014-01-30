@@ -1,5 +1,7 @@
 <?php
 
+require_once('inc/laite_huolto_functions.inc');
+
 if ($action == 'hae_huoltovali_options') {
 	$huoltovali_options = huoltovali_options($huoltosykli_tunnus);
 
@@ -23,7 +25,7 @@ if ($action == 'hae_huoltosykli_options') {
 
 	$huoltosykli_options = hae_huoltosyklit($tunnus, $tyyppi);
 
-	$options_string = "<option value='0'>Ei huoltosykli√§</option>";
+	$options_string = "<option value='0'>Ei huoltosykli‰</option>";
 
 	foreach( $huoltosykli_options as  $val ){
 		$options_string .= "<option value='" . $val['tunnus'] . "'>" . $val['dropdown_text'] ."</option>";

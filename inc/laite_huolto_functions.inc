@@ -716,6 +716,10 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
 function hae_huoltosyklit($laite_tunnus, $tyyppi) {
 	global $kukarow;
 
+	if($tunnus == ''){
+		return false;
+	}
+
 	if ($laite_tunnus != '') {
 		$tuoteno_query = "	SELECT tuoteno
 							FROM laite
@@ -761,11 +765,9 @@ function hae_huoltosyklit($laite_tunnus, $tyyppi) {
 				ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio
 					AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide )
 				WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
-				AND tuotteen_avainsanat.selite LIKE '%{$tyyppi}%'";
-
-	if ($laite_tunnus != '') {
-		$query .= " AND huoltosykli.tyyppi = '{$sammutin_tyyppi}' AND huoltosykli.koko = $sammutin_koko";
-	}
+				AND tuotteen_avainsanat.selite LIKE '%{$tyyppi}%'
+				AND huoltosykli.tyyppi = '{$sammutin_tyyppi}'
+				AND huoltosykli.koko = $sammutin_koko";
 
 	$huoltosykli_result = pupe_query($query);
 

@@ -37,6 +37,7 @@ $request = array(
 	'toim'				 => $toim,
 	'lasku_tunnukset'	 => $lasku_tunnukset,
 	'toimitusaika_haku'	 => $toimitusaika_haku,
+	'laite_tunnus'		 => $laite_tunnus,
 );
 
 $validations = array(
@@ -75,6 +76,10 @@ if ($toim == 'TEHDYT_TYOT') {
 else {
 	if ($request['ala_tee'] == 'merkkaa_tehdyksi') {
 		merkkaa_tyomaarays_tehdyksi($request);
+	}
+
+	if ($request['ala_tee'] == 'merkkaa_kadonneeksi') {
+		merkkaa_laite_kadonneeksi($request);
 	}
 
 	if ($request['ala_tee'] == 'tulosta_tyolista') {

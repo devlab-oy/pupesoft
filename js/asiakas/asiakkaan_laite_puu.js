@@ -61,8 +61,8 @@
 			$(poista_kohde).click(function() {
 				var ok = confirm($('#oletko_varma_confirm_message').val());
 				if (ok) {
-					var button = $(this);
-					var kohde_tunnus = button.parent().find('.kohde_tunnus').val();
+					var $button = $(this);
+					var kohde_tunnus = $button.parent().find('.kohde_tunnus').val();
 					$.ajax({
 						async: true,
 						type: 'GET',
@@ -72,10 +72,10 @@
 							console.log('Kohteen poisto onnistui');
 						}
 						//poistetaan kohde_tr:n paikka_tr:t
-						button.parent().parent().parent().find('.paikat_' + kohde_tunnus).remove();
+						$button.parent().parent().parent().find('.paikat_' + kohde_tunnus).remove();
 
 						//poistetaan itse kohde_tr
-						button.parent().parent().remove();
+						$button.parent().parent().remove();
 
 					}).fail(function() {
 						if (console && console.log) {
@@ -92,8 +92,8 @@
 			$(poista_paikka).click(function() {
 				var ok = confirm($('#oletko_varma_confirm_message').val());
 				if (ok) {
-					var button = $(this);
-					var paikka_tunnus = button.parent().parent().find('.paikka_tunnus').val();
+					var $button = $(this);
+					var paikka_tunnus = $button.parent().parent().find('.paikka_tunnus').val();
 					$.ajax({
 						async: true,
 						type: 'GET',
@@ -102,7 +102,7 @@
 						if (console && console.log) {
 							console.log('Paikan poisto onnistui');
 						}
-						button.parent().parent().remove();
+						$button.parent().parent().remove();
 
 					}).fail(function() {
 						if (console && console.log) {
@@ -119,8 +119,8 @@
 			$(poista_laite).click(function() {
 				var ok = confirm($('#oletko_varma_confirm_message').val());
 				if (ok) {
-					var button = $(this);
-					var laite_tunnus = button.parent().find('.laite_tunnus').val();
+					var $button = $(this);
+					var laite_tunnus = $button.parent().find('.laite_tunnus').val();
 					$.ajax({
 						async: true,
 						type: 'GET',
@@ -129,7 +129,8 @@
 						if (console && console.log) {
 							console.log('Laitteen poisto onnistui');
 						}
-						button.parent().parent().remove();
+
+						$button.parent().parent().find('.tila').html($('#poistettu_message').val());
 
 					}).fail(function() {
 						if (console && console.log) {

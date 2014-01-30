@@ -3,7 +3,6 @@
 $filepath = dirname(__FILE__);
 require_once("{$filepath}/../tilauskasittely/luo_myyntitilausotsikko.inc");
 
-
 function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko = '', $paikan_olosuhde = '') {
 	global $kukarow, $yhtiorow;
 
@@ -84,7 +83,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 					AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
 					AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
 				WHERE  laite.yhtio = '{$kukarow['yhtio']}'
-				AND laite.tila IN ('N', 'V')
+				AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
 				AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
 				HAVING IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 30) DAY)
 				ORDER BY laite_tunnus ASC,
@@ -213,10 +212,13 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
  * tyojono
  * viimeinen_tapahtuma (optional)
  */
-function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $poikkeus_paiva = '') {
+function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(
+), $poikkeus_paiva = '') {
 	global $kukarow, $yhtiorow, $debug;
 
 	$kukarow['kesken'] = 0;
+
+	$edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
 
 	$tyomaarays_tunnus = luo_myyntitilausotsikko("TYOMAARAYS", $huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
 
@@ -279,16 +281,21 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 	);
 	$rivit = lisaa_rivi($parametrit);
 
-	paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
+	paivita_laite_tunnus_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
 	paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
 	paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus']);
+
+	if (!empty($edellinen_tyomaarays) and $edellinen_tyomaarays['tyostatus'] == 'K') {
+		$kommentti = t('Edellisellä kerralla')." ({$edellinen_tyomaarays['toimitettuaika']}) ".t('laitteelle ei voitu suorittaa toimenpidettä')." {$edellinen_tyomaarays['toimenpidetuote_nimitys']} ".t('koska laitetta ei löytynyt');
+		paivita_tilausrivin_kommentti($rivit[0][0], $kommentti);
+	}
 
 	if (!empty($laitteiden_huoltosyklirivit_joita_ei_huolleta)) {
 		paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva($laitteiden_huoltosyklirivit_joita_ei_huolleta, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
 	}
 
 	if ($debug) {
-		echo "Lisätään palvelutuoterivi";
+		echo "Lisätään toimenpidetuote rivit";
 		echo "<br/>";
 		var_dump($rivit);
 		echo "<br/>";
@@ -298,7 +305,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 	return $tyomaarays_tunnus;
 }
 
-function paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($laite, $tilausrivit) {
+function paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $tilausrivit) {
 	global $kukarow, $yhtiorow;
 
 	$query = "	UPDATE tilausrivin_lisatiedot
@@ -308,13 +315,6 @@ function paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($lait
 					AND tilausrivi.tunnus = '{$tilausrivit[0][0]}')
 				SET asiakkaan_positio = {$laite['laite_tunnus']}
 				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'";
-	pupe_query($query);
-
-	$laiteen_kohde_ja_paikka_tiedot = t("Laite")." ".$laite['tuoteno']." ".t("kohteessa").": {$laite['kohde_nimi']} ".t("paikalla").": {$laite['paikka_nimi']}";
-	$query = "	UPDATE tilausrivi
-				SET kommentti = '{$laiteen_kohde_ja_paikka_tiedot}'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$tilausrivit[0][0]}'";
 	pupe_query($query);
 }
 
@@ -361,6 +361,24 @@ function paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtu
 	foreach ($huoltosyklirivit as $huoltosyklirivi) {
 		paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosyklirivi['huoltosykli_tunnus']);
 	}
+}
+
+function paivita_tilausrivin_kommentti($tilausrivi_tunnus, $kommentti) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT kommentti
+				FROM tilausrivi
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$tilausrivi_tunnus}'";
+	$result = pupe_query($query);
+	$tilausrivi = mysql_fetch_assoc($result);
+
+	$kommentti = $tilausrivi['kommentti'].' '.$kommentti;
+	$query = "	UPDATE tilausrivi
+				SET kommentti = '{$kommentti}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$tilausrivi_tunnus}'";
+	pupe_query($query);
 }
 
 function tarkista_loytyyko_tyomaarays($laite) {
@@ -426,6 +444,39 @@ function aseta_tyomaaraysten_status($lasku_tunnukset, $status) {
 	pupe_query($query);
 }
 
+function aseta_laitteen_tila($laite_tunnus, $tila) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE laite
+				SET tila = '{$tila}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$laite_tunnus}'";
+	pupe_query($query);
+}
+
+function hae_laitteen_edellinen_tyomaarays($laite_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT tyomaarays.*,
+				tilausrivin_lisatiedot.asiakkaan_positio AS laite_tunnus,
+				tilausrivi.nimitys AS toimenpidetuote_nimitys,
+				tilausrivi.toimitettuaika
+				FROM tyomaarays
+				JOIN tilausrivi
+				ON ( tilausrivi.yhtio = tyomaarays.yhtio
+					AND tilausrivi.otunnus = tyomaarays.otunnus )
+				JOIN tilausrivin_lisatiedot
+				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+					AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite_tunnus}')
+				WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
+				ORDER BY tilausrivi.toimitettuaika DESC
+				LIMIT 1";
+	$result = pupe_query($query);
+
+	return mysql_fetch_assoc($result);
+}
+
 function merkkaa_tyomaarays_tehdyksi($request) {
 	global $kukarow, $yhtiorow;
 
@@ -451,7 +502,20 @@ function merkkaa_tyomaarays_tehdyksi($request) {
 				AND otunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
 	pupe_query($query);
 
-	aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'X');
+	foreach ($request['lasku_tunnukset'] as $lasku_tunnus) {
+		$query = "	SELECT tyostatus
+					FROM tyomaarays
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus = '{$lasku_tunnus}'";
+		$result = pupe_query($query);
+		$tyomaarays = mysql_fetch_assoc($result);
+
+		//Jos työmääräyksen status on K = Kateissa niin ei merkitä työmääräystä tehdyksi
+		//koska laitetta ei ole tällöin oikeasti huollettu vaan se on kadonnut
+		if ($tyomaarays['tyostatus'] != 'K') {
+			aseta_tyomaarays_status('X', '', $lasku_tunnus);
+		}
+	}
 }
 
 function hae_tyomaarays($tyomaarays_tunnus) {
@@ -503,149 +567,213 @@ function aseta_tyomaarays_var($tilausrivi_tunnus, $var) {
 	pupe_query($query);
 }
 
-function aseta_tyomaarays_status($tilausrivi_tunnus, $status) {
+function aseta_tyomaarays_status($status, $tilausrivi_tunnus = '', $lasku_tunnus = '') {
 	global $kukarow, $yhtiorow;
 
+	if (empty($tilausrivi_tunnus) and empty($lasku_tunnus)) {
+		throw new Exception("Tilausrivi tunnus ja lasku tunnus eivät molemmat voi olla tyhjiä");
+	}
+
+	$join = "";
+	$where = "";
+	if (!empty($tilausrivi_tunnus)) {
+		$join = "	JOIN lasku
+					ON ( lasku.yhtio = tyomaarays.yhtio
+						AND lasku.tunnus = tyomaarays.otunnus )
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = lasku.yhtio
+						AND tilausrivi.otunnus = lasku.tunnus
+						AND tilausrivi.tunnus = '{$tilausrivi_tunnus}')";
+	}
+	else if (!empty($lasku_tunnus)) {
+		$where = "	AND tyomaarays.otunnus = '{$lasku_tunnus}'";
+	}
+
 	$query = "	UPDATE tyomaarays
-				JOIN lasku
-				ON ( lasku.yhtio = tyomaarays.yhtio
-					AND lasku.tunnus = tyomaarays.otunnus )
-				JOIN tilausrivi
-				ON ( tilausrivi.yhtio = lasku.yhtio
-					AND tilausrivi.otunnus = lasku.tunnus
-					AND tilausrivi.tunnus = '{$tilausrivi_tunnus}')
+				{$join}
 				SET tyomaarays.tyostatus = '{$status}'
-				WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'";
+				WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
+				{$where}";
 	pupe_query($query);
 }
 
-
-
-
-
-
-
-
-
 //luodaan huoltosyklirivi huoltosyklityypin perusteella
-function huoltosykli_rivi($tyyppi){
+function huoltosykli_rivi($tyyppi) {
 	global $tunnus;
 
-		$laitteen_huoltosyklit = hae_laitteen_huoltosyklit($tunnus, $tyyppi);
+	$laite_tunnus = $tunnus;
 
-		$pakollisuus_chk = "";
+	$laitteen_huoltosyklit = hae_laitteen_huoltosyklit($laite_tunnus, $tyyppi);
 
-		$huoltosyklit = hae_huoltosyklit($tunnus, $tyyppi);
+	$pakollisuus_chk = "";
 
-		if ( $laitteen_huoltosyklit[0]['pakollisuus'] == 1) {
-			$pakollisuus_chk = "CHECKED";
-		}
+	$huoltosyklit = hae_huoltosyklit($laite_tunnus, $tyyppi);
 
-		echo "<tr>";
-		echo "<th>".t('Huoltosykli')." <br /> {$tyyppi}";
-		echo "<input type='hidden' name='huoltosyklit[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosyklit[0]['hl_tunnus']}' />";
-		echo"</th>";
-		echo "<td>";
-
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t('Huoltosykli')."</th>";
-		echo "<td>";
-
-
-
-		echo "<select class='huoltosykli_select' id='huoltosykli_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltosykli_tunnus]'>";
-
-		$sel = "";
-		echo "<option value='0'>Ei huoltosykliä</option>";
-
-		if( $huoltosyklit ){
-
-			foreach ($huoltosyklit as $huoltosykli) {
-				if ( $laitteen_huoltosyklit[0]['tunnus'] == $huoltosykli['tunnus']) {
-					$sel = "SELECTED";
-				}
-				echo "<option value='{$huoltosykli['tunnus']}' {$sel}>" . $huoltosykli['dropdown_text'] . "</option>";
-				$sel = "";
-			}
-
-		}
-
-		echo "</select>";
-
-
-
-		echo "</td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th>".t('Huoltovali')."</th>";
-		echo "<td>";
-
-		echo "<select class='huoltovali_select' id='huoltovali_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltovali]'>";
-
-		if( $huoltosyklit ){
-
-			$huoltovali_options = huoltovali_options( $laitteen_huoltosyklit[0]['tunnus'] );
-			foreach($huoltovali_options  as $key => $val ){
-				if( $val == $laitteen_huoltosyklit[0]['huoltovali'] ){
-					$sel = "SELECTED";
-				}
-					echo "<option value='".$val."'>" . $key . "</option>";
-					$sel = "";
-			}
-		}else{
-			echo "<option value='0'>Ei huoltoväliä</option>";
-		}
-
-			echo "</select>";
-
-		echo "</td>";
-		echo "</tr>";
-		echo "</table>";
-
-		echo "</td>";
-		echo "</tr>";
-
+	if ($laitteen_huoltosyklit[0]['pakollisuus'] == 1) {
+		$pakollisuus_chk = "CHECKED";
 	}
 
+	echo "<tr>";
+	echo "<th>".t('Huoltosykli')." <br /> {$tyyppi}";
+	echo "<input type='hidden' name='huoltosyklit[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosyklit[0]['hl_tunnus']}' />";
+	echo"</th>";
+	echo "<td>";
 
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t('Huoltosykli')."</th>";
+	echo "<td>";
+	echo "<select class='huoltosykli_select' id='huoltosykli_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltosykli_tunnus]'>";
 
+	$sel = "";
+	echo "<option value='0'>Ei huoltosykliä</option>";
 
+	if ($huoltosyklit) {
+		foreach ($huoltosyklit as $huoltosykli) {
+			if ($laitteen_huoltosyklit[0]['tunnus'] == $huoltosykli['tunnus']) {
+				$sel = "SELECTED";
+			}
+			echo "<option value='{$huoltosykli['tunnus']}' {$sel}>".$huoltosykli['dropdown_text']."</option>";
+			$sel = "";
+		}
+	}
 
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
 
+	echo "<tr>";
+	echo "<th>".t('Huoltovali')."</th>";
+	echo "<td>";
 
+	echo "<select class='huoltovali_select' id='huoltovali_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltovali]'>";
+
+	if ($huoltosyklit) {
+
+		$huoltovali_options = huoltovali_options($laitteen_huoltosyklit[0]['tunnus']);
+		foreach ($huoltovali_options as $key => $val) {
+			if ($val == $laitteen_huoltosyklit[0]['huoltovali']) {
+				$sel = "SELECTED";
+			}
+			echo "<option value='".$val."'>".$key."</option>";
+			$sel = "";
+		}
+	}
+	else {
+		echo "<option value='0'>Ei huoltoväliä</option>";
+	}
+
+	echo "</select>";
+
+	echo "</td>";
+	echo "</tr>";
+	echo "</table>";
+
+	echo "</td>";
+	echo "</tr>";
+}
 
 //haetaan laitteeseen yhdistetyt huoltosyklit
 function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
 	global $kukarow;
 
-	$query = "	SELECT huoltosykli.tunnus, huoltosyklit_laitteet.huoltovali, huoltosyklit_laitteet.pakollisuus, huoltosyklit_laitteet.tunnus as hl_tunnus
+	$query = "	SELECT huoltosykli.tunnus,
+				huoltosyklit_laitteet.huoltovali,
+				huoltosyklit_laitteet.pakollisuus,
+				huoltosyklit_laitteet.tunnus AS hl_tunnus
 				FROM huoltosyklit_laitteet
 				JOIN huoltosykli
-				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
+					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
 				JOIN tuote
-				ON ( tuote.yhtio = huoltosykli.yhtio AND tuote.tuoteno = huoltosykli.toimenpide )
+				ON ( tuote.yhtio = huoltosykli.yhtio
+					AND tuote.tuoteno = huoltosykli.toimenpide )
 				WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
 				AND laite_tunnus = '{$laitetunnus}'
 				AND tuote.nimitys LIKE '%{$tyyppi}%'";
 
 	$result = pupe_query($query);
 
-	$laitteen_huoltosyklit = [];
+	$laitteen_huoltosyklit = array();
 
 	while ($huoltosykli = mysql_fetch_assoc($result)) {
 		$laitteen_huoltosyklit[] = $huoltosykli;
 	}
 
 	if( count($laitteen_huoltosyklit) < 1 ){
-		$laitteen_huoltosyklit[] = array( 'tunnus' => 0, 'huoltovali' => 0, 'pakollisuus' => 0, 'hl_tunnus' => 0 );
+		$laitteen_huoltosyklit[] = array(
+			'tunnus'		 => 0,
+			'huoltovali'	 => 0,
+			'pakollisuus'	 => 0,
+			'hl_tunnus'		 => 0
+		);
 	}
 
 	return $laitteen_huoltosyklit;
 }
 
+//haetaan sallitut huoltosyklit huoltosyklityypin ja laitenumeron perusteella
+function hae_huoltosyklit($laite_tunnus, $tyyppi) {
+	global $kukarow;
 
+	if ($laite_tunnus != '') {
+		$tuoteno_query = "	SELECT tuoteno
+							FROM laite
+							WHERE tunnus = $laite_tunnus
+							AND yhtio = '{$kukarow['yhtio']}'";
+		$tuoteno_result = pupe_query($tuoteno_query);
+		$tuoteno = mysql_result($tuoteno_result, 0);
 
+		$sammutin_koko_query = "SELECT selite
+								FROM tuotteen_avainsanat
+								WHERE tuoteno = '{$tuoteno}'
+								AND laji = 'sammutin_koko'
+								AND yhtio = '{$kukarow['yhtio']}'";
+		$sammutin_koko_result = pupe_query($sammutin_koko_query);
+		$sammutin_koko = mysql_result($sammutin_koko_result, 0);
 
+		$sammutin_tyyppi_query = "	SELECT selite
+									FROM tuotteen_avainsanat
+									WHERE tuoteno = '{$tuoteno}'
+									AND laji = 'sammutin_tyyppi'
+									AND yhtio = '{$kukarow['yhtio']}'";
+		$sammutin_tyyppi_result = pupe_query($sammutin_tyyppi_query);
+		$sammutin_tyyppi = mysql_result($sammutin_tyyppi_result, 0);
+	}
 
+	$query = "	SELECT huoltosykli.tunnus,
+				concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
+					(
+						SELECT selitetark
+						FROM avainsana
+						WHERE avainsana.yhtio = huoltosykli.yhtio
+						AND avainsana.selite = huoltosykli.olosuhde
+						AND avainsana.laji = 'OLOSUHDE'
+					)
+				) as dropdown_text,
+				huoltosykli.huoltovali,
+				huoltosykli.pakollisuus
+				FROM huoltosykli
+				JOIN tuote
+				ON ( tuote.yhtio = huoltosykli.yhtio
+					AND tuote.tuoteno = huoltosykli.toimenpide )
+				JOIN tuotteen_avainsanat
+				ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio
+					AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide )
+				WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
+				AND tuotteen_avainsanat.selite LIKE '%{$tyyppi}%'";
+
+	if ($laite_tunnus != '') {
+		$query .= " AND huoltosykli.tyyppi = '{$sammutin_tyyppi}' AND huoltosykli.koko = $sammutin_koko";
+	}
+
+	$huoltosykli_result = pupe_query($query);
+
+	$huoltosyklit = array();
+
+	while ($huoltosykli = mysql_fetch_assoc($huoltosykli_result)) {
+		$huoltosyklit[] = $huoltosykli;
+	}
+
+	return $huoltosyklit;
+}

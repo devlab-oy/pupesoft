@@ -15,26 +15,26 @@
 		unset($apuwebseuranta);
 	}
 
+	if (isset($_REQUEST['lopetus_temp'])) {
+		$lopetus = urldecode(base64_decode($_REQUEST['lopetus_temp']));
+	}
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
 
+	//Huom ennen tätä riviä ei saa olla mitään echoja!
 	if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
 		require ("inc/{$toim}_ajax.inc");
 	}
-
-	if (function_exists("js_popup")) {
+	
+	if (function_exists("js_popup") and !isset($ajax_request)) {
 		echo js_popup(-100);
 	}
 
 	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana" or $toim == "laite") {
 		enable_ajax();
 	}
-
-	echo '<hr> toim:'. $toim. '<hr>';
-
-	echo '<hr> toim:'. $tunnus. '<hr>';
-
 
 	if (file_exists("inc/laite_huolto_functions.inc")) {
 		require_once('inc/laite_huolto_functions.inc');
@@ -471,57 +471,56 @@
 			}
 			// Päivitetään
 			else {
-
 				if ($toim == 'laite') {
+					foreach ($huoltosyklit as $sykli) {
 
-				foreach( $_POST['huoltosyklit'] as $sykli ){
+							$huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
+							$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
+							$huoltovali = $sykli['huoltovali'];
+							$kuka = $kukarow['kuka'];
+							$yhtio = $kukarow['yhtio'];
 
-						$huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
-						$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
-						$huoltovali = $sykli['huoltovali'];
-						$kuka = $kukarow['kuka'];
-						$yhtio = $kukarow['yhtio'];
+							if( $huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0){
 
-						if( $huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0){
-
-							$sykli_query = "UPDATE huoltosyklit_laitteet SET
-								huoltosykli_tunnus = $huoltosykli_tunnus,
-								huoltovali = $huoltovali,
-								muutospvm = now(),
-								muuttaja = '$kuka'
-								WHERE tunnus = $huoltosykli_laite_tunnus";
-
-						}elseif( $huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0 ){
-
-							$sykli_query = "INSERT INTO
-								huoltosyklit_laitteet (
-								yhtio,
-								huoltosykli_tunnus,
-								laite_tunnus,
-								huoltovali,
-								pakollisuus,
-								laatija,
-								luontiaika,
-								muutospvm,
-								muuttaja)
-								VALUES(
-								'$yhtio',
-								$huoltosykli_tunnus,
-								$tunnus,
-								$huoltovali,
-								1,
-								'$kuka',
-								now(),
-								now(),
-								'$kuka')";
-
-						}elseif( $huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0 ){
-
-							$sykli_query = "DELETE FROM huoltosyklit_laitteet WHERE tunnus = $huoltosykli_laite_tunnus";
-
+								$sykli_query = "UPDATE huoltosyklit_laitteet SET
+									huoltosykli_tunnus = $huoltosykli_tunnus,
+									huoltovali = $huoltovali,
+									muutospvm = now(),
+									muuttaja = '$kuka'
+									WHERE tunnus = $huoltosykli_laite_tunnus";
 						}
-						if(isset($sykli_query)){ pupe_query($sykli_query); }
-						unset($sykli_query);
+						elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
+
+								$sykli_query = "INSERT INTO
+									huoltosyklit_laitteet (
+									yhtio,
+									huoltosykli_tunnus,
+									laite_tunnus,
+									huoltovali,
+									pakollisuus,
+									laatija,
+									luontiaika,
+									muutospvm,
+									muuttaja)
+									VALUES(
+									'$yhtio',
+									$huoltosykli_tunnus,
+									$tunnus,
+									$huoltovali,
+									1,
+									'$kuka',
+									now(),
+									now(),
+									'$kuka')";
+							}
+						elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
+							$sykli_query = "DELETE FROM huoltosyklit_laitteet
+											WHERE tunnus = $huoltosykli_laite_tunnus";
+						}
+						if (isset($sykli_query)) {
+							pupe_query($sykli_query);
+						}
+							unset($sykli_query);
 					}
 				}
 
@@ -588,9 +587,7 @@
 				//lisätään myös huoltosyklit jos on kyse laitteesta
 				if (empty($kopioi_rivi) and $toim == 'laite'){
 
-					//print_r($_POST);die;
-
-					foreach( $_POST['huoltosyklit'] as $sykli ){
+					foreach ($huoltosyklit as $sykli) {
 
 						if( $sykli['huoltosykli_tunnus'] != 0 ){
 
@@ -625,7 +622,6 @@
 						}
 					}
 				}
-
 
 				if (!empty($kopioi_rivi) and $toim == 'laite') {
 					//Laitteen kopioinnissa, kopioidaan myös laitteeseen liitetyt huoltosyklit rivit
@@ -1799,10 +1795,6 @@
 		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
-		if ($toim == 'huoltosyklit_laitteet') {
-			js_huoltosykli_dropdown_huoltovali_change();
-		}
-
 		if ($toim == 'laite') {
 			js_huoltosykli_dropdown_huoltovali_options_change();
 			js_tuoteno_input_huoltosykli_options_change();
@@ -1865,27 +1857,7 @@
 			echo "</td>";
 		}
 
-
-
-
-
-
-
-
-
-
-
-
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
-
-
-
-
-
-
-
-
-
 			// Intrastat_kurssi kenttä näytetään vain jos yrityksen maa on EE
 			if ($yhtiorow['maa'] != 'EE' and mysql_field_name($result, $i) == 'intrastat_kurssi') {
 				continue;
@@ -2131,35 +2103,17 @@
 			}
 		}
 
-
-
-
-
-
-
-
-
-
-
-
-
 		if ($toim == 'laite') {
-
-			$query = "SELECT DISTINCT selite FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow['yhtio']}' AND laji = 'tyomaarayksen_ryhmittely'";
+			$query = "	SELECT DISTINCT selite
+						FROM tuotteen_avainsanat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'tyomaarayksen_ryhmittely'";
 			$result = pupe_query($query);
 
 			while ($selite = mysql_fetch_assoc($result)) {
 				huoltosykli_rivi($selite['selite']);
 			}
-
 		}
-
-
-
-
-
-
-
 
 		echo "</table>";
 
@@ -2313,25 +2267,6 @@
 				echo "<iframe id='pakkauskoodit_iframe' name='pakkauskoodit_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
-
-
-
-/*
-
-		if ($trow["tunnus"] > 0 and $errori == "" and $toim == "laite") {
-			if (($toikrow = tarkista_oikeus("yllapito.php", "huoltosyklit_laitteet%", "", "OK")) !== FALSE) {
-				$lukitse_avaimeen = $tunnus;
-
-				echo "<iframe id='laitteen_huoltosyklit_iframe' name='laitteen_huoltosyklit_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; height: 400px; border: 0px; display: block;' border='0' frameborder='0'>";
-				echo "</iFrame><br />";
-			}
-		}
-
-*/
-
-
-
-
 
 		if ($trow["tunnus"] > 0 and $errori == "" and $from != "yllapito" and $toim == "tuote" and $laji != "V") {
 

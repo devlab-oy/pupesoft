@@ -48,6 +48,7 @@ if (!function_exists("huoltosykli")) {
 		}
 
 		if (mysql_field_name($result, $i) == "koko") {
+			$t[$i] = preg_replace('/\D/', '', $t[$i]);
 			if (empty($t[$i])) {
 				$virhe[$i] = t("Koko ei voi olla tyhjä");
 			}
@@ -92,6 +93,8 @@ if (!function_exists("huoltosykli")) {
 		}
 
 		if (mysql_field_name($result, $i) == "pakollisuus") {
+			//Kovakoodataan pakollisuus aina 1:ksi
+			$t[$i] = 1;
 			if ((int)$t[$i] != 1 and (int)$t[$i] != 0) {
 				$virhe[$i] = t("Virheellinen pakollisuus syötetty");
 			}

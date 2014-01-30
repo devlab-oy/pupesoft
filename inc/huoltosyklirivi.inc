@@ -15,11 +15,10 @@ if (mysql_field_type($result, $i) == "blob") {
 
 //tyyppi pitää löytyä tuotteen_avainsanat taulusta
 if (mysql_field_name($result, $i) == "tyyppi") {
-	$query = "	SELECT *
+	$query = "	SELECT DISTINCT selite
 				FROM tuotteen_avainsanat
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'sammutin_tyyppi'
-				GROUP BY selite";
+				AND laji = 'sammutin_tyyppi'";
 	$tyyppi_result = pupe_query($query);
 	$tyypit = array();
 	while ($tyyppi_row = mysql_fetch_assoc($tyyppi_result)) {
@@ -35,7 +34,7 @@ if (mysql_field_name($result, $i) == "tyyppi") {
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
 	foreach ($tyypit as $tyyppi_row) {
-		$ulos .= "<option value='{$tyyppi_row['selite']}' {$tyyppi_row['selected']}>".t($tyyppi_row['selite'])."</option>";
+		$ulos .= "<option value='{$tyyppi_row['selite']}' {$tyyppi_row['selected']}>".ucfirst(t($tyyppi_row['selite']))."</option>";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";
@@ -108,14 +107,6 @@ if (mysql_field_name($result, $i) == "huoltovali") {
 
 }
 
-//pakollisuus kyllä / ei
 if (mysql_field_name($result, $i) == "pakollisuus") {
-	$ulos = "<td>";
-	$ulos .= "<select name='{$nimi}'>";
-	$ulos .= "<option value=1>".t("Kyllä")."</option>";
-	$ulos .= "<option value=0>".t("Ei")."</option>";
-	$ulos .= "</select>";
-	$ulos .= "</td>";
-
-	$jatko = 0;
+	$tyyppi = 0;
 }

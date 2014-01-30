@@ -8,7 +8,7 @@ require 'logger'
 require 'date'
 require 'base64'
 
-class TarkastuspoytakirjaPDF2
+class TarkastuspoytakirjaPDF
   @logo          = nil
   @customer_data = nil
   @spot_data     = nil
@@ -379,7 +379,7 @@ if !ARGV[0].empty?
 
   workorder = WorkOrderDAO.new(ARGV[0])
 
-  pdf      = TarkastuspoytakirjaPDF2.new
+  pdf      = TarkastuspoytakirjaPDF.new
   pdf.data = workorder.data
 
   puts pdf.generate

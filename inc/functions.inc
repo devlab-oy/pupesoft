@@ -23333,39 +23333,24 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 	}
 }
 
-
-
-
-
-
-
-
 if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 	function js_tuoteno_input_huoltosykli_options_change() {
 		?>
 		<script>
-			$(document).ready(function() { bind_tuoteno_change(); });
+			$(document).ready(function() {
+				bind_tuoteno_change();
+			});
 
 			function bind_tuoteno_change() {
-
 				$('#tuoteno_td input').on('change', function() {
-
 					var tuoteno = $('#tuoteno_td input').val();
-
-					//var select_id = $(this).attr('id').replace("sykli","vali");
-					//hae_huoltosyklin_huoltovali($(this).val(), select_id);
-
-					if( tuoteno.length > 3 ){
-						//$('.huoltosykli_select').html('<option>1</option><option>2</option><option>3</option>');
-
+					if( tuoteno.length > 1 ){
 						$('.huoltosykli_select').each(function(){
 							var select_id = $(this).attr('id');
 							var tyyppi = select_id.replace("huoltosykli_select_","");
 							hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi);
 						});
 					}
-
-
 				});
 			}
 
@@ -23376,7 +23361,6 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 					type: 'GET',
 					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi
 				}).done(function(response) {
-
 						$('#'+select_id).html(response);
 						$('#'+select_id).change();
 
@@ -23386,25 +23370,10 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 
 				});
 			}
-
-
 		</script>
 		<?php
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * huoltosykli dropdownin change bind ja huoltosyklin huoltoväli-dropdownin muutto
@@ -23435,41 +23404,17 @@ if (!function_exists('js_huoltosykli_dropdown_huoltovali_options_change')) {
 						console.log(response);
 					}
 
+				}).fail(function(data){
+					if (console && console.log) {
+						console.log('Huoltoväli haku EPÄONNISTUI');
+						console.log(data);
+					}
 				});
 			}
 		</script>
 		<?php
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if (!function_exists('hae_laite')) {
 	function hae_laite($laite_tunnus) {

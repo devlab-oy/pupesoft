@@ -14,7 +14,12 @@ if (mysql_field_type($result, $i) == "blob") {
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
-	$ulos = "<td id='tuoteno_td'>".livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT')."</td>";
+	$lopetus_temp = base64_encode(urlencode("{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakasid={$valittu_asiakas}"));
+	$lopetus = "yllapito.php////toim=laite//uusi=1//valittu_paikka={$valittu_paikka}//lopetus_temp={$lopetus_temp}";
+	$ulos = "<td id='tuoteno_td'>";
+	$ulos .= livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT');
+	$ulos .= "<a href='{$palvelin2}yllapito.php?uusi=1&toim=tuote!!!tuote_pikaperustus!!!true&lopetus={$lopetus}&js_open_yp=&limit=&nayta_poistetut=&nayta_eraantyneet=&laji=&'><button type='button'>".t('Tuote pikaperustus')."</button></a>";
+	$ulos .= "</td>";
 	$jatko = 0;
 }
 
@@ -30,8 +35,13 @@ if (mysql_field_name($result, $i) == "paikka") {
 						AND asiakas.tunnus = '{$asiakas_tunnus}')";
 	}
 
-	$query = "	SELECT paikka.tunnus, concat_ws(' ', paikka.nimi, paikka.osoite) as dropdown_text
+	$query = "	SELECT paikka.tunnus,
+				concat_ws(' ', paikka.nimi, paikka.osoite, avainsana.selitetark) as dropdown_text
 				FROM paikka
+				JOIN avainsana
+				ON ( avainsana.yhtio = paikka.yhtio
+					AND avainsana.selite = paikka.olosuhde
+					AND avainsana.laji = 'OLOSUHDE' )
 				{$join}
 				WHERE paikka.yhtio = '{$kukarow['yhtio']}'";
 	$paikka_result = pupe_query($query);
@@ -81,9 +91,19 @@ if (mysql_field_name($result, $i) == "oma_numero") {
 
 }
 
-//TODO omistaja. voi olla asiakas tai huoltofirma. ei ole relaatio. tekstikenttä johon voidaan syöttää poikkeava omistaja. tämän avulla saadaan esim. selville kuuluukoo joltain paikalta löytyvä laite ylipäätänsä huollon piiriin.
+//Jos omistaja kentässä on jotain niin kyseiselle laitteelle ei generoida työmääräyksiä. Laitteet, jotka eivät kuulu huollon piiriin halutaan kuitenkin lisätä asiakkaan laitepuuhun, jotta huoltomies ei ihmettele ylimääräisiä laitteita huoltokierroksellaan.
 if (mysql_field_name($result, $i) == "omistaja") {
+	$ulos = "<tr>";
+	$ulos .= "<th align='left'>";
+	$ulos .= t('Muu omistaja');
+	$ulos .= "</th>";
+	$ulos .= "<td>";
+	$ulos .= "<input type='text' class='omistaja' name='t[{$i}]' value='{$trow[$i]}' size='35' maxlength='60' />";
+	$ulos .= "</td>";
+	$ulos .= "</tr>";
 
+	$jatko = 0;
+	$tyyppi = 0;
 }
 
 if (mysql_field_name($result, $i) == "valm_pvm") {

@@ -24335,7 +24335,7 @@ if (!function_exists('paivita_ohjausmerkki')) {
 if (!function_exists("tsekit")) {
 	function tsekit($row, $kaikkivarastossayhteensa, $kaikkiliitettyyhteensa) {
 
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $rahti_ja_kulut;
 
 		$tsekit = array();
 
@@ -24344,6 +24344,7 @@ if (!function_exists("tsekit")) {
 		// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
 		$query  = "	SELECT tilausrivi.*,
 					if(kpl!=0, rivihinta, 0) rivihinta,
+					(kpl * hinta * {$query_ale_lisa}) rivihinta_vietyarvo,
 					((varattu+kpl) * hinta * {$query_ale_lisa}) rivihinta_liitetty
 					FROM tilausrivi USE INDEX (uusiotunnus_index)
 					WHERE yhtio 	= '$kukarow[yhtio]'
@@ -24358,6 +24359,7 @@ if (!function_exists("tsekit")) {
 		$varastossaarvo = 0;
 		$liitettyarvo	= 0;
 		$uusiot 		= array();
+		if ($rahti_ja_kulut == '') $rahti_ja_kulut = 0;
 
 		while ($rivirow = mysql_fetch_assoc($tilres)) {
 			$query = "	SELECT *
@@ -24374,6 +24376,7 @@ if (!function_exists("tsekit")) {
 			$kplyhteensa++; // lasketaan montako tilausriviä on kohdistettu
 
 			$varastossaarvo 			+= $rivirow["rivihinta"];
+			$rahti_ja_kulut 			+= $rivirow["rivihinta"] - $rivirow['rivihinta_vietyarvo'];
 			$liitettyarvo				+= $rivirow["rivihinta_liitetty"];
 			$kaikkivarastossayhteensa 	+= $rivirow["rivihinta"];
 			$kaikkiliitettyyhteensa 	+= $rivirow["rivihinta_liitetty"];
@@ -24512,10 +24515,12 @@ if (!function_exists("tsekit")) {
 					sum(if(lasku.vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku,
 					sum(if(ostores_lasku.tila != 'H' and lasku.vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku_ok,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.arvo * lasku.vienti_kurssi, 0)), 2) vosumma,
+					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), (lasku.osto_kulu + lasku.osto_rahti + lasku.osto_rivi_kulu), 0)), 2) vosumma_kulut,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.arvo, 0)), 2) vosumma_valuutassa,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.summa * lasku.vienti_kurssi, 0)), 2) voverosumma,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.summa, 0)), 2) voverosumma_valuutassa,
 					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), lasku.arvo * lasku.vienti_kurssi, 0)),2) kusumma,
+					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), (lasku.osto_kulu + lasku.osto_rahti + lasku.osto_rivi_kulu), 0)),2) kusumma_kulut,
 					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), lasku.arvo, 0)),2) kusumma_valuutassa
 					FROM lasku use index (yhtio_tila_laskunro)
 					JOIN lasku ostores_lasku ON (ostores_lasku.yhtio = lasku.yhtio AND ostores_lasku.tunnus = lasku.vanhatunnus)
@@ -24531,7 +24536,7 @@ if (!function_exists("tsekit")) {
 			$lisatiedot = t("kesken");
 		}
 
-		return array($kaikkivarastossayhteensa,$kaikkiliitettyyhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$liitettyarvo,$varok);
+		return array($kaikkivarastossayhteensa,$kaikkiliitettyyhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$liitettyarvo,$varok,$rahti_ja_kulut);
 	}
 }
 

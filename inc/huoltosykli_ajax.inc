@@ -1,12 +1,23 @@
 <?php
 
+require_once('inc/laite_huolto_functions.inc');
+
 if ($action == 'hae_huoltovali_options') {
 	$huoltovali_options = huoltovali_options($huoltosykli_tunnus);
 
-	$options_string = "";
+	$oletus = reset($huoltovali_options);
+
+	$options_string = "<option value='0'>Ei huoltov‰li‰</option>";
 
 	foreach( $huoltovali_options as $key => $val ){
-		$options_string .= "<option value='" . $val . "'>" . $key ."</option>";
+
+		if ($val == $oletus) {
+			$selected = 'selected';
+		}
+
+		$options_string .= "<option value='" . $val . "' ".$selected.">" . $key ."</option>";
+
+		$selected = null;
 	}
 
 	echo $options_string;
@@ -23,7 +34,7 @@ if ($action == 'hae_huoltosykli_options') {
 
 	$huoltosykli_options = hae_huoltosyklit($tunnus, $tyyppi);
 
-	$options_string = "<option value='0'>Ei huoltosykli√§</option>";
+	$options_string = "<option value='0'>Ei huoltosykli‰</option>";
 
 	foreach( $huoltosykli_options as  $val ){
 		$options_string .= "<option value='" . $val['tunnus'] . "'>" . $val['dropdown_text'] ."</option>";

@@ -23344,7 +23344,7 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 			function bind_tuoteno_change() {
 				$('#tuoteno_td input').on('change', function() {
 					var tuoteno = $('#tuoteno_td input').val();
-					if( tuoteno.length > 1 ){
+					if( tuoteno.length > 2 ){
 						$('.huoltosykli_select').each(function(){
 							var select_id = $(this).attr('id');
 							var tyyppi = select_id.replace("huoltosykli_select_","");
@@ -25504,58 +25504,5 @@ if (!function_exists("huoltovali_options")) {
 			}
 		}
 		return $huoltovali_options;
-	}
-}
-
-
-if (!function_exists("hae_huoltosyklit")) {
-	function hae_huoltosyklit($tunnus, $tyyppi) {
-		global $kukarow;
-
-		if($tunnus == ''){ return false; }
-
-		$tuoteno_query = "SELECT tuoteno FROM laite WHERE tunnus = $tunnus AND yhtio = '{$kukarow['yhtio']}'";
-		$tuoteno_result = pupe_query($tuoteno_query);
-		$tuoteno = mysql_result($tuoteno_result, 0);
-
-		$sammutin_koko_query = "SELECT selite FROM tuotteen_avainsanat WHERE tuoteno = '{$tuoteno}' AND laji = 'sammutin_koko' AND yhtio = '{$kukarow['yhtio']}'";
-		$sammutin_koko_result = pupe_query($sammutin_koko_query);
-		$sammutin_koko = mysql_result($sammutin_koko_result, 0);
-
-		$sammutin_tyyppi_query = "SELECT selite FROM tuotteen_avainsanat WHERE tuoteno = '{$tuoteno}' AND laji = 'sammutin_tyyppi' AND yhtio = '{$kukarow['yhtio']}'";
-		$sammutin_tyyppi_result = pupe_query($sammutin_tyyppi_query);
-		$sammutin_tyyppi = mysql_result($sammutin_tyyppi_result, 0);
-
-		$query = "	SELECT huoltosykli.tunnus,
-					concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
-						(
-							SELECT selitetark
-							FROM avainsana
-							WHERE avainsana.yhtio = huoltosykli.yhtio
-							AND avainsana.selite = huoltosykli.olosuhde
-							AND avainsana.laji = 'OLOSUHDE'
-						)
-					) as dropdown_text,
-					huoltosykli.huoltovali,
-					huoltosykli.pakollisuus
-					FROM huoltosykli
-					JOIN tuote
-					ON ( tuote.yhtio = huoltosykli.yhtio AND tuote.tuoteno = huoltosykli.toimenpide )
-					JOIN tuotteen_avainsanat
-					ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide )
-					WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
-					AND tuotteen_avainsanat.selite LIKE '%{$tyyppi}%'
-					AND huoltosykli.tyyppi = '{$sammutin_tyyppi}'
-					AND huoltosykli.koko = $sammutin_koko";
-
-		$huoltosykli_result = pupe_query($query);
-
-		$huoltosyklit = array();
-
-		while ($huoltosykli = mysql_fetch_assoc($huoltosykli_result)) {
-			$huoltosyklit[] = $huoltosykli;
-		}
-
-		return $huoltosyklit;
 	}
 }

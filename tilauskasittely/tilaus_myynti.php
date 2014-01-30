@@ -4542,6 +4542,14 @@ if ($tee == '') {
 		require("${pupe_root_polku}/allr_kamppikset.php");
 	}
 
+	$vauriopoytakirja_saako_myyda = true;
+	if ($toim == 'VAURIOPOYTAKIRJA') {
+		if (!saako_myyda_private_label($laskurow['liitostunnus'], $trow["tuoteno"], 1)) {
+			$varaosavirhe = t("VIRHE: Tuotetta ei saa myydä tälle asiakkaalle!")."<br>";
+			$vauriopoytakirja_saako_myyda = false;
+		}
+	}
+
 	//Syöttörivi
 	if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
 		echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lisää rivi").": </font></td></tr></table>";
@@ -4583,7 +4591,7 @@ if ($tee == '') {
 	}
 
 	// erikoisceisi, jos halutaan PIENITUOTEKYSELY tilaustaulussa, mutta emme halua näyttää niitä kun lisätään lisävarusteita
-	if ((($tuoteno != '' or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) and $kpl == '' and $kukarow['extranet'] == '') or ($toim == "REKLAMAATIO" and isset($trow['tuoteno']) and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
+	if ($vauriopoytakirja_saako_myyda and (($tuoteno != '' or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) and $kpl == '' and $kukarow['extranet'] == '') or ($toim == "REKLAMAATIO" and isset($trow['tuoteno']) and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
 
 		if ($toim == "REKLAMAATIO" and $tuoteno == '') {
 			$tuoteno_lisa = $trow['tuoteno'];
@@ -5524,7 +5532,7 @@ if ($tee == '') {
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("TSF materiaalit")."</font>:</td></tr>";
 					}
 
-					if ($header_echottu == false and $row['tuotetyyppi'] == '1 Muut' and $row['try'] == 1) {
+					if ($header_echottu == false and $row['tuotetyyppi'] == '1 Muut' and $row['try'] != 2) {
 						$header_echottu = true;
 
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";

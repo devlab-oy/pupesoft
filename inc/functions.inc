@@ -23355,7 +23355,7 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 					//var select_id = $(this).attr('id').replace("sykli","vali");
 					//hae_huoltosyklin_huoltovali($(this).val(), select_id);
 
-					if( tuoteno.length > 1 ){
+					if( tuoteno.length > 3 ){
 						//$('.huoltosykli_select').html('<option>1</option><option>2</option><option>3</option>');
 
 						$('.huoltosykli_select').each(function(){
@@ -23378,6 +23378,7 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 				}).done(function(response) {
 
 						$('#'+select_id).html(response);
+						$('#'+select_id).change();
 
 					if (console && console.log) {
 						console.log(response);

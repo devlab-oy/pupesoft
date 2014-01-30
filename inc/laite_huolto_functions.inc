@@ -519,7 +519,15 @@ function aseta_tyomaarays_status($tilausrivi_tunnus, $status) {
 	pupe_query($query);
 }
 
-//luodaan huoltosykli huoltosyklityypin perusteella
+
+
+
+
+
+
+
+
+//luodaan huoltosyklirivi huoltosyklityypin perusteella
 function huoltosykli_rivi($tyyppi){
 	global $tunnus;
 
@@ -543,19 +551,30 @@ function huoltosykli_rivi($tyyppi){
 		echo "<tr>";
 		echo "<th>".t('Huoltosykli')."</th>";
 		echo "<td>";
-		echo "<select name='huoltosyklit[{$tyyppi}][huoltosykli_tunnus]'>";
+
+
+
+		echo "<select class='huoltosykli_select' id='huoltosykli_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltosykli_tunnus]'>";
+
 		$sel = "";
 		echo "<option value='0'>Ei huoltosykliä</option>";
 
-		foreach ($huoltosyklit as $huoltosykli) {
-			if ( $laitteen_huoltosyklit[0]['tunnus'] == $huoltosykli['tunnus']) {
-				$sel = "SELECTED";
+		if( $huoltosyklit ){
+
+			foreach ($huoltosyklit as $huoltosykli) {
+				if ( $laitteen_huoltosyklit[0]['tunnus'] == $huoltosykli['tunnus']) {
+					$sel = "SELECTED";
+				}
+				echo "<option value='{$huoltosykli['tunnus']}' {$sel}>" . $huoltosykli['dropdown_text'] . "</option>";
+				$sel = "";
 			}
-			echo "<option value='{$huoltosykli['tunnus']}' {$sel}>{$huoltosykli['dropdown_text']}";
-			$sel = "";
+
 		}
 
 		echo "</select>";
+
+
+
 		echo "</td>";
 		echo "</tr>";
 
@@ -563,41 +582,39 @@ function huoltosykli_rivi($tyyppi){
 		echo "<th>".t('Huoltovali')."</th>";
 		echo "<td>";
 
+		echo "<select class='huoltovali_select' id='huoltovali_select_{$tyyppi}' name='huoltosyklit[{$tyyppi}][huoltovali]'>";
 
+		if( $huoltosyklit ){
 
-			echo "<select name='huoltosyklit[{$tyyppi}][huoltovali]'>";
-
-			$huoltovali_options = huoltovali_options( $huoltosykli['tunnus'] );
-
-			if( $val == $laitteen_huoltosyklit[0]['huoltovali'] ){
-				$sel = "SELECTED";
-			}
-
+			$huoltovali_options = huoltovali_options( $laitteen_huoltosyklit[0]['tunnus'] );
 			foreach($huoltovali_options  as $key => $val ){
-				echo "<option value='".$val."'>".$key."</option>";
-				$sel = "";
+				if( $val == $laitteen_huoltosyklit[0]['huoltovali'] ){
+					$sel = "SELECTED";
+				}
+					echo "<option value='".$val."'>" . $key . "</option>";
+					$sel = "";
 			}
-
+		}else{
+			echo "<option value='0'>Ei huoltoväliä</option>";
+		}
 
 			echo "</select>";
 
-
 		echo "</td>";
 		echo "</tr>";
-
-
-
-
-
-
-
-
 		echo "</table>";
 
 		echo "</td>";
 		echo "</tr>";
 
 	}
+
+
+
+
+
+
+
 
 //haetaan laitteeseen yhdistetyt huoltosyklit
 function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
@@ -631,58 +648,4 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
 
 
 
-//haetaan sallitut huoltosyklit huoltosyklityypin ja laitenumeron perusteella
-function hae_huoltosyklit($tunnus, $tyyppi) {
-	global $kukarow;
 
-	if($tunnus != ''){
-
-
-		$tuoteno_query = "SELECT tuoteno FROM laite WHERE tunnus = $tunnus AND yhtio = '{$kukarow['yhtio']}'";
-		$tuoteno_result = pupe_query($tuoteno_query);
-		$tuoteno = mysql_result($tuoteno_result, 0);
-
-		$sammutin_koko_query = "SELECT selite FROM tuotteen_avainsanat WHERE tuoteno = '{$tuoteno}' AND laji = 'sammutin_koko' AND yhtio = '{$kukarow['yhtio']}'";
-		$sammutin_koko_result = pupe_query($sammutin_koko_query);
-		$sammutin_koko = mysql_result($sammutin_koko_result, 0);
-
-		$sammutin_tyyppi_query = "SELECT selite FROM tuotteen_avainsanat WHERE tuoteno = '{$tuoteno}' AND laji = 'sammutin_tyyppi' AND yhtio = '{$kukarow['yhtio']}'";
-		$sammutin_tyyppi_result = pupe_query($sammutin_tyyppi_query);
-		$sammutin_tyyppi = mysql_result($sammutin_tyyppi_result, 0);
-
-	}
-
-	$query = "	SELECT huoltosykli.tunnus,
-				concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
-					(
-						SELECT selitetark
-						FROM avainsana
-						WHERE avainsana.yhtio = huoltosykli.yhtio
-						AND avainsana.selite = huoltosykli.olosuhde
-						AND avainsana.laji = 'OLOSUHDE'
-					)
-				) as dropdown_text,
-				huoltosykli.huoltovali,
-				huoltosykli.pakollisuus
-				FROM huoltosykli
-				JOIN tuote
-				ON ( tuote.yhtio = huoltosykli.yhtio AND tuote.tuoteno = huoltosykli.toimenpide )
-				JOIN tuotteen_avainsanat
-				ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide )
-				WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
-				AND tuotteen_avainsanat.selite LIKE '%{$tyyppi}%'";
-
-	if($tunnus != ''){
-		$query .= " AND huoltosykli.tyyppi = '{$sammutin_tyyppi}' AND huoltosykli.koko = $sammutin_koko";
-	}
-
-	$huoltosykli_result = pupe_query($query);
-
-	$huoltosyklit = array();
-
-	while ($huoltosykli = mysql_fetch_assoc($huoltosykli_result)) {
-		$huoltosyklit[] = $huoltosykli;
-	}
-
-	return $huoltosyklit;
-}

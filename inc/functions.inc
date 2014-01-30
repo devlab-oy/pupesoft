@@ -23333,44 +23333,105 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 	}
 }
 
-/**
- * Iframe näkymään huoltosykli dropdownin change bind ja huoltosyklin huoltovälin muutto
- */
-if (!function_exists('js_huoltosykli_dropdown_huoltovali_change')) {
-	function js_huoltosykli_dropdown_huoltovali_change() {
+
+
+
+
+
+
+
+if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
+	function js_tuoteno_input_huoltosykli_options_change() {
 		?>
 		<script>
-			$(document).ready(function() {
-				bind_huoltosykli_change();
+			$(document).ready(function() { bind_tuoteno_change(); });
 
-				//jos ollaan muokkaustilassa niin ensimmäisellä sivulatauksella ei päivitetä huoltosykliä, koska kentässä saattaa olla poikkeava huoltoväli ja sitä ei haluta kadottaa
-				//ja jos iframen domista löytyy classilla error mitä tahansa.
-				if ($('input[name=tunnus]').val().length === 0 && $('.error').length === 0) {
-					$('.huoltosykli_tunnus').change();
-				}
-			});
+			function bind_tuoteno_change() {
 
-			function bind_huoltosykli_change() {
-				$('.huoltosykli_tunnus').on('change', function() {
-					var ajax_request_obj = hae_huoltosyklin_huoltovali($(this).val());
+				$('#tuoteno_td input').on('change', function() {
 
-					var huoltovali_input = $(this).parent().parent().parent().find('.huoltovali');
-					ajax_request_obj.done(function(huoltosykli) {
-						$(huoltovali_input).val(huoltosykli.huoltovali);
-					});
+					var tuoteno = $('#tuoteno_td input').val();
+
+					//var select_id = $(this).attr('id').replace("sykli","vali");
+					//hae_huoltosyklin_huoltovali($(this).val(), select_id);
+
+					if( tuoteno.length > 1 ){
+						//$('.huoltosykli_select').html('<option>1</option><option>2</option><option>3</option>');
+
+						$('.huoltosykli_select').each(function(){
+							var select_id = $(this).attr('id');
+							var tyyppi = select_id.replace("huoltosykli_select_","");
+							hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi);
+						});
+					}
+
+
 				});
 			}
 
-			function hae_huoltosyklin_huoltovali(huoltosykli_tunnus) {
+
+			function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi) {
 				return $.ajax({
 					async: true,
-					dataType: 'json',
 					type: 'GET',
-					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli&huoltosykli_tunnus=' + huoltosykli_tunnus
-				}).done(function(data) {
+					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi
+				}).done(function(response) {
+
+						$('#'+select_id).html(response);
+
 					if (console && console.log) {
-						console.log('Huoltoväli haku onnistui');
-						//console.log(data);
+						console.log(response);
+					}
+
+				});
+			}
+
+
+		</script>
+		<?php
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * huoltosykli dropdownin change bind ja huoltosyklin huoltoväli-dropdownin muutto
+ */
+if (!function_exists('js_huoltosykli_dropdown_huoltovali_options_change')) {
+	function js_huoltosykli_dropdown_huoltovali_options_change() {
+		?>
+		<script>
+			$(document).ready(function() { bind_huoltosykli_change(); });
+
+			function bind_huoltosykli_change() {
+				$('.huoltosykli_select').on('change', function() {
+					var select_id = $(this).attr('id').replace("sykli","vali");
+					hae_huoltosyklin_huoltovali($(this).val(), select_id);
+				});
+			}
+
+			function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
+				return $.ajax({
+					async: true,
+					type: 'GET',
+					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
+				}).done(function(response) {
+
+						$('#'+select_id).html(response);
+
+					if (console && console.log) {
+						console.log(response);
 					}
 
 				});
@@ -23379,6 +23440,35 @@ if (!function_exists('js_huoltosykli_dropdown_huoltovali_change')) {
 		<?php
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if (!function_exists('hae_laite')) {
 	function hae_laite($laite_tunnus) {
@@ -25468,5 +25558,58 @@ if (!function_exists("huoltovali_options")) {
 			}
 		}
 		return $huoltovali_options;
+	}
+}
+
+
+if (!function_exists("hae_huoltosyklit")) {
+	function hae_huoltosyklit($tunnus, $tyyppi) {
+		global $kukarow;
+
+		if($tunnus == ''){ return false; }
+
+		$tuoteno_query = "SELECT tuoteno FROM laite WHERE tunnus = $tunnus AND yhtio = '{$kukarow['yhtio']}'";
+		$tuoteno_result = pupe_query($tuoteno_query);
+		$tuoteno = mysql_result($tuoteno_result, 0);
+
+		$sammutin_koko_query = "SELECT selite FROM tuotteen_avainsanat WHERE tuoteno = '{$tuoteno}' AND laji = 'sammutin_koko' AND yhtio = '{$kukarow['yhtio']}'";
+		$sammutin_koko_result = pupe_query($sammutin_koko_query);
+		$sammutin_koko = mysql_result($sammutin_koko_result, 0);
+
+		$sammutin_tyyppi_query = "SELECT selite FROM tuotteen_avainsanat WHERE tuoteno = '{$tuoteno}' AND laji = 'sammutin_tyyppi' AND yhtio = '{$kukarow['yhtio']}'";
+		$sammutin_tyyppi_result = pupe_query($sammutin_tyyppi_query);
+		$sammutin_tyyppi = mysql_result($sammutin_tyyppi_result, 0);
+
+		$query = "	SELECT huoltosykli.tunnus,
+					concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
+						(
+							SELECT selitetark
+							FROM avainsana
+							WHERE avainsana.yhtio = huoltosykli.yhtio
+							AND avainsana.selite = huoltosykli.olosuhde
+							AND avainsana.laji = 'OLOSUHDE'
+						)
+					) as dropdown_text,
+					huoltosykli.huoltovali,
+					huoltosykli.pakollisuus
+					FROM huoltosykli
+					JOIN tuote
+					ON ( tuote.yhtio = huoltosykli.yhtio AND tuote.tuoteno = huoltosykli.toimenpide )
+					JOIN tuotteen_avainsanat
+					ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide )
+					WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
+					AND tuotteen_avainsanat.selite LIKE '%{$tyyppi}%'
+					AND huoltosykli.tyyppi = '{$sammutin_tyyppi}'
+					AND huoltosykli.koko = $sammutin_koko";
+
+		$huoltosykli_result = pupe_query($query);
+
+		$huoltosyklit = array();
+
+		while ($huoltosykli = mysql_fetch_assoc($huoltosykli_result)) {
+			$huoltosyklit[] = $huoltosykli;
+		}
+
+		return $huoltosyklit;
 	}
 }

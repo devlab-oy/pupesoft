@@ -19,6 +19,10 @@
 		require ("inc/parametrit.inc");
 	}
 
+	if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
+		require ("inc/{$toim}_ajax.inc");
+	}
+
 	if (function_exists("js_popup")) {
 		echo js_popup(-100);
 	}
@@ -27,9 +31,10 @@
 		enable_ajax();
 	}
 
-	if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
-		require ("inc/{$toim}_ajax.inc");
-	}
+	echo '<hr> toim:'. $toim. '<hr>';
+
+	echo '<hr> toim:'. $tunnus. '<hr>';
+
 
 	if (file_exists("inc/laite_huolto_functions.inc")) {
 		require_once('inc/laite_huolto_functions.inc');
@@ -1797,6 +1802,13 @@
 		if ($toim == 'huoltosyklit_laitteet') {
 			js_huoltosykli_dropdown_huoltovali_change();
 		}
+
+		if ($toim == 'laite') {
+			js_huoltosykli_dropdown_huoltovali_options_change();
+			js_tuoteno_input_huoltosykli_options_change();
+		}
+
+
 		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
 
 		echo "<table>";
@@ -2011,7 +2023,7 @@
 				$infolinkki = "";
 
 				// Jos riviltä löytyy selitetark_5 niin piirretään otsikon perään tooltip-kysymysmerkki
-				if ($al_row['selitetark_5'] != '') {
+				if (isset($al_row) and $al_row['selitetark_5'] != '') {
 					$siistiselite = str_replace('.','_', $al_row['selite']);
 					$infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
 
@@ -2133,25 +2145,12 @@
 
 		if ($toim == 'laite') {
 
-	//$huoltosyklit = hae_laitteelle_mahdolliset_huoltosyklit('', '', '');
-
-
-
 			$query = "SELECT DISTINCT selite FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow['yhtio']}' AND laji = 'tyomaarayksen_ryhmittely'";
 			$result = pupe_query($query);
 
 			while ($selite = mysql_fetch_assoc($result)) {
 				huoltosykli_rivi($selite['selite']);
 			}
-
-
-
-/*
-			huoltosykli_rivi('tarkastus');
-			huoltosykli_rivi('huolto');
-			huoltosykli_rivi('koeponnistus');
-			huoltosykli_rivi('täyttö');
-*/
 
 		}
 
@@ -2317,8 +2316,8 @@
 
 
 
+/*
 
-		/*
 		if ($trow["tunnus"] > 0 and $errori == "" and $toim == "laite") {
 			if (($toikrow = tarkista_oikeus("yllapito.php", "huoltosyklit_laitteet%", "", "OK")) !== FALSE) {
 				$lukitse_avaimeen = $tunnus;
@@ -2328,7 +2327,7 @@
 			}
 		}
 
-	*/
+*/
 
 
 

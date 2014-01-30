@@ -14,7 +14,7 @@ if (mysql_field_type($result, $i) == "blob") {
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
-	$ulos = "<td>".livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT')."</td>";
+	$ulos = "<td id='tuoteno_td'>".livesearch_kentta('uusi_laite_form', 'TUOTEHAKU', $nimi, '226', $trow[$i], 'NOSUBMIT')."</td>";
 	$jatko = 0;
 }
 
@@ -29,7 +29,7 @@ if (mysql_field_name($result, $i) == "paikka") {
 						AND asiakas.tunnus = kohde.asiakas
 						AND asiakas.tunnus = '{$asiakas_tunnus}')";
 	}
-	
+
 	$query = "	SELECT paikka.tunnus, concat_ws(' ', paikka.nimi, paikka.osoite) as dropdown_text
 				FROM paikka
 				{$join}

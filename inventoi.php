@@ -981,6 +981,43 @@
 		}
 	}
 
+	if ($tee == 'POISTAERANUMERO') {
+		$query = "	SELECT sarjanumeroseuranta.tunnus, tilausrivi_myynti.tunnus myyntitunnus, tilausrivi_osto.tunnus ostotunnus
+					FROM sarjanumeroseuranta
+					JOIN tuote USING (yhtio,tuoteno)
+					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+					JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+					WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
+					and sarjanumeroseuranta.tuoteno		= '$tuoteno'
+					and sarjanumeroseuranta.myyntirivitunnus != -1
+					and tilausrivi_myynti.tunnus is null
+				 	and tilausrivi_osto.laatija = 'Invent'
+					and tilausrivi_osto.laskutettuaika = '0000-00-00'
+					and (tuote.sarjanumeroseuranta not in ('E','F','G') or era_kpl != 0)
+					and sarjanumeroseuranta.tunnus = $sarjatunnus";
+		$sarjares = pupe_query($query);
+
+		if (mysql_num_rows($sarjares) == 1) {
+
+			$sarjarow = mysql_fetch_assoc($sarjares);
+
+			$query = "  UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$sarjarow['ostotunnus']}'";
+			pupe_query($query);
+
+			$query = " 	DELETE FROM sarjanumeroseuranta
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$sarjarow['tunnus']}'";
+			pupe_query($query);
+
+			echo "<br>".t("Erä poistettu")."!<br><br>";
+		}
+
+		$tee = 'INVENTOI';
+	}
+
 	if ($tee == 'INVENTOI') {
 
 		if (isset($tmp_tuoteno) and $tmp_tuoteno != '') {
@@ -1292,6 +1329,7 @@
 								if ($sarjarow['laskutettuaika'] == '0000-00-00') {
 									echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
 									echo "<font class='message'>**",t("UUSI"),"**</font>";
+									echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]'>".t("Poista")."</a>";
 								}
 								else {
 									echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";

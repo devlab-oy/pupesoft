@@ -231,18 +231,18 @@ function echo_tyomaaraykset_table($request = array()) {
 	if ($request['toim'] == 'TEHDYT_TYOT') {
 		$toimitus_string = "Toimitettu";
 	}
-	echo "<tr>
-			<th>".t("Työm").".<br>".t("Viite")."</th>
-			<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
-			<th>".t("Kohde")."</th>
-			<th>".t($toimitus_string)."</th>
-			<th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-			<th></th>
-		</tr>";
+	echo "<tr>";
+	echo "<th>".t("Työm").".<br>".t("Viite")."</th>";
+	echo "<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>";
+	echo "<th>".t("Kohde")."</th>";
+	echo "<th>".t($toimitus_string)."</th>";
+	echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
+	echo "<th></th>";
+	echo "</tr>";
 
 	echo "<tr>";
-
-	echo "<td valign='top'><input type='text' size='10' name='tyomaarays_haku'></td>";
+	echo "<td valign='top'>";
+	echo "</td>";
 
 	echo "<td valign='top'><input type='text' size='10' name='asiakasnimi_haku'></td>";
 	echo "<td valign='top'><input type='text' size='10' name='kohde_haku'></td>";

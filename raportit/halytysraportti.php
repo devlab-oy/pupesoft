@@ -691,6 +691,7 @@
 							$lisaa2
 							$abcjoin
 							JOIN tuotepaikat ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno
+							JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = '$yhtiorow[yhtio]' and tuoteno = tuote.tuoteno ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
 							LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 							and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 							and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
@@ -957,7 +958,7 @@
 					$query = "	SELECT								
 								sum(if(tyyppi = 'O', varattu, 0)) tilattu,
 								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)								
-								JOIN LASKU ON yhtio='$row[yhtio]' and liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio=$row[yhtio] and tuoteno=$row[tuoteno] ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)																
+								JOIN LASKU ON yhtio='$yhtiorow[yhtio]' and liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio=$row[yhtio] and tuoteno='$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)																
 								WHERE yhtio = '$row[yhtio]'
 			 					and tyyppi in ('O')
 								and tuoteno = '$row[tuoteno]'

@@ -7,7 +7,6 @@ if (php_sapi_name() == 'cli') {
 	$php_cli = TRUE;
 }
 
-
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta JA master kantaa *//
 $useslave = 1;
 
@@ -54,6 +53,12 @@ if (!isset($abctyyppi)) $abctyyppi = "kate";
 
 // rakennetaan tiedot
 if ($tee == 'YHTEENVETO') {
+
+	//siivotaan ensin aputaulu tyhj‰ksi
+	$query = "	DELETE from abc_aputaulu
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi IN ('AK','AP','AR','AM')";
+	pupe_query($query);
 
 	// katotaan halutaanko saldottomia mukaan.. default on ettei haluta
 	if ($saldottomatmukaan == "") {
@@ -133,12 +138,6 @@ if ($tee == 'YHTEENVETO') {
 		$kustapermyyrivi = 0;
 	}
 
-	//siivotaan ensin aputaulu tyhj‰ksi
-	$query = "	DELETE from abc_aputaulu
-				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi IN ('AK','AP','AR','AM')";
-	$res = pupe_query($query);
-
 	// rakennetaan perus ABC-luokat
 	$query = "	SELECT
 				lasku.liitostunnus,
@@ -160,7 +159,6 @@ if ($tee == 'YHTEENVETO') {
 				or (tilausrivi.tyyppi = 'L' and tilausrivi.var = 'P' and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59'))
 				GROUP BY 1,2,3,4";
 	$res = pupe_query($query);
-
 
 	$kate_sort 	= array();
 	$kpl_sort 	= array();
@@ -186,25 +184,29 @@ if ($tee == 'YHTEENVETO') {
 			$abcwhat 		= "kate";
 			$abcchar 		= "AK";
 			$kausiyhteensa	=  $kate_kausiyhteensa;
-			array_multisort($kate_sort, SORT_DESC, $rowarray);
+			$looparray 		= $rowarray;
+			array_multisort($kate_sort, SORT_DESC, $looparray);
 		}
 		elseif ($abctyyppi == "kpl") {
 			$abcwhat 		= "kpl";
 			$abcchar 		= "AP";
 			$kausiyhteensa	=  $kpl_kausiyhteensa;
-			array_multisort($kpl_sort, SORT_DESC, $rowarray);
+			$looparray 		= $rowarray;
+			array_multisort($kpl_sort, SORT_DESC, $looparray);
 		}
 		elseif ($abctyyppi == "rivia") {
 			$abcwhat 		= "rivia";
 			$abcchar 		= "AR";
 			$kausiyhteensa	=  $rivia_kausiyhteensa;
-			array_multisort($rivia_sort, SORT_DESC, $rowarray);
+			$looparray 		= $rowarray;
+			array_multisort($rivia_sort, SORT_DESC, $looparray);
 		}
 		else {
 			$abcwhat 		= "summa";
 			$abcchar 		= "AM";
 			$kausiyhteensa	=  $summa_kausiyhteensa;
-			array_multisort($summa_sort, SORT_DESC, $rowarray);
+			$looparray 		= $rowarray;
+			array_multisort($summa_sort, SORT_DESC, $looparray);
 		}
 
 		// Haetaan abc-parametrit
@@ -213,7 +215,7 @@ if ($tee == 'YHTEENVETO') {
 		$i			 = 0;
 		$ryhmaprossa = 0;
 
-		foreach ($rowarray as $row) {
+		foreach ($looparray as $row) {
 
 			// katotaan onko kelvollinen tuote, elikk‰ luokitteluperuste pit‰‰ olla > 0
 			if ($row["${abcwhat}"] > 0) {
@@ -268,7 +270,7 @@ if ($tee == 'YHTEENVETO') {
 						puuterivia			= '$row[puuterivia]',
 						palvelutaso 		= '$palvelutaso',
 						kustannus_yht		= '$kustayht'";
-			pupe_query($query);
+			pupe_query($query, $masterlink);
 
 			//luokka vaihtuu
 			if ($ryhmaprossa >= $ryhmaprossat[$i]) {
@@ -288,7 +290,7 @@ if ($tee == 'YHTEENVETO') {
 					luokka_try = '3'
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$abcchar'";
-		pupe_query($query);
+		pupe_query($query, $masterlink);
 
 		// haetaan kaikki osastot
 		$query = "	SELECT distinct osasto FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)
@@ -346,7 +348,7 @@ if ($tee == 'YHTEENVETO') {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = '$abcchar'
 							and tunnus  = '$row[tunnus]'";
-				pupe_query($query);
+				pupe_query($query, $masterlink);
 
 				// luokka vaihtuu
 				if (round($ryhmaprossa,2) >= $ryhmaprossat[$i]) {
@@ -417,7 +419,7 @@ if ($tee == 'YHTEENVETO') {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = '$abcchar'
 							and tunnus  = '$row[tunnus]'";
-				pupe_query($query);
+				pupe_query($query, $masterlink);
 
 				// luokka vaihtuu
 				if (round($ryhmaprossa,2) >= $ryhmaprossat[$i]) {
@@ -440,7 +442,7 @@ if ($tee == 'YHTEENVETO') {
 	}
 }
 
-if ($tee == "") {
+if (!$php_cli) {
 
 	// piirrell‰‰n formi
 	echo "<form method='post' autocomplete='OFF'>";
@@ -468,8 +470,5 @@ if ($tee == "") {
 	echo "</table>";
 	echo "<br><input type='submit' value='".t("Rakenna")."'>";
 	echo "</form><br><br><br>";
-}
-
-if (!$php_cli) {
 	require ("../inc/footer.inc");
 }

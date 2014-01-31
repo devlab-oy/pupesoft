@@ -13598,6 +13598,9 @@ if (!function_exists("pupe_DataTables")) {
 						if (valid_params && suuntalava_ok) {
 							var ajokerta = rivi_kpl_alkuperainen / massajakokplmaara;
 							var loput = rivi_kpl_alkuperainen - (Math.floor(ajokerta) * massajakokplmaara)
+
+							if (loput==0) ajokerta = ajokerta-1;
+
 							var uudenrivintunnus = 0;
 
 							(function loopperi(i) {

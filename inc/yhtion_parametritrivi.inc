@@ -3864,6 +3864,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'lapsituotteen_poiston_esto') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == '1' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Sallitaan tuoteperheen lapsituotteen poisto myyntitilauksella")."</option>";
+		$ulos .= "<option value = '1' {$sel}>".t("Ei sallita tuoteperheen lapsituotteen poistoa myyntitilauksella")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'takuuvarasto') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

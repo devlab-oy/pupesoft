@@ -2315,6 +2315,7 @@ if ($tee == '') {
 					<input type='hidden' name='mista' value='$mista'>
 					<input type='hidden' name='tee' value='OTSIK'>
 					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='toim_kuka' value='$toim_kuka'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
 					<input type='hidden' name='projektilla' value='$projektilla'>
@@ -2391,14 +2392,16 @@ if ($tee == '') {
 					</form>";
 		}
 
-		echo "<form action='tuote_selaus_haku.php' method='post'>
-				<input type='hidden' name='toim_kutsu' value='$toim'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='hidden' name='tyojono' value='$tyojono'>
-				<input type='hidden' name='orig_tila' value = '$orig_tila'>
-				<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
-				<input type='submit' value='".t("Selaa tuotteita")."'>
-				</form>";
+		if ($toim != 'VAURIOPOYTAKIRJA') {
+			echo "<form action='tuote_selaus_haku.php' method='post'>
+					<input type='hidden' name='toim_kutsu' value='$toim'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='tyojono' value='$tyojono'>
+					<input type='hidden' name='orig_tila' value = '$orig_tila'>
+					<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+					<input type='submit' value='".t("Selaa tuotteita")."'>
+					</form>";
+		}
 
 		// aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n
 		if ($kukarow["extranet"] == "" and ($kukarow["yhtio"] == "artr" or $kukarow['yhtio'] == 'orum')) {
@@ -2516,6 +2519,7 @@ if ($tee == '') {
 				echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
 						<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=VALITSETOIMITUS//tyojono=$tyojono'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='hidden' name='toim_kuka' value='$toim_kuka'>
 						<input type='hidden' name='tyojono' value='$tyojono'>
 						<input type='submit' value='" . t('Tilauksen liitetiedostot')."'>
 						</form>";
@@ -8475,7 +8479,7 @@ if ($tee == '') {
 					echo "</form></td>";
 				}
 			}
-			elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
+			elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U') and $toim != 'VAURIOPOYTAKIRJA') {
 
 				echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>

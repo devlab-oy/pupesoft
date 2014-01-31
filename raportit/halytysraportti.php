@@ -638,7 +638,8 @@
 							tuote.tuotemassa,
 							$splisa,
 							tuote.lyhytkuvaus,
-							tuote.hinnastoon
+							tuote.hinnastoon,
+							tuote.ostoehdotus
 							FROM tuote
 							JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = '$yhtiorow[yhtio]' and tuoteno = tuote.tuoteno ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
 							LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
@@ -686,7 +687,8 @@
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
 							concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso) varastopaikka,
-							varastopaikat.tunnus
+							varastopaikat.tunnus,
+							tuote.ostoehdotus
 							FROM tuote
 							$lisaa2
 							$abcjoin

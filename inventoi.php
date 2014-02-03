@@ -41,7 +41,7 @@
 	}
 
 	if ($rivimaara == '') {
-		$rivimaara = '18';
+		$rivimaara = '16';
 	}
 
 	//katotaan onko tiedosto ladattu
@@ -1076,9 +1076,9 @@
 				$alku = 0;
 			}
 
-			$loppu = "18";
+			$loppu = "16";
 
-			if ($rivimaara != "18" and $rivimaara != '') {
+			if ($rivimaara != "16" and $rivimaara != '') {
 				$loppu = $rivimaara;
 			}
 
@@ -1136,16 +1136,16 @@
 			//-->
 			</script>";
 
-		$sel1rivi=$sel18rivi=$sel180rivi="";
+		$sel1rivi=$sel16rivi=$sel160rivi="";
 
 		if ($rivimaara == '1') {
 			$sel1rivi = "SELECTED";
 		}
-		elseif ($rivimaara == '18') {
-			$sel18rivi = "SELECTED";
+		elseif ($rivimaara == '16') {
+			$sel16rivi = "SELECTED";
 		}
 		else {
-			$sel180rivi = "SELECTED";
+			$sel160rivi = "SELECTED";
 		}
 
 		$seljarj1 = "";
@@ -1170,8 +1170,8 @@
 			echo "<form method='post'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<select name='rivimaara' onchange='submit()'>";
-			echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
-			echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
+			echo "<option value='160' $sel160rivi>".t("N‰ytet‰‰n 160 rivi‰")."</option>";
+			echo "<option value='16' $sel16rivi>".t("N‰ytet‰‰n 16 rivi‰")."</option>";
 			echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
 			echo "</select>";
 			echo "<select name='jarjestys' onchange='submit()'>";

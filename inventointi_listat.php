@@ -879,7 +879,7 @@
 			$listaaika = date("Y-m-d H:i:s");
 
 			$ots  = t("Inventointilista")." $kutsu\t".t("Sivu")." <SIVUNUMERO>\n".t("Listanumero").": $listanro\t\t$yhtiorow[nimi]\t\t$pp.$kk.$vv - $kello\n\n";
-			$ots .= sprintf ('%-28.14s', 	t("Paikka"));
+			$ots .= sprintf ('%-18.14s', 	t("Paikka"));
 			$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
 
 			// Ei n‰ytet‰ toim_tuotenumeroa, nimitys voi olla pidempi
@@ -905,6 +905,7 @@
 			$ots .= sprintf ('%-7.7s',		t("M‰‰r‰"));
 			$ots .= sprintf ('%-9.9s', 		t("Yksikkˆ"));
 			$ots .= sprintf ('%-8.8s',	 	t("Tikpl"));
+			$ots .= sprintf ('%-8.8s',	 	t("Enn/Ker"));
 			$ots .= "\n";
 			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n\n";
 			fwrite($fh, str_replace("<SIVUNUMERO>","1",$ots));
@@ -986,7 +987,9 @@
 				}
 
 				//katsotaan onko tuotetta tilauksessa
-				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
+				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika,
+							ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,
+							ifnull(sum(tilausrivi.varattu),0) ennpois
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoterow[tuoteno]' and varattu>0 and tyyppi='O'";
 				$result1 = pupe_query($query);
@@ -996,7 +999,7 @@
 					$tuoterow["inventointiaika"] = t("Ei inventoitu");
 				}
 
-				$prn  = sprintf ('%-28.14s', 	$tuoterow["varastopaikka"]);
+				$prn  = sprintf ('%-18.14s', 	$tuoterow["varastopaikka"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["tuoteno"]);
 
 				// Jos valittu toim_tuoteno piilotus ei sit‰ piirret‰ (s‰‰stet‰‰n tilaa)
@@ -1029,6 +1032,7 @@
 				$prn .= sprintf ('%-7.7s', 	"_____");
 				$prn .= sprintf ('%-9.9s', 	t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite"));
 				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
+				$prn .= sprintf ('%-8.8d', 	$prow["keratty"]+$prow['ennpois']);
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {
 					$query = "	SELECT sarjanumeroseuranta.sarjanumero,

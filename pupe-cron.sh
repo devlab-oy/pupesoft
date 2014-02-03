@@ -24,7 +24,7 @@ echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 echo ": ABC Aputaulujen rakennus."
 
 # Rakennetaan Asiakas-ABC-analyysin aputaulut
-cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO rivia
+cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO
 
 # Rakennetaan Tuote-ABC-analyysin aputaulut
 cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO

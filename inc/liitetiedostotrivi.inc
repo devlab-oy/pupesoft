@@ -32,6 +32,9 @@
 
 		if ($lukitse_avaimeen != "") {
 			$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+			if (isset($toim_kuka)) {
+				$ulos .= "<input type='hidden' name='toim_kuka' value='$toim_kuka'>";
+			}
 			$jatko = 0;
 		}
 	}

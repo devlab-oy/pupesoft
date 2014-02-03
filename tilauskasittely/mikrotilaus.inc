@@ -755,6 +755,7 @@
 
 		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
 				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='toim_kuka' value='$toim_kuka'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tee' value='file'>

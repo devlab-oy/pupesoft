@@ -119,6 +119,7 @@ if (!isset($tila)) 					$tila = "";
 if (!isset($tilausrivilinkki)) 		$tilausrivilinkki = "";
 if (!isset($toimaika)) 				$toimaika = "";
 if (!isset($toimittajan_tunnus)) 	$toimittajan_tunnus = "";
+if (!isset($toim_kuka)) 			$toim_kuka = "";
 if (!isset($toimkka)) 				$toimkka = 0;
 if (!isset($toimppa)) 				$toimppa = 0;
 if (!isset($toimvva)) 				$toimvva = 0;
@@ -2445,11 +2446,14 @@ if ($tee == '') {
 					</form>";
 		}
 
+		$lopetus = $lopetus . "//toim_kuka=$toim_kuka";
+
 		echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
 				<input type='hidden' name='tee' value='mikrotila'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='mista' value='$mista'>
 				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='toim_kuka' value='$toim_kuka'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
 				<input type='hidden' name='tyojono' value='$tyojono'>
@@ -2517,7 +2521,7 @@ if ($tee == '') {
 				}
 
 				echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
-						<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=VALITSETOIMITUS//tyojono=$tyojono'>
+						<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=VALITSETOIMITUS//tyojono=$tyojono//toim_kuka=$toim_kuka'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
 						<input type='hidden' name='toim_kuka' value='$toim_kuka'>
 						<input type='hidden' name='tyojono' value='$tyojono'>
@@ -6690,6 +6694,7 @@ if ($tee == '') {
 								<input type='hidden' name='tuotenimitys' 	value = '$row[nimitys]'>
 								<input type='hidden' name='orig_tila'		value = '$orig_tila'>
 								<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
+								<input type='hidden' name='toim_kuka' 		value = '{$toim_kuka}'>
 								<input type='hidden' name='tila' 			value = 'MUUTA'>
 								<input type='hidden' name='tapa' 			value = 'MUOKKAA'>
 								<input type='Submit' value='".t("Muokkaa")."'>
@@ -6714,6 +6719,7 @@ if ($tee == '') {
 								<input type='hidden' name='menutila'	 	value = '$menutila'>
 								<input type='hidden' name='orig_tila'		value = '$orig_tila'>
 								<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
+								<input type='hidden' name='toim_kuka' 		value = '{$toim_kuka}'>
 								<input type='hidden' name='tila' 			value = 'MUUTA'>
 								<input type='hidden' name='tapa' 			value = 'POISTA'>
 								<input type='Submit' value='".t("Poista")."' $poista_onclick>

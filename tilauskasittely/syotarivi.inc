@@ -442,6 +442,7 @@
 
 		echo "<td valign='top' class='back'>";
 		echo "<input type='hidden' name='aputapa' value='$tapa'>";
+		echo "<input type='hidden' name='toim_kuka' value='$toim_kuka'>";
 		echo "<input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>$jarjlisa";
@@ -619,6 +620,7 @@
 
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
 		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
+		echo "<input type='hidden' name='toim_kuka' value = '$toim_kuka'>";
 
 		echo "</td></tr></table></form>";
 	}

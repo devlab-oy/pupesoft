@@ -84,6 +84,7 @@
 	if (!isset($rajattu_nakyma)) 	$rajattu_nakyma = "";
 	if (!isset($lukossa)) 			$lukossa = "";
 	if (!isset($lukitse_laji))		$lukitse_laji = "";
+	if (!isset($toim_kuka))			$toim_kuka = "";
 
 	// Tutkitaan v‰h‰n alias_settej‰ ja rajattua n‰kym‰‰
 	$al_lisa = " and selitetark_2 = '' and nakyvyys != '' ";
@@ -1249,12 +1250,15 @@
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";
 		$result = pupe_query($query);
 
+		$lopetus = $lopetus . "//toim_kuka=$toim_kuka";
+
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
 			if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
 			echo "' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'toim_kuka' value = '$toim_kuka'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>

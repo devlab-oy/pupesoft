@@ -1,41 +1,49 @@
 #!/bin/bash
 
-YHTIO=$1
 POLKU=`dirname $0`
 
+DBKANTA=$1
+DBKAYTTAJA=$2
+DBSALASANA=$3
+
 # Katsotaan, ett‰ parametrit on annettu
-if [ -z $YHTIO ]; then
+if [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 	echo
 	echo "ERROR! Pakollisia parametreja ei annettu!"
 	echo
-	echo "Ohje: /polku/pupesoftiin/pupe-cron.sh yhtio"
-	echo "Esim: /var/www/html/pupesoft/pupe-cron.sh demo"
+	echo "Ohje: /polku/pupesoftiin/pupe-cron.sh KANTA KAYTTAJA SALASANA"
+	echo "Esim: /var/www/html/pupesoft/pupe-cron.sh pupesoft pupesoft pupe1"
 	echo
 	exit
 fi
 
-# Teh‰‰n pupesoftin iltasiivo
-cd ${POLKU};php iltasiivo.php $YHTIO
+YHTIOT=`mysql -h 10.0.1.2 -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} -B -N -e "SELECT yhtio FROM yhtio"`
 
-# K‰yd‰‰n luottoraja_t‰ynn‰ tilaukset l‰pi ja laukaistaan ne eteenp‰in jotka on ok
-cd ${POLKU};php odottaa_suoritusta.php $YHTIO
+for YHTIO in $YHTIOT
+do
+	# Teh‰‰n pupesoftin iltasiivo
+	cd ${POLKU};php iltasiivo.php $YHTIO
 
-echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-echo ": ABC Aputaulujen rakennus."
+	# K‰yd‰‰n luottoraja_t‰ynn‰ tilaukset l‰pi ja laukaistaan ne eteenp‰in jotka on ok
+	cd ${POLKU};php odottaa_suoritusta.php $YHTIO
 
-# Rakennetaan Asiakas-ABC-analyysin aputaulut
-cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO rivia
-cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO myynti
-cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO kate
-cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO kpl
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+	echo ": ABC Aputaulujen rakennus."
 
-# Rakennetaan Tuote-ABC-analyysin aputaulut
-cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO rivia
-cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO myynti
-cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kate
-cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kpl
-cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kulutus
+	# Rakennetaan Asiakas-ABC-analyysin aputaulut
+	cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO rivia
+	cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO myynti
+	cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO kate
+	cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO kpl
 
-echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-echo ": ABC Aputaulujen rakennus. Done!"
-echo
+	# Rakennetaan Tuote-ABC-analyysin aputaulut
+	#cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO rivia
+	#cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO myynti
+	#cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kate
+	#cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kpl
+	#cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kulutus
+
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+	echo ": ABC Aputaulujen rakennus. Done!"
+	echo
+done

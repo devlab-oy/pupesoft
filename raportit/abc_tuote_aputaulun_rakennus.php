@@ -112,6 +112,8 @@ if ($tee == 'YHTEENVETO') {
 					AND tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'
 					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22";
 		$rivires = pupe_query($query);
+
+		$abctyypit = array("kulutus");
 	}
 	else {
 		// siivotaan ensin aputaulu tyhjäksi
@@ -155,6 +157,8 @@ if ($tee == 'YHTEENVETO') {
 					AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
 					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17";
 		$rivires = pupe_query($query);
+
+		$abctyypit = array("kate","kpl","rivia","summa");
 	}
 
 	//kokokauden kokonaismyynti
@@ -214,21 +218,27 @@ if ($tee == 'YHTEENVETO') {
 		elseif ($row['epakurantti25pvm']  != '0000-00-00') $row['vararvo'] = round($saldorow['saldo'] * $row['kehahin'] * 0.75, 2);
 		else $row['vararvo'] = round($saldorow['saldo'] * $row['kehahin'], 2);
 
-		$query = "	SELECT
-					sum(tilkpl)	puutekpl,
-					count(*)	puuterivia
-					FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
-					WHERE yhtio   = '$kukarow[yhtio]'
-					AND tyyppi 	  = 'L'
-					AND tuoteno   = '{$row['tuoteno']}'
-					and var 	  = 'P'
-					and laadittu >= '$vva-$kka-$ppa 00:00:00'
-					and laadittu <= '$vvl-$kkl-$ppl 23:59:59'";
-		$puuteres = pupe_query($query);
-		$puuterow = mysql_fetch_assoc($puuteres);
+		if ($abclaji == "") {
+			$query = "	SELECT
+						sum(tilkpl)	puutekpl,
+						count(*)	puuterivia
+						FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+						WHERE yhtio   = '$kukarow[yhtio]'
+						AND tyyppi 	  = 'L'
+						AND tuoteno   = '{$row['tuoteno']}'
+						and var 	  = 'P'
+						and laadittu >= '$vva-$kka-$ppa 00:00:00'
+						and laadittu <= '$vvl-$kkl-$ppl 23:59:59'";
+			$puuteres = pupe_query($query);
+			$puuterow = mysql_fetch_assoc($puuteres);
 
-		$row['puutekpl']   = (float) $puuterow['puutekpl'];
-		$row['puuterivia'] = (float) $puuterow['puuterivia'];
+			$row['puutekpl']   = (float) $puuterow['puutekpl'];
+			$row['puuterivia'] = (float) $puuterow['puuterivia'];
+		}
+		else {
+			$row['puutekpl']   = 0;
+			$row['puuterivia'] = 0;
+		}
 
 		$rowarray[] = $row;
 
@@ -237,67 +247,69 @@ if ($tee == 'YHTEENVETO') {
 
 	$myydyttuotteet = substr($myydyttuotteet, 0, -1);
 
-	// Käydään läpi kaikki tuotteet joilla on saldoa mutta ei laskutusta/ostoja... ne kuuluu myös I-luokkaan
-	$query = "	SELECT
-				tuote.tuoteno,
-				tuote.try,
-				tuote.osasto,
-				tuote.tuotemerkki,
-				tuote.nimitys,
-				tuote.luontiaika,
-				tuote.myyjanro,
-				tuote.ostajanro,
-				tuote.malli,
-				tuote.mallitarkenne,
-				tuote.vihapvm,
-				tuote.status,
-				tuote.epakurantti100pvm,
-				tuote.epakurantti75pvm,
-				tuote.epakurantti50pvm,
-				tuote.epakurantti25pvm,
-				tuote.kehahin,
-				0 summa,
-				0 kate,
-				0 rivia,
-				0 kpl,
-				0 osto_rivia,
-				0 osto_kpl,
-				0 osto_summa,
-				0 osto_kerrat,
-				0 kerrat,
-				sum(tuotepaikat.saldo) saldo,
-				sum(tuotepaikat.saldo) * if(tuote.epakurantti100pvm = '0000-00-00',if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0) vararvo
-				FROM tuotepaikat
-				JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-				AND tuotepaikat.tuoteno NOT IN ($myydyttuotteet)
-				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
-				HAVING saldo > 0";
-	$rivires = pupe_query($query);
-
-	while ($row = mysql_fetch_assoc($rivires)) {
-		$kate_sort[]  = $row['kate'];
-		$kpl_sort[]   = $row['kpl'];
-		$rivia_sort[] = $row['rivia'];
-		$summa_sort[] = $row['summa'];
-
+	if ($abclaji == "") {
+		// Käydään läpi kaikki tuotteet joilla on saldoa mutta ei laskutusta/ostoja... ne kuuluu myös I-luokkaan
 		$query = "	SELECT
-					sum(tilkpl)	puutekpl,
-					count(*)	puuterivia
-					FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
-					WHERE yhtio   = '$kukarow[yhtio]'
-					AND tyyppi 	  = 'L'
-					AND tuoteno   = '{$row['tuoteno']}'
-					and var 	  = 'P'
-					and laadittu >= '$vva-$kka-$ppa 00:00:00'
-					and laadittu <= '$vvl-$kkl-$ppl 23:59:59'";
-		$puuteres = pupe_query($query);
-		$puuterow = mysql_fetch_assoc($puuteres);
+					tuote.tuoteno,
+					tuote.try,
+					tuote.osasto,
+					tuote.tuotemerkki,
+					tuote.nimitys,
+					tuote.luontiaika,
+					tuote.myyjanro,
+					tuote.ostajanro,
+					tuote.malli,
+					tuote.mallitarkenne,
+					tuote.vihapvm,
+					tuote.status,
+					tuote.epakurantti100pvm,
+					tuote.epakurantti75pvm,
+					tuote.epakurantti50pvm,
+					tuote.epakurantti25pvm,
+					tuote.kehahin,
+					0 summa,
+					0 kate,
+					0 rivia,
+					0 kpl,
+					0 osto_rivia,
+					0 osto_kpl,
+					0 osto_summa,
+					0 osto_kerrat,
+					0 kerrat,
+					sum(tuotepaikat.saldo) saldo,
+					sum(tuotepaikat.saldo) * if(tuote.epakurantti100pvm = '0000-00-00',if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0) vararvo
+					FROM tuotepaikat
+					JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+					AND tuotepaikat.tuoteno NOT IN ($myydyttuotteet)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+					HAVING saldo > 0";
+		$rivires = pupe_query($query);
 
-		$row['puutekpl']   = (float) $puuterow['puutekpl'];
-		$row['puuterivia'] = (float) $puuterow['puuterivia'];
+		while ($row = mysql_fetch_assoc($rivires)) {
+			$kate_sort[]  = $row['kate'];
+			$kpl_sort[]   = $row['kpl'];
+			$rivia_sort[] = $row['rivia'];
+			$summa_sort[] = $row['summa'];
 
-		$rowarray[]   = $row;
+			$query = "	SELECT
+						sum(tilkpl)	puutekpl,
+						count(*)	puuterivia
+						FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+						WHERE yhtio   = '$kukarow[yhtio]'
+						AND tyyppi 	  = 'L'
+						AND tuoteno   = '{$row['tuoteno']}'
+						and var 	  = 'P'
+						and laadittu >= '$vva-$kka-$ppa 00:00:00'
+						and laadittu <= '$vvl-$kkl-$ppl 23:59:59'";
+			$puuteres = pupe_query($query);
+			$puuterow = mysql_fetch_assoc($puuteres);
+
+			$row['puutekpl']   = (float) $puuterow['puutekpl'];
+			$row['puuterivia'] = (float) $puuterow['puuterivia'];
+
+			$rowarray[]   = $row;
+		}
 	}
 
 	// tää on nyt hardcoodattu, eli miltä kirjanpidon tasolta otetaan kulut
@@ -350,8 +362,6 @@ if ($tee == 'YHTEENVETO') {
 		$kustaperostrivi = 0;
 	}
 
-	$abctyypit = array("kate","kpl","rivia","summa");
-
 	foreach ($abctyypit as $abctyyppi) {
 
 		if ($abctyyppi == "kate") {
@@ -380,7 +390,7 @@ if ($tee == 'YHTEENVETO') {
 			$abcchar 		= "TV";
 			$kausiyhteensa	= $kpl_kausiyhteensa;
 			$looparray 		= $rowarray;
-			array_multisort($summa_sort, SORT_DESC, $looparray);
+			array_multisort($kpl_sort, SORT_DESC, $looparray);
 		}
 		else {
 			$abcwhat	 	= "summa";

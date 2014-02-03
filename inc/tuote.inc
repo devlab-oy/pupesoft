@@ -25,6 +25,9 @@
 		$rajauslisa	.= "";
 	}
 
+	if ($yhtiorow['vauriopoytakirja'] == 'K') {
+		$rajauslisa = "	AND tuote.try IN ({$kukarow['try']})";
+	}
 
 	// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa (tsekataan tuoterivi.inc)
 	$poistolukko = "ON";

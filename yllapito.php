@@ -1246,8 +1246,19 @@
 		// Ei näytetä seuraavia avainsanoja avainsana-ylläpitolistauksessa
 		$avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
-		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
-        $query .= "$ryhma ORDER BY $jarjestys $limiitti";
+		if (!isset($join)) {
+			$join = "";
+		}
+
+		if (in_array($toim, array('asiakashinta')) and $yhtiorow['vauriopoytakirja'] == 'K') {
+			$query = "SELECT " . $kentat . " FROM $toim $join WHERE $toim.yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
+			$query .= "$ryhma ORDER BY $jarjestys $limiitti";
+		}
+		else {
+			$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
+			$query .= "$ryhma ORDER BY $jarjestys $limiitti";
+		}
+
 		$result = pupe_query($query);
 
 		$lopetus = $lopetus . "//toim_kuka=$toim_kuka";

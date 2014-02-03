@@ -27,11 +27,16 @@ if ($php_cli) {
 
 	$kukarow['yhtio'] = trim($argv[1]);
 
-	$saldottomatmukaan = "";
-	$kustannuksetyht   = "";
+	$abclaji			= "";
+	$saldottomatmukaan  = "";
+	$kustannuksetyht    = "";
 
 	if (isset($argv[2]) and trim($argv[2]) != "") {
-		$saldottomatmukaan = trim($argv[2]);
+		$abclaji = trim($argv[2]);
+	}
+
+	if (isset($argv[3]) and trim($argv[3]) != "") {
+		$saldottomatmukaan = trim($argv[3]);
 	}
 
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -51,7 +56,7 @@ if (!isset($kkl)) $kkl = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("
 if (!isset($vvl)) $vvl = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 if (!isset($ppl)) $ppl = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
-if (!isset($abctyyppi)) $abctyyppi = "kate";
+if (!isset($abclaji)) $abclaji = "";
 
 // rakennetaan tiedot
 if ($tee == 'YHTEENVETO') {
@@ -64,33 +69,49 @@ if ($tee == 'YHTEENVETO') {
 		$tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno) ";
 	}
 
-	if ($abctyyppi == "kulutus") {
-		$kpltyyppi = " tilausrivi.tyyppi='V' ";
-		$summasql  = " sum(if(tilausrivi.tyyppi='V', (SELECT sum(-1*kpl*hinta) from tapahtuma where tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus), 0)) ";
-		$katesql   = " 0 ";
-
-		$riviwhere = " (tilausrivi.tyyppi = 'V' and tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59') ";
+	if ($abclaji == "kulutus") {
 
 		// siivotaan ensin aputaulu tyhjäksi
 		$query = "	DELETE from abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi in ('TV')";
+					and tyyppi = 'TV'";
 		pupe_query($query);
 
-		// Haetaan ensin koko kauden yhteismyynti ja ostot
 		$query = "	SELECT
-					tilausrivi.tuoteno						tuoteno,
-					sum(if(tilausrivi.tyyppi='O', 1, 0))	rivia_osto,
-					sum(if($kpltyyppi, 1, 0))				rivia,
-					sum(if($kpltyyppi, tilausrivi.kpl, 0)) 	kpl,
-					$summasql								summa,
-					$katesql 								kate
-					FROM tilausrivi use index (yhtio_tyyppi_toimitettuaika)
+					tuote.tuoteno,
+					tuote.try,
+					tuote.osasto,
+					tuote.tuotemerkki,
+					tuote.nimitys,
+					tuote.luontiaika,
+					tuote.myyjanro,
+					tuote.ostajanro,
+					tuote.malli,
+					tuote.mallitarkenne,
+					tuote.vihapvm,
+					tuote.status,
+					tuote.epakurantti100pvm,
+					tuote.epakurantti75pvm,
+					tuote.epakurantti50pvm,
+					tuote.epakurantti25pvm,
+					tuote.kehahin,
+					0 kate,
+					0 osto_rivia,
+					0 osto_kpl,
+					0 osto_summa,
+					0 osto_kerrat,
+					sum((SELECT sum(-1*kpl*hinta) from tapahtuma where tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus)) summa,
+					count(*)								rivia,
+					sum(tilausrivi.kpl)						kpl,
+					count(DISTINCT tilausrivi.otunnus)-1	kerrat
+					FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
 					$tuotejoin
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and ($riviwhere)
-					GROUP BY 1";
-		$res = pupe_query($query);
+					AND tilausrivi.tyyppi  = 'V'
+					AND tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00'
+					AND tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22";
+		$rivires = pupe_query($query);
 	}
 	else {
 		// siivotaan ensin aputaulu tyhjäksi
@@ -124,8 +145,8 @@ if ($tee == 'YHTEENVETO') {
 					sum(if(tilausrivi.tyyppi='O', 1, 0))												osto_rivia,
 					sum(if(tilausrivi.tyyppi='O', tilausrivi.kpl, 0))									osto_kpl,
 					sum(if(tilausrivi.tyyppi='O', tilausrivi.rivihinta, 0))								osto_summa,
-					count(distinct if(tilausrivi.tyyppi='O', tilausrivi.otunnus, 0))-1 					osto_kerrat,
-					count(distinct if(tilausrivi.tyyppi='L', tilausrivi.otunnus, 0))-1 					kerrat
+					count(DISTINCT if(tilausrivi.tyyppi='O', tilausrivi.otunnus, 0))-1 					osto_kerrat,
+					count(DISTINCT if(tilausrivi.tyyppi='L', tilausrivi.otunnus, 0))-1 					kerrat
 					FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
 					$tuotejoin
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -729,6 +750,12 @@ if (!$php_cli) {
 			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 			<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
+
+	echo "<tr><th>".t("ABC-luokkien laskentatapa")."</th>";
+	echo "<td colspan='3'><select name='abclaji'>";
+	echo "<option value='myynti'>".t("Myynnin mukaan")."</option>";
+	echo "<option value='kulutus'>".t("Kulutuksen mukaan")."</option>";
+	echo "</select></td></tr>";
 
 	echo "<tr><td colspan='4' class='back'><br></td></tr>";
 	echo "<tr><th colspan='1'>".t("Kustannukset valitulla kaudella")."</th>";

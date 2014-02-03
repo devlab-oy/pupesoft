@@ -157,14 +157,45 @@
 		$tyyppi = 1;
 	}
 
-	if (mysql_field_name($result, $i) == "try"
-		or mysql_field_name($result, $i) == "osasto"
+	if (mysql_field_name($result, $i) == "osasto"
 		or mysql_field_name($result, $i) == "tuotemerkki"
 		or mysql_field_name($result, $i) == "malli"
 		or mysql_field_name($result, $i) == "mallitarkenne"
 		or mysql_field_name($result, $i) == "valmistuslinja") {
 
 		$sresult = t_avainsana(mysql_field_name($result, $i));
+		$sarnimi = mysql_field_name($result, $i);
+
+		// jos avainsanoja on perustettu tehd‰‰n dropdown
+		if (mysql_num_rows($sresult) > 0) {
+			$ulos = "<td><select id='$sarnimi' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+
+			while ($srow = mysql_fetch_array($sresult)) {
+				$sel = '';
+				if ($trow[$i] == $srow["selite"] and $srow["selite"] != "") {
+					$sel = "selected";
+				}
+
+				$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+			}
+
+			$ulos .= "</select>";
+			$ulos .= " <a href='#' onclick=\"js_open_yllapito('$sarnimi','toim=avainsana&lukitse_laji=$sarnimi');\"><img src='pics/lullacons/add.png'>".t("Uusi")." ".t(mysql_field_name($result, $i))."</a></td>";
+
+			$ulos .= "</td>";
+			$jatko = 0;
+		}
+	}
+
+	if (mysql_field_name($result, $i) == "try") {
+		if ($yhtiorow['vauriopoytakirja'] == 'K') {
+			$sresult = t_avainsana(mysql_field_name($result, $i), '', " AND selite IN ({$kukarow['try']})");
+		}
+		else {
+			$sresult = t_avainsana(mysql_field_name($result, $i));
+		}
 		$sarnimi = mysql_field_name($result, $i);
 
 		// jos avainsanoja on perustettu tehd‰‰n dropdown

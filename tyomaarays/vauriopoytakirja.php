@@ -218,7 +218,7 @@ function echo_vauriopoytakirjat($request) {
 		echo "</td>";
 
 		$disabled = '';
-		if ($request['toim'] == 'urakoitija' and $vauriopoytakirja['tyostatus'] != 1) {
+		if ($request['toim'] == 'urakoitsija' and $vauriopoytakirja['tyostatus'] != 1) {
 			$disabled = 'disabled';
 		}
 		echo "<td class='back' nowrap>";

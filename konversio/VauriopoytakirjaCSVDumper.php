@@ -28,6 +28,7 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 		$mandatory_fields = array(
 			'lisakuluprosentti'	 => 7,
 			'tyostatus'			 => 1, //Urakoitsijalla = 1
+			'sap_numero'		 => 0,
 		);
 
 		$this->setFolder('/tmp/sp/');

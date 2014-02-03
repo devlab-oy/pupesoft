@@ -58,7 +58,7 @@ if ($tee == 'YHTEENVETO') {
 	$query = "	DELETE from abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi IN ('AK','AP','AR','AM')";
-	pupe_query($query);
+	pupe_query($query, $masterlink);
 
 	// katotaan halutaanko saldottomia mukaan.. default on ettei haluta
 	if ($saldottomatmukaan == "") {
@@ -317,7 +317,7 @@ if ($tee == 'YHTEENVETO') {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tyyppi  = '$abcchar'
 					ORDER BY osasto";
-		$kaikres = pupe_query($query);
+		$kaikres = pupe_query($query, $masterlink);
 
 		// tehdään osastokohtaiset luokat
 		while ($arow = mysql_fetch_assoc($kaikres)) {
@@ -333,7 +333,7 @@ if ($tee == 'YHTEENVETO') {
 						and tyyppi = '$abcchar'
 						and osasto = '$arow[osasto]'
 						and $abcwhat > 0";
-			$resi 	= pupe_query($query);
+			$resi 	= pupe_query($query, $masterlink);
 			$yhtrow = mysql_fetch_assoc($resi);
 
 			//rakennetaan aliluokat
@@ -349,7 +349,7 @@ if ($tee == 'YHTEENVETO') {
 						and osasto = '$arow[osasto]'
 						and $abcwhat > 0
 						ORDER BY $abcwhat desc";
-			$res = pupe_query($query);
+			$res = pupe_query($query, $masterlink);
 
 			$i			 = 0;
 			$ryhmaprossa = 0;
@@ -389,7 +389,7 @@ if ($tee == 'YHTEENVETO') {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tyyppi  = '$abcchar'
 					ORDER BY try";
-		$kaikres = pupe_query($query);
+		$kaikres = pupe_query($query, $masterlink);
 
 		// tehdään try kohtaiset luokat
 		while ($arow = mysql_fetch_assoc($kaikres)) {
@@ -405,7 +405,7 @@ if ($tee == 'YHTEENVETO') {
 						and tyyppi = '$abcchar'
 						and try = '$arow[try]'
 						and $abcwhat > 0";
-			$resi 	= pupe_query($query);
+			$resi 	= pupe_query($query, $masterlink);
 			$yhtrow = mysql_fetch_assoc($resi);
 
 			//rakennetaan aliluokat
@@ -421,7 +421,7 @@ if ($tee == 'YHTEENVETO') {
 						and try = '$arow[try]'
 						and $abcwhat > 0
 						ORDER BY $abcwhat desc";
-			$res = pupe_query($query);
+			$res = pupe_query($query, $masterlink);
 
 			$i			 = 0;
 			$ryhmaprossa = 0;
@@ -456,7 +456,7 @@ if ($tee == 'YHTEENVETO') {
 	}
 
 	$query = "OPTIMIZE table abc_aputaulu";
-	pupe_query($query);
+	pupe_query($query, $masterlink);
 
 	if ($php_cli == FALSE) {
 		$tee = "";

@@ -739,7 +739,6 @@ if (isset($jatka)) {
 				toim_postino 						= '$toim_postino',
 				toim_postitp 						= '$toim_postitp',
 				tunnusnippu							= '$tunnusnippu',
-				valkoodi 							= '$valkoodi',
 				varasto 							= '$varasto',
 				verkkotunnus						= '$verkkotunnus',
 				vienti 								= '$vienti',

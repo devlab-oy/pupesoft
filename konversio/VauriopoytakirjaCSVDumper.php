@@ -137,7 +137,9 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 						toim_nimitark = '',
 						toim_osoite = '',
 						toim_postino = '',
-						toim_postitp = ''
+						toim_postitp = '',
+						alv = 0,
+						valkoodi = 'EUR'
 						WHERE yhtio = '{$this->kukarow['yhtio']}'
 						AND tunnus = {$lasku_tunnus}";
 			pupe_query($query);

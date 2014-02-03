@@ -25308,6 +25308,25 @@ if (!function_exists('tuoteryhma_rajaus')) {
 	}
 }
 
+if (!function_exists('aseta_kukarow_kesken')) {
+	function aseta_kukarow_kesken($kesken) {
+		global $kukarow;
+
+		$query = "	UPDATE kuka
+					SET kesken = {$kesken}
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kuka = '{$kukarow['kuka']}'";
+		pupe_query($query);
+
+		if (mysql_affected_rows() == 0) {
+			return false;
+		}
+
+		$kukarow['kesken'] = $kesken;
+		return true;
+	}
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

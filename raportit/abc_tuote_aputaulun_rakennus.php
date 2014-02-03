@@ -216,7 +216,7 @@ if ($tee == 'YHTEENVETO') {
 
 	$myydyttuotteet = substr($myydyttuotteet, 0, -1);
 
-	// Käydään läpi kaikki tuotteet joilla on saldoa mutta ei yhtään tilausriviä... ne kuuluu myös I-luokkaan
+	// Käydään läpi kaikki tuotteet joilla on saldoa mutta ei laskutusta/ostoja... ne kuuluu myös I-luokkaan
 	$query = "	SELECT
 				tuote.tuoteno,
 				tuote.try,
@@ -252,7 +252,7 @@ if ($tee == 'YHTEENVETO') {
 				AND tuotepaikat.tuoteno NOT IN ($myydyttuotteet)
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
 				HAVING saldo > 0";
-	$tuores = pupe_query($query);
+	$rivires = pupe_query($query);
 
 	while ($row = mysql_fetch_assoc($rivires)) {
 		$kate_sort[]  = $row['kate'];

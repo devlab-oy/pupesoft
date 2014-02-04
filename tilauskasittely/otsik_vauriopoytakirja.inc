@@ -81,9 +81,6 @@ if (isset($jatka)) {
 	if (empty($toim_osoite)) {
 		$pakolliset_errors['osoite'] = t('Osoite puuttuu');
 	}
-	if (empty($toim_nimitark)) {
-		$pakolliset_errors['postilokero'] = t('Postilokero puuttuu');
-	}
 	if (empty($toim_postino)) {
 		$pakolliset_errors['postino'] = t('Postinumero puuttuu');
 	}
@@ -628,11 +625,71 @@ if ($tila == "" and !isset($jatka)) {
 
 		echo "</tr>";
 
+		echo "<tr>";
+
+		echo "<td class='back' valign='top'>";
+		echo "<input type='submit' value='".t('Jatka')."' />";
+		echo "</td>";
+		
+		echo "</tr>";
+
 		echo "</table>";
 
-		echo "<input type='submit' value='".t('Jatka')."' />";
-
 		echo "</form>";
+
+		echo "<table>";
+
+		echo "<tr>";
+		$lopetus_temp = lopetus($lopetus, '', true);
+		if ($toim_kuka == 'urakoitsija') {
+			echo "<td class='back' valign='top'>";
+			echo "<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>";
+			echo "<input type='hidden' name='tee' value='siirra_tarkastajalle' />";
+			echo "<input type='hidden' name='tyomaarays_tunnus' value='{$tilausnumero}' />";
+			echo "<input type='submit' value='".t("Siirrä tarkastajalle")."' />";
+			echo "</form>";
+			echo "</td>";
+		}
+		else {
+			if ($srow['tyostatus'] == '2') {
+				echo "	<td class='back' valign='top'>
+							<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+								<input type='hidden' name='tee' value='anna_laskutuslupa' />
+								<input type='hidden' name='tyomaarays_tunnus' value='{$tilausnumero}' />
+								<input type='submit' value='".t("Anna laskutus lupa")."' />
+							</form>
+						</td>";
+
+				echo "	<td class='back' valign='top'>
+							<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+								<input type='hidden' name='tee' value='siirra_urakoitsijalle' />
+								<input type='hidden' name='tyomaarays_tunnus' value='{$tilausnumero}' />
+								<input type='submit' value='".t("Siirrä takaisin urakoitsijalle")."' />
+							</form>
+						</td>";
+			}
+			else if ($srow['tyostatus'] == '3') {
+				echo "	<td class='back' valign='top'>
+							<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+								<input type='hidden' name='tee' value='merkitse_maksetuksi' />
+								<input type='hidden' name='tyomaarays_tunnus' value='{$tilausnumero}' />
+								<input type='submit' value='".t("Merkitse maksetuksi")."' />
+							</form>
+						</td>";
+			}
+			else {
+				echo "	<td class='back' valign='top'>
+							<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+								<input type='hidden' name='tee' value='' />
+								<input type='hidden' name='tyomaarays_tunnus' value='{$tilausnumero}' />
+								<input type='submit' value='".t("Palaa selaus näkymään")."' />
+							</form>
+						</td>";
+			}
+		}
+
+		echo "</tr>";
+		echo "</table>";
 	}
 	else {
 		asiakkaan_valinta_formi();
@@ -1003,39 +1060,39 @@ function aiheuttaja($params, $tyyppi = 'aiheuttaja') {
 
 	$aiheuttaja_nimet = array(
 		'nimi'		 => array(
-			'aiheuttaja' => 'toim_nimi',
+			'aiheuttaja'	 => 'toim_nimi',
 			'laskutusosoite' => 'laskutus_nimi',
 		),
 		'nimitark'	 => array(
-			'aiheuttaja' => 'toim_nimitark',
+			'aiheuttaja'	 => 'toim_nimitark',
 			'laskutusosoite' => 'laskutus_nimitark',
 		),
 		'osoite'	 => array(
-			'aiheuttaja' => 'toim_osoite',
+			'aiheuttaja'	 => 'toim_osoite',
 			'laskutusosoite' => 'laskutus_osoite',
 		),
 		'postino'	 => array(
-			'aiheuttaja' => 'toim_postino',
+			'aiheuttaja'	 => 'toim_postino',
 			'laskutusosoite' => 'laskutus_postino',
 		),
 		'postitp'	 => array(
-			'aiheuttaja' => 'toim_postitp',
+			'aiheuttaja'	 => 'toim_postitp',
 			'laskutusosoite' => 'laskutus_postitp',
 		),
 		'maa'		 => array(
-			'aiheuttaja' => 'toim_maa',
+			'aiheuttaja'	 => 'toim_maa',
 			'laskutusosoite' => 'laskutus_maa',
 		),
 		'puhelin'	 => array(
-			'aiheuttaja' => 'aktiivinen_kuljetus',
+			'aiheuttaja'	 => 'aktiivinen_kuljetus',
 			'laskutusosoite' => 'rekisteilmo_rekisterinumero',
 		),
 		'gsm'		 => array(
-			'aiheuttaja' => 'sisamaan_kuljetus',
+			'aiheuttaja'	 => 'sisamaan_kuljetus',
 			'laskutusosoite' => 'rekisteilmo_paakayttokunta',
 		),
 		'ytunnus'	 => array(
-			'aiheuttaja' => 'kirjoitin',
+			'aiheuttaja'	 => 'kirjoitin',
 			'laskutusosoite' => 'rekisteilmo_kieli',
 		),
 	);

@@ -26,7 +26,22 @@
 	}
 
 	if ($yhtiorow['vauriopoytakirja'] == 'K') {
-		$rajauslisa = "	AND tuote.try IN ({$kukarow['try']})";
+		$try_result = t_avainsana('try', '', " AND selite IN ({$kukarow['try']}) AND selitetark_3 = ''");
+
+		$tuoteryhmat = array();
+		while($tuoteryhma = mysql_fetch_assoc($try_result)) {
+			if (in_array($tuoteryhma['selite'], explode(',', $kukarow['try']))) {
+				$tuoteryhmat[] = $tuoteryhma['selite'];
+			}
+		}
+
+		if (!empty($tuoteryhmat) and !stristr($kukarow['profiilit'], 'admin')) {
+			$rajauslisa = "	AND tuote.try IN (".implode(',', $tuoteryhmat).")";
+		}
+		else {
+			//admin n‰kee kaikki tuotteet
+			$rajauslisa = "	AND tuote.try IN ({$kukarow['try']})";
+		}
 	}
 
 	// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa (tsekataan tuoterivi.inc)

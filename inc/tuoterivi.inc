@@ -191,7 +191,12 @@
 
 	if (mysql_field_name($result, $i) == "try") {
 		if ($yhtiorow['vauriopoytakirja'] == 'K') {
-			$sresult = t_avainsana(mysql_field_name($result, $i), '', " AND selite IN ({$kukarow['try']})");
+			if (!stristr($kukarow['profiilit'], 'admin')) {
+				$sresult = t_avainsana(mysql_field_name($result, $i), '', " AND selite IN ({$kukarow['try']}) AND selitetark_3 = ''");
+			}
+			else {
+				$sresult = t_avainsana(mysql_field_name($result, $i), '', " AND selite IN ({$kukarow['try']})");
+			}
 		}
 		else {
 			$sresult = t_avainsana(mysql_field_name($result, $i));
@@ -202,7 +207,9 @@
 		if (mysql_num_rows($sresult) > 0) {
 			$ulos = "<td><select id='$sarnimi' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-			$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+			if ($yhtiorow['vauriopoytakirja'] != 'K') {
+				$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+			}
 
 			while ($srow = mysql_fetch_array($sresult)) {
 				$sel = '';

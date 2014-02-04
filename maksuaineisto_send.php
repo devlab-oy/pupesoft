@@ -29,20 +29,8 @@
 		$yhtiorow = hae_yhtion_parametrit($yhtio);
 
 		// Haetaan käyttäjän tiedot
-		$query = "	SELECT *
-					FROM kuka
-					WHERE yhtio = '$yhtio'
-					AND kuka = 'admin'";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) == 0) {
-			echo "Admin kayttaja puuttuu!";
-			exit;
-		}
-
-		// Adminin tiedot, mutta kuka on cron
-		$kukarow = mysql_fetch_assoc($result);
-		$kukarow['kuka'] = 'admin';
+		$kukarow  = hae_kukarow('admin', $yhtio);
+		
 		$PHP_SELF = "maksuehto_send.php";
 	}
 

@@ -9843,7 +9843,7 @@ if (!function_exists("hae_rahtimaksu")) {
 
 		$otsikot = mysql_real_escape_string(trim($otsikot));
 
-		if ($otsikot == "") {
+		if ($otsikot == "" or $yhtiorow["rahti_hinnoittelu"] == 'K') {
 			return array(0, 0, 0, 0);
 		}
 

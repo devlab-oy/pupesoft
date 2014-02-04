@@ -247,7 +247,7 @@ if ($tee == 'YHTEENVETO') {
 
 	$myydyttuotteet = substr($myydyttuotteet, 0, -1);
 
-	if ($abclaji == "") {
+	if ($abclaji == "" and $myydyttuotteet != "") {
 		// Käydään läpi kaikki tuotteet joilla on saldoa mutta ei laskutusta/ostoja... ne kuuluu myös I-luokkaan
 		$query = "	SELECT
 					tuote.tuoteno,

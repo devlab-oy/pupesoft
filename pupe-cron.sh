@@ -5,6 +5,8 @@ POLKU=`dirname $0`
 DBKANTA=$1
 DBKAYTTAJA=$2
 DBSALASANA=$3
+DBHOST=$4
+
 
 # Katsotaan, että parametrit on annettu
 if [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
@@ -17,7 +19,13 @@ if [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 	exit
 fi
 
-YHTIOT=`mysql -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} -B -N -e "SELECT yhtio FROM yhtio"`
+if [ -n "${DBHOST}" ]; then
+	DBHOSTLISA=" -h ${DBHOST} "
+else
+	DBHOSTLISA=""
+fi
+
+YHTIOT=`mysql ${DBHOSTLISA} -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} -B -N -e "SELECT yhtio FROM yhtio"`
 
 for YHTIO in $YHTIOT
 do

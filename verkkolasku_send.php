@@ -42,7 +42,7 @@
 
 		// Adminin tiedot, mutta kuka on cron
 		$kukarow = mysql_fetch_assoc($result);
-		$kukarow['kuka'] = 'cron';
+		$kukarow['kuka'] = 'admin';
 		$PHP_SELF = "verkkolasku_send.php";
 	}
 

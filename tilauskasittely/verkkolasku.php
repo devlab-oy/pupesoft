@@ -51,7 +51,7 @@
 			$kieli = $argv[2];
 		}
 
-		$kukarow['kuka'] = "crond";
+		$kukarow['kuka'] = "admin";
 
 		// Pupeasennuksen root
 		$pupe_root_polku = dirname(dirname(__FILE__));

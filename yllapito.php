@@ -1261,7 +1261,9 @@
 
 		$result = pupe_query($query);
 
-		$lopetus = $lopetus . "//toim_kuka=$toim_kuka";
+		if (isset($toim_kuka) and $toim_kuka != '') {
+			$lopetus = $lopetus . "//toim_kuka=$toim_kuka";
+		}
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";

@@ -44,6 +44,39 @@ if ($tee == 'siirra_tarkastajalle') {
 	unset($tyomaarays_tunnus);
 }
 else if ($tee == 'anna_laskutuslupa') {
+	if ($yhtiorow['lisakuluprosentti'] != 0) {
+
+		// Lasketaan laskun summa ja lisätään lisäkuluprosentti
+		$hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$tyomaarays_tunnus}'";
+		$hinta_result = pupe_query($hinta_query);
+		$lisakulu = mysql_fetch_assoc($hinta_result);
+
+		$laskurow = hae_lasku($tyomaarays_tunnus);
+
+		// Lisäkuluprosentin tiedot
+		$kulutuote = array(
+			'tuoteno'		 => 'kulu',
+			'nimitys'		 => 'Lisäkuluprosentti',
+			'yksikko'		 => 'KPL',
+			'ei_saldoa'		 => 'o',
+			'tuotetyyppi'	 => 'M'
+		);
+
+		$params = array(
+			'trow'				 => $kulutuote,
+			'laskurow'			 => $laskurow,
+			'tuoteno'			 => 'kulu',
+			'kpl'				 => '1',
+			'hinta'				 => $lisakulu['hinta'],
+			'var'				 => '',
+			'varataan_saldoa'	 => 'EI'
+		);
+		lisaa_rivi($params);
+	}
+
 	$query = "	UPDATE tyomaarays
 				SET tyostatus = 3
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -67,6 +100,10 @@ else if ($tee == 'merkitse_maksetuksi') {
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND otunnus = '{$tyomaarays_tunnus}'";
 	pupe_query($query);
+	unset($tee);
+	unset($tyomaarays_tunnus);
+}
+else {
 	unset($tee);
 	unset($tyomaarays_tunnus);
 }

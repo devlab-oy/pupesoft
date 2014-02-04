@@ -1379,6 +1379,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "VAURIOPOYTAKIRJA")) {
 		// Työmääräys valmis
+		//@TODO alla oleva iffi blocki ehkä turha
 		if ($yhtiorow['tyomaarayksen_kayttaytyminen'] == 'K' and $tyomaarayksen_kayttaytyminen == 'K') {
 
 			require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
@@ -1419,25 +1420,31 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			if ($yhtiorow['lisakuluprosentti'] != 0) {
 
 				// Lasketaan laskun summa ja lisätään lisäkuluprosentti
-				$hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta FROM tilausrivi
-								WHERE yhtio='{$kukarow['yhtio']}' AND otunnus='{$laskurow['tunnus']}'";
+				$hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otunnus = '{$laskurow['tunnus']}'";
 				$hinta_result = pupe_query($hinta_query);
 				$lisakulu = mysql_fetch_assoc($hinta_result);
 
 				// Lisäkuluprosentin tiedot
-				$kulutuote = array('tuoteno' => 'kulu',
-					'nimitys' => 'Lisäkuluprosentti',
-					'yksikko' => 'KPL',
-					'ei_saldoa' => 'o',
-					'tuotetyyppi' => 'M');
+				$kulutuote = array(
+					'tuoteno'		 => 'kulu',
+					'nimitys'		 => 'Lisäkuluprosentti',
+					'yksikko'		 => 'KPL',
+					'ei_saldoa'		 => 'o',
+					'tuotetyyppi'	 => 'M'
+				);
 
-				$params = array('trow' => $kulutuote,
-					'laskurow' => $laskurow,
-					'tuoteno' => 'kulu',
-					'kpl' => '1',
-					'hinta' => $lisakulu['hinta'],
-					'var' => '',
-					'varataan_saldoa' => 'EI');
+				$params = array(
+					'trow'				 => $kulutuote,
+					'laskurow'			 => $laskurow,
+					'tuoteno'			 => 'kulu',
+					'kpl'				 => '1',
+					'hinta'				 => $lisakulu['hinta'],
+					'var'				 => '',
+					'varataan_saldoa'	 => 'EI'
+				);
 				$lisatyt_rivi = lisaa_rivi($params);
 			}
 		}
@@ -7405,7 +7412,7 @@ if ($tee == '') {
 					$ulkom_huom = "";
 				}
 
-				if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {
+				if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0 and $yhtiorow['vauriopoytakirja'] != 'K') {
 					echo "<tr>$jarjlisa
 							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 							<th colspan='5' align='right'>".t("Kotimaan myynti").":</th>
@@ -7433,6 +7440,14 @@ if ($tee == '') {
 					}
 
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
+				}
+				else if ($yhtiorow['vauriopoytakirja'] == 'K') {
+					echo "<tr>$jarjlisa";
+					echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
+					echo "<th colspan='5' align='right'>".t("Yhteensä").":</th>";
+					echo "<td class='spec' align='right'>".sprintf("%.2f",$summa)."</td>";
+					echo "<td class='spec'>$laskurow[valkoodi]</td>";
+					echo "</tr>";
 				}
 				else {
 					echo "<tr>$jarjlisa
@@ -7567,17 +7582,50 @@ if ($tee == '') {
 					$summa = sprintf("%.2f",round($summa ,0));
 				}
 
-				echo "<tr>$jarjlisa
-						<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
-						<th colspan='5' align='right'>".t("Verollinen yhteensä").":</th>";
+				if ($yhtiorow['vauriopoytakirja'] != 'K') {
+					echo "<tr>$jarjlisa
+							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+							<th colspan='5' align='right'>".t("Verollinen yhteensä").":</th>";
 
-				echo "<td class='spec' align='right'>".sprintf("%.2f",$summa)."</td>";
+					echo "<td class='spec' align='right'>".sprintf("%.2f",$summa)."</td>";
 
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
-					echo "<td class='spec' align='right'>&nbsp;</td>";
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
+						echo "<td class='spec' align='right'>&nbsp;</td>";
+					}
+
+					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
+				else {
+					$kulu_query = "	SELECT *
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$laskurow['tunnus']}'
+									AND tuoteno = 'kulu'";
+					$kulu_result = pupe_query($kulu_query);
+					$kulurow = mysql_fetch_assoc($kulu_result);
 
-				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
+					if (empty($kulurow)) {
+						$hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus = '{$laskurow['tunnus']}'";
+						$hinta_result = pupe_query($hinta_query);
+						$lisakulu = mysql_fetch_assoc($hinta_result);
+
+						$kuluprosentti_summa = sprintf("%.2f",$lisakulu['hinta'] + $summa);
+					}
+					else {
+						$kuluprosentti_summa = sprintf("%.2f", $summa);
+					}
+
+					echo "<tr>$jarjlisa";
+					echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
+					echo "<th colspan='5' align='right'>".t("Yhteensä lisakuluprosentilla")." {$yhtiorow['lisakuluprosentti']}% :</th>";
+					echo "<td class='spec' align='right'>{$kuluprosentti_summa}</td>";
+					echo "<td class='spec'>$laskurow[valkoodi]</td>";
+					echo "</tr>";
+				}
+				
 
 				$as_que = "	SELECT rahtivapaa_alarajasumma
 							FROM asiakas
@@ -8217,21 +8265,41 @@ if ($tee == '') {
 		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "VAURIOPOYTAKIRJA" and $toim_kuka == 'tarkastaja') {
 			$lopetus_temp = lopetus($lopetus, '', true);
 
-			echo "	<td class='back' valign='top'>
-						<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
-							<input type='hidden' name='tee' value='anna_laskutuslupa' />
-							<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
-							<input type='submit' value='".t("Anna laskutus lupa")."' />
-						</form>
-					</td>";
+			if ($laskurow['tyostatus'] == '2') {
+				echo "	<td class='back' valign='top'>
+							<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+								<input type='hidden' name='tee' value='anna_laskutuslupa' />
+								<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
+								<input type='submit' value='".t("Anna laskutus lupa")."' />
+							</form>
+						</td>";
 
-			echo "	<td class='back' valign='top'>
-						<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
-							<input type='hidden' name='tee' value='siirra_urakoitsijalle' />
-							<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
-							<input type='submit' value='".t("Siirrä takaisin urakoitsijalle")."' />
-						</form>
-					</td>";
+				echo "	<td class='back' valign='top'>
+							<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+								<input type='hidden' name='tee' value='siirra_urakoitsijalle' />
+								<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
+								<input type='submit' value='".t("Siirrä takaisin urakoitsijalle")."' />
+							</form>
+						</td>";
+			}
+			else if ($laskurow['tyostatus'] == '3') {
+				echo "	<td class='back' valign='top'>
+							<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+								<input type='hidden' name='tee' value='merkitse_maksetuksi' />
+								<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
+								<input type='submit' value='".t("Merkitse maksetuksi")."' />
+							</form>
+						</td>";
+			}
+			else {
+				echo "	<td class='back' valign='top'>
+							<form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
+								<input type='hidden' name='tee' value='' />
+								<input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
+								<input type='submit' value='".t("Palaa selaus näkymään")."' />
+							</form>
+						</td>";
+			}
 		}
 
 		if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {

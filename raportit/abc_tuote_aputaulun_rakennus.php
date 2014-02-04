@@ -734,10 +734,10 @@ if ($tee == 'YHTEENVETO') {
 		}
 	}
 
-	$query = "OPTIMIZE table abc_aputaulu";
-	$optir = pupe_query($query, $masterlink);
-
 	if (!$php_cli) {
+		$query = "OPTIMIZE table abc_aputaulu";
+		pupe_query($query, $masterlink);
+
 		echo t("ABC-aputaulu rakennettu")."!<br><br>";
 	}
 }

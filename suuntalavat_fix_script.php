@@ -32,7 +32,7 @@
 	require ("inc/functions.inc");
 
 	$kukarow['yhtio'] = (string) $argv[1];
-	$kukarow['kuka']  = 'cron';
+	$kukarow['kuka']  = 'admin';
 
 	echo "\n";
 

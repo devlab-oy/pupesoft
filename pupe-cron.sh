@@ -17,7 +17,7 @@ if [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 	exit
 fi
 
-YHTIOT=`mysql -h 10.0.1.2 -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} -B -N -e "SELECT yhtio FROM yhtio"`
+YHTIOT=`mysql -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} -B -N -e "SELECT yhtio FROM yhtio"`
 
 for YHTIO in $YHTIOT
 do

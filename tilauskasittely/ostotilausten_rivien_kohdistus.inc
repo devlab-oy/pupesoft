@@ -662,6 +662,7 @@ if ($tila == 'tee_siirto') {
 								WHERE yhtio = '{$kukarow[yhtio]}'
 								AND tila = 'K'
 								AND alatila = ''
+								AND vanhatunnus = 0
 								AND tunnus = '$otunnus'";
 					$res = pupe_query($query);
 
@@ -828,6 +829,7 @@ if ($tila == 'tee_kohdistus') {
 					WHERE yhtio = '{$kukarow[yhtio]}'
 					AND tila = 'K'
 					AND alatila = ''
+					AND vanhatunnus = 0
 					AND tunnus = '$otunnus'";
 		$res = pupe_query($query);
 

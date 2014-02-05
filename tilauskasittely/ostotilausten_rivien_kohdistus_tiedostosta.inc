@@ -260,6 +260,7 @@ if ($faarao == 'TUTKHM') {
 									WHERE yhtio = '{$kukarow[yhtio]}'
 									AND tila = 'K'
 									AND alatila = ''
+									AND vanhatunnus = 0
 									AND tunnus = '$otunnus'";
 						$res = pupe_query($query);
 						if (mysql_num_rows($res) == 1){

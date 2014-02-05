@@ -25503,7 +25503,7 @@ if (!function_exists("huoltovali_options")) {
 		$query = "	SELECT huoltovali
 					FROM huoltosykli
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					tunnus = {$huoltosykli_tunnus}";
+					AND tunnus = {$huoltosykli_tunnus}";
 		$result = pupe_query($query);
 		$max_huoltovali = mysql_result($result, 0);
 

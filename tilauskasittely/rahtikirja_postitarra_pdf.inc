@@ -237,12 +237,25 @@
 
 		$apkal = 216;
 
-		if ($kollityht>1) {
-			$pdf->draw_text(250, $apkal,  "Monipakettilähetys.", 				$firstpage, $norm);
-			$apkal-= 9;
-		}
-		if ($rahdinmaksaja != "") {
-			$pdf->draw_text(250, $apkal,  "Maksaja muu kuin lähettäjä.", 		$firstpage, $norm);
+		$x_koordinaatti = 250;
+
+		$cnt = 1;
+
+		foreach ($x as $_koodi)  {
+
+			if ($cnt == 5) break;
+
+			$pdf->draw_text($x_koordinaatti, $apkal, $x_tekstit[$_koodi], $firstpage, $norm);
+
+			if ($x_koordinaatti == 250) {
+				$x_koordinaatti = 320;
+			}
+			else {
+				$x_koordinaatti = 250;
+				$apkal -= 9;
+			}
+
+			$cnt++;
 		}
 
 		$pdf->draw_text(250, 194,  "Sisältö Innehåll", 							$firstpage, $pieni);
@@ -283,11 +296,10 @@
 
 		$komm = "";
 
-		if ($kollityht > 1) {
-			$komm .= "MONIPAKETTILÄHETYS.\n";
-		}
-		if ($rahdinmaksaja != "") {
-			$komm .= "MAKSAJA MUU KUIN LÄHETTÄJÄ.\n";
+		$cnt = 1;
+
+		foreach ($x as $_koodi)  {
+			$komm .= $x_tekstit_koko[$_koodi]." ";
 		}
 
 		if (is_array($vakit)) {
@@ -340,5 +352,3 @@
 		//poistetaan tmp file samantien kuleksimasta...
 		system("rm -f $pdffilenimi");
 	}
-
-?>

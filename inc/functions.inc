@@ -23345,7 +23345,7 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 				$('#tuoteno_td input').on('change', function() {
 					var tuoteno = $('#tuoteno_td input').val();
 					if( tuoteno.length > 2 ){
-						$('.huoltosykli_select').each(function(){
+						$('.huoltosykli_select').each(function() {
 							var select_id = $(this).attr('id');
 							var tyyppi = select_id.replace("huoltosykli_select_","");
 							hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi);
@@ -23356,13 +23356,13 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 
 
 			function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi) {
-				return $.ajax({
+				$.ajax({
 					async: true,
 					type: 'GET',
 					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi
 				}).done(function(response) {
-						$('#'+select_id).html(response);
-						$('#'+select_id).change();
+					$('#'+select_id).html(response);
+					$('#'+select_id).change();
 
 					if (console && console.log) {
 						console.log(response);
@@ -23394,7 +23394,7 @@ if (!function_exists('js_huoltosykli_dropdown_huoltovali_options_change')) {
 			}
 
 			function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
-				return $.ajax({
+				$.ajax({
 					async: true,
 					type: 'GET',
 					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
@@ -25475,35 +25475,38 @@ if (!function_exists("korvaavat_kiellot")) {
 	}
 }
 
-
 if (!function_exists("huoltovali_options")) {
-	function huoltovali_options($huoltosykli_tunnus){
+
+	function huoltovali_options($huoltosykli_tunnus) {
 
 		$huoltovali_options['10 vuotta'] = 3650;
-		$huoltovali_options['5 vuotta']= 1825;
-		$huoltovali_options['2 vuotta']= 730;
-		$huoltovali_options['12 kk']= 365;
-		$huoltovali_options['11 kk']= 330;
-		$huoltovali_options['10 kk']= 300;
-		$huoltovali_options['9 kk']= 270;
-		$huoltovali_options['8 kk']= 240;
-		$huoltovali_options['7 kk']= 210;
-		$huoltovali_options['6 kk']= 180;
-		$huoltovali_options['5 kk']= 150;
-		$huoltovali_options['4 kk']= 120;
-		$huoltovali_options['3 kk']= 90;
-		$huoltovali_options['2 kk']= 60;
-		$huoltovali_options['1 kk']= 30;
+		$huoltovali_options['5 vuotta'] = 1825;
+		$huoltovali_options['2 vuotta'] = 730;
+		$huoltovali_options['12 kk'] = 365;
+		$huoltovali_options['11 kk'] = 330;
+		$huoltovali_options['10 kk'] = 300;
+		$huoltovali_options['9 kk'] = 270;
+		$huoltovali_options['8 kk'] = 240;
+		$huoltovali_options['7 kk'] = 210;
+		$huoltovali_options['6 kk'] = 180;
+		$huoltovali_options['5 kk'] = 150;
+		$huoltovali_options['4 kk'] = 120;
+		$huoltovali_options['3 kk'] = 90;
+		$huoltovali_options['2 kk'] = 60;
+		$huoltovali_options['1 kk'] = 30;
 
-		$query = "SELECT huoltovali FROM huoltosykli WHERE tunnus = {$huoltosykli_tunnus}";
+		$query = "	SELECT huoltovali
+					FROM huoltosykli
+					WHERE tunnus = {$huoltosykli_tunnus}";
 		$result = pupe_query($query);
 		$max_huoltovali = mysql_result($result, 0);
 
-		foreach( $huoltovali_options as $key => $val ){
-			if( $val > $max_huoltovali ){
-				unset( $huoltovali_options[$key] );
+		foreach ($huoltovali_options as $key => $val) {
+			if ($val > $max_huoltovali) {
+				unset($huoltovali_options[$key]);
 			}
 		}
 		return $huoltovali_options;
 	}
+
 }

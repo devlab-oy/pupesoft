@@ -906,7 +906,8 @@ if (!function_exists("table_exists")) {
 
 		//	Ei kaaduta errorista
 		$query = "show tables where tables_in_$dbkanta = '$taulu';";
-		$result = mysql_query($query);
+		$result = pupe_query($query);
+
 		if (mysql_num_rows($result) == 1) {
 			return true;
 		}
@@ -1342,7 +1343,7 @@ if (!function_exists("saldo_myytavissa")) {
 		if (is_array($varasto) and count($varasto) > 0) {
 			$varasto = implode(",", $varasto);
 		}
-		elseif (strpos($varasto, "##") !== FALSE) {
+		elseif (!is_array($varasto) and strpos($varasto, "##") !== FALSE) {
 			list($varasto, $keraysvyohyke) = explode("##", $varasto);
 
 			$varasto 	   = (int) $varasto;
@@ -2456,7 +2457,7 @@ if (!function_exists("synkronoi")) {
 								FROM $table
 								WHERE yhtio = '$kohderow[yhtio]'
 								$where";
-					$abures = mysql_query($query);
+					$abures = pupe_query($query);
 
 					if (mysql_num_rows($abures) == 1) {
 						$aburow = mysql_fetch_assoc($abures);
@@ -2466,7 +2467,7 @@ if (!function_exists("synkronoi")) {
 									FROM $table
 									WHERE yhtio = '$kohderow[yhtio]'
 									and tunnus = $vanhatunnus";
-						$delres = mysql_query($query);
+						$delres = pupe_query($query);
 
 						$synclog .= "Yhtiöltä '$kohderow[yhtio]' poistettiin tietue ($vanhatunnus)\n";
 						synclog($kohderow["yhtio"], $table, "Poistettiin $table ($vanhatunnus)", $vanhatunnus);
@@ -2582,7 +2583,7 @@ if (!function_exists("synkronoi")) {
 					$query = "	SELECT tunnus
 								FROM $table
 								WHERE yhtio ='$kohderow[yhtio]' $where";
-					$abures=mysql_query($query);
+					$abures=pupe_query($query);
 
 					$ok = 1;
 
@@ -2730,7 +2731,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 				$tv_kaytossa = FALSE;
 
 				$query = "SELECT count(*) kpl from taric_veroperusteet";
-				$tv_res = mysql_query($query);
+				$tv_res = pupe_query($query);
 				$tv_row = mysql_fetch_array($tv_res);
 
 				if ($tv_row["kpl"] > 0) {
@@ -9842,7 +9843,7 @@ if (!function_exists("hae_rahtimaksu")) {
 
 		$otsikot = mysql_real_escape_string(trim($otsikot));
 
-		if ($otsikot == "") {
+		if ($otsikot == "" or $yhtiorow["rahti_hinnoittelu"] == 'K') {
 			return array(0, 0, 0, 0);
 		}
 
@@ -10825,7 +10826,7 @@ if (!function_exists("hae_kukarow")) {
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "Käyttäjän yritys ei löydy! ($yhtio)";
+			echo "Käyttäjän yritys ei löydy! ($yhtio) ({$_SERVER['SCRIPT_NAME']})\n";
 			return;
 		}
 
@@ -10853,10 +10854,10 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		$query = "	SELECT *
 					FROM yhtio
 					WHERE yhtio = '$yhtio'";
-		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<b>Käyttäjän yritys ei löydy! ($yhtio)";
+			echo "Käyttäjän yritys ei löydy! ($yhtio) ({$_SERVER['SCRIPT_NAME']})\n";
 			exit;
 		}
 		$yhtiorow = mysql_fetch_assoc($result);
@@ -10887,7 +10888,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		$query = "	SELECT *
 					FROM yhtion_parametrit
 					WHERE yhtio='$yhtio'";
-		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$yhtion_parametritrow = mysql_fetch_assoc($result);
@@ -10907,7 +10908,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 						FROM yhtion_toimipaikat
 						WHERE yhtio = '$yhtio'
 						and tunnus  = '$kukarow[toimipaikka]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
@@ -11319,7 +11320,9 @@ if (!function_exists("progress_bar")) {
 }
 
 if (!function_exists("pupesoft_cleanstring")) {
-	function pupesoft_cleanstring($string, $exclude = array()) {
+	function pupesoft_cleanstring($string, Array $exclude = array()) {
+
+		if (!is_numeric($string) and !is_string($string)) return "";
 
 		$illegal = array("\"","'","<",">","\\", ";");
 
@@ -11653,7 +11656,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			$query = "	SELECT *
 						FROM yhtion_parametrit
 						WHERE yhtio = '$laskurow[eta_yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
@@ -11666,7 +11669,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$laskurow[yhtio_toimipaikka]'
 						and lasku_logo != ''";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_toimipaikkarow = mysql_fetch_array($result);
@@ -11678,7 +11681,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			$query = "	SELECT *
 						FROM yhtion_parametrit
 						WHERE yhtio = '$laskurow[yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
@@ -11688,7 +11691,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 					$query = "	SELECT lasku_logo, nimi
 								FROM yhtion_toimipaikat
 								WHERE yhtio='$laskurow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
-					$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 1) {
 						$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
@@ -12041,7 +12044,7 @@ if (!function_exists('liita_tilaus_laskun_liitetiedostoksi')) {
 									jarjestys			= '1',
 									laatija				= '$kukarow[kuka]',
 									luontiaika			= now()";
-						$editilaus_laskulle_result = mysql_query($query) or die ("$query\n\n".mysql_error());
+						$editilaus_laskulle_result = pupe_query($query);
 
 						return TRUE;
 					}
@@ -12997,6 +13000,10 @@ if (!function_exists("pupe_DataTables")) {
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 			$(document).ready(function() {
+
+				$('input[name^=\"rivi_valitut_tunnukset\"]').each(function() {
+					$(this).attr('disabled', false);
+				});
 
 				var datatablesit = [];
 				var parametrit 	 = ".json_encode($json_pass).";
@@ -19914,7 +19921,14 @@ if (!function_exists("suuntalavan_tuotteet")) {
 		$eankoodi = mysql_real_escape_string($eankoodi);
 		if ($eankoodi != '') {
 			$tuotenumerot = hae_viivakoodilla($eankoodi);
-			$eankoodilisa = "and tilausrivi.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+
+			$param_viivakoodi = array();
+
+			foreach ($tuotenumerot as $_tuoteno => $_arr) {
+				array_push($param_viivakoodi, $_tuoteno);
+			}
+
+			$eankoodilisa = "and tilausrivi.tuoteno in ('" . implode($param_viivakoodi, "','") . "')";
 		}
 
 		$tilriv = (int) $tilriv;
@@ -23476,17 +23490,17 @@ if (!function_exists("hae_viivakoodilla")) {
 		global $kukarow, $yhtiorow;
 
 		// Haetaan eankoodilla tuotenumeroa kolmesta eri paikkaa
-		$query = "	(SELECT tuoteno
+		$query = "	(SELECT tuoteno, '' liitostunnus
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND eankoodi = '{$viivakoodi}')
 					UNION
-					(SELECT tuoteno
+					(SELECT tuoteno, liitostunnus
 					FROM tuotteen_toimittajat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND viivakoodi = '{$viivakoodi}')
 					UNION
-					(SELECT tuotteen_toimittajat.tuoteno
+					(SELECT tuotteen_toimittajat.tuoteno, tuotteen_toimittajat.liitostunnus
 					FROM tuotteen_toimittajat_tuotenumerot
 					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio
 					AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
@@ -23496,7 +23510,7 @@ if (!function_exists("hae_viivakoodilla")) {
 		$chk_res = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($chk_res)) {
-			$viivakoodit[$row['tuoteno']] = $row['tuoteno'];
+			$viivakoodit[$row['tuoteno']][] = $row['liitostunnus'];
 		}
 
 		return $viivakoodit;
@@ -23508,7 +23522,14 @@ if (!function_exists("splittaa_valmistukset")) {
 		global $yhtiorow, $kukarow;
 
 		// Otetaan laskurow talteen, ja nollataan sieltä kentät jota ei monisteta
-		$laskurow_temp = $laskurow;
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['tunnus']}'";
+		$laskurow_temp_res = pupe_query($query);
+		$laskurow_temp = mysql_fetch_assoc($laskurow_temp_res);
+
 		unset($laskurow_temp['tunnus']);
 		unset($laskurow_temp['muutospvm']);
 		unset($laskurow_temp['muuttaja']);
@@ -24315,7 +24336,7 @@ if (!function_exists('paivita_ohjausmerkki')) {
 if (!function_exists("tsekit")) {
 	function tsekit($row, $kaikkivarastossayhteensa, $kaikkiliitettyyhteensa) {
 
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $rahti_ja_kulut;
 
 		$tsekit = array();
 
@@ -24324,6 +24345,7 @@ if (!function_exists("tsekit")) {
 		// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
 		$query  = "	SELECT tilausrivi.*,
 					if(kpl!=0, rivihinta, 0) rivihinta,
+					(kpl * hinta * {$query_ale_lisa}) rivihinta_vietyarvo,
 					((varattu+kpl) * hinta * {$query_ale_lisa}) rivihinta_liitetty
 					FROM tilausrivi USE INDEX (uusiotunnus_index)
 					WHERE yhtio 	= '$kukarow[yhtio]'
@@ -24338,6 +24360,7 @@ if (!function_exists("tsekit")) {
 		$varastossaarvo = 0;
 		$liitettyarvo	= 0;
 		$uusiot 		= array();
+		if ($rahti_ja_kulut == '') $rahti_ja_kulut = 0;
 
 		while ($rivirow = mysql_fetch_assoc($tilres)) {
 			$query = "	SELECT *
@@ -24354,6 +24377,7 @@ if (!function_exists("tsekit")) {
 			$kplyhteensa++; // lasketaan montako tilausriviä on kohdistettu
 
 			$varastossaarvo 			+= $rivirow["rivihinta"];
+			$rahti_ja_kulut 			+= $rivirow["rivihinta"] - $rivirow['rivihinta_vietyarvo'];
 			$liitettyarvo				+= $rivirow["rivihinta_liitetty"];
 			$kaikkivarastossayhteensa 	+= $rivirow["rivihinta"];
 			$kaikkiliitettyyhteensa 	+= $rivirow["rivihinta_liitetty"];
@@ -24492,10 +24516,12 @@ if (!function_exists("tsekit")) {
 					sum(if(lasku.vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku,
 					sum(if(ostores_lasku.tila != 'H' and lasku.vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku_ok,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.arvo * lasku.vienti_kurssi, 0)), 2) vosumma,
+					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), (lasku.osto_kulu + lasku.osto_rahti + lasku.osto_rivi_kulu), 0)), 2) vosumma_kulut,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.arvo, 0)), 2) vosumma_valuutassa,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.summa * lasku.vienti_kurssi, 0)), 2) voverosumma,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.summa, 0)), 2) voverosumma_valuutassa,
 					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), lasku.arvo * lasku.vienti_kurssi, 0)),2) kusumma,
+					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), (lasku.osto_kulu + lasku.osto_rahti + lasku.osto_rivi_kulu), 0)),2) kusumma_kulut,
 					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), lasku.arvo, 0)),2) kusumma_valuutassa
 					FROM lasku use index (yhtio_tila_laskunro)
 					JOIN lasku ostores_lasku ON (ostores_lasku.yhtio = lasku.yhtio AND ostores_lasku.tunnus = lasku.vanhatunnus)
@@ -24511,7 +24537,7 @@ if (!function_exists("tsekit")) {
 			$lisatiedot = t("kesken");
 		}
 
-		return array($kaikkivarastossayhteensa,$kaikkiliitettyyhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$liitettyarvo,$varok);
+		return array($kaikkivarastossayhteensa,$kaikkiliitettyyhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$liitettyarvo,$varok,$rahti_ja_kulut);
 	}
 }
 
@@ -25226,7 +25252,7 @@ if (!function_exists('posten_outbounddelivery')) {
 		$custpickinglist->addChild('SalesId', substr($otunnus, 0, 20));
 		$custpickinglist->addChild('PickingListId', substr($otunnus, 0, 20));
 		$custpickinglist->addChild('CustOrderNumber', substr($looprow['asiakkaan_tilausnumero'], 0, 20)); // Magentosta?
-		$custpickinglist->addChild('CustReference', substr($looprow['viesti'], 0, 50));
+		// $custpickinglist->addChild('CustReference', substr($looprow['viesti'], 0, 50));
 		$custpickinglist->addChild('OrderCode', 'U');
 		$custpickinglist->addChild('OrderType', 'SO');
 
@@ -25819,7 +25845,7 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
 	}
 }
 
-if (!function_exists('keraa_saldovahvistusrivit_lahetyspaiva_ytunnus')) {
+if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
 	function keraa_saldovahvistusrivit_ktunnus_ytunnus(&$laskut, $lasku, $ryhmittely) {
 		if (!isset($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'])) {
 			$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'] = 0;

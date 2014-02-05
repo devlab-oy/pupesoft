@@ -23,7 +23,7 @@ require "inc/connect.inc";
 require "inc/functions.inc";
 
 $kukarow['yhtio'] = (string) $argv[1];
-$kukarow['kuka']  = 'cron';
+$kukarow['kuka']  = 'admin';
 $kukarow['kieli'] = 'fi';
 $kukarow['extranet'] = '';
 

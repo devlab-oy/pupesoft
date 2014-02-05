@@ -2721,8 +2721,8 @@ if ($tee == '') {
 
 	if ($laskurow["liitostunnus"] != 0 and $meapurow["kateinen"] == "" and ($laskurow["laskutus_nimi"] == '' or $laskurow["laskutus_osoite"] == '' or $laskurow["laskutus_postino"] == '' or $laskurow["laskutus_postitp"] == '')) {
 		if ($toim != 'VALMISTAVARASTOON' and $toim != 'SIIRTOLISTA' and $toim != 'SIIRTOTYOMAARAYS' and ($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
-			#echo "<font class='error'>".t("VIRHE: Tilauksen laskutusosoitteen tiedot ovat puutteelliset")."!</font><br><br>";
-			#$tilausok++;
+			echo "<font class='error'>".t("VIRHE: Tilauksen laskutusosoitteen tiedot ovat puutteelliset")."!</font><br><br>";
+			$tilausok++;
 		}
 	}
 
@@ -4569,8 +4569,36 @@ if ($tee == '') {
 				if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') {
 					$haettu_alehinta = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 
-					if (isset($ale_peruste) and !empty($ale_peruste) and $haettu_alehinta > 1) {
-						echo "<tr><th>".substr($ale_peruste, 0, strpos($ale_peruste, "Hinta: "))."</th><td align='right'>".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</td></tr>";
+					$ap_font = "<font>";
+					$ap_text = "";
+
+					// Onko asiakasalennusta?
+					preg_match_all("/XXXALEPERUSTE:([0-9]*)/", $ale_peruste, $ap_match);
+
+					foreach($ap_match[1] as $apnumero) {
+						if ($apnumero >= 5 and $apnumero < 13) {
+							$ap_font  = "<font class='ok'>";
+							$ap_text .= t("Asiakasalennus");
+							break;
+						}
+					}
+
+					// Onko asiakashintaa
+					preg_match("/XXXHINTAPERUSTE:([0-9]*)/", $ale_peruste, $ap_match);
+
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+					if ($ap_match[1] > 1 and $ap_match[1] <= 13) {
+						$ap_font = "<font class='ok'>";
+
+						if ($ap_text != "") $ap_text .= " / ";
+						$ap_text .= t("Asiakashinta");
+					}
+
+					if (isset($ale_peruste) and !empty($ale_peruste) and $haettu_alehinta > 1 and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 'o') {
+						echo "<tr><th>{$ap_font}".substr($ale_peruste, 0, strpos($ale_peruste, "Hinta: "))."</font></th><td align='right'>{$ap_font}".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</font></td></tr>";
+					}
+					elseif ($ap_text != "" and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 't') {
+						echo "<tr><th>{$ap_font} {$ap_text}</font></th><td align='right'>{$ap_font}".hintapyoristys($haettu_alehinta[0])." $yhtiorow[valkoodi]</font></td></tr>";
 					}
 				}
 
@@ -7095,13 +7123,16 @@ if ($tee == '') {
 						if ($row['kommentti'] != '') echo "<br>";
 
 						$ap_font = "<font>";
+						$ap_text = "";
 
 						// Onko asiakasalennusta?
 						preg_match_all("/XXXALEPERUSTE:([0-9]*)/", $row['ale_peruste'], $ap_match);
 
 						foreach($ap_match[1] as $apnumero) {
 							if ($apnumero >= 5 and $apnumero < 13) {
-								$ap_font = "<font class='ok'>";
+								$ap_font  = "<font class='ok'>";
+								$ap_text .= t("Asiakasalennus");
+								break;
 							}
 						}
 
@@ -7111,9 +7142,17 @@ if ($tee == '') {
 						// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 						if ($ap_match[1] > 1 and $ap_match[1] <= 13) {
 							$ap_font = "<font class='ok'>";
+
+							if ($ap_text != "") $ap_text .= " / ";
+							$ap_text .= t("Asiakashinta");
 						}
 
-						echo $ap_font.substr($row["ale_peruste"], 0, strpos($row["ale_peruste"], "XXX"))."</font><br>";
+						if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 'o') {
+							echo $ap_font.substr($row["ale_peruste"], 0, strpos($row["ale_peruste"], "XXX"))."</font><br>";
+						}
+						elseif ($ap_text != "" and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] == 't') {
+							echo $ap_font.$ap_text."</font><br>";
+						}
 					}
 
 					// tähän se taulu

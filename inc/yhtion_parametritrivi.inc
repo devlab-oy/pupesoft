@@ -527,6 +527,7 @@
 		$ulos .= "<option value=''  $sel[A]>".t("Rahtikulu muodostuu painon perusteella")."</option>";
 		$ulos .= "<option value='o' $sel[o]>".t("Rahtikulu muodostuu tilauksen hinnan perusteella")."</option>";
 		$ulos .= "<option value='P' $sel[P]>".t("Rahtikulu muodostuu tuotteilta löytyvien painojen mukaan automaattisesti")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Rahtikulu syötetään käsin")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2652,6 +2653,7 @@
 
 		$ulos .= "<option value = ''>".t("Aleperustetta ei näytetä tilausrivillä")."</option>";
 		$ulos .= "<option value = 'o' $sel[o]>".t("Aleperuste näytetään tilausrivillä")."</option>";
+		$ulos .= "<option value = 't' $sel[t]>".t("Aleperuste näytetään tilausrivillä tiivistettynä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

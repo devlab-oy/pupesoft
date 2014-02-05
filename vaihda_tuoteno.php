@@ -488,7 +488,7 @@ if ($error == 0 and $tee == "file") {
 							$query = "	INSERT INTO tuote
 										SET
 										tuoteno 		= '$vantuoteno',
-										nimitys			= '". t("Korvaava tuoteno") ." $uustuoteno',
+										nimitys			= '". t("Korvaava tuoteno", $yhtiorow["kieli"]) ." $uustuoteno',
 										osasto			= '999999',
 										try				= '999999',
 										alv				= '$alv',
@@ -696,7 +696,7 @@ if ($tee == "") {
    			<option value='V'>".t("Tuote näkyy hinnastossa sekä verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>";
 
 	echo "	</select></td></tr>";
-	
+
 	echo "	<tr><th>".t("Valitse vanhan tuotteen ostoehdotus")."</th>";
 	echo "<td><select name='ostoehdotus' ".js_alasvetoMaxWidth("ostoehdotus", 200).">";
 	echo "	<option value='E'>".t("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi")."</option>

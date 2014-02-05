@@ -112,20 +112,21 @@ function encrypt_file {
 }
 
 FILEDATE=$(date "+%Y-%m-%d_%H%M%S")
-FILENAME="${DBKANTA}-backup-${FILEDATE}.bz2"
-MYSQLPOLKU=$(mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -sN -e "show variables like 'datadir'"|cut -f 2)
-
-if [ ! -d ${MYSQLPOLKU}${DBKANTA} ]; then
-	echo
-	echo "ERROR! Mysql-hakemistoa ${MYSQLPOLKU}${DBKANTA} ei löydy!"
-	echo
-	exit
-fi
 
 echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 echo ": Backup started."
 
 if $MYSQLBACKUP; then
+
+	FILENAME="${DBKANTA}-backup-${FILEDATE}.bz2"
+	MYSQLPOLKU=$(mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -sN -e "show variables like 'datadir'"|cut -f 2)
+
+	if [ ! -d ${MYSQLPOLKU}${DBKANTA} ]; then
+		echo
+		echo "ERROR! Mysql-hakemistoa ${MYSQLPOLKU}${DBKANTA} ei löydy!"
+		echo
+		exit
+	fi
 
 	mkdir /tmp/${DBKANTA}
 

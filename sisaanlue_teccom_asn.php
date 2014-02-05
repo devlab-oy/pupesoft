@@ -33,7 +33,7 @@
 
 	// setataan käytetyt muuttujat:
 	$asn_numero					= "";
-	$kukarow["kuka"] 			= "crond";
+	$kukarow["kuka"] 			= "admin";
 	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317","123441","123080","123007","123453","123506","123110");
 	$tavarantoimittajanumero 	= "";
 	$tiedosto_sisalto			= "";

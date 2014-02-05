@@ -6621,7 +6621,9 @@ if ($tee == '') {
 				$varaosakommentti = "";
 
 				if ((((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $kukarow['extranet'] != '') or $kukarow['extranet'] == '') and ($muokkauslukko == "" and $muokkauslukko_rivi == "") or $toim == "YLLAPITO") {
-					if ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $row['positio'] != 'JT')) {
+
+					if (($yhtiorow['lapsituotteen_poiston_esto'] == 0 or (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0)) and
+						($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $row['positio'] != 'JT'))) {
 						echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='muokkaa'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -6641,33 +6643,30 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Muokkaa")."'>
 								</form> ";
 
-						if (!in_array($toim, array('RIVISYOTTO','PIKATILAUS')) or $yhtiorow['lapsituotteen_poiston_esto'] == 0 or (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0)) {
+						$poista_onclick = "";
 
-							$poista_onclick = "";
-
-							if ($row['vanha_otunnus'] != $tilausnumero) {
-								//kyseessä JT-rivi tai JT-muiden mukana, joka tulee asiakkaan edellisiltä tilauksilta. Näille riveille halutaan poista nappiin alertti
-								$poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
-							}
-
-							echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
-									<input type='hidden' name='toim' 			value = '$toim'>
-									<input type='hidden' name='lopetus' 		value = '$lopetus'>
-									<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
-									<input type='hidden' name='projektilla' 	value = '$projektilla'>
-									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
-									<input type='hidden' name='mista' 			value = '$mista'>
-									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-									<input type='hidden' name='ale_peruste' 	value = '$row[ale_peruste]'>
-									<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
-									<input type='hidden' name='menutila'	 	value = '$menutila'>
-									<input type='hidden' name='orig_tila'		value = '$orig_tila'>
-									<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
-									<input type='hidden' name='tila' 			value = 'MUUTA'>
-									<input type='hidden' name='tapa' 			value = 'POISTA'>
-									<input type='Submit' value='".t("Poista")."' $poista_onclick>
-									</form> ";
+						if ($row['vanha_otunnus'] != $tilausnumero) {
+							//kyseessä JT-rivi tai JT-muiden mukana, joka tulee asiakkaan edellisiltä tilauksilta. Näille riveille halutaan poista nappiin alertti
+							$poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
 						}
+
+						echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='lopetus' 		value = '$lopetus'>
+								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+								<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+								<input type='hidden' name='mista' 			value = '$mista'>
+								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='ale_peruste' 	value = '$row[ale_peruste]'>
+								<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
+								<input type='hidden' name='menutila'	 	value = '$menutila'>
+								<input type='hidden' name='orig_tila'		value = '$orig_tila'>
+								<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
+								<input type='hidden' name='tila' 			value = 'MUUTA'>
+								<input type='hidden' name='tapa' 			value = 'POISTA'>
+								<input type='Submit' value='".t("Poista")."' $poista_onclick>
+								</form> ";
 					}
 
 					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $toim == 'VALMISTAVARASTOON' and $kukarow['extranet'] == '') {

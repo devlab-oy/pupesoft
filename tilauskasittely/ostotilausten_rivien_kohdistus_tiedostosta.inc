@@ -258,7 +258,8 @@ if ($faarao == 'TUTKHM') {
 						$query = "	SELECT tila
 									FROM lasku
 									WHERE yhtio = '{$kukarow[yhtio]}'
-									AND tila != 'D'
+									AND tila = 'K'
+									AND alatila = ''
 									AND tunnus = '$otunnus'";
 						$res = pupe_query($query);
 						if (mysql_num_rows($res) == 1){

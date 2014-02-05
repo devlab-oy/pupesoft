@@ -660,7 +660,8 @@ if ($tila == 'tee_siirto') {
 					$query = "	SELECT tila
 								FROM lasku
 								WHERE yhtio = '{$kukarow[yhtio]}'
-								AND tila != 'D'
+								AND tila = 'K'
+								AND alatila = ''
 								AND tunnus = '$otunnus'";
 					$res = pupe_query($query);
 
@@ -825,7 +826,8 @@ if ($tila == 'tee_kohdistus') {
 		$query = "	SELECT tila
 					FROM lasku
 					WHERE yhtio = '{$kukarow[yhtio]}'
-					AND tila != 'D'
+					AND tila = 'K'
+					AND alatila = ''
 					AND tunnus = '$otunnus'";
 		$res = pupe_query($query);
 

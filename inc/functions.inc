@@ -25477,12 +25477,8 @@ if (!function_exists("korvaavat_kiellot")) {
 
 if (!function_exists("huoltovali_options")) {
 
-	function huoltovali_options($huoltosykli_tunnus) {
+	function huoltovali_options($huoltosykli_tunnus = '') {
 		global $kukarow;
-
-		if (empty($huoltosykli_tunnus)) {
-			return array();
-		}
 
 		$huoltovali_options['10 vuotta'] = 3650;
 		$huoltovali_options['5 vuotta'] = 1825;
@@ -25499,6 +25495,10 @@ if (!function_exists("huoltovali_options")) {
 		$huoltovali_options['3 kk'] = 90;
 		$huoltovali_options['2 kk'] = 60;
 		$huoltovali_options['1 kk'] = 30;
+
+		if (empty($huoltosykli_tunnus)) {
+			return $huoltovali_options;
+		}
 
 		$query = "	SELECT huoltovali
 					FROM huoltosykli

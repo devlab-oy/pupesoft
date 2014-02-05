@@ -102,9 +102,22 @@ if (mysql_field_name($result, $i) == "toimenpide") {
 	$jatko = 0;
 }
 
-//huoltoväli float aluksi annetaan päivissä, myöhemmin voi olla mittarilukema, käyttökerta
 if (mysql_field_name($result, $i) == "huoltovali") {
+	$huoltovalit = huoltovali_options();
+	$sel = "";
+	$ulos = "<td>";
+	$ulos .= "<select name='{$nimi}'>";
+	foreach ($huoltovalit as $dropdown_text => $value) {
+		if ($trow[$i] == $value) {
+			$sel = "SELECTED";
+		}
+		$ulos .= "<option value='{$value}' {$sel}>{$dropdown_text}</option>";
+		$sel = "";
+	}
+	$ulos .= "</select>";
+	$ulos .= "</td>";
 
+	$jatko = 0;
 }
 
 if (mysql_field_name($result, $i) == "pakollisuus") {

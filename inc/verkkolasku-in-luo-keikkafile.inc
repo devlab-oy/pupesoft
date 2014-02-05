@@ -53,7 +53,7 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'asn'
 										AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
-										AND status = ''";
+										AND status = 'X'";
 							$chk_res3 = pupe_query($query);
 
 							if (mysql_num_rows($chk_res3) != 0) {
@@ -78,7 +78,7 @@
 								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 					$chk_res = pupe_query($query);
 
-					if (mysql_num_rows($chk_res) == 0) {
+					if (mysql_num_rows($chk_res) != 0) {
 						$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 					}
 					else {
@@ -465,7 +465,6 @@
 								FROM tilausrivi
 								JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
 								JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
-								JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.hyllyalue = tilausrivi.hyllyalue)
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tunnus = '{$tunnus}'
 								ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";

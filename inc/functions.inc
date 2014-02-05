@@ -23344,7 +23344,7 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 			function bind_tuoteno_change() {
 				$('#tuoteno_td input').on('change', function() {
 					var tuoteno = $('#tuoteno_td input').val();
-					if( tuoteno.length > 1 ){
+					if( tuoteno.length > 2 ){
 						$('.huoltosykli_select').each(function(){
 							var select_id = $(this).attr('id');
 							var tyyppi = select_id.replace("huoltosykli_select_","");

@@ -5,10 +5,19 @@ require_once('inc/laite_huolto_functions.inc');
 if ($action == 'hae_huoltovali_options') {
 	$huoltovali_options = huoltovali_options($huoltosykli_tunnus);
 
-	$options_string = "";
+	$oletus = reset($huoltovali_options);
+
+	$options_string = "<option value='0'>Ei huoltoväliä</option>";
 
 	foreach( $huoltovali_options as $key => $val ){
-		$options_string .= "<option value='" . $val . "'>" . $key ."</option>";
+
+		if ($val == $oletus) {
+			$selected = 'selected';
+		}
+
+		$options_string .= "<option value='" . $val . "' ".$selected.">" . $key ."</option>";
+
+		$selected = null;
 	}
 
 	echo $options_string;

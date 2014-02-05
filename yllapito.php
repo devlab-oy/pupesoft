@@ -27,7 +27,7 @@
 	if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
 		require ("inc/{$toim}_ajax.inc");
 	}
-	
+
 	if (function_exists("js_popup") and !isset($ajax_request)) {
 		echo js_popup(-100);
 	}
@@ -1783,6 +1783,7 @@
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
+		echo "<input type = 'hidden' name = 'asiakas_tunnus' value = '$asiakas_tunnus'>";
 
 		if (isset($status) and $toim == 'tuote') {
 			echo "<input type = 'hidden' name = 'status' value = '$status'>";

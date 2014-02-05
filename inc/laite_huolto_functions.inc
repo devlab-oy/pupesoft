@@ -716,11 +716,10 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
 function hae_huoltosyklit($laite_tunnus, $tyyppi) {
 	global $kukarow;
 
-	if($tunnus == ''){
+	if($laite_tunnus == ''){
 		return false;
 	}
 
-	if ($laite_tunnus != '') {
 		$tuoteno_query = "	SELECT tuoteno
 							FROM laite
 							WHERE tunnus = $laite_tunnus
@@ -743,7 +742,7 @@ function hae_huoltosyklit($laite_tunnus, $tyyppi) {
 									AND yhtio = '{$kukarow['yhtio']}'";
 		$sammutin_tyyppi_result = pupe_query($sammutin_tyyppi_query);
 		$sammutin_tyyppi = mysql_result($sammutin_tyyppi_result, 0);
-	}
+
 
 	$query = "	SELECT huoltosykli.tunnus,
 				concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,

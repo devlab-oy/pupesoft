@@ -299,9 +299,7 @@
 		$cnt = 1;
 
 		foreach ($x as $_koodi)  {
-			if ($cnt == 5) break;
-			$komm .= strtoupper($x_tekstit_koko[$_koodi])."\n";
-			$cnt++;
+			$komm .= $x_tekstit_koko[$_koodi]." ";
 		}
 
 		if (is_array($vakit)) {

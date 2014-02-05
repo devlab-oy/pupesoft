@@ -77,7 +77,8 @@
 		}
 
 		$kukarow = mysql_fetch_assoc($kukares);
-		$kukarow[kieli] = $yhtiorow[kieli];
+		$kukarow["kieli"] = $yhtiorow["kieli"];
+
 		$lahdevarastot = explode(",", $argv[2]);
 		$kohdevarasto = (int) $argv[3];
 		$valittu_toimitustapa = mysql_real_escape_string(trim($argv[4]));

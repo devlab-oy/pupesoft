@@ -1149,9 +1149,12 @@ if ($tee == "VALMIS"
 		}
 	}
 	elseif ($kassamyyja_kesken == 'ei' and $seka == 'X') {
-		$query_maksuehto = " SELECT *
-							 FROM maksuehto
-							 WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and kaytossa = '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
+		$query_maksuehto = "	SELECT *
+								FROM maksuehto
+								WHERE yhtio='$kukarow[yhtio]' 
+						 		AND kateinen != '' 
+						 		AND kaytossa = '' 
+				 				AND (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
 		$maksuehtores = pupe_query($query_maksuehto);
 
 		$maksuehtorow = mysql_fetch_assoc($maksuehtores);
@@ -1179,12 +1182,13 @@ if ($tee == "VALMIS"
 						kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));
 						pankki = Number(document.getElementById('pankkikortti').value.replace(\",\",\".\"));
 						luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
+						laskulle = Number(document.getElementById('laskulle').value.replace(\",\",\".\"));
 
-						summa = kaikkiyhteensa - (kateinen + pankki + luotto);
+						summa = kaikkiyhteensa - (kateinen + pankki + luotto + laskulle);
 
 						summa = Math.round(summa*100)/100;
 
-						if (summa == 0 && (document.getElementById('kateismaksu').value != '' || document.getElementById('pankkikortti').value != '' || document.getElementById('luottokortti').value != '')) {
+						if (summa == 0 && (document.getElementById('kateismaksu').value != '' || document.getElementById('pankkikortti').value != '' || document.getElementById('luottokortti').value != '' || document.getElementById('laskulle').value != '')) {
 							summa = 0.00;
 							document.getElementById('hyvaksy_nappi').disabled = false;
 							document.getElementById('seka').value = 'kylla';
@@ -1202,6 +1206,9 @@ if ($tee == "VALMIS"
 		echo "<tr><td>".t("Käteisellä")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
 		echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
 		echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+
+		echo "<tr><td>".t("Laskulle")."</td><td><input type='text' name='kateismaksu[laskulle]' id='laskulle' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+		
 
 		echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
 		echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' disabled></td></tr>";

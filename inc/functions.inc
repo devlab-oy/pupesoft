@@ -25478,6 +25478,11 @@ if (!function_exists("korvaavat_kiellot")) {
 if (!function_exists("huoltovali_options")) {
 
 	function huoltovali_options($huoltosykli_tunnus) {
+		global $kukarow;
+
+		if (empty($huoltosykli_tunnus)) {
+			return array();
+		}
 
 		$huoltovali_options['10 vuotta'] = 3650;
 		$huoltovali_options['5 vuotta'] = 1825;
@@ -25497,7 +25502,8 @@ if (!function_exists("huoltovali_options")) {
 
 		$query = "	SELECT huoltovali
 					FROM huoltosykli
-					WHERE tunnus = {$huoltosykli_tunnus}";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					tunnus = {$huoltosykli_tunnus}";
 		$result = pupe_query($query);
 		$max_huoltovali = mysql_result($result, 0);
 

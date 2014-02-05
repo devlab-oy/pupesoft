@@ -21,7 +21,7 @@
 	// hmm.. j‰nn‰‰
 	$kukarow['yhtio'] 		= $argv[1];
 	$kieli 					= $argv[2];
-	$kukarow['kuka']  		= "crond";
+	$kukarow['kuka']  		= "admin";
 	$kukarow["kirjoitin"] 	= "";
 
 	// Haetaan yhtion tiedot (virhetsekki funktiossa....)

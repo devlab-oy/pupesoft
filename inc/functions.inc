@@ -906,7 +906,8 @@ if (!function_exists("table_exists")) {
 
 		//	Ei kaaduta errorista
 		$query = "show tables where tables_in_$dbkanta = '$taulu';";
-		$result = mysql_query($query);
+		$result = pupe_query($query);
+
 		if (mysql_num_rows($result) == 1) {
 			return true;
 		}
@@ -1342,7 +1343,7 @@ if (!function_exists("saldo_myytavissa")) {
 		if (is_array($varasto) and count($varasto) > 0) {
 			$varasto = implode(",", $varasto);
 		}
-		elseif (strpos($varasto, "##") !== FALSE) {
+		elseif (!is_array($varasto) and strpos($varasto, "##") !== FALSE) {
 			list($varasto, $keraysvyohyke) = explode("##", $varasto);
 
 			$varasto 	   = (int) $varasto;
@@ -2456,7 +2457,7 @@ if (!function_exists("synkronoi")) {
 								FROM $table
 								WHERE yhtio = '$kohderow[yhtio]'
 								$where";
-					$abures = mysql_query($query);
+					$abures = pupe_query($query);
 
 					if (mysql_num_rows($abures) == 1) {
 						$aburow = mysql_fetch_assoc($abures);
@@ -2466,7 +2467,7 @@ if (!function_exists("synkronoi")) {
 									FROM $table
 									WHERE yhtio = '$kohderow[yhtio]'
 									and tunnus = $vanhatunnus";
-						$delres = mysql_query($query);
+						$delres = pupe_query($query);
 
 						$synclog .= "Yhtiöltä '$kohderow[yhtio]' poistettiin tietue ($vanhatunnus)\n";
 						synclog($kohderow["yhtio"], $table, "Poistettiin $table ($vanhatunnus)", $vanhatunnus);
@@ -2582,7 +2583,7 @@ if (!function_exists("synkronoi")) {
 					$query = "	SELECT tunnus
 								FROM $table
 								WHERE yhtio ='$kohderow[yhtio]' $where";
-					$abures=mysql_query($query);
+					$abures=pupe_query($query);
 
 					$ok = 1;
 
@@ -2730,7 +2731,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 				$tv_kaytossa = FALSE;
 
 				$query = "SELECT count(*) kpl from taric_veroperusteet";
-				$tv_res = mysql_query($query);
+				$tv_res = pupe_query($query);
 				$tv_row = mysql_fetch_array($tv_res);
 
 				if ($tv_row["kpl"] > 0) {
@@ -9842,7 +9843,7 @@ if (!function_exists("hae_rahtimaksu")) {
 
 		$otsikot = mysql_real_escape_string(trim($otsikot));
 
-		if ($otsikot == "") {
+		if ($otsikot == "" or $yhtiorow["rahti_hinnoittelu"] == 'K') {
 			return array(0, 0, 0, 0);
 		}
 
@@ -10825,7 +10826,7 @@ if (!function_exists("hae_kukarow")) {
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "Käyttäjän yritys ei löydy! ($yhtio)";
+			echo "Käyttäjän yritys ei löydy! ($yhtio) ({$_SERVER['SCRIPT_NAME']})\n";
 			return;
 		}
 
@@ -10853,10 +10854,10 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		$query = "	SELECT *
 					FROM yhtio
 					WHERE yhtio = '$yhtio'";
-		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<b>Käyttäjän yritys ei löydy! ($yhtio)";
+			echo "Käyttäjän yritys ei löydy! ($yhtio) ({$_SERVER['SCRIPT_NAME']})\n";
 			exit;
 		}
 		$yhtiorow = mysql_fetch_assoc($result);
@@ -10887,7 +10888,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		$query = "	SELECT *
 					FROM yhtion_parametrit
 					WHERE yhtio='$yhtio'";
-		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$yhtion_parametritrow = mysql_fetch_assoc($result);
@@ -10907,7 +10908,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 						FROM yhtion_toimipaikat
 						WHERE yhtio = '$yhtio'
 						and tunnus  = '$kukarow[toimipaikka]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
@@ -11655,7 +11656,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			$query = "	SELECT *
 						FROM yhtion_parametrit
 						WHERE yhtio = '$laskurow[eta_yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
@@ -11668,7 +11669,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$laskurow[yhtio_toimipaikka]'
 						and lasku_logo != ''";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_toimipaikkarow = mysql_fetch_array($result);
@@ -11680,7 +11681,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			$query = "	SELECT *
 						FROM yhtion_parametrit
 						WHERE yhtio = '$laskurow[yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
@@ -11690,7 +11691,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 					$query = "	SELECT lasku_logo, nimi
 								FROM yhtion_toimipaikat
 								WHERE yhtio='$laskurow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
-					$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 1) {
 						$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
@@ -12043,7 +12044,7 @@ if (!function_exists('liita_tilaus_laskun_liitetiedostoksi')) {
 									jarjestys			= '1',
 									laatija				= '$kukarow[kuka]',
 									luontiaika			= now()";
-						$editilaus_laskulle_result = mysql_query($query) or die ("$query\n\n".mysql_error());
+						$editilaus_laskulle_result = pupe_query($query);
 
 						return TRUE;
 					}
@@ -12999,11 +13000,11 @@ if (!function_exists("pupe_DataTables")) {
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 			$(document).ready(function() {
-				
+
 				$('input[name^=\"rivi_valitut_tunnukset\"]').each(function() {
 					$(this).attr('disabled', false);
 				});
-				
+
 				var datatablesit = [];
 				var parametrit 	 = ".json_encode($json_pass).";
 				var spessusortit = [];

@@ -16,7 +16,7 @@
 
 		// hmm.. j‰nn‰‰
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
-		$kukarow['kuka'] = "crond";
+		$kukarow['kuka'] = "admin";
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 

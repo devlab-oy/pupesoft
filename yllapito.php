@@ -491,27 +491,16 @@
 						}
 						elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
 
-								$sykli_query = "INSERT INTO
-									huoltosyklit_laitteet (
-									yhtio,
-									huoltosykli_tunnus,
-									laite_tunnus,
-									huoltovali,
-									pakollisuus,
-									laatija,
-									luontiaika,
-									muutospvm,
-									muuttaja)
-									VALUES(
-									'$yhtio',
-									$huoltosykli_tunnus,
-									$tunnus,
-									$huoltovali,
-									1,
-									'$kuka',
-									now(),
-									now(),
-									'$kuka')";
+								$sykli_query = "INSERT INTO huoltosyklit_laitteet
+												SET yhtio = '$yhtio',
+												huoltosykli_tunnus = $huoltosykli_tunnus,
+												laite_tunnus = $tunnus,
+												huoltovali = $huoltovali,
+												pakollisuus = 1,
+												laatija = '$kuka',
+												luontiaika = now(),
+												muutospvm =	now(),
+												muuttaja = '$kuka'";
 							}
 						elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
 							$sykli_query = "DELETE FROM huoltosyklit_laitteet

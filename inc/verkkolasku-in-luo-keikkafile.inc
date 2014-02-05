@@ -74,11 +74,11 @@
 								FROM asn_sanomat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laji = '{$lajilisa}'
-								AND status = ''
+								AND status = 'X'
 								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 					$chk_res = pupe_query($query);
 
-					if (mysql_num_rows($chk_res) != 0) {
+					if (mysql_num_rows($chk_res) == 0) {
 						$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 					}
 					else {
@@ -461,7 +461,7 @@
 								tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 								tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
 								tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
-								tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali, tilausrivi.uusiotunnus
+								tilausrivi.tunnus, tilausrivi.uusiotunnus
 								FROM tilausrivi
 								JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
 								JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)

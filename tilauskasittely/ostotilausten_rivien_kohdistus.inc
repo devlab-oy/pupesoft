@@ -656,26 +656,39 @@ if ($tila == 'tee_siirto') {
 						}
 					}
 
-					// Siiret‰‰n rivi t‰lle keikalle
-					$query = "	UPDATE tilausrivi USE INDEX (uusiotunnus_index)
-								SET uusiotunnus 		= '$otunnus',
-								erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]',
-								kerattyaika 			= now(),
-								keratty 				= '$kukarow[kuka]',
-								suuntalava				= 0
-								$kpl_lisa
-								WHERE yhtio 	= '$kukarow[yhtio]'
-								and uusiotunnus = '$valittuuusiotunnus'
-								and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
-					$result = pupe_query($query);
+					//Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
+					$query = "	SELECT tila
+								FROM lasku
+								WHERE yhtio = '{$kukarow[yhtio]}'
+								AND tila != 'D'
+								AND tunnus = '$otunnus'";
+					$res = pupe_query($query);
 
-					// Nollataan kohdistus keikalta jolta rivi siirret‰‰n
-					$query = "	UPDATE lasku USE INDEX (PRIMARY)
-								SET kohdistettu = ''
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus = '$valittuuusiotunnus'
-								and tila = 'K'";
+					if (mysql_num_rows($res) == 1){
+						// Siiret‰‰n rivi t‰lle keikalle
+						$query = "	UPDATE tilausrivi USE INDEX (uusiotunnus_index)
+									SET uusiotunnus 		= '$otunnus',
+									erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]',
+									kerattyaika 			= now(),
+									keratty 				= '$kukarow[kuka]',
+									suuntalava				= 0
+									$kpl_lisa
+									WHERE yhtio 	= '$kukarow[yhtio]'
+									and uusiotunnus = '$valittuuusiotunnus'
+									and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
+						$result = pupe_query($query);
+
+						// Nollataan kohdistus keikalta jolta rivi siirret‰‰n
+						$query = "	UPDATE lasku USE INDEX (PRIMARY)
+									SET kohdistettu = ''
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$valittuuusiotunnus'
+									and tila = 'K'";
+						$result = pupe_query($query);
 					$result = pupe_query($query);
+					} else {
+						echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt‰‰ rivej‰, koska se on poistettu")."!</font><br>";
+					}
 				}
 				else {
 					echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n ei lˆydy")."</font><br>!";
@@ -808,24 +821,36 @@ if ($tila == 'tee_kohdistus') {
 			$tunnukset2[$valittutunnus] = $valittutunnus;
 		}
 
-		$query = "	UPDATE tilausrivi
-					SET uusiotunnus 		= '$otunnus',
-					kerattyaika 			= now(),
-					keratty 				= '$kukarow[kuka]',
-					erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]'
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus in (".implode(",", $tunnukset2).")";
-		$result = pupe_query($query);
+		//Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
+		$query = "	SELECT tila
+					FROM lasku
+					WHERE yhtio = '{$kukarow[yhtio]}'
+					AND tila != 'D'
+					AND tunnus = '$otunnus'";
+		$res = pupe_query($query);
 
-		$query = "	UPDATE tilausrivi
-					SET uusiotunnus 		= '$otunnus',
-					kerattyaika 			= now(),
-					keratty 				= '$kukarow[kuka]',
-					erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]'
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND perheid2 in (".implode(",", $tunnukset2).")
-					AND perheid2 > 0";
+		if (mysql_num_rows($res) == 1){
+			$query = "	UPDATE tilausrivi
+						SET uusiotunnus 		= '$otunnus',
+						kerattyaika 			= now(),
+						keratty 				= '$kukarow[kuka]',
+						erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus in (".implode(",", $tunnukset2).")";
+			$result = pupe_query($query);
+
+			$query = "	UPDATE tilausrivi
+						SET uusiotunnus 		= '$otunnus',
+						kerattyaika 			= now(),
+						keratty 				= '$kukarow[kuka]',
+						erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND perheid2 in (".implode(",", $tunnukset2).")
+						AND perheid2 > 0";
 		$result = pupe_query($query);
+		} else {
+			echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt‰‰ rivej‰, koska se on poistettu")."!</font><br>";
+		}
 	}
 	$tila = '';
 

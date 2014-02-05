@@ -254,22 +254,32 @@ if ($faarao == 'TUTKHM') {
 							$hintalisa = '';
 						}
 
-						$query = "UPDATE tilausrivi SET uusiotunnus='$otunnus' $kululisa $hintalisa WHERE tunnus = '$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
-						$result = mysql_query($query) or pupe_error($query);
+						//Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
+						$query = "	SELECT tila
+									FROM lasku
+									WHERE yhtio = '{$kukarow[yhtio]}'
+									AND tila != 'D'
+									AND tunnus = '$otunnus'";
+						$res = pupe_query($query);
+						if (mysql_num_rows($res) == 1){
+							$query = "UPDATE tilausrivi SET uusiotunnus='$otunnus' $kululisa $hintalisa WHERE tunnus = '$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
+							$result = mysql_query($query) or pupe_error($query);
+							echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("M‰‰r‰").": $apukpl ".t("kohdistettu laskuun")."!</font><br>";
 
-						echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("M‰‰r‰").": $apukpl ".t("kohdistettu laskuun")."!</font><br>";
-
-						if ($hinta != 0 and $hinta != $rivirow["hinta"] and $paivi != 'JOO') {
-							echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("Hinta on v‰‰r‰")."!</font><br>";
-						}
-
-						if ($paivi == 'JOO') {
-							if ($hinta != 0) {
-								echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $paivirow[tuoteno] ".t("P‰ivitettiin tiedostossa ollut hinta").": $hinta ".t("riville")."!</font><br>";
+							if ($hinta != 0 and $hinta != $rivirow["hinta"] and $paivi != 'JOO') {
+								echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("Hinta on v‰‰r‰")."!</font><br>";
 							}
-							else {
-								echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $paivirow[tuoteno] ".t("EI p‰ivitetty tiedostossa ollutta hintaa riville, koska se oli tyhj‰ tai nolla")."!</font><br>";
+
+							if ($paivi == 'JOO') {
+								if ($hinta != 0) {
+									echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $paivirow[tuoteno] ".t("P‰ivitettiin tiedostossa ollut hinta").": $hinta ".t("riville")."!</font><br>";
+								}
+								else {
+									echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $paivirow[tuoteno] ".t("EI p‰ivitetty tiedostossa ollutta hintaa riville, koska se oli tyhj‰ tai nolla")."!</font><br>";
+								}
 							}
+						} else {
+							echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt‰‰ rivej‰, koska se on poistettu")."!</font><br>";
 						}
 					}
 				}

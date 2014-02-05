@@ -23352,7 +23352,7 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 								hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi);
 							});
 						}
-					}, 100);
+					}, 200);
 				});
 			}
 

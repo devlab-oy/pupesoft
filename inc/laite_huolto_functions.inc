@@ -655,7 +655,7 @@ function huoltosykli_rivi($tyyppi) {
 			if ($val == $laitteen_huoltosyklit[0]['huoltovali']) {
 				$sel = "SELECTED";
 			}
-			echo "<option value='".$val."'>".$key."</option>";
+			echo "<option value='{$val}' {$sel}>{$key}</option>";
 			$sel = "";
 		}
 	}

@@ -529,103 +529,72 @@ if ($tila == 'tee_siirto') {
 		$rivi_siirrettavat_tunnukset = $rivi_kaikki_tunnukset;
 	}
 
-	//Siirret‰‰n rivit
-	if (is_array($rivi_siirrettavat_tunnukset)) {
+	//Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
+	$query = "	SELECT tila
+				FROM lasku
+				WHERE yhtio = '{$kukarow[yhtio]}'
+				AND tila = 'K'
+				AND alatila = ''
+				AND vanhatunnus = 0
+				AND tunnus = '$otunnus'";
+	$res = pupe_query($query);
 
-		$q1 = "LOCK TABLE lasku WRITE, tilausrivi WRITE, tilausrivin_lisatiedot WRITE";
-		$r = pupe_query($q1);
+	if (mysql_num_rows($res) == 1){
+		//Siirret‰‰n rivit
+		if (is_array($rivi_siirrettavat_tunnukset)) {
 
-		$keikkakesken = 0;
+			$q1 = "LOCK TABLE lasku WRITE, tilausrivi WRITE, tilausrivin_lisatiedot WRITE";
+			$r = pupe_query($q1);
 
-		$lock_params = array(
-		    "locktime" => 0,
-			"lockfile" => "$kukarow[yhtio]-keikka.lock",
-			"return"   => TRUE
-		);
+			$keikkakesken = 0;
 
-		if (!pupesoft_flock($lock_params)) {
-			list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
-		}
+			$lock_params = array(
+			    "locktime" => 0,
+				"lockfile" => "$kukarow[yhtio]-keikka.lock",
+				"return"   => TRUE
+			);
 
-		foreach ($rivi_siirrettavat_tunnukset as $valittu) {
+			if (!pupesoft_flock($lock_params)) {
+				list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
+			}
 
-			list($valittutunnus, $valittuuusiotunnus) = explode("###", $valittu);
+			foreach ($rivi_siirrettavat_tunnukset as $valittu) {
 
-			if ($valittuuusiotunnus != $keikkakesken) {
-				// Katostaan, ett‰ keikka jolta rivi siirret‰‰n ei ole loppuunlaskettu
-				$query  = "	SELECT tunnus
-							FROM lasku USE INDEX (PRIMARY)
-							WHERE tunnus = '$valittuuusiotunnus'
-							and yhtio = '$kukarow[yhtio]'
-							and tila = 'K'
-							and vanhatunnus = 0
-							and alatila = ''";
-				$result = pupe_query($query);
+				list($valittutunnus, $valittuuusiotunnus) = explode("###", $valittu);
 
-				if (mysql_num_rows($result) == 1) {
+				if ($valittuuusiotunnus != $keikkakesken) {
+					// Katostaan, ett‰ keikka jolta rivi siirret‰‰n ei ole loppuunlaskettu
+					$query  = "	SELECT tunnus
+								FROM lasku USE INDEX (PRIMARY)
+								WHERE tunnus = '$valittuuusiotunnus'
+								and yhtio = '$kukarow[yhtio]'
+								and tila = 'K'
+								and vanhatunnus = 0
+								and alatila = ''";
+					$result = pupe_query($query);
 
-					$kpl_lisa = "";
+					if (mysql_num_rows($result) == 1) {
 
-					// Ollaanko syˆtetty siirrett‰v‰ m‰‰r‰?
-					if (isset($siirrettavat_kpl[$valittutunnus])) {
-						$query = "	SELECT *
-									FROM tilausrivi
-									WHERE tunnus = '$valittutunnus'
-									and yhtio = '$kukarow[yhtio]'";
-						$rivires = pupe_query($query);
-						$rivirow = mysql_fetch_assoc($rivires);
+						$kpl_lisa = "";
 
-						$siirrettavat_kpl[$valittutunnus] = (float) str_replace(',', '.', $siirrettavat_kpl[$valittutunnus]);
-
-						// Jos luku ei ole ok niin unsetataan se ja siirret‰‰n koko rivi
-						if ($siirrettavat_kpl[$valittutunnus] > 0 and $siirrettavat_kpl[$valittutunnus] < $rivirow["kpl"]) {
-
-							$jaljelle_jaa = $rivirow["kpl"] - $siirrettavat_kpl[$valittutunnus];
-							$kpl_lisa = ", tilkpl='".$siirrettavat_kpl[$valittutunnus]."', kpl='".$siirrettavat_kpl[$valittutunnus]."' ";
-
-							// Splitataan rivi, uusi rivi j‰‰ vanhalle keikalle
-							$rfields = "yhtio";
-							$rvalues = "'$kukarow[yhtio]'";
-
-							for ($i=1; $i < mysql_num_fields($rivires)-1; $i++) {
-
-								$fieldname = mysql_field_name($rivires,$i);
-
-								$rfields .= ", $fieldname";
-
-								switch ($fieldname) {
-									case 'laatija':
-										$rvalues .= ", '$kukarow[kuka]'";
-										break;
-									case 'laadittu':
-										$rvalues .= ", now()";
-										break;
-									case 'tilkpl':
-									case 'kpl':
-										$rvalues .= ", '$jaljelle_jaa'";
-										break;
-									case 'kate_korjattu':
-										$rvalues .= ", 0";
-										break;
-									default:
-										$rvalues .= ", '".$rivirow[$fieldname]."'";
-								}
-							}
-
-							$kysely = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
-							$insres = pupe_query($kysely);
-							$insid  = mysql_insert_id();
-
+						// Ollaanko syˆtetty siirrett‰v‰ m‰‰r‰?
+						if (isset($siirrettavat_kpl[$valittutunnus])) {
 							$query = "	SELECT *
-										FROM tilausrivin_lisatiedot
-										WHERE tilausrivitunnus = '$valittutunnus'
+										FROM tilausrivi
+										WHERE tunnus = '$valittutunnus'
 										and yhtio = '$kukarow[yhtio]'";
 							$rivires = pupe_query($query);
+							$rivirow = mysql_fetch_assoc($rivires);
 
-							if (mysql_num_rows($rivires) > 0) {
-								$rivirow = mysql_fetch_assoc($rivires);
+							$siirrettavat_kpl[$valittutunnus] = (float) str_replace(',', '.', $siirrettavat_kpl[$valittutunnus]);
 
-								// Splitataan rivin lis‰tiedot, uusi rivi j‰‰ vanhalle keikalle
+							// Jos luku ei ole ok niin unsetataan se ja siirret‰‰n koko rivi
+							if ($siirrettavat_kpl[$valittutunnus] > 0 and $siirrettavat_kpl[$valittutunnus] < $rivirow["kpl"]) {
+
+								$jaljelle_jaa = $rivirow["kpl"] - $siirrettavat_kpl[$valittutunnus];
+								$kpl_lisa = ", tilkpl='".$siirrettavat_kpl[$valittutunnus]."', kpl='".$siirrettavat_kpl[$valittutunnus]."' ";
+
+								// Splitataan rivi, uusi rivi j‰‰ vanhalle keikalle
 								$rfields = "yhtio";
 								$rvalues = "'$kukarow[yhtio]'";
 
@@ -639,71 +608,102 @@ if ($tila == 'tee_siirto') {
 										case 'laatija':
 											$rvalues .= ", '$kukarow[kuka]'";
 											break;
-										case 'luontiaika':
+										case 'laadittu':
 											$rvalues .= ", now()";
 											break;
-										case 'tilausrivitunnus':
-											$rvalues .= ", '$insid'";
+										case 'tilkpl':
+										case 'kpl':
+											$rvalues .= ", '$jaljelle_jaa'";
+											break;
+										case 'kate_korjattu':
+											$rvalues .= ", 0";
 											break;
 										default:
 											$rvalues .= ", '".$rivirow[$fieldname]."'";
 									}
 								}
 
-								$kysely = "INSERT into tilausrivin_lisatiedot ($rfields) VALUES ($rvalues)";
+								$kysely = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
 								$insres = pupe_query($kysely);
+								$insid  = mysql_insert_id();
+
+								$query = "	SELECT *
+											FROM tilausrivin_lisatiedot
+											WHERE tilausrivitunnus = '$valittutunnus'
+											and yhtio = '$kukarow[yhtio]'";
+								$rivires = pupe_query($query);
+
+								if (mysql_num_rows($rivires) > 0) {
+									$rivirow = mysql_fetch_assoc($rivires);
+
+									// Splitataan rivin lis‰tiedot, uusi rivi j‰‰ vanhalle keikalle
+									$rfields = "yhtio";
+									$rvalues = "'$kukarow[yhtio]'";
+
+									for ($i=1; $i < mysql_num_fields($rivires)-1; $i++) {
+
+										$fieldname = mysql_field_name($rivires,$i);
+
+										$rfields .= ", $fieldname";
+
+										switch ($fieldname) {
+											case 'laatija':
+												$rvalues .= ", '$kukarow[kuka]'";
+												break;
+											case 'luontiaika':
+												$rvalues .= ", now()";
+												break;
+											case 'tilausrivitunnus':
+												$rvalues .= ", '$insid'";
+												break;
+											default:
+												$rvalues .= ", '".$rivirow[$fieldname]."'";
+										}
+									}
+
+									$kysely = "INSERT into tilausrivin_lisatiedot ($rfields) VALUES ($rvalues)";
+									$insres = pupe_query($kysely);
+								}
 							}
 						}
-					}
 
-					//Tarksitetaan viel‰ ennen p‰ivityst‰, ettei saapumsita ole poistettu ja infotaan k‰ytt‰j‰‰, jos n‰in on k‰ynyt
-					$query = "	SELECT tila
-								FROM lasku
-								WHERE yhtio = '{$kukarow[yhtio]}'
-								AND tila = 'K'
-								AND alatila = ''
-								AND vanhatunnus = 0
-								AND tunnus = '$otunnus'";
-					$res = pupe_query($query);
 
-					if (mysql_num_rows($res) == 1){
 						// Siiret‰‰n rivi t‰lle keikalle
 						$query = "	UPDATE tilausrivi USE INDEX (uusiotunnus_index)
-									SET uusiotunnus 		= '$otunnus',
-									erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]',
-									kerattyaika 			= now(),
-									keratty 				= '$kukarow[kuka]',
-									suuntalava				= 0
-									$kpl_lisa
-									WHERE yhtio 	= '$kukarow[yhtio]'
-									and uusiotunnus = '$valittuuusiotunnus'
-									and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
+								SET uusiotunnus 		= '$otunnus',
+								erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]',
+								kerattyaika 			= now(),
+								keratty 				= '$kukarow[kuka]',
+								suuntalava				= 0
+								$kpl_lisa
+								WHERE yhtio 	= '$kukarow[yhtio]'
+								and uusiotunnus = '$valittuuusiotunnus'
+								and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
 						$result = pupe_query($query);
 
 						// Nollataan kohdistus keikalta jolta rivi siirret‰‰n
 						$query = "	UPDATE lasku USE INDEX (PRIMARY)
-									SET kohdistettu = ''
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '$valittuuusiotunnus'
-									and tila = 'K'";
+								SET kohdistettu = ''
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '$valittuuusiotunnus'
+								and tila = 'K'";
 						$result = pupe_query($query);
-					$result = pupe_query($query);
-					} else {
-						echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt‰‰ rivej‰, koska se on poistettu")."!</font><br>";
+					}
+					else {
+						echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n ei lˆydy")."</font><br>!";
 					}
 				}
 				else {
-					echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n ei lˆydy")."</font><br>!";
+					echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n on lukittu")."</font><br>!";
 				}
 			}
-			else {
-				echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n on lukittu")."</font><br>!";
-			}
-		}
 
-		$q6 = "UNLOCK TABLES";
-		$r = pupe_query($q6);
-	}
+			$q6 = "UNLOCK TABLES";
+			$r = pupe_query($q6);
+			}
+		} else {
+			echo "<font class='error'>".t("VIRHE: Saapumiselle ei voi liitt‰‰ rivej‰, koska se on poistettu")."!</font><br>";
+		}
 
 	$tila = '';
 }

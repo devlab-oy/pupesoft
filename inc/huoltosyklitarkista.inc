@@ -8,6 +8,10 @@ if (!function_exists("huoltosykli")) {
 		//tämän avulla tarkistetaan, että kantaan ei mene kahta huoltosykliä samoilla atribuuteilla
 		//merkitseviä atribuutteja on laitteen koko, paikan olosuhde, laitteen tyyppi ja huoltosyklin toimenpide
 		if (mysql_field_name($result, $i) == "tunnus") {
+			if (!empty($trow[$i])) {
+				$where = "	AND tunnus != {$trow[$i]}";
+			}
+
 			$query = "	SELECT koko,
 						olosuhde,
 						tyyppi,
@@ -17,7 +21,8 @@ if (!function_exists("huoltosykli")) {
 						AND koko = '{$t['koko']}'
 						AND olosuhde = '{$t['olosuhde']}'
 						AND tyyppi = '{$t['tyyppi']}'
-						AND toimenpide = '{$t['toimenpide']}'";
+						AND toimenpide = '{$t['toimenpide']}'
+						{$where}";
 			$vanha_huoltosykli_result = pupe_query($query);
 
 			if (mysql_num_rows($vanha_huoltosykli_result) > 0) {

@@ -350,6 +350,26 @@
 		echo json_encode('ok');
 
 	}
+	elseif ($_POST['ajax_toiminto'] == 'tarkista_saapuminen') {
+		# Tarkistetaan onko saapuminen suljettu
+		# saapumisen tunnus
+		$otunnus = (int) $_POST['otunnus'];
+
+		if ($otunnus == 0) {
+			echo json_encode('error');
+		}
+
+		$query = "	SELECT tunnus
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tila = 'K'
+					AND alatila = ''
+					AND vanhatunnus = 0
+					AND tunnus = '{$otunnus}'";
+		$res = pupe_query($query);
+
+		echo mysql_num_rows($res) == 0 ? json_encode('suljettu') : json_encode('ok');
+	}
 	elseif ($_POST['ajax_toiminto'] == 'kohdista_rivi') {
 
 		# Valittu tilausrivi ja ostotilaus

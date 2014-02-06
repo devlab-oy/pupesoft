@@ -287,12 +287,13 @@
 
 	if (!isset($naytetaan_luvut)) $naytetaan_luvut = '';
 
-	$sel = array_fill_keys(array($naytetaan_luvut), " selected") + array('tuhansittain' => '', 'eurolleen' => '');
+	$sel = array_fill_keys(array($naytetaan_luvut), " selected") + array('tuhansittain' => '', 'eurolleen' => '', 'sentilleen' => '');
 
 	echo "<tr><th>",t("N‰ytet‰‰n luvut"),"</th>";
 	echo "<td><select name='naytetaan_luvut' id='naytetaan_luvut'>";
 	echo "<option value='tuhansittain'{$sel['tuhansittain']}>",t("Tuhannen tarkkuudella"),"</option>";
-	echo "<option value='eurolleen'{$sel['eurolleen']}>",t("Sellaisinaan"),"</option>";
+	echo "<option value='eurolleen'{$sel['eurolleen']}>",t("Kokonaislukuina"),"</option>";
+	echo "<option value='sentilleen'{$sel['sentilleen']}>",t("Sellaisinaan"),"</option>";
 	echo "</select></td></tr>";
 
 	echo "<tr><td colspan='2' class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
@@ -544,6 +545,10 @@
 				$arvot['tilatut_eurot'] = round($arvot['tilatut_eurot']);
 				$arvot['laskutetut_eurot'] = isset($arvot['laskutetut_eurot']) ? round($arvot['laskutetut_eurot']) : '';
 			}
+			elseif ($naytetaan_luvut == 'sentilleen') {
+				$arvot['tilatut_eurot'] = round($arvot['tilatut_eurot'], 2);
+				$arvot['laskutetut_eurot'] = isset($arvot['laskutetut_eurot']) ? round($arvot['laskutetut_eurot'], 2) : '';
+			}
 			else {
 				$arvot['tilatut_eurot'] = round($arvot['tilatut_eurot'] / 1000);
 				$arvot['laskutetut_eurot'] = isset($arvot['laskutetut_eurot']) ? round($arvot['laskutetut_eurot'] / 1000) : '';
@@ -592,6 +597,10 @@
 				if ($naytetaan_luvut == 'eurolleen') {
 					$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot']) : '';
 					$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot']) : '';
+				}
+				elseif ($naytetaan_luvut == 'sentilleen') {
+					$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'], 2) : '';
+					$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'], 2) : '';
 				}
 				else {
 					$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'] / 1000) : '';
@@ -643,6 +652,10 @@
 					if ($naytetaan_luvut == 'eurolleen') {
 						$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot']) : '';
 						$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot']) : '';
+					}
+					elseif ($naytetaan_luvut == 'sentilleen') {
+						$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'], 2) : '';
+						$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'], 2) : '';
 					}
 					else {
 						$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'] / 1000) : '';
@@ -696,6 +709,10 @@
 							$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot']) : '';
 							$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot']) : '';
 						}
+						elseif ($naytetaan_luvut == 'sentilleen') {
+							$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'], 2) : '';
+							$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'], 2) : '';
+						}
 						else {
 							$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'] / 1000) : '';
 							$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'] / 1000) : '';
@@ -747,6 +764,10 @@
 				if ($naytetaan_luvut == 'eurolleen') {
 					$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot']) : '';
 					$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot']) : '';
+				}
+				elseif ($naytetaan_luvut == 'sentilleen') {
+					$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'], 2) : '';
+					$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'], 2) : '';
 				}
 				else {
 					$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'] / 1000) : '';
@@ -800,6 +821,10 @@
 						$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot']) : '';
 						$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot']) : '';
 					}
+					elseif ($naytetaan_luvut == 'sentilleen') {
+						$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'], 2) : '';
+						$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'], 2) : '';
+					}
 					else {
 						$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'] / 1000) : '';
 						$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'] / 1000) : '';
@@ -828,14 +853,34 @@
 		echo "<td align='right'></td>";
 
 		echo "<td align='right'>";
-		echo $naytetaan_luvut == 'eurolleen' ? round($yhteensa['tilatut_eurot']) : round($yhteensa['tilatut_eurot'] / 1000);
+
+		if ($naytetaan_luvut == 'eurolleen') {
+			echo round($yhteensa['tilatut_eurot']);
+		}
+		elseif ($naytetaan_luvut == 'sentilleen') {
+			echo round($yhteensa['tilatut_eurot'], 2);
+		}
+		else {
+			echo round($yhteensa['tilatut_eurot'] / 1000);
+		}
+
 		echo "</td>";
 
 		echo "<td align='right'>",round($yhteensa['tilatut_kate'] / $yhteensa['tilatut_eurot'] * 100, 1),"</td>";
 		echo "<td align='right'>",round($yhteensa['tilatut_rivit']),"</td>";
 
 		echo "<td align='right'>";
-		echo $naytetaan_luvut == 'eurolleen' ? round($yhteensa['laskutetut_eurot']) : round($yhteensa['laskutetut_eurot'] / 1000);
+
+		if ($naytetaan_luvut == 'eurolleen') {
+			echo round($yhteensa['laskutetut_eurot']);
+		}
+		elseif ($naytetaan_luvut == 'sentilleen') {
+			echo round($yhteensa['laskutetut_eurot'], 2);
+		}
+		else {
+			echo round($yhteensa['laskutetut_eurot'] / 1000);
+		}
+
 		echo "</td>";
 
 		echo "<td align='right'>",(round($yhteensa['laskutetut_kate'] / $yhteensa['laskutetut_eurot'] * 100, 1)),"</td>";
@@ -857,14 +902,34 @@
 			echo "<td align='right'></td>";
 
 			echo "<td align='right'>";
-			echo $naytetaan_luvut == 'eurolleen' ? round($vals['tilatut_eurot']) : round($vals['tilatut_eurot'] / 1000);
+
+			if ($naytetaan_luvut == 'eurolleen') {
+				echo round($vals['tilatut_eurot']);
+			}
+			elseif ($naytetaan_luvut == 'sentilleen') {
+				echo round($vals['tilatut_eurot'], 2);
+			}
+			else {
+				echo round($vals['tilatut_eurot'] / 1000);
+			}
+
 			echo "</td>";
 
 			echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
 			echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
 
 			echo "<td align='right'>";
-			echo $naytetaan_luvut == 'eurolleen' ? round($vals['laskutetut_eurot']) : round($vals['laskutetut_eurot'] / 1000);
+
+			if ($naytetaan_luvut == 'eurolleen') {
+				echo round($vals['laskutetut_eurot']);
+			}
+			elseif ($naytetaan_luvut == 'sentilleen') {
+				echo round($vals['laskutetut_eurot'], 2);
+			}
+			else {
+				echo round($vals['laskutetut_eurot'] / 1000);
+			}
+
 			echo "</td>";
 
 			echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
@@ -887,14 +952,34 @@
 				echo "<td align='right'></td>";
 
 				echo "<td align='right'>";
-				echo $naytetaan_luvut == 'eurolleen' ? round($vals['tilatut_eurot']) : round($vals['tilatut_eurot'] / 1000);
+
+				if ($naytetaan_luvut == 'eurolleen') {
+					echo round($vals['tilatut_eurot']);
+				}
+				elseif ($naytetaan_luvut == 'sentilleen') {
+					echo round($vals['tilatut_eurot'], 2);
+				}
+				else {
+					echo round($vals['tilatut_eurot'] / 1000);
+				}
+
 				echo "</td>";
 
 				echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
 				echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
 
 				echo "<td align='right'>";
-				echo $naytetaan_luvut == 'eurolleen' ? round($vals['laskutetut_eurot']) : round($vals['laskutetut_eurot'] / 1000);
+
+				if ($naytetaan_luvut == 'eurolleen') {
+					echo round($vals['laskutetut_eurot']);
+				}
+				elseif ($naytetaan_luvut == 'sentilleen') {
+					echo round($vals['laskutetut_eurot'], 2);
+				}
+				else {
+					echo round($vals['laskutetut_eurot'] / 1000);
+				}
+
 				echo "</td>";
 
 				echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
@@ -913,14 +998,34 @@
 					echo "<td align='right'></td>";
 
 					echo "<td align='right'>";
-					echo $naytetaan_luvut == 'eurolleen' ? round($vals['tilatut_eurot']) : round($vals['tilatut_eurot'] / 1000);
+
+					if ($naytetaan_luvut == 'eurolleen') {
+						echo round($vals['tilatut_eurot']);
+					}
+					elseif ($naytetaan_luvut == 'sentilleen') {
+						echo round($vals['tilatut_eurot'], 2);
+					}
+					else {
+						echo round($vals['tilatut_eurot'] / 1000);
+					}
+
 					echo "</td>";
 
 					echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
 					echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
 
 					echo "<td align='right'>";
-					echo $naytetaan_luvut == 'eurolleen' ? round($vals['laskutetut_eurot']) : round($vals['laskutetut_eurot'] / 1000);
+
+					if ($naytetaan_luvut == 'eurolleen') {
+						echo round($vals['laskutetut_eurot']);
+					}
+					elseif ($naytetaan_luvut == 'sentilleen') {
+						echo round($vals['laskutetut_eurot'], 2);
+					}
+					else {
+						echo round($vals['laskutetut_eurot'] / 1000);
+					}
+
 					echo "</td>";
 
 					echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
@@ -944,14 +1049,34 @@
 			echo "<td align='right'></td>";
 
 			echo "<td align='right'>";
-			echo $naytetaan_luvut == 'eurolleen' ? round($vals['tilatut_eurot']) : round($vals['tilatut_eurot'] / 1000);
+
+			if ($naytetaan_luvut == 'eurolleen') {
+				echo round($vals['tilatut_eurot']);
+			}
+			elseif ($naytetaan_luvut == 'sentilleen') {
+				echo round($vals['tilatut_eurot'], 2);
+			}
+			else {
+				echo round($vals['tilatut_eurot'] / 1000);
+			}
+
 			echo "</td>";
 
 			echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
 			echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
 
 			echo "<td align='right'>";
-			echo $naytetaan_luvut == 'eurolleen' ? round($vals['laskutetut_eurot']) : round($vals['laskutetut_eurot'] / 1000);
+
+			if ($naytetaan_luvut == 'eurolleen') {
+				echo round($vals['laskutetut_eurot']);
+			}
+			elseif ($naytetaan_luvut == 'sentilleen') {
+				echo round($vals['laskutetut_eurot'], 2);
+			}
+			else {
+				echo round($vals['laskutetut_eurot'] / 1000);
+			}
+
 			echo "</td>";
 
 			echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
@@ -970,14 +1095,34 @@
 				echo "<td align='right'></td>";
 
 				echo "<td align='right'>";
-				echo $naytetaan_luvut == 'eurolleen' ? round($vals['tilatut_eurot']) : round($vals['tilatut_eurot'] / 1000);
+
+				if ($naytetaan_luvut == 'eurolleen') {
+					echo round($vals['tilatut_eurot']);
+				}
+				elseif ($naytetaan_luvut == 'sentilleen') {
+					echo round($vals['tilatut_eurot'], 2);
+				}
+				else {
+					echo round($vals['tilatut_eurot'] / 1000);
+				}
+
 				echo "</td>";
 
 				echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
 				echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
 
 				echo "<td align='right'>";
-				echo $naytetaan_luvut == 'eurolleen' ? round($vals['laskutetut_eurot']) : round($vals['laskutetut_eurot'] / 1000);
+
+				if ($naytetaan_luvut == 'eurolleen') {
+					echo round($vals['laskutetut_eurot']);
+				}
+				elseif ($naytetaan_luvut == 'sentilleen') {
+					echo round($vals['laskutetut_eurot'], 2);
+				}
+				else {
+					echo round($vals['laskutetut_eurot'] / 1000);
+				}
+
 				echo "</td>";
 
 				echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";

@@ -168,7 +168,8 @@
 	echo "<br />";
 	echo "<br />";
 
-	echo t("Päivitä asiakkaiden luottotietoja tiedostosta"),"<br />";
+	echo "<font class='message'>",t("Päivitä asiakkaiden luottotietoja tiedostosta"),"</font><br />";
+	echo "<font class='info'>",t("Otsikot: ytunnus, asiakasnro, luottoraja"),"</font><br />";
 	echo "<table>";
 	echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("Lähetä"),"' /></td></tr>";
 	echo "</table>";
@@ -187,7 +188,7 @@
 
 			$excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 
-			echo "<br /><br /><font class='message'>".t("Luetaan lähetetty tiedosto")."...<br><br></font>";
+			echo "<font class='message'>".t("Luetaan lähetetty tiedosto")."...<br><br></font>";
 
 			// Otetaan otsikot pois
 			array_shift($excelrivit);
@@ -215,8 +216,9 @@
 			}
 
 			$plural = $cnt == 1 ? "rivi" : "riviä";
+			$classi = $cnt > 0 ? "ok" : "error";
 
-			echo "<font class='message'>",t("Päivitettiin %d %s", '', $cnt, $plural),"</font><br />";
+			echo "<font class='{$classi}'>",t("Päivitettiin %d %s", '', $cnt, $plural),".</font><br />";
 		}
 	}
 

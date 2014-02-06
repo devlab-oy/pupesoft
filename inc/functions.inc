@@ -13334,45 +13334,49 @@ if (!function_exists("pupe_DataTables")) {
 					});
 
 					check_arrival_validity = function(otunnus) {
+					  var state = false;
 
-						var state = false;
+					  $.ajax({
+					    async: false,
+					    dataType: 'JSON',
+					    type: 'POST',
+					    data: {
+					      otunnus: otunnus,
+					      ajax_toiminto: 'tarkista_saapuminen',
+					      no_head: 'yes',
+					      ohje: 'off'
+					    },
+					    url: '{$_SERVER['SCRIPT_NAME']}'
+					  }).done(function(data) {
 
-						$.ajax({
-							async: true,
-							dataType: 'JSON',
-							type: 'POST',
-							data: {
-								otunnus: otunnus,
-								ajax_toiminto: 'tarkista_saapuminen',
-								no_head: 'yes',
-								ohje: 'off'
-							},
-							url: '{$_SERVER['SCRIPT_NAME']}'
-						}).done(function(data) {
+					    if (data == 'error') {
+					      alert('",t("VIRHE: Saapumisen tunnus on 0"),"!');
+					    }
+					    else if (data == 'suljettu') {
+							alert('",t("Saapuminen on suljettu"),"!');
+					    }
+					    else {
+					      state = true;
+					    }
 
-							if (data == 'error') {
-								alert('",t("VIRHE: Saapumisen tunnus on 0"),"!');
-							}
-							else if (data == 'suljettu') {
-								alert('",t("Saapuminen on suljettu"),"!');
-							}
-							else {
-								state = true;
-							}
+					    console.log('DONE!');
+					  }).fail(function(data) {
+						alert('",t("VIRHE: Tietokantayhteydessä ongelma"),"!');
+					  });
 
-							return state;
-						}).fail(function(data) {
-							alert('",t("VIRHE: Tietokantayhteydessä ongelma"),"!');
-							return false;
-						});
+					    process = state;
 					};
+
+					var process = false;
 
 					// JOS RUKSATAAN/RUKSATAAN POIS JOKIN RIVI
 					$('input[name^=\"rivi_valitut_tunnukset\"]').live('click', function(){
 						rivi_ja_otsikko = this.value.split(\"###\", 2);
 						var otunnus 	= $('input[name=\"otunnus\"]').val();
 
-						if (setTimeout(check_arrival_validity(otunnus), 200)) {
+						setTimeout(check_arrival_validity(otunnus), 200);
+
+						if (process) {
 
 							if ($(this).is(':checked')) {
 
@@ -13483,7 +13487,9 @@ if (!function_exists("pupe_DataTables")) {
 						var sscc 	= $('#suuntalava_'+tun+' option:selected').text();
 						var otunnus	= $('input[name=\"otunnus\"]').val();
 
-						if (setTimeout(check_arrival_validity(otunnus), 200)) {
+						setTimeout(check_arrival_validity(otunnus), 200);
+
+						if (process) {
 
 							$.post('{$_SERVER['SCRIPT_NAME']}',
 									{	keikan_otunnus: otunnus,
@@ -13521,7 +13527,9 @@ if (!function_exists("pupe_DataTables")) {
 
 						var otunnus = $('input[name=\"otunnus\"]').val();
 
-						if (setTimeout(check_arrival_validity(otunnus), 200)) {
+						setTimeout(check_arrival_validity(otunnus), 200);
+
+						if (process) {
 
 							$('input[name^=\"rivi_kpl\"]').each(function(){
 
@@ -13850,7 +13858,9 @@ if (!function_exists("pupe_DataTables")) {
 
 						var otunnus = $('input[name=\"otunnus\"]').val();
 
-						if (setTimeout(check_arrival_validity(otunnus), 200)) {
+						setTimeout(check_arrival_validity(otunnus), 200);
+
+						if (process) {
 
 							$('input[name^=\"rivi_valitut_tunnukset\"]').each(function(){
 								rivi_ja_otsikko = this.value.split(\"###\", 2);
@@ -13920,7 +13930,9 @@ if (!function_exists("pupe_DataTables")) {
 
 						var otunnus = $('input[name=\"otunnus\"]').val();
 
-						if (setTimeout(check_arrival_validity(otunnus), 200)) {
+						setTimeout(check_arrival_validity(otunnus), 200);
+
+						if (process) {
 
 							$('input[name^=\"rivi_valitut_tunnukset\"]').each(function(){
 								rivi_ja_otsikko = this.value.split(\"###\", 2);

@@ -20,7 +20,14 @@
 
 	if ($tee != '') {
 
-		$aikalisa = $rivien_aika == 'laskutettuaika' ? "laskutettuaika" : "kerattyaika";
+		if ($rivien_aika == 'laskutettuaika') {
+			 $aikalisa = "and tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
+					 	  and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}'";
+		}
+		else {
+			$aikalisa = "and tilausrivi.kerattyaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+					 	  and tilausrivi.kerattyaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
+		}			
 
 		$query = "	SELECT lasku.nimi asiakas, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilkpl, tilausrivi.kpl, tilausrivi.keratty,
 					concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) tuotepaikka,
@@ -30,8 +37,7 @@
 					JOIN lasku ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					and tilausrivi.tyyppi  in ('L', 'D')
-					and tilausrivi.{$aikalisa} >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-					and tilausrivi.{$aikalisa} <= '{$vvl}-{$kkl}-{$ppl} 99:99:99'
+					{$aikalisa}
 					and tilausrivi.var not in ('P','J','O')
 					and tilausrivi.tilkpl <> tilausrivi.kpl
 					ORDER BY sorttauskentta, tuoteno";

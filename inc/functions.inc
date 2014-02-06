@@ -13358,8 +13358,6 @@ if (!function_exists("pupe_DataTables")) {
 					    else {
 					      state = true;
 					    }
-
-					    console.log('DONE!');
 					  }).fail(function(data) {
 						alert('",t("VIRHE: Tietokantayhteydessä ongelma"),"!');
 					  });

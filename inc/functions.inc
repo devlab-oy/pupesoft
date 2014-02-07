@@ -13421,8 +13421,9 @@ if (!function_exists("pupe_DataTables")) {
 						$('input[name=\"search_'+searchbox+'\"]').val(tun).keyup();
 					});
 
-					function splittaus(tun, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, kpl) {
+					function splittaus(tun, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, kpl, varastoon) {
 						var uuden_rivin_tunnus = 0;
+						var varastoon = varastoon ? varastoon : 0;
 						// JOS HINTA * KPL ON ENEMMÄN KUIN 10,2 DESIMAALIA, NIIN HERJATAAN
 						if ((rivi_hinta_value * kpl) > 9999999999.99) {
 							var virhe = '".t('VIRHE: liian iso loppusumma')."!';
@@ -13443,6 +13444,7 @@ if (!function_exists("pupe_DataTables")) {
 										url: '{$_SERVER['SCRIPT_NAME']}',
 										data: {
 											keikan_otunnus: otunnus,
+											varastoon: varastoon,
 											otunnus: otunnus,
 											tunnus: tun,
 											ajax_toiminto: 'rivi_kpl_splittaus',
@@ -13576,6 +13578,7 @@ if (!function_exists("pupe_DataTables")) {
 						var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+keijo).val());
 						var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+keijo).val());
 						var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+keijo).val());
+						var varastoonrivilta		= document.getElementById('varastoon_'+keijo).value;
 						var kpl 	= parseFloat($('#rivi_kpl_'+keijo).val().replace(',','.'));
 						var massatyyppi = document.getElementById('tyyppi_'+keijo).value;
 						var massakeraysvyohyke = document.getElementById('keraysvyohyke_'+keijo).value;
@@ -13605,7 +13608,7 @@ if (!function_exists("pupe_DataTables")) {
 
 							(function loopperi(i) {
 
-								uudenrivintunnus = splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara);
+								uudenrivintunnus = splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara, varastoonrivilta);
 
 								rivi_kpl_alkuperainen = rivi_kpl_alkuperainen - massajakokplmaara;
 

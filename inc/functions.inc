@@ -13477,6 +13477,9 @@ if (!function_exists("pupe_DataTables")) {
 								);
 							}
 						}
+						else {
+							$(this).attr('checked', !$(this).is(':checked'));
+						}
 					});
 
 					// VAIHDETAAN SUUNTALAVAA DROPDOWNISTA

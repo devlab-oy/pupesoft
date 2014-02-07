@@ -1005,7 +1005,7 @@
 
 					if ($mukaan == "asiakasnro") {
 						$group .= ",asiakas.tunnus";
-						$select .= "asiakas.asiakasnro, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi!='' and asiakas.nimi!=asiakas.toim_nimi,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark),NULL)) 'asiakasnro.nimi', concat_ws('<br>',asiakas.postitp,if(asiakas.toim_postitp!='' and asiakas.postitp!=asiakas.toim_postitp,asiakas.toim_postitp,NULL)) 'asiakasnro.postitp', ";
+						$select .= "asiakas.asiakasnro, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi!='' and (asiakas.nimi!=asiakas.toim_nimi or (asiakas.toim_nimitark!='' and asiakas.toim_nimitark!=asiakas.nimitark)),concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark),NULL)) 'asiakasnro.nimi', concat_ws('<br>',asiakas.postitp,if(asiakas.toim_postitp!='' and asiakas.postitp!=asiakas.toim_postitp,asiakas.toim_postitp,NULL)) 'asiakasnro.postitp', ";
 						if (strpos($select, "'asiakaslista',") === FALSE) $select .= "asiakas.tunnus 'asiakaslista', ";
 						$order  .= "asiakas.asiakasnro,";
 						$gluku++;

@@ -5869,7 +5869,7 @@ if ($tee == '') {
 					$borderlask--;
 				}
 				elseif ($borderlask == 1) {
-					if ($row["kommentti"] != '' or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '')) {
+					if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
 						$classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
 						$class    .= " style='font-style:italic; ' ";
 					}

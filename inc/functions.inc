@@ -8886,12 +8886,15 @@ if (!function_exists("livesearch_tuotehaku")) {
 				$varastot_mista_saa_myyda = array();
 
 				// Katsotaan mistä normaalivarastoista käyttäjä saa myydä
-				if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E','G')) and $kukarow['varasto'] != '') {
+				if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E','G'))) {
+
+					$varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
+
 					$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus) AS varastotunnukset
 								FROM varastopaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tyyppi = ''
-								AND tunnus IN ({$kukarow['varasto']})";
+								{$varastolisa}";
 					$varasto_chk_res = pupe_query($query);
 					$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
 

@@ -201,12 +201,45 @@
 			// haetaan maksuehdon tiedot tarkastuksia varten
 			$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
 			$tarkistus_meapu = pupe_query($tarkistus_apuqu);
+			$tarkistus_meapu_row = mysql_fetch_assoc($tarkistus_meapu);
 
 			if (mysql_num_rows($tarkistus_meapu) == 0) {
 				echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
 				$tee = "OTSIK";
 				$tila = "";
 				unset($jatka);
+			}
+			elseif ($tarkistus_meapu_row['kateinen'] == "" and isset($edellinen_maksuehto)) {
+
+				$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$edellinen_maksuehto}'";
+				$tarkistus_meapu2 = pupe_query($tarkistus_apuqu);
+				$tarkistus_meapu_row2 = mysql_fetch_assoc($tarkistus_meapu2);
+
+				if ($tarkistus_meapu_row2['kateinen'] != '') {
+
+					// Parametrejä saatanat.php:lle
+					$sytunnus 	 	 = $laskurow['ytunnus'];
+					$sliitostunnus	 = $laskurow['liitostunnus'];
+					$eiliittymaa 	 = "ON";
+					$luottorajavirhe = "";
+					$jvvirhe 		 = "";
+					$ylivito 		 = 0;
+					$trattavirhe 	 = "";
+					$laji 			 = "MA";
+					$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
+
+					ob_start();
+					require ("raportit/saatanat.php");
+					$retval = ob_get_contents();
+					ob_end_clean();
+
+					if ($luottorajavirhe != '') {
+						echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt. Maksuehtoa ei voi vaihtaa. Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),"!</font><br><br>";
+						$tee = "OTSIK";
+						$tila = "";
+						unset($jatka);
+					}
+				}
 			}
 		}
 
@@ -1257,7 +1290,16 @@
 					}
 					$vasen_sarake[$vasen] .= "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 				}
-				$vasen_sarake[$vasen] .= "</select></td>";
+				$vasen_sarake[$vasen] .= "</select>";
+
+				if (isset($edellinen_maksuehto)) {
+					$vasen_sarake[$vasen] .= "<input type='hidden' name='edellinen_maksuehto' value='{$edellinen_maksuehto}' />";
+				}
+				else {
+					$vasen_sarake[$vasen] .= "<input type='hidden' name='edellinen_maksuehto' value='{$srow['maksuehto']}' />";
+				}
+
+				$vasen_sarake[$vasen] .= "</td>";
 			}
 
 			$vasen++;

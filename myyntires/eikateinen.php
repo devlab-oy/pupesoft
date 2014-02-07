@@ -179,7 +179,8 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 						erpcm      = '{$params['tapahtumapaiva']}',
 						mapvm      = '{$params['tapahtumapaiva']}',
 						maksuehto  = '{$params['maksuehto']}',
-						kassalipas = '{$params['kassalipas']}'
+						kassalipas = '{$params['kassalipas']}',
+						kasumma    = 0
 						where yhtio = '{$kukarow['yhtio']}'
 						and tunnus  = '{$params['tunnus']}'";
 		$result = pupe_query($query);
@@ -203,7 +204,7 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 			else {
 				$kassa_erapvm = "'{$params['mehtorow']['kassa_abspvm']}'";
 			}
-			$kassa_loppusumma = round($params['laskurow']['tapvm'] * $params['mehtorow']['kassa_alepros'] / 100, 2);
+			$kassa_loppusumma = round($params['laskurow']['summa'] * $params['mehtorow']['kassa_alepros'] / 100, 2);
 		}
 		else {
 			$kassa_erapvm = "''";
@@ -334,7 +335,12 @@ function tee_kirjanpito_muutokset($params) {
 			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $vanharow['summa']);
 		}
 		else {
-			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] + $vanharow['summa']);
+			if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+				$summalisa = 0;
+			}
+			else {
+				$summalisa = $params['laskurow']['summa'] + abs($vanharow['summa']);
+			}
 		}
 
 		$query = "	UPDATE lasku SET

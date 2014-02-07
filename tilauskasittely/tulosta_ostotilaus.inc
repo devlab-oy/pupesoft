@@ -469,7 +469,7 @@
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
 				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 
-            	if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) {
+            	if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A') or $toim == "HAAMU") {
 
 	 				//K‰‰nnet‰‰n nimitys
 					$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
@@ -652,18 +652,7 @@
 
 		// katotaan miten halutaan sortattavan
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]);
-
-		if ($mista == "tulostakopio") {
-			$haamulisa = " and tilausrivi.tyyppi = 'D'";
-
-		}
-		else {
-			$haamulisa = " and tilausrivi.tyyppi != 'D'";
-
-		}
-
 		$query_ale_lisa = generoi_alekentta('O');
-
 		$query_ale_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
 		if ($toim != "HAAMU") {
@@ -695,13 +684,13 @@
 			}
 		}
 		else {
-			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu,
+			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu, 2) varattu,
 						tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-						substring(tilausrivi.kommentti,1,80) nimitys, tilausrivi.yksikko, tilausrivi.toimaika
+						substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys
 						FROM tilausrivi
+						join tuote USING (yhtio, tuoteno)
 						WHERE tilausrivi.otunnus = '$otunnus'
 						and tilausrivi.yhtio	 = '$kukarow[yhtio]'
-						$haamulisa
 						ORDER BY tilausrivi.tunnus";
 		}
 

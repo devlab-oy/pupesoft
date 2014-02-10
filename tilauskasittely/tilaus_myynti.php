@@ -3470,15 +3470,12 @@ if ($tee == '') {
 
 			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!";
 
-			if ($meapurow['kateinen'] != '') {
-				echo " ",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
+			if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
+				$muokkauslukko = 'LUKOSSA';
+				$myyntikielto = 'MYYNTIKIELTO';
 			}
 			else {
-
-				if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
-					$muokkauslukko = 'LUKOSSA';
-					$myyntikielto = 'MYYNTIKIELTO';
-				}
+				echo " ",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
 			}
 
 			echo "</font><br />";

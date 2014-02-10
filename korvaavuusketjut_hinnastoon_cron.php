@@ -79,7 +79,7 @@ while ($ketju = mysql_fetch_assoc($result)) {
 
 				// Päivitetään tuote.hinnastoon
 				$query = "UPDATE tuote SET hinnastoon='' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$paa_tuote['tuoteno']}'";
-				if ($result = pupe_query($query)) {
+				if ($result2 = pupe_query($query)) {
 					$muutettu += 1;
 				}
 

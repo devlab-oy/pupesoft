@@ -69,7 +69,13 @@ function hae_tyomaaraykset($request) {
 	}
 
 	if (!empty($request['toimitusaika_haku'])) {
-		$lasku_where .= "	AND lasku.toimaika < DATE_ADD(NOW(), INTERVAL {$request['toimitusaika_haku']} DAY)";
+		if (is_numeric($request['toimitusaika_haku'])) {
+			$lasku_where .= "	AND lasku.toimaika < DATE_ADD(NOW(), INTERVAL {$request['toimitusaika_haku']} DAY)";
+		}
+		else if ($request['toimitusaika_haku'] == 'X') {
+			//N‰yt‰ myˆh‰ss‰ olevat
+			$lasku_where .= "	AND lasku.toimaika < DATE_SUB(NOW(), INTERVAL 1 DAY)";
+		}
 	}
 
 	$query = "	SELECT
@@ -218,6 +224,7 @@ function echo_tyomaaraykset_table($request = array()) {
 
 	$toimitusaika_haku_array = array(
 		''	 => t('N‰yt‰ kaikki'),
+		'X'	 => t('N‰yt‰ myˆh‰ss‰ olevat'),
 		7	 => t('1 viikon p‰‰st‰ er‰‰ntyv‰t'),
 		14	 => t('2 viikon p‰‰st‰ er‰‰ntyv‰t'),
 		21	 => t('3 viikon p‰‰st‰ er‰‰ntyv‰t'),

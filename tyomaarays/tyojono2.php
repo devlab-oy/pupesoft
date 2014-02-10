@@ -2,7 +2,6 @@
 
 require_once('../inc/parametrit.inc');
 require_once('inc/tyojono2_functions.inc');
-require_once('validation/Validation.php');
 require_once('inc/laite_huolto_functions.inc');
 
 if ($tee == 'lataa_tiedosto') {
@@ -39,18 +38,6 @@ $request = array(
 	'toimitusaika_haku'	 => $toimitusaika_haku,
 	'laite_tunnus'		 => $laite_tunnus,
 );
-
-$validations = array(
-	'ala_tee'			 => 'kirjain_numero',
-	'toim'				 => 'kirjain_numero',
-	'toimitusaika_haku'	 => 'numero',
-);
-$validator = new FormValidator($validations);
-
-if (!$validator->validate($request)) {
-	//jos validationit ei mene läpi niin todennäköisesti joku yrittää hakkeroida
-	exit;
-}
 
 $request['tyojonot'] = hae_tyojonot($request);
 

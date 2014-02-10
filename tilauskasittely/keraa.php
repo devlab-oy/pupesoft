@@ -1340,7 +1340,7 @@
 							FROM lasku
 							JOIN asiakas ON asiakas.yhtio=lasku.yhtio AND asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio AND kuka.tunnus=lasku.myyja AND kuka.extranet = '')
-							LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio AND kuka_ext.tunnus = lasku.laatija AND kuka_ext.extranet != '')
+							LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio AND kuka_ext.kuka = lasku.laatija AND kuka_ext.extranet != '')
 							WHERE lasku.tunnus	= '$poikkeamatilaus'
 							and lasku.yhtio		= '$kukarow[yhtio]'";
 				$result = pupe_query($query);

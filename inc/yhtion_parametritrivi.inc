@@ -456,8 +456,23 @@
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
 
-		$ulos .= "<option value = ''>".t("Ei");
-		$ulos .= "<option value = 'K' $sel[K]>".t("Kyllä");
+		$ulos .= "<option value = ''>".t("Ei")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kyllä")."</option>";
+
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "purkulistan_asettelu") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'A' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Tuoteno, nimitys, paikka -asettelu")."</option>";
+		$ulos .= "<option value = 'A' {$sel}>".t("Tuoteno, paikka, nimitys -asettelu")."</option>";
 
 
 		$ulos .= "</select></td>";

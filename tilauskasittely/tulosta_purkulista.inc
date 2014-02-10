@@ -78,14 +78,24 @@
 				$pdf->draw_text(280, 520, t("Nimitys", $kieli),				$firstpage, $pieni);
 			}
 
-			if ($mista == 'vastaanota') {
-				$pdf->draw_text(315, 520, t("Paikasta", $kieli),		$firstpage, $pieni);
-				$pdf->draw_text(475, 520, t("Paikalle", $kieli),		$firstpage, $pieni);
+			if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+				if ($mista == 'vastaanota') {
+					$pdf->draw_text(130, 520, t("Paikasta", $kieli),		$firstpage, $pieni);
+					$pdf->draw_text(130, 510, t("Paikalle", $kieli),		$firstpage, $pieni);
+				}
+				else {
+					$pdf->draw_text(170, 520, t("Paikka(o.saldo)", $kieli),		$firstpage, $pieni);
+				}
 			}
 			else {
-				$pdf->draw_text(440, 520, t("Paikka(o.saldo)", $kieli),		$firstpage, $pieni);
+				if ($mista == 'vastaanota') {
+					$pdf->draw_text(315, 520, t("Paikasta", $kieli),		$firstpage, $pieni);
+					$pdf->draw_text(475, 520, t("Paikalle", $kieli),		$firstpage, $pieni);
+				}
+				else {
+					$pdf->draw_text(440, 520, t("Paikka(o.saldo)", $kieli),		$firstpage, $pieni);
+				}
 			}
-
 
 			if ($mista == 'vastaanota') {
 				$pdf->draw_text(725, 520, t("Määrä", $kieli),				$firstpage, $pieni);
@@ -623,7 +633,17 @@
 
 				if ($mista == "vastaanota") {
 
-					$pdf->draw_text(315, $kala, hyllyalue('', $row['trhyllyalue'], 'riisuttu')." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"],		$firstpage, $p);
+					if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+
+						$tekstiosa = hyllyalue('', $row['trhyllyalue'], 'riisuttu')." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"];
+
+						$oikpos = $pdf->strlen($tekstiosa, $p);
+
+						$pdf->draw_text(140 - $oikpos, $kala, $tekstiosa, $firstpage, $p);
+					}
+					else {
+						$pdf->draw_text(315, $kala, hyllyalue('', $row['trhyllyalue'], 'riisuttu')." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"], $firstpage, $p);
+					}
 
 					if ($vainlistaus != '') {
 
@@ -654,7 +674,17 @@
 
 						$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-						$pdf->draw_text(475, $kala, $t1[$row['tunnus']]." ".$t2[$row['tunnus']]." ".$t3[$row['tunnus']]." ".$t4[$row['tunnus']]." (".$hyllyssa.") ",		$firstpage, $p);
+						if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+
+							$tekstiosa = $t1[$row['tunnus']]." ".$t2[$row['tunnus']]." ".$t3[$row['tunnus']]." ".$t4[$row['tunnus']]." (".$hyllyssa.") ";
+
+							$oikpos = $pdf->strlen($tekstiosa, $p);
+
+							$pdf->draw_text(140 - $oikpos, $kala - 10, $tekstiosa, $firstpage, $p);
+						}
+						else {
+							$pdf->draw_text(475, $kala, $t1[$row['tunnus']]." ".$t2[$row['tunnus']]." ".$t3[$row['tunnus']]." ".$t4[$row['tunnus']]." (".$hyllyssa.") ", $firstpage, $p);
+						}
 					}
 					else {
 
@@ -685,17 +715,47 @@
 
 						$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-						$pdf->draw_text(475, $kala, hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
+						if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+
+							$tekstiosa = hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ";
+
+							$oikpos = $pdf->strlen($tekstiosa, $p);
+
+							$pdf->draw_text(140 - $oikpos, $kala - 10, $tekstiosa, $firstpage, $p);
+						}
+						else {
+							$pdf->draw_text(475, $kala, hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
+						}
 					}
 
 				}
 				else {
 
-					if ($yhtiorow['suuntalavat'] == 'S') {
-						$pdf->draw_text(440, $kala, hyllyalue('', $olesaldorow['hyllyalue'], 'riisuttu')." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
+					if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+						if ($yhtiorow['suuntalavat'] == 'S') {
+
+							$tekstiosa = hyllyalue('', $olesaldorow['hyllyalue'], 'riisuttu')." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ";
+
+							$oikpos = $pdf->strlen($tekstiosa, $p);
+
+							$pdf->draw_text(230 - $oikpos, $kala, $tekstiosa, $firstpage, $p);
+						}
+						else {
+
+							$tekstiosa = hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ";
+
+							$oikpos = $pdf->strlen($tekstiosa, $p);
+
+							$pdf->draw_text(230 - $oikpos, $kala, $tekstiosa, $firstpage, $p);
+						}
 					}
 					else {
-						$pdf->draw_text(440, $kala, hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
+						if ($yhtiorow['suuntalavat'] == 'S') {
+							$pdf->draw_text(440, $kala, hyllyalue('', $olesaldorow['hyllyalue'], 'riisuttu')." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ", $firstpage, $p);
+						}
+						else {
+							$pdf->draw_text(440, $kala, hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ", $firstpage, $p);
+						}
 					}
 				}
 

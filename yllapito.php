@@ -1071,6 +1071,21 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
+			elseif ($from == "" and $toim == 'toimi' and $alias_set == "KAYTTAJA") {
+				$ashak = "	SELECT group_concat(concat('\'',kuka,'\'')) kukat
+							FROM kuka
+							WHERE yhtio = '$kukarow[yhtio]'
+							and (nimi {$hakuehto} or kuka {$hakuehto})";
+				$ashakres = pupe_query($ashak);
+				$ashakrow = mysql_fetch_assoc($ashakres);
+
+				if ($ashakrow["kukat"] != "") {
+					$lisa .= " and {$array[$i]} in (" . $ashakrow["kukat"] . ")";
+				}
+				else {
+					$lisa .= " and {$array[$i]} = NULL ";
+				}
+			}
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
 				$lisa .= " and REPLACE(REPLACE({$array[$i]}, '-', ''), '+', '') like '%".str_replace(array('-','+'), '', $haku[$i])."%' ";
 			}

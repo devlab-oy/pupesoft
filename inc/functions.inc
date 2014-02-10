@@ -8781,7 +8781,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
-				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+				document.getElementById('livesearch_{$hakuid}').style.visibility = 'visible';
 			</script>";
 
 			$haku_array 		= explode(" ", $haku);
@@ -8790,7 +8790,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 			$tuoteindex 		= "";
 			$nimitindex			= "";
 
-			if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
+			if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F','G'))) {
 				$tuoteindex = "USE INDEX (tuoteno)";
 				$nimitindex = "USE INDEX (nimitys)";
 			}
@@ -8798,13 +8798,13 @@ if (!function_exists("livesearch_tuotehaku")) {
 			foreach ($haku_array as $haku) {
 				$haku = mysql_real_escape_string($haku);
 
-				if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
-					$tuoteno_haku_query .= " and match (tuote.tuoteno) against ('$haku*' IN BOOLEAN MODE) ";
-					$nimitys_haku_query .= " and match (tuote.nimitys) against ('$haku*' IN BOOLEAN MODE) ";
+				if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F','G'))) {
+					$tuoteno_haku_query .= " and match (tuote.tuoteno) against ('{$haku}*' IN BOOLEAN MODE) ";
+					$nimitys_haku_query .= " and match (tuote.nimitys) against ('{$haku}*' IN BOOLEAN MODE) ";
 				}
 				else {
-					$tuoteno_haku_query .= " and tuote.tuoteno like ('%$haku%') ";
-					$nimitys_haku_query .= " and tuote.nimitys like ('%$haku%') ";
+					$tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
+					$nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
 				}
 			}
 
@@ -8818,8 +8818,8 @@ if (!function_exists("livesearch_tuotehaku")) {
 			if ($kukarow["kesken"] > 0) {
 				$query  = "	SELECT if (toim_maa != '', toim_maa, maa) maa
 							FROM lasku
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and tunnus  = '$kukarow[kesken]'";
+							WHERE yhtio	= '{$kukarow['yhtio']}'
+							and tunnus  = '{$kukarow['kesken']}'";
 				$vieres = pupe_query($query);
 				$vierow = mysql_fetch_array($vieres);
 			}
@@ -8835,7 +8835,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 			}
 
 			if (isset($vierow) and $vierow["maa"] != "") {
-				$kieltolisa .= " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+				$kieltolisa .= " and (tuote.vienti = '' or tuote.vienti like '%-{$vierow['maa']}%' or tuote.vienti like '%+%') and tuote.vienti not like '%+{$vierow['maa']}%' ";
 			}
 
 			if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
@@ -8861,20 +8861,20 @@ if (!function_exists("livesearch_tuotehaku")) {
 			}
 
 			$query = "	(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
-						FROM tuote $tuoteindex
-						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						$naytetaanko_poistetut
-						$kieltolisa
-						$tuoteno_haku_query)
+						if (tuote.tuoteno = '{$haku}', 1, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 2, if(tuote.nimitys = '{$haku}', 3, if(left(tuote.nimitys, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+						FROM tuote {$tuoteindex}
+						WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+						{$naytetaanko_poistetut}
+						{$kieltolisa}
+						{$tuoteno_haku_query})
 						UNION
 						(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
-						FROM tuote $nimitindex
-						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						$naytetaanko_poistetut
-						$kieltolisa
-						$nimitys_haku_query)
+						if (tuote.tuoteno = '{$haku}', 1, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 2, if(tuote.nimitys = '{$haku}', 3, if(left(tuote.nimitys, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+						FROM tuote {$nimitindex}
+						WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+						{$naytetaanko_poistetut}
+						{$kieltolisa}
+						{$nimitys_haku_query})
 						ORDER BY jarjestys, tuoteno
 						LIMIT 500";
 			$result = pupe_query($query);
@@ -8882,6 +8882,25 @@ if (!function_exists("livesearch_tuotehaku")) {
 			$tuote_search_count = mysql_num_rows($result);
 
 			if ($tuote_search_count > 0) {
+
+				$varastot_mista_saa_myyda = array();
+
+				// Katsotaan mistä normaalivarastoista käyttäjä saa myydä
+				if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E','G'))) {
+
+					$varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
+
+					$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus) AS varastotunnukset
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tyyppi = ''
+								{$varastolisa}";
+					$varasto_chk_res = pupe_query($query);
+					$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
+
+					if ($varasto_chk_row['varastotunnukset'] != '') $varastot_mista_saa_myyda = explode(",", $varasto_chk_row['varastotunnukset']);
+				}
+
 
 				while ($row = mysql_fetch_assoc($result)) {
 
@@ -8894,28 +8913,41 @@ if (!function_exists("livesearch_tuotehaku")) {
 						$tyyli2 = "font-weight:normal'";
 					}
 
-					echo "	<div id='tuote_valinta_$row[tunnus]'
-								name='selectOptions$hakuid'
+					echo "	<div id='tuote_valinta_{$row['tunnus']}'
+								name='selectOptions{$hakuid}'
 								onmouseover=\"this.className='liveSearchSelectedItem';
 									keyStrokeIndex = -1;
-									var aEls = document.getElementsByName('selectOptions$hakuid');
+									var aEls = document.getElementsByName('selectOptions{$hakuid}');
 									for (var iEl = 0; iEl < aEls.length; iEl++) {
-										if (aEls[iEl].id.substring(0,14) == 'tuote_valinta_' && aEls[iEl].id != 'tuote_valinta_$row[tunnus]') {
+										if (aEls[iEl].id.substring(0,14) == 'tuote_valinta_' && aEls[iEl].id != 'tuote_valinta_{$row['tunnus']}') {
 											document.getElementById(aEls[iEl].id).className='';
 										}
 									} \"
 								onmouseout=\"this.className='';\"
-								onclick=\"document.getElementById('$hakuid').value='$row[tuoteno]';";
+								onclick=\"document.getElementById('{$hakuid}').value='{$row['tuoteno']}';";
 								if ($submit == "") {
-									echo "document.$formi.submit();";
+									echo "document.{$formi}.submit();";
 								}
 								else {
-									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+									echo "document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';";
 								}
-								echo "\"
-								style='padding:2px;'>
-								<font style='$tyyli'>$row[tuoteno]</font> &raquo; <font style='$tyyli2'>$row[nimitys]</font>
-							</div><div name='selectValues$hakuid' id='$row[tuoteno]'></div>";
+								echo "\"style='padding:2px;'>";
+								echo "<font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
+
+								if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E','G')) and count($varastot_mista_saa_myyda) > 0) {
+
+									$saldo_yht = 0;
+
+									foreach ($varastot_mista_saa_myyda as $varaston_tunnus) {
+										list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "", $varaston_tunnus);
+										$saldo_yht += $saldo;
+									}
+
+									echo " &raquo; <font style='{$tyyli2}'>",t("Saldo")," {$saldo_yht}</font>";
+								}
+
+								echo "</div>";
+								echo "<div name='selectValues{$hakuid}' id='{$row['tuoteno']}'></div>";
 
 				}
 
@@ -8934,7 +8966,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 		else {
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
-				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+				document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';
 			</script>";
 		}
 	}

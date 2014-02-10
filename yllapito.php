@@ -1174,7 +1174,7 @@
 
 				$lisa = substr($lisa, 0, -3).")";
 			}
-			elseif ($yhtiorow['livetuotehaku_hakutapa'] == "F" and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys")) {
+			elseif (($yhtiorow['livetuotehaku_hakutapa'] == "F" or $yhtiorow['livetuotehaku_hakutapa'] == "G") and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys")) {
 				 $lisa .= " and match ($array[$i]) against ('{$haku[$i]}*' IN BOOLEAN MODE) ";
 			}
 			else {
@@ -1316,7 +1316,7 @@
 					<input type = 'submit' value = '".t("Näytä erääntyneet")."'></form>";
 		}
 
-		if ($yhtiorow['livetuotehaku_hakutapa'] != "F" and $toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
+		if (!in_array($yhtiorow['livetuotehaku_hakutapa'], array('F','G')) and $toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
 
 			$query = "	SELECT *
 						FROM tuote

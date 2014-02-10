@@ -2617,12 +2617,12 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "selected";
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('E' => '', 'F' => '', 'G' => '');
 
 		$ulos .= "<option value = ''>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. (Hidas tapa)")."</option>";
-		$ulos .= "<option value = 'F' $sel[F]>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. (Nopea tapa)")."</option>";
+		$ulos .= "<option value = 'E' {$sel['E']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
+		$ulos .= "<option value = 'F' {$sel['F']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. (Nopea tapa)")."</option>";
+		$ulos .= "<option value = 'G' {$sel['G']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2642,7 +2642,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "naytetaanko_ale_peruste_tilausrivilla") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

@@ -2423,7 +2423,7 @@
 
 	if (function_exists($funktio)) {
 		$params = array(
-			'redirct_to' => $redirect_to,
+			'redirect_to' => $redirect_to,
 			'errori' => $errori,
 			'valittu_asiakas' => $valittu_asiakas,
 		);

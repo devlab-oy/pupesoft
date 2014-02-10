@@ -302,10 +302,8 @@
 			$komm .= "$kuljetusohjeet";
 		}
 
-		if (true) {
-			$komm .= $postirow['tilausyhteyshenkilo'] != '' ? "\n".t("Tilausyhteyshenkilö").": {$postirow['tilausyhteyshenkilo']}" : '';
-			$komm .= $postirow['asiakkaan_tilausnumero'] != '' ? "\n".t("Astilnro").": {$postirow['asiakkaan_tilausnumero']}" : '';
-		}
+		$komm .= $postirow['tilausyhteyshenkilo'] != '' ? "\n".t("Tilausyhteyshenkilö").": {$postirow['tilausyhteyshenkilo']}" : '';
+		$komm .= $postirow['asiakkaan_tilausnumero'] != '' ? "\n".t("Astilnro").": {$postirow['asiakkaan_tilausnumero']}" : '';
 
 		$pdf->draw_paragraph(70, 18, 15, 380, $komm, $firstpage, $isobold);
 

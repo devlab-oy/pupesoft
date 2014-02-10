@@ -465,14 +465,14 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
 	$salakalapala = 65;
 
-	if ($laskurow["viesti"] != "" or $laskurow['yhteyshenkilo'] != "" or $viestirarrow["viesti"] != "") {
+	if ($laskurow["viesti"] != "" or $laskurow['yhteyshenkilo'] != "" or $viestirarrow["viesti"] != "" or $laskurow['asiakkaan_tilausnumero'] != "") {
 		if ($rahtikirja_tulostus == "yep") {
 			$salakalapala -= 5;
-			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$viestirarrow["viesti"]),	$firstpage, $kirj);
+			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow['asiakkaan_tilausnumero']." ".$viestirarrow["viesti"]),	$firstpage, $kirj);
 		}
 		else {
 			$salakalapala -= 5;
-			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow["viesti"]),		$firstpage, $kirj);
+			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow['asiakkaan_tilausnumero']." ".$laskurow["viesti"]),		$firstpage, $kirj);
 		}
 	}
 

@@ -100,7 +100,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		echo "<font class='error'>".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on pienempi kuin laskun p‰iv‰m‰‰r‰ %s", "", $laskurow['tapvm'])."!</font>";
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi['tilikausi_alku'], $tapahtumapaiva)."!</font>";
+		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi, $tapahtumapaiva)."!</font>";
 	}
 }
 
@@ -480,8 +480,8 @@ function hae_lasku2($laskuno, $toim) {
 		return FALSE;
 	}
 	elseif (!empty($tilikausi)) {
-	 		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi muuttaa k‰teist‰ laskuksi %s", "", $tilikausi['tilikausi_alku'], $tapahtumapaiva)."!</font>";
-	 		return FALSE;
+	 	echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi muuttaa k‰teist‰ laskuksi %s", "", $tilikausi, $row['tapvm'])."!</font>";
+	 	return FALSE;
 	}
 
 	return $row;

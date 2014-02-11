@@ -17,6 +17,8 @@ class TarkastuspoytakirjaPDF
   @margin = nil
   @data   = nil
 
+  @pdf = nil
+
   def initialize
     @margin = 20
   end
@@ -33,14 +35,15 @@ class TarkastuspoytakirjaPDF
                                :page_layout => :landscape,
                                :margin      => [100, @margin, @margin, @margin]
                              }) do |pdf|
-      pdf.font 'Helvetica', :style => :normal, :size => 8
-      header pdf
+      @pdf = pdf
+      @pdf.font 'Helvetica', :style => :normal, :size => 8
+      header
 
-      info pdf
+      info
 
-      rows pdf
+      rows
 
-      footer pdf
+      footer
     end
 
     filename
@@ -134,158 +137,158 @@ class TarkastuspoytakirjaPDF
     ]
   end
 
-  def info(pdf)
-    pdf.bounding_box([pdf.bounds.left, pdf.cursor], :width => pdf.bounds.right - @margin, :height => 115) do
-      top_coordinate = pdf.cursor
-      pdf.font 'Helvetica', :style => :normal, :size => 10
+  def info
+    @pdf.bounding_box([@pdf.bounds.left, @pdf.cursor], :width => @pdf.bounds.right - @margin, :height => 115) do
+      top_coordinate = @pdf.cursor
+      @pdf.font 'Helvetica', :style => :normal, :size => 10
 
-      pdf.text @data['yhtio']['nimi']
-      pdf.move_down 10
-      pdf.text @data['yhtio']['osoite']
-      pdf.move_down 10
-      pdf.text @data['yhtio']['postino'] + ' ' + @data['yhtio']['postitp']
-      pdf.move_down 5
-      pdf.text @data['yhtio']['puhelin']
+      @pdf.text @data['yhtio']['nimi']
+      @pdf.move_down 10
+      @pdf.text @data['yhtio']['osoite']
+      @pdf.move_down 10
+      @pdf.text @data['yhtio']['postino'] + ' ' + @data['yhtio']['postitp']
+      @pdf.move_down 5
+      @pdf.text @data['yhtio']['puhelin']
 
-      pdf.move_up top_coordinate - pdf.cursor
-      pdf.font 'Helvetica', :style => :normal, :size => 8
+      @pdf.move_up top_coordinate - @pdf.cursor
+      @pdf.font 'Helvetica', :style => :normal, :size => 8
 
-      pdf.indent(200) do
+      @pdf.indent(200) do
         @customer_data.each do |value|
-          pdf.float do
-            pdf.text value[:header], :style => :bold
+          @pdf.float do
+            @pdf.text value[:header], :style => :bold
           end
-          pdf.indent(80) do
-            pdf.text value[:value], :style => :normal
+          @pdf.indent(80) do
+            @pdf.text value[:value], :style => :normal
           end
-          pdf.move_down 5
+          @pdf.move_down 5
         end
       end
 
-      pdf.move_up top_coordinate - pdf.cursor
+      @pdf.move_up top_coordinate - @pdf.cursor
 
-      pdf.indent(400) do
+      @pdf.indent(400) do
         @spot_data.each do |value|
-          pdf.float do
-            pdf.text value[:header], :style => :bold
+          @pdf.float do
+            @pdf.text value[:header], :style => :bold
           end
-          pdf.indent(80) do
-            pdf.text value[:value], :style => :normal
+          @pdf.indent(80) do
+            @pdf.text value[:value], :style => :normal
           end
-          pdf.move_down 5
+          @pdf.move_down 5
         end
       end
 
-      pdf.move_up top_coordinate - pdf.cursor
+      @pdf.move_up top_coordinate - @pdf.cursor
 
-      pdf.indent(600) do
+      @pdf.indent(600) do
         @other_data.each do |value|
-          pdf.float do
-            pdf.text value[:header], :style => :bold
+          @pdf.float do
+            @pdf.text value[:header], :style => :bold
           end
-          pdf.indent(80) do
-            pdf.text value[:value], :style => :normal
+          @pdf.indent(80) do
+            @pdf.text value[:value], :style => :normal
           end
-          pdf.move_down 5
+          @pdf.move_down 5
         end
       end
     end
   end
 
-  def rows(pdf)
-    row_headers pdf
+  def rows
+    row_headers
 
-    pdf.move_down 10
+    @pdf.move_down 10
 
     @data['rivit'].each do |row|
-      row pdf, row
+      row row
     end
   end
 
-  def row_headers(pdf)
+  def row_headers
     #Line defines the drawing path. Stroke actually draws the line
-    lines_cross_y = pdf.cursor
-    pdf.line [pdf.bounds.left, lines_cross_y], [pdf.bounds.right, lines_cross_y]
-    pdf.stroke
+    lines_cross_y = @pdf.cursor
+    @pdf.line [@pdf.bounds.left, lines_cross_y], [@pdf.bounds.right, lines_cross_y]
+    @pdf.stroke
 
-    pdf.font 'Helvetica', :size => 10
-    pdf.move_down 10
+    @pdf.font 'Helvetica', :size => 10
+    @pdf.move_down 10
 
-    pdf.float do
-      pdf.text 'Laitetiedot'
+    @pdf.float do
+      @pdf.text 'Laitetiedot'
     end
 
-    pdf.indent(650) do
-      pdf.float do
-        pdf.line [-7, lines_cross_y], [-7, pdf.bounds.bottom]
-        pdf.stroke
-        pdf.text 'Tehdyt toimenpiteet'
+    @pdf.indent(650) do
+      @pdf.float do
+        @pdf.line [-7, lines_cross_y], [-7, @pdf.bounds.bottom]
+        @pdf.stroke
+        @pdf.text 'Tehdyt toimenpiteet'
       end
     end
 
-    pdf.font 'Helvetica', :size => 8
-    x = pdf.bounds.left
-    pdf.move_down 60
+    @pdf.font 'Helvetica', :size => 8
+    x = @pdf.bounds.left
+    @pdf.move_down 60
 
 
-    pdf.float do
-      pdf.move_down 5
-      pdf.text_box 'Sijainti nro', :rotate => 90, :at => [x, pdf.cursor]
-      pdf.move_up 5
-      pdf.text_box 'Laitteen sijainti', :at => [x+30, pdf.cursor]
-      pdf.move_down 5
-      pdf.text_box 'Muuttunut sijainti', :at => [x+200, pdf.cursor], :rotate => 90
-      pdf.move_up 5
-      pdf.text_box 'Merkki / malli', :at => [x+220, pdf.cursor]
+    @pdf.float do
+      @pdf.move_down 5
+      @pdf.text_box 'Sijainti nro', :rotate => 90, :at => [x, @pdf.cursor]
+      @pdf.move_up 5
+      @pdf.text_box 'Laitteen sijainti', :at => [x+30, @pdf.cursor]
+      @pdf.move_down 5
+      @pdf.text_box 'Muuttunut sijainti', :at => [x+200, @pdf.cursor], :rotate => 90
+      @pdf.move_up 5
+      @pdf.text_box 'Merkki / malli', :at => [x+220, @pdf.cursor]
 
-      pdf.move_up 10
-      pdf.text_box 'Koko', :at => [x+320, pdf.cursor]
-      pdf.move_down 10
-      pdf.text_box 'kg / litra', :at => [x+320, pdf.cursor]
+      @pdf.move_up 10
+      @pdf.text_box 'Koko', :at => [x+320, @pdf.cursor]
+      @pdf.move_down 10
+      @pdf.text_box 'kg / litra', :at => [x+320, @pdf.cursor]
 
-      pdf.move_up 10
-      pdf.text_box 'Palo-/', :at => [x+370, pdf.cursor]
-      pdf.move_down 10
-      pdf.text_box 'teholuokka', :at => [x+370, pdf.cursor]
+      @pdf.move_up 10
+      @pdf.text_box 'Palo-/', :at => [x+370, @pdf.cursor]
+      @pdf.move_down 10
+      @pdf.text_box 'teholuokka', :at => [x+370, @pdf.cursor]
 
-      pdf.text_box 'Sammute', :at => [x+420, pdf.cursor]
-      pdf.text_box 'Säiliön nro', :at => [x+470, pdf.cursor]
-      pdf.text_box 'Ponnep nro', :at => [x+540, pdf.cursor]
-      pdf.move_down 5
-      pdf.text_box 'Poikkeama raportti', :at => [x+600, pdf.cursor], :rotate => 90
-      pdf.text_box 'Viimeinen painekoe', :at => [x+625, pdf.cursor], :rotate => 90
-      pdf.text_box 'Tark. väli', :at => [x+655, pdf.cursor], :rotate => 90
-      pdf.text_box 'Tarkastus', :at => [x+685, pdf.cursor], :rotate => 90
-      pdf.text_box 'Huolto', :at => [x+715, pdf.cursor], :rotate => 90
-      pdf.text_box 'Painekoe', :at => [x+745, pdf.cursor], :rotate => 90
+      @pdf.text_box 'Sammute', :at => [x+420, @pdf.cursor]
+      @pdf.text_box 'Säiliön nro', :at => [x+470, @pdf.cursor]
+      @pdf.text_box 'Ponnep nro', :at => [x+540, @pdf.cursor]
+      @pdf.move_down 5
+      @pdf.text_box 'Poikkeama raportti', :at => [x+600, @pdf.cursor], :rotate => 90
+      @pdf.text_box 'Viimeinen painekoe', :at => [x+625, @pdf.cursor], :rotate => 90
+      @pdf.text_box 'Tark. väli', :at => [x+655, @pdf.cursor], :rotate => 90
+      @pdf.text_box 'Tarkastus', :at => [x+685, @pdf.cursor], :rotate => 90
+      @pdf.text_box 'Huolto', :at => [x+715, @pdf.cursor], :rotate => 90
+      @pdf.text_box 'Painekoe', :at => [x+745, @pdf.cursor], :rotate => 90
     end
 
-    pdf.move_down 10
-    pdf.line [pdf.bounds.left, pdf.cursor], [pdf.bounds.right, pdf.cursor]
-    pdf.stroke
+    @pdf.move_down 10
+    @pdf.line [@pdf.bounds.left, @pdf.cursor], [@pdf.bounds.right, @pdf.cursor]
+    @pdf.stroke
 
   end
 
-  def row(pdf, row)
+  def row(row)
     table_cells = [
-        pdf.make_cell(:content => row['laite']['oma_numero']),
-        pdf.make_cell(:content => row['laite']['sijainti']),
-        pdf.make_cell(:content => '__'), #muuttunut sijainti
-        pdf.make_cell(:content => row['laite']['nimitys']),
-        pdf.make_cell(:content => row['laite']['sammutin_koko']),
-        pdf.make_cell(:content => ' '), #teholuokka
-        pdf.make_cell(:content => row['laite']['sammutin_tyyppi']),
-        pdf.make_cell(:content => row['laite']['sarjanro']),
-        pdf.make_cell(:content => ' '), #ponnop nro
-        pdf.make_cell(:content => row['poikkeus']),
-        pdf.make_cell(:content => row['laite']['viimeinen_painekoe']),
-        pdf.make_cell(:content => row['toimenpiteen_huoltovali']),
-        pdf.make_cell(:content => row['tarkastus'].nil? ? '' : row['tarkastus']),
-        pdf.make_cell(:content => row['huolto'].nil? ? '' : row['huolto']),
-        pdf.make_cell(:content => row['koeponnistus'].nil? ? '' : row['koeponnistus']),
+        @pdf.make_cell(:content => row['laite']['oma_numero']),
+        @pdf.make_cell(:content => row['laite']['sijainti']),
+        @pdf.make_cell(:content => '__'), #muuttunut sijainti
+        @pdf.make_cell(:content => row['laite']['nimitys']),
+        @pdf.make_cell(:content => row['laite']['sammutin_koko']),
+        @pdf.make_cell(:content => ' '), #teholuokka
+        @pdf.make_cell(:content => row['laite']['sammutin_tyyppi']),
+        @pdf.make_cell(:content => row['laite']['sarjanro']),
+        @pdf.make_cell(:content => ' '), #ponnop nro
+        @pdf.make_cell(:content => row['poikkeus']),
+        @pdf.make_cell(:content => row['laite']['viimeinen_painekoe']),
+        @pdf.make_cell(:content => row['toimenpiteen_huoltovali']),
+        @pdf.make_cell(:content => row['tarkastus'].nil? ? '' : row['tarkastus']),
+        @pdf.make_cell(:content => row['huolto'].nil? ? '' : row['huolto']),
+        @pdf.make_cell(:content => row['koeponnistus'].nil? ? '' : row['koeponnistus']),
     ]
 
-    pdf.table([table_cells],
+    @pdf.table([table_cells],
               :column_widths => {
                   0  => 30,
                   1  => 165,
@@ -309,50 +312,50 @@ class TarkastuspoytakirjaPDF
               })
   end
 
-  def footer(pdf)
+  def footer
     x = 0
     y = 50
 
-    pdf.line [pdf.bounds.left, y], [pdf.bounds.right, y]
-    pdf.stroke_horizontal_line 1, 1, :at => y
+    @pdf.line [@pdf.bounds.left, y], [@pdf.bounds.right, y]
+    @pdf.stroke_horizontal_line 1, 1, :at => y
 
     y -= 10
-    pdf.draw_text "Pvm", :at => [x, y]
+    @pdf.draw_text "Pvm", :at => [x, y]
 
     x += 120
-    pdf.line [x-5, 50], [x-5, 0]
-    pdf.draw_text "Työn suorittajan kuittaus / nimen selvennys", :at => [x, y]
+    @pdf.line [x-5, 50], [x-5, 0]
+    @pdf.draw_text "Työn suorittajan kuittaus / nimen selvennys", :at => [x, y]
 
 
     x += 300
-    pdf.line [x-5, 50], [x-5, 0]
-    pdf.draw_text "Asiakkaan kuittaus / nimen selvennys", :at => [x, y]
+    @pdf.line [x-5, 50], [x-5, 0]
+    @pdf.draw_text "Asiakkaan kuittaus / nimen selvennys", :at => [x, y]
 
     y = 0
-    pdf.line [pdf.bounds.left, y], [pdf.bounds.right, y]
-    pdf.stroke_horizontal_line 1, 1, :at => y
+    @pdf.line [@pdf.bounds.left, y], [@pdf.bounds.right, y]
+    @pdf.stroke_horizontal_line 1, 1, :at => y
   end
 
-  def header(pdf)
-    pdf.repeat(:all, :dynamic => true) do
-      pdf.draw_text pdf.page_number, :at => [770, 540]
-      logo pdf
+  def header
+    @pdf.repeat(:all, :dynamic => true) do
+      @pdf.draw_text @pdf.page_number, :at => [770, 540]
+      logo
 
-      pdf.move_down 40
+      @pdf.move_down 40
 
-      pdf.font 'Helvetica', :style => :bold, :size => 10
-      pdf.draw_text "Tarkastuspöytäkirjan nro #{@data['tunnus']}", :at => [600, 515.28]
-      pdf.font 'Helvetica', :style => :normal
+      @pdf.font 'Helvetica', :style => :bold, :size => 10
+      @pdf.draw_text "Tarkastuspöytäkirjan nro #{@data['tunnus']}", :at => [600, 515.28]
+      @pdf.font 'Helvetica', :style => :normal
     end
   end
 
-  def logo(pdf)
+  def logo
     filepath = '/tmp/logo.jpeg'
     File.open(filepath, 'a+') { |file|
       file.write Base64.decode64 @logo
     }
-    pdf.float do
-      pdf.image filepath, :scale => 0.7, :at => [0, 555.28]
+    @pdf.float do
+      @pdf.image filepath, :scale => 0.7, :at => [0, 555.28]
     end
   end
 

@@ -352,7 +352,7 @@ function tulosta_kalustoraportti($kohteet) {
 	global $kukarow, $yhtiorow;
 
 	$filepath = kirjoita_json_tiedosto($kohteet, 'Kalustoraportti');
-	return aja_ruby($filepath, 'kalustoraportti2');
+	return aja_ruby($filepath, 'kalustoraportti');
 }
 
 function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {

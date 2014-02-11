@@ -9,305 +9,258 @@ require 'date'
 require 'base64'
 
 class KalustoraporttiPDF
+  @logo     = nil
+  @customer = nil
+  @company  = nil
 
-  attr_accessor :customer, :company, :logo
+  @margin = nil
+  @spot   = nil
+
+  @pdf = nil
 
   def initialize
-    margin = 20
-    @pdf = Prawn::Document.new(:page_size => "A4", :page_layout => :landscape, :margin => [margin, margin, margin, margin])
-
-    @pdf.font 'Helvetica', :style => :normal, :size => 10
-
-    #NOTICE!! We have to use pdf_x and pdf_y because Prawn has x and y variables in it and they mix with this class x and y if we had used them in @pdf.repeat
-    @pdf.repeat(:all, :dynamic => true) do
-      @pdf.draw_text @pdf.page_number, :at => [770, 520]
-
-      @pdf_x = 0
-      @pdf_y = 560
-      self.header
-    end
+    @margin = 20
   end
 
-  def data(data)
-    @data = data
-  end
+  def generate(_pdf, header_called)
+    if _pdf.nil?
+      filepath = "/tmp/Kalustoraportti_#{@spot['kohde_tunnus'].to_s}.pdf"
+      filename = "Kalustoraportti_#{@spot['kohde_tunnus'].to_s}.pdf"
+      Prawn::Document.generate(filepath,
+                               { :page_size   => 'A4',
+                                 :page_layout => :landscape,
+                                 :margin      => [100, @margin, @margin, @margin]
+                               }) do |pdf|
+        @pdf = pdf
+        @pdf.font 'Helvetica', :style => :normal, :size => 8
+        header
 
-  def generate
-    if @data.empty?
-      #error
-      #exit
+        @pdf.move_down 75
+        @pdf.font 'Helvetica', :size => 8
+
+        header_info
+
+        @pdf.move_down 20
+
+        spot_devices
+
+        filename
+      end
+    else
+      @pdf = _pdf
+      @pdf.font 'Helvetica', :style => :normal, :size => 8
+      header unless header_called
+
+      @pdf.move_down 75
+      @pdf.font 'Helvetica', :size => 8
+
+      header_info
+
+      @pdf.move_down 20
+
+      spot_devices
+
+      'Kalustoraportit.pdf'
     end
-
-    #NOTICE!!! We have to manually set the y to correct spot because self.header gets called at @pdf.render_file position because of this we do not know how long the header is
-    @x = 0
-    @y = 410
-
-    @pdf.font 'Helvetica', :size => 10
-    @y += 10
-    self.print_spot_devices
-
-    filepath = "/tmp/Kalustoraportti_" + @data['kohde_tunnus'].to_s + ".pdf"
-    #Filename is a separate variable because pdf.render_file wants full path but in HTML save form we want to force the directory user is able to download files from. this is the reason we only retrun filename
-    filename = "Kalustoraportti_" + @data['kohde_tunnus'].to_s + ".pdf";
-    @pdf.render_file filepath
-
-    return filename
   end
 
   def header
-    self.logo
+    @pdf.repeat(:all, :dynamic => true) do
+      @pdf.draw_text @pdf.page_number, :at => [770, 520]
 
-    @pdf_y -= 90
-    self.company_info
-    @pdf_y += 35
-    @pdf.font 'Helvetica', :size => 8
-    @pdf_x = 200
-    customer_data = [
-      {
-        :header => 'Asiakas nro',
-        :value => @customer['asiakasnro']
-      },
-      {
-        :header => 'Asiakas',
-        :value => @customer['nimi']
-      },
-      {
-        :header => 'Kohde',
-        :value => @customer['osoite']
-      },
-    ]
-    self.customer_info(customer_data)
+      logo
 
-    @pdf_x += 250
-    @pdf_y += 45
-
-    other_data = [
-      {
-        :header => 'Pvm',
-        :value => DateTime.now.strftime('%d.%m.%Y')
-      },
-      {
-        :header => 'Asiakasvastaava',
-        :value => ' '
-      },
-    ]
-    self.other_info(other_data)
+      company_info
+    end
   end
 
   def logo
-    file = File.new('/tmp/logo.jpeg', 'a+')
-    file.write Base64.decode64 @logo
-    file.close
-    @pdf.image file.path, :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    filepath = '/tmp/logo.jpeg'
+    File.open(filepath, 'a+') { |file|
+      file.write Base64.decode64 @logo
+    }
+    @pdf.image filepath, :scale => 0.7
   end
 
   def company_info
     @pdf.font 'Helvetica', :size => 10
-    @pdf.draw_text @company['nimi'], :at => [@pdf_x, @pdf_y]
+    @pdf.text @company['nimi']
 
-    @pdf_y -= 35
-    @pdf.draw_text 'KALUSTORAPORTTI', :at => [@pdf_x, @pdf_y], :style => :bold
+    @pdf.move_down 25
+    @pdf.text 'KALUSTORAPORTTI', :style => :bold
   end
 
-  def customer_info(customer_data)
-    customer_data.each do |value|
-      @pdf.draw_text value[:header], :style => :bold, :at => [@pdf_x, @pdf_y]
-      @pdf.draw_text value[:value], :style => :normal, :at => [@pdf_x+100, @pdf_y]
+  def header_info
+    y_temp        = @pdf.y
+    customer_data = [
+        {
+            :header => 'Asiakas nro',
+            :value  => @customer['asiakasnro'].empty? ? ' ' : @customer['asiakasnro']
+        },
+        {
+            :header => 'Asiakas',
+            :value  => @customer['nimi'].empty? ? ' ' : @customer['nimi']
+        },
+        {
+            :header => 'Kohde',
+            :value  => @spot['kohde_nimi'].empty? ? ' ' : @spot['kohde_nimi']
+        },
+    ]
 
-      @pdf_y -= 15
+    @pdf.indent(200) do
+      header_table(customer_data)
+    end
+
+    @pdf.move_up y_temp - @pdf.y
+
+    other_data = [
+        {
+            :header => 'Pvm',
+            :value  => DateTime.now.strftime('%d.%m.%Y')
+        },
+        {
+            :header => 'Asiakasvastaava',
+            :value  => ' '
+        },
+    ]
+
+    @pdf.indent(400) do
+      header_table(other_data)
     end
   end
 
-  def other_info(other_data)
-    other_data.each do |value|
-      @pdf.draw_text value[:header], :style => :bold, :at => [@pdf_x, @pdf_y]
-      @pdf.draw_text value[:value], :style => :normal, :at => [@pdf_x+100, @pdf_y]
-
-      @pdf_y -= 30
+  def header_table(data)
+    data.each do |value|
+      @pdf.float do
+        @pdf.text value[:header], :style => :bold
+      end
+      @pdf.indent(100) do
+        @pdf.text value[:value], :style => :normal
+      end
+      @pdf.move_down 10
     end
   end
 
-  def print_spot_devices
-    @devices_start_temp = @y
-    @pdf.font 'Helvetica', :size => 8
-    self.print_row_headers
+  def spot_devices
+    row_headers
 
+    @pdf.move_down 10
 
-    @current_page = @pdf.page_count
+    rows
+  end
 
-    # @roll = @pdf.transaction do
-    #   @y -= 30
-    #   @devices_start_temp = @y
-    #   @data['paikat'].each do |index, place|
-    #     place['laitteet'].each do |device|
-    #       self.print_row device
-    #       @y -= 20
-    #       @pdf.move_down 20
-    #       @pdf.text ' '
-    #     end
-    #   end
+  def row_headers
+    horizontal_line
 
-    #   @pdf.rollback if @pdf.page_count > @current_page
-    # end
+    table_cells = [
+        @pdf.make_cell(:content => 'Järjestys nro'),
+        @pdf.make_cell(:content => 'Laitteen sijainti'),
+        @pdf.make_cell(:content => 'Nimike'), #muuttunut sijainti
+        @pdf.make_cell(:content => 'Säiliön nro'),
+        @pdf.make_cell(:content => 'Ponnep nro'),
+        @pdf.make_cell(:content => 'Sammute'), #teholuokka
+        @pdf.make_cell(:content => 'Palo-/teholuokka'),
+        @pdf.make_cell(:content => 'Valm. vuosi'),
+        @pdf.make_cell(:content => 'Tark. väli'), #ponnop nro
+        @pdf.make_cell(:content => 'Viimeinen tark kkvv'),
+        @pdf.make_cell(:content => 'huolto kkvv'),
+        @pdf.make_cell(:content => 'painekoe kkvv'),
+        @pdf.make_cell(:content => 'Poikk. raportti'),
+    ]
 
-    # if @roll == false
-    #   @pdf.start_new_page
+    #@pdf.table wants 2 dimensional table
+    table [table_cells]
 
-    #   @pdf.text 'TETETETETETETEETTE'
-    # end
+    horizontal_line
+  end
 
-    @data['paikat'].each do |index, place|
+  def rows
+    table_cells = []
+    @spot['paikat'].each do |index, place|
       place['laitteet'].each do |device|
-        self.print_row device
-        @y -= 20
-        # @pdf.move_down 20
-        # @pdf.text @pdf.cursor.to_s
 
-        if @y <= 20
-          page_changes = true
+        begin
+          Date.parse(device['viimeiset_tapahtumat']['tarkastus'])
+          tarkastus = Date.parse(device['viimeiset_tapahtumat']['tarkastus']).strftime('%m%y')
+        rescue
         end
 
-        if @pdf.page_count > @current_page
-          page_changes = true
+        begin
+          Date.parse(device['viimeiset_tapahtumat']['huolto'])
+          huolto = Date.parse(device['viimeiset_tapahtumat']['huolto']).strftime('%m%y')
+        rescue
         end
-        if page_changes
-          @pdf.start_new_page
-          @y = @devices_start_temp
-          self.print_row_headers
-          page_changes = false
-          @current_page = @pdf.page_count
+
+        begin
+          Date.parse(device['viimeiset_tapahtumat']['koeponnistus'])
+          koeponnistus = Date.parse(device['viimeiset_tapahtumat']['koeponnistus']).strftime('%m%y')
+        rescue
         end
+
+        table_cells << [
+            device['oma_numero'],
+            device['sijainti'],
+            device['tuote_nimi'],
+            device['sarjanro'],
+            device['ponnop_nro'],
+            device['sammutin_tyyppi'],
+            device['palo_luokka'],
+            Date.parse(device['valm_pvm']).year.to_s,
+            device['huoltovali'],
+            tarkastus,
+            huolto,
+            koeponnistus,
+            device['poikkeus']
+        ]
       end
     end
+
+    table table_cells
   end
 
-  def print_row_headers
-    @pdf.line [0, @y], [@pdf.bounds.right, @y]
-    @pdf.stroke_horizontal_line 1, 1, :at => @y
-
-    @x = 0
-    @y -= 20
-    @pdf.bounding_box([@x, @y+10], :width => 35, :height => 50) do
-      @pdf.text 'Järjestys nro'
-    end
-
-    @x += 40
-    @pdf.draw_text 'Laitteen sijainti', :at => [@x, @y]
-
-    @x += 200
-    @pdf.draw_text "Nimike", :at => [@x, @y]
-
-    @x += 70
-    @pdf.draw_text "Säilion nro", :at => [@x, @y]
-
-    @x += 50
-    @pdf.draw_text "Ponnep nro", :at => [@x, @y]
-
-    @x += 50
-    @pdf.draw_text "Sammute", :at => [@x, @y]
-
-    @x += 70
-    @pdf.draw_text "Palo-/teholuokka", :at => [@x, @y]
-
-    @x += 90
-    @pdf.bounding_box([@x, @y+10], :width => 35, :height => 50) do
-      @pdf.text "Valm. vuosi"
-    end
-
-    @x += 30
-    @pdf.bounding_box([@x, @y+10], :width => 35, :height => 50) do
-      @pdf.text "Tark. väli"
-    end
-
-    @x += 50
-    @pdf.draw_text "Viimeinen", :at => [@x, @y+10]
-
-    @y -= 5
-    @pdf.bounding_box([@x, @y+10], :width => 35, :height => 50) do
-      @pdf.text "tark kkvv"
-    end
-
-    @x += 40
-    @pdf.bounding_box([@x, @y+10], :width => 35, :height => 50) do
-      @pdf.text "huolto kkvv"
-    end
-
-    @x += 40
-    @pdf.bounding_box([@x, @y+10], :width => 35, :height => 50) do
-      @pdf.text "painekoe vuosi"
-    end
-
-    @x += 50
-    @pdf.bounding_box([@x, @y+10], :width => 35, :height => 50) do
-      @pdf.text "Poikk. raportti"
-    end
-
-    @y -= 15
-    @pdf.line [0, @y], [@pdf.bounds.right, @y]
-    @pdf.stroke_horizontal_line 1, 1, :at => @y
-
-    @y -= 30
+  def table(table_cells)
+    @pdf.table(table_cells,
+               :column_widths => {
+                   0  => 45,
+                   1  => 175,
+                   2  => 70,
+                   3  => 50,
+                   4  => 50,
+                   5  => 70,
+                   6  => 90,
+                   7  => 30,
+                   8  => 40,
+                   9  => 50,
+                   10 => 40,
+                   11 => 50,
+                   12 => 40,
+               },
+               :cell_style    => {
+                   :borders => []
+               })
   end
 
-  def print_row(row)
-    @x = 0
-    @pdf.draw_text row['oma_numero'], :at => [@x, @y]
+  def horizontal_line
+    #Line defines the drawing path. Stroke actually draws the line
+    lines_cross_y = @pdf.cursor
+    @pdf.line [@pdf.bounds.left, lines_cross_y], [@pdf.bounds.right, lines_cross_y]
+    @pdf.stroke
+  end
 
-    @x += 40
-    @pdf.draw_text row['sijainti'], :at => [@x, @y]
+  def spot=(spot)
+    @spot = spot
+  end
 
-    @x += 200
-    @pdf.draw_text row['tuote_nimi'], :at => [@x, @y]
+  def customer=(customer)
+    @customer = customer
+  end
 
-    @x += 70
-    @pdf.draw_text row['sarjanro'], :at => [@x, @y]
+  def company=(company)
+    @company = company
+  end
 
-    @x += 50
-    @pdf.draw_text row['ponnep_nro'], :at => [@x, @y]
-
-    @x += 50
-    @pdf.draw_text row['sammutin_tyyppi'], :at => [@x, @y]
-
-    @x += 70
-    @pdf.draw_text row['palo_luokka'], :at => [@x, @y]
-
-    @x += 90
-    begin Date.parse(row['valm_pvm'])
-      @pdf.draw_text Date.parse(row['valm_pvm']).year, :at => [@x, @y]
-    rescue
-
-    end
-
-    @x += 35
-    @pdf.draw_text row['huoltovali'], :at => [@x, @y]
-
-    @x += 50
-
-    begin Date.parse(row['viimeiset_tapahtumat']['tarkastus'])
-      date = Date.parse(row['viimeiset_tapahtumat']['tarkastus']).strftime('%m%y')
-      @pdf.draw_text date, :at => [@x, @y]
-    rescue
-
-    end
-
-    @x += 40
-    begin Date.parse(row['viimeiset_tapahtumat']['huolto'])
-      date = Date.parse(row['viimeiset_tapahtumat']['huolto']).strftime('%m%y')
-      @pdf.draw_text date, :at => [@x, @y]
-    rescue
-
-    end
-
-    @x += 40
-    begin Date.parse(row['viimeiset_tapahtumat']['koeponnistus'])
-      date = Date.parse(row['viimeiset_tapahtumat']['koeponnistus']).strftime('%m%y')
-      @pdf.draw_text date, :at => [@x, @y]
-    rescue
-
-    end
-
-    @x += 50
-    @pdf.draw_text row['poikkeus'], :at => [@x, @y]
+  def logo=(logo)
+    @logo = logo
   end
 end
 
@@ -332,17 +285,33 @@ if !ARGV[0].empty?
 
   spots = SpotDAO.new(ARGV[0])
 
-  files = ''
+  file          = ''
+  margin        = 20
+  _pdf          = Prawn::Document.new(:page_size   => 'A4',
+                                      :page_layout => :landscape,
+                                      :margin      => margin
+  )
+  i             = 0
+  header_called = false
   spots.data['kohteet'].each do |index, spot|
-    pdf = KalustoraporttiPDF.new
+    pdf          = KalustoraporttiPDF.new
     pdf.customer = spots.data['asiakas']
-    pdf.company = spots.data['yhtio']
-    pdf.logo = spots.data['logo']
-    pdf.data(spot)
+    pdf.company  = spots.data['yhtio']
+    pdf.logo     = spots.data['logo']
+    pdf.spot     = spot
 
-    files += pdf.generate + ' '
+    file = pdf.generate _pdf, header_called
+
+    header_called = true
+
+    if i != spots.data['kohteet'].count - 1
+      _pdf.start_new_page
+    end
+    i += 1
   end
-  puts files
+
+  _pdf.render_file "/tmp/#{file}"
+  puts file
 else
   puts 'argv0 is empty'
 end

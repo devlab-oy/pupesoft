@@ -2756,8 +2756,8 @@
 			echo "</table>";
 			echo "<br>";
 
-				echo "<input type='Submit' name='RAPORTOI' value = '".t("Aja hälytysraportti")."'>
-				</form>";
+			echo "<input type='Submit' name='RAPORTOI' value = '".t("Aja hälytysraportti")."'>
+			</form>";
 		}
 		require ("../inc/footer.inc");
 	}

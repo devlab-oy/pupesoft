@@ -35,7 +35,14 @@ class KalustoraporttiPDF
         @pdf.font 'Helvetica', :style => :normal, :size => 8
         header
 
-        info
+        @pdf.move_down 75
+        @pdf.font 'Helvetica', :size => 8
+
+        header_info
+
+        @pdf.move_down 20
+
+        spot_devices
 
         filename
       end

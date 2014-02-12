@@ -1610,7 +1610,7 @@
 			}
 			else if ($rtuoteno[$i]['tuoteno'] == "A-100" or $rtuoteno[$i]['tuoteno'] == "A-200") {
 				continue;
-			}	
+			}
 			else {
 				if ($debug == 1) {
 					echo "<br>Ei löytynyt rivejä!!!! Debug tuotteelle {$rtuoteno[$i]['tuoteno']}<br><pre>",var_dump($rtuoteno[$i]),"</pre><br><br>";
@@ -2471,7 +2471,8 @@
 							hyvak5 		  = '',
 							hyvaksyja_nyt = '',
 							comments 	  = TRIM(CONCAT(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
-							WHERE tunnus = '{$tunnus}'";
+							WHERE tunnus = '{$tunnus}'
+							AND tila	 = 'H'";
 				$xresult = pupe_query($query);
 
 				list($_kaikkivarastossayhteensa,$_kaikkiliitettyyhteensa,$_kohdistus,$_kohok,$_kplvarasto,$_kplyhteensa,$_lisatiedot,$_lisok,$_llrow,$_sarjanrook,$_sarjanrot,$_uusiot,$_varastopaikat,$_varastossaarvo,$_liitettyarvo,$_varok) = tsekit($laskurow, 0, 0);

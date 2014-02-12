@@ -667,6 +667,14 @@ function huoltosykli_rivi($tyyppi) {
 
 	echo "</td>";
 	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Seuraava tuleva huolto')." (pp.kk.vvvv)</th>";
+	echo "<td>";
+	echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' name='huoltosyklit[{$tyyppi}][tuleva_toimenpide_pvm]' />";
+	echo "</td>";
+	echo "</tr>";
+
 	echo "</table>";
 
 	echo "</td>";

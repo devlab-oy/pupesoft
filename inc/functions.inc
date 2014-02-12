@@ -23333,13 +23333,44 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 	}
 }
 
-if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
-	function js_tuoteno_input_huoltosykli_options_change() {
+if (!function_exists('js_laite')) {
+	function js_laite() {
 		?>
 		<script>
 			$(document).ready(function() {
+				bind_huoltosykli_change();
+
 				bind_tuoteno_change();
+
+				bind_huoltovali_change();
 			});
+
+			function bind_huoltosykli_change() {
+				$('.huoltosykli_select').on('change', function() {
+					if ($(this).val() != 0) {
+						var huoltovali_select_id = $(this).attr('id').replace("sykli","vali");
+						hae_huoltosyklin_huoltovali($(this).val(), huoltovali_select_id);
+
+						var tapahtuma_select_id = $(this).attr('id').replace('huoltosykli_select_',"tuleva_toimenpide_");
+						muuta_seuraava_tapahtuma($('#'+huoltovali_select_id).val(), tapahtuma_select_id);
+					}
+				});
+			}
+
+			function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
+				$.ajax({
+					async: false,
+					type: 'GET',
+					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
+				}).done(function(response) {
+					$('#'+select_id).html(response);
+				}).fail(function(data){
+					if (console && console.log) {
+						console.log('Huoltoväli haku EPÄONNISTUI');
+						console.log(data);
+					}
+				});
+			}
 
 			function bind_tuoteno_change() {
 				$('#tuoteno_td input').on('change input paste', function() {
@@ -23358,60 +23389,40 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 
 			function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi) {
 				$.ajax({
-					async: true,
+					async: false,
 					type: 'GET',
 					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi
 				}).done(function(response) {
 					$('#'+select_id).html(response);
 					$('#'+select_id).change();
-
-					if (console && console.log) {
-						console.log(response);
-					}
-
-				});
-			}
-		</script>
-		<?php
-	}
-}
-
-/**
- * huoltosykli dropdownin change bind ja huoltosyklin huoltoväli-dropdownin muutto
- */
-if (!function_exists('js_huoltosykli_dropdown_huoltovali_options_change')) {
-	function js_huoltosykli_dropdown_huoltovali_options_change() {
-		?>
-		<script>
-			$(document).ready(function() {
-				bind_huoltosykli_change();
-			});
-
-			function bind_huoltosykli_change() {
-				$('.huoltosykli_select').on('change', function() {
-					var select_id = $(this).attr('id').replace("sykli","vali");
-					hae_huoltosyklin_huoltovali($(this).val(), select_id);
-				});
-			}
-
-			function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
-				$.ajax({
-					async: true,
-					type: 'GET',
-					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
-				}).done(function(response) {
-					$('#'+select_id).html(response);
-
-					if (console && console.log) {
-						console.log(response);
-					}
-
 				}).fail(function(data){
 					if (console && console.log) {
 						console.log('Huoltoväli haku EPÄONNISTUI');
 						console.log(data);
 					}
 				});
+			}
+
+			function bind_huoltovali_change() {
+				$('.huoltovali_select').on('change', function(){
+					var tapahtuma_select_id = $(this).attr('id').replace('huoltovali_select_',"tuleva_toimenpide_");
+					muuta_seuraava_tapahtuma($(this).val(), tapahtuma_select_id);
+				});
+			}
+
+			function muuta_seuraava_tapahtuma(huoltovali, tapahtuma_select_id) {
+				var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
+
+					if (seuraava_tapahtuma instanceof Date) {						
+						var date_string = seuraava_tapahtuma.getDate() + '.' + seuraava_tapahtuma.getMonth() + '.' + seuraava_tapahtuma.getFullYear();
+						$('#'+tapahtuma_select_id).val(date_string);
+					}
+			}
+
+			function laske_default_seuraava_tapahtuma(valittu_huoltovali) {
+				var date = new Date();
+				date.setDate(date.getDate() + parseInt(valittu_huoltovali));
+				return date;
 			}
 		</script>
 		<?php

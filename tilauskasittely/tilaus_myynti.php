@@ -1377,7 +1377,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") and $msiirto == "") {
 		if (($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
-			$valmistus_tunnukset = splittaa_valmistukset($laskurow);
+			$valmistus_tunnukset = splittaa_valmistukset($kukarow["kesken"]);
 
 			// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
 			// niin loopataan valmistusrivit läpi ja luodaan jokaiselle riville oma otsikko
@@ -1493,8 +1493,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
 				//	Voimme myös tehdä tilaukselta suoraan valmistuksia!
 				require("tilauksesta_valmistustilaus.inc");
+				
 				$tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
-
 				if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
 			}
 

@@ -23550,27 +23550,26 @@ if (!function_exists("hae_viivakoodilla")) {
 }
 
 if (!function_exists("splittaa_valmistukset")) {
-	function splittaa_valmistukset($laskurow) {
+	function splittaa_valmistukset($tunnus) {
 		global $yhtiorow, $kukarow;
 
 		// Otetaan laskurow talteen, ja nollataan sielt‰ kent‰t jota ei monisteta
-
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$laskurow['tunnus']}'";
-		$laskurow_temp_res = pupe_query($query);
-		$laskurow_temp = mysql_fetch_assoc($laskurow_temp_res);
+					AND tunnus  = '{$tunnus}'";
+		$laskures = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($laskures);
 
-		unset($laskurow_temp['tunnus']);
-		unset($laskurow_temp['muutospvm']);
-		unset($laskurow_temp['muuttaja']);
-		unset($laskurow_temp['luontiaika']);
-		unset($laskurow_temp['laatija']);
-		unset($laskurow_temp['toimaika']);
-		unset($laskurow_temp['kerayspvm']);
-		unset($laskurow_temp['kohde']);
-		unset($laskurow_temp['alatila']);
+		unset($laskurow['tunnus']);
+		unset($laskurow['muutospvm']);
+		unset($laskurow['muuttaja']);
+		unset($laskurow['luontiaika']);
+		unset($laskurow['laatija']);
+		unset($laskurow['toimaika']);
+		unset($laskurow['kerayspvm']);
+		unset($laskurow['kohde']);
+		unset($laskurow['alatila']);
 
 		// Haetaan kaikki valmisteet
 		$query = "	SELECT tilausrivi.*,
@@ -23578,7 +23577,7 @@ if (!function_exists("splittaa_valmistukset")) {
 					FROM tilausrivi
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+					AND tilausrivi.otunnus = '{$tunnus}'
 					AND tilausrivi.tyyppi in ('W','M')
 					ORDER BY tilausrivi.tunnus";
 		$tilausrivi_split_result = pupe_query($query);
@@ -23588,9 +23587,9 @@ if (!function_exists("splittaa_valmistukset")) {
 
 		while ($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
 
-			$_toimaika = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
+			$_toimaika  = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
 			$_kerayspvm = ($tilausrivi_split_row['kerayspvm'] == '0000-00-00') ? $laskurow['kerayspvm'] : $tilausrivi_split_row['kerayspvm'];
-			$_kohde = ($tilausrivi_split_row['positio'] == '') ? $laskurow['kohde'] : $tilausrivi_split_row['positio'];
+			$_kohde     = ($tilausrivi_split_row['positio'] == '') ? $laskurow['kohde'] : $tilausrivi_split_row['positio'];
 
 			// J‰tet‰‰n ensimm‰inen rivi alkuper‰iselle otsikolle
 			if ($valmistuksen_splittaus_rivi == 0) {
@@ -23610,25 +23609,25 @@ if (!function_exists("splittaa_valmistukset")) {
 			}
 
 			$query = "	INSERT INTO lasku (
-								".implode(", ", array_keys($laskurow_temp)).",
-								luontiaika,
-								laatija,
-								muutospvm,
-								muuttaja,
-								toimaika,
-								kerayspvm,
-								kohde,
-								alatila)
-								VALUES (
-								'".implode("', '", array_values($laskurow_temp))."',
-								now(),
-								'{$kukarow['kuka']}',
-								now(),
-								'{$kukarow['kuka']}',
-								'{$_toimaika}',
-								'{$_kerayspvm}',
-								'{$_kohde}',
-								'J')";
+					".implode(", ", array_keys($laskurow)).",
+					luontiaika,
+					laatija,
+					muutospvm,
+					muuttaja,
+					toimaika,
+					kerayspvm,
+					kohde,
+					alatila)
+					VALUES (
+					'".implode("', '", array_values($laskurow))."',
+					now(),
+					'{$kukarow['kuka']}',
+					now(),
+					'{$kukarow['kuka']}',
+					'{$_toimaika}',
+					'{$_kerayspvm}',
+					'{$_kohde}',
+					'')";
 			pupe_query($query);
 			$valmistus_tunnus = mysql_insert_id();
 			$valmistus_tunnukset[] = $valmistus_tunnus;
@@ -23637,7 +23636,7 @@ if (!function_exists("splittaa_valmistukset")) {
 			if (!empty($valmistus_tunnus)) {
 				$query = "	UPDATE tilausrivi SET otunnus = '{$valmistus_tunnus}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND otunnus = '{$laskurow['tunnus']}'
+							AND otunnus = '{$tunnus}'
 							AND perheid = '{$tilausrivi_split_row['tunnus']}'
 							AND perheid != 0";
 				pupe_query($query);

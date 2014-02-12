@@ -585,29 +585,17 @@
 							$kuka = $kukarow['kuka'];
 							$yhtio = $kukarow['yhtio'];
 
-						$sykli_query = "INSERT INTO
-								huoltosyklit_laitteet (
-								yhtio,
-								huoltosykli_tunnus,
-								laite_tunnus,
-								huoltovali,
-								pakollisuus,
-								laatija,
-								luontiaika,
-								muutospvm,
-								muuttaja)
-								VALUES(
-								'$yhtio',
-								$huoltosykli_tunnus,
-								$tunnus,
-								$huoltovali,
-								1,
-								'$kuka',
-								now(),
-								now(),
-								'$kuka')";
-
-								pupe_query($sykli_query);
+							$sykli_query = "INSERT INTO huoltosyklit_laitteet
+											SET yhtio = '{$yhtio}',
+											huoltosykli_tunnus = {$huoltosykli_tunnus},
+											laite_tunnus = {$tunnus},
+											huoltovali = {$huoltovali},
+											pakollisuus = 1,
+											laatija = '{$kuka}',
+											luontiaika = NOW(),
+											muutospvm = NOW(),
+											muuttaja = '{$kuka}'";
+							pupe_query($sykli_query);
 						}
 					}
 				}
@@ -619,18 +607,18 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laite_tunnus = '{$kopioitavan_rivin_tunnus}'";
 					$result = pupe_query($query);
-					while($huoltoskylit_laitteet_rivi = mysql_fetch_assoc($result)) {
-						unset($huoltoskylit_laitteet_rivi['tunnus']);
-						unset($huoltoskylit_laitteet_rivi['luontiaika']);
-						unset($huoltoskylit_laitteet_rivi['muuttaja']);
-						unset($huoltoskylit_laitteet_rivi['muutospvm']);
-						unset($huoltoskylit_laitteet_rivi['viimeinen_tapahtuma']);
-						$huoltoskylit_laitteet_rivi['laatija'] = $kukarow['kuka'];
-						$huoltoskylit_laitteet_rivi['laite_tunnus'] = $tunnus;
+					while($huoltosyklit_laitteet_rivi = mysql_fetch_assoc($result)) {
+						unset($huoltosyklit_laitteet_rivi['tunnus']);
+						unset($huoltosyklit_laitteet_rivi['luontiaika']);
+						unset($huoltosyklit_laitteet_rivi['muuttaja']);
+						unset($huoltosyklit_laitteet_rivi['muutospvm']);
+						unset($huoltosyklit_laitteet_rivi['viimeinen_tapahtuma']);
+						$huoltosyklit_laitteet_rivi['laatija'] = $kukarow['kuka'];
+						$huoltosyklit_laitteet_rivi['laite_tunnus'] = $tunnus;
 
 						$copy_query = "	INSERT INTO
-										huoltosyklit_laitteet (".implode(", ", array_keys($huoltoskylit_laitteet_rivi)).", luontiaika)
-										VALUES('".implode("', '", array_values($huoltoskylit_laitteet_rivi)). "', now())";
+										huoltosyklit_laitteet (".implode(", ", array_keys($huoltosyklit_laitteet_rivi)).", luontiaika)
+										VALUES('".implode("', '", array_values($huoltosyklit_laitteet_rivi)). "', now())";
 						pupe_query($copy_query);
 					}
 				}

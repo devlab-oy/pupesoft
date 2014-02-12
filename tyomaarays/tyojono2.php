@@ -4,6 +4,16 @@ require_once('../inc/parametrit.inc');
 require_once('inc/tyojono2_functions.inc');
 require_once('inc/laite_huolto_functions.inc');
 
+if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
+	livesearch_asiakashaku();
+	exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "KOHDEHAKU") {
+	livesearch_kohdehaku();
+	exit;
+}
+
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
@@ -31,12 +41,16 @@ $css = hae_tyojono2_css();
 echo $js;
 echo $css;
 
+enable_ajax();
+
 $request = array(
 	'ala_tee'			 => $ala_tee,
 	'toim'				 => $toim,
 	'lasku_tunnukset'	 => $lasku_tunnukset,
 	'toimitusaika_haku'	 => $toimitusaika_haku,
 	'laite_tunnus'		 => $laite_tunnus,
+	'asiakas_tunnus'	 => $asiakas_tunnus,
+	'kohde_tunnus'		 => $kohde_tunnus,
 );
 
 $request['tyojonot'] = hae_tyojonot($request);
@@ -85,6 +99,11 @@ else {
 
 //lasku_tunnukset pit‰‰ unsetata koska niit‰ k‰ytet‰‰n hae_tyomaarays funkkarissa
 unset($request['lasku_tunnukset']);
+
+echo_tyojono_kayttoliittyma($request);
+
+echo "<br/>";
+echo "<br/>";
 
 $request['tyomaaraykset'] = hae_tyomaaraykset($request);
 $request['tyomaaraykset'] = kasittele_tyomaaraykset($request);

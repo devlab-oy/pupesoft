@@ -481,7 +481,7 @@
 							$yhtio = $kukarow['yhtio'];
 
 							if (!empty($sykli['tuleva_toimenpide_pvm'])) {
-								$tuleva_toimenpide_pvm = date('Y-m-d', $sykli['tuleva_toimenpide_pvm']);
+								$tuleva_toimenpide_pvm = date('Y-m-d', strtotime($sykli['tuleva_toimenpide_pvm']));
 								$viimeinen_tapahtuma = date('Y-m-d', strototime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
 
 								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
@@ -585,7 +585,7 @@
 
 					foreach ($huoltosyklit as $sykli) {
 
-						if( $sykli['huoltosykli_tunnus'] != 0 ){
+						if($sykli['huoltosykli_tunnus'] != 0){
 
 							$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
 							$huoltovali = $sykli['huoltovali'];
@@ -594,8 +594,8 @@
 
 							$viimeinen_tapahtuma_query = "";
 							if (!empty($sykli['tuleva_toimenpide_pvm'])) {
-								$tuleva_toimenpide_pvm = date('Y-m-d', $sykli['tuleva_toimenpide_pvm']);
-								$viimeinen_tapahtuma = date('Y-m-d', strototime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
+								$tuleva_toimenpide_pvm = date('Y-m-d', strtotime($sykli['tuleva_toimenpide_pvm']));
+								$viimeinen_tapahtuma = date('Y-m-d', strtotime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
 
 								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
 							}

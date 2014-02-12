@@ -307,7 +307,14 @@ function echo_tyomaaraykset_table($request = array()) {
 		echo "</td>";
 
 		echo "<td>";
-		echo implode('<br/>', $tyomaarays['toimajat']);
+		$unique_values = array_unique($tyomaarays['toimajat']);
+		$fn = function($values) {
+					$return = array();
+					foreach ($values as $value)
+						$return[] = date('d.m.Y', strtotime($value));
+					return $return;
+				};
+		echo implode('<br/>', $fn($unique_values));
 		echo "</td>";
 
 		if ($request['toim'] == 'TEHDYT_TYOT') {

@@ -100,6 +100,7 @@ function hae_tyomaaraykset($request) {
 				laite.sarjanro AS sarjanumero,
 				laite.sijainti AS laite_sijainti,
 				laite.tunnus AS laite_tunnus,
+				tuote.nimitys AS tuote_nimi,
 				lasku.toimaika,
 				a1.selite AS tyojonokoodi,
 				a1.selitetark AS tyojono,
@@ -135,6 +136,9 @@ function hae_tyomaaraykset($request) {
 				JOIN laite
 				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
 					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+				JOIN tuote
+				ON ( tuote.yhtio = laite.yhtio
+					AND tuote.tuoteno = laite.tuoteno )
 				JOIN paikka
 				ON ( paikka.yhtio = laite.yhtio
 					AND paikka.tunnus = laite.paikka )
@@ -468,7 +472,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 		echo "</td>";
 
 		echo "<td>";
-		echo $laite['tuoteno'];
+		echo $laite['tuote_nimi'];
 		echo "</td>";
 
 		echo "<td>";

@@ -482,7 +482,7 @@
 
 							if (!empty($sykli['tuleva_toimenpide_pvm'])) {
 								$tuleva_toimenpide_pvm = date('Y-m-d', strtotime($sykli['tuleva_toimenpide_pvm']));
-								$viimeinen_tapahtuma = date('Y-m-d', strototime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
+								$viimeinen_tapahtuma = date('Y-m-d', strtotime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
 
 								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
 							}
@@ -581,11 +581,11 @@
 				$tunnus = mysql_insert_id();
 
 				//lisätään myös huoltosyklit jos on kyse laitteesta
-				if (empty($kopioi_rivi) and $toim == 'laite'){
+				if (empty($kopioi_rivi) and $toim == 'laite') {
 
 					foreach ($huoltosyklit as $sykli) {
 
-						if($sykli['huoltosykli_tunnus'] != 0){
+						if($sykli['huoltosykli_tunnus'] != 0) {
 
 							$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
 							$huoltovali = $sykli['huoltovali'];

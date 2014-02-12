@@ -672,7 +672,11 @@ function huoltosykli_rivi($tyyppi) {
 	echo "<tr>";
 	echo "<th>".t('Seuraava tuleva huolto')." (pp.kk.vvvv)</th>";
 	echo "<td>";
-	echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' name='huoltosyklit[{$tyyppi}][tuleva_toimenpide_pvm]' value=''/>";
+	$seuraava_tuleva_tapahtuma = '';
+	if (!empty($laitteen_huoltosykli['viimeinen_tapahtuma'])) {
+		$seuraava_tuleva_tapahtuma = date('d.m.Y', strtotime("{$laitteen_huoltosykli['viimeinen_tapahtuma']} + {$laitteen_huoltosykli['huoltovali']} days"));
+	}
+	echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' name='huoltosyklit[{$tyyppi}][tuleva_toimenpide_pvm]' value='{$seuraava_tuleva_tapahtuma}'/>";
 	echo "</td>";
 	echo "</tr>";
 
@@ -683,12 +687,13 @@ function huoltosykli_rivi($tyyppi) {
 }
 
 //haetaan laitteeseen yhdistetyt huoltosyklit
-function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi){
+function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi) {
 	global $kukarow;
 
 	$query = "	SELECT huoltosykli.tunnus,
 				huoltosyklit_laitteet.huoltovali,
 				huoltosyklit_laitteet.pakollisuus,
+				huoltosyklit_laitteet.viimeinen_tapahtuma,
 				huoltosyklit_laitteet.tunnus AS hl_tunnus
 				FROM huoltosyklit_laitteet
 				JOIN huoltosykli
@@ -712,12 +717,13 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi){
 		$laitteen_huoltosyklit[] = $huoltosykli;
 	}
 
-	if(empty($laitteen_huoltosyklit)) {
+	if (empty($laitteen_huoltosyklit)) {
 		$laitteen_huoltosyklit[] = array(
-			'tunnus'		 => 0,
-			'huoltovali'	 => 0,
-			'pakollisuus'	 => 0,
-			'hl_tunnus'		 => 0
+			'tunnus'				 => 0,
+			'huoltovali'			 => 0,
+			'pakollisuus'			 => 0,
+			'hl_tunnus'				 => 0,
+			'viimeinen_tapahtuma'	 => '',
 		);
 	}
 
@@ -754,7 +760,7 @@ function hae_mahdolliset_huoltosyklit($laite_tunnus, $tyyppi) {
 								AND yhtio = '{$kukarow['yhtio']}'";
 	$sammutin_tyyppi_result = pupe_query($sammutin_tyyppi_query);
 	$sammutin_tyyppi = mysql_result($sammutin_tyyppi_result, 0);
-	
+
 	return hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi);
 }
 

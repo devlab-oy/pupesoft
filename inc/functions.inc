@@ -23389,7 +23389,7 @@ if (!function_exists('js_laite')) {
 
 			function hae_tuotteen_huoltosyklit(tuoteno, select_id, tyyppi) {
 				$.ajax({
-					async: false,
+					async: true,
 					type: 'GET',
 					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli_options&tuoteno=' + tuoteno + '&tyyppi=' +tyyppi
 				}).done(function(response) {

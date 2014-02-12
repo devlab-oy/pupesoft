@@ -603,19 +603,20 @@ function huoltosykli_rivi($tyyppi) {
 
 	$laite_tunnus = $tunnus;
 
-	$laitteen_huoltosyklit = hae_laitteen_huoltosyklit($laite_tunnus, $tyyppi);
+	$laitteen_huoltosykli = hae_laitteen_huoltosyklit($laite_tunnus, $tyyppi);
+	$laitteen_huoltosykli = $laitteen_huoltosykli[0];
 
 	$pakollisuus_chk = "";
 
-	$huoltosyklit = hae_huoltosyklit($laite_tunnus, $tyyppi);
+	$huoltosyklit = hae_mahdolliset_huoltosyklit($laite_tunnus, $tyyppi);
 
-	if ($laitteen_huoltosyklit[0]['pakollisuus'] == 1) {
+	if ($laitteen_huoltosykli['pakollisuus'] == 1) {
 		$pakollisuus_chk = "CHECKED";
 	}
 
 	echo "<tr>";
 	echo "<th>".t('Huoltosykli')." <br /> {$tyyppi}";
-	echo "<input type='hidden' name='huoltosyklit[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosyklit[0]['hl_tunnus']}' />";
+	echo "<input type='hidden' name='huoltosyklit[{$tyyppi}][huoltosykli_laite_tunnus]' value='{$laitteen_huoltosykli['hl_tunnus']}' />";
 	echo"</th>";
 	echo "<td>";
 
@@ -630,7 +631,7 @@ function huoltosykli_rivi($tyyppi) {
 
 	if ($huoltosyklit) {
 		foreach ($huoltosyklit as $huoltosykli) {
-			if ($laitteen_huoltosyklit[0]['tunnus'] == $huoltosykli['tunnus']) {
+			if ($laitteen_huoltosykli['tunnus'] == $huoltosykli['tunnus']) {
 				$sel = "SELECTED";
 			}
 			echo "<option value='{$huoltosykli['tunnus']}' {$sel}>".$huoltosykli['dropdown_text']."</option>";
@@ -650,9 +651,9 @@ function huoltosykli_rivi($tyyppi) {
 
 	if ($huoltosyklit) {
 
-		$huoltovali_options = huoltovali_options($laitteen_huoltosyklit[0]['tunnus']);
+		$huoltovali_options = huoltovali_options($laitteen_huoltosykli['tunnus']);
 		foreach ($huoltovali_options as $key => $val) {
-			if ($val == $laitteen_huoltosyklit[0]['huoltovali']) {
+			if ($val == $laitteen_huoltosykli['huoltovali']) {
 				$sel = "SELECTED";
 			}
 			echo "<option value='{$val}' {$sel}>{$key}</option>";
@@ -671,7 +672,7 @@ function huoltosykli_rivi($tyyppi) {
 	echo "<tr>";
 	echo "<th>".t('Seuraava tuleva huolto')." (pp.kk.vvvv)</th>";
 	echo "<td>";
-	echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' name='huoltosyklit[{$tyyppi}][tuleva_toimenpide_pvm]' />";
+	echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' name='huoltosyklit[{$tyyppi}][tuleva_toimenpide_pvm]' value=''/>";
 	echo "</td>";
 	echo "</tr>";
 
@@ -682,7 +683,7 @@ function huoltosykli_rivi($tyyppi) {
 }
 
 //haetaan laitteeseen yhdistetyt huoltosyklit
-function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
+function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi){
 	global $kukarow;
 
 	$query = "	SELECT huoltosykli.tunnus,
@@ -696,9 +697,12 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
 				JOIN tuote
 				ON ( tuote.yhtio = huoltosykli.yhtio
 					AND tuote.tuoteno = huoltosykli.toimenpide )
+				JOIN tuotteen_avainsanat AS t1
+				ON ( t1.yhtio = tuote.yhtio
+					AND t1.tuoteno = tuote.tuoteno
+					AND t1.selite = '{$tyyppi}' )
 				WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
-				AND laite_tunnus = '{$laitetunnus}'
-				AND tuote.nimitys LIKE '%{$tyyppi}%'";
+				AND laite_tunnus = '{$laitetunnus}'";
 
 	$result = pupe_query($query);
 
@@ -708,7 +712,7 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
 		$laitteen_huoltosyklit[] = $huoltosykli;
 	}
 
-	if( count($laitteen_huoltosyklit) < 1 ){
+	if(empty($laitteen_huoltosyklit)) {
 		$laitteen_huoltosyklit[] = array(
 			'tunnus'		 => 0,
 			'huoltovali'	 => 0,
@@ -721,7 +725,7 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi ){
 }
 
 //haetaan sallitut huoltosyklit huoltosyklityypin ja laitenumeron perusteella
-function hae_huoltosyklit($laite_tunnus, $tyyppi) {
+function hae_mahdolliset_huoltosyklit($laite_tunnus, $tyyppi) {
 	global $kukarow;
 
 	if ($laite_tunnus == '') {

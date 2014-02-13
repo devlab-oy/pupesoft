@@ -9,6 +9,13 @@
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
 
+	if (strtolower($toim) == 'oletusvarasto' and $kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
+		$oletusvarasto_chk = $kukarow['oletus_varasto'];
+	}
+	else {
+		$oletusvarasto_chk = '';
+	}
+
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -85,6 +92,8 @@
 
 				if ($tuo != '' and $hyl != '' and $maa != '') {
 					$hylp = explode("-", $hyl);
+
+					if ($oletusvarasto_chk != '' and kuuluukovarastoon($hylp[0], $hylp[1], $oletusvarasto_chk) == 0) continue;
 
 					$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
 					$maara[] = $maa;
@@ -1207,6 +1216,8 @@
 		$rivilask = 0;
 
 		while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
+
+			if ($oletusvarasto_chk != '' and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
 			//Haetaan ker‰tty m‰‰r‰
 			$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois

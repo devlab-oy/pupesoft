@@ -12,15 +12,21 @@ else {
 	require_once($filepath . '/tyojono2_functions.inc');
 }
 
-function hae_tyolistat($lasku_tunnukset) {
-	if (!empty($lasku_tunnukset)) {
+function hae_tyolistat($lasku_tunnukset, $multi = false) {
+if (!empty($lasku_tunnukset)) {
+	if( $multi === true){
+		$tyomaarays_rivit = array();
+		foreach ($lasku_tunnukset as $tunnus) {
+			$tyomaarays_rivit[] = \PDF\Tyolista\pdf_hae_tyomaarayksien_rivit($tunnus);
+		}
+	}
+	else{
 		$tyomaarays_rivit = \PDF\Tyolista\pdf_hae_tyomaarayksien_rivit($lasku_tunnukset);
+	}
 
-		$filepath = kirjoita_json_tiedosto($tyomaarays_rivit, "tyolista_".uniqid()."");
-
-		$pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
-
-		return $pdf_tiedosto;
+	$filepath = kirjoita_json_tiedosto($tyomaarays_rivit, "tyolista_".uniqid()."");
+	$pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
+	return $pdf_tiedosto;
 	}
 }
 

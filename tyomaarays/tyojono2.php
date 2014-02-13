@@ -70,15 +70,29 @@ else {
 	}
 
 	if ($request['ala_tee'] == 'tulosta_tyolista') {
-		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($request['lasku_tunnukset']);
 
+		$multi = false;
+
+		if( is_array($lasku_tunnukset) ){
+			foreach( $lasku_tunnukset as $tunnus ){
+				$tunnus = explode(',', $tunnus);
+				$tunnukset[] = $tunnus;
+			}
+			$lasku_tunnukset = $tunnukset;
+			$multi = true;
+		}
+		else{
+			$lasku_tunnukset = explode(',', $lasku_tunnukset);
+		}
+
+
+		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi );
 		if (!empty($pdf_tiedosto)) {
 			echo_tallennus_formi($pdf_tiedosto, t("Työlista"), 'pdf');
-
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
 		}
 		else {
-			echo t("Työmääräysten generointi epäonnistui");
+			echo t("Työmääräysten generointi epäonnistuiX");
 		}
 	}
 }
@@ -89,6 +103,7 @@ unset($request['lasku_tunnukset']);
 $request['tyomaaraykset'] = hae_tyomaaraykset($request);
 $request['tyomaaraykset'] = kasittele_tyomaaraykset($request);
 echo_tyomaaraykset_table($request);
+
 
 echo "</div>";
 

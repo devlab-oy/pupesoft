@@ -714,9 +714,9 @@
 									}
 
 									// Otetaan ensisijaisesti kustannuspaikka toimipaikan takaa
-									$kustp_ins 		= isset($toimipaikkarow) and $toimipaikkarow["kustp"] > 0 ? $toimipaikkarow["kustp"] : $tuote_row["kustp"];
-									$kohde_ins 		= isset($toimipaikkarow) and $toimipaikkarow["kohde"] > 0 ? $toimipaikkarow["kohde"] : $tuote_row["kohde"];
-									$projekti_ins 	= isset($toimipaikkarow) and $toimipaikkarow["projekti"] > 0 ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
+									$kustp_ins 		= (isset($toimipaikkarow) and $toimipaikkarow["kustp"] > 0) ? $toimipaikkarow["kustp"] : $tuote_row["kustp"];
+									$kohde_ins 		= (isset($toimipaikkarow) and $toimipaikkarow["kohde"] > 0) ? $toimipaikkarow["kohde"] : $tuote_row["kohde"];
+									$projekti_ins 	= (isset($toimipaikkarow) and $toimipaikkarow["projekti"] > 0) ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
 								}
 								else {
 									// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa

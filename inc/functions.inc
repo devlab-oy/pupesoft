@@ -23487,7 +23487,7 @@ if (!function_exists('js_laite')) {
 			}
 
 			function bind_huoltovali_change() {
-				$('.huoltovali_select').on('change', function(){
+				$('.huoltovali_select').on('change', function() {
 					var tapahtuma_select_id = $(this).attr('id').replace('huoltovali_select_',"tuleva_toimenpide_");
 					muuta_seuraava_tapahtuma($(this).val(), tapahtuma_select_id);
 				});
@@ -23496,7 +23496,10 @@ if (!function_exists('js_laite')) {
 			function muuta_seuraava_tapahtuma(huoltovali, tapahtuma_select_id) {
 				var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
 
-					if (seuraava_tapahtuma instanceof Date) {						
+					if (seuraava_tapahtuma instanceof Date) {
+						if (tapahtuma_select_id.indexOf("huolto") != -1 || tapahtuma_select_id.indexOf("koeponnistus") != -1 ) {
+							seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(seuraava_tapahtuma, huoltovali);
+						}
 						var date_string = seuraava_tapahtuma.getDate() + '.' + seuraava_tapahtuma.getMonth() + '.' + seuraava_tapahtuma.getFullYear();
 						$('#'+tapahtuma_select_id).val(date_string);
 					}
@@ -23506,6 +23509,24 @@ if (!function_exists('js_laite')) {
 				var date = new Date();
 				date.setDate(date.getDate() + parseInt(valittu_huoltovali));
 				return date;
+			}
+
+			function seuraava_tapahtuma_valm_pvm(seuraava_tapahtuma, huoltovali) {
+				var today = new Date();
+				today.setDate(1);
+				var date = new Date();
+				date.setMonth(parseInt($('.valm_pvm_tkk').val()));
+				date.setFullYear(parseInt($('.valm_pvm_tvv').val()));
+				date.setDate(parseInt($('.valm_pvm_tpp').val()) + parseInt(huoltovali));
+
+				if (date >= today) {
+					seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val()));
+					seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
+					seuraava_tapahtuma.setDate(seuraava_tapahtuma.getDate() + parseInt(huoltovali));
+				}
+				seuraava_tapahtuma.setDate(1);
+
+				return seuraava_tapahtuma;
 			}
 		</script>
 		<?php

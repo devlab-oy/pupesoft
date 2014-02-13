@@ -2010,9 +2010,9 @@
 				$ppa = substr($trow[$i],8,2);
 
 				echo "<td>
-						<input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
-						<input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
-						<input type = 'text' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
+						<input type = 'text' class='{$otsikko}_tpp' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
+						<input type = 'text' class='{$otsikko}_tkk' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
+						<input type = 'text' class='{$otsikko}_tvv' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
 			}
 			elseif ($tyyppi == 1.6 or $tyyppi == 1.7) {
 				$vva = substr($trow[$i],0,4);
@@ -2021,7 +2021,7 @@
 
 				echo "<td>";
 				if ($tyyppi == 1.6) {
-					echo "<select name='tpp[{$i}]'>";
+					echo "<select class='{$otsikko}_tpp' name='tpp[{$i}]'>";
 					$sel = "";
 					foreach (range(1, 31) as $paiva) {
 						if ($ppa == $paiva) {
@@ -2033,9 +2033,9 @@
 					echo "</select>";
 				}
 				else {
-					echo "<input type='hidden' name='tpp[{$i}]' value='1' />";
+					echo "<input type='hidden' class='{$otsikko}_tpp' name='tpp[{$i}]' value='1' />";
 				}
-				echo "<select name='tkk[$i]'>";
+				echo "<select class='{$otsikko}_tkk' name='tkk[$i]'>";
 				$sel = "";
 				foreach (range(1, 12) as $kuukausi) {
 					if ($kka == $kuukausi) {
@@ -2045,7 +2045,7 @@
 					$sel = "";
 				}
 				echo "</select>";
-				echo "<select name='tvv[$i]'>";
+				echo "<select class='{$otsikko}_tvv' name='tvv[$i]'>";
 				$sel = "";
 				if (empty($vuosi_vaihteluvali)) {
 					$vuosi_vaihteluvali['min'] = 1970;
@@ -2077,7 +2077,7 @@
 					echo "<a href='view.php?id=".$trow[$i]."' target='Attachment'>".t("Näytä liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '$trow[$i]'>";
 				}
 				else {
-					echo "<input type = 'text' name = '$nimi' value = '$trow[$i]'>";
+					echo "<input type = 'text' class='{$otsikko}' name = '$nimi' value = '$trow[$i]'>";
 				}
 
 				echo "<input type = 'file' name = 'liite_$i'></td>";

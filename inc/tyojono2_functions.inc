@@ -51,6 +51,7 @@ function hae_tyomaaraykset($request) {
 	global $kukarow, $yhtiorow;
 
 	$lasku_where = "";
+	$kohde_join = "";
 	if (!empty($request['lasku_tunnukset'])) {
 		$lasku_where = "AND lasku.tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
 	}
@@ -66,6 +67,14 @@ function hae_tyomaaraykset($request) {
 	}
 	else {
 		$lasku_where .= "	AND lasku.tila = 'A'";
+	}
+
+	if (!empty($request['asiakas_tunnus'])) {
+		$lasku_where .= "	AND lasku.liitostunnus = '{$request['asiakas_tunnus']}'";
+	}
+
+	if (!empty($request['kohde_tunnus'])) {
+		$kohde_join .= "	AND kohde.tunnus = '{$request['kohde_tunnus']}'";
 	}
 
 	if (!empty($request['toimitusaika_haku'])) {
@@ -91,6 +100,7 @@ function hae_tyomaaraykset($request) {
 				laite.sarjanro AS sarjanumero,
 				laite.sijainti AS laite_sijainti,
 				laite.tunnus AS laite_tunnus,
+				tuote.nimitys AS tuote_nimi,
 				lasku.toimaika,
 				a1.selite AS tyojonokoodi,
 				a1.selitetark AS tyojono,
@@ -126,6 +136,9 @@ function hae_tyomaaraykset($request) {
 				JOIN laite
 				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
 					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+				JOIN tuote
+				ON ( tuote.yhtio = laite.yhtio
+					AND tuote.tuoteno = laite.tuoteno )
 				JOIN paikka
 				ON ( paikka.yhtio = laite.yhtio
 					AND paikka.tunnus = laite.paikka )
@@ -135,7 +148,8 @@ function hae_tyomaaraykset($request) {
 					AND a3.laji = 'OLOSUHDE')
 				JOIN kohde
 				ON ( kohde.yhtio = paikka.yhtio
-					AND kohde.tunnus = paikka.kohde )
+					AND kohde.tunnus = paikka.kohde
+					{$kohde_join})
 				LEFT JOIN avainsana a1
 				ON ( a1.yhtio = tyomaarays.yhtio
 					AND a1.laji = 'TYOM_TYOJONO'
@@ -219,6 +233,30 @@ function kasittele_tyomaaraykset($request) {
 	return $tyomaaraykset_temp;
 }
 
+function echo_tyojono_kayttoliittyma($request) {
+	echo "<form method='POST' action='' name='tyojono_haku'>";
+	echo "<table>";
+
+	echo "<tr>";
+	echo "<th>".t('Asiakas')."</th>";
+	echo "<td>";
+	echo livesearch_kentta('tyojono_haku', 'ASIAKASHAKU', 'asiakas_tunnus', 300, $request['asiakas_tunnus'], 'NOAUTOSUBMIT');
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Kohde')."</th>";
+	echo "<td>";
+	echo livesearch_kentta('tyojono_haku', 'KOHDEHAKU', 'kohde_tunnus', 300, $request['kohde_tunnus'], 'NOAUTOSUBMIT');
+	echo "</td>";
+	echo "</tr>";
+
+	echo "</table>";
+
+	echo "<input type='submit' value='".t('Hae')."' />";
+	echo "</form>";
+}
+
 function echo_tyomaaraykset_table($request = array()) {
 	global $kukarow, $yhtiorow, $palvelin2;
 
@@ -239,33 +277,20 @@ function echo_tyomaaraykset_table($request = array()) {
 		$toimitus_string = "Toimitettu";
 	}
 	echo "<tr>";
-	echo "<th>".t("Työm").".<br>".t("Viite")."</th>";
+	echo "<th>".t("Kpl")."</th>";
 	echo "<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>";
 	echo "<th>".t("Kohde")."</th>";
 	echo "<th>".t($toimitus_string)."</th>";
 	echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
-	echo "<th>";
-
-
-	echo "<form class='multisubmit' name='tulosta_tyolistat' method='POST'>";
-	echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
-
-	foreach ($request['tyomaaraykset'] as $tyomaarays) {
-		echo '<input type="hidden" name="lasku_tunnukset[]" value="' .implode(',', $tyomaarays['lasku_tunnukset']) . '">';
-	}
-
-	echo "<input type='submit' value='".t("Tallenna tyolistat PDF")."' />";
-	echo "</form>";
-
-	echo "</th>";
+	echo "<th></th>";
 	echo "</tr>";
 
 	echo "<tr>";
 	echo "<td valign='top'>";
 	echo "</td>";
 
-	echo "<td valign='top'><input type='text' size='10' name='asiakasnimi_haku'></td>";
-	echo "<td valign='top'><input type='text' size='10' name='kohde_haku'></td>";
+	echo "<td valign='top'></td>";
+	echo "<td valign='top'></td>";
 	echo "<td valign='top'>";
 	echo "<form name='' method='POST' action=''>";
 	echo "<select id='toimitusaika_select' name='toimitusaika_haku' onchange='this.form.submit()' >";
@@ -320,7 +345,14 @@ function echo_tyomaaraykset_table($request = array()) {
 		echo "</td>";
 
 		echo "<td>";
-		echo implode('<br/>', $tyomaarays['toimajat']);
+		$unique_values = array_unique($tyomaarays['toimajat']);
+		$fn = function($values) {
+					$return = array();
+					foreach ($values as $value)
+						$return[] = date('d.m.Y', strtotime($value));
+					return $return;
+				};
+		echo implode('<br/>', $fn($unique_values));
 		echo "</td>";
 
 		if ($request['toim'] == 'TEHDYT_TYOT') {
@@ -440,7 +472,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 		echo "</td>";
 
 		echo "<td>";
-		echo $laite['tuoteno'];
+		echo $laite['tuote_nimi'];
 		echo "</td>";
 
 		echo "<td>";
@@ -625,6 +657,3 @@ function onko_laitteella_poikkeus($laite_tunnus) {
 
 	return false;
 }
-
-
-

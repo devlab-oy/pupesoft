@@ -4,6 +4,16 @@ require_once('../inc/parametrit.inc');
 require_once('inc/tyojono2_functions.inc');
 require_once('inc/laite_huolto_functions.inc');
 
+if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
+	livesearch_asiakashaku();
+	exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "KOHDEHAKU") {
+	livesearch_kohdehaku();
+	exit;
+}
+
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
@@ -31,12 +41,16 @@ $css = hae_tyojono2_css();
 echo $js;
 echo $css;
 
+enable_ajax();
+
 $request = array(
 	'ala_tee'			 => $ala_tee,
 	'toim'				 => $toim,
 	'lasku_tunnukset'	 => $lasku_tunnukset,
 	'toimitusaika_haku'	 => $toimitusaika_haku,
 	'laite_tunnus'		 => $laite_tunnus,
+	'asiakas_tunnus'	 => $asiakas_tunnus,
+	'kohde_tunnus'		 => $kohde_tunnus,
 );
 
 $request['tyojonot'] = hae_tyojonot($request);
@@ -70,29 +84,15 @@ else {
 	}
 
 	if ($request['ala_tee'] == 'tulosta_tyolista') {
+		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($request['lasku_tunnukset']);
 
-		$multi = false;
-
-		if( is_array($lasku_tunnukset) ){
-			foreach( $lasku_tunnukset as $tunnus ){
-				$tunnus = explode(',', $tunnus);
-				$tunnukset[] = $tunnus;
-			}
-			$lasku_tunnukset = $tunnukset;
-			$multi = true;
-		}
-		else{
-			$lasku_tunnukset = explode(',', $lasku_tunnukset);
-		}
-
-
-		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi );
 		if (!empty($pdf_tiedosto)) {
 			echo_tallennus_formi($pdf_tiedosto, t("Työlista"), 'pdf');
+
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
 		}
 		else {
-			echo t("Työmääräysten generointi epäonnistuiX");
+			echo t("Työmääräysten generointi epäonnistui");
 		}
 	}
 }
@@ -100,10 +100,14 @@ else {
 //lasku_tunnukset pitää unsetata koska niitä käytetään hae_tyomaarays funkkarissa
 unset($request['lasku_tunnukset']);
 
+echo_tyojono_kayttoliittyma($request);
+
+echo "<br/>";
+echo "<br/>";
+
 $request['tyomaaraykset'] = hae_tyomaaraykset($request);
 $request['tyomaaraykset'] = kasittele_tyomaaraykset($request);
 echo_tyomaaraykset_table($request);
-
 
 echo "</div>";
 

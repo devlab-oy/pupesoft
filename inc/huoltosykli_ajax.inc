@@ -15,7 +15,7 @@ if ($action == 'hae_huoltovali_options') {
 			$selected = 'selected';
 		}
 
-		$options_string .= "<option value='" . $val . "' ".$selected.">" . $key ."</option>";
+		$options_string .= "<option value='{$val}' {$selected}>{$key}</option>";
 
 		$selected = null;
 	}
@@ -46,7 +46,7 @@ if ($action == 'hae_huoltosykli_options') {
 		$options_string = "<option value='0'>Ei huoltosykliä</option>";
 
 		foreach( $huoltosykli_options as  $val ){
-			$options_string .= "<option value='" . $val['tunnus'] . "'>" . $val['dropdown_text'] ."</option>";
+			$options_string .= "<option value='{$val['tunnus']}'>{$val['dropdown_text']}</option>";
 		}
 	}
 	else {

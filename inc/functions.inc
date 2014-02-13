@@ -9546,6 +9546,89 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
 	}
 }
 
+if (!function_exists('livesearch_kohdehaku')) {
+	function livesearch_kohdehaku() {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			if (empty($kukarow['kieli'])) {
+				$kieli = $yhtiorow['kieli'];
+			}
+			else {
+				$kieli = $kukarow['kieli'];
+			}
+
+			$query = "	SELECT kohde.nimi AS kohde_nimi,
+						kohde.tunnus AS kohde_tunnus,
+						asiakas.nimi AS asiakas_nimi
+						FROM kohde
+						JOIN asiakas
+						ON ( asiakas.yhtio = kohde.yhtio
+							AND asiakas.tunnus = kohde.asiakas )
+						WHERE kohde.yhtio = '{$kukarow['yhtio']}'
+						AND kohde.nimi LIKE '%{$haku}%'";
+			$result = pupe_query($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_assoc($result)) {
+					echo "	<div id='kohde_valinta_$row[selite]'
+								name='selectOptions$hakuid'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions$hakuid');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,14) == 'tuoteryhma_valinta_' && aEls[iEl].id != 'kohde_valinta_$row[selite]') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onclick=\"document.getElementById('$hakuid').value='{$row['kohde_tunnus']}';";
+								if ($submit == "") {
+									echo "document.$formi.submit();";
+								}
+								else {
+									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+								}
+								echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>{$row['kohde_nimi']} - {$row['asiakas_nimi']}</font>
+							</div><div name='selectValues$hakuid' id='{$row['kohde_tunnus']}'></div>";
+					$limit++;
+
+					if ($limit > 49) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("kohdetta"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei kohteita").".</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+			</script>";
+		}
+	}
+}
+
 if (!function_exists("livesearch_kentta")) {
 	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '') {
 		global $kukarow, $toim;
@@ -23333,13 +23416,44 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 	}
 }
 
-if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
-	function js_tuoteno_input_huoltosykli_options_change() {
+if (!function_exists('js_laite')) {
+	function js_laite() {
 		?>
 		<script>
 			$(document).ready(function() {
+				bind_huoltosykli_change();
+
 				bind_tuoteno_change();
+
+				bind_huoltovali_change();
 			});
+
+			function bind_huoltosykli_change() {
+				$('.huoltosykli_select').on('change', function() {
+					if ($(this).val() != 0) {
+						var huoltovali_select_id = $(this).attr('id').replace("sykli","vali");
+						hae_huoltosyklin_huoltovali($(this).val(), huoltovali_select_id);
+
+						var tapahtuma_select_id = $(this).attr('id').replace('huoltosykli_select_',"tuleva_toimenpide_");
+						muuta_seuraava_tapahtuma($('#'+huoltovali_select_id).val(), tapahtuma_select_id);
+					}
+				});
+			}
+
+			function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
+				$.ajax({
+					async: false,
+					type: 'GET',
+					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
+				}).done(function(response) {
+					$('#'+select_id).html(response);
+				}).fail(function(data){
+					if (console && console.log) {
+						console.log('Huoltoväli haku EPÄONNISTUI');
+						console.log(data);
+					}
+				});
+			}
 
 			function bind_tuoteno_change() {
 				$('#tuoteno_td input').on('change input paste', function() {
@@ -23364,54 +23478,55 @@ if (!function_exists('js_tuoteno_input_huoltosykli_options_change')) {
 				}).done(function(response) {
 					$('#'+select_id).html(response);
 					$('#'+select_id).change();
-
-					if (console && console.log) {
-						console.log(response);
-					}
-
-				});
-			}
-		</script>
-		<?php
-	}
-}
-
-/**
- * huoltosykli dropdownin change bind ja huoltosyklin huoltoväli-dropdownin muutto
- */
-if (!function_exists('js_huoltosykli_dropdown_huoltovali_options_change')) {
-	function js_huoltosykli_dropdown_huoltovali_options_change() {
-		?>
-		<script>
-			$(document).ready(function() {
-				bind_huoltosykli_change();
-			});
-
-			function bind_huoltosykli_change() {
-				$('.huoltosykli_select').on('change', function() {
-					var select_id = $(this).attr('id').replace("sykli","vali");
-					hae_huoltosyklin_huoltovali($(this).val(), select_id);
-				});
-			}
-
-			function hae_huoltosyklin_huoltovali(huoltosykli_tunnus, select_id) {
-				$.ajax({
-					async: true,
-					type: 'GET',
-					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltovali_options&huoltosykli_tunnus=' + huoltosykli_tunnus
-				}).done(function(response) {
-					$('#'+select_id).html(response);
-
-					if (console && console.log) {
-						console.log(response);
-					}
-
 				}).fail(function(data){
 					if (console && console.log) {
 						console.log('Huoltoväli haku EPÄONNISTUI');
 						console.log(data);
 					}
 				});
+			}
+
+			function bind_huoltovali_change() {
+				$('.huoltovali_select').on('change', function() {
+					var tapahtuma_select_id = $(this).attr('id').replace('huoltovali_select_',"tuleva_toimenpide_");
+					muuta_seuraava_tapahtuma($(this).val(), tapahtuma_select_id);
+				});
+			}
+
+			function muuta_seuraava_tapahtuma(huoltovali, tapahtuma_select_id) {
+				var seuraava_tapahtuma = laske_default_seuraava_tapahtuma(huoltovali);
+
+					if (seuraava_tapahtuma instanceof Date) {
+						if (tapahtuma_select_id.indexOf("huolto") != -1 || tapahtuma_select_id.indexOf("koeponnistus") != -1 ) {
+							seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(seuraava_tapahtuma, huoltovali);
+						}
+						var date_string = seuraava_tapahtuma.getDate() + '.' + seuraava_tapahtuma.getMonth() + '.' + seuraava_tapahtuma.getFullYear();
+						$('#'+tapahtuma_select_id).val(date_string);
+					}
+			}
+
+			function laske_default_seuraava_tapahtuma(valittu_huoltovali) {
+				var date = new Date();
+				date.setDate(date.getDate() + parseInt(valittu_huoltovali));
+				return date;
+			}
+
+			function seuraava_tapahtuma_valm_pvm(seuraava_tapahtuma, huoltovali) {
+				var today = new Date();
+				today.setDate(1);
+				var date = new Date();
+				date.setMonth(parseInt($('.valm_pvm_tkk').val()));
+				date.setFullYear(parseInt($('.valm_pvm_tvv').val()));
+				date.setDate(parseInt($('.valm_pvm_tpp').val()) + parseInt(huoltovali));
+
+				if (date >= today) {
+					seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val()));
+					seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
+					seuraava_tapahtuma.setDate(seuraava_tapahtuma.getDate() + parseInt(huoltovali));
+				}
+				seuraava_tapahtuma.setDate(1);
+
+				return seuraava_tapahtuma;
 			}
 		</script>
 		<?php

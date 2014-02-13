@@ -472,7 +472,7 @@
 			// Päivitetään
 			else {
 				if ($toim == 'laite') {
-					foreach ($huoltosyklit as $sykli) {
+					foreach ($huoltosyklit as $tyyppi => $sykli) {
 
 							$huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
 							$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
@@ -480,35 +480,42 @@
 							$kuka = $kukarow['kuka'];
 							$yhtio = $kukarow['yhtio'];
 
-							if( $huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0){
+							if (!empty($sykli['tuleva_toimenpide_pvm'])) {
+								$tuleva_toimenpide_pvm = date('Y-m-d', strtotime($sykli['tuleva_toimenpide_pvm']));
+								$viimeinen_tapahtuma = date('Y-m-d', strtotime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
 
+								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
+							}
+
+							if($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0) {
 								$sykli_query = "UPDATE huoltosyklit_laitteet SET
-									huoltosykli_tunnus = $huoltosykli_tunnus,
-									huoltovali = $huoltovali,
-									muutospvm = now(),
-									muuttaja = '$kuka'
-									WHERE tunnus = $huoltosykli_laite_tunnus";
-						}
-						elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
-
+												huoltosykli_tunnus = $huoltosykli_tunnus,
+												huoltovali = $huoltovali,
+												{$viimeinen_tapahtuma_query}
+												muutospvm = now(),
+												muuttaja = '$kuka'
+												WHERE tunnus = $huoltosykli_laite_tunnus";
+							}
+							elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
 								$sykli_query = "INSERT INTO huoltosyklit_laitteet
 												SET yhtio = '$yhtio',
 												huoltosykli_tunnus = $huoltosykli_tunnus,
 												laite_tunnus = $tunnus,
 												huoltovali = $huoltovali,
+												{$viimeinen_tapahtuma_query}
 												pakollisuus = 1,
 												laatija = '$kuka',
 												luontiaika = now(),
 												muutospvm =	now(),
 												muuttaja = '$kuka'";
 							}
-						elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
-							$sykli_query = "DELETE FROM huoltosyklit_laitteet
-											WHERE tunnus = $huoltosykli_laite_tunnus";
-						}
-						if (isset($sykli_query)) {
-							pupe_query($sykli_query);
-						}
+							elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
+								$sykli_query = "DELETE FROM huoltosyklit_laitteet
+												WHERE tunnus = $huoltosykli_laite_tunnus";
+							}
+							if (isset($sykli_query)) {
+								pupe_query($sykli_query);
+							}
 							unset($sykli_query);
 					}
 				}
@@ -574,40 +581,37 @@
 				$tunnus = mysql_insert_id();
 
 				//lisätään myös huoltosyklit jos on kyse laitteesta
-				if (empty($kopioi_rivi) and $toim == 'laite'){
+				if (empty($kopioi_rivi) and $toim == 'laite') {
 
 					foreach ($huoltosyklit as $sykli) {
 
-						if( $sykli['huoltosykli_tunnus'] != 0 ){
+						if($sykli['huoltosykli_tunnus'] != 0) {
 
 							$huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
 							$huoltovali = $sykli['huoltovali'];
 							$kuka = $kukarow['kuka'];
 							$yhtio = $kukarow['yhtio'];
 
-						$sykli_query = "INSERT INTO
-								huoltosyklit_laitteet (
-								yhtio,
-								huoltosykli_tunnus,
-								laite_tunnus,
-								huoltovali,
-								pakollisuus,
-								laatija,
-								luontiaika,
-								muutospvm,
-								muuttaja)
-								VALUES(
-								'$yhtio',
-								$huoltosykli_tunnus,
-								$tunnus,
-								$huoltovali,
-								1,
-								'$kuka',
-								now(),
-								now(),
-								'$kuka')";
+							$viimeinen_tapahtuma_query = "";
+							if (!empty($sykli['tuleva_toimenpide_pvm'])) {
+								$tuleva_toimenpide_pvm = date('Y-m-d', strtotime($sykli['tuleva_toimenpide_pvm']));
+								$viimeinen_tapahtuma = date('Y-m-d', strtotime("{$tuleva_toimenpide_pvm} - {$huoltovali} days"));
 
-								pupe_query($sykli_query);
+								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
+							}
+
+							$sykli_query = "INSERT INTO huoltosyklit_laitteet
+											SET yhtio = '{$yhtio}',
+											huoltosykli_tunnus = {$huoltosykli_tunnus},
+											laite_tunnus = {$tunnus},
+											huoltovali = {$huoltovali},
+											{$viimeinen_tapahtuma_query}
+											pakollisuus = 1,
+											laatija = '{$kuka}',
+											luontiaika = NOW(),
+											muutospvm = NOW(),
+											muuttaja = '{$kuka}'";
+							pupe_query($sykli_query);
 						}
 					}
 				}
@@ -619,18 +623,18 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laite_tunnus = '{$kopioitavan_rivin_tunnus}'";
 					$result = pupe_query($query);
-					while($huoltoskylit_laitteet_rivi = mysql_fetch_assoc($result)) {
-						unset($huoltoskylit_laitteet_rivi['tunnus']);
-						unset($huoltoskylit_laitteet_rivi['luontiaika']);
-						unset($huoltoskylit_laitteet_rivi['muuttaja']);
-						unset($huoltoskylit_laitteet_rivi['muutospvm']);
-						unset($huoltoskylit_laitteet_rivi['viimeinen_tapahtuma']);
-						$huoltoskylit_laitteet_rivi['laatija'] = $kukarow['kuka'];
-						$huoltoskylit_laitteet_rivi['laite_tunnus'] = $tunnus;
+					while($huoltosyklit_laitteet_rivi = mysql_fetch_assoc($result)) {
+						unset($huoltosyklit_laitteet_rivi['tunnus']);
+						unset($huoltosyklit_laitteet_rivi['luontiaika']);
+						unset($huoltosyklit_laitteet_rivi['muuttaja']);
+						unset($huoltosyklit_laitteet_rivi['muutospvm']);
+						unset($huoltosyklit_laitteet_rivi['viimeinen_tapahtuma']);
+						$huoltosyklit_laitteet_rivi['laatija'] = $kukarow['kuka'];
+						$huoltosyklit_laitteet_rivi['laite_tunnus'] = $tunnus;
 
 						$copy_query = "	INSERT INTO
-										huoltosyklit_laitteet (".implode(", ", array_keys($huoltoskylit_laitteet_rivi)).", luontiaika)
-										VALUES('".implode("', '", array_values($huoltoskylit_laitteet_rivi)). "', now())";
+										huoltosyklit_laitteet (".implode(", ", array_keys($huoltosyklit_laitteet_rivi)).", luontiaika)
+										VALUES('".implode("', '", array_values($huoltosyklit_laitteet_rivi)). "', now())";
 						pupe_query($copy_query);
 					}
 				}
@@ -1786,8 +1790,7 @@
 		$trow = mysql_fetch_array($result);
 
 		if ($toim == 'laite') {
-			js_huoltosykli_dropdown_huoltovali_options_change();
-			js_tuoteno_input_huoltosykli_options_change();
+			js_laite();
 		}
 
 
@@ -2007,9 +2010,9 @@
 				$ppa = substr($trow[$i],8,2);
 
 				echo "<td>
-						<input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
-						<input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
-						<input type = 'text' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
+						<input type = 'text' class='{$otsikko}_tpp' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
+						<input type = 'text' class='{$otsikko}_tkk' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
+						<input type = 'text' class='{$otsikko}_tvv' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
 			}
 			elseif ($tyyppi == 1.6 or $tyyppi == 1.7) {
 				$vva = substr($trow[$i],0,4);
@@ -2018,7 +2021,7 @@
 
 				echo "<td>";
 				if ($tyyppi == 1.6) {
-					echo "<select name='tpp[{$i}]'>";
+					echo "<select class='{$otsikko}_tpp' name='tpp[{$i}]'>";
 					$sel = "";
 					foreach (range(1, 31) as $paiva) {
 						if ($ppa == $paiva) {
@@ -2030,9 +2033,9 @@
 					echo "</select>";
 				}
 				else {
-					echo "<input type='hidden' name='tpp[{$i}]' value='1' />";
+					echo "<input type='hidden' class='{$otsikko}_tpp' name='tpp[{$i}]' value='1' />";
 				}
-				echo "<select name='tkk[$i]'>";
+				echo "<select class='{$otsikko}_tkk' name='tkk[$i]'>";
 				$sel = "";
 				foreach (range(1, 12) as $kuukausi) {
 					if ($kka == $kuukausi) {
@@ -2042,7 +2045,7 @@
 					$sel = "";
 				}
 				echo "</select>";
-				echo "<select name='tvv[$i]'>";
+				echo "<select class='{$otsikko}_tvv' name='tvv[$i]'>";
 				$sel = "";
 				if (empty($vuosi_vaihteluvali)) {
 					$vuosi_vaihteluvali['min'] = 1970;
@@ -2074,7 +2077,7 @@
 					echo "<a href='view.php?id=".$trow[$i]."' target='Attachment'>".t("Näytä liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '$trow[$i]'>";
 				}
 				else {
-					echo "<input type = 'text' name = '$nimi' value = '$trow[$i]'>";
+					echo "<input type = 'text' class='{$otsikko}' name = '$nimi' value = '$trow[$i]'>";
 				}
 
 				echo "<input type = 'file' name = 'liite_$i'></td>";

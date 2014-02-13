@@ -137,6 +137,10 @@ if (mysql_field_name($result, $i) == "tila") {
 	$jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "koodi") {
+	$tyyppi = 0;
+}
+
 if (!isset($redirect_echoed)) {
 	$redirect_echoed = 1;
 	if (!empty($valittu_paikka)) {

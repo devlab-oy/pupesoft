@@ -254,7 +254,26 @@
 				}
 
 				// suoratoimituksissa verkkotunnus-kenttään tallentuu vastaanottajan liitostunnus
+
 				if ($laskurow['verkkotunnus'] != '') {
+						$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.suoraan_laskutukseen
+										FROM tilausrivi
+										join tilausrivin_lisatiedot on tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
+										WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+										and tilausrivi.yhtio	 = '$kukarow[yhtio]'
+										and tilausrivi.tyyppi	!= 'D' 
+										limit 1";
+						$suoratoimres = pupe_query($query);
+						if (mysql_num_rows($suoratoimres) > 0) {
+							$suoratoimrow = mysql_fetch_assoc($suoratoimres);
+							$onkosuoratoimitusasiakkaalle = $suoratoimrow['suoraan_laskutukseen'];
+						}
+						else {
+							$onkosuoratoimitusasiakkaalle = '';
+						}
+				}
+				if ($laskurow['verkkotunnus'] != '' and (($yhtiorow['tee_osto_myyntitilaukselta'] == 'U' or $yhtiorow['tee_osto_myyntitilaukselta'] ==	'B'	or $yhtiorow['tee_osto_myyntitilaukselta'] == 'Q') 
+						or ($onkosuoratoimitusasiakkaalle != '' and ($yhtiorow['tee_osto_myyntitilaukselta'] == 'Y' or $yhtiorow['tee_osto_myyntitilaukselta'] == 'C' or $yhtiorow['tee_osto_myyntitilaukselta'] == 'W' or $yhtiorow['tee_osto_myyntitilaukselta'] == 'J')))) {
 					$query = "	SELECT if(gsm != '', gsm, if(tyopuhelin != '', tyopuhelin, puhelin)) puh
 								FROM asiakas
 								WHERE yhtio = '{$kukarow['yhtio']}'

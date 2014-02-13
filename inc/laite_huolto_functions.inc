@@ -59,12 +59,13 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 				paikka.nimi AS paikka_nimi,
 				tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
 				tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
-				FROM   laite
+				FROM laite
 				JOIN huoltosyklit_laitteet
 				ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
-					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
+					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus
+					AND IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 90) DAY) )
 				JOIN huoltosykli
-				ON ( huoltosykli.yhtio = laite.yhtio
+				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
 					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
 				JOIN paikka
 				ON ( paikka.yhtio = laite.yhtio
@@ -85,7 +86,6 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 				WHERE  laite.yhtio = '{$kukarow['yhtio']}'
 				AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
 				AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
-				HAVING IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 30) DAY)
 				ORDER BY laite_tunnus ASC,
 				tuotteen_avainsanat.jarjestys ASC";
 	$result = pupe_query($query);

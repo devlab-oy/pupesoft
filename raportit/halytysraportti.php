@@ -711,7 +711,6 @@
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
 			}
-			query_dump($query);
 			$res = pupe_query($query);
 
 			if (isset($valitut["poistetut"]) and $valitut["poistetut"] != '' and isset($valitut["poistuvat"]) and $valitut["poistuvat"] != '') {

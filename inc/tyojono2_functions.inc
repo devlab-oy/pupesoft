@@ -244,20 +244,7 @@ function echo_tyomaaraykset_table($request = array()) {
 	echo "<th>".t("Kohde")."</th>";
 	echo "<th>".t($toimitus_string)."</th>";
 	echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
-	echo "<th>";
-
-
-	echo "<form class='multisubmit' name='tulosta_tyolistat' method='POST'>";
-	echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
-
-	foreach ($request['tyomaaraykset'] as $tyomaarays) {
-		echo '<input type="hidden" name="lasku_tunnukset[]" value="' .implode(',', $tyomaarays['lasku_tunnukset']) . '">';
-	}
-
-	echo "<input type='submit' value='".t("Tallenna tyolistat PDF")."' />";
-	echo "</form>";
-
-	echo "</th>";
+	echo "<th></th>";
 	echo "</tr>";
 
 	echo "<tr>";
@@ -625,6 +612,3 @@ function onko_laitteella_poikkeus($laite_tunnus) {
 
 	return false;
 }
-
-
-

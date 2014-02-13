@@ -21,36 +21,29 @@ class TyolistaPDF
     @margin = 20
   end
 
-  def generate(_pdf, header_called)
+  def generate
     init
-    if _pdf.nil?
-      #Filename is a separate variable because pdf.render_file wants full path but in HTML save form we want to force the directory user is able to download files from. this is the reason we only retrun filename
-      filepath = "/tmp/Tyolista_#{@data['tunnus'].to_s}.pdf"
-      filename = "Tyolista_#{@data['tunnus'].to_s}.pdf"
 
-      Prawn::Document.generate(filepath,
-                               { :page_size   => "A4",
-                                 :page_layout => :landscape,
-                                 :margin      => [100, @margin, @margin, @margin]
-                               }) do |pdf|
+    #Filename is a separate variable because pdf.render_file wants full path but in HTML save form we want to force the directory user is able to download files from. this is the reason we only retrun filename
+    filepath = "/tmp/Tyolista_#{@data['tunnus'].to_s}.pdf"
+    filename = "Tyolista_#{@data['tunnus'].to_s}.pdf"
 
-        pdf.font 'Helvetica', :style => :normal, :size => 8
-        header pdf
-        info pdf
-        rows pdf
-        footer pdf
-      end
-    return filename
-    else
-      @pdf = _pdf
-      @pdf.font 'Helvetica', :style => :normal, :size => 8
-      header @pdf unless header_called
-      @pdf.move_down 80
-      info @pdf
-      rows @pdf
-      footer @pdf
-      'Tyolista.pdf'
+    Prawn::Document.generate(filepath,
+                             { :page_size   => "A4",
+                               :page_layout => :landscape,
+                               :margin      => [100, @margin, @margin, @margin]
+                             }) do |pdf|
+      pdf.font 'Helvetica', :style => :normal, :size => 8
+      header pdf
+
+      info pdf
+
+      rows pdf
+
+      footer pdf
     end
+
+    filename
   end
 
   def init
@@ -142,10 +135,6 @@ class TyolistaPDF
   end
 
   def info(pdf)
-
-    pdf.font 'Helvetica', :style => :bold, :size => 10
-    pdf.draw_text "Tyolistan nro #{@data['tunnus']}", :at => [600, 515.28]
-
     pdf.bounding_box([pdf.bounds.left, pdf.cursor], :width => pdf.bounds.right - @margin, :height => 115) do
       top_coordinate = pdf.cursor
       pdf.font 'Helvetica', :style => :normal, :size => 10
@@ -237,6 +226,7 @@ class TyolistaPDF
     pdf.font 'Helvetica', :size => 8
     x = pdf.bounds.left
     pdf.move_down 60
+
 
     pdf.float do
       pdf.move_down 5
@@ -347,7 +337,12 @@ class TyolistaPDF
     pdf.repeat(:all, :dynamic => true) do
       pdf.draw_text pdf.page_number, :at => [770, 540]
       logo pdf
+
       pdf.move_down 40
+
+      pdf.font 'Helvetica', :style => :bold, :size => 10
+      pdf.draw_text "Tyolistan nro #{@data['tunnus']}", :at => [600, 515.28]
+      pdf.font 'Helvetica', :style => :normal
     end
   end
 
@@ -367,44 +362,28 @@ class TyolistaPDF
 
 end
 
-if !ARGV[0].empty?
+class WorkListDAO
 
-  @data = JSON.load(File.read(ARGV[0]))
+  attr_accessor :data
 
-  if ( @data.class == Array )
-
-      file          = ''
-      margin        = 20
-      _pdf          = Prawn::Document.new(:page_size   => 'A4',
-                                          :page_layout => :landscape,
-                                          :margin      => margin
-      )
-
-      i             = 0
-      header_called = false
-      @data.each do |worklist|
-        pdf          = TyolistaPDF.new
-        pdf.data     = worklist
-
-        file = pdf.generate _pdf, header_called
-
-        header_called = true
-
-        if i != @data.count - 1
-          _pdf.start_new_page
-        end
-        i += 1
-      end
-
-      _pdf.render_file "/tmp/#{file}"
-      puts file
-
-  elsif
-
-    pdf      = TyolistaPDF.new
-    pdf.data = @data
-    file = pdf.generate nil, nil
-    puts file
+  def initialize(filepath)
+    @data = JSON.load(File.read(filepath))
   end
 
+  def data
+    @data
+  end
+end
+
+if !ARGV[0].empty?
+
+  worklist = WorkListDAO.new(ARGV[0])
+
+  pdf      = TyolistaPDF.new
+  pdf.data = worklist.data
+
+  puts pdf.generate
+else
+  #error
+  #exit
 end

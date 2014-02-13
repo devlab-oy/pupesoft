@@ -9,7 +9,7 @@
 
 	if ($tee == "laheta" and $tilaukset != "") {
 
-		$tilaukset = pupesoft_cleanstring($tilaukset);
+		$tilaukset = pupesoft_cleanstring(str_replace(array("\r","\n"), "", $tilaukset));
 
 		$query = "	SELECT distinct lasku.tunnus
 		            FROM lasku
@@ -33,7 +33,7 @@
 	echo "<br><br><font class='message'>".t("Anna tilausnumerot pilkulla eroteltuna")."</font><br>";
 	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='laheta'>";
-	echo "<textarea name='tilaukset' wrap='hard' rows='10' cols='60'></textarea>";
+	echo "<textarea name='tilaukset' rows='10' cols='60'></textarea>";
 	echo "<br><input type='submit' value='".t("Lähetä keräyssanomat")."'>";
 	echo "</form>";
 

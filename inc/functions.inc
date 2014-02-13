@@ -23426,6 +23426,8 @@ if (!function_exists('js_laite')) {
 				bind_tuoteno_change();
 
 				bind_huoltovali_change();
+
+				bind_tuleva_toimenpide_change();
 			});
 
 			function bind_huoltosykli_change() {
@@ -23527,6 +23529,51 @@ if (!function_exists('js_laite')) {
 				seuraava_tapahtuma.setDate(1);
 
 				return seuraava_tapahtuma;
+			}
+
+			function bind_tuleva_toimenpide_change() {
+				$('.tuleva_toimenpide').on('change input paste', function() {
+					var onko_validi = isValidDate($(this).val());
+
+					if (!onko_validi) {
+						$(this).parent().find('.tuleva_toimenpide_error').html($('#paiva_ei_validi').val());
+					}
+					else {
+						$(this).parent().find('.tuleva_toimenpide_error').html('');
+					}
+				});
+			}
+
+			function isValidDate(txtDate) {
+				var currVal = txtDate;
+				if(currVal == '') {
+					return false;
+				}
+
+				var rxDatePattern = /^(\d{1,2})[.-\/|](\d{1,2})[.-\/|](\d{4})$/;
+				var dtArray = currVal.match(rxDatePattern);
+
+				if (dtArray == null)
+				   return false;
+
+				//Checks for dd/mm/yyyy format.
+				dtMonth = dtArray[2];
+				dtDay= dtArray[1];
+				dtYear = dtArray[3];
+
+				if (dtMonth < 1 || dtMonth > 12)
+					return false;
+				else if (dtDay < 1 || dtDay> 31)
+					return false;
+				else if ((dtMonth==4 || dtMonth==6 || dtMonth==9 || dtMonth==11) && dtDay ==31)
+					return false;
+				else if (dtMonth == 2)
+				{
+				   var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
+				   if (dtDay> 29 || (dtDay ==29 && !isleap))
+						return false;
+				}
+				return true;
 			}
 		</script>
 		<?php

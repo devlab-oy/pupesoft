@@ -672,11 +672,14 @@ function huoltosykli_rivi($tyyppi) {
 	echo "<tr>";
 	echo "<th>".t('Seuraava tuleva huolto')." (pp.kk.vvvv)</th>";
 	echo "<td>";
+	echo "<input type='hidden' id='paiva_ei_validi' value='<font class=\"error\">".t('P‰iv‰m‰‰r‰ v‰‰rin')."</font>' />";
 	$seuraava_tuleva_tapahtuma = '';
 	if (!empty($laitteen_huoltosykli['viimeinen_tapahtuma'])) {
 		$seuraava_tuleva_tapahtuma = date('d.m.Y', strtotime("{$laitteen_huoltosykli['viimeinen_tapahtuma']} + {$laitteen_huoltosykli['huoltovali']} days"));
 	}
-	echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' name='huoltosyklit[{$tyyppi}][tuleva_toimenpide_pvm]' value='{$seuraava_tuleva_tapahtuma}'/>";
+	echo "<input type='text' id='tuleva_toimenpide_{$tyyppi}' class='tuleva_toimenpide' name='huoltosyklit[{$tyyppi}][tuleva_toimenpide_pvm]' value='{$seuraava_tuleva_tapahtuma}'/>";
+	echo "<div class='tuleva_toimenpide_error'>";
+	echo "</div>";
 	echo "</td>";
 	echo "</tr>";
 

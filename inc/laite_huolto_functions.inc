@@ -55,6 +55,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 				huoltosykli.toimenpide,
 				huoltosykli.huoltovali AS toimenpide_oletus_huoltovali,
 				asiakas.tunnus AS asiakas_tunnus,
+				kohde.tunnus AS kohde_tunnus,
 				kohde.nimi AS kohde_nimi,
 				paikka.nimi AS paikka_nimi,
 				tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
@@ -87,7 +88,8 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 				AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
 				AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
 				ORDER BY laite_tunnus ASC,
-				tuotteen_avainsanat.jarjestys ASC";
+				tuotteen_avainsanat.jarjestys ASC,
+				kohde.tunnus ASC";
 	$result = pupe_query($query);
 
 	$laitteet = array();
@@ -152,6 +154,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 		echo "<br/>";
 	}
 
+	$edellinen_kohde_tunnus = 0;
 	foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavan_laitteen_huoltosyklirivi) {
 		if ($huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi'] == 'koeponnistus' and !empty($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma'])) {
 			$sekunttia_edellisesta_koeponnistuksesta = strtotime(date('Y-m-d')) - strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']);
@@ -187,7 +190,16 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 			continue;
 		}
 
-		generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
+		if ($edellinen_kohde_tunnus == 0 or $edellinen_kohde_tunnus != $huollettavan_laitteen_huoltosyklirivi['kohde_tunnus']) {
+			$lisaa_kulut = true;
+		}
+		else {
+			$lisaa_kulut = false;
+		}
+
+		generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta, '', $lisaa_kulut);
+
+		$edellinen_kohde_tunnus = $huollettavan_laitteen_huoltosyklirivi['kohde_tunnus'];
 	}
 }
 
@@ -212,8 +224,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
  * tyojono
  * viimeinen_tapahtuma (optional)
  */
-function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(
-), $poikkeus_paiva = '') {
+function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $poikkeus_paiva = '', $lisaa_kulut = false) {
 	global $kukarow, $yhtiorow, $debug;
 
 	$kukarow['kesken'] = 0;
@@ -280,6 +291,20 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 		'ale1'		 => $ale,
 	);
 	$rivit = lisaa_rivi($parametrit);
+
+	if ($lisaa_kulut) {
+		$kaynti_trow = hae_tuote('KAYNTI');
+		$parametrit = array(
+			'trow'		 => $kaynti_trow,
+			'laskurow'	 => $laskurow,
+			'kpl'		 => 1,
+			'tuoteno'	 => $kaynti_trow['tuoteno'],
+			'hinta'		 => 0,
+			'netto'		 => '',
+			'ale1'		 => 0,
+		);
+		lisaa_rivi($parametrit);
+	}
 
 	paivita_laite_tunnus_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
 	paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);

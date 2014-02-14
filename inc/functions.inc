@@ -10953,6 +10953,17 @@ if (!function_exists("hae_yhtion_parametrit")) {
 				foreach ($yhtion_toimipaikkarow as $parametrit_nimi => $parametrit_arvo) {
 					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 				}
+
+				// Heataan vielä toimipaikan paramit
+				$query = "	SELECT *
+							FROM yhtion_toimipaikat_parametrit
+							WHERE yhtio 	= '$yhtio'
+							and toimipaikka = '$kukarow[toimipaikka]'";
+				$result = pupe_query($query);
+
+				while ($yhtion_toimipaikka_paramrow = mysql_fetch_assoc($result)) {
+					$yhtiorow[$yhtion_toimipaikka_paramrow['parametri']] = $yhtion_toimipaikka_paramrow['arvo'];
+				}
 		 	}
 		}
 

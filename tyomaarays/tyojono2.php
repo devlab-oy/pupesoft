@@ -88,7 +88,7 @@ else {
 
 		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi );
 		if (!empty($pdf_tiedosto)) {
-			echo_tallennus_formi($pdf_tiedosto, t("Työlista"), 'pdf');
+			echo_tallennus_formi($pdf_tiedosto, $pdf_tiedosto, '');
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
 		}
 		else {

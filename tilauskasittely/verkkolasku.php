@@ -969,7 +969,7 @@
 						if (mysql_num_rows($otsre) == 1 and $virhe == 0) {
 
 							// kirjoitetaan jv kulurivi ekalle otsikolle
-							$query = "  SELECT erilliskasiteltavakulu
+							$query = "  SELECT *
 										FROM toimitustapa
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND selite = '{$laskurow['toimitustapa']}'";
@@ -1005,12 +1005,36 @@
 									}
 								}
 							}
-						}
-						elseif (mysql_num_rows($otsre) != 1 and $silent == "") {
-							$tulos_ulos .= "<tr><td>".t("Erilliskäsiteltäväkulua ei löydy!")."</td><td>{$laskurow['tunnus']}</td><td>{$laskurow['toimitustapa']}</td></tr>\n";
-						}
-						elseif ($silent == "") {
-							$tulos_ulos .= "<tr><td>".t("Erilliskäsiteltäväkulua ei osattu lisätä!")." {$virhe}</td><td>{$otsikot}</td><td>{$laskurow['toimitustapa']}</td></tr>\n";
+
+							if ($ekrow['lisakulu_summa'] != 0 and $ekrow['lisakulu'] != 0 and $yhtiorow["lisakulu_tuotenumero"] != "") {
+
+								$query = "  SELECT *
+											FROM tuote
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tuoteno = '{$yhtiorow['lisakulu_tuotenumero']}'";
+								$rhire = pupe_query($query);
+
+								// jos tuotenumero löytyy
+								if (mysql_num_rows($rhire) == 1 and ($rahtivapaa_alarajasumma_rivit < $ekrow['lisakulu_summa'])) {
+									$trow = mysql_fetch_assoc($rhire);
+
+									$laskun_kieli = laskunkieli($laskurow['liitostunnus'], $kieli);
+
+									$hinta = $ekrow['lisakulu']; // toimitustavan lisakulu
+									$nimitys = t("Toimitustavan lisäkulu", $laskun_kieli);
+									$kommentti = "";
+
+									list($tlhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+
+									$query  = " INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+												values ('{$tlhinta}', 'N', '1', '1', '{$laskurow['tunnus']}', '{$trow['tuoteno']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L', '{$alv}', '{$kommentti}')";
+									$addtil = pupe_query($query);
+
+									if ($silent == "") {
+										$tulos_ulos .= "<tr><td>".t("Lisättiin toimitustavan lisäkulut")."</td><td>{$laskurow['tunnus']}</td><td>{$laskurow['toimitustapa']}</td><td>{$tlhinta}</td><td>{$yhtiorow['valkoodi']}</td></tr>\n";
+									}
+								}
+							}
 						}
 					}
 

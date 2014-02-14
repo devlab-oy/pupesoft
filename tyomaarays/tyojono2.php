@@ -88,7 +88,17 @@ else {
 
 		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi );
 		if (!empty($pdf_tiedosto)) {
-			echo_tallennus_formi($pdf_tiedosto, $pdf_tiedosto, '');
+
+			if( strpos($pdf_tiedosto, '_') ){
+				preg_match('~_(.*?).pdf~', $pdf_tiedosto, $osat);
+				$number = '_'.$osat[1];
+				$uusi_nimi = 'Tyolista';
+			}
+			else{
+				$uusi_nimi = 'Kaikki_tyolistat';
+			}
+
+			echo_tallennus_formi($pdf_tiedosto, $uusi_nimi, 'pdf', $number);
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
 		}
 		else {

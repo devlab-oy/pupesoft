@@ -3276,8 +3276,8 @@
 		$sel = array($apu => "selected");
 
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-		$ulos .= "<option value = ''>".t("Tuonnin intrastat luodaan tavaran varastoonvientip‰iv‰m‰‰r‰n mukaan (HUOM: Intrastat muuttuu takautuvasti jos ostorivien hintoja muutetaan varastoonviennin j‰lkeen!)")."</option>";
-		$ulos .= "<option value = 'V'{$sel['V']}>".t("Tuonnin intrastat luodaan saapumisen virallisen varastonarvolaskentap‰iv‰m‰‰r‰n mukaan (HUOM: Tuotteet n‰ytet‰‰n Intrastatissa vasta kun saapuminen suljetaan!)")."</option>";
+		$ulos .= "<option value = ''>".t("Tuonnin intrastat luodaan saapumisen virallisen varastonarvolaskentap‰iv‰m‰‰r‰n mukaan (HUOM: Tuotteet n‰ytet‰‰n Intrastatissa vasta kun saapuminen suljetaan!)")."</option>";
+		$ulos .= "<option value = 'V'{$sel['V']}>".t("Tuonnin intrastat luodaan tavaran varastoonvientip‰iv‰m‰‰r‰n mukaan (HUOM: Intrastat muuttuu takautuvasti jos ostorivien hintoja muutetaan varastoonviennin j‰lkeen!)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

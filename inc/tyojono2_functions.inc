@@ -527,14 +527,14 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 
 			echo "<select class='tyojono_muutos'>";
 			foreach ($request['tyojonot'] as $tyojono) {
-				$sel = $laite['tyojono'] == $tyojono['selitetark'] ? ' SELECTED' : '';
-				echo "<option value='{$tyojono['selite']}' {$sel}>{$tyojono['selitetark']}</option>";
+				$sel = $laite['tyojono'] == $tyojono['value'] ? ' SELECTED' : '';
+				echo "<option value='{$tyojono['value']}' {$sel}>{$tyojono['text']}</option>";
 			}
 			echo "</select>";
 			echo "<br/>";
 			echo "<select class='tyostatus_muutos'>";
 			foreach ($request['tyostatukset'] as $tyostatus) {
-				$sel = $laite['tyostatus_koodi'] == $tyostatus['selite'] ? ' SELECTED' : '';
+				$sel = $laite['tyostatus_koodi'] == $tyostatus['value'] ? ' SELECTED' : '';
 				echo "<option value='{$tyostatus['value']}' {$sel}>{$tyostatus['text']}</option>";
 			}
 			echo "</select>";

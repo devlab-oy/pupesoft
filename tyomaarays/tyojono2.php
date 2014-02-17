@@ -14,6 +14,14 @@ if (isset($livesearch_tee) and $livesearch_tee == "KOHDEHAKU") {
 	exit;
 }
 
+if (!isset($tee)) 	$tee = '';
+if (!isset($ala_tee)) 	$ala_tee = '';
+if (!isset($toim)) 	$toim = '';
+if (!isset($lasku_tunnukset)) 	$lasku_tunnukset = '';
+if (!isset($toimitusaika_haku)) 	$toimitusaika_haku = '';
+if (!isset($laite_tunnus)) 	$laite_tunnus = '';
+if (!isset($ajax_request)) 	$ajax_request = '';
+
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
@@ -84,11 +92,36 @@ else {
 	}
 
 	if ($request['ala_tee'] == 'tulosta_tyolista') {
-		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($request['lasku_tunnukset']);
 
+		$multi = false;
+
+		if( is_array($lasku_tunnukset) ){
+			foreach( $lasku_tunnukset as $tunnus ){
+				$tunnus = explode(',', $tunnus);
+				$tunnukset[] = $tunnus;
+			}
+			$lasku_tunnukset = $tunnukset;
+			$multi = true;
+		}
+		else{
+			$lasku_tunnukset = explode(',', $lasku_tunnukset);
+		}
+
+
+		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi );
 		if (!empty($pdf_tiedosto)) {
-			echo_tallennus_formi($pdf_tiedosto, t("Työlista"), 'pdf');
 
+			if( strpos($pdf_tiedosto, '_') ){
+				preg_match('~_(.*?).pdf~', $pdf_tiedosto, $osat);
+				$number = '_'.$osat[1];
+				$uusi_nimi = 'Tyolista';
+			}
+			else{
+				$number = null;
+				$uusi_nimi = 'Kaikki_tyolistat';
+			}
+
+			echo_tallennus_formi($pdf_tiedosto, $uusi_nimi, 'pdf', $number);
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
 		}
 		else {

@@ -146,7 +146,7 @@
 
 		// tutkaillaan myynti
 		$query = "	SELECT
-					sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
+					sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
 					sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
 					sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt,
 					sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)) ennakko
@@ -484,7 +484,7 @@
 					FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
 					WHERE tilausrivi.yhtio in ($yhtiot)
-					and tyyppi IN  ('L','G')
+					and tyyppi IN  ('L','G','V')
 					and var = 'J'
 					and jt $lisavarattu > 0";
 		$vtresult = pupe_query($query);

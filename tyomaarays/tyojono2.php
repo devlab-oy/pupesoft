@@ -4,6 +4,14 @@ require_once('../inc/parametrit.inc');
 require_once('inc/tyojono2_functions.inc');
 require_once('inc/laite_huolto_functions.inc');
 
+if (!isset($tee)) 	$tee = '';
+if (!isset($ala_tee)) 	$ala_tee = '';
+if (!isset($toim)) 	$toim = '';
+if (!isset($lasku_tunnukset)) 	$lasku_tunnukset = '';
+if (!isset($toimitusaika_haku)) 	$toimitusaika_haku = '';
+if (!isset($laite_tunnus)) 	$laite_tunnus = '';
+if (!isset($ajax_request)) 	$ajax_request = '';
+
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
@@ -95,6 +103,7 @@ else {
 				$uusi_nimi = 'Tyolista';
 			}
 			else{
+				$number = null;
 				$uusi_nimi = 'Kaikki_tyolistat';
 			}
 
@@ -113,7 +122,6 @@ unset($request['lasku_tunnukset']);
 $request['tyomaaraykset'] = hae_tyomaaraykset($request);
 $request['tyomaaraykset'] = kasittele_tyomaaraykset($request);
 echo_tyomaaraykset_table($request);
-
 
 echo "</div>";
 

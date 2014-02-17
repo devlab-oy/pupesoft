@@ -26,6 +26,7 @@ if (!empty($lasku_tunnukset)) {
 
 	$filepath = kirjoita_json_tiedosto($tyomaarays_rivit, "tyolista_".uniqid()."");
 	$pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
+
 	return $pdf_tiedosto;
 	}
 }
@@ -61,8 +62,9 @@ function pdf_hae_tyomaarayksien_rivit($lasku_tunnukset) {
 				ON ( kohde.yhtio = paikka.yhtio
 					AND kohde.tunnus = paikka.kohde )
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tunnus IN ('".implode("','", $lasku_tunnukset)."')
+				AND lasku.tunnus IN (".implode(",", $lasku_tunnukset).")
 				LIMIT 1";
+
 	$result = pupe_query($query);
 
 	$tyomaarays = mysql_fetch_assoc($result);
@@ -101,11 +103,11 @@ function hae_tyolistan_rivit($lasku_tunnukset) {
 				JOIN tuote AS laite_tuote
 				ON ( laite_tuote.yhtio = laite.yhtio
 					AND laite_tuote.tuoteno = laite.tuoteno )
-				JOIN tuotteen_avainsanat sammutin_koko
+				JOIN tuotteen_avainsanat AS sammutin_koko
 				ON ( sammutin_koko.yhtio = laite_tuote.yhtio
 					AND sammutin_koko.tuoteno = laite_tuote.tuoteno
 					AND sammutin_koko.laji = 'sammutin_koko' )
-				JOIN tuotteen_avainsanat sammutin_tyyppi
+				JOIN tuotteen_avainsanat AS sammutin_tyyppi
 				ON ( sammutin_tyyppi.yhtio = laite_tuote.yhtio
 					AND sammutin_tyyppi.tuoteno = laite_tuote.tuoteno
 					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
@@ -120,8 +122,9 @@ function hae_tyolistan_rivit($lasku_tunnukset) {
 					AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
 					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.otunnus IN ('".implode("','", $lasku_tunnukset)."')
+				AND tilausrivi.otunnus IN (".implode(",", $lasku_tunnukset).")
 				AND tilausrivi.var != 'P'";
+
 	$result = pupe_query($query);
 
 	$rivit = array();
@@ -175,7 +178,13 @@ function hae_rivin_laite($laite_tunnus) {
 	$laite = mysql_fetch_assoc($result);
 
 	$laite['viimeinen_painekoe'] = hae_laitteen_viimeiset_tapahtumat($laite['tunnus']);
-	$laite['viimeinen_painekoe'] = date('my', strtotime($laite['viimeinen_painekoe']['koeponnistus']));
+
+	if( isset( $laite['viimeinen_painekoe']['koeponnistus'] ) and $laite['viimeinen_painekoe']['koeponnistus'] != '' ){
+		$laite['viimeinen_painekoe'] = date('my', strtotime($laite['viimeinen_painekoe']['koeponnistus']));
+	}
+	else{
+		$laite['viimeinen_painekoe'] = '—';
+	}
 
 	return $laite;
 }

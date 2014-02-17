@@ -45,21 +45,21 @@ class TyolistaPDF
     @logo   = @data['logo']
 
     #Space needs to be added if nil. Otherwise text() doesnt work as wanted
-    zipcode = @data['asiakas']['postino'].nil? ? ' ' : @data['asiakas']['postino']
-    city    = @data['asiakas']['postitp'].nil? ? ' ' : @data['asiakas']['postitp']
+    zipcode = @data['asiakas']['postino'].empty? ? ' ' : @data['asiakas']['postino']
+    city    = @data['asiakas']['postitp'].empty? ? ' ' : @data['asiakas']['postitp']
 
     @customer_data = [
         {
             :header => 'Asiakas nro',
-            :value  => @data['asiakas']['asiakasnro'].nil? ? ' ' : @data['asiakas']['asiakasnro']
+            :value  => @data['asiakas']['asiakasnro'].empty? ? ' ' : @data['asiakas']['asiakasnro']
         },
         {
             :header => 'Asiakas',
-            :value  => @data['asiakas']['nimi'].nil? ? ' ' : @data['asiakas']['nimi']
+            :value  => @data['asiakas']['nimi'].empty? ? ' ' : @data['asiakas']['nimi']
         },
         {
             :header => 'Katuosoite',
-            :value  => @data['asiakas']['osoite'].nil? ? ' ' : @data['asiakas']['osoite']
+            :value  => @data['asiakas']['osoite'].empty? ? ' ' : @data['asiakas']['osoite']
         },
         {
             :header => 'Postiosoite',
@@ -75,12 +75,12 @@ class TyolistaPDF
         },
         {
             :header => 'Tilaus nro',
-            :value  => @data['tunnus'].nil? ? ' ' : @data['asiakas']['tunnus']
+            :value  => @data['tunnus'].empty? ? ' ' : @data['asiakas']['tunnus']
         },
     ]
 
-    zipcode = @data['kohde']['postino'].nil? ? ' ' : @data['kohde']['postino']
-    city    = @data['kohde']['postitp'].nil? ? ' ' : @data['kohde']['postitp']
+    zipcode = @data['kohde']['postino'].empty? ? ' ' : @data['kohde']['postino']
+    city    = @data['kohde']['postitp'].empty? ? ' ' : @data['kohde']['postitp']
 
     @spot_data = [
         {
@@ -232,21 +232,21 @@ class TyolistaPDF
       @pdf.move_up 5
       @pdf.text_box 'Laitteen sijainti', :at => [x+30, @pdf.cursor]
       @pdf.move_down 5
-      @pdf.text_box 'Muuttunut sijainti', :at => [x+200, @pdf.cursor], :rotate => 90
+      @pdf.text_box 'Muuttunut sijainti', :at => [x+170, @pdf.cursor], :rotate => 90
       @pdf.move_up 5
-      @pdf.text_box 'Merkki / malli', :at => [x+220, @pdf.cursor]
+      @pdf.text_box 'Merkki / malli', :at => [x+190, @pdf.cursor]
 
       @pdf.move_up 10
-      @pdf.text_box 'Koko', :at => [x+320, @pdf.cursor]
+      @pdf.text_box 'Koko', :at => [x+290, @pdf.cursor]
       @pdf.move_down 10
-      @pdf.text_box 'kg / litra', :at => [x+320, @pdf.cursor]
+      @pdf.text_box 'kg / litra', :at => [x+290, @pdf.cursor]
 
       @pdf.move_up 10
-      @pdf.text_box 'Palo-/', :at => [x+370, @pdf.cursor]
+      @pdf.text_box 'Palo-/', :at => [x+340, @pdf.cursor]
       @pdf.move_down 10
-      @pdf.text_box 'teholuokka', :at => [x+370, @pdf.cursor]
+      @pdf.text_box 'teholuokka', :at => [x+340, @pdf.cursor]
 
-      @pdf.text_box 'Sammute', :at => [x+420, @pdf.cursor]
+      @pdf.text_box 'Sammute', :at => [x+390, @pdf.cursor]
       @pdf.text_box 'Säiliön nro', :at => [x+470, @pdf.cursor]
       @pdf.text_box 'Ponnep nro', :at => [x+540, @pdf.cursor]
       @pdf.move_down 5
@@ -286,12 +286,12 @@ class TyolistaPDF
     @pdf.table([table_cells],
               :column_widths => {
                   0  => 30,
-                  1  => 165,
+                  1  => 135,
                   2  => 20,
                   3  => 100,
                   4  => 50,
                   5  => 50,
-                  6  => 55,
+                  6  => 85,
                   7  => 70,
                   8  => 50,
                   9  => 25,

@@ -904,7 +904,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 
 				$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
 
-				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
+				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $toimipaikat_row['liiketunnus'] != '') {
 
 					require("inc/sahkoinen_lahete.class.inc");
 
@@ -8609,7 +8609,7 @@ if ($tee == '') {
 
 						$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
 
-						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
+						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $toimipaikat_row['liiketunnus'] != '') {
 
 							$query = "	SELECT asiakkaan_avainsanat.*
 										FROM asiakkaan_avainsanat

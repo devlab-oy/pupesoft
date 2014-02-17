@@ -10,11 +10,9 @@ if (isset($_REQUEST['ajax_toiminto']) and trim($_REQUEST['ajax_toiminto']) == 't
 	$ohje = 'off';
 }
 
-if (!isset($kukarow)) {
-	if (@include("../inc/parametrit.inc"));
-	elseif (@include("parametrit.inc"));
-	else exit;
-}
+if (@include("../inc/parametrit.inc"));
+elseif (@include("parametrit.inc"));
+else exit;
 
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");

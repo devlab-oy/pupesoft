@@ -12,8 +12,6 @@ if (isset($_POST["tee"])) {
 require ("../inc/parametrit.inc");
 require('inc/pupeExcel.inc');
 
-$parametrit_inc_require = false;
-
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
@@ -34,102 +32,6 @@ if (isset($livesearch_tee) and $livesearch_tee == "VAURIOPOYTAKIRJAHAKU") {
 enable_ajax();
 
 echo "<font class='head'>".t("Vauriopöytäkirja")."</font><hr>";
-
-if (in_array($tee, array('siirra_tarkastajalle','anna_laskutuslupa','siirra_urakoitsijalle','merkitse_maksetuksi'))) {
-	$pakolliset_errors = array();
-	if (empty($tyo_alku_paiva) or empty($tyo_alku_aika)) {
-		$pakolliset_errors['tyo_alku'] = t('Työ alkoi puuttuu');
-	}
-	if (empty($tyo_loppu_paiva) or empty($tyo_loppu_aika)) {
-		$pakolliset_errors['tyo_loppu'] = t('Työ päättyi puuttuu');
-	}
-	if (empty($ohjausmerkki)) {
-		$pakolliset_errors['kaupunki_kunta'] = t('Kaupunki').'/'.t('kunta puuttuu');
-	}
-	if (empty($kohde)) {
-		$pakolliset_errors['paikka_osoite'] = t('Paikka').'/'.t('osoite puuttuu');
-	}
-	if (empty($jalleenmyyja)) {
-		$pakolliset_errors['verkostoalue'] = t('Verkostoalue puuttuu');
-	}
-	if (empty($tyomaarays_viite)) {
-		$pakolliset_errors['tla'] = t('TLA puuttuu');
-	}
-	if (empty($vikakoodi)) {
-		$pakolliset_errors['vaurio_kohde'] = t('Vaurion kohde puuttuu');
-	}
-	if (empty($merkki)) {
-		$pakolliset_errors['vaurio_kohde_tyyppi'] = t('Vaurion kohteen tyyppi puuttuu');
-	}
-	if (empty($takuunumero)) {
-		$pakolliset_errors['tikettinumero'] = t('Operaattorin tikettinumero puuttuu');
-	}
-	if (empty($prioriteetti)) {
-		$pakolliset_errors['prioriteetti'] = t('Kiireellisyys puuttuu');
-	}
-	if (!isset($kotipuh)) {
-		$pakolliset_errors['kotipuh'] = t('Tieto puuttuu');
-	}
-	if (empty($comments)) {
-		$pakolliset_errors['comments'] = t('Tieto puuttuu');
-	}
-	if (empty($toim_nimi)) {
-		$pakolliset_errors['nimi'] = t('Nimi puuttuu');
-	}
-	if (empty($toim_osoite)) {
-		$pakolliset_errors['osoite'] = t('Osoite puuttuu');
-	}
-	if (empty($toim_postino)) {
-		$pakolliset_errors['postino'] = t('Postinumero puuttuu');
-	}
-	if (empty($toim_postitp)) {
-		$pakolliset_errors['postitp'] = t('Postitoimipaikka puuttuu');
-	}
-	if (empty($sisamaan_kuljetus)) {
-		$pakolliset_errors['gsm'] = t('Matkapuhelin puuttuu');
-	}
-	if (empty($kirjoitin)) {
-		$pakolliset_errors['ytunnus'] = t('Ytunnus puuttuu');
-	}
-	if (!isset($hyvaksy)) {
-		$pakolliset_errors['hyvaksy'] = t('Tieto puuttuu');
-	}
-	if (!isset($mallivari)) {
-		$pakolliset_errors['mallivari'] = t('Tieto puuttuu');
-	}
-	//pakollinen tieto jos kaapelinäyttö (mallivari) on suoritettu
-	if (!empty($mallivari) and empty($tilausyhteyshenkilo)) {
-		$pakolliset_errors['nayttaja'] = t('Näyttäjä puuttuu');
-	}
-	if (!empty($mallivari) and empty($kuljetus)) {
-		$pakolliset_errors['kuljetus'] = t('Näyttäjän yhteystiedot puuttuu');
-	}
-	if (empty($sisviesti1)) {
-		$pakolliset_errors['sisviesti1'] = t('Tieto puuttuu');
-	}
-	if (empty($suorittaja)) {
-		$pakolliset_errors['suorittaja'] = t('Selvityksen antaja puuttuu');
-	}
-	if (empty($noutaja)) {
-		$pakolliset_errors['suorittaja_puhelin'] = t('Selvityksen antajan puhelin puuttuu');
-	}
-	if (empty($huolitsija)) {
-		$pakolliset_errors['huolitsija'] = t('Selvitykseestä vastaava puuttuu');
-	}
-	if (empty($jakelu)) {
-		$pakolliset_errors['jakelu'] = t('Selvityksestä vastaavat puhelin puuttuu');
-	}
-
-	if (!empty($pakolliset_errors)) {
-		$parametrit_inc_require = true;
-		$tilausnumero = $tyomaarays_tunnus;
-		$tee = 'OTSIK';
-		$toim = 'VAURIOPOYTAKIRJA';
-		$tila = '';
-
-		require('tilauskasittely/tilaus_myynti.php');
-	}
-}
 
 //Nämä requestit tulee tilaus_myynti.php puolelta
 if ($tee == 'siirra_tarkastajalle') {

@@ -13372,7 +13372,7 @@ if (!function_exists("pupe_DataTables")) {
 						rivi_ja_otsikko = this.value.split(\"###\", 2);
 						var otunnus 	= $('input[name=\"otunnus\"]').val();
 
-						setTimeout(check_arrival_validity(otunnus), 200);
+						check_arrival_validity(otunnus);
 
 						if (process) {
 
@@ -13488,7 +13488,7 @@ if (!function_exists("pupe_DataTables")) {
 						var sscc 	= $('#suuntalava_'+tun+' option:selected').text();
 						var otunnus	= $('input[name=\"otunnus\"]').val();
 
-						setTimeout(check_arrival_validity(otunnus), 200);
+						check_arrival_validity(otunnus);
 
 						if (process) {
 
@@ -13528,7 +13528,7 @@ if (!function_exists("pupe_DataTables")) {
 
 						var otunnus = $('input[name=\"otunnus\"]').val();
 
-						setTimeout(check_arrival_validity(otunnus), 200);
+						check_arrival_validity(otunnus);
 
 						if (process) {
 
@@ -13859,7 +13859,7 @@ if (!function_exists("pupe_DataTables")) {
 
 						var otunnus = $('input[name=\"otunnus\"]').val();
 
-						setTimeout(check_arrival_validity(otunnus), 200);
+						check_arrival_validity(otunnus);
 
 						if (process) {
 
@@ -13931,7 +13931,7 @@ if (!function_exists("pupe_DataTables")) {
 
 						var otunnus = $('input[name=\"otunnus\"]').val();
 
-						setTimeout(check_arrival_validity(otunnus), 200);
+						check_arrival_validity(otunnus);
 
 						if (process) {
 

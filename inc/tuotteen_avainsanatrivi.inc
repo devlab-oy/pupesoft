@@ -32,6 +32,7 @@
 		if ($yhtiorow['laite_huolto'] == 'X') {
 			$ulos .= "<option value='sammutin_tyyppi' $sel[sammutin_tyyppi]>".t("Sammuttimen tyyppi")."</option>";
 			$ulos .= "<option value='sammutin_koko' $sel[sammutin_koko]>".t("Sammuttimen koko")."</option>";
+			$ulos .= "<option value='palo_luokka' $sel[palo_luokka]>".t("Paloluokka")."</option>";
 		}
 		$ulos .= "<option value='tyomaarayksen_ryhmittely' $sel[tyomaarayksen_ryhmittely]>".t("Työmääräyksen ryhmittely")."</option>";
 		$ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";

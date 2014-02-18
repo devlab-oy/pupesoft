@@ -132,9 +132,26 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
 	}
 
 	protected function tarkistukset() {
-		echo "Ei tarkistuksia";
+		$query = "	SELECT tuote.tuoteno,
+					tuote.nimitys,
+					t.tuoteno
+					FROM   tuote
+					LEFT JOIN tuotteen_avainsanat AS t
+					ON ( t.yhtio = tuote.yhtio
+						AND t.tuoteno = tuote.tuoteno
+						AND t.laji = 'tyomaarayksen_ryhmittely' )
+					WHERE tuote.yhtio = 'lpk'
+					AND tuote.tuotetyyppi = 'K'
+					AND t.tuoteno IS NULL
+					ORDER BY tuote.tuoteno ASC;";
+		$result = pupe_query($query);
+		echo "Seuraavilta tuotteilta puuttuu tyomaarayksen ryhmittely (".mysql_num_rows($result).")";
+		echo "<br/>";
+		echo "<br/>";
+		while($rivi = mysql_fetch_assoc($result)) {
+			echo "{$rivi['nimitys']} - {$rivi['tuoteno']}";
+			echo "<br/>";
+		}
 	}
 
 }
-
-?>

@@ -272,8 +272,6 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 			echo "{$rivi['nimitys']} - {$rivi['tuoteno']}";
 			echo "<br/>";
 		}
-		
-		
 	}
 
 }

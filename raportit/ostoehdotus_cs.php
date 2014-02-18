@@ -484,7 +484,7 @@
 					FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
 					WHERE tilausrivi.yhtio in ($yhtiot)
-					and tyyppi IN  ('L','G','V')
+					and tyyppi IN  ('L','G')
 					and var = 'J'
 					and jt $lisavarattu > 0";
 		$vtresult = pupe_query($query);

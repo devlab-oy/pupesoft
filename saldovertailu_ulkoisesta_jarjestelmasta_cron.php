@@ -57,7 +57,7 @@
 			if ($file == '.' or $file == '..' or $file == '.DS_Store' or is_dir($path.$file)) continue;
 
 			$path_parts = pathinfo($file);
-			$ext = strtoupper($path_parts['extension']);
+			$ext = isset($path_parts['extension']) ? strtoupper($path_parts['extension']) : '';
 
 			if ($ext == 'XML') {
 

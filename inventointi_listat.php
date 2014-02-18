@@ -904,7 +904,7 @@
 
 			$ots .= sprintf ('%-7.7s',		t("Määrä"));
 			$ots .= sprintf ('%-9.9s', 		t("Yksikkö"));
-			$ots .= sprintf ('%-8.8s',	 	t("Tikpl"));
+			$ots .= sprintf ('%-7.7s',	 	t("Tikpl"));
 			$ots .= sprintf ('%-8.8s',	 	t("Enn/Ker"));
 			$ots .= "\n";
 			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n\n";
@@ -1029,7 +1029,7 @@
 
 				$prn .= sprintf ('%-7.7s', 	"_____");
 				$prn .= sprintf ('%-9.9s', 	t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite"));
-				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
+				$prn .= sprintf ('%-7.7d', 	$prow["varattu"]);
 
 				//Haetaan kerätty määrä
 				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -1046,7 +1046,7 @@
 				$hylresult = pupe_query($query);
 				$hylrow = mysql_fetch_assoc($hylresult);
 
-				$prn .= sprintf ('%-8.8d', "{$hylrow['keratty']}/{$hylrow['ennpois']}");
+				$prn .= sprintf ('%-13.13s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {
 					$query = "	SELECT sarjanumeroseuranta.sarjanumero,

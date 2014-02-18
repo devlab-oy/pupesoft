@@ -11,6 +11,7 @@ require_once('KohdeCSVDumper.php');
 require_once('PaikkaCSVDumper.php');
 require_once('LaiteCSVDumper.php');
 require_once('TuotteenavainsanaLaiteCSVDumper.php');
+require_once('TuotteenavainsanaLaite2CSVDumper.php');
 require_once('TuotteenavainsanaToimenpideCSVDumper.php');
 require_once('TuoteryhmaCSVDumper.php');
 require_once('HuoltosykliCSVDumper.php');
@@ -26,6 +27,7 @@ $request = array(
 $request['konversio_tyypit'] = array(
 	'tuote'					 => t('Tuote'),
 	'tuotteen_avainsanat'	 => t('Tuotteen avainsanat'),
+	'tuotteen_avainsanat2'	 => t('Tuotteen avainsanat laite tarkistus'),
 	'asiakas'				 => t('Asiakas'),
 	'kohde'					 => t('Kohde'),
 	'paikka'				 => t('Paikka'),
@@ -49,6 +51,10 @@ if ($request['action'] == 'aja_konversio') {
 
 		case 'tuotteen_avainsanat':
 			$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
+			break;
+		
+		case 'tuotteen_avainsanat2':
+			$dumper = new TuotteenavainsanaLaite2CSVDumper($request['kukarow']);
 			break;
 
 		case 'asiakas':
@@ -113,6 +119,12 @@ if ($request['action'] == 'aja_konversio') {
 			echo "<br/>";
 			echo t('Laite tuotteiden avainsanat').':';
 			$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
+			$dumper->aja();
+			die();
+			echo "<br/>";
+			echo "<br/>";
+			echo t('Laite tuotteiden avainsanat 2 (varmistus)').':';
+			$dumper = new TuotteenavainsanaLaite2CSVDumper($request['kukarow']);
 			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";
@@ -189,12 +201,12 @@ else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 		'DELETE FROM avainsana WHERE yhtio = "'.$kukarow['yhtio'].'" AND laji = "TRY"',
 		'DELETE FROM huoltosykli WHERE yhtio = "'.$kukarow['yhtio'].'"',
 		'DELETE FROM huoltosyklit_laitteet WHERE yhtio = "'.$kukarow['yhtio'].'"',
-		'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'" AND otunnus != "-1"',
-		'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
-		'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
-		'DELETE FROM tilausrivi WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
-		'DELETE FROM tilausrivin_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
-		'DELETE FROM tiliointi WHERE yhtio = "'.$kukarow['yhtio'].'" AND tunnus != "-1"',
+		'DELETE FROM tyomaarays WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM lasku WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM laskun_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tilausrivi WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tilausrivin_lisatiedot WHERE yhtio = "'.$kukarow['yhtio'].'"',
+		'DELETE FROM tiliointi WHERE yhtio = "'.$kukarow['yhtio'].'"',
 	);
 	foreach ($query_array as $query) {
 		pupe_query($query);

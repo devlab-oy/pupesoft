@@ -109,11 +109,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 		}
 
 		if ($valid and count($laitteen_avainsanat) == 0) {
-			$this->errors[$index][] = t('Kannassa ei kokoa tai tyyppiä');
-		}
-
-		if ($valid) {
-			$m = "";
+			$this->errors[$index][] = t('Kannassa ei kokoa tai tyyppiä')." {$rivi['koko']} {$rivi['tyyppi']} {$rivi['tuoteno']}";
 		}
 
 		return $valid;
@@ -141,10 +137,23 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 		return $avainsanat;
 	}
 
+	protected function loytyyko_palo_luokka($tuoteno) {
+		$query = "	SELECT *
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) > 0) {
+			return true;
+		}
+
+		return false;
+	}
+
 	protected function dump_data() {
 		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
 		$progress_bar->initialize(count($this->rivit));
-		die();
 		foreach ($this->rivit as $rivi) {
 			$query = '	INSERT INTO '.$this->table.'
 						(
@@ -189,6 +198,30 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 							'.$rivi['luontiaika'].'
 						)';
 			pupe_query($query);
+
+			if (!$this->loytyyko_palo_luokka($rivi['tuoteno'])) {
+				$query = '	INSERT INTO '.$this->table.'
+							(
+								yhtio,
+								tuoteno,
+								kieli,
+								laji,
+								selite,
+								laatija,
+								luontiaika
+							)
+							VALUES
+							(
+								"'.$rivi['yhtio'].'",
+								"'.$rivi['tuoteno'].'",
+								"'.$rivi['kieli'].'",
+								"palo_luokka",
+								"'.$rivi['palo_luokka'].'",
+								"'.$rivi['laatija'].'",
+								'.$rivi['luontiaika'].'
+							)';
+				pupe_query($query);
+			}
 
 			$progress_bar->increase();
 		}

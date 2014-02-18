@@ -987,9 +987,7 @@
 				}
 
 				//katsotaan onko tuotetta tilauksessa
-				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika,
-							ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,
-							ifnull(sum(tilausrivi.varattu),0) ennpois
+				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoterow[tuoteno]' and varattu>0 and tyyppi='O'";
 				$result1 = pupe_query($query);
@@ -1032,7 +1030,23 @@
 				$prn .= sprintf ('%-7.7s', 	"_____");
 				$prn .= sprintf ('%-9.9s', 	t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite"));
 				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
-				$prn .= sprintf ('%-8.8d', 	$prow["keratty"]+$prow['ennpois']);
+
+				//Haetaan ker‰tty m‰‰r‰
+				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
+							and tyyppi 		in ('L','G','V')
+							and tuoteno		= '{$tuoterow['tuoteno']}'
+							and varattu    <> 0
+							and laskutettu 	= ''
+							and hyllyalue	= '{$tuoterow['hyllyalue']}'
+							and hyllynro 	= '{$tuoterow['hyllynro']}'
+							and hyllyvali 	= '{$tuoterow['hyllyvali']}'
+							and hyllytaso 	= '{$tuoterow['hyllytaso']}'";
+				$hylresult = pupe_query($query);
+				$hylrow = mysql_fetch_assoc($hylresult);
+
+				$prn .= sprintf ('%-8.8d', "{$hylrow['keratty']}/{$hylrow['ennpois']}");
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {
 					$query = "	SELECT sarjanumeroseuranta.sarjanumero,

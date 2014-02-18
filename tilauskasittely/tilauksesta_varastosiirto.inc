@@ -3,11 +3,11 @@
 	// jos halutaan generoida ostotilaus tämän tilauksen riveistä
 	// tarvitaan myyntitilauksen tunnus muuttujassa $otunnus
 
-	if (!function_exists("tilauksesta_ostotilaus")) {
-		function tilauksesta_ostotilaus($otunnus, $tyyppi) {
+	if (!function_exists("tilauksesta_varastosiirto")) {
+		function tilauksesta_varastosiirto($otunnus, $tyyppi) {
 			global $yhtiorow, $kukarow, $toim, $pupe_root_polku;
 
-			$tilauksesta_ostotilaus = "";
+			$tilauksesta_varastosiirto = "";
 			$lisa_varattusiirto = "";
 
 			if ($tyyppi == "T") {
@@ -93,7 +93,7 @@
 							$rivi["toimittajan_tunnus"] = $aburow["liitostunnus"];
 						}
 						else {
-							$tilauksesta_ostotilaus .= "<font class='error'>".t("VIRHE: Toimittajaa ei löydy riville").": '$rivi[tunnus]'<br>";
+							$tilauksesta_varastosiirto .= "<font class='error'>".t("VIRHE: Toimittajaa ei löydy riville").": '$rivi[tunnus]'<br>";
 						}
 					}
 
@@ -107,7 +107,7 @@
 					$erres = pupe_query($query);
 
 					if (mysql_num_rows($erres) != 1) {
-						$tilauksesta_ostotilaus .= "<font class='error'>".t("VIRHE: Toimittajan tietoja ei löytynyt tuotteelta").": $rivi[tuoteno]!<br>";
+						$tilauksesta_varastosiirto .= "<font class='error'>".t("VIRHE: Toimittajan tietoja ei löytynyt tuotteelta").": $rivi[tuoteno]!<br>";
 					}
 					else {
 						// toimittaja löytyi, tehdään tästä ostotilaus
@@ -455,7 +455,7 @@
 										and tilausrivitunnus = '$tilrivirow[rivitunnus]'";
 							$updres = pupe_query($query);
 
-							$tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lisätty ostotilaukselle: $tunnus</font><br>";
+							$tilauksesta_varastosiirto .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lisätty ostotilaukselle: $tunnus</font><br>";
 
 							if ($tilrivirow["tunnus"] == $tilrivirow["perheid2"] and mysql_num_rows($tilrivires) > 1) {
 								$pid = $lisatty_tun;
@@ -533,6 +533,6 @@
 
 			}
 
-			return $tilauksesta_ostotilaus;
+			return $tilauksesta_varastosiirto;
 		}
 	}

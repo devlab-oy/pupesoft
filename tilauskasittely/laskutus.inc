@@ -37,7 +37,7 @@
 											LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 											WHERE tilausrivi.otunnus 	= '$kukarow[kesken]'
 											and tilausrivi.yhtio 		= '$kukarow[yhtio]'
-											and tilausrivi.var 			not in ('P','J', 'O')
+											and tilausrivi.var not in ('P','J','O','S')
 											and tilausrivi.tyyppi 		= 'L'
 											ORDER BY tilausrivi.tunnus";
 

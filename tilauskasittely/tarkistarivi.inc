@@ -206,7 +206,7 @@
 		// A - Myyntitilirivi joka laskutetaan asiakkaalta
 		// B - Myyntitilirivi joka palautetaan myyntitilistä omaan varastoon
 		// R - Rakennettava rivi
-		// S - who knows?
+		// S - Suoratoimitusvarastosiirto
 		// O - Optio
 
 

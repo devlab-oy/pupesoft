@@ -1108,7 +1108,15 @@
 					else {
 						$summaus_lisa = "";
 					}
-kissakoira
+
+					$varastorajausjoini = '';
+					if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
+						$varastorajausjoini = " JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
+												and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
+												and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
+												$mistavarastosta) ";
+					}
+
 					if ($kiertoviilasku != "") {
 						// Haetaan tuotteen myydyt kappaleet
 						// Haetaan tuotteen kulutetut kappaleet
@@ -1133,20 +1141,22 @@ kissakoira
 						// Viimeisin laskutuspäivämäärä
 						$query = "	SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) laskutettuaika
 									FROM tapahtuma use index (yhtio_tuote_laadittu)
-									WHERE yhtio  = '$kukarow[yhtio]'
-									and tuoteno  = '{$row['tuoteno']}'
-									and laadittu > '{$xmyyrow['laskutettuaika']}'
-									and laji 	 = 'laskutus'";
+									$varastorajausjoini
+									WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
+									and tapahtuma.tuoteno  = '{$row['tuoteno']}'
+									and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
+									and tapahtuma.laji 	 = 'laskutus'";
 						$xmyyres = pupe_query($query);
 						$xmyypvmrow = mysql_fetch_assoc($xmyyres);
 
 						// Viimeisin kulutuspäivämäärä
 						$query = "	SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) kulutettuaika
 									FROM tapahtuma use index (yhtio_tuote_laadittu)
-									WHERE yhtio  = '$kukarow[yhtio]'
-									and tuoteno  = '{$row['tuoteno']}'
-									and laadittu > '{$xmyyrow['laskutettuaika']}'
-									and laji 	 = 'kulutus'";
+									$varastorajausjoini
+									WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
+									and tapahtuma.tuoteno  = '{$row['tuoteno']}'
+									and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
+									and tapahtuma.laji 	 = 'kulutus'";
 						$xmyyres = pupe_query($query);
 						$xkulpvmrow = mysql_fetch_assoc($xmyyres);
 
@@ -1229,7 +1239,23 @@ kissakoira
 				$excelsarake++;
 				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
 				$excelsarake++;
-kissa
+
+				if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
+					$query_a = " SELECT ifnull(max(laadittu), '0000-00-00') vihapvm
+								FROM tapahtuma use index (yhtio_tuote_laadittu)
+								JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
+														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
+														and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
+														$mistavarastosta)
+								WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
+								and tapahtuma.tuoteno  = '{$row['tuoteno']}'
+								and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}' 
+								and tapahtuma.laji 	 = 'tulo'";
+					$result_a = pupe_query($query_a);
+					$resultti_a = mysql_fetch_assoc($result_a);
+					$row['vihapvm'] = $resultti_a['vihapvm'];
+				}
+
 				if ($variaatiosummaus == "") {
 
 					if ($kiertoviilasku != "") {

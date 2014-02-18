@@ -95,6 +95,10 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 				}
 			}
 		}
+		
+		if (!in_array($rivi['tyyppi'], array('jauhesammutin','hiilidioksidisammutin','nestesammutin','halonisammutin'))) {
+			return false;
+		}
 
 		return $valid;
 	}

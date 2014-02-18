@@ -16419,6 +16419,12 @@ if (!function_exists("tee_keraysera")) {
 			$kukarow['debugstring'] .= "<font class='head'>".t("Keräyserädebug")."</font><hr><br><br>\n";
 			$kukarow['debugstring'] .= "<font class='head'>".t("Kerääjä").": $kukarow[kuka], $kukarow[nimi]. ($kukarow[keraajanro])</font><br><br>\n";
 		}
+		
+		$tilat = "'N'";
+		
+		if ($kerataanko_myös_varastosiirrot) {
+			$tilat = "'N','A'";
+		}
 
 		# Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään
 		# tilaukset tulemaan keräysvyöhykkeittäin. Jos prio ja aika on sama, otetaan randomisti jonkun keräysvyöhykkeen tilauksia (kumpi nyt sattuu tulemaan ensiksi),
@@ -16445,7 +16451,7 @@ if (!function_exists("tee_keraysera")) {
 									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != ''))
 					LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
-					AND lasku1.tila = 'N'
+					AND lasku1.tila in ({$tilat})
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
@@ -16468,7 +16474,7 @@ if (!function_exists("tee_keraysera")) {
 					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
 					LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
-					AND lasku2.tila = 'N'
+					AND lasku2.tila in ({$tilat})
 					AND lasku2.alatila = 'A'
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
@@ -16500,7 +16506,7 @@ if (!function_exists("tee_keraysera")) {
 					tunnus as keraysvyohyke
 					FROM keraysvyohyke
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$keraysvyohyke}'";
+					AND tunnus  = '{$keraysvyohyke}'";
 		$ker_result = pupe_query($query);
 		$keraysvyohyketiedot = mysql_fetch_assoc($ker_result);
 
@@ -16519,15 +16525,15 @@ if (!function_exists("tee_keraysera")) {
 						pakkaus.minimi_tilavuus * pow({$mittakerroin}, 3) as minimi_tilavuus,
 						pakkaus.minimi_paino,
 						(pakkaus.kayttoprosentti / 100) AS kayttoprosentti,
-						if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) leveys,
+						if(pakkaus.leveys  * {$mittakerroin} < 1, 1, pakkaus.leveys  * {$mittakerroin}) leveys,
 						if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) korkeus,
-						if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) syvyys,
-						if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
+						if(pakkaus.syvyys  * {$mittakerroin} < 1, 1, pakkaus.syvyys  * {$mittakerroin}) syvyys,
+						if(pakkaus.leveys  * {$mittakerroin} < 1, 1, pakkaus.leveys  * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
 						FROM pakkaus
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND paino > 0
-						AND leveys > 0
-						AND syvyys > 0
+						AND paino   > 0
+						AND leveys  > 0
+						AND syvyys  > 0
 						AND korkeus > 0
 						AND tunnus IN ({$keraysvyohyketiedot['sallitut_alustat']})
 						ORDER BY tilavuus ASC";
@@ -16583,7 +16589,7 @@ if (!function_exists("tee_keraysera")) {
 						AND ((lahdot3.pvm = CURDATE() AND lahdot3.lahdon_viikonpvm = '{$viikonpaiva}' AND lahdot3.kerailyn_aloitusaika <= CURTIME() AND lahdot3.tunnus = lasku1.toimitustavan_lahto) or lahdot3.vakisin_kerays != '')
 						AND (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}))
 						WHERE lasku1.yhtio 			= '{$kukarow['yhtio']}'
-						AND lasku1.tila 			= 'N'
+						AND lasku1.tila 		   in ({$tilat})
 						AND lasku1.alatila 			= 'A'
 						AND lasku1.vakisin_kerays 	= ''
 						AND lasku1.varasto 			= '{$varasto}'
@@ -16612,7 +16618,7 @@ if (!function_exists("tee_keraysera")) {
 						JOIN lahdot AS lahdot3 ON (lahdot3.yhtio = lasku2.yhtio AND lahdot3.tunnus = lasku2.toimitustavan_lahto)
 						LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 						WHERE lasku2.yhtio 			= '{$kukarow['yhtio']}'
-						AND lasku2.tila 			= 'N'
+						AND lasku2.tila 		   in ({$tilat})
 						AND lasku2.alatila 			= 'A'
 						AND lasku2.vakisin_kerays  != ''
 						AND lasku2.varasto	 		= '{$varasto}'

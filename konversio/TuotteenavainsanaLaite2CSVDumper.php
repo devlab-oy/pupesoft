@@ -231,7 +231,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 	protected function tarkistukset() {
 		//Tuotteet joilta puuttuu sammun_tyyppi
 		$query = "	SELECT tuote.tuoteno,
-					tuote.nimitys
+					tuote.nimitys,
 					t.tuoteno
 					FROM   tuote
 					LEFT JOIN tuotteen_avainsanat AS t
@@ -253,7 +253,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 		
 		//Tuotteet joilta puuttuu sammutin_koko
 		$query = "	SELECT tuote.tuoteno,
-					tuote.nimitys
+					tuote.nimitys,
 					t.tuoteno
 					FROM   tuote
 					LEFT JOIN tuotteen_avainsanat AS t

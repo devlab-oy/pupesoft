@@ -114,7 +114,7 @@
 
 							$body = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
 
-							$body .= t("Tuoteno")." ".t("Nimitys")." ".t("Posten")." ".t("Pupe")."<br>\n";
+							$body .= t("Tuoteno").";".t("Nimitys").";".t("Posten").";".t("Pupe")."<br>\n";
 
 							foreach ($saldoeroja as $tuoteno => $_arr) {
 

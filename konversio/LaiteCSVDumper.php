@@ -67,7 +67,14 @@ class LaiteCSVDumper extends CSVDumper {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
 				}
 				else if ($konvertoitu_header == 'tuoteno') {
-					$rivi_temp[$konvertoitu_header] = str_replace(' ', '', strtoupper($rivi[$csv_header]));
+					if (strtoupper($rivi[$csv_header]) == 'A990001') {
+						$tuoteno = 'KAYNTI';
+					}
+					else {
+						$tuoteno = str_replace(' ', '', strtoupper($rivi[$csv_header]));
+					}
+
+					$rivi_temp[$konvertoitu_header] = $tuoteno;
 				}
 				else {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
@@ -93,7 +100,7 @@ class LaiteCSVDumper extends CSVDumper {
 					$paikan_nimi = $rivi['kohde'].' - '.$rivi['paikka_tark'];
 				}
 				if ($paikka_tunnus == 0 and in_array($key, $this->required_fields)) {
-					$this->errors[$index][] = t('Paikkaa')." <b>{$paikan_nimi}</b> ".t('ei löydy'). ' ' . $rivi['kohde'] . ' ' . $rivi['asiakas_nimi'];
+					$this->errors[$index][] = t('Paikkaa')." <b>{$paikan_nimi}</b> ".t('ei löydy').' '.$rivi['kohde'].' '.$rivi['asiakas_nimi'];
 					$this->errors[$index][] = $rivi['koodi'];
 					$valid = false;
 				}
@@ -148,10 +155,10 @@ class LaiteCSVDumper extends CSVDumper {
 	}
 
 	private function loytyyko_tuote_nimella($nimitys) {
-		$query = "	SELECT tuoteno "
-				."FROM tuote "
-				."WHERE yhtio = '{$this->kukarow['yhtio']}' "
-				."AND nimitys = '{$nimitys}'";
+		$query = "	SELECT tuoteno
+					FROM tuote
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND nimitys = '{$nimitys}'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
@@ -229,9 +236,8 @@ class LaiteCSVDumper extends CSVDumper {
 							"import",
 							NOW()
 						)';
-		pupe_query($query);
+			pupe_query($query);
 		}
-		
 	}
 
 	private function hae_paikka_tunnus($paikan_nimi, $kohde_nimi, $asiakas_nimi) {
@@ -276,14 +282,14 @@ class LaiteCSVDumper extends CSVDumper {
 
 		return 0;
 	}
-    
-    private function paikka_nimi_muutos($paikka_nimi) {
-        if ($paikka_nimi == '98' or $paikka_nimi == '98.00') {
-            return '98.00';
-        }
-        
-        return $paikka_nimi;
-    }
+
+	private function paikka_nimi_muutos($paikka_nimi) {
+		if ($paikka_nimi == '98' or $paikka_nimi == '98.00') {
+			return '98.00';
+		}
+
+		return $paikka_nimi;
+	}
 
 	protected function tarkistukset() {
 		$query = "	SELECT paikka.tunnus
@@ -292,16 +298,16 @@ class LaiteCSVDumper extends CSVDumper {
 		$result = pupe_query($query);
 
 		$paikat = array();
-		while($paikka = mysql_fetch_assoc($result)) {
+		while ($paikka = mysql_fetch_assoc($result)) {
 			$paikat[] = $paikka;
 		}
 
 		$query = "	SELECT DISTINCT laite.paikka
 					FROM laite
 					WHERE yhtio = '{$this->kukarow['yhtio']}'";
-  		$result = pupe_query($query);
+		$result = pupe_query($query);
 		$laitteiden_paikat = array();
-		while($laitteen_paikka = mysql_fetch_assoc($result)) {
+		while ($laitteen_paikka = mysql_fetch_assoc($result)) {
 			$laitteiden_paikat[] = $laitteen_paikka;
 		}
 

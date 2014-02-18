@@ -87,6 +87,9 @@ class HuoltosykliCSVDumper extends CSVDumper {
 
 						$this->errors[$index][] = t('Laite tuote')." <b>{$rivi[$key]}</b> ".t('perustettiin');
 					}
+					else {
+						//Tänne ei pitäisi ikinä mennä. Tuote siis löytyy mutta siltä puuttuu avainsanat.
+					}
 				}
 				else {
 					$rivi['tyyppi'] = $attrs['tyyppi'];
@@ -109,6 +112,16 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
 		$progress_bar->initialize(count($this->rivit));
 		foreach ($this->rivit as $rivi) {
+			if ($this->loytyyko_huoltosykli_rivi($rivi['tyyppi'], $rivi['koko'], $rivi['toimenpide'])) {
+				$progress_bar->increase();
+				continue;
+			}
+
+			if (empty($rivi['tyyppi']) or empty($rivi['koko']) or empty($rivi['toimenpide'])) {
+				$progress_bar->increase();
+				continue;
+			}
+
 			$nimitys_temp = $rivi['nimitys'];
 			$laite_tuoteno_temp = $rivi['laite'];
 			unset($rivi['nimitys']);
@@ -188,6 +201,22 @@ class HuoltosykliCSVDumper extends CSVDumper {
 					FROM tuote
 					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
 					AND tuote.tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			return false;
+		}
+
+		return true;
+	}
+
+	protected function loytyyko_huoltosykli_rivi($tyyppi, $koko, $toimenpide) {
+		$query = "	SELECT *
+					FROM huoltosykli
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND tyyppi = '{$tyyppi}'
+					AND koko = '{$koko}'
+					AND toimenpide = '{$toimenpide}'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -456,12 +485,12 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$result = pupe_query($query);
 
 		echo "Seuraavilta toimenpide tuotteilta puuttuu tuotteen_avainsana ".mysql_num_rows($result)."<br/>";
-		while($toimenpide_tuote = mysql_fetch_assoc($result)) {
+		while ($toimenpide_tuote = mysql_fetch_assoc($result)) {
 			echo $toimenpide_tuote['tuoteno'].' - '.$toimenpide_tuote['nimitys'].'<br/>';
 		}
 
 		echo "<br/>";
-		
+
 		$query = "	SELECT tuote.tuoteno,
 					tuote.nimitys
 					FROM   tuote
@@ -474,7 +503,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$result = pupe_query($query);
 
 		echo "Seuraavilta normi tuotteilta puuttuu tuotteen_avainsana ".mysql_num_rows($result)."<br/>";
-		while($toimenpide_tuote = mysql_fetch_assoc($result)) {
+		while ($toimenpide_tuote = mysql_fetch_assoc($result)) {
 			echo $toimenpide_tuote['tuoteno'].' - '.$toimenpide_tuote['nimitys'].'<br/>';
 		}
 
@@ -487,6 +516,56 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$result = pupe_query($query);
 
 		echo mysql_num_rows($result)." tuotteella on avainsana ongelma";
+
+		$this->liita_puuttuvat_huoltosyklit();
+	}
+
+	protected function liita_puuttuvat_huoltosyklit() {
+		$query = "	SELECT laite.tunnus,
+					laite.tuoteno,
+					t1.selite AS sammutin_tyyppi,
+					t2.selite AS sammutin_koko,
+					a.nimi AS asiakas_nimi,
+					k.nimi AS kohde_nimi,
+					p.olosuhde,
+					COUNT(*) AS kpl
+					FROM laite
+					JOIN tuote AS t
+					ON ( t.yhtio = laite.yhtio
+						AND t.tuoteno = laite.tuoteno )
+					JOIN tuotteen_avainsanat AS t1
+					ON ( t1.yhtio = t.yhtio
+						AND t1.tuoteno = t.tuoteno
+						AND t1.laji = 'sammutin_tyyppi' )
+					JOIN tuotteen_avainsanat AS t2
+					ON ( t2.yhtio = t.yhtio
+						AND t2.tuoteno = t.tuoteno
+						AND t2.laji = 'sammutin_koko' )
+					JOIN paikka AS p
+					ON ( p.yhtio = laite.yhtio
+						AND p.tunnus = laite.paikka )
+					JOIN kohde AS k
+					ON ( k.yhtio = p.yhtio
+						AND k.tunnus = p.kohde )
+					JOIN asiakas AS a
+					ON ( a.yhtio = k.yhtio
+						AND a.tunnus = k.asiakas )
+					JOIN tuote
+					ON ( tuote.yhtio = laite.yhtio
+						AND	tuote.tuoteno = laite.tuoteno )
+					JOIN huoltosyklit_laitteet
+					ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
+						AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
+					WHERE laite.yhtio = '{$this->kukarow['yhtio']}'
+					GROUP BY 1,2,3,4,5,6,7
+					HAVING kpl < 3
+					ORDER BY laite.tuoteno ASC";
+		$result = pupe_query($query);
+
+		while ($laite = mysql_fetch_assoc($result)) {
+			$mahdolliset_huoltosyklit = hae_laitteelle_mahdolliset_huoltosyklit($laite['sammutin_tyyppi'], $laite['sammutin_koko'], $laite['olosuhde']);
+			$liitetyt_huoltosyklit = hae_laitteen_huoltosyklit($laite['tunnus']);
+		}
 	}
 
 }

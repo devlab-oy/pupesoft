@@ -715,10 +715,17 @@ function huoltosykli_rivi($tyyppi) {
 }
 
 //haetaan laitteeseen yhdistetyt huoltosyklit
-function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi) {
+function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
 	global $kukarow;
 
+	$tuotteen_avainsanat_join = "";
+	if (!empty($tyyppi)) {
+		$tuotteen_avainsanat_join = "	AND t1.selite = '{$tyyppi}' ";
+	}
+
 	$query = "	SELECT huoltosykli.tunnus,
+				t1.selite AS huoltosykli_tyyppi,
+				t1.selitetark AS huoltosykli_prioriteetti,
 				huoltosyklit_laitteet.huoltovali,
 				huoltosyklit_laitteet.pakollisuus,
 				huoltosyklit_laitteet.viimeinen_tapahtuma,
@@ -733,7 +740,7 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi) {
 				JOIN tuotteen_avainsanat AS t1
 				ON ( t1.yhtio = tuote.yhtio
 					AND t1.tuoteno = tuote.tuoteno
-					AND t1.selite = '{$tyyppi}' )
+					{$tuotteen_avainsanat_join})
 				WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
 				AND laite_tunnus = '{$laitetunnus}'";
 

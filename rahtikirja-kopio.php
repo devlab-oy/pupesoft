@@ -246,6 +246,7 @@
 		else {
 			echo "<form action='rahtikirja-kopio.php' method='post'>";
 			echo "<input type='hidden' name='tee' value='tulosta'>";
+			echo "<input type='hidden' name='real_submit' value='joo'>";
 			echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
 			echo "<input type='hidden' name='pp' value='$pp'>";
 			echo "<input type='hidden' name='kk' value='$kk'>";

@@ -89,10 +89,6 @@ class LaiteCSVDumper extends CSVDumper {
 
 	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
-		
-		if (!in_array($rivi['tyyppi'], array('jauhesammutin','hiilidioksidisammutin','nestesammutin','halonisammutin'))) {
-			return false;
-		}
 
 		foreach ($rivi as $key => $value) {
 			if ($key == 'paikka') {

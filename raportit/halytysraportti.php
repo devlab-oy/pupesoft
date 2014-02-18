@@ -470,10 +470,14 @@
 			if ($valitut["UUDETTUOTTEET"] != '') {
 				$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
 			}
+
 			if (isset($nayta_vain_ykkostoimittaja)) {
+				if ($toimittajaid != '') {
+				 $lisaa .= " and paatoimittaja.liitostunnus = '{$toimittajaid}' ";	
+				}
 				$lisaa2 .= " JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = tuote.yhtio and tuoteno = tuote.tuoteno ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
 			}
-			if ($toimittajaid != '') {
+			elseif ($toimittajaid != '') {
 				$lisaa2 .= " JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$toimittajaid'";
 			}
 
@@ -815,7 +819,7 @@
 					//toimittajatiedot
 					$ykkostoim_orderilisa = '';
 					if (isset($nayta_vain_ykkostoimittaja)) {
-						$ykkostoim_orderilisa = " ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1";
+						$ykkostoim_orderilisa = " AND tuotteen_toimittajat.liitostunnus = (SELECT liitostunnus FROM tuotteen_toimittajat WHERE yhtio = '{$row['yhtio']}' AND tuoteno = '{$row['tuoteno']}' ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
 					}
 					if ($toimittajaid == '') {
 

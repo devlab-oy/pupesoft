@@ -314,6 +314,32 @@ class LaiteCSVDumper extends CSVDumper {
 		$kpl = count($paikat) - count($laitteiden_paikat);
 
 		echo "{$kpl} paikkaa ilman laitetta!!!!";
+		
+		/*
+		 * 
+//Kuinka monta laitetta per asiakkaan kohde
+SELECT asiakas.tunnus,
+       asiakas.nimi,
+       kohde.tunnus,
+       kohde.nimi,
+       Count(*) AS laite_kpl
+FROM   laite
+       JOIN paikka
+         ON ( paikka.yhtio = laite.yhtio
+              AND paikka.tunnus = laite.paikka )
+       JOIN kohde
+         ON ( kohde.yhtio = paikka.yhtio
+              AND kohde.tunnus = paikka.kohde )
+       JOIN asiakas
+         ON ( asiakas.yhtio = kohde.yhtio
+              AND asiakas.tunnus = kohde.asiakas )
+WHERE  laite.yhtio = 'lpk'
+GROUP  BY 1,
+          2,
+          3,
+          4
+ORDER  BY laite_kpl DESC;
+		 */
 	}
 
 }

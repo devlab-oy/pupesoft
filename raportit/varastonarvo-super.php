@@ -111,6 +111,13 @@
 			$rukTchk = "";
 		}
 
+		if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
+			$rukVchk = "CHECKED";
+		}
+		else {
+			$rukVchk = "";
+		}
+
 		echo "<br><table>
 			<tr>
 			<th>".t("Listaa vain tuotteet, jotka ei kuulu mihink‰‰n osastoon")."</th>
@@ -119,6 +126,10 @@
 			<tr>
 			<th>".t("Listaa vain tuotteet, jotka ei kuulu mihink‰‰n tuoteryhm‰‰n")."</th>
 			<td><input type='checkbox' name='tuoteryhma_tyhjat' value='tyhjat' $rukTchk></td>
+			</tr>
+			<tr>
+			<th>".t("Listaa osto ja myyntitiedot vain valituista varastoista")."</th>
+			<td><input type='checkbox' name='valitut_varastot_rajaus' value='valitut' $rukVchk></td>
 			</tr></table>";
 
 		echo "<br><table>";
@@ -1097,7 +1108,7 @@
 					else {
 						$summaus_lisa = "";
 					}
-
+kissakoira
 					if ($kiertoviilasku != "") {
 						// Haetaan tuotteen myydyt kappaleet
 						// Haetaan tuotteen kulutetut kappaleet
@@ -1218,7 +1229,7 @@
 				$excelsarake++;
 				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
 				$excelsarake++;
-
+kissa
 				if ($variaatiosummaus == "") {
 
 					if ($kiertoviilasku != "") {

@@ -118,7 +118,7 @@
 
 							foreach ($saldoeroja as $tuoteno => $_arr) {
 
-								$body .= "{$tuoteno} {$_arr['nimitys']} {$_arr['posten']} {$_arr['pupe']}<br>\n";
+								$body .= "{$tuoteno};{$_arr['nimitys']};{$_arr['posten']};{$_arr['pupe']}<br>\n";
 
 							}
 

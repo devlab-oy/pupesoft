@@ -61,7 +61,7 @@ class LaiteCSVDumper extends CSVDumper {
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
 				if ($konvertoitu_header == 'tyyppi') {
-					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header].'sammutin';
+					$rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header]).'sammutin';
 				}
 				else if ($konvertoitu_header == 'paino') {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
@@ -89,6 +89,11 @@ class LaiteCSVDumper extends CSVDumper {
 
 	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
+		
+		if (!in_array($rivi['tyyppi'], array('jauhesammutin','hiilidioksidisammutin','nestesammutin','halonisammutin'))) {
+			return false;
+		}
+
 		foreach ($rivi as $key => $value) {
 			if ($key == 'paikka') {
 				if ($value != '') {

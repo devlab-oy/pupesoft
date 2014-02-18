@@ -76,6 +76,8 @@
 			$selis = array();
 			$lajis = array();
 
+			$oletusvarasto_err = 0;
+
 			for ($excei = 0; $excei < count($excelrivit); $excei++) {
 				// luetaan rivi tiedostosta..
 				$tuo		= mysql_real_escape_string(trim($excelrivit[$excei][0]));
@@ -93,7 +95,10 @@
 				if ($tuo != '' and $hyl != '' and $maa != '') {
 					$hylp = explode("-", $hyl);
 
-					if ($oletusvarasto_chk != '' and kuuluukovarastoon($hylp[0], $hylp[1], $oletusvarasto_chk) == 0) continue;
+					if ($oletusvarasto_chk != '' and kuuluukovarastoon($hylp[0], $hylp[1], $oletusvarasto_chk) == 0) {
+						$oletusvarasto_err++;
+						continue;
+					}
 
 					$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
 					$maara[] = $maa;
@@ -106,6 +111,17 @@
 				$tee 		= "VALMIS";
 				$valmis 	= "OK";
 				$fileesta 	= "ON";
+			}
+			else {
+				$tee = '';
+				echo "<font class='error'>",t("Yhtään tuotetta ei inventoitu"),"!</font>";
+
+				if ($oletusvarasto_chk != '' and $oletusvarasto_err > 0) {
+					$plural = $oletusvarasto_err > 1 ? "tuotetta" : "tuote";
+					echo " <font class='error'>",t("%d %s ei löytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font>";
+				}
+
+				echo "<br /><br />";
 			}
 		}
 	}

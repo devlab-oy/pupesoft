@@ -114,14 +114,12 @@
 			}
 			else {
 				$tee = '';
-				echo "<font class='error'>",t("Yhtään tuotetta ei inventoitu"),"!</font>";
+				echo "<font class='error'>",t("Yhtään tuotetta ei inventoitu"),"!</font><br />";
+			}
 
-				if ($oletusvarasto_chk != '' and $oletusvarasto_err > 0) {
-					$plural = $oletusvarasto_err > 1 ? "tuotetta" : "tuote";
-					echo " <font class='error'>",t("%d %s ei löytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font>";
-				}
-
-				echo "<br /><br />";
+			if ($oletusvarasto_chk != '' and $oletusvarasto_err > 0) {
+				$plural = $oletusvarasto_err > 1 ? "tuotetta" : "tuote";
+				echo " <font class='error'>",t("%d %s ei löytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font><br />";
 			}
 		}
 	}

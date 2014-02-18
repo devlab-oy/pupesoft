@@ -587,12 +587,12 @@
 					$lisavarattu = "";
 				}
 
-				$query = "  SELECT sum(if (tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet
+				$query = "  SELECT sum(if (tilausrivi.var = 'J' and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet
 							FROM tilausrivi
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus = '$laskurow[tunnus]'
 							and tilausrivi.tyyppi  = 'L'
-							and tilausrivi.var in ('J','S')";
+							and tilausrivi.var = 'J'";
 				$sarjares1 = pupe_query($query);
 				$srow1 = mysql_fetch_assoc($sarjares1);
 

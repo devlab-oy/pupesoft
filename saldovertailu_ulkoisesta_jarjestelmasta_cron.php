@@ -85,10 +85,10 @@
 
 						$saldoeroja = array();
 
-						foreach ($xml->InvCounting as $line) {
+						foreach ($xml->InvCounting->Line as $line) {
 
-							$eankoodi = $line->Line->ItemNumber;
-							$kpl = (float) $line->Line->Quantity;
+							$eankoodi = $line->ItemNumber;
+							$kpl = (float) $line->Quantity;
 
 							$query = "	SELECT tuoteno, nimitys
 										FROM tuote

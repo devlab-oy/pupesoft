@@ -679,14 +679,14 @@
 			if ($array[$i] == "asiakas.ytunnus" || $array[$i] == "asiakas.asiakasnro") {
 				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
 				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-			}else{
+			}
+			else {
 				$toimlisa = explode(">>", $array[$i]);
 				$lisa .= " and (" . $toimlisa[0] . " like '%" . $haku[$i] . "%'";
 				$lisa .= " or " . $toimlisa[1] . " like '%" . $haku[$i] . "%')";
 				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 			}
-		}
-		
+		}	
 	}
 	
 	if (strlen($ojarj) > 0) {

@@ -230,15 +230,15 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 
 	protected function tarkistukset() {
 		//Tuotteet joilta puuttuu sammun_tyyppi
-		$query = "	SELECT tuote.tuoteno,
+		$query = "	SELECT tuote.tuoteno AS tuoteno,
 					tuote.nimitys,
-					t.tuoteno
+					t.tuoteno AS t
 					FROM   tuote
 					LEFT JOIN tuotteen_avainsanat AS t
 					ON ( t.yhtio = tuote.yhtio
 						AND t.tuoteno = tuote.tuoteno
 						AND t.laji = 'sammutin_tyyppi' )
-					WHERE tuote.yhtio = 'lpk'
+					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
 					AND tuote.tuotetyyppi = ''
 					AND t.tuoteno IS NULL
 					ORDER BY tuote.tuoteno ASC";
@@ -252,15 +252,15 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 		}
 		
 		//Tuotteet joilta puuttuu sammutin_koko
-		$query = "	SELECT tuote.tuoteno,
+		$query = "	SELECT tuote.tuoteno AS tuoteno,
 					tuote.nimitys,
-					t.tuoteno
+					t.tuoteno AS t
 					FROM   tuote
 					LEFT JOIN tuotteen_avainsanat AS t
 					ON ( t.yhtio = tuote.yhtio
 						AND t.tuoteno = tuote.tuoteno
 						AND t.laji = 'sammutin_koko' )
-					WHERE tuote.yhtio = 'lpk'
+					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
 					AND tuote.tuotetyyppi = ''
 					AND t.tuoteno IS NULL
 					ORDER BY tuote.tuoteno ASC";

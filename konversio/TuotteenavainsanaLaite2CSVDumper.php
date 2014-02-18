@@ -109,7 +109,7 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 		}
 
 		if ($valid and count($laitteen_avainsanat) == 0) {
-			$this->errors[$index][] = t('Kannassa ei kokoa tai tyyppiä')." {$rivi['koko']} {$rivi['tyyppi']} {$rivi['tuoteno']}";
+			$this->errors[$index][] = t('Kannassa ei kokoa tai tyyppiä')." {$rivi['koko']} {$rivi['tyyppi']} {$rivi['tuoteno']} INSERTÖIDÄÄN";
 		}
 
 		return $valid;
@@ -141,7 +141,8 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 		$query = "	SELECT *
 					FROM tuotteen_avainsanat
 					WHERE yhtio = '{$this->kukarow['yhtio']}'
-					AND tuoteno = '{$tuoteno}'";
+					AND tuoteno = '{$tuoteno}'
+					AND laji = 'palo_luokka'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -228,7 +229,51 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 	}
 
 	protected function tarkistukset() {
-		echo "Ei tarkistuksia";
+		//Tuotteet joilta puuttuu sammun_tyyppi
+		$query = "	SELECT tuote.tuoteno,
+					tuote.nimitys
+					t.tuoteno
+					FROM   tuote
+					LEFT JOIN tuotteen_avainsanat AS t
+					ON ( t.yhtio = tuote.yhtio
+						AND t.tuoteno = tuote.tuoteno
+						AND t.laji = 'sammutin_tyyppi' )
+					WHERE tuote.yhtio = 'lpk'
+					AND tuote.tuotetyyppi = ''
+					AND t.tuoteno IS NULL
+					ORDER BY tuote.tuoteno ASC";
+		$result = pupe_query($query);
+		echo "Seuraavilta tuotteilta puuttuu sammutin tyyppi (".mysql_num_rows($result).")";
+		echo "<br/>";
+		echo "<br/>";
+		while($rivi = mysql_fetch_assoc($result)) {
+			echo "{$rivi['nimitys']} - {$rivi['tuoteno']}";
+			echo "<br/>";
+		}
+		
+		//Tuotteet joilta puuttuu sammutin_koko
+		$query = "	SELECT tuote.tuoteno,
+					tuote.nimitys
+					t.tuoteno
+					FROM   tuote
+					LEFT JOIN tuotteen_avainsanat AS t
+					ON ( t.yhtio = tuote.yhtio
+						AND t.tuoteno = tuote.tuoteno
+						AND t.laji = 'sammutin_koko' )
+					WHERE tuote.yhtio = 'lpk'
+					AND tuote.tuotetyyppi = ''
+					AND t.tuoteno IS NULL
+					ORDER BY tuote.tuoteno ASC";
+		$result = pupe_query($query);
+		echo "Seuraavilta tuotteilta puuttuu sammutin koko (".mysql_num_rows($result).")";
+		echo "<br/>";
+		echo "<br/>";
+		while($rivi = mysql_fetch_assoc($result)) {
+			echo "{$rivi['nimitys']} - {$rivi['tuoteno']}";
+			echo "<br/>";
+		}
+		
+		
 	}
 
 }

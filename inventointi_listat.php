@@ -1046,6 +1046,9 @@
 				$hylresult = pupe_query($query);
 				$hylrow = mysql_fetch_assoc($hylresult);
 
+				$hylrow['ennpois'] = fmod($hylrow['ennpois'], 1) == 0 ? round($hylrow['ennpois']) : $hylrow['ennpois'];
+				$hylrow['keratty'] = fmod($hylrow['keratty'], 1) == 0 ? round($hylrow['keratty']) : $hylrow['keratty'];
+
 				$prn .= sprintf ('%-13.13s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {

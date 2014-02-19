@@ -72,7 +72,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 			$kuutiot[$indeksi] = round($kuutiot[$indeksi]/$kollit[$indeksi], 2);
 
 			// Napataan pakkauksen tiedot
-			$query = "	SELECT pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys, pakkaus.pakkauskuvaus, ifnull(pakkauskoodit.koodi, pakkaus.pakkaus) koodi
+			$query = "	SELECT pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys, pakkaus.pakkauskuvaus, ifnull(pakkauskoodit.koodi, pakkaus.pakkaus) koodi, pakkaus.pakkaus
 						FROM pakkaus
 						LEFT JOIN pakkauskoodit ON (pakkaus.yhtio=pakkauskoodit.yhtio AND pakkaus.tunnus=pakkauskoodit.pakkaus AND pakkauskoodit.rahdinkuljettaja = '{$toitarow['rahdinkuljettaja']}')
 						WHERE pakkaus.yhtio 	  = '$kukarow[yhtio]'
@@ -80,6 +80,12 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 						and pakkaus.pakkauskuvaus = '{$pakkauskuvaus[$indeksi]}'";
 			$pakkaus_res = pupe_query($query);
 			$pakkaus_row = mysql_fetch_assoc($pakkaus_res);
+
+			if ($keraysera_row['pakkaus'] == '999') {
+				$pakkaus_row['leveys'] = $pakkaus_row['leveys'] < 0.01 ? 0.01 : $pakkaus_row['leveys'];
+				$pakkaus_row['korkeus'] = $pakkaus_row['korkeus'] < 0.01 ? 0.01 : $pakkaus_row['korkeus'];
+				$pakkaus_row['syvyys'] = $pakkaus_row['syvyys'] < 0.01 ? 0.01 : $pakkaus_row['syvyys'];
+			}
 
 			$kollitiedot = array(
 				'maara' 		=> $kollit[$indeksi],

@@ -313,6 +313,12 @@
 							}
 						}
 
+						if ($keraysera_row['pakkauskuvaus'] == 'MUU KOLLI') {
+							$pakkaus_info_row['leveys'] = $pakkaus_info_row['leveys'] < 0.01 ? 0.01 : $pakkaus_info_row['leveys'];
+							$pakkaus_info_row['korkeus'] = $pakkaus_info_row['korkeus'] < 0.01 ? 0.01 : $pakkaus_info_row['korkeus'];
+							$pakkaus_info_row['syvyys'] = $pakkaus_info_row['syvyys'] < 0.01 ? 0.01 : $pakkaus_info_row['syvyys'];
+						}
+
 						$kollitiedot = array(
 							'maara' => $keraysera_row['maara'],
 							'paino' => $pakkaus_info_row['tuotemassa'],

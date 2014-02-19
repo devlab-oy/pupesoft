@@ -204,9 +204,13 @@
 						$virhe = 1;
 					}
 					
-					if ($inventointipvm != '' and !checkdate()) {
-						echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno</font><br>";
-						$virhe = 1;
+					// Jos on syˆtetty k‰sin inventointipvm sen pit‰‰ olla validi
+					if ($inventointipvm != '') {
+						list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
+						if (!checkdate($mm, $dd, $yyyy)) {
+							echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("Anna p‰iv‰m‰‰r‰ muodossa")." yyyy-mm-dd </font><br>";
+							$virhe = 1;
+						}
 					}
 
 					// k‰yd‰‰n kaikki ruudulla n‰kyv‰t l‰pi ja katsotaan onko joku niist‰ uusi
@@ -655,8 +659,7 @@
 										laatija  	= '$kukarow[kuka]',
 										laadittu 	= $laadittuaika";
 							$result = pupe_query($query);
-							query_dump($query);
-							exit;
+
 							// otetaan tapahtuman tunnus, laitetaan se tiliˆinnin otsikolle
 							$tapahtumaid = mysql_insert_id($link);
 

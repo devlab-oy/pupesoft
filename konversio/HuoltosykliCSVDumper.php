@@ -14,6 +14,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 			'toimenpide' => 'TUOTENRO',
 			'nimitys'	 => 'NIMIKE',
 			'huoltovali' => 'VALI',
+			'hinta'		 => 'HINTA', //Unset ennen dumppia
 		);
 		$required_fields = array(
 			'laite',
@@ -65,6 +66,11 @@ class HuoltosykliCSVDumper extends CSVDumper {
 
 	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
+
+		if ($rivi['hinta'] == 0 or $rivi['huoltovali'] == 0) {
+			return false;
+		}
+
 		foreach ($rivi as $key => $value) {
 			if (in_array($key, $this->required_fields) and $value == '') {
 				$this->errors[$index][] = t('Pakollinen kentt‰')." <b>{$key}</b> ".t('puuttuu');
@@ -112,50 +118,66 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
 		$progress_bar->initialize(count($this->rivit));
 		foreach ($this->rivit as $rivi) {
-			if ($this->loytyyko_huoltosykli_rivi($rivi['tyyppi'], $rivi['koko'], $rivi['toimenpide'])) {
+			unset($rivi['hinta']);
+
+			//Huom koko ei ole pakollinen koska paloposteilla ei ole kokoa
+			if (empty($rivi['tyyppi']) or empty($rivi['toimenpide'])) {
 				$progress_bar->increase();
 				continue;
 			}
 
-			if (empty($rivi['tyyppi']) or empty($rivi['koko']) or empty($rivi['toimenpide'])) {
-				$progress_bar->increase();
-				continue;
-			}
+			$huoltosykli_rivit = $this->huoltosykli_rivit($rivi['tyyppi'], $rivi['koko'], $rivi['toimenpide']);
 
 			$nimitys_temp = $rivi['nimitys'];
 			$laite_tuoteno_temp = $rivi['laite'];
 			unset($rivi['nimitys']);
 			unset($rivi['laite']);
 
-			$query = "	INSERT INTO {$this->table}
-						(".implode(", ", array_keys($rivi)).")
-						VALUES
-						('".implode("', '", array_values($rivi))."')";
+			$huoltosykli_rivi_sisalla = search_array_key_for_value_recursive($huoltosykli_rivit, 'olosuhde', 'A');
 
-			//Purkka fix
-			$query = str_replace("'now()'", 'now()', $query);
-			pupe_query($query);
+			if (empty($huoltosykli_rivi_sisalla)) {
+				$query = "	INSERT INTO {$this->table}
+							(".implode(", ", array_keys($rivi)).")
+							VALUES
+							('".implode("', '", array_values($rivi))."')";
 
-			$huoltosykli_tunnus_sisalla = mysql_insert_id();
-			$huoltosykli_huoltovali_sisalla = $rivi['huoltovali'];
+				//Purkka fix
+				$query = str_replace("'now()'", 'now()', $query);
+				pupe_query($query);
 
-			$rivi['olosuhde'] = 'X';
-
-			if (stristr($nimitys_temp, 'tarkastus')) {
-				$rivi['huoltovali'] = $rivi['huoltovali'] / 2;
+				$huoltosykli_tunnus_sisalla = mysql_insert_id();
+				$huoltosykli_huoltovali_sisalla = $rivi['huoltovali'];
+			}
+			else {
+				$huoltosykli_tunnus_sisalla = $huoltosykli_rivi_sisalla[0]['tunnus'];
+				$huoltosykli_huoltovali_sisalla = $huoltosykli_rivi_sisalla[0]['huoltovali'];
 			}
 
-			$query = "	INSERT INTO {$this->table}
-						(".implode(", ", array_keys($rivi)).")
-						VALUES
-						('".implode("', '", array_values($rivi))."')";
+			$huoltosykli_rivi_ulkona = search_array_key_for_value_recursive($huoltosykli_rivit, 'olosuhde', 'X');
 
-			//Purkka fix
-			$query = str_replace("'now()'", 'now()', $query);
-			pupe_query($query);
+			if (empty($huoltosykli_rivi_ulkona)) {
+				$rivi['olosuhde'] = 'X';
 
-			$huoltosykli_tunnus_ulkona = mysql_insert_id();
-			$huoltosykli_huoltovali_ulkona = $rivi['huoltovali'];
+				if (stristr($nimitys_temp, 'tarkastus')) {
+					$rivi['huoltovali'] = $rivi['huoltovali'] / 2;
+				}
+
+				$query = "	INSERT INTO {$this->table}
+							(".implode(", ", array_keys($rivi)).")
+							VALUES
+							('".implode("', '", array_values($rivi))."')";
+
+				//Purkka fix
+				$query = str_replace("'now()'", 'now()', $query);
+				pupe_query($query);
+
+				$huoltosykli_tunnus_ulkona = mysql_insert_id();
+				$huoltosykli_huoltovali_ulkona = $rivi['huoltovali'];
+			}
+			else {
+				$huoltosykli_tunnus_ulkona = $huoltosykli_rivi_ulkona[0]['tunnus'];
+				$huoltosykli_huoltovali_ulkona = $huoltosykli_rivi_ulkona[0]['huoltovali'];
+			}
 
 			$this->liita_laitteet_huoltosykliin($laite_tuoteno_temp, $huoltosykli_huoltovali_sisalla, $huoltosykli_huoltovali_ulkona, $huoltosykli_tunnus_sisalla, $huoltosykli_tunnus_ulkona);
 
@@ -210,7 +232,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		return true;
 	}
 
-	protected function loytyyko_huoltosykli_rivi($tyyppi, $koko, $toimenpide) {
+	protected function huoltosykli_rivit($tyyppi, $koko, $toimenpide) {
 		$query = "	SELECT *
 					FROM huoltosykli
 					WHERE yhtio = '{$this->kukarow['yhtio']}'
@@ -218,12 +240,12 @@ class HuoltosykliCSVDumper extends CSVDumper {
 					AND koko = '{$koko}'
 					AND toimenpide = '{$toimenpide}'";
 		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) == 0) {
-			return false;
+		$huoltosykli_rivit = array();
+		while ($huoltosykli_rivi = mysql_fetch_assoc($result)) {
+			$huoltosykli_rivit[] = $huoltosykli_rivi;
 		}
 
-		return true;
+		return $huoltosykli_rivit;
 	}
 
 	private function liita_laitteet_huoltosykliin($laite_tuoteno, $huoltosykli_huoltovali_sisalla, $huoltosykli_huoltovali_ulkona, $huoltosykli_tunnus_sisalla, $huoltosykli_tunnus_ulkona) {
@@ -455,57 +477,22 @@ class HuoltosykliCSVDumper extends CSVDumper {
 
 		echo "<br/>";
 
-		$query = "	SELECT laite.tunnus
+		$query = "	SELECT laite.tunnus,
+					laite.tuoteno,
+					hl.tunnus
 					FROM laite
-					WHERE yhtio = '{$this->kukarow['yhtio']}'
-					AND laite.tuoteno != 'A990001'";
+					LEFT JOIN huoltosyklit_laitteet AS hl
+					ON ( hl.yhtio = laite.yhtio
+						AND hl.laite_tunnus = laite.tunnus )
+					WHERE laite.yhtio = 'lpk'
+					AND laite.tuoteno != 'KAYNTI'
+					AND hl.tunnus IS NULL";
 		$result = pupe_query($query);
-		$laitetta = mysql_num_rows($result);
+		$laitteita_joilla_ei_huoltosyklia = mysql_num_rows($result);
 
-		$query = "	SELECT DISTINCT laite_tunnus
-					FROM   huoltosyklit_laitteet
-					WHERE  yhtio = '{$this->kukarow['yhtio']}'";
-		$result = pupe_query($query);
-		$laitetta_joilla_huoltosykli = mysql_num_rows($result);
-
-		$kpl = $laitetta - $laitetta_joilla_huoltosykli;
-		echo "Sammuttimia joilla ei ole yht‰‰n huoltosykli‰ liitettyn‰ {$kpl}";
+		echo "Sammuttimia joilla ei ole yht‰‰n huoltosykli‰ liitettyn‰ {$laitteita_joilla_ei_huoltosyklia}";
 
 		echo "<br/>";
-
-		$query = "	SELECT tuote.tuoteno,
-					tuote.nimitys
-					FROM   tuote
-					LEFT JOIN tuotteen_avainsanat
-					ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
-						AND tuotteen_avainsanat.tuoteno = tuote.tuoteno )
-					WHERE  tuote.yhtio = '{$this->kukarow['yhtio']}'
-					AND tuote.ei_saldoa = 'o'
-					AND tuotteen_avainsanat.tuoteno IS NULL";
-		$result = pupe_query($query);
-
-		echo "Seuraavilta toimenpide tuotteilta puuttuu tuotteen_avainsana ".mysql_num_rows($result)."<br/>";
-		while ($toimenpide_tuote = mysql_fetch_assoc($result)) {
-			echo $toimenpide_tuote['tuoteno'].' - '.$toimenpide_tuote['nimitys'].'<br/>';
-		}
-
-		echo "<br/>";
-
-		$query = "	SELECT tuote.tuoteno,
-					tuote.nimitys
-					FROM   tuote
-					LEFT JOIN tuotteen_avainsanat
-					ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
-						AND tuotteen_avainsanat.tuoteno = tuote.tuoteno )
-					WHERE  tuote.yhtio = '{$this->kukarow['yhtio']}'
-					AND tuote.ei_saldoa = ''
-					AND tuotteen_avainsanat.tuoteno IS NULL";
-		$result = pupe_query($query);
-
-		echo "Seuraavilta normi tuotteilta puuttuu tuotteen_avainsana ".mysql_num_rows($result)."<br/>";
-		while ($toimenpide_tuote = mysql_fetch_assoc($result)) {
-			echo $toimenpide_tuote['tuoteno'].' - '.$toimenpide_tuote['nimitys'].'<br/>';
-		}
 
 		$query = "	SELECT tuoteno, laji, selite, COUNT(*) AS kpl
 					FROM   tuotteen_avainsanat
@@ -517,10 +504,38 @@ class HuoltosykliCSVDumper extends CSVDumper {
 
 		echo mysql_num_rows($result)." tuotteella on avainsana ongelma";
 
-		$this->liita_puuttuvat_huoltosyklit();
+		/* Tarkastus queryita, laitteet joilla ei yht‰‰n huoltosykli‰
+		 *
+		  SELECT laite.tuoteno,
+		  count(*) AS kpl
+		  FROM   laite
+		  LEFT JOIN huoltosyklit_laitteet AS hl
+		  ON ( hl.yhtio = laite.yhtio
+		  AND hl.laite_tunnus = laite.tunnus )
+		  WHERE  laite.yhtio = 'lpk'
+		  AND laite.tuoteno != 'KAYNTI'
+		  AND hl.tunnus IS NULL
+		  GROUP BY laite.tuoteno
+		  ORDER  BY kpl DESC, laite.tuoteno ASC;
+
+		  SELECT laite.tunnus,
+		  laite.tuoteno,
+		  hl.tunnus
+		  FROM   laite
+		  LEFT JOIN huoltosyklit_laitteet AS hl
+		  ON ( hl.yhtio = laite.yhtio
+		  AND hl.laite_tunnus = laite.tunnus )
+		  WHERE  laite.yhtio = 'lpk'
+		  AND laite.tuoteno != 'KAYNTI'
+		  AND hl.tunnus IS NULL
+		  ORDER  BY laite.tuoteno ASC;
+		 */
+
+//		$this->liita_puuttuvat_huoltosyklit();
 	}
 
 	protected function liita_puuttuvat_huoltosyklit() {
+		//Haetaan laitteet, joilla on v‰hemm‰n kuin 3 huoltosykli‰ liitettyn‰
 		$query = "	SELECT laite.tunnus,
 					laite.tuoteno,
 					t1.selite AS sammutin_tyyppi,
@@ -565,7 +580,29 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		while ($laite = mysql_fetch_assoc($result)) {
 			$mahdolliset_huoltosyklit = hae_laitteelle_mahdolliset_huoltosyklit($laite['sammutin_tyyppi'], $laite['sammutin_koko'], $laite['olosuhde']);
 			$liitetyt_huoltosyklit = hae_laitteen_huoltosyklit($laite['tunnus']);
+
+			foreach ($mahdolliset_huoltosyklit as $mahdollinen_huoltosykli) {
+				$loytyyko = search_array_key_for_value_recursive($liitetyt_huoltosyklit, 'huoltosykli_tyyppi', $mahdollinen_huoltosykli['huoltosykli_tyyppi']);
+
+				if (empty($loytyyko)) {
+					$this->liita_huoltosykli($laite['laite_tunnus'], $mahdollinen_huoltosykli);
+					echo "{$laite['laite_tunnus']} liitetty huoltosykli: {$mahdollinen_huoltosykli['tunnus']} {$mahdollinen_huoltosykli['huoltosykli_tyyppi']}";
+					echo "<br/>";
+				}
+			}
 		}
+	}
+
+	protected function liita_huoltosykli($laite_tunnus, $huoltosykli) {
+		$query = "	INSERT INTO huoltosyklit_laitteet
+					SET yhtio = '{$this->kukarow['yhtio']}',
+					huoltosykli_tunnus = '{$huoltosykli['tunnus']}',
+					laite_tunnus = '{$laite_tunnus}',
+					huoltovali = '{$huoltosykli['huoltovali']}',
+					pakollisuus = '1',
+					laatija = 'import',
+					luontiaika = NOW()";
+		pupe_query($query);
 	}
 
 }

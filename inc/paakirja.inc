@@ -730,15 +730,15 @@
 
 						$virhe = "";
 
-						if ($trow["tapvm"] != $trow["laskutapvm"] and $trow["tapvm"] != $trow["laskumapvm"]) {
+						if ($tapvm_clean != $trow["laskutapvm"] and $tapvm_clean != $trow["laskumapvm"]) {
 							$virhe	.= t("Ostovelkatiliöinnin päivämäärä virheellinen")."!";
 						}
 
-						if ($trow["tapvm"] == $trow["laskumapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != $trow["laskusumma"]) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != $trow["laskusumma"]))) {
+						if ($tapvm_clean == $trow["laskumapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != $trow["laskusumma"]) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != $trow["laskusumma"]))) {
 							$virhe	.= t("Ostovelkatiliöinnin summa virheellinen")."!";
 						}
 
-						if ($trow["tapvm"] == $trow["laskutapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != ($trow["laskusumma"]*-1)) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != ($trow["laskusumma"]*-1)))) {
+						if ($tapvm_clean == $trow["laskutapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != ($trow["laskusumma"]*-1)) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != ($trow["laskusumma"]*-1)))) {
 							$virhe	.= t("Ostovelkatiliöinnin summa virheellinen")."!";
 						}
 

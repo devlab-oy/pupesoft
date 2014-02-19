@@ -203,6 +203,11 @@
 						echo "<font class='error'>".t("VIRHE: Inventointiselite on syötettävä")."!: $tuoteno</font><br>";
 						$virhe = 1;
 					}
+					
+					if ($inventointipvm != '' and !checkdate()) {
+						echo "<font class='error'>".t("VIRHE: Virheellinen inventointipäivämäärä")."!: $tuoteno</font><br>";
+						$virhe = 1;
+					}
 
 					// käydään kaikki ruudulla näkyvät läpi ja katsotaan onko joku niistä uusi
 					$onko_uusia = 0;
@@ -624,6 +629,16 @@
 								$selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("täsmäsi.")." <br>$lisaselite<br>$inven_laji";
 							}
 
+							// Katsotaan onko inventointipäivä syötetty käsin
+							$laadittuaika = "now()";
+							if ($inventointipvm != '') {
+								list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
+								$yyyy 				= substr($yyyy,0,4);
+								$mm 				= substr($mm,0,2);
+								$dd 				= substr($dd,0,2);
+								$laadittuaika = !checkdate($mm, $dd, $yyyy) ? "now()" : "'".$yyyy."-".$mm."-".$dd." 23:59:59'"; 
+							}
+
 							///* Tehdään tapahtuma *///
 							$query = "	INSERT into tapahtuma set
 										yhtio   	= '$kukarow[yhtio]',
@@ -638,9 +653,10 @@
 										hyllytaso 	= '$hyllytaso',
 										selite  	= '$selite',
 										laatija  	= '$kukarow[kuka]',
-										laadittu 	= now()";
+										laadittu 	= $laadittuaika";
 							$result = pupe_query($query);
-
+							query_dump($query);
+							exit;
 							// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
 							$tapahtumaid = mysql_insert_id($link);
 
@@ -1500,6 +1516,8 @@
 
 		echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
 		echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
+		echo "<tr><th>".t("Syötä inventointipäivämäärä").":</th>";
+		echo "<td><input type='text' size='25' name='inventointipvm' value='$inventointipvm'></td></tr>";
 		echo "</table><br><br>";
 
 

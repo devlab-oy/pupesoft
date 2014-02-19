@@ -1203,6 +1203,7 @@
 			echo "<input type='hidden' name='lista' value='$lista'>";
 			echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
 			echo "<input type='hidden' name='alku' value='$alku'>";
+			echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
 			echo "</form>";
 		}
 
@@ -1215,6 +1216,7 @@
 		echo "<input type='hidden' name='alku' value='$alku'>";
 		echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
 		echo "<input type='hidden' name='jarjestys' value='$jarjestys'>";
+		echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
 
 		echo "<table>";
 		echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
@@ -1571,6 +1573,7 @@
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
 			echo "<input type='hidden' name='tuoteno' value='$noperow[tuoteno]'>";
+			echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
 			echo "<tr><td class='back'><input type='submit' value='".t("Edellinen tuote")."'></td>";
 			echo "</form>";
 
@@ -1590,6 +1593,7 @@
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
 			echo "<input type='hidden' name='tuoteno' value='$yesrow[tuoteno]'>";
+			echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
 			echo "<td class='back'><input type='submit' value='".t("Seuraava tuote")."'></td></tr>";
 			echo "</form>";
 			echo "</table>";
@@ -1598,7 +1602,7 @@
 		echo "<form name='inve' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";
-
+		echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
 		echo "<br><table>";
 		echo "<tr><th>".t("Tuotenumero:")."</th><td>";
 
@@ -1618,6 +1622,7 @@
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
+				<input type='hidden' name='inventointipvm' value='$inventointipvm'>
 				<br><br>
 				<font class='head'>".t("Inventoi tiedostosta")."</font><hr>
 				<table>
@@ -1672,6 +1677,7 @@
 							<input type='hidden' name='tee' value='INVENTOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
 							<input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
+							<input type='hidden' name='inventointipvm' value='$inventointipvm'>
 							<input type='submit' value='".t("Inventoi")."'>
 							</form>
 						</td>
@@ -1681,6 +1687,7 @@
 							<input type='hidden' name='tee' value='MITATOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
 							<input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
+							<input type='hidden' name='inventointipvm' value='$inventointipvm'>
 							<input type='submit' value='".t("Mit‰tˆi lista")."'>
 							</form>
 						</td>";

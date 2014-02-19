@@ -18,7 +18,7 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 		$required_fields = array(
 			'tuoteno',
 			'tyyppi',
-			'paino',
+//			'paino', //paino ei ole sittenkään pakollinen koska palopostilla ei ole painoa
 		);
 
 		$this->setFilepath("/tmp/konversio/LAITE_s.csv");
@@ -53,7 +53,13 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
 				if ($konvertoitu_header == 'tyyppi') {
-					$rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header].'sammutin');
+					if (stristr($rivi[$csv_header], 'vesi')) {
+						//kyseessä siis paloposti tyyppinen tuote
+						$rivi_temp[$konvertoitu_header] = 'paloposti';
+					}
+					else {
+						$rivi_temp[$konvertoitu_header] = strtolower($rivi[$csv_header].'sammutin');
+					}
 				}
 				else if ($konvertoitu_header == 'paino') {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
@@ -96,7 +102,7 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 			}
 		}
 		
-		if (!in_array($rivi['tyyppi'], array('jauhesammutin','hiilidioksidisammutin','nestesammutin','halonisammutin'))) {
+		if (!in_array($rivi['tyyppi'], array('jauhesammutin','hiilidioksidisammutin','nestesammutin','halonisammutin', 'paloposti'))) {
 			return false;
 		}
 

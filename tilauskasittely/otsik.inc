@@ -190,7 +190,7 @@
 		$tila = "";
 	}
 
-	if ($kukarow['kesken'] > 0 and isset($laskurow) and $laskurow['tila'] == 'N' and $laskurow['alatila'] != '' and isset($maksuehto) and $maksuehto != '') {
+	if ($kukarow['kesken'] > 0 and isset($laskurow) and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or $laskurow['tila'] == 'L') and isset($maksuehto) and $maksuehto != '') {
 
 		$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$maksuehto}'";
 		$tarkistus_meapu = pupe_query($tarkistus_apuqu);

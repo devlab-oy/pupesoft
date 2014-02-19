@@ -188,27 +188,29 @@ class LaiteCSVDumper extends CSVDumper {
 					AND selite = '".strtolower($tyyppi)."'";
 		$result = pupe_query($query);
 		if (mysql_num_rows($result) == 0) {
-			$query = '	INSERT INTO tuotteen_avainsanat
-						(
-							yhtio,
-							tuoteno,
-							kieli,
-							laji,
-							selite,
-							laatija,
-							luontiaika
-						)
-						VALUES
-						(
-							"'.$this->kukarow['yhtio'].'",
-							"'.$tuoteno.'",
-							"fi",
-							"sammutin_tyyppi",
-							"'.strtolower($tyyppi).'",
-							"import",
-							NOW()
-						)';
-			pupe_query($query);
+			if (in_array($tyyppi, array('jauhesammutin','hiilidioksidisammutin','nestesammutin','halonisammutin', 'paloposti'))) {
+				$query = '	INSERT INTO tuotteen_avainsanat
+							(
+								yhtio,
+								tuoteno,
+								kieli,
+								laji,
+								selite,
+								laatija,
+								luontiaika
+							)
+							VALUES
+							(
+								"'.$this->kukarow['yhtio'].'",
+								"'.$tuoteno.'",
+								"fi",
+								"sammutin_tyyppi",
+								"'.strtolower($tyyppi).'",
+								"import",
+								NOW()
+							)';
+				pupe_query($query);
+			}
 		}
 
 		$query = "	SELECT *

@@ -857,8 +857,14 @@
 				$row["kommentti"] = trim($row["kommentti"]);
 
 				if ($row["kommentti"] != '') {
-					$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 280, 5, 740, $row["kommentti"],	$firstpage, $p);
-					$kala = $pohja - 10;
+					if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+						$pohja = $pdf->draw_paragraph($kala+$p["height"]+25, 440, 105, 740, $row["kommentti"],	$firstpage, $p);
+						$kala = $pohja - 25;
+					}
+					else {
+						$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 280, 5, 740, $row["kommentti"],	$firstpage, $p);
+						$kala = $pohja - 10;
+					}
 				}
 
 				$kala -= 7;

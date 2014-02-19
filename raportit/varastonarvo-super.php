@@ -1249,7 +1249,7 @@
 														$mistavarastosta)
 								WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
 								and tapahtuma.tuoteno  = '{$row['tuoteno']}'
-								and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}' 
+								and tapahtuma.laadittu >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)
 								and tapahtuma.laji 	 = 'tulo'";
 					$result_a = pupe_query($query_a);
 					$resultti_a = mysql_fetch_assoc($result_a);

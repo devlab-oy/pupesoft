@@ -535,7 +535,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 	}
 
 	protected function liita_puuttuvat_huoltosyklit() {
-		//Haetaan laitteet, joilla on vähemmän kuin 3 huoltosykliä liitettynä
+		//Haetaan laitteet, joilla on vähemmän kuin 3 huoltosykliä enemmän kuin 0 liitettynä
 		$query = "	SELECT laite.tunnus,
 					laite.tuoteno,
 					t1.selite AS sammutin_tyyppi,

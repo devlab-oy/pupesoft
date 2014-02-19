@@ -9,7 +9,18 @@
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
 
-	if (strtolower($toim) == 'oletusvarasto' and $kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
+	if (strtolower($toim) == 'oletusvarasto') {
+
+		if ($kukarow['oletus_varasto'] == '' or $kukarow['oletus_varasto'] == 0) {
+			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu käyttäjälle"),".</font><br />";
+
+			if ($mobiili != "YES") {
+				require ("inc/footer.inc");
+			}
+
+			exit;
+		}
+
 		$oletusvarasto_chk = $kukarow['oletus_varasto'];
 	}
 	else {

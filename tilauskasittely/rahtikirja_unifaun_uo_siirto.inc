@@ -82,9 +82,9 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 			$pakkaus_row = mysql_fetch_assoc($pakkaus_res);
 
 			if ($keraysera_row['pakkaus'] == '999') {
-				$pakkaus_row['leveys'] = $pakkaus_row['leveys'] < 0.01 ? 0.01 : $pakkaus_row['leveys'];
-				$pakkaus_row['korkeus'] = $pakkaus_row['korkeus'] < 0.01 ? 0.01 : $pakkaus_row['korkeus'];
-				$pakkaus_row['syvyys'] = $pakkaus_row['syvyys'] < 0.01 ? 0.01 : $pakkaus_row['syvyys'];
+				$pakkaus_row['leveys'] = $pakkaus_row['leveys'] < 0.1 ? 0.1 : $pakkaus_row['leveys'];
+				$pakkaus_row['korkeus'] = $pakkaus_row['korkeus'] < 0.1 ? 0.1 : $pakkaus_row['korkeus'];
+				$pakkaus_row['syvyys'] = $pakkaus_row['syvyys'] < 0.1 ? 0.1 : $pakkaus_row['syvyys'];
 			}
 
 			$kollitiedot = array(

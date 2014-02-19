@@ -18,6 +18,8 @@ function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko
 	}
 
 	$query = "	SELECT huoltosykli.tunnus,
+				ta.selite AS huoltosykli_tyyppi,
+				ta.selitetark AS huoltosykli_prioriteetti,
 				concat_ws(' - ', tuote.nimitys, huoltosykli.tyyppi, huoltosykli.koko,
 					(
 						SELECT selitetark
@@ -33,6 +35,10 @@ function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko
 				JOIN tuote
 				ON ( tuote.yhtio = huoltosykli.yhtio
 					AND tuote.tuoteno = huoltosykli.toimenpide )
+				JOIN tuotteen_avainsanat AS ta
+				ON ( ta.yhtio = tuote.yhtio
+					AND ta.tuoteno = tuote.tuoteno
+					AND ta.laji = 'tyomaarayksen_ryhmittely' )
 				WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
 				{$huoltosykli_where}";
 	$huoltosykli_result = pupe_query($query);

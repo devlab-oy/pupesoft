@@ -185,6 +185,9 @@ if ($request['action'] == 'aja_konversio') {
 
 		$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
 		$dumper->aja();
+
+		$dumper = new TuotteenavainsanaLaite2CSVDumper($request['kukarow']);
+		$dumper->aja();
 	}
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {

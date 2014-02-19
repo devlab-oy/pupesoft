@@ -174,7 +174,7 @@ abstract class CSVDumper {
 	private function to_assoc($rivi, $csv_headerit) {
 		$rivi_temp = array();
 		foreach ($rivi as $index => $value) {
-			$rivi_temp[strtoupper($csv_headerit[$index])] = $value;
+			$rivi_temp[trim(strtoupper($csv_headerit[$index]))] = $value;
 		}
 
 		return $rivi_temp;

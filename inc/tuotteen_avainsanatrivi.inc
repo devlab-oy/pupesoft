@@ -167,6 +167,8 @@
 				'jauhesammutin'			 => t('Jauhesammutin'),
 				'hiilidioksidisammutin'	 => t('Hiilidioksidisammutin'),
 				'nestesammutin'			 => t('Nestesammutin'),
+				'halonisammutin'		 => t('Halonisammutin'),
+				'paloposti'				 => t('Paloposti'),
 			);
 			$sel = array($trow[$i] => "SELECTED");
 

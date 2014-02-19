@@ -1131,7 +1131,7 @@
 					echo "<a href='{$palvelin2}inventoi.php?tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
 				}
 				elseif (tarkista_oikeus('inventoi.php', 'OLETUSVARASTO', 1)) {
-					echo "<a href='{$palvelin2}inventoi.php?toim=OLETUSVARASTO&tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
+					echo "<a href='{$palvelin2}inventoi.php?toim=OLETUSVARASTO&tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////toim=OLETUSVARASTO//tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
 				}
 				else {
 					echo "$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]";

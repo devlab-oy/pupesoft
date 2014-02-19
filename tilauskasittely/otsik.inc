@@ -190,6 +190,48 @@
 		$tila = "";
 	}
 
+	if ($kukarow['kesken'] > 0 and isset($laskurow) and $laskurow['tila'] == 'N' and $laskurow['alatila'] != '' and isset($maksuehto) and $maksuehto != '') {
+
+		$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$maksuehto}'";
+		$tarkistus_meapu = pupe_query($tarkistus_apuqu);
+		$tarkistus_meapu_row = mysql_fetch_assoc($tarkistus_meapu);
+
+		if (isset($edellinen_maksuehto)) {
+			$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$edellinen_maksuehto}'";
+			$tarkistus_meapu2 = pupe_query($tarkistus_apuqu);
+			$tarkistus_meapu_row2 = mysql_fetch_assoc($tarkistus_meapu2);
+		}
+
+		$a = $tarkistus_meapu_row['kateinen'];
+		$b = isset($tarkistus_meapu_row2) ? $tarkistus_meapu_row2['kateinen'] : "";
+
+		if (($a == "" and $b != "") or ($a == "")) {
+
+			// Parametrejä saatanat.php:lle
+			$sytunnus 	 	 = $laskurow['ytunnus'];
+			$sliitostunnus	 = $laskurow['liitostunnus'];
+			$eiliittymaa 	 = "ON";
+			$luottorajavirhe = "";
+			$jvvirhe 		 = "";
+			$ylivito 		 = 0;
+			$trattavirhe 	 = "";
+			$laji 			 = "MA";
+			$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
+
+			ob_start();
+			require ("raportit/saatanat.php");
+			$retval = ob_get_contents();
+			ob_end_clean();
+
+			if ($luottorajavirhe != '') {
+				echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt. Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),"!</font><br><br>";
+				$tee = "OTSIK";
+				$tila = "";
+				unset($jatka);
+			}
+		}
+	}
+
 	if (isset($jatka) and $asiakasid != "") {
 		if ($maksuehto == "") {
 			echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
@@ -208,55 +250,6 @@
 				$tee = "OTSIK";
 				$tila = "";
 				unset($jatka);
-			}
-			elseif ($tarkistus_meapu_row['kateinen'] == "") {
-
-				if (isset($edellinen_maksuehto)) {
-					$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$edellinen_maksuehto}'";
-					$tarkistus_meapu2 = pupe_query($tarkistus_apuqu);
-					$tarkistus_meapu_row2 = mysql_fetch_assoc($tarkistus_meapu2);
-				}
-
-				$a = $tarkistus_meapu_row['kateinen'];
-				$b = isset($tarkistus_meapu_row2) ? $tarkistus_meapu_row2['kateinen'] : "";
-
-				if (($a == "" and $b != "") or ($a == "")) {
-
-					if (!isset($laskurow)) {
-						$query = "	SELECT ytunnus
-									FROM asiakas
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$asiakasid}'";
-						$as_chk_res = pupe_query($query);
-						$as_chk_row = mysql_fetch_assoc($as_chk_res);
-
-						$laskurow['ytunnus'] = $as_chk_row['ytunnus'];
-						$laskurow['liitostunnus'] = $asiakasid;
-					}
-
-					// Parametrejä saatanat.php:lle
-					$sytunnus 	 	 = $laskurow['ytunnus'];
-					$sliitostunnus	 = $laskurow['liitostunnus'];
-					$eiliittymaa 	 = "ON";
-					$luottorajavirhe = "";
-					$jvvirhe 		 = "";
-					$ylivito 		 = 0;
-					$trattavirhe 	 = "";
-					$laji 			 = "MA";
-					$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
-
-					ob_start();
-					require ("raportit/saatanat.php");
-					$retval = ob_get_contents();
-					ob_end_clean();
-
-					if ($luottorajavirhe != '') {
-						echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt. Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),"!</font><br><br>";
-						$tee = "OTSIK";
-						$tila = "";
-						unset($jatka);
-					}
-				}
 			}
 		}
 

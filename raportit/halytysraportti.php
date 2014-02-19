@@ -472,10 +472,11 @@
 			}
 
 			if (isset($nayta_vain_ykkostoimittaja)) {
+				$toimittajaidlisa = '';
 				if ($toimittajaid != '') {
-				 $lisaa .= " and paatoimittaja.liitostunnus = '{$toimittajaid}' ";	
+				 $toimittajaidlisa = " and paatoimittaja.liitostunnus = '{$toimittajaid}' ";	
 				}
-				$lisaa2 .= " JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = tuote.yhtio and tuoteno = tuote.tuoteno ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
+				$lisaa2 .= " JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = tuote.yhtio and tuoteno = tuote.tuoteno {$toimittajaidlisa} ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
 			}
 			elseif ($toimittajaid != '') {
 				$lisaa2 .= " JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$toimittajaid'";
@@ -823,19 +824,33 @@
 					}
 					if ($toimittajaid == '') {
 
-						$query = "	SELECT 
-									group_concat(toimi.ytunnus 								order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
-									group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
-									group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-									group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-									group_concat(distinct tuotteen_toimittajat.ostohinta 	order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
-									group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
-									FROM tuotteen_toimittajat
-									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-									WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
-									and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-									{$ykkostoim_orderilisa}
-									";
+						if (isset($nayta_vain_ykkostoimittaja)) {
+							$query = "  SELECT
+										toimi.ytunnus toimittaja,
+										tuotteen_toimittajat.osto_era,
+										tuotteen_toimittajat.toim_tuoteno,
+										tuotteen_toimittajat.toim_nimitys,
+										tuotteen_toimittajat.ostohinta,
+										tuotteen_toimittajat.tuotekerroin
+										FROM tuotteen_toimittajat
+										JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+										WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
+										and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
+										{$ykkostoim_orderilisa}";
+						}
+						else {
+							$query = "	SELECT 
+										group_concat(toimi.ytunnus 								order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
+										group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
+										group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+										group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
+										group_concat(distinct tuotteen_toimittajat.ostohinta 	order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
+										group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
+										FROM tuotteen_toimittajat
+										JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+										WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
+										and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'";
+						}
 					}
 					else {
 						$query = "	SELECT toimi.ytunnus toimittaja,
@@ -848,7 +863,8 @@
 									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 									WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
 									and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-									and tuotteen_toimittajat.liitostunnus = '$toimittajaid' $ykkostoim_orderilisa";
+									and tuotteen_toimittajat.liitostunnus = '$toimittajaid'
+									{$ykkostoim_orderilisa}";
 					}
 
 					$result   = pupe_query($query);

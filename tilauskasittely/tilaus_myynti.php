@@ -1493,7 +1493,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
 				//	Voimme myös tehdä tilaukselta suoraan valmistuksia!
 				require("tilauksesta_valmistustilaus.inc");
-				
+
 				$tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
 				if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
 			}
@@ -3428,20 +3428,7 @@ if ($tee == '') {
 
 	echo "</table>";
 
-	$numres_saatavt  = 0;
-
-	if ((int) $kukarow["kesken"] > 0) {
-		//Näytetäänko asiakkaan saatavat!
-		$query  = "	SELECT yhtio
-					FROM tilausrivi
-					WHERE yhtio	= '$kukarow[yhtio]'
-					AND otunnus = '$kukarow[kesken]'
-					AND tyyppi != 'D'";
-		$numres = pupe_query($query);
-		$numres_saatavt = mysql_num_rows($numres);
-	}
-
-	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
+	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
 
 		js_popup();
 

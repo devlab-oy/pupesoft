@@ -39,7 +39,8 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	$tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
 	$tilikausi_lasku = tarkista_saako_laskua_muuttaa($laskurow['tapvm']);
 
-	if (empty($tilikausi) and empty($tilikausi_lasku) and !$laskupvmerror and !$laskumaksettuerror) {
+	#if (empty($tilikausi) and empty($tilikausi_lasku) and !$laskupvmerror and !$laskumaksettuerror) {
+	if (!$laskupvmerror and ((empty($tilikausi) and empty($tilikausi_lasku)) or ($toim == 'KATEINEN' and !$laskumaksettuerror))) {
 		$mehtorow 		= hae_maksuehto($maksuehto);
 		$konsrow  		= hae_asiakas($laskurow);
 		$kassalipasrow 	= hae_kassalipas($kassalipas);
@@ -100,7 +101,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	elseif ($laskupvmerror) {
 		echo "<font class='error'>".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on pienempi kuin laskun p‰iv‰m‰‰r‰ %s", "", $laskurow['tapvm'])."!</font>";
 	}
-	elseif (!empty($tilikausi_lasku)) {
+	elseif (!empty($tilikausi_lasku) and $toim != 'KATEINEN') {
 		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi_lasku, $laskurow['tapvm'])."!</font>";
 	}
 	else {
@@ -483,7 +484,7 @@ function hae_lasku2($laskuno, $toim) {
 		echo "<font class='error'>".t("VIRHE: Lasku on jo maksettu")."!</font><br><br>";
 		return FALSE;
 	}
-	elseif (!empty($tilikausi)) {
+	elseif (!empty($tilikausi) and $toim != 'KATEINEN') {
 	 	echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi muuttaa k‰teist‰ laskuksi %s", "", $tilikausi, $row['tapvm'])."!</font>";
 	 	return FALSE;
 	}

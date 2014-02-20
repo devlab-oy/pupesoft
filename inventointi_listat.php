@@ -2,7 +2,7 @@
 
 	require ("inc/parametrit.inc");
 
-	if (strtolower($toim) == 'oletusvarasto' and $kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
+	if (strtolower($toim) == 'oletusvarasto' and $kukarow['oletus_varasto'] != 0) {
 		$oletusvarasto_chk = $kukarow['oletus_varasto'];
 	}
 	else {

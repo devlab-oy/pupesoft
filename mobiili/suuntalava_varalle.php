@@ -262,6 +262,7 @@ $query = "	SELECT *
 			FROM tilausrivi
 			WHERE yhtio = '{$kukarow['yhtio']}'
 			AND tyyppi = 'O'
+			AND suuntalava = '{$alusta_tunnus}'
 			AND uusiotunnus = '{$sscc['saapuminen']}'";
 $tuotteet_res = mysql_query($query);
 

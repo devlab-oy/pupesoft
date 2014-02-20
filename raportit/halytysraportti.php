@@ -2151,7 +2151,7 @@
 
 
 			echo "</td></tr>";
-			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'>".t("Päätoimittajarajaus")."<input type='checkbox' name='nayta_vain_ykkostoimittaja' value='JOO'/></td></tr>";
+			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
 
 			echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
@@ -2302,10 +2302,8 @@
 					<input type='hidden' name='abcrajaus' value='$abcrajaus'>
 					<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>
 					<input type='hidden' name='KAIKKIJT' value='$KAIKKIJT'>";
-					if (isset($nayta_vain_ykkostoimittaja)) {
-						echo "<input type='hidden' name='nayta_vain_ykkostoimittaja' value='JOO'>";
-					}
-					echo "<table>
+
+			echo "<table>
 					<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto $trow[selitetark]</td></tr>
 					<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>$tuoryh $srow[selitetark]</td></tr>
 					<tr><th>".t("Toimittaja")."</th><td colspan='3'>$ytunnus $trow1[nimi]</td></tr>
@@ -2330,7 +2328,7 @@
 						and selitetark like 'PAIVAM##%'";
 			$sresult = pupe_query($query);
 
-			while($srow = mysql_fetch_assoc($sresult)) {
+			while ($srow = mysql_fetch_assoc($sresult)) {
 				list($etuliite, $nimi, $paivamaara) = explode('##',$srow["selitetark"]);
 
 				${$nimi} = $paivamaara;
@@ -2431,8 +2429,6 @@
 			}
 
 			echo "	<tr><td class='back'><br></td></tr>";
-
-
 
 			//Yhtiövalinnat
 			$query	= "	SELECT distinct yhtio, nimi
@@ -2661,7 +2657,7 @@
 
 				echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
 			}
-
+			echo "<tr><th>".t("Päätoimittajarajaus")."</th><td colspan='3'><input type='checkbox' name='nayta_vain_ykkostoimittaja' value='JOO'/></tr></td>";
 			echo "<tr><td class='back'><br></td></tr>";
 
 

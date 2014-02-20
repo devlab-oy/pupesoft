@@ -24,7 +24,7 @@
 		$oletusvarasto_chk = $kukarow['oletus_varasto'];
 	}
 	else {
-		$oletusvarasto_chk = '';
+		$oletusvarasto_chk = 0;
 	}
 
 	if ($livesearch_tee == "TUOTEHAKU") {
@@ -106,7 +106,7 @@
 				if ($tuo != '' and $hyl != '' and $maa != '') {
 					$hylp = explode("-", $hyl);
 
-					if ($oletusvarasto_chk != '' and kuuluukovarastoon($hylp[0], $hylp[1], $oletusvarasto_chk) == 0) {
+					if ($oletusvarasto_chk > 0 and kuuluukovarastoon($hylp[0], $hylp[1], $oletusvarasto_chk) == 0) {
 						$oletusvarasto_err++;
 						continue;
 					}
@@ -128,7 +128,7 @@
 				echo "<font class='error'>",t("Yhtään tuotetta ei inventoitu"),"!</font><br />";
 			}
 
-			if ($oletusvarasto_chk != '' and $oletusvarasto_err > 0) {
+			if ($oletusvarasto_chk > 0 and $oletusvarasto_err > 0) {
 				$plural = $oletusvarasto_err > 1 ? "tuotetta" : "tuote";
 				echo " <font class='error'>",t("%d %s ei löytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font><br />";
 			}
@@ -1242,7 +1242,7 @@
 
 		while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
 
-			if ($oletusvarasto_chk != '' and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
+			if ($oletusvarasto_chk > 0 and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
 			//Haetaan kerätty määrä
 			$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois

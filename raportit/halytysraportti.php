@@ -193,7 +193,7 @@
 		$sarakkeet["SARAKE10"] 	= t("Ostoehdotus")." $ehd_kausi_o1\t";
 		$sarakkeet["SARAKE11"] 	= t("Ostoehdotus")." $ehd_kausi_o2\t";
 		$sarakkeet["SARAKE12"] 	= t("Ostoehdotus")." $ehd_kausi_o3\t";
-		
+
 		$sarakkeet["SARAKE12B"] = t("Ostoehdotus status")."\t";
 		$sarakkeet["SARAKE12C"] = t("Viimeinen hankintapäivä")."\t";
 
@@ -472,10 +472,8 @@
 			}
 
 			if (isset($nayta_vain_ykkostoimittaja)) {
-				$toimittajaidlisa = '';
-				if ($toimittajaid != '') {
-				 $toimittajaidlisa = " and paatoimittaja.liitostunnus = '{$toimittajaid}' ";	
-				}
+				$toimittajaidlisa = $toimittajaid != '' ? " and paatoimittaja.liitostunnus = '{$toimittajaid}' " : "";
+
 				$lisaa2 .= " JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = tuote.yhtio and tuoteno = tuote.tuoteno {$toimittajaidlisa} ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
 			}
 			elseif ($toimittajaid != '') {
@@ -834,7 +832,7 @@
 										ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1";
 						}
 						else {
-							$query = "	SELECT 
+							$query = "	SELECT
 										group_concat(toimi.ytunnus 								order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
 										group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
 										group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
@@ -848,10 +846,7 @@
 						}
 					}
 					else {
-						$ykkostoim_orderilisa = '';
-						if (isset($nayta_vain_ykkostoimittaja)) {
-							$ykkostoim_orderilisa = " AND tuotteen_toimittajat.liitostunnus = (SELECT liitostunnus FROM tuotteen_toimittajat WHERE yhtio = '{$row['yhtio']}' AND tuoteno = '{$row['tuoteno']}' ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
-						}
+						$ykkostoim_orderilisa = isset($nayta_vain_ykkostoimittaja) ? " AND tuotteen_toimittajat.liitostunnus = (SELECT liitostunnus FROM tuotteen_toimittajat WHERE yhtio = '{$row['yhtio']}' AND tuoteno = '{$row['tuoteno']}' ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1)": "";
 
 						$query = "	SELECT toimi.ytunnus toimittaja,
 									tuotteen_toimittajat.osto_era,
@@ -977,16 +972,17 @@
 					$ennp   = mysql_fetch_assoc($result);
 
 					if (isset($nayta_vain_ykkostoimittaja)) {
-						$query = "	SELECT								
+						$query = "	SELECT
 									sum(if(tyyppi = 'O', varattu, 0)) tilattu
-									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)								
-									JOIN lasku ON lasku.yhtio='$yhtiorow[yhtio]' and lasku.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio='$row[yhtio]' and tuoteno='$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
+									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+									JOIN lasku ON lasku.yhtio = '$yhtiorow[yhtio]' and lasku.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio='$row[yhtio]' and tuoteno='$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 			 						and tilausrivi.tyyppi in ('O')
 									and tuoteno = '$row[tuoteno]'
 									and laskutettuaika = '0000-00-00'";
 						$result = pupe_query($query);
 						$ykkostoimittajarajattuna   = mysql_fetch_assoc($result);
+
 						$ennp['tilattu'] = empty($ykkostoimittajarajattuna['tilattu']) ? 0 : $ykkostoimittajarajattuna['tilattu'];
 					}
 
@@ -1319,7 +1315,7 @@
 							$worksheet->writeString($excelrivi, $excelsarake, $row["vihapvm"]);
 							$excelsarake++;
 						}
-						
+
 
 						if ($valitut["SARAKE13"] != '') {
 							$rivi .= "$ostettavahaly\t";
@@ -2306,7 +2302,7 @@
 					<input type='hidden' name='abcrajaus' value='$abcrajaus'>
 					<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>
 					<input type='hidden' name='KAIKKIJT' value='$KAIKKIJT'>";
-					if (isset($nayta_vain_ykkostoimittaja)) { 
+					if (isset($nayta_vain_ykkostoimittaja)) {
 						echo "<input type='hidden' name='nayta_vain_ykkostoimittaja' value='JOO'>";
 					}
 					echo "<table>

@@ -133,6 +133,9 @@
 				echo " <font class='error'>",t("%d %s ei löytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font><br />";
 			}
 		}
+		else {
+			$tee = "";
+		}
 	}
 
 	// lukitaan tableja
@@ -1202,6 +1205,7 @@
 
 		if ($lista != "") {
 			echo "<form method='post'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<select name='rivimaara' onchange='submit()'>";
 			echo "<option value='180' $sel180rivi>".t("Näytetään 180 riviä")."</option>";
@@ -1223,6 +1227,7 @@
 
 
 		echo "<form name='inve' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='VALMIS'>";
 		echo "<input type='hidden' name='lista' value='$lista'>";
@@ -1582,6 +1587,7 @@
 
 			echo "<table>";
 			echo "<form method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
@@ -1601,6 +1607,7 @@
 			$yesrow = mysql_fetch_assoc($yesres);
 
 			echo "<form method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
@@ -1611,6 +1618,7 @@
 		}
 
 		echo "<form name='inve' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";
 
@@ -1630,6 +1638,7 @@
 		echo "<br><br>";
 
 		echo "<form method='post' enctype='multipart/form-data'>
+				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
@@ -1683,6 +1692,7 @@
 						<td>".tv1dateconv($lrow["inventointilista_aika"], "PITKA")."</td>
 						<td>
 							<form action='inventoi.php' method='post'>
+							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tee' value='INVENTOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
@@ -1692,6 +1702,7 @@
 						</td>
 						<td>
 							<form action='inventoi.php' method='post'>
+							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tee' value='MITATOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>

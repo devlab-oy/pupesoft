@@ -904,7 +904,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 
 				$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
 
-				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $toimipaikat_row['liiketunnus'] != '') {
+				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
 
 					require("inc/sahkoinen_lahete.class.inc");
 
@@ -3428,7 +3428,20 @@ if ($tee == '') {
 
 	echo "</table>";
 
-	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
+	$numres_saatavt  = 0;
+
+	if ((int) $kukarow["kesken"] > 0) {
+		//Näytetäänko asiakkaan saatavat!
+		$query  = "	SELECT yhtio
+					FROM tilausrivi
+					WHERE yhtio	= '$kukarow[yhtio]'
+					AND otunnus = '$kukarow[kesken]'
+					AND tyyppi != 'D'";
+		$numres = pupe_query($query);
+		$numres_saatavt = mysql_num_rows($numres);
+	}
+
+	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
 
 		js_popup();
 
@@ -8596,7 +8609,7 @@ if ($tee == '') {
 
 						$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
 
-						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $toimipaikat_row['liiketunnus'] != '') {
+						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
 
 							$query = "	SELECT asiakkaan_avainsanat.*
 										FROM asiakkaan_avainsanat

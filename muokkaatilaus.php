@@ -13,6 +13,9 @@
 
 	if (!isset($toim)) $toim = '';
 
+	if (!isset($kaytiin_otsikolla)) $kaytiin_otsikolla = '';
+	else $kaytiin_otsikolla = 'NOJOO!';
+
 	if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
 		echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
 		exit;
@@ -1799,7 +1802,7 @@
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
-			
+
 			$miinus = 7;
 		}
 		elseif ($toim == 'ODOTTAA_SUORITUSTA') {
@@ -2622,12 +2625,13 @@
 						echo "	<input type='hidden' name='projektilla' value='$row[tunnusnippu]'>";
 					}
 
-					echo "	<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi'>
+					echo "	<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi//kaytiin_otsikolla={$kaytiin_otsikolla}'>
 							<input type='hidden' name='mista'		 value='muokkaatilaus'>
 							<input type='hidden' name='toim'		 value='$aputoim1'>
 							<input type='hidden' name='orig_tila'	 value='{$row["tila"]}'>
 							<input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
-							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
+							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>
+							<input type='hidden' name='kaytiin_otsikolla' value='{$kaytiin_otsikolla}' />";
 
 					if ($toim == "VASTAANOTA_REKLAMAATIO") {
 						echo "	<input type='hidden' name='mista' value='vastaanota'>";

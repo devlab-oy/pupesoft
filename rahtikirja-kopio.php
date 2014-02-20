@@ -470,11 +470,11 @@
 				$toimitustapalisa = "AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'";
 			}
 
-			$query = "	SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, t.selite, count(lasku.tunnus) AS cnt
+			$query = "	SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, tt.selite, count(lasku.tunnus) AS cnt
 						FROM lahdot
-						JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)
 						JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
 						JOIN toimitustapa AS tt ON (tt.yhtio = lasku.yhtio
+							AND tt.tunnus = lahdot.liitostunnus
 							AND tt.selite = lasku.toimitustapa
 							AND tt.tulostustapa != 'X'
 							AND tt.rahtikirja != 'rahtikirja_tyhja.inc')
@@ -492,7 +492,7 @@
 						{$toimitustapalisa}
 						GROUP BY 1,2,3
 						HAVING cnt > 0
-						ORDER BY lahdot.lahdon_kellonaika, t.selite";
+						ORDER BY lahdot.lahdon_kellonaika, tt.selite";
 			$lahdot_res = pupe_query($query);
 
 			while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {

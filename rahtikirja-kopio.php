@@ -520,7 +520,7 @@
 
 			$query  = "	SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, toimitustapa.selite
 						FROM lahdot
-						JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio and lahdot.liitostunnus=toimitustapa.tunnus)
+						JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio AND lahdot.liitostunnus=toimitustapa.tunnus AND toimitustapa.erittely != '')
 						JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
 						JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
 							AND r.tulostuspaikka = '{$varasto}'

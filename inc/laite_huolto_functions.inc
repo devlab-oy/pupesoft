@@ -245,7 +245,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime('now')));
 	}
 	else {
-		//poikkeus_paiva annetaan importissa. Normi generoinnissa t‰h‰n iffiin ei menn‰
+		//poikkeus_paiva annetaan importissa. Normi generoinnissa t‰h‰n iffiin menn‰‰n aina
 		if ($poikkeus_paiva == '') {
 			//merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
 			aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")));

@@ -33,6 +33,9 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$progressbar->initialize(count($this->rivit));
 
 		foreach ($this->rivit as $index => &$rivi) {
+			if ($rivi['laite'] == '140002') {
+				$a = "";
+			}
 			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
 
@@ -53,7 +56,18 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
 				if ($konvertoitu_header == 'huoltovali') {
-					$rivi_temp[$konvertoitu_header] = (int)$rivi[$csv_header] * 30;
+					$huoltovalit = huoltovali_options();
+					foreach ($huoltovalit as $huoltovali => $value) {
+						if ($value['months'] == $rivi[$csv_header]) {
+							$rivi_temp[$konvertoitu_header] = (int)$huoltovali;
+							break;
+						}
+					}
+
+					//failsafe
+					if (empty($rivi_temp[$konvertoitu_header])) {
+						$rivi_temp[$konvertoitu_header] = 365;
+					}
 				}
 				else {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];

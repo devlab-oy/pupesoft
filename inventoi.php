@@ -11,7 +11,7 @@
 
 	if (strtolower($toim) == 'oletusvarasto') {
 
-		if ($kukarow['oletus_varasto'] == '' or $kukarow['oletus_varasto'] == 0) {
+		if ($kukarow['oletus_varasto'] == 0) {
 			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu käyttäjälle"),".</font><br />";
 
 			if ($mobiili != "YES") {

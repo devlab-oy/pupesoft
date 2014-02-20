@@ -230,7 +230,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
  * tyojono
  * viimeinen_tapahtuma (optional)
  */
-function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $poikkeus_paiva = '', $lisaa_kulut = false) {
+function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta = array(), $toivottu_toimitusaika = '', $lisaa_kulut = false) {
 	global $kukarow, $yhtiorow, $debug;
 
 	$kukarow['kesken'] = 0;
@@ -246,14 +246,14 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 	}
 	else {
 		//poikkeus_paiva annetaan importissa. Normi generoinnissa t‰h‰n iffiin menn‰‰n aina
-		if ($poikkeus_paiva == '') {
+		if ($toivottu_toimitusaika == '') {
 			//merkataan toimitusajankohdaksi viimeinen_tapahtuma + huoltovali
 			aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")));
 		}
 	}
 
-	if ($poikkeus_paiva != '') {
-		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", strtotime($poikkeus_paiva)));
+	if ($toivottu_toimitusaika != '') {
+		aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $toivottu_toimitusaika);
 	}
 
 	if ($debug and !empty($tyomaarays_tunnus)) {
@@ -314,7 +314,11 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 
 	paivita_laite_tunnus_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
 	paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
-	paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus']);
+	paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus'], $toivottu_toimitusaika);
+
+	if ($toivottu_toimitusaika != '') {
+		aseta_tyomaarayksen_tilausrivien_toimaika($tyomaarays_tunnus, $toivottu_toimitusaika);
+	}
 
 	if (!empty($edellinen_tyomaarays) and $edellinen_tyomaarays['tyostatus'] == 'K') {
 		$kommentti = t('Edellisell‰ kerralla')." ({$edellinen_tyomaarays['toimitettuaika']}) ".t('laitteelle ei voitu suorittaa toimenpidett‰')." {$edellinen_tyomaarays['toimenpidetuote_nimitys']} ".t('koska laitetta ei lˆytynyt');
@@ -363,12 +367,31 @@ function paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $laite
 function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosykli_tunnus, $viimeinen_tapahtuma = '') {
 	global $kukarow, $yhtiorow;
 
+	if ($viimeinen_tapahtuma != '') {
+		$query = "	SELECT IFNULL(viimeinen_tapahtuma, '0000-00-00')
+					FROM huoltosyklit_laitteet
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laite_tunnus = '{$laite_tunnus}'
+					AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
+		$result = pupe_query($query);
+		$huoltosykli = mysql_fetch_assoc($result);
+
+		//Jos kannasta lˆytyv‰ huoltosyklin viimeinen_tapahtuma on tuoreempi kuin p‰ivitett‰v‰ huoltosykli niin ei tehd‰ p‰ivityst‰.
+		//Ongelma ainoastaan importissa, koska laitteen tapahtumat eiv‰t tule kronologisessa j‰rjestyksess‰.
+		if ($huoltosykli['viimeinen_tapahtuma'] >= $viimeinen_tapahtuma) {
+			return false;
+		}
+	}
+
+	if (empty($laite_tunnus) or empty($huoltosykli_tunnus)) {
+		return false;
+	}
 	//Viimeisen tapahtuman manual setti‰ k‰ytet‰‰n konversio-ajossa.
 	if (empty($viimeinen_tapahtuma)) {
 		$huoltosyklit_laitteet_update = "viimeinen_tapahtuma = CURRENT_DATE";
 	}
 	else {
-		$huoltosyklit_laitteet_update = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}'";
+		$huoltosyklit_laitteet_update = "viimeinen_tapahtuma = '".date('Y-m-d', strtotime($viimeinen_tapahtuma))."'";
 	}
 
 	$query = "	UPDATE huoltosyklit_laitteet
@@ -458,6 +481,11 @@ function tarkista_toimenpide_saldo($laite) {
 function aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $ajankohta) {
 	global $kukarow;
 
+	if (empty($tyomaarays_tunnus)) {
+		return false;
+	}
+	$ajankohta = date("Y-m-d", strtotime($ajankohta));
+
 	$query = "	UPDATE lasku
 				SET toimaika = '{$ajankohta}'
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -465,8 +493,27 @@ function aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $ajankohta) {
 	pupe_query($query);
 }
 
+function aseta_tyomaarayksen_tilausrivien_toimaika($tyomaarays_tunnus, $ajankohta) {
+	global $kukarow;
+
+	if (empty($tyomaarays_tunnus)) {
+		return false;
+	}
+	$ajankohta = date("Y-m-d", strtotime($ajankohta));
+
+	$query = "	UPDATE tilausrivi
+				SET toimaika = '{$ajankohta}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$tyomaarays_tunnus}'";
+	pupe_query($query);
+}
+
 function aseta_tyomaaraysten_status($lasku_tunnukset, $status) {
 	global $kukarow, $yhtiorow;
+
+	if (empty($lasku_tunnukset)) {
+		return false;
+	}
 
 	$query = "	UPDATE tyomaarays
 				SET tyostatus = '{$status}'
@@ -478,6 +525,10 @@ function aseta_tyomaaraysten_status($lasku_tunnukset, $status) {
 function aseta_laitteen_tila($laite_tunnus, $tila) {
 	global $kukarow, $yhtiorow;
 
+	if (empty($laite_tunnus)) {
+		return false;
+	}
+
 	$query = "	UPDATE laite
 				SET tila = '{$tila}'
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -487,6 +538,10 @@ function aseta_laitteen_tila($laite_tunnus, $tila) {
 
 function hae_laitteen_edellinen_tyomaarays($laite_tunnus) {
 	global $kukarow, $yhtiorow;
+
+	if (empty($laite_tunnus)) {
+		return false;
+	}
 
 	$query = "	SELECT tyomaarays.*,
 				tilausrivin_lisatiedot.asiakkaan_positio AS laite_tunnus,
@@ -523,7 +578,7 @@ function merkkaa_tyomaarays_tehdyksi($request) {
 		$toimitettuaika_update = "toimitettuaika = NOW()";
 	}
 	else {
-		$toimitettuaika_update = "toimitettuaika = '{$request['toimitettuaika']}'";
+		$toimitettuaika_update = "toimitettuaika = '".date('Y-m-d H:i:s', strtotime($request['toimitettuaika']))."'";
 	}
 
 	$query = "	UPDATE tilausrivi

@@ -18,6 +18,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 		$konversio_array = array(
 			'laite'		 => 'LAITE',
+			'koodi'		 => 'LAITE', //for debug reasons
 			'toimenpide' => 'TUOTENRO',
 			'nimitys'	 => 'NIMIKE',
 			'poikkeus'	 => 'LAATU',
@@ -25,10 +26,10 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			'hinta'		 => 'HINTA',
 			'ale1'		 => 'ALE',
 			'kommentti'	 => 'HUOM',
-			'toimaika'	 => 'ED',
-			'toimitettu' => 'SEUR',
+			'toimaika'	 => 'ED', //tämä pitää mennä huoltosyklit_laitteet.viimeinen_tapahtuma
+			'toimitettu' => 'SEUR', //tämä tilausriville toimajaksi
 			'status'	 => 'STATUS',
-			'id'		 => 'ID' // for debug reasons, unset
+			'id'		 => 'ID' // for debug reasons
 		);
 		$required_fields = array(
 			'laite',
@@ -43,7 +44,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setColumnCount(26);
 		$this->setProggressBar(true);
 
-//		$this->splitFile('/tmp/konversio/tarkastukset/TARKASTUKSET.csv');
+//		$this->split_file($filepath);
 	}
 
 	protected function konvertoi_rivit() {
@@ -168,12 +169,12 @@ class TarkastuksetCSVDumper extends CSVDumper {
 				'toimenpide_tuotteen_tyyppi' => $rivi['toimenpide_tuotteen_tyyppi'],
 				'toimenpide'				 => $rivi['toimenpide'],
 				'laite_tunnus'				 => $rivi['laite'],
-				'huoltosykli_tunnus'		 => $rivi['huoltosykli_tunnus'],
+				'huoltosykli_tunnus'		 => $rivi['tehtava_huolto']['huoltosykli_tunnus'],
 				'tuoteno'					 => $rivi['laite_tuoteno'],
 				'kohde_nimi'				 => $rivi['kohde_nimi'],
 				'paikka_nimi'				 => $rivi['kohde_nimi'],
 				'tyojono'					 => 'joonas',
-				'viimeinen_tapahtuma'		 => $rivi['toimitettu'],
+				'viimeinen_tapahtuma'		 => $rivi['toimaika'], //viimenen_tapahtuma sekä alla oleva poikkeuspäivä on $rivi['toimaika'], koska huoltosyklit_laitteet.viimeinen_tapahtuma ja lasku.toimaika halutaan, että se on generointi ajanhetki eli tyyliin kuun ensimmäinen päivä
 			);
 			$tyomaarays_tunnus = generoi_tyomaarays($params, array(), $rivi['toimaika']);
 
@@ -183,19 +184,23 @@ class TarkastuksetCSVDumper extends CSVDumper {
 				echo "</pre>";
 			}
 
-			if (!empty($tyomaarays_tunnus)) {
-				$params = array(
-					'lasku_tunnukset'	 => array($tyomaarays_tunnus),
-					'toimitettuaika'	 => $rivi['toimitettu'],
-				);
-				merkkaa_tyomaarays_tehdyksi($params);
-				paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $rivi['huoltosykli_tunnus'], $rivi['toimitettu']);
+			if (empty($tyomaarays_tunnus)) {
+				continue;
 			}
+
+			$params = array(
+				'lasku_tunnukset'	 => array($tyomaarays_tunnus),
+				'toimitettuaika'	 => $rivi['toimitettu'],
+			);
+			merkkaa_tyomaarays_tehdyksi($params);
+			paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $rivi['tehtava_huolto']['huoltosykli_tunnus'], $rivi['toimaika']);
 
 			//jos kyseessä on koeponnistus tai huolto niin pitäisi osata merkata huollon/koeponnistuksen ja tarkastuksen viimeinen tapahtuma oikein
 			if ($rivi['tehtava_huolto']['selite'] == 'huolto' or $rivi['tehtava_huolto']['selite'] == 'koeponnistus') {
 				foreach ($rivi['muut_huollot'] as $muu_huolto) {
-					paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $muu_huolto['huoltosykli_tunnus'], $rivi['toimitettu']);
+					if ($rivi['tehtava_huolto']['viimeinen_tapahtuma'] >= $muu_huolto['viimeinen_tapahtuma']) {
+						paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $muu_huolto['huoltosykli_tunnus'], $rivi['toimaika']);
+					}
 				}
 			}
 
@@ -284,6 +289,8 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	private function hae_huoltosyklit($laite_tunnus) {
 		$query = "	SELECT huoltosykli.tunnus AS huoltosykli_tunnus,
 					huoltosykli.toimenpide AS toimenpide,
+					IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') AS viimeinen_tapahtuma,
+					huoltosyklit_laitteet.huoltovali AS huoltovali,
 					tuotteen_avainsanat.selite
 					FROM huoltosykli
 					JOIN huoltosyklit_laitteet
@@ -391,7 +398,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		return mysql_insert_id();
 	}
 
-	private function splitFile($filepath) {
+	private function split_file($filepath) {
 		$folder = dirname($filepath);
 		// Otetaan tiedostosta ensimmäinen rivi talteen, siinä on headerit
 		$file = fopen($filepath, "r") or die(t("Tiedoston avaus epäonnistui")."!");
@@ -402,7 +409,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		// Laitetaan header fileen, koska filejen mergettäminen on nopeempaa komentoriviltä
 		file_put_contents($header_file, $header_rivi);
 
-		// Splitataan tiedosto 10000 rivin osiin datain -hakemistoon
 		chdir($folder);
 		system("split -l 10000 $filepath");
 

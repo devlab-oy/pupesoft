@@ -191,15 +191,17 @@
 
 			if (isset($lahto) and trim($lahto) != "" and $yhtiorow['kerayserat'] == 'K') {
 
-				$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
+				$query = "	SELECT toimitustapa, GROUP_CONCAT(tunnus) tunnukset
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND toimitustavan_lahto = '{$lahto}'";
+							AND toimitustavan_lahto = '{$lahto}'
+							GROUP BY 1";
 				$lahdot_lasku_chk_res = pupe_query($query);
 				$lahdot_lasku_chk_row = mysql_fetch_assoc($lahdot_lasku_chk_res);
 
 				if ($lahdot_lasku_chk_row['tunnukset'] != "") {
 					$tunnuksetlisa = "AND otsikkonro IN ({$lahdot_lasku_chk_row['tunnukset']})";
+					$toimitustapa = $lahdot_lasku_chk_row['toimitustapa'];
 				}
 			}
 
@@ -513,13 +515,26 @@
 			echo t("Tulosta kopiot rahtikirjaerittelystä").":";
 			echo "<br><form action='rahtikirja-kopio.php' method='post'>";
 			echo "<input type='hidden' name='tee' value='erittelykopsu'>";
+			echo "<input type='hidden' name='real_submit' value='joo'>";
 			echo "<table>";
 
-			$query  = "	SELECT lahdot.*, toimitustapa.selite
+			$query  = "	SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, toimitustapa.selite
 						FROM lahdot
-						JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio and lahdot.liitostunnus=toimitustapa.tunnus and lahdot.aktiivi='S')
+						JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio and lahdot.liitostunnus=toimitustapa.tunnus)
+						JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+						JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
+							AND r.tulostuspaikka = '{$varasto}'
+							AND r.toimitustapa = lasku.toimitustapa
+							AND r.tulostettu > '{$vv}-{$kk}-{$pp} 00:00:00'
+							AND r.tulostettu < '{$vv}-{$kk}-{$pp} 23:59:59'
+							AND r.otsikkonro = lasku.tunnus)
 						WHERE lahdot.yhtio = '$kukarow[yhtio]'
-						AND lahdot.pvm     = curdate()
+						AND lahdot.varasto = '{$varasto}'
+						AND lahdot.aktiivi = 'S'
+						AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
+						AND toimitustapa.tulostustapa != 'X'
+						{$toimitustapalisa}
+						GROUP BY 1,2,3
 						ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
 			$result = mysql_query($query) or pupe_error($query);
 

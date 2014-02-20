@@ -292,7 +292,7 @@ function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas) {
 
 			$huoltovali_options = huoltovali_options($sykli['huoltosykli_tunnus']);
 			foreach ($huoltovali_options as $key => $val) {
-				echo "<option value='".$val."'>".$key."</option>";
+				echo "<option value='".$key."'>".$val['dropdown_text']."</option>";
 			}
 
 			echo "</select>";

@@ -11,11 +11,11 @@ if ($action == 'hae_huoltovali_options') {
 
 	foreach( $huoltovali_options as $key => $val ){
 
-		if ($val == $oletus) {
+		if ($key == $oletus) {
 			$selected = 'selected';
 		}
 
-		$options_string .= "<option value='{$val}' {$selected}>{$key}</option>";
+		$options_string .= "<option value='{$key}' {$selected}>{$val['dropdown_text']}</option>";
 
 		$selected = null;
 	}

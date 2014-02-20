@@ -109,11 +109,11 @@ if (mysql_field_name($result, $i) == "huoltovali") {
 	$sel = "";
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
-	foreach ($huoltovalit as $dropdown_text => $value) {
-		if ($trow[$i] == $value) {
+	foreach ($huoltovalit as $key => $value) {
+		if ($trow[$i] == $key) {
 			$sel = "SELECTED";
 		}
-		$ulos .= "<option value='{$value}' {$sel}>{$dropdown_text}</option>";
+		$ulos .= "<option value='{$key}' {$sel}>{$value['dropdown_text']}</option>";
 		$sel = "";
 	}
 	$ulos .= "</select>";

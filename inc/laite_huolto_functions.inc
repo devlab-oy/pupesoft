@@ -739,10 +739,10 @@ function huoltosykli_rivi($tyyppi) {
 
 		$huoltovali_options = huoltovali_options($laitteen_huoltosykli['tunnus']);
 		foreach ($huoltovali_options as $key => $val) {
-			if ($val == $laitteen_huoltosykli['huoltovali']) {
+			if ($key == $laitteen_huoltosykli['huoltovali']) {
 				$sel = "SELECTED";
 			}
-			echo "<option value='{$val}' {$sel}>{$key}</option>";
+			echo "<option value='{$key}' {$sel}>{$val['dropdown_text']}</option>";
 			$sel = "";
 		}
 	}
@@ -908,21 +908,83 @@ if (!function_exists("huoltovali_options")) {
 	function huoltovali_options($huoltosykli_tunnus = '') {
 		global $kukarow;
 
-		$huoltovali_options['10 vuotta'] = 3650;
-		$huoltovali_options['5 vuotta'] = 1825;
-		$huoltovali_options['2 vuotta'] = 730;
-		$huoltovali_options['12 kk'] = 365;
-		$huoltovali_options['11 kk'] = 330;
-		$huoltovali_options['10 kk'] = 300;
-		$huoltovali_options['9 kk'] = 270;
-		$huoltovali_options['8 kk'] = 240;
-		$huoltovali_options['7 kk'] = 210;
-		$huoltovali_options['6 kk'] = 180;
-		$huoltovali_options['5 kk'] = 150;
-		$huoltovali_options['4 kk'] = 120;
-		$huoltovali_options['3 kk'] = 90;
-		$huoltovali_options['2 kk'] = 60;
-		$huoltovali_options['1 kk'] = 30;
+		$huoltovali_options = array(
+			3650 => array(
+				'dropdown_text'	 => '10 '.t('vuotta'),
+				'months'		 => 120,
+				'years'			 => 10,
+			),
+			1825 => array(
+				'dropdown_text'	 => '5 '.t('vuotta'),
+				'months'		 => 60,
+				'years'			 => 5,
+			),
+			730	 => array(
+				'dropdown_text'	 => '2 '.t('vuotta'),
+				'months'		 => 24,
+				'years'			 => 2,
+			),
+			365	 => array(
+				'dropdown_text'	 => '1 '.t('vuotta'),
+				'months'		 => 12,
+				'years'			 => 1,
+			),
+			330	 => array(
+				'dropdown_text'	 => '11 '.t('kuukautta'),
+				'months'		 => 11,
+				'years'			 => 11 / 12,
+			),
+			300	 => array(
+				'dropdown_text'	 => '10 '.t('kuukautta'),
+				'months'		 => 10,
+				'years'			 => 10 / 12,
+			),
+			270	 => array(
+				'dropdown_text'	 => '9 '.t('kuukautta'),
+				'months'		 => 9,
+				'years'			 => 9 / 12,
+			),
+			240	 => array(
+				'dropdown_text'	 => '8 '.t('kuukautta'),
+				'months'		 => 8,
+				'years'			 => 8 / 12,
+			),
+			210	 => array(
+				'dropdown_text'	 => '7 '.t('kuukautta'),
+				'months'		 => 7,
+				'years'			 => 7 / 12,
+			),
+			180	 => array(
+				'dropdown_text'	 => '6 '.t('kuukautta'),
+				'months'		 => 6,
+				'years'			 => 6 / 12,
+			),
+			150	 => array(
+				'dropdown_text'	 => '5 '.t('kuukautta'),
+				'months'		 => 5,
+				'years'			 => 5 / 12,
+			),
+			120	 => array(
+				'dropdown_text'	 => '4 '.t('kuukautta'),
+				'months'		 => 4,
+				'years'			 => 4 / 12,
+			),
+			90	 => array(
+				'dropdown_text'	 => '3 '.t('kuukautta'),
+				'months'		 => 3,
+				'years'			 => 3 / 12,
+			),
+			60	 => array(
+				'dropdown_text'	 => '2 '.t('kuukautta'),
+				'months'		 => 2,
+				'years'			 => 2 / 12,
+			),
+			30	 => array(
+				'dropdown_text'	 => '1 '.t('kuukautta'),
+				'months'		 => 1,
+				'years'			 => 1 / 12,
+			),
+		);
 
 		if (empty($huoltosykli_tunnus)) {
 			return $huoltovali_options;
@@ -936,7 +998,7 @@ if (!function_exists("huoltovali_options")) {
 		$max_huoltovali = mysql_result($result, 0);
 
 		foreach ($huoltovali_options as $key => $val) {
-			if ($val > $max_huoltovali) {
+			if ($key > $max_huoltovali) {
 				unset($huoltovali_options[$key]);
 			}
 		}

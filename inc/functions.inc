@@ -13380,6 +13380,7 @@ if (!function_exists("pupe_DataTables")) {
 									$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) - parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
 									$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
 									$('#massalisanappi_'+rivi_ja_otsikko[0]).hide();
+									$('#massalisa_'+rivi_ja_otsikko[0]).hide();
 								}
 							);
 						}

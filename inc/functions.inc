@@ -13579,13 +13579,16 @@ if (!function_exists("pupe_DataTables")) {
 						var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+keijo).val());
 						var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+keijo).val());
 						var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+keijo).val());
-						var varastoonrivilta		= document.getElementById('varastoon_'+keijo).value;
-						var kpl 	= parseFloat($('#rivi_kpl_'+keijo).val().replace(',','.'));
-						var massatyyppi = document.getElementById('tyyppi_'+keijo).value;
-						var massakeraysvyohyke = document.getElementById('keraysvyohyke_'+keijo).value;
-						var massakaytettavyys = document.getElementById('kaytettavyys_'+keijo).value;
-						var massaterminaalialue = document.getElementById('terminaalialue_'+keijo).value;
-						var massajakokplmaara = parseFloat(document.getElementById('massajakokplmaara_'+keijo).value.replace(',','.'));
+						var varastoonrivilta		= $('#varastoon_'+keijo).val();
+						var kpl 	= document.getElementById('rivi_kpl_'+keijo).value.replace(',','.');
+						var massatyyppi = $('#tyyppi_'+keijo).val();
+						var massakeraysvyohyke = $('#keraysvyohyke_'+keijo).val();
+						var massakaytettavyys = $('#kaytettavyys_'+keijo).val();
+						var massaterminaalialue = $('#terminaalialue_'+keijo).val();
+						var	massajakokplmaara = document.getElementById('massajakokplmaara_'+keijo).value.replace(',','.');
+						
+						var kirjoitin = $('#kirjoitin_'+keijo).val();
+						var kappalemaara = $('#kappalemaara_'+keijo).val();
 
 						var valid_params = true;
 						var suuntalava_ok = false;
@@ -13605,35 +13608,40 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (loput==0) ajokerta = ajokerta-1;
 
-							var uudenrivintunnus = 0;
+							var params = { 	
+								keikan_otunnus: otunnus,
+								otunnus: otunnus,
+								tunnus: 0,
+								ajax_toiminto: 'lisaa_suuntalava',
+								keraysvyohyke: massakeraysvyohyke,
+								kaytettavyys: massakaytettavyys,
+								terminaalialue: massaterminaalialue,
+								tyyppi: massatyyppi,
+								kirjoitin: kirjoitin,
+								kappalemaara: kappalemaara,
+								no_head: 'yes',
+								ohje: 'off'
+							};
 
 							(function loopperi(i) {
 
-								uudenrivintunnus = splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara, varastoonrivilta);
+								params.tunnus = splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara, varastoonrivilta);
 
-								rivi_kpl_alkuperainen = rivi_kpl_alkuperainen - massajakokplmaara;
+								// rivi_kpl_alkuperainen = rivi_kpl_alkuperainen - massajakokplmaara;
 
 								$.ajax({
 									async: false,
 									type: 'POST',
 									url: '{$_SERVER['SCRIPT_NAME']}',
-									data: { 	
-										keikan_otunnus: otunnus,
-										otunnus: otunnus,
-										tunnus: uudenrivintunnus,
-										ajax_toiminto: 'lisaa_suuntalava',
-										keraysvyohyke: massakeraysvyohyke,
-										kaytettavyys: massakaytettavyys,
-										terminaalialue: massaterminaalialue,
-										tyyppi: massatyyppi,
-										no_head: 'yes',
-										ohje: 'off'
-										}
-									}).done(function(return_value) {
+									data: params,
+									})
+									.done(function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										var uusilava = data.suuntalavan_tunnus;
+										
 										if (--i) loopperi(i);
-									});
+									}
+								);
 
 							})(Math.floor(ajokerta));
 
@@ -13655,6 +13663,24 @@ if (!function_exists("pupe_DataTables")) {
 										$('#alerivihintaalkuperainen_'+keijo).val(data.alerivihinta);
 									}
 								);
+
+								params.tunnus = keijo;
+
+								if ($('#suuntalava_'+keijo+' option:selected').val() == 0) {
+
+									$.ajax({
+										async: false,
+										type: 'POST',
+										url: '{$_SERVER['SCRIPT_NAME']}',
+										data: params,
+										})
+										.done(function(return_value) {
+											var data = jQuery.parseJSON(return_value);
+											var uusilava = data.suuntalavan_tunnus;
+										}
+									);
+									
+								}
 							}
 						}
 						else {

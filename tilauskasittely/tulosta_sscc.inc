@@ -64,12 +64,13 @@
 
 			$lopetus = '';
 			$tee = (!isset($sscc_kopio) or $sscc_kopio == '') ? 'uusi' : '';
+			if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA") {
+				echo "<font class='message'>",t("Käytettävä SSCC-koodi"),": {$sscc}</font><br /><br />";
 
-			echo "<font class='message'>",t("Käytettävä SSCC-koodi"),": {$sscc}</font><br /><br />";
-
-			require('suuntalavat.inc');
-			require('inc/footer.inc');
-			exit;
+				require('suuntalavat.inc');
+				require('inc/footer.inc');
+				exit;
+			}
 		}
 		else {
 			$tee = '';

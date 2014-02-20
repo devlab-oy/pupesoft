@@ -508,7 +508,19 @@
 		);
 		
 		$suuntalavan_tunnus = lisaa_suuntalava($otunnus, $params);
+
+		$kirjoitin = $_POST['kirjoitin'];
 		
+		if($kirjoitin != '') {
+
+			$tee = "tulosta_sscc";
+			$sscc_kopio = "joo";
+			$kappalemaara = $_POST['kappalemaara'];
+
+			// Tarvitaan otunnus, kirjoitin, tee=tulosta_sscc, kappalemaara, suuntalavan tunnus, sscc_kopio != '', $suuntalavat_ei_kayttoliittymaa
+			require("../tilauskasittely/tulosta_sscc.inc");
+		}		
+
 		echo json_encode(array('suuntalavan_tunnus' => $suuntalavan_tunnus));
 	}
 

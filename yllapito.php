@@ -570,6 +570,15 @@
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
 						}
 
+						if (trim($otsikrow["laskutus_nimi"]) == "") {
+							$otsikrow["laskutus_nimi"]	   = $otsikrow["nimi"];
+						 	$otsikrow["laskutus_nimitark"] = $otsikrow["nimitark"];
+						 	$otsikrow["laskutus_osoite"]   = $otsikrow["osoite"];
+						 	$otsikrow["laskutus_postino"]  = $otsikrow["postino"];
+						 	$otsikrow["laskutus_postitp"]  = $otsikrow["postitp"];
+						 	$otsikrow["laskutus_maa"]	   = $otsikrow["maa"];
+						}
+
 						$paivita_sisviesti1 = "";
 
 						// Päivitetäänkö sisviesti1?

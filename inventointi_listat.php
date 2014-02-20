@@ -866,7 +866,7 @@
 			$kello = date('H:i:s');
 
 			//rivinleveys default
-			$rivinleveys = 135;
+			$rivinleveys = 137;
 
 			//haetaan inventointilista numero tässä vaiheessa
 			$query = "	SELECT max(inventointilista) listanro
@@ -905,7 +905,7 @@
 			$ots .= sprintf ('%-7.7s',		t("Määrä"));
 			$ots .= sprintf ('%-9.9s', 		t("Yksikkö"));
 			$ots .= sprintf ('%-7.7s',	 	t("Tikpl"));
-			$ots .= sprintf ('%-8.8s',	 	t("Enn/Ker"));
+			$ots .= sprintf ('%-13.13s',	 	t("Enn/Ker"));
 			$ots .= "\n";
 			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n\n";
 			fwrite($fh, str_replace("<SIVUNUMERO>","1",$ots));
@@ -931,7 +931,7 @@
 					$munresult = pupe_query($query);
 				}
 
-				if ($rivit >= 13) {
+				if ($rivit >= 17) {
 					$sivulaskuri++;
 					fwrite($fh, str_replace("<SIVUNUMERO>",$sivulaskuri,$ots));
 					$rivit = 1;

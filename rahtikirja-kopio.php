@@ -472,6 +472,10 @@
 						FROM lahdot
 						JOIN toimitustapa AS t ON (t.yhtio = lahdot.yhtio AND t.tunnus = lahdot.liitostunnus)
 						JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+						JOIN toimitustapa AS tt ON (tt.yhtio = lasku.yhtio
+							AND tt.selite = lasku.toimitustapa
+							AND tt.tulostustapa != 'X'
+							AND tt.rahtikirja != 'rahtikirja_tyhja.inc')
 						JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
 							AND r.tulostuspaikka = '{$varasto}'
 							AND r.toimitustapa = lasku.toimitustapa

@@ -20,10 +20,12 @@ $filepath = dirname(__FILE__);
 if (file_exists($filepath.'/inc/parametrit.inc')) {
 	require_once($filepath.'/inc/parametrit.inc');
 	require_once($filepath.'/inc/tyojono2_functions.inc');
+	require_once($filepath.'/inc/laite_huolto_functions.inc');
 }
 else {
 	require_once($filepath.'/parametrit.inc');
 	require_once($filepath.'/tyojono2_functions.inc');
+	require_once($filepath.'/laite_huolto_functions.inc');
 }
 
 if (!empty($kukarow['extranet'])) {

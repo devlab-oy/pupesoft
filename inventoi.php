@@ -9,6 +9,24 @@
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
 
+	if (strtolower($toim) == 'oletusvarasto') {
+
+		if ($kukarow['oletus_varasto'] == 0) {
+			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu käyttäjälle"),".</font><br />";
+
+			if ($mobiili != "YES") {
+				require ("inc/footer.inc");
+			}
+
+			exit;
+		}
+
+		$oletusvarasto_chk = $kukarow['oletus_varasto'];
+	}
+	else {
+		$oletusvarasto_chk = 0;
+	}
+
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -69,6 +87,8 @@
 			$selis = array();
 			$lajis = array();
 
+			$oletusvarasto_err = 0;
+
 			for ($excei = 0; $excei < count($excelrivit); $excei++) {
 				// luetaan rivi tiedostosta..
 				$tuo		= mysql_real_escape_string(trim($excelrivit[$excei][0]));
@@ -86,6 +106,11 @@
 				if ($tuo != '' and $hyl != '' and $maa != '') {
 					$hylp = explode("-", $hyl);
 
+					if ($oletusvarasto_chk > 0 and kuuluukovarastoon($hylp[0], $hylp[1], $oletusvarasto_chk) == 0) {
+						$oletusvarasto_err++;
+						continue;
+					}
+
 					$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
 					$maara[] = $maa;
 					$selis[] = $lisaselite;
@@ -97,6 +122,15 @@
 				$tee 		= "VALMIS";
 				$valmis 	= "OK";
 				$fileesta 	= "ON";
+			}
+			else {
+				$tee = '';
+				echo "<font class='error'>",t("Yhtään tuotetta ei inventoitu"),"!</font><br />";
+			}
+
+			if ($oletusvarasto_chk > 0 and $oletusvarasto_err > 0) {
+				$plural = $oletusvarasto_err > 1 ? "tuotetta" : "tuote";
+				echo " <font class='error'>",t("%d %s ei löytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font><br />";
 			}
 		}
 	}
@@ -1207,6 +1241,8 @@
 		$rivilask = 0;
 
 		while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
+
+			if ($oletusvarasto_chk > 0 and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
 			//Haetaan kerätty määrä
 			$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois

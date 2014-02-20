@@ -931,7 +931,7 @@
 					$munresult = pupe_query($query);
 				}
 
-				if ($rivit >= 17) {
+				if ($rivit >= 13) {
 					$sivulaskuri++;
 					fwrite($fh, str_replace("<SIVUNUMERO>",$sivulaskuri,$ots));
 					$rivit = 1;

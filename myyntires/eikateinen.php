@@ -39,7 +39,6 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	$tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
 	$tilikausi_lasku = tarkista_saako_laskua_muuttaa($laskurow['tapvm']);
 
-	#if (empty($tilikausi) and empty($tilikausi_lasku) and !$laskupvmerror and !$laskumaksettuerror) {
 	if (!$laskupvmerror and ((empty($tilikausi) and empty($tilikausi_lasku)) or ($toim == 'KATEINEN' and !$laskumaksettuerror))) {
 		$mehtorow 		= hae_maksuehto($maksuehto);
 		$konsrow  		= hae_asiakas($laskurow);

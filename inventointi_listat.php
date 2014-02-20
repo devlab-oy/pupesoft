@@ -20,6 +20,7 @@
 	echo "<font class='head'>",t("Tulosta inventointilista"),"</font><hr>";
 
 	echo "<form name='inve' method='post' enctype='multipart/form-data' autocomplete='off'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)

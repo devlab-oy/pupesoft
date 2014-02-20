@@ -37,8 +37,9 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	}
 
 	$tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
+	$tilikausi_lasku = tarkista_saako_laskua_muuttaa($laskurow['tapvm']);
 
-	if (empty($tilikausi) and !$laskupvmerror and !$laskumaksettuerror) {
+	if (empty($tilikausi) and empty($tilikausi_lasku) and !$laskupvmerror and !$laskumaksettuerror) {
 		$mehtorow 		= hae_maksuehto($maksuehto);
 		$konsrow  		= hae_asiakas($laskurow);
 		$kassalipasrow 	= hae_kassalipas($kassalipas);
@@ -99,8 +100,11 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	elseif ($laskupvmerror) {
 		echo "<font class='error'>".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on pienempi kuin laskun p‰iv‰m‰‰r‰ %s", "", $laskurow['tapvm'])."!</font>";
 	}
+	elseif (!empty($tilikausi_lasku)) {
+		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi_lasku, $laskurow['tapvm'])."!</font>";
+	}
 	else {
-		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi['tilikausi_alku'], $tapahtumapaiva)."!</font>";
+		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi, $tapahtumapaiva)."!</font>";
 	}
 }
 
@@ -179,7 +183,8 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 						erpcm      = '{$params['tapahtumapaiva']}',
 						mapvm      = '{$params['tapahtumapaiva']}',
 						maksuehto  = '{$params['maksuehto']}',
-						kassalipas = '{$params['kassalipas']}'
+						kassalipas = '{$params['kassalipas']}',
+						kasumma    = 0
 						where yhtio = '{$kukarow['yhtio']}'
 						and tunnus  = '{$params['tunnus']}'";
 		$result = pupe_query($query);
@@ -203,7 +208,7 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 			else {
 				$kassa_erapvm = "'{$params['mehtorow']['kassa_abspvm']}'";
 			}
-			$kassa_loppusumma = round($params['laskurow']['tapvm'] * $params['mehtorow']['kassa_alepros'] / 100, 2);
+			$kassa_loppusumma = round($params['laskurow']['summa'] * $params['mehtorow']['kassa_alepros'] / 100, 2);
 		}
 		else {
 			$kassa_erapvm = "''";
@@ -334,7 +339,12 @@ function tee_kirjanpito_muutokset($params) {
 			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $vanharow['summa']);
 		}
 		else {
-			$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] + $vanharow['summa']);
+			if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+				$summalisa = 0;
+			}
+			else {
+				$summalisa = $params['laskurow']['summa'] + abs($vanharow['summa']);
+			}
 		}
 
 		$query = "	UPDATE lasku SET
@@ -415,7 +425,8 @@ function hae_lasku2($laskuno, $toim) {
 					asiakas.toim_nimitark asiakas_toim_nimitark,
 					asiakas.toim_osoite asiakas_toim_osoite,
 					asiakas.toim_postino asiakas_toim_postino,
-					asiakas.toim_postitp asiakas_toim_postitp
+					asiakas.toim_postitp asiakas_toim_postitp,
+					lasku.tapvm
 					FROM lasku
 					JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus)
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
@@ -442,7 +453,8 @@ function hae_lasku2($laskuno, $toim) {
 					asiakas.toim_nimitark asiakas_toim_nimitark,
 					asiakas.toim_osoite asiakas_toim_osoite,
 					asiakas.toim_postino asiakas_toim_postino,
-					asiakas.toim_postitp asiakas_toim_postitp
+					asiakas.toim_postitp asiakas_toim_postitp,
+					lasku.tapvm
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != ''
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
@@ -461,6 +473,8 @@ function hae_lasku2($laskuno, $toim) {
 
 	$row = mysql_fetch_assoc($result);
 
+	$tilikausi = tarkista_saako_laskua_muuttaa($row['tapvm']);
+
 	if ($toim == 'KATEINEN' and $row['kateinen'] != '') {
 		echo "<font class='error'>".t("VIRHE: Lasku on jo k‰teislasku")."!</font><br><br>";
 		return FALSE;
@@ -468,6 +482,10 @@ function hae_lasku2($laskuno, $toim) {
 	elseif ($toim == 'KATEINEN' and $row['mapvm'] != '0000-00-00') {
 		echo "<font class='error'>".t("VIRHE: Lasku on jo maksettu")."!</font><br><br>";
 		return FALSE;
+	}
+	elseif (!empty($tilikausi)) {
+	 	echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi muuttaa k‰teist‰ laskuksi %s", "", $tilikausi, $row['tapvm'])."!</font>";
+	 	return FALSE;
 	}
 
 	return $row;

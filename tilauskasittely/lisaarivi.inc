@@ -50,6 +50,7 @@
 
 	if (!isset($rivilaadittu)) 		$rivilaadittu = "";
 	if (!isset($kommentti)) 		$kommentti = "";
+	if (!isset($ale_peruste))		$ale_peruste = "";
 	if (!isset($jaksotettu)) 		$jaksotettu = "";
 	if (!isset($korvaavakielto))	$korvaavakielto = "";
 	if (!isset($orvoteikiinnosta)) 	$orvoteikiinnosta = "";
@@ -1631,6 +1632,7 @@
 											tyyppi 			= '$rivityyppi',
 											toimaika 		= '$toimaika',
 											kommentti 		= '$kommentti',
+											ale_peruste		= '$ale_peruste',
 											var 			= '',
 											var2			= '{$var2}',
 											try				= '$trow[try]',
@@ -1887,6 +1889,7 @@
 								$tuotenimitys 		= "";
 								$tuotenimitys_force = "";
 								$omalle_tilaukselle = "";
+								$ale_peruste		= "";
 
 							} // Tällä rundilla myydyt
 						} // Jos tuoteperhettä löytyi riittävästi tai myytiin pelkää isää
@@ -2789,6 +2792,7 @@
 						tyyppi 			= '$rivityyppi',
 						toimaika 		= '$toimaika',
 						kommentti 		= '$kommentti',
+						ale_peruste		= '$ale_peruste',
 						var 			= '$var',
 						var2 			= '{$var2}',
 						try				= '$trow[try]',

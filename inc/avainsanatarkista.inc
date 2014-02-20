@@ -149,6 +149,20 @@ if(!function_exists("avainsanatarkista")) {
 					$virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla lˆytyy kannasta. Duplikaatit ovat kiellettyj‰!");
 				}
 			}
+
+			if ($tem_laji == "SALDOVAHVISTUS") {
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+							AND selite = '{$tem_selite}'
+							AND laji = '{$tem_laji}'
+							AND tunnus != '{$tunnus}'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) > 0) {
+					$virhe[$i] = t("Saldovahvistuksen nimi pit‰‰ olla uniikki");
+				}
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "selitetark") {

@@ -284,7 +284,7 @@
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in ($otunnukset)
-					ORDER BY ytunnus, tunnus";
+					ORDER BY ytunnus, ovttunnus, toim_ovttunnus, liitostunnus, tunnus";
 	}
 	else {
 		$query = "	SELECT

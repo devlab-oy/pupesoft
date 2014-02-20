@@ -27,8 +27,10 @@ if(!function_exists("yhtion_parametrittarkista")) {
 		    mysql_field_name($result, $i) == "jalkivaatimus_tuotenumero" OR
 		    mysql_field_name($result, $i) == "laskutuslisa_tuotenumero" OR
 		    mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero" OR
+			mysql_field_name($result, $i) == "kasittelykulu_tuotenumero" OR
 		    mysql_field_name($result, $i) == "alennus_tuotenumero" OR
 			mysql_field_name($result, $i) == "kuljetusvakuutus_tuotenumero" OR
+			mysql_field_name($result, $i) == "erilliskasiteltava_tuotenumero" OR
 			mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero") {
 
 			$tuote = mysql_real_escape_string(trim($t[$i]));

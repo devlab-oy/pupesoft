@@ -116,7 +116,10 @@
 		$pres  = pupe_query($query);
 		$print = mysql_fetch_assoc($pres);
 
-		if ($komento == "PDF_RUUDULLE") {
+		if ($avainrow["selitetark_2"] == "hrx") {
+			$kirjoitin_tunnus = $print["printteri10"]; // Rahtikirja hrx
+		}
+		elseif ($komento == "PDF_RUUDULLE") {
 			$kirjoitin = "PDF_RUUDULLE";
 		}
 		elseif ($komento != "") {

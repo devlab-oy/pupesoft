@@ -1967,7 +1967,8 @@
 															hyvak5 		  = '',
 															hyvaksyja_nyt = '',
 															comments 	  = trim(concat(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
-															WHERE tunnus = '$tunnus'";
+															WHERE tunnus = '$tunnus'
+															AND tila	 = 'H'";
 												$xresult = pupe_query($query);
 											}
 										}

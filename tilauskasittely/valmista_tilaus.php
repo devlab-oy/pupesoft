@@ -105,6 +105,13 @@
 							and tila	= '$row[tila]'
 							and alatila = 'K'";
 				$chkresult4 = pupe_query($query);
+				
+				$query = "	UPDATE tilausrivi
+							SET varattu	= 0
+							WHERE yhtio = '$kukarow[yhtio]'
+							and otunnus	= '$row[tunnus]'
+							and tyyppi in ('V','W','M')";
+				$chkresult4 = pupe_query($query);
 			}
 
 			$valmistettavat = "";
@@ -774,6 +781,13 @@
 								and tila	= '$row[tila]'
 								and alatila = 'K'";
 					$chkresult4 = pupe_query($query);
+					
+					$query = "	UPDATE tilausrivi
+								SET varattu	= 0
+								WHERE yhtio = '$kukarow[yhtio]'
+								and otunnus	= '$row[tunnus]'
+								and tyyppi in ('V','W','M')";
+					$chkresult4 = pupe_query($query);
 				}
 
 				echo "<br><br><font class='message'>Valmistus korjattu!</font><br>";
@@ -1245,7 +1259,14 @@
 					$sarjares = pupe_query($query);
 					$sarjarow = mysql_fetch_assoc($sarjares);
 
-					if ($sarjarow["kpl"] == abs($prow["valmistetaan"]+$prow["valmistettu"]+$prow["valmistettu_valmiiksi"])) {
+					if ($toim == "KORJAA" and $prow["tyyppi"] == 'V') {
+						$era_maara = $prow["korjataan"];
+					}
+					else {
+						$era_maara = $prow["valmistetaan"]+$prow["valmistettu"]+$prow["valmistettu_valmiiksi"];
+					}
+
+					if ($sarjarow["kpl"] == abs($era_maara)) {
 						$sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' style='color:#00FF00;'>".t("E:nro ok")."</font></a>)";
 					}
 					else {

@@ -818,12 +818,7 @@
 					}
 
 					//toimittajatiedot
-					$ykkostoim_orderilisa = '';
-					if (isset($nayta_vain_ykkostoimittaja)) {
-						$ykkostoim_orderilisa = " AND tuotteen_toimittajat.liitostunnus = (SELECT liitostunnus FROM tuotteen_toimittajat WHERE yhtio = '{$row['yhtio']}' AND tuoteno = '{$row['tuoteno']}' ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
-					}
 					if ($toimittajaid == '') {
-
 						if (isset($nayta_vain_ykkostoimittaja)) {
 							$query = "  SELECT
 										toimi.ytunnus toimittaja,
@@ -836,7 +831,7 @@
 										JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 										WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
 										and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-										{$ykkostoim_orderilisa}";
+										ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1";
 						}
 						else {
 							$query = "	SELECT 
@@ -853,6 +848,11 @@
 						}
 					}
 					else {
+						$ykkostoim_orderilisa = '';
+						if (isset($nayta_vain_ykkostoimittaja)) {
+							$ykkostoim_orderilisa = " AND tuotteen_toimittajat.liitostunnus = (SELECT liitostunnus FROM tuotteen_toimittajat WHERE yhtio = '{$row['yhtio']}' AND tuoteno = '{$row['tuoteno']}' ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
+						}
+
 						$query = "	SELECT toimi.ytunnus toimittaja,
 									tuotteen_toimittajat.osto_era,
 									tuotteen_toimittajat.toim_tuoteno,
@@ -869,7 +869,6 @@
 
 					$result   = pupe_query($query);
 					$toimirow = mysql_fetch_assoc($result);
-
 
 					$row['toimittaja'] 		= $toimirow['toimittaja'];
 					$row['osto_era'] 		= $toimirow['osto_era'];

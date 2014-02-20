@@ -190,20 +190,18 @@
 		$tila = "";
 	}
 
-	if ($kukarow['kesken'] > 0 and isset($laskurow) and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or $laskurow['tila'] == 'L') and isset($maksuehto) and $maksuehto != '') {
+	if ($kukarow['kesken'] > 0 and isset($laskurow) and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or $laskurow['tila'] == 'L') and isset($maksuehto) and $maksuehto != '' and isset($edellinen_maksuehto) and $edellinen_maksuehto != '' and $edellinen_maksuehto != 0 and $maksuehto != $edellinen_maksuehto) {
 
 		$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$maksuehto}'";
 		$tarkistus_meapu = pupe_query($tarkistus_apuqu);
 		$tarkistus_meapu_row = mysql_fetch_assoc($tarkistus_meapu);
 
-		if (isset($edellinen_maksuehto)) {
-			$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$edellinen_maksuehto}'";
-			$tarkistus_meapu2 = pupe_query($tarkistus_apuqu);
-			$tarkistus_meapu_row2 = mysql_fetch_assoc($tarkistus_meapu2);
-		}
+		$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$edellinen_maksuehto}'";
+		$tarkistus_meapu2 = pupe_query($tarkistus_apuqu);
+		$tarkistus_meapu_row2 = mysql_fetch_assoc($tarkistus_meapu2);
 
 		$a = $tarkistus_meapu_row['kateinen'];
-		$b = isset($tarkistus_meapu_row2) ? $tarkistus_meapu_row2['kateinen'] : "";
+		$b = $tarkistus_meapu_row2['kateinen'];
 
 		if (($a == "" and $b != "") or ($a == "")) {
 

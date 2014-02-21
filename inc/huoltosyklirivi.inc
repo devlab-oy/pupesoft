@@ -17,26 +17,16 @@ if (mysql_field_type($result, $i) == "blob") {
 
 //tyyppi pitää löytyä tuotteen_avainsanat taulusta
 if (mysql_field_name($result, $i) == "tyyppi") {
-	$query = "	SELECT DISTINCT selite
-				FROM tuotteen_avainsanat
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'sammutin_tyyppi'";
-	$tyyppi_result = pupe_query($query);
-	$tyypit = array();
-	while ($tyyppi_row = mysql_fetch_assoc($tyyppi_result)) {
-		if ($trow[$i] == $tyyppi_row['selite']) {
-			$tyyppi_row['selected'] = "SELECTED";
-		}
-		else {
-			$tyyppi_row['selected'] = "";
-		}
-		$tyypit[] = $tyyppi_row;
-	}
-
+	$sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
+	$sel = "";
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
-	foreach ($tyypit as $tyyppi_row) {
-		$ulos .= "<option value='{$tyyppi_row['selite']}' {$tyyppi_row['selected']}>".ucfirst(t($tyyppi_row['selite']))."</option>";
+	foreach ($sammutin_tyypit as $key => $sammutin_tyyppi) {
+		if ($trow[$i] == $key) {
+			$sel = "SELECTED";
+		}
+		$ulos .= "<option value='{$key}' {$sel}>".ucfirst($sammutin_tyyppi)."</option>";
+		$sel = "";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";

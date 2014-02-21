@@ -23386,11 +23386,11 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 
 		$query = "	SELECT huoltosykli.*
 					FROM   laite
-					JOIN tuotteen_avainsanat ta
+					JOIN tuotteen_avainsanat AS ta
 					ON ( ta.yhtio = laite.yhtio
 						AND ta.tuoteno = laite.tuoteno
 						AND ta.laji = 'sammutin_tyyppi' )
-					JOIN tuotteen_avainsanat ta2
+					JOIN tuotteen_avainsanat AS ta2
 					ON ( ta2.yhtio = laite.yhtio
 						AND ta2.tuoteno = laite.tuoteno
 						AND ta2.laji = 'sammutin_koko' )

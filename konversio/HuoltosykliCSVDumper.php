@@ -33,9 +33,6 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		$progressbar->initialize(count($this->rivit));
 
 		foreach ($this->rivit as $index => &$rivi) {
-			if ($rivi['laite'] == '140002') {
-				$a = "";
-			}
 			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
 

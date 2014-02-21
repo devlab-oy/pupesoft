@@ -17,6 +17,10 @@ if ($argv[1] == '') {
 	die;
 }
 
-$dumper = new TarkastuksetCSVDumper($kukarow, $argv[1]);
+$filepaths = TarkastuksetCSVDumper::split_file($argv[1]);
 
-$dumper->aja();
+foreach ($filepaths as $filepath) {
+	echo "{$filepath}<br/><br/>";
+	$dumper = new TarkastuksetCSVDumper($kukarow, $filepath);
+	$dumper->aja();
+}

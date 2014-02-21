@@ -94,7 +94,6 @@ if ($request['action'] == 'aja_konversio') {
 			foreach ($tiedostot as $tiedosto) {
 				echo $tiedosto.'<br/>';
                 $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
-//				$output = system("php tarkastukset.php {$tiedosto}");
 				echo "<pre>";
 				echo $output;
 				var_dump($arr);
@@ -102,8 +101,6 @@ if ($request['action'] == 'aja_konversio') {
 				echo "</pre>";
 				echo "<br/>";
 				echo "<br/>";
-//				$dumper = new TarkastuksetCSVDumper($kukarow, $tiedosto);
-//				$dumper->aja();
 			}
 			break;
 

@@ -398,7 +398,9 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		return mysql_insert_id();
 	}
 
-	private function split_file($filepath) {
+	public static function split_file($filepath) {
+		$filepaths = array();
+
 		$folder = dirname($filepath);
 		// Otetaan tiedostosta ensimmäinen rivi talteen, siinä on headerit
 		$file = fopen($filepath, "r") or die(t("Tiedoston avaus epäonnistui")."!");
@@ -430,12 +432,16 @@ class TarkastuksetCSVDumper extends CSVDumper {
 						// Poistetaan alkuperäinen file
 						unlink($file);
 					}
+
+					$filepaths[] = $file;
 				}
 			}
 			closedir($handle);
 		}
 
 		unlink($header_file);
+
+		return $filepaths;
 	}
 
 	protected function tarkistukset() {

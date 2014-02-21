@@ -83,7 +83,8 @@ class TuotteenavainsanaLaite2CSVDumper extends CSVDumper {
 			$valid = false;
 		}
 
-		if ($valid and !in_array(strtolower($rivi['tyyppi']), array('hiilidioksidisammutin', 'jauhesammutin', 'nestesammutin', 'kalvovaahtosammutin'))) {
+		$mahdolliset_sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
+		if ($valid and !in_array(strtolower($rivi['tyyppi']), array_keys($mahdolliset_sammutin_tyypit))) {
 			$valid = false;
 			$this->errors[$index][] = t('Virheellinen tyyppi')." {$rivi['tyyppi']}";
 		}

@@ -101,8 +101,9 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 				}
 			}
 		}
-		
-		if (!in_array($rivi['tyyppi'], array('jauhesammutin','hiilidioksidisammutin','nestesammutin','halonisammutin', 'paloposti'))) {
+
+		$mahdolliset_sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
+		if (!in_array($rivi['tyyppi'], array_keys($mahdolliset_sammutin_tyypit))) {
 			return false;
 		}
 

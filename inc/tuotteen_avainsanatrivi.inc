@@ -163,13 +163,7 @@
 			$ulos .= "</td>";
 		}
 		elseif ($trow[3] == "sammutin_tyyppi") {
-			$sammutin_tyypit = array(
-				'jauhesammutin'			 => t('Jauhesammutin'),
-				'hiilidioksidisammutin'	 => t('Hiilidioksidisammutin'),
-				'nestesammutin'			 => t('Nestesammutin'),
-				'halonisammutin'		 => t('Halonisammutin'),
-				'paloposti'				 => t('Paloposti'),
-			);
+			$sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
 			$sel = array($trow[$i] => "SELECTED");
 
 			$ulos = "<td>";

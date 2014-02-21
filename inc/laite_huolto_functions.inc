@@ -903,6 +903,65 @@ function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi 
 	return $huoltosyklit;
 }
 
+if (!function_exists('hae_sammuttimien_koot')) {
+
+	function hae_sammuttimien_koot() {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT DISTINCT selite
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'sammutin_koko'";
+		$result = pupe_query($query);
+
+		$sammuttimien_koot = array();
+		while ($sammuttimen_koko = mysql_fetch_assoc($result)) {
+			$sammuttimien_koot[] = $sammuttimen_koko['selite'];
+		}
+
+		return $sammuttimien_koot;
+	}
+
+}
+
+
+if (!function_exists('hae_sammuttimien_tyypit')) {
+
+	function hae_sammuttimien_tyypit() {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT DISTINCT selite
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'sammutin_tyyppi'";
+		$result = pupe_query($query);
+
+		$sammuttimien_tyypit = array();
+		while ($sammuttimen_tyyppi = mysql_fetch_assoc($result)) {
+			$sammuttimien_tyypit[] = $sammuttimen_tyyppi['selite'];
+		}
+
+		return $sammuttimien_tyypit;
+	}
+
+}
+
+if (!function_exists('hae_mahdolliset_sammutin_tyypit')) {
+
+	function hae_mahdolliset_sammutin_tyypit() {
+		return array(
+			'jauhesammutin'			 => t('Jauhesammutin'),
+			'hiilidioksidisammutin'	 => t('Hiilidioksidisammutin'),
+			'nestesammutin'			 => t('Nestesammutin'),
+			'halonisammutin'		 => t('Halonisammutin'),
+			'kalvovaahtosammutin'	 => t('Kalvovaahtosammutin'),
+			'paloposti'				 => t('Paloposti'),
+			'muistutus'				 => t('Muistutus'),
+		);
+	}
+
+}
+
 if (!function_exists("huoltovali_options")) {
 
 	function huoltovali_options($huoltosykli_tunnus = '') {

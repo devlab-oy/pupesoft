@@ -569,6 +569,9 @@
 		// Verkkokaupan "root" kategorian tunnus, magenton API ei anna hakea t‰t‰ mist‰‰n. Pit‰‰ k‰yd‰ katsomassa magentosta
 		if (isset($magento_parent_id)) $magento_client->setParentID($magento_parent_id);
 
+		// Verkkokaupanhintakentt‰, joko myyntihinta tai myymalahinta
+		if (isset($magento_hintakentta)) $magento_client->setHintakentta($magento_hintakentta);
+
 		// lisaa_kategoriat
 		if (count($dnstuoteryhma) > 0) {
 			echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

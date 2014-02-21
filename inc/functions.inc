@@ -13586,9 +13586,9 @@ if (!function_exists("pupe_DataTables")) {
 						var massakaytettavyys = $('#kaytettavyys_'+keijo).val();
 						var massaterminaalialue = $('#terminaalialue_'+keijo).val();
 						var	massajakokplmaara = document.getElementById('massajakokplmaara_'+keijo).value.replace(',','.');
-						
-						var kirjoitin = $('#kirjoitin_'+keijo).val();
-						var kappalemaara = $('#kappalemaara_'+keijo).val();
+
+						var kirjoitin = $('#kirjoitin_'+keijo+' option:selected').val();
+						var kappalemaara = $('#kappalemaara_'+keijo+' option:selected').val();
 
 						var valid_params = true;
 						var suuntalava_ok = false;
@@ -13638,7 +13638,7 @@ if (!function_exists("pupe_DataTables")) {
 									.done(function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										var uusilava = data.suuntalavan_tunnus;
-										
+
 										if (--i) loopperi(i);
 									}
 								);

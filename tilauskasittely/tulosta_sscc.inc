@@ -1,13 +1,15 @@
 <?php
 
 	$query  = "SELECT * FROM lasku WHERE tunnus = '{$otunnus}' AND yhtio = '{$kukarow['yhtio']}' AND tila = 'K'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
 		$laskurow = mysql_fetch_assoc($result);
 	}
 	else {
-		echo "<font class='error'>",t("VIRHE: Tilausta ei enää löydy"),"!</font>";
+		if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA") {
+			echo "<font class='error'>",t("VIRHE: Tilausta ei enää löydy"),"!</font>";
+		}
 		exit;
 	}
 
@@ -24,15 +26,15 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$kirjoitin}'
 					ORDER BY kirjoitin";
-		$kires = mysql_query($query) or pupe_error($query);
+		$kires = pupe_query($query);
 		$kirow = mysql_fetch_assoc($kires);
 		$komento = $kirow['komento'];
 
 		if (is_numeric($kappalemaara) and $kappalemaara > 0 and trim($komento) != '') {
 
 			// emuloidaan transactioita mysql LOCK komennolla
-			$query = "LOCK TABLES avainsana WRITE";
-			$res   = mysql_query($query) or pupe_error($query);
+			$query = "LOCK TABLES avainsana WRITE, suuntalavat READ";
+			$res   = pupe_query($query);
 
 			// koko korkeus 92mm
 			// printin korkeus 73mm
@@ -48,7 +50,7 @@
 							FROM suuntalavat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$suuntalavan_tunnus}'";
-				$sscc_fetch_res = pupe_error($query);
+				$sscc_fetch_res = pupe_query($query);
 				$sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
 
 				$sscc_koodi = $sscc_fetch_row['sscc'];
@@ -60,7 +62,7 @@
 
 			// poistetaan lukko
 			$query = "UNLOCK TABLES";
-			$res   = mysql_query($query) or pupe_error($query);
+			$res   = pupe_query($query);
 
 			$lopetus = '';
 			$tee = (!isset($sscc_kopio) or $sscc_kopio == '') ? 'uusi' : '';
@@ -77,7 +79,7 @@
 		}
 	}
 
-	if ($tee == '') {
+	if ($tee == '' and (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA")) {
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 		echo "<input type='hidden' name='toiminto' value='tulosta_sscc'>";

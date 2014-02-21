@@ -506,20 +506,31 @@
 			        "loppuhyllyvali" => "",
 			        "loppuhyllytaso" => "",
 		);
-		
+
 		$suuntalavan_tunnus = lisaa_suuntalava($otunnus, $params);
 
-		$kirjoitin = $_POST['kirjoitin'];
-		
-		if($kirjoitin != '') {
+		// Koska kyseessä on kopioitu tilausrivi, varmistetaan vielä että juuri luotu suuntalava setataan uudelle riville
+		$query = "	UPDATE tilausrivi
+					SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.uusiotunnus = '{$otunnus}'
+					AND tilausrivi.tunnus = '{$_POST['tunnus']}'
+					AND tilausrivi.kpl = 0
+					AND tilausrivi.tyyppi = 'O'";
+
+		$tilausrivi_res = pupe_query($query);
+
+		$kirjoitin = (int) $_POST['kirjoitin'];
+
+		if($kirjoitin != 0) {
 
 			$tee = "tulosta_sscc";
 			$sscc_kopio = "joo";
-			$kappalemaara = $_POST['kappalemaara'];
+			$kappalemaara = (int) $_POST['kappalemaara'];
 
 			// Tarvitaan otunnus, kirjoitin, tee=tulosta_sscc, kappalemaara, suuntalavan tunnus, sscc_kopio != '', $suuntalavat_ei_kayttoliittymaa
 			require("../tilauskasittely/tulosta_sscc.inc");
-		}		
+		}	
 
 		echo json_encode(array('suuntalavan_tunnus' => $suuntalavan_tunnus));
 	}

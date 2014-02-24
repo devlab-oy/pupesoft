@@ -610,12 +610,7 @@ else {
 			}
 		}
 
-		$query = "	SELECT *
-					FROM toimitustapa
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND selite = '$laskurow[toimitustapa]'";
-		$result = pupe_query($query);
-		$torow = mysql_fetch_assoc($result);
+	
 
 		// kaikkiyhteens‰ ja rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa
 		if ($rahtivapaa_alarajasumma_rivit > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
@@ -638,6 +633,13 @@ else {
 
 			// t‰h‰n ker‰t‰‰n tilausnumerot, joista lasketaan rahti
 			$rahtimaksu_tunnukset = array();
+
+			$query = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$laskurow[toimitustapa]'";
+			$result = pupe_query($query);
+			$torow = mysql_fetch_assoc($result);
 
 			$rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
 

@@ -49,7 +49,7 @@ $_POST		= pupe_register_globals($_POST);
 $_REQUEST	= pupe_register_globals($_REQUEST);
 
 // Hoidetaan pakkaus
-if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {		
+if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
 	ini_set('zlib.output_compression', 'Off');
 }
 else {
@@ -600,7 +600,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			$css = $yhtiorow['css'];
 		}
 
-		if ($kukarow["kieli"] == "ru") {
+		if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
 			$charset = "utf-8";
 		}
 		else {
@@ -793,7 +793,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		}
 
 		// Messenger-viestit (X = ei luettu)
-		if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off") and $no_head != "yes") {
+		if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off") and (!isset($no_head) or $no_head != "yes")) {
 
 			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)

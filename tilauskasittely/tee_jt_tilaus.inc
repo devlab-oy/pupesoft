@@ -691,6 +691,35 @@
 							if (mysql_num_rows($aresult) > 0) {
 								$orig_laskurow = mysql_fetch_assoc($aresult);
 
+								// Katotaan onko alkuper‰isell‰ tilauksella k‰sinsyˆtetty rahti joka tulisi nyt laskuttaa
+								if ($yhtiorow["rahti_hinnoittelu"] == 'K' and $laskurow["rahtivapaa"] == "" and $laskurow["osatoimitus"] == "") {
+									$query = "	SELECT tunnus
+												FROM tilausrivi
+												WHERE yhtio  = '$kukarow[yhtio]'
+												AND otunnus  = '$alkupotunnus'
+												AND tyyppi  != 'D'
+												AND tuoteno  = '$yhtiorow[rahti_tuotenumero]'
+												AND varattu != 0
+												AND kpl      = 0
+												AND var in ('','H')";
+									$rares = pupe_query($query);
+
+									if (mysql_num_rows($rares) > 0) {
+										// Siirret‰‰n rahti t‰lle tilaukselle
+										$query = "	UPDATE tilausrivi
+													SET otunnus = $id,
+													tyyppi      = 'L'
+													WHERE yhtio  = '$kukarow[yhtio]'
+													AND otunnus  = '$alkupotunnus'
+													AND tyyppi  != 'D'
+													AND tuoteno  = '$yhtiorow[rahti_tuotenumero]'
+													AND varattu != 0
+													AND kpl      = 0
+													AND var in ('','H')";
+										pupe_query($query);
+									}
+								}
+
 								// Joitain tietoja alkuper‰iselt‰ tilaukselta, vain jos osatoimitus ei ole estetty ja jtrivit yhdistet‰‰n samalle otsikolle ja kyseess‰ ei ole ennakkotilaus
 								if ($otsikkorivi["osatoimitus"] == "" and $toim != "ENNAKKO" and $otsikkorivi['jtkielto'] != "Y") {
 
@@ -752,7 +781,6 @@
 								// Tilausrivin systeemikommentti
 								$kommentti .= t("Toimitettavissa oleva JT-rivi")."!";
 							}
-
 
 							if ($jt_huomioi_pvm != "") {
 								// Jos JT-rivit varaavat saldoa, niin tulevaisuudessa toimitettavat rivit varaavat nykyhetken saldoa vaikka "JTSPEC" tarkoittaa, ett‰ JT-rivien varauksia ei huomioida

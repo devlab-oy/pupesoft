@@ -273,6 +273,7 @@
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
 			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
+			if ($alv_prosentit != '')		$alv_prosentitchk 		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
 			if ($naytatoimtuoteno != '')	$naytatoimtuotenochk 	= "CHECKED";
 
@@ -562,6 +563,11 @@
 			echo "<td class='back'>".t('(Toimii vain jos listaat tilauksittain)')."</td>";
 			echo "</tr>";
 
+			echo "<tr>";
+			echo "<th>".t('Näytä tilauksen ALV-prosentit')."</th>";
+			echo "<td colspan='3'><input type='checkbox' name='alv_prosentit' {$alv_prosentitchk} /></td>";
+			echo "<td class='back'>".t('(Toimii vain jos listaat tilauksittain)')."</td>";
+			echo "</tr>";
 
 			echo "<tr>";
 			echo "<th>";
@@ -1005,7 +1011,7 @@
 
 					if ($mukaan == "asiakasnro") {
 						$group .= ",asiakas.tunnus";
-						$select .= "asiakas.asiakasnro, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi!='' and asiakas.nimi!=asiakas.toim_nimi,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark),NULL)) 'asiakasnro.nimi', concat_ws('<br>',asiakas.postitp,if(asiakas.toim_postitp!='' and asiakas.postitp!=asiakas.toim_postitp,asiakas.toim_postitp,NULL)) 'asiakasnro.postitp', ";
+						$select .= "asiakas.asiakasnro, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi!='' and (asiakas.nimi!=asiakas.toim_nimi or (asiakas.toim_nimitark!='' and asiakas.toim_nimitark!=asiakas.nimitark)),concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark),NULL)) 'asiakasnro.nimi', concat_ws('<br>',asiakas.postitp,if(asiakas.toim_postitp!='' and asiakas.postitp!=asiakas.toim_postitp,asiakas.toim_postitp,NULL)) 'asiakasnro.postitp', ";
 						if (strpos($select, "'asiakaslista',") === FALSE) $select .= "asiakas.tunnus 'asiakaslista', ";
 						$order  .= "asiakas.asiakasnro,";
 						$gluku++;
@@ -1342,6 +1348,14 @@
 					$select .= "tilausrivi.kommentti, ";
 					$gluku++;
 					$muutgroups++;
+				}
+
+				if ($ruk140chk != '' and $alv_prosentit != '') {
+					$group .= ",tilausrivi.alv";
+					$select .= "tilausrivi.alv, ";
+					$gluku++;
+					$muutgroups++;
+					$lisa .= " and tilausrivi.var != 'P' ";
 				}
 
 				if ($naytamaksupvm != "") {

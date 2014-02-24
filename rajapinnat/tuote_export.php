@@ -566,6 +566,9 @@
 		// tax_class_id, magenton API ei anna hakea t‰t‰ mist‰‰n. Pit‰‰ k‰yd‰ katsomassa magentosta
 		$magento_client->setTaxClassID($magento_tax_class_id);
 
+		// Verkkokaupan "root" kategorian tunnus, magenton API ei anna hakea t‰t‰ mist‰‰n. Pit‰‰ k‰yd‰ katsomassa magentosta
+		if (isset($magento_parent_id)) $magento_client->setParentID($magento_parent_id);
+
 		// lisaa_kategoriat
 		if (count($dnstuoteryhma) > 0) {
 			echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

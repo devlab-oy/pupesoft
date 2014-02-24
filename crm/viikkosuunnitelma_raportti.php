@@ -133,8 +133,41 @@ if ($tee == '') {
 			<td><input type='text' name='vvl' value='{$vvl}' size='5'></td></tr>";
 	echo "<tr>";
 
-	echo "	<th>",t("Näytä viikkosuunnitelmat")," </th><td colspan='3'><input type='radio' name='vstk' value='Viikkosuunnitelma' {$sel11}></td></tr>
-			<tr><th>",t("Näytä asiakaskäynnit")," </th><td colspan='3'><input type='radio' name='vstk' value='Asiakaskäynti' {$sel22}></td></tr>";
+	if (isset($kaletapa)) {
+		if (!isset($vali_kale)) $vali_kale = "";
+
+		foreach($kaletapa as $tama) {
+			$vali_kale .= "$tama,";
+		}
+		$vali_kale 		= substr($vali_kale,0,-1); // Viimeinen pilkku poistetaan
+		
+	}
+	else {
+		if (!isset($vali_kale)) {
+			$valitut = "$kukarow[kuka]"; // Jos ketaan ei ole valittu valitaan kayttaja itse
+			$vertaa  = "'$kukarow[kuka]'";
+		}
+	}
+	$ruksatut_kalet = explode(",", $vali_kale);
+	$kale_querylisa = "'".implode("','", $ruksatut_kalet)."'";
+	$checked = '';
+	echo "<th>".t("Valitse listattavat kalenteritapahtuman lajit")."</th>";
+	echo "<td colspan='3'><div style='width:280px;height:265px;overflow:auto;'>
+			<table width='100%'>";
+
+	$query = "	SELECT tunnus,selitetark
+				FROM avainsana
+				WHERE yhtio	= '{$kukarow['yhtio']}'
+				and laji = 'KALETAPA'";
+	$result = pupe_query($query);
+
+	while ($row = mysql_fetch_assoc($result)) {
+		$checked = in_array("$row[tunnus]", $ruksatut_kalet) ? 'checked' : "";
+
+		echo "<tr><td nowrap><input type='checkbox' name='kaletapa[]' value='{$row['tunnus']}' {$checked}></td><td>{$row['selitetark']}</td></tr>";
+	}
+	echo "<tr><td><input type='checkbox' name='chbox' onclick='toggleAll(this)'></td><td>".t("Valitse kaikki")."</td></tr>";
+	echo "</table>";
 
 	if (isset($kalen)) {
 		if (!isset($valitut)) $valitut = "";
@@ -157,7 +190,6 @@ if ($tee == '') {
 	$ruksatut   = explode(",", $valitut);					//tata kaytetaan ihan lopussa
 	$ruksattuja = count($ruksatut);   					//taman avulla pohditaan tarvitaanko tarkenteita
 	$vertaa     = "'".implode("','", $ruksatut)."'";	// tehdään mysql:n ymmärtämä muoto
-	$checked = '';
 
 	if (in_array("$kukarow[kuka]", $ruksatut)) { // Oletko valinnut itsesi
 		$checked = 'checked';
@@ -228,13 +260,6 @@ if ($tee == '') {
 
 	$nayta_sarake = ($vstk == 'Asiakaskäynti' and $piilota_matkasarakkeet != "") ? FALSE : TRUE;
 
-	$tapahaku = '';
-	if ($vstk == 'Asiakaskäynti') {
-		$tapahaku = "'Asiakaskäynti', 'Kliendikülastus'";
-	}
-	elseif ($vstk == 'Viikkosuunnitelma') {
-		$tapahaku = "'Viikkosuunnitelma', 'Nädalaplaan'";
-	}
 
 	foreach($yhtiot as $yhtio) {
 
@@ -245,18 +270,22 @@ if ($tee == '') {
 					IF(kalenteri.asiakas!='', asiakas.nimi, 'N/A') nimi,
 					LEFT(kalenteri.pvmalku,10) pvmalku,
 					kentta01, kentta02, kentta03, kentta04,
-					IF(right(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu
+					IF(right(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu,
+					avainsana.selitetark aselitetark
 					FROM kalenteri
 					LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' {$lisa})
 					LEFT JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = '{$yhtio}')
+					JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.yhtio = '{$yhtio}')
 					WHERE kalenteri.yhtio = '{$yhtio}'
 					AND kalenteri.kuka IN ({$vertaa})
 					AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 					AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-					AND kalenteri.tapa   IN	($tapahaku)
 					AND kalenteri.tyyppi IN ('kalenteri','memo')
+					AND avainsana.tunnus IN ({$kale_querylisa})
 					ORDER BY pvmalku, kalenteri.tunnus";
 		$result = pupe_query($query);
+		
+		query_dump($query);
 
 		if (mysql_num_rows($result) > 0) {
 
@@ -269,6 +298,7 @@ if ($tee == '') {
 			echo "<tr>";
 			echo "<th>",t("Edustaja"),"</th>";
 			if ($nayta_sarake) echo "<th>",t("Yhtio"),"</th>";
+			echo "<th>",t("Tapa"),"</th>";
 			echo "<th>",t("Paikka"),"</th>";
 			echo "<th>",t("Postino"),"</th>";
 			echo "<th>",t("Asiakas"),"</th>";
@@ -280,6 +310,7 @@ if ($tee == '') {
 			$excelsarake = 0;
 			$worksheet->write($excelrivi, $excelsarake++, t("Edustaja"),	$format_bold);
 			if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, t("Yhtio"),		$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Tapa"),		$format_bold);
 			$worksheet->write($excelrivi, $excelsarake++, t("Paikka"),		$format_bold);
 			$worksheet->write($excelrivi, $excelsarake++, t("Postino"),		$format_bold);
 			$worksheet->write($excelrivi, $excelsarake++, t("Asiakas"),		$format_bold);
@@ -312,6 +343,7 @@ if ($tee == '') {
 				echo "<tr>";
 				echo "<td>{$row['kukanimi']}</td>";
 				if ($nayta_sarake) echo "<td>{$row['yhtio']}</td>";
+				echo "<td>{$row['aselitetark']}</td>";
 				echo "<td>{$row['postitp']}</td>";
 				echo "<td>{$row['postino']}</td>";
 				echo "<td>{$row['ytunnus']}</td>";
@@ -322,6 +354,7 @@ if ($tee == '') {
 				$excelsarake = 0;
 				$worksheet->write($excelrivi, $excelsarake++, $row["kukanimi"]);
 				if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, $row["yhtio"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["aselitetark"]);
 				$worksheet->write($excelrivi, $excelsarake++, $row["postitp"]);
 				$worksheet->write($excelrivi, $excelsarake++, $row["postino"]);
 				$worksheet->write($excelrivi, $excelsarake++, $row["ytunnus"]);

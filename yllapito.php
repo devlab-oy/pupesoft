@@ -599,6 +599,9 @@
 
 								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
 							}
+							else{
+								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = NOW(),";
+							}
 
 							$sykli_query = "INSERT INTO huoltosyklit_laitteet
 											SET yhtio = '{$yhtio}',

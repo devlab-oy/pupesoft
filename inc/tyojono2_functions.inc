@@ -48,7 +48,7 @@ function hae_tyojono2_css() {
 }
 
 function hae_tyomaaraykset($request) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $temp;
 
 	$lasku_where = "";
 	$kohde_join = "";
@@ -87,6 +87,10 @@ function hae_tyomaaraykset($request) {
 		}
 	}
 
+	if ( $temp === 1 ) {
+		$tmp = "_temp";
+	}
+
 	$query = "	SELECT
 				lasku.tunnus AS lasku_tunnus,
 				lasku.ytunnus AS asiakas_ytunnus,
@@ -113,15 +117,15 @@ function hae_tyomaaraykset($request) {
 				tilausrivin_lisatiedot.tilausrivilinkki AS poikkeus_tunnus,
 				IF(tilausrivin_lisatiedot.tilausrivilinkki != 0, CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys), '') AS poikkeus_teksti,
 				poistettu_laite.tuoteno AS poistettu_laite
-				FROM lasku
-				JOIN tyomaarays
+				FROM lasku{$tmp} AS lasku
+				JOIN tyomaarays{$tmp} AS tyomaarays
 				ON ( tyomaarays.yhtio = lasku.yhtio
 					AND tyomaarays.otunnus = lasku.tunnus )
-				JOIN tilausrivi
+				JOIN tilausrivi{$tmp} AS tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
 					AND tilausrivi.otunnus = lasku.tunnus
 					AND tilausrivi.var != 'P' )
-				JOIN tilausrivin_lisatiedot
+				JOIN tilausrivin_lisatiedot{$tmp} AS tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
 				LEFT JOIN tilausrivi AS poikkeus_rivi
@@ -160,6 +164,7 @@ function hae_tyomaaraykset($request) {
 					AND a2.selite = tyomaarays.tyostatus )
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				{$lasku_where}";
+
 	$result = pupe_query($query);
 
 	$tyomaaraykset = array();
@@ -331,7 +336,6 @@ function echo_tyomaaraykset_table($request = array()) {
 
 	foreach ($request['tyomaaraykset'] as $tyomaarays) {
 		echo "<tr class='kohde_tr_hidden aktiivi'>";
-
 		echo "<td>";
 		echo count($tyomaarays['lasku_tunnukset']);
 		echo "</td>";

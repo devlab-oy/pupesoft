@@ -25263,7 +25263,7 @@ if (!function_exists('posten_outbounddelivery')) {
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus = '{$otunnus}'";
 		$loopres = pupe_query($query);

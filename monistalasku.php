@@ -696,7 +696,7 @@ if ($tee == "ETSILASKU") {
 
 					echo "</tr>";
 
-					$rivilaskuri = mysql_num_rows($result);
+					$rivilaskuri = mysql_num_rows($nayta_rivit_res);
 
 					if ($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
 						$rivino = 0;

@@ -858,7 +858,7 @@
 
 				if ($row["kommentti"] != '') {
 					if ($yhtiorow['purkulistan_asettelu'] == 'A') {
-						$pohja = $pdf->draw_paragraph($kala+$p["height"]+25, 440, 105, 740, $row["kommentti"],	$firstpage, $p);
+						$pohja = $pdf->draw_paragraph($kala+$p["height"]+25, 440, 105, 740, $row["kommentti"],	$firstpage, $pieni);
 						$kala = $pohja - 25;
 					}
 					else {

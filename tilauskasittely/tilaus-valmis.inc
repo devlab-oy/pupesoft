@@ -839,44 +839,7 @@ else {
 				$laskurow["rahtivapaa"]  = 'o';
 			}
 		}
-		// jos toimitustavalle on setattu lisäkuluraja ja lisäkulu sekä yhtiöllä on lisäkulun tuotenumero
 
-		if ($torow['lisakulu_summa'] != 0 and $torow['lisakulu'] != 0 and $yhtiorow["lisakulu_tuotenumero"] != "") {
-
-			$query = "	SELECT tunnus
-						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$laskurow['tunnus']}'
-						AND tyyppi != 'D'
-						AND tuoteno = '{$yhtiorow['lisakulu_tuotenumero']}'";
-			$result = pupe_query($query);
-
-			$query = "	SELECT *
-						FROM tuote
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tuoteno = '{$yhtiorow['lisakulu_tuotenumero']}'";
-			$rhire = pupe_query($query);
-
-			// lisätään toimituslisäkulu jos sitä ei ole tilauksella ja tuote löytyy sekä rajasumma ei täyty
-			if (mysql_num_rows($rhire) == 1 and mysql_num_rows($result) == 0 and ($rahtivapaa_alarajasumma_rivit < $torow['lisakulu_summa'])) {
-
-				$trow = mysql_fetch_assoc($rhire);
-
-				$otunnus	 = $laskurow['tunnus'];
-				$hinta		 = $torow["lisakulu"]; // jvkulu
-				$nimitys	 = t("Toimitustavan lisäkulu");
-
-				list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
-
-				$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-							values (now(), '{$hinta}', '{$netto}', '1', '1', '{$otunnus}', '{$trow['tuoteno']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L', '{$alv}', '')";
-				$addtil = pupe_query($query);
-
-				$hinta = money_format('%.2n', $hinta);
-
-				$tilaus_valmis_ulos .= t("Tilaukselle lisättiin toimitustavan lisäkulua").": {$hinta} {$laskurow['valkoodi']}<br>";
-			}
-		}
 		// Jos on kassamyyntiä ja se on käteistä niin tulostetaan lasku heti ilman lähetettä
 		if (($kateinen == 'X' and $kateisohitus == "" and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or $korkolasku == 'kylla') {
 

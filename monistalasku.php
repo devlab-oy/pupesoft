@@ -1240,6 +1240,8 @@ if ($tee == 'MONISTA') {
 						$values .= ", ''";
 						break;
 					case 'kate_korjattu':
+					case 'toimitustavan_lahto':
+					case 'toimitustavan_lahto_siirto':
 						$values .= ", 0";
 						break;
 					case 'clearing':

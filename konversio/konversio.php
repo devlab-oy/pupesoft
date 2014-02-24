@@ -25,6 +25,7 @@ $request = array(
 );
 
 $request['konversio_tyypit'] = array(
+	'check'					 => t('Tarkasta tarkastukset'),
 	'tuote'					 => t('Tuote'),
 	'tuotteen_avainsanat'	 => t('Tuotteen avainsanat'),
 	'tuotteen_avainsanat2'	 => t('Tuotteen avainsanat laite tarkistus'),
@@ -45,6 +46,9 @@ if ($request['action'] == 'aja_konversio') {
 	echo "<br/>";
 
 	switch ($request['konversio_tyyppi']) {
+		case 'check':
+			tarkasta_tarkastukset();
+			break;
 		case 'tuote':
 			$dumper = new TuoteCSVDumper($request['kukarow']);
 			break;
@@ -352,4 +356,29 @@ function luo_kaato_tiedot() {
 	foreach ($query_array as $query) {
 		pupe_query($query);
 	}
+}
+
+function tarkasta_tarkastukset() {
+	global $kukarow, $yhtiorow;
+
+	$vanhat_tarkastukset = hae_vanhat_tarkastukset();
+
+	foreach ($vanhat_tarkastukset as $vanha_tarkastus) {
+
+	}
+}
+
+function hae_vanhat_tarkastukset() {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELETCT *
+				FROM tarkastukset
+				WHERE STATUS = 'Ilmoitettu'";
+	$result = pupe_query($query);
+	$tarkastukset = array();
+	while($tarkastus = mysql_fetch_assoc($result)) {
+		$tarkastukset[] = $tarkastus;
+	}
+
+	return $tarkastukset;
 }

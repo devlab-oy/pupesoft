@@ -85,7 +85,7 @@ if (isset($submit) and trim($submit) != '') {
 					if (trim($_maara) != '') {
 
 						if (!is_numeric($_maara)) {
-							$error['tuotteet'] = t("M‰‰r‰ t‰ytyy olla numeerinen!", $browkieli);
+							$error['tuotteet'] = t("M‰‰r‰ t‰ytyy olla numeerinen!");
 							$kaikki_ok = false;
 							break;
 						}
@@ -101,7 +101,7 @@ if (isset($submit) and trim($submit) != '') {
 						$chk_varattu_row = mysql_fetch_assoc($chk_varattu_res);
 
 						if ((int) ($_maara * 10000) <= (int) ($chk_varattu_row['varattu'] * 10000)) {
-							$error['tuotteet'] = t("Syˆtetty m‰‰r‰ t‰ytyy olla suurempi kuin alkuper‰inen m‰‰r‰!", $browkieli);
+							$error['tuotteet'] = t("Syˆtetty m‰‰r‰ t‰ytyy olla suurempi kuin alkuper‰inen m‰‰r‰!");
 							$kaikki_ok = false;
 							break;
 						}
@@ -215,15 +215,15 @@ echo "<div class='main'>
 	<form name='varalleformi' method='post' action=''>
 	<table>
 		<tr>
-			<th>",t("Suuntalava", $browkieli),"</th>
+			<th>",t("Suuntalava"),"</th>
 			<td colspan='3'>{$sscc['sscc']}</td>
 		</tr>
 		<tr>
-			<th>",t("Ker‰yspaikka", $browkieli),"</th>
+			<th>",t("Ker‰yspaikka"),"</th>
 			<td><input type='text' name='tuotepaikka' value='{$_tuotepaikka}' /></td>
 		</tr>
 		<tr>
-			<th>",t("Koodi", $browkieli),"</th>
+			<th>",t("Koodi"),"</th>
 			<td colspan='2'><input type='text' name='koodi' value='{$koodi}' size='7' />
 		</tr>
 		<tr>
@@ -250,7 +250,7 @@ echo "<div class='main'>
 	</div>
 
 	<div class='controls'>
-		<button name='submit' value='submit' class='button' onclick='submit();'>",t("OK", $browkieli),"</button>
+		<button name='submit' value='submit' class='button' onclick='submit();'>",t("OK"),"</button>
 	</div>
 
 	<span class='error'>{$error['varalle']}</span>
@@ -274,8 +274,8 @@ if (mysql_num_rows($tuotteet_res) > 0) {
 	echo "<span class='error'>{$error['tuotteet']}</span>";
 	echo "<table>";
 	echo "<tr>";
-	echo "<th>",t("Tuoteno", $browkieli),"</th>";
-	echo "<th>",t("M‰‰r‰", $browkieli),"</th>";
+	echo "<th>",t("Tuoteno"),"</th>";
+	echo "<th>",t("M‰‰r‰"),"</th>";
 	echo "</tr>";
 
 	while ($tuotteet_row = mysql_fetch_assoc($tuotteet_res)) {

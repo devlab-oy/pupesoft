@@ -2,9 +2,25 @@
 
 	require ("inc/parametrit.inc");
 
+	if (strtolower($toim) == 'oletusvarasto') {
+
+		if ($kukarow['oletus_varasto'] == 0) {
+			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu käyttäjälle"),".</font><br />";
+
+			require ("inc/footer.inc");
+			exit;
+		}
+
+		$oletusvarasto_chk = $kukarow['oletus_varasto'];
+	}
+	else {
+		$oletusvarasto_chk = 0;
+	}
+
 	echo "<font class='head'>",t("Tulosta inventointilista"),"</font><hr>";
 
 	echo "<form name='inve' method='post' enctype='multipart/form-data' autocomplete='off'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
@@ -913,6 +929,8 @@
 			$rivit = 1;
 			$sivulaskuri = 1;
 			while($tuoterow = mysql_fetch_array($saldoresult)) {
+
+				if ($oletusvarasto_chk > 0 and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
 				// Joskus halutaan vain tulostaa lista, mutta ei oikeasti invata tuotteita
 				if ($ei_inventointi == "") {

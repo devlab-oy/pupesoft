@@ -145,7 +145,7 @@ if (isset($submit) and trim($submit) != '') {
 					}
 				}
 				else {
-					echo t("Tuote oli jo viety varastoon! Ei viedä tuotettaa uudestoon varastoon!");
+					echo t("Tuote oli jo viety varastoon! Ei viedä tuotetta uudestaan varastoon!");
 				}
 
 

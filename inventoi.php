@@ -9,6 +9,24 @@
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
 
+	if (strtolower($toim) == 'oletusvarasto') {
+
+		if ($kukarow['oletus_varasto'] == 0) {
+			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu k‰ytt‰j‰lle"),".</font><br />";
+
+			if ($mobiili != "YES") {
+				require ("inc/footer.inc");
+			}
+
+			exit;
+		}
+
+		$oletusvarasto_chk = $kukarow['oletus_varasto'];
+	}
+	else {
+		$oletusvarasto_chk = 0;
+	}
+
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -69,6 +87,8 @@
 			$selis = array();
 			$lajis = array();
 
+			$oletusvarasto_err = 0;
+
 			for ($excei = 0; $excei < count($excelrivit); $excei++) {
 				// luetaan rivi tiedostosta..
 				$tuo		= mysql_real_escape_string(trim($excelrivit[$excei][0]));
@@ -86,6 +106,11 @@
 				if ($tuo != '' and $hyl != '' and $maa != '') {
 					$hylp = explode("-", $hyl);
 
+					if ($oletusvarasto_chk > 0 and kuuluukovarastoon($hylp[0], $hylp[1], $oletusvarasto_chk) == 0) {
+						$oletusvarasto_err++;
+						continue;
+					}
+
 					$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
 					$maara[] = $maa;
 					$selis[] = $lisaselite;
@@ -98,6 +123,18 @@
 				$valmis 	= "OK";
 				$fileesta 	= "ON";
 			}
+			else {
+				$tee = '';
+				echo "<font class='error'>",t("Yht‰‰n tuotetta ei inventoitu"),"!</font><br />";
+			}
+
+			if ($oletusvarasto_chk > 0 and $oletusvarasto_err > 0) {
+				$plural = $oletusvarasto_err > 1 ? "tuotetta" : "tuote";
+				echo " <font class='error'>",t("%d %s ei lˆytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font><br />";
+			}
+		}
+		else {
+			$tee = "";
 		}
 	}
 
@@ -1168,6 +1205,7 @@
 
 		if ($lista != "") {
 			echo "<form method='post'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<select name='rivimaara' onchange='submit()'>";
 			echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
@@ -1189,6 +1227,7 @@
 
 
 		echo "<form name='inve' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='VALMIS'>";
 		echo "<input type='hidden' name='lista' value='$lista'>";
@@ -1207,6 +1246,8 @@
 		$rivilask = 0;
 
 		while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
+
+			if ($oletusvarasto_chk > 0 and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
 			//Haetaan ker‰tty m‰‰r‰
 			$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -1546,6 +1587,7 @@
 
 			echo "<table>";
 			echo "<form method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
@@ -1565,6 +1607,7 @@
 			$yesrow = mysql_fetch_assoc($yesres);
 
 			echo "<form method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
@@ -1575,6 +1618,7 @@
 		}
 
 		echo "<form name='inve' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";
 
@@ -1594,6 +1638,7 @@
 		echo "<br><br>";
 
 		echo "<form method='post' enctype='multipart/form-data'>
+				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
@@ -1647,6 +1692,7 @@
 						<td>".tv1dateconv($lrow["inventointilista_aika"], "PITKA")."</td>
 						<td>
 							<form action='inventoi.php' method='post'>
+							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tee' value='INVENTOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
@@ -1656,6 +1702,7 @@
 						</td>
 						<td>
 							<form action='inventoi.php' method='post'>
+							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tee' value='MITATOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>

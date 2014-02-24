@@ -642,7 +642,7 @@ if ($tee == "ETSILASKU") {
 
 				if (mysql_num_rows($nayta_rivit_res) > 0) {
 
-					echo "<tr id='row_{$row['tilaus']}' style='display: none;'>";
+					echo "<tr class='back' id='row_{$row['tilaus']}' style='display: none;'>";
 
 					echo "<td colspan='11'>";
 
@@ -931,6 +931,7 @@ if ($tee == "ETSILASKU") {
 						echo "</tr>";
 					}
 
+					echo "<tr><td class='back' colspan='16'>&nbsp;</td></tr>";
 
 					echo "</table>";
 					echo "</td>";

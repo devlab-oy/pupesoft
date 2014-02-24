@@ -43,8 +43,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setTable('tyomaarays');
 		$this->setColumnCount(26);
 		$this->setProggressBar(false);
-
-		$this->split_file($filepath);
 	}
 
 	protected function konvertoi_rivit() {

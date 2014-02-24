@@ -14080,7 +14080,7 @@ if (!function_exists("pupe_DataTables")) {
 				$('select.suuntalava_sort').change(function() {
 					var haku_arvo = $(this, 'option:selected').val();
 
-					datatablesit[0].fnFilter(haku_arvo, 13, true, false);
+					datatablesit[0].fnFilter(haku_arvo, 14, true, false);
 				} );
 
 			} );

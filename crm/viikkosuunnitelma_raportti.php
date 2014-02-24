@@ -258,6 +258,48 @@ if ($tee == '') {
 
 	echo "<br><br><table>";
 
+	foreach($yhtiot as $yhtio) {
+		$query = "SELECT kuka.nimi kukanimi, 
+		kuka.yhtio yhtijo,
+		avainsana.selitetark aselitetark,
+		count(*) montakotapahtumaa
+		FROM kalenteri
+		JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
+		JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ({$kale_querylisa}))
+		WHERE kalenteri.yhtio = '{$yhtio}'
+		AND kalenteri.kuka IN ({$vertaa})
+		AND kalenteri.pvmalku >= '2014-01-24 00:00:00'
+		AND kalenteri.pvmalku <= '2014-02-24 23:59:59'
+		AND kalenteri.tyyppi IN ('kalenteri','memo')
+		AND kalenteri.tapa = avainsana.selitetark
+		GROUP BY 1,2
+		HAVING count(*) > 0
+		ORDER BY kukanimi, aselitetark";
+		$result = pupe_query($query);
+		query_dump($query);
+		if (mysql_num_rows($result) > 0) {
+			echo "<tr>";
+			echo "<th>".t("Edustaja")."</th>";
+			echo "<th>".t("Yhtiö")."</th>";
+			echo "<th>".t("Tapa")."</th>";
+			echo "<th>".t("Tapahtumia")."</th>";
+			echo "</tr>";
+			
+			while ($rivi = mysql_fetch_assoc($result)) {
+		
+		echo "<tr>";
+		echo "<td>{$rivi['kukanimi']}</td>";
+		echo "<td>{$rivi['yhtijo']}</td>";
+		echo "<td>{$rivi['aselitetark']}</td>";
+		echo "<td>{$rivi['montakotapahtumaa']}</td>";
+		echo "</tr>";
+	}
+	}
+	}
+	echo "</table>";
+
+	echo "<br><br><table>";
+
 	$nayta_sarake = ($vstk == 'Asiakaskäynti' and $piilota_matkasarakkeet != "") ? FALSE : TRUE;
 
 
@@ -275,13 +317,13 @@ if ($tee == '') {
 					FROM kalenteri
 					LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' {$lisa})
 					LEFT JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = '{$yhtio}')
-					JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.yhtio = '{$yhtio}')
+					JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ({$kale_querylisa}))
 					WHERE kalenteri.yhtio = '{$yhtio}'
 					AND kalenteri.kuka IN ({$vertaa})
 					AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 					AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 					AND kalenteri.tyyppi IN ('kalenteri','memo')
-					AND avainsana.tunnus IN ({$kale_querylisa})
+					AND kalenteri.tapa = avainsana.selitetark
 					ORDER BY pvmalku, kalenteri.tunnus";
 		$result = pupe_query($query);
 		

@@ -610,8 +610,6 @@ else {
 			}
 		}
 
-	
-
 		// kaikkiyhteensä ja rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa
 		if ($rahtivapaa_alarajasumma_rivit > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
 			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";

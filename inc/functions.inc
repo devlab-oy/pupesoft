@@ -25304,7 +25304,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
 		$orderedby = $custpickinglist->addChild('OrderedBy');
 		$orderedby->addChild('CustAccount', 0);
-		$orderedby->addChild('CustName', substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']), 0, 50));
+		$orderedby->addChild('CustName', substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50));
 		$orderedby->addChild('CustStreet', substr($looprow['osoite'], 0, 50));
 		$orderedby->addChild('CustStreet2', substr($looprow['osoite'], 0, 50));
 		$orderedby->addChild('CustPostCode', substr($looprow['postino'], 0, 10));

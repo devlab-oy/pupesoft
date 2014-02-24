@@ -15342,92 +15342,106 @@ if (!function_exists("hae_hyvityshinta")) {
 
 		$query_ale_lisa = generoi_alekentta('M');
 
-		// Haetaan asiakkaan laskutetut/toimitetut veloitusrivit + toisella queryll‰ hyvitysrivit
-		$query = "	SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
-					tilausrivi.hinta * {$query_ale_lisa} hinta,
-					sum(tilausrivi.kpl + tilausrivi.varattu) kpl
-					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laadittu) 
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-						AND lasku.tunnus = tilausrivi.otunnus
-						AND lasku.tila = 'L'
-						AND lasku.alatila IN ('D','X')
-						AND lasku.liitostunnus = '{$liitostunnus}')
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.tuoteno = '{$tuoteno}'
-					AND tilausrivi.varattu + tilausrivi.kpl > 0
-					AND tilausrivi.var not in ('P','J')
-					AND tilausrivi.laadittu > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR)
-					AND (tilausrivi.laskutettuaika > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR) or tilausrivi.laskutettuaika = '0000-00-00')
-					GROUP BY ika, hinta
-					HAVING kpl != 0
+		$cur_date = new DateTime();
+		$date_2yo = new DateTime();
+		$date_2yo->sub(new DateInterval('P2Y'));
 
-					UNION
+		// Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
+		while ($date_2yo >= $cur_date) {
 
-					SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
-					tilausrivi.hinta * {$query_ale_lisa} hinta,
-					sum(tilausrivi.kpl + tilausrivi.varattu) kpl
-					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laadittu)
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-						AND lasku.tunnus = tilausrivi.otunnus
-						AND lasku.tila = 'L'
-						AND lasku.alatila IN ('D','X')
-						AND lasku.liitostunnus = '{$liitostunnus}')
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.tuoteno = '{$tuoteno}'
-					AND tilausrivi.varattu + tilausrivi.kpl < 0
-					AND tilausrivi.var not in ('P','J')
-					AND tilausrivi.laadittu > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR)
-					AND (tilausrivi.laskutettuaika > DATE_ADD(CURRENT_DATE, INTERVAL -2 YEAR) or tilausrivi.laskutettuaika = '0000-00-00')
-					GROUP BY ika, hinta
-					HAVING kpl != 0
+			$cur_date->sub(new DateInterval('P1M'));
 
-					ORDER BY ika ASC, kpl ASC";
-		$viimhintares = pupe_query($query);
+			$pre_date = new DateTime($cur_date->format('Y-m-d'));
+			$pre_date->add(new DateInterval('P1M'));
 
-		// Asiakas ei ole ostanut t‰t‰ tuotette -> palautuskielto
-		if (mysql_num_rows($viimhintares) == 0) {
-			$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
-			return $palautus;
-		}
+			// Haetaan asiakkaan laskutetut/toimitetut veloitusrivit + toisella queryll‰ hyvitysrivit
+			$query = "	SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
+						tilausrivi.hinta * {$query_ale_lisa} hinta,
+						sum(tilausrivi.kpl + tilausrivi.varattu) kpl
+						FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laskutettuaika)
+						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							AND lasku.tila = 'L'
+							AND lasku.alatila IN ('D','X')
+							AND lasku.liitostunnus = '{$liitostunnus}')
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.tuoteno = '{$tuoteno}'
+						AND tilausrivi.varattu + tilausrivi.kpl > 0
+						AND tilausrivi.var not in ('P','J')
+						AND tilausrivi.laadittu >= '".$date_2yo->format('Y-m-d')." 00:00:00'
+						AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') or tilausrivi.laskutettuaika = '0000-00-00')
+						GROUP BY ika, hinta
+						HAVING kpl != 0
 
-		// echo "Syotetty: $kpl<br>";
+						UNION
 
-		while ($viimerow = mysql_fetch_assoc($viimhintares)) {
+						SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
+						tilausrivi.hinta * {$query_ale_lisa} hinta,
+						sum(tilausrivi.kpl + tilausrivi.varattu) kpl
+						FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_laskutettuaika)
+						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							AND lasku.liitostunnus = '{$liitostunnus}')
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.tuoteno = '{$tuoteno}'
+						AND tilausrivi.varattu + tilausrivi.kpl < 0
+						AND tilausrivi.var not in ('P','J')
+						AND tilausrivi.laadittu >= '".$date_2yo->format('Y-m-d')." 00:00:00'
+						AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') or tilausrivi.laskutettuaika = '0000-00-00')
+						GROUP BY ika, hinta
+						HAVING kpl != 0
 
-			// Haluamme hyvitt‰‰ $kpl kappaletta
-			// Tilausrivill‰ (historiassa) on myyty $viimerow[kpl] kappaletta
-			// Asiakkaan kumulatiiviset myydyt kappaleet on $laskuri kappaletta
+						ORDER BY ika ASC, kpl ASC";
+			$viimhintares = pupe_query($query);
 
-			$laskuri += $viimerow['kpl'];
-
-			// echo "Kpl $viimerow[kpl] Kumulatiivinen_kpl $laskuri J‰ljell‰_kpl $kpl<br>";
-
-			if ($laskuri > 0 and $viimerow["kpl"] > 0) {
-
-				// Rivill‰ on v‰hemm‰n kuin halutaan hyvitt‰‰, joten hyvitet‰‰n vain rivin verra
-				if ($viimerow["kpl"] <= $kpl and $laskuri >= $kpl) {
-					$hyvitys_kpl = $viimerow["kpl"];
-				}
-				elseif ($laskuri <= $kpl) {
-					// Kumulatiivisesti on v‰hemm‰n kuin halutaan, joten hyvitet‰‰n vain kumulatiivinen arvo
-					$hyvitys_kpl = $laskuri;
-				}
-				else {
-					// Muussa tapauksessa hyvitet‰‰n niin paljon kun tarvitaan;
-					$hyvitys_kpl = $kpl;
-				}
-
-				// Lis‰t‰‰n rivi
-				$tilausrivit[] = array("ika" => $viimerow['ika'], "hinta" => $viimerow['hinta'], "kpl" => $hyvitys_kpl);
-
-				// V‰hennet‰‰n kumulatiivisesta saldosta sek‰ j‰ljell‰ olevasta m‰‰r‰tst‰ t‰m‰ rivi
-				$laskuri -= $hyvitys_kpl;
-				$kpl -= $hyvitys_kpl;
-				// echo "** Hyvitet‰‰n: $hyvitys_kpl J‰ljell‰_kpl $kpl<br>";
+			// Asiakas ei ole ostanut t‰t‰ tuotette -> palautuskielto
+			if (mysql_num_rows($viimhintares) == 0) {
+				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+				return $palautus;
 			}
 
+			// echo "Syotetty: $kpl<br>";
+
+			while ($viimerow = mysql_fetch_assoc($viimhintares)) {
+
+				// Haluamme hyvitt‰‰ $kpl kappaletta
+				// Tilausrivill‰ (historiassa) on myyty $viimerow[kpl] kappaletta
+				// Asiakkaan kumulatiiviset myydyt kappaleet on $laskuri kappaletta
+
+				$laskuri += $viimerow['kpl'];
+
+				// echo "Kpl $viimerow[kpl] Kumulatiivinen_kpl $laskuri J‰ljell‰_kpl $kpl<br>";
+
+				if ($laskuri > 0 and $viimerow["kpl"] > 0) {
+
+					// Rivill‰ on v‰hemm‰n kuin halutaan hyvitt‰‰, joten hyvitet‰‰n vain rivin verra
+					if ($viimerow["kpl"] <= $kpl and $laskuri >= $kpl) {
+						$hyvitys_kpl = $viimerow["kpl"];
+					}
+					elseif ($laskuri <= $kpl) {
+						// Kumulatiivisesti on v‰hemm‰n kuin halutaan, joten hyvitet‰‰n vain kumulatiivinen arvo
+						$hyvitys_kpl = $laskuri;
+					}
+					else {
+						// Muussa tapauksessa hyvitet‰‰n niin paljon kun tarvitaan;
+						$hyvitys_kpl = $kpl;
+					}
+
+					// Lis‰t‰‰n rivi
+					$tilausrivit[] = array("ika" => $viimerow['ika'], "hinta" => $viimerow['hinta'], "kpl" => $hyvitys_kpl);
+
+					// V‰hennet‰‰n kumulatiivisesta saldosta sek‰ j‰ljell‰ olevasta m‰‰r‰tst‰ t‰m‰ rivi
+					$laskuri -= $hyvitys_kpl;
+					$kpl -= $hyvitys_kpl;
+					// echo "** Hyvitet‰‰n: $hyvitys_kpl J‰ljell‰_kpl $kpl<br>";
+				}
+
+				if ($laskuri >= $kpl) {
+					break 2;
+				}
+			}
 		}
 
 		// Jos lˆytyi v‰hemm‰n myyntej‰ kun asiakas on palauttamassa -> palautuskielto

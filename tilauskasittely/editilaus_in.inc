@@ -1627,6 +1627,8 @@ while ($tietue = fgets($fd)) {
 
 						$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
+						if (count($palautus) > 0) $tuoteno_array = array();
+
 						foreach ($palautus as $index => $arvot) {
 							$tuoteno_array[] = $palautus[$index]["tuoteno"];
 							$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];

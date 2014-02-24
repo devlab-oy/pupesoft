@@ -451,7 +451,7 @@ if ($tee == "ETSILASKU") {
 				});
 
 				$('.toiminnot_chk').on('click', function() {
-					if ($(this).val() == 'REKLAMA') {
+					if ($(this).val() == 'REKLAMA' && '{$yhtiorow['reklamaation_hinnoittelu']}' == 'K') {
 						$('.'+$(this).attr('id')).show();
 					}
 					else {

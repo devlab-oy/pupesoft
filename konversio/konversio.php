@@ -97,7 +97,8 @@ if ($request['action'] == 'aja_konversio') {
 			$tiedostot = lue_tiedostot('/tmp/konversio/tarkastukset/');
 			foreach ($tiedostot as $tiedosto) {
 				echo $tiedosto.'<br/>';
-                $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
+//                $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
+				$output = exec("php tarkastukset.php {$tiedosto}", $arr, $ret);
 				echo "<pre>";
 				echo $output;
 				var_dump($arr);

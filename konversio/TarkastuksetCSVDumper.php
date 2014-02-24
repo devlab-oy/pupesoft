@@ -422,6 +422,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			while (false !== ($file = readdir($handle))) {
 				if (!in_array($file, array('.', '..', '.DS_Store', 'header_file')) and is_file($file)) {
 					// Jos kyseess‰ on eka file (loppuu "aa"), ei laiteta headeri‰
+					$temp_file = $folder."/{$file}";
 					if (substr($file, -2) != "aa") {
 						// Keksit‰‰n temp file
 						$temp_file = $folder."/{$file}_s";
@@ -433,7 +434,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 						unlink($file);
 					}
 
-					$filepaths[] = $file;
+					$filepaths[] = $temp_file;
 				}
 			}
 			closedir($handle);

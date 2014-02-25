@@ -11,7 +11,7 @@ if ($action == 'hae_huoltovali_options') {
 
 	foreach( $huoltovali_options as $key => $val ){
 
-		if ($key == $oletus) {
+		if ($key == $oletus['days']) {
 			$selected = 'selected';
 		}
 

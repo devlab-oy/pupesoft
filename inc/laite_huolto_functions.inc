@@ -112,8 +112,8 @@ function hae_laitteet_ja_niiden_huoltosyklit_ajalta($start, $end, $asiakas) {
 	global $kukarow;
 
 	$asiakas_and = '';
-	if ( $asiakas != '' ) {
-		$asiakas_and = "AND asiakas.tunnus = {$asiakas} " ;
+	if ($asiakas != '') {
+		$asiakas_and = "AND asiakas.tunnus = {$asiakas} ";
 	}
 
 
@@ -263,10 +263,10 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 
 		if ($edellinen_kohde_tunnus == 0 or $edellinen_kohde_tunnus != $huollettavan_laitteen_huoltosyklirivi['kohde_tunnus']) {
 			$lisaa_kulut = true;
-	}
+		}
 		else {
 			$lisaa_kulut = false;
-}
+		}
 
 		generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_huoltosyklirivit_joita_ei_huolleta, '', $lisaa_kulut);
 
@@ -303,7 +303,7 @@ function generoi_tyomaarays_temp($huollettavan_laitteen_huoltosyklirivi) {
 		return false;
 	}
 
-     $laskurow = hae_tyomaarays_temp($tyomaarays_tunnus);
+	$laskurow = hae_tyomaarays_temp($tyomaarays_tunnus);
 
 	$kukarow['kesken'] = $laskurow['tunnus'];
 
@@ -399,7 +399,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 		return false;
 	}
 
-    $laskurow = hae_tyomaarays($tyomaarays_tunnus);
+	$laskurow = hae_tyomaarays($tyomaarays_tunnus);
 	$kukarow['kesken'] = $laskurow['tunnus'];
 
 	//lisätään sammuttimen toimenpiteen palvelurivi
@@ -1148,76 +1148,91 @@ if (!function_exists("huoltovali_options")) {
 		$huoltovali_options = array(
 			3650 => array(
 				'dropdown_text'	 => '10 '.t('vuotta'),
+				'days'			 => 3650,
 				'months'		 => 120,
 				'years'			 => 10,
 			),
 			1825 => array(
 				'dropdown_text'	 => '5 '.t('vuotta'),
+				'days'			 => 1825,
 				'months'		 => 60,
 				'years'			 => 5,
 			),
 			730	 => array(
 				'dropdown_text'	 => '2 '.t('vuotta'),
+				'days'			 => 730,
 				'months'		 => 24,
 				'years'			 => 2,
 			),
 			365	 => array(
 				'dropdown_text'	 => '1 '.t('vuotta'),
+				'days'			 => 365,
 				'months'		 => 12,
 				'years'			 => 1,
 			),
 			330	 => array(
 				'dropdown_text'	 => '11 '.t('kuukautta'),
+				'days'			 => 330,
 				'months'		 => 11,
 				'years'			 => 11 / 12,
 			),
 			300	 => array(
 				'dropdown_text'	 => '10 '.t('kuukautta'),
+				'days'			 => 300,
 				'months'		 => 10,
 				'years'			 => 10 / 12,
 			),
 			270	 => array(
 				'dropdown_text'	 => '9 '.t('kuukautta'),
+				'days'			 => 270,
 				'months'		 => 9,
 				'years'			 => 9 / 12,
 			),
 			240	 => array(
 				'dropdown_text'	 => '8 '.t('kuukautta'),
+				'days'			 => 240,
 				'months'		 => 8,
 				'years'			 => 8 / 12,
 			),
 			210	 => array(
 				'dropdown_text'	 => '7 '.t('kuukautta'),
+				'days'			 => 210,
 				'months'		 => 7,
 				'years'			 => 7 / 12,
 			),
 			180	 => array(
 				'dropdown_text'	 => '6 '.t('kuukautta'),
+				'days'			 => 180,
 				'months'		 => 6,
 				'years'			 => 6 / 12,
 			),
 			150	 => array(
 				'dropdown_text'	 => '5 '.t('kuukautta'),
+				'days'			 => 150,
 				'months'		 => 5,
 				'years'			 => 5 / 12,
 			),
 			120	 => array(
 				'dropdown_text'	 => '4 '.t('kuukautta'),
+				'days'			 => 120,
 				'months'		 => 4,
 				'years'			 => 4 / 12,
 			),
 			90	 => array(
 				'dropdown_text'	 => '3 '.t('kuukautta'),
+				'days'			 => 90,
 				'months'		 => 3,
 				'years'			 => 3 / 12,
 			),
 			60	 => array(
 				'dropdown_text'	 => '2 '.t('kuukautta'),
+				'days'			 => 60,
 				'months'		 => 2,
 				'years'			 => 2 / 12,
 			),
 			30	 => array(
 				'dropdown_text'	 => '1 '.t('kuukautta'),
+				'days'			 => 30,
 				'months'		 => 1,
 				'years'			 => 1 / 12,
 			),

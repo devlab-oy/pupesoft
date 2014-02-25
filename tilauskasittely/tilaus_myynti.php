@@ -904,7 +904,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 
 				$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
 
-				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
+				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $toimipaikat_row['liiketunnus'] != '') {
 
 					require("inc/sahkoinen_lahete.class.inc");
 
@@ -1377,7 +1377,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") and $msiirto == "") {
 		if (($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
-			$valmistus_tunnukset = splittaa_valmistukset($laskurow);
+			$valmistus_tunnukset = splittaa_valmistukset($kukarow["kesken"]);
 
 			// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
 			// niin loopataan valmistusrivit läpi ja luodaan jokaiselle riville oma otsikko
@@ -1493,8 +1493,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
 				//	Voimme myös tehdä tilaukselta suoraan valmistuksia!
 				require("tilauksesta_valmistustilaus.inc");
-				$tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
 
+				$tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
 				if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
 			}
 
@@ -5869,7 +5869,7 @@ if ($tee == '') {
 					$borderlask--;
 				}
 				elseif ($borderlask == 1) {
-					if ($row["kommentti"] != '' or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '')) {
+					if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
 						$classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
 						$class    .= " style='font-style:italic; ' ";
 					}
@@ -6621,7 +6621,9 @@ if ($tee == '') {
 				$varaosakommentti = "";
 
 				if ((((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $kukarow['extranet'] != '') or $kukarow['extranet'] == '') and ($muokkauslukko == "" and $muokkauslukko_rivi == "") or $toim == "YLLAPITO") {
-					if ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $row['positio'] != 'JT')) {
+
+					if (($yhtiorow['lapsituotteen_poiston_esto'] == 0 or (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0)) and
+						($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $row['positio'] != 'JT'))) {
 						echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='muokkaa'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -8607,7 +8609,7 @@ if ($tee == '') {
 
 						$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
 
-						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $toimipaikat_row['liiketunnus'] != '') {
+						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $toimipaikat_row['liiketunnus'] != '') {
 
 							$query = "	SELECT asiakkaan_avainsanat.*
 										FROM asiakkaan_avainsanat

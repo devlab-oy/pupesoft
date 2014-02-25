@@ -15,7 +15,7 @@
 	}
 
 	require ("../inc/parametrit.inc");
-
+	
 	$sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc") ? true : false;
 
 	if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
@@ -1605,7 +1605,7 @@
 
 									echo "</tr>";
 
-									echo "	<form name='tilaus' method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
+									echo "	<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
 											<input type='hidden' name='toim' 			value = '$toim'>
 											<input type='hidden' name='lopetus' 		value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
@@ -1644,7 +1644,7 @@
 								}
 								elseif (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] != -1) {
 									echo "	<td class='back'>
-											<form name='tilaus' method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
+											<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
 											<input type='hidden' name='toim' 				value = '$toim'>
 											<input type='hidden' name='lopetus' 			value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>

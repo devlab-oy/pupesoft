@@ -600,7 +600,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			$css = $yhtiorow['css'];
 		}
 
-		if ($kukarow["kieli"] == "ru") {
+		if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
 			$charset = "utf-8";
 		}
 		else {

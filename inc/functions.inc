@@ -8781,7 +8781,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
-				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+				document.getElementById('livesearch_{$hakuid}').style.visibility = 'visible';
 			</script>";
 
 			$haku_array 		= explode(" ", $haku);
@@ -8790,7 +8790,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 			$tuoteindex 		= "";
 			$nimitindex			= "";
 
-			if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
+			if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F','G'))) {
 				$tuoteindex = "USE INDEX (tuoteno)";
 				$nimitindex = "USE INDEX (nimitys)";
 			}
@@ -8798,13 +8798,13 @@ if (!function_exists("livesearch_tuotehaku")) {
 			foreach ($haku_array as $haku) {
 				$haku = mysql_real_escape_string($haku);
 
-				if ($yhtiorow['livetuotehaku_hakutapa'] == "F") {
-					$tuoteno_haku_query .= " and match (tuote.tuoteno) against ('$haku*' IN BOOLEAN MODE) ";
-					$nimitys_haku_query .= " and match (tuote.nimitys) against ('$haku*' IN BOOLEAN MODE) ";
+				if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F','G'))) {
+					$tuoteno_haku_query .= " and match (tuote.tuoteno) against ('{$haku}*' IN BOOLEAN MODE) ";
+					$nimitys_haku_query .= " and match (tuote.nimitys) against ('{$haku}*' IN BOOLEAN MODE) ";
 				}
 				else {
-					$tuoteno_haku_query .= " and tuote.tuoteno like ('%$haku%') ";
-					$nimitys_haku_query .= " and tuote.nimitys like ('%$haku%') ";
+					$tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
+					$nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
 				}
 			}
 
@@ -8818,8 +8818,8 @@ if (!function_exists("livesearch_tuotehaku")) {
 			if ($kukarow["kesken"] > 0) {
 				$query  = "	SELECT if (toim_maa != '', toim_maa, maa) maa
 							FROM lasku
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and tunnus  = '$kukarow[kesken]'";
+							WHERE yhtio	= '{$kukarow['yhtio']}'
+							and tunnus  = '{$kukarow['kesken']}'";
 				$vieres = pupe_query($query);
 				$vierow = mysql_fetch_array($vieres);
 			}
@@ -8835,7 +8835,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 			}
 
 			if (isset($vierow) and $vierow["maa"] != "") {
-				$kieltolisa .= " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+				$kieltolisa .= " and (tuote.vienti = '' or tuote.vienti like '%-{$vierow['maa']}%' or tuote.vienti like '%+%') and tuote.vienti not like '%+{$vierow['maa']}%' ";
 			}
 
 			if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
@@ -8861,20 +8861,20 @@ if (!function_exists("livesearch_tuotehaku")) {
 			}
 
 			$query = "	(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
-						FROM tuote $tuoteindex
-						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						$naytetaanko_poistetut
-						$kieltolisa
-						$tuoteno_haku_query)
+						if (tuote.tuoteno = '{$haku}', 1, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 2, if(tuote.nimitys = '{$haku}', 3, if(left(tuote.nimitys, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+						FROM tuote {$tuoteindex}
+						WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+						{$naytetaanko_poistetut}
+						{$kieltolisa}
+						{$tuoteno_haku_query})
 						UNION
 						(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
-						FROM tuote $nimitindex
-						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						$naytetaanko_poistetut
-						$kieltolisa
-						$nimitys_haku_query)
+						if (tuote.tuoteno = '{$haku}', 1, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 2, if(tuote.nimitys = '{$haku}', 3, if(left(tuote.nimitys, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+						FROM tuote {$nimitindex}
+						WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+						{$naytetaanko_poistetut}
+						{$kieltolisa}
+						{$nimitys_haku_query})
 						ORDER BY jarjestys, tuoteno
 						LIMIT 500";
 			$result = pupe_query($query);
@@ -8882,6 +8882,25 @@ if (!function_exists("livesearch_tuotehaku")) {
 			$tuote_search_count = mysql_num_rows($result);
 
 			if ($tuote_search_count > 0) {
+
+				$varastot_mista_saa_myyda = array();
+
+				// Katsotaan mist‰ normaalivarastoista k‰ytt‰j‰ saa myyd‰
+				if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E','G'))) {
+
+					$varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
+
+					$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus) AS varastotunnukset
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tyyppi = ''
+								{$varastolisa}";
+					$varasto_chk_res = pupe_query($query);
+					$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
+
+					if ($varasto_chk_row['varastotunnukset'] != '') $varastot_mista_saa_myyda = explode(",", $varasto_chk_row['varastotunnukset']);
+				}
+
 
 				while ($row = mysql_fetch_assoc($result)) {
 
@@ -8894,28 +8913,41 @@ if (!function_exists("livesearch_tuotehaku")) {
 						$tyyli2 = "font-weight:normal'";
 					}
 
-					echo "	<div id='tuote_valinta_$row[tunnus]'
-								name='selectOptions$hakuid'
+					echo "	<div id='tuote_valinta_{$row['tunnus']}'
+								name='selectOptions{$hakuid}'
 								onmouseover=\"this.className='liveSearchSelectedItem';
 									keyStrokeIndex = -1;
-									var aEls = document.getElementsByName('selectOptions$hakuid');
+									var aEls = document.getElementsByName('selectOptions{$hakuid}');
 									for (var iEl = 0; iEl < aEls.length; iEl++) {
-										if (aEls[iEl].id.substring(0,14) == 'tuote_valinta_' && aEls[iEl].id != 'tuote_valinta_$row[tunnus]') {
+										if (aEls[iEl].id.substring(0,14) == 'tuote_valinta_' && aEls[iEl].id != 'tuote_valinta_{$row['tunnus']}') {
 											document.getElementById(aEls[iEl].id).className='';
 										}
 									} \"
 								onmouseout=\"this.className='';\"
-								onclick=\"document.getElementById('$hakuid').value='$row[tuoteno]';";
+								onclick=\"document.getElementById('{$hakuid}').value='{$row['tuoteno']}';";
 								if ($submit == "") {
-									echo "document.$formi.submit();";
+									echo "document.{$formi}.submit();";
 								}
 								else {
-									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+									echo "document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';";
 								}
-								echo "\"
-								style='padding:2px;'>
-								<font style='$tyyli'>$row[tuoteno]</font> &raquo; <font style='$tyyli2'>$row[nimitys]</font>
-							</div><div name='selectValues$hakuid' id='$row[tuoteno]'></div>";
+								echo "\"style='padding:2px;'>";
+								echo "<font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
+
+								if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E','G')) and count($varastot_mista_saa_myyda) > 0) {
+
+									$saldo_yht = 0;
+
+									foreach ($varastot_mista_saa_myyda as $varaston_tunnus) {
+										list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "", $varaston_tunnus);
+										$saldo_yht += $saldo;
+									}
+
+									echo " &raquo; <font style='{$tyyli2}'>",t("Saldo")," {$saldo_yht}</font>";
+								}
+
+								echo "</div>";
+								echo "<div name='selectValues{$hakuid}' id='{$row['tuoteno']}'></div>";
 
 				}
 
@@ -8934,7 +8966,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 		else {
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
-				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+				document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';
 			</script>";
 		}
 	}
@@ -13001,6 +13033,11 @@ if (!function_exists("pupe_DataTables")) {
 
 			$(document).ready(function() {
 
+				$('input[id^=\"massaesiin_\"]').live('click', function() {
+					var keijo = $(this).attr('id').substring(11);
+				    $('#massalisa_'+keijo).toggle();
+			    });
+
 				$('input[name^=\"rivi_valitut_tunnukset\"]').each(function() {
 					$(this).attr('disabled', false);
 				});
@@ -13334,48 +13371,43 @@ if (!function_exists("pupe_DataTables")) {
 					});
 
 					check_arrival_validity = function(otunnus) {
-					  var state = false;
+						var state = false;
 
-					  $.ajax({
-					    async: false,
-					    dataType: 'JSON',
-					    type: 'POST',
-					    data: {
-					      otunnus: otunnus,
-					      ajax_toiminto: 'tarkista_saapuminen',
-					      no_head: 'yes',
-					      ohje: 'off'
-					    },
-					    url: '{$_SERVER['SCRIPT_NAME']}'
-					  }).done(function(data) {
+						$.ajax({
+							async: false,
+							dataType: 'JSON',
+							type: 'POST',
+							data: {
+								otunnus: otunnus,
+								ajax_toiminto: 'tarkista_saapuminen',
+								no_head: 'yes',
+								ohje: 'off'
+							},
+							url: '{$_SERVER['SCRIPT_NAME']}'
+						}).done(function(data) {
 
-					    if (data == 'error') {
-					      alert('",t("VIRHE: Saapumisen tunnus on 0"),"!');
-					    }
-					    else if (data == 'suljettu') {
-							alert('",t("Saapuminen on suljettu"),"!');
-					    }
-					    else {
-					      state = true;
-					    }
-					  }).fail(function(data) {
-						alert('",t("VIRHE: Tietokantayhteydess‰ ongelma"),"!');
-					  });
+							if (data == 'error') {
+								alert('",t("VIRHE: Saapumisen tunnus on 0"),"!');
+							}
+							else if (data == 'suljettu') {
+								alert('",t("Saapuminen on suljettu"),"!');
+							}
+							else {
+								state = true;
+							}
+						}).fail(function(data) {
+							alert('",t("VIRHE: Tietokantayhteydess‰ ongelma"),"!');
+						});
 
-					    process = state;
+						return state;
 					};
-
-					var process = false;
 
 					// JOS RUKSATAAN/RUKSATAAN POIS JOKIN RIVI
 					$('input[name^=\"rivi_valitut_tunnukset\"]').live('click', function(){
 						rivi_ja_otsikko = this.value.split(\"###\", 2);
 						var otunnus 	= $('input[name=\"otunnus\"]').val();
 
-						check_arrival_validity(otunnus);
-
-						if (process) {
-
+						if (check_arrival_validity(otunnus)) {
 							if ($(this).is(':checked')) {
 
 								var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
@@ -13430,6 +13462,7 @@ if (!function_exists("pupe_DataTables")) {
 										$('#kohdistettu_rivit').html(parseInt($('#kohdistettu_rivit').html()) + 1);
 										$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) + parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
 										$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+										$('#massalisanappi_'+rivi_ja_otsikko[0]).show();
 									}
 								);
 							}
@@ -13473,6 +13506,8 @@ if (!function_exists("pupe_DataTables")) {
 										$('#kohdistettu_rivit').html(parseInt($('#kohdistettu_rivit').html()) - 1);
 										$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) - parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
 										$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+										$('#massalisanappi_'+rivi_ja_otsikko[0]).hide();
+										$('#massalisa_'+rivi_ja_otsikko[0]).hide();
 									}
 								);
 							}
@@ -13484,13 +13519,11 @@ if (!function_exists("pupe_DataTables")) {
 
 					// VAIHDETAAN SUUNTALAVAA DROPDOWNISTA
 					$('select[id^=\"suuntalava_\"]').live('change', function(){
-						var tun		= $(this).attr('id').substring(11);
-						var sscc 	= $('#suuntalava_'+tun+' option:selected').text();
 						var otunnus	= $('input[name=\"otunnus\"]').val();
 
-						check_arrival_validity(otunnus);
-
-						if (process) {
+						if (check_arrival_validity(otunnus)) {
+							var tun		= $(this).attr('id').substring(11);
+							var sscc 	= $('#suuntalava_'+tun+' option:selected').text();
 
 							$.post('{$_SERVER['SCRIPT_NAME']}',
 									{	keikan_otunnus: otunnus,
@@ -13523,163 +13556,299 @@ if (!function_exists("pupe_DataTables")) {
 						$('input[name=\"search_'+searchbox+'\"]').val(tun).keyup();
 					});
 
-					// JOS PAINETAAN 'TALLENNA SIVUN MUUTOKSET'-NAPPIA
-					$('#submit_tallenna').live('click', function() {
+					function splittaus(tun, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, kpl, varastoon) {
+						var uuden_rivin_tunnus = 0;
+						var varastoon = varastoon ? varastoon : 0;
+						// JOS HINTA * KPL ON ENEMMƒN KUIN 10,2 DESIMAALIA, NIIN HERJATAAN
+						if ((rivi_hinta_value * kpl) > 9999999999.99) {
+							var virhe = '".t('VIRHE: liian iso loppusumma')."!';
+							alert(virhe);
+						}
+						else {
+							if (rivi_kpl_alkuperainen != kpl) {
 
-						var otunnus = $('input[name=\"otunnus\"]').val();
-
-						check_arrival_validity(otunnus);
-
-						if (process) {
-
-							$('input[name^=\"rivi_kpl\"]').each(function(){
-
-								// OTETAAN TARVITTAVAT TUNNUKSET JA MUUTTUJAT TALTEEN
-								var tun 					= $(this).attr('id').substring(9);
-								var rivi_hinta_value 		= parseFloat($('#rivi_hinta_'+tun).val());
-								var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+tun).val());
-								var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+tun).val());
-								var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
-								var kpl 					= parseFloat(this.value.replace(',','.'));
-
-								// JOS HINTA * KPL ON ENEMMƒN KUIN 10,2 DESIMAALIA, NIIN HERJATAAN
-								if ((rivi_hinta_value * kpl) > 9999999999.99) {
-									var virhe = '".t('VIRHE: liian iso loppusumma')."!';
-									alert(virhe);
+								if (kpl == 0) {
+									$('#refresh_screen_ajaxille').val('true');
 								}
-								else {
-									if (rivi_kpl_alkuperainen != kpl) {
+								if (rivi_kpl_alkuperainen > 1 && rivi_kpl_alkuperainen > kpl && kpl > 0) {
+									var uuden_rivin_kpl = rivi_kpl_alkuperainen - kpl;
 
-										if (kpl == 0) {
+									$.ajax({
+										async: false,
+										type: 'POST',
+										url: '{$_SERVER['SCRIPT_NAME']}',
+										data: {
+											keikan_otunnus: otunnus,
+											varastoon: varastoon,
+											otunnus: otunnus,
+											tunnus: tun,
+											ajax_toiminto: 'rivi_kpl_splittaus',
+											no_head: 'yes',
+											ohje: 'off',
+											uuden_rivin_kpl: uuden_rivin_kpl,
+											vanhan_rivin_kpl: rivi_kpl_alkuperainen
+											}
+										}).done(function(return_value) {
+
+											var data = jQuery.parseJSON(return_value);
+
+											var uusi_rivi = $('tr[class*=\"'+tun+'\"]').clone();
+
+											// MUUTETAAN KLOONATUN RIVIN (<tr>) CLASSI UUDELLE TILAUSRIVIN TUNNUKSELLE
+											$(uusi_rivi).attr('class', $(uusi_rivi).attr('class').replace(tun, data.tunnus));
+
+											$(uusi_rivi).insertAfter('tr[class*=\"'+tun+'\"]').show(500).animate({'opacity':0.5},200).animate({'opacity':1},200).animate({'opacity':0.5},200).animate({'opacity':1},200,'linear');
+
+											$('tr[class*=\"'+data.tunnus+'\"]').find('td, div, input, a, span').each(function() {
+
+												if ($(this).attr('id') != false && $(this).attr('id') != undefined) {
+													$(this).attr('id', $(this).attr('id').replace(tun, data.tunnus));
+												}
+
+												if ($(this).attr('class') != false && $(this).attr('class') != undefined) {
+													$(this).attr('class', $(this).attr('class').replace(tun, data.tunnus));
+												}
+
+												if ($(this).attr('name') != false && $(this).attr('name') != undefined) {
+													$(this).attr('name', $(this).attr('name').replace(tun, data.tunnus));
+												}
+
+												if ($(this).is('input') && $(this).val() != false && $(this).val() != undefined) {
+													$(this).val($(this).val().replace(tun, data.tunnus));
+												}
+
+												if ($(this).is('a') && $(this).attr('href') != false && $(this).attr('href') != undefined) {
+													$(this).attr('href', $(this).attr('href').replace(new RegExp(tun, 'g'), data.tunnus));
+												}
+											});
+
+											$('tr[class*=\"'+data.tunnus+'\"]').find('#rivi_kpl_'+data.tunnus).val(uuden_rivin_kpl);
+											$('tr[class*=\"'+data.tunnus+'\"]').find('#ulkkpl_'+data.tunnus).html(uuden_rivin_kpl);
+											$('#hinnat_'+data.tunnus).html(data.rivihinta+'<br>'+data.alerivihinta);
+											$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
+											$('#rivi_kpl_alkuperainen_'+data.tunnus).val(uuden_rivin_kpl);
+
+											uuden_rivin_tunnus = data.tunnus;
 											$('#refresh_screen_ajaxille').val('true');
 										}
+									);
+								}
+								else {
+									$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
 
-										if (rivi_kpl_alkuperainen > 1 && rivi_kpl_alkuperainen > kpl && kpl > 0) {
-											var uuden_rivin_kpl = rivi_kpl_alkuperainen - kpl;
+									var uuden_rivin_kpl = kpl - rivi_kpl_alkuperainen;
 
-											$.post('{$_SERVER['SCRIPT_NAME']}',
-												{ 	keikan_otunnus: otunnus,
-													otunnus: otunnus,
-													tunnus: tun,
-													ajax_toiminto: 'rivi_kpl_splittaus',
-													no_head: 'yes',
-													ohje: 'off',
-													uuden_rivin_kpl: uuden_rivin_kpl,
-													vanhan_rivin_kpl: rivi_kpl_alkuperainen},
-												function(return_value) {
+									$.post('{$_SERVER['SCRIPT_NAME']}',
+										{ 	keikan_otunnus: otunnus,
+											otunnus: otunnus,
+											tunnus: tun,
+											ajax_toiminto: 'rivi_kpl_tuoteperhe_lapsi',
+											no_head: 'yes',
+											ohje: 'off',
+											uuden_rivin_kpl: uuden_rivin_kpl},
+										function(return_value) {
+											var data = $.parseJSON(return_value);
 
-													var data = jQuery.parseJSON(return_value);
-
-													var uusi_rivi = $('tr[class*=\"'+tun+'\"]').clone();
-
-													// MUUTETAAN KLOONATUN RIVIN (<tr>) CLASSI UUDELLE TILAUSRIVIN TUNNUKSELLE
-													$(uusi_rivi).attr('class', $(uusi_rivi).attr('class').replace(tun, data.tunnus));
-
-													$(uusi_rivi).insertAfter('tr[class*=\"'+tun+'\"]').show(500).animate({'opacity':0.5},200).animate({'opacity':1},200).animate({'opacity':0.5},200).animate({'opacity':1},200,'linear');
-
-													$('tr[class*=\"'+data.tunnus+'\"]').find('td, div, input, a, span').each(function() {
-
-														if ($(this).attr('id') != false && $(this).attr('id') != undefined) {
-															$(this).attr('id', $(this).attr('id').replace(tun, data.tunnus));
-														}
-
-														if ($(this).attr('class') != false && $(this).attr('class') != undefined) {
-															$(this).attr('class', $(this).attr('class').replace(tun, data.tunnus));
-														}
-
-														if ($(this).attr('name') != false && $(this).attr('name') != undefined) {
-															$(this).attr('name', $(this).attr('name').replace(tun, data.tunnus));
-														}
-
-														if ($(this).is('input') && $(this).val() != false && $(this).val() != undefined) {
-															$(this).val($(this).val().replace(tun, data.tunnus));
-														}
-
-														if ($(this).is('a') && $(this).attr('href') != false && $(this).attr('href') != undefined) {
-															$(this).attr('href', $(this).attr('href').replace(new RegExp(tun, 'g'), data.tunnus));
-														}
-													});
-
-													$('tr[class*=\"'+data.tunnus+'\"]').find('#rivi_kpl_'+data.tunnus).val(uuden_rivin_kpl);
-													$('tr[class*=\"'+data.tunnus+'\"]').find('#ulkkpl_'+data.tunnus).html(uuden_rivin_kpl);
-													$('#hinnat_'+data.tunnus).html(data.rivihinta+'<br>'+data.alerivihinta);
-													$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
-													$('#rivi_kpl_alkuperainen_'+data.tunnus).val(uuden_rivin_kpl);
-
-													$('#refresh_screen_ajaxille').val('true');
-												}
-											);
-										}
-										else {
-											$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
-
-											var uuden_rivin_kpl = kpl - rivi_kpl_alkuperainen;
-
-											$.post('{$_SERVER['SCRIPT_NAME']}',
-												{ 	keikan_otunnus: otunnus,
-													otunnus: otunnus,
-													tunnus: tun,
-													ajax_toiminto: 'rivi_kpl_tuoteperhe_lapsi',
-													no_head: 'yes',
-													ohje: 'off',
-													uuden_rivin_kpl: uuden_rivin_kpl},
-												function(return_value) {
-													var data = $.parseJSON(return_value);
-
-													if (data.paivitetaanko) {
-														$('#refresh_screen_ajaxille').val('true');
-													}
-												}
-											);
-
-											// P‰ivitet‰‰n 'Kohdistettu Summa'
-											if ($('#rivi_valitut_tunnukset_'+tun).is(':checked')) {
-												// V‰hennet‰‰n summista rivin alkuper‰inen arvo
-												var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html()) - alerivi_hinta_alkup;
-												var summa_jaljella = parseFloat($('#laskunsumma_jaljella').html()) + alerivi_hinta_alkup;
-
-												// Lis‰t‰‰n uusilla arvoilla
-												summa_kohdistettu = summa_kohdistettu + ((alerivi_hinta_alkup/rivi_kpl_alkuperainen) * kpl);
-												summa_jaljella = summa_jaljella - ((alerivi_hinta_alkup/rivi_kpl_alkuperainen) * kpl);
-
-												if (summa_jaljella != 0) {
-													$('#kohdistettu_summa_td font').css({'color': '#000', 'font-weight': 'normal'});
-													$('#laskunsumma_jaljella_td font').css({'color': '#000', 'font-weight': 'normal'});
-												}
-												else {
-													$('#kohdistettu_summa_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
-													$('#laskunsumma_jaljella_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
-												}
-
-												$('#kohdistettu_summa').html(summa_kohdistettu.toFixed(2));
-												$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+											if (data.paivitetaanko) {
+												$('#refresh_screen_ajaxille').val('true');
 											}
 										}
+									);
 
-										$.post('{$_SERVER['SCRIPT_NAME']}',
-											{ 	keikan_otunnus: otunnus,
-												otunnus: otunnus,
-												tunnus: tun,
-												ajax_toiminto: 'rivi_kpl',
-												kpl: kpl,
-												no_head: 'yes',
-												ohje: 'off'},
-											function(return_value) {
+									// P‰ivitet‰‰n 'Kohdistettu Summa'
+									if ($('#rivi_valitut_tunnukset_'+tun).is(':checked')) {
+										// V‰hennet‰‰n summista rivin alkuper‰inen arvo
+										var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html()) - alerivi_hinta_alkup;
+										var summa_jaljella = parseFloat($('#laskunsumma_jaljella').html()) + alerivi_hinta_alkup;
+
+										// Lis‰t‰‰n uusilla arvoilla
+										summa_kohdistettu = summa_kohdistettu + ((alerivi_hinta_alkup/rivi_kpl_alkuperainen) * kpl);
+										summa_jaljella = summa_jaljella - ((alerivi_hinta_alkup/rivi_kpl_alkuperainen) * kpl);
+
+										if (summa_jaljella != 0) {
+											$('#kohdistettu_summa_td font').css({'color': '#000', 'font-weight': 'normal'});
+											$('#laskunsumma_jaljella_td font').css({'color': '#000', 'font-weight': 'normal'});
+										}
+										else {
+											$('#kohdistettu_summa_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
+											$('#laskunsumma_jaljella_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
+										}
+
+										$('#kohdistettu_summa').html(summa_kohdistettu.toFixed(2));
+										$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+									}
+								}
+
+								$.ajax({
+									async: false,
+									type: 'POST',
+									url: '{$_SERVER['SCRIPT_NAME']}',
+									data: {
+										keikan_otunnus: otunnus,
+										otunnus: otunnus,
+										tunnus: tun,
+										ajax_toiminto: 'rivi_kpl',
+										kpl: kpl,
+										no_head: 'yes',
+										ohje: 'off'
+										}
+									}).done(function(return_value) {
+										var data = jQuery.parseJSON(return_value);
+
+										$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);
+										$('#ulkkpl_'+tun).html(data.ulkkpl);
+										$('#alerivihintaalkuperainen_'+tun).val(data.alerivihinta);
+									});
+
+							}
+						}
+						return uuden_rivin_tunnus;
+					}
+
+					// JOS PAINETAAN MASSATULOUTUSNAPPIA
+					$('input[id^=\"massasubmitti\"]').live('click', function() {
+						var otunnus	= $('input[name=\"otunnus\"]').val();
+
+						if (check_arrival_validity(otunnus)) {
+							var keijo					= $(this).attr('id').substring(14);
+							var rivi_hinta_value 		= parseFloat($('#rivi_hinta_'+keijo).val());
+							var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+keijo).val());
+							var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+keijo).val());
+							var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+keijo).val());
+							var varastoonrivilta		= $('#varastoon_'+keijo).val();
+							var kpl 	= document.getElementById('rivi_kpl_'+keijo).value.replace(',','.');
+							var massatyyppi = $('#tyyppi_'+keijo).val();
+							var massakeraysvyohyke = $('#keraysvyohyke_'+keijo).val();
+							var massakaytettavyys = $('#kaytettavyys_'+keijo).val();
+							var massaterminaalialue = $('#terminaalialue_'+keijo).val();
+							var	massajakokplmaara = document.getElementById('massajakokplmaara_'+keijo).value.replace(',','.');
+
+							var kirjoitin = $('#kirjoitin_'+keijo+' option:selected').val();
+							var kappalemaara = $('#kappalemaara_'+keijo+' option:selected').val();
+
+							var valid_params = true;
+							var suuntalava_ok = false;
+							if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara)) {
+								valid_params = false;
+							}
+							if (massatyyppi.length == 0 || massakeraysvyohyke.length == 0 || massaterminaalialue.length == 0) {
+								valid_params = false;
+							}
+							else {
+								suuntalava_ok = true;
+							}
+
+							if (valid_params && suuntalava_ok) {
+								var ajokerta = rivi_kpl_alkuperainen / massajakokplmaara;
+								var loput = rivi_kpl_alkuperainen - (Math.floor(ajokerta) * massajakokplmaara)
+
+								if (loput==0) ajokerta = ajokerta-1;
+
+								var params = {
+									keikan_otunnus: otunnus,
+									otunnus: otunnus,
+									tunnus: 0,
+									ajax_toiminto: 'lisaa_suuntalava',
+									keraysvyohyke: massakeraysvyohyke,
+									kaytettavyys: massakaytettavyys,
+									terminaalialue: massaterminaalialue,
+									tyyppi: massatyyppi,
+									kirjoitin: kirjoitin,
+									kappalemaara: kappalemaara,
+									no_head: 'yes',
+									ohje: 'off'
+								};
+
+								(function loopperi(i) {
+
+									params.tunnus = splittaus(keijo, otunnus, rivi_hinta_value, (massajakokplmaara * 2), rivi_hinta_alkup, alerivi_hinta_alkup, massajakokplmaara, varastoonrivilta);
+
+									// rivi_kpl_alkuperainen = rivi_kpl_alkuperainen - massajakokplmaara;
+
+									$.ajax({
+										async: false,
+										type: 'POST',
+										url: '{$_SERVER['SCRIPT_NAME']}',
+										data: params,
+										})
+										.done(function(return_value) {
+											var data = jQuery.parseJSON(return_value);
+											var uusilava = data.suuntalavan_tunnus;
+
+											if (--i) loopperi(i);
+										}
+									);
+
+								})(Math.floor(ajokerta));
+
+								if (loput != 0) {
+
+									$.post('{$_SERVER['SCRIPT_NAME']}',
+										{ 	keikan_otunnus: otunnus,
+											otunnus: otunnus,
+											tunnus: keijo,
+											ajax_toiminto: 'rivi_kpl',
+											kpl: loput,
+											no_head: 'yes',
+											ohje: 'off'},
+										function(return_value) {
+											var data = jQuery.parseJSON(return_value);
+
+											$('#hinnat_'+keijo).html(data.rivihinta+'<br>'+data.alerivihinta);
+											$('#ulkkpl_'+keijo).html(data.ulkkpl);
+											$('#alerivihintaalkuperainen_'+keijo).val(data.alerivihinta);
+										}
+									);
+
+									params.tunnus = keijo;
+
+									if ($('#suuntalava_'+keijo+' option:selected').val() == 0) {
+
+										$.ajax({
+											async: false,
+											type: 'POST',
+											url: '{$_SERVER['SCRIPT_NAME']}',
+											data: params,
+											})
+											.done(function(return_value) {
 												var data = jQuery.parseJSON(return_value);
-
-												$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);
-												$('#ulkkpl_'+tun).html(data.ulkkpl);
-												$('#alerivihintaalkuperainen_'+tun).val(data.alerivihinta);
+												var uusilava = data.suuntalavan_tunnus;
 											}
 										);
 
 									}
 								}
+							}
+							else {
+								var slavavirhe = suuntalava_ok ? '' : ' - Suuntalavaa ei voitu luoda';
+								alert('Virheelliset parametrit'+ slavavirhe);
+							}
+						}
+					});
+
+					// JOS PAINETAAN 'TALLENNA SIVUN MUUTOKSET'-NAPPIA
+					$('#submit_tallenna').live('click', function() {
+						var otunnus = $('input[name=\"otunnus\"]').val();
+
+						if (check_arrival_validity(otunnus)) {
+
+							$('input[name^=\"rivi_kpl\"]').each(function(){
+
+									// OTETAAN TARVITTAVAT TUNNUKSET JA MUUTTUJAT TALTEEN
+									var tun 					= $(this).attr('id').substring(9);
+									var rivi_hinta_value 		= parseFloat($('#rivi_hinta_'+tun).val());
+									var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+tun).val());
+									var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+tun).val());
+									var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
+									var kpl 					= parseFloat(this.value.replace(',','.'));
+
+									splittaus(tun, otunnus, rivi_hinta_value, rivi_kpl_alkuperainen, rivi_hinta_alkup, alerivi_hinta_alkup, kpl);
+
 							}).ajaxComplete(function(){
-								if ($('#refresh_screen_ajaxille').val() == 'true') {
-									$('#refresh_screen_ajaxille').val('false');
-									var t = setTimeout('document.formi1.submit()', 1000);
-								}
+									if ($('#refresh_screen_ajaxille').val() == 'true') {
+										$('#refresh_screen_ajaxille').val('false');
+										var t = setTimeout('document.formi1.submit()', 1000);
+									}
 							});
 
 							$('input[name^=\"rivi_ale\"]').each(function(){
@@ -13824,7 +13993,6 @@ if (!function_exists("pupe_DataTables")) {
 							$('input[name^=\"rivi_toimitettuaika_vv\"]').each(function(){
 
 								var tun 				= $(this).attr('id').substring(23);
-
 								var rivi_taika_vv		= parseFloat(this.value);
 								var rivi_taika_kk		= parseFloat($('input[name=\"rivi_toimitettuaika_kk_'+tun+'\"]').val());
 								var rivi_taika_pp		= parseFloat($('input[name=\"rivi_toimitettuaika_pp_'+tun+'\"]').val());
@@ -13847,6 +14015,7 @@ if (!function_exists("pupe_DataTables")) {
 								}
 							});
 						}
+
 					}).ajaxComplete(function(){
 						if ($('#refresh_screen_ajaxille').val() == 'true') {
 							$('#refresh_screen_ajaxille').val('false');
@@ -13856,133 +14025,125 @@ if (!function_exists("pupe_DataTables")) {
 
 					// KOHDISTETAAN SIVUN KAIKKI RIVIT
 					$('#submit_kohd_kaikki').live('click', function(){
-
 						var otunnus = $('input[name=\"otunnus\"]').val();
 
-						check_arrival_validity(otunnus);
-
-						if (process) {
-
+						if (check_arrival_validity(otunnus)) {
 							$('input[name^=\"rivi_valitut_tunnukset\"]').each(function(){
-								rivi_ja_otsikko = this.value.split(\"###\", 2);
+							rivi_ja_otsikko = this.value.split(\"###\", 2);
 
-								if (!$('#rivi_valitut_tunnukset_'+rivi_ja_otsikko[0]).is(':checked')) {
-									var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
-									var suoratoimitusrivi  = $('#suoratoimitus_'+rivi_ja_otsikko[0]).val() == 'X' ? 'X' : '';
+							if (!$('#rivi_valitut_tunnukset_'+rivi_ja_otsikko[0]).is(':checked')) {
+								var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
+								var suoratoimitusrivi  = $('#suoratoimitus_'+rivi_ja_otsikko[0]).val() == 'X' ? 'X' : '';
 
-									$.post('{$_SERVER['SCRIPT_NAME']}',
-										{ 	keikan_otunnus: otunnus,
-											otunnus: otunnus,
-											ajax_toiminto: 'kohdista_rivi',
-											valittu: this.value,
-											suuntalavan_tunnus: suuntalavan_tunnus,
-											suoratoimitusrivi: suoratoimitusrivi,
-											no_head: 'yes',
-											ohje: 'off' },
-										function(return_value) {
-											var data = jQuery.parseJSON(return_value);
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	keikan_otunnus: otunnus,
+										otunnus: otunnus,
+										ajax_toiminto: 'kohdista_rivi',
+										valittu: this.value,
+										suuntalavan_tunnus: suuntalavan_tunnus,
+										suoratoimitusrivi: suoratoimitusrivi,
+										no_head: 'yes',
+										ohje: 'off' },
+									function(return_value) {
+										var data = jQuery.parseJSON(return_value);
 
-											var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());
-											var summa_jaljella = parseFloat($('#laskunsumma_jaljella').html());
+										var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());
+										var summa_jaljella = parseFloat($('#laskunsumma_jaljella').html());
 
-											for (var key in data.uudet_hinnat) {
-												summa_kohdistettu = summa_kohdistettu + parseFloat(data.uudet_hinnat[key]['alerivihinta']);
-												summa_jaljella = summa_jaljella - parseFloat(data.uudet_hinnat[key]['alerivihinta']);
+										for (var key in data.uudet_hinnat) {
+											summa_kohdistettu = summa_kohdistettu + parseFloat(data.uudet_hinnat[key]['alerivihinta']);
+											summa_jaljella = summa_jaljella - parseFloat(data.uudet_hinnat[key]['alerivihinta']);
 
-												$('#hinnat_'+key).html(data.uudet_hinnat[key]['rivihinta']+'<br>'+data.uudet_hinnat[key]['alerivihinta']);
-												$('#alerivihintaalkuperainen_'+key).val(data.uudet_hinnat[key]['alerivihinta']);
-												$('#tr_'+key+' td').addClass('tumma');
+											$('#hinnat_'+key).html(data.uudet_hinnat[key]['rivihinta']+'<br>'+data.uudet_hinnat[key]['alerivihinta']);
+											$('#alerivihintaalkuperainen_'+key).val(data.uudet_hinnat[key]['alerivihinta']);
+											$('#tr_'+key+' td').addClass('tumma');
 
-												if (data.suuntalava != null && data.suuntalava > 0) {
+											if (data.suuntalava != null && data.suuntalava > 0) {
 
-													if ($('#option_'+key+'_'+data.suuntalava).length > 0) {
-														$('#option_'+key+'_'+data.suuntalava).attr('selected', true);
-													}
-													else {
-														$('#suuntalava_'+key+' option:last').after('<option id=\"option_'+key+'_'+data.suuntalava+'\" value=\"'+data.suuntalava+'\" selected>'+data.suuntalava_sscc+'</option>');
-													}
+												if ($('#option_'+key+'_'+data.suuntalava).length > 0) {
+													$('#option_'+key+'_'+data.suuntalava).attr('selected', true);
+												}
+												else {
+													$('#suuntalava_'+key+' option:last').after('<option id=\"option_'+key+'_'+data.suuntalava+'\" value=\"'+data.suuntalava+'\" selected>'+data.suuntalava_sscc+'</option>');
 												}
 											}
-
-											if (summa_jaljella != 0) {
-												$('#kohdistettu_summa_td font').css({'color': '#000', 'font-weight': 'normal'});
-												$('#laskunsumma_jaljella_td font').css({'color': '#000', 'font-weight': 'normal'});
-											}
-											else {
-												$('#kohdistettu_summa_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
-												$('#laskunsumma_jaljella_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
-											}
-
-											$('#kohdistettu_summa').html(summa_kohdistettu.toFixed(2));
-											$('#kohdistettu_rivit').html(parseInt($('#kohdistettu_rivit').html()) + 1);
-											$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) + parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
-											$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
 										}
-									);
 
-									$(this).attr('checked', 'checked');
-								}
-							});
+										if (summa_jaljella != 0) {
+											$('#kohdistettu_summa_td font').css({'color': '#000', 'font-weight': 'normal'});
+											$('#laskunsumma_jaljella_td font').css({'color': '#000', 'font-weight': 'normal'});
+										}
+										else {
+											$('#kohdistettu_summa_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
+											$('#laskunsumma_jaljella_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
+										}
+
+										$('#kohdistettu_summa').html(summa_kohdistettu.toFixed(2));
+										$('#kohdistettu_rivit').html(parseInt($('#kohdistettu_rivit').html()) + 1);
+										$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) + parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
+										$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+									}
+								);
+
+								$(this).attr('checked', 'checked');
+							}
+						});
 						}
 					});
 
 					// POISTETAAN KAIKKI KOHDISTUKSET
 					$('#submit_kohd_eimit').live('click', function(){
-
 						var otunnus = $('input[name=\"otunnus\"]').val();
 
-						check_arrival_validity(otunnus);
-
-						if (process) {
-
+						if (check_arrival_validity(otunnus)) {
 							$('input[name^=\"rivi_valitut_tunnukset\"]').each(function(){
-								rivi_ja_otsikko = this.value.split(\"###\", 2);
+							rivi_ja_otsikko = this.value.split(\"###\", 2);
 
-								if ($('#rivi_valitut_tunnukset_'+rivi_ja_otsikko[0]).is(':checked')) {
+							if ($('#rivi_valitut_tunnukset_'+rivi_ja_otsikko[0]).is(':checked')) {
 
-									$.post('{$_SERVER['SCRIPT_NAME']}',
-										{ 	keikan_otunnus: otunnus,
-											otunnus: 0,
-											ajax_toiminto: 'kohdista_rivi',
-											valittu: this.value,
-											no_head: 'yes',
-											ohje: 'off' },
-										function(return_value) {
-											var data = jQuery.parseJSON(return_value);
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	keikan_otunnus: otunnus,
+										otunnus: 0,
+										ajax_toiminto: 'kohdista_rivi',
+										valittu: this.value,
+										no_head: 'yes',
+										ohje: 'off' },
+									function(return_value) {
+										var data = jQuery.parseJSON(return_value);
 
-											var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());
-											var summa_jaljella = parseFloat($('#laskunsumma_jaljella').html());
+										var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());
+										var summa_jaljella = parseFloat($('#laskunsumma_jaljella').html());
 
-											for (var key in data.uudet_hinnat) {
-												summa_kohdistettu = summa_kohdistettu - parseFloat(data.vanhat_hinnat[key]['alerivihinta']);
-												summa_jaljella = summa_jaljella + parseFloat(data.vanhat_hinnat[key]['alerivihinta']);
+										for (var key in data.uudet_hinnat) {
+											summa_kohdistettu = summa_kohdistettu - parseFloat(data.vanhat_hinnat[key]['alerivihinta']);
+											summa_jaljella = summa_jaljella + parseFloat(data.vanhat_hinnat[key]['alerivihinta']);
 
-												$('#hinnat_'+key).html(data.uudet_hinnat[key]['rivihinta']+'<br>'+data.uudet_hinnat[key]['alerivihinta']);
-												$('#alerivihintaalkuperainen_'+key).val(data.uudet_hinnat[key]['alerivihinta']);
-												$('#tr_'+key+' td').removeClass('tumma');
+											$('#hinnat_'+key).html(data.uudet_hinnat[key]['rivihinta']+'<br>'+data.uudet_hinnat[key]['alerivihinta']);
+											$('#alerivihintaalkuperainen_'+key).val(data.uudet_hinnat[key]['alerivihinta']);
+											$('#tr_'+key+' td').removeClass('tumma');
 
-												$('#suuntalava_'+key+' option:first').attr('selected', true);
-											}
-
-											if (summa_jaljella != 0) {
-												$('#kohdistettu_summa_td font').css({'color': '#000', 'font-weight': 'normal'});
-												$('#laskunsumma_jaljella_td font').css({'color': '#000', 'font-weight': 'normal'});
-											}
-											else {
-												$('#kohdistettu_summa_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
-												$('#laskunsumma_jaljella_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
-											}
-
-											$('#kohdistettu_summa').html(summa_kohdistettu.toFixed(2));
-											$('#kohdistettu_rivit').html(parseInt($('#kohdistettu_rivit').html()) - 1);
-											$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) - parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
-											$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+											$('#suuntalava_'+key+' option:first').attr('selected', true);
 										}
-									);
 
-									$(this).removeAttr('checked');
-								}
-							});
+										if (summa_jaljella != 0) {
+											$('#kohdistettu_summa_td font').css({'color': '#000', 'font-weight': 'normal'});
+											$('#laskunsumma_jaljella_td font').css({'color': '#000', 'font-weight': 'normal'});
+										}
+										else {
+											$('#kohdistettu_summa_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
+											$('#laskunsumma_jaljella_td font').css({'color': '{$varirgb[1]}', 'font-weight': 'bold'});
+										}
+
+										$('#kohdistettu_summa').html(summa_kohdistettu.toFixed(2));
+										$('#kohdistettu_rivit').html(parseInt($('#kohdistettu_rivit').html()) - 1);
+										$('#kohdistettu_kpl').html(parseFloat($('#kohdistettu_kpl').html()) - parseFloat($('#rivi_kpl_alkuperainen_'+rivi_ja_otsikko[0]).val()));
+										$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
+									}
+								);
+
+								$(this).removeAttr('checked');
+							}
+						});
 						}
 					});
 				}
@@ -14058,7 +14219,7 @@ if (!function_exists("pupe_DataTables")) {
 				$('select.suuntalava_sort').change(function() {
 					var haku_arvo = $(this, 'option:selected').val();
 
-					datatablesit[0].fnFilter(haku_arvo, 13, true, false);
+					datatablesit[0].fnFilter(haku_arvo, 14, true, false);
 				} );
 
 			} );
@@ -23579,27 +23740,26 @@ if (!function_exists("hae_viivakoodilla")) {
 }
 
 if (!function_exists("splittaa_valmistukset")) {
-	function splittaa_valmistukset($laskurow) {
+	function splittaa_valmistukset($tunnus) {
 		global $yhtiorow, $kukarow;
 
 		// Otetaan laskurow talteen, ja nollataan sielt‰ kent‰t jota ei monisteta
-
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$laskurow['tunnus']}'";
-		$laskurow_temp_res = pupe_query($query);
-		$laskurow_temp = mysql_fetch_assoc($laskurow_temp_res);
+					AND tunnus  = '{$tunnus}'";
+		$laskures = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($laskures);
 
-		unset($laskurow_temp['tunnus']);
-		unset($laskurow_temp['muutospvm']);
-		unset($laskurow_temp['muuttaja']);
-		unset($laskurow_temp['luontiaika']);
-		unset($laskurow_temp['laatija']);
-		unset($laskurow_temp['toimaika']);
-		unset($laskurow_temp['kerayspvm']);
-		unset($laskurow_temp['kohde']);
-		unset($laskurow_temp['alatila']);
+		unset($laskurow['tunnus']);
+		unset($laskurow['muutospvm']);
+		unset($laskurow['muuttaja']);
+		unset($laskurow['luontiaika']);
+		unset($laskurow['laatija']);
+		unset($laskurow['toimaika']);
+		unset($laskurow['kerayspvm']);
+		unset($laskurow['kohde']);
+		unset($laskurow['alatila']);
 
 		// Haetaan kaikki valmisteet
 		$query = "	SELECT tilausrivi.*,
@@ -23607,7 +23767,7 @@ if (!function_exists("splittaa_valmistukset")) {
 					FROM tilausrivi
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+					AND tilausrivi.otunnus = '{$tunnus}'
 					AND tilausrivi.tyyppi in ('W','M')
 					ORDER BY tilausrivi.tunnus";
 		$tilausrivi_split_result = pupe_query($query);
@@ -23617,9 +23777,9 @@ if (!function_exists("splittaa_valmistukset")) {
 
 		while ($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
 
-			$_toimaika = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
+			$_toimaika  = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
 			$_kerayspvm = ($tilausrivi_split_row['kerayspvm'] == '0000-00-00') ? $laskurow['kerayspvm'] : $tilausrivi_split_row['kerayspvm'];
-			$_kohde = ($tilausrivi_split_row['positio'] == '') ? $laskurow['kohde'] : $tilausrivi_split_row['positio'];
+			$_kohde     = ($tilausrivi_split_row['positio'] == '') ? $laskurow['kohde'] : $tilausrivi_split_row['positio'];
 
 			// J‰tet‰‰n ensimm‰inen rivi alkuper‰iselle otsikolle
 			if ($valmistuksen_splittaus_rivi == 0) {
@@ -23639,25 +23799,25 @@ if (!function_exists("splittaa_valmistukset")) {
 			}
 
 			$query = "	INSERT INTO lasku (
-								".implode(", ", array_keys($laskurow_temp)).",
-								luontiaika,
-								laatija,
-								muutospvm,
-								muuttaja,
-								toimaika,
-								kerayspvm,
-								kohde,
-								alatila)
-								VALUES (
-								'".implode("', '", array_values($laskurow_temp))."',
-								now(),
-								'{$kukarow['kuka']}',
-								now(),
-								'{$kukarow['kuka']}',
-								'{$_toimaika}',
-								'{$_kerayspvm}',
-								'{$_kohde}',
-								'J')";
+					".implode(", ", array_keys($laskurow)).",
+					luontiaika,
+					laatija,
+					muutospvm,
+					muuttaja,
+					toimaika,
+					kerayspvm,
+					kohde,
+					alatila)
+					VALUES (
+					'".implode("', '", array_values($laskurow))."',
+					now(),
+					'{$kukarow['kuka']}',
+					now(),
+					'{$kukarow['kuka']}',
+					'{$_toimaika}',
+					'{$_kerayspvm}',
+					'{$_kohde}',
+					'')";
 			pupe_query($query);
 			$valmistus_tunnus = mysql_insert_id();
 			$valmistus_tunnukset[] = $valmistus_tunnus;
@@ -23666,7 +23826,7 @@ if (!function_exists("splittaa_valmistukset")) {
 			if (!empty($valmistus_tunnus)) {
 				$query = "	UPDATE tilausrivi SET otunnus = '{$valmistus_tunnus}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND otunnus = '{$laskurow['tunnus']}'
+							AND otunnus = '{$tunnus}'
 							AND perheid = '{$tilausrivi_split_row['tunnus']}'
 							AND perheid != 0";
 				pupe_query($query);
@@ -25293,7 +25453,7 @@ if (!function_exists('posten_outbounddelivery')) {
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus = '{$otunnus}'";
 		$loopres = pupe_query($query);
@@ -25334,7 +25494,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
 		$orderedby = $custpickinglist->addChild('OrderedBy');
 		$orderedby->addChild('CustAccount', 0);
-		$orderedby->addChild('CustName', substr(trim($looprow['nimi'].' '.$looprow['nimitark'], 0, 50)));
+		$orderedby->addChild('CustName', substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50));
 		$orderedby->addChild('CustStreet', substr($looprow['osoite'], 0, 50));
 		$orderedby->addChild('CustStreet2', substr($looprow['osoite'], 0, 50));
 		$orderedby->addChild('CustPostCode', substr($looprow['postino'], 0, 10));

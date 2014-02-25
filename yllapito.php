@@ -631,7 +631,6 @@
 						unset($huoltosyklit_laitteet_rivi['luontiaika']);
 						unset($huoltosyklit_laitteet_rivi['muuttaja']);
 						unset($huoltosyklit_laitteet_rivi['muutospvm']);
-						unset($huoltosyklit_laitteet_rivi['viimeinen_tapahtuma']);
 						$huoltosyklit_laitteet_rivi['laatija'] = $kukarow['kuka'];
 						$huoltosyklit_laitteet_rivi['laite_tunnus'] = $tunnus;
 

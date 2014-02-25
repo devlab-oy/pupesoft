@@ -230,9 +230,12 @@
 				}
 			}
 
+			if ($yhtiorow['valmistuksien_kasittely'] == 'Y') {
+				$valmistus_tunnukset = splittaa_valmistukset($tunnus);
+			}
+
 			$kukarow["kesken"] = $kukakesken;
 
 			return $tilauksesta_valmistustilaus;
 		}
 	}
-?>

@@ -570,6 +570,15 @@
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
 						}
 
+						if (trim($otsikrow["laskutus_nimi"]) == "") {
+							$otsikrow["laskutus_nimi"]	   = $otsikrow["nimi"];
+						 	$otsikrow["laskutus_nimitark"] = $otsikrow["nimitark"];
+						 	$otsikrow["laskutus_osoite"]   = $otsikrow["osoite"];
+						 	$otsikrow["laskutus_postino"]  = $otsikrow["postino"];
+						 	$otsikrow["laskutus_postitp"]  = $otsikrow["postitp"];
+						 	$otsikrow["laskutus_maa"]	   = $otsikrow["maa"];
+						}
+
 						$paivita_sisviesti1 = "";
 
 						// Päivitetäänkö sisviesti1?
@@ -1071,6 +1080,21 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
+			elseif ($from == "" and $toim == 'toimi' and $alias_set == "KAYTTAJA") {
+				$ashak = "	SELECT group_concat(concat('\'',kuka,'\'')) kukat
+							FROM kuka
+							WHERE yhtio = '$kukarow[yhtio]'
+							and (nimi {$hakuehto} or kuka {$hakuehto})";
+				$ashakres = pupe_query($ashak);
+				$ashakrow = mysql_fetch_assoc($ashakres);
+
+				if ($ashakrow["kukat"] != "") {
+					$lisa .= " and {$array[$i]} in (" . $ashakrow["kukat"] . ")";
+				}
+				else {
+					$lisa .= " and {$array[$i]} = NULL ";
+				}
+			}
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
 				$lisa .= " and REPLACE(REPLACE({$array[$i]}, '-', ''), '+', '') like '%".str_replace(array('-','+'), '', $haku[$i])."%' ";
 			}
@@ -1159,7 +1183,7 @@
 
 				$lisa = substr($lisa, 0, -3).")";
 			}
-			elseif ($yhtiorow['livetuotehaku_hakutapa'] == "F" and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys")) {
+			elseif (($yhtiorow['livetuotehaku_hakutapa'] == "F" or $yhtiorow['livetuotehaku_hakutapa'] == "G") and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys")) {
 				 $lisa .= " and match ($array[$i]) against ('{$haku[$i]}*' IN BOOLEAN MODE) ";
 			}
 			else {
@@ -1301,7 +1325,7 @@
 					<input type = 'submit' value = '".t("Näytä erääntyneet")."'></form>";
 		}
 
-		if ($yhtiorow['livetuotehaku_hakutapa'] != "F" and $toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
+		if (!in_array($yhtiorow['livetuotehaku_hakutapa'], array('F','G')) and $toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
 
 			$query = "	SELECT *
 						FROM tuote

@@ -162,8 +162,21 @@
 		unset($tunnus);
 
 		// Jos kirjataan tase uudestaan, niin tässä on tositteen tunnus
-		if (isset($tilikausi_alku_loppu_row["avaava_tase"]) and $tilikausi_alku_loppu_row["avaava_tase"] != 0) {
-			$tunnus = $tilikausi_alku_loppu_row["avaava_tase"];
+		if (isset($tilikausi_alku_loppu_row["avaava_tase"]) and $tilikausi_alku_loppu_row["avaava_tase"] > 0) {
+
+			// Onko tämä varmasti oikea tosite?
+			$query = "	SELECT tunnus
+						FROM lasku
+						WHERE yhtio	= '{$kukarow['yhtio']}'
+						AND tapvm 	= '{$tpv}-{$tpk}-{$tpp}'
+						AND tila 	= 'X'
+						AND alatila = 'A'
+						AND tunnus	= '{$tilikausi_alku_loppu_row["avaava_tase"]}'";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$tunnus = $tilikausi_alku_loppu_row["avaava_tase"];
+			}
 		}
 
 		$summa				= '';
@@ -385,7 +398,7 @@
 			$itili[$maara] 		= $trow['tilino'];
 			$iselite[$maara] 	= t("Avaavat saldot")." ".tv1dateconv($tpv);
 			$ivero[$maara] 		= 0;
-			
+
 			$query = "	SELECT nimi
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'

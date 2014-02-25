@@ -1286,7 +1286,8 @@ if ($tila == 'tee_kohdistus') {
 
 				// Splitataan myyntisaamiset
 				$query = "	UPDATE tiliointi
-							SET summa = ($kassaan*-1)
+							SET summa = ($kassaan*-1),
+							summa_valuutassa = ($kassaan_valuutassa*-1)
 							WHERE tunnus = $tiliointi1[tunnus]
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -1320,7 +1321,8 @@ if ($tila == 'tee_kohdistus') {
 
 				// Splitataan rahatiliöinti
 				$query = "	UPDATE tiliointi
-							SET summa = $kassaan
+							SET summa = $kassaan,
+							summa_valuutassa = $kassaan_valuutassa
 							WHERE tunnus = $tiliointi2[tunnus]
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);

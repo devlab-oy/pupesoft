@@ -23536,10 +23536,7 @@ if (!function_exists('js_laite')) {
 					var onko_validi = isValidDate($(this).val());
 
 					if (!onko_validi) {
-						var $this = $(this);
-						setTimeout(function() {
-							$this.parent().find('.tuleva_toimenpide_error').html($('#paiva_ei_validi').val());
-						}, 1000);
+						$(this).parent().find('.tuleva_toimenpide_error').html($('#paiva_ei_validi').val());
 					}
 					else {
 						$(this).parent().find('.tuleva_toimenpide_error').html('');

@@ -967,6 +967,7 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
 				t1.selitetark AS huoltosykli_prioriteetti,
 				huoltosyklit_laitteet.huoltovali,
 				huoltosyklit_laitteet.pakollisuus,
+				huoltosyklit_laitteet.viimeinen_tapahtuma,
 				huoltosyklit_laitteet.tunnus AS hl_tunnus
 				FROM huoltosyklit_laitteet
 				JOIN huoltosykli
@@ -992,9 +993,9 @@ function hae_laitteen_huoltosyklit($laitetunnus, $tyyppi = '') {
 
 	if (empty($laitteen_huoltosyklit)) {
 		$laitteen_huoltosyklit[] = array(
-			'tunnus'		 => 0,
-			'huoltovali'	 => 0,
-			'pakollisuus'	 => 0,
+			'tunnus'				 => 0,
+			'huoltovali'			 => 0,
+			'pakollisuus'			 => 0,
 			'hl_tunnus'				 => 0,
 			'viimeinen_tapahtuma'	 => '',
 		);

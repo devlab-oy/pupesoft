@@ -23508,7 +23508,7 @@ if (!function_exists('js_laite')) {
 						if (tapahtuma_select_id.indexOf("huolto") != -1 || tapahtuma_select_id.indexOf("koeponnistus") != -1 ) {
 							seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(seuraava_tapahtuma, huoltovali);
 						}
-						var date_string = seuraava_tapahtuma.getDate() + '.' + seuraava_tapahtuma.getMonth() + '.' + seuraava_tapahtuma.getFullYear();
+						var date_string = seuraava_tapahtuma.getDate() + '.' + (seuraava_tapahtuma.getMonth() + 1) + '.' + seuraava_tapahtuma.getFullYear();
 						$('#'+tapahtuma_select_id).val(date_string);
 					}
 			}
@@ -23523,12 +23523,12 @@ if (!function_exists('js_laite')) {
 				var today = new Date();
 				today.setDate(1);
 				var date = new Date();
-				date.setMonth(parseInt($('.valm_pvm_tkk').val()));
+				date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
 				date.setFullYear(parseInt($('.valm_pvm_tvv').val()));
 				date.setDate(parseInt($('.valm_pvm_tpp').val()) + parseInt(huoltovali));
 
 				if (date >= today) {
-					seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val()));
+					seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
 					seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
 					seuraava_tapahtuma.setDate(seuraava_tapahtuma.getDate() + parseInt(huoltovali));
 				}

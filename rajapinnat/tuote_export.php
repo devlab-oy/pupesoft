@@ -181,23 +181,24 @@
 		echo date("d.m.Y @ G:i:s")." - Haetaan poistettavat tuotteet.\n";
 
 		// Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pit‰‰ olla Magentossa
-		$query = "	SELECT DISTINCT tuotteen_avainsanat.selite configurable_tuoteno, tuote.tuoteno
-					FROM tuotteen_avainsanat
-					JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+		$query = "	SELECT DISTINCT tuote.tuoteno, tuotteen_avainsanat.selite configurable_tuoteno
+					FROM tuote
+					LEFT JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio
 					AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
-					AND tuote.status != 'P'
-					AND tuote.tuotetyyppi NOT IN ('A','B')
-					AND tuote.tuoteno != ''
-					AND tuote.nakyvyys != '')
-					WHERE tuotteen_avainsanat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-					AND trim(tuotteen_avainsanat.selite) != ''";
+					AND trim(tuotteen_avainsanat.selite) != '')
+					WHERE tuote.yhtio   = '{$kukarow["yhtio"]}'
+					AND tuote.status   != 'P'
+					AND tuote.tuotetyyppi NOT in ('A','B')
+					AND tuote.tuoteno  != ''
+					AND tuote.nakyvyys != ''";
 		$res = pupe_query($query);
 
 		// Kaikki tuotenumerot arrayseen
 		while ($row = mysql_fetch_array($res)) {
 			$kaikki_tuotteet[] = $row['tuoteno'];
-			$kaikki_tuotteet[] = $row['configurable_tuoteno'];
+
+			if ($row['configurable_tuoteno' != "") $kaikki_tuotteet[] = $row['configurable_tuoteno'];
 		}
 
 		$kaikki_tuotteet = array_unique($kaikki_tuotteet);

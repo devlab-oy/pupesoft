@@ -158,8 +158,69 @@
 	echo "<input type='submit' value='".t("Näytä")."'>";
 	echo "</form>";
 
+	echo "<br />";
+	echo "<br />";
+
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
+	echo "<input type='hidden' name='tee'    value = '3'>";
+
+	echo t("tai"),"...";
+	echo "<br />";
+	echo "<br />";
+
+	echo "<font class='message'>",t("Päivitä asiakkaiden luottotietoja tiedostosta"),"</font><br />";
+	echo "<font class='info'>",t("Otsikot: ytunnus, asiakasnro, luottoraja"),"</font><br />";
+	echo "<table>";
+	echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("Lähetä"),"' /></td></tr>";
+	echo "</table>";
+	echo "</form>";
+
 	echo "<br>";
 	echo "<br>";
+
+	if ($tee == "3") {
+
+		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+
+			$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
+			$path_parts = pathinfo($_FILES['userfile']['name']);
+			$ext = strtoupper($path_parts['extension']);
+
+			$excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
+
+			echo "<font class='message'>".t("Luetaan lähetetty tiedosto")."...<br><br></font>";
+
+			// Otetaan otsikot pois
+			array_shift($excelrivit);
+
+			$cnt = 0;
+
+			foreach ($excelrivit as $rivinumero => $rivi) {
+				$ytunnus	= mysql_real_escape_string(trim($rivi[0]));
+				$asiakasnro	= trim($rivi[1]) != "" ? (int) trim($rivi[1]) : "";
+				$luottoraja = (float) $rivi[2];
+
+				if ($ytunnus == "" and $asiakasnro == "") continue;
+
+				$ytunnuslisa = $ytunnus != "" ? "AND ytunnus = '{$ytunnus}'" : "";
+				$asiakasnrolisa = $asiakasnro != "" ? "AND asiakasnro = '{$asiakasnro}'" : "";
+
+				$query = "	UPDATE asiakas SET
+							luottoraja = '{$luottoraja}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							{$ytunnuslisa}
+							{$asiakasnrolisa}";
+				pupe_query($query);
+
+				$cnt++;
+			}
+
+			$plural = $cnt == 1 ? "rivi" : "riviä";
+			$classi = $cnt > 0 ? "ok" : "error";
+
+			echo "<font class='{$classi}'>",t("Päivitettiin %d %s", '', $cnt, $plural),".</font><br />";
+		}
+	}
 
 	// päivitetään asiakkaat
 	if ($tee == "2") {
@@ -428,5 +489,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

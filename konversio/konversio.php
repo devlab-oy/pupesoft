@@ -167,8 +167,8 @@ if ($request['action'] == 'aja_konversio') {
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Huoltosyklit').':';
-//			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
-//			$dumper->aja();
+			$dumper = new HuoltosykliCSVDumper($request['kukarow']);
+			$dumper->aja();
 			echo "<br/>";
 			echo "<br/>";
 			echo t('Tarkastukset').':';

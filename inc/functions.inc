@@ -23164,7 +23164,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 
 if (!function_exists("lisaa_rivi")) {
 	function lisaa_rivi($parametrit) {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $temp;
 
 		if (empty($kukarow['kesken'])) {
 			echo "Kukarow kesken on pakollinen";
@@ -23219,11 +23219,17 @@ if (!function_exists("lisaa_rivi")) {
 			${'ale'.$alepostfix} = (!empty($ale_temp)) ? $ale_temp : "";
 		}
 
-		if (@include("tilauskasittely/lisaarivi.inc"));
-		elseif (@include("lisaarivi.inc"));
-		else {
-			echo "Lisaarivi not found";
-			exit;
+
+		if( $temp === 1){
+			@include("tilauskasittely/lisaarivi_temp.inc");
+		}
+		else{
+			if (@include("tilauskasittely/lisaarivi.inc"));
+			elseif (@include("lisaarivi.inc"));
+			else {
+				echo "Lisaarivi not found";
+				exit;
+			}
 		}
 
 		return array($lisatyt_rivit1, $lisatyt_rivit2);

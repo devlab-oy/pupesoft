@@ -427,8 +427,6 @@ if ($tee == "ETSILASKU") {
 					var id = $(this).attr('id');
 					var rows = $('#row_'+id);
 
-					console.log(rows);
-
 					if (rows.is(':visible')) {
 						rows.hide();
 						$(this).val('",t("Näytä rivit"),"');
@@ -1610,6 +1608,23 @@ if ($tee == 'MONISTA') {
 					}
 				}
 
+				$palautus = array();
+
+				if ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '') {
+					$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $rivirow['tuoteno'], ($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"]));
+
+					if (count($palautus) > 0) {
+						$rivirow['hinta'] = $palautus[0]["hinta"];
+						$rivirow['kommentti'] = trim($rivirow['kommentti']) != '' ? "{$rivirow['kommentti']} {$palautus[0]['kommentti']}" : $palautus[0]['kommentti'];
+						$rivirow['varattu'] = $palautus[0]["kpl"];
+						$rivirow['ale1'] = $palautus[0]['ale'];
+						for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$rivirow['ale'.$alepostfix] = 0;
+						}
+
+					}
+				}
+
 				$rfields = "yhtio";
 				$rvalues = "'{$kukarow['yhtio']}'";
 
@@ -1650,6 +1665,9 @@ if ($tee == 'MONISTA') {
 							break;
 						case 'kommentti':
 							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {
+								$rvalues .= ", '{$rivirow['kommentti']}'";
+							}
+							elseif ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '' and count($palautus) > 0) {
 								$rvalues .= ", '{$rivirow['kommentti']}'";
 							}
 							else {
@@ -1735,21 +1753,6 @@ if ($tee == 'MONISTA') {
 							// Tarjouskase
 							if ($toim == 'TARJOUS') {
 								$rvalues .= ", 'T'";
-							}
-							else {
-								$rvalues .= ", '".$rivirow[$i]."'";
-							}
-							break;
-						case 'hinta':
-							if ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '') {
-								$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $rivirow['tuoteno'], ($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"]));
-
-								if (isset($palautus[0]["hinta"]) and $palautus[0]["hinta"] != '') {
-									$rvalues .= ", '".$palautus[0]["hinta"]."'";
-								}
-								else {
-									$rvalues .= ", '".$rivirow[$i]."'";
-								}
 							}
 							else {
 								$rvalues .= ", '".$rivirow[$i]."'";

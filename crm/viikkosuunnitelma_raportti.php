@@ -272,7 +272,7 @@ if ($tee == '') {
 		AND kalenteri.pvmalku <= '2014-02-24 23:59:59'
 		AND kalenteri.tyyppi IN ('kalenteri','memo')
 		AND kalenteri.tapa = avainsana.selitetark
-		GROUP BY 1,2
+		GROUP BY 1,2,3
 		HAVING count(*) > 0
 		ORDER BY kukanimi, aselitetark";
 		$result = pupe_query($query);
@@ -305,7 +305,7 @@ if ($tee == '') {
 
 	foreach($yhtiot as $yhtio) {
 
-		$query = "	SELECT kuka.nimi kukanimi,
+		/*$query = "	SELECT kuka.nimi kukanimi,
 					IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
 					IF(asiakas.toim_postino!='' and asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
 					kalenteri.asiakas ytunnus, asiakas.asiakasnro asiakasno, kalenteri.yhtio,
@@ -324,7 +324,27 @@ if ($tee == '') {
 					AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 					AND kalenteri.tyyppi IN ('kalenteri','memo')
 					AND kalenteri.tapa = avainsana.selitetark
-					ORDER BY pvmalku, kalenteri.tunnus";
+					ORDER BY pvmalku, kalenteri.tunnus";*/
+		$query = "		SELECT kuka.nimi kukanimi, 
+						avainsana.selitetark aselitetark,
+						IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
+						IF(asiakas.toim_postino!='' AND asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
+						kalenteri.asiakas ytunnus, asiakas.asiakasnro asiakasno, kalenteri.yhtio,
+						IF(kalenteri.asiakas!='', asiakas.nimi, 'N/A') nimi,
+						LEFT(kalenteri.pvmalku,10) pvmalku,
+						kentta01, kentta02, kentta03, kentta04,
+						IF(RIGHT(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu
+						FROM kalenteri
+						JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
+						JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ('422825'))
+						LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = 'turva' )
+						WHERE kalenteri.yhtio = 'turva'
+						AND kalenteri.kuka IN ('mikanils')
+						AND kalenteri.pvmalku >= '2014-01-24 00:00:00'
+						AND kalenteri.pvmalku <= '2014-02-24 23:59:59'
+						AND kalenteri.tyyppi IN ('kalenteri','memo')
+						AND kalenteri.tapa = avainsana.selitetark
+						ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
 		$result = pupe_query($query);
 		
 		query_dump($query);
@@ -382,6 +402,7 @@ if ($tee == '') {
 			$excelrivi++;
 
 			while ($row = mysql_fetch_assoc($result)) {
+				
 				echo "<tr>";
 				echo "<td>{$row['kukanimi']}</td>";
 				if ($nayta_sarake) echo "<td>{$row['yhtio']}</td>";

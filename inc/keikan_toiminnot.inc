@@ -520,6 +520,10 @@
 
 		$tilausrivi_res = pupe_query($query);
 
+		# Suuntalava siirtovalmiiksi - tarvitaan $suuntalavat_ei_kayttoliittymaa != '', $tee = 'siirtovalmis', $suuntalavan_tunnus
+		$tee = 'siirtovalmis';
+		require ("../tilauskasittely/suuntalavat.inc");
+		
 		$kirjoitin = (int) $_POST['kirjoitin'];
 
 		if($kirjoitin != 0) {

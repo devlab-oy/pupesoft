@@ -471,6 +471,11 @@ if ($tee == "ETSILASKU") {
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
+		echo "	<form method='post' autocomplete='off'>
+		<input type='hidden' name='kklkm' value='1'>
+		<input type='hidden' name='toim' value='{$toim}'>
+		<input type='hidden' name='tee' value='MONISTA'>";
+
 		echo "<table>";
 		echo "<tr>";
 
@@ -493,11 +498,6 @@ if ($tee == "ETSILASKU") {
 		}
 
 		echo "<th>".t("Näytä")."</th></tr>";
-
-		echo "	<form method='post' autocomplete='off'>
-				<input type='hidden' name='kklkm' value='1'>
-				<input type='hidden' name='toim' value='{$toim}'>
-				<input type='hidden' name='tee' value='MONISTA'>";
 
 		while ($row = mysql_fetch_array($result)) {
 			echo "<tr>";

@@ -9,7 +9,7 @@
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
 
-	if (strtolower($toim) == 'oletusvarasto') {
+	if (strpos(strtolower($toim), "oletusvarasto") !== FALSE) {
 
 		if ($kukarow['oletus_varasto'] == 0) {
 			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu käyttäjälle"),".</font><br />";
@@ -26,8 +26,11 @@
 	else {
 		$oletusvarasto_chk = 0;
 	}
+	if (strpos(strtolower($toim), "paivamaara") !== FALSE) {
+		$paivamaaran_kasisyotto = "JOO";
+	}
 
-	if ($livesearch_tee == "TUOTEHAKU") {
+		if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
 	}
@@ -242,7 +245,7 @@
 					}
 					
 					// Jos on syötetty käsin inventointipvm sen pitää olla validi
-					if ($inventointipvm != '') {
+					if (isset($paivamaaran_kasisyotto) and $inventointipvm != '') {
 						list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
 						if (!checkdate($mm, $dd, $yyyy)) {
 							echo "<font class='error'>".t("VIRHE: Virheellinen inventointipäivämäärä")."!: $tuoteno ".t("Anna päivämäärä muodossa")." yyyy-mm-dd </font><br>";
@@ -672,7 +675,7 @@
 
 							// Katsotaan onko inventointipäivä syötetty käsin
 							$laadittuaika = "now()";
-							if ($inventointipvm != '') {
+							if (isset($paivamaaran_kasisyotto) and $inventointipvm != '') {
 								list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
 								$yyyy 				= substr($yyyy,0,4);
 								$mm 				= substr($mm,0,2);
@@ -1562,8 +1565,10 @@
 
 		echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
 		echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
-		echo "<tr><th>".t("Syötä inventointipäivämäärä").":</th>";
-		echo "<td><input type='text' size='25' name='inventointipvm' value='$inventointipvm'></td></tr>";
+		if (isset($paivamaaran_kasisyotto)) {
+			echo "<tr><th>".t("Syötä inventointipäivämäärä").":</th>";
+			echo "<td><input type='text' size='25' name='inventointipvm' value='$inventointipvm'></td></tr>";
+		}
 		echo "</table><br><br>";
 
 

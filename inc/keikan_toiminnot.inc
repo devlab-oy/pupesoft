@@ -485,9 +485,9 @@
 		$suuntalavat_ei_kayttoliittymaa = "KYLLA";
         
 		require ("../tilauskasittely/suuntalavat.inc");
-		
+		$sscc_gen = uusi_sscc_nro();
 		$params = array(
-			"sscc" => $otunnus.$_POST['tunnus'],
+			"sscc" => $sscc_gen,
 			"usea_keraysvyohyke" => "K",
 			"keraysvyohyke" => $_POST['keraysvyohyke'],
 			"kaytettavyys" => $_POST['kaytettavyys'],

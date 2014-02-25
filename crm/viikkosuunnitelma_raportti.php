@@ -262,7 +262,9 @@ if ($tee == '') {
 		$query = "SELECT kuka.nimi kukanimi, 
 		kuka.yhtio yhtijo,
 		avainsana.selitetark aselitetark,
-		count(*) montakotapahtumaa
+		count(*) montakotapahtumaa,
+		kalenteri.kuka,
+		avainsana.tunnus
 		FROM kalenteri
 		JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
 		JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ({$kale_querylisa}))
@@ -277,6 +279,7 @@ if ($tee == '') {
 		ORDER BY kukanimi, aselitetark";
 		$result = pupe_query($query);
 		query_dump($query);
+
 		if (mysql_num_rows($result) > 0) {
 			echo "<tr>";
 			echo "<th>".t("Edustaja")."</th>";
@@ -284,23 +287,81 @@ if ($tee == '') {
 			echo "<th>".t("Tapa")."</th>";
 			echo "<th>".t("Tapahtumia")."</th>";
 			echo "</tr>";
-			
+
 			while ($rivi = mysql_fetch_assoc($result)) {
+				echo "<tr>";
+				echo "<td>{$rivi['kukanimi']}</td>";
+				echo "<td>{$rivi['yhtijo']}</td>";
+				echo "<td><a href='#'>{$rivi['aselitetark']}</a></td>";
+				echo "<td>{$rivi['montakotapahtumaa']}</td>";
+				echo "</tr>";
+				//echo "<div id='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'>";
+				echo "<tr id='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'>";
+				echo "<td>";
+				// haetaan diviin tarkemmat tiedot
+				$query = "		SELECT kuka.nimi kukanimi, 
+								avainsana.selitetark aselitetark,
+								IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
+								IF(asiakas.toim_postino!='' AND asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
+								kalenteri.asiakas ytunnus, asiakas.asiakasnro asiakasno, kalenteri.yhtio,
+								IF(kalenteri.asiakas!='', asiakas.nimi, 'N/A') nimi,
+								LEFT(kalenteri.pvmalku,10) pvmalku,
+								kentta01, kentta02, kentta03, kentta04,
+								IF(RIGHT(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu
+								FROM kalenteri
+								JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
+								JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ('{$rivi['tunnus']}'))
+								LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = 'turva' )
+								WHERE kalenteri.yhtio = 'turva'
+								AND kalenteri.kuka IN ('{$rivi['kuka']}')
+								AND kalenteri.pvmalku >= '2014-01-24 00:00:00'
+								AND kalenteri.pvmalku <= '2014-02-24 23:59:59'
+								AND kalenteri.tyyppi IN ('kalenteri','memo')
+								AND kalenteri.tapa = avainsana.selitetark
+								ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
+				$ressu = pupe_query($query);
+
+				echo "<table>";
 		
-		echo "<tr>";
-		echo "<td>{$rivi['kukanimi']}</td>";
-		echo "<td>{$rivi['yhtijo']}</td>";
-		echo "<td>{$rivi['aselitetark']}</td>";
-		echo "<td>{$rivi['montakotapahtumaa']}</td>";
-		echo "</tr>";
-	}
-	}
+				echo "<tr>";
+				echo "<th>",t("Edustaja"),"</th>";
+				if ($nayta_sarake) echo "<th>",t("Yhtio"),"</th>";
+				echo "<th>",t("Tapa"),"</th>";
+				echo "<th>",t("Paikka"),"</th>";
+				echo "<th>",t("Postino"),"</th>";
+				echo "<th>",t("Asiakas"),"</th>";
+				echo "<th>",t("Asiakasno"),"</th>";
+				echo "<th>",t("Nimi"),"</th>";
+				if ($nayta_sarake) echo "<th>",t("Pvm"),"</th>";
+				echo "</tr>";
+
+				while ($divirivi = mysql_fetch_assoc($ressu)) {	
+					echo "<tr>";
+					echo "<td>{$divirivi['kukanimi']}</td>";
+					if ($nayta_sarake) echo "<td>{$divirivi['yhtio']}</td>";
+					echo "<td>{$divirivi['aselitetark']}</td>";
+					echo "<td>{$divirivi['postitp']}</td>";
+					echo "<td>{$divirivi['postino']}</td>";
+					echo "<td>{$divirivi['ytunnus']}</td>";
+					echo "<td>{$divirivi['asiakasno']}</td>";
+					echo "<td><a href='asiakasmemo.php?ytunnus={$divirivi['ytunnus']}'>{$divirivi['nimi']}</a></td>";
+					if ($nayta_sarake) echo "<td>{$divirivi['pvmalku']}</td>";
+					echo "</tr>";
+
+				}
+				echo "</table>";
+				echo "</td>";
+				echo "</tr>";
+				//echo "</div>";
+			}
+
+		}
 	}
 	echo "</table>";
 
 	echo "<br><br><table>";
 
-	$nayta_sarake = ($vstk == 'Asiakaskäynti' and $piilota_matkasarakkeet != "") ? FALSE : TRUE;
+	$nayta_sarake = ($piilota_matkasarakkeet != "") ? FALSE : TRUE;
 
 
 	foreach($yhtiot as $yhtio) {
@@ -325,7 +386,7 @@ if ($tee == '') {
 					AND kalenteri.tyyppi IN ('kalenteri','memo')
 					AND kalenteri.tapa = avainsana.selitetark
 					ORDER BY pvmalku, kalenteri.tunnus";*/
-		$query = "		SELECT kuka.nimi kukanimi, 
+		/*$query = "		SELECT kuka.nimi kukanimi, 
 						avainsana.selitetark aselitetark,
 						IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
 						IF(asiakas.toim_postino!='' AND asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
@@ -344,12 +405,12 @@ if ($tee == '') {
 						AND kalenteri.pvmalku <= '2014-02-24 23:59:59'
 						AND kalenteri.tyyppi IN ('kalenteri','memo')
 						AND kalenteri.tapa = avainsana.selitetark
-						ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
-		$result = pupe_query($query);
+						ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";*/
+		//$result = pupe_query($query);
 		
-		query_dump($query);
+		//query_dump($query);
 
-		if (mysql_num_rows($result) > 0) {
+		if (false) {#mysql_num_rows($result) > 0) {
 
 			include('inc/pupeExcel.inc');
 

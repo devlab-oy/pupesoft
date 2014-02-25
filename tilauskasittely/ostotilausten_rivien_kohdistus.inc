@@ -1,5 +1,21 @@
 <?php
 
+$query  = "	SELECT *
+			FROM lasku
+			WHERE tunnus = '$otunnus'
+			AND yhtio 	 = '$kukarow[yhtio]'
+			AND tila 	 = 'K'
+			AND alatila != 'X'";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) == 1) {
+	$laskurow = mysql_fetch_assoc($result);
+}
+else {
+	echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
+	exit;
+}
+
 echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 			function submit_tallenna(){
 				document.paaformi.action='$PHP_SELF';
@@ -15,11 +31,6 @@ echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 			}
 
 		</SCRIPT>";
-
-// haetaan keikan tiedot
-$query    = "SELECT * FROM lasku WHERE tunnus='$otunnus' AND yhtio ='$kukarow[yhtio]'";
-$result   = pupe_query($query);
-$laskurow = mysql_fetch_assoc($result);
 
 //Kukarow kesken päivitetään kohdistuksessa jotta kukaan ei voi samalla viedä varaston ja tehdä kohdistuksia
 if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $laskurow["tunnus"]) {

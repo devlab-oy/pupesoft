@@ -20,7 +20,7 @@ if (mysql_num_rows($result) == 1) {
 	$laskurow = mysql_fetch_array($result);
 }
 else {
-	echo "<font style='error'>".t("Tilaus katosi!")."</font>";
+	echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
 	exit;
 }
 

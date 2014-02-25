@@ -491,7 +491,7 @@
 			"usea_keraysvyohyke" => "K",
 			"keraysvyohyke" => $_POST['keraysvyohyke'],
 			"kaytettavyys" => $_POST['kaytettavyys'],
-			"terminaalialue" => $_POST['terminaalialue'],
+			"terminaalialue" => utf8_decode($_POST['terminaalialue']),
 			"automaattinen_paivitys" => "S",
 			"valittutunnus" => $_POST['tunnus'],
 			"tyyppi" => $_POST['tyyppi'],

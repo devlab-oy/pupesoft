@@ -192,10 +192,17 @@
 
 				}
 				elseif ($tavarantoimittajanumero == "123007") {
-					// emme luekkaan tämän toimittajan PacketKind-arvoa, vaan generoidaan tietyistä arvoista.
-					$laatikko = (int) $element->PkgNumber;
-					$parameters["laatikkoind"]	= $asn_numero.$laatikko;
-					$parameters["sscc"]			= $asn_numero.$laatikko;
+					$laatikko = $asn_numero;
+					
+					foreach($element->PkgId as $pkg) {
+						if (isset($pkg->PkgIdentSystem) and (int) $pkg->PkgIdentSystem == 17) {
+							$laatikko = (string) $pkg->PkgIdentNumber;
+							break;
+						}
+					}
+					
+					$parameters["laatikkoind"]	= $laatikko;
+					$parameters["sscc"]			= $laatikko;
 				}
 				elseif ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") {
 					$parameters["laatikkoind"]	= $asn_numero;

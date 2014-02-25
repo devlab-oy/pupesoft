@@ -15342,15 +15342,18 @@ if (!function_exists("hae_hyvityshinta")) {
 
 		$query_ale_lisa = generoi_alekentta('M');
 
+		$i = 0;
 		$cur_date = new DateTime();
 		$date_2yo = new DateTime();
 		$date_2yo->sub(new DateInterval('P2Y'));
 
 		// Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
-		while ($date_2yo >= $cur_date) {
+		while ($cur_date >= $date_2yo) {
+
+			$querylisa = $i == 0 ? " or tilausrivi.laskutettuaika = '0000-00-00'" : "";
+			$i++;
 
 			$cur_date->sub(new DateInterval('P1M'));
-
 			$pre_date = new DateTime($cur_date->format('Y-m-d'));
 			$pre_date->add(new DateInterval('P1M'));
 
@@ -15370,7 +15373,7 @@ if (!function_exists("hae_hyvityshinta")) {
 						AND tilausrivi.varattu + tilausrivi.kpl > 0
 						AND tilausrivi.var not in ('P','J')
 						AND tilausrivi.laadittu >= '".$date_2yo->format('Y-m-d')." 00:00:00'
-						AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') or tilausrivi.laskutettuaika = '0000-00-00')
+						AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
 						GROUP BY ika, hinta
 						HAVING kpl != 0
 
@@ -15389,20 +15392,14 @@ if (!function_exists("hae_hyvityshinta")) {
 						AND tilausrivi.varattu + tilausrivi.kpl < 0
 						AND tilausrivi.var not in ('P','J')
 						AND tilausrivi.laadittu >= '".$date_2yo->format('Y-m-d')." 00:00:00'
-						AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') or tilausrivi.laskutettuaika = '0000-00-00')
+						AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
 						GROUP BY ika, hinta
 						HAVING kpl != 0
 
 						ORDER BY ika ASC, kpl ASC";
 			$viimhintares = pupe_query($query);
 
-			// Asiakas ei ole ostanut tätä tuotette -> palautuskielto
-			if (mysql_num_rows($viimhintares) == 0) {
-				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
-				return $palautus;
-			}
-
-			// echo "Syotetty: $kpl<br>";
+			 // echo "Syotetty: $kpl<br>";
 
 			while ($viimerow = mysql_fetch_assoc($viimhintares)) {
 
@@ -15412,7 +15409,7 @@ if (!function_exists("hae_hyvityshinta")) {
 
 				$laskuri += $viimerow['kpl'];
 
-				// echo "Kpl $viimerow[kpl] Kumulatiivinen_kpl $laskuri Jäljellä_kpl $kpl<br>";
+				 // echo "Kpl $viimerow[kpl] Kumulatiivinen_kpl $laskuri Jäljellä_kpl $kpl<br>";
 
 				if ($laskuri > 0 and $viimerow["kpl"] > 0) {
 
@@ -15442,6 +15439,12 @@ if (!function_exists("hae_hyvityshinta")) {
 					break 2;
 				}
 			}
+		}
+
+		// Asiakas ei ole ostanut tätä tuotette -> palautuskielto
+		if (count($tilausrivit) == 0) {
+			$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+			return $palautus;
 		}
 
 		// Jos löytyi vähemmän myyntejä kun asiakas on palauttamassa -> palautuskielto

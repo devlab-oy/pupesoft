@@ -40,21 +40,24 @@ if ($vstk == 'Asiakaskäynti') {
 }
 
 print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-		<!--
+			$(function() {
+				$('.check_all').on('click', function() {
+					var id = $(this).val();
 
-		function toggleAll(toggleBox) {
+					if ($(this).is(':checked')) {
+						$('.'+id).attr('checked', true);
+					}
+					else {
+						$('.'+id).attr('checked', false);
+					}
+				});
 
-			var currForm = toggleBox.form;
-			var isChecked = toggleBox.checked;
-
-			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].id != 'piilota_matkasarakkeet') {
-					currForm.elements[elementIdx].checked = isChecked;
-				}
-			}
-		}
-
-		//-->
+				$('.show_all').on('click', function() {
+					var id = $(this).attr('id');
+					$('.'+id).toggle();
+					$(this).toggleClass('tumma');
+				});
+			});
 		</script>";
 
 if ($tee == '') {
@@ -151,7 +154,7 @@ if ($tee == '') {
 	$ruksatut_kalet = explode(",", $vali_kale);
 	$kale_querylisa = "'".implode("','", $ruksatut_kalet)."'";
 	$checked = '';
-	echo "<th>".t("Valitse listattavat kalenteritapahtuman lajit")."</th>";
+	echo "<th>".t("Valitse listattavat kalenteritapahtuman lajit")."<br><br><input type='checkbox' class='check_all' value='kaletapa'>".t("Valitse kaikki")."</th>";
 	echo "<td colspan='3'><div style='width:280px;height:265px;overflow:auto;'>
 			<table width='100%'>";
 
@@ -164,9 +167,9 @@ if ($tee == '') {
 	while ($row = mysql_fetch_assoc($result)) {
 		$checked = in_array("$row[tunnus]", $ruksatut_kalet) ? 'checked' : "";
 
-		echo "<tr><td nowrap><input type='checkbox' name='kaletapa[]' value='{$row['tunnus']}' {$checked}></td><td>{$row['selitetark']}</td></tr>";
+		echo "<tr><td nowrap><input type='checkbox' class='kaletapa' name='kaletapa[]' value='{$row['tunnus']}' {$checked}></td><td>{$row['selitetark']}</td></tr>";
 	}
-	echo "<tr><td><input type='checkbox' name='chbox' onclick='toggleAll(this)'></td><td>".t("Valitse kaikki")."</td></tr>";
+	
 	echo "</table>";
 
 	if (isset($kalen)) {
@@ -196,12 +199,12 @@ if ($tee == '') {
 	}
 
 	echo "<tr>
-			<th>",t("Listaa edustajat"),"</th>";
+			<th>",t("Listaa edustajat"),"<br><br><input type='checkbox' class='check_all' value='kalen'> ".t("Valitse kaikki")."</th>";
 
 	echo "	<td colspan='3'><div style='width:280px;height:265px;overflow:auto;'>
 
 			<table width='100%'><tr>
-			<td><input type='checkbox' name='kalen[]' value = '{$kukarow['kuka']}' {$checked}></td>
+			<td><input type='checkbox' class='kalen' name='kalen[]' value = '{$kukarow['kuka']}' {$checked}></td>
 			<td>",t("Oma"),"</td></tr>";
 
 	$query = "	SELECT kuka.tunnus, kuka.nimi, kuka.kuka
@@ -217,10 +220,8 @@ if ($tee == '') {
 	while ($row = mysql_fetch_assoc($result)) {
 		$checked = in_array("$row[kuka]", $ruksatut) ? 'checked' : "";
 
-		echo "<tr><td nowrap><input type='checkbox' name='kalen[]' value='{$row['kuka']}' {$checked}></td><td>{$row['nimi']}</td></tr>";
+		echo "<tr><td nowrap><input type='checkbox' class='kalen' name='kalen[]' value='{$row['kuka']}' {$checked}></td><td>{$row['nimi']}</td></tr>";
 	}
-
-	echo "<tr><td><input type='checkbox' name='chbox' onclick='toggleAll(this)'></td><td>Näytä kaikki</td></tr>";
 
 	echo "</table>";
 	echo "</div></td></tr></table>";
@@ -289,15 +290,15 @@ if ($tee == '') {
 			echo "</tr>";
 
 			while ($rivi = mysql_fetch_assoc($result)) {
-				echo "<tr>";
+				echo "<tr class='show_all' id='{$rivi['kuka']}_{$rivi['tunnus']}'>";
 				echo "<td>{$rivi['kukanimi']}</td>";
 				echo "<td>{$rivi['yhtijo']}</td>";
-				echo "<td><a href='#'>{$rivi['aselitetark']}</a></td>";
+				echo "<td>{$rivi['aselitetark']}</td>";
 				echo "<td>{$rivi['montakotapahtumaa']}</td>";
 				echo "</tr>";
 				//echo "<div id='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'>";
-				echo "<tr id='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'>";
-				echo "<td>";
+				echo "<tr class='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'>";
+				echo "<td colspan='4' >";
 				// haetaan diviin tarkemmat tiedot
 				$query = "		SELECT kuka.nimi kukanimi, 
 								avainsana.selitetark aselitetark,
@@ -321,7 +322,7 @@ if ($tee == '') {
 								ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
 				$ressu = pupe_query($query);
 
-				echo "<table>";
+				echo "<table style='width:100%;'>";
 		
 				echo "<tr>";
 				echo "<th>",t("Edustaja"),"</th>";
@@ -349,9 +350,11 @@ if ($tee == '') {
 					echo "</tr>";
 
 				}
+				
 				echo "</table>";
 				echo "</td>";
 				echo "</tr>";
+				echo "<tr class='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'><td class='back' colspan='4'>&nbsp;</td></tr>";
 				//echo "</div>";
 			}
 

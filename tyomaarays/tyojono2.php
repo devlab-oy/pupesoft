@@ -131,7 +131,7 @@ else {
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
 		}
 		else {
-			echo t("Työmääräysten generointi epäonnistui");
+			echo t("Työlista tiedostojen luonti epäonnistui");
 		}
 	}
 }

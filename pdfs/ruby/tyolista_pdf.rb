@@ -271,7 +271,7 @@ class TyolistaPDF
         @pdf.make_cell(:content => ' '), #muuttunut sijainti
         @pdf.make_cell(:content => row['laite']['nimitys']),
         @pdf.make_cell(:content => row['laite']['sammutin_koko']),
-        @pdf.make_cell(:content => ' '), #teholuokka
+        @pdf.make_cell(:content => row['laite']['palo_luokka']), #teholuokka
         @pdf.make_cell(:content => row['laite']['sammutin_tyyppi']),
         @pdf.make_cell(:content => row['laite']['sarjanro']),
         @pdf.make_cell(:content => ' '), #ponnop nro

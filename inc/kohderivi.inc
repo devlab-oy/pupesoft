@@ -85,9 +85,30 @@ if (mysql_field_name($result, $i) == "poistettu") {
 	$tyyppi = 0;
 }
 
-if(!isset($redirect_echoed)) {
+if (mysql_field_name($result, $i) == "vastuuhenkilo") {
+	$query = "	SELECT *
+				FROM kuka
+				WHERE yhtio = '{$kukarow['yhtio']}'";
+	$result2 = pupe_query($query);
+
+	$sel = "";
+	$ulos = "<td>";
+	$ulos .= "<select name='{$nimi}'>";
+	while($kuka = mysql_fetch_assoc($result2)) {
+		if ($trow[$i] == $kuka['kuka']) {
+			$sel = "SELECTED";
+		}
+		$ulos .= "<option value='{$kuka['kuka']}' {$sel}>{$kuka['nimi']}</option>";
+		$sel = "";
+	}
+	$ulos .= "</select>";
+	$ulos .= "</td>";
+	$jatko = 0;
+}
+
+if (!isset($redirect_echoed)) {
 	$redirect_echoed = 1;
-	if(!empty($valittu_asiakas)) {
+	if (!empty($valittu_asiakas)) {
 		echo "<input type='hidden' name='redirect_to' value='asiakkaan_laite_hallinta.php' />";
 		echo "<input type='hidden' name='valittu_asiakas' value='{$valittu_asiakas}' />";
 	}

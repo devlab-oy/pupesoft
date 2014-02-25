@@ -1795,7 +1795,6 @@
 			js_laite();
 		}
 
-
 		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
 
 		echo "<table>";

@@ -411,23 +411,8 @@
 		echo "<option value='E' $chke>".t("E-Netto")."</option>";
 		echo "</select></td>";
 
-		//Jos meillä on marginaalimyyntiä/käänteinen alv
-	/*	if (isset($alv) and $alv >= 500) {
-			echo "<td valign='top'>";
-
-			if ($alv >= 600) {
-				echo t("K.V.");
-			}
-			else {
-				echo t("M.V.");
-			}
-			echo "</td>";
-			#echo "<input type='hidden' name='alv' value='$alv'>";
-			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
-		}
-		else { */
-			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
-		#} 
+		// vaikka aluperin olisi marginaalimyyntiä/käänteinen alv (alv >= 500), saa alvia muuttaa rivillä
+		echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 
 		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
 			$sel = (isset($omalle_tilaukselle) and trim($omalle_tilaukselle) != '') ? ' selected' : '';

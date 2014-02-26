@@ -13799,7 +13799,6 @@ if (!function_exists("pupe_DataTables")) {
 											$('#alerivihintaalkuperainen_'+keijo).val(data.alerivihinta);
 										}
 									);
-
 								}
 								params.tunnus = keijo;
 

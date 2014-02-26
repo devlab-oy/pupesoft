@@ -14,13 +14,20 @@ if (isset($livesearch_tee) and $livesearch_tee == "KOHDEHAKU") {
 	exit;
 }
 
-if (!isset($tee)) 	$tee = '';
-if (!isset($ala_tee)) 	$ala_tee = '';
-if (!isset($toim)) 	$toim = '';
-if (!isset($lasku_tunnukset)) 	$lasku_tunnukset = '';
-if (!isset($toimitusaika_haku)) 	$toimitusaika_haku = '';
-if (!isset($laite_tunnus)) 	$laite_tunnus = '';
-if (!isset($ajax_request)) 	$ajax_request = '';
+if (!isset($tee))
+	$tee = '';
+if (!isset($ala_tee))
+	$ala_tee = '';
+if (!isset($toim))
+	$toim = '';
+if (!isset($lasku_tunnukset))
+	$lasku_tunnukset = '';
+if (!isset($toimitusaika_haku))
+	$toimitusaika_haku = '';
+if (!isset($laite_tunnus))
+	$laite_tunnus = '';
+if (!isset($ajax_request))
+	$ajax_request = '';
 
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
@@ -95,28 +102,27 @@ else {
 
 		$multi = false;
 
-		if( is_array($lasku_tunnukset) ){
-			foreach( $lasku_tunnukset as $tunnus ){
+		if (is_array($lasku_tunnukset)) {
+			foreach ($lasku_tunnukset as $tunnus) {
 				$tunnus = explode(',', $tunnus);
 				$tunnukset[] = $tunnus;
 			}
 			$lasku_tunnukset = $tunnukset;
 			$multi = true;
 		}
-		else{
+		else {
 			$lasku_tunnukset = explode(',', $lasku_tunnukset);
 		}
 
-
-		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi );
+		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi);
 		if (!empty($pdf_tiedosto)) {
 
-			if( strpos($pdf_tiedosto, '_') ){
+			if (strpos($pdf_tiedosto, '_')) {
 				preg_match('~_(.*?).pdf~', $pdf_tiedosto, $osat);
 				$number = '_'.$osat[1];
 				$uusi_nimi = 'Tyolista';
 			}
-			else{
+			else {
 				$number = null;
 				$uusi_nimi = 'Kaikki_tyolistat';
 			}
@@ -125,7 +131,7 @@ else {
 			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
 		}
 		else {
-			echo t("Työmääräysten generointi epäonnistui");
+			echo t("Työlista tiedostojen luonti epäonnistui");
 		}
 	}
 }

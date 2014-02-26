@@ -3,31 +3,31 @@
 namespace PDF\Tyolista;
 
 $filepath = dirname(__FILE__);
-if (file_exists($filepath . '/../inc/parametrit.inc')) {
-	require_once($filepath . '/../inc/parametrit.inc');
-	require_once($filepath . '/../inc/tyojono2_functions.inc');
+if (file_exists($filepath.'/../inc/parametrit.inc')) {
+	require_once($filepath.'/../inc/parametrit.inc');
+	require_once($filepath.'/../inc/tyojono2_functions.inc');
 }
 else {
-	require_once($filepath . '/parametrit.inc');
-	require_once($filepath . '/tyojono2_functions.inc');
+	require_once($filepath.'/parametrit.inc');
+	require_once($filepath.'/tyojono2_functions.inc');
 }
 
 function hae_tyolistat($lasku_tunnukset, $multi = false) {
-if (!empty($lasku_tunnukset)) {
-	if( $multi === true){
-		$tyomaarays_rivit = array();
-		foreach ($lasku_tunnukset as $tunnus) {
-			$tyomaarays_rivit[] = \PDF\Tyolista\pdf_hae_tyomaarayksien_rivit($tunnus);
+	if (!empty($lasku_tunnukset)) {
+		if ($multi === true) {
+			$tyomaarays_rivit = array();
+			foreach ($lasku_tunnukset as $tunnus) {
+				$tyomaarays_rivit[] = \PDF\Tyolista\pdf_hae_tyomaarayksien_rivit($tunnus);
+			}
 		}
-	}
-	else{
-		$tyomaarays_rivit = \PDF\Tyolista\pdf_hae_tyomaarayksien_rivit($lasku_tunnukset);
-	}
+		else {
+			$tyomaarays_rivit = \PDF\Tyolista\pdf_hae_tyomaarayksien_rivit($lasku_tunnukset);
+		}
 
-	$filepath = kirjoita_json_tiedosto($tyomaarays_rivit, "tyolista_".uniqid()."");
-	$pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
+		$filepath = kirjoita_json_tiedosto($tyomaarays_rivit, "tyolista_".uniqid()."");
+		$pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
 
-	return $pdf_tiedosto;
+		return $pdf_tiedosto;
 	}
 }
 
@@ -50,8 +50,7 @@ function pdf_hae_tyomaarayksien_rivit($lasku_tunnukset) {
 					AND tilausrivi.var != 'P')
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-					)
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
 				JOIN laite
 				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
 					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
@@ -156,7 +155,9 @@ function hae_rivin_laite($laite_tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$query = "	SELECT laite.*,
+				paikka.nimi AS paikka_nimi,
 				concat_ws(' ', tuote.nimitys, tuote.tuoteno) as nimitys,
+				palo_luokka.selite AS palo_luokka,
 				sammutin_koko.selite as sammutin_koko,
 				sammutin_tyyppi.selite as sammutin_tyyppi
 				FROM laite
@@ -171,6 +172,13 @@ function hae_rivin_laite($laite_tunnus) {
 				ON ( sammutin_tyyppi.yhtio = tuote.yhtio
 					AND sammutin_tyyppi.tuoteno = tuote.tuoteno
 					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
+				LEFT JOIN tuotteen_avainsanat AS palo_luokka
+				ON (palo_luokka.yhtio = tuote.yhtio
+					AND palo_luokka.tuoteno = tuote.tuoteno
+					AND palo_luokka.laji = 'palo_luokka')
+				JOIN paikka
+				ON ( paikka.yhtio = laite.yhtio
+					AND paikka.tunnus = laite.paikka )
 				WHERE laite.yhtio = '{$kukarow['yhtio']}'
 				AND laite.tunnus = '{$laite_tunnus}'";
 	$result = pupe_query($query);
@@ -179,10 +187,10 @@ function hae_rivin_laite($laite_tunnus) {
 
 	$laite['viimeinen_painekoe'] = hae_laitteen_viimeiset_tapahtumat($laite['tunnus']);
 
-	if( isset( $laite['viimeinen_painekoe']['koeponnistus'] ) and $laite['viimeinen_painekoe']['koeponnistus'] != '' ){
+	if (isset($laite['viimeinen_painekoe']['koeponnistus']) and $laite['viimeinen_painekoe']['koeponnistus'] != '') {
 		$laite['viimeinen_painekoe'] = date('my', strtotime($laite['viimeinen_painekoe']['koeponnistus']));
 	}
-	else{
+	else {
 		$laite['viimeinen_painekoe'] = '—';
 	}
 

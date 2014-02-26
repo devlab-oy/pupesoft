@@ -599,6 +599,9 @@
 
 								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
 							}
+							else{
+								$viimeinen_tapahtuma_query = "viimeinen_tapahtuma = NOW(),";
+							}
 
 							$sykli_query = "INSERT INTO huoltosyklit_laitteet
 											SET yhtio = '{$yhtio}',
@@ -628,7 +631,6 @@
 						unset($huoltosyklit_laitteet_rivi['luontiaika']);
 						unset($huoltosyklit_laitteet_rivi['muuttaja']);
 						unset($huoltosyklit_laitteet_rivi['muutospvm']);
-						unset($huoltosyklit_laitteet_rivi['viimeinen_tapahtuma']);
 						$huoltosyklit_laitteet_rivi['laatija'] = $kukarow['kuka'];
 						$huoltosyklit_laitteet_rivi['laite_tunnus'] = $tunnus;
 
@@ -1792,7 +1794,6 @@
 		if ($toim == 'laite') {
 			js_laite();
 		}
-
 
 		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
 

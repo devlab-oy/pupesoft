@@ -199,7 +199,7 @@ class KalustoraporttiPDF
 
         table_cells << [
             device['oma_numero'],
-            device['sijainti'],
+            device['paikka_nimi'],
             device['tuote_nimi'],
             device['sarjanro'],
             device['ponnop_nro'],

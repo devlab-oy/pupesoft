@@ -23164,7 +23164,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 
 if (!function_exists("lisaa_rivi")) {
 	function lisaa_rivi($parametrit) {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $temp;
 
 		if (empty($kukarow['kesken'])) {
 			echo "Kukarow kesken on pakollinen";
@@ -23219,11 +23219,17 @@ if (!function_exists("lisaa_rivi")) {
 			${'ale'.$alepostfix} = (!empty($ale_temp)) ? $ale_temp : "";
 		}
 
-		if (@include("tilauskasittely/lisaarivi.inc"));
-		elseif (@include("lisaarivi.inc"));
-		else {
-			echo "Lisaarivi not found";
-			exit;
+
+		if( $temp === 1){
+			@include("tilauskasittely/lisaarivi_temp.inc");
+		}
+		else{
+			if (@include("tilauskasittely/lisaarivi.inc"));
+			elseif (@include("lisaarivi.inc"));
+			else {
+				echo "Lisaarivi not found";
+				exit;
+			}
 		}
 
 		return array($lisatyt_rivit1, $lisatyt_rivit2);
@@ -23386,11 +23392,11 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 
 		$query = "	SELECT huoltosykli.*
 					FROM   laite
-					JOIN tuotteen_avainsanat ta
+					JOIN tuotteen_avainsanat AS ta
 					ON ( ta.yhtio = laite.yhtio
 						AND ta.tuoteno = laite.tuoteno
 						AND ta.laji = 'sammutin_tyyppi' )
-					JOIN tuotteen_avainsanat ta2
+					JOIN tuotteen_avainsanat AS ta2
 					ON ( ta2.yhtio = laite.yhtio
 						AND ta2.tuoteno = laite.tuoteno
 						AND ta2.laji = 'sammutin_koko' )
@@ -23502,7 +23508,7 @@ if (!function_exists('js_laite')) {
 						if (tapahtuma_select_id.indexOf("huolto") != -1 || tapahtuma_select_id.indexOf("koeponnistus") != -1 ) {
 							seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(seuraava_tapahtuma, huoltovali);
 						}
-						var date_string = seuraava_tapahtuma.getDate() + '.' + seuraava_tapahtuma.getMonth() + '.' + seuraava_tapahtuma.getFullYear();
+						var date_string = seuraava_tapahtuma.getDate() + '.' + (seuraava_tapahtuma.getMonth() + 1) + '.' + seuraava_tapahtuma.getFullYear();
 						$('#'+tapahtuma_select_id).val(date_string);
 					}
 			}
@@ -23517,12 +23523,12 @@ if (!function_exists('js_laite')) {
 				var today = new Date();
 				today.setDate(1);
 				var date = new Date();
-				date.setMonth(parseInt($('.valm_pvm_tkk').val()));
+				date.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
 				date.setFullYear(parseInt($('.valm_pvm_tvv').val()));
 				date.setDate(parseInt($('.valm_pvm_tpp').val()) + parseInt(huoltovali));
 
 				if (date >= today) {
-					seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val()));
+					seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
 					seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
 					seuraava_tapahtuma.setDate(seuraava_tapahtuma.getDate() + parseInt(huoltovali));
 				}
@@ -23536,10 +23542,7 @@ if (!function_exists('js_laite')) {
 					var onko_validi = isValidDate($(this).val());
 
 					if (!onko_validi) {
-						var $this = $(this);
-						setTimeout(function() {
-							$this.parent().find('.tuleva_toimenpide_error').html($('#paiva_ei_validi').val());
-						}, 1000);
+						$(this).parent().find('.tuleva_toimenpide_error').html($('#paiva_ei_validi').val());
 					}
 					else {
 						$(this).parent().find('.tuleva_toimenpide_error').html('');

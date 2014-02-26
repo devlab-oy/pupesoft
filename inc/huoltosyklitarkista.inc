@@ -54,9 +54,6 @@ if (!function_exists("huoltosykli")) {
 
 		if (mysql_field_name($result, $i) == "koko") {
 			$t[$i] = preg_replace('/\D/', '', $t[$i]);
-			if (empty($t[$i])) {
-				$virhe[$i] = t("Koko ei voi olla tyhjä");
-			}
 		}
 
 //olosuhde pitää löytyä avainsanat taulusta OLOSUHDE

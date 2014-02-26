@@ -187,7 +187,9 @@ function hae_rivin_laite($laite_tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$query = "	SELECT laite.*,
+				paikka.nimi AS paikka_nimi,
 				concat_ws(' ', tuote.nimitys, tuote.tuoteno) as nimitys,
+				palo_luokka.selite AS palo_luokka,
 				sammutin_koko.selite as sammutin_koko,
 				sammutin_tyyppi.selite as sammutin_tyyppi
 				FROM laite
@@ -202,6 +204,13 @@ function hae_rivin_laite($laite_tunnus) {
 				ON ( sammutin_tyyppi.yhtio = tuote.yhtio
 					AND sammutin_tyyppi.tuoteno = tuote.tuoteno
 					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
+				LEFT JOIN tuotteen_avainsanat AS palo_luokka
+				ON (palo_luokka.yhtio = tuote.yhtio
+					AND palo_luokka.tuoteno = tuote.tuoteno
+					AND palo_luokka.laji = 'palo_luokka')
+				JOIN paikka
+				ON ( paikka.yhtio = laite.yhtio
+					AND paikka.tunnus = laite.paikka )
 				WHERE laite.yhtio = '{$kukarow['yhtio']}'
 				AND laite.tunnus = '{$laite_tunnus}'";
 	$result = pupe_query($query);

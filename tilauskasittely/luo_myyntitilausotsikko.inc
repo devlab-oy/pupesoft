@@ -2,7 +2,7 @@
 
 if (!function_exists("luo_myyntitilausotsikko")) {
 	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '') {
-		global $kukarow, $yhtiorow, $session;
+		global $kukarow, $yhtiorow, $session, $temp;
 
 		$query	= "	SELECT *
 					FROM asiakas
@@ -377,7 +377,12 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		$override_ytunnus_check = "YES";
 		$ei_kayttoliittymaa = "kylla";
 
-		require ("otsik.inc");
+		if( $temp !== 1){
+			require ("otsik.inc");
+		}
+		else{
+			require ("otsik_temp.inc");
+		}
 
 		if ($session == "") {
 			return $id;

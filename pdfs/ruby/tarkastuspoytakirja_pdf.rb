@@ -247,12 +247,12 @@ class TarkastuspoytakirjaPDF
       @pdf.text_box 'kg / litra', :at => [x+320, @pdf.cursor]
 
       @pdf.move_up 10
-      @pdf.text_box 'Palo-/', :at => [x+370, @pdf.cursor]
+      @pdf.text_box 'Palo-/', :at => [x+360, @pdf.cursor]
       @pdf.move_down 10
-      @pdf.text_box 'teholuokka', :at => [x+370, @pdf.cursor]
+      @pdf.text_box 'teholuokka', :at => [x+360, @pdf.cursor]
 
-      @pdf.text_box 'Sammute', :at => [x+420, @pdf.cursor]
-      @pdf.text_box 'Säiliön nro', :at => [x+470, @pdf.cursor]
+      @pdf.text_box 'Sammute', :at => [x+410, @pdf.cursor]
+      @pdf.text_box 'Säiliön nro', :at => [x+480, @pdf.cursor]
       @pdf.text_box 'Ponnep nro', :at => [x+540, @pdf.cursor]
       @pdf.move_down 5
       @pdf.text_box 'Poikkeama raportti', :at => [x+600, @pdf.cursor], :rotate => 90
@@ -272,11 +272,11 @@ class TarkastuspoytakirjaPDF
   def row(row)
     table_cells = [
         @pdf.make_cell(:content => row['laite']['oma_numero']),
-        @pdf.make_cell(:content => row['laite']['sijainti']),
+        @pdf.make_cell(:content => row['laite']['paikka_nimi']),
         @pdf.make_cell(:content => '__'), #muuttunut sijainti
         @pdf.make_cell(:content => row['laite']['nimitys']),
         @pdf.make_cell(:content => row['laite']['sammutin_koko']),
-        @pdf.make_cell(:content => ' '), #teholuokka
+        @pdf.make_cell(:content => row['laite']['palo_luokka']),
         @pdf.make_cell(:content => row['laite']['sammutin_tyyppi']),
         @pdf.make_cell(:content => row['laite']['sarjanro']),
         @pdf.make_cell(:content => ' '), #ponnop nro
@@ -294,10 +294,10 @@ class TarkastuspoytakirjaPDF
                   1  => 165,
                   2  => 20,
                   3  => 100,
-                  4  => 50,
+                  4  => 40,
                   5  => 50,
-                  6  => 55,
-                  7  => 70,
+                  6  => 75,
+                  7  => 60,
                   8  => 50,
                   9  => 25,
                   10 => 30,

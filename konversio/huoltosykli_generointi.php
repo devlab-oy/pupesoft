@@ -1,7 +1,7 @@
 <?php
 
 require ("../inc/parametrit.inc");
-
+require('konversio/huoltosykli_generointi.php');
 
 echo "<font class='head'>".t("Huoltosyklien generointi")."</font><hr>";
 
@@ -82,40 +82,6 @@ function paattele_toimenpide_tuote($sammutin_koko, $sammutin_tyyppi) {
 			echo "<br/>";
 		}
 	}
-}
-
-function hae_sammuttimien_koot() {
-	global $kukarow, $yhtiorow;
-
-	$query = "	SELECT DISTINCT selite
-				FROM tuotteen_avainsanat
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'sammutin_koko'";
-	$result = pupe_query($query);
-
-	$sammuttimien_koot = array();
-	while ($sammuttimen_koko = mysql_fetch_assoc($result)) {
-		$sammuttimien_koot[] = $sammuttimen_koko['selite'];
-	}
-
-	return $sammuttimien_koot;
-}
-
-function hae_sammuttimien_tyypit() {
-	global $kukarow, $yhtiorow;
-
-	$query = "	SELECT DISTINCT selite
-				FROM tuotteen_avainsanat
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'sammutin_tyyppi'";
-	$result = pupe_query($query);
-
-	$sammuttimien_tyypit = array();
-	while ($sammuttimen_tyyppi = mysql_fetch_assoc($result)) {
-		$sammuttimien_tyypit[] = $sammuttimen_tyyppi['selite'];
-	}
-
-	return $sammuttimien_tyypit;
 }
 
 require('inc/footer.inc');

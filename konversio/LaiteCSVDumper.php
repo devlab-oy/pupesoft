@@ -188,7 +188,8 @@ class LaiteCSVDumper extends CSVDumper {
 					AND selite = '".strtolower($tyyppi)."'";
 		$result = pupe_query($query);
 		if (mysql_num_rows($result) == 0) {
-			if (in_array($tyyppi, array('jauhesammutin','hiilidioksidisammutin','nestesammutin','halonisammutin', 'paloposti'))) {
+			$mahdolliset_sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
+			if (in_array($tyyppi, array_keys($mahdolliset_sammutin_tyypit))) {
 				$query = '	INSERT INTO tuotteen_avainsanat
 							(
 								yhtio,
@@ -244,7 +245,6 @@ class LaiteCSVDumper extends CSVDumper {
 	}
 
 	private function hae_paikka_tunnus($paikan_nimi, $kohde_nimi, $asiakas_nimi) {
-//        $paikan_nimi = $this->paikka_nimi_muutos($paikan_nimi);
 		$asiakas_join = '	JOIN asiakas
 							ON ( asiakas.yhtio = kohde.yhtio
 								AND asiakas.tunnus = kohde.asiakas
@@ -284,14 +284,6 @@ class LaiteCSVDumper extends CSVDumper {
 		}
 
 		return 0;
-	}
-
-	private function paikka_nimi_muutos($paikka_nimi) {
-		if ($paikka_nimi == '98' or $paikka_nimi == '98.00') {
-			return '98.00';
-		}
-
-		return $paikka_nimi;
 	}
 
 	protected function tarkistukset() {

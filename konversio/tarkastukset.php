@@ -18,7 +18,7 @@ if ($argv[1] == '') {
 }
 
 $filepaths = TarkastuksetCSVDumper::split_file($argv[1]);
-
+var_dump($filepaths);
 foreach ($filepaths as $filepath) {
 	echo "{$filepath}<br/><br/>";
 	$dumper = new TarkastuksetCSVDumper($kukarow, $filepath);

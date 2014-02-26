@@ -95,18 +95,19 @@ if ($request['action'] == 'aja_konversio') {
 
 		case 'tarkastukset':
 			$tiedostot = lue_tiedostot('/tmp/konversio/tarkastukset/');
+			echo "alku:" .date('Y-m-d H:i:s');
 			foreach ($tiedostot as $tiedosto) {
 				echo $tiedosto.'<br/>';
 //                $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
 				$output = exec("php tarkastukset.php {$tiedosto}", $arr, $ret);
 				echo "<pre>";
-				echo $output;
 				var_dump($arr);
 				echo $ret;
 				echo "</pre>";
 				echo "<br/>";
 				echo "<br/>";
 			}
+			echo "loppu:" .date('Y-m-d H:i:s');
 			break;
 
 		case 'kaikki':

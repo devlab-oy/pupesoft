@@ -15,7 +15,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 	exit;
 }
 
-echo "<font class='head'>",t("Viikkosuunnitelma raportti"),"</font><hr>";
+echo "<font class='head'>",t("Edustajaraportti"),"</font><hr>";
 
 if (!isset($konserni)) $konserni = "";
 if (!isset($vstk)) $vstk = "";

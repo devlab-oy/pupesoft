@@ -3728,7 +3728,7 @@
 									SET erikoisale = '{$erikoisale}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND otunnus = '{$erikoisale_query_otunnus}'
-									AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}')
+									AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')
 									AND netto  != 'N'
 									AND tyyppi != 'D'";
 			$upd_erikoisale_res = pupe_query($query_erikoisale);

@@ -472,7 +472,7 @@ else {
 			$result = pupe_query($query);
 		}
 
-		if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+		if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
 
 			require("inc/sahkoinen_lahete.class.inc");
 
@@ -780,11 +780,49 @@ else {
 
 						$tilaus_valmis_ulos .= t("Tilaukselle lisättiin jälkivaatimuskulua").": $hinta $laskurow[valkoodi]<br>";
 					}
+
+					// lisätään erilliskasiteltäväkulu jos sitä ei ole tilauksella ja tuote löytyy ja se on toimitustavan takana setattu
+					if ($torow['erilliskasiteltavakulu'] != 0 and $yhtiorow["erilliskasiteltava_tuotenumero"] != "") {
+
+						$query = "	SELECT tunnus
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$laskurow['tunnus']}'
+									AND tyyppi != 'D'
+									AND tuoteno = '{$yhtiorow['erilliskasiteltava_tuotenumero']}'";
+						$result = pupe_query($query);
+
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tuoteno = '{$yhtiorow['erilliskasiteltava_tuotenumero']}'";
+						$rhire = pupe_query($query);
+
+						// lisätään jälkivaatimuskulu jos sitä ei ole tilauksella ja tuote löytyy
+						if (mysql_num_rows($rhire) == 1 and mysql_num_rows($result) == 0) {
+
+							$trow = mysql_fetch_assoc($rhire);
+
+							$otunnus	 = $laskurow['tunnus'];
+							$hinta		 = $torow["erilliskasiteltavakulu"]; // jvkulu
+							$nimitys	 = t("Erilliskäsiteltäväkulu");
+
+							list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+
+							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+										values (now(), '{$hinta}', '{$netto}', '1', '1', '{$otunnus}', '{$trow['tuoteno']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L', '{$alv}', '')";
+							$addtil = pupe_query($query);
+
+							$hinta = money_format('%.2n', $hinta);
+
+							$tilaus_valmis_ulos .= t("Tilaukselle lisättiin erilliskäsiteltäväkulua").": {$hinta} {$laskurow['valkoodi']}<br>";
+						}
+					}
 				}
 			}
 
 		}
-		else {
+		elseif ($yhtiorow["rahti_hinnoittelu"] == "") {
 			// jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei rahtikulu mene uudestaan laskutuksen yhteydessä!
 			if ($laskurow["rahtivapaa"] == '' and onko_rahtituote_syotetty($laskurow, TRUE) > 0) {
 				$tilaus_valmis_ulos .= t("Tilauksella oli käsin syötetty rahtikulu! Merkattiin tilaus rahtivapaaksi, ettei kulua lisätä enää automaattisesti laskutuksessa.")."<br>";
@@ -881,7 +919,7 @@ else {
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
 
-				if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+				if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
 
 					require("inc/sahkoinen_lahete.class.inc");
 
@@ -1736,7 +1774,7 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
-					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
 
 						require("inc/sahkoinen_lahete.class.inc");
 
@@ -1778,7 +1816,7 @@ else {
 						laheta_tilausvahvistus($params_tilausvahvistus);
 					}
 
-					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO'))) {
+					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
 
 						require("inc/sahkoinen_lahete.class.inc");
 

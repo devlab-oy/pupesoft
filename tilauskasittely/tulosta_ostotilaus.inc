@@ -254,16 +254,15 @@
 				}
 
 				// suoratoimituksissa verkkotunnus-kenttään tallentuu vastaanottajan liitostunnus
-				if ($laskurow['verkkotunnus'] != '') {
+				if ($laskurow['verkkotunnus'] != '' and $laskurow['suoraveloitus'] != '') {
 					$query = "	SELECT if(gsm != '', gsm, if(tyopuhelin != '', tyopuhelin, puhelin)) puh
 								FROM asiakas
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$laskurow['verkkotunnus']}'";
 					$puhelinres = pupe_query($query);
+					$puhelinrow = mysql_fetch_assoc($puhelinres);
 
-					if (mysql_num_rows($puhelinres) > 0) {
-						$puhelinrow = mysql_fetch_assoc($puhelinres);
-
+					if ($puhelinrow['puh'] != "") {
 						$pdf->draw_rectangle($lakork, 300, $lakork-21, 580, $thispage, $rectparam);
 						$pdf->draw_text(310, $lakork-8, t("Vastaanottajan puhelinnumero", $kieli), $thispage, $pieni);
 						$pdf->draw_text(310, $lakork-18, $puhelinrow['puh'], $thispage, $norm);

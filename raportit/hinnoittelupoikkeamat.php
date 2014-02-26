@@ -167,6 +167,7 @@
 							AND tuoteno NOT IN (
 								'{$yhtiorow['rahti_tuotenumero']}',
 								'{$yhtiorow['jalkivaatimus_tuotenumero']}',
+								'{$yhtiorow['erilliskasiteltava_tuotenumero']}',
 								'{$yhtiorow['kasittelykulu_tuotenumero']}',
 								'{$yhtiorow['maksuehto_tuotenumero']}',
 								'{$yhtiorow['ennakkomaksu_tuotenumero']}',

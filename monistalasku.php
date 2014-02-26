@@ -599,9 +599,15 @@ if ($tee == "ETSILASKU") {
 				}
 
 				if ($toim == '') {
-					$sel = (isset($kaytetaanhyvityshintoja[$row["tilaus"]]) and $kaytetaanhyvityshintoja[$row["tilaus"]] != '') ? "CHECKED" : "";
 
-					echo "<input class='rekla_{$row['tilaus']}' style='display:none;' type='checkbox' name='kaytetaanhyvityshintoja[{$row['tilaus']}]' value='on' {$sel}> <span style='display: none;' class='rekla_{$row['tilaus']}'>",t("K‰ytet‰‰n reklamaatiolla hyvityshintoja"),"</span>";
+					$display_none = "style='display:none;'";
+
+					if (isset($kaytetaanhyvityshintoja[$row["tilaus"]]) and $kaytetaanhyvityshintoja[$row["tilaus"]] != '') {
+						$sel = "CHECKED";
+						$display_none = "";
+					}
+
+					echo "<input class='rekla_{$row['tilaus']}' {$display_none} type='checkbox' name='kaytetaanhyvityshintoja[{$row['tilaus']}]' value='on' {$sel}> <span {$display_none} class='rekla_{$row['tilaus']}'>",t("K‰ytet‰‰n reklamaatiolla hyvityshintoja"),"</span>";
 				}
 
 				echo "</{$ero}>";

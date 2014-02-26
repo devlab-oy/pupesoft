@@ -198,7 +198,7 @@
 		while ($row = mysql_fetch_array($res)) {
 			$kaikki_tuotteet[] = $row['tuoteno'];
 
-			if ($row['configurable_tuoteno' != "") $kaikki_tuotteet[] = $row['configurable_tuoteno'];
+			if ($row['configurable_tuoteno'] != "") $kaikki_tuotteet[] = $row['configurable_tuoteno'];
 		}
 
 		$kaikki_tuotteet = array_unique($kaikki_tuotteet);

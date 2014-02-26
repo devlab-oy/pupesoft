@@ -43,8 +43,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$this->setTable('tyomaarays');
 		$this->setColumnCount(26);
 		$this->setProggressBar(false);
-
-		$this->split_file($filepath);
 	}
 
 	protected function konvertoi_rivit() {
@@ -422,6 +420,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			while (false !== ($file = readdir($handle))) {
 				if (!in_array($file, array('.', '..', '.DS_Store', 'header_file')) and is_file($file)) {
 					// Jos kyseess‰ on eka file (loppuu "aa"), ei laiteta headeri‰
+					$new_file_filepath = $folder."/{$file}";
 					if (substr($file, -2) != "aa") {
 						// Keksit‰‰n temp file
 						$temp_file = $folder."/{$file}_s";
@@ -431,9 +430,10 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 						// Poistetaan alkuper‰inen file
 						unlink($file);
+						$new_file_filepath = $folder."/{$file}_s";
 					}
 
-					$filepaths[] = $file;
+					$filepaths[] = $new_file_filepath;
 				}
 			}
 			closedir($handle);

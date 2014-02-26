@@ -63,6 +63,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 				asiakas.tunnus AS asiakas_tunnus,
 				kohde.tunnus AS kohde_tunnus,
 				kohde.nimi AS kohde_nimi,
+				kohde.vastuuhenkilo,
 				paikka.nimi AS paikka_nimi,
 				tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
 				tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
@@ -101,7 +102,8 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 	$laitteet = array();
 	while ($laite = mysql_fetch_assoc($result)) {
 		//@TODO suorittajan m‰‰ritt‰miseen pit‰‰ tehd‰ algoritmi jne jne.
-		$laite['tyojono'] = 'joonas';
+		$laite['tyojono'] = $laite['vastuuhenkilo'];
+		$laite['tyostatus'] = 'A';
 		$laitteet[$laite['laite_tunnus']][] = $laite;
 	}
 
@@ -445,7 +447,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 	}
 
 	paivita_laite_tunnus_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
-	paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
+	paivita_tyojono_ja_tyostatus_tyomaarayksille($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
 	paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus'], $toivottu_toimitusaika);
 
 	if ($toivottu_toimitusaika != '') {
@@ -509,15 +511,38 @@ function paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $tilausrivit) {
 	pupe_query($query);
 }
 
-function paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $laite) {
+function paivita_tyojono_ja_tyostatus_tyomaarayksille($tyomaarays_tunnukset, $laite) {
 	global $kukarow, $yhtiorow;
 
+	if (!isset($laite['tyojono']) and !isset($laite['tyostatus'])) {
+		return false;
+	}
+
+	if (empty($tyomaarays_tunnukset)) {
+		return false;
+	}
+
+	$update = "";
+	if (isset($laite['tyojono'])) {
+		$update .= "tyojono = '{$laite['tyojono']}',";
+	}
+	if (isset($laite['tyostatus'])) {
+		$update .= "tyostatus = '{$laite['tyostatus']}',";
+	}
+	$update = substr($update, 0, -1);
+
+	if (!is_array($tyomaarays_tunnukset)) {
+		$tyomaarays_tunnukset = array($tyomaarays_tunnukset);
+	}
+
 	$query = "	UPDATE tyomaarays
-				SET tyojono = '{$laite['tyojono']}',
-				tyostatus = 'A'
+				SET
+				{$update}
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND otunnus = '{$tyomaarays_tunnus}'";
+				AND otunnus IN ('".implode("','", $tyomaarays_tunnukset)."')";
 	pupe_query($query);
+
+	return true;
 }
 
 function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosykli_tunnus, $viimeinen_tapahtuma = '') {

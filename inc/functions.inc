@@ -13799,24 +13799,23 @@ if (!function_exists("pupe_DataTables")) {
 											$('#alerivihintaalkuperainen_'+keijo).val(data.alerivihinta);
 										}
 									);
+								}
+								params.tunnus = keijo;
 
-									params.tunnus = keijo;
+								if ($('#suuntalava_'+keijo+' option:selected').val() == 0) {
 
-									if ($('#suuntalava_'+keijo+' option:selected').val() == 0) {
+									$.ajax({
+										async: false,
+										type: 'POST',
+										url: '{$_SERVER['SCRIPT_NAME']}',
+										data: params,
+										})
+										.done(function(return_value) {
+											var data = jQuery.parseJSON(return_value);
+											var uusilava = data.suuntalavan_tunnus;
+										}
+									);
 
-										$.ajax({
-											async: false,
-											type: 'POST',
-											url: '{$_SERVER['SCRIPT_NAME']}',
-											data: params,
-											})
-											.done(function(return_value) {
-												var data = jQuery.parseJSON(return_value);
-												var uusilava = data.suuntalavan_tunnus;
-											}
-										);
-
-									}
 								}
 							}
 							else {

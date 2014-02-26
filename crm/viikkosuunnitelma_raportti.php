@@ -448,7 +448,7 @@ if ($tee == '') {
 
 				$excelrivi++;
 			}
-			
+
 			$excelnimi = $worksheet->close();
 		}
 	}

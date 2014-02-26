@@ -72,7 +72,6 @@ $request = array(
 	'ala_tee'			 => $ala_tee,
 	'toim'				 => $toim,
 	'lasku_tunnukset'	 => $lasku_tunnukset,
-	'toimitusaika_haku'	 => $toimitusaika_haku,
 	'laite_tunnus'		 => $laite_tunnus,
 	'asiakas_tunnus'	 => $asiakas_tunnus,
 	'kohde_tunnus'		 => $kohde_tunnus,

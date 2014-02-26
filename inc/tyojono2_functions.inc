@@ -82,11 +82,11 @@ function hae_tyomaaraykset($request) {
 
 	if (!empty($request['toimitusaika'])) {
 		if (is_numeric($request['toimitusaika'])) {
-			$lasku_where .= "	AND lasku.toimaika < DATE_ADD(NOW(), INTERVAL {$request['toimitusaika']} DAY)";
+			$lasku_where .= "	AND lasku.toimaika < DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)";
 		}
 		else if ($request['toimitusaika'] == 'X') {
 			//Näytä myöhässä olevat
-			$lasku_where .= "	AND lasku.toimaika < DATE_SUB(NOW(), INTERVAL 1 DAY)";
+			$lasku_where .= "	AND lasku.toimaika < DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)";
 		}
 	}
 

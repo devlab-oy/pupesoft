@@ -454,8 +454,6 @@ if ($tee == '') {
 	}
 	echo "</table>";
 
-	echo "<br><br>";
-
 	if (isset($excelnimi)) {
 		echo "<br><br><table>";
 		echo "<tr><th>",t("Tallenna tulos"),":</th>";

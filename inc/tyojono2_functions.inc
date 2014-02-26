@@ -43,6 +43,9 @@ function hae_tyojono2_css() {
 		#message_box_fail {
 			display:none;
 		}
+		select[disabled] {
+			background-color: gainsboro;
+		}
 	</style>
 	<?php
 	$js = ob_get_clean();
@@ -433,7 +436,7 @@ function echo_tyomaaraykset_table($request = array()) {
 				}
 				echo "</select>";
 				echo "<br/>";
-				echo "<select class='tyostatus_muutos'>";
+				echo "<select class='tyostatus_muutos' disabled='disabled'>";
 				foreach ($request['tyostatukset'] as $tyostatus) {
 					$sel = $tyomaarays['tyostatus_koodi'] == $tyostatus['value'] ? ' SELECTED' : '';
 					echo "<option value='{$tyostatus['value']}' {$sel}>{$tyostatus['text']}</option>";
@@ -579,7 +582,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 			}
 			echo "</select>";
 			echo "<br/>";
-			echo "<select class='tyostatus_muutos'>";
+			echo "<select class='tyostatus_muutos' disabled='disabled'>";
 			foreach ($request['tyostatukset'] as $tyostatus) {
 				$sel = $laite['tyostatus_koodi'] == $tyostatus['value'] ? ' SELECTED' : '';
 				echo "<option value='{$tyostatus['value']}' {$sel}>{$tyostatus['text']}</option>";

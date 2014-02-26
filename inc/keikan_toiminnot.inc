@@ -506,12 +506,13 @@
         
 		require ("../tilauskasittely/suuntalavat.inc");
 		
+		$sscc_gen = uusi_sscc_nro();
 		$params = array(
-			"sscc" => $otunnus.$_POST['tunnus'],
+			"sscc" => $sscc_gen,
 			"usea_keraysvyohyke" => "K",
 			"keraysvyohyke" => $_POST['keraysvyohyke'],
 			"kaytettavyys" => $_POST['kaytettavyys'],
-			"terminaalialue" => $_POST['terminaalialue'],
+			"terminaalialue" => utf8_decode($_POST['terminaalialue']),
 			"automaattinen_paivitys" => "S",
 			"valittutunnus" => $_POST['tunnus'],
 			"tyyppi" => $_POST['tyyppi'],
@@ -539,6 +540,10 @@
 					AND tilausrivi.tyyppi = 'O'";
 
 		$tilausrivi_res = pupe_query($query);
+
+		# Suuntalava siirtovalmiiksi - tarvitaan $suuntalavat_ei_kayttoliittymaa != '', $tee = 'siirtovalmis', $suuntalavan_tunnus
+		$tee = 'siirtovalmis';		 
+		require ("../tilauskasittely/suuntalavat.inc");
 
 		$kirjoitin = (int) $_POST['kirjoitin'];
 

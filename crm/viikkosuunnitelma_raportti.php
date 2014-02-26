@@ -15,7 +15,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 	exit;
 }
 
-echo "<font class='head'>",t("Viikkosuunnitelma"),"</font><hr>";
+echo "<font class='head'>",t("Viikkosuunnitelma raportti"),"</font><hr>";
 
 if (!isset($konserni)) $konserni = "";
 if (!isset($vstk)) $vstk = "";
@@ -25,18 +25,7 @@ if (!isset($asos)) $asos = "";
 if (!isset($aspiiri)) $aspiiri = "";
 if (!isset($asryhma)) $asryhma = "";
 
-$sel1 = $sel11 = $sel22 = $lisa = "";
-
-if ($vstk == '') {
-	$sel11 = "CHECKED";
-	$vstk = "Viikkosuunnitelma";
-}
-if ($vstk == 'Viikkosuunnitelma') {
-	$sel11 = "CHECKED";
-}
-if ($vstk == 'Asiakaskäynti') {
-	$sel22 = "CHECKED";
-}
+$lisa = "";
 
 print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			$(function() {
@@ -113,17 +102,15 @@ if ($tee == '') {
 		$chk = trim($konserni) != '' ? "CHECKED" : "";
 		echo "<tr><th>",t("Näytä konsernin kaikki asiakkaat"),":</th><td colspan='3'><input type='checkbox' name='konserni' {$chk}></td></tr>";
 	}
-
 	$chk = trim($piilota_matkasarakkeet) != '' ? "CHECKED" : "";
-
 	echo "<tr><th>",t("Piilota matkasarakkeet"),":</th><td colspan='3'><input type='checkbox' id='piilota_matkasarakkeet' name='piilota_matkasarakkeet' {$chk}></td></tr>";
 
 	if (!isset($kka))
-		$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+		$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 	if (!isset($vva))
-		$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+		$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 	if (!isset($ppa))
-		$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+		$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 
 	if (!isset($kkl))
 		$kkl = date("m");
@@ -267,6 +254,10 @@ if ($tee == '') {
 
 	echo "<br><br><table>";
 
+	$asiakasjoini = "";
+	if ($lisa != '') {
+		$asiakasjoini = " LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = kalenteri.yhtio) ";
+	}
 	foreach($yhtiot as $yhtio) {
 		$query = "SELECT kuka.nimi kukanimi, 
 		kuka.yhtio yhtijo,
@@ -277,17 +268,19 @@ if ($tee == '') {
 		FROM kalenteri
 		JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
 		JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ({$kale_querylisa}))
+		{$asiakasjoini}
 		WHERE kalenteri.yhtio = '{$yhtio}'
 		AND kalenteri.kuka IN ({$vertaa})
-		AND kalenteri.pvmalku >= '2014-01-24 00:00:00'
-		AND kalenteri.pvmalku <= '2014-02-24 23:59:59'
+		AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+		AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 		AND kalenteri.tyyppi IN ('kalenteri','memo')
 		AND kalenteri.tapa = avainsana.selitetark
+		{$lisa}
 		GROUP BY 1,2,3
 		HAVING count(*) > 0
 		ORDER BY kukanimi, aselitetark";
 		$result_group = pupe_query($query);
-		
+
 		if (mysql_num_rows($result_group) > 0) {
 
 			include('inc/pupeExcel.inc');
@@ -346,10 +339,11 @@ if ($tee == '') {
 								LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
 								WHERE kalenteri.yhtio = '{$yhtio}'
 								AND kalenteri.kuka IN ('{$rivi['kuka']}')
-								AND kalenteri.pvmalku >= '2014-01-24 00:00:00'
-								AND kalenteri.pvmalku <= '2014-02-24 23:59:59'
+								AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+								AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 								AND kalenteri.tyyppi IN ('kalenteri','memo')
 								AND kalenteri.tapa = avainsana.selitetark
+								{$lisa}
 								ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
 				$ressu = pupe_query($query);
 
@@ -425,10 +419,11 @@ if ($tee == '') {
 							LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
 							WHERE kalenteri.yhtio = '{$yhtio}'
 							AND kalenteri.kuka IN ($vertaa)
-							AND kalenteri.pvmalku >= '2014-01-24 00:00:00'
-							AND kalenteri.pvmalku <= '2014-02-24 23:59:59'
+							AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+							AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 							AND kalenteri.tyyppi IN ('kalenteri','memo')
 							AND kalenteri.tapa = avainsana.selitetark
+							{$lisa}
 							ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
 			$ressu = pupe_query($query);
 

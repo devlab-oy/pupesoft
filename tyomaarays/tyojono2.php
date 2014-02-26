@@ -40,6 +40,16 @@ if ($tee == 'lataa_tiedosto') {
 
 //AJAX requestit tänne
 if ($ajax_request) {
+	if ($action == 'paivita_tyomaaraysten_tyojonot') {
+		if (!empty($lasku_tunnukset)) {
+			$params = array(
+				'tyojono' => $tyojono,
+			);
+			$ok = paivita_tyojono_ja_tyostatus_tyomaarayksille($lasku_tunnukset, $params);
+
+			echo $ok;
+		}
+	}
 	exit;
 }
 
@@ -66,6 +76,9 @@ $request = array(
 	'laite_tunnus'		 => $laite_tunnus,
 	'asiakas_tunnus'	 => $asiakas_tunnus,
 	'kohde_tunnus'		 => $kohde_tunnus,
+	'tyojono'			 => $tyojono,
+	'tyostatus'			 => $tyostatus,
+	'toimitusaika'		 => $toimitusaika,
 );
 
 $request['tyojonot'] = hae_tyojonot($request);
@@ -73,6 +86,18 @@ $request['tyojonot'] = hae_tyojonot($request);
 $request['tyostatukset'] = hae_tyostatukset($request);
 
 echo "<div id='tyojono_wrapper'>";
+
+echo "<div id='message_box_success'>";
+echo '<font class="message">'.t('Päivitys onnistui').'</font>';
+echo "<br/>";
+echo "<br/>";
+echo "</div>";
+
+echo "<div id='message_box_fail'>";
+echo '<font class="message">'.t('Päivitys epäonnistui').'</font>';
+echo "<br/>";
+echo "<br/>";
+echo "</div>";
 
 if (is_string($request['lasku_tunnukset'])) {
 	$request['lasku_tunnukset'] = explode(',', $lasku_tunnukset);

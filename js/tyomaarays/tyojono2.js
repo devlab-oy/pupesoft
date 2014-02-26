@@ -71,6 +71,76 @@
 			});
 		};
 
+		this.bind_tyojono_muutos_lasku_change = function() {
+			$('.tyojono_muutos_lasku').on('change', function() {
+				var lasku_tunnukset = [];
+				lasku_tunnukset.push($(this).parent().parent().parent().find('input.lasku_tunnus').val());
+
+				var tyojono_paivitys_request_obj = paivita_laskujen_tyojonot(lasku_tunnukset, $(this).val());
+
+				tyojono_paivitys_request_obj.success(function() {
+					$('#message_box_success').delay(500).fadeIn('normal', function() {
+						$(this).delay(2500).fadeOut();
+					});
+				});
+			});
+		};
+
+		this.bind_tyojono_muutos_kohde_change = function() {
+			$('.tyojono_muutos_kohde').on('change', function() {
+				var tyojono = $(this).val();
+				var $kohde_tr = $(this).parent().parent();
+				var lasku_tunnukset = $kohde_tr.find('input.lasku_tunnukset').val().split(',');
+
+				var tyojono_paivitys_request_obj = paivita_laskujen_tyojonot(lasku_tunnukset, tyojono);
+
+				tyojono_paivitys_request_obj.success(function() {
+					$('#message_box_success').delay(500).fadeIn('normal', function() {
+						$(this).delay(2500).fadeOut();
+					});
+
+					//Päivitetään myös "childien työjonot"
+					var lasku_selectit = $kohde_tr.next().find('select.tyojono_muutos_lasku');
+					lasku_selectit.each(function(index, select) {
+						$(select).val(tyojono);
+					});
+				});
+
+				tyojono_paivitys_request_obj.fail(function() {
+					$('#message_box_fail').delay(500).fadeIn('normal', function() {
+						$(this).delay(2500).fadeOut();
+					});
+				});
+			});
+		};
+
+		var paivita_laskujen_tyojonot = function(lasku_tunnukset, tyojono) {
+			return $.ajax({
+				async: true,
+				dataType: 'json',
+				type: 'POST',
+				data: {
+					lasku_tunnukset: lasku_tunnukset,
+					tyojono: tyojono
+				},
+				url: 'tyojono2.php?ajax_request=true&action=paivita_tyomaaraysten_tyojonot&no_head=yes'
+			}).done(function(data) {
+				if (console && console.log) {
+					console.log('Päivitys onnistui');
+					console.log(data);
+				}
+			});
+		};
+
+		this.bind_all_events = function() {
+			this.bind_kohde_tr_click();
+			this.bind_select_kaikki_checkbox();
+			this.bind_laite_checkbox();
+			this.bind_aineisto_submit_button_click();
+			this.bind_tyojono_muutos_lasku_change();
+			this.bind_tyojono_muutos_kohde_change();
+		};
+
 	};
 
 	$.fn.tyojonoPlugin = function() {

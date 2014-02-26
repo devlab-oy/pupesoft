@@ -913,7 +913,7 @@
 				else {
 					$ketjutus_group = "";
 				}
-				
+
 				if ($yhtiorow["lisakulu_tuotenumero"] != "") {
 					$tlhinta   = 0;
 
@@ -1115,6 +1115,12 @@
 									}
 								}
 							}
+						}
+						elseif (mysql_num_rows($otsre) != 1 and $silent == "") {
+							$tulos_ulos .= "<tr><td>".t("Erilliskäsiteltäväkulua ei löydy!")."</td><td>{$laskurow['tunnus']}</td><td>{$laskurow['toimitustapa']}</td></tr>\n";
+						}
+						elseif ($silent == "") {
+							$tulos_ulos .= "<tr><td>".t("Erilliskäsiteltäväkulua ei osattu lisätä!")." {$virhe}</td><td>{$otsikot}</td><td>{$laskurow['toimitustapa']}</td></tr>\n";
 						}
 					}
 

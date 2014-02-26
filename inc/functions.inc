@@ -17881,6 +17881,23 @@ if (!function_exists("tee_keraysera")) {
 								}
 
 								if (!$yksin_kerailyalustalle_normi_tuote_trigger) {
+
+									if ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] > 0) {
+										$eran_koko += $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'];
+										$eran_koko_pintaala += ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys']);
+
+										if ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
+											if (isset($kukarow['debugstring'])) {
+												$kukarow['debugstring'] .= "(E1120): Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $x kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $x)<br><br>\n";
+											}
+
+											$x--;
+
+											$era_valmis = true;
+											break 3;
+										}
+									}
+
 									$kaytettava_pakkaus = "";
 								}
 							}

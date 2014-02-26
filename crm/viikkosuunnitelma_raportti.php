@@ -56,6 +56,13 @@ print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 					var id = $(this).attr('id');
 					$('.'+id).toggle();
 					$(this).toggleClass('tumma');
+					if ($('.'+id).is(':visible')) {
+						$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
+					}
+					else {
+						$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
+					}
+
 				});
 			});
 		</script>";
@@ -291,7 +298,7 @@ if ($tee == '') {
 
 			while ($rivi = mysql_fetch_assoc($result)) {
 				echo "<tr class='show_all' id='{$rivi['kuka']}_{$rivi['tunnus']}'>";
-				echo "<td>{$rivi['kukanimi']}</td>";
+				echo "<td><img style='float:left;' id='img_{$rivi['kuka']}_{$rivi['tunnus']}' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$rivi['kukanimi']}</td>";
 				echo "<td>{$rivi['yhtijo']}</td>";
 				echo "<td>{$rivi['aselitetark']}</td>";
 				echo "<td>{$rivi['montakotapahtumaa']}</td>";

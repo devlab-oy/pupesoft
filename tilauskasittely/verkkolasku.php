@@ -1079,7 +1079,7 @@
 						if (mysql_num_rows($otsre) == 1 and $virhe == 0) {
 
 							// kirjoitetaan jv kulurivi ekalle otsikolle
-							$query = "  SELECT *
+							$query = "  SELECT erilliskasiteltavakulu
 										FROM toimitustapa
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND selite = '{$laskurow['toimitustapa']}'";

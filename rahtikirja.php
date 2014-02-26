@@ -2900,7 +2900,7 @@
 				$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 				$rhire = pupe_query($query);
 
-				if (mysql_num_rows($rhire) == 1 and $merahti!='') {
+				if (mysql_num_rows($rhire) == 1) {
 					$trow  = mysql_fetch_assoc($rhire);
 
 					$query = "	SELECT

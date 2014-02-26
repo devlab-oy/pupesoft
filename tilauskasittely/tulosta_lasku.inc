@@ -2454,7 +2454,7 @@ if (!function_exists("tulosta_lasku")) {
 					min(tilausrivi.hyllynro) hyllynro,
 					min(tilausrivi.keratty) keratty,
 					min(if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika)) toimaika,
-					min(if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', if(date_format(tilausrivi.laskutettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.laskutettuaika, '%Y-%m-%d')), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d'))) toimitettuaika,
+					min(if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d'))) toimitettuaika,
 					min(tilausrivi.otunnus) otunnus,
 					min(tilausrivi.perheid) perheid,
 					min(tilausrivi.tunnus) tunnus,

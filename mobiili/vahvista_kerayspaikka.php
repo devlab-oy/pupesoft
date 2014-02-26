@@ -109,45 +109,32 @@ if (isset($submit) and trim($submit) != '') {
 					pupe_query($query);
 				}
 
-				//tarkistetaan vielä ettei riviä ole jo viety varastoon
-				$viety_query = "	SELECT uusiotunnus
-									FROM tilausrivi
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$row['tunnus']}'
-									AND laskutettuaika != '0000-00-00'";
-				$viety = pupe_query($viety_query);
+				// Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
+				if ($maara < $row['varattu']) {
 
-				if (mysql_num_rows($viety) == 0) {
-					// Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
-					if ($maara < $row['varattu']) {
-						// Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
-						// Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
-						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
+					// Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
+					// Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
+					splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
 
-						// Alkuperäinen viedään varastoon, splitattu jää jâljelle
-						$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
-						$tilausrivit[] = $tilausrivi;
+					// Alkuperäinen viedään varastoon, splitattu jää jâljelle
+					$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
+					$tilausrivit[] = $tilausrivi;
 
-						// Ei voi olla viimeinen rivi jos rivi on splitattu
-						$viimeinen = false;
-					}
-					elseif ($maara == $row['varattu']) {
-						$tilausrivit[] = $tilausrivi;
-					}
-					else {
-						# Tehdään insertti erotukselle
-						$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
-
-						# Päivitä kopioidun kpl (maara - varattu)
-						paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
-
-						$tilausrivit = array($tilausrivi, $kopioitu_tilausrivi);
-					}
+					// Ei voi olla viimeinen rivi jos rivi on splitattu
+					$viimeinen = false;
+				}
+				elseif ($maara == $row['varattu']) {
+					$tilausrivit[] = $tilausrivi;
 				}
 				else {
-					echo t("Tuote oli jo viety varastoon! Ei viedä tuotetta uudestaan varastoon!");
-				}
+					# Tehdään insertti erotukselle
+					$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
 
+					# Päivitä kopioidun kpl (maara - varattu)
+					paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
+
+					$tilausrivit = array($tilausrivi, $kopioitu_tilausrivi);
+				}
 
 				$temppi_lava = false;
 

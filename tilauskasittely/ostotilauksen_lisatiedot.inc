@@ -1,21 +1,5 @@
 <?php
 
-$query  = "	SELECT *
-			FROM lasku
-			WHERE tunnus = '$otunnus'
-			AND yhtio 	 = '$kukarow[yhtio]'
-			AND tila 	 = 'K'
-			AND alatila != 'X'";
-$result = pupe_query($query);
-
-if (mysql_num_rows($result) == 1) {
-	$laskurow = mysql_fetch_assoc($result);
-}
-else {
-	echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
-	exit;
-}
-
 // lasku taulussa käytetään kenttiä seuraavasti:
 //
 // rahti			= kuluprosentti
@@ -23,6 +7,10 @@ else {
 // rahti_huolinta	= kulusumma (jos löytyy niin ohittaa kuluprosentin)
 
 if ($tee == "update") {
+
+	$query = "SELECT * from lasku WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array ($result);
 
 	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
 
@@ -128,7 +116,7 @@ if ($tee == "update") {
 				yhtio_toimipaikka		= '{$toimipaikka}'
 				WHERE tunnus = '$otunnus'
 				and yhtio 	 = '$kukarow[yhtio]'";
-	$result = pupe_query($query);
+	$result = mysql_query($query) or pupe_error($query);
 
 	$query_erikoisale = "	UPDATE tilausrivi
 							SET erikoisale_saapuminen = '{$erikoisale_saapuminen}'
@@ -154,11 +142,18 @@ if ($tee == "update") {
 
 if ($tee == "") {
 
+	$query = "SELECT *
+			  FROM lasku
+			  	WHERE tunnus = '$otunnus'
+				and yhtio = '$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array ($result);
+
 	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
 
 	// haetaan toimittajan tiedot
 	$query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";
-	$result = pupe_query($query);
+	$result = mysql_query($query) or pupe_error($query);
 	$toimittaja = mysql_fetch_array($result);
 
 	// katotaan paljonko on kohdistamatta
@@ -209,7 +204,7 @@ if ($tee == "") {
 				FROM maat
 				where nimi != ''
 				ORDER BY koodi";
-	$result = pupe_query($query);
+	$result = mysql_query($query) or pupe_error($query);
 	echo "<option value=''>".t("Valitse")."</option>";
 
 	while($row = mysql_fetch_array($result)) {
@@ -237,7 +232,7 @@ if ($tee == "") {
 				FROM maat
 				where nimi != ''
 				ORDER BY koodi";
-	$result = pupe_query($query);
+	$result = mysql_query($query) or pupe_error($query);
 
 	if ($laskurow["maa_maara"] == "") {
 		$query = "	SELECT varastopaikat.maa, count(*) kpl
@@ -251,7 +246,7 @@ if ($tee == "") {
 					GROUP BY varastopaikat.maa
 					ORDER BY kpl DESC
 					LIMIT 1";
-		$maaresult = pupe_query($query);
+		$maaresult = mysql_query($query) or pupe_error($query);
 
 		if ($maarow = mysql_fetch_array($maaresult)) {
 			$laskurow["maa_maara"] = $maarow["maa"];
@@ -327,7 +322,7 @@ if ($tee == "") {
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 					AND tilausrivi.tyyppi != 'D'";
-		$painoresult = pupe_query($query);
+		$painoresult = mysql_query($query) or pupe_error($query);
 		$painorow = mysql_fetch_array($painoresult);
 
 		if ($painorow["kpl"] > 0) {
@@ -407,7 +402,7 @@ if ($tee == "") {
 				AND tilausrivi.tyyppi != 'D'
 				GROUP BY 1
 				ORDER BY 1";
-	$painoresult = pupe_query($query);
+	$painoresult = mysql_query($query) or pupe_error($query);
 
 	while ($painorow = mysql_fetch_array($painoresult)) {
 		echo "<tr><th>".t("Tilaus").": {$painorow['otunnus']}</th><td colspan='3'><input type='text' name='tilauksen_erikoisale[{$painorow['otunnus']}]' size='5' value='{$painorow['erikoisale']}'></td></tr>";

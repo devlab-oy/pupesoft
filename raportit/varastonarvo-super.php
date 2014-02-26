@@ -111,13 +111,6 @@
 			$rukTchk = "";
 		}
 
-		if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
-			$rukVchk = "CHECKED";
-		}
-		else {
-			$rukVchk = "";
-		}
-
 		echo "<br><table>
 			<tr>
 			<th>".t("Listaa vain tuotteet, jotka ei kuulu mihink‰‰n osastoon")."</th>
@@ -126,10 +119,6 @@
 			<tr>
 			<th>".t("Listaa vain tuotteet, jotka ei kuulu mihink‰‰n tuoteryhm‰‰n")."</th>
 			<td><input type='checkbox' name='tuoteryhma_tyhjat' value='tyhjat' $rukTchk></td>
-			</tr>
-			<tr>
-			<th>".t("Listaa osto ja myyntitiedot vain valituista varastoista")."</th>
-			<td><input type='checkbox' name='valitut_varastot_rajaus' value='valitut' $rukVchk></td>
 			</tr></table>";
 
 		echo "<br><table>";
@@ -1109,14 +1098,6 @@
 						$summaus_lisa = "";
 					}
 
-					$varastorajausjoini = '';
-					if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
-						$varastorajausjoini = " JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
-												and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
-												and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
-												$mistavarastosta) ";
-					}
-
 					if ($kiertoviilasku != "") {
 						// Haetaan tuotteen myydyt kappaleet
 						// Haetaan tuotteen kulutetut kappaleet
@@ -1141,22 +1122,20 @@
 						// Viimeisin laskutusp‰iv‰m‰‰r‰
 						$query = "	SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) laskutettuaika
 									FROM tapahtuma use index (yhtio_tuote_laadittu)
-									$varastorajausjoini
-									WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
-									and tapahtuma.tuoteno  = '{$row['tuoteno']}'
-									and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
-									and tapahtuma.laji 	 = 'laskutus'";
+									WHERE yhtio  = '$kukarow[yhtio]'
+									and tuoteno  = '{$row['tuoteno']}'
+									and laadittu > '{$xmyyrow['laskutettuaika']}'
+									and laji 	 = 'laskutus'";
 						$xmyyres = pupe_query($query);
 						$xmyypvmrow = mysql_fetch_assoc($xmyyres);
 
 						// Viimeisin kulutusp‰iv‰m‰‰r‰
 						$query = "	SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) kulutettuaika
 									FROM tapahtuma use index (yhtio_tuote_laadittu)
-									$varastorajausjoini
-									WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
-									and tapahtuma.tuoteno  = '{$row['tuoteno']}'
-									and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
-									and tapahtuma.laji 	 = 'kulutus'";
+									WHERE yhtio  = '$kukarow[yhtio]'
+									and tuoteno  = '{$row['tuoteno']}'
+									and laadittu > '{$xmyyrow['laskutettuaika']}'
+									and laji 	 = 'kulutus'";
 						$xmyyres = pupe_query($query);
 						$xkulpvmrow = mysql_fetch_assoc($xmyyres);
 
@@ -1239,22 +1218,6 @@
 				$excelsarake++;
 				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
 				$excelsarake++;
-
-				if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
-					$query_a = " SELECT ifnull(max(laadittu), '0000-00-00') vihapvm
-								FROM tapahtuma use index (yhtio_tuote_laadittu)
-								JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
-														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
-														and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
-														$mistavarastosta)
-								WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
-								and tapahtuma.tuoteno  = '{$row['tuoteno']}'
-								and tapahtuma.laadittu >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)
-								and tapahtuma.laji 	 = 'tulo'";
-					$result_a = pupe_query($query_a);
-					$resultti_a = mysql_fetch_assoc($result_a);
-					$row['vihapvm'] = $resultti_a['vihapvm'];
-				}
 
 				if ($variaatiosummaus == "") {
 

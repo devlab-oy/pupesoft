@@ -2,19 +2,15 @@
 	# Voidaan tehdä uusi lava ilman otunnusta
 	if(!empty($otunnus)) {
 
-		$query  = "	SELECT *
-					FROM lasku
-					WHERE tunnus = '$otunnus'
-					AND yhtio 	 = '$kukarow[yhtio]'
-					AND tila 	 = 'K'
-					AND alatila != 'X'";
+		$query  = "SELECT * FROM lasku WHERE tunnus = '{$otunnus}' AND yhtio = '{$kukarow['yhtio']}' AND tila = 'K'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$laskurow = mysql_fetch_assoc($result);
 		}
 		else {
-			echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
+			echo "<font class='error'>",t("VIRHE: Tilausta ei enää löydy"),"!</font>";
+			require('../inc/footer.inc');
 			exit;
 		}
 	}

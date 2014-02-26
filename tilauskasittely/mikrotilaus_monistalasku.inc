@@ -79,6 +79,8 @@ if ($tee == "file") {
 		$hyvit 		= "";
 		$slask 		= "";
 		$krahd		= "";
+		$rekla 		= "";
+		$rekla_hinnat = "";
 
 		fclose($file);
 	}

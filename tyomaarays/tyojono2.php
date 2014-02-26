@@ -126,10 +126,18 @@ else {
 
 		$multi = false;
 
+		//requestista voi tulla lasku_tunnukset, joko stringinä tai arraynä
+		//Jos se tulee arraynä niin arrayn solu voi pitää sisällään joko yhden tai useamman lasku_tunnuksen pilkulla eroteltuna
+		//tästä syystä todella epäselvää
+		//lasku_tunnukset_temp halutaan olevan yksiulotteinen array tunnuksista
+		$lasku_tunnukset_temp = array();
 		if (is_array($lasku_tunnukset)) {
 			foreach ($lasku_tunnukset as $tunnus) {
 				$tunnus = explode(',', $tunnus);
 				$tunnukset[] = $tunnus;
+				foreach ($tunnus as $t) {
+					$lasku_tunnukset_temp[] = $t;
+				}
 			}
 			$lasku_tunnukset = $tunnukset;
 			$multi = true;
@@ -152,7 +160,7 @@ else {
 			}
 
 			echo_tallennus_formi($pdf_tiedosto, $uusi_nimi, 'pdf', $number);
-			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
+			aseta_tyomaaraysten_status($lasku_tunnukset_temp, 'T');
 		}
 		else {
 			echo t("Työlista tiedostojen luonti epäonnistui");

@@ -859,7 +859,7 @@
 
 				if (trim($row["kommentti"]) != '') {
 					if ($yhtiorow['purkulistan_asettelu'] == 'A') {
-						$_row_height = $kala+$pieni["height"]+25;
+						$_row_height = $kala+20;
 
 				        $paras = explode("\n", $row["kommentti"]);
 				        for ($i = 0; ($_row_height > $kala and count($paras) > 0); $i++) {

@@ -30,7 +30,7 @@
 		$paivamaaran_kasisyotto = "JOO";
 	}
 
-		if ($livesearch_tee == "TUOTEHAKU") {
+	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
 	}
@@ -249,6 +249,10 @@
 						list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
 						if (!checkdate($mm, $dd, $yyyy)) {
 							echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("Anna p‰iv‰m‰‰r‰ muodossa")." yyyy-mm-dd </font><br>";
+							$virhe = 1;
+						}
+						elseif (strtotime("{$yyyy}-{$mm}-{$dd}") < strtotime($yhtiorow['tilikausi_alku']) or strtotime("{$yyyy}-{$mm}-{$dd}") > strtotime($yhtiorow['tilikausi_loppu'])) {
+							echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("P‰iv‰m‰‰r‰ ei ole avoimella tilikaudella")."</font><br>";
 							$virhe = 1;
 						}
 					}

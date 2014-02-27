@@ -356,12 +356,13 @@ function echo_tyomaaraykset_table($request = array()) {
 		echo "</td>";
 
 		if ($request['toim'] == 'TEHDYT_TYOT') {
+
 			echo "<td>";
+
 			echo $tyomaarays['tyojono'];
 			echo "<br/>";
 			echo $tyomaarays['tyostatus'];
 			echo "</td>";
-
 			echo "<td>";
 			echo "<form class='multisubmit' name='tulosta_tarkastuspoytakirja'>";
 			echo "<input type='hidden' name='ala_tee' value='tulosta_tarkastuspoytakirja' />";
@@ -369,7 +370,18 @@ function echo_tyomaaraykset_table($request = array()) {
 			echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
 			echo "<input type='submit' value='".t("Tallenna tarkastuspyötäkirja PDF")."' />";
 			echo "</form>";
+
+			echo "<br/>";
+
+			echo "<form class='multisubmit' name='tulosta_laskutuspoytakirja'>";
+			echo "<input type='hidden' name='ala_tee' value='tulosta_laskutuspoytakirja' />";
+			echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
+			echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
+			echo "<input type='submit' value='".t("Tallenna laskutuspyötäkirja PDF")."' />";
+			echo "</form>";
+
 			echo "</td>";
+
 		}
 		else {
 			if (!empty($tyomaarays["tyostatusvari"])) {
@@ -500,7 +512,7 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 			echo "<td>";
 			echo $laite['tyojono'];
 			echo "<br/>";
-			echo $laite['tyojono'];
+			echo $laite['tyostatus'];
 			echo "</td>";
 
 			echo "<td>";

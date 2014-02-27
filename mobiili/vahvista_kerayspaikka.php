@@ -56,12 +56,12 @@ if(isset($hylly)) {
 $alkuperainen_saapuminen = $saapuminen;
 
 # Tullaan nappulasta
-if (isset($submit) and trim($submit) != '') {
+if (isset($submit_button) and trim($submit_button) != '') {
 
 	# Virheet
 	$errors = array();
 
-	switch ($submit) {
+	switch ($submit_button) {
 
 		case 'new':
 			echo "<META HTTP-EQUIV='Refresh' CONTENT='0; URL=uusi_kerayspaikka.php?{$url}'>";
@@ -286,7 +286,7 @@ if (isset($hyllytetty)) {
 
 echo "
 	<script type='text/javascript'>
-		function vahvista() {
+		function vahvista_formin_submittaus() {
 			var maara = document.getElementById('maara').value;
 			var row_varattu = parseInt(document.getElementById('row_varattu').innerHTML);
 			if(maara > row_varattu) {
@@ -376,11 +376,11 @@ echo "<tr>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' class='button' value='submit' id='vahvista' onclick='return vahvista();'>",t("Vahvista"),"</button>";
+	<button name='submit_button' class='button' value='submit' id='vahvista' onclick='return vahvista_formin_submittaus();'>",t("Vahvista"),"</button>";
 
 # Jos hyllytyksestä niin tämä piiloon
 if (!isset($hyllytys)) {
-	echo "<button class='button right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
+	echo "<button class='button right' name='submit_button' value='new'>",t("Uusi keräyspaikka"),"</button>";
 
 	$saapuminen = !isset($saapuminen) ? $row['uusiotunnus'] : $saapuminen;
 

@@ -921,9 +921,9 @@
 			$ots .= sprintf ('%-7.7s',		t("Määrä"));
 			$ots .= sprintf ('%-9.9s', 		t("Yksikkö"));
 			$ots .= sprintf ('%-7.7s',	 	t("Tikpl"));
-			$ots .= sprintf ('%-13.13s',	 	t("Enn/Ker"));
+			$ots .= sprintf ('%-13.13s',	t("Enn/Ker"));
 			$ots .= "\n";
-			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n\n";
+			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n";
 			fwrite($fh, str_replace("<SIVUNUMERO>","1",$ots));
 			$ots = chr(12).$ots;
 
@@ -949,7 +949,7 @@
 					$munresult = pupe_query($query);
 				}
 
-				if ($rivit >= 17) {
+				if ($rivit >= 18) {
 					$sivulaskuri++;
 					fwrite($fh, str_replace("<SIVUNUMERO>",$sivulaskuri,$ots));
 					$rivit = 1;
@@ -1015,7 +1015,11 @@
 					$tuoterow["inventointiaika"] = t("Ei inventoitu");
 				}
 
-				$prn  = sprintf ('%-18.14s', 	$tuoterow["varastopaikka"]);
+				$prn = "\n";
+
+				if ($rivit > 1) $prn .= "\n";
+
+				$prn .= sprintf ('%-18.14s', 	$tuoterow["varastopaikka"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["tuoteno"]);
 
 				// Jos valittu toim_tuoteno piilotus ei sitä piirretä (säästetään tilaa)
@@ -1130,7 +1134,7 @@
 							$prn .= sprintf ('%-42.42s', $sarjarow["sarjanumero"]);
 							$prn .= sprintf ('%-74.74s', $sarjarow["nimitys"].$fnlina22);
 
-							if ($rivit >= 17) {
+							if ($rivit >= 18) {
 								fwrite($fh, $ots);
 								$rivit = 1;
 							}
@@ -1138,9 +1142,8 @@
 					}
 				}
 
-				$prn .= "\n\n";
-				$prn .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n";
-
+				$prn .= "\n";
+				$prn .= "_______________________________________________________________________________________________________________________________________$katkoviiva";
 
 				fwrite($fh, $prn);
 				$rivit++;

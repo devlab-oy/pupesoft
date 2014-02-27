@@ -499,9 +499,7 @@ if ($tee == '') {
 					echo "</tr>";
 				}
 			}
-			if(!$piirra_yhteenveto) {
-				echo "</table>";
-			}
+			if(!$piirra_yhteenveto) echo "</table>";
 			$excelnimi = $worksheet->close();
 		}
 	}

@@ -98,8 +98,8 @@ if ($request['action'] == 'aja_konversio') {
 			echo "alku:" .date('Y-m-d H:i:s');
 			foreach ($tiedostot as $tiedosto) {
 				echo $tiedosto.'<br/>';
-//                $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
-				$output = exec("php tarkastukset.php {$tiedosto}", $arr, $ret);
+                $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
+//				$output = exec("php tarkastukset.php {$tiedosto}", $arr, $ret);
 				echo "<pre>";
 				var_dump($arr);
 				echo $ret;
@@ -364,16 +364,76 @@ function tarkasta_tarkastukset() {
 	global $kukarow, $yhtiorow;
 
 	$vanhat_tarkastukset = hae_vanhat_tarkastukset();
+	$huoltosyklit = hae_kaikkien_laitteiden_huoltosyklit();
 
+	$oikein = 0;
+	$vaarin = 0;
 	foreach ($vanhat_tarkastukset as $vanha_tarkastus) {
-
+		
+		$uusi_paiva = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']]['seuraava_tapahtuma'];
+		if ($uusi_paiva == null) {
+			$vaarin++;
+			echo "seuraava_tapahtuma null";
+			echo "<br/>";
+			continue;
+		}
+		
+		if ($uusi_paiva != $vanha_tarkastus['ED']) {
+			$vaarin++;
+			echo "Laite {$vanha_tarkastus['LAITE']} toimenpide {$vanha_tarkastus['TUOTENRO']} {$uusi_paiva} pitäisi olla {$vanha_tarkastus['ED']}";
+			echo "<br/>";
+		}
+		else {
+			$oikein++;
+			echo "Oikein oli";
+			echo "<br/>";
+		}
 	}
+	
+	echo "<br/>";
+	echo "<br/>";
+	echo "Oikein: {$oikein} Vaarin: {$vaarin}";
+}
+
+function hae_kaikkien_laitteiden_huoltosyklit() {
+	global $kukarow, $yhtiorow;
+	
+	$query = "	SELECT laite.tuoteno AS laite_tuoteno,
+				laite.koodi AS laite_koodi,
+				hl.viimeinen_tapahtuma,
+				hl.huoltovali,
+				h.toimenpide AS toimenpide_tuoteno
+				FROM laite
+				JOIN huoltosyklit_laitteet AS hl
+				ON (hl.yhtio = laite.yhtio
+					AND hl.laite_tunnus = laite.tunnus )
+				JOIN huoltosykli AS h
+				ON (h.yhtio = hl.yhtio
+					AND h.tunnus = hl.huoltosykli_tunnus )
+				WHERE laite.yhtio = '{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+	
+	$huoltovalit = huoltovali_options();
+	$huoltosyklit = array();
+	while($huoltosykli = mysql_fetch_assoc($result)) {
+		$huoltosykli['seuraava_tapahtuma'] = date('Y-m-d', strtotime("{$huoltosykli['viimeinen_tapahtuma']} + {$huoltovalit[$huoltosykli['huoltovali']]['years']} years")) . ' 00:00:00';
+		$huoltosyklit[$huoltosykli['laite_koodi']]['huoltosyklit'][$huoltosykli['toimenpide_tuoteno']] = $huoltosykli;
+	}
+	
+	return $huoltosyklit;
 }
 
 function hae_vanhat_tarkastukset() {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELETCT *
+	$query = "	SELECT ID,
+				LAITE,
+				TARKASTUS,
+				TUOTENRO,
+				NIMIKE,
+				ED,
+				VALI,
+				TUNNUS
 				FROM tarkastukset
 				WHERE STATUS = 'Ilmoitettu'";
 	$result = pupe_query($query);

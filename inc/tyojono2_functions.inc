@@ -547,10 +547,16 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 		echo "</td>";
 
 		if ($request['toim'] == 'TEHDYT_TYOT') {
+			if (empty($laite['tyojono'])) {
+				$tyojono = t('Tekijä tuntematon');
+			}
+			else {
+				$tyojono = $laite['tyojono'];
+			}
 			echo "<td>";
-			echo $laite['tyojono'];
+			echo $tyojono;
 			echo "<br/>";
-			echo $laite['tyojono'];
+			echo $laite['tyostatus'];
 			echo "</td>";
 
 			echo "<td>";

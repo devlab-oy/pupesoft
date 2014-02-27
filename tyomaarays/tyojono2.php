@@ -80,6 +80,10 @@ $request = array(
 	'toimitusaika'		 => $toimitusaika,
 );
 
+if (!isset($request['toimitusaika'])) {
+	$request['toimitusaika'] = 28;
+}
+
 $request['tyojonot'] = hae_tyojonot($request);
 
 $request['tyostatukset'] = hae_tyostatukset($request);

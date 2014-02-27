@@ -80,7 +80,7 @@
 	$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 	// alustetaan arrayt
-	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = array();
+	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = $individual_tuotteet = array();
 
 	if ($ajetaanko_kaikki == "NO") {
 		$muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
@@ -198,6 +198,7 @@
 		while ($row = mysql_fetch_array($res)) {
 			$kaikki_tuotteet[] = $row['tuoteno'];
 
+			if ($row['configurable_tuoteno'] == "") $individual_tuotteet[$row['tuoteno']] = $row['tuoteno'];
 			if ($row['configurable_tuoteno'] != "") $kaikki_tuotteet[] = $row['configurable_tuoteno'];
 		}
 
@@ -583,7 +584,7 @@
 		// Tuotteet (Simple)
 		if (count($dnstuote) > 0) {
 			echo date("d.m.Y @ G:i:s")." - Päivitetään simple tuotteet\n";
-			$count = $magento_client->lisaa_simple_tuotteet($dnstuote);
+			$count = $magento_client->lisaa_simple_tuotteet($dnstuote, $individual_tuotteet);
 			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (simple)\n";
 		}
 

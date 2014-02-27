@@ -135,7 +135,7 @@ class MagentoClient {
 						'available_sort_by' 		=> 'position',
 						'include_in_menu'   		=> 1,
 						#// HUOM: Vain jos "Category access control"-moduli on asennettu
-						#'accesscontrol_show_group' 	=> 0
+						'accesscontrol_show_group' 	=> 0
 					);
 
 					// Kutsutaan soap rajapintaa
@@ -166,7 +166,7 @@ class MagentoClient {
 	 * @param  array  $dnstuote 	Pupesoftin tuote_exportin palauttama tuote array
 	 * @return int  	         	Lisättyjen tuotteiden määrä
 	 */
-	public function lisaa_simple_tuotteet(array $dnstuote) {
+	public function lisaa_simple_tuotteet(array $dnstuote, array $individual_tuotteet) {
 
 		$this->log("Lisätään tuotteita (simple)");
 
@@ -193,6 +193,8 @@ class MagentoClient {
 
 		// Lisätään tuotteet erissä
 		foreach ($dnstuote as $tuote) {
+			$tuote_clean = $tuote['tuoteno'];
+
 			if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
 			// Lyhytkuvaus ei saa olla magentossa tyhjä.
@@ -206,6 +208,14 @@ class MagentoClient {
 			// Etsitään kategoria_id tuoteryhmällä
 			$category_id = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
 
+			// Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
+			if (isset($individual_tuotteet[$tuote_clean])) {
+				$visibility = self::CATALOG_SEARCH;
+			}
+			else {
+				$visibility = self::NOT_VISIBLE_INDIVIDUALLY;
+			}
+
 			$tuote_data = array(
 					'categories'            => array($category_id),
 					'websites'              => explode(" ", $tuote['nakyvyys']),
@@ -214,7 +224,7 @@ class MagentoClient {
 					'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
 					'weight'                => $tuote['tuotemassa'],
 					'status'                => self::ENABLED,
-					'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
+					'visibility'            => $visibility,
 					'price'                 => $tuote[$hintakentta],
 					'special_price'         => $tuote['kuluprosentti'],
 					'tax_class_id'          => $this->getTaxClassID(),

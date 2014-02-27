@@ -1179,6 +1179,7 @@
 	}
 
 	if ($tee == 'INVENTOI') {
+		echo "inventastasdas {$inventointipvm}";
 
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--

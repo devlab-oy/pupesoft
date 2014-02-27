@@ -21,6 +21,7 @@ if (!isset($konserni)) $konserni = "";
 if (!isset($vstk)) $vstk = "";
 if (!isset($tee)) $tee = "";
 if (!isset($piilota_matkasarakkeet)) $piilota_matkasarakkeet = "";
+if (!isset($nayta_yhteenveto)) $nayta_yhteenveto = "";
 if (!isset($asos)) $asos = "";
 if (!isset($aspiiri)) $aspiiri = "";
 if (!isset($asryhma)) $asryhma = "";
@@ -104,6 +105,9 @@ if ($tee == '') {
 	}
 	$chk = trim($piilota_matkasarakkeet) != '' ? "CHECKED" : "";
 	echo "<tr><th>",t("Piilota matkasarakkeet"),":</th><td colspan='3'><input type='checkbox' id='piilota_matkasarakkeet' name='piilota_matkasarakkeet' {$chk}></td></tr>";
+	
+	$chk = trim($nayta_yhteenveto) != '' ? "CHECKED" : "";
+	echo "<tr><th>".t("Näytä yhteenveto")."</th><td colspan='3'><input type='checkbox' name='nayta_yhteenveto' {$chk}></td></tr>";
 
 	if (!isset($kka))
 		$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
@@ -251,6 +255,7 @@ if ($tee == '') {
 		$yhtiot[] = $kukarow["yhtio"];
 	}
 	$nayta_sarake = ($piilota_matkasarakkeet != "") ? FALSE : TRUE;
+	$piirra_yhteenveto = ($nayta_yhteenveto != "") ? TRUE : FALSE;
 
 	echo "<br><br><table>";
 
@@ -290,100 +295,102 @@ if ($tee == '') {
 			$excelrivi 	 = 0;
 			$excelsarake = 0;
 
-			echo "<tr>";
-			echo "<th>".t("Edustaja")."</th>";
-			echo "<th>".t("Yhtiö")."</th>";
-			echo "<th>".t("Tapa")."</th>";
-			echo "<th>".t("Tapahtumia")."</th>";
-			echo "</tr>";
+			if ($piirra_yhteenveto) {
+				# yhteenveto alkuun
+				echo "<tr>";
+				echo "<th>".t("Edustaja")."</th>";
+				echo "<th>".t("Yhtiö")."</th>";
+				echo "<th>".t("Tapa")."</th>";
+				echo "<th>".t("Tapahtumia")."</th>";
+				echo "</tr>";
 
-			# yhteenveto alkuun
-			$worksheet->write($excelrivi, $excelsarake++, t("Edustaja"),	$format_bold);
-			$worksheet->write($excelrivi, $excelsarake++, t("Yhtiö"),	$format_bold);
-			$worksheet->write($excelrivi, $excelsarake++, t("Tapa"),	$format_bold);
-			$worksheet->write($excelrivi, $excelsarake++, t("Tapahtumia"),	$format_bold);
-			$excelrivi++;
+				$worksheet->write($excelrivi, $excelsarake++, t("Edustaja"),	$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("Yhtiö"),	$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("Tapa"),	$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("Tapahtumia"),	$format_bold);
+				$excelrivi++;
 			
 
-			while ($rivi = mysql_fetch_assoc($result_group)) {
-				echo "<tr class='show_all' id='{$rivi['kuka']}_{$rivi['tunnus']}'>";
-				echo "<td><img style='float:left;' id='img_{$rivi['kuka']}_{$rivi['tunnus']}' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$rivi['kukanimi']}</td>";
-				echo "<td>{$rivi['yhtijo']}</td>";
-				echo "<td>{$rivi['aselitetark']}</td>";
-				echo "<td>{$rivi['montakotapahtumaa']}</td>";
-				echo "</tr>";
-
-				$excelsarake = 0;
-				$worksheet->write($excelrivi, $excelsarake++, $rivi["kukanimi"]);
-				$worksheet->write($excelrivi, $excelsarake++, $rivi["yhtijo"]);
-				$worksheet->write($excelrivi, $excelsarake++, $rivi["aselitetark"]);
-				$worksheet->write($excelrivi, $excelsarake++, $rivi["montakotapahtumaa"]);
-
-				$excelrivi++;
-
-				echo "<tr class='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'>";
-				echo "<td colspan='4' >";
-				// haetaan tarkemmat tiedot kalelajilla ja kalekukalla
-				$query = "		SELECT kuka.nimi kukanimi, 
-								avainsana.selitetark aselitetark,
-								IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
-								IF(asiakas.toim_postino!='' AND asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
-								kalenteri.asiakas ytunnus, asiakas.asiakasnro asiakasno, kalenteri.yhtio,
-								IF(kalenteri.asiakas!='', asiakas.nimi, 'N/A') nimi,
-								LEFT(kalenteri.pvmalku,10) pvmalku,
-								kentta01, kentta02, kentta03, kentta04,
-								IF(RIGHT(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu
-								FROM kalenteri
-								JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
-								JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ('{$rivi['tunnus']}'))
-								LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
-								WHERE kalenteri.yhtio = '{$yhtio}'
-								AND kalenteri.kuka IN ('{$rivi['kuka']}')
-								AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-								AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-								AND kalenteri.tyyppi IN ('kalenteri','memo')
-								AND kalenteri.tapa = avainsana.selitetark
-								{$lisa}
-								ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
-				$ressu = pupe_query($query);
-
-				echo "<table style='width:100%;'>";
-		
-				echo "<tr>";
-				echo "<th>",t("Edustaja"),"</th>";
-				if ($nayta_sarake) echo "<th>",t("Yhtio"),"</th>";
-				echo "<th>",t("Tapa"),"</th>";
-				echo "<th>",t("Paikka"),"</th>";
-				echo "<th>",t("Postino"),"</th>";
-				echo "<th>",t("Asiakas"),"</th>";
-				echo "<th>",t("Asiakasno"),"</th>";
-				echo "<th>",t("Nimi"),"</th>";
-				if ($nayta_sarake) echo "<th>",t("Pvm"),"</th>";
-				echo "</tr>";
-
-				while ($divirivi = mysql_fetch_assoc($ressu)) {	
-					echo "<tr>";
-					echo "<td>{$divirivi['kukanimi']}</td>";
-					if ($nayta_sarake) echo "<td>{$divirivi['yhtio']}</td>";
-					echo "<td>{$divirivi['aselitetark']}</td>";
-					echo "<td>{$divirivi['postitp']}</td>";
-					echo "<td>{$divirivi['postino']}</td>";
-					echo "<td>{$divirivi['ytunnus']}</td>";
-					echo "<td>{$divirivi['asiakasno']}</td>";
-					echo "<td><a href='asiakasmemo.php?ytunnus={$divirivi['ytunnus']}' target='_blank'>{$divirivi['nimi']}</a></td>";
-					if ($nayta_sarake) echo "<td>{$divirivi['pvmalku']}</td>";
+				while ($rivi = mysql_fetch_assoc($result_group)) {
+					echo "<tr class='show_all' id='{$rivi['kuka']}_{$rivi['tunnus']}'>";
+					echo "<td><img style='float:left;' id='img_{$rivi['kuka']}_{$rivi['tunnus']}' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$rivi['kukanimi']}</td>";
+					echo "<td>{$rivi['yhtijo']}</td>";
+					echo "<td>{$rivi['aselitetark']}</td>";
+					echo "<td>{$rivi['montakotapahtumaa']}</td>";
 					echo "</tr>";
+
+					$excelsarake = 0;
+					$worksheet->write($excelrivi, $excelsarake++, $rivi["kukanimi"]);
+					$worksheet->write($excelrivi, $excelsarake++, $rivi["yhtijo"]);
+					$worksheet->write($excelrivi, $excelsarake++, $rivi["aselitetark"]);
+					$worksheet->write($excelrivi, $excelsarake++, $rivi["montakotapahtumaa"]);
+
+					$excelrivi++;
+
+					echo "<tr class='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'>";
+					echo "<td colspan='4' >";
+					// haetaan tarkemmat tiedot kalelajilla ja kalekukalla
+					$query = "		SELECT kuka.nimi kukanimi, 
+									avainsana.selitetark aselitetark,
+									IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
+									IF(asiakas.toim_postino!='' AND asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
+									kalenteri.asiakas ytunnus, asiakas.asiakasnro asiakasno, kalenteri.yhtio,
+									IF(kalenteri.asiakas!='', asiakas.nimi, 'N/A') nimi,
+									LEFT(kalenteri.pvmalku,10) pvmalku,
+									kentta01, kentta02, kentta03, kentta04,
+									IF(RIGHT(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu
+									FROM kalenteri
+									JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
+									JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ('{$rivi['tunnus']}'))
+									LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
+									WHERE kalenteri.yhtio = '{$yhtio}'
+									AND kalenteri.kuka IN ('{$rivi['kuka']}')
+									AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+									AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+									AND kalenteri.tyyppi IN ('kalenteri','memo')
+									AND kalenteri.tapa = avainsana.selitetark
+									{$lisa}
+									ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
+									$ressu = pupe_query($query);
+
+					echo "<table style='width:100%;'>";
+		
+					echo "<tr>";
+					echo "<th>",t("Edustaja"),"</th>";
+					if ($nayta_sarake) echo "<th>",t("Yhtio"),"</th>";
+					echo "<th>",t("Tapa"),"</th>";
+					echo "<th>",t("Paikka"),"</th>";
+					echo "<th>",t("Postino"),"</th>";
+					echo "<th>",t("Asiakas"),"</th>";
+					echo "<th>",t("Asiakasno"),"</th>";
+					echo "<th>",t("Nimi"),"</th>";
+					if ($nayta_sarake) echo "<th>",t("Pvm"),"</th>";
+					echo "</tr>";
+
+					while ($divirivi = mysql_fetch_assoc($ressu)) {	
+						echo "<tr>";
+						echo "<td>{$divirivi['kukanimi']}</td>";
+						if ($nayta_sarake) echo "<td>{$divirivi['yhtio']}</td>";
+						echo "<td>{$divirivi['aselitetark']}</td>";
+						echo "<td>{$divirivi['postitp']}</td>";
+						echo "<td>{$divirivi['postino']}</td>";
+						echo "<td>{$divirivi['ytunnus']}</td>";
+						echo "<td>{$divirivi['asiakasno']}</td>";
+						echo "<td><a href='asiakasmemo.php?ytunnus={$divirivi['ytunnus']}' target='_blank'>{$divirivi['nimi']}</a></td>";
+						if ($nayta_sarake) echo "<td>{$divirivi['pvmalku']}</td>";
+						echo "</tr>";
+					}
+
+					echo "</table>";
+					echo "</td>";
+					echo "</tr>";
+					echo "<tr class='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'><td class='back' colspan='4'>&nbsp;</td></tr>";
+
 				}
 
-				echo "</table>";
-				echo "</td>";
-				echo "</tr>";
-				echo "<tr class='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'><td class='back' colspan='4'>&nbsp;</td></tr>";
-
+				$excelsarake = 0;
+				$excelrivi+=2;
 			}
-
-			$excelsarake = 0;
-			$excelrivi+=2;
 
 			$worksheet->write($excelrivi, $excelsarake++, t("Edustaja"),	$format_bold);
 			if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, t("Yhtio"),		$format_bold);
@@ -404,6 +411,28 @@ if ($tee == '') {
 
 			$excelrivi++;
 			
+			if(!$piirra_yhteenveto) {
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>".t("Edustaja")."</th>";
+				if ($nayta_sarake) echo "<th>".t("Yhtio")."</th>";
+				echo "<th>".t("Tapa")."</th>";
+				echo "<th>".t("Paikka")."</th>";
+				echo "<th>".t("Postino")."</th>";
+				echo "<th>".t("Asiakas")."</th>";
+				echo "<th>".t("Asiakasnro")."</th>";
+				echo "<th>".t("Nimi")."</th>";
+				if ($nayta_sarake) echo "<th>".t("Pvm")."</th>";
+				if ($nayta_sarake) echo "<th>".t("Kampanjat")."</th>";
+				echo "<th>".t("PvmKäyty")."</th>";
+				if ($nayta_sarake) echo "<th>".t("Km")."</th>";
+				echo "<th>".t("Lähtö")."</th>";
+				echo "<th>".t("Paluu")."</th>";
+				if ($nayta_sarake) echo "<th>".t("PvRaha")."</th>";
+				echo "<th>".t("Kommentit")."</th>";
+				echo "</tr>";
+			}
+
 			$query = "		SELECT kuka.nimi kukanimi, 
 							avainsana.selitetark aselitetark,
 							IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
@@ -429,6 +458,7 @@ if ($tee == '') {
 
 			while ($row = mysql_fetch_assoc($ressu)) {	
 				$excelsarake = 0;
+
 				$worksheet->write($excelrivi, $excelsarake++, $row["kukanimi"]);
 				if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, $row["yhtio"]);
 				$worksheet->write($excelrivi, $excelsarake++, $row["aselitetark"]);
@@ -447,8 +477,31 @@ if ($tee == '') {
 				$worksheet->write($excelrivi, $excelsarake++, $row["kentta01"]);
 
 				$excelrivi++;
-			}
 
+				if(!$piirra_yhteenveto) {
+					echo "<tr>";
+					echo "<td>{$row["kukanimi"]}</td>";
+					if ($nayta_sarake) echo "<td>{$row["yhtio"]}</td>";
+					echo "<td>{$row["aselitetark"]}</td>";
+					echo "<td>{$row["postitp"]}</td>";
+					echo "<td>{$row["postino"]}</td>";
+					echo "<td>{$row["ytunnus"]}</td>";
+					echo "<td>{$row["asiakasno"]}</td>";
+					echo "<td>{$row["nimi"]}</td>";
+					if ($nayta_sarake) echo "<td nowrap>{$row["pvmalku"]}</td>";
+					if ($nayta_sarake) echo "<td>{$row["kentta02"]}</td>";
+					echo "<td nowrap>{$row["pvmalku"]}</td>";
+					if ($nayta_sarake) echo "<td>{$row["kentta03"]}</td>";
+					echo "<td>{$row["aikaalku"]}</td>";
+					echo "<td>{$row["aikaloppu"]}</td>";
+					if ($nayta_sarake) echo "<td>{$row["kentta04"]}</td>";
+					echo "<td>{$row["kentta01"]}</td>";
+					echo "</tr>";
+				}
+			}
+			if(!$piirra_yhteenveto) {
+				echo "</table>";
+			}
 			$excelnimi = $worksheet->close();
 		}
 	}

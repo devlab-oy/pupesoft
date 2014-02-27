@@ -373,8 +373,11 @@
 										$kate = sprintf('%.2f', abs(100 * $row["kate"] / $row["rivihinta"]))."%";
 									}
 								}
-								elseif ($row["kate"] != 0) {
+								elseif ($row["kate"] <= 0) {
 									$kate = "-100.00%";
+								}
+								elseif ($row["kate"] > 0) {
+									$kate = "100.00%";
 								}
 
 								$kate_eur  = $row["kate"];

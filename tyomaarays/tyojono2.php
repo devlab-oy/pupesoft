@@ -86,7 +86,7 @@ if ($toim == 'TEHDYT_TYOT') {
 		$pdf_tiedosto = \PDF\Laskutuspoytakirja\hae_laskutuspoytakirja($request['lasku_tunnukset']);
 
 		if (!empty($pdf_tiedosto)) {
-			echo_tallennus_formi($pdf_tiedosto[0], 'Laskutuspoytakirja', 'pdf');
+			echo_tallennus_formi($pdf_tiedosto, 'Laskutuspoytakirja', 'pdf');
 		}
 		else {
 			echo t("Laskutuspoytäkirjan generointi epäonnistui");

@@ -12,7 +12,6 @@ else {
 }
 
 function hae_laskutuspoytakirja($lasku_tunnukset) {
-	$pdf_tiedostot = array();
 	if (!empty($lasku_tunnukset)) {
 		$tyomaaraykset = \PDF\Laskutuspoytakirja\pdf_hae_tyomaaraykset($lasku_tunnukset);
 
@@ -55,7 +54,7 @@ function hae_laskutuspoytakirja($lasku_tunnukset) {
 			$tyomaaraykset[$key1]['rivit'] = array_values($uudet_rivit);
 
 			$filepath = kirjoita_json_tiedosto($tyomaaraykset[$key1], "laskutuspoytakirja_{$tyomaaraykset[$key1]['tunnus']}");
-			$pdf_tiedosto[] = aja_ruby($filepath, 'laskutuspoytakirja_pdf');
+			$pdf_tiedosto = aja_ruby($filepath, 'laskutuspoytakirja_pdf');
 		}
 	}
 	return $pdf_tiedosto;
@@ -176,32 +175,8 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
 	$rivit = array();
 	while ($rivi = mysql_fetch_assoc($result)) {
-		if (!empty($rivi['poikkeamarivi_tunnus'])) {
-			$rivi['poikkeus'] = 'X';
-		}
-		else {
-			//Lisätään tyhjä space, jotta pdf-tulostus toimii
-			$rivi['poikkeus'] = ' ';
-		}
-
-		if ($rivi['toimenpiteen_tyyppi'] == 'koeponnistus') {
-			$rivi['koeponnistus'] = date('my', strtotime($rivi['toimitettuaika']));
-			$rivi['huolto'] = ' ';
-			$rivi['tarkastus'] = ' ';
-		}
-		else if ($rivi['toimenpiteen_tyyppi'] == 'huolto') {
-			$rivi['koeponnistus'] = ' ';
-			$rivi['huolto'] = date('my', strtotime($rivi['toimitettuaika']));
-			$rivi['tarkastus'] = ' ';
-		}
-		else if ($rivi['toimenpiteen_tyyppi'] == 'tarkastus') {
-			$rivi['koeponnistus'] = ' ';
-			$rivi['huolto'] = ' ';
-			$rivi['tarkastus'] = date('my', strtotime($rivi['toimitettuaika']));
-		}
 
 		$rivi['laite'] = \PDF\Laskutuspoytakirja\hae_rivin_laite($rivi['asiakkaan_positio']);
-		$rivi['sisaltyvat_tyot'] = \PDF\Laskutuspoytakirja\hae_riviin_sisaltyvat_tyot($rivi['laite_tunnus'], $rivi['tuoteno']);
 
 		if (search_array_key_for_value_recursive($rivi['sisaltyvat_tyot'], 'toimenpiteen_tyyppi', 'tarkastus')) {
 			$rivi['tarkastus'] = date('my', strtotime($rivi['toimitettuaika']));
@@ -242,54 +217,7 @@ function hae_rivin_laite($laite_tunnus) {
 
 	$laite = mysql_fetch_assoc($result);
 
-	$laite['viimeinen_painekoe'] = hae_laitteen_viimeiset_tapahtumat($laite['tunnus']);
-	$laite['viimeinen_painekoe'] = date('my', strtotime($laite['viimeinen_painekoe']['koeponnistus']));
-
 	return $laite;
-}
-
-function hae_riviin_sisaltyvat_tyot($laite_tunnus, $toimenpide_tuoteno) {
-	global $kukarow, $yhtiorow;
-
-	if (empty($laite_tunnus) or empty($toimenpide_tuoteno)) {
-		return false;
-	}
-
-	$query = "	SELECT toimenpide_tuote.*,
-				ta.selite AS toimenpiteen_tyyppi,
-				ta.selitetark AS toimenpiteen_jarjestys
-				FROM laite
-				JOIN huoltosyklit_laitteet AS hl
-				ON ( hl.yhtio = laite.yhtio
-					AND hl.laite_tunnus = laite.tunnus )
-				JOIN huoltosykli
-				ON ( huoltosykli.yhtio = hl.yhtio
-					AND huoltosykli.tunnus = hl.huoltosykli_tunnus )
-				JOIN tuote AS toimenpide_tuote
-				ON ( toimenpide_tuote.yhtio = huoltosykli.yhtio
-					AND toimenpide_tuote.tuoteno = huoltosykli.toimenpide )
-				JOIN tuotteen_avainsanat AS ta
-				ON ( ta.yhtio = toimenpide_tuote.yhtio
-					AND ta.tuoteno = toimenpide_tuote.tuoteno
-					AND ta.selitetark > (	SELECT ta1.selitetark
-											FROM tuote
-											JOIN tuotteen_avainsanat AS ta1
-											ON ( ta1.yhtio = tuote.yhtio
-												AND ta1.tuoteno = tuote.tuoteno )
-											WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-											AND tuote.tuoteno = '{$toimenpide_tuoteno}') )
-				WHERE laite.yhtio = '{$kukarow['yhtio']}'
-				AND laite.tunnus = {$laite_tunnus}
-				ORDER BY toimenpiteen_jarjestys ASC";
-	$result = pupe_query($query);
-
-	$toimenpide_tuotteet = array();
-	while($toimenpide_tuote = mysql_fetch_assoc($result)) {
-		$toimenpide_tuotteet[] = $toimenpide_tuote;
-	}
-
-	return $toimenpide_tuotteet;
-
 }
 
 function hae_tyomaarayksen_asiakas($asiakas_tunnus) {

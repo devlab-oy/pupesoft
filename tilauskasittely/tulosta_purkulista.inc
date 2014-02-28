@@ -867,8 +867,6 @@
 				        	$_row_height -= 10;
 				        	array_shift($paras);
 				        }
-
-				        $kala -= 10;
 					}
 					else {
 						$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 280, 5, 740, $row["kommentti"],	$firstpage, $p);

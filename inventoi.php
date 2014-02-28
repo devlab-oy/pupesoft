@@ -8,6 +8,7 @@
 	if (!isset($filusta))			$filusta = "";
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
+	if (!isset($laadittuaika))		$laadittuaika = "";
 
 	if (strpos(strtolower($toim), "oletusvarasto") !== FALSE) {
 
@@ -247,13 +248,28 @@
 					// Jos on syˆtetty k‰sin inventointipvm sen pit‰‰ olla validi
 					if (isset($paivamaaran_kasisyotto) and $inventointipvm != '') {
 						list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
+						$koppi = FALSE;
 						if (!checkdate($mm, $dd, $yyyy)) {
 							echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("Anna p‰iv‰m‰‰r‰ muodossa")." yyyy-mm-dd </font><br>";
 							$virhe = 1;
+							$koppi = TRUE;
 						}
 						elseif (strtotime("{$yyyy}-{$mm}-{$dd}") < strtotime($yhtiorow['tilikausi_alku']) or strtotime("{$yyyy}-{$mm}-{$dd}") > strtotime($yhtiorow['tilikausi_loppu'])) {
 							echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("P‰iv‰m‰‰r‰ ei ole avoimella tilikaudella")."</font><br>";
 							$virhe = 1;
+							$koppi = TRUE;
+						}
+						
+						if (!$koppi) {
+							// Katsotaan onko inventointip‰iv‰ syˆtetty k‰sin
+							$laadittuaika = "now()";
+							if (isset($paivamaaran_kasisyotto) and $inventointipvm != '') {
+								list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
+								$yyyy 				= substr($yyyy,0,4);
+								$mm 				= substr($mm,0,2);
+								$dd 				= substr($dd,0,2);
+								$laadittuaika = !checkdate($mm, $dd, $yyyy) ? "now()" : "'".$yyyy."-".$mm."-".$dd." 23:59:59'"; 
+							}
 						}
 					}
 
@@ -431,6 +447,26 @@
 
 					if (mysql_num_rows($result) == 1 and $virhe != 1) {
 						$row = mysql_fetch_assoc($result);
+
+						if (isset($paivamaaran_kasisyotto) and $laadittuaika != "now()" and $laadittuaika != '') {
+							# Inventointipvm k‰sisyˆttˆfallbacki - ei sallita p‰iv‰m‰‰r‰‰ jos sen j‰lkeen on tuloja, valmistuksia tai ep‰kuranttiajoja
+
+							$query = "	SELECT *
+										FROM tapahtuma
+										WHERE yhtio 	= '$kukarow[yhtio]'
+										and tuoteno 	= '$row[tuoteno]'
+										and laji IN ('tulo', 'valmistus', 'ep‰kurantti')	
+										and laadittu   >= {$laadittuaika}
+										and hyllyalue 	= '$row[hyllyalue]'
+										and hyllynro 	= '$row[hyllynro] '
+										and hyllyvali 	= '$row[hyllyvali]'
+										and hyllytaso 	= '$row[hyllytaso]'";
+
+							$ressu = pupe_query($query);
+							if (mysql_num_rows($ressu) > 0) {
+								$laadittuaika = "now()";
+							}
+						}
 
 						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
 							//jos invataan raportin avulla niin tehd‰‰n p‰iv‰m‰‰r‰tsekit ja lasketaan saldo takautuvasti
@@ -677,16 +713,6 @@
 								$selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("t‰sm‰si.")." <br>$lisaselite<br>$inven_laji";
 							}
 
-							// Katsotaan onko inventointip‰iv‰ syˆtetty k‰sin
-							$laadittuaika = "now()";
-							if (isset($paivamaaran_kasisyotto) and $inventointipvm != '') {
-								list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
-								$yyyy 				= substr($yyyy,0,4);
-								$mm 				= substr($mm,0,2);
-								$dd 				= substr($dd,0,2);
-								$laadittuaika = !checkdate($mm, $dd, $yyyy) ? "now()" : "'".$yyyy."-".$mm."-".$dd." 23:59:59'"; 
-							}
-
 							///* Tehd‰‰n tapahtuma *///
 							$query = "	INSERT into tapahtuma set
 										yhtio   	= '$kukarow[yhtio]',
@@ -721,7 +747,7 @@
 							}
 
 							$query .= " saldoaika 				= now(),
-										inventointiaika 		= now(),
+										inventointiaika 		= {$laadittuaika},
 										inventointipoikkeama 	= '$poikkeama',
 										inventointilista_aika	= '0000-00-00 00:00:00',
 										muuttaja			 	= '$kukarow[kuka]',
@@ -1179,7 +1205,6 @@
 	}
 
 	if ($tee == 'INVENTOI') {
-		echo "inventastasdas {$inventointipvm}";
 
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--
@@ -1318,9 +1343,9 @@
 							ORDER BY sarjanumero";
 				$sarjares = pupe_query($query);
 			}
-
+			
 			if (($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] != '0000-00-00 00:00:00')) {
-
+				echo "kik KISSA:{$laadittuaika}";
 				echo "<tr>";
 				echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
@@ -1572,7 +1597,7 @@
 		echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
 		if (isset($paivamaaran_kasisyotto)) {
 			echo "<tr><th>".t("Syˆt‰ inventointip‰iv‰m‰‰r‰").":</th>";
-			echo "<td><input type='text' size='25' name='inventointipvm' value='$inventointipvm'></td></tr>";
+			echo "<td><input type='text' size='10' maxlength='10' name='inventointipvm' value='$inventointipvm'></td></tr>";
 		}
 		echo "</table><br><br>";
 

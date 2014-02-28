@@ -169,7 +169,8 @@ class HuoltosykliCSVDumper extends CSVDumper {
 			if (empty($huoltosykli_rivi_ulkona)) {
 				$rivi['olosuhde'] = 'X';
 
-				if (stristr($nimitys_temp, 'tarkastus')) {
+				//Minimi huoltoväli on 365 riippumatta onko laite ulkona vai sisällä
+				if (stristr($nimitys_temp, 'tarkastus') and $rivi['huoltovali'] != 365) {
 					$rivi['huoltovali'] = $rivi['huoltovali'] / 2;
 				}
 

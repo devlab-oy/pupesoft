@@ -549,7 +549,7 @@ function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huol
 	global $kukarow, $yhtiorow;
 
 	if ($viimeinen_tapahtuma != '') {
-		$query = "	SELECT IFNULL(viimeinen_tapahtuma, '0000-00-00')
+		$query = "	SELECT IFNULL(viimeinen_tapahtuma, '0000-00-00') AS viimeinen_tapahtuma
 					FROM huoltosyklit_laitteet
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laite_tunnus = '{$laite_tunnus}'

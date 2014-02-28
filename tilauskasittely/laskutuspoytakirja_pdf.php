@@ -49,15 +49,25 @@ function hae_laskutuspoytakirja($lasku_tunnukset) {
 					$uudet_rivit[$index]['total'] = number_format($total, 2);
 				}
 			}
-
+			$uudet_rivit = array_values($uudet_rivit);
+			usort($uudet_rivit,"\PDF\Laskutuspoytakirja\kpl_sort");
 			$tyomaaraykset[$key1]['full_total'] = number_format($full_total, 2);
-			$tyomaaraykset[$key1]['rivit'] = array_values($uudet_rivit);
-
+			$tyomaaraykset[$key1]['rivit'] = $uudet_rivit;
 			$filepath = kirjoita_json_tiedosto($tyomaaraykset[$key1], "laskutuspoytakirja_{$tyomaaraykset[$key1]['tunnus']}");
 			$pdf_tiedosto = aja_ruby($filepath, 'laskutuspoytakirja_pdf');
 		}
 	}
 	return $pdf_tiedosto;
+}
+
+function kpl_sort($a, $b) {
+    if ($a['kpl'] < $b['kpl']) {
+        return 1;
+    } else if ($a['kpl,'] > $b['kpl']) {
+        return -1;
+    } else {
+        return 0;
+    }
 }
 
 function pdf_hae_tyomaaraykset($lasku_tunnukset) {

@@ -25,7 +25,6 @@ class LaskutuspoytakirjaPDF
     header
     info
     rows
-    footer
     filename = "Laskutuspoytakirja.pdf"
   end
 
@@ -35,7 +34,7 @@ class LaskutuspoytakirjaPDF
 
   def header
     @pdf.repeat(:all, :dynamic => true) do
-      @pdf.draw_text @pdf.page_number, :at => [770, 540]
+      @pdf.draw_text "#{@pdf.page_number}  (#{@pdf.page_count})", :at => [770, 540]
       #@pdf.draw_text "Laskutuspöytäkirjan nro", :at => [680, 520]
       #@pdf.draw_text "Faktureringsprotokoll nr", :at => [680, 510]
       logo
@@ -48,26 +47,55 @@ class LaskutuspoytakirjaPDF
 
   def info
     @pdf.move_down 120
-    @pdf.text_box "LASKUTUSPÖYTÄKIRJA / FAKTURERINGSPROTOKOLL", :at => [0, @pdf.cursor]
+    @pdf.text "LASKUTUSPÖYTÄKIRJA / FAKTURERINGSPROTOKOLL"
     #@pdf.text_box "Tarkastuspöytäkirjan nro", :at => [680, @pdf.cursor+5]
     #@pdf.text_box "Faktureringsprotokoll nr", :at => [680, @pdf.cursor-5]
+    @pdf.move_down 15
+    @pdf.horizontal_rule
+    @pdf.stroke
+    @pdf.move_down 15
+
+    @pdf.float do
+        @pdf.text "Asiakas/Kund"
+    end
+    @pdf.float do
+      @pdf.indent(100) do
+        @pdf.text @data['asiakas']['nimi']
+      end
+    end
+    @pdf.float do
+      @pdf.indent(250) do
+        @pdf.text "Asiakasnro./Kund nr. #{@data['kohde']['tunnus']}"
+      end
+    end
     @pdf.move_down 20
     @pdf.horizontal_rule
     @pdf.stroke
-    @pdf.move_down 20
-    @pdf.text_box "Asiakas/Kund", :at => [0, @pdf.cursor]
-    @pdf.text_box @data['asiakas']['nimi'], :at => [120, @pdf.cursor]
-    @pdf.text_box "Asiakasnro./Kund nr. #{@data['kohde']['tunnus']}", :at => [400, @pdf.cursor]
-    @pdf.move_down 20
-    @pdf.horizontal_rule
-    @pdf.stroke
-    @pdf.move_down 20
-    @pdf.text_box "Kohde/Plats", :at => [0, @pdf.cursor]
-    @pdf.text_box @data['kohde']['nimi'], :at => [120, @pdf.cursor]
-    @pdf.text_box "Kust.paikka/Merkki", :at => [@pdf.bounds.right-500, @pdf.cursor+5], :width => 100, :align => :right
-    @pdf.text_box "Kostnadsställe/Märke", :at => [@pdf.bounds.right-500, @pdf.cursor-5], :width => 100, :align => :right
-    @pdf.text_box "Tilausnumero/", :at => [600, @pdf.cursor+5]
-    @pdf.text_box "Order nr", :at => [600, @pdf.cursor-5]
+    @pdf.move_down 15
+    @pdf.float do
+       @pdf.text "Kohde/Plats"
+    end
+    @pdf.float do
+      @pdf.indent(100) do
+        @pdf.text @data['kohde']['nimi']
+      end
+    end
+
+=begin
+    @pdf.move_up 6
+    @pdf.float do
+      @pdf.indent(350) do
+        @pdf.text "Kust.paikka/Merkki<br />Kostnadsställe/Märke", :inline_format => true
+      end
+    end
+    @pdf.float do
+      @pdf.indent(500) do
+        @pdf.text "Tilausnumero/<br />Order nr.", :inline_format => true
+      end
+    end
+    @pdf.move_down 6
+=end
+
     @pdf.move_down 20
     @pdf.horizontal_rule
     @pdf.stroke
@@ -75,57 +103,117 @@ class LaskutuspoytakirjaPDF
 
   def rows
     row_headers
-    @data['rivit'].each_with_index do |r, index|
-      row(r)
-      if ( @pdf.cursor < 60)
-        @pdf.start_new_page
-        @pdf.move_down 100
-        row_headers
-      end
+    @pdf.move_down 15.76
+
+    @data['rivit'].each_with_index do |r,i|
+
+    bottom = @data['rivit'].size-1 == i ?  80 :  10
+
+    if @pdf.cursor < bottom
+      @pdf.start_new_page
+      @pdf.move_down 100.28
+      row_headers
+      @pdf.move_down 15
+    end
+
+    row(r)
+
+    if @data['rivit'].size-1 == i
+      footer
+    end
+
     end
   end
 
   def row_headers
-    @pdf.move_down 20
-    @pdf.text_box "Tuote nro. / Produkt nr.", :at => [0, @pdf.cursor]
-    @pdf.text_box "Nimike / Produkt", :at => [120, @pdf.cursor]
-    @pdf.text_box "Kpl. / St.", :at => [@pdf.bounds.right-500, @pdf.cursor], :width => 100, :align => :right
-    @pdf.text_box "á-hinta / á-pris", :at => [@pdf.bounds.right-400, @pdf.cursor], :width => 100, :align => :right
-    @pdf.text_box "Alennus % / Rabatt %", :at => [@pdf.bounds.right-300, @pdf.cursor], :width => 100, :align => :right
-    @pdf.text_box "Yhteensä / Totalt", :at => [@pdf.bounds.right-200, @pdf.cursor], :width => 100, :align => :right
-    @pdf.move_down 20
+    @pdf.move_down 10
+    @pdf.float do
+        @pdf.text "Tuote nro. / Produkt nr."
+    end
+    @pdf.float do
+      @pdf.indent(100) do
+        @pdf.text "Nimike / Produkt"
+      end
+    end
+    @pdf.float do
+      @pdf.indent(350) do
+        @pdf.text "Kpl. / St."
+      end
+    end
+    @pdf.float do
+      @pdf.indent(450) do
+        @pdf.text "á-hinta / á-pris"
+      end
+    end
+     @pdf.float do
+      @pdf.indent(550) do
+        @pdf.text "Alennus % / Rabatt %"
+      end
+    end
+     @pdf.float do
+      @pdf.indent(650) do
+        @pdf.text "Yhteensä / Totalt"
+      end
+    end
+    @pdf.move_down 15
     @pdf.horizontal_rule
     @pdf.stroke
-    @pdf.move_down 20
   end
 
-  def row(rivi)
+  def row(r)
     @pdf.font 'Helvetica', :style => :normal, :size => 8
-    @pdf.text_box rivi['tuoteno'], :at => [0, @pdf.cursor]
-    @pdf.text_box rivi['nimitys'], :at => [120, @pdf.cursor]
-    @pdf.text_box rivi['kpl'], :at => [@pdf.bounds.right-500, @pdf.cursor], :width => 100, :align => :right
-    @pdf.text_box rivi['hinta'], :at => [@pdf.bounds.right-400, @pdf.cursor], :width => 100, :align => :right
-    @pdf.text_box rivi['ale1'], :at => [@pdf.bounds.right-300, @pdf.cursor], :width => 100, :align => :right
-    @pdf.text_box rivi['total'], :at => [@pdf.bounds.right-200, @pdf.cursor], :width => 100, :align => :right
-    @pdf.move_down 20
+    @pdf.float do
+         @pdf.text r['tuoteno']
+    end
+    @pdf.float do
+      @pdf.indent(100) do
+         @pdf.text r['nimitys']
+      end
+    end
+    @pdf.float do
+      @pdf.indent(350) do
+         @pdf.text r['kpl']
+      end
+    end
+    @pdf.float do
+      @pdf.indent(450) do
+         @pdf.text r['hinta']
+      end
+    end
+    @pdf.float do
+      @pdf.indent(550) do
+         @pdf.text r['ale1']
+      end
+    end
+    @pdf.float do
+      @pdf.indent(650) do
+         @pdf.text r['total']
+      end
+    end
+    @pdf.move_down 15
   end
 
   def footer
     @pdf.line [@pdf.bounds.left, 60], [@pdf.bounds.right, 60]
-    @pdf.text_box "Yht. alv / Totalt moms 0 %", :at => [@pdf.bounds.right-200, 50], :width => 100, :align => :right
-    @pdf.text_box "alv / moms 23,00 %", :at => [@pdf.bounds.right-200, 36], :width => 100, :align => :right
-    @pdf.text_box "Yhteensä alv / Totalt moms 23,00 %", :at => [@pdf.bounds.right-200, 10], :width => 100, :align => :right
+
+    @pdf.text_box "Yht. alv / Totalt moms 0 %", :at => [500, 50], :width => 100, :align => :right
+    @pdf.text_box "alv / moms #{@data['alv']} %", :at => [500, 36], :width => 100, :align => :right
+    @pdf.text_box "Yhteensä alv / Totalt moms 23,00 %", :at => [500, 10], :width => 100, :align => :right
 
     @pdf.font 'Helvetica', :style => :bold, :size => 8
-    @pdf.text_box @data['full_total'], :at => [@pdf.bounds.right-90, 50], :align => :right
+    @pdf.text_box @data['full_total'], :at => [500, 50], :width => 170, :align => :right
 
-    alv = (@data['full_total'].to_i * 0.23).round(2)
-    @pdf.text_box alv.to_s, :at => [@pdf.bounds.right-90, 36], :align => :right
+    #alv = (@data['full_total'].to_f * (@data['alv'].to_f / 100)).round(2)
+    # aiemmissa ruby versioissa kuin 1.9.0 round() ei ota argumentteja
+    # joten tässä yleispätevä pyöristys
+    alv = @data['full_total'].to_f * (@data['alv'].to_f / 100)
+    alv = (alv * 100).round() / 100.0
+
+    @pdf.text_box alv.to_s, :at => [500, 36], :width => 170, :align => :right
 
     total_with_alv = (@data['full_total'].to_i + alv)
-    @pdf.text_box total_with_alv.to_s, :at => [@pdf.bounds.right-90, 10], :align => :right
+    @pdf.text_box total_with_alv.to_s, :at => [500, 10], :width => 170, :align => :right
 
-    @pdf.font 'Helvetica', :style => :normal, :size => 8
     @pdf.line [@pdf.bounds.left, 20], [@pdf.bounds.right, 20]
   end
 

@@ -56,7 +56,7 @@ if ($request['action'] == 'aja_konversio') {
 		case 'tuotteen_avainsanat':
 			$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
 			break;
-		
+
 		case 'tuotteen_avainsanat2':
 			$dumper = new TuotteenavainsanaLaite2CSVDumper($request['kukarow']);
 			break;
@@ -95,19 +95,21 @@ if ($request['action'] == 'aja_konversio') {
 
 		case 'tarkastukset':
 			$tiedostot = lue_tiedostot('/tmp/konversio/tarkastukset/');
-			echo "alku:" .date('Y-m-d H:i:s');
+			echo "alku:".date('Y-m-d H:i:s');
 			foreach ($tiedostot as $tiedosto) {
 				echo $tiedosto.'<br/>';
-                $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
-//				$output = exec("php tarkastukset.php {$tiedosto}", $arr, $ret);
-				echo "<pre>";
-				var_dump($arr);
-				echo $ret;
-				echo "</pre>";
-				echo "<br/>";
-				echo "<br/>";
+//                $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
+////				$output = exec("php tarkastukset.php {$tiedosto}", $arr, $ret);
+//				echo "<pre>";
+//				var_dump($arr);
+//				echo $ret;
+//				echo "</pre>";
+//				echo "<br/>";
+//				echo "<br/>";
+				$dumper = new TarkastuksetCSVDumper($request['kukarow'], $tiedosto);
+				$dumper->aja();
 			}
-			echo "loppu:" .date('Y-m-d H:i:s');
+			echo "loppu:".date('Y-m-d H:i:s');
 			break;
 
 		case 'kaikki':
@@ -330,28 +332,28 @@ function luo_kaato_tiedot() {
 			'',
 			'FI',
 			'', '', '', '', '', '', '', '', '', '', '', 'EUR', 0.00, '0000-00-00', '0000-00-00', '0000-00-00', '0000-00-00', '', '0000-00-00', '2006-11-01', '', NOW(), '', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.000000, 0.00, 'import', NOW(), '', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 'tulosta_lahete_eiale_eihinta.inc', 0, '', '0000-00-00 00:00:00', '', '0000-00-00 00:00:00', '', '0000-00-00 00:00:00', '', '0000-00-00 00:00:00', '', '0000-00-00 00:00:00', '', '', '0000-00-00 00:00:00', '', 9, '', '', 0, '', '', '', '', '', '', '', '', '', 104, 0, 103, 'Nouto', 0, 0, '', '', '', '', '', '', '', '100', '0000-00-00', '0000-00-00 00:00:00', 0.000000000, 0.000000000, '', '293', 'L', 'D', '', '', '', '', NOW(), '', '', '', '', '', '', '', '', 'A', '', '', 0, '', '', '', '', '', 0.00, 0.00, 0, 41694, 10.00, 0.00, 0, '', '', '', '', 0.000000, 0.00, 0.000000, 0.00, 0.00, 0.00, 0.00, 0.000000, 0.000000, 0.000000, '', '', '', 0, 0, 0.00, '', '', '', 0, '', '', 0, '', '', 0.00, 0.00, '', '', '', 0, 0, 0, 'PUPESOFT', 0, 0, 0, -1);",
-			"	INSERT INTO `laskun_lisatiedot` (`yhtio`, `otunnus`, `rahlaskelma_rahoitettava_positio`, `rahlaskelma_jaannosvelka_vaihtokohteesta`, `rahlaskelma_perustamiskustannus`, `rahlaskelma_muutluottokustannukset`, `rahlaskelma_sopajankorko`, `rahlaskelma_maksuerienlkm`, `rahlaskelma_luottoaikakk`, `rahlaskelma_ekaerpcm`, `rahlaskelma_erankasittelymaksu`, `rahlaskelma_tilinavausmaksu`, `rahlaskelma_viitekorko`, `rahlaskelma_marginaalikorko`, `rahlaskelma_lyhennystapa`, `rahlaskelma_poikkeava_era`, `rahlaskelma_nfref`, `vakuutushak_vakuutusyhtio`, `vakuutushak_alkamispaiva`, `vakuutushak_kaskolaji`, `vakuutushak_maksuerat`, `vakuutushak_perusomavastuu`, `vakuutushak_runko_takila_purjeet`, `vakuutushak_moottori`, `vakuutushak_varusteet`, `vakuutushak_yhteensa`, `rekisteilmo_rekisterinumero`, `rekisteilmo_paakayttokunta`, `rekisteilmo_kieli`, `rekisteilmo_tyyppi`, `rekisteilmo_omistajienlkm`, `rekisteilmo_omistajankotikunta`, `rekisteilmo_lisatietoja`, `rekisteilmo_laminointi`, `rekisteilmo_suoramarkkinointi`, `rekisteilmo_veneen_nimi`, `rekisteilmo_omistaja`, `kolm_ovttunnus`, `kolm_nimi`, `kolm_nimitark`, `kolm_osoite`, `kolm_postino`, `kolm_postitp`, `kolm_maa`, `laskutus_nimi`, `laskutus_nimitark`, `laskutus_osoite`, `laskutus_postino`, `laskutus_postitp`, `laskutus_maa`, `toimitusehto2`, `kasinsyotetty_viite`, `asiakkaan_kohde`, `kantaasiakastunnus`, `ulkoinen_tarkenne`, `saate`, `yhteyshenkilo_kaupallinen`, `yhteyshenkilo_tekninen`, `rahlaskelma_hetu_tarkistus`, `rahlaskelma_hetu_tarkastaja`, `rahlaskelma_hetu_asiakirjamyontaja`, `rahlaskelma_hetu_asiakirjanro`, `rahlaskelma_hetu_kolm_tarkistus`, `rahlaskelma_hetu_kolm_tarkastaja`, `rahlaskelma_hetu_kolm_asiakirjanro`, `rahlaskelma_hetu_kolm_asiakirjamyontaja`, `rahlaskelma_takuukirja`, `rahlaskelma_huoltokirja`, `rahlaskelma_kayttoohjeet`, `rahlaskelma_opastus`, `rahlaskelma_kuntotestitodistus`, `rahlaskelma_kayttotarkoitus`, `sopimus_kk`, `sopimus_pp`, `sopimus_alkupvm`, `sopimus_loppupvm`, `sopimus_lisatietoja`, `projektipaallikko`, `seuranta`, `tunnusnippu_tarjous`, `projekti`, `rivihintoja_ei_nayteta`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`, `tunnus`)
+		"	INSERT INTO `laskun_lisatiedot` (`yhtio`, `otunnus`, `rahlaskelma_rahoitettava_positio`, `rahlaskelma_jaannosvelka_vaihtokohteesta`, `rahlaskelma_perustamiskustannus`, `rahlaskelma_muutluottokustannukset`, `rahlaskelma_sopajankorko`, `rahlaskelma_maksuerienlkm`, `rahlaskelma_luottoaikakk`, `rahlaskelma_ekaerpcm`, `rahlaskelma_erankasittelymaksu`, `rahlaskelma_tilinavausmaksu`, `rahlaskelma_viitekorko`, `rahlaskelma_marginaalikorko`, `rahlaskelma_lyhennystapa`, `rahlaskelma_poikkeava_era`, `rahlaskelma_nfref`, `vakuutushak_vakuutusyhtio`, `vakuutushak_alkamispaiva`, `vakuutushak_kaskolaji`, `vakuutushak_maksuerat`, `vakuutushak_perusomavastuu`, `vakuutushak_runko_takila_purjeet`, `vakuutushak_moottori`, `vakuutushak_varusteet`, `vakuutushak_yhteensa`, `rekisteilmo_rekisterinumero`, `rekisteilmo_paakayttokunta`, `rekisteilmo_kieli`, `rekisteilmo_tyyppi`, `rekisteilmo_omistajienlkm`, `rekisteilmo_omistajankotikunta`, `rekisteilmo_lisatietoja`, `rekisteilmo_laminointi`, `rekisteilmo_suoramarkkinointi`, `rekisteilmo_veneen_nimi`, `rekisteilmo_omistaja`, `kolm_ovttunnus`, `kolm_nimi`, `kolm_nimitark`, `kolm_osoite`, `kolm_postino`, `kolm_postitp`, `kolm_maa`, `laskutus_nimi`, `laskutus_nimitark`, `laskutus_osoite`, `laskutus_postino`, `laskutus_postitp`, `laskutus_maa`, `toimitusehto2`, `kasinsyotetty_viite`, `asiakkaan_kohde`, `kantaasiakastunnus`, `ulkoinen_tarkenne`, `saate`, `yhteyshenkilo_kaupallinen`, `yhteyshenkilo_tekninen`, `rahlaskelma_hetu_tarkistus`, `rahlaskelma_hetu_tarkastaja`, `rahlaskelma_hetu_asiakirjamyontaja`, `rahlaskelma_hetu_asiakirjanro`, `rahlaskelma_hetu_kolm_tarkistus`, `rahlaskelma_hetu_kolm_tarkastaja`, `rahlaskelma_hetu_kolm_asiakirjanro`, `rahlaskelma_hetu_kolm_asiakirjamyontaja`, `rahlaskelma_takuukirja`, `rahlaskelma_huoltokirja`, `rahlaskelma_kayttoohjeet`, `rahlaskelma_opastus`, `rahlaskelma_kuntotestitodistus`, `rahlaskelma_kayttotarkoitus`, `sopimus_kk`, `sopimus_pp`, `sopimus_alkupvm`, `sopimus_loppupvm`, `sopimus_lisatietoja`, `projektipaallikko`, `seuranta`, `tunnusnippu_tarjous`, `projekti`, `rivihintoja_ei_nayteta`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`, `tunnus`)
 				VALUES
 				('{$kukarow['yhtio']}', -1, 0, 0.00, 0.00, 0.00, 0.00, 0, 0, '0000-00-00', 0.00, 0.00, '', 0.00, '', 0.00, 0, '', '0000-00-00', '', 0, 0.00, 0.00, 0.00, 0.00, 0.00, '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', 'Kaato-asiakas', '', '', '', '', '', '', '', 0, '', '', '', 0, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0000-00-00', '0000-00-00', '', '', '', 0, 0, '', 'import', '2013-12-16 17:32:12', '0000-00-00 00:00:00', '', -1);",
-			"	INSERT INTO `tilausrivi` (`yhtio`, `tyyppi`, `toimaika`, `kerayspvm`, `otunnus`, `tuoteno`, `try`, `osasto`, `nimitys`, `kpl`, `kpl2`, `tilkpl`, `yksikko`, `varattu`, `jt`, `hinta`, `hinta_valuutassa`, `hinta_alkuperainen`, `alv`, `rivihinta`, `rivihinta_valuutassa`, `erikoisale`, `erikoisale_saapuminen`, `ale1`, `ale2`, `ale3`, `kate`, `kate_korjattu`, `kommentti`, `laatija`, `laadittu`, `keratty`, `kerattyaika`, `toimitettu`, `toimitettuaika`, `laskutettu`, `laskutettuaika`, `var`, `var2`, `netto`, `perheid`, `perheid2`, `hyllyalue`, `hyllynro`, `hyllytaso`, `hyllyvali`, `suuntalava`, `varastoon`, `vahvistettu_maara`, `vahvistettu_kommentti`, `tilaajanrivinro`, `jaksotettu`, `uusiotunnus`, `tunnus`)
+		"	INSERT INTO `tilausrivi` (`yhtio`, `tyyppi`, `toimaika`, `kerayspvm`, `otunnus`, `tuoteno`, `try`, `osasto`, `nimitys`, `kpl`, `kpl2`, `tilkpl`, `yksikko`, `varattu`, `jt`, `hinta`, `hinta_valuutassa`, `hinta_alkuperainen`, `alv`, `rivihinta`, `rivihinta_valuutassa`, `erikoisale`, `erikoisale_saapuminen`, `ale1`, `ale2`, `ale3`, `kate`, `kate_korjattu`, `kommentti`, `laatija`, `laadittu`, `keratty`, `kerattyaika`, `toimitettu`, `toimitettuaika`, `laskutettu`, `laskutettuaika`, `var`, `var2`, `netto`, `perheid`, `perheid2`, `hyllyalue`, `hyllynro`, `hyllytaso`, `hyllyvali`, `suuntalava`, `varastoon`, `vahvistettu_maara`, `vahvistettu_kommentti`, `tilaajanrivinro`, `jaksotettu`, `uusiotunnus`, `tunnus`)
 				VALUES
 				('{$kukarow['yhtio']}', 'L', '2013-12-16', '2013-12-16', -1, 'kaato-tuoteno', 10, 0, 'Poikkeamarivi', 0.00, 0.00, 1.00, '', 1.00, 0.00, 37.000000, 0.000000, 0.000000, 0.00, 0.000000, 0.000000, 0.00, 0.00, 20.00, 0.00, 0.00, 0.000000, NULL, '', 'import', NOW(), 'saldoton', NOW(), 'import', '2006-01-01 00:00:00', '', '0000-00-00', '', '', '', 0, 0, '', '', '', '', 0, 1, NULL, NULL, 0, 0, 0, -1);",
-			"	INSERT INTO `tilausrivin_lisatiedot` (`yhtio`, `tilausrivitunnus`, `tiliointirivitunnus`, `tilausrivilinkki`, `toimittajan_tunnus`, `kulun_kohdemaan_alv`, `kulun_kohdemaa`, `hankintakulut`, `asiakkaan_positio`, `positio`, `pituus`, `leveys`, `pidin`, `viiste`, `porauskuvio`, `niitti`, `autoid`, `rekisterinumero`, `ei_nayteta`, `osto_vai_hyvitys`, `sistyomaarays_sarjatunnus`, `suoraan_laskutukseen`, `erikoistoimitus_myynti`, `vanha_otunnus`, `omalle_tilaukselle`, `ohita_kerays`, `jt_manual`, `poikkeava_tulliprosentti`, `jarjestys`, `sopimus_alkaa`, `sopimus_loppuu`, `sopimuksen_lisatieto1`, `sopimuksen_lisatieto2`, `suoratoimitettuaika`, `toimitusaika_paivitetty`, `kohde_hyllyalue`, `kohde_hyllynro`, `kohde_hyllyvali`, `kohde_hyllytaso`, `luontiaika`, `laatija`, `muutospvm`, `muuttaja`, `tunnus`)
+		"	INSERT INTO `tilausrivin_lisatiedot` (`yhtio`, `tilausrivitunnus`, `tiliointirivitunnus`, `tilausrivilinkki`, `toimittajan_tunnus`, `kulun_kohdemaan_alv`, `kulun_kohdemaa`, `hankintakulut`, `asiakkaan_positio`, `positio`, `pituus`, `leveys`, `pidin`, `viiste`, `porauskuvio`, `niitti`, `autoid`, `rekisterinumero`, `ei_nayteta`, `osto_vai_hyvitys`, `sistyomaarays_sarjatunnus`, `suoraan_laskutukseen`, `erikoistoimitus_myynti`, `vanha_otunnus`, `omalle_tilaukselle`, `ohita_kerays`, `jt_manual`, `poikkeava_tulliprosentti`, `jarjestys`, `sopimus_alkaa`, `sopimus_loppuu`, `sopimuksen_lisatieto1`, `sopimuksen_lisatieto2`, `suoratoimitettuaika`, `toimitusaika_paivitetty`, `kohde_hyllyalue`, `kohde_hyllynro`, `kohde_hyllyvali`, `kohde_hyllytaso`, `luontiaika`, `laatija`, `muutospvm`, `muuttaja`, `tunnus`)
 				VALUES
 				('{$kukarow['yhtio']}', -1, 0, 0, 0, 0.00, '', '', 0, '', '', '', '', '', '', '', 0, '', '', '', '', '', 0, -1, '', '', '', NULL, 0, '0000-00-00', '0000-00-00', '', '', '0000-00-00', '0000-00-00 00:00:00', '', '', '', '', NOW(), 'import', '0000-00-00 00:00:00', '', -1);",
-			"	INSERT INTO `tuote` (`yhtio`, `tuoteno`, `nimitys`, `osasto`, `try`, `tuotemerkki`, `malli`, `mallitarkenne`, `kuvaus`, `lyhytkuvaus`, `mainosteksti`, `aleryhma`, `muuta`, `tilausrivi_kommentti`, `kerayskommentti`, `purkukommentti`, `myyntihinta`, `myyntihinta_maara`, `kehahin`, `vihahin`, `vihapvm`, `yksikko`, `ei_saldoa`, `kommentoitava`, `tuotetyyppi`, `myynninseuranta`, `hinnastoon`, `sarjanumeroseuranta`, `suoratoimitus`, `status`, `yksin_kerailyalustalle`, `keraysvyohyke`, `panttitili`, `tilino`, `tilino_eu`, `tilino_ei_eu`, `tilino_kaanteinen`, `tilino_marginaali`, `tilino_osto_marginaali`, `tilino_triang`, `kustp`, `kohde`, `projekti`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`, `eankoodi`, `epakurantti25pvm`, `epakurantti50pvm`, `epakurantti75pvm`, `epakurantti100pvm`, `myymalahinta`, `nettohinta`, `halytysraja`, `varmuus_varasto`, `tilausmaara`, `ostoehdotus`, `tahtituote`, `tarrakerroin`, `tarrakpl`, `myynti_era`, `minimi_era`, `valmistuslinja`, `valmistusaika_sekunneissa`, `tullikohtelu`, `tullinimike1`, `tullinimike2`, `toinenpaljous_muunnoskerroin`, `vienti`, `tuotekorkeus`, `tuoteleveys`, `tuotesyvyys`, `tuotemassa`, `tuotekuva`, `nakyvyys`, `kuluprosentti`, `vakkoodi`, `vakmaara`, `leimahduspiste`, `meria_saastuttava`, `vak_imdg_koodi`, `kuljetusohje`, `pakkausmateriaali`, `alv`, `myyjanro`, `ostajanro`, `tuotepaallikko`)
+		"	INSERT INTO `tuote` (`yhtio`, `tuoteno`, `nimitys`, `osasto`, `try`, `tuotemerkki`, `malli`, `mallitarkenne`, `kuvaus`, `lyhytkuvaus`, `mainosteksti`, `aleryhma`, `muuta`, `tilausrivi_kommentti`, `kerayskommentti`, `purkukommentti`, `myyntihinta`, `myyntihinta_maara`, `kehahin`, `vihahin`, `vihapvm`, `yksikko`, `ei_saldoa`, `kommentoitava`, `tuotetyyppi`, `myynninseuranta`, `hinnastoon`, `sarjanumeroseuranta`, `suoratoimitus`, `status`, `yksin_kerailyalustalle`, `keraysvyohyke`, `panttitili`, `tilino`, `tilino_eu`, `tilino_ei_eu`, `tilino_kaanteinen`, `tilino_marginaali`, `tilino_osto_marginaali`, `tilino_triang`, `kustp`, `kohde`, `projekti`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`, `eankoodi`, `epakurantti25pvm`, `epakurantti50pvm`, `epakurantti75pvm`, `epakurantti100pvm`, `myymalahinta`, `nettohinta`, `halytysraja`, `varmuus_varasto`, `tilausmaara`, `ostoehdotus`, `tahtituote`, `tarrakerroin`, `tarrakpl`, `myynti_era`, `minimi_era`, `valmistuslinja`, `valmistusaika_sekunneissa`, `tullikohtelu`, `tullinimike1`, `tullinimike2`, `toinenpaljous_muunnoskerroin`, `vienti`, `tuotekorkeus`, `tuoteleveys`, `tuotesyvyys`, `tuotemassa`, `tuotekuva`, `nakyvyys`, `kuluprosentti`, `vakkoodi`, `vakmaara`, `leimahduspiste`, `meria_saastuttava`, `vak_imdg_koodi`, `kuljetusohje`, `pakkausmateriaali`, `alv`, `myyjanro`, `ostajanro`, `tuotepaallikko`)
 				VALUES
 				('{$kukarow['yhtio']}', 'MUISTUTUS', 'Muistutus', 0, 0, '', '', '', '', '', '', '', '', '', '', '', 0.000000, 0, 0.000000, 0.000000, '0000-00-00', 'V', 'o', '', '', '', '', '', '', 'N', '', 0, '', '', '', '', '', '', '', '', 0, 0, 0, 'import', NOW(), NOW(), 'import', '', '0000-00-00', '0000-00-00', '0000-00-00', '0000-00-00', 0.000000, 0.000000, 0.00, 0.00, 0.00, '', '', 0.00, 0, 0.00, 0.00, '', 0, '', '', '', 0.00, '', 0.0000, 0.0000, 0.0000, 0.0000, '', '', 0.000, '', '', '', '', 0, '', '', 23.00, 0, 0, 0);",
-			"	INSERT INTO `tuote` (`yhtio`, `tuoteno`, `nimitys`, `osasto`, `try`, `tuotemerkki`, `malli`, `mallitarkenne`, `kuvaus`, `lyhytkuvaus`, `mainosteksti`, `aleryhma`, `muuta`, `tilausrivi_kommentti`, `kerayskommentti`, `purkukommentti`, `myyntihinta`, `myyntihinta_maara`, `kehahin`, `vihahin`, `vihapvm`, `yksikko`, `ei_saldoa`, `kommentoitava`, `tuotetyyppi`, `myynninseuranta`, `hinnastoon`, `sarjanumeroseuranta`, `suoratoimitus`, `status`, `yksin_kerailyalustalle`, `keraysvyohyke`, `panttitili`, `tilino`, `tilino_eu`, `tilino_ei_eu`, `tilino_kaanteinen`, `tilino_marginaali`, `tilino_osto_marginaali`, `tilino_triang`, `kustp`, `kohde`, `projekti`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`, `eankoodi`, `epakurantti25pvm`, `epakurantti50pvm`, `epakurantti75pvm`, `epakurantti100pvm`, `myymalahinta`, `nettohinta`, `halytysraja`, `varmuus_varasto`, `tilausmaara`, `ostoehdotus`, `tahtituote`, `tarrakerroin`, `tarrakpl`, `myynti_era`, `minimi_era`, `valmistuslinja`, `valmistusaika_sekunneissa`, `tullikohtelu`, `tullinimike1`, `tullinimike2`, `toinenpaljous_muunnoskerroin`, `vienti`, `tuotekorkeus`, `tuoteleveys`, `tuotesyvyys`, `tuotemassa`, `tuotekuva`, `nakyvyys`, `kuluprosentti`, `vakkoodi`, `vakmaara`, `leimahduspiste`, `meria_saastuttava`, `vak_imdg_koodi`, `kuljetusohje`, `pakkausmateriaali`, `alv`, `myyjanro`, `ostajanro`, `tuotepaallikko`)
+		"	INSERT INTO `tuote` (`yhtio`, `tuoteno`, `nimitys`, `osasto`, `try`, `tuotemerkki`, `malli`, `mallitarkenne`, `kuvaus`, `lyhytkuvaus`, `mainosteksti`, `aleryhma`, `muuta`, `tilausrivi_kommentti`, `kerayskommentti`, `purkukommentti`, `myyntihinta`, `myyntihinta_maara`, `kehahin`, `vihahin`, `vihapvm`, `yksikko`, `ei_saldoa`, `kommentoitava`, `tuotetyyppi`, `myynninseuranta`, `hinnastoon`, `sarjanumeroseuranta`, `suoratoimitus`, `status`, `yksin_kerailyalustalle`, `keraysvyohyke`, `panttitili`, `tilino`, `tilino_eu`, `tilino_ei_eu`, `tilino_kaanteinen`, `tilino_marginaali`, `tilino_osto_marginaali`, `tilino_triang`, `kustp`, `kohde`, `projekti`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`, `eankoodi`, `epakurantti25pvm`, `epakurantti50pvm`, `epakurantti75pvm`, `epakurantti100pvm`, `myymalahinta`, `nettohinta`, `halytysraja`, `varmuus_varasto`, `tilausmaara`, `ostoehdotus`, `tahtituote`, `tarrakerroin`, `tarrakpl`, `myynti_era`, `minimi_era`, `valmistuslinja`, `valmistusaika_sekunneissa`, `tullikohtelu`, `tullinimike1`, `tullinimike2`, `toinenpaljous_muunnoskerroin`, `vienti`, `tuotekorkeus`, `tuoteleveys`, `tuotesyvyys`, `tuotemassa`, `tuotekuva`, `nakyvyys`, `kuluprosentti`, `vakkoodi`, `vakmaara`, `leimahduspiste`, `meria_saastuttava`, `vak_imdg_koodi`, `kuljetusohje`, `pakkausmateriaali`, `alv`, `myyjanro`, `ostajanro`, `tuotepaallikko`)
 				VALUES
 				('{$kukarow['yhtio']}', 'KAYNTI', 'Käynti', 0, 0, '', '', '', '', '', '', '', '', '', '', '', 0.000000, 0, 0.000000, 0.000000, '0000-00-00', 'V', 'o', '', 'K', '', '', '', '', 'N', '', 0, '', '', '', '', '', '', '', '', 0, 0, 0, 'import', NOW(), NOW(), 'import', '', '0000-00-00', '0000-00-00', '0000-00-00', '0000-00-00', 0.000000, 0.000000, 0.00, 0.00, 0.00, '', '', 0.00, 0, 0.00, 0.00, '', 0, '', '', '', 0.00, '', 0.0000, 0.0000, 0.0000, 0.0000, '', '', 0.000, '', '', '', '', 0, '', '', 23.00, 0, 0, 0);",
-			"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
+		"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
 				VALUES
 				('{$kukarow['yhtio']}', 'MUISTUTUS', 'fi', 'sammutin_tyyppi', 'jauhesammutin', '', '', '', 0, 'import', NOW(), NOW(), 'import');",
-			"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
+		"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
 				VALUES
 				('{$kukarow['yhtio']}', 'MUISTUTUS', 'fi', 'sammutin_koko', '1', '', '', '', 0, 'import', NOW(), NOW(), 'import');",
-			"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
+		"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
 				VALUES
 				('{$kukarow['yhtio']}', 'KAYNTI', 'fi', 'tyomaarayksen_ryhmittely', 'tarkastus', '3', '', '', 3, 'import', NOW(), NOW(), 'import');",
 	);
@@ -369,7 +371,12 @@ function tarkasta_tarkastukset() {
 	$oikein = 0;
 	$vaarin = 0;
 	foreach ($vanhat_tarkastukset as $vanha_tarkastus) {
-		
+
+		if ($vanha_tarkastus['LAITE'] == '32186' AND $vanha_tarkastus['TUOTENRO'] == '109100') {
+			$lol = $huoltosyklit[$vanha_tarkastus['LAITE']];
+			$b = "";
+		}
+
 		$uusi_paiva = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']]['seuraava_tapahtuma'];
 		if ($uusi_paiva == null) {
 			$vaarin++;
@@ -377,7 +384,7 @@ function tarkasta_tarkastukset() {
 			echo "<br/>";
 			continue;
 		}
-		
+
 		if ($uusi_paiva != $vanha_tarkastus['ED']) {
 			$vaarin++;
 			echo "Laite {$vanha_tarkastus['LAITE']} toimenpide {$vanha_tarkastus['TUOTENRO']} {$uusi_paiva} pitäisi olla {$vanha_tarkastus['ED']}";
@@ -389,7 +396,40 @@ function tarkasta_tarkastukset() {
 			echo "<br/>";
 		}
 	}
-	
+
+	echo "<br/>";
+	echo "<br/>";
+	echo "Oikein: {$oikein} Vaarin: {$vaarin}";
+}
+
+function tarkasta_tarkastukset2() {
+	global $kukarow, $yhtiorow;
+
+	$huoltosyklit = hae_kaikkien_laitteiden_huoltosyklit();
+	$laite_koodit = array_keys($huoltosyklit);
+	$vanhat_tarkastukset = hae_vanhat_tarkastukset($laite_koodit);
+
+	$oikein = 0;
+	$vaarin = 0;
+	foreach ($huoltosyklit as $laite_koodi => $huoltosykli) {
+		foreach ($huoltosykli['huoltosyklit'] as $toimenpide_tuoteno => $toimenpide) {
+			foreach ($vanhat_tarkastukset as $vanha_tarkastus) {
+				if ($vanha_tarkastus['LAITE'] == $laite_koodi and $vanha_tarkastus['TUOTENRO'] == $toimenpide_tuoteno) {
+					if ($vanha_tarkastus['ED'] != $toimenpide['seuraava_tapahtuma']) {
+						$vaarin++;
+						echo "Laite {$vanha_tarkastus['LAITE']} toimenpide {$vanha_tarkastus['TUOTENRO']} {$toimenpide['seuraava_tapahtuma']} pitäisi olla {$vanha_tarkastus['ED']}";
+						echo "<br/>";
+					}
+					else {
+						$oikein++;
+						echo "Oikein oli";
+						echo "<br/>";
+					}
+				}
+			}
+		}
+	}
+
 	echo "<br/>";
 	echo "<br/>";
 	echo "Oikein: {$oikein} Vaarin: {$vaarin}";
@@ -397,7 +437,7 @@ function tarkasta_tarkastukset() {
 
 function hae_kaikkien_laitteiden_huoltosyklit() {
 	global $kukarow, $yhtiorow;
-	
+
 	$query = "	SELECT laite.tuoteno AS laite_tuoteno,
 				laite.koodi AS laite_koodi,
 				hl.viimeinen_tapahtuma,
@@ -412,20 +452,34 @@ function hae_kaikkien_laitteiden_huoltosyklit() {
 					AND h.tunnus = hl.huoltosykli_tunnus )
 				WHERE laite.yhtio = '{$kukarow['yhtio']}'";
 	$result = pupe_query($query);
-	
+
 	$huoltovalit = huoltovali_options();
 	$huoltosyklit = array();
-	while($huoltosykli = mysql_fetch_assoc($result)) {
-		$huoltosykli['seuraava_tapahtuma'] = date('Y-m-d', strtotime("{$huoltosykli['viimeinen_tapahtuma']} + {$huoltovalit[$huoltosykli['huoltovali']]['years']} years")) . ' 00:00:00';
+	while ($huoltosykli = mysql_fetch_assoc($result)) {
+		if ($huoltosykli['viimeinen_tapahtuma'] == null) {
+			$huoltosykli['seuraava_tapahtuma'] = '0000-00-00 00:00:00';
+		}
+		else {
+			if (!in_array($huoltosykli['huoltovali'], array_keys($huoltovalit))) {
+				$huoltosykli['seuraava_tapahtuma'] = "HUOLTOVÄLIÄ {$huoltosykli['huoltovali']} EI MAHDOLLINEN";
+			}
+			else {
+				$huoltosykli['seuraava_tapahtuma'] = date('Y-m-d', strtotime("{$huoltosykli['viimeinen_tapahtuma']} + {$huoltovalit[$huoltosykli['huoltovali']]['years']} years")).' 00:00:00';
+			}
+		}
 		$huoltosyklit[$huoltosykli['laite_koodi']]['huoltosyklit'][$huoltosykli['toimenpide_tuoteno']] = $huoltosykli;
 	}
-	
+
 	return $huoltosyklit;
 }
 
-function hae_vanhat_tarkastukset() {
+function hae_vanhat_tarkastukset($laite_koodit = array()) {
 	global $kukarow, $yhtiorow;
 
+	$where = "";
+	if (!empty($laite_koodit)) {
+		$where = " AND LAITE IN ('".implode("','", $laite_koodit)."')";
+	}
 	$query = "	SELECT ID,
 				LAITE,
 				TARKASTUS,
@@ -434,11 +488,12 @@ function hae_vanhat_tarkastukset() {
 				ED,
 				VALI,
 				TUNNUS
-				FROM tarkastukset
-				WHERE STATUS = 'Ilmoitettu'";
+				FROM tarkastukset2
+				WHERE STATUS = 'Ilmoitettu'
+				{$where}";
 	$result = pupe_query($query);
 	$tarkastukset = array();
-	while($tarkastus = mysql_fetch_assoc($result)) {
+	while ($tarkastus = mysql_fetch_assoc($result)) {
 		$tarkastukset[] = $tarkastus;
 	}
 

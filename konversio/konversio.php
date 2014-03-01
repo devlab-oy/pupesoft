@@ -99,15 +99,15 @@ if ($request['action'] == 'aja_konversio') {
 			foreach ($tiedostot as $tiedosto) {
 				echo $tiedosto.'<br/>';
 //                $output = exec("/Applications/MAMP/bin/php/php5.4.10/bin/php tarkastukset.php {$tiedosto}", $arr, $ret);
-////				$output = exec("php tarkastukset.php {$tiedosto}", $arr, $ret);
-//				echo "<pre>";
-//				var_dump($arr);
-//				echo $ret;
-//				echo "</pre>";
-//				echo "<br/>";
-//				echo "<br/>";
-				$dumper = new TarkastuksetCSVDumper($request['kukarow'], $tiedosto);
-				$dumper->aja();
+				$output = exec("php tarkastukset.php {$tiedosto}", $arr, $ret);
+				echo "<pre>";
+				var_dump($arr);
+				echo $ret;
+				echo "</pre>";
+				echo "<br/>";
+				echo "<br/>";
+//				$dumper = new TarkastuksetCSVDumper($request['kukarow'], $tiedosto);
+//				$dumper->aja();
 			}
 			echo "loppu:".date('Y-m-d H:i:s');
 			break;
@@ -488,7 +488,7 @@ function hae_vanhat_tarkastukset($laite_koodit = array()) {
 				ED,
 				VALI,
 				TUNNUS
-				FROM tarkastukset2
+				FROM tarkastukset
 				WHERE STATUS = 'Ilmoitettu'
 				{$where}";
 	$result = pupe_query($query);

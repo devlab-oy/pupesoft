@@ -10,6 +10,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 	protected $unique_values = array();
 	protected $products = array();
 	protected $laitteet = array();
+	protected $huoltosyklit = array();
 	private $kaato_tilausrivi = array();
 	private $kaato_tilausrivin_lisatiedot = array();
 
@@ -53,6 +54,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 		$this->hae_kaikki_laitteet();
 		$this->hae_tuotteet();
+		$this->hae_kaikkien_laitteiden_huoltosyklit();
 
 		foreach ($this->rivit as $index => &$rivi) {
 			$rivi = $this->konvertoi_rivi($rivi);
@@ -120,7 +122,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					//loytyyko_tuote metodi populoi products arrayta
 					$rivi['toimenpide_tuotteen_tyyppi'] = $this->products[$rivi[$key]]['selite'];
 
-					$huoltosyklit = $this->hae_huoltosyklit($rivi['laite']);
+					$huoltosyklit = $this->huoltosyklit[$rivi['laite']];
 
 					$tehtava_huolto = search_array_key_for_value_recursive($huoltosyklit, 'toimenpide', $rivi['toimenpide']);
 					$tehtava_huolto = $tehtava_huolto[0];
@@ -284,17 +286,17 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		return false;
 	}
 
-	private function hae_huoltosyklit($laite_tunnus) {
+	private function hae_kaikkien_laitteiden_huoltosyklit() {
 		$query = "	SELECT huoltosykli.tunnus AS huoltosykli_tunnus,
 					huoltosykli.toimenpide AS toimenpide,
 					IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') AS viimeinen_tapahtuma,
 					huoltosyklit_laitteet.huoltovali AS huoltovali,
+					huoltosyklit_laitteet.laite_tunnus AS laite_tunnus,
 					tuotteen_avainsanat.selite
 					FROM huoltosykli
 					JOIN huoltosyklit_laitteet
 					ON ( huoltosyklit_laitteet.yhtio = huoltosykli.yhtio
-						AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus
-						AND huoltosyklit_laitteet.laite_tunnus = '{$laite_tunnus}' )
+						AND huoltosyklit_laitteet.huoltosykli_tunnus = huoltosykli.tunnus)
 					JOIN tuotteen_avainsanat
 					ON ( tuotteen_avainsanat.yhtio = huoltosykli.yhtio
 						AND tuotteen_avainsanat.tuoteno = huoltosykli.toimenpide )
@@ -305,12 +307,9 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			return false;
 		}
 
-		$huoltosyklit = array();
 		while ($huoltosykli = mysql_fetch_assoc($result)) {
-			$huoltosyklit[] = $huoltosykli;
+			$this->huoltosyklit[$huoltosykli['laite_tunnus']] = $huoltosykli;
 		}
-
-		return $huoltosyklit;
 	}
 
 	private function paivita_tyomaarayksen_kommentti($tunnus, $kommentti) {

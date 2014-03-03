@@ -91,7 +91,7 @@
 			}
 
 			$excelrivi = pupeFileReader($_FILES['userfile']['tmp_name'], $ext, '', $lue_useammalta_valilehdelta);
-			
+
 			$filetyyppi = "";
 			$rivilask1 = 0;
 
@@ -298,8 +298,26 @@
 
 							if ($kukarow["extranet"] == "") {
 
-								$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
-								$kerayspvm		= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
+								//Toimitusaika
+								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_Arvioitu])) OR $rivi[$ind_Arvioitu] == "") {
+									$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
+								}
+								else {
+									$toimaika = $rivi[$ind_Arvioitu] = "";
+									echo "Tiedostosta ei saa syˆtt‰‰ toimitusp‰iv‰‰! Tiedoston toimitusp‰iv‰‰ ei tallennettu! K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰m‰‰r‰ otsikolta! <br><br>";
+								}
+
+								//Ker‰ysp‰iv‰m‰‰r‰
+								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_ToivottuKeraysajankohta])) OR $rivi[$ind_ToivottuKeraysajankohta] == "") {
+									$kerayspvm	= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
+
+								}
+								else {
+									$kerayspvm = $rivi[$ind_ToivottuKeraysajankohta] = "";
+									echo "Tiedoston ker‰ysp‰iv‰m‰‰r‰‰ ei k‰ytetty. K‰y p‰ivitt‰m‰ss‰ tarvittaessa ker‰ysp‰iv‰m‰‰r‰ otsikolta! <br><br>";
+
+								}
+
 								$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
 
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -363,6 +381,10 @@
 
 										if ($toimaika == '') {
 											$toimaika = $laskurow["toimaika"];
+										}
+
+										if ($kerayspvm == "") {
+											$kerayspvm = $laskurow["kerayspvm"];
 										}
 
 										if ($hinta == 0) {
@@ -642,8 +664,25 @@
 
 						if ($kukarow["extranet"] == "") {
 
-							$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
-							$kerayspvm		= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
+							//Toimitusaika
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_Arvioitu])) OR $rivi[$ind_Arvioitu] == "") {
+								$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
+							}
+							else {
+								$toimaika = $rivi[$ind_Arvioitu] = "";
+								echo "Tiedostosta ei saa syˆtt‰‰ toimitusp‰iv‰‰! Tiedoston toimitusp‰iv‰‰ ei tallennettu! K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰m‰‰r‰ otsikolta! <br><br>";
+							}
+
+							//Ker‰ysp‰iv‰m‰‰r‰
+							if ($yhtiorow["splittauskielto"] == "K" OR !(isset($rivi[$ind_ToivottuKeraysajankohta])) OR $rivi[$ind_ToivottuKeraysajankohta] == "") {
+								$kerayspvm	= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
+							}
+							else {
+								$kerayspvm = $rivi[$ind_ToivottuKeraysajankohta] = "";
+								echo "Tiedostosta ei saa syˆtt‰‰ ker‰ysp‰iv‰m‰‰r‰‰! Tiedoston ker‰ysp‰iv‰m‰‰r‰‰ ei k‰ytetty. K‰y p‰ivitt‰m‰ss‰ tarvittaessa ker‰ysp‰iv‰m‰‰r‰ otsikolta! <br><br>";
+
+							}
+
 							$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -707,6 +746,10 @@
 
 									if ($toimaika == '') {
 										$toimaika = $laskurow["toimaika"];
+									}
+
+									if ($kerayspvm == "") {
+										$kerayspvm = $laskurow["kerayspvm"];
 									}
 
 									if ($hinta == 0) {
@@ -784,7 +827,7 @@
 					}
 				}
 			}
-			
+
 
 			$tuoteno	= '';
 			$kpl		= '';

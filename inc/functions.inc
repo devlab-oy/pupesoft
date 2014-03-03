@@ -13728,7 +13728,10 @@ if (!function_exists("pupe_DataTables")) {
 
 							var valid_params = true;
 							var suuntalava_ok = false;
-							if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara)) {
+							if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara) || typeof(massajakokplmaara.length) == 'undefined') {
+								valid_params = false;
+							}
+							if (rivi_kpl_alkuperainen / massajakokplmaara > 30) {
 								valid_params = false;
 							}
 							if (massatyyppi.length == 0 || massakeraysvyohyke.length == 0 || massaterminaalialue.length == 0) {

@@ -68,7 +68,7 @@ class LaiteCSVDumper extends CSVDumper {
 				}
 				else if ($konvertoitu_header == 'tuoteno') {
 					if (strtoupper($rivi[$csv_header]) == 'A990001') {
-						$tuoteno = 'KAYNTI';
+						$tuoteno = 'MUISTUTUS';
 					}
 					else {
 						$tuoteno = str_replace(' ', '', strtoupper($rivi[$csv_header]));

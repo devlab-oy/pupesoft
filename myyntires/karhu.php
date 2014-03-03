@@ -26,6 +26,10 @@ if (!isset($karhu_kertaa_myyntikielto)) {
 // jos jollain laskulla on kolmas tai useampi karhukierros menossa, asetetaan asiakas myyntikieltoon
 $ehdota_maksukielto = 0;
 
+// jos jollain laskulla on toinen tai useampi karhukierros menossa, voidaan lähettää karhu myös myyjän sähköpostiin (vain jos sellainen löytyy)
+$ehdota_karhuemail_myyjalle = 0;
+$myyjalla_on_eposti = 0;
+
 if (!isset($tee)) $tee = "";
 
 $query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$yhtiorow[yhtio]'";
@@ -494,6 +498,19 @@ if ($tee == 'KARHUA')  {
 			$ehdota_maksukielto = 1;
 		}
 
+		if ($lasku["karhuttu"] >= 1) {
+			$ehdota_karhuemail_myyjalle = 1;
+			$query = "	SELECT eposti
+						FROM kuka
+						WHERE yhtio = '{$asiakastiedot['yhtio']}'
+						AND myyja = '{$asiakastiedot['myyjanro']}'";
+			$res = pupe_query($query);
+			if (mysql_num_rows($res) > 0) {
+				$myyjalla_on_eposti = 1;
+				$myyjatiedot = mysql_fetch_assoc($res);
+			}
+		}
+
 		$summmmma += $lasku["summa"];
 
 		// kerätään eri valuutat taulukkoon
@@ -512,6 +529,11 @@ if ($tee == 'KARHUA')  {
 
 	if ($ehdota_maksukielto) {
 		echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on vähintään %s kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella", "", ($karhu_kertaa_myyntikielto + 1)).": {$asiakastiedot["ytunnus"]}</font>";
+	}
+
+	if ($ehdota_karhuemail_myyjalle and $myyjalla_on_eposti) {
+		if ($ehdota_maksukielto) echo "<br>";
+		echo "<font class='message'><input type='checkbox' name = 'laheta_karhuemail_myyjalle' value = '{$myyjatiedot["eposti"]}'> " . t("Lähetä karhu myös myyjän sähköpostiin").": {$myyjatiedot["eposti"]}</font>";
 	}
 
 	echo "<table>";

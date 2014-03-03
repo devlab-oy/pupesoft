@@ -1026,7 +1026,23 @@
 
 	// tulostetaan jos ei lähetetä ekirjettä eikä maventaan
 	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and $_REQUEST['maventa_laheta'] != 'Lähetä Maventaan') {
+		if (function_exists("pupesoft_sahkoposti") and !empty($laheta_karhuemail_myyjalle)) {
 
+			$polkupyora = pathinfo($pdffilenimi);
+			$params = array( 	
+				"to" 		=> $laheta_karhuemail_myyjalle,
+				"subject"	=> t("Maksukehotuskopio"),
+				"ctype"		=> "text",
+				"attachements" => array(0 	=> array(
+											"filename"		=> $pdffilenimi,
+											"newfilename"	=> "",
+											"ctype"			=> $polkupyora['extension'],
+											)
+										)
+			);
+			$jou = pupesoft_sahkoposti($params);
+			if ($jou) echo t("Karhukirjekopio lähetettiin myyjälle").": {$laheta_karhuemail_myyjalle}...\n<br>";
+		}
 		if (isset($_REQUEST['email_laheta']) and $_REQUEST['karhu_email'] != "") {
 			$liite 		  = $pdffilenimi;
 			$kutsu 		  = t("Maksukehotus", $kieli);

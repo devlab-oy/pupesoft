@@ -246,7 +246,7 @@
 					}
 					
 					// Jos on syötetty käsin inventointipvm sen pitää olla validi
-					if (isset($paivamaaran_kasisyotto) and $inventointipvm != '') {
+					if (isset($paivamaaran_kasisyotto) and !empty($inventointipvm)) {
 						list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
 						$koppi = FALSE;
 						if (!checkdate($mm, $dd, $yyyy)) {
@@ -263,7 +263,7 @@
 						if (!$koppi) {
 							// Katsotaan onko inventointipäivä syötetty käsin
 							$laadittuaika = "now()";
-							if (isset($paivamaaran_kasisyotto) and $inventointipvm != '') {
+							if (isset($paivamaaran_kasisyotto) and !empty($inventointipvm)) {
 								list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
 								$yyyy 				= substr($yyyy,0,4);
 								$mm 				= substr($mm,0,2);
@@ -448,7 +448,7 @@
 					if (mysql_num_rows($result) == 1 and $virhe != 1) {
 						$row = mysql_fetch_assoc($result);
 
-						if (isset($paivamaaran_kasisyotto) and $laadittuaika != "now()" and $laadittuaika != '') {
+						if (isset($paivamaaran_kasisyotto) and !empty($laadittuaika) and $laadittuaika != "now()") {
 							# Inventointipvm käsisyöttöfallbacki - ei sallita päivämäärää jos sen jälkeen on tuloja, valmistuksia tai epäkuranttiajoja
 
 							$query = "	SELECT *
@@ -467,13 +467,24 @@
 								$laadittuaika = "now()";
 							}
 						}
+						elseif(isset($paivamaaran_kasisyotto) and empty($laadittuaika)) {
+							$laadittuaika = "now()";
+						}
 
-						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
+						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or (isset($paivamaaran_kasisyotto) and !empty($laadittuaika) and $laadittuaika != "now()") or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
+
+							if (isset($paivamaaran_kasisyotto) and !empty($laadittuaika) and $laadittuaika != "now()") {
+								$row['inventointilista_aika'] = $laadittuaika;
+							}
+							else {
+								$row['inventointilista_aika'] = "'".$row['inventointilista_aika']."'";
+							}
+
 							//jos invataan raportin avulla niin tehdään päivämäärätsekit ja lasketaan saldo takautuvasti
 							$saldomuutos = 0;
 							$kerattymuut = 0;
 
-							if ($row["sarjanumeroseuranta"] == "" and $row["inventointilista_aika"] != "0000-00-00 00:00:00" and $mobiili != "YES") {
+							if ($row["sarjanumeroseuranta"] == "" and $row["inventointilista_aika"] != "'0000-00-00 00:00:00'" and $mobiili != "YES") {
 								//katotaan paljonko saldot on muuttunut listan ajoajankohdasta
 								$query = "	SELECT sum(tapahtuma.kpl) muutos
 											FROM tapahtuma
@@ -484,7 +495,7 @@
 											and tilausrivi.hyllytaso 	= '$hyllytaso'
 											WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 											and tapahtuma.tuoteno = '$tuoteno'
-											and tapahtuma.laadittu >= '$row[inventointilista_aika]'
+											and tapahtuma.laadittu >= {$row[inventointilista_aika]}
 											and tapahtuma.kpl <> 0
 											and laji != 'Inventointi'";
 								$result = pupe_query($query);
@@ -502,9 +513,9 @@
 											and tyyppi 		in ('L','G','V')
 											and tuoteno		= '$tuoteno'
 											and varattu    <> 0
-											and kerattyaika		< '$row[inventointilista_aika]'
+											and kerattyaika		< {$row[inventointilista_aika]}
 											and kerattyaika		> '0000-00-00 00:00:00'
-											and (laskutettuaika	> '$row[inventointilista_aika]' or laskutettuaika	= '0000-00-00 00:00:00')
+											and (laskutettuaika	> {$row[inventointilista_aika]} or laskutettuaika	= '0000-00-00 00:00:00')
 											and hyllyalue	= '$hyllyalue'
 											and hyllynro 	= '$hyllynro'
 											and hyllyvali 	= '$hyllyvali'
@@ -1345,7 +1356,7 @@
 			}
 			
 			if (($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] != '0000-00-00 00:00:00')) {
-				echo "kik KISSA:{$laadittuaika}";
+
 				echo "<tr>";
 				echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 

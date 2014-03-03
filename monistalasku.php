@@ -1245,6 +1245,8 @@ if ($tee == 'MONISTA') {
 						$values .= ", ''";
 						break;
 					case 'kate_korjattu':
+						$values .= ", NULL";
+						break;
 					case 'toimitustavan_lahto':
 					case 'toimitustavan_lahto_siirto':
 						$values .= ", 0";
@@ -1667,7 +1669,7 @@ if ($tee == 'MONISTA') {
 							$rvalues .= ", ''";
 							break;
 						case 'kate_korjattu':
-							$rvalues .= ", 0";
+							$rvalues .= ", NULL";
 							break;
 						case 'kommentti':
 							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {

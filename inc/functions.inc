@@ -15471,7 +15471,7 @@ if (!function_exists("kopioi_tilausrivi")) {
 						}
 						break;
 					case 'kate_korjattu':
-						$rvalues .= "0,";
+						$rvalues .= "NULL,";
 						break;
 					case 'poikkeava_tulliprosentti':
 					case 'vahvistettu_maara':
@@ -16220,7 +16220,7 @@ if (!function_exists("splittaa_tilaus")) {
 
 				switch ($fieldname) {
 					case "kate_korjattu":
-						$values .= ", 0";
+						$values .= ", NULL";
 						break;
 					default:
 						$values .= ", '".$laskusplitrow[$fieldname]."'";
@@ -16295,7 +16295,7 @@ if (!function_exists("splittaa_tilaus")) {
 								$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
 								break;
 							case 'kate_korjattu':
-								$values .= ", 0";
+								$values .= ", NULL";
 								break;
 							default:
 								$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
@@ -16379,7 +16379,7 @@ if (!function_exists("splittaa_tilaus")) {
 										$values .= ", {$uusitunnus_tilausrivi}";
 										break;
 									case 'kate_korjattu':
-										$values .= ", 0";
+										$values .= ", NULL";
 										break;
 									default:
 										$values .= ", '{$lapsirow[$fieldname]}'";

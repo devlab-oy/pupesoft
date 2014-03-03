@@ -146,7 +146,7 @@
 							$values .= ", '$kukarow[kuka]'";
 							break;
 						case 'kate_korjattu':
-							$values .= ", 0";
+							$values .= ", NULL";
 							break;
 						default:
 							$values .= ", '".$monistarow[$i]."'";

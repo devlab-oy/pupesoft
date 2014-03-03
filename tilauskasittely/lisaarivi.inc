@@ -2037,7 +2037,7 @@
 
 			$kaannetaan_tuote = true;
 
-			if (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and in_array($yhtiorow["korvaavuusketjun_puutekasittely"], array('K','V')) and $puu_ohiker[$i] == '' and $myy_tyyppi[$i] == 'LAPSITUOTE') {
+			if (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and in_array($yhtiorow["korvaavuusketjun_puutekasittely"], array('K','V')) and $puu_ohiker[$i] == '' and $puu_hintake[$i] != "X") {
 				list(, , $_myytavissa) = saldo_myytavissa($myy_tuoteno[$i], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 
 				if ($_myytavissa > 0) $kaannetaan_tuote = false;

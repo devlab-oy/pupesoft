@@ -312,8 +312,9 @@ if ($tee == '') {
 			
 
 				while ($rivi = mysql_fetch_assoc($result_group)) {
-					echo "<tr class='show_all' id='{$rivi['kuka']}_{$rivi['tunnus']}'>";
-					echo "<td><img style='float:left;' id='img_{$rivi['kuka']}_{$rivi['tunnus']}' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$rivi['kukanimi']}</td>";
+					$js_safe_muuttuja = str_replace("#", "hash_", $rivi['kuka']);
+					echo "<tr class='show_all' id='{$js_safe_muuttuja}_{$rivi['tunnus']}'>";
+					echo "<td><img style='float:left;' id='img_{$js_safe_muuttuja}_{$rivi['tunnus']}' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$rivi['kukanimi']}</td>";
 					echo "<td>{$rivi['yhtijo']}</td>";
 					echo "<td>{$rivi['aselitetark']}</td>";
 					echo "<td>{$rivi['montakotapahtumaa']}</td>";
@@ -327,7 +328,7 @@ if ($tee == '') {
 
 					$excelrivi++;
 
-					echo "<tr class='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'>";
+					echo "<tr class='{$js_safe_muuttuja}_{$rivi['tunnus']}' style='display:none;'>";
 					echo "<td colspan='4' >";
 					// haetaan tarkemmat tiedot kalelajilla ja kalekukalla
 					$query = "		SELECT kuka.nimi kukanimi, 
@@ -400,7 +401,7 @@ if ($tee == '') {
 					echo "</table>";
 					echo "</td>";
 					echo "</tr>";
-					echo "<tr class='{$rivi['kuka']}_{$rivi['tunnus']}' style='display:none;'><td class='back' colspan='4'>&nbsp;</td></tr>";
+					echo "<tr class='{$js_safe_muuttuja}_{$rivi['tunnus']}' style='display:none;'><td class='back' colspan='4'>&nbsp;</td></tr>";
 
 				}
 

@@ -75,6 +75,13 @@
 						$toimaika = "{$vv}-{$kk}-{$pp}";
 						$toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
 
+						$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$otunnus}'";
+						$laskures = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($laskures);
+
 						$tuotteiden_paino = 0;
 
 						$kerayspoikkeama = array();
@@ -92,13 +99,16 @@
 							$tilausrivi_res = pupe_query($query);
 							$tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
-							$a = (int) ($tilausrivi_row['varattu'] * 10000);
-							$b = (int) ($keratty * 10000);
+							// tarkistetaan ja setataan ker‰yspoikkeamat vain magento-tilauksissa
+							if (strtolower($laskurow['ohjelma_moduli']) == 'magento') {
+								$a = (int) ($tilausrivi_row['varattu'] * 10000);
+								$b = (int) ($keratty * 10000);
 
-							if ($a != $b) {
-								$kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
-								$kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
-								$keratty = $tilausrivi_row['varattu'];
+								if ($a != $b) {
+									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
+									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+									$keratty = $tilausrivi_row['varattu'];
+								}
 							}
 
 							$query = "	UPDATE tilausrivi
@@ -122,13 +132,6 @@
 
 							$tuotteiden_paino += $painorow['paino'];
 						}
-
-						$query = "	SELECT *
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$otunnus}'";
-						$laskures = pupe_query($query);
-						$laskurow = mysql_fetch_assoc($laskures);
 
 						$query  = "	INSERT INTO rahtikirjat SET
 									kollit 			= 1,
@@ -170,7 +173,8 @@
 							pupesoft_sahkoposti($params);
 						}
 
-						unlink($path.$file);
+						// siirret‰‰n tiedosto done-kansioon
+						rename($path.$file, $path.'done/'.$file)
 					}
 				}
 			}

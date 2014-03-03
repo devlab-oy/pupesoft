@@ -264,26 +264,26 @@ if ($tee == '') {
 		$asiakasjoini = " LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = kalenteri.yhtio) ";
 	}
 	foreach($yhtiot as $yhtio) {
-		$query = "SELECT kuka.nimi kukanimi, 
-		kuka.yhtio yhtijo,
-		avainsana.selitetark aselitetark,
-		count(*) montakotapahtumaa,
-		kalenteri.kuka,
-		avainsana.tunnus
-		FROM kalenteri
-		JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
-		JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ({$kale_querylisa}))
-		{$asiakasjoini}
-		WHERE kalenteri.yhtio = '{$yhtio}'
-		AND kalenteri.kuka IN ({$vertaa})
-		AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-		AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-		AND kalenteri.tyyppi IN ('kalenteri','memo')
-		AND kalenteri.tapa = avainsana.selitetark
-		{$lisa}
-		GROUP BY 1,2,3
-		HAVING count(*) > 0
-		ORDER BY kukanimi, aselitetark";
+		$query = "	SELECT kuka.nimi kukanimi, 
+					kuka.yhtio yhtijo,
+					avainsana.selitetark aselitetark,
+					count(*) montakotapahtumaa,
+					kalenteri.kuka,
+					avainsana.tunnus
+					FROM kalenteri
+					JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
+					JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.tunnus IN ({$kale_querylisa}))
+					{$asiakasjoini}
+					WHERE kalenteri.yhtio = '{$yhtio}'
+					AND kalenteri.kuka IN ({$vertaa})
+					AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+					AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+					AND kalenteri.tyyppi IN ('kalenteri','memo')
+					AND kalenteri.tapa = avainsana.selitetark
+					{$lisa}
+					GROUP BY 1,2,3
+					HAVING count(*) > 0
+					ORDER BY kukanimi, aselitetark";
 		$result_group = pupe_query($query);
 
 		if (mysql_num_rows($result_group) > 0) {
@@ -356,6 +356,7 @@ if ($tee == '') {
 					echo "<table style='width:100%;'>";
 		
 					echo "<tr>";
+
 					echo "<th>",t("Edustaja"),"</th>";
 					if ($nayta_sarake) echo "<th>",t("Yhtio"),"</th>";
 					echo "<th>",t("Tapa"),"</th>";
@@ -365,6 +366,14 @@ if ($tee == '') {
 					echo "<th>",t("Asiakasno"),"</th>";
 					echo "<th>",t("Nimi"),"</th>";
 					if ($nayta_sarake) echo "<th>",t("Pvm"),"</th>";
+					if ($nayta_sarake) echo "<th>",t("Kampanjat"),"</th>";
+					echo "<th>",t("PvmKäyty"),"</th>";
+					if ($nayta_sarake) echo "<th>",t("Km"),"</th>";
+					echo "<th>",t("Lähtö"),"</th>";
+					echo "<th>",t("Paluu"),"</th>";
+					if ($nayta_sarake) echo "<th>",t("PvRaha"),"</th>";
+					echo "<th>",t("Kommentit"),"</th>";
+
 					echo "</tr>";
 
 					while ($divirivi = mysql_fetch_assoc($ressu)) {	
@@ -377,7 +386,14 @@ if ($tee == '') {
 						echo "<td>{$divirivi['ytunnus']}</td>";
 						echo "<td>{$divirivi['asiakasno']}</td>";
 						echo "<td><a href='asiakasmemo.php?ytunnus={$divirivi['ytunnus']}' target='_blank'>{$divirivi['nimi']}</a></td>";
-						if ($nayta_sarake) echo "<td>{$divirivi['pvmalku']}</td>";
+						if ($nayta_sarake) echo "<td nowrap>{$divirivi['pvmalku']}</td>";
+						if ($nayta_sarake) echo "<td>{$divirivi['kentta02']}</td>";
+						echo "<td nowrap>{$divirivi['pvmalku']}</td>";
+						if ($nayta_sarake) echo "<td>{$divirivi['kentta03']}</td>";
+						echo "<td>{$divirivi['aikaalku']}</td>";
+						echo "<td>{$divirivi['aikaloppu']}</td>";
+						if ($nayta_sarake) echo "<td>{$divirivi['kentta04']}</td>";
+						echo "<td>{$divirivi['kentta01']}</td>";
 						echo "</tr>";
 					}
 

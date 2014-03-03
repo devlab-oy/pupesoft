@@ -555,20 +555,20 @@ class HuoltosykliCSVDumper extends CSVDumper {
 					WHERE yhtio = '{$this->kukarow['yhtio']}'
 					AND tuoteno = 'MUISTUTUS'";
 		$result = pupe_query($query);
-		while($kaynti_laite = mysql_fetch_assoc($result)) {
+		while($muistutus_laite = mysql_fetch_assoc($result)) {
 			$kaynti_huoltosykli = $this->kaynti_huoltosykli();
 
 			$query = "	SELECT *
 						FROM huoltosyklit_laitteet AS hl
 						WHERE hl.yhtio = '{$this->kukarow['yhtio']}'
 						AND hl.huoltosykli_tunnus = '{$kaynti_huoltosykli['tunnus']}'
-						AND hl.laite_tunnus = '{$kaynti_laite['tunnus']}'";
+						AND hl.laite_tunnus = '{$muistutus_laite['tunnus']}'";
 			$result2 = pupe_query($query);
 
 			if (mysql_num_rows($result2) == 0) {
-				echo "muistutus laite {$kaynti_laite['tunnus']} liitettiin käynti toimenpiteeseen {$kaynti_huoltosykli['tunnus']}";
+				echo "muistutus laite {$muistutus_laite['tunnus']} liitettiin käynti toimenpiteeseen {$kaynti_huoltosykli['tunnus']}";
 				echo "<br/>";
-				$this->liita_huoltosykli($kaynti_laite['tunnus'], $kaynti_huoltosykli['tunnus']);
+				$this->liita_huoltosykli($muistutus_laite['tunnus'], $kaynti_huoltosykli);
 			}
 		}
 	}

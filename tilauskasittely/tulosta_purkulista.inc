@@ -858,14 +858,18 @@
 				$row["kommentti"] = trim($row["kommentti"]);
 
 				if (trim($row["kommentti"]) != '') {
-					if ($yhtiorow['purkulistan_asettelu'] == 'A') {
-						$_row_height = $kala+20;
 
-				        $paras = explode("\n", $row["kommentti"]);
-				        for ($i = 0; ($_row_height > $kala and count($paras) > 0); $i++) {
-				        	$pdf->draw_text(440, $_row_height, substr($paras[$i], 0, 100), $firstpage, $pieni);
-				        	$_row_height -= 10;
-				        	array_shift($paras);
+					if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+
+						$_row_height = $kala+25;
+
+				        $params = explode("\n", $row["kommentti"]);
+
+				        for ($i = 0; ($_row_height > $kala and count($params) > 0); $_row_height -= 10) {
+
+				        	$pdf->draw_text(440, $_row_height, substr($params[$i], 0, 100), $firstpage, $pieni);
+
+				        	array_shift($params);
 				        }
 					}
 					else {

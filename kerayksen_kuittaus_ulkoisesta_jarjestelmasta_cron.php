@@ -71,6 +71,10 @@
 					if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and trim($xml->MessageHeader->MessageType) == 'OutboundDeliveryConfirmation') {
 
 						$otunnus = (int) $xml->CustPackingSlip->SalesId;
+
+						// Fallback to pickinglist id
+						if ($otunnus == 0) $otunnus = (int) $xml->CustPackingSlip->PickingListId;
+
 						list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
 						$toimaika = "{$vv}-{$kk}-{$pp}";
 						$toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;

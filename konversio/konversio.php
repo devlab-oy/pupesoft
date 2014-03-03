@@ -374,8 +374,8 @@ function tarkasta_tarkastukset() {
 	$vaarin = 0;
 	foreach ($vanhat_tarkastukset as &$vanha_tarkastus) {
 
-		if ($vanha_tarkastus['TUOTENRO'] == 'A990001') {
-			$vanha_tarkastus['TUOTENRO'] = 'MUISTUTUS';
+		if ($vanha_tarkastus['TUOTENRO'] == 'A990001' or $vanha_tarkastus['TUOTENRO'] == '990001' or $vanha_tarkastus['TUOTENRO'] == '990011') {
+			$vanha_tarkastus['TUOTENRO'] = 'KAYNTI';
 		}
 
 		if ($vanha_tarkastus['LAITE'] == '32186' AND $vanha_tarkastus['TUOTENRO'] == '109100') {

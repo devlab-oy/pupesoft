@@ -174,7 +174,7 @@
 						}
 
 						// siirret‰‰n tiedosto done-kansioon
-						rename($path.$file, $path.'done/'.$file)
+						rename($path.$file, $path.'done/'.$file);
 					}
 				}
 			}

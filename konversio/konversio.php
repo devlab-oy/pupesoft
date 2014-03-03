@@ -349,13 +349,13 @@ function luo_kaato_tiedot() {
 				('{$kukarow['yhtio']}', 'KAYNTI', 'Käynti', 0, 0, '', '', '', '', '', '', '', '', '', '', '', 0.000000, 0, 0.000000, 0.000000, '0000-00-00', 'V', 'o', '', 'K', '', '', '', '', 'N', '', 0, '', '', '', '', '', '', '', '', 0, 0, 0, 'import', NOW(), NOW(), 'import', '', '0000-00-00', '0000-00-00', '0000-00-00', '0000-00-00', 0.000000, 0.000000, 0.00, 0.00, 0.00, '', '', 0.00, 0, 0.00, 0.00, '', 0, '', '', '', 0.00, '', 0.0000, 0.0000, 0.0000, 0.0000, '', '', 0.000, '', '', '', '', 0, '', '', 23.00, 0, 0, 0);",
 		"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
 				VALUES
-				('{$kukarow['yhtio']}', 'MUISTUTUS', 'fi', 'sammutin_tyyppi', 'jauhesammutin', '', '', '', 0, 'import', NOW(), NOW(), 'import');",
-		"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
-				VALUES
-				('{$kukarow['yhtio']}', 'MUISTUTUS', 'fi', 'sammutin_koko', '1', '', '', '', 0, 'import', NOW(), NOW(), 'import');",
+				('{$kukarow['yhtio']}', 'MUISTUTUS', 'fi', 'sammutin_tyyppi', 'muistutus', '', '', '', 0, 'import', NOW(), NOW(), 'import');",
 		"	INSERT INTO `tuotteen_avainsanat` (`yhtio`, `tuoteno`, `kieli`, `laji`, `selite`, `selitetark`, `status`, `nakyvyys`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
 				VALUES
 				('{$kukarow['yhtio']}', 'KAYNTI', 'fi', 'tyomaarayksen_ryhmittely', 'tarkastus', '3', '', '', 3, 'import', NOW(), NOW(), 'import');",
+		"	INSERT INTO `huoltosykli` (`yhtio`, `tyyppi`, `koko`, `olosuhde`, `toimenpide`, `huoltovali`, `pakollisuus`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
+				VALUES
+				('{$kukarow['yhtio']}', 'muistutus', '', 'A', 'KAYNTI', 365, '1', 'import', NOW(), NOW(), 'import')",
 	);
 	foreach ($query_array as $query) {
 		pupe_query($query);
@@ -368,9 +368,15 @@ function tarkasta_tarkastukset() {
 	$vanhat_tarkastukset = hae_vanhat_tarkastukset();
 	$huoltosyklit = hae_kaikkien_laitteiden_huoltosyklit();
 
+	$laite_koodit = array_keys($huoltosyklit);
+
 	$oikein = 0;
 	$vaarin = 0;
-	foreach ($vanhat_tarkastukset as $vanha_tarkastus) {
+	foreach ($vanhat_tarkastukset as &$vanha_tarkastus) {
+
+		if ($vanha_tarkastus['TUOTENRO'] == 'A990001') {
+			$vanha_tarkastus['TUOTENRO'] = 'MUISTUTUS';
+		}
 
 		if ($vanha_tarkastus['LAITE'] == '32186' AND $vanha_tarkastus['TUOTENRO'] == '109100') {
 			$lol = $huoltosyklit[$vanha_tarkastus['LAITE']];
@@ -379,8 +385,19 @@ function tarkasta_tarkastukset() {
 
 		$uusi_paiva = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']]['seuraava_tapahtuma'];
 		if ($uusi_paiva == null) {
-			$vaarin++;
-			echo "seuraava_tapahtuma null";
+			if (!in_array($vanha_tarkastus['LAITE'], $laite_koodit)) {
+				echo "Laite {$vanha_tarkastus['LAITE']} EI OLEMASSA toimenpide {$vanha_tarkastus['TUOTENRO']} pitäisi olla {$vanha_tarkastus['ED']}";
+			}
+			else {
+				$debug = $huoltosyklit[$vanha_tarkastus['LAITE']];
+				$huoltosykli_tuotenumerot = array_keys($huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit']);
+				if (!in_array($vanha_tarkastus['TUOTENRO'], $huoltosykli_tuotenumerot)) {
+					echo "Laite {$vanha_tarkastus['LAITE']} LÖYTYY, mutta toimenpide {$vanha_tarkastus['TUOTENRO']} EI OLE LIITETTYNÄ pitäisi olla {$vanha_tarkastus['ED']} ".implode(', ', $huoltosykli_tuotenumerot);
+				}
+				else {
+					echo "seuraava_tapahtuma null";
+				}
+			}
 			echo "<br/>";
 			continue;
 		}
@@ -444,10 +461,10 @@ function hae_kaikkien_laitteiden_huoltosyklit() {
 				hl.huoltovali,
 				h.toimenpide AS toimenpide_tuoteno
 				FROM laite
-				JOIN huoltosyklit_laitteet AS hl
+				LEFT JOIN huoltosyklit_laitteet AS hl
 				ON (hl.yhtio = laite.yhtio
 					AND hl.laite_tunnus = laite.tunnus )
-				JOIN huoltosykli AS h
+				LEFT JOIN huoltosykli AS h
 				ON (h.yhtio = hl.yhtio
 					AND h.tunnus = hl.huoltosykli_tunnus )
 				WHERE laite.yhtio = '{$kukarow['yhtio']}'";

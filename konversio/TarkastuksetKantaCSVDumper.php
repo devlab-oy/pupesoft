@@ -39,11 +39,11 @@ class TarkastuksetKantaCSVDumper extends CSVDumper {
 			'ID',
 		);
 
-		$this->setFilepath("/tmp/konversio/tarkastukset/xbb_s");
+		$this->setFilepath("/tmp/konversio/TARKASTUKSET.CSV");
 		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
-		$this->setTable('tarkastukset2');
+		$this->setTable('tarkastukset');
 	}
 
 	protected function konvertoi_rivit() {

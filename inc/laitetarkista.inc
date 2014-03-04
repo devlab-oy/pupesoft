@@ -14,7 +14,7 @@ if (!function_exists("laitetarkista")) {
 						AND tuoteno = '{$t['tuoteno']}'";
 			$tuotteen_atribuutit_result = pupe_query($query);
 
-			if (mysql_num_rows($tuotteen_atribuutit_result) != 2) {
+			if (mysql_num_rows($tuotteen_atribuutit_result) < 1) {
 				$virhe[$i] = t("Tuotteen avainsanat on perustamatta").". ".t("Tarvittuja avainsanoja on koko ja tyyppi");
 
 				$virhe[1] .= t("Tuotteen avainsanat on perustamatta").". ".t("Tarvittuja avainsanoja on koko ja tyyppi");

@@ -417,6 +417,11 @@ function tarkasta_tarkastukset() {
 	echo "<br/>";
 	echo "<br/>";
 	echo "Oikein: {$oikein} Vaarin: {$vaarin}";
+
+	echo "<br/>";
+	echo "<br/>";
+
+	koeponnistus_tarkastus();
 }
 
 function tarkasta_tarkastukset2() {
@@ -515,4 +520,78 @@ function hae_vanhat_tarkastukset($laite_koodit = array()) {
 	}
 
 	return $tarkastukset;
+}
+
+function koeponnistus_tarkastus() {
+	$query = "	SELECT laite,
+					tuotenro,
+					nimike,
+					ed,
+					seur,
+					STATUS,
+					vali
+					FROM   tarkastukset
+					WHERE STATUS = 'ilmoitettu'";
+	$result = pupe_query($query);
+	$ilmoitetut = array();
+	while ($ilmoitettu = mysql_fetch_assoc($result)) {
+		$ilmoitetut[$ilmoitettu['laite']][$ilmoitettu['tuotenro']] = $ilmoitettu;
+	}
+
+	$query = "	SELECT laite,
+				tuotenro,
+				nimike,
+				ed,
+				seur,
+				STATUS,
+				vali,
+				DATE_ADD(ed, INTERVAL vali MONTH) AS seuraava_tapahtuma
+				FROM   tarkastukset
+				WHERE  nimike LIKE 'koeponnistus%'
+				AND STATUS = 'valmis'
+				GROUP BY laite
+				ORDER BY laite DESC, ed DESC;";
+	$result = pupe_query($query);
+
+	$vaarin = 0;
+	$riveja = 0;
+	while ($koeponnistus_rivi = mysql_fetch_assoc($result)) {
+		$riveja++;
+
+		$ilmoitettu_koeponnistus = $ilmoitetut[$koeponnistus_rivi['laite']][$koeponnistus_rivi['tuotenro']];
+
+		if ($ilmoitettu_koeponnistus == false) {
+//			echo "Ei ilmoitettua koeponnistusta. Laite: {$koeponnistus_rivi['laite']} toimenpide: {$koeponnistus_rivi['tuotenro']}";
+//			echo "<br/>";
+//			echo "vali: {$koeponnistus_rivi['vali']}";
+//			echo "<br/>";
+//			echo "Laitteen edellinen tapahtuma: ".date('Y-m-d', strtotime($koeponnistus_rivi['ed']));
+//			echo "<br/>";
+//			echo "Tuleva tapahtuma pitäisi olla: ".date('Y-m-d', strtotime($koeponnistus_rivi['seuraava_tapahtuma']));
+//			echo "<br/>";
+//			$vaarin++;
+		}
+		else {
+			if ($ilmoitettu_koeponnistus['ed'] != $koeponnistus_rivi['seuraava_tapahtuma']) {
+				$sykli = (strtotime($koeponnistus_rivi['ed']) - strtotime($ilmoitettu_koeponnistus['ed'])) / 60 / 60 / 24 / 365;
+				echo "Vanhan järjestelmän bugiko? Laite: {$koeponnistus_rivi['laite']} toimenpide: {$koeponnistus_rivi['tuotenro']}";
+				echo "<br/>";
+				echo "vali: {$koeponnistus_rivi['vali']}";
+				echo "<br/>";
+				echo "Laitteen edellinen tapahtuma: ".date('Y-m-d', strtotime($koeponnistus_rivi['ed']));
+				echo "<br/>";
+				echo "Tuleva tapahtuma pitäisi olla: ".date('Y-m-d', strtotime($koeponnistus_rivi['seuraava_tapahtuma']));
+				echo "<br/>";
+				echo "Tuleva tapahtuma onkin: ".date('Y-m-d', strtotime($ilmoitettu_koeponnistus['ed']));
+				echo "<br/>";
+				echo "syklin todellinen pituus: ".abs($sykli);
+				echo "<br/>";
+				$vaarin++;
+			}
+		}
+		echo "<br/>";
+	}
+
+	echo "<br/>";
+	echo "{$riveja} joissa {$vaarin} ongelmaa";
 }

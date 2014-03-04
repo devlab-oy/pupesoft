@@ -535,7 +535,8 @@
 
 			$sarjanumero_haku = $sarjanumero;
 
-			echo "<font class='error'>".t("Sarjanumero löytyy jo tuotteelta")." $sarjarow[tuoteno]/$sarjanumero.</font><br><br>";
+			echo "<font class='error'>".t("Sarjanumero $sarjanumero löytyy jo tuotteelta")." $sarjarow[tuoteno]/$sarjanumero.</font><br><br>";
+			$sarjanumero	= "";
 		}
 	}
 

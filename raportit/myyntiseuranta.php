@@ -1480,6 +1480,7 @@
 
 					if (!empty($kumulatiivinen_valittu)) {
 						$katelisanyt .= " 0 kateproskumul, ";
+						$katelisaed .= " 0 kateproskumuled, ";
 					}
 				}
 				else {
@@ -1493,6 +1494,7 @@
 
 					if (!empty($kumulatiivinen_valittu)) {
 						$nettokatelisanyt .= " 0 nettokateproskumul, ";
+						$nettokatelisaed .= " 0 nettokateproskumuled, ";
 					}
 				}
 				else {
@@ -2876,6 +2878,21 @@
 										}
 									}
 
+									//edellisen kauden kumulatiivinen kateprossa
+									if ($ken_nimi == 'kateproskumuled') {
+										if ($row["myyntikumuled"] != 0) {
+											$row[$ken_nimi] = round($row["katekumuled"] / abs($row["myyntikumuled"]) * 100, 2);
+										}
+										else {
+											if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattakumuled"] != 0) {
+												$row[$ken_nimi] = round($row["katelaskuttamattakumuled"] / abs($row["myyntikumuled"]) * 100, 2);
+											}
+											else {
+												$row[$ken_nimi] = 0;
+											}
+										}
+									}
+
 									// nettokateprossa
 									if ($ken_nimi == "nettokateprosnyt") {
 										if ($row["myyntinyt"] != 0) {
@@ -2909,6 +2926,21 @@
 										else {
 											if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattakumul"] != 0) {
 												$row[$ken_nimi] = round($row["nettokatelaskuttamattakumul"] / abs($row["myyntilaskuttamattakumul"]) * 100, 2);
+											}
+											else {
+												$row[$ken_nimi] = 0;
+											}
+										}
+									}
+
+									//kumulatiivinen edellisen kauden nettokateprossa
+									if ($ken_nimi == "nettokateproskumuled") {
+										if ($row["myyntikumuled"] != 0) {
+											$row[$ken_nimi] = round($row["nettokatekumuled"] / abs($row["myyntikumuled"]) * 100, 2);
+										}
+										else {
+											if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattakumuled"] != 0) {
+												$row[$ken_nimi] = round($row["nettokatelaskuttamattakumuled"] / abs($row["myyntilaskuttamattakumuled"]) * 100, 2);
 											}
 											else {
 												$row[$ken_nimi] = 0;

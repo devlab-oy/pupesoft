@@ -1480,7 +1480,7 @@
 
 					if (!empty($kumulatiivinen_valittu)) {
 						$katelisanyt .= " 0 kateproskumul, ";
-						$katelisaed .= " 0 kateproskumuled, ";
+						if ($piiloed == '') $katelisaed .= " 0 kateproskumuled, ";
 					}
 				}
 				else {
@@ -1494,7 +1494,7 @@
 
 					if (!empty($kumulatiivinen_valittu)) {
 						$nettokatelisanyt .= " 0 nettokateproskumul, ";
-						$nettokatelisaed .= " 0 nettokateproskumuled, ";
+						if ($piiloed == '') $nettokatelisaed .= " 0 nettokateproskumuled, ";
 					}
 				}
 				else {

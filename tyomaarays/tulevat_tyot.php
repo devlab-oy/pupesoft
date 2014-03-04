@@ -54,7 +54,7 @@ if ($ala_tee != 'hae_tyomaaraykset') {
 		$kka = '01';
 	}
 	if (!isset($vva)) {
-		$vva = '1970';
+		$vva = date('Y');
 	}
 	if (!isset($ppl)) {
 		$ppl = '01';
@@ -63,7 +63,7 @@ if ($ala_tee != 'hae_tyomaaraykset') {
 		$kkl = '01';
 	}
 	if (!isset($vvl)) {
-		$vvl = '2970';
+		$vvl = '2030';
 	}
 
 	echo "<div>";

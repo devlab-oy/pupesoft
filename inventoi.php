@@ -10,6 +10,8 @@
 	if (!isset($mobiili))			$mobiili = "";
 	if (!isset($laadittuaika))		$laadittuaika = "";
 
+	$validi_kasinsyotetty_inventointipaivamaara = 0;
+
 	if (strpos(strtolower($toim), "oletusvarasto") !== FALSE) {
 
 		if ($kukarow['oletus_varasto'] == 0) {
@@ -244,13 +246,19 @@
 						echo "<font class='error'>".t("VIRHE: Inventointiselite on syˆtett‰v‰")."!: $tuoteno</font><br>";
 						$virhe = 1;
 					}
-					
+
+					$laadittuaika = "now()";
 					// Jos on syˆtetty k‰sin inventointipvm sen pit‰‰ olla validi
 					if (isset($paivamaaran_kasisyotto) and !empty($inventointipvm)) {
 						list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
 						$koppi = FALSE;
 						if (!checkdate($mm, $dd, $yyyy)) {
-							echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("Anna p‰iv‰m‰‰r‰ muodossa")." yyyy-mm-dd </font><br>";
+							echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("Anna p‰iv‰m‰‰r‰ muodossa")." YYYY-mm-dd </font><br>";
+							$virhe = 1;
+							$koppi = TRUE;
+						}
+						elseif (strtotime("{$yyyy}-{$mm}-{$dd} 23:59:59") > strtotime(date('Y-m-d'))) {
+							echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("K‰sinsyˆtetyn p‰iv‰m‰‰r‰n tulee olla pienempi kuin nykyinen p‰iv‰m‰‰r‰")."</font><br>";
 							$virhe = 1;
 							$koppi = TRUE;
 						}
@@ -259,16 +267,35 @@
 							$virhe = 1;
 							$koppi = TRUE;
 						}
-						
+
 						if (!$koppi) {
-							// Katsotaan onko inventointip‰iv‰ syˆtetty k‰sin
-							$laadittuaika = "now()";
-							if (isset($paivamaaran_kasisyotto) and !empty($inventointipvm)) {
+							// Katsotaan onko inventointip‰iv‰ syˆtetty k‰sin ja fiilataan se kuntoon
+							if (!empty($inventointipvm)) {
 								list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
 								$yyyy 				= substr($yyyy,0,4);
 								$mm 				= substr($mm,0,2);
 								$dd 				= substr($dd,0,2);
 								$laadittuaika = !checkdate($mm, $dd, $yyyy) ? "now()" : "'".$yyyy."-".$mm."-".$dd." 23:59:59'"; 
+							}
+
+							if (!empty($laadittuaika) and $laadittuaika != "now()") {
+								# Inventointipvm k‰sisyˆttˆfallbacki - ei sallita p‰iv‰m‰‰r‰‰ jos sen j‰lkeen on tuloja, valmistuksia tai ep‰kuranttiajoja
+								$query = "	SELECT *
+											FROM tapahtuma
+											WHERE yhtio 	= '$kukarow[yhtio]'
+											and tuoteno 	= '$tuote_row[tuoteno]'
+											and laji IN ('tulo', 'valmistus', 'ep‰kurantti')	
+											and laadittu   >= {$laadittuaika}";
+
+								$ressu = pupe_query($query);
+
+								if (mysql_num_rows($ressu) > 0) {
+									echo "<font class='error'>".t("VIRHE: Virheellinen inventointip‰iv‰m‰‰r‰")."!: $tuoteno ".t("Tuotteella on inventointiin vaikuttavia tapahtumia annetun p‰iv‰m‰‰r‰n j‰lkeen")."</font><br>";
+									$virhe = 1;
+								}
+								else {
+									$validi_kasinsyotetty_inventointipaivamaara = 1;
+								}
 							}
 						}
 					}
@@ -448,32 +475,10 @@
 					if (mysql_num_rows($result) == 1 and $virhe != 1) {
 						$row = mysql_fetch_assoc($result);
 
-						if (isset($paivamaaran_kasisyotto) and !empty($laadittuaika) and $laadittuaika != "now()") {
-							# Inventointipvm k‰sisyˆttˆfallbacki - ei sallita p‰iv‰m‰‰r‰‰ jos sen j‰lkeen on tuloja, valmistuksia tai ep‰kuranttiajoja
 
-							$query = "	SELECT *
-										FROM tapahtuma
-										WHERE yhtio 	= '$kukarow[yhtio]'
-										and tuoteno 	= '$row[tuoteno]'
-										and laji IN ('tulo', 'valmistus', 'ep‰kurantti')	
-										and laadittu   >= {$laadittuaika}
-										and hyllyalue 	= '$row[hyllyalue]'
-										and hyllynro 	= '$row[hyllynro] '
-										and hyllyvali 	= '$row[hyllyvali]'
-										and hyllytaso 	= '$row[hyllytaso]'";
+						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
 
-							$ressu = pupe_query($query);
-							if (mysql_num_rows($ressu) > 0) {
-								$laadittuaika = "now()";
-							}
-						}
-						elseif(isset($paivamaaran_kasisyotto) and empty($laadittuaika)) {
-							$laadittuaika = "now()";
-						}
-
-						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or (isset($paivamaaran_kasisyotto) and !empty($laadittuaika) and $laadittuaika != "now()") or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
-
-							if (isset($paivamaaran_kasisyotto) and !empty($laadittuaika) and $laadittuaika != "now()") {
+							if ($validi_kasinsyotetty_inventointipaivamaara) {
 								$row['inventointilista_aika'] = $laadittuaika;
 							}
 							else {
@@ -499,7 +504,6 @@
 											and tapahtuma.kpl <> 0
 											and laji != 'Inventointi'";
 								$result = pupe_query($query);
-
 								$trow = mysql_fetch_assoc ($result);
 
 								if ($trow["muutos"] != 0) {

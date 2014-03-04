@@ -1,16 +1,21 @@
 <?php
+
 require_once('../inc/parametrit.inc');
 require_once("inc/laite_huolto_functions.inc");
 
 if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
-  livesearch_asiakashaku();
-  exit;
+	livesearch_asiakashaku();
+	exit;
 }
 
-if(!isset($ala_tee)){$ala_tee = '';}
-if(!isset($valittu_asiakas)){$valittu_asiakas = '';}
+if (!isset($ala_tee)) {
+	$ala_tee = '';
+}
+if (!isset($valittu_asiakas)) {
+	$valittu_asiakas = '';
+}
 
-if (isset($tee) and $tee  == 'lataa_tiedosto') {
+if (isset($tee) and $tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
 		readfile($filepath);
@@ -19,7 +24,7 @@ if (isset($tee) and $tee  == 'lataa_tiedosto') {
 	exit;
 }
 
- //AJAX requestit tänne
+//AJAX requestit tänne
 if (isset($ajax_request)) {
 	exit;
 }
@@ -38,16 +43,28 @@ $css = hae_tyojono2_css();
 echo $js;
 echo $css;
 
-if( $ala_tee != 'hae_tyomaaraykset' ){
+if ($ala_tee != 'hae_tyomaaraykset') {
 
 	enable_ajax();
 
-	if(!isset($ppa)){$ppa = '01';}
-	if(!isset($kka)){$kka = '01';}
-	if(!isset($vva)){$vva = '1970';}
-	if(!isset($ppl)){$ppl = '01';}
-	if(!isset($kkl)){$kkl = '01';}
-	if(!isset($vvl)){$vvl = '2970';}
+	if (!isset($ppa)) {
+		$ppa = '01';
+	}
+	if (!isset($kka)) {
+		$kka = '01';
+	}
+	if (!isset($vva)) {
+		$vva = '1970';
+	}
+	if (!isset($ppl)) {
+		$ppl = '01';
+	}
+	if (!isset($kkl)) {
+		$kkl = '01';
+	}
+	if (!isset($vvl)) {
+		$vvl = '2970';
+	}
 
 	echo "<div>";
 
@@ -87,8 +104,8 @@ if( $ala_tee != 'hae_tyomaaraykset' ){
 	echo "</form>";
 
 	echo "</div>";
-
-}else{
+}
+else {
 
 	pupe_query("TRUNCATE TABLE lasku_temp");
 	pupe_query("TRUNCATE TABLE laskun_lisatiedot_temp");
@@ -99,7 +116,7 @@ if( $ala_tee != 'hae_tyomaaraykset' ){
 	$temp = 1;
 
 	$start = date('Y-m-d', strtotime($vva.'-'.$kka.'-'.$ppa));
-    $end = date('Y-m-d', strtotime($vvl.'-'.$kkl.'-'.$ppl));
+	$end = date('Y-m-d', strtotime($vvl.'-'.$kkl.'-'.$ppl));
 
 	$laitteiden_huoltosyklirivit = hae_laitteet_ja_niiden_huoltosyklit_ajalta($start, $end, $valittu_asiakas);
 
@@ -118,6 +135,5 @@ if( $ala_tee != 'hae_tyomaaraykset' ){
 	echo "<div id='tyojono_wrapper'>";
 	echo_tyomaaraykset_table($request);
 	echo "</div>";
-
 }
 require ("inc/footer.inc");

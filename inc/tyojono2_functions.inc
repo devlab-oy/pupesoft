@@ -359,7 +359,7 @@ function echo_tyomaaraykset_table($request = array()) {
 	echo "<th>".t($toimitus_string)."</th>";
 	echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
 	echo "<th>";
-	if (!empty($request['tyomaaraykset'])) {
+	if (!empty($request['tyomaaraykset']) and $request['toim'] != 'TEHDYT_TYOT') {
 		echo "<form class='multisubmit' name='tulosta_tyolistat' method='POST'>";
 		echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
 		foreach ($request['tyomaaraykset'] as $tyomaarays_per_paiva) {

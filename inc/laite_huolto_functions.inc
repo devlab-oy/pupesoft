@@ -1066,8 +1066,13 @@ function hae_mahdolliset_huoltosyklit($laite_tunnus, $tyyppi) {
 function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi = '') {
 	global $kukarow, $yhtiorow;
 
-	if (empty($sammutin_tyyppi) or empty($sammutin_koko)) {
+	if (empty($sammutin_tyyppi)) {
 		return array();
+	}
+	
+	$where = "";
+	if (!empty($sammutin_koko)) {
+		$where = " AND huoltosykli.koko = $sammutin_koko";
 	}
 
 	$tuotteen_avainsanat_join = "";
@@ -1097,7 +1102,7 @@ function hae_huoltosyklit_tyyppi_koko($sammutin_tyyppi, $sammutin_koko, $tyyppi 
 					{$tuotteen_avainsanat_join} )
 				WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
 				AND huoltosykli.tyyppi = '{$sammutin_tyyppi}'
-				AND huoltosykli.koko = $sammutin_koko";
+				{$where}";
 
 	$huoltosykli_result = pupe_query($query);
 

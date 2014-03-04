@@ -106,12 +106,11 @@
 
 	if ($alisa != "" and $llisa != "") {
 
-		$query = "	SELECT lasku.tunnus, lasku.nimi nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
+		$query = "	SELECT lasku.tunnus, if(lasku.tila = 'X', '".t("Tosite")."', lasku.nimi) nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
 					FROM lasku
 					JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[matkalla_olevat]' and tiliointi.korjattu = '')
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.tila in ('H', 'Y', 'M', 'P', 'Q')
-					AND lasku.alatila != 'A'
+					AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))
 					$alisa
 					$llisa
 					GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm

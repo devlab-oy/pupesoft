@@ -428,6 +428,9 @@
 				if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
+					if (mysql_field_name($result,$i) == 'tuoteno') {
+						$tuoteno_temp = $t[$i];
+					}
 					// Tuleeko tämä columni käyttöliittymästä
 					if (isset($t[$i])) {
 
@@ -466,6 +469,35 @@
 							$oletusarvo = trim($oletuksen_tarkistus_rivi['selitetark_4']);
 							$query .= ", $al_nimi = '$oletusarvo' ";
 						}
+					}
+				}
+				
+				if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote') {
+					if (isset($sammutin_tyyppi)) {
+						$query1 = "	INSERT INTO tuotteen_avainsanat
+									SET yhtio = '{$kukarow['yhtio']}',
+									tuoteno = '{$tuoteno_temp}',
+									kieli = 'fi',
+									laji = 'sammutin_tyyppi',
+									selite = '{$sammutin_tyyppi}',
+									laatija = '{$kukarow['kuka']}',
+									muuttaja = '{$kukarow['kuka']}',
+									luontiaika = NOW(),
+									muutospvm = NOW()";
+						pupe_query($query1);
+					}
+					if (isset($sammutin_koko) and $sammutin_koko != '') {
+						$query1 = "	INSERT INTO tuotteen_avainsanat
+									SET yhtio = '{$kukarow['yhtio']}',
+									tuoteno = '{$tuoteno_temp}',
+									kieli = 'fi',
+									laji = 'sammutin_koko',
+									selite = '{$sammutin_koko}',
+									laatija = '{$kukarow['kuka']}',
+									muuttaja = '{$kukarow['kuka']}',
+									luontiaika = NOW(),
+									muutospvm = NOW()";
+						pupe_query($query1);
 					}
 				}
 			}
@@ -2107,6 +2139,29 @@
 			while ($selite = mysql_fetch_assoc($result)) {
 				huoltosykli_rivi($selite['selite']);
 			}
+		}
+		
+		if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote' and $pikaperustus == 1) {
+			//quick fix
+			//@TODO remove this
+			$sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
+			echo "<tr>";
+			echo "<th>".t('Tyyppi')."</th>";
+			echo "<td>";
+			echo "<select name='sammutin_tyyppi'>";
+			foreach ($sammutin_tyypit as $key => $sammutin_tyyppi) {
+				echo "<option value='{$key}' {$sel}>".ucfirst($sammutin_tyyppi)."</option>";
+			}
+			echo "</select>";
+			echo "</td>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<th>".t('Koko')."</th>";
+			echo "<td>";
+			echo "<input type='text' name='sammutin_koko' />";
+			echo "</td>";
+			echo "</tr>";
 		}
 
 		echo "</table>";

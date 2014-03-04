@@ -23506,7 +23506,7 @@ if (!function_exists('js_laite')) {
 
 					if (seuraava_tapahtuma instanceof Date) {
 						if (tapahtuma_select_id.indexOf("huolto") != -1 || tapahtuma_select_id.indexOf("koeponnistus") != -1 ) {
-							seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(seuraava_tapahtuma, huoltovali);
+							seuraava_tapahtuma = seuraava_tapahtuma_valm_pvm(huoltovali);
 						}
 						var date_string = seuraava_tapahtuma.getDate() + '.' + (seuraava_tapahtuma.getMonth() + 1) + '.' + seuraava_tapahtuma.getFullYear();
 						$('#'+tapahtuma_select_id).val(date_string);
@@ -23519,7 +23519,7 @@ if (!function_exists('js_laite')) {
 				return date;
 			}
 
-			function seuraava_tapahtuma_valm_pvm(seuraava_tapahtuma, huoltovali) {
+			function seuraava_tapahtuma_valm_pvm(huoltovali) {
 				var today = new Date();
 				today.setDate(1);
 				var date = new Date();
@@ -23528,11 +23528,24 @@ if (!function_exists('js_laite')) {
 				date.setDate(parseInt($('.valm_pvm_tpp').val()) + parseInt(huoltovali));
 
 				if (date >= today) {
+					//@TODO korjaa seuraavan tapahtuman p‰iv‰m‰‰r‰ logiikka
+					//halutaan, ett‰ seuraava p‰iv‰ on valm_pvm + huoltovali
+					var seuraava_tapahtuma = new Date();
 					seuraava_tapahtuma.setMonth(parseInt($('.valm_pvm_tkk').val() - 1));
 					seuraava_tapahtuma.setFullYear(parseInt($('.valm_pvm_tvv').val()));
-					seuraava_tapahtuma.setDate(seuraava_tapahtuma.getDate() + parseInt(huoltovali));
+					seuraava_tapahtuma.setDate(1);
+					if (huoltovali == 3650) {
+						seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + 10);
+					}
+					else if (huoltovali == 1825) {
+						seuraava_tapahtuma.setFullYear(seuraava_tapahtuma.getFullYear() + 5);
+					}
 				}
-				seuraava_tapahtuma.setDate(1);
+				else {
+					//Jos nykyhetki on kauempana tulevaisuudessa kuin valm_pvm + huoltov‰li niin ei voida tiet‰‰ seuraavaa tulevaa tapahtumaa
+					//palautetaan t‰m‰ p‰iv‰
+					seuraava_tapahtuma = today;
+				}
 
 				return seuraava_tapahtuma;
 			}

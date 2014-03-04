@@ -300,25 +300,23 @@
 
 								//Toimitusaika
 								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_Arvioitu])) OR $rivi[$ind_Arvioitu] == "") {
-									$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
+									$toimaika = choose_correct_date($rivi[$ind_Arvioitu]);
 								}
 								else {
 									$toimaika = $rivi[$ind_Arvioitu] = "";
-									echo "Tiedostosta ei saa syˆtt‰‰ toimitusp‰iv‰‰! Tiedoston toimitusp‰iv‰‰ ei tallennettu! K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰m‰‰r‰ otsikolta! <br><br>";
+									echo t("Tiedostosta ei voi syˆtt‰‰ toimitusp‰iv‰‰. K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰ tilauksen otsikolta!")."<br><br>";
 								}
 
 								//Ker‰ysp‰iv‰m‰‰r‰
 								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_ToivottuKeraysajankohta])) OR $rivi[$ind_ToivottuKeraysajankohta] == "") {
 									$kerayspvm	= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
-
 								}
 								else {
 									$kerayspvm = $rivi[$ind_ToivottuKeraysajankohta] = "";
-									echo "Tiedoston ker‰ysp‰iv‰m‰‰r‰‰ ei k‰ytetty. K‰y p‰ivitt‰m‰ss‰ tarvittaessa ker‰ysp‰iv‰m‰‰r‰ otsikolta! <br><br>";
-
+									echo t("Tiedostosta ei voi syˆtt‰‰ ker‰ysp‰iv‰‰. K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰ tilauksen otsikolta!")."<br><br>";
 								}
 
-								$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
+								$hinta = str_replace(",", ".", $rivi[$ind_Hinta]);
 
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 									${'ale'.$alepostfix} = str_replace(",", ".", $rivi[${'ind_Ale'.$alepostfix}]);
@@ -666,24 +664,23 @@
 
 							//Toimitusaika
 							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_Arvioitu])) OR $rivi[$ind_Arvioitu] == "") {
-								$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
+								$toimaika = choose_correct_date($rivi[$ind_Arvioitu]);
 							}
 							else {
 								$toimaika = $rivi[$ind_Arvioitu] = "";
-								echo "Tiedostosta ei saa syˆtt‰‰ toimitusp‰iv‰‰! Tiedoston toimitusp‰iv‰‰ ei tallennettu! K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰m‰‰r‰ otsikolta! <br><br>";
+								echo t("Tiedostosta ei voi syˆtt‰‰ toimitusp‰iv‰‰. K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰ tilauksen otsikolta!")."<br><br>";
 							}
 
 							//Ker‰ysp‰iv‰m‰‰r‰
 							if ($yhtiorow["splittauskielto"] == "K" OR !(isset($rivi[$ind_ToivottuKeraysajankohta])) OR $rivi[$ind_ToivottuKeraysajankohta] == "") {
-								$kerayspvm	= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
+								$kerayspvm = choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
 							}
 							else {
 								$kerayspvm = $rivi[$ind_ToivottuKeraysajankohta] = "";
-								echo "Tiedostosta ei saa syˆtt‰‰ ker‰ysp‰iv‰m‰‰r‰‰! Tiedoston ker‰ysp‰iv‰m‰‰r‰‰ ei k‰ytetty. K‰y p‰ivitt‰m‰ss‰ tarvittaessa ker‰ysp‰iv‰m‰‰r‰ otsikolta! <br><br>";
-
+								echo t("Tiedostosta ei voi syˆtt‰‰ ker‰ysp‰iv‰‰. K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰ tilauksen otsikolta!")."<br><br>";
 							}
 
-							$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
+							$hinta = str_replace(",", ".", $rivi[$ind_Hinta]);
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ale'.$alepostfix} = str_replace(",", ".", $rivi[${'ind_Ale'.$alepostfix}]);

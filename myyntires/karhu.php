@@ -498,12 +498,13 @@ if ($tee == 'KARHUA')  {
 			$ehdota_maksukielto = 1;
 		}
 
-		if ($lasku["karhuttu"] >= 1) {
+		if ($lasku["karhuttu"] >= 1 and $asiakastiedot['myyjanro'] != 0) {
 			$ehdota_karhuemail_myyjalle = 1;
 			$query = "	SELECT eposti
 						FROM kuka
 						WHERE yhtio = '{$asiakastiedot['yhtio']}'
-						AND myyja = '{$asiakastiedot['myyjanro']}'";
+						AND myyja = '{$asiakastiedot['myyjanro']}'
+						AND trim(eposti) != ''";
 			$res = pupe_query($query);
 			if (mysql_num_rows($res) > 0) {
 				$myyjalla_on_eposti = 1;

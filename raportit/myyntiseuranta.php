@@ -2032,7 +2032,7 @@
 										$query .= "	sum(if(tilausrivi.laskutettuaika >= '{$kumulatiivinen_alkupaiva}' and tilausrivi.laskutettuaika <= '{$kumulatiivinen_loppupaiva}', tilausrivi.kate, 0)) katekumul, ";
 
 										if ($piiloed == '') {
-											$query .= "	sum(if(tilausrivi.laskutettuaika >= '{$kumulatiivinen_alkupaiva_ed}' and tilausrivi.laskutettuaika <= '{$kumulatiivinen_loppupaiva_ed}', tilausrivi.kate, 0)) katekumul, ";
+											$query .= "	sum(if(tilausrivi.laskutettuaika >= '{$kumulatiivinen_alkupaiva_ed}' and tilausrivi.laskutettuaika <= '{$kumulatiivinen_loppupaiva_ed}', tilausrivi.kate, 0)) katekumuled, ";
 										}
 									}
 

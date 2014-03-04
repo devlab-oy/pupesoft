@@ -38,6 +38,7 @@ $request['konversio_tyypit'] = array(
 	'huoltosykli'			 => t('Huoltosykli'),
 	'tarkastukset_kanta'	 => t('Tarkastukset kanta'),
 	'tarkastukset'			 => t('Tarkastukset'),
+	'paivita_tarkastukset'	 => t('Päivitä seuraavat tulevat tapahtumat'),
 	'kaikki'				 => t('Kaikki'),
 );
 
@@ -110,6 +111,10 @@ if ($request['action'] == 'aja_konversio') {
 //				$dumper->aja();
 			}
 			echo "loppu:".date('Y-m-d H:i:s');
+			break;
+
+		case 'paivita_tarkastukset':
+			paivita_tulevat_tapahtumat();
 			break;
 
 		case 'kaikki':
@@ -372,39 +377,47 @@ function tarkasta_tarkastukset() {
 
 	$oikein = 0;
 	$vaarin = 0;
+	$ei_olemassa = 0;
+	$ei_liitettyja_huoltosykleja = 0;
+	$ei_oikeaa_huoltosyklia = 0;
 	foreach ($vanhat_tarkastukset as &$vanha_tarkastus) {
 
 		if ($vanha_tarkastus['TUOTENRO'] == 'A990001' or $vanha_tarkastus['TUOTENRO'] == '990001' or $vanha_tarkastus['TUOTENRO'] == '990011') {
 			$vanha_tarkastus['TUOTENRO'] = 'KAYNTI';
 		}
 
-		if ($vanha_tarkastus['LAITE'] == '32186' AND $vanha_tarkastus['TUOTENRO'] == '109100') {
-			$lol = $huoltosyklit[$vanha_tarkastus['LAITE']];
-			$b = "";
-		}
-
 		$uusi_paiva = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']]['seuraava_tapahtuma'];
 		if ($uusi_paiva == null) {
 			if (!in_array($vanha_tarkastus['LAITE'], $laite_koodit)) {
 				echo "Laite {$vanha_tarkastus['LAITE']} EI OLEMASSA toimenpide {$vanha_tarkastus['TUOTENRO']} pitäisi olla {$vanha_tarkastus['ED']}";
+				$ei_olemassa++;
 			}
 			else {
 				$debug = $huoltosyklit[$vanha_tarkastus['LAITE']];
 				$huoltosykli_tuotenumerot = array_keys($huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit']);
 				if (!in_array($vanha_tarkastus['TUOTENRO'], $huoltosykli_tuotenumerot)) {
-					echo "Laite {$vanha_tarkastus['LAITE']} LÖYTYY, mutta toimenpide {$vanha_tarkastus['TUOTENRO']} EI OLE LIITETTYNÄ pitäisi olla {$vanha_tarkastus['ED']} ".implode(', ', $huoltosykli_tuotenumerot);
+					if (count($huoltosykli_tuotenumerot) == 1 and $huoltosykli_tuotenumerot[0] == '') {
+						$huoltosykli_tuotenumerot = 'Ei liitettyjä huoltosyklejä';
+						$ei_liitettyja_huoltosykleja++;
+					}
+					else {
+						$huoltosykli_tuotenumerot = implode(', ', $huoltosykli_tuotenumerot);
+						$ei_oikeaa_huoltosyklia++;
+					}
+					echo "Laite {$vanha_tarkastus['LAITE']} LÖYTYY, mutta toimenpide {$vanha_tarkastus['TUOTENRO']} EI OLE LIITETTYNÄ pitäisi olla {$vanha_tarkastus['ED']} {$huoltosykli_tuotenumerot}";
 				}
 				else {
 					echo "seuraava_tapahtuma null";
 				}
 			}
 			echo "<br/>";
+			$vaarin++;
 			continue;
 		}
 
 		if ($uusi_paiva != $vanha_tarkastus['ED']) {
 			$vaarin++;
-			echo "Laite {$vanha_tarkastus['LAITE']} toimenpide {$vanha_tarkastus['TUOTENRO']} {$uusi_paiva} pitäisi olla {$vanha_tarkastus['ED']}";
+			echo "Laite {$vanha_tarkastus['LAITE']} toimenpide {$vanha_tarkastus['TUOTENRO']} {$uusi_paiva} pitäisi olla {$vanha_tarkastus['ED']} vanha huoltovali: ".($vanha_tarkastus['VALI'] / 12).'v';
 			echo "<br/>";
 		}
 		else {
@@ -417,11 +430,13 @@ function tarkasta_tarkastukset() {
 	echo "<br/>";
 	echo "<br/>";
 	echo "Oikein: {$oikein} Vaarin: {$vaarin}";
+	echo "<br/>";
+	echo "(ei olemassa: {$ei_olemassa} ei liitetty huoltosykleja: {$ei_liitettyja_huoltosykleja} ei oikeaa_huoltosyklia: {$ei_oikeaa_huoltosyklia}";
 
 	echo "<br/>";
 	echo "<br/>";
 
-	koeponnistus_tarkastus();
+//	koeponnistus_tarkastus();
 }
 
 function tarkasta_tarkastukset2() {
@@ -462,6 +477,7 @@ function hae_kaikkien_laitteiden_huoltosyklit() {
 
 	$query = "	SELECT laite.tuoteno AS laite_tuoteno,
 				laite.koodi AS laite_koodi,
+				hl.tunnus AS huoltosyklit_laitteet_tunnus,
 				hl.viimeinen_tapahtuma,
 				hl.huoltovali,
 				h.toimenpide AS toimenpide_tuoteno
@@ -547,8 +563,7 @@ function koeponnistus_tarkastus() {
 				vali,
 				DATE_ADD(ed, INTERVAL vali MONTH) AS seuraava_tapahtuma
 				FROM   tarkastukset
-				WHERE  nimike LIKE 'koeponnistus%'
-				AND STATUS = 'valmis'
+				WHERE STATUS = 'valmis'
 				GROUP BY laite
 				ORDER BY laite DESC, ed DESC;";
 	$result = pupe_query($query);
@@ -594,4 +609,59 @@ function koeponnistus_tarkastus() {
 
 	echo "<br/>";
 	echo "{$riveja} joissa {$vaarin} ongelmaa";
+}
+
+function paivita_tulevat_tapahtumat() {
+	global $kukarow, $yhtiorow;
+
+	$vanhat_tarkastukset = hae_vanhat_tarkastukset();
+	$huoltosyklit = hae_kaikkien_laitteiden_huoltosyklit();
+
+	foreach ($vanhat_tarkastukset as $vanha_tarkastus) {
+		if ($vanha_tarkastus['TUOTENRO'] == 'A990001' or $vanha_tarkastus['TUOTENRO'] == '990001' or $vanha_tarkastus['TUOTENRO'] == '990011') {
+			$vanha_tarkastus['TUOTENRO'] = 'KAYNTI';
+		}
+
+		$uusi_paiva = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']]['seuraava_tapahtuma'];
+
+		if ($uusi_paiva != $vanha_tarkastus['ED']) {
+			$uusi_huoltosykli = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']];
+			if (!empty($uusi_huoltosykli)) {
+				$huoltosyklit_laitteet_tunnus = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']]['huoltosyklit_laitteet_tunnus'];
+				$vanhan_jarjestelman_viimeinen_tapahtuma = date('Y-m-d', strtotime("{$vanha_tarkastus['ED']} - {$vanha_tarkastus['VALI']} month"));
+				paivita_viimeinen_tapahtuma($huoltosyklit_laitteet_tunnus, $vanhan_jarjestelman_viimeinen_tapahtuma, $vanha_tarkastus['VALI']);
+			}
+		}
+	}
+}
+
+function paivita_viimeinen_tapahtuma($huoltosyklit_laitteet_tunnus, $vanhan_jarjestelman_viimeinen_tapahtuma, $vanhan_jarjestelman_huoltovali) {
+	global $kukarow, $yhtiorow;
+
+	if (empty($huoltosyklit_laitteet_tunnus)) {
+		echo "Päivitys epäonnistui";
+		echo "<br/>";
+		return false;
+	}
+	else {
+		echo "Päivitetty";
+		echo "<br/>";
+	}
+
+	$huoltovali_options = huoltovali_options();
+	$vanhan_jarjestelman_huoltovali = search_array_key_for_value_recursive($huoltovali_options, 'months', $vanhan_jarjestelman_huoltovali);
+	$vanhan_jarjestelman_huoltovali = $vanhan_jarjestelman_huoltovali[0];
+
+	$huoltosyklit_laitteet_update = "";
+	if ($vanhan_jarjestelman_huoltovali['days'] > 0) {
+		$huoltosyklit_laitteet_update = "	huoltovali = '{$vanhan_jarjestelman_huoltovali['days']}',";
+	}
+
+	$query = "	UPDATE huoltosyklit_laitteet SET
+				{$huoltosyklit_laitteet_update}
+				viimeinen_tapahtuma = '".date('Y-m-d', strtotime($vanhan_jarjestelman_viimeinen_tapahtuma))."'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$huoltosyklit_laitteet_tunnus}'";
+
+	pupe_query($query);
 }

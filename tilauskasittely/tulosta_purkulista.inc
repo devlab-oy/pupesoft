@@ -867,9 +867,16 @@
 
 				        for ($i = 0; ($_row_height > $kala and count($params) > 0); $_row_height -= 10) {
 
-				        	$pdf->draw_text(440, $_row_height, substr($params[$i], 0, 100), $firstpage, $pieni);
-
-				        	array_shift($params);
+				        	if ($_row_height == $kala+25 and strlen($params[$i]) > 44) {
+				        		$_teksti = substr($params[$i], 0, 44);
+					        	$pdf->draw_text(440, $_row_height, $_teksti, $firstpage, $pieni);
+					        	$params[$i] = substr($params[$i], 45);
+					        	$i--;
+				        	}
+				        	else {
+					        	$pdf->draw_text(440, $_row_height, substr($params[$i], 0, 100), $firstpage, $pieni);
+					        	array_shift($params);
+				        	}
 				        }
 					}
 					else {

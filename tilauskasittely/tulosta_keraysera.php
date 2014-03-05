@@ -8,6 +8,11 @@
 
 	echo "	<script type='text/javascript' language='JavaScript'>
 				$(document).ready(function() {
+					
+					$('input[id^=\"tulosta_kaikki\"]').live('click', function() {
+						alert('mosj');
+						console.log('klik klik');
+					});
 
 					$('.notoggle').click(function(event){
 						event.stopPropagation();
@@ -41,6 +46,10 @@
 		if (isset($uusi_pakkaus)) {
 			$tee = "uusi_pakkaus";
 		}
+	}
+	
+	if (isset($tulosta_kaikki)) {
+		echo "KISSA";
 	}
 
 	if ($tee == "selaa" and (int) $keraajanro == 0 and $keraajalist == "") {
@@ -494,7 +503,9 @@
 
 				echo "</select></td>";
 
-				echo "<td class='back'><input type='submit' value='",t("Hae keräyserä"),"' /></td>";
+				echo "<td class='back'><input type='submit' value='",t("Hae keräyserä"),"' />";
+				echo "<input type='button' id='tulosta_kaikki' value='",t("Tulosta kaikki"),"' />";
+				echo "</td>";
 			}
 
 			echo "</tr></table>";

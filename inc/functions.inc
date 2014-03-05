@@ -13728,7 +13728,10 @@ if (!function_exists("pupe_DataTables")) {
 
 							var valid_params = true;
 							var suuntalava_ok = false;
-							if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara)) {
+							if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara) || typeof(massajakokplmaara.length) == 'undefined') {
+								valid_params = false;
+							}
+							if (rivi_kpl_alkuperainen / massajakokplmaara > 30) {
 								valid_params = false;
 							}
 							if (massatyyppi.length == 0 || massakeraysvyohyke.length == 0 || massaterminaalialue.length == 0) {
@@ -15471,7 +15474,7 @@ if (!function_exists("kopioi_tilausrivi")) {
 						}
 						break;
 					case 'kate_korjattu':
-						$rvalues .= "0,";
+						$rvalues .= "NULL,";
 						break;
 					case 'poikkeava_tulliprosentti':
 					case 'vahvistettu_maara':
@@ -16220,7 +16223,7 @@ if (!function_exists("splittaa_tilaus")) {
 
 				switch ($fieldname) {
 					case "kate_korjattu":
-						$values .= ", 0";
+						$values .= ", NULL";
 						break;
 					default:
 						$values .= ", '".$laskusplitrow[$fieldname]."'";
@@ -16295,7 +16298,7 @@ if (!function_exists("splittaa_tilaus")) {
 								$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
 								break;
 							case 'kate_korjattu':
-								$values .= ", 0";
+								$values .= ", NULL";
 								break;
 							default:
 								$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
@@ -16379,7 +16382,7 @@ if (!function_exists("splittaa_tilaus")) {
 										$values .= ", {$uusitunnus_tilausrivi}";
 										break;
 									case 'kate_korjattu':
-										$values .= ", 0";
+										$values .= ", NULL";
 										break;
 									default:
 										$values .= ", '{$lapsirow[$fieldname]}'";

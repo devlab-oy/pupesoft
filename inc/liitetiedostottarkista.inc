@@ -2,7 +2,7 @@
 
 if(!function_exists("liitetiedostottarkista")) {
 	function liitetiedostottarkista (&$t, $i, $result, &$tunnus, &$virhe, $trow) {
-		global $kukarow, $_FILES, $thumb_size_x, $thumb_size_y;
+		global $kukarow, $_FILES, $thumb_size_x, $thumb_size_y, $normaali_size_x, $normaali_size_y;
 		static $liite_liitos, $liite_liitostunnus, $liite_datai, $liite_selite, $liite_kieli, $liite_kayttotarkoitus;
 
 		if (mysql_field_name($result, $i) == "liitos") {
@@ -98,6 +98,14 @@ if(!function_exists("liitetiedostottarkista")) {
 					else {
 						$thumb_size_x = 96;
 						$thumb_size_y = 65;
+					}
+					if (isset($normaali_size_x) and trim($normaali_size_x) != '' and isset($normaali_size_y) and trim($normaali_size_y) != '') {
+						$normaali_size_x = (int) $normaali_size_x;
+						$normaali_size_y = (int) $normaali_size_y;
+					}
+					else {
+						$normaali_size_x = 640;
+						$normaali_size_y = 480;
 					}
 
 					// Muutetaan tuotekuvan koko sopivaksi

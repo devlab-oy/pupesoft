@@ -411,6 +411,8 @@
 
 				$sarakkeet["SARAKE{$_x}#".$vrow["tunnus"]] = t("tilattu kpl - $vrow[nimitys]")."\t";
 				$abuArray["SARAKE{$_x}#".$vrow["tunnus"]] = "SARAKE{$_x}#".$vrow["tunnus"];
+
+				$_x++;
 			}
 
 			// Liitet‰‰n oletus jotta summat voisi t‰sm‰t‰..
@@ -418,6 +420,8 @@
 
 			$sarakkeet["SARAKE{$_x}#oletus"] = t("tilattu kpl - varastoa ei annettu")."\t";
 			$abuArray["SARAKE{$_x}#oletus"] = "SARAKE65#oletus";
+
+			$_x++;
 
 			//	karseeta haetaan offset valitut arrayksi jotta osataan siirt‰‰ n‰m‰ tiedot oikeaan paikkaan..
 			$i = 0;

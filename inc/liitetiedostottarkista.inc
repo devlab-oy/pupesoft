@@ -115,7 +115,7 @@ if(!function_exists("liitetiedostottarkista")) {
 
 						$_FILES["liite_data"] = $temp_file;
 
-						$uusi_filu = muuta_kuvan_koko(480, 640, "normaali", $liite_liitos, "liite_data");
+						$uusi_filu = muuta_kuvan_koko($normaali_size_y, $normaali_size_x, "normaali", $liite_liitos, "liite_data");
 
 						$uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
 

@@ -299,21 +299,19 @@
 							if ($kukarow["extranet"] == "") {
 
 								//Toimitusaika
-								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_Arvioitu])) OR $rivi[$ind_Arvioitu] == "") {
+								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
 									$toimaika = choose_correct_date($rivi[$ind_Arvioitu]);
 								}
 								else {
-									$toimaika = $rivi[$ind_Arvioitu] = "";
-									echo t("Tiedostosta ei voi syˆtt‰‰ toimitusp‰iv‰‰. K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰ tilauksen otsikolta!")."<br><br>";
+									$toimaika = "";
 								}
 
 								//Ker‰ysp‰iv‰m‰‰r‰
-								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_ToivottuKeraysajankohta])) OR $rivi[$ind_ToivottuKeraysajankohta] == "") {
+								if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
 									$kerayspvm	= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
 								}
 								else {
-									$kerayspvm = $rivi[$ind_ToivottuKeraysajankohta] = "";
-									echo t("Tiedostosta ei voi syˆtt‰‰ ker‰ysp‰iv‰‰. K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰ tilauksen otsikolta!")."<br><br>";
+									$kerayspvm = "";
 								}
 
 								$hinta = str_replace(",", ".", $rivi[$ind_Hinta]);
@@ -530,12 +528,21 @@
 							// Valmistukset aina tyyppi‰ kolme
 							$filetyyppi = "KOLMONE";
 
-							$ind_Tuoteno                 = 0;
-							$ind_Maara                   = 1;
-							$ind_Arvioitu                = 2;
-							$ind_Hinta                   = 3;
+							$ind_Tuoteno = 0;
+							$ind_Maara = 1;
 
-							$_indx = 4;
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
+								$ind_Arvioitu = 2;
+								$ind_Hinta = 3;
+
+								$_indx = 4;
+							}
+							else {
+								$ind_Hinta = 2;
+
+								$_indx = 3;
+
+							}
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ind_Ale'.$alepostfix} = $_indx;
@@ -568,10 +575,19 @@
 
 							$ind_Tuoteno 	= 0;
 							$ind_Maara 		= 1;
-							$ind_Arvioitu 	= 2;
-							$ind_Hinta 		= 4;
 
-							$_indx = 5;
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
+								$ind_Arvioitu = 2;
+								$ind_Hinta = 4;
+
+								$_indx = 5;
+							}
+							else {
+								$ind_Hinta = 3;
+
+								$_indx = 4;
+
+							}
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ind_Ale'.$alepostfix} = $_indx;
@@ -597,10 +613,19 @@
 
 							$ind_Tuoteno 	= 0;
 							$ind_Maara 		= 1;
-							$ind_Arvioitu 	= 2;
-							$ind_Hinta 		= 3;
 
-							$_indx = 4;
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
+								$ind_Arvioitu = 2;
+								$ind_Hinta    = 3;
+
+								$_indx = 4;
+							}
+							else {
+								$ind_Hinta = 2;
+
+								$_indx = 3;
+
+							}
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ind_Ale'.$alepostfix} = $_indx;
@@ -622,10 +647,19 @@
 
 							$ind_Tuoteno 	= 0;
 							$ind_Maara 		= 1;
-							$ind_Arvioitu 	= 2;
-							$ind_Hinta 		= 3;
 
-							$_indx = 4;
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
+								$ind_Arvioitu = 2;
+								$ind_Hinta = 3;
+
+								$_indx = 4;
+							}
+							else {
+								$ind_Hinta = 2;
+
+								$_indx = 3;
+
+							}
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ind_Ale'.$alepostfix} = $_indx;
@@ -663,21 +697,19 @@
 						if ($kukarow["extranet"] == "") {
 
 							//Toimitusaika
-							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR !(isset($rivi[$ind_Arvioitu])) OR $rivi[$ind_Arvioitu] == "") {
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
 								$toimaika = choose_correct_date($rivi[$ind_Arvioitu]);
 							}
 							else {
-								$toimaika = $rivi[$ind_Arvioitu] = "";
-								echo t("Tiedostosta ei voi syˆtt‰‰ toimitusp‰iv‰‰. K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰ tilauksen otsikolta!")."<br><br>";
+								$toimaika = "";
 							}
 
 							//Ker‰ysp‰iv‰m‰‰r‰
-							if ($yhtiorow["splittauskielto"] == "K" OR !(isset($rivi[$ind_ToivottuKeraysajankohta])) OR $rivi[$ind_ToivottuKeraysajankohta] == "") {
+							if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
 								$kerayspvm = choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
 							}
 							else {
-								$kerayspvm = $rivi[$ind_ToivottuKeraysajankohta] = "";
-								echo t("Tiedostosta ei voi syˆtt‰‰ ker‰ysp‰iv‰‰. K‰y p‰ivitt‰m‰ss‰ tarvittaessa toimitusp‰iv‰ tilauksen otsikolta!")."<br><br>";
+								$kerayspvm = "";
 							}
 
 							$hinta = str_replace(",", ".", $rivi[$ind_Hinta]);
@@ -912,7 +944,10 @@
 				echo "<td>".t('Ker‰ysajankohta')." ".t("(vvvv-kk-pp)")."</td>";
 			}
 			else {
-				echo "<td>".t("Arvioitu toimitusp‰iv‰")." ".t("(vvvv-kk-pp)")."</td>";
+				if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
+					echo "<td>".t("Arvioitu toimitusp‰iv‰")." ".t("(vvvv-kk-pp)")."</td>";
+				}
+
 				echo "<td>".t("Hinta")."</td>";
 
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {

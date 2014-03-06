@@ -975,7 +975,7 @@
 						$query = "	SELECT
 									sum(if(tyyppi = 'O', varattu, 0)) tilattu
 									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-									JOIN lasku ON lasku.yhtio = '$yhtiorow[yhtio]' and lasku.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio='$row[yhtio]' and tuoteno='$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
+									JOIN lasku ON lasku.yhtio = '$yhtiorow[yhtio]' and lasku.tunnus=tilausrivi.otunnus and  lasku.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio='$row[yhtio]' and tuoteno='$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 			 						and tilausrivi.tyyppi in ('O')
 									and tuoteno = '$row[tuoteno]'

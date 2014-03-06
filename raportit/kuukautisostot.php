@@ -1855,169 +1855,169 @@
 							$_tuotteet = $vastaavat->tuotteet($ketju);
 
 							foreach ($_tuotteet as $_tuoteno_arr) {
-							if ($_tuoteno_arr['tuoteno'] != $row['tuoteno']) {
+								if ($_tuoteno_arr['tuoteno'] != $row['tuoteno']) {
 
-								if ($i == 6) break;
+									if ($i == 6) break;
 
-								$vastaava_saldo = saldo_funktio($_tuoteno_arr['tuoteno'], $varastot_yhtiot, $varastot, $paikoittain, $lisa, $row['yhtio']);
+									$vastaava_saldo = saldo_funktio($_tuoteno_arr['tuoteno'], $varastot_yhtiot, $varastot, $paikoittain, $lisa, $row['yhtio']);
 
-								$vastaava_myydy_kappaleet = myydyt_kappaleet($row['yhtio'], $_tuoteno_arr['tuoteno'], $apvm, $lpvm, $lisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
+									$vastaava_myydy_kappaleet = myydyt_kappaleet($row['yhtio'], $_tuoteno_arr['tuoteno'], $apvm, $lpvm, $lisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
 
-								$tuotteen_toimittajat = hae_tuotteen_toimittajat($_tuoteno_arr['tuoteno']);
-								$trow = hae_tuote($_tuoteno_arr['tuoteno']);
+									$tuotteen_toimittajat = hae_tuotteen_toimittajat($_tuoteno_arr['tuoteno']);
+									$trow = hae_tuote($_tuoteno_arr['tuoteno']);
 
-								$ostohinta = "";
-								$tuotteen_toimittajat_string = "";
+									$ostohinta = "";
+									$tuotteen_toimittajat_string = "";
 
-								foreach ($tuotteen_toimittajat as $tuotteen_toimittaja) {
-									$laskurow_temp = array(
-										'liitostunnus' 	=> $tuotteen_toimittaja['liitostunnus'],
-										'valkoodi' 		=> $tuotteen_toimittaja['valkoodi'],
-										'vienti_kurssi' => $tuotteen_toimittaja['kurssi'],
-										'ytunnus' 		=> $tuotteen_toimittaja['ytunnus'],
-									);
+									foreach ($tuotteen_toimittajat as $tuotteen_toimittaja) {
+										$laskurow_temp = array(
+											'liitostunnus' 	=> $tuotteen_toimittaja['liitostunnus'],
+											'valkoodi' 		=> $tuotteen_toimittaja['valkoodi'],
+											'vienti_kurssi' => $tuotteen_toimittaja['kurssi'],
+											'ytunnus' 		=> $tuotteen_toimittaja['ytunnus'],
+										);
 
-									list($ostohinta_temp, $netto, $alennus,) = alehinta_osto($laskurow_temp, $trow, 1, '', '', '');
-									if (empty($netto)) {
-										$ostohinta_temp = $ostohinta_temp * generoi_alekentta_php($alennus, 'O', 'kerto', 'EI');
+										list($ostohinta_temp, $netto, $alennus,) = alehinta_osto($laskurow_temp, $trow, 1, '', '', '');
+										if (empty($netto)) {
+											$ostohinta_temp = $ostohinta_temp * generoi_alekentta_php($alennus, 'O', 'kerto', 'EI');
+										}
+										$ostohinta .= sprintf('%.2f', $ostohinta_temp) . ' / ';
+										$tuotteen_toimittajat_string .= $tuotteen_toimittaja['toimittajan_nimi'] . ' / ';
 									}
-									$ostohinta .= sprintf('%.2f', $ostohinta_temp) . ' / ';
-									$tuotteen_toimittajat_string .= $tuotteen_toimittaja['toimittajan_nimi'] . ' / ';
+
+									$ostohinta = substr($ostohinta, 0, -3);
+									$tuotteen_toimittajat_string = substr($tuotteen_toimittajat_string, 0, -3);
+
+									$vastaava_ennp = kappaleet_tila($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//tuoteno
+										$rivi .= "\"{$_tuoteno_arr['tuoteno']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $_tuoteno_arr["tuoteno"]);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//saldo
+										$rivi .= "\"{$vastaava_saldo['saldo']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $vastaava_saldo['saldo']);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//tilatut
+										$rivi .= "\"{$vastaava_ennp['tilattu']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $vastaava_ennp['tilattu']);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//saapuneet
+										$rivi .= "\"{$vastaava_ennp['saapuneet']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $vastaava_ennp['saapuneet']);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//vapaa saldo
+										$vapaa_saldo = $vastaava_saldo['saldo'] + $vastaava_ennp['tilattu'] - $vastaava_ennp['ennpois'];
+
+										$rivi .= "\"{$vapaa_saldo}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $vapaa_saldo);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//myytävissä
+
+										$myytavissa = $vastaava_saldo['saldo'] - $vastaava_ennp['ennpois'];
+
+										if ($yhtiorow['varaako_jt_saldoa'] == 'K') $myytavissa -= $vastaava_ennp['jt'];
+
+										$rivi .= "\"{$myytavissa}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $myytavissa);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//myynti q1
+										$rivi .= "\"{$vastaava_myydy_kappaleet['kpl_q1']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $vastaava_myydy_kappaleet['kpl_q1']);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//myynti q2
+										$rivi .= "\"{$vastaava_myydy_kappaleet['kpl_q2']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $vastaava_myydy_kappaleet['kpl_q2']);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//myynti q3
+										$rivi .= "\"{$vastaava_myydy_kappaleet['kpl_q3']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $vastaava_myydy_kappaleet['kpl_q3']);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//myynti q4
+										$rivi .= "\"{$vastaava_myydy_kappaleet['kpl_q4']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $vastaava_myydy_kappaleet['kpl_q4']);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//toimittaja
+										$rivi .= "\"{$tuotteen_toimittajat_string}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $tuotteen_toimittajat_string);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//ostohinta
+										$rivi .= "\"{$ostohinta}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $ostohinta);
+										$excelsarake++;
+									}
+									$_x++;
+
+									if ($valitut["SARAKE{$_x}"] != '') {
+										//kehahin
+										$rivi .= "\"{$trow['kehahin']}\"\t";
+
+										$worksheet->write($excelrivi, $excelsarake, $trow['kehahin']);
+										$excelsarake++;
+									}
+									$_x++;
+
+									$i++;
 								}
-
-								$ostohinta = substr($ostohinta, 0, -3);
-								$tuotteen_toimittajat_string = substr($tuotteen_toimittajat_string, 0, -3);
-
-								$vastaava_ennp = kappaleet_tila($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//tuoteno
-									$rivi .= "\"{$_tuoteno_arr['tuoteno']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $_tuoteno_arr["tuoteno"]);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//saldo
-									$rivi .= "\"{$vastaava_saldo['saldo']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $vastaava_saldo['saldo']);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//tilatut
-									$rivi .= "\"{$vastaava_ennp['tilattu']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $vastaava_ennp['tilattu']);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//saapuneet
-									$rivi .= "\"{$vastaava_ennp['saapuneet']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $vastaava_ennp['saapuneet']);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//vapaa saldo
-									$vapaa_saldo = $vastaava_saldo['saldo'] + $vastaava_ennp['tilattu'] - $vastaava_ennp['ennpois'];
-
-									$rivi .= "\"{$vapaa_saldo}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $vapaa_saldo);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//myytävissä
-
-									$myytavissa = $vastaava_saldo['saldo'] - $vastaava_ennp['ennpois'];
-
-									if ($yhtiorow['varaako_jt_saldoa'] == 'K') $myytavissa -= $vastaava_ennp['jt'];
-
-									$rivi .= "\"{$myytavissa}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $myytavissa);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//myynti q1
-									$rivi .= "\"{$vastaava_myydy_kappaleet['kpl_q1']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $vastaava_myydy_kappaleet['kpl_q1']);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//myynti q2
-									$rivi .= "\"{$vastaava_myydy_kappaleet['kpl_q2']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $vastaava_myydy_kappaleet['kpl_q2']);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//myynti q3
-									$rivi .= "\"{$vastaava_myydy_kappaleet['kpl_q3']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $vastaava_myydy_kappaleet['kpl_q3']);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//myynti q4
-									$rivi .= "\"{$vastaava_myydy_kappaleet['kpl_q4']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $vastaava_myydy_kappaleet['kpl_q4']);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//toimittaja
-									$rivi .= "\"{$tuotteen_toimittajat_string}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $tuotteen_toimittajat_string);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//ostohinta
-									$rivi .= "\"{$ostohinta}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $ostohinta);
-									$excelsarake++;
-								}
-								$_x++;
-
-								if ($valitut["SARAKE{$_x}"] != '') {
-									//kehahin
-									$rivi .= "\"{$trow['kehahin']}\"\t";
-
-									$worksheet->write($excelrivi, $excelsarake, $trow['kehahin']);
-									$excelsarake++;
-								}
-								$_x++;
-
-								$i++;
 							}
 						}
-					}
 					}
 
 					$rivi .= "\r\n";

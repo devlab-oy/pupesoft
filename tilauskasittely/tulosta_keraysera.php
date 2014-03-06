@@ -8,10 +8,11 @@
 
 	echo "	<script type='text/javascript' language='JavaScript'>
 				$(document).ready(function() {
-					
-					$('input[id^=\"tulosta_kaikki\"]').live('click', function() {
-						alert('mosj');
-						console.log('klik klik');
+
+					$('input[id^=\"tulosta_kaikki_namiska\"]').live('click', function() {
+						
+						$('#tulosta_kaikki').val('JOO');
+						alert('mosj '+ $('#tulosta_kaikki').val());
 					});
 
 					$('.notoggle').click(function(event){
@@ -34,6 +35,10 @@
 	if (!isset($keraajalist)) 	 $keraajalist = '';
 	if (!isset($select_varasto)) $select_varasto = '';
 	if (!isset($keraajanro)) 	 $keraajanro = '';
+	if (!isset($tulosta_kaikki)) $tulosta_kaikki = '';
+	
+	echo "kissa: {$tulosta_kaikki}";
+	var_dump($_POST);
 
 	if ($tee == 'tee_arpajaiset') {
 		if (isset($palaa)) {
@@ -48,7 +53,7 @@
 		}
 	}
 	
-	if (isset($tulosta_kaikki)) {
+	if (isset($tulosta_kaikki) and $tulosta_kaikki == "JOO") {
 		echo "KISSA";
 	}
 
@@ -60,7 +65,7 @@
 	if ($tee == '') {
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='selaa' />";
-
+		echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 		echo "<table>";
 
 		$query = "	SELECT *
@@ -448,6 +453,7 @@
 			echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 			echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 			echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
+			echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 
 			echo "<table>";
 			echo "<tr><th>",t("Ker‰‰j‰"),"</th><td>{$keraajarow['nimi']}</td></tr>";
@@ -504,7 +510,8 @@
 				echo "</select></td>";
 
 				echo "<td class='back'><input type='submit' value='",t("Hae ker‰yser‰"),"' />";
-				echo "<input type='button' id='tulosta_kaikki' value='",t("Tulosta kaikki"),"' />";
+				echo "<input type='submit' id='tulosta_kaikki_namiska' value='",t("Tulosta kaikki"),"' />";
+				echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 				echo "</td>";
 			}
 
@@ -597,6 +604,7 @@
 				echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 				echo "<input type='hidden' name='tee' value='selaa' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
+				echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 				echo t('Etsi'),":&nbsp;<input type='text' name='etsi_kerayseraa' value='{$etsi_kerayseraa}' />&nbsp;";
 				echo "<input type='submit' value='",t("Hae"),"' />";
 				echo "</form>";
@@ -690,6 +698,7 @@
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 						echo "<input type='hidden' name='tee' value='muokkaa' />";
 						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
+						echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 						echo "<input type='submit' value='",t("Muokkaa"),"' />";
 						echo "</form>";
 					}
@@ -698,6 +707,7 @@
 						echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
+						echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 						echo "<input type='hidden' name='tee' value='tee_arpajaiset'>";
 						echo "<input class='notoggle' type='submit' name='muuta' value='",t("Tallenna"),"'>";
 						echo "<input class='notoggle' type='submit' name='uusi_pakkaus' value='",t("Uusi pakkaus"),"'>";

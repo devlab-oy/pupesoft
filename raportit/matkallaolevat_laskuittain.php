@@ -40,8 +40,8 @@
 		$vresult = pupe_query($query);
 		$tilikaudetrow = mysql_fetch_array($vresult);
 
-		$alisa = " AND lasku.tapvm >= '{$tilikaudetrow["tilikausi_alku"]}' ";
-		$llisa = " AND lasku.tapvm <= '{$tilikaudetrow["tilikausi_loppu"]}' ";
+		$alisa = $tilikaudetrow["tilikausi_alku"];
+		$llisa = $tilikaudetrow["tilikausi_loppu"];
 	}
 	else {
 		if ($vv != "") {
@@ -49,7 +49,7 @@
 				echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";
 			}
 			else {
-		 		$alisa = " AND lasku.tapvm >= '$vv-$kk-$pp' ";
+		 		$alisa = "$vv-$kk-$pp";
 			}
 		}
 
@@ -58,7 +58,7 @@
 				echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";
 			}
 			else {
-				$llisa = " AND lasku.tapvm <= '$lvv-$lkk-$lpp' ";
+				$llisa = "$lvv-$lkk-$lpp";
 			}
 		}
 	}
@@ -108,11 +108,11 @@
 
 		$query = "	SELECT lasku.tunnus, if(lasku.tila = 'X', '".t("Tosite")."', lasku.nimi) nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
 					FROM lasku
-					JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[matkalla_olevat]' and tiliointi.korjattu = '')
+					JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[matkalla_olevat]' AND tiliointi.tapvm >= '$alisa' AND tiliointi.tapvm <= '$llisa' AND tiliointi.korjattu = '')
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))
-					$alisa
-					$llisa
+					AND lasku.tapvm >= '$alisa'
+					AND lasku.tapvm <= '$llisa'
 					GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
 					HAVING matkalla != 0
 					ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";

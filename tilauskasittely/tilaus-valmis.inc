@@ -50,9 +50,18 @@ $query  = "	SELECT *
 $tilausvalmis_asiakas_res = pupe_query($query);
 $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 
+// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
+$query = "	SELECT *
+			FROM maksuehto
+			WHERE yhtio = '{$kukarow['yhtio']}'
+			AND tunnus = '{$laskurow['maksuehto']}'";
+$maksuehto_result = pupe_query($query);
+$maksuehtorow = mysql_fetch_assoc($maksuehto_result);
+
 // Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, E -  kaikki muu ku myyjien tekemä estetään)
+// Jos maksuehto on käteinen, sallitaan luottorajan ylitys
 // samma på erapaivan_ylityksen_raja
-$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J","L","M"))             or (in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
+$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J","L","M"))             or (in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0 and $maksuehtorow['kateinen'] == '') ? 1 : 0;
 $erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K","J","L","M")) or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F")) and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
 
 if ($luottoraja_chk or $erapaiva_chk) {
@@ -111,14 +120,6 @@ while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
 				AND tunnus = '{$rekisterinumero_row['tilausrivitunnus']}'";
 	pupe_query($query);
 }
-
-// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
-$query = "	SELECT *
-			FROM maksuehto
-			WHERE yhtio = '{$kukarow['yhtio']}'
-			AND tunnus = '{$laskurow['maksuehto']}'";
-$maksuehto_result = pupe_query($query);
-$maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
 // Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
 if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)

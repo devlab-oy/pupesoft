@@ -914,116 +914,6 @@
 					$ketjutus_group = "";
 				}
 
-				if ($yhtiorow["lisakulu_tuotenumero"] != "") {
-					$tlhinta   = 0;
-
-					// toimitustavan lisakulu omalle riville ja tutkitaan tarvitseeko lisailla toimitustavan lisakuluja
-					if ($silent == "") {
-						$tulos_ulos .= "<br>\n".t("Toimitustavan lisäkulut").":<br>\n";
-					}
-
-					$query = "  SELECT group_concat(distinct lasku.tunnus) tunnukset
-								FROM lasku
-								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tuoteno != '{$yhtiorow['lisakulu_tuotenumero']}')
-								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tunnus in ({$tunnukset})
-								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp";
-					$result = pupe_query($query);
-
-					$yhdista = array();
-
-					while ($row = mysql_fetch_assoc($result)) {
-						$yhdista[] = $row["tunnukset"];
-					}
-
-					if (count($yhdista) == 0 and $silent == "") {
-						$tulos_ulos .= t("Ei lisäkuluja")."!<br>\n";
-					}
-
-					if ($silent == "") $tulos_ulos .= "<table>";
-
-					foreach ($yhdista as $otsikot) {
-
-						// lisätään näille tilauksille toimitustavan lisakulut
-						$virhe = 0;
-
-						//haetaan vikan otsikon tiedot
-						$query = "  SELECT *
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus in ({$otsikot})
-									ORDER BY tunnus DESC
-									LIMIT 1";
-						$otsre = pupe_query($query);
-						$laskurow = mysql_fetch_assoc($otsre);
-
-						if (mysql_num_rows($otsre) != 1) $virhe++;
-
-						if (mysql_num_rows($otsre) == 1 and $virhe == 0) {
-
-							// kirjoitetaan toimitustavan lisakulu ekalle otsikolle
-							$query = "  SELECT *
-										FROM toimitustapa
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND selite = '{$laskurow['toimitustapa']}'";
-							$ekres = pupe_query($query);
-							$ekrow = mysql_fetch_assoc($ekres);
-
-							if ($ekrow['lisakulu_summa'] != 0 and $ekrow['lisakulu'] != 0) {
-
-								$query = "  SELECT *
-											FROM tuote
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tuoteno = '{$yhtiorow['lisakulu_tuotenumero']}'";
-								$rhire = pupe_query($query);
-
-								$query_ale_lisa = generoi_alekentta('M');
-
-								$tilausriviquery = "SELECT tilausrivi.tuoteno, (tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * $query_ale_lisa) rivihinta, (tilausrivi.varattu+tilausrivi.jt) kplmaara
-													FROM tilausrivi
-													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-													AND tilausrivi.otunnus = '$laskurow[tunnus]'
-													AND tilausrivi.tyyppi != 'D'";
-								$rivihintaresult = pupe_query($tilausriviquery);
-
-								$tilausrivit_kokosumma = 0;
-
-								while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {
-									// KAUTTALASKUTUSKIKKARE
-									if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) {
-										$tilausrivit_kokosumma += etayhtio_hinta($totaalirivi["tuoteno"], $totaalirivi["kplmaara"], $laskurow);
-									}
-									else {
-										$tilausrivit_kokosumma += $totaalirivi["rivihinta"];
-									}
-								}
-
-								// jos tuotenumero löytyy lisakulun rajasumma ei tayty
-								if (mysql_num_rows($rhire) == 1 and ($tilausrivit_kokosumma < $ekrow['lisakulu_summa'])) {
-									$trow = mysql_fetch_assoc($rhire);
-
-									$laskun_kieli = laskunkieli($laskurow['liitostunnus'], $kieli);
-
-									$hinta = $ekrow['lisakulu']; // toimitustavan lisakulu
-									$nimitys = t("Toimitustavan lisäkulu", $laskun_kieli);
-									$kommentti = "";
-
-									list($tlhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
-
-									$query  = " INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-												values ('{$tlhinta}', 'N', '1', '1', '{$laskurow['tunnus']}', '{$trow['tuoteno']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L', '{$alv}', '{$kommentti}')";
-									$addtil = pupe_query($query);
-
-									if ($silent == "") {
-										$tulos_ulos .= "<tr><td>".t("Lisättiin toimitustavan lisäkulut")."</td><td>{$laskurow['tunnus']}</td><td>{$laskurow['toimitustapa']}</td><td>{$tlhinta}</td><td>{$yhtiorow['valkoodi']}</td></tr>\n";
-									}
-								}
-							}
-						}
-					}
-				}
-
 				// Lasketaan rahtikulut, jälkivaatimuskulut ja erilliskäsiteltäväkulut vain jos niitä ei olla laskettu jo tilausvaiheessa.
 				if ($yhtiorow["rahti_hinnoittelu"] == "") {
 
@@ -1846,7 +1736,7 @@
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi, lasku.laskutyyppi,
 							laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 							$ketjutus_group
-							ORDER BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
+							ORDER BY ketjutuskentta, reklamaatiot_lasku DESC, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,

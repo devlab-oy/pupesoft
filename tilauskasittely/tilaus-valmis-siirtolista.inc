@@ -139,6 +139,8 @@
 
 				//varasto vaihtuu, splitataan tilaus, paitsi jos spliauskielto on trigattu
 				if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAASIAKKAALLE" and $toim != "VALMISTAVARASTOON") {
+					//Koska ollaan täällää olaan juuri splittaamassa tilaus, eli halutaan tulostaa kaikkien splittauksessa syntyvien varastosiirojen siirtolistat
+					$splitattiin = TRUE;
 
 					if (!is_resource($laskusplitres)) {
 						// Jotta saadaan lasku kopsattua kivasti jos se splittaantuu
@@ -402,11 +404,22 @@
 		if ($tulostetaan == "OK") {
 
 			//Haetaan uusien jaon yhteydessä syntyneiden tilausten tiedot, jotta saadaan tulostettu siirtolistat
-			$query = "	SELECT *
-						FROM lasku
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND vanhatunnus = '{$laskurow['tunnus']}'";
-			$hresult = mysql_query($query) or pupe_error($query);
+			if (isset($splitattiin) AND $splitattiin) {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND vanhatunnus = '{$laskurow['tunnus']}'";
+				$hresult = mysql_query($query) or pupe_error($query);
+			}
+			//Haetaan yksittäisen tilausrivin tiedot uudestaan, jotta yksittäisen siirtolistan tulostus tukee myös useamman tapausta (siirtolistan jakotapaus)
+			else {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['tunnus']}'";
+				$hresult = mysql_query($query) or pupe_error($query);
+			}
+				
 
 			while ($laskurow = mysql_fetch_array($hresult)) {
 				//Tulostetaan lista

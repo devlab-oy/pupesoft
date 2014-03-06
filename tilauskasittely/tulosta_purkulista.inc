@@ -871,7 +871,6 @@
 				        		$_teksti = substr($params[$i], 0, 44);
 					        	$pdf->draw_text(440, $_row_height, $_teksti, $firstpage, $pieni);
 					        	$params[$i] = substr($params[$i], 45);
-					        	$i--;
 				        	}
 				        	else {
 					        	$pdf->draw_text(440, $_row_height, substr($params[$i], 0, 100), $firstpage, $pieni);

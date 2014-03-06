@@ -198,7 +198,7 @@ if (isset($tee) and $tee == "hae_raportti") {
 			echo $row['hyllyssa'];
 			echo '</td>';
 			echo '<td>';
-			echo $row['haly'];
+			echo number_format($row['haly']);
 			echo '</td>';
 			echo '</tr>';
 

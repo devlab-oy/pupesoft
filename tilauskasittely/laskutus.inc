@@ -37,7 +37,7 @@
 											LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 											WHERE tilausrivi.otunnus 	= '$kukarow[kesken]'
 											and tilausrivi.yhtio 		= '$kukarow[yhtio]'
-											and tilausrivi.var 			not in ('P','J')
+											and tilausrivi.var 			not in ('P','J', 'O')
 											and tilausrivi.tyyppi 		= 'L'
 											ORDER BY tilausrivi.tunnus";
 
@@ -183,7 +183,7 @@
 												break;
 											case 'tunnus':
 											case 'kate_korjattu':
-												$rvalues .= ", 0";
+												$rvalues .= ", NULL";
 												break;
 											default:
 												$rvalues .= ", '".mysql_real_escape_string($trow[$fieldname])."'";
@@ -221,7 +221,7 @@
 													break;
 												case 'tunnus':
 												case 'kate_korjattu':
-													$rvalues .= ", 0";
+													$rvalues .= ", NULL";
 													break;
 												default:
 													$rvalues .= ", '".mysql_real_escape_string($monistarow2[$fieldname])."'";
@@ -368,7 +368,7 @@
 				$rivihinta_valuutassa	= round((float) laskuval($hinta * $trow["varattu"], $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);									// Rivihinta alennuksineen valuutassa
 
 				// kumuloidaan loppusummia
-				if (strtoupper($yhtiorow['maa']) == 'EE') {									
+				if (strtoupper($yhtiorow['maa']) == 'EE') {
 					$loppusumma			 	+= $rivihinta * ($trow["alv"] / 100);								                                    								// Kumuloidaan verollinen loppusumma valuutassa
 					$loppusumma_valuutassa	+= $rivihinta_valuutassa * ($trow["alv"] / 100);																						// Kumuloidaan verollinen loppusumma
 				}
@@ -376,7 +376,7 @@
 					$loppusumma 			+= $rivihinta;																															// Kumuloidaan verollinen loppusumma
 					$loppusumma_valuutassa 	+= $rivihinta_valuutassa;																												// Kumuloidaan verollinen loppusumma valuutassa
 				}
-				
+
 				$arvosumma				+= $rivihinta;																																// Kumuloidaan veroton loppusumma
 				$arvosumma_valuutassa	+= $rivihinta_valuutassa;																													// Kumuloidaan veroton loppusumma valuutassa
 
@@ -399,15 +399,15 @@
 				$rivihinta_valuutassa	= round((float) laskuval($hinta * $trow["varattu"] / (1 + ($trow["alv"] / 100)), $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);		// Veroton rivihinta alennuksineen valuutassa
 
 				// kumuloidaan loppusummia
-				if (strtoupper($yhtiorow['maa']) == 'EE') {									
+				if (strtoupper($yhtiorow['maa']) == 'EE') {
 					$loppusumma			 	+= $rivihinta * ($trow["alv"] / 100);								                                    								// Kumuloidaan verollinen loppusumma valuutassa
 					$loppusumma_valuutassa	+= $rivihinta_valuutassa * ($trow["alv"] / 100);																						// Kumuloidaan verollinen loppusumma
 				}
 				else {
 					$loppusumma			 	+= round((float) $hinta * $trow["varattu"], $yhtiorow["hintapyoristys"]);																// Kumuloidaan verollinen loppusumma valuutassa
-					$loppusumma_valuutassa	+= round((float) laskuval($hinta * $trow["varattu"], $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);	
+					$loppusumma_valuutassa	+= round((float) laskuval($hinta * $trow["varattu"], $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);
 				}
-				
+
 				$arvosumma				+= $rivihinta;                                                                                                                      		// Kumuloidaan veroton loppusumma
 				$arvosumma_valuutassa	+= $rivihinta_valuutassa;                                                                                                           		// Kumuloidaan veroton loppusumma valuutassa
 
@@ -429,7 +429,7 @@
 				$rivihinta_valuutassa	= round((float) laskuval($hinta * $trow["varattu"], $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);									// Veroton kappalehinta alennuksineen valuutassa
 
 				// kumuloidaan loppusummia
-				if (strtoupper($yhtiorow['maa']) == 'EE') {									
+				if (strtoupper($yhtiorow['maa']) == 'EE') {
 					$loppusumma			 	+= $rivihinta * ($trow["alv"] / 100);								                                    								// Kumuloidaan verollinen loppusumma valuutassa
 					$loppusumma_valuutassa	+= $rivihinta_valuutassa * ($trow["alv"] / 100);																						// Kumuloidaan verollinen loppusumma
 				}
@@ -437,7 +437,7 @@
 					$loppusumma			 	+= round((float) $hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100)), $yhtiorow["hintapyoristys"]);									    // Kumuloidaan verollinen loppusumma valuutassa
 					$loppusumma_valuutassa	+= round((float) laskuval($hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100)), $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);	// Kumuloidaan verollinen loppusumma
 				}
-				
+
 				$arvosumma				+= $rivihinta;																																// Kumuloidaan veroton loppusumma
 				$arvosumma_valuutassa	+= $rivihinta_valuutassa;																													// Kumuloidaan veroton loppusumma valuutassa
 
@@ -876,14 +876,14 @@
 			$laskutusres = pupe_query($query);
 		}
 
-		
+
 		// $loppusumma muuttujassa oli vain veron m‰‰r‰, nyt lis‰t‰‰n siihen veroton summa ja saadaan verollinen loppusumma
 		// Vain EE keississ‰
-		if (strtoupper($yhtiorow['maa']) == 'EE') {									
+		if (strtoupper($yhtiorow['maa']) == 'EE') {
 			$loppusumma			 	+= $arvosumma;
 			$loppusumma_valuutassa	+= $arvosumma_valuutassa;
 		}
-		
+
 		// tehd‰‰n maksuehtok‰sittely vain jos er‰p‰iv‰‰ ei ole syˆtetty jo laskulle...
 		if ($orow["erpcm"] == "0000-00-00") {
 			// Etsit‰‰n maksuehto

@@ -53,7 +53,7 @@
 				while ($rivi = mysql_fetch_assoc($result)) {
 
 					$ostotilauksen_kasittely = $myytilrow['ostotilauksen_kasittely'];
-					
+
 					if ($rivi['ei_saldoa'] != '' and $rivi['perheid'] == $rivi['rivitunnus']) {
 						// saldottomat tuotteet laitetaan jälkkäriin jos ne on tuoteperheen isiä ja skipataan loopissa
 						$query = "	UPDATE tilausrivi
@@ -105,16 +105,16 @@
 					// tehdään aluksi vähän oikeellisuustarkastuksia
 					$query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$ttrow[liitostunnus]'";
 					$erres = pupe_query($query);
-					
+
 					if (mysql_num_rows($erres) != 1) {
 						$tilauksesta_ostotilaus .= "<font class='error'>".t("VIRHE: Toimittajan tietoja ei löytynyt tuotteelta").": $rivi[tuoteno]!<br>";
 					}
 					else {
 						// toimittaja löytyi, tehdään tästä ostotilaus
 						$tiltoi = mysql_fetch_assoc($erres);
-						
+
 						$ohjausmerkki = ($tiltoi['ostotilauksen_kasittely'] == 4) ? '' : $myytilrow['ohjausmerkki'] ;
-							
+
 
 						// Katsotaan onko toimittajalla avoimia ostotilauksia
 						// Pitää olla myös oikeat osoitetiedot
@@ -242,6 +242,13 @@
 						// ei löydy, tehdään uus otsikko
 						if (mysql_num_rows($jtsre) == 0) {
 
+							$suoratoimitus = "";
+
+							// Onko suoratoimitus
+							if ($tyyppi == "U" or ($tyyppi == 'KAIKKI' and $yhtiorow["tee_osto_myyntitilaukselta"] == 'Q')) {
+								$suoratoimitus = " , suoraveloitus = 'S' ";
+							}
+
 							// Vanhatunnus-kenttään laitetaan ostotilauksella toimipaikan tunnus
 							$query = "	INSERT INTO lasku SET
 										alatila 			= '',
@@ -286,7 +293,8 @@
 										viesti 				= '$myytilrow[viesti]',
 										viikorkopros 		= '$yhtiorow[viivastyskorko]',
 										yhtio 				= '$kukarow[yhtio]',
-										ytunnus				= '$tiltoi[ytunnus]'";
+										ytunnus				= '$tiltoi[ytunnus]'
+										{$suoratoimitus}";
 							$updre = pupe_query($query);
 							$tunnus = (string) mysql_insert_id();
 
@@ -324,7 +332,7 @@
 							if ($tilrivirow['perheid'] == 0) $perheid = 0;
 
 							if ($oletusostovarasto != 0) {
-								$varastopaikat_lisa = "		JOIN varastopaikat ON 
+								$varastopaikat_lisa = "		JOIN varastopaikat ON
 													   		 (
 													   		 	varastopaikat.yhtio = tuotepaikat.yhtio
 													   		 	AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
@@ -339,10 +347,10 @@
 							}
 
 							// haetaan oletuspaikan tiedot niin laitetaan se riville
-							$query = "	SELECT tuotepaikat.* 
+							$query = "	SELECT tuotepaikat.*
 										FROM tuotepaikat
 										{$varastopaikat_lisa}
-										WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}' 
+										WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
 										AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
 										{$oletuspaikka_lisa}
 										LIMIT 1";

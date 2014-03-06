@@ -194,6 +194,9 @@
 		$sarakkeet["SARAKE11"] 	= t("Ostoehdotus")." $ehd_kausi_o2\t";
 		$sarakkeet["SARAKE12"] 	= t("Ostoehdotus")." $ehd_kausi_o3\t";
 
+		$sarakkeet["SARAKE12B"] = t("Ostoehdotus status")."\t";
+		$sarakkeet["SARAKE12C"] = t("Viimeinen hankintapäivä")."\t";
+
 		$sarakkeet["SARAKE13"] 	= t("ostettava haly")."\t";
 		$sarakkeet["SARAKE13B"] = t("ostettava tilausmaara")."\t";
 		$sarakkeet["SARAKE14"] 	= t("osto_era")."\t";
@@ -468,8 +471,13 @@
 				$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
 			}
 
-			if ($toimittajaid != '') {
-				$lisaa2 .= " JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid' ";
+			if (isset($nayta_vain_ykkostoimittaja)) {
+				$toimittajaidlisa = $toimittajaid != '' ? " and paatoimittaja.liitostunnus = '{$toimittajaid}' " : "";
+
+				$lisaa2 .= " JOIN tuotteen_toimittajat paatoimittaja ON paatoimittaja.yhtio=tuote.yhtio and paatoimittaja.tuoteno=tuote.tuoteno and paatoimittaja.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = tuote.yhtio and tuoteno = tuote.tuoteno {$toimittajaidlisa} ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
+			}
+			elseif ($toimittajaid != '') {
+				$lisaa2 .= " JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$toimittajaid'";
 			}
 
 			//Yhtiövalinnat
@@ -604,6 +612,7 @@
 				$splisa = "tuote.tuotesyvyys";
 			}
 
+
 			//Ajetaan raportti tuotteittain
 			if ($paikoittain == '') {
 				$query = "	SELECT
@@ -638,7 +647,9 @@
 							tuote.tuotemassa,
 							$splisa,
 							tuote.lyhytkuvaus,
-							tuote.hinnastoon
+							tuote.hinnastoon,
+							tuote.ostoehdotus,
+							tuote.vihapvm
 							FROM tuote
 							LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
 							$lisaa2
@@ -685,7 +696,9 @@
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
 							concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso) varastopaikka,
-							varastopaikat.tunnus
+							varastopaikat.tunnus,
+							tuote.ostoehdotus,
+							tuote.vihapvm
 							FROM tuote
 							$lisaa2
 							$abcjoin
@@ -701,7 +714,6 @@
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
 			}
-
 			$res = pupe_query($query);
 
 			if (isset($valitut["poistetut"]) and $valitut["poistetut"] != '' and isset($valitut["poistuvat"]) and $valitut["poistuvat"] != '') {
@@ -805,18 +817,37 @@
 
 					//toimittajatiedot
 					if ($toimittajaid == '') {
-						$query = "	SELECT group_concat(toimi.ytunnus 						order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
-									group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
-									group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-									group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-									group_concat(distinct tuotteen_toimittajat.ostohinta 	order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
-									group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
-									FROM tuotteen_toimittajat
-									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-									WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
-									and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'";
+						if (isset($nayta_vain_ykkostoimittaja)) {
+							$query = "  SELECT
+										toimi.ytunnus toimittaja,
+										tuotteen_toimittajat.osto_era,
+										tuotteen_toimittajat.toim_tuoteno,
+										tuotteen_toimittajat.toim_nimitys,
+										tuotteen_toimittajat.ostohinta,
+										tuotteen_toimittajat.tuotekerroin
+										FROM tuotteen_toimittajat
+										JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+										WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
+										and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
+										ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1";
+						}
+						else {
+							$query = "	SELECT
+										group_concat(toimi.ytunnus 								order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
+										group_concat(distinct tuotteen_toimittajat.osto_era 	order by tuotteen_toimittajat.tunnus separator '/') osto_era,
+										group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+										group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
+										group_concat(distinct tuotteen_toimittajat.ostohinta 	order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
+										group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
+										FROM tuotteen_toimittajat
+										JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+										WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
+										and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'";
+						}
 					}
 					else {
+						$ykkostoim_orderilisa = isset($nayta_vain_ykkostoimittaja) ? " AND tuotteen_toimittajat.liitostunnus = (SELECT liitostunnus FROM tuotteen_toimittajat WHERE yhtio = '{$row['yhtio']}' AND tuoteno = '{$row['tuoteno']}' ORDER BY IF (jarjestys = 0, 9999, jarjestys) LIMIT 1)": "";
+
 						$query = "	SELECT toimi.ytunnus toimittaja,
 									tuotteen_toimittajat.osto_era,
 									tuotteen_toimittajat.toim_tuoteno,
@@ -827,12 +858,12 @@
 									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 									WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
 									and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-									and tuotteen_toimittajat.liitostunnus = '$toimittajaid'";
+									and tuotteen_toimittajat.liitostunnus = '$toimittajaid'
+									{$ykkostoim_orderilisa}";
 					}
 
 					$result   = pupe_query($query);
 					$toimirow = mysql_fetch_assoc($result);
-
 
 					$row['toimittaja'] 		= $toimirow['toimittaja'];
 					$row['osto_era'] 		= $toimirow['osto_era'];
@@ -939,6 +970,21 @@
 								and (varattu+jt > 0)";
 					$result = pupe_query($query);
 					$ennp   = mysql_fetch_assoc($result);
+
+					if (isset($nayta_vain_ykkostoimittaja)) {
+						$query = "	SELECT
+									sum(if(tyyppi = 'O', varattu, 0)) tilattu
+									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+									JOIN lasku ON lasku.yhtio = '$yhtiorow[yhtio]' and lasku.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio='$row[yhtio]' and tuoteno='$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
+									WHERE tilausrivi.yhtio = '$row[yhtio]'
+			 						and tilausrivi.tyyppi in ('O')
+									and tuoteno = '$row[tuoteno]'
+									and laskutettuaika = '0000-00-00'";
+						$result = pupe_query($query);
+						$ykkostoimittajarajattuna   = mysql_fetch_assoc($result);
+
+						$ennp['tilattu'] = empty($ykkostoimittajarajattuna['tilattu']) ? 0 : $ykkostoimittajarajattuna['tilattu'];
+					}
 
 					if ($paikoittain == '') {
 						// Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
@@ -1254,6 +1300,22 @@
 							$worksheet->writeNumber($excelrivi, $excelsarake, $ostettava4kk, $format_bold);
 							$excelsarake++;
 						}
+
+						if ($valitut["SARAKE12B"] != '') {
+							$ostoehdotus_status = $row['ostoehdotus'] == 'E' ? t("Ei") : t("Kyllä");
+							$rivi .= $ostoehdotus_status."\t";
+
+							$worksheet->writeString($excelrivi, $excelsarake, $ostoehdotus_status);
+							$excelsarake++;
+						}
+
+						if ($valitut["SARAKE12C"] != '') {
+							$rivi .= $row['vihapvm']."\t";
+
+							$worksheet->writeString($excelrivi, $excelsarake, $row["vihapvm"]);
+							$excelsarake++;
+						}
+
 
 						if ($valitut["SARAKE13"] != '') {
 							$rivi .= "$ostettavahaly\t";
@@ -1913,9 +1975,10 @@
 									$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow["kpl4"]);
 									$excelsarake++;
 								}
-							}
-						}
 
+							}
+
+						}
 
 						$rivi .= "\r\n";
 						$excelrivi++;
@@ -2238,9 +2301,9 @@
 					<input type='hidden' name='asiakasosasto' value='$asiakasosasto'>
 					<input type='hidden' name='abcrajaus' value='$abcrajaus'>
 					<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>
-					<input type='hidden' name='KAIKKIJT' value='$KAIKKIJT'>
+					<input type='hidden' name='KAIKKIJT' value='$KAIKKIJT'>";
 
-					<table>
+			echo "<table>
 					<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto $trow[selitetark]</td></tr>
 					<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>$tuoryh $srow[selitetark]</td></tr>
 					<tr><th>".t("Toimittaja")."</th><td colspan='3'>$ytunnus $trow1[nimi]</td></tr>
@@ -2265,7 +2328,7 @@
 						and selitetark like 'PAIVAM##%'";
 			$sresult = pupe_query($query);
 
-			while($srow = mysql_fetch_assoc($sresult)) {
+			while ($srow = mysql_fetch_assoc($sresult)) {
 				list($etuliite, $nimi, $paivamaara) = explode('##',$srow["selitetark"]);
 
 				${$nimi} = $paivamaara;
@@ -2366,8 +2429,6 @@
 			}
 
 			echo "	<tr><td class='back'><br></td></tr>";
-
-
 
 			//Yhtiövalinnat
 			$query	= "	SELECT distinct yhtio, nimi
@@ -2596,7 +2657,7 @@
 
 				echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
 			}
-
+			echo "<tr><th>".t("Päätoimittajarajaus")."</th><td colspan='3'><input type='checkbox' name='nayta_vain_ykkostoimittaja' value='JOO'/></tr></td>";
 			echo "<tr><td class='back'><br></td></tr>";
 
 
@@ -2703,9 +2764,10 @@
 
 			echo "</tr>";
 			echo "</table>";
-			echo "<br>
-				<input type='Submit' name='RAPORTOI' value = '".t("Aja hälytysraportti")."'>
-				</form>";
+			echo "<br>";
+
+			echo "<input type='Submit' name='RAPORTOI' value = '".t("Aja hälytysraportti")."'>
+			</form>";
 		}
 		require ("../inc/footer.inc");
 	}

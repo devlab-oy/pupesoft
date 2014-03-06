@@ -218,9 +218,9 @@
 
 			foreach ($vspserie as $htunnus => $matkustaja) {
 
-				$matkustaja['paivarahat']  = round($matkustaja['paivarahat']);
+				$matkustaja['paivarahat']  = number_format(round($matkustaja['paivarahat'],  2), 2, "", "");
+				$matkustaja['kilsat_raha'] = number_format(round($matkustaja['kilsat_raha'], 2), 2, "", "");
 				$matkustaja['kilsat']      = round($matkustaja['kilsat']);
-				$matkustaja['kilsat_raha'] = round($matkustaja['kilsat_raha']);
 
 				$file .= "000:VSPSERIE\n";
 				$file .= "101:0\n";

@@ -16556,7 +16556,8 @@ if (!function_exists("tee_keraysera")) {
 					avainsana as b READ,
 					varaston_tulostimet READ,
 					tuotepaikat READ,
-					maksuehto READ,
+					maksuehto as maksuehto1 READ,
+					maksuehto as maksuehto2 READ,
 					varastopaikat READ,
 					kirjoittimet READ,
 					kuka WRITE,
@@ -16625,6 +16626,7 @@ if (!function_exists("tee_keraysera")) {
 									AND lahdot1.aktiivi IN ('', 'T')
 									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
 									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != ''))
+					JOIN maksuehto AS maksuehto1 ON (maksuehto1.yhtio = lasku1.yhtio and maksuehto1.tunnus = lasku1.maksuehto and maksuehto1.jv != '')
 					LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 					AND lasku1.tila = 'N'
@@ -16648,6 +16650,7 @@ if (!function_exists("tee_keraysera")) {
 					JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus IN ({$keraysvyohyke}) AND keraysvyohyke2.tunnus = vh2.keraysvyohyke)
 					JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
 					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
+					JOIN maksuehto AS maksuehto2 ON (maksuehto2.yhtio = lasku2.yhtio and maksuehto2.tunnus = lasku2.maksuehto and maksuehto2.jv != '')
 					LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
 					AND lasku2.tila = 'N'

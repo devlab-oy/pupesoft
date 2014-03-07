@@ -101,6 +101,7 @@
 		//Voidaan tarvita jotain muuttujaa t‰‰lt‰
 		if (isset($muutparametrit)) {
 			list($temp_osasto,$temp_tuoryh,$temp_ytunnus,$temp_tuotemerkki,$temp_asiakasosasto,$temp_asiakasno,$temp_toimittaja) = explode('#', $muutparametrit);
+			$temp_tuoryh = unserialize(urldecode($temp_tuoryh));
 		}
 
 		$sarakkeet["SARAKE1"] 	= t("osasto")."\t";
@@ -2079,9 +2080,10 @@
 		if ($tee == "" or $tee == "JATKA") {
 			if (isset($muutparametrit)) {
 				list($osasto,$tuoryh,$ytunnus,$tuotemerkki,$asiakasosasto,$asiakasno,$toimittaja) = explode('#', $muutparametrit);
+				$tuoryh = unserialize($urldecode($tuoryh));
 			}
 
-			$muutparametrit = $osasto."#".$tuoryh."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
+			$muutparametrit = $osasto."#".urlencode(serialize($tuoryh))."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
 
 			if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '') {
 				if ($ytunnus != '' and !isset($ylatila)) {
@@ -2103,7 +2105,7 @@
 				}
 			}
 
-			$muutparametrit = $osasto."#".$tuoryh."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
+			$muutparametrit = $osasto."#".urlencode(serialize($tuoryh))."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
 
 			if ($asiakasno != '' and $tee == "JATKA") {
 				$muutparametrit .= $ytunnus;

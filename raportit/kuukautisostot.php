@@ -488,7 +488,7 @@
 				}
 			}
 
-			if ($tuoryh != '') {
+			if (count($tuoryh) > 0) {
 				$sresult = t_avainsana("TRY", "", "and avainsana.selite IN('".implode("','", $tuoryh)."')");
 				$srow = array();
 				while($sro = mysql_fetch_assoc($sresult)) {
@@ -548,7 +548,7 @@
 			if ($osasto != '') {
 				$lisaa .= " and tuote.osasto = '$osasto' ";
 			}
-			if ($tuoryh != '') {
+			if (count($tuoryh) > 0) {
 				$lisaa .= " and tuote.try IN ('".implode("','", $tuoryh)."') ";
 			}
 			if ($tuotemerkki != '') {
@@ -2080,7 +2080,7 @@
 		if ($tee == "" or $tee == "JATKA") {
 			if (isset($muutparametrit)) {
 				list($osasto,$tuoryh,$ytunnus,$tuotemerkki,$asiakasosasto,$asiakasno,$toimittaja) = explode('#', $muutparametrit);
-				$tuoryh = unserialize($urldecode($tuoryh));
+				$tuoryh = unserialize(urldecode($tuoryh));
 			}
 
 			$muutparametrit = $osasto."#".urlencode(serialize($tuoryh))."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
@@ -2294,7 +2294,7 @@
 			if (!isset($ostoehdotus))
 				$k3 = "CHECKED";
 
-			if ($tuoryh != '') {
+			if (count($tuoryh) > 0) {
 				// tehdään avainsana query
 				$sresult = t_avainsana("TRY", "", "and avainsana.selite IN('".implode("','", $tuoryh)."')");
 				$srow = array();

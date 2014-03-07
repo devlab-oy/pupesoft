@@ -118,6 +118,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				}
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$joinattavat = array("YTUNNUS" => "asiakas");
+				$saakopoistaa = TRUE;
 				break;
 			case "avainsana" :
 				$pakolliset = array("LAJI", "SELITE");

@@ -9,10 +9,12 @@
 	echo "	<script type='text/javascript' language='JavaScript'>
 				$(document).ready(function() {
 
-					$('input[id^=\"tulosta_kaikki_namiska\"]').live('click', function() {
-						
+					$('#tulosta_kaikki_namiska').on('click', function() {
 						$('#tulosta_kaikki').val('JOO');
-						alert('mosj '+ $('#tulosta_kaikki').val());
+						var c  = confirm('".t('Oletko varma ett‰ haluat tulostaa kaikki ker‰yser‰t')."?');
+						if (c) {
+							$('#tee_keraysera_formi').submit();
+						}
 					});
 
 					$('.notoggle').click(function(event){
@@ -36,9 +38,6 @@
 	if (!isset($select_varasto)) $select_varasto = '';
 	if (!isset($keraajanro)) 	 $keraajanro = '';
 	if (!isset($tulosta_kaikki)) $tulosta_kaikki = '';
-	
-	echo "kissa: {$tulosta_kaikki}";
-	var_dump($_POST);
 
 	if ($tee == 'tee_arpajaiset') {
 		if (isset($palaa)) {
@@ -52,10 +51,6 @@
 			$tee = "uusi_pakkaus";
 		}
 	}
-	
-	if (isset($tulosta_kaikki) and $tulosta_kaikki == "JOO") {
-		echo "KISSA";
-	}
 
 	if ($tee == "selaa" and (int) $keraajanro == 0 and $keraajalist == "") {
 		echo "<font class='error'>",t("Valitse ker‰‰j‰"),"!</font><br>";
@@ -65,7 +60,6 @@
 	if ($tee == '') {
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='selaa' />";
-		echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 		echo "<table>";
 
 		$query = "	SELECT *
@@ -444,7 +438,7 @@
 			// Valitun ker‰‰j‰n tiedot
 			$keraajarow = mysql_fetch_assoc($result);
 
-			echo "<form method='post'>";
+			echo "<form method='post' id='tee_keraysera_formi'>";
 
 			if ($tee != 'muuta' and $tee != 'muokkaa') {
 				echo "<input type='hidden' name='tee' value='keraysera' />";
@@ -453,7 +447,6 @@
 			echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 			echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 			echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
-			echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 
 			echo "<table>";
 			echo "<tr><th>",t("Ker‰‰j‰"),"</th><td>{$keraajarow['nimi']}</td></tr>";
@@ -510,8 +503,15 @@
 				echo "</select></td>";
 
 				echo "<td class='back'><input type='submit' value='",t("Hae ker‰yser‰"),"' />";
-				echo "<input type='submit' id='tulosta_kaikki_namiska' value='",t("Tulosta kaikki"),"' />";
-				echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
+				$naytetaan_tulosta_kaikki = 0;
+				// Tsekataan onko k‰ytt‰j‰ll‰ oikeus tulostaa kaikki t‰ss‰ varastossa
+				$ktkre = t_avainsana("KERAYSERA_TK", "", "and avainsana.selite  = '{$keraajarow['kuka']}' AND avainsana.selitetark = '{$select_varasto}' ");
+				$ktkrow = mysql_fetch_assoc($ktkre);
+
+				if ($ktkrow['selite'] != "") $naytetaan_tulosta_kaikki = 1;
+ 
+				if ($naytetaan_tulosta_kaikki) echo "<input type='button' id='tulosta_kaikki_namiska' value='",t("Tulosta kaikki"),"' />";
+				echo "<input type='hidden' id='tulosta_kaikki' name='tulosta_kaikki' value='' />";
 				echo "</td>";
 			}
 
@@ -532,60 +532,67 @@
 				// HUOM: Generoidaan ker‰yser‰ valitulle k‰ytt‰j‰lle
 				$kukarow = $keraajarow;
 
-				// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
-				$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
+				$loop_counter = true;
 
-				if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
+				while ($loop_counter) {
+					// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
+					$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
 
-					// Tallennetaan ker‰yser‰
-					require('inc/tallenna_keraysera.inc');
+					if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
 
-					// N‰m‰ tilaukset tallennettin ker‰yser‰‰n
+						// Tallennetaan ker‰yser‰
+						require('inc/tallenna_keraysera.inc');
+
+						// N‰m‰ tilaukset tallennettin ker‰yser‰‰n
+						if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
+
+							$otunnukset = implode(",", $lisatyt_tilaukset);
+							$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+
+							$query = "	SELECT *
+										FROM lasku
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus IN ($otunnukset)";
+							$res = pupe_query($query);
+							$laskurow = mysql_fetch_assoc($res);
+
+							$tilausnumeroita  	  = $otunnukset;
+							$valittu_tulostin 	  = $kerayslistatulostin;
+							$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
+							$laskuja 			  = count($erat['tilaukset']);
+							$lukotetaan 		  = FALSE;
+
+							require("tilauskasittely/tilaus-valmis-tulostus.inc");
+
+							// Jos tulostus feilasi, niin dellataan ker‰yser‰
+							if ($virheellinen == "X" and $kerayseran_numero > 0) {
+								$query = "	DELETE FROM kerayserat
+											WHERE yhtio	= '{$kukarow['yhtio']}'
+											AND nro		= '{$kerayseran_numero}' ";
+								pupe_query($query);
+							}
+						}
+
+						$loop_counter = $tulosta_kaikki == 'JOO' ? true : false;
+					}
+					else {
+						echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";
+						$loop_counter = false;
+					}
+
+					// lukitaan tableja
+			 		$query = "UNLOCK TABLES";
+					$result = pupe_query($query);
+
 					if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
-						$otunnukset = implode(",", $lisatyt_tilaukset);
-						$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+						// Tulostetaan kollilappu
+						require('inc/tulosta_reittietiketti.inc');
 
-						$query = "	SELECT *
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus IN ($otunnukset)";
-						$res = pupe_query($query);
-						$laskurow = mysql_fetch_assoc($res);
-
-						$tilausnumeroita  	  = $otunnukset;
-						$valittu_tulostin 	  = $kerayslistatulostin;
-						$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
-						$laskuja 			  = count($erat['tilaukset']);
-						$lukotetaan 		  = FALSE;
-
-						require("tilauskasittely/tilaus-valmis-tulostus.inc");
-
-						// Jos tulostus feilasi, niin dellataan ker‰yser‰
-						if ($virheellinen == "X" and $kerayseran_numero > 0) {
-							$query = "	DELETE FROM kerayserat
-										WHERE yhtio	= '{$kukarow['yhtio']}'
-										AND nro		= '{$kerayseran_numero}' ";
-							pupe_query($query);
+						if ($erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K") {
+							require("inc/kardex_send.inc");
 						}
-					}
-				}
-				else {
-					echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";
-				}
-
-				// lukitaan tableja
-		 		$query = "UNLOCK TABLES";
-				$result = pupe_query($query);
-
-				if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
-
-					// Tulostetaan kollilappu
-					require('inc/tulosta_reittietiketti.inc');
-
-					if ($erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K") {
-						require("inc/kardex_send.inc");
-					}
+					}					
 				}
 
 				// Palautetaan alkup kukarow
@@ -604,7 +611,6 @@
 				echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 				echo "<input type='hidden' name='tee' value='selaa' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
-				echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 				echo t('Etsi'),":&nbsp;<input type='text' name='etsi_kerayseraa' value='{$etsi_kerayseraa}' />&nbsp;";
 				echo "<input type='submit' value='",t("Hae"),"' />";
 				echo "</form>";
@@ -698,7 +704,6 @@
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 						echo "<input type='hidden' name='tee' value='muokkaa' />";
 						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
-						echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 						echo "<input type='submit' value='",t("Muokkaa"),"' />";
 						echo "</form>";
 					}
@@ -707,7 +712,6 @@
 						echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
-						echo "<input type='hidden' id='tulosta_kaikki' value='{$tulosta_kaikki}' />";
 						echo "<input type='hidden' name='tee' value='tee_arpajaiset'>";
 						echo "<input class='notoggle' type='submit' name='muuta' value='",t("Tallenna"),"'>";
 						echo "<input class='notoggle' type='submit' name='uusi_pakkaus' value='",t("Uusi pakkaus"),"'>";

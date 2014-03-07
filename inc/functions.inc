@@ -16612,7 +16612,8 @@ if (!function_exists("tee_keraysera")) {
 					lasku1.ohjausmerkki,
 					lasku1.h1time,
 					lahdot1.lahdon_kellonaika,
-					keraysvyohyke1.tunnus AS ker_tunnus
+					keraysvyohyke1.tunnus AS ker_tunnus,
+					maksuehto1.jv
 					FROM lasku AS lasku1
 					JOIN tilausrivi AS tilausrivi1 ON (tilausrivi1.yhtio = lasku1.yhtio AND tilausrivi1.otunnus = lasku1.tunnus AND tilausrivi1.var NOT IN ('P', 'J') AND tilausrivi1.tyyppi != 'D' AND tilausrivi1.varattu > 0)
 					JOIN tilausrivin_lisatiedot AS tilrivlis1 ON (tilrivlis1.yhtio = tilausrivi1.yhtio AND tilrivlis1.tilausrivitunnus = tilausrivi1.tunnus AND tilrivlis1.ohita_kerays = '')
@@ -16626,7 +16627,7 @@ if (!function_exists("tee_keraysera")) {
 									AND lahdot1.aktiivi IN ('', 'T')
 									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
 									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != ''))
-					JOIN maksuehto AS maksuehto1 ON (maksuehto1.yhtio = lasku1.yhtio and maksuehto1.tunnus = lasku1.maksuehto and maksuehto1.jv != '')
+					LEFT JOIN maksuehto AS maksuehto1 ON (maksuehto1.yhtio = lasku1.yhtio and maksuehto1.tunnus = lasku1.maksuehto and maksuehto1.jv != '')
 					LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 					AND lasku1.tila = 'N'
@@ -16634,7 +16635,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
 					AND kuka.tunnus is null
-					GROUP BY 1,2,3,4,5,6)
+					GROUP BY 1,2,3,4,5,6,7)
 					UNION
 					(SELECT SQL_NO_CACHE
 					lasku2.prioriteettinro as prioriteetti,
@@ -16642,7 +16643,8 @@ if (!function_exists("tee_keraysera")) {
 					lasku2.ohjausmerkki,
 					lasku2.h1time,
 					999999999999 as lahdon_kellonaika,
-					keraysvyohyke2.tunnus AS ker_tunnus
+					keraysvyohyke2.tunnus AS ker_tunnus,
+					maksuehto2.jv
 					FROM lasku AS lasku2
 					JOIN tilausrivi AS tilausrivi2 ON (tilausrivi2.yhtio = lasku2.yhtio AND tilausrivi2.otunnus = lasku2.tunnus AND tilausrivi2.var NOT IN ('P', 'J') AND tilausrivi2.tyyppi != 'D' AND tilausrivi2.varattu > 0)
 					JOIN tilausrivin_lisatiedot AS tilrivlis2 ON (tilrivlis2.yhtio = tilausrivi2.yhtio AND tilrivlis2.tilausrivitunnus = tilausrivi2.tunnus AND tilrivlis2.ohita_kerays = '')
@@ -16650,7 +16652,7 @@ if (!function_exists("tee_keraysera")) {
 					JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus IN ({$keraysvyohyke}) AND keraysvyohyke2.tunnus = vh2.keraysvyohyke)
 					JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
 					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
-					JOIN maksuehto AS maksuehto2 ON (maksuehto2.yhtio = lasku2.yhtio and maksuehto2.tunnus = lasku2.maksuehto and maksuehto2.jv != '')
+					LEFT JOIN maksuehto AS maksuehto2 ON (maksuehto2.yhtio = lasku2.yhtio and maksuehto2.tunnus = lasku2.maksuehto and maksuehto2.jv != '')
 					LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
 					AND lasku2.tila = 'N'
@@ -16658,7 +16660,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
 					AND kuka2.tunnus is null
-					GROUP BY 1,2,3,4,5,6)
+					GROUP BY 1,2,3,4,5,6,7)
 					ORDER BY 1,2,3,4,5,6";
 		$res = pupe_query($query);
 

@@ -91,7 +91,7 @@
 			}
 
 			$excelrivi = pupeFileReader($_FILES['userfile']['tmp_name'], $ext, '', $lue_useammalta_valilehdelta);
-			
+
 			$filetyyppi = "";
 			$rivilask1 = 0;
 
@@ -425,6 +425,24 @@
 											unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
 										}
 										else {
+
+					                    	if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
+
+												$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
+
+												$tuoteno = $palautus[0]["tuoteno"];
+												$hinta = $palautus[0]["hinta"];
+												$ale1 = $palautus[0]["ale"];
+
+												for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+													${'ale'.$alepostfix} = 0;
+												}
+
+												$kpl = $palautus[0]["kpl"] * -1;
+												if (stripos($kommentti, $palautus[0]["kommentti"]) === FALSE) $kommentti = $palautus[0]["kommentti"];
+												$hyvityssaannon_palautuskielto = $palautus[0]["palautuskielto"];
+					                    	}
+
 											require ("lisaarivi.inc");
 										}
 									}
@@ -769,6 +787,24 @@
 										unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
 									}
 									else {
+
+				                    	if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
+
+											$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
+
+											$tuoteno = $palautus[0]["tuoteno"];
+											$hinta = $palautus[0]["hinta"];
+											$ale1 = $palautus[0]["ale"];
+
+											for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+												${'ale'.$alepostfix} = 0;
+											}
+
+											$kpl = $palautus[0]["kpl"] * -1;
+											if (stripos($kommentti, $palautus[0]["kommentti"]) === FALSE) $kommentti = $palautus[0]["kommentti"];
+											$hyvityssaannon_palautuskielto = $palautus[0]["palautuskielto"];
+				                    	}
+
 										require ("lisaarivi.inc");
 									}
 								}
@@ -784,7 +820,7 @@
 					}
 				}
 			}
-			
+
 
 			$tuoteno	= '';
 			$kpl		= '';

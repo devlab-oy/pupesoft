@@ -96,7 +96,7 @@
 							$eankoodi = mysql_real_escape_string($line->ItemNumber);
 							$keratty = (float) $line->DeliveredQuantity;
 
-							$query = "	SELECT varattu, tuoteno
+							$query = "	SELECT *
 										FROM tilausrivi
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$tilausrivin_tunnus}'";

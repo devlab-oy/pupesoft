@@ -920,8 +920,8 @@
 
 			$ots .= sprintf ('%-7.7s',		t("Määrä"));
 			$ots .= sprintf ('%-9.9s', 		t("Yksikkö"));
-			$ots .= sprintf ('%-7.7s',	 	t("Tikpl"));
-			$ots .= sprintf ('%-13.13s',	t("Enn/Ker"));
+			$ots .= sprintf ('%-7.7s',	 	t("Tilkpl"));
+			$ots .= sprintf ('%-13.13s',	t("Varattu/Ker"));
 			$ots .= "\n";
 			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n";
 			fwrite($fh, str_replace("<SIVUNUMERO>","1",$ots));
@@ -1004,13 +1004,6 @@
 					$rivivarastosaldo 		= 0;
 				}
 
-				//katsotaan onko tuotetta tilauksessa
-				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoterow[tuoteno]' and varattu>0 and tyyppi='O'";
-				$result1 = pupe_query($query);
-				$prow    = mysql_fetch_array($result1);
-
 				if ($tuoterow["inventointiaika"]=='0000-00-00 00:00:00') {
 					$tuoterow["inventointiaika"] = t("Ei inventoitu");
 				}
@@ -1051,6 +1044,18 @@
 
 				$prn .= sprintf ('%-7.7s', 	"_____");
 				$prn .= sprintf ('%-9.9s', 	t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite"));
+
+
+				//katsotaan onko tuotetta tilauksessa
+				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE yhtio='$kukarow[yhtio]'
+							and tuoteno='$tuoterow[tuoteno]'
+							and varattu>0
+							and tyyppi='O'";
+				$result1 = pupe_query($query);
+				$prow    = mysql_fetch_assoc($result1);
+
 				$prn .= sprintf ('%-7.7d', 	$prow["varattu"]);
 
 				//Haetaan kerätty määrä

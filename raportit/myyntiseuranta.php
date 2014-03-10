@@ -1476,30 +1476,34 @@
 
 				if ($kateprossat != "") {
 					$katelisanyt = " 0 kateprosnyt, ";
-					$katelisaed  = " 0 kateprosed, ";
+					if ($piiloed == '') $katelisaed  = " 0 kateprosed, ";
 
 					if (!empty($kumulatiivinen_valittu)) {
-						$katelisanyt .= " 0 kateproskumul, ";
-						if ($piiloed == '') $katelisaed .= " 0 kateproskumuled, ";
+						$katelisakumulnyt .= " 0 kateproskumul, ";
+						if ($piiloed == '') $katelisakumuled .= " 0 kateproskumuled, ";
 					}
 				}
 				else {
-					$katelisanyt = "";
-					$katelisaed  = "";
+					$katelisanyt 	  = "";
+					$katelisaed  	  = "";
+					$katelisakumulnyt = "";
+					$katelisakumuled  = "";
 				}
 
 				if ($nettokateprossat != "") {
 					$nettokatelisanyt = " 0 nettokateprosnyt, ";
-					$nettokatelisaed  = " 0 nettokateprosed, ";
+					if ($piiloed == '') $nettokatelisaed  = " 0 nettokateprosed, ";
 
 					if (!empty($kumulatiivinen_valittu)) {
-						$nettokatelisanyt .= " 0 nettokateproskumul, ";
-						if ($piiloed == '') $nettokatelisaed .= " 0 nettokateproskumuled, ";
+						$nettokatelisakumulnyt .= " 0 nettokateproskumul, ";
+						if ($piiloed == '') $nettokatelisakumuled .= " 0 nettokateproskumuled, ";
 					}
 				}
 				else {
-					$nettokatelisanyt = "";
-					$nettokatelisaed  = "";
+					$nettokatelisanyt      = "";
+					$nettokatelisaed  	   = "";
+					$nettokatelisakumulnyt = "";
+					$nettokatelisakumuled  = "";
 				}
 
 				if ($asiakaskaynnit != "") {
@@ -1974,12 +1978,12 @@
 
 								//nettokateprossa näytetään vain jos myynti ja nettokate on valittu myös näytettäväksi
 								if ($piilota_myynti == "" and $piilota_nettokate == "") {
-									//NETTOKATEPROS
 									$query .= $nettokatelisanyt;
+									if ($piiloed == "") $query .= $nettokatelisaed;
 
-									//NETTOKATEPROSED
-									if ($piiloed == "") {
-										$query .= $nettokatelisaed;
+									if (!empty($kumulatiivinen_valittu)) {
+										$query .= $nettokatelisakumulnyt;
+										if ($piiloed == '') $query .= $nettokatelisakumuled;
 									}
 								}
 							}
@@ -2051,12 +2055,12 @@
 
 							//kateprossa näytetään vain jos myynti ja kate on valittu myös näytettäväksi
 							if ($piilota_myynti == "" and $piilota_kate == "") {
-								//KATEPROS
 								$query .= $katelisanyt;
+								if ($piiloed == "") $query .= $katelisaed;
 
-								//KATEPROSED
-								if ($piiloed == "") {
-									$query .= $katelisaed;
+								if (!empty($kumulatiivinen_valittu)) {
+									$query .= $katelisakumulnyt;
+									if ($piiloed == '') $query .= $katelisakumuled;
 								}
 							}
 						}

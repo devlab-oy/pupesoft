@@ -1,20 +1,41 @@
 <?php
-
-if (isset($_POST["tee"])) {
-	if($_POST["tee"] == 'lataa_tiedosto'){ $lataa_tiedosto=1; }
-	if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != ''){ $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]); }
-}
-
 if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
 	require ("../inc/parametrit.inc");
 }
 
-if (isset($tee) and $tee == "lataa_tiedosto") {
-	readfile("/tmp/".$tmpfilenimi);
+if ($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
 	exit;
 }
 
 echo "<font class='head'>" . t("Siirtokehotusraportti") . "</font><hr>";
+
+if (isset($tee) and $tee == 'lataa_pdf') {
+
+	$pdf_data = unserialize(base64_decode($pdf_data));
+	$siirtokehotus_json = "/tmp/siirtokehotusraportti.json";
+	array_walk_recursive($pdf_data, 'array_utf8_encode');
+	file_put_contents($siirtokehotus_json, json_encode($pdf_data));
+	$pdf_tiedosto = aja_ruby($siirtokehotus_json, 'siirtokehotus_pdf');
+
+	echo "<form id='tallennus_form' method='post' class='multisubmit'>";
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Tallenna pdf").":</th>";
+	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+	echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+	echo "<input type='hidden' name='kaunisnimi' value='siirtokehotusraportti_". date("m-d-Y") .".pdf'>";
+	echo "<input type='hidden' name='tmpfilenimi' value='{$pdf_tiedosto}'>";
+	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</form>";
+
+}
 
 if (isset($tee) and $tee == "hae_raportti" and count($varasto) < 1) {
 	$tee = '';
@@ -118,6 +139,8 @@ if (isset($tee) and $tee == "hae_raportti") {
 		echo '</th>';
 		echo '<tr>';
 
+		$pdf_data = [];
+
 		foreach ($oletuspaikat as $row) {
 
 			$saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row['alue'], $row['nro'], $row['vali'], $row['taso'] );
@@ -131,8 +154,7 @@ if (isset($tee) and $tee == "hae_raportti") {
 							hyllyalue AS alue,
 							hyllynro AS nro,
 							hyllyvali AS vali,
-							hyllytaso AS taso,
-							varastopaikat.tunnus as vt
+							hyllytaso AS taso
 							FROM tuotepaikat
 							JOIN varastopaikat ON
 								(
@@ -146,6 +168,7 @@ if (isset($tee) and $tee == "hae_raportti") {
 							AND varastopaikat.tunnus = {$row['varasto']}";
 
 			$varapaikka_echo = '';
+			$varapaikat = [];
 			$result2 = pupe_query($query2);
 			while ($row2 = mysql_fetch_assoc($result2)) {
 				$saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row2['alue'], $row2['nro'], $row2['vali'], $row2['taso'] );
@@ -173,17 +196,20 @@ if (isset($tee) and $tee == "hae_raportti") {
 				$varapaikka_echo .= '</td>';
 				$varapaikka_echo .= '</tr>';
 
+				$varapaikat[] = $row2;
 			}
 
 			if( $varapaikka_echo == '' ){
 				continue;
+			}
+			else{
+				$row['varapaikat'] = $varapaikat;
 			}
 
 			//tyhj‰ rivi ennen jokaista oletuspaikkaa
 			echo '<tr>';
 			echo '<td colspan="12" style="background:#cbd9e1; padding:4px;"></td>';
 			echo '</tr>';
-
 			echo '<tr>';
 			echo '<th>';
 			echo 'Oletuspaikka';
@@ -204,11 +230,23 @@ if (isset($tee) and $tee == "hae_raportti") {
 
 			echo $varapaikka_echo;
 
-		}
+			$pdf_data[] = $row;
 
+		}
 		echo '</table>';
+
+		$pdf_data = base64_encode(serialize($pdf_data));
+
+		echo '<br />';
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='siirtokehotus_json' value='" . $siirtokehotus_json . "' />";
+		echo "<input type='hidden' name='tee' value='lataa_pdf' />";
+		echo "<input type='hidden' name='pdf_data' value='" . $pdf_data . "' />";
+		echo "<input type='submit' value='Luo PDF-tiedosto' />";
+		echo "</form>";
+
 }
-else {
+else if( $tee != 'lataa_pdf' ) {
 
 	if( $ei_varastoa === true ){
 		echo "<font class='error'>V‰hint‰‰n yksi varasto on valittava</font>";
@@ -257,4 +295,19 @@ else {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
 	require ("../inc/footer.inc");
+}
+
+function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
+	global $pupe_root_polku;
+	$filepath = $pupe_root_polku . "/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
+	$cmd = "ruby {$filepath} {$json_data_filepath}";
+	$return = exec($cmd, $output, $return_code);
+	//poistetaan json tiedosto
+	unlink($json_data_filepath);
+	// Palautetaan ensimm‰inen rivi outputista, siin‰ on filenimet
+	return $output[0];
+}
+
+function array_utf8_encode(&$item, $key) {
+	$item = utf8_encode($item);
 }

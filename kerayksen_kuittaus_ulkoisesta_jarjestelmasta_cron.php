@@ -103,13 +103,13 @@
 							$tilausrivi_res = pupe_query($query);
 							$tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
-							// tarkistetaan ja setataan keräyspoikkeamat vain magento-tilauksissa
-							if (strtolower($laskurow['ohjelma_moduli']) == 'magento') {
-								$a = (int) ($tilausrivi_row['varattu'] * 10000);
+							# Verkkokaupassa etukäteen maksettu tuote!
+							if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
+								$a = (int) ($tilausrivi_row['tilkpl'] * 10000);
 								$b = (int) ($keratty * 10000);
 
 								if ($a != $b) {
-									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
+									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['tilkpl']);
 									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
 									$keratty = $tilausrivi_row['varattu'];
 								}

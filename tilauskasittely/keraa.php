@@ -2862,6 +2862,7 @@
 
 					$poikkeava_maara_disabled = "";
 
+					# Verkkokaupassa etukäteen maksettu tuote!
 					if ($otsik_row["mapvm"] != '' and $otsik_row["mapvm"] != '0000-00-00') {
 						$row["varattu"] = $row["tilkpl"];
 						$poikkeava_maara_disabled = "disabled";

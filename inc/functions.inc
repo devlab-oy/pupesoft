@@ -16556,6 +16556,7 @@ if (!function_exists("tee_keraysera")) {
 					avainsana as b READ,
 					varaston_tulostimet READ,
 					tuotepaikat READ,
+					maksuehto READ,
 					maksuehto as maksuehto1 READ,
 					maksuehto as maksuehto2 READ,
 					varastopaikat READ,
@@ -16754,7 +16755,8 @@ if (!function_exists("tee_keraysera")) {
 						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark, ' ', lasku1.toim_osoite, ' ', lasku1.toim_postino, ' ', lasku1.toim_postitp)) as asiakas_nimi,
 						CONCAT_WS('!¡!', lahdot3.tunnus, lahdot3.asiakasluokka, lahdot3.lahdon_kellonaika) as lahdon_tiedot,
 						AVG(DATE_FORMAT(lasku1.h1time, '%y%m%d%H%i')) h1time,
-						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
+						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus,
+						maksuehto1.jv
 						FROM lasku AS lasku1
 						JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
 						JOIN tilausrivi AS tilausrivi1 ON (tilausrivi1.yhtio = lasku1.yhtio AND tilausrivi1.otunnus = lasku1.tunnus AND tilausrivi1.var NOT IN ('P', 'J') AND tilausrivi1.tyyppi != 'D' AND tilausrivi1.varattu > 0)
@@ -16762,6 +16764,7 @@ if (!function_exists("tee_keraysera")) {
 						JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
 						JOIN keraysvyohyke AS keraysvyohyke1 ON (keraysvyohyke1.yhtio = lasku1.yhtio AND keraysvyohyke1.tunnus = '{$keraysvyohyke}')
 						JOIN toimitustapa AS toimitustapa1 ON (toimitustapa1.yhtio = lasku1.yhtio AND toimitustapa1.selite = lasku1.toimitustapa)
+						LEFT JOIN maksuehto AS maksuehto1 ON (maksuehto1.yhtio = lasku1.yhtio and maksuehto1.tunnus = lasku1.maksuehto and maksuehto1.jv != '')
 						LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 						JOIN lahdot AS lahdot3
 						ON (lahdot3.yhtio = toimitustapa1.yhtio
@@ -16787,7 +16790,8 @@ if (!function_exists("tee_keraysera")) {
 						TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark, ' ', lasku2.toim_osoite, ' ', lasku2.toim_postino, ' ', lasku2.toim_postitp)) as asiakas_nimi,
 						CONCAT_WS('!¡!', 999999999999, 999999999999, 999999999999) lahdon_tiedot,
 						AVG(DATE_FORMAT(lasku2.h1time, '%y%m%d%H%i')) h1time,
-						GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
+						GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus,
+						maksuehto2.jv
 						FROM lasku AS lasku2
 						JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
 						JOIN tilausrivi AS tilausrivi2 ON (tilausrivi2.yhtio = lasku2.yhtio AND tilausrivi2.otunnus = lasku2.tunnus AND tilausrivi2.var NOT IN ('P', 'J') AND tilausrivi2.tyyppi != 'D' AND tilausrivi2.varattu > 0)
@@ -16797,6 +16801,7 @@ if (!function_exists("tee_keraysera")) {
 						JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus = '{$keraysvyohyke}')
 						JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
 						JOIN lahdot AS lahdot3 ON (lahdot3.yhtio = lasku2.yhtio AND lahdot3.tunnus = lasku2.toimitustavan_lahto)
+						LEFT JOIN maksuehto AS maksuehto2 ON (maksuehto2.yhtio = lasku2.yhtio and maksuehto2.tunnus = lasku2.maksuehto and maksuehto2.jv != '')
 						LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 						WHERE lasku2.yhtio 			= '{$kukarow['yhtio']}'
 						AND lasku2.tila 			= 'N'

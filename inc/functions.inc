@@ -25564,8 +25564,17 @@ if (!function_exists('posten_outbounddelivery')) {
 			$line->addChild('CustItemName', 0);
 			$line->addChild('Type', 1);
 			$line->addChild('BBDate', 0);
-			$line->addChild('OrderedQuantity', ($looprow['varattu']+$looprow['kpl']));
-			$line->addChild('DeliveredQuantity', ($looprow['varattu']+$looprow['kpl']));
+
+			if ($looprow["mapvm"] != '' and $looprow["mapvm"] != '0000-00-00') {
+				#Verkkokaupassa etukäteen maksettu tuote
+				$line->addChild('OrderedQuantity', $looprow['tilkpl']);
+				$line->addChild('DeliveredQuantity', $looprow['tilkpl']);
+			}
+			else {
+				$line->addChild('OrderedQuantity', $looprow['varattu']);
+				$line->addChild('DeliveredQuantity', $looprow['varattu']);
+			}
+
 			$line->addChild('Unit', 0);
 			$line->addChild('Price', 0);
 			$line->addChild('DiscountPercent', 0);

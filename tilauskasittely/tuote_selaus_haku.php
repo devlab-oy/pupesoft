@@ -425,6 +425,12 @@
 		}
 	}
 
+	if (!isset($saldotonrajaus)) $saldotonrajaus = '';
+	if ($saldotonrajaus != '') {
+		$saldotoncheck = "CHECKED";
+		$ulisa .= "&saldotonrajaus=checked";
+	}
+	
 	if (!isset($poistetut)) {
 		$poistetut = '';
 	}
@@ -744,7 +750,7 @@
 			echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
 			echo "<tr><th>".t("Lis‰tiedot")."</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
 		}
-
+		echo "<tr><th>".t("N‰yt‰ vain saldolliset tuotteet")."</th><td><input type='checkbox' name='rajaa_saldoton' id='rajaa_saldoton' $saldotoncheck></td></tr>";
 		echo "</table><br/>";
 
 		if ($hae_ja_selaa_row['selite'] == 'B') {
@@ -1378,14 +1384,15 @@
 			}
 
 			$isan_kuva = '';
-			foreach ($rows as &$row) {
 
+			foreach ($rows as &$row) {
 				if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
 					$hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];
 				}
 				else {
 					$hae_ja_selaa_asiakas = (int) $laskurow['liitostunnus'];
 				}
+			//	dikkii shittii
 
 				//jos ollaan verkkokaupassa ja n‰ytet‰‰n vain aletuotteet asetus on p‰‰ll‰ niin pakotetaan saako_myyda_private_label tarkistamaan alet kaikilta tuotteilta, jotta n‰ytet‰‰n vain aletuotteet
 				if ($hae_ja_selaa_asiakas != 0) {

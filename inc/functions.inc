@@ -25564,8 +25564,8 @@ if (!function_exists('posten_outbounddelivery')) {
 			$line->addChild('CustItemName', 0);
 			$line->addChild('Type', 1);
 			$line->addChild('BBDate', 0);
-			$line->addChild('OrderedQuantity', $looprow['varattu']);
-			$line->addChild('DeliveredQuantity', $looprow['varattu']);
+			$line->addChild('OrderedQuantity', ($looprow['varattu']+$looprow['kpl']));
+			$line->addChild('DeliveredQuantity', ($looprow['varattu']+$looprow['kpl']));
 			$line->addChild('Unit', 0);
 			$line->addChild('Price', 0);
 			$line->addChild('DiscountPercent', 0);

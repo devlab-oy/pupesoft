@@ -535,8 +535,8 @@
 
 			$sarjanumero_haku = $sarjanumero;
 
-			echo "<font class='error'>".t("Sarjanumero $sarjanumero löytyy jo tuotteelta")." $sarjarow[tuoteno]/$sarjanumero.</font><br><br>";
-			$sarjanumero	= "";
+			echo "<font class='error'>".t("Sarjanumero löytyy jo tuotteelta")." $sarjarow[tuoteno]/$sarjanumero.</font><br><br>";
+			$sarjanumero = "";
 		}
 	}
 
@@ -1060,7 +1060,7 @@
 	echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 				function verify(){
 					msg = '".t("Haluatko todella poistaa tämän sarjanumeron")."?';
-					
+
 					if (confirm(msg)) {
 						return true;
 					}

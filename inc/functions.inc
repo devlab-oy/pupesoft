@@ -25472,13 +25472,13 @@ if (!function_exists('posten_outbounddelivery')) {
 					tuote.eankoodi
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.tilkpl) > 0)
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus = '{$otunnus}'";
 		$loopres = pupe_query($query);
 
-		if (mysql_num_rows($loopres) == 0) continue;
+		if (mysql_num_rows($loopres) == 0) return;
 
 		$looprow = mysql_fetch_assoc($loopres);
 
@@ -25564,8 +25564,17 @@ if (!function_exists('posten_outbounddelivery')) {
 			$line->addChild('CustItemName', 0);
 			$line->addChild('Type', 1);
 			$line->addChild('BBDate', 0);
-			$line->addChild('OrderedQuantity', $looprow['varattu']);
-			$line->addChild('DeliveredQuantity', $looprow['varattu']);
+
+			if ($looprow["mapvm"] != '' and $looprow["mapvm"] != '0000-00-00') {
+				#Verkkokaupassa etukäteen maksettu tuote
+				$line->addChild('OrderedQuantity', $looprow['tilkpl']);
+				$line->addChild('DeliveredQuantity', $looprow['tilkpl']);
+			}
+			else {
+				$line->addChild('OrderedQuantity', $looprow['varattu']);
+				$line->addChild('DeliveredQuantity', $looprow['varattu']);
+			}
+
 			$line->addChild('Unit', 0);
 			$line->addChild('Price', 0);
 			$line->addChild('DiscountPercent', 0);

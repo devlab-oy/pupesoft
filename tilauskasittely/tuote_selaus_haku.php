@@ -1204,7 +1204,39 @@
 						$i++;
 					}
 				}
+				$vastaaviaoli = 0;
+				if ($saldotonrajaus != '') {
+					$piilolaskuri = 0;
 
+					foreach ($rows as $row_key => $row_value) { 
+						$ei_piirreta = FALSE;
+						// Rajataan saldottomat pois
+						if ($row_value["tuoteperhe"] != "") {
+							$saldot = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+						}
+						else {
+							$saldot = tuoteperhe_myytavissa($row_value["tuoteno"], "", "KAIKKI", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+						}
+						$kokonaiskissa = 0;
+
+						foreach ($saldot as $varasto => $myytavissa) {
+							$kokonaiskissa += $myytavissa;
+						}
+						echo "myytävissä: {$kokonaiskissa} vastaavamaara: {$row_value['vastaavamaara']}";
+
+						if ($kokonaiskissa == 0) {
+							$ei_piirreta = TRUE;
+							$piilolaskuri++;
+						}
+
+						if ($ei_piirreta) unset($rows["{$row_key}"]);
+						if (isset($rows["{$row_key}"]) and $row_value['mikavastaava'] != '' or $row_value['vastaavamaara'] > 0) $vastaaviaoli++;
+					}
+					echo "KISSAMOI: $piilolaskuri tuotetta poistettiin arraysta ja vastaavia oli {$vastaaviaoli}<br>";
+				}
+				echo "<pre>";
+				var_dump($rows);
+				echo "</pre>";
 				if ($hae_ja_selaa_row['selite'] == 'B') {
 					echo "&raquo;  ".count($rows)." ",t("tuotetta")."</h3>";
 				}
@@ -1390,18 +1422,12 @@
 			$isan_kuva = '';
 
 			foreach ($rows as &$row) {
+
 				if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
 					$hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];
 				}
 				else {
 					$hae_ja_selaa_asiakas = (int) $laskurow['liitostunnus'];
-				}
-
-				// Rajataan saldottomat pois
-				if ($saldotonrajaus != '') {
-					// Tuoteperheen isätuotteet jotka eivät ole sarjanumeroseurannassa
-					if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
-					}
 				}
 
 				//jos ollaan verkkokaupassa ja näytetään vain aletuotteet asetus on päällä niin pakotetaan saako_myyda_private_label tarkistamaan alet kaikilta tuotteilta, jotta näytetään vain aletuotteet
@@ -1416,7 +1442,7 @@
 						continue;
 					}
 				}
-
+				
 				if (isset($row["sarjatunnus"]) and $row["sarjatunnus"] > 0 and $kukarow["extranet"] == "" and $verkkokauppa == "" and function_exists("sarjanumeronlisatiedot_popup")) {
 					if ($lisatiedot != "") {
 						echo "<tr class='aktiivi'><td colspan='7' class='back'><br></td></tr>";
@@ -1429,7 +1455,9 @@
 				echo "<tr class='aktiivi'>";
 
 				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
-					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$row["vastaavamaara"]}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
+					$vastaavarivimaara = $row["vastaavamaara"];
+					if ($saldotonrajaus != '') $vastaavarivimaara  = $vastaaviaoli;
+					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
 				elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {
 					echo "<td class='back'></td>";

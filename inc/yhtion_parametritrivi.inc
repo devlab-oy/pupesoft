@@ -1,8 +1,8 @@
 <?php
 
-	
+
 	if (isset($ytp_fieldname) and $ytp_fieldname != "") {
-		$fieldname = $ytp_fieldname; 
+		$fieldname = $ytp_fieldname;
 	}
 	else {
 		$ulos   = "";
@@ -12,10 +12,10 @@
 		if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
 			$tyyppi = 0;
 		}
-	
+
 		$fieldname = mysql_field_name($result, $i);
 	}
-	
+
 	if ($fieldname == "css") {
 		$ulos = "<td><textarea cols='45' rows='7' name='css'>$trow[$i]</textarea><input type='hidden' name='cssi' value='$i'></td>";
 		$jatko = 0;
@@ -2127,6 +2127,21 @@
 
 		$ulos .= "<option value = ''>".t("Myyntitilaukselle ei saa liitt‰‰ liitetiedostoja")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilaukselle saa liitt‰‰ liitetiedostoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if ($fieldname == "myyntitilauksen_toimipaikka") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = 'K' $sel[K]>".t("K‰ytet‰‰n ensisijaisesti k‰ytt‰j‰n toimipaikkaa")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n ensisijaisesti asiakkaan toimipaikkaa")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

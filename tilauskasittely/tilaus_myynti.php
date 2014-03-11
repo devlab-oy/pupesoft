@@ -7758,6 +7758,8 @@ if ($tee == '') {
 
 								$sel = (count($toimitustavan_lahto_chk) > 0 and in_array($lahdot_row['tunnus'], $toimitustavan_lahto_chk)) ? " selected" : ($laskurow['toimitustavan_lahto'] == $lahdot_row['tunnus'] ? " selected" : "");
 
+								if ($sel != "") $selectoitunut = TRUE;
+
 								if (!$selectoitunut and $sel == "" and $laskurow['toimitustavan_lahto'] == 0 and strtolower($state) != 'disabled' and (count($toimitustavan_lahto_chk) == 0 or !in_array($lahto, $toimitustavan_lahto_chk))) {
 									$sel = " selected";
 									$selectoitunut = TRUE;

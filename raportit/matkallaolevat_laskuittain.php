@@ -116,7 +116,7 @@
 					GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
 					HAVING matkalla != 0
 					ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 
@@ -128,12 +128,63 @@
 			echo "<th>".t("Valuutta")."</th>";
 			echo "<th>".t("Matkalla")."</th>";
 			echo "<th>".t("Valuutta")."</th>";
+			echo "<th>".t("Saapuminen")."</th>";
+			echo "<th>".t("Saapuminen suljettu")."</th>";
+			echo "<th>".t("Varastoonvientip‰iv‰")."</th>";
+			echo "<th>".t("Toimitusehto")."</th>";
+
 			echo "</tr>";
 
 			$summa = 0;
 			$alvsumma = array();
 
 			while ($row = mysql_fetch_array($result)) {
+
+				$liotsrow = array();
+				$keikrow  = array();
+				$rivirow  = array();
+				$toimirow = array();
+
+				// Onko lasku liitetty saapumiseen?
+				$query = "	SELECT laskunro
+							FROM lasku
+							WHERE yhtio		= '$kukarow[yhtio]'
+							AND tila		= 'K'
+							AND vanhatunnus	= $row[tunnus]";
+				$liotsres = pupe_query($query);
+
+				while ($liotsrow = mysql_fetch_assoc($liotsres)) {
+					// Virallinen varastoonvientip‰iv‰
+					$query = "	SELECT laskunro, tunnus, mapvm, liitostunnus
+								FROM lasku
+								WHERE yhtio		= '$kukarow[yhtio]'
+								AND tila		= 'K'
+								AND vanhatunnus	= 0
+								AND laskunro    = '{$liotsrow['laskunro']}'";
+					$keikres = pupe_query($query);
+					$keikrow = mysql_fetch_assoc($keikres);
+
+					// Milloin rivit on viety saldoille keskim‰‰rin
+					$query = "	SELECT round(AVG(DATE_FORMAT(laskutettuaika, '%Y%m%d'))) laskutettuaika
+								FROM tilausrivi
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
+								AND uusiotunnus = {$keikrow['tunnus']}
+								AND tyyppi 		= 'O'";
+					$rivires = pupe_query($query);
+					$rivirow = mysql_fetch_assoc($rivires);
+
+					// Toimittajan toimitusehto
+					$query = "	SELECT toimitusehto
+								FROM toimi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = {$keikrow['liitostunnus']}";
+					$toimires = pupe_query($query);
+					$toimirow = mysql_fetch_assoc($toimires);
+
+				}
+
+
+
 				echo "<tr class='aktiivi'>";
 				echo "<td>$row[nimi]</td>";
 				echo "<td>".tv1dateconv($row["tapvm"])."</td>";
@@ -141,6 +192,12 @@
 				echo "<td align='right'>$row[valkoodi]</td>";
 				echo "<td align='right'><a href='$palvelin2","muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$palvelin2","raportit/matkallaolevat_laskuittain.php'>$row[matkalla]</a></td>";
 				echo "<td align='right'>$yhtiorow[valkoodi]</td>";
+
+				echo "<td>{$keikrow["laskunro"]}</td>";
+				echo "<td>".tv1dateconv($keikrow["mapvm"])."</td>";
+				echo "<td>".tv1dateconv(tv3dateconv($rivirow["laskutettuaika"], TRUE))."</td>";
+				echo "<td>$toimirow[toimitusehto]</td>";
+
 				echo "</tr>";
 				$summa += $row["matkalla"];
 			}
@@ -148,12 +205,11 @@
 			echo "<tr>";
 			echo "<th colspan='4'>".t("Yhteens‰")."</th>";
 			echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
-			echo "<th></th>";
+			echo "<th colspan='5'></th>";
 			echo "</tr>";
 
 			echo "</table>";
 		}
-
 	}
 
 	require ("inc/footer.inc");

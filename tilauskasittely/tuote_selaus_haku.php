@@ -1205,13 +1205,14 @@
 					}
 				}
 				$vastaaviaoli = 0;
+				// Rajataan saldottomat pois
 				if ($saldotonrajaus != '') {
 					$piilolaskuri = 0;
-
+					$numbatalteen[] = '';
 					foreach ($rows as $row_key => $row_value) { 
 						$ei_piirreta = FALSE;
-						// Rajataan saldottomat pois
-						if ($row_value["tuoteperhe"] != "") {
+						
+						if ($row_value["tuoteperhe"] == "") {
 							$saldot = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 						}
 						else {
@@ -1230,13 +1231,22 @@
 						}
 
 						if ($ei_piirreta) unset($rows["{$row_key}"]);
-						if (isset($rows["{$row_key}"]) and $row_value['mikavastaava'] != '' or $row_value['vastaavamaara'] > 0) $vastaaviaoli++;
+						if ($row_value['vastaavamaara'] > 0) $numbatalteen["{$row_key}"] = 0;
+						//if (isset($row_value['mikavastaava']) and !empty($row_value['mikavastaava'])) $numbatalteen["{$row_value['mikavastaava']}"]++;
+						if (isset($rows["{$row_key}"]) and ($row_value['mikavastaava'] != '')) $vastaaviaoli++;
+		
 					}
-					echo "KISSAMOI: $piilolaskuri tuotetta poistettiin arraysta ja vastaavia oli {$vastaaviaoli}<br>";
+					echo "<br>KISSAMOI: $piilolaskuri tuotetta poistettiin arraysta ja alkup. arrayssa vastaavia oli {$vastaaviaoli}<br>";
+					echo "<pre>";
+					var_dump($numbatalteen);
+					echo "</pre>";
+					$uusinumero = 0;
+					foreach ($rows as $row_key => $row_value) { 
+						if ($row_value['mikavastaava'] != '') $uusinumero++;
+					}
+					echo "<br>vanha: {$vastaaviaoli} uusi: {$uusinumero}";
 				}
-				echo "<pre>";
-				var_dump($rows);
-				echo "</pre>";
+
 				if ($hae_ja_selaa_row['selite'] == 'B') {
 					echo "&raquo;  ".count($rows)." ",t("tuotetta")."</h3>";
 				}
@@ -1456,7 +1466,7 @@
 
 				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
 					$vastaavarivimaara = $row["vastaavamaara"];
-					if ($saldotonrajaus != '') $vastaavarivimaara  = $vastaaviaoli;
+					if ($saldotonrajaus != '') $vastaavarivimaara = $vastaaviaoli;
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
 				elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {

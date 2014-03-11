@@ -25478,7 +25478,7 @@ if (!function_exists('posten_outbounddelivery')) {
 					AND lasku.tunnus = '{$otunnus}'";
 		$loopres = pupe_query($query);
 
-		if (mysql_num_rows($loopres) == 0) continue;
+		if (mysql_num_rows($loopres) == 0) return;
 
 		$looprow = mysql_fetch_assoc($loopres);
 

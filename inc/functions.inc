@@ -645,9 +645,17 @@ if (!function_exists("tv2dateconv")) {
 }
 
 if (!function_exists("tv3dateconv")) {
-	function tv3dateconv($date) {
+	function tv3dateconv($date, $lyhyt = FALSE) {
 		//k‰‰nt‰‰ vvvvkkpp muodon muotoon vvvv-kk-pp
-		return substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2)." 00:00:00";
+
+		if ($date == "00000000" or $date == "") {
+			return "";
+		}
+
+		$loppu = "";
+		if (!$lyhyt) $loppu = " 00:00:00";
+
+		return substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2).$loppu;
 	}
 }
 

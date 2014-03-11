@@ -4,7 +4,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "karhu.php")  !== FALSE) {
 	require ("../inc/parametrit.inc");
 }
 
-echo "<font class='head'>".t("Karhu")."</font><hr>";
+echo "<font class='head'>".t("Maksukehotukset")."</font><hr>";
 
 // vain näin monta päivää sitten karhutut
 // laskut huomioidaan näkymässsä
@@ -36,7 +36,7 @@ $query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$y
 $res = pupe_query($query);
 
 if (mysql_num_rows($res) == 0) {
-    echo "<font class='error'>".t("Yhtiöllä ei ole yhtään karhuviestiä tallennettuna. Ei voida karhuta").".</font><br>";
+    echo "<font class='error'>".t("Yhtiöllä ei ole yhtään maksukehotusviestiä. Maksukehotuksia ei voida luoda").".</font><br>";
     $tee = '';
 }
 
@@ -65,7 +65,7 @@ if ($tee == 'LAHETA') {
 		}
 		catch (Exception $e) {
 			$ekarhu_success = false;
-			echo "<font class='error'>".t("Ei voitu lähettää karhua eKirjeenä, karhuaminen peruttiin").". ".t("VIRHE").": " . $e->getMessage() . "</font>";
+			echo "<font class='error'>".t("Ei voitu lähettää maksukehotusta eKirjeenä, maksukehotuksen lähetys peruttiin").". ".t("VIRHE").": " . $e->getMessage() . "</font>";
 		}
 	}
 	else {
@@ -106,7 +106,8 @@ if ($tee == "ALOITAKARHUAMINEN") {
 			$factoringrow = mysql_fetch_assoc($result);
 			$query = "	SELECT GROUP_CONCAT(tunnus) karhuttavat
 						FROM maksuehto
-						WHERE yhtio = '$kukarow[yhtio]' and factoring = '$factoringrow[factoringyhtio]'";
+						WHERE yhtio   = '$kukarow[yhtio]'
+						AND factoring = '$factoringrow[factoringyhtio]'";
 			$result = pupe_query($query);
 
 			$maksuehdotrow = mysql_fetch_assoc($result);
@@ -115,7 +116,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
 			}
 			else {
-				echo t("Ei karhuttavaa");
+				echo t("Ei perittäviä laskuja");
 				exit;
 			}
 		}
@@ -134,8 +135,9 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 		if ($maksuehdotrow["karhuttavat"] != '') {
 			$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat])";
-		} else {
-			echo "Ei karhuttavaa";
+		}
+		else {
+			echo t("Ei perittäviä laskuja");
 			exit;
 		}
 	}
@@ -215,7 +217,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		}
 	}
 	else {
-		echo "<font class='message'>".t("Ei karhuttavia asiakkaita")."!</font><br><br>";
+		echo "<font class='message'>".t("Ei perittäviä asiakkaita")."!</font><br><br>";
 		$tee = "";
 	}
 }
@@ -243,7 +245,7 @@ if ($tee == 'KARHUA' and isset($karhuttavat_cookiesta) and $karhuttavat_cookiest
 }
 
 if ($tee == 'KARHUA' and $karhuttavat[0] == "") {
-	echo "<font class='message'>".t("Kaikki asiakkaat karhuttu")."!</font><br><br>";
+	echo "<font class='message'>".t("Kaikki asiakkaat käyty läpi")."!</font><br><br>";
 	$tee = "";
 }
 
@@ -312,7 +314,7 @@ if ($tee == 'KARHUA')  {
 		echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01] ($amrow[laatija] / $amrow[paivamaara])</td></tr>";
 	}
 
-	echo "<tr><th>". t('Karhuviesti') ."</th><td>";
+	echo "<tr><th>". t('Maksukehotusviesti') ."</th><td>";
 
 	$max = 0;
 
@@ -375,7 +377,7 @@ if ($tee == 'KARHUA')  {
 	echo "</td><td valign='top' class='back'>";
 
 	echo "<table>";
-	echo "<tr><th>".t("Edellinen karhu väh").".</th><td>$kpvm_aikaa ".t("päivää sitten").".</td></tr>";
+	echo "<tr><th>".t("Edellinen maksukehotus väh").".</th><td>$kpvm_aikaa ".t("päivää sitten").".</td></tr>";
 	echo "<tr><th>".t("Eräpäivästä väh").".</th><td>$lpvm_aikaa ".t("päivää").".</td></tr>";
 	echo "<tr><th>".t("Sähköposti")."</th><td>$asiakastiedot[karhu_email]</td></tr>";
 	echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
@@ -430,9 +432,9 @@ if ($tee == 'KARHUA')  {
 	echo "<th>".t("Summa")."</th>";
 	echo "<th>".t("Eräpäivä")."</th>";
 	echo "<th>".t("Ikä päivää")."</th>";
-	echo "<th>".t("Karhuttu")."</th>";
-	echo "<th>".t("Viimeisin karhu")."</th>";
-	echo "<th>".t("Lasku karhutaan")."</th>";
+	echo "<th>".t("Maksukehotuskerrat")."</th>";
+	echo "<th>".t("Viimeisin maksukehotus")."</th>";
+	echo "<th>".t("Lisätään maksukehotukselle")."</th>";
 	echo "<th>".t("Myyntikielto")."</th>";
 	echo "<th>".t("Viesti")."</th></tr>";
 
@@ -522,7 +524,7 @@ if ($tee == 'KARHUA')  {
 
 	$summmmma -= $kaatosumma;
 
-	echo "<th colspan='2'>".t("Karhuttavaa yhteensä")."</th>";
+	echo "<th colspan='2'>".t("Maksukehotuksella yhteensä")."</th>";
 	echo "<th>".sprintf('%.2f', $summmmma)."</th>";
 	echo "<td class='back'></td></tr>";
 
@@ -534,7 +536,7 @@ if ($tee == 'KARHUA')  {
 
 	if ($ehdota_karhuemail_myyjalle and $myyjalla_on_eposti) {
 		if ($ehdota_maksukielto) echo "<br>";
-		echo "<font class='message'><input type='checkbox' name = 'laheta_karhuemail_myyjalle' value = '{$myyjatiedot["eposti"]}'> " . t("Lähetä karhu myös myyjän sähköpostiin").": {$myyjatiedot["eposti"]}</font>";
+		echo "<font class='message'><input type='checkbox' name = 'laheta_karhuemail_myyjalle' value = '{$myyjatiedot["eposti"]}'> " . t("Lähetä maksukehotus myös myyjän sähköpostiin").": {$myyjatiedot["eposti"]}</font>";
 	}
 
 	echo "<table>";
@@ -582,7 +584,7 @@ if ($tee == "") {
 
 	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='ALOITAKARHUAMINEN'>";
-	echo t("Syötä ytunnus jos haluat karhuta tiettyä asiakasta").".<br>".t("Jätä kenttä tyhjäksi jos haluat aloittaa karhuamisen ensimmäisestä asiakkaasta").".<br><br>";
+	echo t("Syötä ytunnus jos haluat lähettää maksukehotuksen tietylle asiakkaalle").".<br>".t("Jätä kenttä tyhjäksi jos haluat aloittaa ensimmäisestä asiakkaasta").".<br><br>";
 
 	echo "<table>";
 
@@ -593,7 +595,7 @@ if ($tee == "") {
 
 	if (mysql_num_rows($meapu) > 0) {
 
-		echo "<tr><th>".t("Karhujen tyyppi")."</th>";
+		echo "<tr><th>".t("Maksukehotuksen tyyppi")."</th>";
 		echo "<td><select name='ktunnus'>";
 		echo "<option value='0'>".t("Ei factoroidut")."</option>";
 
@@ -607,7 +609,7 @@ if ($tee == "") {
 		echo "<input type='hidden' name='ktunnus' value='0'>";
 	}
 
-	echo "<tr><th>".t("Karhua vain laskuja maahan")."</th>";
+	echo "<tr><th>".t("Lähetä maksukehotuksia vain maahan")."</th>";
 	echo "<td><select name='lasku_maa'>";
 	echo "<option value=''>".t("Ei maavalintaa")."</option>";
 

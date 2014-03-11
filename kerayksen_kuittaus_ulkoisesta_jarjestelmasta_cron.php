@@ -103,6 +103,8 @@
 							$tilausrivi_res = pupe_query($query);
 							$tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
+							$varattuupdate = "";
+
 							# Verkkokaupassa etuk‰teen maksettu tuote!
 							if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
 								$a = (int) ($tilausrivi_row['tilkpl'] * 10000);
@@ -111,8 +113,11 @@
 								if ($a != $b) {
 									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['tilkpl']);
 									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
-									$keratty = $tilausrivi_row['varattu'];
 								}
+							}
+							else {
+								// Jos ei oo etuk‰teen maksettu, niin tehd‰‰b ker‰yspoikkeama
+								$varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
 							}
 
 							$query = "	UPDATE tilausrivi
@@ -120,10 +125,10 @@
 										SET tilausrivi.keratty = '{$kukarow['kuka']}',
 										tilausrivi.kerattyaika = '{$toimaika} 00:00:00',
 										tilausrivi.toimitettu = '{$kukarow['kuka']}',
-										tilausrivi.toimitettuaika = '{$toimaika} 00:00:00',
-										tilausrivi.varattu = '{$keratty}'
+										tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'
+										{$varattuupdate}
 										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.tunnus = '{$tilausrivin_tunnus}'";
+										AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
 							pupe_query($query);
 
 							$query = "	SELECT SUM(tuote.tuotemassa) paino

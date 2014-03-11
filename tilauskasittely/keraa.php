@@ -1450,6 +1450,9 @@
 				}
 
 				if ($laskurow['kuka_ext_nimi'] != '' and $yhtiorow['extranet_kerayspoikkeama_email'] != '') {
+					$uloslisa .= t("Tilauksen keräsi").": $keraaja[nimi]<br><br>";
+					$ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
+
 					$boob = mail($yhtiorow['extranet_kerayspoikkeama_email'], mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f {$yhtiorow['postittaja_email']}");
 					if ($boob === FALSE) echo " - ",t("\"Extranet keräyspoikkeama\"-sähköpostin lähetys epäonnistui"),"!<br>";
 				}

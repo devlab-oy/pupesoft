@@ -241,7 +241,7 @@ if (!function_exists("pupe_error")) {
 		mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SQL Error", "ISO-8859-1", "Q"), $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 
-		if (ob_get_level() > 200) {
+		if (ob_get_level() > 1) {
 			$fleur = ob_get_contents();
 
 			// Onko nagios monitor asennettu?

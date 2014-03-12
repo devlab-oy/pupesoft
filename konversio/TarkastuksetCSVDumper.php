@@ -104,9 +104,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 
 	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
-		if ($rivi['koodi'] == '32210' and $rivi['toimenpide'] == '100306') {
-			$b = "";
-		}
 		foreach ($rivi as $key => $value) {
 			if (in_array($key, $this->required_fields) and $value == '') {
 				$this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
@@ -179,9 +176,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		}
 		$i = 1;
 		foreach ($this->rivit as $rivi) {
-			if ($rivi['koodi'] == '32210' and $rivi['toimenpide'] == '100306') {
-				$b = "";
-			}
 			$asiakas = $this->asiakkaat[$rivi['liitostunnus']];
 			$toimenpide_tuote = $this->tuotteet[$rivi['toimenpide']];
 			$laite_tuote = $this->tuotteet[$rivi['laite_tuoteno']];
@@ -223,70 +217,6 @@ class TarkastuksetCSVDumper extends CSVDumper {
 			if (!empty($rivi['kommentti'])) {
 				$this->paivita_tyomaarayksen_kommentti($tyomaarays_tunnus, $rivi['kommentti']);
 			}
-
-//			$params = array(
-//				'asiakas_tunnus'			 => $rivi['liitostunnus'],
-//				'toimenpide_tuotteen_tyyppi' => $rivi['toimenpide_tuotteen_tyyppi'],
-//				'toimenpide'				 => $rivi['toimenpide'],
-//				'laite_tunnus'				 => $rivi['laite'],
-//				'huoltosykli_tunnus'		 => $rivi['tehtava_huolto']['huoltosykli_tunnus'],
-//				'tuoteno'					 => $rivi['laite_tuoteno'],
-//				'kohde_nimi'				 => $rivi['kohde_nimi'],
-//				'paikka_nimi'				 => $rivi['kohde_nimi'],
-//				'tyojono'					 => 'joonas',
-//				'viimeinen_tapahtuma'		 => $rivi['toimaika'], //viimenen_tapahtuma sekä alla oleva poikkeuspäivä on $rivi['toimaika'], koska huoltosyklit_laitteet.viimeinen_tapahtuma ja lasku.toimaika halutaan, että se on generointi ajanhetki eli tyyliin kuun ensimmäinen päivä
-//			);
-//			$tyomaarays_tunnus = generoi_tyomaarays($params, array(), $rivi['toimaika']);
-//
-//			if (empty($tyomaarays_tunnus)) {
-//				echo "<pre>";
-//				var_dump($params);
-//				echo "</pre>";
-//			}
-//
-//			if (empty($tyomaarays_tunnus)) {
-//				continue;
-//			}
-//
-//			$params = array(
-//				'lasku_tunnukset'	 => array($tyomaarays_tunnus),
-//				'toimitettuaika'	 => $rivi['toimitettu'],
-//			);
-//			merkkaa_tyomaarays_tehdyksi($params);
-//			paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $rivi['tehtava_huolto']['huoltosykli_tunnus'], $rivi['toimaika']);
-//
-//			//jos kyseessä on koeponnistus tai huolto niin pitäisi osata merkata huollon/koeponnistuksen ja tarkastuksen viimeinen tapahtuma oikein
-//			if ($rivi['tehtava_huolto']['selite'] == 'huolto' or $rivi['tehtava_huolto']['selite'] == 'koeponnistus') {
-//				foreach ($rivi['muut_huollot'] as $muu_huolto) {
-//					if ($rivi['tehtava_huolto']['viimeinen_tapahtuma'] >= $muu_huolto['viimeinen_tapahtuma']) {
-//						paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $muu_huolto['huoltosykli_tunnus'], $rivi['toimaika']);
-//					}
-//				}
-//			}
-//
-//			//poikkeukset pitää merkata historiaan.
-//			if (!empty($rivi['poikkeus'])) {
-//				$tekematon_tilausrivi = $this->hae_tyomaarayksen_tilausrivi($tyomaarays_tunnus);
-//				$kaato_tilausrivi = $this->hae_kaato_tilausrivi();
-//				$kaato_tilausrivin_lisatiedot = $this->hae_kaato_tilausrivin_lisatiedot();
-//
-//				aseta_tyomaarays_var($tekematon_tilausrivi['tunnus'], 'P');
-//				aseta_tyomaarays_status('V', $tekematon_tilausrivi['tunnus']);
-//
-//				$kaato_tilausrivi['kommentti'] = $rivi['kommentti'];
-//				$kaato_tilausrivi['otunnus'] = $tyomaarays_tunnus;
-//
-//				$kaato_tilausrivin_lisatiedot['tilausrivilinkki'] = $tekematon_tilausrivi['tunnus'];
-//				$kaato_tilausrivin_lisatiedot['vanha_otunnus'] = $tyomaarays_tunnus;
-//				$kaato_tilausrivin_lisatiedot['asiakkaan_positio'] = $tekematon_tilausrivi['asiakkaan_positio'];
-//
-//				$kaato_tilausrivin_lisatiedot['tilausrivitunnus'] = $this->tallenna_poikkeus_rivi($kaato_tilausrivi, false);
-//				$this->tallenna_poikkeus_rivi($kaato_tilausrivin_lisatiedot, true);
-//			}
-//
-//			if (!empty($rivi['kommentti'])) {
-//				$this->paivita_tyomaarayksen_kommentti($tyomaarays_tunnus, $rivi['kommentti']);
-//			}
 
 			if ($this->is_proggressbar_on) {
 				$progress_bar->increase();

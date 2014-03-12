@@ -397,6 +397,18 @@ function tarkasta_tarkastukset() {
 				$debug = $huoltosyklit[$vanha_tarkastus['LAITE']];
 				$huoltosykli_tuotenumerot = array_keys($huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit']);
 				if (!in_array($vanha_tarkastus['TUOTENRO'], $huoltosykli_tuotenumerot)) {
+
+//					if (count($huoltosykli_tuotenumerot) == 1 and $huoltosykli_tuotenumerot[0] == '') {
+//						$huoltosykli_tuotenumerot = 'Ei liitettyj? huoltosyklej?';
+//						$ei_liitettyja_huoltosykleja++;
+//					}
+//					else {
+//						$huoltosykli_tuotenumerot = implode(', ', $huoltosykli_tuotenumerot);
+//						$ei_oikeaa_huoltosyklia++;
+//					}
+//					echo "Laite {$vanha_tarkastus['LAITE']} L÷YTYY, mutta toimenpide {$vanha_tarkastus['TUOTENRO']} EI OLE LIITETTYN? pit?isi olla {$vanha_tarkastus['ED']} {$huoltosykli_tuotenumerot}";
+
+					
 					$laite = hae_laite_koodilla($vanha_tarkastus['LAITE']);
 					$huoltosykli = hae_huoltosykli2($vanha_tarkastus['TUOTENRO'], $vanha_tarkastus['VALI']);
 
@@ -640,7 +652,7 @@ function paivita_tulevat_tapahtumat() {
 
 		$uusi_paiva = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']]['seuraava_tapahtuma'];
 
-		if ($uusi_paiva != $vanha_tarkastus['ED']) {
+		if (!empty($vanha_tarkastus['ED']) and $uusi_paiva != $vanha_tarkastus['ED']) {
 			$uusi_huoltosykli = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']];
 			if (!empty($uusi_huoltosykli)) {
 				$huoltosyklit_laitteet_tunnus = $huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit'][$vanha_tarkastus['TUOTENRO']]['huoltosyklit_laitteet_tunnus'];
@@ -736,6 +748,10 @@ function hae_huoltosykli2($toimenpide, $vali_kk) {
 function liita_huoltosykli_laitteeseen2($laite, $huoltosykli, $seuraava_tapahtuma) {
 	global $kukarow, $yhtiorow;
 
+	if (empty($seuraava_tapahtuma)) {
+		return false;
+	}
+
 	$query = "	SELECT *
 				FROM huoltosyklit_laitteet
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -753,7 +769,7 @@ function liita_huoltosykli_laitteeseen2($laite, $huoltosykli, $seuraava_tapahtum
 	if (empty($huoltovali)) {
 		return false;
 	}
-	$viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tapahtuma} - {$huoltovali['years']}"));
+	$viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tapahtuma} - {$huoltovali['years']} years"));
 
 	$query = "	INSERT INTO huoltosyklit_laitteet
 				SET yhtio = '{$kukarow['yhtio']}',

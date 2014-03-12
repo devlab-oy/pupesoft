@@ -3,12 +3,7 @@
  // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
-if ($kukarow['extranet'] == '') {
-	$tilvahvfilenimi = "../dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
-}
-else {
 	$tilvahvfilenimi = "$pupe_root_polku/dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
-}
 
 if (!file_exists($tilvahvfilenimi)) {
 

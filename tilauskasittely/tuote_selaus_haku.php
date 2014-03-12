@@ -1204,15 +1204,15 @@
 						$i++;
 					}
 				}
-				$vastaaviaoli = 0;
+				$vastaaviaoli = array();
 				// Rajataan saldottomat pois
 				if ($saldotonrajaus != '') {
 					$piilolaskuri = 0;
-					$numbatalteen[] = '';
+					$apunumero = -1;
 					foreach ($rows as $row_key => $row_value) { 
 						$ei_piirreta = FALSE;
 						
-						if ($row_value["tuoteperhe"] == "") {
+						if ($row_value["tuoteperhe"] != "") {
 							$saldot = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 						}
 						else {
@@ -1223,7 +1223,6 @@
 						foreach ($saldot as $varasto => $myytavissa) {
 							$kokonaiskissa += $myytavissa;
 						}
-						echo "myytävissä: {$kokonaiskissa} vastaavamaara: {$row_value['vastaavamaara']}";
 
 						if ($kokonaiskissa == 0) {
 							$ei_piirreta = TRUE;
@@ -1231,20 +1230,23 @@
 						}
 
 						if ($ei_piirreta) unset($rows["{$row_key}"]);
-						if ($row_value['vastaavamaara'] > 0) $numbatalteen["{$row_key}"] = 0;
-						//if (isset($row_value['mikavastaava']) and !empty($row_value['mikavastaava'])) $numbatalteen["{$row_value['mikavastaava']}"]++;
-						if (isset($rows["{$row_key}"]) and ($row_value['mikavastaava'] != '')) $vastaaviaoli++;
+						if ($row_value['vastaavamaara'] > 0 and !$eipiirreta) $apunumero++;# = $row_key;#$vastaaviaoli["{$row_key}"] = 0;
+						if ($row_value['vastaavamaara'] > 0 and !$eipiirreta) $vastaaviaoli["{$apunumero}"]++;
+						if ($row_value['mikavastaava'] != '' and !$eipiirreta) $vastaaviaoli["{$apunumero}"]++;
 		
 					}
-					echo "<br>KISSAMOI: $piilolaskuri tuotetta poistettiin arraysta ja alkup. arrayssa vastaavia oli {$vastaaviaoli}<br>";
+					echo "<br>KISSAMOI: $piilolaskuri tuotetta poistettiin arraysta ja alkup. arrayssa vastaavia oli:".var_dump($vastaaviaoli)."<br>";
 					echo "<pre>";
-					var_dump($numbatalteen);
+					var_dump($vastaaviaoli);
 					echo "</pre>";
-					$uusinumero = 0;
+					$indeksi= 0;
 					foreach ($rows as $row_key => $row_value) { 
-						if ($row_value['mikavastaava'] != '') $uusinumero++;
+						if ($row_value['vastaavamaara'] > 0) {
+							$rows["{$row_key}"]["vastaavamaara"] = $vastaaviaoli[$indeksi];
+							$indeksi++;
+						}
 					}
-					echo "<br>vanha: {$vastaaviaoli} uusi: {$uusinumero}";
+
 				}
 
 				if ($hae_ja_selaa_row['selite'] == 'B') {
@@ -1466,7 +1468,7 @@
 
 				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
 					$vastaavarivimaara = $row["vastaavamaara"];
-					if ($saldotonrajaus != '') $vastaavarivimaara = $vastaaviaoli;
+					//if ($saldotonrajaus != '') $vastaavarivimaara = $vastaaviaoli[0];
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
 				elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {

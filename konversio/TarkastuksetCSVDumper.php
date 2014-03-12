@@ -152,6 +152,11 @@ class TarkastuksetCSVDumper extends CSVDumper {
 					$rivi['muut_huollot'] = $muut_huollot;
 				}
 			}
+			else if ($key == 'toimaika') {
+				if (empty($rivi[$key])) {
+					$valid = false;
+				}
+			}
 			else if ($key == 'status') {
 				if (!stristr($rivi[$key], 'valmis')) {
 					$valid = false;

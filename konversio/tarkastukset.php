@@ -10,7 +10,7 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 
 ini_set("memory_limit", "5G");
 
-$kukarow = hae_kukarow('joonas', 'lpk');
+$kukarow = hae_kukarow('admin', 'lpk');
 
 if ($argv[1] == '') {
 	echo "Anna tiedosto\n";

@@ -10294,7 +10294,7 @@ if (!function_exists("pakkaamo")) {
 
 if (!function_exists("laheta_tilausvahvistus")) {
 	function laheta_tilausvahvistus($params) {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $pupe_root_polku;
 
 		// Luodaan muuttujat
 		foreach ($params as $key => $val) {

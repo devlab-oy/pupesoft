@@ -391,27 +391,43 @@ function tarkasta_tarkastukset() {
 			if (!in_array($vanha_tarkastus['LAITE'], $laite_koodit)) {
 				echo "Laite {$vanha_tarkastus['LAITE']} EI OLEMASSA toimenpide {$vanha_tarkastus['TUOTENRO']} pitäisi olla {$vanha_tarkastus['ED']}";
 				$ei_olemassa++;
+				$vaarin++;
 			}
 			else {
 				$debug = $huoltosyklit[$vanha_tarkastus['LAITE']];
 				$huoltosykli_tuotenumerot = array_keys($huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit']);
 				if (!in_array($vanha_tarkastus['TUOTENRO'], $huoltosykli_tuotenumerot)) {
-					if (count($huoltosykli_tuotenumerot) == 1 and $huoltosykli_tuotenumerot[0] == '') {
-						$huoltosykli_tuotenumerot = 'Ei liitettyjä huoltosyklejä';
-						$ei_liitettyja_huoltosykleja++;
+					$laite = hae_laite_koodilla($vanha_tarkastus['LAITE']);
+					$huoltosykli = hae_huoltosykli2($vanha_tarkastus['TUOTENRO'], $vanha_tarkastus['VALI']);
+
+					if (!empty($laite) and !empty($huoltosykli)) {
+						$ok = liita_huoltosykli_laitteeseen2($laite, $huoltosykli, $vanha_tarkastus['ED']);
+						if ($ok) {
+							echo "Huoltosykli {$huoltosykli['toimenpide']} liitetty laitteeseen {$laite['tuoteno']}";
+							$oikein++;
+						}
+						else {
+							echo "Huoltosyklin liitto ERROR2";
+							$vaarin++;
+						}
 					}
 					else {
-						$huoltosykli_tuotenumerot = implode(', ', $huoltosykli_tuotenumerot);
-						$ei_oikeaa_huoltosyklia++;
+						$vaarin++;
+						echo "Huoltosyklin liitto ERROR {$laite['tuoteno']} {$huoltosykli['toimenpide']} - {$vanha_tarkastus['TUOTENRO']} {$vanha_tarkastus['VALI']}";
+						if (empty($laite)) {
+							echo " Laite tyhjä";
+						}
+						if (empty($huoltosykli)) {
+							echo " Huoltosykli tyhjä";
+						}
 					}
-					echo "Laite {$vanha_tarkastus['LAITE']} LÖYTYY, mutta toimenpide {$vanha_tarkastus['TUOTENRO']} EI OLE LIITETTYNÄ pitäisi olla {$vanha_tarkastus['ED']} {$huoltosykli_tuotenumerot}";
 				}
 				else {
 					echo "seuraava_tapahtuma null";
+					$vaarin++;
 				}
 			}
 			echo "<br/>";
-			$vaarin++;
 			continue;
 		}
 
@@ -664,4 +680,91 @@ function paivita_viimeinen_tapahtuma($huoltosyklit_laitteet_tunnus, $vanhan_jarj
 				AND tunnus = '{$huoltosyklit_laitteet_tunnus}'";
 
 	pupe_query($query);
+}
+
+function hae_laite_koodilla($koodi) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT *
+				FROM laite
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND koodi = '{$koodi}'";
+	$result = pupe_query($query);
+
+	return mysql_fetch_assoc($result);
+}
+
+function hae_huoltosykli2($toimenpide, $vali_kk) {
+	global $kukarow, $yhtiorow;
+
+	$huoltovali_options = huoltovali_options();
+	$huoltovali = search_array_key_for_value_recursive($huoltovali_options, 'months', $vali_kk);
+	$huoltovali = $huoltovali[0];
+
+	//Kyseessä arvailu haku. Vanhojen tarkastuksien perusteella ei tiedetä mm. olosuhdetta niin liitetään laitteeseen huoltosykli jonka olosuhde on sisällä
+	$query = "	SELECT *
+				FROM huoltosykli
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND toimenpide = '{$toimenpide}'
+				AND olosuhde = 'A'
+				AND huoltovali = '{$huoltovali['days']}'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) == 0) {
+		$query = "	SELECT *
+					FROM huoltosykli
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND toimenpide = '{$toimenpide}'
+					AND huoltovali = '{$huoltovali['days']}'
+					LIMIT 1";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			$query = "	SELECT *
+						FROM huoltosykli
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND toimenpide = '{$toimenpide}'
+						AND olosuhde = 'A'
+						LIMIT 1";
+			$result = pupe_query($query);
+		}
+	}
+
+	return mysql_fetch_assoc($result);
+}
+
+function liita_huoltosykli_laitteeseen2($laite, $huoltosykli, $seuraava_tapahtuma) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT *
+				FROM huoltosyklit_laitteet
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND huoltosykli_tunnus = '{$huoltosykli['tunnus']}'
+				AND laite_tunnus = '{$laite['tunnus']}'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) != 0) {
+		return false;
+	}
+
+	$huoltovali_options = huoltovali_options();
+	$huoltovali = search_array_key_for_value_recursive($huoltovali_options, 'days', $huoltosykli['huoltovali']);
+	$huoltovali = $huoltovali[0];
+	if (empty($huoltovali)) {
+		return false;
+	}
+	$viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tapahtuma} - {$huoltovali['years']}"));
+
+	$query = "	INSERT INTO huoltosyklit_laitteet
+				SET yhtio = '{$kukarow['yhtio']}',
+				huoltosykli_tunnus = '{$huoltosykli['tunnus']}',
+				laite_tunnus = '{$laite['tunnus']}',
+				huoltovali = '{$huoltosykli['huoltovali']}',
+				pakollisuus = '1',
+				viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',
+				laatija = 'import',
+				luontiaika = NOW()";
+	pupe_query($query);
+
+	return true;
 }

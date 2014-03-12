@@ -396,19 +396,7 @@ function tarkasta_tarkastukset() {
 			else {
 				$debug = $huoltosyklit[$vanha_tarkastus['LAITE']];
 				$huoltosykli_tuotenumerot = array_keys($huoltosyklit[$vanha_tarkastus['LAITE']]['huoltosyklit']);
-				if (!in_array($vanha_tarkastus['TUOTENRO'], $huoltosykli_tuotenumerot)) {
-
-//					if (count($huoltosykli_tuotenumerot) == 1 and $huoltosykli_tuotenumerot[0] == '') {
-//						$huoltosykli_tuotenumerot = 'Ei liitettyj? huoltosyklej?';
-//						$ei_liitettyja_huoltosykleja++;
-//					}
-//					else {
-//						$huoltosykli_tuotenumerot = implode(', ', $huoltosykli_tuotenumerot);
-//						$ei_oikeaa_huoltosyklia++;
-//					}
-//					echo "Laite {$vanha_tarkastus['LAITE']} L÷YTYY, mutta toimenpide {$vanha_tarkastus['TUOTENRO']} EI OLE LIITETTYN? pit?isi olla {$vanha_tarkastus['ED']} {$huoltosykli_tuotenumerot}";
-
-					
+				if (!in_array($vanha_tarkastus['TUOTENRO'], $huoltosykli_tuotenumerot)) {		
 					$laite = hae_laite_koodilla($vanha_tarkastus['LAITE']);
 					$huoltosykli = hae_huoltosykli2($vanha_tarkastus['TUOTENRO'], $vanha_tarkastus['VALI']);
 

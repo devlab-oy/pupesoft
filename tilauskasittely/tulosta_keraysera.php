@@ -532,9 +532,10 @@
 				// HUOM: Generoidaan keräyserä valitulle käyttäjälle
 				$kukarow = $keraajarow;
 
-				$loop_counter = true;
+				$loop_counter = TRUE;
 
 				while ($loop_counter) {
+
 					// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
 					$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
 
@@ -573,11 +574,11 @@
 							}
 						}
 
-						$loop_counter = $tulosta_kaikki == 'JOO' ? true : false;
+						$loop_counter = $tulosta_kaikki == "JOO" ? TRUE : FALSE;
 					}
 					else {
 						echo "<font class='message'>",t("Ei ole yhtään kerättävää keräyserää"),".</font><br />";
-						$loop_counter = false;
+						$loop_counter = FALSE;
 					}
 
 					// lukitaan tableja
@@ -592,7 +593,7 @@
 						if ($erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K") {
 							require("inc/kardex_send.inc");
 						}
-					}					
+					}
 				}
 
 				// Palautetaan alkup kukarow

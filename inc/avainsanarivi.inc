@@ -816,3 +816,49 @@
 
 		$jatko = 0;
 	}
+	
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {	
+
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND nimi != ''
+					AND extranet = ''
+					AND (keraajanro > 0 or kuka = '$kukarow[kuka]')
+					ORDER BY nimi";
+		$varresult = pupe_query($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		while ($kukkarow = mysql_fetch_assoc($varresult)) {
+
+			$sel = $trow[$i] == $kukkarow['tunnus'] ? " selected" : "";
+
+			$ulos .= "<option value='{$kukkarow['kuka']}'{$sel}>{$kukkarow['nimi']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {	
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and nimitys != ''
+					ORDER BY nimitys";
+		$varresult = pupe_query($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		while ($kukkarow = mysql_fetch_assoc($varresult)) {
+
+			$sel = $trow[$i] == $kukkarow['tunnus'] ? " selected" : "";
+
+			$ulos .= "<option value='{$kukkarow['tunnus']}'{$sel}>{$kukkarow['nimitys']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}

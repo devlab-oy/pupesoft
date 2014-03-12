@@ -3556,7 +3556,7 @@ if (!function_exists("hae_alehinta_minkpl")) {
 			$ei_loydy = TRUE;
 
 			foreach ($hinnasto as $_arr) {
-				if ($_arr['hinta'] == $hinta) {
+				if ($_arr['hinta'] == $hinta and $_arr['ale'] === $ale) {
 					$ei_loydy = FALSE;
 					break;
 				}

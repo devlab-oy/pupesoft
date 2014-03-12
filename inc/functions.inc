@@ -25480,7 +25480,7 @@ if (!function_exists('posten_outbounddelivery')) {
 					tuote.eankoodi
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.tilkpl) > 0)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.tilkpl) > 0 AND tilausrivi.tyyppi= 'L')
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus = '{$otunnus}'";

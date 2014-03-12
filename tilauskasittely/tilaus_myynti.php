@@ -645,11 +645,11 @@ elseif ($toim == "PROJEKTI") {
 elseif ($toim == "YLLAPITO") {
 	$otsikko = t("Yll‰pitosopimus");
 }
+elseif ($toim == "EXTENNAKKO") {
+	$otsikko = t("Ext-Ennakkotilaus");
+}
 elseif ($toim == "ENNAKKO" or $laskurow["tilaustyyppi"] == "E") {
 	$otsikko = t("Ennakkotilaus");
-}
-elseif ($toim == "EXTENNAKKO" or $laskurow["tilaustyyppi"] == "E") {
-	$otsikko = t("Ext-Ennakkotilaus");
 }
 else {
 	$otsikko = t("Myyntitilaus");
@@ -1055,7 +1055,7 @@ if (isset($tyhjenna)) {
 }
 
 if ($tee == "VALMIS"
-	and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
 	and $kateinen != ''
 	and $kukarow['extranet'] == ''
 	and (
@@ -2016,6 +2016,10 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 		$tyhjenna 	= "JOO";
 		$tee 		= "";
 	}
+}
+
+if ($tee == "MUUTA_EXT_ENNAKKO") {
+	echo "kissa";
 }
 
 // n‰ytet‰‰n tilaus-ruutu...

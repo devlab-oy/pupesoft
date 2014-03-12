@@ -3454,6 +3454,13 @@
 		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
 		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
+		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
+			$queryx = "SELECT toimipaikka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$asiakasid}";
+			$resultx = pupe_query($queryx);
+			$asiakkaan_toimipaikkax = mysql_result($resultx, 0);
+			$kukarow['toimipaikka'] = $asiakkaan_toimipaikkax;
+		}
+
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		// yhtiön tiedot
@@ -4051,8 +4058,7 @@
 		}
 	}
 
-	// Palutetaan puhtaat kukarow ja yhtiörow
+	// Palutetaan puhdas kukarow
 	$kukarow  = hae_kukarow($kukarow['kuka'], $kukarow['yhtio']);
-	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 	unset($alv);

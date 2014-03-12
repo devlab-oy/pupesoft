@@ -3519,7 +3519,7 @@ if (!function_exists("hae_asiakkaan_minkpl")) {
 }
 
 if (!function_exists("hae_alehinta_minkpl")) {
-	function hae_alehinta_minkpl($minkpl, $laskurow, $trow) {
+	function hae_alehinta_minkpl($minkpl, $laskurow, $trow, $hinnat_per_alennus = false) {
 		global $kukarow, $yhtiorow;
 
 		$hinnasto = array();
@@ -3556,7 +3556,7 @@ if (!function_exists("hae_alehinta_minkpl")) {
 			$ei_loydy = TRUE;
 
 			foreach ($hinnasto as $_arr) {
-				if ($_arr['hinta'] == $hinta and $_arr['ale'] === $ale) {
+				if ($_arr['hinta'] == $hinta and (!$hinnat_per_alennus or $_arr['ale'] === $ale)) {
 					$ei_loydy = FALSE;
 					break;
 				}

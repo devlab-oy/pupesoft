@@ -4,7 +4,7 @@
 // tarvitaan $yhtiorow array
 
 if ($kukarow['extranet'] == '') {
-	$tilvahvfilenimi = "$pupe_root_polku/dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
+	$tilvahvfilenimi = "../dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
 }
 else {
 	$tilvahvfilenimi = "$pupe_root_polku/dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";

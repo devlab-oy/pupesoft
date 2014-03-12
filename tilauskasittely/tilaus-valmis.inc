@@ -395,7 +395,9 @@ else {
 		}
 	}
 
-	if ($yhtiorow["lisakulu_tuotenumero"] != "") {
+	// Tarkistetaan onko ensimmäinen kerta kun tilaus klikataan valmiiksi
+	$tsekkitsekki = ($laskurow['hyvak1'] == '' and $laskurow['h1time'] == '0000-00-00 00:00:00') ? TRUE : FALSE;
+	if ($tsekkitsekki and $yhtiorow["lisakulu_tuotenumero"] != "") {
 		$query = "	SELECT *
 					FROM toimitustapa
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -430,19 +432,12 @@ else {
 
 			$lisakulu_alarajasumma_rivit = 0;
 
-			while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {
-				// KAUTTALASKUTUSKIKKARE
-				if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) {
-					$lisakulu_alarajasumma_rivit += etayhtio_hinta($totaalirivi["tuoteno"], $totaalirivi["kplmaara"], $laskurow);
-				}
-				else {
-					$lisakulu_alarajasumma_rivit += $totaalirivi["rivihinta"];
-				}
+			while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {			
+				$lisakulu_alarajasumma_rivit += $totaalirivi["rivihinta"];
 			}
 
-			$tsekkitsekki = ($laskurow['hyvak1'] == '' and $laskurow['h1time'] == '0000-00-00 00:00:00') ? TRUE : FALSE;
-			// lisätään toimituslisäkulu jos klikataan tilausta ekaa kertaa valmiiksi ja toimituslisäkulua ei ole tilauksella ja lisäkulutuote löytyy JA rajasumma ei täyty
-			if ($tsekkitsekki and mysql_num_rows($rhire) == 1 and mysql_num_rows($result) == 0 and $lisakulu_alarajasumma_rivit != 0 and ($lisakulu_alarajasumma_rivit < $torow['lisakulu_summa'])) {
+			// lisätään toimituslisäkulu jos toimituslisäkulua ei ole tilauksella ja lisäkulutuote löytyy JA rajasumma ei täyty
+			if (mysql_num_rows($rhire) == 1 and mysql_num_rows($result) == 0 and $lisakulu_alarajasumma_rivit != 0 and ($lisakulu_alarajasumma_rivit < $torow['lisakulu_summa'])) {
 
 				$trow = mysql_fetch_assoc($rhire);
 

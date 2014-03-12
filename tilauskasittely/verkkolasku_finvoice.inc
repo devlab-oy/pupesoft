@@ -299,8 +299,9 @@ if (!function_exists('finvoice_otsik')) {
 			#xml_add("InvoiceSenderOrganisationTaxCode", 					"", 								$tootfinvoice);
 			#fputs($tootfinvoice, "</InvoiceSenderPartyDetails>\r\n");
 
+			if (strpos($_SERVER['SCRIPT_NAME'], "karhu.php") == FALSE)  {
 			//	Oisko toista laskutusosoitetta?
-			$query = "	SELECT laskutus_nimi,
+				$query = "	SELECT laskutus_nimi,
 						laskutus_nimitark,
 						laskutus_osoite,
 						laskutus_postino,
@@ -312,15 +313,42 @@ if (!function_exists('finvoice_otsik')) {
 						AND CONCAT(laskutus_nimi, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa) != '$lasrow[nimi]$lasrow[osoite]$lasrow[postino]$lasrow[postitp]$lasrow[maa]'
 						AND otunnus = '{$lasrow['tunnus']}'
 						LIMIT 1";
-			$tarkres = pupe_query($query);
+				$tarkres = pupe_query($query);
 
-			if (mysql_num_rows($tarkres) == 1) {
-				$tarkrow = mysql_fetch_assoc($tarkres);
+				if (mysql_num_rows($tarkres) == 1) {
+					$tarkrow = mysql_fetch_assoc($tarkres);
 
+					fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
+					xml_add("InvoiceRecipientPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),	$tootfinvoice, 35);
+
+					$laskutus_nimitieto = trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]);
+					$laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
+
+					foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
+						xml_add("InvoiceRecipientOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 2);
+					}
+
+					if ($yhtiorow["verkkolasku_lah"] != "maventa") {
+						xml_add("InvoiceRecipientOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),	$tootfinvoice, 35); // Maventa ei salli tyhjänä, optionaalinen
+					}
+					fputs($tootfinvoice, "<InvoiceRecipientPostalAddressDetails>\r\n");
+					xml_add("InvoiceRecipientStreetName", 							$tarkrow["laskutus_osoite"], 	$tootfinvoice, 35, 2);
+					xml_add("InvoiceRecipientTownName", 							$tarkrow["laskutus_postitp"], 	$tootfinvoice, 35, 2);
+					xml_add("InvoiceRecipientPostCodeIdentifier", 					$tarkrow["laskutus_postino"],	$tootfinvoice, 35, 1);
+					xml_add("CountryCode", 											$tarkrow["laskutus_maa"], 		$tootfinvoice, 2);
+					xml_add("CountryName", 											$tarkrow["laskutus_maa"], 		$tootfinvoice, 35);
+					xml_add("InvoiceRecipientPostOfficeBoxIdentifier",				"", 							$tootfinvoice, 35);
+					fputs($tootfinvoice, "</InvoiceRecipientPostalAddressDetails>\r\n");
+					fputs($tootfinvoice, "</InvoiceRecipientPartyDetails>\r\n");
+
+					xml_add("InvoiceRecipientOrganisationUnitNumber", 				$lasrow['ovttunnus'],			$tootfinvoice);
+				}
+			}
+			else   {
 				fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
 				xml_add("InvoiceRecipientPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),	$tootfinvoice, 35);
 
-				$laskutus_nimitieto = trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]);
+				$laskutus_nimitieto = trim($masrow["laskutus_nimi"]." ".$masrow["laskutus_nimitark"]);
 				$laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
 
 				foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
@@ -331,11 +359,11 @@ if (!function_exists('finvoice_otsik')) {
 					xml_add("InvoiceRecipientOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),	$tootfinvoice, 35); // Maventa ei salli tyhjänä, optionaalinen
 				}
 				fputs($tootfinvoice, "<InvoiceRecipientPostalAddressDetails>\r\n");
-				xml_add("InvoiceRecipientStreetName", 							$tarkrow["laskutus_osoite"], 	$tootfinvoice, 35, 2);
-				xml_add("InvoiceRecipientTownName", 							$tarkrow["laskutus_postitp"], 	$tootfinvoice, 35, 2);
-				xml_add("InvoiceRecipientPostCodeIdentifier", 					$tarkrow["laskutus_postino"],	$tootfinvoice, 35, 1);
-				xml_add("CountryCode", 											$tarkrow["laskutus_maa"], 		$tootfinvoice, 2);
-				xml_add("CountryName", 											$tarkrow["laskutus_maa"], 		$tootfinvoice, 35);
+				xml_add("InvoiceRecipientStreetName", 							$masrow["laskutus_osoite"], 	$tootfinvoice, 35, 2);
+				xml_add("InvoiceRecipientTownName", 							$masrow["laskutus_postitp"], 	$tootfinvoice, 35, 2);
+				xml_add("InvoiceRecipientPostCodeIdentifier", 					$masrow["laskutus_postino"],	$tootfinvoice, 35, 1);
+				xml_add("CountryCode", 											$masrow["laskutus_maa"], 		$tootfinvoice, 2);
+				xml_add("CountryName", 											$masrow["laskutus_maa"], 		$tootfinvoice, 35);
 				xml_add("InvoiceRecipientPostOfficeBoxIdentifier",				"", 							$tootfinvoice, 35);
 				fputs($tootfinvoice, "</InvoiceRecipientPostalAddressDetails>\r\n");
 				fputs($tootfinvoice, "</InvoiceRecipientPartyDetails>\r\n");

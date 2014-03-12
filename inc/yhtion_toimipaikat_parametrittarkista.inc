@@ -33,6 +33,7 @@ if(!function_exists("yhtion_toimipaikat_parametrittarkista")) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat_parametrit
 						WHERE yhtio   = '{$kukarow['yhtio']}'
+						AND toimipaikka = '$chtoimipaikka'
 						AND parametri = '$chparametri'
 						AND tunnus   != '$trow[$i]'";
 			$vares = pupe_query($query);

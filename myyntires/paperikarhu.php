@@ -892,12 +892,7 @@
 
 		$masrow = array(
 			'teksti' => 'Heti',
-			'kassa_alepros' => 0,
-			'laskutus_nimi' => trim($asiakastiedot['laskutus_nimi'] . ' ' . $asiakastiedot['laskutus_nimitark']),
-			'laskutus_osoite'	=> $asiakastiedot["laskutus_osoite"],
-			'laskutus_postino'  => $asiakastiedot["laskutus_postino"],
-			'laskutus_postitp'	=> $asiakastiedot["laskutus_postitp"],
-			'laskutus_maa'		=> $asiakastiedot["laskutus_maa"]
+			'kassa_alepros' => 0
 		);
 
 		$myyrow = array(

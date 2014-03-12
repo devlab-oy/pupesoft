@@ -24227,7 +24227,7 @@ if (!function_exists('hyllysiirto')) {
 						$query = "	SELECT tunnus
 									FROM lasku
 									WHERE tila = 'X'
-									and tila   = 'G'
+									and alatila = 'G'
 									and tapvm  = current_date
 									and yhtio  = '$kukarow[yhtio]'";
 						$result = pupe_query($query);

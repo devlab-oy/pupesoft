@@ -396,6 +396,68 @@ else {
 		}
 	}
 
+	// Tarkistetaan onko ensimmäinen kerta kun tilaus klikataan valmiiksi
+	$tsekkitsekki = ($laskurow['hyvak1'] == '' and $laskurow['h1time'] == '0000-00-00 00:00:00') ? TRUE : FALSE;
+	if ($tsekkitsekki and $yhtiorow["lisakulu_tuotenumero"] != "") {
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND selite = '$laskurow[toimitustapa]'";
+		$result = pupe_query($query);
+		$torow = mysql_fetch_assoc($result);
+		// jos toimitustavalle on setattu lisäkuluraja, lisäkulu sekä yhtiöllä on lisäkulun tuotenumero
+		if ($torow['lisakulu_summa'] != 0 and $torow['lisakulu'] != 0) {
+
+			$query = "	SELECT tunnus
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$laskurow['tunnus']}'
+						AND tyyppi != 'D'
+						AND tuoteno = '{$yhtiorow['lisakulu_tuotenumero']}'";
+			$result = pupe_query($query);
+
+			$query = "	SELECT *
+						FROM tuote
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$yhtiorow['lisakulu_tuotenumero']}'";
+			$rhire = pupe_query($query);
+
+			$query_ale_lisa = generoi_alekentta('M');
+
+			$tilausriviquery = "SELECT tilausrivi.tuoteno, (tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * $query_ale_lisa) rivihinta, (tilausrivi.varattu+tilausrivi.jt) kplmaara
+								FROM tilausrivi
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								AND tilausrivi.otunnus = '$laskurow[tunnus]'
+								AND tilausrivi.tyyppi != 'D'";
+			$rivihintaresult = pupe_query($tilausriviquery);
+
+			$lisakulu_alarajasumma_rivit = 0;
+
+			while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {			
+				$lisakulu_alarajasumma_rivit += $totaalirivi["rivihinta"];
+			}
+
+			// lisätään toimituslisäkulu jos toimituslisäkulua ei ole tilauksella ja lisäkulutuote löytyy JA rajasumma ei täyty
+			if (mysql_num_rows($rhire) == 1 and mysql_num_rows($result) == 0 and $lisakulu_alarajasumma_rivit != 0 and ($lisakulu_alarajasumma_rivit < $torow['lisakulu_summa'])) {
+
+				$trow = mysql_fetch_assoc($rhire);
+
+				$otunnus	 = $laskurow['tunnus'];
+				$hinta		 = $torow["lisakulu"]; // jvkulu
+				$nimitys	 = t("Toimitustavan lisäkulu");
+
+				list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+
+				$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+							values (now(), '{$hinta}', '{$netto}', '1', '1', '{$otunnus}', '{$trow['tuoteno']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L', '{$alv}', '')";
+				$addtil = pupe_query($query);
+
+				$hinta = money_format('%.2n', $hinta);
+
+				$tilaus_valmis_ulos .= t("Tilaukselle lisättiin toimitustavan lisäkulua").": {$hinta} {$laskurow['valkoodi']}<br>";
+			}
+		}
+	}
 	//päivitetään tilaus valmisaika, kun painetaan ekan kerran tilaus valmiiksi
 	if ($laskurow['h1time'] == "0000-00-00 00:00:00") {
 		$query = "	UPDATE lasku

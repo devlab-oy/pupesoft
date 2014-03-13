@@ -972,14 +972,13 @@
 					$ennp   = mysql_fetch_assoc($result);
 
 					if (isset($nayta_vain_ykkostoimittaja)) {
-						$query = "	SELECT
-									sum(if(tyyppi = 'O', varattu, 0)) tilattu
+						$query = "	SELECT sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)) tilattu
 									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-									JOIN lasku ON lasku.yhtio = '$yhtiorow[yhtio]' and lasku.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio='$row[yhtio]' and tuoteno='$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
+									JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio='$row[yhtio]' and tuoteno='$row[tuoteno]' ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
-			 						and tilausrivi.tyyppi in ('O')
-									and tuoteno = '$row[tuoteno]'
-									and laskutettuaika = '0000-00-00'";
+			 						and tilausrivi.tyyppi  = 'O'
+									and tilausrivi.tuoteno = '$row[tuoteno]'
+									and tilausrivi.laskutettuaika = '0000-00-00'";
 						$result = pupe_query($query);
 						$ykkostoimittajarajattuna   = mysql_fetch_assoc($result);
 

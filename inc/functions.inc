@@ -645,9 +645,17 @@ if (!function_exists("tv2dateconv")) {
 }
 
 if (!function_exists("tv3dateconv")) {
-	function tv3dateconv($date) {
+	function tv3dateconv($date, $lyhyt = FALSE) {
 		//kääntää vvvvkkpp muodon muotoon vvvv-kk-pp
-		return substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2)." 00:00:00";
+
+		if ($date == "00000000" or $date == "") {
+			return "";
+		}
+
+		$loppu = "";
+		if (!$lyhyt) $loppu = " 00:00:00";
+
+		return substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2).$loppu;
 	}
 }
 
@@ -10286,7 +10294,7 @@ if (!function_exists("pakkaamo")) {
 
 if (!function_exists("laheta_tilausvahvistus")) {
 	function laheta_tilausvahvistus($params) {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $pupe_root_polku;
 
 		// Luodaan muuttujat
 		foreach ($params as $key => $val) {
@@ -13739,7 +13747,10 @@ if (!function_exists("pupe_DataTables")) {
 
 							var valid_params = true;
 							var suuntalava_ok = false;
-							if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara)) {
+							if (massajakokplmaara >= rivi_kpl_alkuperainen || isNaN(massajakokplmaara) || typeof(massajakokplmaara.length) == 'undefined') {
+								valid_params = false;
+							}
+							if (rivi_kpl_alkuperainen / massajakokplmaara > 30) {
 								valid_params = false;
 							}
 							if (massatyyppi.length == 0 || massakeraysvyohyke.length == 0 || massaterminaalialue.length == 0) {
@@ -24233,7 +24244,7 @@ if (!function_exists('hyllysiirto')) {
 						$query = "	SELECT tunnus
 									FROM lasku
 									WHERE tila = 'X'
-									and tila   = 'G'
+									and alatila = 'G'
 									and tapvm  = current_date
 									and yhtio  = '$kukarow[yhtio]'";
 						$result = pupe_query($query);
@@ -25486,13 +25497,13 @@ if (!function_exists('posten_outbounddelivery')) {
 					tuote.eankoodi
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.tilkpl) > 0 AND tilausrivi.tyyppi= 'L')
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus = '{$otunnus}'";
 		$loopres = pupe_query($query);
 
-		if (mysql_num_rows($loopres) == 0) continue;
+		if (mysql_num_rows($loopres) == 0) return;
 
 		$looprow = mysql_fetch_assoc($loopres);
 
@@ -25578,8 +25589,17 @@ if (!function_exists('posten_outbounddelivery')) {
 			$line->addChild('CustItemName', 0);
 			$line->addChild('Type', 1);
 			$line->addChild('BBDate', 0);
-			$line->addChild('OrderedQuantity', $looprow['varattu']);
-			$line->addChild('DeliveredQuantity', $looprow['varattu']);
+
+			if ($looprow["mapvm"] != '' and $looprow["mapvm"] != '0000-00-00') {
+				#Verkkokaupassa etukäteen maksettu tuote
+				$line->addChild('OrderedQuantity', $looprow['tilkpl']);
+				$line->addChild('DeliveredQuantity', $looprow['tilkpl']);
+			}
+			else {
+				$line->addChild('OrderedQuantity', $looprow['varattu']);
+				$line->addChild('DeliveredQuantity', $looprow['varattu']);
+			}
+
 			$line->addChild('Unit', 0);
 			$line->addChild('Price', 0);
 			$line->addChild('DiscountPercent', 0);

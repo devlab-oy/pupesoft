@@ -3467,13 +3467,18 @@ if ($tee == '') {
 
 		if ($luottorajavirhe != '') {
 			echo "<br/>";
-			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!</font>";
-			echo "<br/>";
+
+			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!";
 
 			if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
 				$muokkauslukko = 'LUKOSSA';
 				$myyntikielto = 'MYYNTIKIELTO';
 			}
+			else {
+				echo " ",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
+			}
+
+			echo "</font><br />";
 		}
 
 		if ($jvvirhe != '') {
@@ -7752,6 +7757,8 @@ if ($tee == '') {
 								$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
 
 								$sel = (count($toimitustavan_lahto_chk) > 0 and in_array($lahdot_row['tunnus'], $toimitustavan_lahto_chk)) ? " selected" : ($laskurow['toimitustavan_lahto'] == $lahdot_row['tunnus'] ? " selected" : "");
+
+								if ($sel != "") $selectoitunut = TRUE;
 
 								if (!$selectoitunut and $sel == "" and $laskurow['toimitustavan_lahto'] == 0 and strtolower($state) != 'disabled' and (count($toimitustavan_lahto_chk) == 0 or !in_array($lahto, $toimitustavan_lahto_chk))) {
 									$sel = " selected";

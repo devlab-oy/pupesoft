@@ -38,7 +38,7 @@
 	$edellinen_vuosi_loppu 	  = date("Y-m-d", mktime(0, 0, 0, 1, 0, date("Y")));
 	$edellinen_kuukausi_loppu = date("Y-m-d", mktime(0, 0, 0, date("m"), 0, date("Y")));
 
-	$maxrivimaara = 15000;
+	$maxrivimaara = 5000;
 
 	// Tiedoston tallennusta varten
 	if ($tee == "lataa_tiedosto") {

@@ -60,6 +60,10 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			$fieldname == "lisakulu_tuotenumero") {
 
 			$tuote = mysql_real_escape_string(trim($t[$i]));
+			
+			if (mysql_field_name($result, $i) == "rahti_tuotenumero") $aatami = TRUE;
+			if (mysql_field_name($result, $i) == "erilliskasiteltava_tuotenumero") $beetami = TRUE;
+			if (mysql_field_name($result, $i) == "lisakulu_tuotenumero") $ceetami = TRUE;
 
 			${$fieldname} = $tuote;
 			${"ind_".$fieldname} = $i;
@@ -76,6 +80,35 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
 				if (mysql_num_rows($xyresult) == 0) {
 					$virhe[$i] = t("Tuotetta ei löydy!")." / ".t("Tuote pitää olla saldoton!");
+				}
+				elseif ($aatami or $beetami or $ceetami) {
+				
+					// tsekataan myös että erilliskasiteltavalla, toimitustavan lisakululla ja rahtikululla ei ole samaa tuotenumeroa
+					$hakufieldi = "";
+					$messu = t("tuotenumero ei voi olla sama kuin");
+
+					if ($aatami) {
+						$hakufieldi = "erilliskasiteltava_tuotenumero = '$tuote' OR lisakulu_tuotenumero = '$tuote'";
+						$messu = t("Rahti")." ".$messu." ".t("Erilliskäsiteltäväkulun tai Lisäkulun tuotenumero");
+					}
+					elseif ($beetami) {
+						$hakufieldi = "rahti_tuotenumero = '$tuote' OR lisakulu_tuotenumero = '$tuote'";
+						$messu = t("Erilliskäsiteltävä")." ".$messu." ".t("Rahtikulun tai Lisäkulun tuotenumero");
+					}
+					elseif($ceetami) {
+						$hakufieldi = "rahti_tuotenumero = '$tuote' OR erilliskasiteltava_tuotenumero = '$tuote'";
+						$messu = t("Lisäkulu")." ".$messu." ".t("Rahtikulun tai Erilliskäsiteltäväkulun tuotenumero");
+					}
+					
+					$query = "	SELECT * 
+								FROM yhtion_parametrit
+								WHERE yhtio='{$kukarow['yhtio']}'
+								AND ({$hakufieldi})";
+					$dxresult = pupe_query($query);
+
+					if (mysql_num_rows($dxresult) > 0) {
+						$virhe[$i] = $messu;
+					}
 				}
 			}
 		}

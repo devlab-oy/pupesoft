@@ -1990,12 +1990,35 @@
 
 
 			$oikea_sarake[$oikea] = "<td>".t("Myy varastosta").":</td>";
-			$oikea_sarake[$oikea] .= "<td><select name='varasto'><option value='0'>".t("Kaikista")."</option>";
+			$oikea_sarake[$oikea] .= "<td>";
 
 			$varastot_array = array();
 			$varastot_lisa_query = "";
 
-			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
+			$asiakkaan_oletusvarasto_query = "	SELECT avainsana
+												FROM asiakkaan_avainsanat
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND laji = 'oletusmyyntivarasto'
+												AND liitostunnus = {$srow['tunnus']}";
+
+			$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
+
+			$aov = array();
+
+			while ($aov_row = mysql_fetch_assoc($aov_result)) {
+				$aov[] = $aov_row['avainsana'];
+			}
+
+			if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $yhtiorow['takuuvarasto'] == 0 and isset($srow['toimipaikka'])){
+				if( count($aov) > 0 ){
+					$aov = implode(",", $aov);
+					$varastot_lisa_query = " AND tunnus IN ($aov)";
+				}
+				else{
+					$varastot_lisa_query = " AND toimipaikka = {$srow['yhtiotoimipaikka']}";
+				}
+			}
+			elseif ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
 				$yhtiorow['takuuvarasto'] = (int) $yhtiorow['takuuvarasto'];
 				$varastot_lisa_query = " and varastopaikat.tunnus = '{$yhtiorow['takuuvarasto']}'";
 				$varastot_array = array($yhtiorow['takuuvarasto']);
@@ -2014,36 +2037,46 @@
 						$varastot_lisa_query
 						AND tyyppi != 'P'
 						order by tyyppi, nimitys";
+
 			$vares = pupe_query($query);
 
-			while ($varow = mysql_fetch_assoc($vares)) {
+			if (mysql_num_rows($vares) > 0) {
 
-				if ($varow["tyyppi"] == '' or in_array($varow["tunnus"], $varastot_array)) {
+				$oikea_sarake[$oikea] .= "<select name='varasto'>";
 
-					$sel = '';
+				while ($varow = mysql_fetch_assoc($vares)) {
+					if ($varow["tyyppi"] == '' or in_array($varow["tunnus"], $varastot_array)) {
 
-					if ($toim == "REKLAMAATIO" and $srow['varasto'] == '' and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] == $varow['tunnus']) {
-						$sel = 'selected';
+						$sel = '';
+
+						if ($toim == "REKLAMAATIO" and $srow['varasto'] == '' and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] == $varow['tunnus']) {
+							$sel = 'selected';
+						}
+						// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
+						elseif ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '') {
+							$sel = 'selected';
+						}
+						// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
+						elseif ($kukarow["kesken"] == 0 and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and $varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '') {
+							$sel = 'selected';
+						}
+						elseif ($varow['tunnus'] == $srow["varasto"]) {
+							$sel = 'selected';
+						}
+
+						if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
+
+						$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+
 					}
-					// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
-					elseif ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '') {
-						$sel = 'selected';
-					}
-					// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
-					elseif ($kukarow["kesken"] == 0 and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and $varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '') {
-						$sel = 'selected';
-					}
-					elseif ($varow['tunnus'] == $srow["varasto"]) {
-						$sel = 'selected';
-					}
-
-					if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
-
-					$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
+				$oikea_sarake[$oikea] .= "</select>";
+			}
+			else{
+				$oikea_sarake[$oikea] .= "Ei löytynyt varastopaikkoja!";
 			}
 
-			$oikea_sarake[$oikea] .= "</select></td>";
+			$oikea_sarake[$oikea] .= "</td>";
 			$oikea++;
 
 			$tresult = t_avainsana("TV");

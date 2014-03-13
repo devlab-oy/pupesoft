@@ -2971,6 +2971,7 @@
 			echo "<tr><td class='back'>";
 			echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
 			echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+			echo "<input type='hidden' name='klikkaus' value='1'>";
 			echo "<input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td>";
 			echo "<td class='back'><input type='submit' name='vaihdatoim_asiakas' value='".t("Hae toimitusosoite")."'></td>";
 			echo "</form>";
@@ -3454,7 +3455,8 @@
 		// K‰ytt‰j‰n toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
 		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
-		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
+		// T‰m‰ tehd‰‰n vain jos edet‰‰n klikkaamalla jatka-nappia, ei pikatilauksissa
+		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and !isset($klikkaus)){
 			$queryx = "SELECT toimipaikka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$asiakasid}";
 			$resultx = pupe_query($queryx);
 			$asiakkaan_toimipaikkax = mysql_result($resultx, 0);

@@ -871,6 +871,20 @@
 			$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
 		}
 
+		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
+
+			if (!isset($srow['yhtio_toimipaikka']) and !isset($srow['yhtiotoimipaikka'])){
+				$kukarow['toimipaikka'] = $srow['toimipaikka'];
+			}
+			elseif (isset($srow['yhtio_toimipaikka'])) {
+				$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
+			}
+			elseif (isset($srow['yhtiotoimipaikka'])) {
+				$kukarow['toimipaikka'] = $srow['yhtiotoimipaikka'];
+			}
+
+		}
+
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		// jos meillä on lasku menossa ulkomaille
@@ -2054,19 +2068,27 @@
 
 				$predefined_yhtiotoimipaikka = 0;
 
-				$oikea_sarake[$oikea] .= "<td><select name='yhtiotoimipaikka'>";
+				$oikea_sarake[$oikea] .= "<td><select name='yhtiotoimipaikka' onchange='this.form.submit()''>";
 				$oikea_sarake[$oikea] .= "<option value='0'>".t("Yhtiön perustiedot")."</option>";
 
 				while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
-
 					$sel = "";
-
-					if (!isset($srow['yhtio_toimipaikka'])) {
-						if ($alv_velvollisuus != "" and $yht_toimpaik_row['tunnus'] == $alhiro['tunnus']) $sel = "selected";
-						if ($sel == "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+					if ( !isset($srow['yhtio_toimipaikka']) ) {
+						if ($alv_velvollisuus != "" and $yht_toimpaik_row['tunnus'] == $alhiro['tunnus']) { $sel = "selected"; }
+						if ( !isset($srow['yhtiotoimipaikka']) ) {
+							if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
+								if ($sel == "" and $srow['toimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }
+							}
+							else {
+								if ($sel == "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }
+							}
+						}
+						else{
+							if ($sel == "" and $srow['yhtiotoimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }
+						}
 					}
 					else {
-						if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+						if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }
 					}
 
 					if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
@@ -2999,6 +3021,7 @@
 			echo "<tr><td class='back'>";
 			echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
 			echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+			echo "<input type='hidden' name='klikkaus' value='1'>";
 			echo "<input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td>";
 			echo "<td class='back'><input type='submit' name='vaihdatoim_asiakas' value='".t("Hae toimitusosoite")."'></td>";
 			echo "</form>";
@@ -3481,6 +3504,14 @@
 
 		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
 		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
+
+		// Tämä tehdään vain jos edetään klikkaamalla jatka-nappia, ei pikatilauksissa
+		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and !isset($klikkaus)){
+			$queryx = "SELECT toimipaikka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$asiakasid}";
+			$resultx = pupe_query($queryx);
+			$asiakkaan_toimipaikkax = mysql_result($resultx, 0);
+			$kukarow['toimipaikka'] = $asiakkaan_toimipaikkax;
+		}
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
@@ -4079,8 +4110,7 @@
 		}
 	}
 
-	// Palutetaan puhtaat kukarow ja yhtiörow
+	// Palutetaan puhdas kukarow
 	$kukarow  = hae_kukarow($kukarow['kuka'], $kukarow['yhtio']);
-	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 	unset($alv);

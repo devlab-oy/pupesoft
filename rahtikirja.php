@@ -296,7 +296,7 @@
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$tunnukset})
 						AND tilausrivi.tyyppi IN ('L','G')
-						AND tilausrivi.var NOT IN ('P', 'J')";
+						AND tilausrivi.var not in ('P','J','O','S')";
 		$vakresult = pupe_query($vakquery);
 		$vakrow = mysql_fetch_assoc($vakresult);
 
@@ -483,7 +483,7 @@
 
 				//Voi käydä niin, että rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
 				$query = "	UPDATE tilausrivi set toimitettu = '', toimitettuaika = ''
-							where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J','O') and tyyppi='$tila'";
+							where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J','O','S') and tyyppi='$tila'";
 				$result = pupe_query($query);
 
 				//	Poistetaan kaikki lavaeloitukset

@@ -274,7 +274,7 @@
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
 					tilausrivi.otunnus in ($tilausnumeroita) and
 					tilausrivi.tyyppi in ('L','G')
-					and tilausrivi.var not in ('P','T','U','J','O')";
+					and tilausrivi.var not in ('P','J','O','S')";
 		$toimresult = pupe_query($query);
 
 		if (mysql_num_rows($toimresult) > 0) {
@@ -1551,7 +1551,7 @@
 						$query = "	UPDATE tilausrivi
 									SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 									WHERE otunnus 	= '$laskurow[tunnus]'
-									and var not in ('P','J','O')
+									and var not in ('P','J','O','S')
 									and yhtio 		= '$kukarow[yhtio]'
 									and keratty    != ''
 									and toimitettu  = ''

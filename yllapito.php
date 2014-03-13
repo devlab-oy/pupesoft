@@ -349,7 +349,7 @@
 			unset($virhe);
 			$errori = "";
 		}
-		elseif ($errori != '') {
+		elseif ($errori != '' and isset($yllapitonappi)) {
 			echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivitt‰‰!")."</font>";
 		}
 

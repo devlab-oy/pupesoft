@@ -220,15 +220,15 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
 		if ($fieldname == "tunnus") {
 		    // Tsekataan, ett‰ tietyt tuotteen ei oo samoja kesken‰‰n
-			if ($rahti_tuotenumero == $erilliskasiteltava_tuotenumero) {
+			if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $erilliskasiteltava_tuotenumero) {
 				$virhe[$i] = $virhe[$ind_erilliskasiteltava_tuotenumero] = t("Erillisk‰sitelt‰v‰kulun tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
 			}
 
-			if ($rahti_tuotenumero == $lisakulu_tuotenumero) {
+			if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $lisakulu_tuotenumero) {
 				$virhe[$i] = $virhe[$ind_lisakulu_tuotenumero] = t("Lis‰rahtikulun tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
 			}
 
-			if ($rahti_tuotenumero == $kuljetusvakuutus_tuotenumero) {
+			if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $kuljetusvakuutus_tuotenumero) {
 				$virhe[$i] = $virhe[$ind_kuljetusvakuutus_tuotenumero] = t("Kuljetusvakuutuksen tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
 			}
         }

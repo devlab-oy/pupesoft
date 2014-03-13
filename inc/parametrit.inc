@@ -600,7 +600,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			$css = $yhtiorow['css'];
 		}
 
-		$charset = "iso-8859-1";
+		if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
+			$charset = "utf-8";
+		}
+		else {
+			$charset = "iso-8859-1";
+		}
 
 		if (!headers_sent()) {
 			header("Content-Type: text/html; charset=$charset");
@@ -662,7 +667,6 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 				if (!stristr($phpnimi, 'indexvas')) {
 					echo livezhat_js_sources();
-					echo add_livezhat();
 				}
 			}
 

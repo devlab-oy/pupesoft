@@ -9,6 +9,10 @@
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
+	if (!isset($real_submit)) $real_submit = '';
+
+	if ($real_submit == '') $tee = '';
+
 	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
@@ -24,6 +28,11 @@
 	}
 
 	if (!isset($nayta_pdf)) echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
+
+	if ($yhtiorow['kerayserat'] == 'K' and $real_submit != "" and $tee == 'valitse' and $toimitustapa == "" and $lahto == "") {
+		echo "<font class='error'>",t("Valitse toimitustapa tai lähtö"),"</font><br />";
+		$real_submit = $tee = "";
+	}
 
 	if ($tee == 'erittelykopsu') {
 
@@ -169,7 +178,7 @@
 		}
 	}
 
-	if ($tee == 'valitse') {
+	if ($tee == 'valitse' and $real_submit != '') {
 
 		if ($toimitustapa != '') {
 			list($toimitustapa, $yhtio) = explode("!!!!", $toimitustapa);
@@ -177,13 +186,35 @@
 		}
 
 		if ($otunnus == "") {
+
+			$tunnuksetlisa = "";
+
+			if (isset($lahto) and trim($lahto) != "" and $yhtiorow['kerayserat'] == 'K') {
+
+				$query = "	SELECT toimitustapa, GROUP_CONCAT(tunnus) tunnukset
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND toimitustavan_lahto = '{$lahto}'
+							GROUP BY 1";
+				$lahdot_lasku_chk_res = pupe_query($query);
+				$lahdot_lasku_chk_row = mysql_fetch_assoc($lahdot_lasku_chk_res);
+
+				if ($lahdot_lasku_chk_row['tunnukset'] != "") {
+					$tunnuksetlisa = "AND otsikkonro IN ({$lahdot_lasku_chk_row['tunnukset']})";
+					$toimitustapa = $lahdot_lasku_chk_row['toimitustapa'];
+				}
+			}
+
+			$toimitustapalisa = $toimitustapa != "" ? "and toimitustapa	= '{$toimitustapa}'" : "";
+
 			$query = "	SELECT yhtio, rahtikirjanro, sum(kilot) paino
 						from rahtikirjat
-						where yhtio		= '$kukarow[yhtio]' and
-						tulostuspaikka	= '$varasto' and
-						toimitustapa	= '$toimitustapa' and
-						tulostettu		> '$vv-$kk-$pp 00:00:00' and
-						tulostettu		< '$vv-$kk-$pp 23:59:59'
+						where yhtio		= '$kukarow[yhtio]'
+						and tulostuspaikka	= '$varasto'
+						{$toimitustapalisa}
+						and tulostettu		> '$vv-$kk-$pp 00:00:00'
+						and tulostettu		< '$vv-$kk-$pp 23:59:59'
+						{$tunnuksetlisa}
 						GROUP BY rahtikirjanro";
 		}
 		else {
@@ -206,19 +237,27 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='message'>$toimitustapa: $vv-$kk-$pp<br><br>".t("Yhtään rahtikirjaa ei löytynyt")."!</font><br><br>";
+
+			echo "<font class='message'>";
+
+			echo $toimitustapa != "" ? $toimitustapa.": " : "";
+
+			echo "{$vv}-{$kk}-{$pp}<br><br>".t("Yhtään rahtikirjaa ei löytynyt")."!</font><br><br>";
 			$tee = "";
 		}
 		else {
 			echo "<form action='rahtikirja-kopio.php' method='post'>";
 			echo "<input type='hidden' name='tee' value='tulosta'>";
+			echo "<input type='hidden' name='real_submit' value='joo'>";
 			echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
 			echo "<input type='hidden' name='pp' value='$pp'>";
 			echo "<input type='hidden' name='kk' value='$kk'>";
 			echo "<input type='hidden' name='vv' value='$vv'>";
 
 			if ($otunnus == "") {
-				echo "<font class='message'>$toimitustapa: $vv-$kk-$pp</font><br><br>";
+				echo "<font class='message'>";
+				echo $toimitustapa != "" ? $toimitustapa.": " : "";
+				echo "{$vv}-{$kk}-{$pp}</font><br><br>";
 				echo "<input type='hidden' name='varasto' value='$varasto'>";
 				echo "<input type='hidden' name='toimitustapa' value='$toimitustapa'>";
 			}
@@ -322,6 +361,7 @@
 		if (!isset($kk)) $kk = date("m");
 		if (!isset($pp)) $pp = date("d");
 
+		$onchange = $yhtiorow['kerayserat'] == 'K' ? "onchange='submit();'" : "";
 
 		echo "<br><form action='rahtikirja-kopio.php' method='post'>";
 		echo "<input type='hidden' name='tee' value='valitse'>";
@@ -338,23 +378,39 @@
 			<th>".t("Syötä päivämäärä (pp-kk-vvvv)").":</th>
 			<td><input type='text' name='pp' value='$pp' size='3'>
 			<input type='text' name='kk' value='$kk' size='3'>
-			<input type='text' name='vv' value='$vv' size='5'></td>
-			</tr>";
+			<input type='text' name='vv' value='$vv' size='5'>";
+
+		if ($yhtiorow['kerayserat'] == 'K') echo "<input type='submit' name='dummy_submit' value='",t("Päivitä lähdöt"),"' />";
+
+		echo "</td></tr>";
 
 		$query  = "SELECT * FROM toimitustapa WHERE nouto='' and $logistiikka_yhtiolisa order by jarjestys, selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr><th>".t("Valitse toimitustapa").":</th>";
-		echo "<td><select name='toimitustapa'>";
+		echo "<td><select name='toimitustapa' {$onchange}>";
+
+		if ($yhtiorow['kerayserat'] == 'K') echo "<option value=''>",t("Ei valintaa"),"</option>";
+
+		$toimitustapa_tunnus = '';
 
 		while ($row = mysql_fetch_array($result)) {
-			if ($toimitustapa==$row['selite']) $sel=" selected ";
-			else $sel = "";
+
+			$preg_str = "!!!!{$row['yhtio']}";
+
+			if (preg_replace("/{$preg_str}/", "", $toimitustapa) == $row['selite']) {
+				$sel = " selected ";
+				$toimitustapa_tunnus = $row['tunnus'];
+			}
+			else {
+				$sel = "";
+			}
 
 			echo "<option value='$row[selite]!!!!$row[yhtio]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
 			if ($logistiikka_yhtio != '') {
 				echo " ($row[yhtio])";
 			}
+
 			echo "</option>";
 		}
 
@@ -370,15 +426,25 @@
 		// jos löytyy enemmän kuin yksi, tehdään varasto popup..
 		if (mysql_num_rows($result)>1) {
 			echo "<tr><th>".t("Valitse varasto").":</th>";
-			echo "<td><select name='varasto'>";
+			echo "<td><select name='varasto' {$onchange}>";
 
 			while ($row = mysql_fetch_array($result)) {
-				if ($varasto==$row['tunnus']) $sel=" selected ";
-				else $sel = "";
+
+				if (!isset($varasto)) $varasto = $row['tunnus'];
+
+				if ($varasto == $row['tunnus']) {
+					$sel = " selected ";
+				}
+				else {
+					$sel = "";
+				}
+
 				echo "<option value='$row[tunnus]' $sel>$row[nimitys]";
+
 				if ($logistiikka_yhtio != '') {
 					echo " ($row[yhtio])";
 				}
+
 				echo "</option>";
 			}
 
@@ -390,21 +456,85 @@
 			echo "<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>";
 		}
 
+		if ($yhtiorow['kerayserat'] == 'K') {
+
+			echo "<tr>";
+			echo "<th>",t("Valitse lähtö"),"</th>";
+			echo "<td>";
+			echo "<select name='lahto'>";
+			echo "<option value=''>",t("Kaikki"),"</option>";
+
+			$toimitustapalisa = "";
+
+			if (isset($toimitustapa_tunnus) and trim($toimitustapa_tunnus) != "") {
+				$toimitustapalisa = "AND lahdot.liitostunnus = '{$toimitustapa_tunnus}'";
+			}
+
+			$query = "	SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, tt.selite, count(lasku.tunnus) AS cnt
+						FROM lahdot
+						JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+						JOIN toimitustapa AS tt ON (tt.yhtio = lasku.yhtio
+							AND tt.tunnus = lahdot.liitostunnus
+							AND tt.selite = lasku.toimitustapa
+							AND tt.tulostustapa != 'X'
+							AND tt.rahtikirja != 'rahtikirja_tyhja.inc')
+						JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
+							AND r.tulostuspaikka = '{$varasto}'
+							AND r.toimitustapa = lasku.toimitustapa
+							AND r.tulostettu > '{$vv}-{$kk}-{$pp} 00:00:00'
+							AND r.tulostettu < '{$vv}-{$kk}-{$pp} 23:59:59'
+							AND r.otsikkonro = lasku.tunnus)
+						WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+						AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
+						AND lahdot.varasto = '{$varasto}'
+						AND lahdot.aktiivi = 'S'
+						AND lahdot.liitostunnus != 0
+						{$toimitustapalisa}
+						GROUP BY 1,2,3
+						HAVING cnt > 0
+						ORDER BY lahdot.lahdon_kellonaika, tt.selite";
+			$lahdot_res = pupe_query($query);
+
+			while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
+
+				$sel = (isset($lahto) and $lahto == $lahdot_row['tunnus']) ? "selected" : "";
+
+				echo "<option value='{$lahdot_row['tunnus']}' {$sel}>{$lahdot_row['tunnus']} {$lahdot_row['lahdon_kellonaika']} {$lahdot_row['selite']}</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+			echo "</tr>";
+		}
+
 		echo "</table><br>";
-		echo "<input type='submit' value='".t("Tulosta")."'>";
+		echo "<input type='submit' name='real_submit' value='".t("Tulosta")."'>";
 		echo "</form><br><br><hr>";
 
 		if ($yhtiorow['kerayserat'] == 'K') {
 			echo t("Tulosta kopiot rahtikirjaerittelystä").":";
 			echo "<br><form action='rahtikirja-kopio.php' method='post'>";
 			echo "<input type='hidden' name='tee' value='erittelykopsu'>";
+			echo "<input type='hidden' name='real_submit' value='joo'>";
 			echo "<table>";
 
-			$query  = "	SELECT lahdot.*, toimitustapa.selite
+			$query  = "	SELECT lahdot.tunnus, lahdot.lahdon_kellonaika, toimitustapa.selite
 						FROM lahdot
-						JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio and lahdot.liitostunnus=toimitustapa.tunnus and lahdot.aktiivi='S')
+						JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio AND lahdot.liitostunnus=toimitustapa.tunnus AND toimitustapa.erittely != '')
+						JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+						JOIN rahtikirjat AS r ON (r.yhtio = lasku.yhtio
+							AND r.tulostuspaikka = '{$varasto}'
+							AND r.toimitustapa = lasku.toimitustapa
+							AND r.tulostettu > '{$vv}-{$kk}-{$pp} 00:00:00'
+							AND r.tulostettu < '{$vv}-{$kk}-{$pp} 23:59:59'
+							AND r.otsikkonro = lasku.tunnus)
 						WHERE lahdot.yhtio = '$kukarow[yhtio]'
-						AND lahdot.pvm     = curdate()
+						AND lahdot.varasto = '{$varasto}'
+						AND lahdot.aktiivi = 'S'
+						AND lahdot.pvm = '{$vv}-{$kk}-{$pp}'
+						AND toimitustapa.tulostustapa != 'X'
+						{$toimitustapalisa}
+						GROUP BY 1,2,3
 						ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -445,5 +575,3 @@
 	}
 
 	require("inc/footer.inc");
-
-?>

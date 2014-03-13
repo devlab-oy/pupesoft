@@ -451,7 +451,6 @@
 			$querykieli = "	SELECT kirjoittimet.kirjoitin, keraysvyohyke.tunnus, keraysvyohyke.printteri8, keraysvyohyke.printteri0, kirjoittimet.tunnus as kir_tunnus
 							FROM kirjoittimet
 							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$keraajarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
-							JOIN kuka ON (kuka.yhtio = keraysvyohyke.yhtio AND kuka.keraysvyohyke = keraysvyohyke.tunnus AND kuka.kuka = '{$keraajarow['kuka']}')
 							WHERE kirjoittimet.yhtio = '{$kukarow['yhtio']}'
 							AND kirjoittimet.komento != 'EDI'
 							GROUP BY 1,2,3,4,5

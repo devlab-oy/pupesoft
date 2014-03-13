@@ -25,6 +25,7 @@
 			$p["height"] 		= 10;
 			$p["font"] 			= "Times-Roman";
 
+			$pieni['align'] 	= 'left';
 			$pieni["height"] 	= 8;
 			$pieni["font"] 		= "Times-Roman";
 
@@ -856,9 +857,31 @@
 				// Trimmataan uudestaan
 				$row["kommentti"] = trim($row["kommentti"]);
 
-				if ($row["kommentti"] != '') {
-					$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 280, 5, 740, $row["kommentti"],	$firstpage, $p);
-					$kala = $pohja - 10;
+				if (trim($row["kommentti"]) != '') {
+
+					if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+
+						$_row_height = $kala+25;
+
+				        $params = explode("\n", $row["kommentti"]);
+
+				        for ($i = 0; ($_row_height > $kala and count($params) > 0); $_row_height -= 10) {
+
+				        	if ($_row_height == $kala+25 and strlen($params[$i]) > 44) {
+				        		$_teksti = substr($params[$i], 0, 44);
+					        	$pdf->draw_text(440, $_row_height, $_teksti, $firstpage, $pieni);
+					        	$params[$i] = substr($params[$i], 45);
+				        	}
+				        	else {
+					        	$pdf->draw_text(440, $_row_height, substr($params[$i], 0, 100), $firstpage, $pieni);
+					        	array_shift($params);
+				        	}
+				        }
+					}
+					else {
+						$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 280, 5, 740, $row["kommentti"],	$firstpage, $p);
+						$kala = $pohja - 10;
+					}
 				}
 
 				$kala -= 7;

@@ -372,7 +372,7 @@
 							$query .= $fieldname."='',";
 						}
 						elseif ($fieldname == 'kate_korjattu') {
-							$query .= $fieldname." = 0,";
+							$query .= $fieldname." = NULL,";
 						}
 						elseif ($fieldname == 'tilausvahvistus') {
 

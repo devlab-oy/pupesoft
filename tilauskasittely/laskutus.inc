@@ -183,7 +183,7 @@
 												break;
 											case 'tunnus':
 											case 'kate_korjattu':
-												$rvalues .= ", 0";
+												$rvalues .= ", NULL";
 												break;
 											default:
 												$rvalues .= ", '".mysql_real_escape_string($trow[$fieldname])."'";
@@ -221,7 +221,7 @@
 													break;
 												case 'tunnus':
 												case 'kate_korjattu':
-													$rvalues .= ", 0";
+													$rvalues .= ", NULL";
 													break;
 												default:
 													$rvalues .= ", '".mysql_real_escape_string($monistarow2[$fieldname])."'";

@@ -119,15 +119,17 @@
 
 		echo "</table>";
 
+		// Skipataan avaava tase
 		$query  = "	SELECT sum(tiliointi.summa) summa
 					FROM tiliointi
+					JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and !(lasku.tila = 'X' and lasku.alatila = 'A')
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-					and tiliointi.tapvm >= '$vv-$kk-$pp'
-					and tiliointi.tapvm <= '$vv1-$kk1-$pp1'
-					and tiliointi.korjattu = ''
-					and tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')";
+					AND tiliointi.tapvm >= '$vv-$kk-$pp'
+					AND tiliointi.tapvm <= '$vv1-$kk1-$pp1'
+					AND tiliointi.korjattu = ''
+					AND tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')";
 		$lresult = pupe_query($query);
-		$lrow = mysql_fetch_assoc ($lresult);
+		$lrow = mysql_fetch_assoc($lresult);
 
 		echo "<br>";
 		echo t("Samalta ajanjaksolta varastonarvoon vaikuttavat käsiviennit tileiltä"). " $yhtiorow[varasto] & $yhtiorow[matkalla_olevat]: ";

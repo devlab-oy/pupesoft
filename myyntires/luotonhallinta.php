@@ -127,9 +127,9 @@
 	echo "<option value='D' $raja_select[D]>".t("N‰yt‰ asiakkaat, joilla on luottoraja, mutta ei myynti‰")."</option>";
 	echo "<option value='E' $raja_select[E]>".t("N‰yt‰ asiakkaat, jotka ovat myyntikiellossa")."</option>";
 	echo "<option value='F' $raja_select[F]>".t("N‰yt‰ asiakkaat, jotka ovat ylitt‰neet luottorajan, mutta eiv‰t ole myyntikiellossa")."</option>";
-	echo "<option value='G' $raja_select[G]>".t("N‰yt‰ asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kerran")."</option>";
-	echo "<option value='H' $raja_select[H]>".t("N‰yt‰ asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kaksi kertaa")."</option>";
-	echo "<option value='I' $raja_select[I]>".t("N‰yt‰ asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kolme kertaa")."</option>";
+	echo "<option value='G' $raja_select[G]>".t("N‰yt‰ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kerran")."</option>";
+	echo "<option value='H' $raja_select[H]>".t("N‰yt‰ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kaksi kertaa")."</option>";
+	echo "<option value='I' $raja_select[I]>".t("N‰yt‰ asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kolme kertaa")."</option>";
 	echo "<option value='Z' $raja_select[Z]>".t("N‰yt‰ kaikki asiakkaat")."</option>";
 	echo "</select></td>";
 	echo "</tr>";
@@ -158,8 +158,69 @@
 	echo "<input type='submit' value='".t("N‰yt‰")."'>";
 	echo "</form>";
 
+	echo "<br />";
+	echo "<br />";
+
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
+	echo "<input type='hidden' name='tee'    value = '3'>";
+
+	echo t("tai"),"...";
+	echo "<br />";
+	echo "<br />";
+
+	echo "<font class='message'>",t("P‰ivit‰ asiakkaiden luottotietoja tiedostosta"),"</font><br />";
+	echo "<font class='info'>",t("Otsikot: ytunnus, asiakasnro, luottoraja"),"</font><br />";
+	echo "<table>";
+	echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("L‰het‰"),"' /></td></tr>";
+	echo "</table>";
+	echo "</form>";
+
 	echo "<br>";
 	echo "<br>";
+
+	if ($tee == "3") {
+
+		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+
+			$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
+			$path_parts = pathinfo($_FILES['userfile']['name']);
+			$ext = strtoupper($path_parts['extension']);
+
+			$excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
+
+			echo "<font class='message'>".t("Luetaan l‰hetetty tiedosto")."...<br><br></font>";
+
+			// Otetaan otsikot pois
+			array_shift($excelrivit);
+
+			$cnt = 0;
+
+			foreach ($excelrivit as $rivinumero => $rivi) {
+				$ytunnus	= mysql_real_escape_string(trim($rivi[0]));
+				$asiakasnro	= trim($rivi[1]) != "" ? (int) trim($rivi[1]) : "";
+				$luottoraja = (float) $rivi[2];
+
+				if ($ytunnus == "" and $asiakasnro == "") continue;
+
+				$ytunnuslisa = $ytunnus != "" ? "AND ytunnus = '{$ytunnus}'" : "";
+				$asiakasnrolisa = $asiakasnro != "" ? "AND asiakasnro = '{$asiakasnro}'" : "";
+
+				$query = "	UPDATE asiakas SET
+							luottoraja = '{$luottoraja}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							{$ytunnuslisa}
+							{$asiakasnrolisa}";
+				pupe_query($query);
+
+				$cnt++;
+			}
+
+			$plural = $cnt == 1 ? "rivi" : "rivi‰";
+			$classi = $cnt > 0 ? "ok" : "error";
+
+			echo "<font class='{$classi}'>",t("P‰ivitettiin %d %s", '', $cnt, $plural),".</font><br />";
+		}
+	}
 
 	// p‰ivitet‰‰n asiakkaat
 	if ($tee == "2") {
@@ -246,7 +307,7 @@
 		echo "<th>".t("Myyntikielto")."</th>";
 
 		if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
-			echo "<th>".t("Karhukertoja")."</th>";
+			echo "<th>".t("Maksukehotuskertoja")."</th>";
 			echo "<th>".t("Laskuja")."</th>";
 		}
 
@@ -428,5 +489,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

@@ -2018,8 +2018,24 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 	}
 }
 
-if ($tee == "MUUTA_EXT_ENNAKKO") {
-	echo "kissa";
+if ($tee == "MUUTA_EXT_ENNAKKO" and $kukarow['extranet'] == '') {
+
+	$query = "	UPDATE lasku
+				SET clearing = ''
+				WHERE yhtio='{$kukarow['yhtio']}'
+				AND tunnus = '{$tilausnumero}'
+				AND tilaustyyppi = '{$tilaustyyppi}'
+				AND tila = '{$orig_tila}'
+				AND alatila = '{$orig_alatila}'
+				AND clearing = 'EXTENNAKKO'";
+	$jauza = pupe_query($query);
+
+	if (mysql_affected_rows() != 1) {
+		echo "<font class='error'>".t("VIRHE: Tilausta")." $tilausnumero ".t("ei muutettu normaaliksi ennakkotilaukseksi")."!</font><br><br>";
+	}
+	else {
+		echo "<font class='message'>".t("Tilaus")." $tilausnumero ".t("muutettiin normaaliksi ennakkotilaukseksi")."!</font><br><br>";
+	}
 }
 
 // n‰ytet‰‰n tilaus-ruutu...
@@ -8720,37 +8736,6 @@ if ($tee == '') {
 					</form> ";
 		}
 
-		if ($toim == "EXTENNAKKO") {
-			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
-						function veri_fyi(){
-							msg = '".t("Haluatko todella muuttaa tilauksen normaaliksi ennakkotilaukseksi")."?';
-
-							if (confirm(msg)) {
-								return true;
-							}
-							else {
-								skippaa_tama_submitti = true;
-								return false;
-							}
-						}
-				</SCRIPT>";
-
-			echo "<td align='right' class='back' valign='top'>
-					<form name='mitatoikokonaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onSubmit = 'return veri_fyi();'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
-					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-					<input type='hidden' name='projektilla' value='$projektilla'>
-					<input type='hidden' name='tee' value='MUUTA_EXT_ENNAKKO'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='mista' value = '$mista'>
-					<input type='hidden' name='orig_tila' value = '$orig_tila'>
-					<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
-					<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>
-					<input type='submit' value='* ".t("Muuta")." $otsikko ".t("normaaliksi ennakkotilaukseksi")."*'>
-					</form></td>";
-		}
-
 		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "") {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
@@ -8800,7 +8785,37 @@ if ($tee == '') {
 						</td>
 					</tr>";
 		}
+		if ($toim == "EXTENNAKKO" and $kukarow['extranet'] == '') {
+			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
+						function veri_fyi(){
+							msg = '".t("Haluatko todella muuttaa tilauksen normaaliksi ennakkotilaukseksi")."?';
 
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
+						}
+				</SCRIPT>";
+
+			echo "<tr><td align='left' class='back' valign='top'>
+					<form name='muuta_ennakoksi' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onSubmit = 'return veri_fyi();'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+					<input type='hidden' name='projektilla' value='$projektilla'>
+					<input type='hidden' name='tee' value='MUUTA_EXT_ENNAKKO'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='mista' value = '$mista'>
+					<input type='hidden' name='orig_tila' value = '$orig_tila'>
+					<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+					<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>
+					<input type='submit' value='* ".t("Muuta")." $otsikko ".t("normaaliksi ennakkotilaukseksi")."*'>
+					</form></td></tr>";
+		}
+		
 		echo "</table>";
 
 	}

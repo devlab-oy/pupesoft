@@ -412,8 +412,6 @@
 
 				$sarakkeet["SARAKE{$_x}#".$vrow["tunnus"]] = t("tilattu kpl - $vrow[nimitys]")."\t";
 				$abuArray["SARAKE{$_x}#".$vrow["tunnus"]] = "SARAKE{$_x}#".$vrow["tunnus"];
-
-				$_x++;
 			}
 
 			// Liitetään oletus jotta summat voisi täsmätä..
@@ -429,6 +427,8 @@
 
 			$chk_array = array();
 
+			$offset = $_x_k;
+
 			for ($xxx = $_x_k; $xxx < $_x; $xxx++) {
 				$chk_array[] = "SARAKE{$xxx}";
 			}
@@ -436,7 +436,7 @@
 			foreach($valitut as $key => $value) {
 				if (in_array($key, $chk_array)) {
 					$offset = $i;
-					echo "löydettiin offset ($offset)<br>";
+					# echo "löydettiin offset ($offset)<br>";
 					break;
 				}
 				$i++;
@@ -919,6 +919,8 @@
 				$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("Varastopaikka")), $format_bold);
 				$excelsarake++;
 			}
+
+			reset($valitut);
 
 			foreach ($valitut as $val) {
 				$rivi .= $sarakkeet[$val];
@@ -1709,8 +1711,6 @@
 
 							$worksheet->write($excelrivi, $excelsarake, $ennp["tilattu_".$vrow["tunnus"]]);
 							$excelsarake++;
-
-							$_x++;
 						}
 
 						$rivi .= str_replace(".",",",$ennp["tilattu_oletus"])."\t";

@@ -1498,6 +1498,12 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
 			}
 
+			if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K') {
+				require('tilauksesta_varastosiirto2.inc');
+
+				tilauksesta_varastosiirto($laskurow['tunnus']);
+			}
+
 			if ($kukarow["extranet"] != "") {
 				//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
 				$silent = "SILENT";

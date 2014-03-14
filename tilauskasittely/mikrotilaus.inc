@@ -430,20 +430,28 @@
 
 												$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
-												$tuoteno = $palautus[0]["tuoteno"];
-												$hinta = $palautus[0]["hinta"];
-												$ale1 = $palautus[0]["ale"];
+												foreach ($palautus as $inx => $arvot) {
 
-												for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-													${'ale'.$alepostfix} = 0;
+													$tuoteno = $palautus[$inx]["tuoteno"];
+													$hinta = $palautus[$inx]["hinta"];
+													$ale1 = $palautus[$inx]["ale"];
+
+													for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+														${'ale'.$alepostfix} = 0;
+													}
+
+													$kpl = $palautus[$inx]["kpl"] * -1;
+													if (stripos($kommentti, $palautus[$inx]["kommentti"]) === FALSE) $kommentti = $palautus[$inx]["kommentti"];
+													$hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
+
+													require ("lisaarivi.inc");
 												}
 
-												$kpl = $palautus[0]["kpl"] * -1;
-												if (stripos($kommentti, $palautus[0]["kommentti"]) === FALSE) $kommentti = $palautus[0]["kommentti"];
-												$hyvityssaannon_palautuskielto = $palautus[0]["palautuskielto"];
+												unset($hyvityssaannon_palautuskielto);
 					                    	}
-
-											require ("lisaarivi.inc");
+					                    	else {
+												require ("lisaarivi.inc");
+					                    	}
 										}
 									}
 									else {
@@ -792,20 +800,28 @@
 
 											$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
-											$tuoteno = $palautus[0]["tuoteno"];
-											$hinta = $palautus[0]["hinta"];
-											$ale1 = $palautus[0]["ale"];
+											foreach ($palautus as $inx => $arvot) {
 
-											for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-												${'ale'.$alepostfix} = 0;
+												$tuoteno = $palautus[$inx]["tuoteno"];
+												$hinta = $palautus[$inx]["hinta"];
+												$ale1 = $palautus[$inx]["ale"];
+
+												for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+													${'ale'.$alepostfix} = 0;
+												}
+
+												$kpl = $palautus[$inx]["kpl"] * -1;
+												if (stripos($kommentti, $palautus[$inx]["kommentti"]) === FALSE) $kommentti = $palautus[$inx]["kommentti"];
+												$hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
+
+												require ("lisaarivi.inc");
 											}
 
-											$kpl = $palautus[0]["kpl"] * -1;
-											if (stripos($kommentti, $palautus[0]["kommentti"]) === FALSE) $kommentti = $palautus[0]["kommentti"];
-											$hyvityssaannon_palautuskielto = $palautus[0]["palautuskielto"];
+											unset($hyvityssaannon_palautuskielto);
 				                    	}
-
-										require ("lisaarivi.inc");
+				                    	else {
+											require ("lisaarivi.inc");
+										}
 									}
 								}
 								else {

@@ -26218,6 +26218,55 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
 	}
 }
 
+if (!function_exists('hae_mahdolliset_siirto_varastot')) {
+	function hae_mahdolliset_siirto_varastot($kohde_varastot = array(), $tuoteno = '') {
+		global $kukarow, $yhtiorow;
+
+		$avainsana_where = "";
+		if (!empty($kohde_varastot)) {
+			$avainsana_where = "	AND a.selitetark IN (".implode(', ', $kohde_varastot).")";
+		}
+
+		$query = "	SELECT a.*,
+					v_lahde.yhtio AS lahde_yhtio,
+					v_lahde.nimitys AS lahde_nimi,
+					v_lahde.tunnus AS lahde_tunnus,
+					v_lahde.alkuhyllyalue AS lahde_alkuhyllyalue,
+					v_lahde.alkuhyllynro AS lahde_alkuhyllynro,
+					v_kohde.nimitys AS kohde_nimi,
+					v_kohde.tunnus AS kohde_tunnus,
+					v_kohde.alkuhyllyalue AS kohde_alkuhyllyalue,
+					v_kohde.alkuhyllynro AS kohde_alkuhyllynro
+					FROM avainsana AS a
+					JOIN varastopaikat AS v_lahde
+					ON ( v_lahde.tunnus = a.selite )
+					JOIN varastopaikat AS v_kohde
+					ON ( v_kohde.tunnus = a.selitetark )
+					WHERE a.yhtio = '{$kukarow['yhtio']}'
+					AND a.laji = 'SIIRTOVARASTOT'
+					{$avainsana_where}
+					ORDER BY a.jarjestys ASC";
+		$result = pupe_query($query);
+
+		$varastosiirto_linkit = array();
+		while($varastosiirto_linkki = mysql_fetch_assoc($result)) {
+			$varastosiirto_linkki['tuote'] = array();
+			if ($tuoteno != '') {
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $varastosiirto_linkki['lahde_tunnus'], $varastosiirto_linkki['lahde_yhtio']);
+				$varastosiirto_linkki['tuote'] = array(
+					'tuoteno' => $tuoteno,
+					'saldo' => $saldo,
+					'hyllyssa' => $hyllyssa,
+					'myytavissa' => $myytavissa
+				);
+			}
+			$varastosiirto_linkit[] = $varastosiirto_linkki;
+		}
+
+		return $varastosiirto_linkit;
+	}
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

@@ -894,6 +894,21 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "tee_siirtolista_myyntitilaukselta") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myyntitilaukselta ei voi luoda siirtolistoja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilaukselta voi luoda siirtolistoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "automaattinen_jt_toimitus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

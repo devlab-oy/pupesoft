@@ -825,6 +825,38 @@
 			}
 		}
 
+		if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K') {
+			$sel4 = "";
+			if (!empty($laskurow['varasto'])) {
+				$kohde_varastot = array($laskurow['varasto']);
+			}
+			else if (empty($laskurow['varasto']) and !empty($laskurow['yhtion_toimipaikka'])) {
+				$query = "	SELECT *
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND toimipaikka = '{$laskurow['yhtion_toimipaikka']}'";
+				$varastopaikat_result = pupe_query($query);
+				$kohde_varastot = array();
+				while($varastopaikka = mysql_fetch_assoc($varastopaikat_result)) {
+					$kohde_varastot[] = $varastopaikka['tunnus'];
+				}
+			}
+			else {
+				$kohde_varastot = array();
+			}
+			$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
+
+			foreach ($siirto_varastot as $siirto_varasto) {
+				if ($row['var'] == 'S' and $siirto_varasto['tunnus'] == $row['toimittajan_tunnus']) {
+					$sel4 = "SELECTED";
+				}
+				$siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$siirto_varasto['tuote']['myytavissa']}";
+				$paikat .= "<option value='¡¡S{$siirto_varasto['tunnus']}¡¡S{$siirto_varasto['lahde_tunnus']}¡¡S{$siirto_varasto['kohde_tunnus']}' {$sel4}>{$siirto_varastot_text}</option>";
+				$paikatlask++;
+				$sel4 = "";
+			}
+		}
+
 		if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
 			$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
 		}

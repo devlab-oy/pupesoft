@@ -2009,7 +2009,7 @@
 				$aov[] = $aov_row['avainsana'];
 			}
 
-			if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $yhtiorow['takuuvarasto'] == 0 and isset($srow['toimipaikka'])){
+			if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $yhtiorow['takuuvarasto'] == 0 and isset($srow['yhtiotoimipaikka'])){
 				if( count($aov) > 0 ){
 					$aov = implode(",", $aov);
 					$varastot_lisa_query = " AND tunnus IN ($aov)";

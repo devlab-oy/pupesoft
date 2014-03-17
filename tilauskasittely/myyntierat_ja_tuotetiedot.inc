@@ -3,33 +3,66 @@
 // k‰ytet‰‰n slavea
 $useslave = 1;
 
-if (isset($_POST["tee"])) {
-	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+// if (isset($_POST["ajannyt"])) {
+// 	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+// 	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+// }
+
+if (!isset($aja_ja_tallenna) and !isset($_REQUEST['lajit'])) {
+	// piirrell‰‰n vaihtoehdot aina jos ei olla subattu rapsaa
+	echo "<br><br>";
+	echo "<font class='head'>".t("Myyntier‰t ja tuotetiedot")."</font>";
+	echo "<br><br>";
+
+	$query = "	SELECT distinct laji
+				FROM tuotteen_avainsanat
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				ORDER BY laji";
+	$result = pupe_query($query);
+
+	echo "<form>";
+	echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
+	echo "<tr><th>".t("Valitse sarakkeet")."</th></tr>";
+	$secretcounter = 0;
+	$eka_ajo = true;
+	while ($row = mysql_fetch_assoc($result)) {
+		//KISSA moro poista lengthrivi - debuggia
+		if (strlen($row['laji']) < 4) continue;
+		$nollaus = false;
+		if ($secretcounter == 0) {
+			echo "<tr>";
+		}
+	
+
+		echo "<td align='left' valign='top' width='100'><input type='checkbox' name='lajit[]' value='{$row['laji']}' >{$row['laji']}</td>";
+		if ($secretcounter == 2) echo "</tr>";
+		if ($secretcounter == 2) { 
+			$secretcounter = 0;
+			$nollaus = true;
+		}
+		$eka_ajo = false;
+		if (!$nollaus) $secretcounter++;	
+	}
+	echo "<br><br>";
+	echo "	<tr>
+		  		<td align='left' class='back' valign='top'>
+				<form name='aja_ja_tallenna' method='post'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
+				<input type='hidden' name='otunnus' value='$tilausnumero'>
+				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='hidden' name='mista' value = '$mista'>
+				<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='naantali' value='KIVAPAIKKA'>
+				<input type='submit' name='aja_ja_tallenna' value='".t("Tallenna tilauksen myyntier‰tiedot exceliin")."'>
+				</form>
+				</td>
+			</tr>";
+			echo "</table>";
+	echo "</form>";
 }
-echo "<br><br>";
-echo "<font class='head'>".t("Myyntier‰t ja tuotetiedot")."</font>";
-echo "<br><br>";
-
-$query = "	SELECT distinct laji
-			FROM tuotteen_avainsanat
-			WHERE yhtio='{$kukarow['yhtio']}'
-			ORDER BY laji";
-$result = pupe_query($query);
-
-echo "<table>";
-echo "<tr><th>".t("Valitse sarakkeet")."</th></tr>";
-while ($row = mysql_fetch_assoc($result)) {
-	echo "<tr><td>{$row['laji']}<input type='checkbox' name='lajit[]' value='{$row['laji']}' class='right'></td></tr>";
-}
-echo "</table>";
-
-if (isset($tee) and $tee == "lataa_tiedosto") {
-	readfile("/tmp/".$tmpfilenimi);
-	exit;
-}
-
-if (isset($tee) and $tee == "JOTAINKIVAA") {
+else {
+	// t‰‰ll‰ ajellaan rapsa ja tallennetaan henkseliin
 	$ressu = "kissa";
 	if (mysql_num_rows($ressu) > 0) {
 
@@ -69,5 +102,11 @@ if (isset($tee) and $tee == "JOTAINKIVAA") {
 		$excelnimi = $worksheet->close();
 	}	
 }
+
+// if (isset($tee) and $tee == "lataa_tiedosto") {
+// 	readfile("/tmp/".$tmpfilenimi);
+// 	exit;
+// }
+
 
 

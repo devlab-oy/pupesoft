@@ -14,6 +14,8 @@ if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
 
+var_dump($_REQUEST);
+
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
 
@@ -8768,9 +8770,11 @@ if ($tee == '') {
 		$kukkanen = TRUE;
 		if ($kukarow['extranet'] == "" and $kukkanen and $tilausok == 0 and $rivilaskuri > 0) {
 
+			if (!isset($piirtele_valikko)) {
 			echo "	<tr>
 						<td align='left' class='back' valign='top'>
 						<form name='excel_tuote_rapsa' method='post' class='multisubmit'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='otunnus' value='$tilausnumero'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 						<input type='hidden' name='mista' value = '$mista'>
@@ -8778,11 +8782,11 @@ if ($tee == '') {
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='$tee'>
 						<input type='hidden' name='naantali' value='KIVAPAIKKA'>
-						<input type='submit' name='PIIRTELE_EKSELI' value='".t("Tallenna tilauksen myyntierätiedot")."'>
+						<input type='submit' name='piirtele_valikko' value='".t("Myyntierätietovalikko")."'>
 						</form>
 						</td>
 					</tr>";
-
+			}
 		}
 
 		echo "</table>";

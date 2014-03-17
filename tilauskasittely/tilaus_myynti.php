@@ -8765,10 +8765,33 @@ if ($tee == '') {
 						</td>
 					</tr>";
 		}
+		$kukkanen = TRUE;
+		if ($kukarow['extranet'] == "" and $kukkanen and $tilausok == 0 and $rivilaskuri > 0) {
+
+			echo "	<tr>
+						<td align='left' class='back' valign='top'>
+						<form name='excel_tuote_rapsa' method='post' class='multisubmit'>
+						<input type='hidden' name='otunnus' value='$tilausnumero'>
+						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+						<input type='hidden' name='mista' value = '$mista'>
+						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='tee' value='$tee'>
+						<input type='hidden' name='naantali' value='KIVAPAIKKA'>
+						<input type='submit' name='PIIRTELE_EKSELI' value='".t("Tallenna tilauksen myyntierätiedot")."'>
+						</form>
+						</td>
+					</tr>";
+
+		}
 
 		echo "</table>";
 
 	}
+}
+
+if (isset($naantali) and $naantali == "KIVAPAIKKA") {
+	require("myyntierat_ja_tuotetiedot.inc");
 }
 
 if (@include("inc/footer.inc"));

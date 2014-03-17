@@ -946,6 +946,23 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "automaattinen_jt_toimitus_siirtolista") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos .= "<option value=''>".t("Siirtolistarivej‰ ei toimiteta eik‰ kohdisteta automaattisesti")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("J‰lkitoimitusrivit kohdistetaan automaattisesti vastaanoton yhteydess‰")."</option>";
+		$ulos .= "<option value='T' $sel[T]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti vastaanoton yhteydess‰, jos k‰ytt‰j‰ll‰ on p‰ivitysoikeus JT-selaukseen")."</option>";
+		$ulos .= "<option value='J' $sel[J]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti vastaanoton yhteydess‰")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle myydyt j‰lkitoimitusrivit kohdistetaan ja siirret‰‰n tulostusjonoon automaattisesti siirtolistan vastaanoton yhteydess‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "kerataanko_jos_vain_puute_jt") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

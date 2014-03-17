@@ -26267,6 +26267,105 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 	}
 }
 
+if (!function_exists('varaston_tuotepaikkojen_saldo')) {
+	function varaston_tuotepaikkojen_saldo($tuoteno, $yhtiot = array(), $varastot = array()) {
+		global $kukarow, $yhtiorow;
+
+		$where = "";
+		if (!empty($yhtiot)) {
+			$where = "AND tuote.yhtio IN ('".implode("','", $yhtiot)."')";
+		}
+
+		$varastopaikat_join = "";
+		if (!empty($varastot)) {
+			$varastopaikat_join = "	AND varastopaikat.tunnus IN ('".implode("','", $varastot)."')";
+		}
+
+		if ($yhtiorow["saldo_kasittely"] == "T") {
+			$saldoaikalisa = date("Y-m-d");
+		}
+		else {
+			$saldoaikalisa = "";
+		}
+
+		$query = "	SELECT tuote.yhtio,
+					tuote.tuoteno,
+					tuote.ei_saldoa,
+					varastopaikat.tunnus AS varasto,
+					varastopaikat.tyyppi AS varastotyyppi,
+					varastopaikat.maa AS varastomaa,
+					tuotepaikat.oletus,
+					tuotepaikat.hyllyalue,
+					tuotepaikat.hyllynro,
+					tuotepaikat.hyllyvali,
+					tuotepaikat.hyllytaso,
+					concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) AS sorttauskentta,
+					varastopaikat.nimitys,
+					if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') AS tyyppi
+					FROM tuote
+					JOIN tuotepaikat
+					ON (tuotepaikat.yhtio = tuote.yhtio
+						AND tuotepaikat.tuoteno = tuote.tuoteno )
+					JOIN varastopaikat
+					ON ( varastopaikat.yhtio = tuotepaikat.yhtio
+						AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+						{$varastopaikat_join})
+					WHERE tuote.tuoteno = '{$tuoteno}'
+					{$where}
+					ORDER BY tuotepaikat.oletus DESC,
+					varastopaikat.nimitys,
+					sorttauskentta";
+		$result = pupe_query($query);
+
+		$tuotepaikat = array();
+		while($tuotepaikka = mysql_fetch_assoc($result)) {
+			list($tuotepaikka['saldo'], $tuotepaikka['hyllyssa'], $tuotepaikka['myytavissa']) = saldo_myytavissa($tuotepaikka["tuoteno"], '', '', $tuotepaikka["yhtio"], $tuotepaikka["hyllyalue"], $tuotepaikka["hyllynro"], $tuotepaikka["hyllyvali"], $tuotepaikka["hyllytaso"], '', $saldoaikalisa);
+
+			$tuotepaikat[] = $tuotepaikka;
+		}
+
+		return $tuotepaikat;
+	}
+}
+
+if (!function_exists('tuotteen_oletuspaikka')) {
+	function tuotteen_oletuspaikka($tuoteno, $varasto) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($tuoteno) or empty($varasto)) {
+			return false;
+		}
+
+		$query = "	SELECT tuotepaikat.*,
+					varastopaikat.tunnus AS varasto_tunnus,
+					varastopaikat.nimitys AS varasto_nimitys
+					FROM tuotepaikat
+					JOIN varastopaikat
+					ON ( varastopaikat.yhtio = tuotepaikat.yhtio
+						AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+						AND varastopaikat.tunnus = {$varasto} )
+					WHERE oletus = 'X'
+					AND tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('aseta_tilausrivien_var')) {
+	function aseta_tilausrivien_var($tilausrivi_tunnukset, $var) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	UPDATE tilausrivi
+					SET var = '{$var}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus IN (".implode(",", $tilausrivi_tunnukset).")";
+		pupe_query($query);
+	}
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

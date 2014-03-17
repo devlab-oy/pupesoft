@@ -428,7 +428,7 @@
 					}
 
 					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"]) AND strtoupper($row["toim_tuoteno"] != "")) {
-						list($ff_string, $ff_font) = pdf_fontfit("(".$row["tuoteno"].")", 110, $pdf, $pieni); 
+						list($ff_string, $ff_font) = pdf_fontfit("(".$row["tuoteno"].")", 110, $pdf, $pieni);
 						$oikpos = $pdf->strlen($ff_string, $ff_font);
 						$pdf->draw_text(290-$oikpos, $kala, $ff_string, $thispage, $ff_font);
 					}

@@ -832,7 +832,7 @@
 
 		while ($kukkarow = mysql_fetch_assoc($varresult)) {
 
-			$sel = $trow[$i] == $kukkarow['tunnus'] ? " selected" : "";
+			$sel = $trow[$i] == $kukkarow['kuka'] ? " selected" : "";
 
 			$ulos .= "<option value='{$kukkarow['kuka']}'{$sel}>{$kukkarow['nimi']}</option>";
 		}

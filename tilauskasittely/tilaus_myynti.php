@@ -1499,7 +1499,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			}
 
 			if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K') {
-				require('tilauksesta_varastosiirto2.inc');
+				require('tilauksesta_varastosiirto.inc');
 
 				tilauksesta_varastosiirto($laskurow['tunnus']);
 			}

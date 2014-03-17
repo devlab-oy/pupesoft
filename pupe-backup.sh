@@ -398,8 +398,8 @@ find ${BACKUPDIR} -type f -mtime +${BACKUPPAIVAT} -delete
 if [ ! -z "${S3BUCKET}" ]; then
 
 	# Katsotaan mistä löytyy config file
-	if [ -f "/home/devlab/.s3cfg" ]; then
-		S3CONFIG="/home/devlab/.s3cfg"
+	if [ -f "/home/devlab/secret/s3cfg" ]; then
+		S3CONFIG="/home/devlab/secret/s3cfg"
 	else
 		S3CONFIG="/root/.s3cfg"
 	fi

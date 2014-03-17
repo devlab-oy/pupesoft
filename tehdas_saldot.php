@@ -146,7 +146,7 @@
 					$tuo = mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][$tuo_sarake]));
 					$sal = (float) str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][$teh_sarake]));
 
-					if ($tuo != '' and $sal != '') {
+					if ($tuo != '') {
 						$tuote[] = $tuo;
 						$saldo[] = $sal;
 					}

@@ -2059,7 +2059,6 @@
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
 						$varastot_lisa_query
-						$varastot_lisa_query2
 						AND tyyppi != 'P'
 						order by tyyppi, nimitys";
 

@@ -609,12 +609,7 @@
 			}
 			echo "<br>";
 		}
-
-
-
 	}
-
-
 
 	if ($tee == 'TEEVALMISTUS' and isset($osatoimitus)) {
 		// Osatoimitetaan valitut rivit

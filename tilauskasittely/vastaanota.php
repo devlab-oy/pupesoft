@@ -340,21 +340,14 @@
 				}
 			}
 
-			//ei p‰ivitet‰ tuotteen muutosp‰iv‰m‰‰r‰‰, jos ei p‰ivitet‰ tuotetta
-			$eanquery = "	SELECT eankoodi
-			 			FROM tuote
-						WHERE yhtio = '{$kukarow[yhtio]}'
-						AND tuoteno = '{$tilausrivirow[tuoteno]}'";
-			$ean = pupe_query($eanquery);
-			$eanrow = mysql_fetch_assoc($ean);
-
-			if ($eankoodi[$tun] != '' AND $eankoodi[$tun] != $eanrow["eankoodi"]) {
+			if ($eankoodi[$tun] != '') {
 				$query = "	UPDATE tuote
 							SET eankoodi = '$eankoodi[$tun]',
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tilausrivirow[tuoteno]'";
+							AND tuoteno = '$tilausrivirow[tuoteno]'
+							AND eankoodi != '$eankoodi[$tun]'";
 				$resulteankoodi = pupe_query($query);
 			}
 

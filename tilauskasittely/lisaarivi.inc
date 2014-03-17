@@ -884,6 +884,7 @@
 
 				while ($zrow = mysql_fetch_assoc($zres)) {
 
+					//Kun tee_siirtolista_myyntitilaukselta on päällä niin on mahdollista tehdä myös muiden yritysten varastoista varastosiirtoja
 					if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K') {
 						$yhtio_temp = $zrow['varasto_yhtio'];
 					}

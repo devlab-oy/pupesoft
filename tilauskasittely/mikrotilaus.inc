@@ -168,10 +168,19 @@
 
 								$ind_Tuoteno                 = 0;
 								$ind_Maara                   = 1;
-								$ind_Arvioitu                = 2;
-								$ind_Hinta                   = 3;
 
-								$_indx = 4;
+								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+									$ind_Arvioitu = 2;
+									$ind_Hinta = 3;
+
+									$_indx = 4;
+								}
+								else {
+									$ind_Hinta = 2;
+
+									$_indx = 3;
+
+								}
 
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 									${'ind_Ale'.$alepostfix} = $_indx;
@@ -204,10 +213,19 @@
 
 								$ind_Tuoteno 	= 0;
 								$ind_Maara 		= 1;
-								$ind_Arvioitu 	= 2;
-								$ind_Hinta 		= 4;
 
-								$_indx = 5;
+								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+									$ind_Arvioitu = 2;
+									$ind_Hinta = 4;
+
+									$_indx = 5;
+								}
+								else {
+									$ind_Hinta = 3;
+
+									$_indx = 4;
+
+								}
 
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 									${'ind_Ale'.$alepostfix} = $_indx;
@@ -233,10 +251,19 @@
 
 								$ind_Tuoteno 	= 0;
 								$ind_Maara 		= 1;
-								$ind_Arvioitu 	= 2;
-								$ind_Hinta 		= 3;
 
-								$_indx = 4;
+								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+									$ind_Arvioitu = 2;
+									$ind_Hinta = 3;
+
+									$_indx = 4;
+								}
+								else {
+									$ind_Hinta = 2;
+
+									$_indx = 3;
+
+								}
 
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 									${'ind_Ale'.$alepostfix} = $_indx;
@@ -258,10 +285,19 @@
 
 								$ind_Tuoteno 	= 0;
 								$ind_Maara 		= 1;
-								$ind_Arvioitu 	= 2;
-								$ind_Hinta 		= 3;
 
-								$_indx = 4;
+								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+									$ind_Arvioitu = 2;
+									$ind_Hinta = 3;
+
+									$_indx = 4;
+								}
+								else {
+									$ind_Hinta = 2;
+
+									$_indx = 3;
+
+								}
 
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 									${'ind_Ale'.$alepostfix} = $_indx;
@@ -298,9 +334,23 @@
 
 							if ($kukarow["extranet"] == "") {
 
-								$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
-								$kerayspvm		= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
-								$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
+								//Toimitusaika
+								if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+									$toimaika = choose_correct_date($rivi[$ind_Arvioitu]);
+								}
+								else {
+									$toimaika = "";
+								}
+
+								//Keräyspäivämäärä
+								if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+									$kerayspvm	= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
+								}
+								else {
+									$kerayspvm = "";
+								}
+
+								$hinta = str_replace(",", ".", $rivi[$ind_Hinta]);
 
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 									${'ale'.$alepostfix} = str_replace(",", ".", $rivi[${'ind_Ale'.$alepostfix}]);
@@ -363,6 +413,10 @@
 
 										if ($toimaika == '') {
 											$toimaika = $laskurow["toimaika"];
+										}
+
+										if ($kerayspvm == "") {
+											$kerayspvm = $laskurow["kerayspvm"];
 										}
 
 										if ($hinta == 0) {
@@ -536,12 +590,21 @@
 							// Valmistukset aina tyyppiä kolme
 							$filetyyppi = "KOLMONE";
 
-							$ind_Tuoteno                 = 0;
-							$ind_Maara                   = 1;
-							$ind_Arvioitu                = 2;
-							$ind_Hinta                   = 3;
+							$ind_Tuoteno = 0;
+							$ind_Maara = 1;
 
-							$_indx = 4;
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+								$ind_Arvioitu = 2;
+								$ind_Hinta = 3;
+
+								$_indx = 4;
+							}
+							else {
+								$ind_Hinta = 2;
+
+								$_indx = 3;
+
+							}
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ind_Ale'.$alepostfix} = $_indx;
@@ -574,10 +637,19 @@
 
 							$ind_Tuoteno 	= 0;
 							$ind_Maara 		= 1;
-							$ind_Arvioitu 	= 2;
-							$ind_Hinta 		= 4;
 
-							$_indx = 5;
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+								$ind_Arvioitu = 2;
+								$ind_Hinta = 4;
+
+								$_indx = 5;
+							}
+							else {
+								$ind_Hinta = 3;
+
+								$_indx = 4;
+
+							}
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ind_Ale'.$alepostfix} = $_indx;
@@ -603,10 +675,19 @@
 
 							$ind_Tuoteno 	= 0;
 							$ind_Maara 		= 1;
-							$ind_Arvioitu 	= 2;
-							$ind_Hinta 		= 3;
 
-							$_indx = 4;
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+								$ind_Arvioitu = 2;
+								$ind_Hinta    = 3;
+
+								$_indx = 4;
+							}
+							else {
+								$ind_Hinta = 2;
+
+								$_indx = 3;
+
+							}
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ind_Ale'.$alepostfix} = $_indx;
@@ -628,10 +709,19 @@
 
 							$ind_Tuoteno 	= 0;
 							$ind_Maara 		= 1;
-							$ind_Arvioitu 	= 2;
-							$ind_Hinta 		= 3;
 
-							$_indx = 4;
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+								$ind_Arvioitu = 2;
+								$ind_Hinta = 3;
+
+								$_indx = 4;
+							}
+							else {
+								$ind_Hinta = 2;
+
+								$_indx = 3;
+
+							}
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ind_Ale'.$alepostfix} = $_indx;
@@ -668,9 +758,23 @@
 
 						if ($kukarow["extranet"] == "") {
 
-							$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
-							$kerayspvm		= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
-							$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
+							//Toimitusaika
+							if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO" OR (($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') AND $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+								$toimaika = choose_correct_date($rivi[$ind_Arvioitu]);
+							}
+							else {
+								$toimaika = "";
+							}
+
+							//Keräyspäivämäärä
+							if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+								$kerayspvm = choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
+							}
+							else {
+								$kerayspvm = "";
+							}
+
+							$hinta = str_replace(",", ".", $rivi[$ind_Hinta]);
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								${'ale'.$alepostfix} = str_replace(",", ".", $rivi[${'ind_Ale'.$alepostfix}]);
@@ -733,6 +837,10 @@
 
 									if ($toimaika == '') {
 										$toimaika = $laskurow["toimaika"];
+									}
+
+									if ($kerayspvm == "") {
+										$kerayspvm = $laskurow["kerayspvm"];
 									}
 
 									if ($hinta == 0) {
@@ -924,7 +1032,10 @@
 				echo "<td>".t('Keräysajankohta')." ".t("(vvvv-kk-pp)")."</td>";
 			}
 			else {
-				echo "<td>".t("Arvioitu toimituspäivä")." ".t("(vvvv-kk-pp)")."</td>";
+				if ($yhtiorow["splittauskielto"] == "K" OR $toim == "YLLAPITO") {
+					echo "<td>".t("Arvioitu toimituspäivä")." ".t("(vvvv-kk-pp)")."</td>";
+				}
+
 				echo "<td>".t("Hinta")."</td>";
 
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {

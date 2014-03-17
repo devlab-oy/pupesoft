@@ -105,7 +105,7 @@
 							and tila	= '$row[tila]'
 							and alatila = 'K'";
 				$chkresult4 = pupe_query($query);
-				
+
 				$query = "	UPDATE tilausrivi
 							SET varattu	= 0
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -448,6 +448,18 @@
 				if (mysql_num_rows($roxresult) > 0) {
 					while ($tilrivirow = mysql_fetch_assoc($roxresult)) {
 
+						$epaquery = "	SELECT epakurantti25pvm
+										FROM tuote
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										AND tuoteno = '{$tilrivirow["tuoteno"]}'";
+						$eparesult = pupe_query($epaquery);
+						$eparow = mysql_fetch_assoc($eparesult);
+
+						if ($eparow["epakurantti25pvm"] != '0000-00-00') {
+							echo "<font class='error'>".t("VIRHE: Tuote on ep‰kurantti, sit‰ ei saa valmistaa")."!</font><br>";
+							$tee = "VALMISTA";
+						}
+
 						if ($valmkpl < 0 or $tilrivirow["varattu"] < 0) {
 							echo "<font class='error'>".t("VIRHE: Negatiivista kappalem‰‰r‰‰ ei voi valmistaa")."!</font><br>";
 							$tee = "VALMISTA";
@@ -597,7 +609,12 @@
 			}
 			echo "<br>";
 		}
+
+
+
 	}
+
+
 
 	if ($tee == 'TEEVALMISTUS' and isset($osatoimitus)) {
 		// Osatoimitetaan valitut rivit
@@ -781,7 +798,7 @@
 								and tila	= '$row[tila]'
 								and alatila = 'K'";
 					$chkresult4 = pupe_query($query);
-					
+
 					$query = "	UPDATE tilausrivi
 								SET varattu	= 0
 								WHERE yhtio = '$kukarow[yhtio]'

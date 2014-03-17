@@ -164,8 +164,8 @@
 	}
 
 	// katsotaan, ettei tilata epäkuranttia tuotetta
-	if (($toim == "VALMISTAVARASTOON" OR $toim == 'VALMISTAASIAKKAALLE') AND (($trow["epakurantti25pvm"] != '0000-00-00' or $trow["epakurantti50pvm"] != '0000-00-00' or $trow["epakurantti75pvm"] != '0000-00-00' or $trow["epakurantti100pvm"] != '0000-00-00') and $riviok == 0)) {
-		$varaosavirhe .= t("VIRHE: Tuote on epäkurantti, sitä ei saa valmistaa!")."<br>1/4: $trow[epakurantti25pvm]<br>1/2: $trow[epakurantti50pvm]<br>3/4: $trow[epakurantti75pvm]<br>1/1: $trow[epakurantti100pvm]";
+	if (($toim == "VALMISTAVARASTOON" OR $toim == 'VALMISTAASIAKKAALLE') AND (($trow["epakurantti25pvm"] != '0000-00-00') and $riviok == 0)) {
+		$varaosavirhe .= t("VIRHE: Tuote on epäkurantti, sitä ei saa valmistaa!");
 		$riviok++;
 		$tilausok++;
 	}

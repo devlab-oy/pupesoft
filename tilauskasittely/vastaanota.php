@@ -339,7 +339,16 @@
 					$t4[$tun] = $paikkarow['hyllytaso'];
 				}
 			}
-			if ($eankoodi[$tun]!= '') {
+
+			//ei p‰ivitet‰ tuotteen muutosp‰iv‰m‰‰r‰‰, jos ei p‰ivitet‰ tuotetta
+			$eanquery = "	SELECT eankoodi
+			 			FROM tuote
+						WHERE yhtio = '{$kukarow[yhtio]}'
+						AND tuoteno = '{$tilausrivirow[tuoteno]}'";
+			$ean = pupe_query($eanquery);
+			$eanrow = mysql_fetch_assoc($ean);
+
+			if ($eankoodi[$tun] != '' AND $eankoodi[$tun] != $eanrow["eankoodi"]) {
 				$query = "	UPDATE tuote
 							SET eankoodi = '$eankoodi[$tun]',
 							muuttaja	= '$kukarow[kuka]',

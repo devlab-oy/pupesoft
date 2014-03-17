@@ -976,25 +976,47 @@ while ($tietue = fgets($fd)) {
 				}
 
 				if (trim($editilaus_toimitustapa) != '') {
-					$query = "	SELECT *
-								FROM asiakkaan_avainsanat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tarkenne = '{$editilaus_toimitustapa}'
-								AND laji = 'editilaus_toimitustapa'
-								AND tarkenne != ''
-								AND avainsana != ''
-								AND liitostunnus = '{$arow['tunnus']}'
-								ORDER BY muutospvm DESC
-								LIMIT 1";
-					$toimitustapa_chk_res = pupe_query($query);
-
-					if (mysql_num_rows($toimitustapa_chk_res) == 1) {
-						$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-						$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+					// tarkistetaan löytyykö toimitustapa pupesta suoraan
+					if ($edi_tyyppi == "magento") {
+						$query = "	SELECT *
+									FROM toimitustapa
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND selite = '{$editilaus_toimitustapa}'
+									AND selite != ''
+									ORDER BY muutospvm DESC
+									LIMIT 1";
+						$ressu = pupe_query($query);
+					
+						// - jos löytyy niin käytetään sitä
+						if (mysql_num_rows($ressu) == 1) {
+							$ftc = mysql_fetch_assoc($ressu);
+							$editilaus_toimitustapa = $ftc['selite'];
+						}
+						else {
+							$editilaus_toimitustapa = '';
+						}
 					}
 					else {
-						$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa \n";
-						$editilaus_toimitustapa = '';
+						$query = "	SELECT *
+									FROM asiakkaan_avainsanat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tarkenne = '{$editilaus_toimitustapa}'
+									AND laji = 'editilaus_toimitustapa'
+									AND tarkenne != ''
+									AND avainsana != ''
+									AND liitostunnus = '{$arow['tunnus']}'
+									ORDER BY muutospvm DESC
+									LIMIT 1";
+						$toimitustapa_chk_res = pupe_query($query);
+
+						if (mysql_num_rows($toimitustapa_chk_res) == 1) {
+							$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+							$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+						}
+						else {
+							$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa \n";
+							$editilaus_toimitustapa = '';
+						}
 					}
 				}
 

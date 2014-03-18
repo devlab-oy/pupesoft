@@ -162,8 +162,15 @@
 		$riviok++;
 		$tilausok++;
 	}
-	
-	if (in_array($row['var'], array('U','T')) and $trow['epakurantti25pvm'] != '0000-00-00') { 
+
+	// katsotaan, ettei valmisteta epäkuranttia tuotetta
+	if (($toim == "VALMISTAVARASTOON" OR $toim == 'VALMISTAASIAKKAALLE') AND $trow["epakurantti25pvm"] != '0000-00-00' AND $riviok == 0) {
+		$varaosavirhe .= t("VIRHE: Tuote on epäkurantti, sitä ei saa valmistaa!");
+		$riviok++;
+		$tilausok++;
+	}
+
+	if (in_array($row['var'], array('U','T', 'R')) and $trow['epakurantti25pvm'] != '0000-00-00') {
 		$varaosavirhe .= t("HUOM: tuote on epäkurantti!")."<br>";
 	}
 
@@ -1158,7 +1165,7 @@
 							if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
 								$V_hinta = round($V_hinta * (1+$row['alv']/100), $yhtiorow['hintapyoristys']);
 							}
-							
+
 							$vastaavat_table .= " $vaihtoehtoinen</td>"
 										."<td>{$tvrow["nimitys"]}</td>"
 							 			."<td align='right'><font class='{$myytavissa_font}'>".sprintf("%.2f", $vmyytavissa)."</font></td>"

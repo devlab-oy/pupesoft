@@ -38,6 +38,7 @@
 	if (!isset($select_varasto)) $select_varasto = '';
 	if (!isset($keraajanro)) 	 $keraajanro = '';
 	if (!isset($tulosta_kaikki)) $tulosta_kaikki = '';
+	$naytetaan_tulosta_kaikki = 0;
 
 	if ($tee == 'tee_arpajaiset') {
 		if (isset($palaa)) {
@@ -503,7 +504,7 @@
 				echo "</select></td>";
 
 				echo "<td class='back'><input type='submit' value='",t("Hae keräyserä"),"' />";
-				$naytetaan_tulosta_kaikki = 0;
+				
 				// Tsekataan onko käyttäjällä oikeus tulostaa kaikki tässä varastossa
 				$ktkre = t_avainsana("KERAYSERA_TK", "", "and avainsana.selite  = '{$keraajarow['kuka']}' AND avainsana.selitetark = '{$select_varasto}' ");
 				$ktkrow = mysql_fetch_assoc($ktkre);
@@ -534,12 +535,10 @@
 
 				$loop_counter = TRUE;
 
-				if($tulosta_kaikki == "JOO") {
+				if ($tulosta_kaikki == "JOO" and $naytetaan_tulosta_kaikki == 0) {
 					//jos yritetään tulostaa kaikki niin tsekataan vielä käyttöoikeudet
-					$oliko_oikat = tarkista_oikeus("tulosta_keraysera.php");
-				}
-				else {
-					$oliko_oikat = FALSE;
+					$tulosta_kaikki = "";
+					echo "<font class='message'>",t("Yritit tulostaa kaikki keräyserät mutta käyttöoikeus puuttuu"),".</font><br />";
 				}
 
 				while ($loop_counter) {
@@ -581,14 +580,16 @@
 								pupe_query($query);
 							}
 						}
-						$loop_counter = $oliko_oikat ? TRUE : FALSE;
+						else {
+							$tulosta_kaikki = "";
+						}
+
+						$loop_counter = $tulosta_kaikki == "JOO" ? TRUE : FALSE;
 					}
 					else {
 						echo "<font class='message'>",t("Ei ole yhtään kerättävää keräyserää"),".</font><br />";
 						$loop_counter = FALSE;
 					}
-
-					if (!$oliko_oikat and $tulosta_kaikki == "JOO") echo "<font class='message'>",t("Yritit tulostaa kaikki keräyserät mutta käyttöoikeus puuttuu"),".</font><br />";
 
 					// lukitaan tableja
 			 		$query = "UNLOCK TABLES";

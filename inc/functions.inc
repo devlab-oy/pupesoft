@@ -26239,9 +26239,11 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 					v_kohde.alkuhyllynro AS kohde_alkuhyllynro
 					FROM avainsana AS a
 					JOIN varastopaikat AS v_lahde
-					ON ( v_lahde.tunnus = a.selite )
+					ON ( v_lahde.yhtio = a.yhtio
+						AND v_lahde.tunnus = a.selite )
 					JOIN varastopaikat AS v_kohde
-					ON ( v_kohde.tunnus = a.selitetark )
+					ON ( v_kohde.yhtio = a.yhtio
+						AND v_kohde.tunnus = a.selitetark )
 					WHERE a.yhtio = '{$kukarow['yhtio']}'
 					AND a.laji = 'SIIRTOVARASTOT'
 					{$avainsana_where}
@@ -26311,7 +26313,8 @@ if (!function_exists('varaston_tuotepaikkojen_saldo')) {
 						AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 						{$varastopaikat_join})
-					WHERE tuote.tuoteno = '{$tuoteno}'
+					WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+					AND tuote.tuoteno = '{$tuoteno}'
 					{$where}
 					ORDER BY tuotepaikat.oletus DESC,
 					varastopaikat.nimitys,
@@ -26346,8 +26349,9 @@ if (!function_exists('tuotteen_oletuspaikka')) {
 						AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 						AND varastopaikat.tunnus = {$varasto} )
-					WHERE oletus = 'X'
-					AND tuoteno = '{$tuoteno}'";
+					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+					AND tuotepaikat.oletus = 'X'
+					AND tuotepaikat.tuoteno = '{$tuoteno}'";
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);

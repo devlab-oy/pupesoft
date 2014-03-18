@@ -853,14 +853,7 @@
 						$limit = " LIMIT 1 ";
 					}
 
-					if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K') {
-						$yhtiowhere = "";
-					}
-					else {
-						$yhtiowhere = "tuote.yhtio = '$kukarow[yhtio]'";
-					}
-
-					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.yhtio varasto_yhtio, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.prio,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
 								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, '' era
@@ -869,8 +862,8 @@
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 								and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-								WHERE tuote.tuoteno = '$tuoteno'
-								{$yhtiowhere}
+								WHERE tuote.yhtio = '$kukarow[yhtio]'
+								and tuote.tuoteno = '$tuoteno'
 								$notfromvarasto
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta
 								$limit";
@@ -884,15 +877,8 @@
 
 				while ($zrow = mysql_fetch_assoc($zres)) {
 
-					//Kun tee_siirtolista_myyntitilaukselta on päällä niin on mahdollista tehdä myös muiden yritysten varastoista varastosiirtoja
-					if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K') {
-						$yhtio_temp = $zrow['varasto_yhtio'];
-					}
-					else {
-						$yhtio_temp = '';
-					}
 					// Saldolliset tuotteet
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $jtspec, '', $yhtio_temp, $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $jtspec, '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
 
 					if ($lisaarivi_debug==1) echo "Saldo_myytävissä funktio sanoo $tuoteno: $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Erä: $zrow[era]) PVM: $saldoaikalisa<br>";
 

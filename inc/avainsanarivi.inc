@@ -299,12 +299,10 @@
 	}
 
 	if ($avain_sel['SIIRTOVARASTOT'] == 'SELECTED' and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark")) {
-		$query = "	SELECT varastopaikat.*,
-					yhtio.nimi AS yhtio_nimi
+		$query = "	SELECT *
 					FROM varastopaikat
-					JOIN yhtio
-					ON (yhtio.yhtio = varastopaikat.yhtio)
-					WHERE tyyppi = ''";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi = ''";
 		$varasto_result = pupe_query($query);
 
 		$ulos .= "<td><select name = '$nimi'>";
@@ -313,7 +311,7 @@
 			if ($varasto['tunnus'] == $trow[$i]) {
 				$sel = "SELECTED";
 			}
-			$ulos .= "<option value = '{$varasto['tunnus']}' {$sel}>{$varasto['nimitys']} - {$varasto['yhtio_nimi']}</option>";
+			$ulos .= "<option value = '{$varasto['tunnus']}' {$sel}>{$varasto['nimitys']}</option>";
 			$sel = "";
 		}
 		$ulos .= "</select></td>";

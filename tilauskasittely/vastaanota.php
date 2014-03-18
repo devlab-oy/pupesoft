@@ -584,6 +584,52 @@
 			}
 		}
 
+		$query = "	SELECT paivitys
+					FROM oikeu
+					WHERE yhtio	= '$kukarow[yhtio]'
+					and kuka	= '$kukarow[kuka]'
+					and nimi	= 'tilauskasittely/jtselaus.php'
+					and alanimi = ''";
+		$jtoikeudetres = pupe_query($query);
+
+		if ((mysql_num_rows($jtoikeudetres) <> 0 and $yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "") or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
+			$jtoikeudetrow  = mysql_fetch_assoc($jtoikeudetres);
+			$jtrivit = array();
+			$varastosta = '';
+
+			if ($yhtiorow['automaattinen_jt_toimitus_siirtolista'] == 'S') {
+				//Haetaan JT-rivit jotka mäppäytyvät siirtolistariveihin
+				$query = "	SELECT tilausrivin_lisatiedot.tilausrivilinkki AS jtrivi,
+							tilausrivi.hyllyalue,
+							tilausrivi.hyllynro
+							FROM tilausrivin_lisatiedot
+							JOIN tilausrivi
+							ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+								AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus )
+							WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivin_lisatiedot.tilausrivitunnus IN (".implode(',', $tunnus).")";
+				$varastoon_result = pupe_query($query);
+
+				while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
+					// Mitkä suoratoimitukset valmistettiin tällä keikalla
+					$jtrivit[$varastoon_row["jtrivi"]] = $varastoon_row["jtrivi"];
+
+					$varastosta = array(kuuluukovarastoon($varastoon_row['hyllyalue'], $varastoon_row['hyllynro']));
+				}
+			}
+
+			$varastosta = array(kuuluukovarastoon($tilausrivirow['hyllyalue'], $tilausrivirow['hyllynro']));
+
+			jt_toimita("", "", $varastosta, $jtrivit, array(), "tosi_automaaginen", "JATKA", '', '', '', '');
+
+			if ( ($jtoikeudetrow["paivitys"] == 1
+					and ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "T" or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "S")
+				)
+				or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
+				jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
+			}
+		}
+
 		echo "<br><br>";
 
 		if ($virheita == 0) {

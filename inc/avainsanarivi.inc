@@ -825,6 +825,7 @@
 					AND nimi != ''
 					AND extranet = ''
 					AND (keraajanro > 0 or kuka = '$kukarow[kuka]')
+					AND aktiivinen = 1
 					ORDER BY nimi";
 		$varresult = pupe_query($query);
 
@@ -846,8 +847,9 @@
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and nimitys != ''
-					ORDER BY nimitys";
+					AND nimitys != ''
+					AND tyyppi != 'P'
+					ORDER BY tyyppi,nimitys";
 		$varresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

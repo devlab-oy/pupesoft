@@ -534,6 +534,14 @@
 
 				$loop_counter = TRUE;
 
+				if($tulosta_kaikki == "JOO") {
+					//jos yritetään tulostaa kaikki niin tsekataan vielä käyttöoikeudet
+					$oliko_oikat = tarkista_oikeus("tulosta_keraysera.php");
+				}
+				else {
+					$oliko_oikat = FALSE;
+				}
+
 				while ($loop_counter) {
 
 					// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
@@ -573,13 +581,14 @@
 								pupe_query($query);
 							}
 						}
-
-						$loop_counter = $tulosta_kaikki == "JOO" ? TRUE : FALSE;
+						$loop_counter = $oliko_oikat ? TRUE : FALSE;
 					}
 					else {
 						echo "<font class='message'>",t("Ei ole yhtään kerättävää keräyserää"),".</font><br />";
 						$loop_counter = FALSE;
 					}
+
+					if (!$oliko_oikat and $tulosta_kaikki == "JOO") echo "<font class='message'>",t("Yritit tulostaa kaikki keräyserät mutta käyttöoikeus puuttuu"),".</font><br />";
 
 					// lukitaan tableja
 			 		$query = "UNLOCK TABLES";

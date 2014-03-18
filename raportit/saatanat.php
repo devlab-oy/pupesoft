@@ -365,6 +365,8 @@
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Yhteensä"), $format_bold);
 				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Luottotilanne nyt"), $format_bold);
+				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Luottoraja"), $format_bold);
 
 				$excelsarake = 0;
@@ -420,6 +422,7 @@
 			echo "<th align='right'>".t("Avoimet")."<br>".t("tilaukset")."</th>";
 			echo "<th align='right'>".t("Kaatotili")."</th>";
 			echo "<th align='right'>".t("Yhteensä")."</th>";
+			echo "<th align='right'>".t("Luottotilanne nyt")."</th>";
 			echo "<th align='right'>".t("Luottoraja")."</th>";
 			echo "</tr>";
 			echo "</thead>";
@@ -554,6 +557,7 @@
 					echo "<td valign='top' align='right'>$avoimettilaukset</td>";
 					echo "<td valign='top' align='right'>$kaatotilisumma</td>";
 					echo "<td valign='top' align='right'>".($row["avoimia"]+$avoimettilaukset-$kaatotilisumma)."</td>";
+					echo "<td valign='top' align='right'>$luottotilanne_nyt</td>";
 					echo "<td valign='top' align='right'>$luottoraja</td>";
 					echo "</tr>";
 
@@ -590,6 +594,8 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, ($row["avoimia"]+$avoimettilaukset-$kaatotilisumma));
 						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $luottotilanne_nyt);
+						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, $luottoraja);
 
 						$excelsarake = 0;
@@ -614,6 +620,7 @@
 					$avoimia_yhteensa 			+= $row["avoimia"];
 					$ylivito					+= $row["ylivito"];
 					$avoimettilaukset_yhteensa 	+= $avoimettilaukset;
+					$luottotilanne_nyt_yhteensa += $luottotilanne_nyt;
 					$rivilask++;
 				}
 			}
@@ -656,6 +663,8 @@
 				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>$kaato_yhteensa</td>";
 				$sumlask++;
 				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>".($avoimia_yhteensa+$avoimettilaukset_yhteensa-$kaato_yhteensa)."</td>";
+				$sumlask++;
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>".($luottotilanne_nyt_yhteensa)."</td>";
 				echo "<td valign='top' class='tumma'></td>";
 				echo "</tr>";
 			}

@@ -561,9 +561,11 @@
 				if ($laskuttajan_valkoodi != "") {
 					$valkoodi = $laskuttajan_valkoodi;
 				}
+				elseif ($trow['oletus_valkoodi'] != '') {
+					$valkoodi = $trow['oletus_valkoodi'];
+				}
 				else {
-					if ($trow['oletus_valkoodi'] != '') $valkoodi = $trow['oletus_valkoodi'];
-					else $valkoodi = 'EUR';
+					$valkoodi = 'EUR';
 				}
 
 				// Hyl‰t‰‰n viite jos se on nollaa

@@ -29,10 +29,7 @@ if (!isset($aja_ja_tallenna) and !isset($_REQUEST['lajit'])) {
 		//KISSA moro poista lengthrivi - debuggia
 		if (strlen($row['laji']) < 4) continue;
 		$nollaus = false;
-		if ($secretcounter == 0) {
-			echo "<tr>";
-		}
-	
+		if ($secretcounter == 0) echo "<tr>";
 
 		echo "<td align='left' valign='top' width='100'><input type='checkbox' name='lajit[]' value='{$row['laji']}' >{$row['laji']}</td>";
 		if ($secretcounter == 2) echo "</tr>";

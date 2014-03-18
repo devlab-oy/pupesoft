@@ -25565,7 +25565,7 @@ if (!function_exists('posten_outbounddelivery')) {
 		$receiver->addChild('RecCustPostCode', substr($looprow['toim_postino'], 0, 10));
 		$receiver->addChild('RecCustCity', substr($looprow['toim_postitp'], 0, 30));
 		$receiver->addChild('RecCustCountry', substr($looprow['toim_maa'], 0, 10));
-		$receiver->addChild('RecCustPhone', 0); // wat toim_puhelinnumero
+		$receiver->addChild('RecCustPhone', substr($looprow['toim_puh'], 0, 30));
 
 		$query = "	SELECT tunnus
 					FROM toimitustapa

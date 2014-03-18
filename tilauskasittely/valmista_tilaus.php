@@ -435,7 +435,7 @@
 				$valmkpl = str_replace(',', '.', $valmkpl);
 
 				//Haetaan valmisteet
-				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta
+				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta, tuote.epakurantti25pvm
 							FROM tilausrivi
 							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -448,15 +448,8 @@
 				if (mysql_num_rows($roxresult) > 0) {
 					while ($tilrivirow = mysql_fetch_assoc($roxresult)) {
 
-						$epaquery = "	SELECT epakurantti25pvm
-										FROM tuote
-										WHERE yhtio = '{$kukarow["yhtio"]}'
-										AND tuoteno = '{$tilrivirow["tuoteno"]}'";
-						$eparesult = pupe_query($epaquery);
-						$eparow = mysql_fetch_assoc($eparesult);
-
-						if ($eparow["epakurantti25pvm"] != '0000-00-00') {
-							echo "<font class='error'>".t("VIRHE: Tuote on epäkurantti, sitä ei saa valmistaa")."!</font><br>";
+						if ($tilrivirow["epakurantti25pvm"] != '0000-00-00') {
+							echo "<font class='error'>".t("VIRHE: Tuote %s on epäkurantti, sitä ei saa valmistaa", "", $tilrivirow["tuoteno"])."!</font><br>";
 							$tee = "VALMISTA";
 						}
 

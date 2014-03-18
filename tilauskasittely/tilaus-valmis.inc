@@ -405,6 +405,7 @@ else {
 					AND selite = '$laskurow[toimitustapa]'";
 		$result = pupe_query($query);
 		$torow = mysql_fetch_assoc($result);
+
 		// jos toimitustavalle on setattu lisäkuluraja, lisäkulu sekä yhtiöllä on lisäkulun tuotenumero
 		if ($torow['lisakulu_summa'] != 0 and $torow['lisakulu'] != 0) {
 
@@ -433,7 +434,7 @@ else {
 
 			$lisakulu_alarajasumma_rivit = 0;
 
-			while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {			
+			while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {
 				$lisakulu_alarajasumma_rivit += $totaalirivi["rivihinta"];
 			}
 
@@ -442,9 +443,9 @@ else {
 
 				$trow = mysql_fetch_assoc($rhire);
 
-				$otunnus	 = $laskurow['tunnus'];
-				$hinta		 = $torow["lisakulu"]; // jvkulu
-				$nimitys	 = t("Toimitustavan lisäkulu");
+				$otunnus = $laskurow['tunnus'];
+				$hinta   = $torow['lisakulu'];
+				$nimitys = $trow['nimitys'] != "" ? $trow['nimitys'] : t("Toimitustavan lisäkulu");
 
 				list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 

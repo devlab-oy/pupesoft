@@ -18232,6 +18232,7 @@ if (!function_exists("tee_keraysera")) {
 				$ed_asiakas = $kerailyniput_tiedot[$key]['nimi'];
 				$ed_otunnus = $tuoterow['otunnus'];
 				$ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
+				$ed_jiivee = $jiivee[$tuoterow['jv']];
 			}
 
 			if (mysql_num_rows($tuoteres) > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] != 'K') {

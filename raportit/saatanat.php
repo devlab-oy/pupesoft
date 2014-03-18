@@ -323,6 +323,7 @@
 		$ylivito					= 0;
 		$rivilask 					= 0;
 		$avoimettilaukset_yhteensa 	= 0;
+		$luottotilanne_nyt_yhteensa	= 0;
 
 		if (mysql_num_rows($result) > 0) {
 

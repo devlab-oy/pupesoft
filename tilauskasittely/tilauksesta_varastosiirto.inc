@@ -22,8 +22,10 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 
 				aseta_kukarow_kesken($siirtolista['tunnus']);
 				foreach ($tilausrivit['tilausrivit'] as $tilausrivi) {
-					luo_siirtolistarivi($siirtolista, $tilausrivi, $lahdevarasto_tunnus);
+					$lisatyt_rivit1 = luo_siirtolistarivi($siirtolista, $tilausrivi, $lahdevarasto_tunnus);
 					$tilausrivi_tunnukset[] = $tilausrivi['tunnus'];
+
+					linkkaa_myyntitilausrivi_siirtolistariviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 				}
 			}
 		}
@@ -92,6 +94,8 @@ if (!function_exists('luo_siirtolistarivi')) {
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			${'ale'.$alepostfix} = '';
 		}
+
+		return $lisatyt_rivit1;
 	}
 
 }
@@ -139,6 +143,26 @@ if (!function_exists('aseta_kukarow_kesken')) {
 		}
 
 		return false;
+	}
+
+}
+
+if (!function_exists('linkkaa_myyntitilausrivi_siirtolistariviin')) {
+
+	function linkkaa_myyntitilausrivi_siirtolistariviin($siirtolistarivi_tunnus, $myyntitilausirivi_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($siirtolistarivi_tunnus) or empty($myyntitilausirivi_tunnus)) {
+			return false;
+		}
+
+		$query = "	UPDATE tilausrivin_lisatiedot
+					SET tilausrivilinkki = {$myyntitilausirivi_tunnus}
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivitunnus = {$siirtolistarivi_tunnus}";
+		pupe_query($query);
+
+		return true;
 	}
 
 }

@@ -204,7 +204,8 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "SSCC")			 	$ulos .= "<option value='SSCC' $avain_sel[SSCC]>							".t("SSCC-koodi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAKKAUSKV") 		$ulos .= "<option value='PAKKAUSKV' $avain_sel[PAKKAUSKV]>					".t("Pakkaustiedon kieliversio")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "INVASTEPAIKKA")		$ulos .= "<option value='INVASTEPAIKKA' {$avain_sel['INVASTEPAIKKA']}>		".t("Inventointiaste-raportin hylk‰‰m‰t tuotepaikat")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "SIIRTOVARASTOT")	$ulos .= "<option value='SIIRTOVARASTOT' {$avain_sel['SIIRTOVARASTOT']}>".t("Varastosta-varastoon myyntitilauksesta siirtolista sallinta")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "SIIRTOVARASTOT")	$ulos .= "<option value='SIIRTOVARASTOT' {$avain_sel['SIIRTOVARASTOT']}>	".t("Varastosta-varastoon myyntitilauksesta siirtolista sallinta")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSERA_TK") 		$ulos .= "<option value='KERAYSERA_TK' $avain_sel[KERAYSERA_TK]>			".t("K‰ytt‰j‰n oikeus tulostaa kaikki ker‰yser‰t varastossa")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tyˆm‰‰r‰ysten avainsanat")."'>";
@@ -857,5 +858,53 @@
 		}
 		$ulos .= "</select></td>";
 
+		$jatko = 0;
+	}
+
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND nimi != ''
+					AND extranet = ''
+					AND (keraajanro > 0 or kuka = '$kukarow[kuka]')
+					AND aktiivinen = 1
+					ORDER BY nimi";
+		$varresult = pupe_query($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		while ($kukkarow = mysql_fetch_assoc($varresult)) {
+
+			$sel = $trow[$i] == $kukkarow['kuka'] ? " selected" : "";
+
+			$ulos .= "<option value='{$kukkarow['kuka']}'{$sel}>{$kukkarow['nimi']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND nimitys != ''
+					AND tyyppi != 'P'
+					ORDER BY tyyppi,nimitys";
+		$varresult = pupe_query($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		while ($kukkarow = mysql_fetch_assoc($varresult)) {
+
+			$sel = $trow[$i] == $kukkarow['tunnus'] ? " selected" : "";
+
+			$ulos .= "<option value='{$kukkarow['tunnus']}'{$sel}>{$kukkarow['nimitys']}</option>";
+		}
+
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

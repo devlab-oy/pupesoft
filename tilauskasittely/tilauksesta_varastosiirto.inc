@@ -32,6 +32,8 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 
 				linkkaa_myyntitilausrivi_siirtolistariviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 			}
+
+			aseta_tilaus_alatila($siirtolista['tunnus'], 'J');
 		}
 
 		return true;
@@ -122,6 +124,25 @@ if (!function_exists('luo_siirtolista')) {
 		require ("otsik_siirtolista.inc");
 
 		return hae_lasku($id);
+	}
+
+}
+
+if (!function_exists('aseta_tilaus_alatila')) {
+
+	function aseta_tilaus_alatila($tunnus, $alatila) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($tunnus)) {
+			return false;
+		}
+		$query = "	UPDATE lasku
+					SET alatila = '{$alatila}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tunnus}'";
+		pupe_query($query);
+
+		return true;
 	}
 
 }

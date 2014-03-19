@@ -192,9 +192,13 @@
 		if ($trow[$i] == 'K') {
 			$sel2 = "selected";
 		}
+		if ($trow[$i] == 'U') {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value = 'K' $sel2>".t("Siirtolistojen tulostukseen k‰ytet‰‰n tulostusjonoa");
 		$ulos .= "<option value = 'A' $sel1>".t("Siirtolistat tulostetaan automaattisesti");
+		$ulos .= "<option value = 'U' $sel3>".t("Siirtolistat tulostetaan ker‰yserien kautta");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

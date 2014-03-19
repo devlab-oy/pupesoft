@@ -34,6 +34,9 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 			}
 		}
 
+		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
+		aseta_kukarow_kesken($myyntitilaus_tunnus);
+
 		return true;
 	}
 

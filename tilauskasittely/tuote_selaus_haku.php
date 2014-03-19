@@ -1205,48 +1205,58 @@
 					}
 				}
 				$vastaaviaoli = array();
+				$delliavaimet = array();
 				// Rajataan saldottomat pois
 				if ($saldotonrajaus != '') {
 					$piilolaskuri = 0;
-					$apunumero = -1;
+					$apunumero = "";
 					foreach ($rows as $row_key => $row_value) { 
 						$ei_piirreta = FALSE;
-						
-						if ($row_value["tuoteperhe"] != "") {
-							$saldot = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+						echo "KISSA -- {$row_value['vastaavat']} -- {$row_value['vastaavamaara']}<br>";
+						if ($row_value["tuoteperhe"] == "") {
+							list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 						}
 						else {
-							$saldot = tuoteperhe_myytavissa($row_value["tuoteno"], "", "KAIKKI", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
-						}
-						$kokonaiskissa = 0;
-
-						foreach ($saldot as $varasto => $myytavissa) {
-							$kokonaiskissa += $myytavissa;
+							list($saldo, $hyllyssa, $myytavissa) = tuoteperhe_myytavissa($row_value["tuoteno"], "", "KAIKKI", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 						}
 
-						if ($kokonaiskissa == 0) {
+						if ($myytavissa == 0) {
 							$ei_piirreta = TRUE;
 							$piilolaskuri++;
 						}
 
-						if ($ei_piirreta) unset($rows["{$row_key}"]);
-						if ($row_value['vastaavamaara'] > 0 and !$eipiirreta) $apunumero++;# = $row_key;#$vastaaviaoli["{$row_key}"] = 0;
-						if ($row_value['vastaavamaara'] > 0 and !$eipiirreta) $vastaaviaoli["{$apunumero}"]++;
-						if ($row_value['mikavastaava'] != '' and !$eipiirreta) $vastaaviaoli["{$apunumero}"]++;
-		
-					}
-					echo "<br>KISSAMOI: $piilolaskuri tuotetta poistettiin arraysta ja alkup. arrayssa vastaavia oli:".var_dump($vastaaviaoli)."<br>";
-					echo "<pre>";
-					var_dump($vastaaviaoli);
-					echo "</pre>";
-					$indeksi= 0;
-					foreach ($rows as $row_key => $row_value) { 
-						if ($row_value['vastaavamaara'] > 0) {
-							$rows["{$row_key}"]["vastaavamaara"] = $vastaaviaoli[$indeksi];
-							$indeksi++;
+						if ($ei_piirreta) {
+							unset($rows["{$row_key}"]);
+							continue;
+						}
+						//if ($row_value['vastaavamaara'] > 0 and !$eipiirreta) $apunumero++;# = $row_key;#$vastaaviaoli["{$row_key}"] = 0;
+						if ($row_value['vastaavamaara'] > 0) echo "MORJENS {$row_value['tuoteno']}";
+						if ($row_value['vastaavamaara'] > 0 and !$eipiirreta) $apunumero = $row_value['tuoteno'];#$row_key;#$vastaaviaoli["{$apunumero}"]++;
+						if (($row_value['vastaavamaara'] > 0 or $row_value['mikavastaava'] != '') and !$eipiirreta and $apunumero != "") {
+							if(!isset($vastaaviaoli[$apunumero])) $vastaaviaoli[$apunumero] = 0; 
+							$vastaaviaoli[$apunumero]++;
 						}
 					}
-
+					echo "<br>KISSAMOI: $piilolaskuri tuotetta poistettiin arraysta ja alkup. arrayssa vastaavia oli:<br>";
+					echo "<pre>";
+					var_dump($vastaaviaoli);
+					//var_dump($delliavaimet);
+					echo "</pre>";
+					// $indeksi= 0;
+					// foreach ($delliavaimet as $row_key => $row_value) {
+					// 						//echo "vastaavadel: {$rows[$row_key]}<br>";
+					// 						//var_dump($rows[$row_key]);
+					// 						if (in_array($row_key, $vastaaviaoli)) {
+					// 							echo "MOROO OLEN TUOTE JOTA EI DELLATTU {$rows[$row_key]['tuoteno']}<br>";
+					// 							$vastaaviaoli[$row_key]--;
+					// 							//$rows["{$row_key}"]["vastaavamaara"] = $vastaaviaoli[$indeksi];
+					// 						}
+					// 						else {
+					// 							echo "DEL:{$rows[$row_key]['tuoteno']}<br>";
+					// 							unset($rows[$row_key]);
+					// 						}
+					// 					}
+					
 				}
 
 				if ($hae_ja_selaa_row['selite'] == 'B') {
@@ -1433,7 +1443,7 @@
 
 			$isan_kuva = '';
 
-			foreach ($rows as &$row) {
+			foreach ($rows as $row_key => &$row) {
 
 				if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
 					$hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];
@@ -1465,10 +1475,10 @@
 				}
 
 				echo "<tr class='aktiivi'>";
-
-				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
+				echo "tuoteno:{$row['tuoteno']} <br>";
+				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0 and $row['vastaavat'] != '') {
 					$vastaavarivimaara = $row["vastaavamaara"];
-					//if ($saldotonrajaus != '') $vastaavarivimaara = $vastaaviaoli[0];
+					if ($saldotonrajaus != '') $vastaavarivimaara = $vastaaviaoli[$row['tuoteno']];
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
 				elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {

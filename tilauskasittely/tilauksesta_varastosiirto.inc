@@ -7,31 +7,32 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 
 		$myyntitilaus = hae_lasku($myyntitilaus_tunnus);
 		$myyntitilaus['tilausrivit'] = hae_tilausrivit($myyntitilaus_tunnus);
-		$myyntitilaus['tilausrivit'] = kasittele_tilausrivit($myyntitilaus['tilausrivit']);
+		$keys = array(
+			'lahdevarasto_tunnus',
+			'kohdevarasto_tunnus'
+		);
+		$lahde_ja_kohde_varasto_yhdistelmat = array_find_unique_values($myyntitilaus['tilausrivit'], $keys);
 
 		$tilausrivi_tunnukset = array();
-		foreach ($myyntitilaus['tilausrivit'] as $lahdevarasto_tunnus => $kohdevaraston_tilausrivit) {
-			foreach ($kohdevaraston_tilausrivit as $kohdevaraston_tunnus => $tilausrivit) {
+		foreach ($lahde_ja_kohde_varasto_yhdistelmat as $lahde_ja_kohde_varasto_yhdistelma) {
+			$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
 
-				aseta_kukarow_kesken(0);
-				$siirtolista = luo_siirtolista($lahdevarasto_tunnus, $kohdevaraston_tunnus, $tilausrivit['toimitustapa_tunnus']);
+			aseta_kukarow_kesken(0);
+			//Kaikilla myyntitilausriveillä on sama toimitustapa, joka määritellään avainsanoissa SIIRTOVARASTOT. Tällöin voidaan viitata indeksillä.
+			$siirtolista = luo_siirtolista($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], $lahde_ja_kohde_varasto_yhdistelma['kohdevarasto_tunnus'], $myyntitilausrivit[0]['toimitustapa_tunnus']);
 
-				if (empty($siirtolista)) {
-					return false;
-				}
+			if (empty($siirtolista)) {
+				return false;
+			}
 
-				aseta_kukarow_kesken($siirtolista['tunnus']);
-				foreach ($tilausrivit['tilausrivit'] as $tilausrivi) {
-					$lisatyt_rivit1 = luo_siirtolistarivi($siirtolista, $tilausrivi, $lahdevarasto_tunnus);
-					$tilausrivi_tunnukset[] = $tilausrivi['tunnus'];
+			aseta_kukarow_kesken($siirtolista['tunnus']);
+			foreach ($myyntitilausrivit as $tilausrivi) {
+				$lisatyt_rivit1 = luo_siirtolistarivi($siirtolista, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus']);
+				$tilausrivi_tunnukset[] = $tilausrivi['tunnus'];
 
-					linkkaa_myyntitilausrivi_siirtolistariviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
-				}
+				linkkaa_myyntitilausrivi_siirtolistariviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 			}
 		}
-
-		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
-		aseta_kukarow_kesken($myyntitilaus_tunnus);
 
 		return true;
 	}
@@ -163,21 +164,6 @@ if (!function_exists('linkkaa_myyntitilausrivi_siirtolistariviin')) {
 		pupe_query($query);
 
 		return true;
-	}
-
-}
-
-if (!function_exists('kasittele_tilausrivit')) {
-
-	function kasittele_tilausrivit($tilausrivit) {
-		$tilausrivit_temp = array();
-
-		foreach ($tilausrivit as $tilausrivi) {
-			$tilausrivit_temp[$tilausrivi['lahdevarasto_tunnus']][$tilausrivi['kohdevarasto_tunnus']]['toimitustapa_tunnus'] = $tilausrivi['toimitustapa_tunnus'];
-			$tilausrivit_temp[$tilausrivi['lahdevarasto_tunnus']][$tilausrivi['kohdevarasto_tunnus']]['tilausrivit'][] = $tilausrivi;
-		}
-
-		return $tilausrivit_temp;
 	}
 
 }

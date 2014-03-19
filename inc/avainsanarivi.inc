@@ -302,7 +302,8 @@
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tyyppi = ''";
+					AND tyyppi = ''
+					ORDER BY nimitys ASC";
 		$varasto_result = pupe_query($query);
 
 		$ulos .= "<td><select name = '$nimi'>";

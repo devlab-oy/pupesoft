@@ -26255,6 +26255,15 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 			$varastosiirto_linkki['tuote'] = array();
 			if ($tuoteno != '') {
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $varastosiirto_linkki['lahde_tunnus'], $varastosiirto_linkki['lahde_yhtio']);
+				if (empty($saldo)) {
+					$saldo = 0;
+				}
+				if (empty($hyllyssa)) {
+					$hyllyssa = 0;
+				}
+				if (empty($myytavissa)) {
+					$myytavissa = 0;
+				}
 				$varastosiirto_linkki['tuote'] = array(
 					'tuoteno' => $tuoteno,
 					'saldo' => $saldo,
@@ -26367,6 +26376,77 @@ if (!function_exists('aseta_tilausrivien_var')) {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN (".implode(",", $tilausrivi_tunnukset).")";
 		pupe_query($query);
+	}
+}
+
+/**
+ * Hakee $array:stä annettujen arvojen mukaiset rivit
+ *
+ * $values = array(
+			'lahdevarasto_tunnus' => 139,
+			'kohdevarasto_tunnus' => 155
+	);
+ * @param array $array
+ * @param array $values
+ * @return array
+ */
+if (!function_exists('array_find')) {
+	function array_find($array, $values) {
+		$result = array();
+		foreach ($array as $a) {
+			$element_ok = true;
+			foreach ($values as $key => $v) {
+				if (isset($a[$key]) and $a[$key] != $v) {
+					$element_ok = false;
+					break;
+				}
+			}
+
+			if ($element_ok) {
+				$result[] = $a;
+			}
+		}
+
+		return $result;
+	}
+}
+
+/**
+ * Hakee $array:stä uniikit kombinaatiot annetuilla key:llä
+ * $keys = array(
+			'lahdevarasto_tunnus',
+			'kohdevarasto_tunnus'
+	);
+ * @param array $array
+ * @param array $keys
+ * @return array
+ */
+if  (!function_exists('array_find_unique_values')) {
+	function array_find_unique_values($array, $keys) {
+		$result = array();
+		foreach ($array as $a) {
+			$array_temp2 = array();
+			foreach ($keys as $k) {
+				$array_temp2[$k] = $a[$k];
+			}
+			if (empty($result)) {
+				array_push($result, $array_temp2);
+			}
+			else {
+				$unique = true;
+				foreach ($result as $a2) {
+					$diff = array_diff_assoc($a2, $array_temp2);
+					if (empty($diff)) {
+						$unique = false;
+					}
+				}
+				if ($unique) {
+					array_push($result, $array_temp2);
+				}
+			}
+		}
+
+		return $result;
 	}
 }
 

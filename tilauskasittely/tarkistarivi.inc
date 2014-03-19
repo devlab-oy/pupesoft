@@ -847,9 +847,14 @@
 			$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
 			foreach ($siirto_varastot as $siirto_varasto) {
+				if ($siirto_varasto['tuote']['myytavissa'] <= 0) {
+					continue;
+				}
+
 				if ($row['var'] == 'S' and $siirto_varasto['tunnus'] == $row['toimittajan_tunnus']) {
 					$sel4 = "SELECTED";
 				}
+
 				$siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$siirto_varasto['tuote']['myytavissa']}";
 				$paikat .= "<option value='¡¡S{$siirto_varasto['tunnus']}¡¡S{$siirto_varasto['lahde_tunnus']}¡¡S{$siirto_varasto['kohde_tunnus']}' {$sel4}>{$siirto_varastot_text}</option>";
 				$paikatlask++;

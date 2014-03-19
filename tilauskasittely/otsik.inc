@@ -3800,9 +3800,6 @@
 		$orig_tila    = $ylatila;
 		$orig_alatila = $alatila;
 
-		// Tehd‰‰n laskun tapahtuma
-		Tapahtumat::lasku($laskurow['tunnus']);
-
 		// Jos erikoisalennus muuttuu
 		if ($laskurow["erikoisale"] != $erikoisale) {
 			// p‰ivitet‰‰n erikoisale tilausriveille

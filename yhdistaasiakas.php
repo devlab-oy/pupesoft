@@ -222,6 +222,26 @@ function yhdista_asiakkaita($jataminut, $yhdista, $spessut = 0) {
 
     $historia = t("Asiakkaaseen").": ". $jrow["nimi"].", ". t("ytunnus").": ". $jrow["ytunnus"].", ".t("asiakasnro").": ". $asrow["asiakasnro"] ." ".t("liitettiin seuraavat asiakkaat").": <br />";
 
+    if( $spessut != 0 ){
+      // haetaan säilytettävien spesiaalikenttien tiedot
+      $spessu_query = " SELECT laji, piiri, osasto, luokka
+            FROM asiakas
+            where yhtio = '$kukarow[yhtio]'
+            and tunnus = '$spessut' ";
+      $spessu_result = pupe_query($spessu_query);
+      $spessu_row = mysql_fetch_assoc($spessu_result);
+
+      // muutetaan säilytettävän asiakkaan spesiaalikentät
+        $paivitys = " UPDATE asiakas SET
+                laji    =   '{$spessu_row['laji']}',
+                piiri   =   '{$spessu_row['piiri']}',
+                osasto  =   '{$spessu_row['osasto']}',
+                luokka  =   '{$spessu_row['luokka']}'
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus =  '$jrow[tunnus]'";
+        pupe_query($paivitys);
+    }
+
     foreach ($yhdista as $haettava) {
 
       // haetaan "Yhdistettävän" firman tiedot esille niin saadaan oikeat parametrit.
@@ -841,26 +861,6 @@ function yhdista_asiakkaita($jataminut, $yhdista, $spessut = 0) {
       }//if
     }//foreach
 
-    if( $spessut != 0 ){
-      // haetaan säilytettävien spesiaalikenttien tiedot
-      $spessu_query = " SELECT laji, piiri, osasto, luokka
-            FROM asiakas
-            where yhtio = '$kukarow[yhtio]'
-            and tunnus = '$spessut' ";
-      $spessu_result = pupe_query($spessu_query);
-      $spessu_row = mysql_fetch_assoc($spessu_result);
-
-      // muutetaan säilytettävän asiakkaan spesiaalikentät
-        $paivitys = " UPDATE asiakas SET
-                laji    =   '{$spessu_row['laji']}',
-                piiri   =   '{$spessu_row['piiri']}',
-                osasto  =   '{$spessu_row['osasto']}',
-                luokka  =   '{$spessu_row['luokka']}'
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus =  '$jrow[tunnus]'";
-        pupe_query($paivitys);
-    }
-
     $historia_tietokantaan = str_replace('<br />', '\\n', $historia);
 
     $kysely = " INSERT INTO kalenteri
@@ -878,9 +878,6 @@ function yhdista_asiakkaita($jataminut, $yhdista, $spessut = 0) {
 
     return $historia;
 }
-
-
-
 
 function hae_asiakastunnus($ytunnus, $ovttunnus, $toim_ovttunnus) {
   global $kukarow;

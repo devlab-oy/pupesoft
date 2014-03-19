@@ -118,6 +118,7 @@ $ltoim_maa				= "";
 $yhteyshenkilon_puhelin = "";
 $tilausyhteyshenkilo	= "";
 $lopviesti            	= "";
+$veromaara				= "";
 $ohjausmerkki			= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
@@ -845,6 +846,11 @@ while ($tietue = fgets($fd)) {
 			$lopviesti = trim($orig_tieto);
 			break;
 
+		case 'OSTOTIL.OT_VEROMAARA':
+			// magento-keisissä, veron määrä
+			$veromaara = (int) trim($orig_tieto);
+			break;
+
 		//Tilaus päättyy. Aika tehdä se kantaan
 		case 'OHDR__END' :
 		case '*RE OSTOTIL' :
@@ -919,7 +925,13 @@ while ($tietue = fgets($fd)) {
 							$arow["vienti"] = "K";
 						}
 						else {
-							$arow["vienti"] = "E";
+							// Jos EU-yksityishenkilkölle menee verollisena
+							if ($veromaara != 0) {
+								$arow["vienti"] = "";
+							}
+							else {
+								$arow["vienti"] = "E";
+							}
 						}
 					}
 				}
@@ -2051,6 +2063,7 @@ while ($tietue = fgets($fd)) {
 			$yhteyshenkilon_puhelin = "";
 			$tilausyhteyshenkilo	= "";
 			$lopviesti            	= "";
+			$veromaara				= "";
 			$ohjausmerkki			= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";

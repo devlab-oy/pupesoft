@@ -1177,7 +1177,7 @@
 								else $values .= ", 0";
 								break;
 							case 'kate_korjattu':
-								$values .= ", 0";
+								$values .= ", NULL";
 								break;
 							default:
 								$values .= ", '".$ostotilausrivirow[$fieldname]."'";

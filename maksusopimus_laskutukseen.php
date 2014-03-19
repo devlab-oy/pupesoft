@@ -147,7 +147,7 @@
 					$query .= $fieldname."='',";
 				}
 				elseif ($fieldname == 'kate_korjattu') {
-					$query .= $fieldname." = 0,";
+					$query .= $fieldname." = NULL,";
 				}
 				// maksuehto tulee tältä positiolta
 				elseif ($fieldname == 'maksuehto') {

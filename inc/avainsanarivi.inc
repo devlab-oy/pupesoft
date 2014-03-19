@@ -224,7 +224,7 @@
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Maksuehtojen avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LASKUKUVAUS") 		$ulos .= "<option value='LASKUKUVAUS' $avain_sel[LASKUKUVAUS]>				".t("Maksuposition kuvaus")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "KARHUVIESTI") 		$ulos .= "<option value='KARHUVIESTI' $avain_sel[KARHUVIESTI]>				".t("Karhuviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KARHUVIESTI") 		$ulos .= "<option value='KARHUVIESTI' $avain_sel[KARHUVIESTI]>				".t("Maksukehotusviesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "MAKSUEHTOKV")		$ulos .= "<option value='MAKSUEHTOKV' $avain_sel[MAKSUEHTOKV]>				".t("Maksuehdon kieliversio")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 

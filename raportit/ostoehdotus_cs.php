@@ -116,7 +116,6 @@
 		// otetaan kaikki muuttujat mukaan funktioon mitä on failissakin
 		extract($GLOBALS);
 
-		$laskuntoimmaa = "";
 		$returnstring1 = 0;
 		$returnstring2 = 0;
 
@@ -134,20 +133,27 @@
 			$varastotapa = "";
 		}
 
+		$laskujoin 	   = "";
+		$laskuntoimmaa = "";
+
 		if ($myynti_maa != "") {
 			$laskuntoimmaa = " and lasku.toim_maa = '$myynti_maa' ";
 		}
 
+		if ($lisaa3 != "" or $laskuntoimmaa != "") {
+			$laskujoin = " JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa) ";
+		}
+
 		// tutkaillaan myynti
 		$query = "	SELECT
-					sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4,
+					sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
 					sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
 					sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var = 'J', tilausrivi.jt $lisavarattu, 0)) jt,
 					sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)) ennakko
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-					JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa)
-					JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus $lisaa3)
-					$varastotapa
+					{$laskujoin}
+					{$lisaa3}
+					{$varastotapa}
 					WHERE tilausrivi.yhtio in ($yhtiot)
 					and tilausrivi.tyyppi in ('L','V','E')
 					and tilausrivi.tuoteno = '$row[tuoteno]'
@@ -464,7 +470,7 @@
 			$lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
 		}
 		if ($eliminoikonserni != '') {
-			$lisaa3 .= " and asiakas.konserniyhtio = '' ";
+			$lisaa3 .= " JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.konserniyhtio = '') ";
 		}
 
 		$valvarasto = "";
@@ -863,7 +869,6 @@
 		echo "<input type='hidden' name='eliminoikonserni' value='$eliminoikonserni'>";
 		echo "<input type='hidden' name='abcrajaus' value='$abcrajaus'>";
 		echo "<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>";
-		echo "<input type='hidden' name='eliminoi' value='$eliminoi'>";
 		echo "<input type='hidden' name='erikoisvarastot' value='$erikoisvarastot'>";
 		echo "<input type='hidden' name='naytakaikkituotteet' value='$naytakaikkituotteet'>";
 		echo "<input type='hidden' name='eivarastoivattilaus' value='$eivarastoivattilaus'>";
@@ -1059,8 +1064,8 @@
 	echo "</table><table><br>";
 
 	$chk = "";
-	if ($eliminoi != "") $chk = "checked";
-	echo "<tr><th>".t("Älä huomioi konsernimyyntiä")."</th><td colspan='3'><input type='checkbox' name='eliminoi' $chk></td></tr>";
+	if ($eliminoikonserni != "") $chk = "checked";
+	echo "<tr><th>".t("Älä huomioi konsernimyyntiä")."</th><td colspan='3'><input type='checkbox' name='eliminoikonserni' $chk></td></tr>";
 
 	$chk = "";
 	if ($erikoisvarastot != "") $chk = "checked";

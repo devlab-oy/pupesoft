@@ -854,6 +854,16 @@
 		$alv_velvollisuus = "";
 		$alkuperainen_toimipaikka = $yhtiorow['toimipaikka'];
 
+		if (isset($srow['yhtiotoimipaikka'])) {
+			$kukarow['toimipaikka'] = $srow['yhtiotoimipaikka'];
+		}
+		elseif (!empty($srow['yhtio_toimipaikka'])) {
+			$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
+		}
+		elseif( $yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $srow['toimipaikka'] != 0 ){
+			$kukarow['toimipaikka'] = $srow['toimipaikka'];
+		}
+
 		if (!isset($srow['yhtio_toimipaikka']) and !empty($srow['maa'])) {
 			$alhqur = "	SELECT tunnus
 						FROM yhtion_toimipaikat
@@ -866,23 +876,6 @@
 				$alhiro  = mysql_fetch_assoc($alhire);
 				$kukarow['toimipaikka'] = $alhiro['tunnus'];
 			}
-		}
-		elseif (!empty($srow['yhtio_toimipaikka'])) {
-			$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
-		}
-
-		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
-
-			if (!isset($srow['yhtio_toimipaikka']) and !isset($srow['yhtiotoimipaikka'])){
-				$kukarow['toimipaikka'] = $srow['toimipaikka'];
-			}
-			elseif (isset($srow['yhtio_toimipaikka'])) {
-				$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
-			}
-			elseif (isset($srow['yhtiotoimipaikka'])) {
-				$kukarow['toimipaikka'] = $srow['yhtiotoimipaikka'];
-			}
-
 		}
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -2128,7 +2121,9 @@
 				while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
 					$sel = "";
 					if ( !isset($srow['yhtio_toimipaikka']) ) {
+
 						if ($alv_velvollisuus != "" and $yht_toimpaik_row['tunnus'] == $alhiro['tunnus']) { $sel = "selected"; }
+
 						if ( !isset($srow['yhtiotoimipaikka']) ) {
 							if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
 								if ($sel == "" and $srow['toimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }

@@ -11,18 +11,6 @@
 		require('validation/Validation.php');
 	}
 
-	// Työmääräysten listausta filtteröidään tyomaarays.tyostatus kentän mukaan
-	$tyomaarays_tyostatus = '';
-
-	// Jos alanimi sisältää _-viivan niin splitataan se osiin
-	if (strstr($oikeurow['alanimi'], '_')) {
-		$parts = explode('_', $oikeurow['alanimi']);
-		$oikeurow['alanimi'] = $parts[0];
-		$oikeurow[3] = $parts[0];
-		$toim = $parts[0];
-		$tyomaarays_tyostatus = $parts[1];
-	}
-
 	if (!isset($toim)) $toim = '';
 
 	if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
@@ -1337,11 +1325,6 @@
 			}
 			else {
 				$tyomalatlat = " and lasku.alatila in ('','A','B','C','J') ";
-
-				// Rajataan työmääräykset työstatuksen mukaan
-				if ($tyomaarays_tyostatus != '') {
-					$tyomstatus = " and tyomaarays.tyostatus='$tyomaarays_tyostatus'";
-				}
 			}
 
 			$query = "	SELECT lasku.tunnus tilaus,
@@ -1356,7 +1339,7 @@
 						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' $tyomalatlat $tyomstatus
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' $tyomalatlat
 						$haku
 						GROUP BY lasku.tunnus
 						$mt_order_by

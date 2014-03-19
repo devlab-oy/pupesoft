@@ -74,6 +74,13 @@ if(!function_exists("toimitustapatarkista")) {
 			$apuvakkielto  = $t[$i];
 		}
 
+		if (mysql_field_name($result, $i) == "erilliskasiteltavakulu" or mysql_field_name($result, $i) == "lisakulu" or mysql_field_name($result, $i) == "lisakulu_summa") {
+			if (trim($t[$i]) == '') $t[$i] = 0;
+			if (!is_numeric(trim($t[$i]))) {
+				$virhe[$i] = t("Kulu pit‰‰ olla numeerinen!");
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "rahti_tuotenumero" OR
 			mysql_field_name($result, $i) == "kuljetusvakuutus_tuotenumero") {
 

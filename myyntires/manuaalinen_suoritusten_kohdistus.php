@@ -1286,7 +1286,8 @@ if ($tila == 'tee_kohdistus') {
 
 				// Splitataan myyntisaamiset
 				$query = "	UPDATE tiliointi
-							SET summa = ($kassaan*-1)
+							SET summa = ($kassaan*-1),
+							summa_valuutassa = ($kassaan_valuutassa*-1)
 							WHERE tunnus = $tiliointi1[tunnus]
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -1320,7 +1321,8 @@ if ($tila == 'tee_kohdistus') {
 
 				// Splitataan rahatiliöinti
 				$query = "	UPDATE tiliointi
-							SET summa = $kassaan
+							SET summa = $kassaan,
+							summa_valuutassa = $kassaan_valuutassa
 							WHERE tunnus = $tiliointi2[tunnus]
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -1478,7 +1480,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 
 	$query = "	SELECT suoritus.summa,
 				suoritus.valkoodi valkoodi,
-				concat(viite, viesti) tieto,
+				concat(viite, ifnull(viesti,'')) tieto,
 				suoritus.tilino,
 				maksupvm,
 				kirjpvm,
@@ -1600,7 +1602,6 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	if ($osasuoritus == '1') $osacheck = 'checked';
 	if ($pyoristys_virhe_ok == '1') $pyocheck = 'checked';
 
-
 	echo "<form method = 'post' action='manuaalinen_suoritusten_kohdistus.php' name='summat'>";
 	echo "<table>";
 	echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='0.0' readonly></td>";
@@ -1609,7 +1610,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	echo "</form>";
 
 	//Näytetään laskut!
-	$kentat = 'summa, kasumma, laskunro, erpvm, kapvm, viite, ytunnus';
+	$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
 	$kentankoko = array(10,10,15,10,10,15);
 	$array 	= explode(",", $kentat);
 	$count 	= count($array);
@@ -2017,7 +2018,7 @@ if ($tila == '') {
 				min(asiakas.toim_osoite) toim_osoite,
 				min(asiakas.toim_postitp) toim_postitp,
 				count(suoritus.asiakas_tunnus) maara,
-				sum(if (suoritus.viite>0, 1,0)) viitteita
+				sum(if(suoritus.viite != '', 1, 0)) viitteita
 				FROM suoritus use index (yhtio_kohdpvm)
 				JOIN asiakas ON asiakas.yhtio=suoritus.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus
 				WHERE suoritus.yhtio = '$kukarow[yhtio]'

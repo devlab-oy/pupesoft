@@ -215,6 +215,7 @@
 		$ulos .= "<option value='U'{$sel['U']}>".t("Unikko")."</option>";
 		$ulos .= "<option value='G'{$sel['G']}>".t("Geodis Wilson")."</option>";
 		$ulos .= "<option value='C'{$sel['C']}>".t("Kiinalainen tehdas")."</option>";
+		$ulos .= "<option value='P'{$sel['P']}>".t("Posten Logistik")."</option>";
 		$ulos .= "</select>";
 
 		$ulos .= "</td>";

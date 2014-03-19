@@ -254,11 +254,24 @@ $order";
 
 		echo "<table cellpadding='5'><tr><td valign='top' class='back'>";
 
-		$query  = "show tables from $dbkanta";
+		$query  = "SHOW tables FROM $dbkanta";
 	    $result =  mysql_query($query);
 
 		while ($row = mysql_fetch_array($result)) {
-			echo "<a href='$PHP_SELF?table=$row[0]'>$row[0]</a><br>";
+
+			$query  = "describe $row[0]";
+			$fieldresult = pupe_query($query);
+
+			$naytetaanko = FALSE;
+
+			while ($fields = mysql_fetch_assoc($fieldresult)) {
+				if ($fields["Field"] == "yhtio") {
+					$naytetaanko = TRUE;
+					break;
+				}
+			}
+
+			if ($naytetaanko) echo "<a href='$PHP_SELF?table=$row[0]'>$row[0]</a><br>";
 		}
 
 		echo "</td><td class='back' valign='top'>";
@@ -411,4 +424,3 @@ $order";
 
 		require "inc/footer.inc";
 	}
-?>

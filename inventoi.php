@@ -9,6 +9,24 @@
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
 
+	if (strtolower($toim) == 'oletusvarasto') {
+
+		if ($kukarow['oletus_varasto'] == 0) {
+			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu k‰ytt‰j‰lle"),".</font><br />";
+
+			if ($mobiili != "YES") {
+				require ("inc/footer.inc");
+			}
+
+			exit;
+		}
+
+		$oletusvarasto_chk = $kukarow['oletus_varasto'];
+	}
+	else {
+		$oletusvarasto_chk = 0;
+	}
+
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -41,7 +59,7 @@
 	}
 
 	if ($rivimaara == '') {
-		$rivimaara = '18';
+		$rivimaara = '17';
 	}
 
 	//katotaan onko tiedosto ladattu
@@ -69,6 +87,8 @@
 			$selis = array();
 			$lajis = array();
 
+			$oletusvarasto_err = 0;
+
 			for ($excei = 0; $excei < count($excelrivit); $excei++) {
 				// luetaan rivi tiedostosta..
 				$tuo		= mysql_real_escape_string(trim($excelrivit[$excei][0]));
@@ -86,6 +106,11 @@
 				if ($tuo != '' and $hyl != '' and $maa != '') {
 					$hylp = explode("-", $hyl);
 
+					if ($oletusvarasto_chk > 0 and kuuluukovarastoon($hylp[0], $hylp[1], $oletusvarasto_chk) == 0) {
+						$oletusvarasto_err++;
+						continue;
+					}
+
 					$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
 					$maara[] = $maa;
 					$selis[] = $lisaselite;
@@ -98,6 +123,18 @@
 				$valmis 	= "OK";
 				$fileesta 	= "ON";
 			}
+			else {
+				$tee = '';
+				echo "<font class='error'>",t("Yht‰‰n tuotetta ei inventoitu"),"!</font><br />";
+			}
+
+			if ($oletusvarasto_chk > 0 and $oletusvarasto_err > 0) {
+				$plural = $oletusvarasto_err > 1 ? "tuotetta" : "tuote";
+				echo " <font class='error'>",t("%d %s ei lˆytynyt oletusvarastosta", "", $oletusvarasto_err, $plural),".</font><br />";
+			}
+		}
+		else {
+			$tee = "";
 		}
 	}
 
@@ -279,6 +316,8 @@
 									$onko_uusia++;
 								}
 							}
+
+							$erasyotetyt = round($erasyotetyt, 2);
 
 							if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and $onko_uusia > 0) {
 								echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
@@ -701,17 +740,20 @@
 									$varcheckres = pupe_query($query);
 									$varcheckrow = mysql_fetch_assoc($varcheckres);
 
-									$query = "	SELECT kustp, kohde, projekti
-												FROM yhtion_toimipaikat
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus  = {$varcheckrow['toimipaikka']}";
-									$toimipaikkares = pupe_query($query);
-									$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+									unset($toimipaikkarow);
+									if ($varcheckrow['toimipaikka'] > 0) {
+										$query = "	SELECT kustp, kohde, projekti
+													FROM yhtion_toimipaikat
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus  = {$varcheckrow['toimipaikka']}";
+										$toimipaikkares = pupe_query($query);
+										$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+									}
 
 									// Otetaan ensisijaisesti kustannuspaikka toimipaikan takaa
-									$kustp_ins 		= $toimipaikkarow["kustp"] > 0 ? $toimipaikkarow["kustp"] : $tuote_row["kustp"];
-									$kohde_ins 		= $toimipaikkarow["kohde"] > 0 ? $toimipaikkarow["kohde"] : $tuote_row["kohde"];
-									$projekti_ins 	= $toimipaikkarow["projekti"] > 0 ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
+									$kustp_ins 		= (isset($toimipaikkarow) and $toimipaikkarow["kustp"] > 0) ? $toimipaikkarow["kustp"] : $tuote_row["kustp"];
+									$kohde_ins 		= (isset($toimipaikkarow) and $toimipaikkarow["kohde"] > 0) ? $toimipaikkarow["kohde"] : $tuote_row["kohde"];
+									$projekti_ins 	= (isset($toimipaikkarow) and $toimipaikkarow["projekti"] > 0) ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
 								}
 								else {
 									// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
@@ -976,6 +1018,43 @@
 		}
 	}
 
+	if ($tee == 'POISTAERANUMERO') {
+		$query = "	SELECT sarjanumeroseuranta.tunnus, tilausrivi_myynti.tunnus myyntitunnus, tilausrivi_osto.tunnus ostotunnus
+					FROM sarjanumeroseuranta
+					JOIN tuote USING (yhtio,tuoteno)
+					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+					JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+					WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
+					and sarjanumeroseuranta.tuoteno		= '$tuoteno'
+					and sarjanumeroseuranta.myyntirivitunnus != -1
+					and tilausrivi_myynti.tunnus is null
+				 	and tilausrivi_osto.laatija = 'Invent'
+					and tilausrivi_osto.laskutettuaika = '0000-00-00'
+					and (tuote.sarjanumeroseuranta not in ('E','F','G') or era_kpl != 0)
+					and sarjanumeroseuranta.tunnus = $sarjatunnus";
+		$sarjares = pupe_query($query);
+
+		if (mysql_num_rows($sarjares) == 1) {
+
+			$sarjarow = mysql_fetch_assoc($sarjares);
+
+			$query = "  UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$sarjarow['ostotunnus']}'";
+			pupe_query($query);
+
+			$query = " 	DELETE FROM sarjanumeroseuranta
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$sarjarow['tunnus']}'";
+			pupe_query($query);
+
+			echo "<br>".t("Er‰ poistettu")."!<br><br>";
+		}
+
+		$tee = 'INVENTOI';
+	}
+
 	if ($tee == 'INVENTOI') {
 
 		if (isset($tmp_tuoteno) and $tmp_tuoteno != '') {
@@ -1034,9 +1113,9 @@
 				$alku = 0;
 			}
 
-			$loppu = "18";
+			$loppu = "17";
 
-			if ($rivimaara != "18" and $rivimaara != '') {
+			if ($rivimaara != "17" and $rivimaara != '') {
 				$loppu = $rivimaara;
 			}
 
@@ -1094,16 +1173,16 @@
 			//-->
 			</script>";
 
-		$sel1rivi=$sel18rivi=$sel180rivi="";
+		$sel1rivi=$sel17rivi=$sel170rivi="";
 
 		if ($rivimaara == '1') {
 			$sel1rivi = "SELECTED";
 		}
-		elseif ($rivimaara == '18') {
-			$sel18rivi = "SELECTED";
+		elseif ($rivimaara == '17') {
+			$sel17rivi = "SELECTED";
 		}
 		else {
-			$sel180rivi = "SELECTED";
+			$sel170rivi = "SELECTED";
 		}
 
 		$seljarj1 = "";
@@ -1126,10 +1205,11 @@
 
 		if ($lista != "") {
 			echo "<form method='post'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<select name='rivimaara' onchange='submit()'>";
-			echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
-			echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
+			echo "<option value='170' $sel170rivi>".t("N‰ytet‰‰n 170 rivi‰")."</option>";
+			echo "<option value='17' $sel17rivi>".t("N‰ytet‰‰n 17 rivi‰")."</option>";
 			echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
 			echo "</select>";
 			echo "<select name='jarjestys' onchange='submit()'>";
@@ -1147,6 +1227,7 @@
 
 
 		echo "<form name='inve' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='VALMIS'>";
 		echo "<input type='hidden' name='lista' value='$lista'>";
@@ -1165,6 +1246,8 @@
 		$rivilask = 0;
 
 		while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
+
+			if ($oletusvarasto_chk > 0 and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
 			//Haetaan ker‰tty m‰‰r‰
 			$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -1287,6 +1370,7 @@
 								if ($sarjarow['laskutettuaika'] == '0000-00-00') {
 									echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
 									echo "<font class='message'>**",t("UUSI"),"**</font>";
+									echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]'>".t("Poista")."</a>";
 								}
 								else {
 									echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
@@ -1503,6 +1587,7 @@
 
 			echo "<table>";
 			echo "<form method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
@@ -1522,6 +1607,7 @@
 			$yesrow = mysql_fetch_assoc($yesres);
 
 			echo "<form method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
@@ -1532,6 +1618,7 @@
 		}
 
 		echo "<form name='inve' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";
 
@@ -1551,6 +1638,7 @@
 		echo "<br><br>";
 
 		echo "<form method='post' enctype='multipart/form-data'>
+				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
@@ -1604,6 +1692,7 @@
 						<td>".tv1dateconv($lrow["inventointilista_aika"], "PITKA")."</td>
 						<td>
 							<form action='inventoi.php' method='post'>
+							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tee' value='INVENTOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
@@ -1613,6 +1702,7 @@
 						</td>
 						<td>
 							<form action='inventoi.php' method='post'>
+							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tee' value='MITATOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>

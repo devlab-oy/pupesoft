@@ -42,7 +42,7 @@
 	// Otetaan yhtiön oletus jos ei olla submitattu....
 	if (!isset($tilirivformi))		$grouppaa = $yhtiorow["tositteen_tilioinnit"];
 
-	echo "<br><br>";
+	echo "<br>";
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Tili")."</th>";

@@ -1075,7 +1075,7 @@
 					SUM(tiliointi.summa) tilsumma
 					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != '')
-					LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.korjattu = '' AND tiliointi.tilino IN ({$myyntisaamiset_tilit}))
+					LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.korjattu = '' AND tiliointi.tilino IN ({$myyntisaamiset_tilit}) AND tiliointi.tapvm = lasku.mapvm)
 					LEFT JOIN kassalipas ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
 					WHERE lasku.yhtio	= '{$kukarow['yhtio']}'
 					AND lasku.tila 		= 'U'
@@ -1274,6 +1274,7 @@
 			$tilinumero 		= array();
 			$kassalippaat 		= array();
 			$kassalipas_tunnus 	= array();
+			$vahennetty 		= array();
 
 			if (isset($tasmays) and $tasmays != '') {
 				if (mysql_num_rows($result) > 0) {
@@ -1287,6 +1288,13 @@
 					}
 					if ($row["tyyppi"] == 'Luottokortti') {
 						$luottokortti = true;
+					}
+
+					if ($row['tilsumma'] < $row['summa']) {
+						$echolisa = "({$row['summa']}) ";
+					}
+					else {
+						$echolisa = "";
 					}
 
 					if (stristr($row["tyyppi"], 'kateinen')) {
@@ -1496,14 +1504,13 @@
 							$kateismaksuyhteensa = 0;
 						}
 
-
 						echo "<tr class='aktiivi'>";
 						echo "<td>$row[kassanimi]</td>";
 						echo "<td>".substr($row["nimi"],0,23)."</td>";
 						echo "<td>$row[ytunnus]</td>";
 						echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 						echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-						echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
+						echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
 						$kateismaksu 		= $row['tyyppi'];
 						$kateismaksuekotus 	= t(str_replace("kateinen", "Käteinen", $kateismaksu));
@@ -1727,6 +1734,13 @@
 
 					while ($row = mysql_fetch_assoc($result)) {
 
+						if ($row['tilsumma'] < $row['summa']) {
+							$echolisa = "({$row['summa']}) ";
+						}
+						else {
+							$echolisa = "";
+						}
+
 						if ($row["tyyppi"] == 'Pankkikortti') {
 
 							if ($row["tilino"] != '') {
@@ -1818,6 +1832,13 @@
 
 					while ($row = mysql_fetch_assoc($result)) {
 
+						if ($row['tilsumma'] < $row['summa']) {
+							$echolisa = "({$row['summa']}) ";
+						}
+						else {
+							$echolisa = "";
+						}
+						
 						if ($row["tyyppi"] == 'Luottokortti') {
 
 							if ($row["tilino"] != '') {
@@ -1836,7 +1857,7 @@
 							echo "<td>$row[ytunnus]</td>";
 							echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-							echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
+							echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
 							$kateinen    		  = $row["tilino"];
 							$edkassa 	 		  = $row["kassa"];
@@ -1894,6 +1915,13 @@
 			else {
 				while ($row = mysql_fetch_assoc($result)) {
 
+					if ($row['tilsumma'] < $row['summa']) {
+						$echolisa = "({$row['summa']}) ";
+					}
+					else {
+						$echolisa = "";
+					}
+
 					if ((($edkassa != $row["kassa"] and $edkassa != '') or ($kateinen != $row["tilino"] and $kateinen != ''))) {
 						$kassalippaan_kateisotot_yhteensa = 0;
 						foreach($kateisotot[$edkassa] as $kateisotto) {
@@ -1906,7 +1934,10 @@
 							echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
 							echo "<td>{$kateisotto['summa']}</td>";
 							echo "</tr>";
+
+							$vahennetty[$kateisotto['tunnus']] = $kateisotto['tunnus'];
 						}
+
 						$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
 						$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
 						$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
@@ -1972,7 +2003,7 @@
 					echo "<td>$row[ytunnus]</td>";
 					echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 					echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-					echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
+					echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
 					$kateinen    		= $row["tilino"];
 					$edkassa 	 		= $row["kassa"];
@@ -2006,15 +2037,17 @@
 
 				$kassalippaan_kateisotot_yhteensa = 0;
 				foreach($kateisotot[$edkassa] as $kateisotto) {
-					$kassalippaan_kateisotot_yhteensa += $kateisotto['summa'];
-					echo "<tr class='aktiivi'>";
-					echo "<td>{$kateisotto['kassalipas_nimi']}</td>";
-					echo "<td>{$kateisotto['selite']} - {$kateisotto['kuka_nimi']}</td>";
-					echo "<td>-</td>";
-					echo "<td>-</td>";
-					echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
-					echo "<td>{$kateisotto['summa']}</td>";
-					echo "</tr>";
+					if (!isset($vahennetty[$kateisotto["tunnus"]])) {
+						$kassalippaan_kateisotot_yhteensa += $kateisotto['summa'];
+						echo "<tr class='aktiivi'>";
+						echo "<td>{$kateisotto['kassalipas_nimi']}</td>";
+						echo "<td>{$kateisotto['selite']} - {$kateisotto['kuka_nimi']}</td>";
+						echo "<td>-</td>";
+						echo "<td>-</td>";
+						echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
+						echo "<td>{$kateisotto['summa']}</td>";
+						echo "</tr>";
+					}
 				}
 
 				//$kassalippaan_kateisotot_yhteensa aina < 0 $kateismaksuyhteensa aina > 0
@@ -2566,7 +2599,8 @@
 								tiliointi.summa,
 								tiliointi.selite,
 								kassalipas.nimi as kassalipas_nimi,
-								kuka.nimi as kuka_nimi
+								kuka.nimi as kuka_nimi,
+								lasku.tunnus
 								FROM lasku
 								JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.summa < 0 AND tiliointi.korjattu = '')
 								JOIN kassalipas ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)

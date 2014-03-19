@@ -20,7 +20,7 @@
 		$tilausok++;
 	}
 
-	if ($trow["toimittaja"] == "" and $toim_tarkistus != "EI" and $riviok == 0) {
+	if ($trow["liitostunnus"] == 0 and $toim_tarkistus != "EI" and $riviok == 0) {
 		$varaosavirhe .= t("VIRHE: Tuotetta ei voi tilata tältä toimittajalta")."!<br>";
 		$riviok++;
 		$tilausok++;
@@ -49,6 +49,10 @@
 		$prow["kommentti"] .= "<br>".t("HUOM: Toimittajan tehtaan saldo on")." {$trow['tehdas_saldo']}.<br>";
 	}
 
+	if ($trow['ostoehdotus'] == 'E' and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE) {
+		$varaosavirhe .= t("HUOM: Tuotetta ei ehdoteta ostoehdotus ohjelmissa tilattavaksi")."!<br>";
+	}
+
 	if ($yhtiorow['ostoera_pyoristys'] == 'K' and isset($ostoerahuom) and is_array($ostoerahuom) and in_array($prow['tunnus'], $ostoerahuom) and $kpl_st != $org_kpl) {
 		$varaosavirhe .= "<font class='message'>".t("HUOM: Rivin määrä on pyöristetty täyteen ostoerään!")."<br></font>";
 	}
@@ -57,7 +61,7 @@
 		$prow["hinta"] = round($prow["hinta"] * $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
 	}
 
-	if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['ostohinta'] and ($prow["var"] == "" or $toiminto == 'kohdista') and $trow["toimittaja"] != "" and $riviok == 0) {
+	if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['ostohinta'] and ($prow["var"] == "" or $toiminto == 'kohdista') and $trow["liitostunnus"] != 0 and $riviok == 0) {
 
 		$paiv_hinta = (float) $paiv_hinta;
 
@@ -234,7 +238,7 @@
 												avainsana.selitetark_4,
 												avainsana.selitetark_5
 												FROM tuotteen_toimittajat
-												JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
+												JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 												LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['vanhatunnus']}' AND toimi.tunnus = avainsana.selitetark)
 												JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 												WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
@@ -369,12 +373,8 @@
 												toimi.tunnus as toimi_tunnus,
 												tuote.myyntihinta
 												FROM tuotteen_toimittajat
-												JOIN toimi
-												ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-													AND toimi.ytunnus = tuotteen_toimittajat.toimittaja )
-												JOIN tuote
-												ON ( tuote.yhtio = tuotteen_toimittajat.yhtio
-													AND tuote.tuoteno = tuotteen_toimittajat.tuoteno )
+												JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+												JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 												WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
 												AND tuotteen_toimittajat.tuoteno = '{$korvaava_tuote['tuoteno']}'";
 				$tuotteen_toimittaja_result = pupe_query($tuotteen_toimittaja_query);

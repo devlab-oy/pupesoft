@@ -32,10 +32,13 @@
 		// poistetaan ihan aluksi kaikki.. iiik.
 		$query = "	DELETE
 					FROM oikeu
-					WHERE yhtio='$kukarow[yhtio]' and kuka = '$selkukarow[kuka]'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kuka = '$selkukarow[kuka]'";
+
 		if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
 			$query .= " and sovellus='$sovellus'";
 		}
+
 		$result = pupe_query($query);
 
 		// sitten tutkaillaan onko jotain ruksattu...
@@ -123,6 +126,9 @@
 				}
 			}
 		}
+
+		// p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+		paivita_aktiiviset_kayttajat($selkukarow["kuka"]);
 	}
 
 	echo "<font class='head'>".t("Tietosuoja").":</font><hr>";

@@ -162,7 +162,7 @@
 											$kysely .= $kennimi."='$koprivihinta',";
 											break;
 										case 'kate_korjattu':
-											$kysely .= $kennimi."=NULL,";
+											$kysely .= $kennimi."= NULL,";
 											break;
 										default:
 											$kysely .= $kennimi."='".$ostokokorow[$kennimi]."',";

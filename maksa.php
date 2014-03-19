@@ -205,7 +205,7 @@
 							and pankki4 	= '$trow[pankki4]'
 							and sisviesti1 	= '$trow[sisviesti1]'";
 			}
-
+			
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
@@ -1141,7 +1141,7 @@
 
 				echo "</td>";
 
-				echo "<td valign='top'>$trow[ultilno]</td>";
+				echo "<td valign='top'>$trow[ultilno]<br>$trow[swift]</td>";
 
 				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";
 
@@ -1372,7 +1372,7 @@
 				}
 
 				echo "</td>";
-				echo "<td valign='top'>$trow[ultilno]</td>";
+				echo "<td valign='top'>$trow[ultilno]<br>$trow[swift]</td>";
 
 				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']);
 

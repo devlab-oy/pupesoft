@@ -722,9 +722,7 @@
 				$srow_from = "LASKU";
 			}
 			else {
-				//tyomaarays.viite as tyomaarays_viite, selectoidaan erikseen koska resultista löytyy 2 viite kenttää: tyomaarays.viite ja lasku.viite. mysql driveri yliajaa tyomaarays.viiteen lasku.viitteellä
-				//kts. n rivi. 2717 Dynaaminen osio
-				$squery = "	SELECT tyomaarays.viite as tyomaarays_viite, tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -887,7 +885,6 @@
 			);
 		}
 
-		// Ostaja //
 		echo "<table>";
 		echo "<tr><td style='padding:0px;'>";
 
@@ -1045,8 +1042,6 @@
                         {$kohde_ui}
                         </select></td></tr>";
             }
-
-            // Toimitusosoite //
             echo "<tr>
 					<td valign='top'> ".t("Nimi").": </td>
 					<td><input type='text' name='tnimi' size='35' value='$srow[toim_nimi]'></td></tr>";
@@ -1085,7 +1080,6 @@
 			echo "</table>";
 			echo "</td>";
 
-			// Laskun postitusosoite //
 			echo "<td valign='top' style='padding:0px;'>";
 			echo "<table>";
 			echo "<tr>
@@ -1187,7 +1181,6 @@
 
 			echo "<table>";
 
-			// Tiedot //
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
 			}
@@ -2444,9 +2437,6 @@
 				$vasen++;
 			}
 
-			$vasen_sarake[$vasen] = "<td>".t("Perintäesto"). "</td><td><input type='text' name='estopp' value='$estopp' size='3'><input type='text' name='estokk' value='$estokk' size='3'><input type='text' name='estovv' value='$estovv' size='6'></td>";
-			$vasen++;
-
 			// Ekotetan sarakkeet!
 			$rivicount = count($vasen_sarake) > count($oikea_sarake) ? count($vasen_sarake) : count($oikea_sarake);
 
@@ -2467,7 +2457,6 @@
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
 
-				// Työjono //
 				echo "	<tr>
 						<td>".t("Työjono").":</td><td>";
 
@@ -2506,7 +2495,6 @@
 				}
 				echo "</select>";
 
-				// Työstatus //
 				echo "	</td>
 						<td>".t("Työstatus").":</td><td>";
 
@@ -2530,7 +2518,6 @@
 				echo "</select>";
 				echo "</td></tr>";
 
-				// Prioriteetti //
 				echo "<tr><td>".t("Prioriteetti").":</td><td colspan=3>";
 				echo "<select name='prioriteetti'>";
 
@@ -2553,7 +2540,6 @@
 				echo "</td></tr>";
 			}
 
-			// Täysin dynaaminen osio
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
 				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != ''");
 
@@ -2572,7 +2558,6 @@
 
 					$kentta = $al_row["selite"];
 
-					// Text
 					if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
 
 						if ($al_lask == 1) {
@@ -2583,7 +2568,6 @@
 
 						$al_lask++;
 					}
-					// Date
 					elseif (strtoupper($al_row["selitetark_2"]) == "DATE") {
 
 						list($al_vv, $al_kk, $al_pp) = explode('-', $srow["$kentta"]);
@@ -2597,7 +2581,6 @@
 								<input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
 								<input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
 					}
-					// Datetime
 					elseif (strtoupper($al_row["selitetark_2"]) == "DATETIME") {
 						echo "<td>$al_row[selitetark]:</td>";
 						echo "<td>";
@@ -2605,7 +2588,6 @@
 						echo "<input type='datetime' name='$al_row[selitetark]' value=''>";
 						echo "</td>";
 					}
-					// Dropdownit
 					elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
 						$dropdown_arvot = explode("#", $al_row['selitetark_3']);
 
@@ -2620,7 +2602,6 @@
 						echo "</select>";
 						echo "</td>";
 					}
-					// Checkbox
 					elseif (strtoupper($al_row["selitetark_2"]) == "CHECKBOX") {
 						$checkbox_arvot = explode("#", $al_row['selitetark_3']);
 
@@ -2643,7 +2624,6 @@
 						echo "</td>";
 
 					}
-					// Radio button
 					elseif (strtoupper($al_row["selitetark_2"]) == "RADIO") {
 						$radio_values = explode("#", $al_row['selitetark_3']);
 
@@ -2660,7 +2640,6 @@
 						echo "</td>";
 
 					}
-					// Livesearchi
 					elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
 						$mika_livesearch = $al_row["selitetark_3"];
 						echo "<td>";
@@ -2677,7 +2656,6 @@
 						echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, 'EISUBMIT', '', '', 'ei_break_all');
 						echo "</td>";
 					}
-					// Työn suorittaja
 					elseif ($kentta == "suorittaja") {
 
 						$query = "	SELECT DISTINCT if (avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
@@ -2716,7 +2694,6 @@
 
 						echo "</select></td>";
 					}
-					// Merkki
 					elseif ($kentta == "merkki") {
 
 						echo "<td>$al_row[selitetark]:</td><td>";
@@ -2748,28 +2725,8 @@
 
 						echo "<input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
 					}
-					// Laskennallinen kenttä
-					elseif ($kentta == "toimintavarmuus") {
-						$_paivat = (strtotime($srow['valmis']) - strtotime($srow['luvattu'])) / 3600 / 24;
-						$kiireellisyys = $srow['prioriteetti'];
-						echo "<td>$al_row[selitetark]</td>";
-						echo "<td>";
-						echo round(tyomaarays_toimintavarmuus($kiireellisyys, $_paivat) * 100, 2) . " %";
-						echo "</td>";
-					}
-					// Laskennallinen kenttä
-					elseif ($kentta == "palautusvarmuus") {
-						$_paivat = (strtotime($srow['tyo_loppu']) - strtotime($srow['tyo_alku'])) / 3600 / 24;
-						echo "<td>$al_row[selitetark]</td>";
-						echo "<td>";
-						echo round(tyomaarays_palautusvarmuus($_paivat) * 100, 2) . " %";
-						echo "</td>";
-					}
 					// Muut
 					else {
-						if ($kentta == 'viite') {
-							$srow[$kentta] = $srow['tyomaarays_viite'];
-						}
 						echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
 					}
 
@@ -3996,39 +3953,6 @@
 					$merkki = $merkki2;
 				}
 
-				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
-					//Dynaamisen osion checkbox toiminnallisuutta varten. Kaikki tyomääräyksen requestista tulevat kentät
-					//pitää käydä läpi ja katsoa onko array (checkbox), paitsi date ja datetime tyyppiset kentät
-					$dynaamiset_kentat = array(
-						'kotipuh'		 => $kotipuh,
-						'tyopuh'		 => $tyopuh,
-						'myyjaliike'	 => $myyjaliike,
-						'rekno'			 => $rekno,
-						'mittarilukema'	 => $mittarilukema,
-						'merkki'		 => $merkki,
-						'mallivari'		 => $mallivari,
-						'valmnro'		 => $valmnro,
-						'komm1'			 => $komm1,
-						'komm2'			 => $komm2,
-						'suorittaja'	 => $suorittaja,
-						'viite'			 => $viite,
-						'prioriteetti'	 => $prioriteetti,
-						'jalleenmyyja'	 => $jalleenmyyja,
-						'tehdas'		 => $tehdas,
-						'tyoaika'		 => $tyoaika,
-						'vikakoodi'		 => $vikakoodi,
-						'takuunumero'	 => $takuunumero,
-						'tyokoodi'		 => $tyokoodi,
-						'hyvaksy'		 => $hyvaksy,
-					);
-
-					foreach ($dynaamiset_kentat as $kentan_nimi => $dynaaminen_kentta) {
-						if (is_array($dynaaminen_kentta)) {
-							${$kentan_nimi} = implode('#', $dynaaminen_kentta);
-						}
-					}
-				}
-
 				$query2 .= "tyomaarays SET
 							yhtio			= '$kukarow[yhtio]',
 							kotipuh 		= '$kotipuh',
@@ -4042,9 +3966,6 @@
 							valmnro 		= '$valmnro',
 							tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
 							luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
-							valmis			= '$valmisvv-$valmiskk-$valmispp',
-							tyo_alku			= '$tyo_alkuvv-$tyo_alkukk-$tyo_alkupp',
-							tyo_loppu		= '$tyo_loppuvv-$tyo_loppukk-$tyo_loppupp',
 							komm1 			= '$komm1',
 							komm2 			= '$komm2',
 							suorittaja 		= '$suorittaja',
@@ -4057,7 +3978,6 @@
 							takuunumero		= '$takuunumero',
 							tyokoodi		= '$tyokoodi',
 							hyvaksy			= '$hyvaksy',
-							lisakuluprosentti = '{$yhtiorow['lisakuluprosentti']}',
 							otunnus 		= '$kukarow[kesken]'";
 
 				//Nämä kentät päivitetään vain, jos päivitetään sitä työmääräykseltä tai muualta missä nuo kaksi kenttää näkyy..

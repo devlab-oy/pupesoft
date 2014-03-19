@@ -241,7 +241,7 @@ if (!function_exists('tyomaarays_alku')) {
 					}
 
 					$pdf->draw_text($al_lask, $kala, $al_row["selitetark"].":",	$thispage, $norm);
-					$pdf->draw_text($al_lask+110, $kala, $laskurow[$kentta], 	$thispage, $norm);
+					$pdf->draw_text($al_lask+70, $kala, $laskurow[$kentta], 	$thispage, $norm);
 					$al_fask++;
 					$al_lask += 275;
 				}
@@ -450,9 +450,6 @@ if (!function_exists('tyomaarays_rivi_otsikot')) {
 			if ($tuotetyyppi == "2 Työt") {
 				$pdf->draw_text(25,  $kala+35, t("Työt ja palvelut", $kieli),			$thispage, $boldi);
 			}
-			elseif ($tyomaarays_ryhmittely != '') {
-				$pdf->draw_text(25,  $kala+35, t(ucfirst($tyomaarays_ryhmittely), $kieli),		$thispage, $boldi);
-			}
 			else {
 				$pdf->draw_text(25,  $kala+35, t("Osat ja tarvikkeet", $kieli),		$thispage, $boldi);
 			}
@@ -544,7 +541,7 @@ if (!function_exists('tyomaarays_rivi')) {
 			$uudehko = "";
 		}
 
-		if (($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E" and ($row["tuotetyyppi"] != $edtuotetyyppi or $row["tyomaarays_ryhmittely"] != $edryhmittely)) or $uudehko == "ON") {
+		if (($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E" and $row["tuotetyyppi"] != $edtuotetyyppi) or $uudehko == "ON") {
 			$kala -= $rivinkorkeus*3;
 
 			if ($kala < 95) {
@@ -566,7 +563,6 @@ if (!function_exists('tyomaarays_rivi')) {
 			// Luodaan palautettavat
 			$return = compact(array_keys($params));
 			$return["tuotetyyppi"] = $row["tuotetyyppi"];
-			$return["tyomaarays_ryhmittely"] = $row["tyomaarays_ryhmittely"];
 
 			$params = tyomaarays_rivi_otsikot($return);
 
@@ -575,7 +571,6 @@ if (!function_exists('tyomaarays_rivi')) {
 		}
 
 		$edtuotetyyppi = $row["tuotetyyppi"];
-		$edryhmittely = $row["tyomaarays_ryhmittely"];
 
 		$varastopaikka = $row["hyllyalue"] . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 

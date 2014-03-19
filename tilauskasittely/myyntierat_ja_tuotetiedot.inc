@@ -1,5 +1,4 @@
 <?php
-
 // käytetään slavea
 $useslave = 1;
 
@@ -7,6 +6,8 @@ $useslave = 1;
 // 	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 // 	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 // }
+if (isset($lajit)) setcookie('avainsanalaji_keksi', serialize($lajit), strtotime('+30 days'), "/");
+if (isset($_COOKIE['avainsanalaji_keksi'])) $lajit_array = unserialize($_COOKIE['avainsanalaji_keksi']);
 
 if (!isset($aja_ja_tallenna) and !isset($_REQUEST['lajit'])) {
 	// piirrellään vaihtoehdot aina jos ei olla subattu rapsaa
@@ -30,8 +31,8 @@ if (!isset($aja_ja_tallenna) and !isset($_REQUEST['lajit'])) {
 		if (strlen($row['laji']) < 4) continue;
 		$nollaus = false;
 		if ($secretcounter == 0) echo "<tr>";
-
-		echo "<td align='left' valign='top' width='100'><input type='checkbox' name='lajit[]' value='{$row['laji']}' >{$row['laji']}</td>";
+		$tsekk = isset($lajit_array["{$row['laji']}"]) ? "CHECKED" : "";
+		echo "<td align='left' valign='top' width='100'><input type='checkbox' name='lajit[]' value='{$row['laji']}' $tsekk>{$row['laji']}</td>";
 		if ($secretcounter == 2) echo "</tr>";
 		if ($secretcounter == 2) { 
 			$secretcounter = 0;

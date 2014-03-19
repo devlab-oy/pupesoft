@@ -2541,6 +2541,7 @@
 			}
 
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
+				//Täysin dynaaminen osio
 				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != ''");
 
 				$al_lask = 0;
@@ -2725,7 +2726,6 @@
 
 						echo "<input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
 					}
-					// Muut
 					else {
 						echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
 					}

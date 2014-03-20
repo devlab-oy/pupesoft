@@ -459,6 +459,9 @@ class MagentoClient {
 		// Uusia voi hakea? state => 'new'
 		#$filter = array(array('state' => array('eq' => 'new')));
 
+		// Näin voi hakea yhden tilauksen tiedot
+		//return array($this->_proxy->call($this->_session, 'sales_order.info', '100019914'));
+
 		// Haetaan tilaukset (orders.status = 'processing')
 		$fetched_orders = $this->_proxy->call($this->_session, 'sales_order.list', $filter);
 
@@ -581,10 +584,10 @@ class MagentoClient {
 	 * @param array $kaikki_tuotteet Kaikki tuotteet, jotka pitää LÖYTYÄ Magentosta
 	 * @return   Poistettujen tuotteiden määrä
 	 */
-	public function poista_poistetut(array $kaikki_tuotteet) {
+	public function poista_poistetut(array $kaikki_tuotteet, $exclude_giftcards = false) {
 
 		$count = 0;
-		$skus = $this->getProductList(true);
+		$skus = $this->getProductList(true, $exclude_giftcards);
 
 		// Poistetaan tuottee jotka löytyvät arraysta $kaikki_tuotteet arraystä $skus
 		$poistettavat_tuotteet = array_diff($skus, $kaikki_tuotteet);
@@ -981,11 +984,19 @@ class MagentoClient {
 	 * @param boolean $only_skus 	Palauttaa vain tuotenumerot (true)
 	 * @return array
 	 */
-	private function getProductList($only_skus = false) {
+	private function getProductList($only_skus = false, $exclude_giftcards = false) {
 
 		try {
 			$result = $this->_proxy->call($this->_session, 'catalog_product.list');
 
+			if ($exclude_giftcards) {
+				foreach ($result as $index => $product) {
+					if ($product['type'] == 'giftcards') {
+						unset($result[$index]);
+					}
+				}
+			}
+			
 			if ($only_skus == true) {
 				$skus = array();
 

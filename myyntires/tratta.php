@@ -221,9 +221,9 @@ if ($tee == 'TRATTAA')  {
 	echo "</td><td valign='top' class='back'>";
 
 	echo "<table>";
-	echo "<tr><th>".t("Edellinen karhu v‰h").".</th><td>$kpvm_aikaa ".t("p‰iv‰‰ sitten").".</td></tr>";
+	echo "<tr><th>".t("Edellinen maksukehotus v‰h").".</th><td>$kpvm_aikaa ".t("p‰iv‰‰ sitten").".</td></tr>";
 	echo "<tr><th>".t("Er‰p‰iv‰st‰ v‰h").".</th><td>$lpvm_aikaa ".t("p‰iv‰‰").".</td></tr>";
-	echo "<tr><th>".t("Karhukertoja v‰h").".</th><td>$karhu_kerta ".t("kertaa").".</td></tr>";
+	echo "<tr><th>".t("Maksukehotus l‰hetetty v‰h").".</th><td>$karhu_kerta ".t("kertaa").".</td></tr>";
 	echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
 
 	$query = "	SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
@@ -265,8 +265,8 @@ if ($tee == 'TRATTAA')  {
 	echo "<th>".t("Summa")."</th>";
 	echo "<th>".t("Er‰p‰iv‰")."</th>";
 	echo "<th>".t("Ik‰ p‰iv‰‰")."</th>";
-	echo "<th>".t("Karhuttu")."</th>";
-	echo "<th>".t("Edellinen karhu")."</th>";
+	echo "<th>".t("Maksukehotuksia")."</th>";
+	echo "<th>".t("Edellinen maksukehotus")."</th>";
 	echo "<th>".t("Tratataan")."</th>";
 
 	$summmmma = 0;
@@ -308,7 +308,7 @@ if ($tee == 'TRATTAA')  {
 
 	$summmmma += $kaatosumma;
 
-	echo "<th colspan='2'>".t("Karhuttavaa yhteens‰")."</th>";
+	echo "<th colspan='2'>".t("Tratalla yhteens‰")."</th>";
 	echo "<th>$summmmma</th>";
 	echo "<td class='back'></td></tr>";
 

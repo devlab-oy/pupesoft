@@ -188,21 +188,14 @@
 
 	   	$i = 1;
 
-	   	$ta_lisa = $ta_where = "";
-
-	   	if ($myynti_vai_osto == 'O') {
-	   		$ta_lisa = "LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')";
-	   		$ta_where = "AND ta.tunnus IS NULL";
-	   	}
-
 		$query = "	SELECT tilausrivi.*
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
-					{$ta_lisa}
+					LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 					AND tilausrivi.var not in ('U','J')
-					{$ta_where}";
+					AND ta.tunnus IS NULL";
 		$tilausrivi_res = pupe_query($query);
 
 		if (mysql_num_rows($tilausrivi_res) == 0) return false;

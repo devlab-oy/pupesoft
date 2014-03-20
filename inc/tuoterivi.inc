@@ -111,7 +111,7 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-		if($laji == "V") {
+		if ($laji == "V" or $trow[$i] == "A" or $trow[$i] == "B") {
 			$ulos .= "<option value='A' $sel[A]>".t("Päiväraha")."</option>";
 			$ulos .= "<option value='B' $sel[B]>".t("Muu kulu")."</option>";
 		}

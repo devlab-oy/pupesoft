@@ -3,6 +3,9 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
+// Ei k‰ytet‰ pakkausta
+$compression = FALSE;
+
 if (isset($_REQUEST["tee"])) {
 	if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 	if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
@@ -135,11 +138,6 @@ else {
 
 	if (isset($subnappi) and $subnappi != '') {
 
-		if (!@include('Spreadsheet/Excel/Writer.php')) {
-			echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
-			exit;
-		}
-
 		$msg  = "";
 
 		if (isset($lisa) and $lisa != '') {
@@ -220,16 +218,18 @@ else {
 					epakurantti75pvm,
 					tuote.tuotemerkki,
 					tuote.myyjanro,
+					tuote.sarjanumeroseuranta,
 					sum(saldo) saldo
 					FROM tuote
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					AND tuote.ei_saldoa = ''
 					AND tuote.tuotetyyppi NOT IN ('A', 'B')
+					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
 					$epakuranttipvm
 					$tuote_epa_rajaus
 					$lisa
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 					HAVING saldo != 0
 					ORDER BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
@@ -242,18 +242,10 @@ else {
 
 		$elements = mysql_num_rows($result); // total number of elements to process
 
-		//keksit‰‰n failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+		include('inc/pupeExcel.inc');
 
-		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$workbook->setVersion(8);
-		$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-		$format_bold =& $workbook->addFormat();
-		$format_bold->setBold();
-
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
 		$excelrivi 	 = 0;
 		$excelsarake = 0;
 
@@ -297,11 +289,15 @@ else {
 			$excelsarake++;
 		}
 
-		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("ep‰kurantti 25 pvm")), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti25pvm")), $format_bold);
 		$excelsarake++;
-		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("ep‰kurantti 50 pvm")), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti50pvm")), $format_bold);
 		$excelsarake++;
-		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("ep‰kurantti 75 pvm")), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti75pvm")), $format_bold);
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epakurantti100pvm")), $format_bold);
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("toiminto")), $format_bold);
 		$excelsarake++;
 
 		if ($elements > 0) {
@@ -375,8 +371,9 @@ else {
 			// Lis‰ksi jos kyseess‰ on joku muu kuin 25% ep‰kuranttiajo, pit‰‰ viimeisin ep‰kuranttipvm olla pienempi kuin t‰ysep‰kuranttisuuden alaraja pvm
  			if (($saapunut < $alaraja) and ($epaku1pv < $epa2raja or $tyyppi == '25')) {
 
-				$query = "	SELECT group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') toimittaja
+				$query = "	SELECT group_concat(distinct toimi.ytunnus separator '/') toimittaja
 							FROM tuotteen_toimittajat
+							JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 							and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'";
 				$toimittajares = mysql_query($query) or pupe_error($query);
@@ -470,6 +467,9 @@ else {
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['kehahin']));
 					$excelsarake++;
+
+					$tuotensarake = $excelsarake;
+
 					$worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno']);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
@@ -502,13 +502,66 @@ else {
 					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti75pvm']);
 					$excelsarake++;
 
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, "muuta");
+
 					$excelsarake = 0;
 					$excelrivi++;
+
+					// N‰ytet‰‰n varastossa olevat er‰t/sarjanumerot
+					if ($row["sarjanumeroseuranta"] == "V" or $row['sarjanumeroseuranta'] == 'T') {
+
+						$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
+									tilausrivi_osto.tunnus osto_rivitunnus,
+									tilausrivi_osto.perheid2 osto_perheid2,
+									tilausrivi_osto.nimitys nimitys,
+									lasku_myynti.nimi myynimi
+									FROM sarjanumeroseuranta
+									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+									LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+									LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+									and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+									and sarjanumeroseuranta.myyntirivitunnus != -1
+									and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+									and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+						$sarjares = pupe_query($query);
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							$worksheet->writeString($excelrivi, $tuotensarake, t("S:nro"));
+							$worksheet->writeString($excelrivi, $tuotensarake+1, $sarjarow["sarjanumero"]);
+							$excelrivi++;
+						}
+					}
+					elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
+
+						$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto,
+									sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso,
+									sarjanumeroseuranta.era_kpl kpl,
+									sarjanumeroseuranta.tunnus sarjatunnus
+									FROM sarjanumeroseuranta
+									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+									and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+									and sarjanumeroseuranta.myyntirivitunnus = 0
+									and sarjanumeroseuranta.era_kpl != 0
+									and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+						$sarjares = pupe_query($query);
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							$worksheet->writeString($excelrivi, $tuotensarake, t("E:nro"));
+							$worksheet->writeString($excelrivi, $tuotensarake+1, "$sarjarow[sarjanumero] ($sarjarow[kpl])");
+							$excelrivi++;
+						}
+					}
+
+
 				}
 			} // end saapunut ennen alarajaa
 		}
 
-		$workbook->close();
+		$excelnimi = $worksheet->close();
 
 		echo "<br/>";
 		echo "<font class='message'>".t("Ehdotuksessa %s tuotetta.", "", $laskuri)."</font>";
@@ -516,10 +569,10 @@ else {
 		echo "<br/>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
+		echo "<tr><th>".t("Tallenna raportti (xlsx)").":</th>";
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Epakuranttiraportti.xls'>";
+		echo "<input type='hidden' name='kaunisnimi' value='".t("Epakuranttiraportti").".xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 		echo "</table><br>";

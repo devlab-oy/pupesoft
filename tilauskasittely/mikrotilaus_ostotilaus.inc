@@ -65,10 +65,10 @@
 				$varaosavirhe 	= '';
 				$tuoteerror 	= 0;
 
-				$tuoteno	= trim($rivi[0]);
+				$tuoteno	= pupesoft_cleanstring($rivi[0]);
 				$kpl  		= (float) str_replace(",", ".", $rivi[1]);
 
-				$toimaika 	= $rivi[2];
+				$toimaika 	= pupesoft_cleanstring($rivi[2]);
 
 				if (trim($toimaika) == "") {
 					$toimaika = $laskurow["toimaika"];
@@ -88,7 +88,7 @@
 					$ale1 = "";
 				}
 
-				$paikka	  = $rivi[5];
+				$paikka	  = pupesoft_cleanstring($rivi[5]);
 
 				if ($tuoteno != '' and $kpl != 0) {
 

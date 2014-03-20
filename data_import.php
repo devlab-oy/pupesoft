@@ -1,9 +1,11 @@
 <?php
 
 	// Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-	ini_set('zlib.output_compression', 0);
 	ini_set('implicit_flush', 1);
 	ob_implicit_flush(1);
+
+	// Ei käytetä pakkausta
+	$compression = FALSE;
 
 	// Ladataan tiedosto
 	if (isset($_POST["tee"])) {
@@ -410,6 +412,16 @@
 					<option value='3'>".t("Asiakas-sarakkeessa asiakkaan asiakasnumero")."</option>
 				</select></td>
 		</tr>";
+	}
+
+	if ($table == "tuotteen_toimittajat") {
+		echo "<tr><th>".t("Toimittajan valinta").":</th>
+					<td><select name='toimittajavalinta'>
+					<option value='1'>".t("Käytetään toimittajan tunnusta")."</option>
+					<option value='2'>".t("Käytetään toimittajan ytunnusta")."</option>
+					<option value='3'>".t("Käytetään toimittajan toimittajanumeroa")."</option>
+					</select></td>
+			</tr>";
 	}
 
 	if ($table == "extranet_kayttajan_lisatiedot") {

@@ -41,7 +41,7 @@ else {
 									AND kustp 	 = '$vkustp'
 									AND kohde 	 = '$vkohde'
 									AND projekti = '$vproj'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) == 1) {
 
@@ -74,7 +74,7 @@ else {
 												AND kohde 	 = '$vkohde'
 												AND projekti = '$vproj'";
 								}
-								$result = mysql_query($query) or pupe_error($query);
+								$result = pupe_query($query);
 								$paiv++;
 							}
 						}
@@ -91,7 +91,7 @@ else {
 										projekti 	= '$vproj',
 										laatija 	= '$kukarow[kuka]',
 										luontiaika  = now()";
-							$result = mysql_query($query) or pupe_error($query);
+							$result = pupe_query($query);
 							$lisaa++;
 						}
 					}
@@ -103,11 +103,13 @@ else {
 	}
 
 	if (isset($tyyppi)) {
-		$sel1="";
-		$sel2="";
-		$sel3="";
-		$sel4="";
-		$sel5="";
+
+		$sel1 = "";
+		$sel2 = "";
+		$sel3 = "";
+		$sel4 = "";
+		$sel5 = "";
+
 		switch ($tyyppi) {
 			case (1):
 				$sel1 = 'selected';
@@ -146,11 +148,11 @@ else {
 				FROM tilikaudet
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY tilikausi_alku desc";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "</th><td><select name='tkausi'>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel="";
 		if ($tkausi == $vrow['tunnus']) {
 			$sel = "selected";
@@ -168,11 +170,11 @@ else {
 				and kaytossa != 'E'
 				and tyyppi = 'K'
 				ORDER BY koodi+0, koodi, nimi";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<td><select name='kustp'><option value='0'>".t("Ei valintaa")."</option>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel="";
 		if ($kustp == $vrow['tunnus']) {
 			$sel = "selected";
@@ -189,11 +191,11 @@ else {
 				and kaytossa != 'E'
 				and tyyppi = 'O'
 				ORDER BY koodi+0, koodi, nimi";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<td><select name='kohde'><option value='0'>".t("Ei valintaa")."</option>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel="";
 		if ($kohde == $vrow['tunnus']) {
 			$sel = "selected";
@@ -211,11 +213,11 @@ else {
 				and kaytossa != 'E'
 				and tyyppi = 'P'
 				ORDER BY koodi+0, koodi, nimi";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<td><select name='proj'><option value='0'>".t("Ei valintaa")."</option>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel="";
 		if ($proj == $vrow['tunnus']) {
 			$sel = "selected";
@@ -224,7 +226,6 @@ else {
 	}
 
 	echo "</select></td></tr>";
-
 
 	$sel = array();
 	$sel[$rtaso] = "SELECTED";
@@ -235,7 +236,7 @@ else {
 	$query = "	SELECT max(length(taso)) taso
 				from taso
 				where yhtio = '$kukarow[yhtio]'";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 	$vrow = mysql_fetch_assoc($vresult);
 
 	echo "<option value='TILI'>".t("Tili taso")."</option>\n";
@@ -254,8 +255,9 @@ else {
 	$excelsarake = 0;
 	$excelrivi++;
 
-	$tasotyyppi = "U";
-	$tilityyppi = "ulkoinen_taso";
+	$tasotyyppi  = "U";
+	$tilityyppi  = "ulkoinen_taso";
+	$cleantyyppi = $tyyppi;
 
 	// Sis‰inen tuloslaskelma
 	if ($tyyppi == 4) {
@@ -280,7 +282,7 @@ else {
 				and LEFT(taso, 1) in (BINARY '$tyyppi')
 				and taso != ''
 				ORDER BY taso";
-	$tasores = mysql_query($query) or pupe_error($query);
+	$tasores = pupe_query($query);
 
 	// Jos meill‰ on tasoja piirret‰‰n taulukko
 	while ($tasorow = mysql_fetch_assoc($tasores)) {
@@ -303,10 +305,10 @@ else {
 					FROM tilikaudet
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tkausi'";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		if (mysql_num_rows($vresult) == 1) {
-			$tilikaudetrow = mysql_fetch_array($vresult);
+			$tilikaudetrow = mysql_fetch_assoc($vresult);
 		}
 	}
 
@@ -314,39 +316,30 @@ else {
 
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
+			$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 			$path_parts = pathinfo($_FILES['userfile']['name']);
 			$ext = strtoupper($path_parts['extension']);
 
-			if ($ext != "XLS") {
-				die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font>");
-			}
-
-			if ($_FILES['userfile']['size'] == 0) {
-				die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
-			}
-
-			require_once ('excel_reader/reader.php');
-
-			// ExcelFile
-			$data = new Spreadsheet_Excel_Reader();
-
-			// Set output Encoding.
-			$data->setOutputEncoding('CP1251');
-			$data->setRowColOffset(0);
-			$data->read($_FILES['userfile']['tmp_name']);
+			$excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 
 			echo "<br /><br /><font class='message'>".t("Luetaan l‰hetetty tiedosto")."...<br><br></font>";
 
-			$headers = array();
-			$taulunrivit	= array();
+			$headers     = array();
+			$taulunrivit = array();
 
-			for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
+			// rivim‰‰r‰ exceliss‰
+			$excelrivimaara = count($excelrivit);
+
+			// sarakem‰‰r‰ exceliss‰
+			$excelsarakemaara = count($headers);
+
+			for ($excei = 1; $excei < $excelrivimaara; $excei++) {
 				for ($excej = 3; $excej < 20; $excej++) {
 
-					$nro = trim($data->sheets[0]['cells'][$excei][$excej]);
+					$nro = trim($excelrivit[$excei][$excej]);
 
 					if ((float) $nro != 0 or $nro == "!") {
-						$taulunrivit[$data->sheets[0]['cells'][$excei][0]][$data->sheets[0]['cells'][$excei][1]][$excej-3] = $nro;
+						$taulunrivit[$excelrivit[$excei][0]][$excelrivit[$excei][1]][$excej-3] = $nro;
 					}
 				}
 			}
@@ -355,23 +348,10 @@ else {
 			unset($taulunrivit);
 		}
 
-		if (!@include('Spreadsheet/Excel/Writer.php')) {
-			echo "<font class='error'>",t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta."),"</font><br>";
-			exit;
-		}
+		include('inc/pupeExcel.inc');
 
-		//keksit‰‰n failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$workbook->setVersion(8);
-		$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-		$format_bold =& $workbook->addFormat();
-		$format_bold->setBold();
-
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
 		$excelrivi 	 = 0;
 		$excelsarake = 0;
 
@@ -426,14 +406,17 @@ else {
 						and kustp		= '$kustp'
 						and kohde		= '$kohde'
 						and projekti	= '$proj'";
-			$xresult = mysql_query($query) or pupe_error($query);
+			$xresult = pupe_query($query);
 
-			while ($brow = mysql_fetch_array($xresult)) {
+			while ($brow = mysql_fetch_assoc($xresult)) {
 				$budjetit[(string) $brow["taso"]][(string) $brow["tili"]][(string) $brow["kausi"]] = $brow["summa"];
 			}
 		}
 
 		echo "</tr>\n";
+
+		$excelrivi++;
+		$excelsarake = 0;
 
 		// sortataan array indexin (tason) mukaan
 		ksort($tasonimi);
@@ -460,7 +443,7 @@ else {
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND $tilityyppi = '$key'
 								ORDER BY 1,2";
-					$tiliresult = mysql_query($query) or pupe_error($query);
+					$tiliresult = pupe_query($query);
 
 					while ($tilirow = mysql_fetch_assoc($tiliresult)) {
 
@@ -547,25 +530,25 @@ else {
 
 		echo "</table></form><br>";
 
-		$workbook->close();
+		$excelnimi = $worksheet->close();
 
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi.xls'>";
+		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi.xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 		echo "<table>";
-		echo "<tr><th>",t("Tallenna budjetti (xls)"),":</th>";
+		echo "<tr><th>",t("Tallenna budjetti (xlsx)"),":</th>";
 		echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
 		echo "</table></form><br />";
 
 		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
-		echo "<input type='hidden' name='tee' value='file'>";
-		echo "<input type='hidden' name='vkustp' value='$kustp'>";
-		echo "<input type='hidden' name='vkohde' value='$kohde'>";
-		echo "<input type='hidden' name='vproj' value='$proj'>";
-		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
-		echo "<input type='hidden' name='tkausi' value='$tkausi'>";
-		echo "<input type='hidden' name='rtaso' value='$rtaso'>";
+		echo "<input type='hidden' name='tee'    value = 'file'>";
+		echo "<input type='hidden' name='vkustp' value = '$kustp'>";
+		echo "<input type='hidden' name='vkohde' value = '$kohde'>";
+		echo "<input type='hidden' name='vproj'  value = '$proj'>";
+		echo "<input type='hidden' name='tyyppi' value = '$cleantyyppi'>";
+		echo "<input type='hidden' name='tkausi' value = '$tkausi'>";
+		echo "<input type='hidden' name='rtaso'  value = '$rtaso'>";
 		echo "<table>";
 		echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("L‰het‰"),"' /></td></tr>";
 		echo "</table>";
@@ -578,5 +561,3 @@ else {
 
 	require ("inc/footer.inc");
 }
-
-?>

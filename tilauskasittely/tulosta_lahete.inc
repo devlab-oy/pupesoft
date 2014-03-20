@@ -4213,6 +4213,7 @@ if (!function_exists('print_pdf_lahete')) {
 					Tsekataan rekisteritieto kentistä distinct rekkarit ja kirjoitetaan muutama niistä emailin subjektiin ihan loppuun sulkujen sisään.
 					Muutama = 2, ja jos on enemmänkin rekkareita niin sitten niistä info tyyliin näin: (ABC-123, EFG-456, ..). Ja jos esim yksi niin: (ABC-123).
 					*/
+					$kutsu2 = "";
 					if (strpos($laskurow['tilausvahvistus'], 'R') !== FALSE) {
 
 						$rekkarit_subject = array_slice(array_keys(hae_tilauksen_rekisterinumerot($laskurow['tunnus'], true)), 0, 3);
@@ -4221,11 +4222,11 @@ if (!function_exists('print_pdf_lahete')) {
 
 							if (isset($rekkarit_subject[2])) $rekkarit_subject[2] = '...';
 
-							$kutsu .= " (".implode(", ", $rekkarit_subject).")";
+							$kutsu2 = "(".implode(", ", $rekkarit_subject).") ";
 						}
 					}
 
-					$kutsu = "{$yhtiorow["nimi"]} - $kutsu";
+					$kutsu = "$kutsu2{$yhtiorow["nimi"]} - $kutsu";
 
 					// Sähköpostin lähetykseen parametrit
 					$parametri = array( "to" 			=> $sahkoposti_to,

@@ -22,21 +22,21 @@ if ($toim == "TRATTA") {
 	$tyyppi = "T";
 }
 else {
-	echo "<font class='head'>".t("Selaa karhuja")."</font><hr />";
+	echo "<font class='head'>".t("Selaa maksukehotuksia")."</font><hr />";
 	$tyyppi = "";
 }
 
 if ($tee == 'uusi_ekirje') {
 	$tee_pdf = "tulosta_karhu";
-	
+
 	require ('myyntires/paperikarhu.php');
-	
+
 	echo "<br><font class='ok'>eKirje l‰hetetty uudestaan asiakkaalle $asiakastiedot[nimi]!</font><br><br>";
 }
 
 if ($tee == "uusi_ekirjekierros") {
 	$tee_pdf = "tulosta_karhu";
-	
+
 	$query = "	SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) karhuttavat,
 				sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
 				FROM karhukierros
@@ -49,31 +49,31 @@ if ($tee == "uusi_ekirjekierros") {
 				GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
 				HAVING karhuttava_summa > 0";
 	$uek_res = pupe_query($query);
-	
+
 	$uek_lask = 0;
-	
+
 	echo "<br>";
-	
+
 	while ($uek_row = mysql_fetch_assoc($uek_res)) {
 
 		unset($karhuviesti);
 
 		$lasku_tunnus = $uek_row["karhuttavat"];
 
-		try {								
+		try {
 			// koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
 			require ('paperikarhu.php');
-			
+
 			echo "<font class='ok'>eKirje l‰hetetty uudestaan asiakkaalle $asiakastiedot[nimi]!</font><br>";
 		}
 		catch (Exception $e) {
 			$ekarhu_success = false;
 			echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰. Virhe: " . $e->getMessage() . "</font>";
 		}
-		
+
 		$uek_lask++;
 	}
-	
+
 	echo "<br><br><font class='ok'>L‰hetettiin: $uek_lask eKirjett‰!</font><br><br><br>";
 }
 
@@ -119,9 +119,9 @@ echo "<form name='karhu_selaa' method='post'>
 		</form>";
 
 if ($toim == "") {
-	echo "<br><br><font class='head'>".t("Selaa karhukierroksia / uudelleenl‰het‰ kierros asiakkaille")."</font><hr />";
+	echo "<br><br><font class='head'>".t("Selaa maksukehotuskierroksia / uudelleenl‰het‰ kierros asiakkaille")."</font><hr />";
 	echo "<form name='karhu_selaa' method='post'>
-		<input type='submit' name='tee_kiekat' value='".t("N‰yt‰ karhukierrokset")."'>
+		<input type='submit' name='tee_kiekat' value='".t("N‰yt‰ maksukehotuskierrokset")."'>
 		</form><br>";
 }
 
@@ -131,25 +131,25 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
 		$where  = sprintf("lasku.laskunro = %d", (int) $_POST['laskunro']);
 		$malisa = " ";
 		$limit  = "GROUP BY karhu_lasku.ktunnus ORDER BY tunnus desc LIMIT 1";
-		echo "<br><br><font class='info'>".t("Haetut karhut").":</font>";
+		echo "<br><br><font class='info'>".t("Haetut maksukehotukset").":</font>";
 	}
 	elseif (!empty($_POST['kierros'])) {
 		$where  = sprintf("karhukierros.tunnus = %d", (int) $_POST['kierros']);
 		$malisa = " ";
 		$limit  = "GROUP BY karhu_lasku.ktunnus ORDER BY tunnus desc LIMIT 1";
-		echo "<br><br><font class='info'>".t("Karhukierroksen karhut").":</font>";
+		echo "<br><br><font class='info'>".t("Maksukehotuskierroksen maksukehotukset").":</font>";
 	}
 	elseif (!empty($_POST['ytunnus'])) {
 		$where  = sprintf("lasku.ytunnus = '%s'", (int) $_POST['ytunnus']);
 		$malisa = " ";
 		$limit  = "ORDER BY tunnus desc LIMIT 1";
-		echo "<br><br><font class='info'>".t("Haetut karhut").":</font>";
+		echo "<br><br><font class='info'>".t("Haetut maksukehotukset").":</font>";
 	}
 	else {
 		$where  = "lasku.mapvm = '0000-00-00'";
 		$malisa = " and lasku.mapvm = '0000-00-00' ";
 		$limit  = "";
-		echo "<br><br><font class='info'>".t("Kaikki avoimet karhut").":</font>";
+		echo "<br><br><font class='info'>".t("Kaikki avoimet maksukehotukset").":</font>";
 	}
 
 	// haetaan uusin karhukierros/karhukerta
@@ -180,8 +180,8 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
 			echo "<th>".t('Trattakertoja')."</th>";
 		}
 		else {
-			echo "<th>".t('Karhuamis pvm')."<br>".t('Er‰p‰iv‰')."</th>";
-			echo "<th>".t('Karhukertoja')."</th>";
+			echo "<th>".t('Maksukehotuspvm')."<br>".t('Er‰p‰iv‰')."</th>";
+			echo "<th>".t('Maksukehotuskertoja')."</th>";
 		}
 
 		echo "<td class='back'></td>";
@@ -329,10 +329,10 @@ elseif (isset($tee_kiekat)) {
 				ORDER BY karhukierros.pvm DESC";
 	$res = pupe_query($query);
 
-	echo "<br><br><font class='info'>".t("Karhukierrokset").":</font>";
+	echo "<br><br><font class='info'>".t("Maksukehotuskierrokset").":</font>";
 	echo "<table><tr>
 		<th>".t('Kierros')."</th>
-		<th>".t('Karhujen m‰‰r‰')."</th>
+		<th>".t('Maksukehotusten m‰‰r‰')."</th>
 		<th>".t('Maksamattomia laskuja nyt')."</th></tr>";
 
 	while ($row = mysql_fetch_assoc($res)) {
@@ -347,7 +347,7 @@ elseif (isset($tee_kiekat)) {
 					<input type='hidden' name='tee_kaikki' 	value = '$tee_kaikki'>
 					<input type='hidden' name='tee_kierros' value = 'JES'>
 					<input type='hidden' name='kierros' 	value = '$row[kierros]'>
-					<input type='submit' value='".t("N‰yt‰ kierroksen karhut")."'>
+					<input type='submit' value='".t("N‰yt‰ kierroksen maksukehotukset")."'>
 					</form>
 				</td>";
 

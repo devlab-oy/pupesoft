@@ -33,12 +33,13 @@
 
 			if ($tee == "PAIVITA") {
 		    	$query = "	UPDATE valuu SET
-							kurssi = round(1 / $kurssi, 9),
+							kurssi    = round(1 / $kurssi, 9),
 							muutospvm = now(),
-							muuttaja = '$kukarow[kuka]'
-							WHERE yhtio	= '$kukarow[yhtio]'
-							AND nimi	= '$valkoodi'";
-				$result = mysql_query($query) or pupe_error($query);
+							muuttaja  = '$kukarow[kuka]'
+							WHERE yhtio			   = '$kukarow[yhtio]'
+							AND nimi			   = '$valkoodi'
+							AND automaattipaivitys = ''";
+				$result = pupe_query($query);
 
 				if (mysql_affected_rows() != 0) {
 					echo "<td class='back'>".t("Kurssi päivitetty").".</td>";
@@ -70,5 +71,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

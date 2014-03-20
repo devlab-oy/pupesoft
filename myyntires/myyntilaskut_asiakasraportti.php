@@ -20,7 +20,7 @@
 
 			$asiakasid = (int) $asiakasid;
 
-			$query = "	SELECT nimi, IF(lasku_email != '', lasku_email, email) AS email
+			$query = "	SELECT nimi, IF(talhal_email != '', talhal_email, email) AS email
 						FROM asiakas
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$asiakasid}'";
@@ -218,7 +218,7 @@
 				$haku_sql = "ytunnus = '$ytunnus'";
 			}
 
-			$query = "	SELECT tunnus, ytunnus, nimi, osoite, postino, postitp, maa, IF(lasku_email != '', lasku_email, email) AS email
+			$query = "	SELECT tunnus, ytunnus, nimi, osoite, postino, postitp, maa, IF(talhal_email != '', talhal_email, email) AS email
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
 						and $haku_sql

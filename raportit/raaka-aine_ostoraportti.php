@@ -128,7 +128,7 @@
 		// Haetaan raaka-aineen toimittajatiedot
 		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
 					if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
-					tuotteen_toimittajat.toimittaja,
+					toimi.ytunnus,
 					tuotteen_toimittajat.ostohinta,
 					toimi.nimi,
 					toimi.tunnus,
@@ -271,7 +271,7 @@
 		$tuoterivi['ostoeramaara']             = $lapsi_ostettavamaara;
 		$tuoterivi['pakkauskoko']              = $toimittajarow['pakkauskoko'];
 		$tuoterivi['toimittajan_tunnus']       = $toimittajarow['tunnus'];
-		$tuoterivi['toimittajan_ytunnus']      = $toimittajarow['toimittaja'];
+		$tuoterivi['toimittajan_ytunnus']      = $toimittajarow['ytunnus'];
 		$tuoterivi['toimittajan_nimi']         = $toimittajarow['nimi'];
 		$tuoterivi['ostohinta']                = $toimittajarow['ostohinta'];
 		$tuoterivi['ostosuosituksen_arvo']     = $toimittajarow['ostohinta'] * $lapsi_ostosuositus;
@@ -439,7 +439,7 @@
 		}
 		else {
 			// Jos toimittajaa ei olla rajattu, haetaan tuotteen oletustoimittaja subqueryllä
-			$toimittaja_select = "(SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno ORDER BY if(jarjestys = 0, 9999, jarjestys), toimittaja LIMIT 1) toimittaja";
+			$toimittaja_select = "(SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus LIMIT 1) toimittaja";
 		}
 
 		if ($abcrajaus != "") {

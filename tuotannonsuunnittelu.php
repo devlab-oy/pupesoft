@@ -3,7 +3,7 @@
 require 'inc/parametrit.inc';
 
 // Ajax requestit
-if ($ajax_request == 1) {
+if (isset($ajax_request) and $ajax_request == 1) {
 	require "valmistuslinjat_json.php";
 	exit();
 }

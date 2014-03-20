@@ -724,7 +724,6 @@
 								yhtio = '{$kukarow['yhtio']}',
 								tuoteno = '{$tuote_chk_row['tuoteno']}',
 								liitostunnus = '{$liitostunnus}',
-								toimittaja = '{$toimi_chk_row['ytunnus']}',
 								alkuperamaa = '{$toimi_chk_row['maa']}',
 								laatija = '{$kukarow['kuka']}',
 								ostohinta = '$toimittaja_liitos_ostohinta',
@@ -771,6 +770,15 @@
 							$otsikrow["toim_postino"]	= $otsikrow["postino"];
 							$otsikrow["toim_postitp"]	= $otsikrow["postitp"];
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
+						}
+
+						if (trim($otsikrow["laskutus_nimi"]) == "") {
+							$otsikrow["laskutus_nimi"]	   = $otsikrow["nimi"];
+						 	$otsikrow["laskutus_nimitark"] = $otsikrow["nimitark"];
+						 	$otsikrow["laskutus_osoite"]   = $otsikrow["osoite"];
+						 	$otsikrow["laskutus_postino"]  = $otsikrow["postino"];
+						 	$otsikrow["laskutus_postitp"]  = $otsikrow["postitp"];
+						 	$otsikrow["laskutus_maa"]	   = $otsikrow["maa"];
 						}
 
 						$paivita_sisviesti1 = "";
@@ -1274,6 +1282,21 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
+			elseif ($from == "" and $toim == 'toimi' and $alias_set == "KAYTTAJA") {
+				$ashak = "	SELECT group_concat(concat('\'',kuka,'\'')) kukat
+							FROM kuka
+							WHERE yhtio = '$kukarow[yhtio]'
+							and (nimi {$hakuehto} or kuka {$hakuehto})";
+				$ashakres = pupe_query($ashak);
+				$ashakrow = mysql_fetch_assoc($ashakres);
+
+				if ($ashakrow["kukat"] != "") {
+					$lisa .= " and {$array[$i]} in (" . $ashakrow["kukat"] . ")";
+				}
+				else {
+					$lisa .= " and {$array[$i]} = NULL ";
+				}
+			}
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
 				$lisa .= " and REPLACE(REPLACE({$array[$i]}, '-', ''), '+', '') like '%".str_replace(array('-','+'), '', $haku[$i])."%' ";
 			}
@@ -1302,7 +1325,7 @@
 			}
 			elseif ($from == "" and $toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {
 				if (!is_numeric($haku[$i])) {
-					$ashak = "	SELECT group_concat(concat(\"'\",ytunnus,\"'\")) tunnukset
+					$ashak = "	SELECT group_concat(tunnus) tunnukset
 								FROM toimi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and nimi {$hakuehto}";
@@ -1310,14 +1333,14 @@
 					$ashakrow = mysql_fetch_assoc($ashakres);
 
 					if ($ashakrow["tunnukset"] != "") {
-						$lisa .= " and toimittaja in ({$ashakrow["tunnukset"]})";
+						$lisa .= " and liitostunnus in ({$ashakrow["tunnukset"]})";
 					}
 					else {
-						$lisa .= " and toimittaja = NULL ";
+						$lisa .= " and liitostunnus = NULL ";
 					}
 				}
 				else {
-					$lisa .= " and toimittaja = '{$haku[$i]}'";
+					$lisa .= " and liitostunnus = '{$haku[$i]}'";
 				}
 			}
 			elseif ($from == "" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {
@@ -1361,6 +1384,9 @@
 				}
 
 				$lisa = substr($lisa, 0, -3).")";
+			}
+			elseif (($yhtiorow['livetuotehaku_hakutapa'] == "F" or $yhtiorow['livetuotehaku_hakutapa'] == "G") and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys") and !$tarkkahaku) {
+				 $lisa .= " and match ($array[$i]) against ('{$haku[$i]}*' IN BOOLEAN MODE) ";
 			}
 			else {
 				$lisa .= " and {$array[$i]} {$hakuehto} ";
@@ -1501,7 +1527,7 @@
 					<input type = 'submit' value = '".t("Näytä erääntyneet")."'></form>";
 		}
 
-		if ($toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
+		if (!in_array($yhtiorow['livetuotehaku_hakutapa'], array('F','G')) and $toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
 
 			$query = "	SELECT *
 						FROM tuote
@@ -1671,7 +1697,7 @@
 					}
 
 					if ($i == 1) {
-						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
+						if (trim($trow[1]) == '' or (is_float($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
 
 						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
 
@@ -1973,6 +1999,9 @@
 						break;
 					case "printteri9":
 						$otsikko = t("Reklamaatioiden ja siirtolistojen vastaanoton purkulista");
+						break;
+					case "printteri10":
+						$otsikko = t("Lämpösiirto");
 						break;
 					default:
 						if (isset($mysqlaliasarraysetti) and isset($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)])) {
@@ -2348,6 +2377,30 @@
 			}
 			if (($toikrow = tarkista_oikeus("yllapito.php", "auto_vari_korvaavat%", "", "OK")) !== FALSE) {
 				echo "<iframe id='auto_vari_korvaavat_iframe' name='auto_vari_korvaavat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
+
+			$query = "	SELECT kuka.kuka, kuka.nimi
+						FROM kuka
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.aktiivinen = 1
+						AND kuka.oletus_asiakas = {$trow["tunnus"]}
+						ORDER BY kuka.nimi";
+			$extkukares = pupe_query($query);
+
+			if (mysql_num_rows($extkukares) > 0) {
+
+				echo "<br><font class='head'>".t("Extranet-käyttäjät")."</font><hr>";
+				echo "<table>";
+				echo "<tr><th>".t("Käyttäjätunnus")."</th><th>".t("Nimi")."</th></tr>";
+
+				while ($extkukarow = mysql_fetch_assoc($extkukares)) {
+					echo "<tr><td>{$extkukarow["kuka"]}</td><td>{$extkukarow["nimi"]}</td></tr>";
+				}
+
+				echo "</table>";
 			}
 		}
 

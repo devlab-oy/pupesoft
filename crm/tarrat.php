@@ -46,15 +46,16 @@
 		}
 
 		$rajaus = array();
-		$rajaus["asmemo_viesti"] 	= $asmemo_viesti;
-		$rajaus["tarra_aineisto"] 	= $tarra_aineisto;
-		$rajaus["raportti"] 		= $raportti;
-		$rajaus["toimas"] 			= $toimas;
-		$rajaus["as_yht_tiedot"] 	= $as_yht_tiedot;
-		$rajaus["limitti"] 			= $limitti;
-		$rajaus["negaatio_haku"] 	= $negaatio_haku;
-		$rajaus["lisaraj_haku"] 	= $lisaraj_haku;
-		$rajaus["ojarj"] 			= $ojarj;
+		$rajaus["asmemo_viesti"] 		= $asmemo_viesti;
+		$rajaus["tarra_aineisto"] 		= $tarra_aineisto;
+		$rajaus["raportti"] 			= $raportti;
+		$rajaus["toimas"] 				= $toimas;
+		$rajaus["as_yht_tiedot"] 		= $as_yht_tiedot;
+		$rajaus["asiakas_segmentin_yhteystiedot"]	= $asiakas_segmentin_yhteystiedot;
+		$rajaus["limitti"] 				= $limitti;
+		$rajaus["negaatio_haku"] 		= $negaatio_haku;
+		$rajaus["lisaraj_haku"] 		= $lisaraj_haku;
+		$rajaus["ojarj"] 				= $ojarj;
 
 		foreach ($haku as $a => $b) {
 			$ind = "haku_$a";
@@ -73,6 +74,21 @@
 		if ($as_yht_tiedot == 'on') {
 			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email ";
 			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
+		}
+		
+		if ($asiakas_segmentin_yhteystiedot == 'on') {
+			$mul_asiakas = array();
+			for ($i = 1; $i <= $dynaaminenasiakasmaxsyvyys; $i++) {
+				$muuttuja = "mul_asiakas{$i}";
+				$mul_asiakas = array_merge($mul_asiakas, ${$muuttuja});
+			}
+			
+			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email";
+			$joinilisa = "	JOIN yhteyshenkilo yht
+							ON ( yht.yhtio = asiakas.yhtio
+								AND yht.liitostunnus = asiakas.tunnus
+								AND yht.tyyppi = 'A'
+								AND yht.rooli IN ('".implode("','", $mul_asiakas)."') )";
 		}
 
 		$query = "	SELECT asiakas.* $selectilisa
@@ -101,7 +117,7 @@
 			$sarakkeet 		= 3;
 			$rivit 			= 8;
 
-			if ($as_yht_tiedot == 'on') {
+			if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
 				$sisalto .= "\n";
 				$sisalto .= "\n";
 			}
@@ -119,7 +135,7 @@
 			$worksheet->writeString($excelrivi, $excelsarake, t("Nimitarkenne"), $format_bold);
 			$excelsarake++;
 
-			if ($as_yht_tiedot == 'on') {
+			if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
 				$worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkilö"), $format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Titteli"), $format_bold);
@@ -190,7 +206,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake, $row["nimitark"]);
 				$excelsarake++;
 
-				if ($as_yht_tiedot == 'on') {
+				if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_nimi"]);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_titteli"]);
@@ -209,7 +225,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake, $row["maa"]);
 				$excelsarake++;
 
-				if ($as_yht_tiedot == 'on') {
+				if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_email"]);
 					$excelsarake++;
 				}
@@ -230,14 +246,14 @@
 
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimi"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimitark"]))."\n";
-				if ($as_yht_tiedot == 'on' and $row["yht_nimi"] != '') {
+				if (($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') and $row["yht_nimi"] != '') {
 					$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["yht_nimi"]))."\n";
 				}
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["osoite"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["postino"]." ".$row["postitp"]))."\n";
 				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["maa"]))."\n";
 
-				if ($as_yht_tiedot == 'on' and $row["yht_nimi"] != '') {
+				if (($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') and $row["yht_nimi"] != '') {
 					$sisalto .= "\n";
 				}
 				else {
@@ -342,7 +358,15 @@
 			//-->
 			</script>";
 
-		$kentat = "nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
+		echo "<form method = 'post'>
+		<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>";
+
+		$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
+		$monivalintalaatikot_normaali = array();
+
+		require ("tilauskasittely/monivalintalaatikot.inc");
+
+		$kentat = "asiakas.nimi, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.osasto, asiakas.ryhma, asiakas.piiri, asiakas.flag_1, asiakas.flag_2, asiakas.flag_3, asiakas.flag_4";
 
 		$array = explode(",", $kentat);
         $count = count($array);
@@ -360,7 +384,7 @@
 				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 			}
         }
-
+		
 		if (strlen($ojarj) > 0) {
         	$jarjestys = $ojarj;
         }
@@ -371,7 +395,7 @@
 		$limit = "";
 
 		if ($tarra_aineisto != "") {
-			$lisa .= " and tunnus in ($tarra_aineisto) ";
+			$lisa .= " and asiakas.tunnus in ($tarra_aineisto) ";
 		}
 		elseif (isset($limitti) and $limitti != "KAIKKI" and (int) $limitti > 0) {
 			$limit = " LIMIT $limitti ";
@@ -380,22 +404,32 @@
 			$limit = " LIMIT 1000 ";
 		}
 
+		$asiakas_yhteeyshenkilo_join = "";
+		if (!empty($asiakas_segmentin_yhteystiedot)) {
+			$mul_asiakas = array();
+			for ($i = 1; $i <= $dynaaminenasiakasmaxsyvyys; $i++) {
+				$muuttuja = "mul_asiakas{$i}";
+				$mul_asiakas = array_merge($mul_asiakas, ${$muuttuja});
+			}
+			$asiakas_yhteeyshenkilo_join = "JOIN yhteyshenkilo
+											ON ( yhteyshenkilo.yhtio = asiakas.yhtio
+												AND yhteyshenkilo.liitostunnus = asiakas.tunnus
+												AND yhteyshenkilo.rooli IN ('".implode("','", $mul_asiakas)."'))";
+		}
+
 		//haetaan omat asiakkaat
-		$query = "	SELECT nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4, tunnus
+		$query = "	SELECT asiakas.nimi, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.osasto, asiakas.ryhma, asiakas.piiri, asiakas.flag_1, asiakas.flag_2, asiakas.flag_3, asiakas.flag_4, asiakas.tunnus
 					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]'
-					and laji != 'P'
-					and nimi != ''
+					{$asiakas_yhteeyshenkilo_join}
+					WHERE asiakas.yhtio = '$kukarow[yhtio]'
+					and asiakas.laji != 'P'
+					and asiakas.nimi != ''
 					$lisa
 					ORDER BY $jarjestys
 					$limit";
 		$result = mysql_query($query) or pupe_error($query);
-
 		$lim = "";
 		$lim[$limitti] = "SELECTED";
-
-		echo "<form method = 'post'>
-			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Rivimäärärajaus").":</th>
@@ -420,40 +454,45 @@
 			$lis_chk = ' checked';
 		}
 
-		echo "<tr><th valign='bottom'>".t("Näytä lisärajaukset")."</th><td><input type='checkbox' name='lisaraj_haku' $lis_chk></th></tr>";
+		if (isset($asiakas_segmentin_yhteystiedot) and $asiakas_segmentin_yhteystiedot == 'on') {
+			$asiakas_segmentin_yhteystiedot_chk = 'CHECKED';
+		}
+
+		echo "<tr><th valign='bottom'>".t("Näytä lisärajaukset")."</th><td><input type='checkbox' name='lisaraj_haku' $lis_chk></td></tr>";
+		echo "<tr><th>".t("Luo aineisto vain valitun asiakaskategorian yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='asiakas_segmentin_yhteystiedot' value='on' onclick='submit();' $asiakas_segmentin_yhteystiedot_chk /></td></tr>";
 
 		echo "</table><br>";
 
 		echo "<table><tr>";
 		echo "<th></th>";
 
-		$urllisa = "&asmemo_viesti=$asmemo_viesti&tarra_aineisto=$tarra_aineisto&raportti=$raportti&toimas=$toimas&as_yht_tiedot=$as_yht_tiedot&limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku".$ulisa;
+		$urllisa = "&asmemo_viesti=$asmemo_viesti&tarra_aineisto=$tarra_aineisto&raportti=$raportti&toimas=$toimas&as_yht_tiedot=$as_yht_tiedot&asiakas_segmentin_yhteystiedot=$asiakas_segmentin_yhteystiedot&limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku".$ulisa;
 
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=nimi$urllisa'>".t("Nimi")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.nimi$urllisa'>".t("Nimi")."</a>";
 		echo "<br><input type='text' size='10' name = 'haku[0]'  value = '$haku[0]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=osoite$urllisa'>".t("Osoite")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.osoite$urllisa'>".t("Osoite")."</a>";
 		echo "<br><input type='text' size='10' name = 'haku[1]'  value = '$haku[1]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=postino$urllisa'>".t("Postino")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.postino$urllisa'>".t("Postino")."</a>";
 		echo "<br><input type='text' size='7' name = 'haku[2]'  value = '$haku[2]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=postitp$urllisa'>".t("Postitp")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.postitp$urllisa'>".t("Postitp")."</a>";
 		echo "<br><input type='text' size='10' name = 'haku[3]'  value = '$haku[3]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=maa$urllisa'>".t("Maa")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.maa$urllisa'>".t("Maa")."</a>";
 		echo "<br><input type='text' size='3' name = 'haku[4]'  value = '$haku[4]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=osasto$urllisa'>".t("Osasto")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.osasto$urllisa'>".t("Osasto")."</a>";
 		echo "<br><input type='text' size='3' name = 'haku[5]'  value = '$haku[5]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=ryhma$urllisa'>".t("Ryhma")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.ryhma$urllisa'>".t("Ryhma")."</a>";
 		echo "<br><input type='text' size='3' name = 'haku[6]'  value = '$haku[6]'></th>";
-		echo "<th nowrap><a href='$PHP_SELF?ojarj=piiri$urllisa'>".t("Piiri")."</a>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.piiri$urllisa'>".t("Piiri")."</a>";
 		echo "<br><input type='text' size='3' name = 'haku[7]'  value = '$haku[7]'></th>";
 
 		if (isset($lisaraj_haku) and $lisaraj_haku == 'on') {
-			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_1$urllisa'>".t("Muuta 1")."</a>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.flag_1$urllisa'>".t("Muuta 1")."</a>";
 			echo "<br><input type='text' size='3' name = 'haku[8]'  value = '$haku[8]'></th>";
-			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_2$urllisa'>".t("Muuta 2")."</a>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.flag_2$urllisa'>".t("Muuta 2")."</a>";
 			echo "<br><input type='text' size='3' name = 'haku[9]'  value = '$haku[9]'></th>";
-			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_3$urllisa'>".t("Muuta 3")."</a>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.flag_3$urllisa'>".t("Muuta 3")."</a>";
 			echo "<br><input type='text' size='3' name = 'haku[10]' value = '$haku[10]'></th>";
-			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_4$urllisa'>".t("Muuta 4")."</a>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=asiakas.flag_4$urllisa'>".t("Muuta 4")."</a>";
 			echo "<br><input type='text' size='3' name = 'haku[11]' value = '$haku[11]'></th>";
 		}
 

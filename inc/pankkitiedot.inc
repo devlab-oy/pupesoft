@@ -25,12 +25,12 @@ if(!function_exists("pankkitiedot")) {
 		if (substr($tilino, 0, 2) == "FI") {
 			$rahalaitoskoodi1 = substr($tilino, 4, 1);
 			$rahalaitoskoodi2 = substr($tilino, 5, 1);
-			$rahalaitoskoodi2 = substr($tilino, 4, 3);
+			$rahalaitoskoodi3 = substr($tilino, 4, 3);
 		}
 		else {
 			$rahalaitoskoodi1 = substr($tilino, 0, 1);
 			$rahalaitoskoodi2 = substr($tilino, 1, 1);
-			$rahalaitoskoodi2 = substr($tilino, 0, 3);
+			$rahalaitoskoodi3 = substr($tilino, 0, 3);
 		}
 
 		//	oletuksia
@@ -63,7 +63,7 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["swift"]			= "NDEAFIHH";
 				break;
 			case (3) :
-				switch ($rahalaitoskoodi1) {
+				switch ($rahalaitoskoodi2) {
 					case (1) : //Handelsbanken
 						$pankki["rahalaitos"] 		= '  ';
 						$pankki["pankkilaitos"] 	= "Handelsbanken";

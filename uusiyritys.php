@@ -802,7 +802,7 @@
 				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KM'>".t("Kuljetusmuoto")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='C'>".t("CHN tietue")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKUKUVAUS'>".t("Maksuposition kuvaus")."</td></tr>
-				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KARHUVIESTI'>".t("Karhuviesti")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KARHUVIESTI'>".t("Maksukehotusviesti")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='MAKSUEHTOKV'>".t("Maksuehdon kieliversio")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_ROOLI'>".t("Yhteyshenkilön rooli")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_SUORAMARKKI'>".t("Yhteyshenkilön suoramarkkinointitiedot")."</td></tr>

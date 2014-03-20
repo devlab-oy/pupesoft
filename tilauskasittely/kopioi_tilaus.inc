@@ -66,7 +66,7 @@ if (!function_exists("kopioi_tilaus")) {
 			}
 
 			if ($field == "kate_korjattu") {
-				$values .= ", 0";
+				$values .= ", NULL";
 			}
 			else {
 				$values .= ", '$monistarow[$i]'";
@@ -116,7 +116,7 @@ if (!function_exists("kopioi_tilaus")) {
 				}
 				elseif (mysql_field_name($rivires, $i) == "kate_korjattu") {
 					$rfields .= ", $field";
-					$rvalues .= ", 0";
+					$rvalues .= ", NULL";
 				}
 				else {
 

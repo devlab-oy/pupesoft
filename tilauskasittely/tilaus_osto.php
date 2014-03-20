@@ -675,7 +675,7 @@
 					$tilausrivirow['otunnus']   = $toisen_toimittajan_ostotilaus['tunnus'];
 					$tilausrivirow['tuoteno']   = $vastaavatuoteno;
 					$tilausrivirow['nimitys']   = $trow['nimitys'];
- 
+
 					$copy_query = "	INSERT INTO
 									tilausrivi (".implode(", ", array_keys($tilausrivirow)).", laadittu, laatija)
 									VALUES('".implode("', '", array_values($tilausrivirow)). "', now(), '{$kukarow['kuka']}')";
@@ -1118,7 +1118,7 @@
 				echo "</font>";
 				echo "</form>";
 			}
-			
+
 			require('syotarivi_ostotilaus.inc');
 
 			if ($huomio != '') {
@@ -1131,7 +1131,7 @@
 			if (!isset($toim_nimitykset)) {
 				$toim_nimitykset = "ME";
 			}
-			
+
 			if ($toim != "HAAMU") {
 				$sel = array();
 				$sel[$toim_nimitykset] = "CHECKED";
@@ -1529,6 +1529,11 @@
 
 						echo "<td valign='top' $class align='right'>".((float) $prow["alv"])."</td>";
 						echo "<td valign='top' $class align='right'>".hintapyoristys($prow["rivihinta"])."</td>";
+
+						if ($prow["valuutta"] == "" and $toimittajarow["oletus_valkoodi"] != "") {
+							$prow["valuutta"] = $toimittajarow["oletus_valkoodi"];
+						}
+
 						echo "<td valign='top' $classlisa align='right'>$prow[valuutta]</td>";
 
 						if ($prow["uusiotunnus"] == 0) {
@@ -1605,7 +1610,7 @@
 
 									echo "</tr>";
 
-									echo "	<form name='tilaus' method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
+									echo "	<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
 											<input type='hidden' name='toim' 			value = '$toim'>
 											<input type='hidden' name='lopetus' 		value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
@@ -1644,7 +1649,7 @@
 								}
 								elseif (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] != -1) {
 									echo "	<td class='back'>
-											<form name='tilaus' method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
+											<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
 											<input type='hidden' name='toim' 				value = '$toim'>
 											<input type='hidden' name='lopetus' 			value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>

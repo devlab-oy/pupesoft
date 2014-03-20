@@ -40,9 +40,8 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 			$param_viivakoodi = array();
 
 			foreach ($tuotenumerot as $_tuoteno => $_arr) {
-
-				if (!empty($_arr[0])) {
-					foreach ($_arr as $_liitostunnus) {
+				foreach ($_arr as $_liitostunnus) {
+					if (trim($_liitostunnus) != "") {
 						array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
 					}
 				}

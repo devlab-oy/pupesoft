@@ -20,7 +20,7 @@
 	require ("tilauskasittely/luo_myyntitilausotsikko.inc");
 
 	$kukarow['yhtio'] = (string) $argv[1];
-	$kukarow['kuka'] = 'cron';
+	$kukarow['kuka'] = 'admin';
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 	//haetaan asiakkaat, joilla ( ei ole panttitili käytössä TAI asiakas on poistettu TAI tuote on poistettu TAI panttitili riviä ei ole käsitelty) ja tarkistetaan onko näillä asiakkailla kuitenkin pantteja

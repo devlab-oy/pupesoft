@@ -42,7 +42,7 @@
 
 		// Tehd‰‰n oletukset
 		$kukarow['yhtio'] = $argv[1];
-		$kukarow['kuka'] = "crond";
+		$kukarow['kuka'] = "admin";
 		$yhtiorow = hae_yhtion_parametrit($argv[1]);
 
 		$php_cli 		= TRUE;

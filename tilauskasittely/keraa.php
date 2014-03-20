@@ -978,7 +978,7 @@
 													$values .= ", 'N'";
 													break;
 												case 'kate_korjattu':
-													$values .= ", 0";
+													$values .= ", NULL";
 													break;
 												default:
 													$values .= ", '".$laskusplitrow[$fieldname]."'";
@@ -1336,10 +1336,11 @@
 		if ($muuttuiko == 'kylsemuuttu') {
 			foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
 
-				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, asiakas.keraysvahvistus_lahetys, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
+				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, asiakas.keraysvahvistus_lahetys, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli, kuka_ext.nimi kuka_ext_nimi
 							FROM lasku
 							JOIN asiakas ON asiakas.yhtio=lasku.yhtio AND asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio AND kuka.tunnus=lasku.myyja AND kuka.extranet = '')
+							LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio AND kuka_ext.kuka = lasku.laatija AND kuka_ext.extranet != '')
 							WHERE lasku.tunnus	= '$poikkeamatilaus'
 							and lasku.yhtio		= '$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -1446,6 +1447,14 @@
 
 					$boob = mail($laskurow["kukamail"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
 					if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
+				}
+
+				if ($laskurow['kuka_ext_nimi'] != '' and $yhtiorow['extranet_kerayspoikkeama_email'] != '') {
+					$uloslisa .= t("Tilauksen keräsi").": $keraaja[nimi]<br><br>";
+					$ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
+
+					$boob = mail($yhtiorow['extranet_kerayspoikkeama_email'], mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f {$yhtiorow['postittaja_email']}");
+					if ($boob === FALSE) echo " - ",t("\"Extranet keräyspoikkeama\"-sähköpostin lähetys epäonnistui"),"!<br>";
 				}
 
 				unset($ulos);
@@ -2856,6 +2865,7 @@
 
 					$poikkeava_maara_disabled = "";
 
+					# Verkkokaupassa etukäteen maksettu tuote!
 					if ($otsik_row["mapvm"] != '' and $otsik_row["mapvm"] != '0000-00-00') {
 						$row["varattu"] = $row["tilkpl"];
 						$poikkeava_maara_disabled = "disabled";

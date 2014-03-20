@@ -57,7 +57,7 @@
 			if ($file == '.' or $file == '..' or $file == '.DS_Store' or is_dir($path.$file)) continue;
 
 			$path_parts = pathinfo($file);
-			$ext = strtoupper($path_parts['extension']);
+			$ext = isset($path_parts['extension']) ? strtoupper($path_parts['extension']) : '';
 
 			if ($ext == 'XML') {
 
@@ -85,10 +85,10 @@
 
 						$saldoeroja = array();
 
-						foreach ($xml->InvCounting as $line) {
+						foreach ($xml->InvCounting->Line as $line) {
 
-							$eankoodi = $line->Line->ItemNumber;
-							$kpl = (float) $line->Line->Quantity;
+							$eankoodi = $line->ItemNumber;
+							$kpl = (float) $line->Quantity;
 
 							$query = "	SELECT tuoteno, nimitys
 										FROM tuote
@@ -114,11 +114,11 @@
 
 							$body = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
 
-							$body .= t("Tuoteno")." ".t("Nimitys")." ".t("Posten")." ".t("Pupe")."<br>\n";
+							$body .= t("Tuoteno").";".t("Nimitys").";".t("Posten").";".t("Pupe")."<br>\n";
 
 							foreach ($saldoeroja as $tuoteno => $_arr) {
 
-								$body .= "{$tuoteno} {$_arr['nimitys']} {$_arr['posten']} {$_arr['pupe']}<br>\n";
+								$body .= "{$tuoteno};{$_arr['nimitys']};{$_arr['posten']};{$_arr['pupe']}<br>\n";
 
 							}
 
@@ -133,7 +133,8 @@
 							pupesoft_sahkoposti($params);
 						}
 
-						unlink($path.$file);
+						// siirret‰‰n tiedosto done-kansioon
+						rename($path.$file, $path.'done/'.$file);
 					}
 				}
 			}

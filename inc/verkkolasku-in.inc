@@ -288,38 +288,6 @@
 			$kukarow['yhtio'] = $yhtio;
 			$kukarow['kuka']  = 'verkkolas';
 
-			// Perusta lasku
-			$summa = $laskun_summa_eur;
-
-			if ($laskuttajan_valkoodi != "") {
-				$valkoodi = $laskuttajan_valkoodi;
-			}
-			else {
-				$valkoodi = 'EUR';
-			}
-
-			$onko_hyvityslasku = FALSE;
-
-			if ($laskun_tyyppi == "381" or $laskun_tyyppi_teksti == 'HYVITYSLASKU' or $laskun_summa_eur < 0) {
-				$onko_hyvityslasku = TRUE;
-			}
-
-			if ($onko_hyvityslasku and $summa > 0) {
-				$summa = $summa * -1;
-			}
-
-			$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
-			$viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
-
-			// Hylätään viite jos se on nollaa
-			if (is_numeric($viite) and (int) $viite == 0) {
-				$viite = "";
-
-				// Setataan viesti
-				if (trim($laskun_numero) != "") $viesti = $laskun_numero;
-				else $viesti = "Lasku: $summa $valkoodi";
-			}
-
 			$ebid = $laskun_ebid;
 
 			unset($trow);
@@ -573,6 +541,40 @@
 				}
 				else {
 					$return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
+				}
+
+				// Perusta lasku
+				$summa = $laskun_summa_eur;
+				$onko_hyvityslasku = FALSE;
+
+				if ($laskun_tyyppi == "381" or $laskun_tyyppi_teksti == 'HYVITYSLASKU' or $laskun_summa_eur < 0) {
+					$onko_hyvityslasku = TRUE;
+				}
+
+				if ($onko_hyvityslasku and $summa > 0) {
+					$summa = $summa * -1;
+				}
+
+				$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
+				$viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
+
+				if ($laskuttajan_valkoodi != "") {
+					$valkoodi = $laskuttajan_valkoodi;
+				}
+				elseif ($trow['oletus_valkoodi'] != '') {
+					$valkoodi = $trow['oletus_valkoodi'];
+				}
+				else {
+					$valkoodi = 'EUR';
+				}
+
+				// Hylätään viite jos se on nollaa
+				if (is_numeric($viite) and (int) $viite == 0) {
+					$viite = "";
+
+					// Setataan viesti
+					if (trim($laskun_numero) != "") $viesti = $laskun_numero;
+					else $viesti = "Lasku: $summa $valkoodi";
 				}
 
 				$ytunnus = $trow["ytunnus"];
@@ -1967,7 +1969,8 @@
 															hyvak5 		  = '',
 															hyvaksyja_nyt = '',
 															comments 	  = trim(concat(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
-															WHERE tunnus = '$tunnus'";
+															WHERE tunnus = '$tunnus'
+															AND tila	 = 'H'";
 												$xresult = pupe_query($query);
 											}
 										}

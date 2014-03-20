@@ -16647,11 +16647,11 @@ if (!function_exists("tee_keraysera")) {
 			$kukarow['debugstring'] .= "<font class='head'>".t("Keräyserädebug")."</font><hr><br><br>\n";
 			$kukarow['debugstring'] .= "<font class='head'>".t("Kerääjä").": $kukarow[kuka], $kukarow[nimi]. ($kukarow[keraajanro])</font><br><br>\n";
 		}
-		
+
 		$tilat = "'N'";
-		
-		if ($kerataanko_myös_varastosiirrot) {
-			$tilat = "'N','A'";
+		if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+//			$tilat = "'N','G'";
+			$tilat = "'G'";
 		}
 
 		# Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään
@@ -16680,7 +16680,7 @@ if (!function_exists("tee_keraysera")) {
 					LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 					AND lasku1.tila in ({$tilat})
-					AND lasku1.alatila = 'A'
+					AND lasku1.alatila IN ('A','J')
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
 					AND kuka.tunnus is null
@@ -16703,10 +16703,10 @@ if (!function_exists("tee_keraysera")) {
 					LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
 					AND lasku2.tila in ({$tilat})
-					AND lasku2.alatila = 'A'
-					AND lasku2.vakisin_kerays != ''
+					AND lasku2.alatila IN ('A','J')
+					AND lasku2.vakisin_kerays = '' #MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
 					AND lasku2.varasto = '{$varasto}'
-					AND kuka2.tunnus is null
+					#AND kuka2.tunnus is null #MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
 					GROUP BY 1,2,3,4,5,6)
 					ORDER BY 1,2,3,4,5,6";
 		$res = pupe_query($query);
@@ -16792,6 +16792,13 @@ if (!function_exists("tee_keraysera")) {
 			$pakkaukset = array();
 		}
 
+		$asiakas_join = "";
+		$asiakas_join2 = "";
+		if ($yhtiorow['siirtolistan_tulostustapa'] != 'U') {
+			$asiakas_join = "JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)";
+			$asiakas_join2 = "JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)";
+		}
+
 		if ($aikarajaus != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
 			$query = "	SELECT SQL_NO_CACHE
 						lasku1.prioriteettinro as prioriteetti,
@@ -16803,7 +16810,7 @@ if (!function_exists("tee_keraysera")) {
 						AVG(DATE_FORMAT(lasku1.h1time, '%y%m%d%H%i')) h1time,
 						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
 						FROM lasku AS lasku1
-						JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
+						{$asiakas_join}
 						JOIN tilausrivi AS tilausrivi1 ON (tilausrivi1.yhtio = lasku1.yhtio AND tilausrivi1.otunnus = lasku1.tunnus AND tilausrivi1.var not in ('P','J','O','S') AND tilausrivi1.tyyppi != 'D' AND tilausrivi1.varattu > 0)
 						JOIN varaston_hyllypaikat AS vh1 ON (vh1.yhtio = tilausrivi1.yhtio AND vh1.hyllyalue = tilausrivi1.hyllyalue AND vh1.hyllynro = tilausrivi1.hyllynro AND vh1.hyllyvali = tilausrivi1.hyllyvali AND vh1.hyllytaso = tilausrivi1.hyllytaso AND vh1.keraysvyohyke = '{$keraysvyohyke}')
 						JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
@@ -16836,7 +16843,7 @@ if (!function_exists("tee_keraysera")) {
 						AVG(DATE_FORMAT(lasku2.h1time, '%y%m%d%H%i')) h1time,
 						GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
 						FROM lasku AS lasku2
-						JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
+						{$asiakas_join2}
 						JOIN tilausrivi AS tilausrivi2 ON (tilausrivi2.yhtio = lasku2.yhtio AND tilausrivi2.otunnus = lasku2.tunnus AND tilausrivi2.var not in ('P','J','O','S') AND tilausrivi2.tyyppi != 'D' AND tilausrivi2.varattu > 0)
 						JOIN tilausrivin_lisatiedot AS tilrivlis2 ON (tilrivlis2.yhtio = tilausrivi2.yhtio AND tilrivlis2.tilausrivitunnus = tilausrivi2.tunnus AND tilrivlis2.ohita_kerays = '')
 						JOIN varaston_hyllypaikat AS vh2 ON (vh2.yhtio = tilausrivi2.yhtio AND vh2.hyllyalue = tilausrivi2.hyllyalue AND vh2.hyllynro = tilausrivi2.hyllynro AND vh2.hyllyvali = tilausrivi2.hyllyvali AND vh2.hyllytaso = tilausrivi2.hyllytaso AND vh2.keraysvyohyke = '{$keraysvyohyke}')
@@ -16847,8 +16854,8 @@ if (!function_exists("tee_keraysera")) {
 						LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 						WHERE lasku2.yhtio 			= '{$kukarow['yhtio']}'
 						AND lasku2.tila 		   in ({$tilat})
-						AND lasku2.alatila 			= 'A'
-						AND lasku2.vakisin_kerays  != ''
+						AND lasku2.alatila 			IN ('A','J')
+						AND lasku2.vakisin_kerays = ''#MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
 						AND lasku2.varasto	 		= '{$varasto}'
 						AND kuka2.tunnus is null
 						GROUP BY 1,2,3,4,5,6
@@ -26625,11 +26632,17 @@ if (!function_exists('aseta_tilausrivien_var')) {
 	function aseta_tilausrivien_var($tilausrivi_tunnukset, $var) {
 		global $kukarow, $yhtiorow;
 
+		if (empty($tilausrivi_tunnukset)) {
+			return false;
+		}
+
 		$query = "	UPDATE tilausrivi
 					SET var = '{$var}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN (".implode(",", $tilausrivi_tunnukset).")";
 		pupe_query($query);
+
+		return true;
 	}
 }
 

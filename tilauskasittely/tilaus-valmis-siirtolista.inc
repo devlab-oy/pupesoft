@@ -399,6 +399,32 @@
 				$tee = "valmis";
 				$tulostetaan = "OK";
 			}
+
+			if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus 	= '{$laskurow['tunnus']}'
+							AND toimitustavan_lahto = 0";
+				$result = pupe_query($query);
+				$lahtorow = mysql_fetch_assoc($result);
+
+				// Tilaustyyppi 2, eli varastotäydennys, siirretään aina yhden päivän eteenpäin
+				$eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
+
+				$lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
+
+				if ($lahdot !== FALSE) {
+					// Otetaan eka lähtö
+					$valitu_lahto = array_shift($lahdot);
+
+					$query = "	UPDATE lasku
+								SET toimitustavan_lahto = '{$valitu_lahto['tunnus']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$laskurow['tunnus']}'";
+					pupe_query($query);
+				}
+			}
 		}
 
 		if ($tulostetaan == "OK") {

@@ -13,6 +13,10 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 		);
 		$lahde_ja_kohde_varasto_yhdistelmat = array_find_unique_values($myyntitilaus['tilausrivit'], $keys);
 
+		if (empty($lahde_ja_kohde_varasto_yhdistelmat)) {
+			return false;
+		}
+
 		$tilausrivi_tunnukset = array();
 		foreach ($lahde_ja_kohde_varasto_yhdistelmat as $lahde_ja_kohde_varasto_yhdistelma) {
 			$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
@@ -33,13 +37,44 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 				linkkaa_myyntitilausrivi_siirtolistariviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 			}
 
-			aseta_tilaus_alatila($siirtolista['tunnus'], 'J');
+			tilaus_valmis_siirtolista($siirtolista);
 		}
 
 		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
 		aseta_kukarow_kesken($myyntitilaus_tunnus);
 
 		return true;
+	}
+
+}
+
+if (!function_exists('tilaus_valmis_siirtolista')) {
+	function tilaus_valmis_siirtolista($laskurow) {
+		global $kukarow, $yhtiorow;
+
+		$toim = "SIIRTOLISTA";
+		$tulostetaan = '';
+
+		require('tilauskasittely/tilaus-valmis-siirtolista.inc');
+	}
+}
+
+if (!function_exists('hae_toimitustapa')) {
+
+	function hae_toimitustapa($toimitustapa_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($toimitustapa_tunnus)) {
+			return false;
+		}
+
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = {$toimitustapa_tunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
 	}
 
 }
@@ -111,6 +146,9 @@ if (!function_exists('luo_siirtolista')) {
 	function luo_siirtolista($lahdevarasto_tunnus, $kohdevaraston_tunnus, $toimitustapa_tunnus) {
 		global $kukarow, $yhtiorow;
 
+		$toimitustapa = hae_toimitustapa($toimitustapa_tunnus);
+		$toimitustapa = $toimitustapa['selite'];
+
 		$jatka = 'joo';
 		$tilausnumero = 0;
 		$clearing = $kohdevaraston_tunnus;
@@ -121,31 +159,11 @@ if (!function_exists('luo_siirtolista')) {
 		$comments = $kukarow["nimi"]." ".t("Automaattinen varastosiirron luonti myyntitilauksen perusteella");
 		$viesti = $kukarow["nimi"]." ".t("Automaattinen varastosiirron luonti myyntitilauksen perusteella");
 		$varasto = $lahdevarasto_tunnus;
-		$toimitustapa = $toimitustapa_tunnus;
 		$toim = "SIIRTOLISTA";
 
 		require ("otsik_siirtolista.inc");
 
 		return hae_lasku($id);
-	}
-
-}
-
-if (!function_exists('aseta_tilaus_alatila')) {
-
-	function aseta_tilaus_alatila($tunnus, $alatila) {
-		global $kukarow, $yhtiorow;
-
-		if (empty($tunnus)) {
-			return false;
-		}
-		$query = "	UPDATE lasku
-					SET alatila = '{$alatila}'
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$tunnus}'";
-		pupe_query($query);
-
-		return true;
 	}
 
 }

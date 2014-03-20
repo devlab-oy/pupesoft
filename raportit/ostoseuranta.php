@@ -6,6 +6,9 @@
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "ostoseuranta.php") !== FALSE) {
+		// Ei käytetä pakkausta
+		$compression = FALSE;
+
 		require ("../inc/parametrit.inc");
 	}
 
@@ -401,22 +404,12 @@
 
 				if ($query != "") {
 					if (strpos($_SERVER['SCRIPT_NAME'], "ostoseuranta.php") !== FALSE) {
-						if(@include('Spreadsheet/Excel/Writer.php')) {
+						include('inc/pupeExcel.inc');
 
-							//keksitään failille joku varmasti uniikki nimi:
-							list($usec, $sec) = explode(' ', microtime());
-							mt_srand((float) $sec + ((float) $usec * 100000));
-							$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+						$worksheet 	 = new pupeExcel();
+						$format_bold = array("bold" => TRUE);
 
-							$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-							$workbook->setVersion(8);
-							$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-							$format_bold =& $workbook->addFormat();
-							$format_bold->setBold();
-
-							$excelrivi = 0;
-						}
+						$excelrivi = 0;
 					}
 
 					echo "<table>";
@@ -449,7 +442,7 @@
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result,$i))."</th>";
 					}
 
-					if (isset($workbook)) {
+					if (isset($worksheet)) {
 						for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 						$excelrivi++;
 					}
@@ -543,7 +536,7 @@
 
 									if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-									if(isset($workbook)) {
+									if(isset($worksheet)) {
 										$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
 									}
 
@@ -561,21 +554,21 @@
 							if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
 								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
-								if(isset($workbook)) {
+								if(isset($worksheet)) {
 									$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 								}
 							}
 							elseif (mysql_field_name($result, $i) == 'sarjanumero') {
 								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-								if(isset($workbook)) {
+								if(isset($worksheet)) {
 									$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", "\n", $row[$i])));
 								}
 							}
 							else {
 								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-								if(isset($workbook)) {
+								if(isset($worksheet)) {
 									$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " / ", $row[$i])));
 								}
 							}
@@ -623,7 +616,7 @@
 
 							if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-							if(isset($workbook)) {
+							if(isset($worksheet)) {
 								$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
 							}
 
@@ -654,7 +647,7 @@
 
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
-						if(isset($workbook)) {
+						if(isset($worksheet)) {
 							$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
 							$excelsarake++;
 						}
@@ -665,15 +658,15 @@
 
 					echo "<br>";
 
-					if(isset($workbook)) {
+					if(isset($worksheet)) {
 						// We need to explicitly close the workbook
-						$workbook->close();
+						$excelnimi = $worksheet->close();
 
 						echo "<table>";
 						echo "<tr><th>".t("Tallenna tulos").":</th>";
 						echo "<form method='post' class='multisubmit'>";
 						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-						echo "<input type='hidden' name='kaunisnimi' value='Ostoseuranta.xls'>";
+						echo "<input type='hidden' name='kaunisnimi' value='Ostoseuranta.xlsx'>";
 						echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 						echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 						echo "</table><br>";

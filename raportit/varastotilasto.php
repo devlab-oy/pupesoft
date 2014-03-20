@@ -8,6 +8,9 @@
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
+	// Ei k‰ytet‰ pakkausta
+	$compression = FALSE;
+
 	// DataTables p‰‰lle
 	$pupe_DataTables = 'vartiltaul';
 

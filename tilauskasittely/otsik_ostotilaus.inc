@@ -271,6 +271,7 @@
 						FROM kuka
 						JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%tilaus_osto.php'
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.aktiivinen = 1
 						and kuka.extranet = ''
 						ORDER BY kuka.nimi";
 			$yresult = mysql_query($query) or pupe_error($query);

@@ -265,7 +265,7 @@
 		echo "</select></td></tr>";
 
 		echo "<tr>";
-		echo "<th>".t("Näytä laskut, joita on karhuttu ainakin")."</th>";
+		echo "<th>".t("Näytä laskut, joista on lähetetty maksukehotus ainakin")."</th>";
 		echo "<td colspan='3'>";
 		echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa");
 		echo "</td>";

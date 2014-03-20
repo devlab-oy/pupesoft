@@ -13,6 +13,9 @@
 
 	if (!isset($toim)) $toim = '';
 
+	if (!isset($kaytiin_otsikolla)) $kaytiin_otsikolla = '';
+	else $kaytiin_otsikolla = 'NOJOO!';
+
 	if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
 		echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
 		exit;
@@ -71,7 +74,7 @@
 				$apure  = pupe_query($query);
 
 				$laskurow["tila"] 			= "N";
-				$laskurow["alatila"] 		= "A";
+				$laskurow["alatila"] 		= "";
 				$laskurow["clearing"] 		= "ENNAKKOTILAUS";
 				$laskurow["tilaustyyppi"] 	= "";
 
@@ -563,6 +566,8 @@
 					}
 
 					echo "<input type='hidden' name='toim' value='$aputoim1'>";
+					echo "<input type='hidden' name='kaytiin_otsikolla' value='{$kaytiin_otsikolla}' />";
+					echo "<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi//kaytiin_otsikolla={$kaytiin_otsikolla}'>";
 
 					echo "<br><table>
 							<tr>
@@ -854,18 +859,18 @@
 
 		// Näytetään asiakastiedot linkki
 		if ($asiakastiedot == 'toimitus') {
-			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=laskutus&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka'>" .t("Näytä vain laskutustiedot") . "</a>";
+			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=laskutus&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&kaytiin_otsikolla=$kaytiin_otsikolla'>" .t("Näytä vain laskutustiedot") . "</a>";
 		}
 		else {
-			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=toimitus&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka'>" . t("Näytä myös toimitusasiakkaan tiedot") . "</a>";
+			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=toimitus&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&kaytiin_otsikolla=$kaytiin_otsikolla'>" . t("Näytä myös toimitusasiakkaan tiedot") . "</a>";
 		}
 
 		// Näytetäänkö saldot linkki
 		if ($toim == '' and $naytetaanko_saldot == 'kylla') {
-			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=ei&toimipaikka=$toimipaikka'>" . t("Piilota saldot keräypäivänä") . "</a>";
+			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=ei&toimipaikka=$toimipaikka&kaytiin_otsikolla=$kaytiin_otsikolla'>" . t("Piilota saldot keräypäivänä") . "</a>";
 		}
 		elseif ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '') {
-			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=kylla&toimipaikka=$toimipaikka'>" .t("Näytä saldot keräyspäivänä") . "</a>";
+			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=kylla&toimipaikka=$toimipaikka&kaytiin_otsikolla=$kaytiin_otsikolla'>" .t("Näytä saldot keräyspäivänä") . "</a>";
 		}
 
 		echo "<br><br>";
@@ -1799,7 +1804,7 @@
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
-			
+
 			$miinus = 7;
 		}
 		elseif ($toim == 'ODOTTAA_SUORITUSTA') {
@@ -2622,12 +2627,13 @@
 						echo "	<input type='hidden' name='projektilla' value='$row[tunnusnippu]'>";
 					}
 
-					echo "	<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi'>
+					echo "	<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi//kaytiin_otsikolla={$kaytiin_otsikolla}'>
 							<input type='hidden' name='mista'		 value='muokkaatilaus'>
 							<input type='hidden' name='toim'		 value='$aputoim1'>
 							<input type='hidden' name='orig_tila'	 value='{$row["tila"]}'>
 							<input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
-							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
+							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>
+							<input type='hidden' name='kaytiin_otsikolla' value='{$kaytiin_otsikolla}' />";
 
 					if ($toim == "VASTAANOTA_REKLAMAATIO") {
 						echo "	<input type='hidden' name='mista' value='vastaanota'>";
@@ -2646,6 +2652,7 @@
 						echo "<input type='hidden' name='toim' value='$whiletoim'>";
 						echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
 						echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
+						echo "<input type='hidden' name='kaytiin_otsikolla' value='$kaytiin_otsikolla'>";
 						echo "<input type='submit' name='$aputoim1' value='".t("Mitätöi")."'>";
 						echo "</form></td>";
 					}
@@ -2661,6 +2668,7 @@
 						echo "<input type='hidden' name='toim' value='$whiletoim'>";
 						echo "<input type='hidden' name='tee' value='TOIMITA_ENNAKKO'>";
 						echo "<input type='hidden' name='toimita_ennakko' value='$row[tunnus]'>";
+						echo "<input type='hidden' name='kaytiin_otsikolla' value='$kaytiin_otsikolla'>";
 						echo "<input type='submit' name='$aputoim1' value='".t("Toimita ennakkotilaus")."'>";
 						echo "</form></td>";
 					}
@@ -2704,6 +2712,7 @@
 							<input type='hidden' name='etsi' value='$etsi'>
 							<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>
 							<input type='hidden' name='limit' value='NO'>
+							<input type='hidden' name='kaytiin_otsikolla' value='$kaytiin_otsikolla'>
 							<table>
 							<tr><th>".t("Listauksessa näkyy 50 ensimmäistä")." $otsikko.</th>
 							<td class='back'><input type='Submit' value = '".t("Näytä kaikki")."'></td></tr>
@@ -2719,6 +2728,7 @@
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 					echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xlsx'>";
 					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+					echo "<input type='hidden' name='kaytiin_otsikolla' value='$kaytiin_otsikolla'>";
 					echo "<br><table>";
 					echo "<tr><th>".t("Tallenna lista").":</th>";
 					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
@@ -2732,6 +2742,7 @@
 					echo "<input type='hidden' name='toim' value='$toim' />";
 					echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS_KAIKKI' />";
 					echo "<input type='hidden' name='tunnukset' value='($tunnukset)' />";
+					echo "<input type='hidden' name='kaytiin_otsikolla' value='$kaytiin_otsikolla'>";
 					echo "<input type='submit' value='".t("Mitätöi kaikki näkymän tarjoukset")."'/>";
 					echo "</form>";
 				}
@@ -2741,6 +2752,7 @@
 					echo "<input type='hidden' name='toim' value='$whiletoim'>";
 					echo "<input type='hidden' name='tee' value='TOIMITA_ENNAKKO'>";
 					echo "<input type='hidden' name='toimita_ennakko' value='".implode(",", $toimitettavat_ennakot)."'>";
+					echo "<input type='hidden' name='kaytiin_otsikolla' value='$kaytiin_otsikolla'>";
 					echo "<table><tr><th>".t("Toimita")."</th>";
 					echo "<td><input type='submit' name='$aputoim1' value='".t("Toimita kaikki yllälistatut ennakkotilaukset")."'></td>";
 					echo "</table></form>";

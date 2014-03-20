@@ -240,10 +240,10 @@
 
 	echo "<tr><th>".t("Vain käsin viedyt")."</th><td colspan='3'><input type='checkbox' name='kasin' $sel>";
 
-	$query = "	SELECT distinct kuka.kuka, kuka.nimi
+	$query = "	SELECT kuka.kuka, kuka.nimi
 				FROM kuka
-				JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 				WHERE kuka.yhtio = '{$kukarow["yhtio"]}'
+				AND kuka.aktiivinen = 1
 				and kuka.extranet = ''
 				ORDER BY kuka.nimi";
 	$vresult = pupe_query($query);
@@ -730,15 +730,15 @@
 
 						$virhe = "";
 
-						if ($trow["tapvm"] != $trow["laskutapvm"] and $trow["tapvm"] != $trow["laskumapvm"]) {
+						if ($tapvm_clean != $trow["laskutapvm"] and $tapvm_clean != $trow["laskumapvm"]) {
 							$virhe	.= t("Ostovelkatiliöinnin päivämäärä virheellinen")."!";
 						}
 
-						if ($trow["tapvm"] == $trow["laskumapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != $trow["laskusumma"]) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != $trow["laskusumma"]))) {
+						if ($tapvm_clean == $trow["laskumapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != $trow["laskusumma"]) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != $trow["laskusumma"]))) {
 							$virhe	.= t("Ostovelkatiliöinnin summa virheellinen")."!";
 						}
 
-						if ($trow["tapvm"] == $trow["laskutapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != ($trow["laskusumma"]*-1)) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != ($trow["laskusumma"]*-1)))) {
+						if ($tapvm_clean == $trow["laskutapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != ($trow["laskusumma"]*-1)) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != ($trow["laskusumma"]*-1)))) {
 							$virhe	.= t("Ostovelkatiliöinnin summa virheellinen")."!";
 						}
 

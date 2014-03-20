@@ -33,12 +33,13 @@
 
 	// setataan käytetyt muuttujat:
 	$asn_numero					= "";
-	$kukarow["kuka"] 			= "crond";
+	$kukarow["kuka"] 			= "admin";
 	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317","123441","123080","123007","123453","123506","123110");
 	$tavarantoimittajanumero 	= "";
 	$tiedosto_sisalto			= "";
 	$toimituspvm				= "";
 	$vastaanottaja				= "";
+	$_yhtion_toimipaikka		= 0;
 
 	function loop_packet($xml_element, $parameters) {
 		global $kukarow;
@@ -191,10 +192,17 @@
 
 				}
 				elseif ($tavarantoimittajanumero == "123007") {
-					// emme luekkaan tämän toimittajan PacketKind-arvoa, vaan generoidaan tietyistä arvoista.
-					$laatikko = (int) $element->PkgNumber;
-					$parameters["laatikkoind"]	= $asn_numero.$laatikko;
-					$parameters["sscc"]			= $asn_numero.$laatikko;
+					$laatikko = $asn_numero;
+					
+					foreach($element->PkgId as $pkg) {
+						if (isset($pkg->PkgIdentSystem) and (int) $pkg->PkgIdentSystem == 17) {
+							$laatikko = (string) $pkg->PkgIdentNumber;
+							break;
+						}
+					}
+					
+					$parameters["laatikkoind"]	= $laatikko;
+					$parameters["sscc"]			= $laatikko;
 				}
 				elseif ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") {
 					$parameters["laatikkoind"]	= $asn_numero;

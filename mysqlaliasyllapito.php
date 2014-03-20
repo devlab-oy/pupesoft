@@ -12,7 +12,7 @@
 		$query = "	SELECT *
 					FROM $xtaulu
 					WHERE tunnus = '0'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
@@ -26,7 +26,7 @@
 						and laji	= 'MYSQLALIAS'
 						and selite	= '$xtaulu.$al_nimi'
 						and selitetark_2 = '$xalias_set'";
-			$al_res = mysql_query($query) or pupe_error($query);
+			$al_res = pupe_query($query);
 
 			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "" or trim($oletusarvo[$al_nimi]) != "" or trim($ohjeteksti[$al_nimi]) != "") {
 
@@ -36,7 +36,7 @@
 				if ($mysqlaliaspakollisuus[$al_nimi] != "") {
 					$pakollisuus = "PAKOLLINEN";
 				}
-				
+
 				if ($mysqlaliasbox[$al_nimi] != "") {
 					$nakyvyys = "X";
 				}
@@ -53,9 +53,24 @@
 							selitetark_3 	= '$pakollisuus',
 							selitetark_4	= '{$oletusarvo[$al_nimi]}',
 							selitetark_5	= '{$ohjeteksti[$al_nimi]}'";
-				$al_res = mysql_query($query) or pupe_error($query);
+				$al_res = pupe_query($query);
 			}
 		}
+	}
+
+	if ($delete == 1) {
+		list($xtaulu, $xalias_set) = explode("###", $taulu);
+
+		$query = "	DELETE FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]'
+					and laji = 'MYSQLALIAS'
+					and selite like '$xtaulu.%'
+					and selitetark_2 = '$xalias_set'";
+		$al_res1 = pupe_query($query);
+
+		echo "<br><br>".t("Mysqlaliakset poistettu")."!<br><br><br>";
+
+		$taulu = "";
 	}
 
 	if ($kopsaataulu != "" and $uusisetti != "") {
@@ -68,7 +83,7 @@
 					and laji='MYSQLALIAS'
 					and selite like '$kopsaataulu.%'
 					and selitetark_2 = '$alias_set'";
-		$al_res1 = mysql_query($query) or pupe_error($query);
+		$al_res1 = pupe_query($query);
 
 		$query = "	SELECT *
 					FROM avainsana
@@ -76,7 +91,7 @@
 					and laji='MYSQLALIAS'
 					and selite like '$kopsaataulu.%'
 					and selitetark_2 = '$uusisetti'";
-		$al_res2 = mysql_query($query) or pupe_error($query);
+		$al_res2 = pupe_query($query);
 
 		if (mysql_num_rows($al_res1) > 0 and mysql_num_rows($al_res2) == 0) {
 			while ($al_row = mysql_fetch_array($al_res1)) {
@@ -86,14 +101,14 @@
 							selite			= '$al_row[selite]',
 							selitetark 		= '$al_row[selitetark]',
 							selitetark_2 	= '$uusisetti'";
-				$al_res3 = mysql_query($query) or pupe_error($query);
+				$al_res3 = pupe_query($query);
 			}
 		}
 	}
 
 	// Nyt selataan
 	$query  = "SHOW TABLES FROM $dbkanta";
-	$tabresult = mysql_query($query) or pupe_error($query);
+	$tabresult = pupe_query($query);
 
 	$sel[$taulu] = "SELECTED";
 
@@ -110,7 +125,7 @@
 						and laji	= 'MYSQLALIAS'
 						and selite	like '".$tables[0].".%'
 						and selitetark_2 != ''";
-			$al_res = mysql_query($query) or pupe_error($query);
+			$al_res = pupe_query($query);
 
 			echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
 
@@ -143,7 +158,7 @@
 							and laji	= 'MYSQLALIAS'
 							and selite	like '".$tables[0].".%'
 							and selitetark_2 != ''";
-				$al_res = mysql_query($query) or pupe_error($query);
+				$al_res = pupe_query($query);
 
 				echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
 
@@ -165,8 +180,11 @@
 
 	// Nyt n‰ytet‰‰n vanha tai tehd‰‰n uusi(=tyhj‰)
 	if ($taulu != "") {
+
+		$cleantaulu = $taulu;
+
 		echo "<form method = 'post'>";
-		echo "<input type = 'hidden' name = 'taulu' value = '$taulu'>";
+		echo "<input type = 'hidden' name = 'taulu' value = '$cleantaulu'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
 
 		list($taulu, $alias_set) = explode("###", $taulu);
@@ -175,7 +193,7 @@
 		$query = "	SELECT *
 					FROM $taulu
 					WHERE tunnus = 0";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
 		echo "<table><tr><td class='back' valign='top'>";
@@ -237,7 +255,7 @@
 						and laji='MYSQLALIAS'
 						and selite='$taulu.$al_nimi'
 						and selitetark_2 = '$alias_set'";
-			$al_res = mysql_query($query) or pupe_error($query);
+			$al_res = pupe_query($query);
 
 			if (mysql_num_rows($al_res) > 0) {
 				$al_row = mysql_fetch_array($al_res);
@@ -309,7 +327,28 @@
 		}
 		echo "</table><br>";
 		echo "<input type='submit' value='".t("P‰ivit‰")."'>";
+		echo "</form><br><br>";
+
+		echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+					function verify(){
+						msg = '".t("HUOM: Oletko varma, ett‰ haluat poistaa aliakset?")."';
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
+					}
+				</SCRIPT>";
+
+		echo "<form method = 'post'>";
+		echo "<input type = 'hidden' name = 'taulu' value = '$cleantaulu'>";
+		echo "<input type = 'hidden' name = 'delete' value = '1'>";
+		echo "<input type='submit' value='".t("Poista")."' onClick='return verify();'>";
 		echo "</form>";
+
 	}
 
 	require ("inc/footer.inc");

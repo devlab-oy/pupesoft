@@ -64,7 +64,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TOIMITTAJAHAKU") {
 // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 js_openFormInNewWindow();
 
-echo "	<script language='javascript'> 
+echo "	<script language='javascript'>
 
 			$(function() {
 
@@ -73,7 +73,7 @@ echo "	<script language='javascript'>
 				});
 
 			});
-			
+
 			$(document).ready(function() {
 				$('#lisaselite').on('keyup change blur', function() {
 					$('.selite').val($('#lisaselite').val());
@@ -1096,7 +1096,7 @@ if ($tee == 'E' or $tee == 'F') {
 			$karhu_result = pupe_query($karhu_query);
 
 			if (mysql_num_rows($karhu_result) > 0) {
-				echo "<tr><th>",t('Karhu / Tratta'),":</th><td>";
+				echo "<tr><th>",t('Maksukehotus / Tratta'),":</th><td>";
 
 				$laskuri = 0;
 
@@ -1207,9 +1207,9 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><th colspan='3'>".t("Fakta")."</th></tr>";
 			echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
 		}
-		
+
 		echo "<tr><th colspan='3'>".t("Selite tiliöinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
-		
+
 		// Lopetaaan koko table
 		echo "</table>";
 
@@ -1546,6 +1546,8 @@ if ($tee == 'E' or $tee == 'F') {
 		require "inc/tilausrivit.inc";
 	}
 	else {
+		echo "<br>";
+
 		// Tositteen tiliöintirivit...
 		require "inc/tiliointirivit.inc";
 

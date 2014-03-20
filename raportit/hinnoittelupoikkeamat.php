@@ -5,7 +5,8 @@
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	ini_set('zlib.output_compression', 0);
+	// Ei k‰ytet‰ pakkausta
+	$compression = FALSE;
 
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
@@ -166,6 +167,7 @@
 							AND tuoteno NOT IN (
 								'{$yhtiorow['rahti_tuotenumero']}',
 								'{$yhtiorow['jalkivaatimus_tuotenumero']}',
+								'{$yhtiorow['erilliskasiteltava_tuotenumero']}',
 								'{$yhtiorow['kasittelykulu_tuotenumero']}',
 								'{$yhtiorow['maksuehto_tuotenumero']}',
 								'{$yhtiorow['ennakkomaksu_tuotenumero']}',

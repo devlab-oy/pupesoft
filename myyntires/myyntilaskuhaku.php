@@ -145,10 +145,12 @@
 	// LN = Etsit‰‰n myyj‰n tai laatijan nimell‰
 	if ($tee == 'LN') {
 		// haetaan vain aktiivisia k‰ytt‰ji‰
-		$query = "	SELECT group_concat(distinct concat('\'',kuka.kuka,'\'')) kuka, group_concat(distinct concat(if(kuka.myyja=0, null, kuka.myyja))) myyja
+		$query = "	SELECT
+					group_concat(concat('\'',kuka.kuka,'\'')) kuka,
+					group_concat(concat(if(kuka.myyja=0, null, kuka.myyja))) myyja
 					FROM kuka
-					JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 					WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+					AND kuka.aktiivinen = 1
 					AND (kuka.kuka like '%$summa1%' or kuka.nimi like '%$summa1%')";
 		$kukares = pupe_query($query);
 

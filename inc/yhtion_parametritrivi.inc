@@ -456,8 +456,23 @@
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
 
-		$ulos .= "<option value = ''>".t("Ei");
-		$ulos .= "<option value = 'K' $sel[K]>".t("Kyll‰");
+		$ulos .= "<option value = ''>".t("Ei")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kyll‰")."</option>";
+
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "purkulistan_asettelu") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'A' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Tuoteno, nimitys, paikka -asettelu")."</option>";
+		$ulos .= "<option value = 'A' {$sel}>".t("Tuoteno, paikka, nimitys -asettelu")."</option>";
 
 
 		$ulos .= "</select></td>";
@@ -527,6 +542,7 @@
 		$ulos .= "<option value=''  $sel[A]>".t("Rahtikulu muodostuu painon perusteella")."</option>";
 		$ulos .= "<option value='o' $sel[o]>".t("Rahtikulu muodostuu tilauksen hinnan perusteella")."</option>";
 		$ulos .= "<option value='P' $sel[P]>".t("Rahtikulu muodostuu tuotteilta lˆytyvien painojen mukaan automaattisesti")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Rahtikulu syˆtet‰‰n k‰sin")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2616,12 +2632,12 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "selected";
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('E' => '', 'F' => '', 'G' => '');
 
 		$ulos .= "<option value = ''>".t("Livetuotehaku hakee tuotenumeron ja nimityksen mill‰ tahansa osalla. (Hidas tapa)")."</option>";
-		$ulos .= "<option value = 'F' $sel[F]>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. (Nopea tapa)")."</option>";
+		$ulos .= "<option value = 'E' {$sel['E']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
+		$ulos .= "<option value = 'F' {$sel['F']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. (Nopea tapa)")."</option>";
+		$ulos .= "<option value = 'G' {$sel['G']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2637,6 +2653,22 @@
 
 		$ulos .= "<option value = ''>".t("Tuoteosaston/tuoteryhm‰n koodi ja nimi n‰ytet‰‰n")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Tuoteosaston/tuoteryhm‰n nimi n‰ytet‰‰n")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "naytetaanko_ale_peruste_tilausrivilla") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Aleperustetta ei n‰ytet‰ tilausrivill‰")."</option>";
+		$ulos .= "<option value = 'o' $sel[o]>".t("Aleperuste n‰ytet‰‰n tilausrivill‰")."</option>";
+		$ulos .= "<option value = 't' $sel[t]>".t("Aleperuste n‰ytet‰‰n tilausrivill‰ tiivistettyn‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3238,6 +3270,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "intrastat_pvm") {
+
+		$apu = $trow[$i];
+		$sel = array($apu => "selected");
+
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos .= "<option value = ''>".t("Tuonnin intrastat luodaan saapumisen virallisen varastonarvolaskentap‰iv‰m‰‰r‰n mukaan (HUOM: Tuotteet n‰ytet‰‰n Intrastatissa vasta kun saapuminen suljetaan!)")."</option>";
+		$ulos .= "<option value = 'V'{$sel['V']}>".t("Tuonnin intrastat luodaan tavaran varastoonvientip‰iv‰m‰‰r‰n mukaan (HUOM: Intrastat muuttuu takautuvasti jos ostorivien hintoja muutetaan varastoonviennin j‰lkeen!)")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "myynti_asiakhin_tallenna") {
 
 		$sel = "";
@@ -3434,10 +3479,13 @@
 	if (mysql_field_name($result, $i) == 'maksukehotus_kentat') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
 
 		$ulos .= "<option value = ''>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja")."</option>";
+		$ulos .= "<option value = 'J' $sel[J]>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat sek‰ korot ja lis‰t‰‰n ne maksukehotuksen summaan")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja eik‰ korkoja")."</option>";
+		$ulos .= "<option value = 'L' $sel[L]>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja. N‰ytet‰‰n korot ja lis‰t‰‰n ne maksukehotuksen summaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3826,6 +3874,39 @@
 	}
 
 	if (mysql_field_name($result, $i) == 'suoratoimitusvarasto') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$ulos .= "<option value = '0'>".t("Ei valittu")."</option>";
+
+		$query  = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+					ORDER BY tyyppi, nimitys";
+		$vares = pupe_query($query);
+
+		while ($varow = mysql_fetch_assoc($vares)) {
+			$sel = $trow[$i] == $varow['tunnus'] ? "selected" : "";
+			$ulos .= "<option value = '{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'lapsituotteen_poiston_esto') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == '1' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Sallitaan tuoteperheen lapsituotteen poisto myyntitilauksella")."</option>";
+		$ulos .= "<option value = '1' {$sel}>".t("Ei sallita tuoteperheen lapsituotteen poistoa myyntitilauksella")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'takuuvarasto') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$ulos .= "<option value = '0'>".t("Ei valittu")."</option>";

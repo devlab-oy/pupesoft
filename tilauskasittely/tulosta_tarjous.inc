@@ -1602,8 +1602,8 @@ if (!function_exists('tulosta_tarjous')) {
 		$query_ale_lisa = generoi_alekentta('M');
 
 		$query = "	SELECT tilausrivi.*,
-					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
-					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
+					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') rivihinta,
+					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl), '$yhtiorow[hintapyoristys]') bruttorivihinta,
 					tilausrivin_lisatiedot.positio,
 					$sorttauskentta,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,

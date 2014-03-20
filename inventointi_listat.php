@@ -2,9 +2,25 @@
 
 	require ("inc/parametrit.inc");
 
+	if (strtolower($toim) == 'oletusvarasto') {
+
+		if ($kukarow['oletus_varasto'] == 0) {
+			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu käyttäjälle"),".</font><br />";
+
+			require ("inc/footer.inc");
+			exit;
+		}
+
+		$oletusvarasto_chk = $kukarow['oletus_varasto'];
+	}
+	else {
+		$oletusvarasto_chk = 0;
+	}
+
 	echo "<font class='head'>",t("Tulosta inventointilista"),"</font><hr>";
 
 	echo "<form name='inve' method='post' enctype='multipart/form-data' autocomplete='off'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
@@ -547,7 +563,7 @@
 		$joinlisa = "";
 
 		# Resrvipaikka ja keräysvyöhyke rajaus vain jos keräyserät parametri on asetettu.
-		if (($yhtiorow["varastopaikkojen_maarittely"] != '' and isset($reservipaikka)) or (isset($keraysvyohyke) and $yhtiorow["kerayserat"] != '')) {
+		if (($yhtiorow["varastopaikkojen_maarittely"] != '' and isset($reservipaikka)) or (isset($keraysvyohyke) and $yhtiorow["kerayserat"] == 'K')) {
 			$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
 			$vyohykelisa = $keraysvyohyke != '' ? "varaston_hyllypaikat.keraysvyohyke = '".mysql_real_escape_string($keraysvyohyke)."' AND " : "";
 
@@ -624,13 +640,16 @@
 
 				if ($from == '') {
 					$yhtiotaulu = "tuotteen_toimittajat";
-					$from 		= " FROM tuotteen_toimittajat ";
+					$from 		= " FROM tuotteen_toimittajat
+							 		JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus";
+
 					$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra
 									JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
-					$where		= " and tuotteen_toimittajat.toimittaja = '$toimittaja'";
+					$where		= " and toimi.ytunnus = '$toimittaja'";
 				}
 				else {
-					$join 	   .= " JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno and tuotteen_toimittajat.toimittaja = '$toimittaja' ";
+					$join 	   .= " JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
+									JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus and toimi.ytunnus = '$toimittaja' ";
 				}
 
 				$lefttoimi = "";
@@ -863,7 +882,7 @@
 			$kello = date('H:i:s');
 
 			//rivinleveys default
-			$rivinleveys = 135;
+			$rivinleveys = 137;
 
 			//haetaan inventointilista numero tässä vaiheessa
 			$query = "	SELECT max(inventointilista) listanro
@@ -876,7 +895,7 @@
 			$listaaika = date("Y-m-d H:i:s");
 
 			$ots  = t("Inventointilista")." $kutsu\t".t("Sivu")." <SIVUNUMERO>\n".t("Listanumero").": $listanro\t\t$yhtiorow[nimi]\t\t$pp.$kk.$vv - $kello\n\n";
-			$ots .= sprintf ('%-28.14s', 	t("Paikka"));
+			$ots .= sprintf ('%-18.14s', 	t("Paikka"));
 			$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
 
 			// Ei näytetä toim_tuotenumeroa, nimitys voi olla pidempi
@@ -901,15 +920,18 @@
 
 			$ots .= sprintf ('%-7.7s',		t("Määrä"));
 			$ots .= sprintf ('%-9.9s', 		t("Yksikkö"));
-			$ots .= sprintf ('%-8.8s',	 	t("Tikpl"));
+			$ots .= sprintf ('%-7.7s',	 	t("Tilkpl"));
+			$ots .= sprintf ('%-13.13s',	t("Varattu/Ker"));
 			$ots .= "\n";
-			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n\n";
+			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n";
 			fwrite($fh, str_replace("<SIVUNUMERO>","1",$ots));
 			$ots = chr(12).$ots;
 
 			$rivit = 1;
 			$sivulaskuri = 1;
 			while($tuoterow = mysql_fetch_array($saldoresult)) {
+
+				if ($oletusvarasto_chk > 0 and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
 				// Joskus halutaan vain tulostaa lista, mutta ei oikeasti invata tuotteita
 				if ($ei_inventointi == "") {
@@ -927,7 +949,7 @@
 					$munresult = pupe_query($query);
 				}
 
-				if ($rivit >= 17) {
+				if ($rivit >= 18) {
 					$sivulaskuri++;
 					fwrite($fh, str_replace("<SIVUNUMERO>",$sivulaskuri,$ots));
 					$rivit = 1;
@@ -982,18 +1004,15 @@
 					$rivivarastosaldo 		= 0;
 				}
 
-				//katsotaan onko tuotetta tilauksessa
-				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoterow[tuoteno]' and varattu>0 and tyyppi='O'";
-				$result1 = pupe_query($query);
-				$prow    = mysql_fetch_array($result1);
-
 				if ($tuoterow["inventointiaika"]=='0000-00-00 00:00:00') {
 					$tuoterow["inventointiaika"] = t("Ei inventoitu");
 				}
 
-				$prn  = sprintf ('%-28.14s', 	$tuoterow["varastopaikka"]);
+				$prn = "\n";
+
+				if ($rivit > 1) $prn .= "\n";
+
+				$prn .= sprintf ('%-18.14s', 	$tuoterow["varastopaikka"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["tuoteno"]);
 
 				// Jos valittu toim_tuoteno piilotus ei sitä piirretä (säästetään tilaa)
@@ -1025,7 +1044,39 @@
 
 				$prn .= sprintf ('%-7.7s', 	"_____");
 				$prn .= sprintf ('%-9.9s', 	t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite"));
-				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
+
+
+				//katsotaan onko tuotetta tilauksessa
+				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE yhtio='$kukarow[yhtio]'
+							and tuoteno='$tuoterow[tuoteno]'
+							and varattu>0
+							and tyyppi='O'";
+				$result1 = pupe_query($query);
+				$prow    = mysql_fetch_assoc($result1);
+
+				$prn .= sprintf ('%-7.7d', 	$prow["varattu"]);
+
+				//Haetaan kerätty määrä
+				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
+							and tyyppi 		in ('L','G','V')
+							and tuoteno		= '{$tuoterow['tuoteno']}'
+							and varattu    <> 0
+							and laskutettu 	= ''
+							and hyllyalue	= '{$tuoterow['hyllyalue']}'
+							and hyllynro 	= '{$tuoterow['hyllynro']}'
+							and hyllyvali 	= '{$tuoterow['hyllyvali']}'
+							and hyllytaso 	= '{$tuoterow['hyllytaso']}'";
+				$hylresult = pupe_query($query);
+				$hylrow = mysql_fetch_assoc($hylresult);
+
+				$hylrow['ennpois'] = fmod($hylrow['ennpois'], 1) == 0 ? round($hylrow['ennpois']) : $hylrow['ennpois'];
+				$hylrow['keratty'] = fmod($hylrow['keratty'], 1) == 0 ? round($hylrow['keratty']) : $hylrow['keratty'];
+
+				$prn .= sprintf ('%-13.13s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {
 					$query = "	SELECT sarjanumeroseuranta.sarjanumero,
@@ -1088,7 +1139,7 @@
 							$prn .= sprintf ('%-42.42s', $sarjarow["sarjanumero"]);
 							$prn .= sprintf ('%-74.74s', $sarjarow["nimitys"].$fnlina22);
 
-							if ($rivit >= 17) {
+							if ($rivit >= 18) {
 								fwrite($fh, $ots);
 								$rivit = 1;
 							}
@@ -1096,9 +1147,8 @@
 					}
 				}
 
-				$prn .= "\n\n";
-				$prn .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n";
-
+				$prn .= "\n";
+				$prn .= "_______________________________________________________________________________________________________________________________________$katkoviiva";
 
 				fwrite($fh, $prn);
 				$rivit++;

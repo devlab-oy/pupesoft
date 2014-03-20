@@ -3,11 +3,13 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("inc/parametrit.inc");
-
-ini_set('zlib.output_compression', 0);
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
+
+// Ei k‰ytet‰ pakkausta
+$compression = FALSE;
+
+require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Uudelleenl‰het‰ keraysvahvistus")."</font><hr>";
 
@@ -59,5 +61,3 @@ else {
 	echo "<input type='submit' value='".t("L‰het‰ ker‰ysvahvistukset")."'>";
 	echo "</form>";
 }
-
-?>

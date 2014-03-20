@@ -74,7 +74,7 @@
 								FROM asn_sanomat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laji = '{$lajilisa}'
-								AND status = ''
+								AND status = 'X'
 								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 					$chk_res = pupe_query($query);
 
@@ -461,11 +461,10 @@
 								tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 								tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
 								tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
-								tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali, tilausrivi.uusiotunnus
+								tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.uusiotunnus
 								FROM tilausrivi
 								JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
 								JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
-								JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.hyllyalue = tilausrivi.hyllyalue AND tuotepaikat.hyllynro = tilausrivi.hyllynro AND tuotepaikat.hyllyvali = tilausrivi.hyllyvali AND tuotepaikat.hyllytaso = tilausrivi.hyllytaso)
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tunnus = '{$tunnus}'
 								ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
@@ -522,7 +521,7 @@
 								ale3			= '{$ale['ale3']}',
 								hinta			= '{$hinta}',
 								laatija			= 'lapset',
-								kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lisätään lapsituote: {$lapsitieto['tuoteno']}',
+								kommentti		= 'Lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lisätään lapsituote: {$lapsitieto['tuoteno']}',
 								laadittu		=  now(),
 								hyllyalue		= '{$lapsitieto['hyllyalue']}',
 								hyllynro		= '{$lapsitieto['hyllynro']}',
@@ -1239,7 +1238,7 @@
 
 						// jos skipattiin vähänkin niin nollataan kaikki kohdistukset
 						$updatequery = "UPDATE asn_sanomat SET
-										tilausrivi = '',
+										tilausrivi = NULL,
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
@@ -1258,7 +1257,7 @@
 
 							// jos skipattiin vähänkin niin nollataan kaikki kohdistukset
 							$updatequery = "UPDATE asn_sanomat SET
-											tilausrivi = ''
+											tilausrivi = NULL
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
 							$upd_res = pupe_query($updatequery);
@@ -1497,7 +1496,7 @@
 									$values .= ", 'extraa'";
 									break;
 								case 'kommentti':
-									$values .= ", 'TECCOM-laskulla 1: {$laskun_numero} tuli {$rtuoteno[$i]['kpl']} ja tilaukselta löytyi {$laskuri} Tehtiin tilausrivi {$ylimaaraista} määrälle'";
+									$values .= ", 'Laskulla 1: {$laskun_numero} tuli {$rtuoteno[$i]['kpl']} ja tilaukselta löytyi {$laskuri} Tehtiin tilausrivi {$ylimaaraista} määrälle'";
 									break;
 								case 'laadittu':
 									$values .= ", now()";
@@ -1511,7 +1510,7 @@
 									$values .= ", '0000-00-00'";
 									break;
 								case 'kate_korjattu':
-									$values .= ", 0";
+									$values .= ", NULL";
 									break;
 								default:
 									$values .= ", '".$tilausrivirow[$fieldname]."'";
@@ -1607,6 +1606,9 @@
 						list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilriv, $tilausrivirow, $rtuoteno[$i], $debug);
 					}
 				}
+			}
+			else if ($rtuoteno[$i]['tuoteno'] == "A-100" or $rtuoteno[$i]['tuoteno'] == "A-200") {
+				continue;
 			}
 			else {
 				if ($debug == 1) {
@@ -2468,7 +2470,8 @@
 							hyvak5 		  = '',
 							hyvaksyja_nyt = '',
 							comments 	  = TRIM(CONCAT(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
-							WHERE tunnus = '{$tunnus}'";
+							WHERE tunnus = '{$tunnus}'
+							AND tila	 = 'H'";
 				$xresult = pupe_query($query);
 
 				list($_kaikkivarastossayhteensa,$_kaikkiliitettyyhteensa,$_kohdistus,$_kohok,$_kplvarasto,$_kplyhteensa,$_lisatiedot,$_lisok,$_llrow,$_sarjanrook,$_sarjanrot,$_uusiot,$_varastopaikat,$_varastossaarvo,$_liitettyarvo,$_varok) = tsekit($laskurow, 0, 0);

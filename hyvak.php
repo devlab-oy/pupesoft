@@ -1608,7 +1608,7 @@
 
 			echo "<td valign='top'>";
 
-			echo tv1dateconv($trow["erpcm"]);
+			echo pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow["erpcm"]);
 			if ($trow["kapvm"] != "0000-00-00") echo "<br>".pupe_DataTablesEchoSort($trow['kapvm']).tv1dateconv($trow["kapvm"]);
 
 			echo "</td>";
@@ -1756,5 +1756,3 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") !== FALSE) {
 		require ("inc/footer.inc");
 	}
-
-?>

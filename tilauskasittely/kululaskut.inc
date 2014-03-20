@@ -52,7 +52,7 @@ else {
 		$laskurow = mysql_fetch_array($result);
 	}
 	else {
-		echo "<font class='error'>".t("Tilaus katosi!")."</font>";
+		echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
 		exit;
 	}
 }

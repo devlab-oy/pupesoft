@@ -204,6 +204,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "SSCC")			 	$ulos .= "<option value='SSCC' $avain_sel[SSCC]>							".t("SSCC-koodi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAKKAUSKV") 		$ulos .= "<option value='PAKKAUSKV' $avain_sel[PAKKAUSKV]>					".t("Pakkaustiedon kieliversio")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "INVASTEPAIKKA")		$ulos .= "<option value='INVASTEPAIKKA' {$avain_sel['INVASTEPAIKKA']}>		".t("Inventointiaste-raportin hylk‰‰m‰t tuotepaikat")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSERA_TK") 		$ulos .= "<option value='KERAYSERA_TK' $avain_sel[KERAYSERA_TK]>".t("K‰ytt‰j‰n oikeus tulostaa kaikki ker‰yser‰t varastossa")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tyˆm‰‰r‰ysten avainsanat")."'>";
@@ -223,7 +224,7 @@
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Maksuehtojen avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LASKUKUVAUS") 		$ulos .= "<option value='LASKUKUVAUS' $avain_sel[LASKUKUVAUS]>				".t("Maksuposition kuvaus")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "KARHUVIESTI") 		$ulos .= "<option value='KARHUVIESTI' $avain_sel[KARHUVIESTI]>				".t("Karhuviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KARHUVIESTI") 		$ulos .= "<option value='KARHUVIESTI' $avain_sel[KARHUVIESTI]>				".t("Maksukehotusviesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "MAKSUEHTOKV")		$ulos .= "<option value='MAKSUEHTOKV' $avain_sel[MAKSUEHTOKV]>				".t("Maksuehdon kieliversio")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
@@ -258,6 +259,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "PAIKALLISVARAST")	$ulos .= "<option value='PAIKALLISVARAST' {$avain_sel['PAIKALLISVARAST']}>	".t("Paikallisvarasto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON") 	 	$ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>        	".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")  	$ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>	".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")	$ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>	".t("Saldovahvistuksen viesti")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -745,6 +747,7 @@
 		$ulos .= "<option value = '1' $sel[1]>".t("Tulostintyyppi")." - ".t("Laser A4")."</option>";
 		$ulos .= "<option value = '2' $sel[2]>".t("Tulostintyyppi")." - ".t("Laser A5")."</option>";
 		$ulos .= "<option value = '3' $sel[3]>".t("Tulostintyyppi")." - ".t("Matriisi")."</option>";
+		$ulos .= "<option value = 'hrx' {$sel['hrx']}>".t("Tulostintyyppi")." - ".t("HRX")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -811,5 +814,53 @@
 		}
 		$ulos .= "</select></td>";
 
+		$jatko = 0;
+	}
+	
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {	
+
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND nimi != ''
+					AND extranet = ''
+					AND (keraajanro > 0 or kuka = '$kukarow[kuka]')
+					AND aktiivinen = 1
+					ORDER BY nimi";
+		$varresult = pupe_query($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		while ($kukkarow = mysql_fetch_assoc($varresult)) {
+
+			$sel = $trow[$i] == $kukkarow['kuka'] ? " selected" : "";
+
+			$ulos .= "<option value='{$kukkarow['kuka']}'{$sel}>{$kukkarow['nimi']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {	
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND nimitys != ''
+					AND tyyppi != 'P'
+					ORDER BY tyyppi,nimitys";
+		$varresult = pupe_query($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		while ($kukkarow = mysql_fetch_assoc($varresult)) {
+
+			$sel = $trow[$i] == $kukkarow['tunnus'] ? " selected" : "";
+
+			$ulos .= "<option value='{$kukkarow['tunnus']}'{$sel}>{$kukkarow['nimitys']}</option>";
+		}
+
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -36,7 +36,7 @@
 						FROM asn_sanomat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND status = ''
-						AND tilausrivi = ''
+						AND tilausrivi is NULL
 						AND laji = 'asn'
 						{$toimittajalisa}
 						ORDER BY toimittajanumero, asn_numero, paketinnumero";

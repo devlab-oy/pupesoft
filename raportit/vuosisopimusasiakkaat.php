@@ -1,17 +1,19 @@
 <?php
 
 	// Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-	ini_set('zlib.output_compression', 0);
 	ini_set('implicit_flush', 1);
 	ob_implicit_flush(1);
 
 	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
-	require "../inc/parametrit.inc";
-	require "tulosta_vuosisopimusasiakkaat.inc";
-	require_once 'tulosta_vuosisopimusasiakkaat_excel.inc';
-	require('inc/ProgressBar.class.php');
+	// Ei käytetä pakkausta
+	$compression = FALSE;
+
+	require("../inc/parametrit.inc");
+	require("tulosta_vuosisopimusasiakkaat.inc");
+	require_once("tulosta_vuosisopimusasiakkaat_excel.inc");
+	require("inc/ProgressBar.class.php");
 
 	if ($asiakas_tarkistus == 1) {
 		$ajax_params = array(

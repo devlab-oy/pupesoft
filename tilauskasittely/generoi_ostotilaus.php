@@ -28,25 +28,30 @@
 		return array($ennp['tilattu'], $ennp['valmistuksessa'], $ennp['ennpois'], $ennp['jt']);
 	}
 
+	if (isset($muutparametrit) and $muutparametrit != '') {
+		list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi, $ohjausmerkki, $tilaustyyppi, $viesti, $myytavissasummaus, $ed_ytunnus) = explode("!¡!", urldecode($muutparametrit));
+
+		$kohdevarastot = unserialize($kohdevarastot);
+		$mul_osasto    = unserialize($mul_osasto);
+		$mul_try       = unserialize($mul_try);
+		$mul_tme       = unserialize($mul_tme);
+	}
+
 	if ($tee != '' and $ytunnus != '') {
 
 		// Vaihdetaan toimittaja
-		if (isset($generoi) and $ed_ytunnus != $ytunnus) $toimittajaid = "";
+		if (isset($generoi) and $generoi != "" and $ed_ytunnus != $ytunnus) {
+			$toimittajaid = "";
+		}
 
 		$ytunnus = mysql_real_escape_string($ytunnus);
 
-		$muutparametrit = $tee."/".serialize($kohdevarastot)."/".$mul_osasto."/".$mul_try."/".$mul_tme."/".$abcrajaus."/".$generoi."/".$ohjausmerkki."/".$tilaustyyppi."/".$viesti."/".$myytavissasummaus;
+		$muutparametrit = urlencode($tee."!¡!".serialize($kohdevarastot)."!¡!".serialize($mul_osasto)."!¡!".serialize($mul_try)."!¡!".serialize($mul_tme)."!¡!".$abcrajaus."!¡!".$generoi."!¡!".$ohjausmerkki."!¡!".$tilaustyyppi."!¡!".$viesti."!¡!".$myytavissasummaus."!¡!".$ed_ytunnus);
 
 		require ("inc/kevyt_toimittajahaku.inc");
 
 		if ($toimittajaid == '') {
 			$tee = '';
-		}
-		else {
-			if ($muutparametrit != '') {
-				list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi, $ohjausmerkki, $tilaustyyppi, $viesti, $myytavissasummaus) = explode("/", $muutparametrit);
-				$kohdevarastot = unserialize($kohdevarastot);
-			}
 		}
 	}
 
@@ -249,7 +254,7 @@
 
 	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi ostotilaus"),"'></form><br><br>";
 
-	if ($tee == 'M' and isset($generoi) and $toimittajaid > 0 and count($kohdevarastot) > 0) {
+	if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and count($kohdevarastot) > 0) {
 
 		require ("vastaavat.class.php");
 		require ("inc/luo_ostotilausotsikko.inc");
@@ -578,7 +583,7 @@
 		$query = "UPDATE kuka SET kesken = 0 WHERE yhtio = '{$kukarow['yhtio']}' and kuka = '{$kukarow['kuka']}'";
 		$delresult = pupe_query($query);
 	}
-	elseif ($tee == 'M' and isset($generoi)) {
+	elseif ($tee == 'M' and isset($generoi) and $generoi != "") {
 		echo "<br><br><font class='error'>".t("VIRHE: Valitse toimittaja ja varasto johon tilataan")."!</font>";
 	}
 

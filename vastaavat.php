@@ -1,10 +1,11 @@
-
 <?php
 
 require ("inc/parametrit.inc");
 
-/** Lisää tuotteen ketjuun
+/*
+ * Lisää tuotteen ketjuun
  */
+
 function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
     global $kukarow;
 

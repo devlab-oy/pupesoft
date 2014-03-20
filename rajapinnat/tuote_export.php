@@ -61,8 +61,9 @@
 	}
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
+	if (!isset($verkkokauppa_saldo_varasto)) $verkkokauppa_saldo_varasto = array();
 
-	if (isset($verkkokauppa_saldo_varasto) and !is_array($verkkokauppa_saldo_varasto)) {
+	if (!is_array($verkkokauppa_saldo_varasto)) {
 		echo "verkkokauppa_saldo_varasto pitää olla array!";
 		exit;
 	}
@@ -259,6 +260,7 @@
 
 	while ($row = mysql_fetch_assoc($result)) {
 		list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
+
 		$dnstock[] = array(	'tuoteno'		=> $row["tuoteno"],
 							'ean'			=> $row["eankoodi"],
 							'myytavissa'	=> $myytavissa,
@@ -411,6 +413,9 @@
 
 	echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
 
+	// Magentoon vain tuotteet joiden näkyvyys != ''
+	$nakyvyys_lisa = ($verkkokauppatyyppi == 'magento') ? "AND tuote.nakyvyys != ''" : "";
+
 	// haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan
 	$query = "	SELECT DISTINCT tuotteen_avainsanat.selite selite
 				FROM tuotteen_avainsanat
@@ -435,9 +440,6 @@
 	else {
 		$muutoslisa = "";
 	}
-
-	// Magentoon vain tuotteet joiden näkyvyys != ''
-	$nakyvyys_lisa = ($verkkokauppatyyppi == 'magento') ? "AND tuote.nakyvyys != ''" : "";
 
 	// loopataan variaatio-nimitykset
 	while ($rowselite = mysql_fetch_assoc($resselite)) {
@@ -563,6 +565,9 @@
 
 		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
 		$magento_client->setTaxClassID($magento_tax_class_id);
+
+		// Verkkokaupan "root" kategorian tunnus, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
+		if (isset($magento_parent_id)) $magento_client->setParentID($magento_parent_id);
 
 		// lisaa_kategoriat
 		if (count($dnstuoteryhma) > 0) {

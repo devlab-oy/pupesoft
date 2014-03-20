@@ -953,14 +953,14 @@ if ($tuoteno != '') {
 								$tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
 								$korjaus_alku   = (int) str_replace("-", "", substr($trow["laadittu"], 0, 10));
 
-								// Haetaan tiliöinnit, näitä on kaksi (varasto ja varastonmuutos)
+								// Haetaan tiliöinnit, näitä on kolme (varasto ja varastonmuutos ja 'osto')
 								$query = "	SELECT *
 											FROM tiliointi
 											WHERE yhtio  		= '{$kukarow['yhtio']}'
 											AND tapahtumatunnus = '{$trow['tunnus']}'
 											AND tapahtumatunnus > 0
 											AND korjattu = ''
-											LIMIT 2";
+											LIMIT 3";
 								$sum_chk_res = pupe_query($query);
 
 								while ($sum_chk_row = mysql_fetch_assoc($sum_chk_res)) {

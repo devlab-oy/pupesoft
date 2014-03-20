@@ -482,6 +482,7 @@
 		$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
 		$oleasres = pupe_query($query);
 		$oleasrow = mysql_fetch_assoc($oleasres);
+		$oleasrow["liitostunnus"] = $oleasrow["tunnus"];
 
 		$query = "SELECT * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
 		$olhires = pupe_query($query);
@@ -1386,8 +1387,15 @@
 					$hae_ja_selaa_asiakas = (int) $laskurow['liitostunnus'];
 				}
 
+				//jos ollaan verkkokaupassa ja n‰ytet‰‰n vain aletuotteet asetus on p‰‰ll‰ niin pakotetaan saako_myyda_private_label tarkistamaan alet kaikilta tuotteilta, jotta n‰ytet‰‰n vain aletuotteet
 				if ($hae_ja_selaa_asiakas != 0) {
-					if (!saako_myyda_private_label($hae_ja_selaa_asiakas, $row["tuoteno"])) {
+					$vainaletuotteet = FALSE;
+
+					if ($verkkokauppa != "" AND $kukarow["naytetaan_tuotteet"] == "A") {
+						$vainaletuotteet = TRUE;
+					}
+
+					if (!saako_myyda_private_label($hae_ja_selaa_asiakas, $row["tuoteno"], 1, $vainaletuotteet)) {
 						continue;
 					}
 				}

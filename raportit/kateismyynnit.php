@@ -1075,7 +1075,7 @@
 					SUM(tiliointi.summa) tilsumma
 					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != '')
-					LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.korjattu = '' AND tiliointi.tilino IN ({$myyntisaamiset_tilit}))
+					LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.korjattu = '' AND tiliointi.tilino IN ({$myyntisaamiset_tilit}) AND tiliointi.tapvm = lasku.mapvm)
 					LEFT JOIN kassalipas ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
 					WHERE lasku.yhtio	= '{$kukarow['yhtio']}'
 					AND lasku.tila 		= 'U'
@@ -1290,6 +1290,13 @@
 						$luottokortti = true;
 					}
 
+					if ($row['tilsumma'] < $row['summa']) {
+						$echolisa = "({$row['summa']}) ";
+					}
+					else {
+						$echolisa = "";
+					}
+
 					if (stristr($row["tyyppi"], 'kateinen')) {
 
 						$solu = "kateinen";
@@ -1497,14 +1504,13 @@
 							$kateismaksuyhteensa = 0;
 						}
 
-
 						echo "<tr class='aktiivi'>";
 						echo "<td>$row[kassanimi]</td>";
 						echo "<td>".substr($row["nimi"],0,23)."</td>";
 						echo "<td>$row[ytunnus]</td>";
 						echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 						echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-						echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
+						echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
 						$kateismaksu 		= $row['tyyppi'];
 						$kateismaksuekotus 	= t(str_replace("kateinen", "Käteinen", $kateismaksu));
@@ -1728,6 +1734,13 @@
 
 					while ($row = mysql_fetch_assoc($result)) {
 
+						if ($row['tilsumma'] < $row['summa']) {
+							$echolisa = "({$row['summa']}) ";
+						}
+						else {
+							$echolisa = "";
+						}
+
 						if ($row["tyyppi"] == 'Pankkikortti') {
 
 							if ($row["tilino"] != '') {
@@ -1819,6 +1832,13 @@
 
 					while ($row = mysql_fetch_assoc($result)) {
 
+						if ($row['tilsumma'] < $row['summa']) {
+							$echolisa = "({$row['summa']}) ";
+						}
+						else {
+							$echolisa = "";
+						}
+						
 						if ($row["tyyppi"] == 'Luottokortti') {
 
 							if ($row["tilino"] != '') {
@@ -1837,7 +1857,7 @@
 							echo "<td>$row[ytunnus]</td>";
 							echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-							echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
+							echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
 							$kateinen    		  = $row["tilino"];
 							$edkassa 	 		  = $row["kassa"];
@@ -1894,6 +1914,13 @@
 			}
 			else {
 				while ($row = mysql_fetch_assoc($result)) {
+
+					if ($row['tilsumma'] < $row['summa']) {
+						$echolisa = "({$row['summa']}) ";
+					}
+					else {
+						$echolisa = "";
+					}
 
 					if ((($edkassa != $row["kassa"] and $edkassa != '') or ($kateinen != $row["tilino"] and $kateinen != ''))) {
 						$kassalippaan_kateisotot_yhteensa = 0;
@@ -1976,7 +2003,7 @@
 					echo "<td>$row[ytunnus]</td>";
 					echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 					echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-					echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
+					echo "<td align='right'>$echolisa".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
 					$kateinen    		= $row["tilino"];
 					$edkassa 	 		= $row["kassa"];

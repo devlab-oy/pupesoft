@@ -265,7 +265,7 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		// Viranomaistuotteita ei tsekata...
-		if ($fieldname == "vienti" and $laji != "V") {
+		if ($fieldname == "vienti" and $laji != "V" and $tem_tuotetyyppi != "A" and $tem_tuotetyyppi != "B") {
 
 			// Katsotaan, ettei ole sekaisin plussia ja miinuksia
 			if ($t[$i] != '' and strpos($t[$i], "+") !== FALSE and strpos($t[$i], "-") !== FALSE) {

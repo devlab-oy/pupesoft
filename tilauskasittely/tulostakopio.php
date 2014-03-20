@@ -521,7 +521,7 @@
 
 		if ($toim == "PURKU") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa purkulista
-			$where1 .= " lasku.tila = 'K' ";
+			$where1 .= " lasku.tila = 'K' and lasku.vanhatunnus = 0";
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 

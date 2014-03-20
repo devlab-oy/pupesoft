@@ -13,7 +13,7 @@
 	$kukarow = array();
 
 	$kukarow['yhtio'] = isset($argv[1]) ? $argv[1] : die("Et antanut yhtiota!\n");
-	$kukarow['kuka'] = 'crond';
+	$kukarow['kuka'] = 'admin';
 
 	require 'inc/connect.inc';
 	require 'inc/functions.inc';

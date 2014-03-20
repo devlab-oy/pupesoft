@@ -2,7 +2,7 @@
 
 if(!function_exists("liitetiedostottarkista")) {
 	function liitetiedostottarkista (&$t, $i, $result, &$tunnus, &$virhe, $trow) {
-		global $kukarow, $_FILES, $thumb_size_x, $thumb_size_y;
+		global $kukarow, $_FILES, $thumb_size_x, $thumb_size_y, $normaali_size_x, $normaali_size_y;
 		static $liite_liitos, $liite_liitostunnus, $liite_datai, $liite_selite, $liite_kieli, $liite_kayttotarkoitus;
 
 		if (mysql_field_name($result, $i) == "liitos") {
@@ -99,6 +99,14 @@ if(!function_exists("liitetiedostottarkista")) {
 						$thumb_size_x = 96;
 						$thumb_size_y = 65;
 					}
+					if (isset($normaali_size_x) and trim($normaali_size_x) != '' and isset($normaali_size_y) and trim($normaali_size_y) != '') {
+						$normaali_size_x = (int) $normaali_size_x;
+						$normaali_size_y = (int) $normaali_size_y;
+					}
+					else {
+						$normaali_size_x = 640;
+						$normaali_size_y = 480;
+					}
 
 					// Muutetaan tuotekuvan koko sopivaksi
 					if ($liite_kayttotarkoitus == "TK" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
@@ -115,7 +123,7 @@ if(!function_exists("liitetiedostottarkista")) {
 
 						$_FILES["liite_data"] = $temp_file;
 
-						$uusi_filu = muuta_kuvan_koko(480, 640, "normaali", $liite_liitos, "liite_data");
+						$uusi_filu = muuta_kuvan_koko($normaali_size_y, $normaali_size_x, "normaali", $liite_liitos, "liite_data");
 
 						$uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
 

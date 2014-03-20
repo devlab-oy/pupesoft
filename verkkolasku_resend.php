@@ -34,7 +34,7 @@
 			if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
 
 				$kukarow['yhtio'] = $yhtio[1];
-				$kukarow['kuka']  = 'cron';
+				$kukarow['kuka']  = 'admin';
 				$kukarow['kieli'] = 'fi';
 
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -63,7 +63,7 @@
 			if (preg_match("/TRANSFER_IPOST\-(.*?)\-2/", $lasku, $yhtio)) {
 
 				$kukarow['yhtio'] = $yhtio[1];
-				$kukarow['kuka']  = 'cron';
+				$kukarow['kuka']  = 'admin';
 				$kukarow['kieli'] = 'fi';
 
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -93,7 +93,7 @@
 			if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
 
 				$kukarow['yhtio'] = $yhtio[1];
-				$kukarow['kuka']  = 'cron';
+				$kukarow['kuka']  = 'admin';
 				$kukarow['kieli'] = 'fi';
 
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -122,7 +122,7 @@
 			if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
 
 				$kukarow['yhtio'] = $yhtio[1];
-				$kukarow['kuka']  = 'cron';
+				$kukarow['kuka']  = 'admin';
 				$kukarow['kieli'] = 'fi';
 
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -151,7 +151,7 @@
 			if (preg_match("/laskutus\-(.*?)\-2[0-9]{7,7}\-([0-9]*?)\-serialized.txt/", $lasku, $matsit)) {
 
 				$kukarow['yhtio'] = $matsit[1];
-				$kukarow['kuka']  = 'cron';
+				$kukarow['kuka']  = 'admin';
 				$kukarow['kieli'] = 'fi';
 
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -200,7 +200,7 @@
 			if (preg_match("/Apix_(.*?)_invoices_/", $lasku, $matsit)) {
 
 				$kukarow['yhtio'] = $matsit[1];
-				$kukarow['kuka']  = 'cron';
+				$kukarow['kuka']  = 'admin';
 				$kukarow['kieli'] = 'fi';
 
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

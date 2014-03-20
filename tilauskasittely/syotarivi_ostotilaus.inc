@@ -88,7 +88,7 @@
 					$nosubmitti = "EISUBMIT";
 				}
 
-				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, '', $nosubmitti)."</td>";
+				echo "<td valign='top'>".livesearch_kentta("rivi", "TUOTEHAKU", "tuoteno", 200, '', $nosubmitti)."</td>";
 			}
 			else {
 				echo "<td><input type='text' size='18' name='tuoteno' value = '$tuoteno'></td>";
@@ -179,5 +179,3 @@
    if ($kentta == '') {
        $kentta = 'tuoteno';
    }
-
-?>

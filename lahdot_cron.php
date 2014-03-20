@@ -19,7 +19,7 @@
 	require ("inc/functions.inc");
 
 	$kukarow['yhtio'] = (string) $argv[1];
-	$kukarow['kuka']  = 'cron';
+	$kukarow['kuka']  = 'admin';
 	$kukarow['kieli'] = 'fi';
 
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

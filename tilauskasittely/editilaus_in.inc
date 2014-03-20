@@ -118,6 +118,7 @@ $ltoim_maa				= "";
 $yhteyshenkilon_puhelin = "";
 $tilausyhteyshenkilo	= "";
 $lopviesti            	= "";
+$veromaara				= "";
 $ohjausmerkki			= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
@@ -845,6 +846,11 @@ while ($tietue = fgets($fd)) {
 			$lopviesti = trim($orig_tieto);
 			break;
 
+		case 'OSTOTIL.OT_VEROMAARA':
+			// magento-keisissä, veron määrä
+			$veromaara = (int) trim($orig_tieto);
+			break;
+
 		//Tilaus päättyy. Aika tehdä se kantaan
 		case 'OHDR__END' :
 		case '*RE OSTOTIL' :
@@ -919,7 +925,13 @@ while ($tietue = fgets($fd)) {
 							$arow["vienti"] = "K";
 						}
 						else {
-							$arow["vienti"] = "E";
+							// Jos EU-yksityishenkilkölle menee verollisena
+							if ($veromaara != 0) {
+								$arow["vienti"] = "";
+							}
+							else {
+								$arow["vienti"] = "E";
+							}
 						}
 					}
 				}
@@ -964,25 +976,47 @@ while ($tietue = fgets($fd)) {
 				}
 
 				if (trim($editilaus_toimitustapa) != '') {
-					$query = "	SELECT *
-								FROM asiakkaan_avainsanat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tarkenne = '{$editilaus_toimitustapa}'
-								AND laji = 'editilaus_toimitustapa'
-								AND tarkenne != ''
-								AND avainsana != ''
-								AND liitostunnus = '{$arow['tunnus']}'
-								ORDER BY muutospvm DESC
-								LIMIT 1";
-					$toimitustapa_chk_res = pupe_query($query);
-
-					if (mysql_num_rows($toimitustapa_chk_res) == 1) {
-						$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-						$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+					// tarkistetaan löytyykö toimitustapa pupesta suoraan
+					if ($edi_tyyppi == "magento") {
+						$query = "	SELECT *
+									FROM toimitustapa
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND selite = '{$editilaus_toimitustapa}'
+									AND selite != ''
+									ORDER BY muutospvm DESC
+									LIMIT 1";
+						$ressu = pupe_query($query);
+					
+						// - jos löytyy niin käytetään sitä
+						if (mysql_num_rows($ressu) == 1) {
+							$ftc = mysql_fetch_assoc($ressu);
+							$editilaus_toimitustapa = $ftc['selite'];
+						}
+						else {
+							$editilaus_toimitustapa = '';
+						}
 					}
 					else {
-						$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa \n";
-						$editilaus_toimitustapa = '';
+						$query = "	SELECT *
+									FROM asiakkaan_avainsanat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tarkenne = '{$editilaus_toimitustapa}'
+									AND laji = 'editilaus_toimitustapa'
+									AND tarkenne != ''
+									AND avainsana != ''
+									AND liitostunnus = '{$arow['tunnus']}'
+									ORDER BY muutospvm DESC
+									LIMIT 1";
+						$toimitustapa_chk_res = pupe_query($query);
+
+						if (mysql_num_rows($toimitustapa_chk_res) == 1) {
+							$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+							$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+						}
+						else {
+							$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa \n";
+							$editilaus_toimitustapa = '';
+						}
 					}
 				}
 
@@ -1618,24 +1652,26 @@ while ($tietue = fgets($fd)) {
 					$hyvityssaanto_palautuskielto_array	= "";
 
 					// Jos käytetään reklamaatioiden hinnoittelusääntöä ja käyttäjä ei ole väkisinhyväksynyt riviä
-					// if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $editilaus_tilaustyyppi == 3) {
-					// 	$hyvityssaanto_hinta_array = array();
-					// 	$hyvityssaanto_ale_array = array();
-					// 	$hyvityssaanto_kpl_array = array();
-					// 	$hyvityssaanto_kommentti_array = array();
-					// 	$hyvityssaanto_palautuskielto_array = array();
+					if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $editilaus_tilaustyyppi == 3) {
+						$hyvityssaanto_hinta_array = array();
+						$hyvityssaanto_ale_array = array();
+						$hyvityssaanto_kpl_array = array();
+						$hyvityssaanto_kommentti_array = array();
+						$hyvityssaanto_palautuskielto_array = array();
 
-					// 	$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
+						$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
-					// 	foreach ($palautus as $index => $arvot) {
-					// 		$tuoteno_array[] = $palautus[$index]["tuoteno"];
-					// 		$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
-					// 		$hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
-					// 		$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
-					// 		$hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
-					// 		$hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
-					// 	}
-					// }
+						if (count($palautus) > 0) $tuoteno_array = array();
+
+						foreach ($palautus as $index => $arvot) {
+							$tuoteno_array[] = $palautus[$index]["tuoteno"];
+							$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
+							$hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
+							$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
+							$hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
+							$hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
+						}
+					}
 
 					foreach ($tuoteno_array as $tuoteno) {
 
@@ -2051,6 +2087,7 @@ while ($tietue = fgets($fd)) {
 			$yhteyshenkilon_puhelin = "";
 			$tilausyhteyshenkilo	= "";
 			$lopviesti            	= "";
+			$veromaara				= "";
 			$ohjausmerkki			= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";

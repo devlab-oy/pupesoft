@@ -16,7 +16,7 @@
 
 		// hmm.. j‰nn‰‰
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
-		$kukarow['kuka'] = "crond";
+		$kukarow['kuka'] = "admin";
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
@@ -33,7 +33,8 @@
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tila = 'N'
-					AND lasku.alatila = ''";
+					AND lasku.alatila = ''
+					AND lasku.clearing NOT IN ('EXTENNAKKO','EXTTARJOUS')";
 		$result = mysql_query($query) or die($query);
 
 		while ($row = mysql_fetch_assoc($result)) {

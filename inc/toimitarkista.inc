@@ -162,15 +162,6 @@ if (!function_exists("toimitarkista")) {
 			}
 
 			$tmp_ytunnus = $t[$i];
-
-			// Jos ytunnus vaihtuu niin korjataan myös tuotteiden toimittajat
-			if (trim($t[$i]) != "" and $trow[$i] != $t[$i] and $errori != 1 and (int) $tunnus > 0) {
-				$query = "	UPDATE tuotteen_toimittajat
-							SET toimittaja = '$t[$i]'
-							WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'
-							and tuotteen_toimittajat.liitostunnus 	= $tunnus";
-				$vres = pupe_query($query);
-			}
 		}
 
 		if ($fieldname == "ohjeitapankille") {
@@ -257,13 +248,12 @@ if (!function_exists("toimitarkista")) {
 
 			if ($toimtyyppi == "L" and $tunnus > 0 and $errori != 1) {
 				// injisoidaan tuotteen_toimittajat kaikille tuotteille
-				$query = "	INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, toimittaja, liitostunnus, valuutta, alkuperamaa, tuotekerroin, laatija, luontiaika)
-							SELECT yhtio, tuoteno, tuoteno, '$tmp_ytunnus', '$tunnus', '$tmp_valkoodi', '$tmp_maakoodi', 1, '$kukarow[kuka]', now()
+				$query = "	INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, liitostunnus, valuutta, alkuperamaa, tuotekerroin, laatija, luontiaika)
+							SELECT yhtio, tuoteno, tuoteno, '$tunnus', '$tmp_valkoodi', '$tmp_maakoodi', 1, '$kukarow[kuka]', now()
 							FROM tuote
 							WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' and tuote.status != 'P'
 							ON DUPLICATE KEY UPDATE
 							tuotteen_toimittajat.liitostunnus 	= $tunnus,
-							tuotteen_toimittajat.toimittaja		= '$tmp_ytunnus',
 							tuotteen_toimittajat.valuutta		= '$tmp_valkoodi',
 							tuotteen_toimittajat.alkuperamaa	= '$tmp_maakoodi'";
 				$vres = pupe_query($query);

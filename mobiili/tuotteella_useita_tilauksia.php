@@ -36,7 +36,23 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 		$tuotenumerot = hae_viivakoodilla($viivakoodi);
 
 		if (count($tuotenumerot) > 0) {
-			$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+
+			$param_viivakoodi = array();
+
+			foreach ($tuotenumerot as $_tuoteno => $_arr) {
+				foreach ($_arr as $_liitostunnus) {
+					if (trim($_liitostunnus) != "") {
+						array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
+					}
+				}
+			}
+
+			if (empty($param_viivakoodi)) {
+				$params['viivakoodi'] = "tuote.tuoteno IN ('".implode(array_keys($tuotenumerot), "','")."')";
+			}
+			else {
+				$params['viivakoodi'] = "(".implode($param_viivakoodi, " OR ").")";
+			}
 		}
 		else {
 			$errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";
@@ -203,7 +219,7 @@ if ($tilausten_lukumaara == 0) {
 }
 
 # Jos vain yksi osuma, mennään suoraan hyllytykseen;
-if ($tilausten_lukumaara == 1 and $_viivakoodi == "") {
+if ($tilausten_lukumaara == 1 and $orig_tilausten_lukumaara == 1 and $_viivakoodi == "") {
 
 	$url_array['tilausrivi'] = $tilaukset['tunnus'];
 	$url_array['ostotilaus'] = empty($ostotilaus) ? $tilaukset['otunnus'] : $ostotilaus;
@@ -229,7 +245,7 @@ echo "<div class='header'>
 	<button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
 	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
-$viivakoodi_formi_urli = "?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
+$viivakoodi_formi_urli = "?tuotenumero=".urlencode($tuotenumero)."&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
 
 echo "<div class='main'>
 
@@ -327,10 +343,13 @@ echo "</div>";
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
 
+	// katotaan onko mobile
+	var is_mobile = navigator.userAgent.match(/Opera Mob/i) != null;
+
 	$(document).ready(function() {
 		$('#viivakoodi').on('keyup', function() {
 			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
-			if ($('#viivakoodi').val().length > 8) {
+			if (is_mobile && $('#viivakoodi').val().length > 8) {
 				document.getElementById('valitse_nappi').click();
 			}
 		});

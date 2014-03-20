@@ -116,7 +116,6 @@
 		// otetaan kaikki muuttujat mukaan funktioon mitä on failissakin
 		extract($GLOBALS);
 
-		$laskuntoimmaa = "";
 		$returnstring1 = 0;
 		$returnstring2 = 0;
 
@@ -134,20 +133,27 @@
 			$varastotapa = "";
 		}
 
+		$laskujoin 	   = "";
+		$laskuntoimmaa = "";
+
 		if ($myynti_maa != "") {
 			$laskuntoimmaa = " and lasku.toim_maa = '$myynti_maa' ";
 		}
 
+		if ($lisaa3 != "" or $laskuntoimmaa != "") {
+			$laskujoin = " JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa) ";
+		}
+
 		// tutkaillaan myynti
 		$query = "	SELECT
-					sum(if(tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4,
+					sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
 					sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
 					sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt,
 					sum(if(tilausrivi.tyyppi = 'E' and tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakko
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-					JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa)
-					JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus $lisaa3)
-					$varastotapa
+					{$laskujoin}
+					{$lisaa3}
+					{$varastotapa}
 					WHERE tilausrivi.yhtio in ($yhtiot)
 					and tilausrivi.tyyppi in ('L','V','E')
 					and tilausrivi.tuoteno = '$row[tuoteno]'
@@ -464,7 +470,7 @@
 			$lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
 		}
 		if ($eliminoikonserni != '') {
-			$lisaa3 .= " and asiakas.konserniyhtio = '' ";
+			$lisaa3 .= " JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.konserniyhtio = '') ";
 		}
 
 		$valvarasto = "";
@@ -603,11 +609,11 @@
 		while ($row = mysql_fetch_assoc($res)) {
 
 			$toimilisa = "";
-			if ($toimittajaid != '') $toimilisa = " and liitostunnus = '$toimittajaid' ";
+			if ($toimittajaid != '') $toimilisa = " and tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
 
 			//hae liitostunnukset
 			// haetaan tuotteen toimittajatietoa
-			$query = "	SELECT group_concat(tuotteen_toimittajat.toimittaja     order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
+			$query = "	SELECT group_concat(toimi.ytunnus                       order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
 						group_concat(distinct tuotteen_toimittajat.osto_era     order by tuotteen_toimittajat.tunnus separator '/') osto_era,
 						group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
 						group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
@@ -618,8 +624,9 @@
 						group_concat(distinct tuotteen_toimittajat.tunnus 		order by tuotteen_toimittajat.tunnus separator '/') tunnukset,
 						group_concat(distinct tuotteen_toimittajat.liitostunnus order by tuotteen_toimittajat.tunnus separator '/') liitostunnukset
 						FROM tuotteen_toimittajat
-						WHERE yhtio in ($yhtiot)
-						and tuoteno = '$row[tuoteno]'
+						JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+						WHERE tuotteen_toimittajat.yhtio in ($yhtiot)
+						and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
 						$toimilisa";
 			$result   = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($result);
@@ -862,7 +869,6 @@
 		echo "<input type='hidden' name='eliminoikonserni' value='$eliminoikonserni'>";
 		echo "<input type='hidden' name='abcrajaus' value='$abcrajaus'>";
 		echo "<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>";
-		echo "<input type='hidden' name='eliminoi' value='$eliminoi'>";
 		echo "<input type='hidden' name='erikoisvarastot' value='$erikoisvarastot'>";
 		echo "<input type='hidden' name='naytakaikkituotteet' value='$naytakaikkituotteet'>";
 		echo "<input type='hidden' name='eivarastoivattilaus' value='$eivarastoivattilaus'>";
@@ -1058,8 +1064,8 @@
 	echo "</table><table><br>";
 
 	$chk = "";
-	if ($eliminoi != "") $chk = "checked";
-	echo "<tr><th>".t("Älä huomioi konsernimyyntiä")."</th><td colspan='3'><input type='checkbox' name='eliminoi' $chk></td></tr>";
+	if ($eliminoikonserni != "") $chk = "checked";
+	echo "<tr><th>".t("Älä huomioi konsernimyyntiä")."</th><td colspan='3'><input type='checkbox' name='eliminoikonserni' $chk></td></tr>";
 
 	$chk = "";
 	if ($erikoisvarastot != "") $chk = "checked";

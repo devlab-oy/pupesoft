@@ -72,22 +72,15 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 				ORDER BY lasku.toimaika $suunta, lasku.nimi, lasku.tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if (($vain_excel != '' or $vain_excel_kaikki != '') and @include('Spreadsheet/Excel/Writer.php')) {
-		//keksitään failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+	if ($vain_excel != '' or $vain_excel_kaikki != '') {
+		include('inc/pupeExcel.inc');
 
-		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$workbook->setVersion(8);
-		$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-		$format_bold =& $workbook->addFormat();
-		$format_bold->setBold();
+		$worksheet    = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
 
 		$excelrivi = 0;
 
-		if(isset($workbook)) {
+		if(isset($worksheet)) {
 			$excelsarake = 0;
 
 			$worksheet->write($excelrivi, $excelsarake, t("Tilno"), $format_bold);
@@ -131,7 +124,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 		$tilsum += $tulrow["tilattu"];
 		$eursum += $tulrow["arvo"];
 
-		if(isset($workbook)) {
+		if(isset($worksheet)) {
 			$excelsarake = 0;
 
 			$worksheet->writeString($excelrivi, $excelsarake, $tulrow["tunnus"]);
@@ -164,7 +157,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 	echo "</tr>";
 	echo "</table>";
 
-	if(isset($workbook)) {
+	if(isset($worksheet)) {
 		$excelsarake = 0;
 
 		$excelsarake++;
@@ -179,16 +172,16 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 		$excelrivi++;
 	}
 
-	if(isset($workbook)) {
+	if(isset($worksheet)) {
 
 		// We need to explicitly close the workbook
-		$workbook->close();
+		$excelnimi = $worksheet->close();
 
 		echo "<br><table>";
 		echo "<tr><th>".t("Tallenna tulos").":</th>";
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Menossa_olevat.xls'>";
+		echo "<input type='hidden' name='kaunisnimi' value='Menossa_olevat.xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 		echo "</table><br>";

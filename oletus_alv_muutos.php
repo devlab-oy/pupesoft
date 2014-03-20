@@ -115,6 +115,29 @@ else {
 									WHERE yhtio = '{$kukarow["yhtio"]}'";
 						$result = pupe_query($query);
 					}
+					elseif ($tables[0] == "toimitustapa" and $fields[0] == "erilliskasiteltavakulu") {
+						echo "<tr><th>$tables[0]</th><th>$fields[0]</th><th>$teksti</th></tr>";
+
+						$updalv = $alv;
+
+						if ($yhtiorow["erilliskasiteltava_tuotenumero"] != "") {
+							$query  = "	SELECT alv
+										FROM tuote
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										AND tuoteno = '{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
+							$tuotenores = pupe_query($query);
+
+							if (mysql_num_rows($tuotenores) == 1) {
+								$tuotenorow = mysql_fetch_assoc($tuotenores);
+								$updalv = $tuotenorow["alv"];
+							}
+						}
+
+						$query  = " UPDATE toimitustapa
+									SET erilliskasiteltavakulu = round(erilliskasiteltavakulu {$oper} (1 + ({$updalv} / 100)), {$yhtiorow['hintapyoristys']})
+									WHERE yhtio = '{$kukarow["yhtio"]}'";
+						$result = pupe_query($query);
+					}
 					elseif ($tables[0] == "rahtimaksut" and  $fields[0] == "rahtihinta") {
 						echo "<tr><th>$tables[0]</th><th>$fields[0]</th><th>$teksti</th></tr>";
 
@@ -211,5 +234,3 @@ else {
 	$query = "UNLOCK TABLES";
 	$locre = mysql_query($query) or pupe_error($query);
 }
-
-?>

@@ -58,6 +58,7 @@ class Edi {
 		$edi_order .= "OSTOTIL.OT_MAKSUEHTO:".strip_tags($order['payment']['method'])."\n";
 		$edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
 		$edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
+		$edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
 		$edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
 		$edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";
 		$edi_order .= "OSTOTIL.OT_KLAUSUULI1:\n";

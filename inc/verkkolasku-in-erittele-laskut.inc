@@ -73,6 +73,11 @@
 					}
 
 					$path_parts = pathinfo($file);
+
+					// Siivotaan vanha nimi, ettei nimi mee liian pitkäksi...
+					$path_parts["filename"] = preg_replace("/(finvoice\-)/", "", $path_parts["filename"]);
+					$path_parts["filename"] = preg_replace("/(\-gen[a-z0-9]{20,20})/", "", $path_parts["filename"]);
+
 					$filenimi = "finvoice-{$path_parts["filename"]}-$ebid.xml";
 					$save = file_put_contents($laskut."/".$filenimi, $boob);
 
@@ -133,10 +138,14 @@
 			}
 
 			// Teccom laskuaineisto
-			if (isset($xml->Document->attributes()->Type) and $xml->Document->attributes()->Type == "Invoice") {
+			if (isset($xml->Document) and isset($xml->Document->attributes()->Type) and $xml->Document->attributes()->Type == "Invoice") {
 
 				// Laitetaan teccomifile ensin talteen sellaisenaan
 				$path_parts = pathinfo($file);
+
+				// Siivotaan vanha nimi, ettei nimi mee liian pitkäksi...
+				$path_parts["basename"] = preg_replace("/(teccominvoice_)/", "", $path_parts["basename"]);
+
 				$filenimi = "teccominvoice_{$path_parts['basename']}";
 				copy($file, $origlaskut."/".$filenimi);
 
@@ -155,6 +164,9 @@
 
 				$save = file_put_contents($file, $xmldata);
 				$path_parts = pathinfo($file);
+
+				// Siivotaan vanha nimi, ettei nimi mee liian pitkäksi...
+				$path_parts["basename"] = preg_replace("/(teccominvoice_)/", "", $path_parts["basename"]);
 
 				rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");
 			}

@@ -80,7 +80,7 @@
 				if ($toimitustapa_check_row['vak_kielto'] != '' and $toimitustapa_check_row['vak_kielto'] != 'K') {
 					$otsikko_lisatiedot .= "<li>".t("VAK-tuotteiden toimituksessa k‰ytet‰‰n muuta toimitustapaa")."</li>";
 				}
-				
+
 				$otsikko_lisatiedot .= "</ul></font>";
 			}
 		}

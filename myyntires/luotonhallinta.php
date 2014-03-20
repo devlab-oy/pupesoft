@@ -127,9 +127,9 @@
 	echo "<option value='D' $raja_select[D]>".t("Näytä asiakkaat, joilla on luottoraja, mutta ei myyntiä")."</option>";
 	echo "<option value='E' $raja_select[E]>".t("Näytä asiakkaat, jotka ovat myyntikiellossa")."</option>";
 	echo "<option value='F' $raja_select[F]>".t("Näytä asiakkaat, jotka ovat ylittäneet luottorajan, mutta eivät ole myyntikiellossa")."</option>";
-	echo "<option value='G' $raja_select[G]>".t("Näytä asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kerran")."</option>";
-	echo "<option value='H' $raja_select[H]>".t("Näytä asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kaksi kertaa")."</option>";
-	echo "<option value='I' $raja_select[I]>".t("Näytä asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kolme kertaa")."</option>";
+	echo "<option value='G' $raja_select[G]>".t("Näytä asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kerran")."</option>";
+	echo "<option value='H' $raja_select[H]>".t("Näytä asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kaksi kertaa")."</option>";
+	echo "<option value='I' $raja_select[I]>".t("Näytä asiakkaat, joilla on avoimia maksukehotuksia, joita on kehotettu maksamaan ainakin kolme kertaa")."</option>";
 	echo "<option value='Z' $raja_select[Z]>".t("Näytä kaikki asiakkaat")."</option>";
 	echo "</select></td>";
 	echo "</tr>";
@@ -307,7 +307,7 @@
 		echo "<th>".t("Myyntikielto")."</th>";
 
 		if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
-			echo "<th>".t("Karhukertoja")."</th>";
+			echo "<th>".t("Maksukehotuskertoja")."</th>";
 			echo "<th>".t("Laskuja")."</th>";
 		}
 

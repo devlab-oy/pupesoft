@@ -172,7 +172,7 @@
 			$Amt = $CdtTrfTxInf->addChild('Amt', '');												// Amount
 
 			if ($laskurow['alatila'] != 'K') {
-				$InstdAmt = $Amt->addChild('InstdAmt', $laskurow['summa']);							// InstructedAmount, Pakollinen kenttä
+				$InstdAmt = $Amt->addChild('InstdAmt', round($laskurow['summa'], 2));							// InstructedAmount, Pakollinen kenttä
 			}
 			else {
 				$InstdAmt = $Amt->addChild('InstdAmt', round($laskurow['summa'] - $laskurow['kasumma'],2));	// InstructedAmount, Pakollinen kenttä

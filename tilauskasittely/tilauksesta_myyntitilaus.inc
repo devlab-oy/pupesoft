@@ -46,7 +46,9 @@
 							and alatila			 in ('','A')
 							and yhtio_toimipaikka = '{$kukarow['toimipaikka']}'
 							and liitostunnus 	  = '{$asiakasjollepalautetaan}'
-							and tilaustyyppi	  = '9'";
+							and tilaustyyppi	  = '9'
+							ORDER BY luontiaika DESC
+							LIMIT 1";
 				$stresult = pupe_query($query);
 
 				if (mysql_num_rows($stresult) == 1) {

@@ -254,16 +254,15 @@
 				}
 
 				// suoratoimituksissa verkkotunnus-kentt‰‰n tallentuu vastaanottajan liitostunnus
-				if ($laskurow['verkkotunnus'] != '') {
+				if ($laskurow['verkkotunnus'] != '' and $laskurow['suoraveloitus'] != '') {
 					$query = "	SELECT if(gsm != '', gsm, if(tyopuhelin != '', tyopuhelin, puhelin)) puh
 								FROM asiakas
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$laskurow['verkkotunnus']}'";
 					$puhelinres = pupe_query($query);
+					$puhelinrow = mysql_fetch_assoc($puhelinres);
 
-					if (mysql_num_rows($puhelinres) > 0) {
-						$puhelinrow = mysql_fetch_assoc($puhelinres);
-
+					if ($puhelinrow['puh'] != "") {
 						$pdf->draw_rectangle($lakork, 300, $lakork-21, 580, $thispage, $rectparam);
 						$pdf->draw_text(310, $lakork-8, t("Vastaanottajan puhelinnumero", $kieli), $thispage, $pieni);
 						$pdf->draw_text(310, $lakork-18, $puhelinrow['puh'], $thispage, $norm);
@@ -420,15 +419,18 @@
 				else {
 
 					if ($row["toim_tuoteno"] != "") {
-						$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],$thispage, $norm);
+						list($ff_string, $ff_font) = pdf_fontfit($row["toim_tuoteno"], 140, $pdf, $norm);
+						$pdf->draw_text(45,  $kala, $ff_string,$thispage, $ff_font);
 					}
 					else {
-						$pdf->draw_text(45,  $kala, $row["tuoteno"], $thispage, $norm);
+						list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+						$pdf->draw_text(45,  $kala, $ff_string, $thispage, $ff_font);
 					}
 
-					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"])) {
-						$oikpos = $pdf->strlen("(".$row["tuoteno"].")", $pieni);
-						$pdf->draw_text(290-$oikpos, $kala, "(".$row["tuoteno"].")", $thispage, $pieni);
+					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"]) AND strtoupper($row["toim_tuoteno"] != "")) {
+						list($ff_string, $ff_font) = pdf_fontfit("(".$row["tuoteno"].")", 110, $pdf, $pieni);
+						$oikpos = $pdf->strlen($ff_string, $ff_font);
+						$pdf->draw_text(290-$oikpos, $kala, $ff_string, $thispage, $ff_font);
 					}
 				}
 
@@ -469,7 +471,7 @@
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
 				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 
-            	if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) {
+            	if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A') or $toim == "HAAMU") {
 
 	 				//K‰‰nnet‰‰n nimitys
 					$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
@@ -652,18 +654,7 @@
 
 		// katotaan miten halutaan sortattavan
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]);
-
-		if ($mista == "tulostakopio") {
-			$haamulisa = " and tilausrivi.tyyppi = 'D'";
-
-		}
-		else {
-			$haamulisa = " and tilausrivi.tyyppi != 'D'";
-
-		}
-
 		$query_ale_lisa = generoi_alekentta('O');
-
 		$query_ale_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
 		if ($toim != "HAAMU") {
@@ -695,13 +686,13 @@
 			}
 		}
 		else {
-			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu,
+			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu, 2) varattu,
 						tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-						substring(tilausrivi.kommentti,1,80) nimitys, tilausrivi.yksikko, tilausrivi.toimaika
+						substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys
 						FROM tilausrivi
+						join tuote USING (yhtio, tuoteno)
 						WHERE tilausrivi.otunnus = '$otunnus'
 						and tilausrivi.yhtio	 = '$kukarow[yhtio]'
-						$haamulisa
 						ORDER BY tilausrivi.tunnus";
 		}
 

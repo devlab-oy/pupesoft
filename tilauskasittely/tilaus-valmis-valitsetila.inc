@@ -149,46 +149,58 @@
 		if ($rivirow["riveja"] == $rivirow["puutteet"]) {
 			// Jos tilauksella oli vain puuterivej‰ niin poistetaan rahtikulurivi jos sellanen on
 			$query  = "	DELETE FROM tilausrivi
-						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+						WHERE otunnus = '$laskurow[tunnus]'
+						AND yhtio     = '$kukarow[yhtio]'
+						AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
 			$result = pupe_query($query);
 
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆi ohjelmassa tilaus-valmis-valitsetila.php (2)")."<br>";
 
 			$query  = "	UPDATE lasku
 						SET tila='D', alatila='$laskurow[tila]', comments = '$komm'
-						where tunnus='$laskurow[tunnus]'
-						and yhtio='$kukarow[yhtio]'";
+						WHERE tunnus = '$laskurow[tunnus]'
+						AND yhtio    = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s  oli pelk‰st‰‰n Puuterivej‰. Otsikko mit‰tˆitiin."), $laskurow["tunnus"])."</font><br><br>\n";
 			$toimitusvahvitus_laheta = TRUE;
 		}
 		elseif ($rivirow["riveja"] == $rivirow["jteet"]) {
-			// Jos tilauksella oli vain jt-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
-			$query  = "	DELETE FROM tilausrivi
-						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-			$result = pupe_query($query);
+
+			if ($yhtiorow["rahti_hinnoittelu"] != 'K') {
+				// Jos tilauksella oli vain jt-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
+				$query  = "	DELETE FROM tilausrivi
+							WHERE otunnus = '$laskurow[tunnus]'
+							AND yhtio     = '$kukarow[yhtio]'
+							AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
+				$result = pupe_query($query);
+			}
 
 			$query  = "	UPDATE lasku
 						SET tila='N', alatila='T'
-						where tunnus='$laskurow[tunnus]'
-						and yhtio='$kukarow[yhtio]'";
+						WHERE tunnus='$laskurow[tunnus]'
+						AND yhtio='$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 		}
 		elseif ($rivirow["riveja"] == $rivirow["jteet"] + $rivirow["puutteet"]) {
 			// Tilauskella on pelk‰st‰‰n jt-rivej‰ ja puutteita joita ei ker‰t‰
-			// Jos tilauksella oli vain jt/puute-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
-			$query  = "	DELETE FROM tilausrivi
-						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-			$result = pupe_query($query);
+
+			if ($yhtiorow["rahti_hinnoittelu"] != 'K') {
+				// Jos tilauksella oli vain jt/puute-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
+				$query  = "	DELETE FROM tilausrivi
+							WHERE otunnus = '$laskurow[tunnus]'
+							AND yhtio     = '$kukarow[yhtio]'
+							AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
+				$result = pupe_query($query);
+			}
 
 			// P‰ivitet‰‰n tilaus tilaan 'odottaa jt-rivej‰'
 			$query  = "	UPDATE lasku
 						SET tila='N', alatila='T'
-						where tunnus='$laskurow[tunnus]'
-						and yhtio='$kukarow[yhtio]'";
+						WHERE tunnus = '$laskurow[tunnus]'
+						AND yhtio    = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja Puuterivej‰ ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";

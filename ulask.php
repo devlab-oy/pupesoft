@@ -1619,6 +1619,8 @@ if ($tee == 'P' or $tee == 'E') {
 			  	FROM kuka
 				JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
 			  	WHERE kuka.yhtio = '$kukarow[yhtio]'
+				AND kuka.aktiivinen = 1
+				AND kuka.extranet = ''
 				and kuka.hyvaksyja = 'o'
 			  	ORDER BY kuka.nimi";
 	$vresult = pupe_query($query);

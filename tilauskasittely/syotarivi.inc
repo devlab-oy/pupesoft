@@ -23,17 +23,6 @@
 		require ("syota_variaatiorivi.inc");
 	}
 
-	if ($tila == "MUUTA" and $tapa == "MUOKKAA" and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
-		// valittu ei näytetä alveja vaikka hinnat alvillisina	
-		if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
-			$hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
-		}
-		// valittu näytetään alvit vaikka hinnat alvittomia
-		if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o') {
-			$hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
-		}
-	}	
-	
 	if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
 		// Pikatilauksen syöttörivi
 		echo "<table><tr>$jarjlisa";
@@ -258,6 +247,7 @@
 			}
 
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
@@ -421,21 +411,15 @@
 		echo "<option value='E' $chke>".t("E-Netto")."</option>";
 		echo "</select></td>";
 
-		//Jos meillä on marginaalimyyntiä/käänteinen alv
-		if (isset($alv) and $alv >= 500) {
+		// vaikka aluperin olisi marginaalimyyntiä/käänteinen alv (alv >= 500), saa alvia muuttaa rivillä
+		if (isset($alv) and $alv >= 500 and $alv < 600) {
 			echo "<td valign='top'>";
-
-			if ($alv >= 600) {
-				echo t("K.V.");
-			}
-			else {
-				echo t("M.V.");
-			}
+			echo t("M.V.");
 			echo "</td>";
 			echo "<input type='hidden' name='alv' value='$alv'>";
 		}
-		else {
-			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
+		else { 
+		 	echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 
 		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
@@ -619,6 +603,7 @@
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
@@ -793,6 +778,7 @@
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";

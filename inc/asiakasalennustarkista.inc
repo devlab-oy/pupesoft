@@ -11,7 +11,7 @@ if(!function_exists("asiakasalennustarkista")) {
 				$virhe[$i] = t("Tieto puuttuu!");
 			}
 
-			if (abs(trim($t[$i])) > 100 AND (float)trim($t[$i]) != 999.99) {
+			if (abs(trim($t[$i])) > 100 AND (float)trim($t[$i]) != 999.99 AND (float)trim($t[$i]) != -999.99) {
 				$virhe[$i] = t("Alennus ei voi olla yli 100%");
 			}
 		}

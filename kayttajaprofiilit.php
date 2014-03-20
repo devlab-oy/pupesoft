@@ -27,15 +27,18 @@
 	}
 
 	if ($tee == 'POISTA' and $profiili != "") {
+
 		$query = "	DELETE
-					FROM oikeu
+ 		   			FROM oikeu
 					WHERE yhtio  = '$kukarow[yhtio]'
 					AND kuka     = '$profiili'
 					AND profiili = '$profiili'
 					AND lukittu  = ''";
 		$result = pupe_query($query);
-
 		$maara = mysql_affected_rows();
+
+		// p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+		paivita_aktiiviset_kayttajat();
 
 		echo "<font class='message'>".t("Poistettiin")." $maara ".t("rivi‰")."</font><br>";
 
@@ -61,7 +64,7 @@
 
 		// sitten tutkaillaan onko jotain ruksattu...
 		if (count($valittu) != 0) {
-			foreach ($valittu as $rastit) { // Tehd‰‰n oikeudet
+			foreach ($valittu as $inde => $rastit) { // Tehd‰‰n oikeudet
 				list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
 				// haetaan menu itemi
@@ -75,13 +78,19 @@
 				$result = pupe_query($query);
 				$trow = mysql_fetch_assoc($result);
 
+				$paivitys_ins = '';
+
+				if (isset($paivitys[$inde]) and $paivitys[$inde] != "") {
+					$paivitys_ins = '1';
+				}
+
 				$query = "	INSERT into oikeu
 							SET kuka	= '$profiili',
 							profiili	= '$profiili',
 							sovellus	= '$trow[sovellus]',
 							nimi		= '$trow[nimi]',
 							alanimi 	= '$trow[alanimi]',
-							paivitys	= '',
+							paivitys	= '$paivitys_ins',
 							lukittu		= '',
 							nimitys		= '$trow[nimitys]',
 							jarjestys 	= '$trow[jarjestys]',
@@ -96,37 +105,6 @@
 			}
 			echo "<font class='message'>".t("K‰yttˆoikeudet p‰ivitetty")."!</font><br>";
 		}
-
-		if (count($paivitys) != 0) {
-			foreach ($paivitys as $rastit) { // P‰ivitet‰‰n p‰ivitys-kentt‰
-				list ($nimi, $alanimi, $sov) = explode("#", $rastit);
-
-				$query = "	SELECT nimi
-							FROM oikeu
-							WHERE yhtio		= '$kukarow[yhtio]'
-							AND kuka		= '$profiili'
-							AND sovellus	= '$sov'
-							AND nimi		= '$nimi'
-							AND alanimi		= '$alanimi'
-							AND profiili	= '$profiili'";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$query = "	UPDATE oikeu
-								SET paivitys 	= '1',
-								muutospvm 		= now(),
-								muuttaja 		= '{$kukarow['kuka']}'
-								WHERE yhtio		= '$kukarow[yhtio]'
-								AND kuka		= '$profiili'
-								AND sovellus	= '$sov'
-								AND nimi		= '$nimi'
-								AND alanimi		= '$alanimi'
-								AND profiili	= '$profiili'";
-					$result = pupe_query($query);
-				}
-			}
-		}
-
 
 		//p‰ivitet‰‰n k‰ytt‰jien profiilit (joilla on k‰ytˆss‰ t‰m‰ profiili)
 		$query = "	SELECT *
@@ -170,7 +148,7 @@
 						while ($trow = mysql_fetch_assoc($pres)) {
 							// joudumme tarkistamaan ettei t‰t‰ oikeutta ole jo t‰ll‰ k‰ytt‰j‰ll‰.
 							// voi olla esim jos se on lukittuna annettu
-							$query = "	SELECT yhtio
+							$query = "	SELECT yhtio, paivitys
 										FROM oikeu use index (sovellus_index)
 										WHERE yhtio		= '$kukarow[yhtio]'
 										AND kuka		= '$krow[kuka]'
@@ -197,24 +175,31 @@
 											muuttaja 	= '{$kukarow['kuka']}'";
 								$rresult = pupe_query($query);
 							}
-							elseif ($trow["paivitys"] == 1) {
-								// Meill‰ ei v‰ltt‰m‰tt‰ ollut p‰ivitysoikeutta, koska aiempi checki ei huomio sit‰. Lis‰t‰‰n p‰ivitysoikeus.
-								$query = "	UPDATE oikeu
-											SET paivitys 	= 1,
-											muutospvm 		= now(),
-											muuttaja 		= '{$kukarow['kuka']}'
-											WHERE yhtio		= '$kukarow[yhtio]'
-											AND kuka		= '$krow[kuka]'
-											AND sovellus	= '$trow[sovellus]'
-											AND nimi		= '$trow[nimi]'
-											AND alanimi 	= '$trow[alanimi]'";
-								$tarkesult = pupe_query($query);
+							else {
+								$tarkrow = mysql_fetch_assoc($tarkesult);
+
+								if ($trow["paivitys"] == 1 and $tarkrow["paivitys"] != 1) {
+									// Meill‰ ei v‰ltt‰m‰tt‰ ollut p‰ivitysoikeutta, koska aiempi checki ei huomio sit‰. Lis‰t‰‰n p‰ivitysoikeus.
+									$query = "	UPDATE oikeu
+												SET paivitys 	= 1,
+												muutospvm 		= now(),
+												muuttaja 		= '{$kukarow['kuka']}'
+												WHERE yhtio		= '$kukarow[yhtio]'
+												AND kuka		= '$krow[kuka]'
+												AND sovellus	= '$trow[sovellus]'
+												AND nimi		= '$trow[nimi]'
+												AND alanimi 	= '$trow[alanimi]'";
+									$tarkesult = pupe_query($query);
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+
+		// p‰ivite‰‰n kuka-tauluun mitk‰ k‰ytt‰j‰t on aktiivisia ja mitk‰ poistettuja
+		paivita_aktiiviset_kayttajat();
 	}
 
 	echo "<SCRIPT LANGUAGE=JAVASCRIPT>
@@ -412,7 +397,7 @@
 			if (mysql_num_rows($or) != 0) {
 				$checked = "CHECKED";
 
-				$oikeurow=mysql_fetch_assoc($or);
+				$oikeurow = mysql_fetch_assoc($or);
 
 				if ($oikeurow["paivitys"] == 1) {
 					$paivit = "CHECKED";
@@ -429,8 +414,8 @@
 			}
 
 			echo "	".t("$orow[nimitys]")."</td>
-					<td align='center'><input type='checkbox' class='A".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $checked 	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
-					<td align='center'><input type='checkbox' class='B".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $paivit  	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
+					<td align='center'><input type='checkbox' class='A".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $checked 	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[$lask]'></td>
+					<td align='center'><input type='checkbox' class='B".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $paivit  	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[$lask]'></td>
 					</tr>";
 
 			$vsove = $orow['sovellus'];

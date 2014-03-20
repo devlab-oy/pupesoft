@@ -1,7 +1,5 @@
 <?php
 
-	ini_set('zlib.output_compression', 1);
-
 	require ("../inc/parametrit.inc");
 
 	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
@@ -23,7 +21,6 @@
 			exit;
 		}
 	}
-
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
@@ -348,6 +345,12 @@
 												GROUP BY 1,2,3,4";
 									$pakkaus_info_res = pupe_query($query);
 									$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
+
+									if ($keraysera_row['kollilaji'] == 'MUU KOLLI') {
+										$pakkaus_info_row['leveys'] = $pakkaus_info_row['leveys'] < 0.1 ? 0.1 : $pakkaus_info_row['leveys'];
+										$pakkaus_info_row['korkeus'] = $pakkaus_info_row['korkeus'] < 0.1 ? 0.1 : $pakkaus_info_row['korkeus'];
+										$pakkaus_info_row['syvyys'] = $pakkaus_info_row['syvyys'] < 0.1 ? 0.1 : $pakkaus_info_row['syvyys'];
+									}
 
 									$kollitiedot = array(
 										'maara' => $keraysera_row['maara'],

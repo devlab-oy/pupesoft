@@ -31,5 +31,3 @@ echo "</head>
 		<noframes>Your browser does not support frames!</noframes>
 	</frameset>
 	</html>";
-
-?>

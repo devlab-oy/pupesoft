@@ -163,6 +163,17 @@
 		$tilausok++;
 	}
 
+	// katsotaan, ettei valmisteta ep‰kuranttia tuotetta
+	if (($toim == "VALMISTAVARASTOON" OR $toim == 'VALMISTAASIAKKAALLE') AND $trow["epakurantti25pvm"] != '0000-00-00' AND $riviok == 0) {
+		$varaosavirhe .= t("VIRHE: Tuote on ep‰kurantti, sit‰ ei saa valmistaa!");
+		$riviok++;
+		$tilausok++;
+	}
+
+	if (in_array($row['var'], array('U','T', 'R')) and $trow['epakurantti25pvm'] != '0000-00-00') {
+		$varaosavirhe .= t("HUOM: tuote on ep‰kurantti!")."<br>";
+	}
+
 	if ($row["hinta"] < 0) {
 		$varaosavirhe .= t("VIRHE: Hinta ei voi olla negatiivinen!")."<br>";
 		$riviok++;
@@ -1144,6 +1155,15 @@
 
 							if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
 								$vastaavat_table .= "</a>";
+							}
+
+							// poistetaan alvit (jos hintamuunnos p‰‰ll‰)
+							if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+								$V_hinta = round($V_hinta / (1+$row['alv']/100), $yhtiorow['hintapyoristys']);
+							}
+							// lisataan alvit (jos hintamuunnos p‰‰ll‰)
+							if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+								$V_hinta = round($V_hinta * (1+$row['alv']/100), $yhtiorow['hintapyoristys']);
 							}
 
 							$vastaavat_table .= " $vaihtoehtoinen</td>"

@@ -837,11 +837,11 @@
 			if (!empty($laskurow['varasto'])) {
 				$kohde_varastot = array($laskurow['varasto']);
 			}
-			else if (empty($laskurow['varasto']) and !empty($laskurow['yhtion_toimipaikka'])) {
+			else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
 				$query = "	SELECT *
 							FROM varastopaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND toimipaikka = '{$laskurow['yhtion_toimipaikka']}'";
+							AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
 				$varastopaikat_result = pupe_query($query);
 				$kohde_varastot = array();
 				while($varastopaikka = mysql_fetch_assoc($varastopaikat_result)) {

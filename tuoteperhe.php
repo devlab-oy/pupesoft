@@ -6,7 +6,7 @@
 	}
 
 	require ("inc/parametrit.inc");
-
+	
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
@@ -259,7 +259,7 @@
 		echo "</table></form>";
 	}
 
-	if ($tee == 'LISAA') {
+	if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
 
 		echo "<br>";
 
@@ -375,7 +375,7 @@
 		$tee = "";
 	}
 
-	if ($tee == 'POISTA') {
+	if ($tee == 'POISTA' and $oikeurow['paivitys'] == '1') {
 		$isatuoteno = trim($isatuoteno);
 
 		// Varmistetaan, että faktat ei mene rikki
@@ -404,7 +404,7 @@
 		$tunnus = '';
 	}
 
-	if ($tee == 'TALLENNAFAKTA') {
+	if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
 		$isatuoteno = trim($isatuoteno);
 
 		$query = "	UPDATE tuoteperhe
@@ -682,9 +682,11 @@
 					echo "<th>".t("Yhdistämisen lisätiedot").": </th></tr>";
 					echo "<td><textarea cols='35' rows='4' name='fakta2'>{$faktarow["fakta2"]}</textarea></td>";
 				}
-				echo "<td class='back'>
-					  <input type='submit' value='".t("Tallenna")."'>
-					  </td></form>";
+				echo "<td class='back'>";
+
+				if ($oikeurow['paivitys'] == '1') echo "<input type='submit' value='".t("Tallenna")."'>";
+
+				echo "</td></form>";
 				echo "</tr></table><br>";
 
 
@@ -810,9 +812,9 @@
 						echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
 					}
 
-					echo "	<td class='back'><input type='submit' value='".t("Lisää")."'></td>
-							</form>
-							</tr>";
+					echo "<td class='back'>";
+					if ($oikeurow['paivitys'] == '1') echo "<input type='submit' value='".t("Lisää")."'>";
+					echo "</td></form></tr>";
 				}
 
 				if (mysql_num_rows($res) > 0) {
@@ -900,26 +902,33 @@
 
 						$excelrivi++;
 
-						echo "<form method='post' action='tuoteperhe.php' autocomplete='off'>
-								<td class='back'>
-								<input type='hidden' name='toim' value='$toim'>
-								<input type='hidden' name='tunnus' value='$prow[tunnus]'>
-								<input type='hidden' name='isatuoteno' value='$isatuoteno'>
-								<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>
-								<input type='submit' value='".t("Muuta")."'>
-								</td></form>";
-
-
-						echo "<form method='post' action='tuoteperhe.php' autocomplete='off'>
-								<td class='back'>
-								<input type='hidden' name='toim' value='$toim'>
-								<input type='hidden' name='tee' value='POISTA'>
-								<input type='hidden' name='tunnus' value='$prow[tunnus]'>
-								<input type='hidden' name='isatuoteno' value='$isatuoteno'>
-								<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>
-								<input type='submit' value='".t("Poista")."'>
-								</td></form>";
-
+						echo "<td class='back'>";
+						
+						if ($oikeurow['paivitys'] == '1') {
+							echo "	<form method='post' action='tuoteperhe.php' autocomplete='off'>
+									<input type='hidden' name='toim' value='$toim'>
+									<input type='hidden' name='tunnus' value='$prow[tunnus]'>
+									<input type='hidden' name='isatuoteno' value='$isatuoteno'>
+									<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>
+									<input type='submit' value='".t("Muuta")."'>
+									</form>";
+						}
+						
+						echo "</td>";
+						echo "<td class='back'>";
+						
+						if ($oikeurow['paivitys'] == '1') {
+							echo "	<form method='post' action='tuoteperhe.php' autocomplete='off'>
+									<input type='hidden' name='toim' value='$toim'>
+									<input type='hidden' name='tee' value='POISTA'>
+									<input type='hidden' name='tunnus' value='$prow[tunnus]'>
+									<input type='hidden' name='isatuoteno' value='$isatuoteno'>
+									<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>
+									<input type='submit' value='".t("Poista")."'>
+									</form>";
+						}
+						
+						echo "</td>";
 						echo "</tr>";
 					}
 					elseif ($tunnus == $prow["tunnus"]) {
@@ -986,7 +995,9 @@
 									</td>";
 						}
 
-						echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td></form></tr>";
+						echo "<td class='back'>";
+						if ($oikeurow['paivitys'] == '1') echo "<input type='submit' value='".t("Päivitä")."'>";
+						echo "</td></form></tr>";
 					}
 				}
 
@@ -1023,28 +1034,30 @@
 				echo "</table><br>";
 
 				echo "<br><br>";
-				echo "	<form method='post' action='tuoteperhe.php' autocomplete='off'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type='hidden' name='tee' value='KOPIOI'>
-						<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
+				
+				if ($oikeurow['paivitys'] == '1') {
+					echo "	<form method='post' action='tuoteperhe.php' autocomplete='off'>
+							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' name='tee' value='KOPIOI'>
+							<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
 
 
-				foreach ($kop_tuoteno as $kop_index => $tuoteno) {
-					echo "<input type='hidden' name='kop_tuoteno[$kop_index]' value='$kop_tuoteno[$kop_index]'>";
-					echo "<input type='hidden' name='kop_kerroin[$kop_index]' value='$kop_kerroin[$kop_index]'>";
-					echo "<input type='hidden' name='kop_hinkerr[$kop_index]' value='$kop_hinkerr[$kop_index]'>";
-					echo "<input type='hidden' name='kop_alekerr[$kop_index]' value='$kop_alekerr[$kop_index]'>";
-					#echo "<input type='hidden' name='kop_rivikom[$kop_index]' value='$kop_rivikom[$kop_index]'>";
-					echo "<input type='hidden' name='kop_fakta[$kop_index]' value='$kop_fakta[$kop_index]'>";
+					foreach ($kop_tuoteno as $kop_index => $tuoteno) {
+						echo "<input type='hidden' name='kop_tuoteno[$kop_index]' value='$kop_tuoteno[$kop_index]'>";
+						echo "<input type='hidden' name='kop_kerroin[$kop_index]' value='$kop_kerroin[$kop_index]'>";
+						echo "<input type='hidden' name='kop_hinkerr[$kop_index]' value='$kop_hinkerr[$kop_index]'>";
+						echo "<input type='hidden' name='kop_alekerr[$kop_index]' value='$kop_alekerr[$kop_index]'>";
+						#echo "<input type='hidden' name='kop_rivikom[$kop_index]' value='$kop_rivikom[$kop_index]'>";
+						echo "<input type='hidden' name='kop_fakta[$kop_index]' value='$kop_fakta[$kop_index]'>";
 
-					if ($toim == "PERHE") {
-						echo "<input type='hidden' name='kop_ohita_kerays[$kop_index]' value='$kop_ohita_kerays[$kop_index]'>";
+						if ($toim == "PERHE") {
+							echo "<input type='hidden' name='kop_ohita_kerays[$kop_index]' value='$kop_ohita_kerays[$kop_index]'>";
+						}
 					}
+
+					echo "<input type='submit' value='".t("Kopioi")."'>";
+					echo "</form>";
 				}
-
-				echo "<input type='submit' value='".t("Kopioi")."'>";
-				echo "</form>";
-
 			}
 			else {
 				echo "<table>";

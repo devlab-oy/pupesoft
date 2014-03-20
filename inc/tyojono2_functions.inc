@@ -12,10 +12,7 @@ function hae_tyojono2_js() {
 				$('#tyojono_wrapper').tyojonoPlugin();
 				var tyojono_plugin = $('#tyojono_wrapper').data('tyojonoPlugin');
 
-				tyojono_plugin.bind_kohde_tr_click();
-				tyojono_plugin.bind_select_kaikki_checkbox();
-				tyojono_plugin.bind_laite_checkbox();
-				tyojono_plugin.bind_aineisto_submit_button_click();
+				tyojono_plugin.bind_all_events();
 			}
 		});
 	</script>
@@ -40,6 +37,15 @@ function hae_tyojono2_css() {
 		.laite_tr {
 			background-color: #DADDDE;
 		}
+		#message_box_success {
+			display:none;
+		}
+		#message_box_fail {
+			display:none;
+		}
+		select[disabled] {
+			background-color: gainsboro;
+		}
 	</style>
 	<?php
 	$js = ob_get_clean();
@@ -48,7 +54,7 @@ function hae_tyojono2_css() {
 }
 
 function hae_tyomaaraykset($request) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $temp;
 
 	$lasku_where = "";
 	$kohde_join = "";
@@ -77,14 +83,33 @@ function hae_tyomaaraykset($request) {
 		$kohde_join .= "	AND kohde.tunnus = '{$request['kohde_tunnus']}'";
 	}
 
-	if (!empty($request['toimitusaika_haku'])) {
-		if (is_numeric($request['toimitusaika_haku'])) {
-			$lasku_where .= "	AND lasku.toimaika < DATE_ADD(NOW(), INTERVAL {$request['toimitusaika_haku']} DAY)";
+	if (!empty($request['toimitusaika'])) {
+		if (is_numeric($request['toimitusaika'])) {
+			$lasku_where .= "	AND lasku.toimaika < DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)";
 		}
-		else if ($request['toimitusaika_haku'] == 'X') {
+		else if ($request['toimitusaika'] == 'X') {
 			//Näytä myöhässä olevat
-			$lasku_where .= "	AND lasku.toimaika < DATE_SUB(NOW(), INTERVAL 1 DAY)";
+			$lasku_where .= "	AND lasku.toimaika < DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)";
 		}
+	}
+
+	$tyomaarays_join = "";
+	if (!empty($request['tyojono']) and $request['tyojono'] != 'KAIKKI') {
+		$tyomaarays_join .= " AND tyomaarays.tyojono = '{$request['tyojono']}'";
+	}
+	else if (!empty($request['tyojono']) and $request['tyojono'] == 'EIJONOSSA') {
+		$tyomaarays_join .= " AND tyomaarays.tyojono = ''";
+	}
+
+	if (!empty($request['tyostatus']) and $request['tyostatus'] != 'KAIKKI') {
+		$tyomaarays_join .= " AND tyomaarays.tyostatus = '{$request['tyostatus']}'";
+	}
+	else if (!empty($request['tyostatus']) and $request['tyostatus'] == 'EISTATUSTA') {
+		$tyomaarays_join .= " AND tyomaarays.tyostatus = ''";
+	}
+
+	if ($temp === 1) {
+		$tmp = "_temp";
 	}
 
 	$query = "	SELECT
@@ -113,15 +138,16 @@ function hae_tyomaaraykset($request) {
 				tilausrivin_lisatiedot.tilausrivilinkki AS poikkeus_tunnus,
 				IF(tilausrivin_lisatiedot.tilausrivilinkki != 0, CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys), '') AS poikkeus_teksti,
 				poistettu_laite.tuoteno AS poistettu_laite
-				FROM lasku
-				JOIN tyomaarays
+				FROM lasku{$tmp} AS lasku
+				JOIN tyomaarays{$tmp} AS tyomaarays
 				ON ( tyomaarays.yhtio = lasku.yhtio
-					AND tyomaarays.otunnus = lasku.tunnus )
-				JOIN tilausrivi
+					AND tyomaarays.otunnus = lasku.tunnus
+					{$tyomaarays_join} )
+				JOIN tilausrivi{$tmp} AS tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
 					AND tilausrivi.otunnus = lasku.tunnus
 					AND tilausrivi.var != 'P' )
-				JOIN tilausrivin_lisatiedot
+				JOIN tilausrivin_lisatiedot{$tmp} AS tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
 				LEFT JOIN tilausrivi AS poikkeus_rivi
@@ -159,7 +185,9 @@ function hae_tyomaaraykset($request) {
 					AND a2.laji = 'TYOM_TYOSTATUS'
 					AND a2.selite = tyomaarays.tyostatus )
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				{$lasku_where}";
+				{$lasku_where}
+				ORDER BY kohde.tunnus ASC,
+				lasku.toimaika ASC";
 	$result = pupe_query($query);
 
 	$tyomaaraykset = array();
@@ -180,8 +208,10 @@ function kasittele_tyomaaraykset($request) {
 			$tyomaarays['poikkeus_teksti'] .= '<br/>'.$tyomaarays['poistettu_laite'].' -> '.$tyomaarays['tuoteno'];
 		}
 
-		if (!isset($tyomaaraykset_temp[$tyomaarays['kohde_tunnus']])) {
-			$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']] = array(
+		$toimaika = $tyomaarays['toimaika'];
+
+		if (!isset($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']])) {
+			$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']] = array(
 				'asiakas_ytunnus'	 => $tyomaarays['asiakas_ytunnus'],
 				'asiakas_nimi'		 => $tyomaarays['asiakas_nimi'],
 				'kohde_tunnus'		 => $tyomaarays['kohde_tunnus'],
@@ -189,51 +219,61 @@ function kasittele_tyomaaraykset($request) {
 			);
 		}
 
-		$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['toimajat'][] = $tyomaarays['toimaika'];
+		$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['toimajat'][] = $tyomaarays['toimaika'];
 
 		//jos kohteen kaikilla työmääräyksillä on sama työstatus, asetetaan se myös kohteelle, jotta se voidaan näyttää ylemmällä tasolla taulukko näkymässä
-		if (isset($tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus'])) {
-			if ($tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus'] != $tyomaarays['tyostatus']) {
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus'] = '';
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus_koodi'] = '';
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatusvari'] = '';
+		if (isset($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus'])) {
+			if ($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus'] != $tyomaarays['tyostatus']) {
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus'] = '';
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus_koodi'] = '';
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatusvari'] = '';
 			}
 			else {
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus'] = $tyomaarays['tyostatus'];
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus_koodi'] = $tyomaarays['tyostatus_koodi'];
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatusvari'] = $tyomaarays['tyostatusvari'];
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus'] = $tyomaarays['tyostatus'];
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus_koodi'] = $tyomaarays['tyostatus_koodi'];
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatusvari'] = $tyomaarays['tyostatusvari'];
 			}
 		}
 		else {
-			$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus'] = $tyomaarays['tyostatus'];
-			$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus_koodi'] = $tyomaarays['tyostatus_koodi'];
-			$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatusvari'] = $tyomaarays['tyostatusvari'];
+			$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus'] = $tyomaarays['tyostatus'];
+			$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatus_koodi'] = $tyomaarays['tyostatus_koodi'];
+			$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyostatusvari'] = $tyomaarays['tyostatusvari'];
 		}
 
 		//jos kohteen kaikilla työmääräyksillä on sama työjono, asetetaan se myös kohteelle, jotta se voidaan näyttää ylemmällä tasolla taulukko näkymässä
-		if (isset($tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyojonokoodi'])) {
-			if ($tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyojonokoodi'] != $tyomaarays['tyojonokoodi']) {
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyojonokoodi'] = '';
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyojono'] = '';
+		if (isset($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyojonokoodi'])) {
+			if ($tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyojonokoodi'] != $tyomaarays['tyojonokoodi']) {
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyojonokoodi'] = '';
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyojono'] = '';
 			}
 			else {
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyojonokoodi'] = $tyomaarays['tyojonokoodi'];
-				$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyojono'] = $tyomaarays['tyojono'];
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyojonokoodi'] = $tyomaarays['tyojonokoodi'];
+				$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyojono'] = $tyomaarays['tyojono'];
 			}
 		}
 		else {
-			$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyojonokoodi'] = $tyomaarays['tyojonokoodi'];
-			$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyojono'] = $tyomaarays['tyojono'];
+			$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyojonokoodi'] = $tyomaarays['tyojonokoodi'];
+			$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyojono'] = $tyomaarays['tyojono'];
 		}
 
-		$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['lasku_tunnukset'][] = $tyomaarays['lasku_tunnus'];
-		$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyomaaraykset'][] = $tyomaarays;
+		$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['lasku_tunnukset'][] = $tyomaarays['lasku_tunnus'];
+		$tyomaaraykset_temp[$toimaika][$tyomaarays['kohde_tunnus']]['tyomaaraykset'][] = $tyomaarays;
 	}
 
 	return $tyomaaraykset_temp;
 }
 
 function echo_tyojono_kayttoliittyma($request) {
+
+	$toimitusaika_haku_array = array(
+		''	 => t('Näytä kaikki'),
+		'X'	 => t('Näytä myöhässä olevat'),
+		7	 => t('1 viikon päästä erääntyvät'),
+		14	 => t('2 viikon päästä erääntyvät'),
+		21	 => t('3 viikon päästä erääntyvät'),
+		28	 => t('4 viikon päästä erääntyvät'),
+	);
+
 	echo "<form method='POST' action='' name='tyojono_haku'>";
 	echo "<table>";
 
@@ -251,6 +291,51 @@ function echo_tyojono_kayttoliittyma($request) {
 	echo "</td>";
 	echo "</tr>";
 
+	echo "<tr>";
+	echo "<th>".t('Toimitus')."</th>";
+	echo "<td>";
+	echo "<select id='toimitusaika_select' name='toimitusaika'>";
+	foreach ($toimitusaika_haku_array as $toimitusaika_value => $toimitusaika) {
+		$sel = "";
+		if ($toimitusaika_value == $request['toimitusaika']) {
+			$sel = "SELECTED";
+		}
+		echo "<option value='{$toimitusaika_value}' {$sel}>{$toimitusaika}</option>";
+	}
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Työjono')."</th>";
+	echo "<td>";
+	echo "<select name='tyojono' class='tyojono_sort'>";
+	foreach ($request['tyojonot'] as $tyojono) {
+		$sel = "";
+		if ($tyojono['value'] == $request['tyojono']) {
+			$sel = "SELECTED";
+		}
+		echo "<option value='{$tyojono['value']}' {$sel}>{$tyojono['text']}</option>";
+	}
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Työstatus')."</th>";
+	echo "<td>";
+	echo "<select name='tyostatus' class='tyostatus_sort'>";
+	foreach ($request['tyostatukset'] as $tyostatus) {
+		$sel = "";
+		if ($tyostatus['value'] == $request['tyostatus']) {
+			$sel = "SELECTED";
+		}
+		echo "<option value='{$tyostatus['value']}' {$sel}>{$tyostatus['text']}</option>";
+	}
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
 	echo "</table>";
 
 	echo "<input type='submit' value='".t('Hae')."' />";
@@ -259,15 +344,6 @@ function echo_tyojono_kayttoliittyma($request) {
 
 function echo_tyomaaraykset_table($request = array()) {
 	global $kukarow, $yhtiorow, $palvelin2;
-
-	$toimitusaika_haku_array = array(
-		''	 => t('Näytä kaikki'),
-		'X'	 => t('Näytä myöhässä olevat'),
-		7	 => t('1 viikon päästä erääntyvät'),
-		14	 => t('2 viikon päästä erääntyvät'),
-		21	 => t('3 viikon päästä erääntyvät'),
-		28	 => t('4 viikon päästä erääntyvät'),
-	);
 
 	echo "<table>";
 	echo "<thead>";
@@ -282,46 +358,19 @@ function echo_tyomaaraykset_table($request = array()) {
 	echo "<th>".t("Kohde")."</th>";
 	echo "<th>".t($toimitus_string)."</th>";
 	echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
-	echo "<th></th>";
-	echo "</tr>";
-
-	echo "<tr>";
-	echo "<td valign='top'>";
-	echo "</td>";
-
-	echo "<td valign='top'></td>";
-	echo "<td valign='top'></td>";
-	echo "<td valign='top'>";
-	echo "<form name='' method='POST' action=''>";
-	echo "<select id='toimitusaika_select' name='toimitusaika_haku' onchange='this.form.submit()' >";
-	foreach ($toimitusaika_haku_array as $toimitusaika_value => $toimitusaika) {
-		$sel = "";
-		if ($toimitusaika_value == $request['toimitusaika_haku']) {
-			$sel = "SELECTED";
+	echo "<th>";
+	if (!empty($request['tyomaaraykset']) and $request['toim'] != 'TEHDYT_TYOT') {
+		echo "<form class='multisubmit' name='tulosta_tyolistat' method='POST'>";
+		echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
+		foreach ($request['tyomaaraykset'] as $tyomaarays_per_paiva) {
+			foreach ($tyomaarays_per_paiva as $tyomaarays) {
+				echo '<input type="hidden" name="lasku_tunnukset[]" value="'.implode(',', $tyomaarays['lasku_tunnukset']).'">';
+			}
 		}
-		echo "<option value='{$toimitusaika_value}' {$sel}>{$toimitusaika}</option>";
+		echo "<input type='submit' value='".t("Tallenna tyolistat PDF")."' />";
+		echo "</form>";
 	}
-	echo "</select>";
-	echo "</form>";
-	echo "</td>";
-
-	echo "<td>";
-
-	echo "<select class='tyojono_sort'>";
-	foreach ($request['tyojonot'] as $tyojono) {
-		echo "<option value='{$tyojono['value']}'>{$tyojono['text']}</option>";
-	}
-	echo "</select>";
-	echo "<br/>";
-	echo "<select class='tyostatus_sort'>";
-	foreach ($request['tyostatukset'] as $tyostatus) {
-		echo "<option value='{$tyostatus['value']}'>{$tyostatus['text']}</option>";
-	}
-	echo "</select>";
-	echo "</td>";
-
-	echo "<td>";
-	echo "</td>";
+	echo "</th>";
 
 	echo "</tr>";
 
@@ -329,91 +378,93 @@ function echo_tyomaaraykset_table($request = array()) {
 
 	echo "<tbody>";
 
-	foreach ($request['tyomaaraykset'] as $tyomaarays) {
-		echo "<tr class='kohde_tr_hidden aktiivi'>";
-
-		echo "<td>";
-		echo count($tyomaarays['lasku_tunnukset']);
-		echo "</td>";
-
-		echo "<td>";
-		echo $tyomaarays['asiakas_ytunnus'].'<br/>'.$tyomaarays['asiakas_nimi'];
-		echo "</td>";
-
-		echo "<td>";
-		echo $tyomaarays['kohde_nimi'];
-		echo "</td>";
-
-		echo "<td>";
-		$unique_values = array_unique($tyomaarays['toimajat']);
-		$fn = function($values) {
-					$return = array();
-					foreach ($values as $value)
-						$return[] = date('d.m.Y', strtotime($value));
-					return $return;
-				};
-		echo implode('<br/>', $fn($unique_values));
-		echo "</td>";
-
-		if ($request['toim'] == 'TEHDYT_TYOT') {
+	foreach ($request['tyomaaraykset'] as $tyomaarays_per_kohde) {
+		foreach ($tyomaarays_per_kohde as $tyomaarays) {
+			echo "<tr class='kohde_tr_hidden aktiivi'>";
 			echo "<td>";
-			echo $tyomaarays['tyojono'];
-			echo "<br/>";
-			echo $tyomaarays['tyostatus'];
+			echo count($tyomaarays['lasku_tunnukset']);
 			echo "</td>";
+
 			echo "<td>";
-			echo "<form class='multisubmit' name='tulosta_tarkastuspoytakirja'>";
-			echo "<input type='hidden' name='ala_tee' value='tulosta_tarkastuspoytakirja' />";
-			echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
-			echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
-			echo "<input type='submit' value='".t("Tallenna tarkastuspyötäkirja PDF")."' />";
-			echo "</form>";
-			echo "<br/>";
-			echo "<form class='multisubmit' name='tulosta_laskutuspoytakirja'>";
-			echo "<input type='hidden' name='ala_tee' value='tulosta_laskutuspoytakirja' />";
-			echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
-			echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
-			echo "<input type='submit' value='".t("Tallenna laskutuspyötäkirja PDF")."' />";
-			echo "</form>";
+			echo $tyomaarays['asiakas_ytunnus'].'<br/>'.$tyomaarays['asiakas_nimi'];
 			echo "</td>";
-		}
-		else {
-			if (!empty($tyomaarays["tyostatusvari"])) {
-				$td_taustavari = "style='background-color: {$tyomaarays['tyostatusvari']};'";
+
+			echo "<td>";
+			echo $tyomaarays['kohde_nimi'];
+			echo "</td>";
+
+			echo "<td>";
+			$unique_values = array_unique($tyomaarays['toimajat']);
+			$fn = function($values) {
+						$return = array();
+						foreach ($values as $value)
+							$return[] = date('d.m.Y', strtotime($value));
+						return $return;
+					};
+			echo implode('<br/>', $fn($unique_values));
+			echo "</td>";
+
+			if ($request['toim'] == 'TEHDYT_TYOT') {
+				echo "<td>";
+				echo $tyomaarays['tyojono'];
+				echo "<br/>";
+				echo $tyomaarays['tyostatus'];
+				echo "</td>";
+
+				echo "<td>";
+				echo "<form class='multisubmit' name='tulosta_tarkastuspoytakirja'>";
+				echo "<input type='hidden' name='ala_tee' value='tulosta_tarkastuspoytakirja' />";
+				echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
+				echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
+				echo "<input type='submit' value='".t("Tallenna tarkastuspyötäkirja PDF")."' />";
+				echo "</form>";
+				echo "<br/>";
+				echo "<form class='multisubmit' name='tulosta_laskutuspoytakirja'>";
+				echo "<input type='hidden' name='ala_tee' value='tulosta_laskutuspoytakirja' />";
+				echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
+				echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
+				echo "<input type='submit' value='".t("Tallenna laskutuspyötäkirja PDF")."' />";
+				echo "</form>";
+				echo "</td>";
 			}
 			else {
-				$td_taustavari = "";
-			}
-			echo "<td {$td_taustavari}>";
+				if (!empty($tyomaarays["tyostatusvari"])) {
+					$td_taustavari = "style='background-color: {$tyomaarays['tyostatusvari']};'";
+				}
+				else {
+					$td_taustavari = "";
+				}
+				echo "<td {$td_taustavari}>";
 
-			echo "<select class='tyojono_muutos'>";
-			foreach ($request['tyojonot'] as $tyojono) {
-				$sel = $tyomaarays['tyojonokoodi'] == $tyojono['value'] ? ' SELECTED' : '';
-				echo "<option value='{$tyojono['value']}' {$sel}>{$tyojono['text']}</option>";
-			}
-			echo "</select>";
-			echo "<br/>";
-			echo "<select class='tyostatus_muutos'>";
-			foreach ($request['tyostatukset'] as $tyostatus) {
-				$sel = $tyomaarays['tyostatus_koodi'] == $tyostatus['value'] ? ' SELECTED' : '';
-				echo "<option value='{$tyostatus['value']}' {$sel}>{$tyostatus['text']}</option>";
-			}
-			echo "</select>";
+				echo "<select class='tyojono_muutos_kohde'>";
+				foreach ($request['tyojonot'] as $tyojono) {
+					$sel = $tyomaarays['tyojonokoodi'] == $tyojono['value'] ? ' SELECTED' : '';
+					echo "<option value='{$tyojono['value']}' {$sel}>{$tyojono['text']}</option>";
+				}
+				echo "</select>";
+				echo "<br/>";
+				echo "<select class='tyostatus_muutos' disabled='disabled'>";
+				foreach ($request['tyostatukset'] as $tyostatus) {
+					$sel = $tyomaarays['tyostatus_koodi'] == $tyostatus['value'] ? ' SELECTED' : '';
+					echo "<option value='{$tyostatus['value']}' {$sel}>{$tyostatus['text']}</option>";
+				}
+				echo "</select>";
 
-			echo "</td>";
+				echo "</td>";
 
-			echo "<td>";
-			echo "<form class='multisubmit' name='tulosta_tyolista'>";
-			echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
-			echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
-			echo "<input type='submit' value='".t("Tallenna työlista PDF")."' />";
-			echo "</form>";
-			echo "</td>";
+				echo "<td>";
+				echo "<form class='multisubmit' name='tulosta_tyolista'>";
+				echo "<input type='hidden' name='ala_tee' value='tulosta_tyolista' />";
+				echo "<input type='hidden' class='lasku_tunnukset' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
+				echo "<input type='submit' value='".t("Tallenna työlista PDF")."' />";
+				echo "</form>";
+				echo "</td>";
+			}
+
+			echo "</tr>";
+
+			echo_tyomaarays_rivi($request, $tyomaarays['tyomaaraykset']);
 		}
-
-		echo "</tr>";
-
-		echo_tyomaarays_rivi($request, $tyomaarays['tyomaaraykset']);
 	}
 
 	if (empty($request['tyomaaraykset'])) {
@@ -503,8 +554,14 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 		echo "</td>";
 
 		if ($request['toim'] == 'TEHDYT_TYOT') {
+			if (empty($laite['tyojono'])) {
+				$tyojono = t('Tekijä tuntematon');
+			}
+			else {
+				$tyojono = $laite['tyojono'];
+			}
 			echo "<td>";
-			echo $laite['tyojono'];
+			echo $tyojono;
 			echo "<br/>";
 			echo $laite['tyostatus'];
 			echo "</td>";
@@ -531,14 +588,14 @@ function echo_tyomaarays_rivi($request, $laitteet) {
 			}
 			echo "<td {$td_taustavari}>";
 
-			echo "<select class='tyojono_muutos'>";
+			echo "<select class='tyojono_muutos_lasku'>";
 			foreach ($request['tyojonot'] as $tyojono) {
-				$sel = $laite['tyojono'] == $tyojono['value'] ? ' SELECTED' : '';
+				$sel = $laite['tyojonokoodi'] == $tyojono['value'] ? ' SELECTED' : '';
 				echo "<option value='{$tyojono['value']}' {$sel}>{$tyojono['text']}</option>";
 			}
 			echo "</select>";
 			echo "<br/>";
-			echo "<select class='tyostatus_muutos'>";
+			echo "<select class='tyostatus_muutos' disabled='disabled'>";
 			foreach ($request['tyostatukset'] as $tyostatus) {
 				$sel = $laite['tyostatus_koodi'] == $tyostatus['value'] ? ' SELECTED' : '';
 				echo "<option value='{$tyostatus['value']}' {$sel}>{$tyostatus['text']}</option>";
@@ -587,7 +644,11 @@ function hae_tyojonot($request = array()) {
 	$tyojono_result = t_avainsana("TYOM_TYOJONO");
 	$tyojonot = array();
 	$tyojonot[] = array(
-		'value'	 => 'EIJONOA',
+		'value'	 => 'KAIKKI',
+		'text'	 => t('Kaikki'),
+	);
+	$tyojonot[] = array(
+		'value'	 => 'EIJONOSSA',
 		'text'	 => t('Ei jonossa'),
 	);
 	while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
@@ -604,6 +665,10 @@ function hae_tyostatukset($request = array()) {
 
 	$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
 	$tyostatukset = array();
+	$tyostatukset[] = array(
+		'value'	 => 'KAIKKI',
+		'text'	 => t('Kaikki'),
+	);
 	$tyostatukset[] = array(
 		'value'	 => 'EISTATUSTA',
 		'text'	 => t('Ei statusta'),

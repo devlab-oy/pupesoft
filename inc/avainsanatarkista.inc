@@ -29,7 +29,8 @@ if(!function_exists("avainsanatarkista")) {
 
 				$onko_input_ok = false;
 				$sallitut_kentat = "";
-				while($tyomaarays_kentat = mysql_fetch_assoc($tyomaarays_result)) {
+
+				while ($tyomaarays_kentat = mysql_fetch_assoc($tyomaarays_result)) {
 					//dynaaminen kentt‰ ei saa olla yhtio tai otunnus
 					if ($tyomaarays_kentat['Field'] != 'yhtio' and $tyomaarays_kentat['Field'] != 'otunnus') {
 						$sallitut_kentat .= $tyomaarays_kentat['Field'] . ', ';
@@ -150,6 +151,20 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
+			if ($tem_laji == "SALDOVAHVISTUS") {
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+							AND selite = '{$tem_selite}'
+							AND laji = '{$tem_laji}'
+							AND tunnus != '{$tunnus}'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) > 0) {
+					$virhe[$i] = t("Saldovahvistuksen nimi pit‰‰ olla uniikki");
+				}
+			}
+
 			if ($tem_laji == 'SAMMUTIN_KOKO') {
 				if (!is_numeric($tem_selite)) {
 					$virhe[$i] = t("Selitteen on oltava numeerinen")."!";
@@ -210,7 +225,6 @@ if(!function_exists("avainsanatarkista")) {
 			$tem_selitetark_2 = trim($t[$i]);
 
 			if (strtoupper($tem_laji) == "INVEN_LAJI" and $tem_selitetark_2 != "") {
-
 				$query = "	SELECT tunnus
 							FROM tili
 							WHERE yhtio = '{$kukarow['yhtio']}'

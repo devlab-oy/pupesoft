@@ -1,5 +1,21 @@
 <?php
 
+$query  = "	SELECT *
+			FROM lasku
+			WHERE tunnus = '$otunnus'
+			AND yhtio 	 = '$kukarow[yhtio]'
+			AND tila 	 = 'K'
+			AND alatila != 'X'";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) == 1) {
+	$laskurow = mysql_fetch_assoc($result);
+}
+else {
+	echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
+	exit;
+}
+
 //katotaan onko varaston hyllypaikat käytössä ja jos on käytössä ei anneta perustaa sellasta tuotepaikkaa, joka ei ole olemassa varaston hyllypaikoissa
 $query = "	SELECT tunnus
 			FROM varaston_hyllypaikat
@@ -7,21 +23,6 @@ $query = "	SELECT tunnus
 			LIMIT 1";
 $kaytosq = pupe_query($query);
 $varaston_hyllypaikat_kaytossa = mysql_num_rows($kaytosq) == 0 ? FALSE : TRUE;
-
-$query  = "	SELECT *
-			from lasku
-			where tunnus = '$otunnus'
-			and yhtio 	 = '$kukarow[yhtio]'
-			and tila 	 = 'K'";
-$result = pupe_query($query);
-
-if (mysql_num_rows($result) == 1) {
-	$laskurow = mysql_fetch_array($result);
-}
-else {
-	echo "<font style='error'>".t("VIRHE: Tilausta ei enää löydy")."!</font>";
-	exit;
-}
 
 if ($tee == "valmis") {
 
@@ -750,6 +751,7 @@ if ($tee == "") {
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='otunnus' value='$otunnus'>";

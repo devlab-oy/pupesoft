@@ -36,6 +36,7 @@
 		}
 		$ulos .= "<option value='tyomaarayksen_ryhmittely' $sel[tyomaarayksen_ryhmittely]>".t("Työmääräyksen ryhmittely")."</option>";
 		$ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
+		$ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
 		$ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
 
 		$sresult = t_avainsana("TUOTEULK");

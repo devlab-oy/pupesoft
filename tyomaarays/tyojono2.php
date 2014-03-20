@@ -14,13 +14,20 @@ if (isset($livesearch_tee) and $livesearch_tee == "KOHDEHAKU") {
 	exit;
 }
 
-if (!isset($tee)) 	$tee = '';
-if (!isset($ala_tee)) 	$ala_tee = '';
-if (!isset($toim)) 	$toim = '';
-if (!isset($lasku_tunnukset)) 	$lasku_tunnukset = '';
-if (!isset($toimitusaika_haku)) 	$toimitusaika_haku = '';
-if (!isset($laite_tunnus)) 	$laite_tunnus = '';
-if (!isset($ajax_request)) 	$ajax_request = '';
+if (!isset($tee))
+	$tee = '';
+if (!isset($ala_tee))
+	$ala_tee = '';
+if (!isset($toim))
+	$toim = '';
+if (!isset($lasku_tunnukset))
+	$lasku_tunnukset = '';
+if (!isset($toimitusaika_haku))
+	$toimitusaika_haku = '';
+if (!isset($laite_tunnus))
+	$laite_tunnus = '';
+if (!isset($ajax_request))
+	$ajax_request = '';
 
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
@@ -33,6 +40,16 @@ if ($tee == 'lataa_tiedosto') {
 
 //AJAX requestit tänne
 if ($ajax_request) {
+	if ($action == 'paivita_tyomaaraysten_tyojonot') {
+		if (!empty($lasku_tunnukset)) {
+			$params = array(
+				'tyojono' => $tyojono,
+			);
+			$ok = paivita_tyojono_ja_tyostatus_tyomaarayksille($lasku_tunnukset, $params);
+
+			echo $ok;
+		}
+	}
 	exit;
 }
 
@@ -56,17 +73,35 @@ $request = array(
 	'ala_tee'			 => $ala_tee,
 	'toim'				 => $toim,
 	'lasku_tunnukset'	 => $lasku_tunnukset,
-	'toimitusaika_haku'	 => $toimitusaika_haku,
 	'laite_tunnus'		 => $laite_tunnus,
 	'asiakas_tunnus'	 => $asiakas_tunnus,
 	'kohde_tunnus'		 => $kohde_tunnus,
+	'tyojono'			 => $tyojono,
+	'tyostatus'			 => $tyostatus,
+	'toimitusaika'		 => $toimitusaika,
 );
+
+if (!isset($request['toimitusaika'])) {
+	$request['toimitusaika'] = 28;
+}
 
 $request['tyojonot'] = hae_tyojonot($request);
 
 $request['tyostatukset'] = hae_tyostatukset($request);
 
 echo "<div id='tyojono_wrapper'>";
+
+echo "<div id='message_box_success'>";
+echo '<font class="message">'.t('Päivitys onnistui').'</font>';
+echo "<br/>";
+echo "<br/>";
+echo "</div>";
+
+echo "<div id='message_box_fail'>";
+echo '<font class="message">'.t('Päivitys epäonnistui').'</font>';
+echo "<br/>";
+echo "<br/>";
+echo "</div>";
 
 if (is_string($request['lasku_tunnukset'])) {
 	$request['lasku_tunnukset'] = explode(',', $lasku_tunnukset);
@@ -106,37 +141,44 @@ else {
 
 		$multi = false;
 
-		if( is_array($lasku_tunnukset) ){
-			foreach( $lasku_tunnukset as $tunnus ){
+		//requestista voi tulla lasku_tunnukset, joko stringinä tai arraynä
+		//Jos se tulee arraynä niin arrayn solu voi pitää sisällään joko yhden tai useamman lasku_tunnuksen pilkulla eroteltuna
+		//tästä syystä todella epäselvää
+		//lasku_tunnukset_temp halutaan olevan yksiulotteinen array tunnuksista
+		$lasku_tunnukset_temp = array();
+		if (is_array($lasku_tunnukset)) {
+			foreach ($lasku_tunnukset as $tunnus) {
 				$tunnus = explode(',', $tunnus);
 				$tunnukset[] = $tunnus;
+				foreach ($tunnus as $t) {
+					$lasku_tunnukset_temp[] = $t;
+				}
 			}
 			$lasku_tunnukset = $tunnukset;
 			$multi = true;
 		}
-		else{
+		else {
 			$lasku_tunnukset = explode(',', $lasku_tunnukset);
 		}
 
-
-		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi );
+		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi);
 		if (!empty($pdf_tiedosto)) {
 
-			if( strpos($pdf_tiedosto, '_') ){
+			if (strpos($pdf_tiedosto, '_')) {
 				preg_match('~_(.*?).pdf~', $pdf_tiedosto, $osat);
 				$number = '_'.$osat[1];
 				$uusi_nimi = 'Tyolista';
 			}
-			else{
+			else {
 				$number = null;
 				$uusi_nimi = 'Kaikki_tyolistat';
 			}
 
 			echo_tallennus_formi($pdf_tiedosto, $uusi_nimi, 'pdf', $number);
-			aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'T');
+			aseta_tyomaaraysten_status($lasku_tunnukset_temp, 'T');
 		}
 		else {
-			echo t("Työmääräysten generointi epäonnistui");
+			echo t("Työlista tiedostojen luonti epäonnistui");
 		}
 	}
 }

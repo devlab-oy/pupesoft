@@ -130,6 +130,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		echo "<input type='hidden' name='toiminto' value='kaikkiok'>";
 		echo "<input type='hidden' name='tee' value='varma'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 		echo "<input type='submit' value='".t("Laske virallinen varastonarvo!")."'>";
 		echo "</form>";
 
@@ -137,6 +138,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 		echo "<input type='submit' value='".t("Peruuta")."'>";
 		echo "</form>";
 	}

@@ -1,5 +1,8 @@
 <?php
 
+// Ei käytetä pakkausta
+$compression = FALSE;
+
 $useslave = 1;
 
 if (isset($_POST["tee"])) {

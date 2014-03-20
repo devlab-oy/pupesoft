@@ -271,6 +271,7 @@
 						FROM kuka
 						JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%tilaus_osto.php'
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.aktiivinen = 1
 						and kuka.extranet = ''
 						ORDER BY kuka.nimi";
 			$yresult = mysql_query($query) or pupe_error($query);
@@ -294,12 +295,31 @@
 			}
 			echo "</select></td></tr>";
 
+			$selectoitu_varasto_toimipaikka = 0;
+
+			$query  = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tyyppi != 'P'
+						ORDER BY tyyppi, nimitys";
+			$vares = pupe_query($query);
+
+			while ($varow = mysql_fetch_array($vares)) {
+				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
+
+					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
+					if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
+						$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
+						break;
+					}
+				}
+			}
+
 			$yresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 			if (mysql_num_rows($yresult) > 0) {
 
-				echo "<tr><td></td><td></td>";
-				echo "<td>".t("Tilaava toimipiste").":</td>";
+				echo "<tr><td></td><td></td><td>".t("Tilaava toimipiste").":</td>";
 				echo "<td valign='middle'>";
 				echo "<select name='toimipiste'>";
 				echo "<option value=''>".t("Ei poikkeavaa toimipistettä")."</option>";
@@ -308,6 +328,8 @@
 					$sel = "";
 
 					if ($srow["vanhatunnus"] == $row["tunnus"] or ($srow['vanhatunnus'] == 0 and $kukarow['toimipaikka'] == $row['tunnus'])) $sel = "selected";
+
+					if ($sel == '' and $srow['vanhatunnus'] == 0 and $selectoitu_varasto_toimipaikka == $row['tunnus']) $sel = "selected";
 
 					echo "<option value='$row[tunnus]' $sel>$row[nimi] ($row[ovtlisa])</option>";
 				}
@@ -380,12 +402,7 @@
 			echo "<td>".t("Tilaa Varastoon").":</td>";
 			echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
 
-			$query  = "	SELECT *
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tyyppi != 'P'
-						ORDER BY tyyppi, nimitys";
-			$vares = mysql_query($query) or pupe_error($query);
+			mysql_data_seek($vares, 0);
 
 			while ($varow = mysql_fetch_array($vares)) {
 				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
@@ -393,7 +410,9 @@
 					$sel = '';
 
 					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-					if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) $sel = 'selected';
+					if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
+						$sel = 'selected';
+					}
 
 					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
@@ -539,6 +558,10 @@
 						and tunnus 	= '$varasto'";
 			$vares = mysql_query($edique) or pupe_error($edique);
 			$varow = mysql_fetch_array($vares);
+
+			if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($toimipiste) and (trim($toimipiste) == '' or $toimipiste == 0) and $varow['toimipaikka'] != 0) {
+				$toimipiste = $varow['toimipaikka'];
+			}
 
 			if ($varow["nimi"] != "" and $varow["osoite"] != "") {
 				$tnimi     = $varow["nimi"];

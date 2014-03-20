@@ -267,11 +267,11 @@ class TyolistaPDF
   def row(row)
     table_cells = [
         @pdf.make_cell(:content => row['laite']['oma_numero']),
-        @pdf.make_cell(:content => row['laite']['sijainti']),
+        @pdf.make_cell(:content => row['laite']['paikka_nimi']),
         @pdf.make_cell(:content => ' '), #muuttunut sijainti
         @pdf.make_cell(:content => row['laite']['nimitys']),
         @pdf.make_cell(:content => row['laite']['sammutin_koko']),
-        @pdf.make_cell(:content => ' '), #teholuokka
+        @pdf.make_cell(:content => row['laite']['palo_luokka']), #teholuokka
         @pdf.make_cell(:content => row['laite']['sammutin_tyyppi']),
         @pdf.make_cell(:content => row['laite']['sarjanro']),
         @pdf.make_cell(:content => ' '), #ponnop nro

@@ -23,11 +23,28 @@
 	if (!isset($toimittajaid)) 	   $toimittajaid = "";
 	if (!isset($livesearch_tee))   $livesearch_tee = "";
 	if (!isset($saako_hyvaksya))   $saako_hyvaksya = FALSE;
+	if (!isset($lisaselite)) $lisaselite = "";
 
 	if ($livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
 	}
+
+	echo "	<script language='javascript'>
+
+				$(function() {
+
+					$('.hae_lisaselite').on('click', function() {
+						$('.lisaselite').val($('#lisaselite').val());
+					});
+				});
+
+				$(document).ready(function() {
+					$('#lisaselite').on('keyup change blur', function() {
+						$('.selite').val($('#lisaselite').val());
+					});
+				});
+			</script>";
 
 	$lopetus = "{$palvelin2}hyvak.php////kutsuja=";
 
@@ -1370,6 +1387,12 @@
 		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
 		if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
 
+			if ($kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
+				echo "<br><table>";
+				echo "<tr><th colspan='3'>".t("Selite tiliöinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
+				echo "</table>";
+			}
+
 			// Tositteen tiliöintirivit...
 			require ("inc/tiliointirivit.inc");
 			echo "<br><br>";
@@ -1585,7 +1608,7 @@
 
 			echo "<td valign='top'>";
 
-			echo tv1dateconv($trow["erpcm"]);
+			echo pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow["erpcm"]);
 			if ($trow["kapvm"] != "0000-00-00") echo "<br>".pupe_DataTablesEchoSort($trow['kapvm']).tv1dateconv($trow["kapvm"]);
 
 			echo "</td>";
@@ -1733,5 +1756,3 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") !== FALSE) {
 		require ("inc/footer.inc");
 	}
-
-?>

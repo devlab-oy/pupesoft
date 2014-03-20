@@ -51,7 +51,7 @@
 			$kieli = $argv[2];
 		}
 
-		$kukarow['kuka'] = "crond";
+		$kukarow['kuka'] = "admin";
 
 		// Pupeasennuksen root
 		$pupe_root_polku = dirname(dirname(__FILE__));
@@ -907,20 +907,112 @@
 				// vika pilkku pois
 				$tunnukset = substr($tunnukset,0,-1);
 
-				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
+				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {
 					$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
 				}
 				else {
 					$ketjutus_group = "";
 				}
 
-				// Lasketaan rahtikulut ja jälkivaatimuskulut vain jos niitä ei olla laskettu jo tilausvaiheessa.
+				// Lasketaan rahtikulut, jälkivaatimuskulut ja erilliskäsiteltäväkulut vain jos niitä ei olla laskettu jo tilausvaiheessa.
 				if ($yhtiorow["rahti_hinnoittelu"] == "") {
 
-					//rahtien ja jälkivaatimuskulujen muuttujia
+					//rahtien, jälkivaatimuskulujen ja erilliskäsiteltäväkulujen muuttujia
 					$rah       = 0;
 					$jvhinta   = 0;
 					$rah_hinta = 0;
+					$ekhinta   = 0;
+
+					// erilliskäsiteltäväkulut omalle riville ja tutkitaan tarvimmeko lisäillä EK-kuluja
+					if ($silent == "") {
+						$tulos_ulos .= "<br>\n".t("Erilliskäsiteltäväkulut").":<br>\n";
+					}
+
+					$query = "  SELECT group_concat(distinct lasku.tunnus) tunnukset
+								FROM lasku
+								JOIN rahtikirjat ON (rahtikirjat.yhtio = lasku.yhtio AND rahtikirjat.otsikkonro = lasku.tunnus)
+								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tunnus in ({$tunnukset})
+								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp";
+					$result = pupe_query($query);
+
+					$yhdista = array();
+
+					while ($row = mysql_fetch_assoc($result)) {
+						$yhdista[] = $row["tunnukset"];
+					}
+
+					if (count($yhdista) == 0 and $silent == "") {
+						$tulos_ulos .= t("Ei erilliskäsittelyjä")."!<br>\n";
+					}
+
+					if ($silent == "") $tulos_ulos .= "<table>";
+
+					foreach ($yhdista as $otsikot) {
+
+						// lisätään näille tilauksille erilliskäsiteltäväkulut
+						$virhe = 0;
+
+						//haetaan vikan otsikon tiedot
+						$query = "  SELECT *
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus in ({$otsikot})
+									ORDER BY tunnus DESC
+									LIMIT 1";
+						$otsre = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($otsre);
+
+						if (mysql_num_rows($otsre) != 1) $virhe++;
+
+						if (mysql_num_rows($otsre) == 1 and $virhe == 0) {
+
+							// kirjoitetaan jv kulurivi ekalle otsikolle
+							$query = "  SELECT erilliskasiteltavakulu
+										FROM toimitustapa
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND selite = '{$laskurow['toimitustapa']}'";
+							$ekres = pupe_query($query);
+							$ekrow = mysql_fetch_assoc($ekres);
+
+							if ($ekrow['erilliskasiteltavakulu'] != 0 and $yhtiorow["erilliskasiteltava_tuotenumero"] != "") {
+
+								$query = "  SELECT *
+											FROM tuote
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tuoteno = '{$yhtiorow['erilliskasiteltava_tuotenumero']}'";
+								$rhire = pupe_query($query);
+
+								// jos tuotenumero löytyy
+								if (mysql_num_rows($rhire) == 1) {
+									$trow = mysql_fetch_assoc($rhire);
+
+									$laskun_kieli = laskunkieli($laskurow['liitostunnus'], $kieli);
+
+									$hinta = $ekrow['erilliskasiteltavakulu']; // jv kulu
+									$nimitys = t("Erilliskäsiteltäväkulu", $laskun_kieli);
+									$kommentti = "";
+
+									list($ekhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+
+									$query  = " INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+												values ('{$ekhinta}', 'N', '1', '1', '{$laskurow['tunnus']}', '{$trow['tuoteno']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L', '{$alv}', '{$kommentti}')";
+									$addtil = pupe_query($query);
+
+									if ($silent == "") {
+										$tulos_ulos .= "<tr><td>".t("Lisättiin erilliskäsiteltäväkulut")."</td><td>{$laskurow['tunnus']}</td><td>{$laskurow['toimitustapa']}</td><td>{$ekhinta}</td><td>{$yhtiorow['valkoodi']}</td></tr>\n";
+									}
+								}
+							}
+						}
+						elseif (mysql_num_rows($otsre) != 1 and $silent == "") {
+							$tulos_ulos .= "<tr><td>".t("Erilliskäsiteltäväkulua ei löydy!")."</td><td>{$laskurow['tunnus']}</td><td>{$laskurow['toimitustapa']}</td></tr>\n";
+						}
+						elseif ($silent == "") {
+							$tulos_ulos .= "<tr><td>".t("Erilliskäsiteltäväkulua ei osattu lisätä!")." {$virhe}</td><td>{$otsikot}</td><td>{$laskurow['toimitustapa']}</td></tr>\n";
+						}
+					}
 
 					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per päivä
 					// jälkivaatimukset omalle riville ja tutkitaan tarvimmeko lisäillä JV-kuluja
@@ -976,8 +1068,8 @@
 							// kirjoitetaan jv kulurivi ekalle otsikolle
 							$query = "  SELECT jvkulu
 										FROM toimitustapa
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND selite = '$laskurow[toimitustapa]'";
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND selite = '{$laskurow['toimitustapa']}'";
 							$tjvres = pupe_query($query);
 							$tjvrow = mysql_fetch_assoc($tjvres);
 
@@ -1180,13 +1272,14 @@
 					// Tehdään ketjutus (group by PITÄÄ OLLA sama kuin alhaalla) rivi ~1243
 					$query = "  SELECT
 								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+								if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 								group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 								where lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tunnus in ($tunnukset)
 								$laskutuslisa_tyyppi_ehto
-								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
+								GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi, lasku.laskutyyppi,
@@ -1367,12 +1460,13 @@
 					// Tehdään ketjutus (group by PITÄÄ OLLA sama kuin alhaalla) rivi ~1243
 					$query = "  SELECT
 								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+								if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 								group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 								where lasku.yhtio = '{$kukarow['yhtio']}'
 								and lasku.tunnus in ({$tunnukset})
-								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
+								GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi, lasku.laskutyyppi,
@@ -1622,6 +1716,7 @@
 				//haetaan kaikki laskutusvalmiit tilaukset jotka saa ketjuttaa, viite pitää olla tyhjää muuten ei laskuteta
 				$query  = " SELECT
 							if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+							if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
 							lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
@@ -1635,13 +1730,13 @@
 							and lasku.tila      = 'L'
 							and lasku.viite     = ''
 							$lasklisa
-							GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
+							GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi, lasku.laskutyyppi,
 							laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 							$ketjutus_group
-							ORDER BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
+							ORDER BY ketjutuskentta, reklamaatiot_lasku DESC, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,

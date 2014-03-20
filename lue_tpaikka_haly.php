@@ -104,36 +104,48 @@ if ($korjataan != '') {
 					$oletus = '';
 				}
 
-				$query = "	INSERT INTO tuotepaikat SET
-							yhtio 		= '$kukarow[yhtio]',
-							tuoteno 	= '$tuoteno[$id]',
-							hyllyalue	= '$hyllyalue[$id]',
-							hyllynro	= '$hyllynro[$id]',
-							hyllyvali	= '$hyllyvali[$id]',
-							hyllytaso	= '$hyllytaso[$id]',
-							oletus		= '$oletus',
-							halytysraja	= '$halytysraja[$id]',
-							tilausmaara	= '$tilattava[$id]',
-							laatija 	= '$kukarow[kuka]',
-							luontiaika 	= now()";
-				$result = pupe_query($query);
+				$query = "	SELECT tunnus
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tuoteno 	= '$tuoteno[$id]'
+							AND hyllyalue	= '$hyllyalue[$id]'
+							AND hyllynro	= '$hyllynro[$id]'
+							AND hyllyvali	= '$hyllyvali[$id]'
+							AND hyllytaso	= '$hyllytaso[$id]'";
+				$loytyykoresult = pupe_query($query);
 
-				// tehd‰‰n tapahtuma
-				$query = "	INSERT into tapahtuma set
-							yhtio 		= '$kukarow[yhtio]',
-							tuoteno 	= '$tuoteno[$id]',
-							kpl 		= '0',
-							kplhinta	= '0',
-							hinta 		= '0',
-							laji 		= 'uusipaikka',
-							hyllyalue	= '$hyllyalue[$id]',
-							hyllynro	= '$hyllynro[$id]',
-							hyllyvali	= '$hyllyvali[$id]',
-							hyllytaso	= '$hyllytaso[$id]',
-							selite 		= '".t("Lis‰ttiin tuotepaikka")." $hyllyalue[$id] $hyllynro[$id] $hyllyvali[$id] $hyllytaso[$id]',
-							laatija 	= '$kukarow[kuka]',
-							laadittu 	= now()";
-				$korjres = pupe_query($query);
+				if (mysql_num_rows($loytyykoresult) == 0) {
+					$query = "	INSERT INTO tuotepaikat SET
+								yhtio 		= '$kukarow[yhtio]',
+								tuoteno 	= '$tuoteno[$id]',
+								hyllyalue	= '$hyllyalue[$id]',
+								hyllynro	= '$hyllynro[$id]',
+								hyllyvali	= '$hyllyvali[$id]',
+								hyllytaso	= '$hyllytaso[$id]',
+								oletus		= '$oletus',
+								halytysraja	= '$halytysraja[$id]',
+								tilausmaara	= '$tilattava[$id]',
+								laatija 	= '$kukarow[kuka]',
+								luontiaika 	= now()";
+					$result = pupe_query($query);
+
+					// tehd‰‰n tapahtuma
+					$query = "	INSERT into tapahtuma set
+								yhtio 		= '$kukarow[yhtio]',
+								tuoteno 	= '$tuoteno[$id]',
+								kpl 		= '0',
+								kplhinta	= '0',
+								hinta 		= '0',
+								laji 		= 'uusipaikka',
+								hyllyalue	= '$hyllyalue[$id]',
+								hyllynro	= '$hyllynro[$id]',
+								hyllyvali	= '$hyllyvali[$id]',
+								hyllytaso	= '$hyllytaso[$id]',
+								selite 		= '".t("Lis‰ttiin tuotepaikka")." $hyllyalue[$id] $hyllynro[$id] $hyllyvali[$id] $hyllytaso[$id]',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now()";
+					$korjres = pupe_query($query);
+				}
 			}
 			else {
 				$error = "<font class='error'>".t("Antamasi varastopaikka ei ole k‰sitelt‰v‰ss‰ varastossa")."</font>";

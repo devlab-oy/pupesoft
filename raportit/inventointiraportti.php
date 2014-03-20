@@ -3,6 +3,9 @@
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
+	// Ei k‰ytet‰ pakkausta
+	$compression = FALSE;
+
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -946,10 +949,10 @@
 
 			echo "<td valign='top'>";
 
-			$query = "	SELECT distinct kuka, nimi
+			$query = "	SELECT kuka, nimi
 						FROM kuka
-						WHERE yhtio='$kukarow[yhtio]'
-						and nimi != ''
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND aktiivinen = 1
 						and extranet = ''
 						ORDER BY nimi";
 			$sresult = mysql_query($query) or pupe_error($query);

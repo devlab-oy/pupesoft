@@ -78,9 +78,9 @@ class HuoltosykliCSVDumper extends CSVDumper {
 	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
 
-		if ($rivi['hinta'] == 0 or $rivi['huoltovali'] == 0) {
-			return false;
-		}
+//		if ($rivi['hinta'] == 0 or $rivi['huoltovali'] == 0) {
+//			return false;
+//		}
 
 		foreach ($rivi as $key => $value) {
 			if (in_array($key, $this->required_fields) and $value == '') {
@@ -169,7 +169,8 @@ class HuoltosykliCSVDumper extends CSVDumper {
 			if (empty($huoltosykli_rivi_ulkona)) {
 				$rivi['olosuhde'] = 'X';
 
-				if (stristr($nimitys_temp, 'tarkastus')) {
+				//Minimi huoltoväli on 365 riippumatta onko laite ulkona vai sisällä
+				if (stristr($nimitys_temp, 'tarkastus') and $rivi['huoltovali'] != 365) {
 					$rivi['huoltovali'] = $rivi['huoltovali'] / 2;
 				}
 
@@ -194,6 +195,8 @@ class HuoltosykliCSVDumper extends CSVDumper {
 
 			$progress_bar->increase();
 		}
+
+		$this->liita_muistutus_laitteet_kaynti_toimenpiteeseen();
 	}
 
 	protected function lisaa_pakolliset_kentat($rivi) {
@@ -496,7 +499,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 					ON ( hl.yhtio = laite.yhtio
 						AND hl.laite_tunnus = laite.tunnus )
 					WHERE laite.yhtio = 'lpk'
-					AND laite.tuoteno != 'KAYNTI'
+					AND laite.tuoteno != 'MUISTUTUS'
 					AND hl.tunnus IS NULL";
 		$result = pupe_query($query);
 		$laitteita_joilla_ei_huoltosyklia = mysql_num_rows($result);
@@ -524,7 +527,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		  ON ( hl.yhtio = laite.yhtio
 		  AND hl.laite_tunnus = laite.tunnus )
 		  WHERE  laite.yhtio = 'lpk'
-		  AND laite.tuoteno != 'KAYNTI'
+		  AND laite.tuoteno != 'MUISTUTUS'
 		  AND hl.tunnus IS NULL
 		  GROUP BY laite.tuoteno
 		  ORDER  BY kpl DESC, laite.tuoteno ASC;
@@ -537,12 +540,52 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		  ON ( hl.yhtio = laite.yhtio
 		  AND hl.laite_tunnus = laite.tunnus )
 		  WHERE  laite.yhtio = 'lpk'
-		  AND laite.tuoteno != 'KAYNTI'
+		  AND laite.tuoteno != 'MUISTUTUS'
 		  AND hl.tunnus IS NULL
 		  ORDER  BY laite.tuoteno ASC;
 		 */
 
 //		$this->liita_puuttuvat_huoltosyklit();
+	}
+
+	private function liita_muistutus_laitteet_kaynti_toimenpiteeseen() {
+		//LaiteCSVDumper forcettaa kaikki käyntituotteet (eli muistutukset) MUISTUTUS tuotenumerolle
+		$query = "	SELECT *
+					FROM laite
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND tuoteno = 'MUISTUTUS'";
+		$result = pupe_query($query);
+		while($muistutus_laite = mysql_fetch_assoc($result)) {
+			$kaynti_huoltosykli = $this->kaynti_huoltosykli();
+
+			$query = "	SELECT *
+						FROM huoltosyklit_laitteet AS hl
+						WHERE hl.yhtio = '{$this->kukarow['yhtio']}'
+						AND hl.huoltosykli_tunnus = '{$kaynti_huoltosykli['tunnus']}'
+						AND hl.laite_tunnus = '{$muistutus_laite['tunnus']}'";
+			$result2 = pupe_query($query);
+
+			if (mysql_num_rows($result2) == 0) {
+				echo "muistutus laite {$muistutus_laite['tunnus']} liitettiin käynti toimenpiteeseen {$kaynti_huoltosykli['tunnus']}";
+				echo "<br/>";
+				$this->liita_huoltosykli($muistutus_laite['tunnus'], $kaynti_huoltosykli);
+			}
+		}
+	}
+
+	private function kaynti_huoltosykli() {
+		$query = "	SELECT *
+					FROM huoltosykli
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND toimenpide = 'KAYNTI'
+					AND tyyppi = 'muistutus'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 1) {
+			die('Liian monta käynti huoltosykliä');
+		}
+
+		return mysql_fetch_assoc($result);
 	}
 
 	protected function liita_puuttuvat_huoltosyklit() {

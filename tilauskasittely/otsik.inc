@@ -29,13 +29,16 @@
 					// Katotaan onko rahtivapaa
 					var rvcb_ch = document.getElementById('rahtivapaa').checked;
 
+					// katotaan onks iPadkäyttäjä
+					var isiPad = navigator.userAgent.match(/iPad/i) != null;
+
 					if (merahti == 'K' && mrdd_sel != 1) {
 						mrdd_id.options[1].selected = '1';
-						alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+						if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
 					}
 					else if (merahti != 'K' && mrdd_sel != 2 && rvcb_ch != true) {
 						mrdd_id.options[2].selected = '1';
-						alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+						if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
 					}
 				}
 
@@ -187,6 +190,46 @@
 		$tila = "";
 	}
 
+	if ($kukarow['kesken'] > 0 and isset($laskurow) and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or $laskurow['tila'] == 'L') and isset($maksuehto) and $maksuehto != '' and isset($edellinen_maksuehto) and $edellinen_maksuehto != '' and $edellinen_maksuehto != 0 and $maksuehto != $edellinen_maksuehto) {
+
+		$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$maksuehto}'";
+		$tarkistus_meapu = pupe_query($tarkistus_apuqu);
+		$tarkistus_meapu_row = mysql_fetch_assoc($tarkistus_meapu);
+
+		$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$edellinen_maksuehto}'";
+		$tarkistus_meapu2 = pupe_query($tarkistus_apuqu);
+		$tarkistus_meapu_row2 = mysql_fetch_assoc($tarkistus_meapu2);
+
+		$a = $tarkistus_meapu_row['kateinen'];
+		$b = $tarkistus_meapu_row2['kateinen'];
+
+		if (($a == "" and $b != "") or ($a == "")) {
+
+			// Parametrejä saatanat.php:lle
+			$sytunnus 	 	 = $laskurow['ytunnus'];
+			$sliitostunnus	 = $laskurow['liitostunnus'];
+			$eiliittymaa 	 = "ON";
+			$luottorajavirhe = "";
+			$jvvirhe 		 = "";
+			$ylivito 		 = 0;
+			$trattavirhe 	 = "";
+			$laji 			 = "MA";
+			$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
+
+			ob_start();
+			require ("raportit/saatanat.php");
+			$retval = ob_get_contents();
+			ob_end_clean();
+
+			if ($luottorajavirhe != '') {
+				echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt. Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),"!</font><br><br>";
+				$tee = "OTSIK";
+				$tila = "";
+				unset($jatka);
+			}
+		}
+	}
+
 	if (isset($jatka) and $asiakasid != "") {
 		if ($maksuehto == "") {
 			echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
@@ -198,6 +241,7 @@
 			// haetaan maksuehdon tiedot tarkastuksia varten
 			$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
 			$tarkistus_meapu = pupe_query($tarkistus_apuqu);
+			$tarkistus_meapu_row = mysql_fetch_assoc($tarkistus_meapu);
 
 			if (mysql_num_rows($tarkistus_meapu) == 0) {
 				echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
@@ -1254,7 +1298,16 @@
 					}
 					$vasen_sarake[$vasen] .= "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 				}
-				$vasen_sarake[$vasen] .= "</select></td>";
+				$vasen_sarake[$vasen] .= "</select>";
+
+				if (isset($edellinen_maksuehto)) {
+					$vasen_sarake[$vasen] .= "<input type='hidden' name='edellinen_maksuehto' value='{$edellinen_maksuehto}' />";
+				}
+				else {
+					$vasen_sarake[$vasen] .= "<input type='hidden' name='edellinen_maksuehto' value='{$srow['maksuehto']}' />";
+				}
+
+				$vasen_sarake[$vasen] .= "</td>";
 			}
 
 			$vasen++;
@@ -1663,10 +1716,10 @@
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
 						AND kuka.tunnus  = '$srow[myyja]')
 						UNION
-					   (SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+					   (SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.aktiivinen = 1
 						AND kuka.extranet = '')
 						ORDER BY nimi";
 			$yresult = pupe_query($query);
@@ -1728,10 +1781,10 @@
 
 				$oikea_sarake[$oikea] .= "<option value=''>".t("Ei projektipäällikköä")."</option>";
 
-				$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+				$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 							FROM kuka
-							JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 							WHERE kuka.yhtio  = '$kukarow[yhtio]'
+							AND kuka.aktiivinen = 1
 							AND kuka.extranet = ''
 							AND kuka.asema	  = 'PP'
 							ORDER BY kuka.nimi";
@@ -1928,11 +1981,18 @@
 			$varastot_array = array();
 			$varastot_lisa_query = "";
 
-			if ($kukarow["varasto"] != "") {
+			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
+				$yhtiorow['takuuvarasto'] = (int) $yhtiorow['takuuvarasto'];
+				$varastot_lisa_query = " and varastopaikat.tunnus = '{$yhtiorow['takuuvarasto']}'";
+				$varastot_array = array($yhtiorow['takuuvarasto']);
+			}
+			elseif ($kukarow["varasto"] != "") {
 				$varastot_array = explode(",", $kukarow["varasto"]);
 				$varastot_lista = mysql_real_escape_string($kukarow["varasto"]);
 				$varastot_lisa_query = " and varastopaikat.tunnus in ($varastot_lista) ";
 			}
+
+			$selectoitu_varasto_toimipaikka = 0;
 
 			$query  = "	SELECT *
 						FROM varastopaikat
@@ -1948,8 +2008,11 @@
 
 					$sel = '';
 
+					if ($toim == "REKLAMAATIO" and $srow['varasto'] == '' and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] == $varow['tunnus']) {
+						$sel = 'selected';
+					}
 					// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
-					if ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '') {
+					elseif ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '') {
 						$sel = 'selected';
 					}
 					// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
@@ -1959,6 +2022,8 @@
 					elseif ($varow['tunnus'] == $srow["varasto"]) {
 						$sel = 'selected';
 					}
+
+					if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
 
 					$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
@@ -2005,6 +2070,11 @@
 					}
 
 					if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
+
+					if ($yhtiorow['pakollinen_varasto'] == 'K' and $predefined_yhtiotoimipaikka == 0 and $selectoitu_varasto_toimipaikka == $yht_toimpaik_row['tunnus']) {
+						$sel = "selected";
+						$predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
+					}
 
 					$oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
 				}
@@ -2395,10 +2465,10 @@
 				$vasen_sarake[$vasen] = "<td>".t("Allekirjoittaja")."</td>";
 				$vasen_sarake[$vasen] .= "<td><select name='allekirjoittaja'>";
 
-				$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi
+				$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi
 							FROM kuka
-							JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 							WHERE kuka.yhtio  = '$kukarow[yhtio]'
+							AND kuka.aktiivinen = 1
 							AND kuka.nimi    != ''
 							AND kuka.extranet = ''
 							ORDER BY kuka.nimi";
@@ -2602,11 +2672,11 @@
 					}
 					elseif ($kentta == "suorittaja") {
 
-						$query = "	SELECT DISTINCT if (avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
+						$query = "	SELECT if(avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
 									FROM kuka
-									JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 									LEFT JOIN avainsana ON (avainsana.yhtio=kuka.yhtio and avainsana.laji='TYOM_TYOLINJA' and avainsana.selitetark=kuka.kuka)
 									WHERE kuka.yhtio  = '$kukarow[yhtio]'
+									AND kuka.aktiivinen = 1
 									and kuka.extranet = ''
 									ORDER BY sort, kuka.nimi";
 						$yresult = pupe_query($query);
@@ -3395,6 +3465,20 @@
 			$kukarow['toimipaikka'] = $alhiro['tunnus'];
 		}
 
+		if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($varasto) and $varasto != 0 and isset($yhtiotoimipaikka) and (trim($yhtiotoimipaikka) == '' or $yhtiotoimipaikka == 0)) {
+
+			$_query  = "SELECT toimipaikka
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$varasto}'";
+			$vares = pupe_query($_query);
+			$varow = mysql_fetch_assoc($vares);
+
+			if ($varow['toimipaikka'] != 0) {
+				$yhtiotoimipaikka = $varow['toimipaikka'];
+			}
+		}
+
 		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
 		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
@@ -3694,7 +3778,7 @@
 									SET erikoisale = '{$erikoisale}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND otunnus = '{$erikoisale_query_otunnus}'
-									AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}')
+									AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')
 									AND netto  != 'N'
 									AND tyyppi != 'D'";
 			$upd_erikoisale_res = pupe_query($query_erikoisale);

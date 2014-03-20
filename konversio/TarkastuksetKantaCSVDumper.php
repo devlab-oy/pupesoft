@@ -39,7 +39,7 @@ class TarkastuksetKantaCSVDumper extends CSVDumper {
 			'ID',
 		);
 
-		$this->setFilepath("/tmp/konversio/TARKASTUKSET.csv");
+		$this->setFilepath("/tmp/konversio/TARKASTUKSET.CSV");
 		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);

@@ -56,12 +56,12 @@ if(isset($hylly)) {
 $alkuperainen_saapuminen = $saapuminen;
 
 # Tullaan nappulasta
-if (isset($submit) and trim($submit) != '') {
+if (isset($submit_button) and trim($submit_button) != '') {
 
 	# Virheet
 	$errors = array();
 
-	switch ($submit) {
+	switch ($submit_button) {
 
 		case 'new':
 			echo "<META HTTP-EQUIV='Refresh' CONTENT='0; URL=uusi_kerayspaikka.php?{$url}'>";
@@ -109,32 +109,45 @@ if (isset($submit) and trim($submit) != '') {
 					pupe_query($query);
 				}
 
-				// Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
-				if ($maara < $row['varattu']) {
+				//tarkistetaan vielä ettei riviä ole jo viety varastoon
+				$viety_query = "	SELECT uusiotunnus
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$row['tunnus']}'
+									AND laskutettuaika != '0000-00-00'";
+				$viety = pupe_query($viety_query);
 
-					// Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
-					// Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
-					splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
+				if (mysql_num_rows($viety) == 0) {
+					// Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
+					if ($maara < $row['varattu']) {
+						// Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
+						// Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
+						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
 
-					// Alkuperäinen viedään varastoon, splitattu jää jâljelle
-					$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
-					$tilausrivit[] = $tilausrivi;
+						// Alkuperäinen viedään varastoon, splitattu jää jâljelle
+						$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
+						$tilausrivit[] = $tilausrivi;
 
-					// Ei voi olla viimeinen rivi jos rivi on splitattu
-					$viimeinen = false;
-				}
-				elseif ($maara == $row['varattu']) {
-					$tilausrivit[] = $tilausrivi;
+						// Ei voi olla viimeinen rivi jos rivi on splitattu
+						$viimeinen = false;
+					}
+					elseif ($maara == $row['varattu']) {
+						$tilausrivit[] = $tilausrivi;
+					}
+					else {
+						# Tehdään insertti erotukselle
+						$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
+
+						# Päivitä kopioidun kpl (maara - varattu)
+						paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
+
+						$tilausrivit = array($tilausrivi, $kopioitu_tilausrivi);
+					}
 				}
 				else {
-					# Tehdään insertti erotukselle
-					$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
-
-					# Päivitä kopioidun kpl (maara - varattu)
-					paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
-
-					$tilausrivit = array($tilausrivi, $kopioitu_tilausrivi);
+					echo t("Tuote oli jo viety varastoon! Ei viedä tuotetta uudestaan varastoon!");
 				}
+
 
 				$temppi_lava = false;
 
@@ -273,7 +286,7 @@ if (isset($hyllytetty)) {
 
 echo "
 	<script type='text/javascript'>
-		function vahvista() {
+		function vahvista_formin_submittaus() {
 			var maara = document.getElementById('maara').value;
 			var row_varattu = parseInt(document.getElementById('row_varattu').innerHTML);
 			if(maara > row_varattu) {
@@ -363,11 +376,11 @@ echo "<tr>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' class='button' value='submit' id='vahvista' onclick='return vahvista();'>",t("Vahvista"),"</button>";
+	<button name='submit_button' class='button' value='submit' id='vahvista' onclick='return vahvista_formin_submittaus();'>",t("Vahvista"),"</button>";
 
 # Jos hyllytyksestä niin tämä piiloon
 if (!isset($hyllytys)) {
-	echo "<button class='button right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
+	echo "<button class='button right' name='submit_button' value='new'>",t("Uusi keräyspaikka"),"</button>";
 
 	$saapuminen = !isset($saapuminen) ? $row['uusiotunnus'] : $saapuminen;
 

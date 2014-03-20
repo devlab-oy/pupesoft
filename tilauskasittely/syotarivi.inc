@@ -247,6 +247,7 @@
 			}
 
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
@@ -410,21 +411,15 @@
 		echo "<option value='E' $chke>".t("E-Netto")."</option>";
 		echo "</select></td>";
 
-		//Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv
-		if (isset($alv) and $alv >= 500) {
+		// vaikka aluperin olisi marginaalimyynti‰/k‰‰nteinen alv (alv >= 500), saa alvia muuttaa rivill‰
+		if (isset($alv) and $alv >= 500 and $alv < 600) {
 			echo "<td valign='top'>";
-
-			if ($alv >= 600) {
-				echo t("K.V.");
-			}
-			else {
-				echo t("M.V.");
-			}
+			echo t("M.V.");
 			echo "</td>";
 			echo "<input type='hidden' name='alv' value='$alv'>";
 		}
-		else {
-			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
+		else { 
+		 	echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 
 		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
@@ -617,6 +612,7 @@
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
@@ -791,6 +787,7 @@
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
 			echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";

@@ -2,7 +2,7 @@
 
 if (!function_exists("luo_myyntitilausotsikko")) {
 	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '') {
-		global $kukarow, $yhtiorow, $session;
+		global $kukarow, $yhtiorow, $session, $temp;
 
 		$query	= "	SELECT *
 					FROM asiakas
@@ -151,7 +151,10 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			// Jos on varasto setattuna, pässätään eteenpäin
 			$varasto = 0;
 
-			if (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
+			if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
+				$varasto = $yhtiorow['takuuvarasto'];
+			}
+			elseif (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
 				// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
 				$varasto = $kukarow['varasto'];
 			}
@@ -377,7 +380,12 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		$override_ytunnus_check = "YES";
 		$ei_kayttoliittymaa = "kylla";
 
-		require ("otsik.inc");
+		if( $temp !== 1){
+			require ("otsik.inc");
+		}
+		else{
+			require ("otsik_temp.inc");
+		}
 
 		if ($session == "") {
 			return $id;

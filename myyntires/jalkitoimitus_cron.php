@@ -8,7 +8,7 @@
 if (php_sapi_name() != 'cli') {
     die();
 }
-    
+
 // otetaan includepath aina rootista
 $pupe_root_polku = dirname(dirname(__FILE__));
 ini_set("include_path", ini_get("include_path") . PATH_SEPARATOR . $pupe_root_polku . PATH_SEPARATOR . "/usr/share/pear");
@@ -33,4 +33,4 @@ $oikeurow = array(
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtio);
 
-jt_toimita('', '', $varastot, array(), array(), 'tosi_automaaginen', '', '', '', '', '', 'j');
+jt_toimita('', '', $varastot, array(), array(), 'tosi_automaaginen', '');

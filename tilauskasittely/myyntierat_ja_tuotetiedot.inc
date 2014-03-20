@@ -2,15 +2,18 @@
 // käytetään slavea
 $useslave = 1;
 
-// if (isset($_POST["ajannyt"])) {
-// 	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-// 	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
-// }
-if (isset($lajit)) setcookie('avainsanalaji_keksi', serialize($lajit), strtotime('+30 days'), "/");
-if (isset($_COOKIE['avainsanalaji_keksi'])) $lajit_array = unserialize($_COOKIE['avainsanalaji_keksi']);
+//if (isset($lajit)) echo "POLVIPÄÄLLIKÖ<br>";
+//if (isset($lajit)) setcookie("avainsanalaji_keksi", serialize($lajit), 52552, "/");
 
-if (!isset($aja_ja_tallenna) and !isset($_REQUEST['lajit'])) {
+//if (isset($_COOKIE['avainsanalaji_keksi'])) $lajit_array = unserialize($_COOKIE['avainsanalaji_keksi']);
+//else $lajit_array = $lajit;
+
+//echo "MORJENS OLEN $lajit_array<br>";
+
+if (!isset($lajit_array) and isset($lajit)) $lajit_array = $lajit;
+if (isset($_POST['piirtele_valikko'])) {
 	// piirrellään vaihtoehdot aina jos ei olla subattu rapsaa
+	echo "PIIRTELYVALIKKOON MENTY";
 	echo "<br><br>";
 	echo "<font class='head'>".t("Myyntierät ja tuotetiedot")."</font>";
 	echo "<br><br>";
@@ -31,10 +34,16 @@ if (!isset($aja_ja_tallenna) and !isset($_REQUEST['lajit'])) {
 		if (strlen($row['laji']) < 4) continue;
 		$nollaus = false;
 		if ($secretcounter == 0) echo "<tr>";
-		$tsekk = isset($lajit_array["{$row['laji']}"]) ? "CHECKED" : "";
+		$tsekk = "";
+		foreach ($lajit_array as $osuma) {
+			if ($osuma == $row['laji']) {
+				$tsekk = "CHECKED";
+				break;
+			}
+		}
 		echo "<td align='left' valign='top' width='100'><input type='checkbox' name='lajit[]' value='{$row['laji']}' $tsekk>{$row['laji']}</td>";
-		if ($secretcounter == 2) echo "</tr>";
-		if ($secretcounter == 2) { 
+		if ($secretcounter == 2) {
+			echo "</tr>"; 
 			$secretcounter = 0;
 			$nollaus = true;
 		}
@@ -52,18 +61,22 @@ if (!isset($aja_ja_tallenna) and !isset($_REQUEST['lajit'])) {
 				<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='naantali' value='KIVAPAIKKA'>
-				<input type='submit' name='aja_ja_tallenna' value='".t("Tallenna tilauksen myyntierätiedot exceliin")."'>
+				<input type='submit' name='aja_ja_tallenna' value='".t("Aja rapsa")."'>
 				</form>
 				</td>
 			</tr>";
-			echo "</table>";
+	echo "</table>";
 	echo "</form>";
 }
-else {
+elseif(isset($lajit_array) and count($lajit_array) > 0) {
 	// täällä ajellaan rapsa ja tallennetaan henkseliin
-	$ressu = "kissa";
-	if (mysql_num_rows($ressu) > 0) {
+	$keyo = implode("','",$lajit_array);
+	$keyo = "'".$keyo."'";
 
+	//$kveeri = "SELECT * FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow['yhtio']}' AND laji IN ({$keyo}) ORDER BY laji";
+	//$ressu = pupe_query($kveeri);
+	//if (mysql_num_rows($ressu) > 0) {
+	
 		include('inc/pupeExcel.inc');
 
 		$worksheet 	 = new pupeExcel();
@@ -71,40 +84,71 @@ else {
 		$excelrivi 	 = 0;
 		$excelsarake = 0;
 
-		$query = "	SELECT distinct laji
-					FROM tuotteen_avainsanat
-					WHERE yhtio='{$kukarow['yhtio']}'
-					ORDER BY laji";
-
-		$ressu = pupe_query($query);
-
 		$totaalisarakemaara = mysql_num_rows();
-
+		
+		$kveeri = "SELECT distinct laji FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow['yhtio']}' AND laji IN ({$keyo}) ORDER BY laji";
+		$ressu = pupe_query($kveeri);
+		//piirretään sarakkeiden headerit
+		$worksheet->write($excelrivi, $excelsarake++, t("Tuotenumero"),	$format_bold);
 		while ($row = mysql_fetch_assoc($ressu)) {
 			$worksheet->write($excelrivi, $excelsarake++, $row['laji'],	$format_bold);
 		}
 
 		$excelrivi++;
+		
+		//haetaan tilausrivit
+		//$query = "	SELECT * FROM tilausrivi WHERE yhtio='{$kukarow['yhtio']}' AND otunnus = {$tilausnumero}";
+		//$tilres = pupe_query($query);
+		//query_dump($query);
 
-		$query = "	SELECT *
-					FROM tuotteen_avainsanat
-					WHERE yhtio='{$kukarow['yhtio']}'
-					ORDER BY laji";
-		while ($row = mysql_fetch_assoc($result)) {
-
+		//loopataan myyntierätiedot per tilausrivi
+		mysql_data_seek($tilausrivit_talteen, 0);
+		while ($tilausrivi = mysql_fetch_assoc($tilausrivit_talteen)) {
+			$query = "	SELECT tuotteen_avainsanat.*
+						FROM tuotteen_avainsanat
+						WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+						AND tuotteen_avainsanat.tuoteno='{$tilausrivi['tuoteno']}'
+						AND tuotteen_avainsanat.laji IN ($keyo)
+						ORDER BY tuotteen_avainsanat.laji";
+			$result = pupe_query($query);
+			query_dump($query);
 			$excelsarake = 0;
-			$worksheet->write($excelrivi, $excelsarake++, $row["kukanimi"]);
+
+			$worksheet->write($excelrivi, $excelsarake++, $tilausrivi['tuoteno']);
+			while ($selirivi = mysql_fetch_assoc($result)) {
+				if (in_array($selirivi["laji"], $lajit_array)) {
+					$worksheet->write($excelrivi, $excelsarake++, $selirivi["selite"]);
+				}
+				else {
+					$worksheet->write($excelrivi, $excelsarake++, "");
+				}
+			}
 			$excelrivi++;
 		}
-
 		$excelnimi = $worksheet->close();
+	
+	
+	if (isset($excelnimi)) {
+		echo "<br><br><table>";
+		echo "<tr><th>",t("Tallenna tulos"),":</th>";
+		echo "<form method='post' class='multisubmit'>";
+		echo "<input type='hidden' name='tappi' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='hidden' name='otunnus' value='$tilausnumero'>";
+		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+		echo "<input type='hidden' name='mista' value = '$mista'>";
+		echo "<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='kaunisnimi' value='Myyntieratiedot.xlsx'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
+		echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr></form>";
+		echo "</table><br>";
 	}	
+	else {
+		echo t("Tallennus epäonnistui")."!<br>";
+	}
 }
 
-// if (isset($tee) and $tee == "lataa_tiedosto") {
-// 	readfile("/tmp/".$tmpfilenimi);
-// 	exit;
-// }
 
 
 

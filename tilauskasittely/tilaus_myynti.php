@@ -10,11 +10,19 @@ if (isset($_REQUEST['ajax_toiminto']) and trim($_REQUEST['ajax_toiminto']) == 't
 	$ohje = 'off';
 }
 
+if (isset($_POST["tappi"])) {
+	if($_POST["tappi"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+}
+
 if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
 
-var_dump($_REQUEST);
+if (isset($tappi) and $tappi == "lataa_tiedosto" and isset($tmpfilenimi)) {
+	readfile("/tmp/".$tmpfilenimi);
+	exit;
+}
 
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
@@ -5032,7 +5040,8 @@ if ($tee == '') {
 					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus
 					$limitlisa";
 		$result = pupe_query($query);
-
+		$tilausrivit_talteen = $result;
+		echo "nyt tää ajettiin";
 		if ($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
 			if (isset($ruutulimit) and $ruutulimit > 0) {
 				$rivino = $ruutulimit-1;
@@ -8773,7 +8782,7 @@ if ($tee == '') {
 			if (!isset($piirtele_valikko)) {
 			echo "	<tr>
 						<td align='left' class='back' valign='top'>
-						<form name='excel_tuote_rapsa' method='post' class='multisubmit'>
+						<form name='excel_tuote_rapsa' method='post'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='otunnus' value='$tilausnumero'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>

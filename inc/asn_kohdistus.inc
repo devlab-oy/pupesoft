@@ -2,7 +2,7 @@
 
 	if (!function_exists("asn_kohdistus")) {
 		function asn_kohdistus($tavarantoimittajanumero = '') {
-			global $yhtiorow, $kukarow;
+			global $yhtiorow, $kukarow, $_yhtion_toimipaikka;
 
 			$php_cli = FALSE;
 
@@ -36,7 +36,7 @@
 						FROM asn_sanomat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND status = ''
-						AND tilausrivi = ''
+						AND tilausrivi is NULL
 						AND laji = 'asn'
 						{$toimittajalisa}
 						ORDER BY toimittajanumero, asn_numero, paketinnumero";
@@ -82,7 +82,8 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
 											AND lasku.tila = 'O'
-											AND lasku.alatila = 'A')
+											AND lasku.alatila = 'A'
+											AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -109,7 +110,8 @@
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
 												AND lasku.tila = 'O'
-												AND lasku.alatila = 'A')
+												AND lasku.alatila = 'A'
+												AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -137,7 +139,8 @@
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
 												AND lasku.tila = 'O'
-												AND lasku.alatila = 'A')
+												AND lasku.alatila = 'A'
+												AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -164,7 +167,8 @@
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
 												AND lasku.tila = 'O'
-												AND lasku.alatila = 'A')
+												AND lasku.alatila = 'A'
+												AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -191,7 +195,8 @@
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
 												AND lasku.tila = 'O'
-												AND lasku.alatila = 'A')
+												AND lasku.alatila = 'A'
+												AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -282,7 +287,8 @@
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 													AND lasku.tunnus = tilausrivi.otunnus
 													AND lasku.tila = 'O'
-													AND lasku.alatila = 'A')
+													AND lasku.alatila = 'A'
+													AND lasku.vanhatunnus = '{$_yhtion_toimipaikka}')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.toimittajanro = '{$row['toimittajanumero']}'

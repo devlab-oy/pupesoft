@@ -42,7 +42,7 @@
 
 		// Tehd‰‰n oletukset
 		$kukarow['yhtio'] = $argv[1];
-		$kukarow['kuka'] = "crond";
+		$kukarow['kuka'] = "admin";
 		$yhtiorow = hae_yhtion_parametrit($argv[1]);
 
 		$php_cli 		= TRUE;
@@ -65,6 +65,7 @@
 
 		// Haetaan kaikki saldolliset tuotteet
 		$query  = "	SELECT tuote.tuoteno,
+					tuote.nimitys,
 					tuote.try,
 					tuote.epakurantti25pvm,
 					tuote.epakurantti50pvm,
@@ -73,6 +74,7 @@
 					if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin,
 					tuote.kehahin bruttokehahin,
 					tuote.luontiaika,
+					tuote.sarjanumeroseuranta,
 					sum(tuotepaikat.saldo) saldo
 					FROM tuote
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
@@ -80,7 +82,7 @@
 					AND tuote.ei_saldoa = ''
 					AND tuote.epakurantti100pvm = '0000-00-00'
 					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
-					GROUP BY 1,2,3,4,5,6,7,8,9
+					GROUP BY 1,2,3,4,5,6,7,8,9,10
 					HAVING saldo > 0
 					ORDER BY tuoteno";
 		$epakurantti_result = mysql_query($query) or pupe_error($query);
@@ -96,6 +98,7 @@
 			echo "<br><table>";
 			echo "<tr>";
 			echo "<th>".t("Tuote")."</th>";
+			echo "<th>".t("Nimitys")."</th>";
 			echo "<th>".t("Try")."</th>";
 			echo "<th>".t("Viimeisin saapuminen")."</th>";
 			echo "<th>".t("Viimeisin laskutus")."</th>";
@@ -114,6 +117,7 @@
 		}
 
 		$worksheet->writeString($excelrivi, $excelsarake++, t("Tuote"), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"), $format_bold);
 		$worksheet->writeString($excelrivi, $excelsarake++, t("Try"), $format_bold);
 		$worksheet->writeString($excelrivi, $excelsarake++, t("Viimeisin saapuminen"), $format_bold);
 		$worksheet->writeString($excelrivi, $excelsarake++, t("Viimeisin laskutus"), $format_bold);
@@ -247,9 +251,61 @@
 
 				if ($mikataso > 0) {
 
-					if (!$php_cli) echo "<tr><td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a></td>";
+					if (!$php_cli) echo "<tr><td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a>";
+
+					// N‰ytet‰‰n varastossa olevat er‰t/sarjanumerot
+					if ($epakurantti_row["sarjanumeroseuranta"] == "V" or $epakurantti_row['sarjanumeroseuranta'] == 'T') {
+
+						$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
+									tilausrivi_osto.tunnus osto_rivitunnus,
+									tilausrivi_osto.perheid2 osto_perheid2,
+									tilausrivi_osto.nimitys nimitys,
+									lasku_myynti.nimi myynimi
+									FROM sarjanumeroseuranta
+									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+									LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+									LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+									and sarjanumeroseuranta.tuoteno = '$epakurantti_row[tuoteno]'
+									and sarjanumeroseuranta.myyntirivitunnus != -1
+									and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+									and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+						$sarjares = pupe_query($query);
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							if (!$php_cli) echo "<br>".t("S:nro")."$sarjarow[sarjanumero]";
+						}
+					}
+					elseif ($epakurantti_row["sarjanumeroseuranta"] == "E" or $epakurantti_row["sarjanumeroseuranta"] == "F") {
+
+						$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto,
+									sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso,
+									sarjanumeroseuranta.era_kpl kpl,
+									sarjanumeroseuranta.tunnus sarjatunnus
+									FROM sarjanumeroseuranta
+									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+									and sarjanumeroseuranta.tuoteno = '$epakurantti_row[tuoteno]'
+									and sarjanumeroseuranta.myyntirivitunnus = 0
+									and sarjanumeroseuranta.era_kpl != 0
+									and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+						$sarjares = pupe_query($query);
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							if (!$php_cli) echo "<br>".t("E:nro")." $sarjarow[sarjanumero] ($sarjarow[kpl])";
+						}
+					}
+
+					if (!$php_cli) echo "</td>";
+
+					$tuotensarake = $excelsarake;
 
 					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['tuoteno']);
+
+
+					if (!$php_cli) echo "<td>{$epakurantti_row['nimitys']}</td>";
+					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['nimitys']);
 
 					$try = t_avainsana("TRY", '', "and selite = '{$epakurantti_row['try']}'", '', '', "selitetark");
 
@@ -334,6 +390,26 @@
 					$excelrivi++;
 					$excelsarake = 0;
 
+					if ($epakurantti_row["sarjanumeroseuranta"] == "V" or $epakurantti_row['sarjanumeroseuranta'] == 'T') {
+
+						mysql_data_seek($sarjares, 0);
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							$worksheet->writeString($excelrivi, $tuotensarake, t("S:nro"));
+							$worksheet->writeString($excelrivi, $tuotensarake+1, $sarjarow["sarjanumero"]);
+							$excelrivi++;
+						}
+					}
+					elseif ($epakurantti_row["sarjanumeroseuranta"] == "E" or $epakurantti_row["sarjanumeroseuranta"] == "F") {
+						mysql_data_seek($sarjares, 0);
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							$worksheet->writeString($excelrivi, $tuotensarake, t("E:nro"));
+							$worksheet->writeString($excelrivi, $tuotensarake+1, "$sarjarow[sarjanumero] ($sarjarow[kpl])");
+							$excelrivi++;
+						}
+					}
+
 					$vararvot_nyt += $vararvo_nyt;
 					$vararvot_sit += $vararvo_sit;
 
@@ -345,14 +421,14 @@
 
 		if ($epa_tuotemaara > 0) {
 
-			if (!$php_cli) echo "<tr><td class='tumma' colspan='8'>".t("Yhteens‰").":</td>";
-			$worksheet->writeString($excelrivi, 7, t("Yhteens‰"));
+			if (!$php_cli) echo "<tr><td class='tumma' colspan='9'>".t("Yhteens‰").":</td>";
+			$worksheet->writeString($excelrivi, 8, t("Yhteens‰"));
 
 			if (!$php_cli) echo "<td class='tumma' align='right'>$vararvot_nyt</td>";
-			$worksheet->writeNumber($excelrivi, 8, $vararvot_nyt);
+			$worksheet->writeNumber($excelrivi, 9, $vararvot_nyt);
 
 			if (!$php_cli) echo "<td class='tumma' align='right'>$vararvot_sit</td>";
-			$worksheet->writeNumber($excelrivi, 9, $vararvot_sit);
+			$worksheet->writeNumber($excelrivi, 10, $vararvot_sit);
 
 			if (!$php_cli and isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 				echo "<td class='tumma'></td>";
@@ -361,11 +437,11 @@
 			if (!$php_cli) echo "</tr>";
 			$excelrivi++;
 
-			if (!$php_cli) echo "<tr><td class='tumma' colspan='9'>".t("Ep‰kuranttimuutos yhteens‰").":</td>";
-			$worksheet->writeString($excelrivi, 7, t("Ep‰kuranttimuutos yhteens‰"));
+			if (!$php_cli) echo "<tr><td class='tumma' colspan='10'>".t("Ep‰kuranttimuutos yhteens‰").":</td>";
+			$worksheet->writeString($excelrivi, 8, t("Ep‰kuranttimuutos yhteens‰"));
 
 			if (!$php_cli) echo "<td class='tumma' align='right'>",($vararvot_sit-$vararvot_nyt),"</td>";
-			$worksheet->writeNumber($excelrivi, 9, ($vararvot_sit-$vararvot_nyt));
+			$worksheet->writeNumber($excelrivi, 10, ($vararvot_sit-$vararvot_nyt));
 
 			if (!$php_cli and isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 				echo "<td class='tumma'></td>";

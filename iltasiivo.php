@@ -16,7 +16,7 @@
 
 		//tarvitaan yhtiö
 		$kukarow['yhtio'] = $argv[1];
-		$kukarow['kuka'] = "crond";
+		$kukarow['kuka'] = "admin";
 
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);

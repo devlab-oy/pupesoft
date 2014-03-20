@@ -37,6 +37,9 @@
 				$upres = pupe_query($query);
 			}
 
+			// päiviteään kuka-tauluun mitkä käyttäjät on aktiivisia ja mitkä poistettuja
+			paivita_aktiiviset_kayttajat($tokuka, $toyhtio);
+
 			$fromkuka	= '';
 			$tokuka		= '';
 			$fromyhtio	= '';
@@ -136,7 +139,11 @@
 		if ($tokuka!='') {
 			// tehdään yhtiolistaukset
 
-			$query = "select distinct kuka.yhtio, yhtio.nimi from kuka, yhtio where kuka.kuka='$tokuka' and kuka.extranet='' and yhtio.yhtio=kuka.yhtio ";
+			$query = "	SELECT distinct kuka.yhtio, yhtio.nimi
+						FROM kuka, yhtio
+						WHERE kuka.kuka = '$tokuka'
+						AND kuka.extranet = ''
+						AND yhtio.yhtio = kuka.yhtio ";
 			$yhres = pupe_query($query);
 
 			if (mysql_num_rows($yhres) > 1) {

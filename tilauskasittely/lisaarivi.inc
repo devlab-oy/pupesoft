@@ -50,6 +50,7 @@
 
 	if (!isset($rivilaadittu)) 		$rivilaadittu = "";
 	if (!isset($kommentti)) 		$kommentti = "";
+	if (!isset($ale_peruste))		$ale_peruste = "";
 	if (!isset($jaksotettu)) 		$jaksotettu = "";
 	if (!isset($korvaavakielto))	$korvaavakielto = "";
 	if (!isset($orvoteikiinnosta)) 	$orvoteikiinnosta = "";
@@ -59,6 +60,8 @@
 	if (!isset($valmistuslinja))	$valmistuslinja = "";
 	if (!isset($rekisterinumero))	$rekisterinumero = "";
 	if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
+
+	$reklamaatiohyvitys = false;
 
 	if ($rekisterinumero == '') {
 		//Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, k‰yttˆliittym‰st‰ on mahdollisuus syˆtt‰‰ tilausriville rekisterinumero.
@@ -259,12 +262,12 @@
 	$hinta	= str_replace(',', '.', $hinta);
 
 	// lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
-	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o' and !is_array($hyvityssaanto_hinta_array)) {
 		if (!isset($alv) or $alv == '') $alv = $trow['alv'];
 		$hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
 	}
 	// poistetaan alvit (jos hintamuunnos p‰‰ll‰)
-	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+	if (isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o' and !is_array($hyvityssaanto_hinta_array)) {
 		if (!isset($alv) or $alv == '') $alv = $trow['alv'];
 		$hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
 	}
@@ -558,8 +561,10 @@
 
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
+		$kvkasittely = in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('H', 'W')) ? false : true;
+
 		// Etsit‰‰n korvaavia tuotteita
-		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA" and $laskurow['tilaustyyppi'] != '9') {
+		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA" and $laskurow['tilaustyyppi'] != '9' and $kvkasittely) {
 			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myyd‰‰n, vastaavia ei
 			$krkaikkimyytavissa	= 0;
 
@@ -1627,6 +1632,7 @@
 											tyyppi 			= '$rivityyppi',
 											toimaika 		= '$toimaika',
 											kommentti 		= '$kommentti',
+											ale_peruste		= '$ale_peruste',
 											var 			= '',
 											var2			= '{$var2}',
 											try				= '$trow[try]',
@@ -1883,6 +1889,7 @@
 								$tuotenimitys 		= "";
 								$tuotenimitys_force = "";
 								$omalle_tilaukselle = "";
+								$ale_peruste		= "";
 
 							} // T‰ll‰ rundilla myydyt
 						} // Jos tuoteperhett‰ lˆytyi riitt‰v‰sti tai myytiin pelk‰‰ is‰‰
@@ -2007,8 +2014,37 @@
 			$kpl = $puu_kpl[$i];
 			$var = $puu_var[$i];
 
+			if (!$kvkasittely) {
+
+				// Otetaan tuotteen oletustoimittaja
+				$query = "	SELECT tuotteen_toimittajat.tehdas_saldo
+							FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+							JOIN toimi
+							ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+								AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+								AND tuotteen_toimittajat.tuoteno = '$tuoteno'
+							ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+							LIMIT 1";
+
+				$toimpaikres = pupe_query($query);
+				$krow = mysql_fetch_assoc($toimpaikres);
+
+				if ($kpl > $krow['tehdas_saldo']) {
+					$kvkasittely = true;
+				}
+			}
+
+			$kaannetaan_tuote = true;
+
+			if (in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and in_array($yhtiorow["korvaavuusketjun_puutekasittely"], array('K','V')) and $puu_ohiker[$i] == '' and $puu_hintake[$i] != "X") {
+				list(, , $_myytavissa) = saldo_myytavissa($myy_tuoteno[$i], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
+
+				if ($_myytavissa > 0) $kaannetaan_tuote = false;
+			}
+
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS')))) {
+			if ($kaannetaan_tuote and $puu_hintake[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -2024,7 +2060,7 @@
 				}
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS')))) {
+			elseif ($kaannetaan_tuote and $puu_hintake[$i] != "X" and $tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $laskurow['tilaustyyppi'] != '9' and (empty($rivitunnus) and (!isset($mista_tullaan) or (isset($mista_tullaan) and $mista_tullaan != 'TULOUTUS'))) and $kvkasittely) {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
@@ -2099,24 +2135,29 @@
 					and $toim != "SIIRTOTYOMAARAYS"
 				) {
 
-					// Katsotaan onko t‰lle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
-					$query = "	SELECT tilausrivin_lisatiedot.toimittajan_tunnus
-								FROM tilausrivi
-								JOIN tilausrivin_lisatiedot
-								ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-									AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-									AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-								AND tilausrivi.tyyppi != 'D'
-								AND tilausrivi.var in ('J','T','U')
-								ORDER BY tilausrivi.tunnus ASC
-								LIMIT 1";
-					$toimittaja_result = pupe_query($query);
-					$toimittaja = mysql_fetch_assoc($toimittaja_result);
+					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J'))) {
+						// Katsotaan onko t‰lle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
+						$query = "	SELECT tilausrivin_lisatiedot.toimittajan_tunnus
+									FROM tilausrivi
+									JOIN tilausrivin_lisatiedot
+									ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+										AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+										AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+									AND tilausrivi.tyyppi != 'D'
+									AND tilausrivi.var in ('J','T','U')
+									ORDER BY tilausrivi.tunnus ASC
+									LIMIT 1";
+						$toimittaja_result = pupe_query($query);
+						$toimittaja = mysql_fetch_assoc($toimittaja_result);
 
-					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J')) and !empty($toimittaja['toimittajan_tunnus'])) {
-						$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
+						if (!empty($toimittaja['toimittajan_tunnus'])) {
+							$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
+						}
+						else {
+							$yksi_suoratoimittaja_join = "";
+						}
 					}
 					else {
 						$yksi_suoratoimittaja_join = "";
@@ -2140,7 +2181,7 @@
 					$toimpaikres = pupe_query($query);
 					$krow = mysql_fetch_assoc($toimpaikres);
 
-					if (!empty($krow) and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('Y', 'V')) or ($krow['tehdas_saldo'] >= $kpl)) {
+					if (!empty($krow) and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('Y', 'V', 'W', 'H')) or ($krow['tehdas_saldo'] >= $kpl)) {
 						// tarkistetaan voiko tuotteen tilata suoraan asiakkaalle tai varastoon. oletuksena voi...
 						$tmp_varastoon   = 1;
 						$tmp_asiakkaalle = 1;
@@ -2169,13 +2210,13 @@
 							)
 						) {
 
-							if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('X', 'Y'))) {
+							if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('X', 'Y', 'H'))) {
 								$var 		 		= "T";
 								$toimittajan_tunnus	= $krow['liitostunnus'];
 								$paikka		 		= "";
 							}
 
-							if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('U', 'V'))) {
+							if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('U', 'V', 'W'))) {
 								$var 		 		= "U";
 								$toimittajan_tunnus	= $krow['liitostunnus'];
 								$paikka		 		= "";
@@ -2350,6 +2391,10 @@
 						elseif ($kpl < 0) {
 							$var 	= "";
 							$varattu = $kpl;
+
+							if ($toim == "REKLAMAATIO" and $laskurow['tilaustyyppi'] == 'U') {
+								$reklamaatiohyvitys = true;
+							}
 						}
 						// Normaalisti kaikki menee puutteeksi.
 						else {
@@ -2438,6 +2483,25 @@
 								break;
 							}
 						}
+
+						if (!$loydetytpaikat AND $reklamaatiohyvitys and $laskurow['varasto'] != 0) {
+
+							$query = "	SELECT alkuhyllyalue, alkuhyllynro
+										FROM varastopaikat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$laskurow['varasto']}'";
+							$oletus_tuotepaikka_res = pupe_query($query);
+							$oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
+
+							lisaa_tuotepaikka($trow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], '0', '0', 'Tuotetta lis‰tt‰ess‰');
+
+							$p_hyllyalue	= $oletus_tuotepaikka_row["alkuhyllyalue"];
+							$p_hyllynro		= $oletus_tuotepaikka_row["alkuhyllynro"];
+							$p_hyllyvali	= '0';
+							$p_hyllytaso	= '0';
+
+							$loydetytpaikat = TRUE;
+						}
 					}
 
 					// ostotilaus
@@ -2480,7 +2544,7 @@
 							$p_hyllyvali	= $olerow["hyllyvali"];
 							$p_hyllytaso	= $olerow["hyllytaso"];
 						}
-					}	
+					}
 				}
 			}
 
@@ -2736,6 +2800,7 @@
 						tyyppi 			= '$rivityyppi',
 						toimaika 		= '$toimaika',
 						kommentti 		= '$kommentti',
+						ale_peruste		= '$ale_peruste',
 						var 			= '$var',
 						var2 			= '{$var2}',
 						try				= '$trow[try]',

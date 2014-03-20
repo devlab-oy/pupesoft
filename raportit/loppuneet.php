@@ -29,17 +29,18 @@
 					concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka,
 					tuote.yksikko, tuotepaikat.inventointiaika, tuote.tahtituote, tuote.hinnastoon, tuote.status,
 					group_concat(tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-					group_concat(tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '/') toimittaja
+					group_concat(toimi.ytunnus                     order by tuotteen_toimittajat.tunnus separator '/') toimittaja
 					FROM tuotepaikat
 					JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio	and tuote.tuoteno=tuotepaikat.tuoteno
+					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno
+					LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
 					LEFT JOIN varastopaikat
 					ON varastopaikat.yhtio = tuotepaikat.yhtio
 					and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno
-					WHERE tuotepaikat.yhtio='$kukarow[yhtio]'
-					and saldoaika>='$vv-$kk-$pp 00:00:00'
-					and saldo<=0
+					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+					and tuotepaikat.saldoaika >= '$vv-$kk-$pp 00:00:00'
+					and tuotepaikat.saldo <= 0
 					$varastot
 					group by 1,2,3,4,5,6,7,8,9,10,11
 					ORDER BY osasto, try, tuoteno";

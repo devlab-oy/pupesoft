@@ -14,8 +14,26 @@ class Edi {
 		global $magento_api_ana_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
 		global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys;
 
-		if (empty($magento_api_ana_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrej√§ puuttuu\n");
-		if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrej√§ puuttuu\n");
+		if (empty($magento_api_ana_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrej‰ puuttuu\n");
+		if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrej‰ puuttuu\n");
+
+		//Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
+		$giftcards = json_decode($order['webtex_giftcard']);
+		if (!empty($giftcards)) {
+			$giftcard_sum = 0;
+			foreach ($giftcards as $giftcard_values) {
+				foreach ($giftcard_values as $index => $value) {
+					if (!stristr($index, 'classname')) {
+						$giftcard_sum += $value;
+					}
+				}
+			}
+
+			$grand_total = $order['grand_total'] + $giftcard_sum;
+		}
+		else {
+			$grand_total = $order['grand_total'];
+		}
 
 		// Miten storen nimi?
 		#$storenimi = (isset($_COOKIE["store_name"])) ? $_COOKIE["store_name"] : "";
@@ -35,12 +53,13 @@ class Edi {
 		$edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:".$order['shipping_description']."\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
-		//Onko tilaus maksettu = processing vai j√§lkvaatimus = pending_cashondelivery_asp
+		//Onko tilaus maksettu = processing vai j‰lkvaatimus = pending_cashondelivery_asp
 		$edi_order .= "OSTOTIL.OT_MAKSETTU:".$order['status']."\n";
 		$edi_order .= "OSTOTIL.OT_MAKSUEHTO:".strip_tags($order['payment']['method'])."\n";
 		$edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
 		$edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
-		$edi_order .= "OSTOTIL.OT_SUMMA:".$order['grand_total']."\n";
+		$edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
+		$edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
 		$edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";
 		$edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
 		$edi_order .= "OSTOTIL.OT_KLAUSUULI1:\n";
@@ -93,13 +112,13 @@ class Edi {
 				// Nimitys
 				$nimitys = $item['name'];
 
-				// M√§√§r√§
+				// M‰‰r‰
 				$kpl = $item['qty_ordered'] * 1;
 
-				// Hinta pit√§√§ hakea is√§lt√§
+				// Hinta pit‰‰ hakea is‰lt‰
 				$result = search_array_key_for_value_recursive($order['items'], "item_id", $item['parent_item_id']);
 
-				// L√∂yty yks tai enemm√§n, otetaan eka?
+				// Lˆyty yks tai enemm‰n, otetaan eka?
 				if (count($result) != 0) {
 					$_item = $result[0];
 				}
@@ -107,10 +126,10 @@ class Edi {
 					$_item = $item;
 				}
 
-				// Verollinen yksikk√∂hinta
+				// Verollinen yksikkˆhinta
 				$verollinen_hinta = $_item['original_price'];
 
-				// Veroton yksikk√∂hinta
+				// Veroton yksikkˆhinta
 				$veroton_hinta = $_item['price'];
 
 				// Rivin alennusprosentti

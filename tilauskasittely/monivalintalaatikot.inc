@@ -104,7 +104,7 @@
 		$asiakasvalintachk  = "CHECKED";
 	}
 
-	if ($kustapvalinta == 'tuote') {
+	if (isset($kustapvalinta) and $kustapvalinta == 'tuote') {
 		$kustapvalinta_tuote  	= "CHECKED";
 	}
 	else {
@@ -1971,10 +1971,7 @@
 		}
 
 		if ($monivalintalaatikko == "toimipaikka") {
-			$query = "	SELECT *
-						FROM yhtion_toimipaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'";
-			$toimipaikka_result = pupe_query($query);
+			$toimipaikka_result = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 			if (mysql_num_rows($toimipaikka_result) > 0) {
 
@@ -2263,4 +2260,4 @@
 		}
 	}
 
-	echo "<div style='clear: both;'></div>";
+	if (!isset($php_cli) or !$php_cli) echo "<div style='clear: both;'></div>";

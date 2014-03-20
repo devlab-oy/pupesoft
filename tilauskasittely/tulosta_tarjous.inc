@@ -1402,7 +1402,12 @@ if (!function_exists('loppu_tarjous')) {
 						}
 					}
 
-					if ($laskurow["rahtivapaa"] == "") $pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
+					if ($laskurow["rahtivapaa"] == "") {
+						$pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
+					}
+					else {
+						$pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti, $page_tarjous[$sivu], $norm);
+					}
 
 					$pdf_tarjous->draw_text(30,  $kuha-36, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous[$sivu], $norm);
 
@@ -1597,8 +1602,8 @@ if (!function_exists('tulosta_tarjous')) {
 		$query_ale_lisa = generoi_alekentta('M');
 
 		$query = "	SELECT tilausrivi.*,
-					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
-					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
+					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') rivihinta,
+					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl), '$yhtiorow[hintapyoristys]') bruttorivihinta,
 					tilausrivin_lisatiedot.positio,
 					$sorttauskentta,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -1645,17 +1650,21 @@ if (!function_exists('tulosta_tarjous')) {
 			#$yhtiorow['tarjouksen_alv_kasittely'] == 'X'	- Tuotteiden myyntihinnat ovat arvonlisäverottomia
 
 			if ($yhtiorow['alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) == 'verolliset') {
+				$row["hinta"] = $row["hinta"] * (1+$row["alv"]/100);
 				$row["rivihinta"] = $row["rivihinta"] * (1+$row["alv"]/100);
 			}
 			elseif ($yhtiorow['alv_kasittely'] == '' and trim($verolliset_verottomat_hinnat) == 'verottomat') {
+				$row["hinta"] = $row["hinta"] / (1+$row["alv"]/100);
 				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
 			}
 			elseif ($yhtiorow['tarjouksen_alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) == '') {
 
 				if ($yhtiorow['alv_kasittely'] == '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
+					$row["hinta"] = $row["hinta"] / (1+$row["alv"]/100);
 		        	$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
 				}
 				elseif ($yhtiorow['alv_kasittely'] != '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'S') {
+					$row["hinta"] = $row["hinta"] * (1+$row["alv"]/100);
 					$row["rivihinta"] = $row["rivihinta"] * (1+$row["alv"]/100);
 				}
 			}

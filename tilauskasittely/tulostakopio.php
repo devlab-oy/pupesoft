@@ -30,6 +30,9 @@
 	if (!isset($laskunroloppu)) 		$laskunroloppu = "";
 	if (!isset($kerayseran_numero)) 	$kerayseran_numero = "";
 	if (!isset($kerayseran_tilaukset)) 	$kerayseran_tilaukset = "";
+	if (!isset($toimipaikka))			$toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
+
+	$onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 	if ($toim == "OSOITELAPPU") {
 		//osoitelapuille on v‰h‰n eri p‰iv‰m‰‰r‰vaatimukset kuin muilla
@@ -398,6 +401,27 @@
 			}
 
 			echo "</tr>";
+
+			if ($onkolaajattoimipaikat and $toim == "VASTAANOTTORAPORTTI") {
+
+				$sel = $toimipaikka == 0 ? "selected" : "";
+
+				echo "<tr>";
+				echo "<th>",t("Toimipaikka"),"</th>";
+				echo "<td colspan='3'>";
+				echo "<select name='toimipaikka'>";
+				echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
+				echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+
+				while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+					$sel = $toimipaikat_row['tunnus'] == $toimipaikka ? "selected" : "";
+					echo "<option value='{$toimipaikat_row['tunnus']}' {$sel}>{$toimipaikat_row['nimi']}</option>";
+				}
+
+				echo "</select>";
+				echo "</td><td class='back'></td>";
+				echo "</tr>";
+			}
 		}
 
 		echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
@@ -497,7 +521,7 @@
 
 		if ($toim == "PURKU") {
 			//ostolasku jolle on kohdistettu rivej‰. T‰lle oliolle voidaan tulostaa purkulista
-			$where1 .= " lasku.tila = 'K' ";
+			$where1 .= " lasku.tila = 'K' and lasku.vanhatunnus = 0";
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
@@ -522,6 +546,10 @@
 		if ($toim == "VASTAANOTTORAPORTTI") {
 			//ostolasku jolle on kohdistettu rivej‰. T‰lle oliolle voidaan tulostaa Vastaanottoraportti
 			$where1 .= " lasku.tila = 'K' ";
+
+			if ($onkolaajattoimipaikat and $toim == "VASTAANOTTORAPORTTI" and $toimipaikka != 'kaikki') {
+				$where2 .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
+			}
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
@@ -990,6 +1018,7 @@
 						<input type='hidden' name='vvl' value='$vvl'>
 						<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>
 						<input type='hidden' name='mista' value='tulostakopio'>
+						<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />
 						<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
 			}
 			echo "<table><tr>";

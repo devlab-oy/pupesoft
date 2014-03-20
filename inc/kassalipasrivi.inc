@@ -62,11 +62,8 @@
 	if (mysql_field_name($result, $i) == "toimipaikka") {
 
 		$ulos = "<td><select name='{$nimi}'><option value='0'>".t("Ei toimipaikkaa")."</option>";
-		$query = "	SELECT tunnus, ovtlisa, postitp, nimi
-					FROM yhtion_toimipaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					ORDER BY nimi, ovtlisa, postitp";
-		$vresult = mysql_query($query) or pupe_error($query);
+
+		$vresult = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 		while ($vrow = mysql_fetch_assoc($vresult)) {
 			$sel = $trow[$i] == $vrow['tunnus'] ? " selected" : "";

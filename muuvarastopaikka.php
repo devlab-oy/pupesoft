@@ -6,6 +6,9 @@
 
 	if ($tee != '') {
 		$query  = "	LOCK TABLE tuotepaikat WRITE,
+					tuotteen_toimittajat READ,
+					toimi READ,
+					tiliointi WRITE,
 					tapahtuma WRITE,
 					sanakirja WRITE,
 					tilausrivin_lisatiedot WRITE,
@@ -17,12 +20,13 @@
 					tilausrivi as tilausrivi_osto READ,
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,
-					lasku READ,
+					lasku WRITE,
 					asiakas READ,
 					avainsana as a1 READ,
 					avainsana as a2 READ,
 					avainsana as a3 READ,
-					avainsana as a4 READ";
+					avainsana as a4 READ,
+					yhtion_toimipaikat READ";
 		$result = pupe_query($query);
 	}
 	else {
@@ -1125,6 +1129,9 @@
 
 				if (tarkista_oikeus('inventoi.php', '', 1)) {
 					echo "<a href='{$palvelin2}inventoi.php?tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
+				}
+				elseif (tarkista_oikeus('inventoi.php', 'OLETUSVARASTO', 1)) {
+					echo "<a href='{$palvelin2}inventoi.php?toim=OLETUSVARASTO&tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////toim=OLETUSVARASTO//tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
 				}
 				else {
 					echo "$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]";

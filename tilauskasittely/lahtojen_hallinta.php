@@ -1,7 +1,5 @@
 <?php
 
-	ini_set('zlib.output_compression', 1);
-
 	require ("../inc/parametrit.inc");
 
 	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
@@ -23,7 +21,6 @@
 			exit;
 		}
 	}
-
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
@@ -349,6 +346,12 @@
 									$pakkaus_info_res = pupe_query($query);
 									$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
 
+									if ($keraysera_row['kollilaji'] == 'MUU KOLLI') {
+										$pakkaus_info_row['leveys'] = $pakkaus_info_row['leveys'] < 0.1 ? 0.1 : $pakkaus_info_row['leveys'];
+										$pakkaus_info_row['korkeus'] = $pakkaus_info_row['korkeus'] < 0.1 ? 0.1 : $pakkaus_info_row['korkeus'];
+										$pakkaus_info_row['syvyys'] = $pakkaus_info_row['syvyys'] < 0.1 ? 0.1 : $pakkaus_info_row['syvyys'];
+									}
+
 									$kollitiedot = array(
 										'maara' => $keraysera_row['maara'],
 										'paino' => $keraysera_row['tuotemassa'],
@@ -635,140 +638,165 @@
 
 				$select_varasto = (int) $select_varasto;
 
-				require("inc/unifaun_send.inc");
+				// Tarkistetaan onko lähdöt kyseisen varaston lähtöjä
+				$varasto_lahto_conflict = false;
+				$varasto_lahto_conflict_array = array();
 
 				foreach ($checkbox_parent as $lahto) {
 
-					$sel_ltun = $mergeid_arr = array();
-
-					$lahto = (int) $lahto;
-
-					$query = "	SELECT tunnus, toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
-								FROM lasku
+					$query = "	SELECT tunnus
+								FROM lahdot
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tila 	= 'L'
-								AND alatila = 'B'
-								AND toimitustavan_lahto = '{$lahto}'";
-					$result = pupe_query($query);
+								AND varasto = '{$select_varasto}'
+								AND tunnus = '{$lahto}'";
+					$chk_conflict_res = pupe_query($query);
 
-					$toimitustapa_varasto = "";
-					$lahetetaanko_unifaun_era  = FALSE;
-					$lahetetaanko_unifaun_heti = FALSE;
-
-					while ($row = mysql_fetch_assoc($result)) {
-						$sel_ltun[] = $row['tunnus'];
-
-						$toimitustapa_varasto = $row['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$select_varasto;
-
-						$query = "	SELECT *
-									FROM toimitustapa
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND selite  = '{$row['toimitustapa']}'";
-						$toimitustapa_res = pupe_query($query);
-						$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
-
-						// Erätulostus
-						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
-							$lahetetaanko_unifaun_era = $toimitustapa_row["rahtikirja"];
-
-							$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
-							$mergeid_arr[$mergeid] = $mergeid;
-						}
-
-						// Hetitulostus
-						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'H') {
-							$lahetetaanko_unifaun_heti = $toimitustapa_row["rahtikirja"];
-						}
-					}
-
-					if (count($sel_ltun) > 0) {
-						if ($lahetetaanko_unifaun_era !== FALSE) {
-							foreach ($mergeid_arr as $mergeid) {
-
-								if ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
-									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
-								}
-								elseif ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
-									$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
-								}
-
-								$query = "	SELECT unifaun_nimi
-											FROM kirjoittimet
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus  = '{$komento}'";
-								$kires = pupe_query($query);
-								$kirow = mysql_fetch_assoc($kires);
-
-								$unifaun->_closeWithPrinter($mergeid, $kirow['unifaun_nimi']);
-								$unifaun->ftpSend();
-							}
-						}
-
-						$query = "	UPDATE kerayserat
-									SET tila = 'R'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otunnus IN (".implode(",", $sel_ltun).")";
-						$ures  = pupe_query($query);
-
-						$tee 		= "tulosta";
-						$nayta_pdf  = 'foo';
-						$tee_varsinainen_tulostus = ($lahetetaanko_unifaun_era !== FALSE or $lahetetaanko_unifaun_heti !== FALSE) ? FALSE : TRUE;
-
-						require ("rahtikirja-tulostus.php");
-
-						$tee = "";
-					}
-					else {
-						echo "<font class='error'>",t("Lähdössä")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";
+					if (mysql_num_rows($chk_conflict_res) == 0) {
+						$varasto_lahto_conflict = true;
+						array_push($varasto_lahto_conflict_array, $lahto);
 					}
 				}
 
-				foreach ($checkbox_parent as $lahto) {
-					// Siirretään ne tilaukset toiseen lähtöön jotka oli tässä lähdössä, mutta joiden rahtikirjat ei vielä tulostunu.
-					$lahto = (int) $lahto;
+				require("inc/unifaun_send.inc");
 
-					$query = "	(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
-								FROM lasku
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila 	  = 'N'
-								AND lasku.alatila = 'A'
-								AND lasku.toimitustavan_lahto = '{$lahto}')
-								UNION
-								(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
-								FROM lasku
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila 	  = 'L'
-								AND lasku.alatila IN ('A','C')
-								AND lasku.toimitustavan_lahto = '{$lahto}')";
-					$result = pupe_query($query);
+				if ($varasto_lahto_conflict) {
+					echo "<font class='error'>",t("VIRHE: valitut lähdöt eivät kuulu valittuun varastoon"),"!</font><br />";
+				}
+				else {
 
-					while ($row = mysql_fetch_assoc($result)) {
-						$lahdot = seuraavat_lahtoajat($row['toimitustapa'], $row['prioriteettinro'], $row['varasto'], $lahto);
+					foreach ($checkbox_parent as $lahto) {
 
-						if ($lahdot !== FALSE) {
-							// Otetaan eka lähtö
-							$valitu_lahto = array_shift($lahdot);
+						$sel_ltun = $mergeid_arr = array();
 
-							$query = "	UPDATE rahtikirjat
-										SET toimitustapa = '{$row['toimitustapa']}'
-										WHERE yhtio    = '{$kukarow['yhtio']}'
-										AND otsikkonro = '{$row['tunnus']}'";
-							$upd_res = pupe_query($query);
+						$lahto = (int) $lahto;
 
-							$query = "	UPDATE lasku
-										SET toimitustavan_lahto    = '{$valitu_lahto["tunnus"]}',
-										toimitustavan_lahto_siirto = '{$lahto}'
+						$query = "	SELECT tunnus, toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tila 	= 'L'
+									AND alatila = 'B'
+									AND toimitustavan_lahto = '{$lahto}'";
+						$result = pupe_query($query);
+
+						$toimitustapa_varasto = "";
+						$lahetetaanko_unifaun_era  = FALSE;
+						$lahetetaanko_unifaun_heti = FALSE;
+
+						while ($row = mysql_fetch_assoc($result)) {
+							$sel_ltun[] = $row['tunnus'];
+
+							$toimitustapa_varasto = $row['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$select_varasto;
+
+							$query = "	SELECT *
+										FROM toimitustapa
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus  = '{$row['tunnus']}'";
-							$upd_res = pupe_query($query);
+										AND selite  = '{$row['toimitustapa']}'";
+							$toimitustapa_res = pupe_query($query);
+							$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+							// Erätulostus
+							if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
+								$lahetetaanko_unifaun_era = $toimitustapa_row["rahtikirja"];
+
+								$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
+								$mergeid_arr[$mergeid] = $mergeid;
+							}
+
+							// Hetitulostus
+							if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'H') {
+								$lahetetaanko_unifaun_heti = $toimitustapa_row["rahtikirja"];
+							}
+						}
+
+						if (count($sel_ltun) > 0) {
+							if ($lahetetaanko_unifaun_era !== FALSE) {
+								foreach ($mergeid_arr as $mergeid) {
+
+									if ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+										$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+									}
+									elseif ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+										$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+									}
+
+									$query = "	SELECT unifaun_nimi
+												FROM kirjoittimet
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus  = '{$komento}'";
+									$kires = pupe_query($query);
+									$kirow = mysql_fetch_assoc($kires);
+
+									$unifaun->_closeWithPrinter($mergeid, $kirow['unifaun_nimi']);
+									$unifaun->ftpSend();
+								}
+							}
+
+							$query = "	UPDATE kerayserat
+										SET tila = 'R'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus IN (".implode(",", $sel_ltun).")";
+							$ures  = pupe_query($query);
+
+							$tee 		= "tulosta";
+							$nayta_pdf  = 'foo';
+							$tee_varsinainen_tulostus = ($lahetetaanko_unifaun_era !== FALSE or $lahetetaanko_unifaun_heti !== FALSE) ? FALSE : TRUE;
+
+							require ("rahtikirja-tulostus.php");
+
+							$tee = "";
+						}
+						else {
+							echo "<font class='error'>",t("Lähdössä")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";
 						}
 					}
 
-					$query = "	UPDATE lahdot
-								SET aktiivi = 'S'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus  = '{$lahto}'";
-					$upd_res = pupe_query($query);
+					foreach ($checkbox_parent as $lahto) {
+						// Siirretään ne tilaukset toiseen lähtöön jotka oli tässä lähdössä, mutta joiden rahtikirjat ei vielä tulostunu.
+						$lahto = (int) $lahto;
+
+						$query = "	(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
+									FROM lasku
+									WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+									AND lasku.tila 	  = 'N'
+									AND lasku.alatila = 'A'
+									AND lasku.toimitustavan_lahto = '{$lahto}')
+									UNION
+									(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
+									FROM lasku
+									WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+									AND lasku.tila 	  = 'L'
+									AND lasku.alatila IN ('A','C')
+									AND lasku.toimitustavan_lahto = '{$lahto}')";
+						$result = pupe_query($query);
+
+						while ($row = mysql_fetch_assoc($result)) {
+							$lahdot = seuraavat_lahtoajat($row['toimitustapa'], $row['prioriteettinro'], $row['varasto'], $lahto);
+
+							if ($lahdot !== FALSE) {
+								// Otetaan eka lähtö
+								$valitu_lahto = array_shift($lahdot);
+
+								$query = "	UPDATE rahtikirjat
+											SET toimitustapa = '{$row['toimitustapa']}'
+											WHERE yhtio    = '{$kukarow['yhtio']}'
+											AND otsikkonro = '{$row['tunnus']}'";
+								$upd_res = pupe_query($query);
+
+								$query = "	UPDATE lasku
+											SET toimitustavan_lahto    = '{$valitu_lahto["tunnus"]}',
+											toimitustavan_lahto_siirto = '{$lahto}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus  = '{$row['tunnus']}'";
+								$upd_res = pupe_query($query);
+							}
+						}
+
+						$query = "	UPDATE lahdot
+									SET aktiivi = 'S'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus  = '{$lahto}'";
+						$upd_res = pupe_query($query);
+					}
 				}
 			}
 			else {

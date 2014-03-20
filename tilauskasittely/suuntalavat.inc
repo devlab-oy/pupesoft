@@ -2,15 +2,19 @@
 	# Voidaan tehdä uusi lava ilman otunnusta
 	if(!empty($otunnus)) {
 
-		$query  = "SELECT * FROM lasku WHERE tunnus = '{$otunnus}' AND yhtio = '{$kukarow['yhtio']}' AND tila = 'K'";
+		$query  = "	SELECT *
+					FROM lasku
+					WHERE tunnus = '$otunnus'
+					AND yhtio 	 = '$kukarow[yhtio]'
+					AND tila 	 = 'K'
+					AND alatila != 'X'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$laskurow = mysql_fetch_assoc($result);
 		}
 		else {
-			echo "<font class='error'>",t("VIRHE: Tilausta ei enää löydy"),"!</font>";
-			require('../inc/footer.inc');
+			echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
 			exit;
 		}
 	}
@@ -78,7 +82,7 @@
 				'alkuhyllyalue', 'alkuhyllynro', 'alkuhyllyvali', 'alkuhyllytaso',
 				'loppuhyllyalue', 'loppuhyllynro', 'loppuhyllyvali', 'loppuhyllynro', 'loppuhyllytaso',
 				'tyyppi', 'keraysvyohyke', 'usea_keraysvyohyke', 'kaytettavyys', 'terminaalialue',
-				'korkeus', 'paino', 'suuntalavan_tunnus'
+				'korkeus', 'paino', 'suuntalavan_tunnus', 'valittutunnus', 'automaattinen_paivitys'
 				);
 
 		# Parametri tyhjäksi jos sitä ei ole setattu
@@ -118,7 +122,7 @@
 
 				$suuntalava_upd_res = pupe_query($query);
 
-				if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
+				if (trim($automaattinen_paivitys) == 'K' OR (trim($automaattinen_paivitys) == 'S' and $valittutunnus != '')) {
 
 					if (trim($automaattinen_paivitys) == 'K') {
 						$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";
@@ -211,7 +215,7 @@
 			}
 
 			// päivitetään suuntalava automaattisesti niille riveille mihin se mätsää
-			if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
+			if (trim($automaattinen_paivitys) == 'K' OR (trim($automaattinen_paivitys) == 'S' and $valittutunnus != '')) {
 
 				if (trim($automaattinen_paivitys) == 'K') {
 					$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";

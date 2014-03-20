@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DISABLED="$(lpstat -t | awk '/disabled/ { print $2 }')"
+DISABLED="$(lpstat -t 2> /dev/null | awk '/disabled/ { print $2 }')"
 
 for PRINTER in ${DISABLED}
 do	

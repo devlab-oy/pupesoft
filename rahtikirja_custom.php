@@ -212,9 +212,9 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
 		// poikkeava toimipaikka,otetaan sen osoitetiedot
 		$alhqur = "	SELECT *
-					from yhtion_toimipaikat
+					FROM yhtion_toimipaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$kukarow[toimipaikka]'";
+					AND tunnus = '$kukarow[toimipaikka]'";
 		$alhire = pupe_query($alhqur);
 
 		if (mysql_num_rows($alhire) == 1) {
@@ -803,7 +803,7 @@ function pupe_toimitustapa_fetch_all() {
 	$query  = "	SELECT *
 				FROM toimitustapa
 				WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
-				and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc','rahtikirja_hrx_siirto.inc')
+				and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc','rahtikirja_hrx_siirto.inc', 'rahtikirja_tyhja.inc')
 				order by jarjestys,selite";
 	$result = pupe_query($query);
 

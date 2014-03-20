@@ -32,12 +32,20 @@
 	// Tehään uysi dirikka
 	system("mkdir $path");
 
-	$path_nimike     = $path . 'ITEM.txt';
-	$path_asiakas    = $path . 'CUSTOMER.txt';
-	$path_toimittaja = $path . 'VENDOR.txt';
-	$path_varasto    = $path . 'BALANCE.txt';
-	$path_tapahtumat = $path . 'TRANSACTION.txt';
-	$path_myynti     = $path . 'ORDER.txt';
+	$vuosilisa = "";
+
+	$where_logisticar = $logisticar[$yhtio]["where"];
+
+	if ($where_logisticar["vuosi_ajo"] != "") {
+		$vuosilisa = (int) $where_logisticar["vuosi_ajo"];
+	}
+
+	$path_nimike     = $path . "ITEM{$vuosilisa}.txt";
+	$path_asiakas    = $path . "CUSTOMER{$vuosilisa}.txt";
+	$path_toimittaja = $path . "VENDOR{$vuosilisa}.txt";
+	$path_varasto    = $path . "BALANCE{$vuosilisa}.txt";
+	$path_tapahtumat = $path . "TRANSACTION{$vuosilisa}.txt";
+	$path_myynti     = $path . "ORDER{$vuosilisa}.txt";
 
 	$yhtiorow = hae_yhtion_parametrit($yhtio);
 
@@ -422,6 +430,9 @@
 
 		if ($where_logisticar["paiva_ajo"] != "") {
 			$pvmlisa = " and date_format(tapahtuma.laadittu, '%Y-%m-%d') >= date_sub(now(), interval 30 day) ";
+		}
+		elseif ($where_logisticar["vuosi_ajo"] != "") {
+			$pvmlisa = " and date_format(tapahtuma.laadittu, '%Y-%m-%d') >= date_sub(now(), interval 1 year) ";
 		}
 		else {
 			$pvmlisa = " and date_format(tapahtuma.laadittu, '%Y-%m-%d') > '0000-00-00 00:00:00' ";

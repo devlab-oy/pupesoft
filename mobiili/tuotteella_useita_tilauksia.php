@@ -36,7 +36,23 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 		$tuotenumerot = hae_viivakoodilla($viivakoodi);
 
 		if (count($tuotenumerot) > 0) {
-			$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+
+			$param_viivakoodi = array();
+
+			foreach ($tuotenumerot as $_tuoteno => $_arr) {
+				foreach ($_arr as $_liitostunnus) {
+					if (trim($_liitostunnus) != "") {
+						array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
+					}
+				}
+			}
+
+			if (empty($param_viivakoodi)) {
+				$params['viivakoodi'] = "tuote.tuoteno IN ('".implode(array_keys($tuotenumerot), "','")."')";
+			}
+			else {
+				$params['viivakoodi'] = "(".implode($param_viivakoodi, " OR ").")";
+			}
 		}
 		else {
 			$errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";
@@ -69,7 +85,7 @@ if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
 }
 
-$orderby = "tuoteno";
+$orderby = "tilausrivi_tyyppi DESC, ostotilaus, sorttaus_kpl";
 $ascdesc = "desc";
 
 if (isset($sort_by)) {
@@ -100,8 +116,9 @@ $query = "	SELECT
 			tilausrivi.tilkpl,
 			tilausrivi.uusiotunnus,
 			concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-			tuotteen_toimittajat.tuotekerroin,
-			tuotteen_toimittajat.liitostunnus
+			IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+			tuotteen_toimittajat.liitostunnus,
+			IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
 			FROM lasku
 			JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
 				AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
@@ -109,9 +126,12 @@ $query = "	SELECT
 			JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
 				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+			LEFT JOIN tilausrivin_lisatiedot
+			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
 			WHERE lasku.tila = 'O'
 			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
+			AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
 			{$query_lisa}
 			ORDER BY {$orderby} {$ascdesc}
 		";
@@ -141,8 +161,9 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
 				tilausrivi.tilkpl,
 				tilausrivi.uusiotunnus,
 				concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-				tuotteen_toimittajat.tuotekerroin,
-				tuotteen_toimittajat.liitostunnus
+				IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+				tuotteen_toimittajat.liitostunnus,
+				IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
 				FROM lasku
 				JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
 					AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
@@ -150,9 +171,12 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
 				JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
 					AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 					AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+				LEFT JOIN tilausrivin_lisatiedot
+				ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
 				WHERE lasku.tila = 'O'
 				AND lasku.alatila = 'A'
 				AND lasku.yhtio='{$kukarow['yhtio']}'
+				AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
 				{$query_lisa}
 				ORDER BY {$orderby} {$ascdesc}
 			";
@@ -195,7 +219,7 @@ if ($tilausten_lukumaara == 0) {
 }
 
 # Jos vain yksi osuma, mennään suoraan hyllytykseen;
-if ($tilausten_lukumaara == 1 and $_viivakoodi == "") {
+if ($tilausten_lukumaara == 1 and $orig_tilausten_lukumaara == 1 and $_viivakoodi == "") {
 
 	$url_array['tilausrivi'] = $tilaukset['tunnus'];
 	$url_array['ostotilaus'] = empty($ostotilaus) ? $tilaukset['otunnus'] : $ostotilaus;
@@ -221,7 +245,7 @@ echo "<div class='header'>
 	<button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
 	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
-$viivakoodi_formi_urli = "?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
+$viivakoodi_formi_urli = "?tuotenumero=".urlencode($tuotenumero)."&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
 
 echo "<div class='main'>
 
@@ -264,6 +288,11 @@ echo "</tr>";
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {
 
+	if ($row['tilausrivi_tyyppi'] == 'o') {
+	    //suoratoimitus asiakkaalle
+	    $row['tilausrivi_tyyppi'] = 'JTS';
+	}
+
 	# Jos rivi on jo kohdistettu eri saapumiselle
 	if ($row['uusiotunnus'] != 0) $saapuminen = $row['uusiotunnus'];
 
@@ -290,7 +319,7 @@ while($row = mysql_fetch_assoc($result)) {
 	}
 	echo "
 		<td><a href='hyllytys.php?{$url}'>".($row['varattu']+$row['kpl']).
-			"(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].")
+			"(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].") {$row['tilausrivi_tyyppi']}
 		</a></td>
 		<td>{$row['hylly']}</td>";
 	echo "<tr>";
@@ -314,10 +343,13 @@ echo "</div>";
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
 
+	// katotaan onko mobile
+	var is_mobile = navigator.userAgent.match(/Opera Mob/i) != null;
+
 	$(document).ready(function() {
 		$('#viivakoodi').on('keyup', function() {
 			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
-			if ($('#viivakoodi').val().length > 8) {
+			if (is_mobile && $('#viivakoodi').val().length > 8) {
 				document.getElementById('valitse_nappi').click();
 			}
 		});

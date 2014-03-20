@@ -3,7 +3,7 @@
 require 'inc/parametrit.inc';
 
 // Ajax requestit
-if ($ajax_request == 1) {
+if (isset($ajax_request) and $ajax_request == 1) {
 	require "valmistuslinjat_json.php";
 	exit();
 }
@@ -215,6 +215,25 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND otunnus = '{$tunnus}'";
 				pupe_query($query);
+
+				if ($tila=='VT' and $valmistus->getTila() == 'VA') {
+					$tilausrivi_query = "	UPDATE tilausrivi SET
+											kerayspvm   = '{$pvmalku}',
+											toimaika    = '{$pvmalku}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND otunnus = {$tunnus}
+											AND tyyppi = 'V'";
+					pupe_query($tilausrivi_query);
+
+					//p‰ivitet‰‰n valmisteen ker‰yspvm ja toimaika nykyhetkeen, jotta ne tulevat myyt‰viksi
+					$tilausrivi_query = "	UPDATE tilausrivi SET
+											kerayspvm   = '{$pvmloppu}',
+											toimaika    = '{$pvmloppu}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND otunnus = {$tunnus}
+											AND tyyppi = 'W'";
+					pupe_query($tilausrivi_query);
+				}
 			}
 		}
 

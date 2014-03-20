@@ -266,7 +266,9 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 	if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 		$query = "	SELECT *
 					FROM yhtion_toimipaikat
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$laskurow[yhtio_toimipaikka]'
+					and lasku_logo != ''";
 		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 		if (mysql_num_rows($result) == 1) {
@@ -463,14 +465,20 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
 	$salakalapala = 65;
 
-	if ($laskurow["viesti"] != "" or $laskurow['yhteyshenkilo'] != "" or $viestirarrow["viesti"] != "") {
+	if ($laskurow["viesti"] != "" or $laskurow['yhteyshenkilo'] != "" or $viestirarrow["viesti"] != "" or $laskurow['asiakkaan_tilausnumero'] != "") {
+
+		if ($laskurow['yhteyshenkilo'] != "") 			$laskurow['yhteyshenkilo'] .= ".";
+		if ($laskurow['asiakkaan_tilausnumero'] != "") 	$laskurow['asiakkaan_tilausnumero']  .= ".";
+		if ($laskurow['viesti'] != "") 					$laskurow['viesti'] .= ".";
+		if ($viestirarrow['viesti'] != "") 				$viestirarrow['viesti']  .= ".";
+
 		if ($rahtikirja_tulostus == "yep") {
 			$salakalapala -= 5;
-			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$viestirarrow["viesti"]),	$firstpage, $kirj);
+			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow['asiakkaan_tilausnumero']." ".$viestirarrow["viesti"]),	$firstpage, $kirj);
 		}
 		else {
 			$salakalapala -= 5;
-			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow["viesti"]),		$firstpage, $kirj);
+			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow['asiakkaan_tilausnumero']." ".$laskurow["viesti"]),		$firstpage, $kirj);
 		}
 	}
 

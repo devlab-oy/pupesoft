@@ -23,7 +23,7 @@ require "inc/connect.inc";
 require "inc/functions.inc";
 
 $kukarow['yhtio'] = (string) $argv[1];
-$kukarow['kuka']  = 'cron';
+$kukarow['kuka']  = 'admin';
 $kukarow['kieli'] = 'fi';
 $kukarow['extranet'] = '';
 
@@ -79,7 +79,7 @@ while ($ketju = mysql_fetch_assoc($result)) {
 
 				// Päivitetään tuote.hinnastoon
 				$query = "UPDATE tuote SET hinnastoon='' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$paa_tuote['tuoteno']}'";
-				if ($result = pupe_query($query)) {
+				if ($result2 = pupe_query($query)) {
 					$muutettu += 1;
 				}
 

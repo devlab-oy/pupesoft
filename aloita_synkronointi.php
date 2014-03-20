@@ -84,6 +84,10 @@ if ($tee == "SYNK") {
 			$lisa = ", maksuehto READ, toimitustapa READ";
 		}
 
+		if ($table == "tuotteen_toimittajat") {
+			$lisa = ", tuote READ, toimi READ";
+		}
+
 		$query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, synclog WRITE, $table WRITE $lisa";
 		$abures = pupe_query($query);
 

@@ -2,7 +2,10 @@
 
 	// Kutsutaanko CLI:st‰
 	$php_cli = FALSE;
-
+	
+	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+	$useslave = 1;
+	
 	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
 		$php_cli = TRUE;
 	}
@@ -58,6 +61,7 @@
 		echo "Voidaan ajaa vain komentorivilt‰!!!\n";
 		die;
 	}
+	
 
 	//monenko p‰iv‰n takaa haetaan mm myynnit ja ostot skriptin ajohetkell‰, ‰l‰ aseta isommaksi kuin 2
 	$ajopaiva = 1;
@@ -818,7 +822,7 @@
 						FROM tuote use index (tuoteno_index)
 						LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio=tuote.yhtio AND abc_aputaulu.tyyppi='TM' AND tuote.tuoteno=abc_aputaulu.tuoteno)
 						LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-						WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
+						WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset
 						GROUP BY tuote.tuoteno, tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.nimitys, tuote.status, tuote.suoratoimitus, tuote.epakurantti25pvm, tuote.ostoehdotus, korvaavatuoteno
 						HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
 						ORDER BY 1";

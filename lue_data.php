@@ -1012,7 +1012,7 @@ if ($kasitellaan_tiedosto) {
 
 						$valinta .= " and {$taulunotsikot[$taulu][$j]} = '$tpttrow[tunnus]' ";
 					}
-				}				
+				}
 				else {
 					$valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
 				}
@@ -1976,6 +1976,7 @@ if ($kasitellaan_tiedosto) {
 				$t 				= array();
 				$virhe 			= array();
 				$poistolukko	= "LUEDATA";
+				$luedata_toiminto = $taulunrivit[$taulu][$eriviindex][$postoiminto];
 
 				// Jos on uusi rivi niin kaikki lukot on auki
 				if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {

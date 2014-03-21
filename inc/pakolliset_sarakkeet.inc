@@ -31,6 +31,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				}
 
 				$wherelliset = array("TUOTENO");
+				$saakopoistaa = TRUE;
 				break;
 			case "tuotepaikat" :
 				$pakolliset = array("TUOTENO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO", "OLETUS");

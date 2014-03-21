@@ -2,7 +2,7 @@
 
 if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
+		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko, $luedata_toiminto;
 
 		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
 
@@ -38,7 +38,7 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 
-			if ($poistolukko != "LUEDATA") {
+			if ($poistolukko != "LUEDATA" or ($poistolukko == "LUEDATA" and strtoupper($luedata_toiminto) == "POISTA")) {
 				// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
 				$query = "	SELECT yhtio
 							FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)

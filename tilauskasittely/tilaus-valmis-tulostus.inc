@@ -74,25 +74,23 @@
 						and tunnus in ($tilausnumeroita)";
 		}
 		else {
-			if (is_array($tilausnumeroita)) {
-				foreach ($tilausnumeroita as $tilausnumero) {
-					$lasku_temp = hae_lasku($tilausnumero);
-					if ($lasku_temp['tila'] == 'N') {
-						$query = "	UPDATE lasku SET
-									tila = 'L'
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = $tilausnumero";
+			$tilausnumerot_temp = explode(',', $tilausnumeroita);
+			foreach ($tilausnumerot_temp as $tilausnumero) {
+				$lasku_temp = hae_lasku($tilausnumero);
+				if ($lasku_temp['tila'] == 'N') {
+					$query = "	UPDATE lasku SET
+								tila = 'L'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = $tilausnumero";
 
-						$result = pupe_query($query);
-					}
 				}
-			}
-			else {
-				$query = "	UPDATE lasku SET
-							tila = 'L'
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus = $tilausnumeroita";
-
+				else {
+					$query = "	UPDATE lasku SET
+								tila = 'G',
+								alatila = 'A'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = $tilausnumero";
+				}
 				$result = pupe_query($query);
 			}
 		}
@@ -278,6 +276,8 @@
 			else $vhlisa = "";
 
 			$query = "	SELECT tilausrivi.*,
+						lasku.tila AS lasku_tila,
+						lasku.alatila AS lasku_alatila,
 						tuote.sarjanumeroseuranta,
 						kerayserat.kpl as tilkpl,
 						kerayserat.kpl as varattu,
@@ -288,6 +288,7 @@
 						FROM kerayserat
 						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
+						JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus )
 						{$vhlisa}
 						WHERE kerayserat.otunnus IN ({$tilausnumeroita})
 						AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
@@ -295,6 +296,8 @@
 		}
 		else {
 			$query = "	SELECT tilausrivi.*,
+						lasku.tila AS lasku_tila,
+						lasku.alatila AS lasku_alatila,
 						$select_lisa
 						$sorttauskentta,
 						if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -303,6 +306,7 @@
 						tuote.eankoodi
 						FROM tilausrivi
 						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+						JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus )
 						WHERE tilausrivi.otunnus in ($tilausnumeroita)
 						and tilausrivi.yhtio   = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi != 'D'
@@ -318,7 +322,7 @@
 		$kal = 1;
 
 		while ($row = mysql_fetch_assoc($riresult)) {
-			if ($row['var'] == 'S') {
+			if ($row['lasku_tila'] == 'G' and $row['lasku_alatila'] == 'A') {
 				if ($row['varattu'] == 0 and $row['tilkpl'] == 9999.99) {
 					//siirretään kaikki mitä paikalla on
 					$vapaana = 0;
@@ -360,6 +364,7 @@
 					pupe_query($query);
 				}
 			}
+
 			if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 				$rivinumerot[$row["ker_tunnus"]] = $kal;
 			}
@@ -519,16 +524,29 @@
 							and tunnus in ($tilausnumeroita)";
 			}
 			else {
-				$query = "	UPDATE lasku SET
-							tila = 'N'
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tila = 'L'
-							and tunnus in ($tilausnumeroita)";
+				$tilausnumerot_temp = explode(',', $tilausnumeroita);
+				foreach ($tilausnumerot_temp as $tilausnumero) {
+					$lasku_temp = hae_lasku($tilausnumero);
+					if ($lasku_temp['tila'] == 'L') {
+						$query = "	UPDATE lasku SET
+									tila = 'N'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tila = 'L'
+									and tunnus in ($tilausnumero)";
+					}
+					else {
+						$query = "	UPDATE lasku SET
+									alatila = 'J'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tila = 'G'
+									and tunnus in ($tilausnumero)";
+					}
+					$result = pupe_query($query);
+				}
 			}
-			$result = pupe_query($query);
 		}
 
-		// jos meillä oli lähetteen tulostusongelmia
+		// jos meillä ei ollut lähetteen tulostusongelmia
 		if ($virheellinen != 'X') {
 
 			// jos tilauksia on useita niin laitetaan niille yhteinen kerayslista-tunnus
@@ -558,19 +576,38 @@
 							and tila = 'C'
 							and alatila = 'B'
 							and tunnus in ($tilausnumeroita)";
+				$result = pupe_query($query);
 			}
 			else {
-				$query = "	UPDATE lasku SET
-							tila = 'L',
-							lahetepvm = now(),
-							hyvak3 = '{$kukarow['kuka']}',
-							h3time = NOW(),
-							kerayslista = '$kerayslistatunnus'
-							$ei_pakkaamoa_lisaviesti
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus in ($tilausnumeroita)";
+				$tilausnumerot_temp = explode(',', $tilausnumeroita);
+				foreach ($tilausnumerot_temp as $tilausnumero) {
+					$lasku_temp = hae_lasku($tilausnumero);
+					if ($lasku_temp['tila'] == 'L') {
+						$query = "	UPDATE lasku SET
+									tila = 'L',
+									lahetepvm = now(),
+									hyvak3 = '{$kukarow['kuka']}',
+									h3time = NOW(),
+									kerayslista = '$kerayslistatunnus'
+									$ei_pakkaamoa_lisaviesti
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus in ($tilausnumero)";
+					}
+					else {
+						$query = "	UPDATE lasku SET
+									tila = 'G',
+									lahetepvm = now(),
+									hyvak3 = '{$kukarow['kuka']}',
+									h3time = NOW(),
+									kerayslista = '$kerayslistatunnus'
+									$ei_pakkaamoa_lisaviesti
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus in ($tilausnumero)";
+					}
+					$result = pupe_query($query);
+				}
+				
 			}
-			$result = pupe_query($query);
 		}
 	}
 	else {

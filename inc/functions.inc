@@ -16648,10 +16648,27 @@ if (!function_exists("tee_keraysera")) {
 			$kukarow['debugstring'] .= "<font class='head'>".t("Kerääjä").": $kukarow[kuka], $kukarow[nimi]. ($kukarow[keraajanro])</font><br><br>\n";
 		}
 
-		$tilat = "'N'";
+		$tilat = "AND (
+					(lasku1.tila = 'N' AND lasku1.alatila = 'A')
+				)";
+		$tilat2 = "AND (
+					(lasku2.tila = 'N' AND lasku2.alatila = 'A')
+				)";
 		if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-//			$tilat = "'N','G'";
-			$tilat = "'G'";
+			$tilat = "AND (
+					(lasku1.tila = 'N' AND lasku1.alatila = 'A')
+					OR (lasku1.tila = 'G' AND lasku1.alatila = 'J')
+				)";
+			$tilat2 = "AND (
+					(lasku2.tila = 'N' AND lasku2.alatila = 'A')
+					OR (lasku2.tila = 'G' AND lasku2.alatila = 'J')
+				)";
+			$tilat = "AND (
+					(lasku1.tila = 'G' AND lasku1.alatila = 'J')
+				)";
+			$tilat2 = "AND (
+					(lasku2.tila = 'G' AND lasku2.alatila = 'J')
+				)";
 		}
 
 		# Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään
@@ -16679,8 +16696,7 @@ if (!function_exists("tee_keraysera")) {
 									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != ''))
 					LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
-					AND lasku1.tila in ({$tilat})
-					AND lasku1.alatila IN ('A','J')
+					{$tilat}
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
 					AND kuka.tunnus is null
@@ -16702,8 +16718,7 @@ if (!function_exists("tee_keraysera")) {
 					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
 					LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
-					AND lasku2.tila in ({$tilat})
-					AND lasku2.alatila IN ('A','J')
+					{$tilat2}
 					AND lasku2.vakisin_kerays = '' #MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
 					AND lasku2.varasto = '{$varasto}'
 					#AND kuka2.tunnus is null #MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
@@ -16824,8 +16839,7 @@ if (!function_exists("tee_keraysera")) {
 						AND ((lahdot3.pvm = CURDATE() AND lahdot3.lahdon_viikonpvm = '{$viikonpaiva}' AND lahdot3.kerailyn_aloitusaika <= CURTIME() AND lahdot3.tunnus = lasku1.toimitustavan_lahto) or lahdot3.vakisin_kerays != '')
 						AND (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}))
 						WHERE lasku1.yhtio 			= '{$kukarow['yhtio']}'
-						AND lasku1.tila 		   in ({$tilat})
-						AND lasku1.alatila 			= 'A'
+						{$tilat}
 						AND lasku1.vakisin_kerays 	= ''
 						AND lasku1.varasto 			= '{$varasto}'
 						AND kuka.tunnus is null
@@ -16853,8 +16867,7 @@ if (!function_exists("tee_keraysera")) {
 						JOIN lahdot AS lahdot3 ON (lahdot3.yhtio = lasku2.yhtio AND lahdot3.tunnus = lasku2.toimitustavan_lahto)
 						LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 						WHERE lasku2.yhtio 			= '{$kukarow['yhtio']}'
-						AND lasku2.tila 		   in ({$tilat})
-						AND lasku2.alatila 			IN ('A','J')
+						{$tilat2}
 						AND lasku2.vakisin_kerays = ''#MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
 						AND lasku2.varasto	 		= '{$varasto}'
 						AND kuka2.tunnus is null

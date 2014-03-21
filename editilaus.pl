@@ -3,15 +3,41 @@
 use FileHandle;
 use Net::SMTP;
 use Fcntl qw(:flock);
+use Cwd 'abs_path';
+use File::Basename;
 
-$dirri1    = "/home/elma/elma/edi/autolink_orders/";    # mist‰ haetaan
-$dirri2    = "/home/elma/elma/edi/autolink_orders/done/"; # minne siirret‰‰n
-$dirri3    = "/home/elma/elma/edi/autolink_orders/errors/"; # minne siirret‰‰n kun erroroi
-$pupedir   = "/var/www/html/pupesoft/tilauskasittely/"; # pupesoftin tilausk‰sittely hakemisto
-$komento   = "/usr/bin/php"; # ajettava komento
-$email     = "development\@devlab.fi"; # kenelle meilataan jos on ongelma
-$emailfrom = "development\@devlab.fi"; # mill‰ osoitteella meili l‰hetet‰‰n
-$tmpfile   = "/tmp/##edi-tmp";   # minne tehd‰‰n lock file
+# Kutsu t‰t‰ crontabista esimerkiksi:
+# */5 * * * * root /usr/bin/perl /home/devlab/pupesoft/editilaus.pl "/home/editilaus/" "/home/editilaus/done/" "/home/editilaus/error/" "user@example.com" "pupesoft@example.com"
+
+$dirri1    = $ARGV[0]; # mist‰ haetaan
+$dirri2    = $ARGV[1]; # minne siirret‰‰n
+$dirri3    = $ARGV[2]; # minne siirret‰‰n kun erroroi
+$email     = $ARGV[3]; # kenelle meilataan jos on ongelma
+$emailfrom = $ARGV[4]; # mill‰ osoitteella meili l‰hetet‰‰n
+
+$pupedir = abs_path(dirname($0)) . "/tilauskasittely/"; # pupesoftin tilausk‰sittely hakemisto
+$komento = "/usr/bin/php";                              # polku php -komentoon
+$tmpfile = "/tmp/##pupesoft-edi-tmp";                   # lukkotiedosto
+
+if ($dirri1 eq "" || $dirri2 eq "" || $dirri3 eq "" || $email eq "" || $emailfrom eq "") {
+	print "invalid arguments!\n";
+	exit;
+}
+
+if (! -d $dirri1) {
+	print "invalid directory: $dirri1\n";
+	exit;
+}
+
+if (! -d $dirri2) {
+	print "invalid directory: $dirri2\n";
+	exit;
+}
+
+if (! -d $dirri3) {
+	print "invalid directory: $dirri3\n";
+	exit;
+}
 
 sysopen("tmpfaili", $tmpfile, O_CREAT) or die("Failin $tmpfile avaus ep‰onnistui!");
 flock("tmpfaili", LOCK_EX) or die("Lukkoa ei saatu fileen: $tmpfile");

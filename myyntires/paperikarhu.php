@@ -944,10 +944,10 @@
 		$return_value = $client->invoice_put_finvoice($api_keys, $files_out);
 
 		if (stristr($return_value->status, 'OK')) {
-			echo t("Karhukirje l‰hetettiin Maventaan")."\n<br>";
+			echo t("Maksukehotus l‰hetettiin Maventaan")."\n<br>";
 		}
 		else {
-			echo '<font class="error">'.t("Karhukirjeen l‰hetys maventaan ep‰onnistui")." ({$return_value->status})</font>\n<br>";
+			echo '<font class="error">'.t("Maksukehotuksen l‰hetys maventaan ep‰onnistui")." ({$return_value->status})</font>\n<br>";
 			throw new Exception("Maventa Error.");
 		}
 	}
@@ -1026,14 +1026,30 @@
 
 	// tulostetaan jos ei l‰hetet‰ ekirjett‰ eik‰ maventaan
 	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and $_REQUEST['maventa_laheta'] != 'L‰het‰ Maventaan') {
+		if (function_exists("pupesoft_sahkoposti") and !empty($laheta_karhuemail_myyjalle)) {
 
+			$polkupyora = pathinfo($pdffilenimi);
+			$params = array( 	
+				"to" 		=> $laheta_karhuemail_myyjalle,
+				"subject"	=> t("Maksukehotuskopio"),
+				"ctype"		=> "text",
+				"attachements" => array(0 	=> array(
+											"filename"		=> $pdffilenimi,
+											"newfilename"	=> "",
+											"ctype"			=> $polkupyora['extension'],
+											)
+										)
+			);
+			$jou = pupesoft_sahkoposti($params);
+			if ($jou) echo t("Maksukehotuskopio l‰hetettiin myyj‰lle").": {$laheta_karhuemail_myyjalle}...\n<br>";
+		}
 		if (isset($_REQUEST['email_laheta']) and $_REQUEST['karhu_email'] != "") {
 			$liite 		  = $pdffilenimi;
 			$kutsu 		  = t("Maksukehotus", $kieli);
 			$komento 	  = "asiakasemail".$_REQUEST['karhu_email'];
 			$content_body = $karhuviesti."\n\n".$yhteyshenkiloteksti."\n\n\n";
 
-			echo t("Karhukirje l‰hetet‰‰n osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
+			echo t("Maksukehotus l‰hetet‰‰n osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
 
 			require("inc/sahkoposti.inc");
 		}
@@ -1055,7 +1071,7 @@
 				if ($kirow["komento"] == "email") {
 					$liite = $pdffilenimi;
 					$kutsu = t("Maksukehotus", $kieli)." ".$asiakastiedot["ytunnus"];
-					echo t("Karhukirje l‰hetet‰‰n osoitteeseen").": $kukarow[eposti]...\n<br>";
+					echo t("Maksukehotus l‰hetet‰‰n osoitteeseen").": $kukarow[eposti]...\n<br>";
 
 					require("inc/sahkoposti.inc");
 				}

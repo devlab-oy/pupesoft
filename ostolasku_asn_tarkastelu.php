@@ -772,6 +772,7 @@
 							AND alatila = 'A'
 							AND liitostunnus = '{$toimirow['tunnus']}'
 							AND vanhatunnus = '{$toimipaikka}'
+							AND suoraveloitus != 'S'
 							ORDER BY tunnus
 							DESC LIMIT 1";
 				$res = pupe_query($query);

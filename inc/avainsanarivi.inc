@@ -204,6 +204,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "SSCC")			 	$ulos .= "<option value='SSCC' $avain_sel[SSCC]>							".t("SSCC-koodi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAKKAUSKV") 		$ulos .= "<option value='PAKKAUSKV' $avain_sel[PAKKAUSKV]>					".t("Pakkaustiedon kieliversio")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "INVASTEPAIKKA")		$ulos .= "<option value='INVASTEPAIKKA' {$avain_sel['INVASTEPAIKKA']}>		".t("Inventointiaste-raportin hylk‰‰m‰t tuotepaikat")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSERA_TK") 		$ulos .= "<option value='KERAYSERA_TK' $avain_sel[KERAYSERA_TK]>".t("K‰ytt‰j‰n oikeus tulostaa kaikki ker‰yser‰t varastossa")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tyˆm‰‰r‰ysten avainsanat")."'>";
@@ -223,7 +224,7 @@
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Maksuehtojen avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LASKUKUVAUS") 		$ulos .= "<option value='LASKUKUVAUS' $avain_sel[LASKUKUVAUS]>				".t("Maksuposition kuvaus")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "KARHUVIESTI") 		$ulos .= "<option value='KARHUVIESTI' $avain_sel[KARHUVIESTI]>				".t("Karhuviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KARHUVIESTI") 		$ulos .= "<option value='KARHUVIESTI' $avain_sel[KARHUVIESTI]>				".t("Maksukehotusviesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "MAKSUEHTOKV")		$ulos .= "<option value='MAKSUEHTOKV' $avain_sel[MAKSUEHTOKV]>				".t("Maksuehdon kieliversio")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
@@ -356,25 +357,26 @@
 
 			$query = "	SELECT group_concat(kieli) kielet
 						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and perhe='$perhe' and laji = '$laji'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and perhe   = '$perhe'
+						and laji    = '$laji'";
 			$res = pupe_query($query);
 			$kilerow = mysql_fetch_array($res);
 			$kielet = $kilerow["kielet"];
 		}
 
-		$query  = "SHOW columns from sanakirja";
-		$fields =  mysql_query($query);
-
-		while ($apurow = mysql_fetch_array($fields)) {
-			if (strlen($apurow[0]) == 2 and (strpos($kielet,$apurow[0]) === false or $apurow[0] == $trow[$i])) {
+		foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+			if (strpos($kielet,$sanakirja_kieli) === FALSE or $sanakirja_kieli == $trow[$i]) {
 				$sel = "";
-				if ($trow[$i] == $apurow[0]) {
+
+				if ($trow[$i] == $sanakirja_kieli) {
 					$sel = "SELECTED";
 				}
-				elseif ($trow[$i] == "" and $apurow[0] == $yhtiorow["kieli"]) {
+				elseif ($trow[$i] == "" and $sanakirja_kieli == $yhtiorow["kieli"]) {
 					$sel = "SELECTED";
 				}
-				$ulos .= "<option value='$apurow[0]' $sel>$apurow[0] - ".maa($apurow[0])."</option>";
+
+				$ulos .= "<option value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."</option>";
 			}
 		}
 
@@ -813,5 +815,53 @@
 		}
 		$ulos .= "</select></td>";
 
+		$jatko = 0;
+	}
+
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND nimi != ''
+					AND extranet = ''
+					AND (keraajanro > 0 or kuka = '$kukarow[kuka]')
+					AND aktiivinen = 1
+					ORDER BY nimi";
+		$varresult = pupe_query($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		while ($kukkarow = mysql_fetch_assoc($varresult)) {
+
+			$sel = $trow[$i] == $kukkarow['kuka'] ? " selected" : "";
+
+			$ulos .= "<option value='{$kukkarow['kuka']}'{$sel}>{$kukkarow['nimi']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND nimitys != ''
+					AND tyyppi != 'P'
+					ORDER BY tyyppi,nimitys";
+		$varresult = pupe_query($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		while ($kukkarow = mysql_fetch_assoc($varresult)) {
+
+			$sel = $trow[$i] == $kukkarow['tunnus'] ? " selected" : "";
+
+			$ulos .= "<option value='{$kukkarow['tunnus']}'{$sel}>{$kukkarow['nimitys']}</option>";
+		}
+
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

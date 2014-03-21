@@ -619,7 +619,7 @@ if ($tee == "ETSILASKU") {
 
 			if ($toim == '') {
 
-				$query = "	SELECT vienti_kurssi, liitostunnus, GROUP_CONCAT(tunnus) AS otsikot
+				$query = "	SELECT liitostunnus, GROUP_CONCAT(tunnus) AS otsikot
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laskunro = '{$row['laskunro']}'
@@ -662,18 +662,7 @@ if ($tee == "ETSILASKU") {
 						echo "<th>",t("Var"),"</th>";
 						echo "<th>",t("Netto"),"</th>";
 
-						$vientikurssi = 1;
-						$kurssilisa = "";
-
-						if (!in_array($otsikot_row["vienti_kurssi"], array(1,0))) {
-							$vientikurssi = $otsikot_row["vienti_kurssi"];
-						}
-
-						if ($vientikurssi != 1) {
-							$kurssilisa = " (Hinta val.)";
-						}
-
-						if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>",t("Svh $kurssilisa"),"</th>";
+						if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>",t("Svh"),"</th>";
 
 						if ($kukarow['hinnat'] == 0) {
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -682,14 +671,7 @@ if ($tee == "ETSILASKU") {
 						}
 
 						if ($kukarow['hinnat'] == 0) echo "<th style='text-align:right;'>",t("Hinta"),"</th>";
-
-						$kurssilisa = "";
-
-						if ($vientikurssi != 1) {
-							$kurssilisa = " (Rivihinta val.)";
-						}
-
-						if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>",t("Rivihinta $kurssilisa"),"</th>";
+						if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>",t("Rivihinta"),"</th>";
 
 						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 							echo "<th style='text-align:right;'>".t("Kate")."</th>";
@@ -771,12 +753,7 @@ if ($tee == "ETSILASKU") {
 							}
 							elseif ($kukarow['hinnat'] == 0) {
 
-								$kurssilisa = "";
-								if ($vientikurssi != 1) {
-									$kurssilisa = " (".hintapyoristys($nayta_rivit_row["hinta"]/$vientikurssi).")";
-								}
-
-								if ($myyntihinta != $nayta_rivit_row["hinta"]) $myyntihinta = hintapyoristys($myyntihinta)." $kurssilisa";
+								if ($myyntihinta != $nayta_rivit_row["hinta"]) $myyntihinta = hintapyoristys($myyntihinta);
 								else $myyntihinta = hintapyoristys($myyntihinta);
 
 								echo "<td align='right' valign='top' nowrap>$myyntihinta</td>";
@@ -801,23 +778,10 @@ if ($tee == "ETSILASKU") {
 
 								if ($yhtiorow["alv_kasittely"] == "") {
 									//verolliset hinnat
-									$kurssilisa = "";
-
-									if ($vientikurssi != 1) {
-										$kurssilisa = " (".hintapyoristys($nayta_rivit_row["summa"] / $vientikurssi).")";
-									}
-
-									echo "<td align='right' valign='top' nowrap>".hintapyoristys($nayta_rivit_row["summa"])."$kurssilisa</td>";
+									echo "<td align='right' valign='top' nowrap>".hintapyoristys($nayta_rivit_row["summa"])."</td>";
 								}
 								else {
-
-									$kurssilisa = "";
-
-									if ($vientikurssi != 1) {
-										$kurssilisa = " (".hintapyoristys($nayta_rivit_row["arvo"]/$vientikurssi).")";
-									}
-
-									echo "<td align='right' valign='top' nowrap>".hintapyoristys($nayta_rivit_row["arvo"])."$kurssilisa</td>";
+									echo "<td align='right' valign='top' nowrap>".hintapyoristys($nayta_rivit_row["arvo"])."</td>";
 								}
 							}
 

@@ -104,13 +104,14 @@ elseif(isset($lajit_array) and count($lajit_array) > 0) {
 		//loopataan myyntierätiedot per tilausrivi
 		mysql_data_seek($tilausrivit_talteen, 0);
 		while ($tilausrivi = mysql_fetch_assoc($tilausrivit_talteen)) {
-			$query = "	SELECT tuotteen_avainsanat.*
-						FROM tuotteen_avainsanat
-						WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
-						AND tuotteen_avainsanat.tuoteno='{$tilausrivi['tuoteno']}'
-						AND tuotteen_avainsanat.laji IN ($keyo)
-						ORDER BY tuotteen_avainsanat.laji";
-			$result = pupe_query($query);
+			foreach ($lajit_array as $asanalaji) {
+				$query = "	SELECT tuotteen_avainsanat.*
+							FROM tuotteen_avainsanat
+							WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+							AND tuotteen_avainsanat.tuoteno = '{$tilausrivi['tuoteno']}'
+							AND tuotteen_avainsanat.laji = '{$laji}'";
+					$result = pupe_query($query);
+			}
 			query_dump($query);
 			$excelsarake = 0;
 

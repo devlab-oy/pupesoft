@@ -2,7 +2,7 @@
 
 if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
+		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko, $toiminto;
 
 		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
 
@@ -63,7 +63,13 @@ if(!function_exists("tuotetarkista")) {
 					if (mysql_num_rows($sdtres) == 0) {
 						$poistolukko = "";
 					}
+					else {
+						$poistolukko = "TAPAHTUMIA";
+					}
 				}
+			}
+			else if ($poistolukko == "LUEDATA" and $toiminto != "POISTA") {
+				$poistolukko = "LUEDATAMUUTA";
 			}
 
 			$tem_tuoteno = $t[$i];
@@ -204,6 +210,36 @@ if(!function_exists("tuotetarkista")) {
 			if (isset($t[$i])) {
 				// Tyyppiä ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
 				if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
+					if ($poistolukko == "LUEDATAMUUTA") {
+						$query = "	SELECT yhtio
+									FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
+									WHERE yhtio = '$kukarow[yhtio]'
+									and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
+									and tuoteno = '{$tem_tuoteno}'
+									LIMIT 1";
+						$sdtres = pupe_query($query);
+
+						if (mysql_num_rows($sdtres) == 0) {
+						// Ei saa olla myöskään yhtään tilausriviä (Puuterivit sallitaan)
+							$query = "	SELECT yhtio
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tyyppi in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
+										and tuoteno = '{$tem_tuoteno}'
+										and laadittu > '0000-00-00 00:00:00'
+										and var != 'P'
+										LIMIT 1";
+							$sdtres = pupe_query($query);
+
+							if (mysql_num_rows($sdtres) == 0) {
+								$poistolukko = "";
+							}
+							else {
+								$poistolukko == "TAPAHTUMIA";
+							}
+						}
+					}
+
 					if (trim(strtoupper($trow["tuotetyyppi"])) == "") {
 						if ($poistolukko != "" and ($t[$i] == 'R' or $t[$i] == 'K' or $t[$i] == 'M')) {
 							$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
@@ -227,7 +263,36 @@ if(!function_exists("tuotetarkista")) {
 						and saldo  != 0";
 			$vresult = pupe_query($query);
 			$vrow = mysql_fetch_array($vresult);
+			
+			if ($poistolukko == "LUEDATAMUUTA") {
+				$query = "	SELECT yhtio
+							FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
+							and tuoteno = '{$tem_tuoteno}'
+							LIMIT 1";
+				$sdtres = pupe_query($query);
 
+				if (mysql_num_rows($sdtres) == 0) {
+				// Ei saa olla myöskään yhtään tilausriviä (Puuterivit sallitaan)
+					$query = "	SELECT yhtio
+								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
+								and tuoteno = '{$tem_tuoteno}'
+								and laadittu > '0000-00-00 00:00:00'
+								and var != 'P'
+								LIMIT 1";
+					$sdtres = pupe_query($query);
+
+					if (mysql_num_rows($sdtres) == 0) {
+						$poistolukko = "";
+					}
+					else {
+						$poistolukko == "TAPAHTUMIA";
+					}
+				}
+			}
 			if ($poistolukko != "" and $t[$i] != $trow["sarjanumeroseuranta"]) {
 
 				// Tietyt vaihdot sallitaan!!!, huomaa NOT iffissä, helpompi kirjoittaa näin päin
@@ -255,7 +320,35 @@ if(!function_exists("tuotetarkista")) {
 						$virhe[$i] = t("Tuotteella on varastopaikkoja. Poista ne ensin!");
 					}
 				}
+				if ($poistolukko == "LUEDATAMUUTA") {
+					$query = "	SELECT yhtio
+								FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
+								WHERE yhtio = '$kukarow[yhtio]'
+								and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
+								and tuoteno = '{$tem_tuoteno}'
+								LIMIT 1";
+					$sdtres = pupe_query($query);
 
+					if (mysql_num_rows($sdtres) == 0) {
+					// Ei saa olla myöskään yhtään tilausriviä (Puuterivit sallitaan)
+						$query = "	SELECT yhtio
+									FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tyyppi in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
+									and tuoteno = '{$tem_tuoteno}'
+									and laadittu > '0000-00-00 00:00:00'
+									and var != 'P'
+									LIMIT 1";
+						$sdtres = pupe_query($query);
+
+						if (mysql_num_rows($sdtres) == 0) {
+							$poistolukko = "";
+						}
+						else {
+							$poistolukko == "TAPAHTUMIA";
+						}
+					}
+				}
 				if ($poistolukko != "" and isset($trow['ei_saldoa']) and $t[$i] != $trow["ei_saldoa"]) {
 					$virhe[$i] = t("Tuotteella on tapahtumia. Saldottomuutta ei voi vaihtaa")."!";
 				}

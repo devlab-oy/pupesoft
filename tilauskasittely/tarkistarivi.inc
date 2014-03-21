@@ -164,7 +164,7 @@
 	}
 
 	// katsotaan, ettei valmisteta epäkuranttia tuotetta
-	if (($toim == "VALMISTAVARASTOON" OR $toim == 'VALMISTAASIAKKAALLE') AND $trow["epakurantti25pvm"] != '0000-00-00' AND $riviok == 0) {
+	if (($toim == "VALMISTAVARASTOON" OR $toim == 'VALMISTAASIAKKAALLE') AND $trow["epakurantti25pvm"] != '0000-00-00' AND $row["tyyppi"] == "W" AND $riviok == 0) {
 		$varaosavirhe .= t("VIRHE: Tuote on epäkurantti, sitä ei saa valmistaa!");
 		$riviok++;
 		$tilausok++;

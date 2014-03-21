@@ -378,10 +378,10 @@
 
 			if ($eiliittymaa != 'ON') {
 				if ($grouppaus == "kustannuspaikka") {
-					$sarakemaara = count($saatavat_array)+7;
+					$sarakemaara = count($saatavat_array)+8;
 				}
 				else {
-					$sarakemaara = count($saatavat_array)+8;
+					$sarakemaara = count($saatavat_array)+9;
 
 					if ($tiliointilisa != "") {
 						$sarakemaara++;

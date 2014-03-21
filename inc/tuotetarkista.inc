@@ -63,6 +63,16 @@ if(!function_exists("tuotetarkista")) {
 					if (mysql_num_rows($sdtres) == 0) {
 						$poistolukko = "";
 					}
+					else {
+						if ($poistolukko == "LUEDATA" and strtoupper($luedata_toiminto) == "POISTA") {
+							$virhe[$i] = t("Tuotetta ei saa poistaa, koska tuotteella on tilausrivejä");
+						}
+					}
+				}
+				else {
+					if ($poistolukko == "LUEDATA" and strtoupper($luedata_toiminto) == "POISTA") {
+						$virhe[$i] = t("Tuotetta ei saa poistaa, koska tuotteella on tapahtumia");
+					}
 				}
 			}
 

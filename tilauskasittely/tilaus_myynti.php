@@ -5041,7 +5041,7 @@ if ($tee == '') {
 					$limitlisa";
 		$result = pupe_query($query);
 		$tilausrivit_talteen = $result;
-		echo "nyt tää ajettiin";
+
 		if ($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
 			if (isset($ruutulimit) and $ruutulimit > 0) {
 				$rivino = $ruutulimit-1;

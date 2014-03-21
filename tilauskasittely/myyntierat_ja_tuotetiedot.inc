@@ -26,7 +26,13 @@ if (isset($_POST['piirtele_valikko'])) {
 
 	echo "<form>";
 	echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
-	echo "<tr><th>".t("Valitse sarakkeet")."</th></tr>";
+	echo "<tr><th>".t("Valitse avainsanat ja kielet")."</th><td>";
+	$query = "	SELECT DISTINCT kieli FROM tuotteen_avainsanat WHERE yhtio='{$yhtiorow['yhtio']}' and kieli != '{$yhtiorow['kieli']}'";
+	$ressu = pupe_query($query);
+	while ($row = mysql_fetch_assoc($ressu)) {
+		echo "<input type='checkbox' name='kielet[]' value='{$row['kieli']}'> {$row['kieli']}";
+	}
+	echo "</td></tr>";
 	$secretcounter = 0;
 	$eka_ajo = true;
 	while ($row = mysql_fetch_assoc($result)) {
@@ -84,46 +90,88 @@ elseif(isset($lajit_array) and count($lajit_array) > 0) {
 		$excelrivi 	 = 0;
 		$excelsarake = 0;
 
-		$totaalisarakemaara = mysql_num_rows();
-		
-		$kveeri = "SELECT distinct laji FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow['yhtio']}' AND laji IN ({$keyo}) ORDER BY laji";
-		$ressu = pupe_query($kveeri);
 		//piirretään sarakkeiden headerit
 		$worksheet->write($excelrivi, $excelsarake++, t("Tuotenumero"),	$format_bold);
-		while ($row = mysql_fetch_assoc($ressu)) {
-			$worksheet->write($excelrivi, $excelsarake++, $row['laji'],	$format_bold);
+		// 			nimitys
+		// 			osasto
+		// 			try
+		// 			tuotemerkki
+		// 			malli
+		// 			mallitarkenne
+		// 			kuvaus
+		// 			lyhytkuvaus
+		// 			mainosteksti
+		// 			aleryhma
+		// 			muuta
+		// 			tilausrivi_kommentti
+		// 			kerayskommentti
+		// 			purkukommentti
+		// 			myyntihinta
+		// 			myyntihinta_maara
+		// 			yksikko
+		// 			ei_saldoa
+		// 			kommentoitava
+		// 			tuotetyyppi
+		// 			myynninseuranta
+		// 			hinnastoon
+		// 			sarjanumeroseuranta
+		// 			suoratoimitus
+		// 			myymalahinta
+		// 			nettohinta
+		// 			halytysraja
+		// 			varmuus_varasto
+		// 			tilausmaara
+		// 			ostoehdotus
+		// 			tahtituote
+		// 			tarrakerroin
+		// 			tarrakpl
+		// 			myynti_era
+		// 			minimi_era
+		// 			valmistuslinja
+		// 			valmistusaika_sekunneissa
+		// 			tullinimike1
+		// 			vienti
+		// 			tuotekorkeus
+		// 			tuoteleveys
+		// 			tuotesyvyys
+		// 			tuotemassa
+		// 			kuluprosentti
+		// 			kuljetusohje
+		// 			myyjanro
+		// 			toiminto
+
+		foreach ($lajit_array as $laji) {
+			$worksheet->write($excelrivi, $excelsarake++, $laji, $format_bold);
+			
+			
 		}
 
 		$excelrivi++;
-		
-		//haetaan tilausrivit
-		//$query = "	SELECT * FROM tilausrivi WHERE yhtio='{$kukarow['yhtio']}' AND otunnus = {$tilausnumero}";
-		//$tilres = pupe_query($query);
-		//query_dump($query);
 
 		//loopataan myyntierätiedot per tilausrivi
 		mysql_data_seek($tilausrivit_talteen, 0);
 		while ($tilausrivi = mysql_fetch_assoc($tilausrivit_talteen)) {
-			foreach ($lajit_array as $asanalaji) {
-				$query = "	SELECT tuotteen_avainsanat.*
-							FROM tuotteen_avainsanat
-							WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-							AND tuotteen_avainsanat.tuoteno = '{$tilausrivi['tuoteno']}'
-							AND tuotteen_avainsanat.laji = '{$laji}'";
-					$result = pupe_query($query);
-			}
-			query_dump($query);
 			$excelsarake = 0;
-
+			
 			$worksheet->write($excelrivi, $excelsarake++, $tilausrivi['tuoteno']);
-			while ($selirivi = mysql_fetch_assoc($result)) {
-				if (in_array($selirivi["laji"], $lajit_array)) {
-					$worksheet->write($excelrivi, $excelsarake++, $selirivi["selite"]);
+
+			foreach ($lajit_array as $asanalaji) {
+				
+				$query = "	SELECT *
+							FROM tuotteen_avainsanat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$tilausrivi['tuoteno']}'
+							AND laji = '{$asanalaji}'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$asanase = mysql_fetch_assoc($result);
+					$worksheet->write($excelrivi, $excelsarake++, $asanase['selite']);
 				}
-				else {
-					$worksheet->write($excelrivi, $excelsarake++, "");
-				}
+				else $excelsarake++;
+
 			}
+
 			$excelrivi++;
 		}
 		$excelnimi = $worksheet->close();

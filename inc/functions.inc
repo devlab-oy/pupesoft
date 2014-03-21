@@ -26625,11 +26625,17 @@ if (!function_exists('aseta_tilausrivien_var')) {
 	function aseta_tilausrivien_var($tilausrivi_tunnukset, $var) {
 		global $kukarow, $yhtiorow;
 
+		if (empty($tilausrivi_tunnukset)) {
+			return false;
+		}
+
 		$query = "	UPDATE tilausrivi
 					SET var = '{$var}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN (".implode(",", $tilausrivi_tunnukset).")";
 		pupe_query($query);
+
+		return true;
 	}
 }
 

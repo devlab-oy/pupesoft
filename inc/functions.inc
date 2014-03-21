@@ -17244,12 +17244,20 @@ if (!function_exists("tee_keraysera")) {
 
 			$skipattavien_lapsien_lkm = 0;
 
-			$ohjausmerkki = array();
-			$query = "SELECT tunnus, LOWER(TRIM(ohjausmerkki)) AS ohjausmerkki FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$tilaukset})";
+			$ohjausmerkki = $jiivee = array();
+
+			$query = "	SELECT lasku.tunnus, 
+						LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
+		 				IFNULL(maksuehto.jv, '') jv
+						FROM lasku
+						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto) 
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+						AND lasku.tunnus IN ({$tilaukset})";
 			$ohjausmerkki_res = pupe_query($query);
 
 			while ($ohjausmerkki_row = mysql_fetch_assoc($ohjausmerkki_res)) {
 				$ohjausmerkki[$ohjausmerkki_row['tunnus']] = $ohjausmerkki_row['ohjausmerkki'];
+				$jiivee[$ohjausmerkki_row['tunnus']] = $ohjausmerkki_row['jv'];
 			}
 
 			if (isset($kukarow['debugstring'])) {
@@ -17519,7 +17527,8 @@ if (!function_exists("tee_keraysera")) {
 			$ii = 1;
 
 			$ed_ohjausmerkki = 'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ';
-
+			$ed_jiivee = "ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ";
+			
 			$ed_tuote = '';
 
 			foreach ($inner_main_array as $inner_key => &$tuoterow) {
@@ -17564,11 +17573,14 @@ if (!function_exists("tee_keraysera")) {
 					$kukarow['debugstring'] .= "(E740): Otunnus: $tuoterow[otunnus] \n";
 					$kukarow['debugstring'] .= "(E750): Tuotteen tilavuus: $tuoterow[y_koko] (l: $tuoterow[tuoteleveys] x k: $tuoterow[tuotekorkeus] x s: $tuoterow[tuotesyvyys]) \n";
 					$kukarow['debugstring'] .= "(E760): Yksin keräysalustalle: $tuoterow[yksin_kerailyalustalle] \n";
+					$kukarow['debugstring'] .= "(E761): Ohjausmerkki: {$ohjausmerkki[$tuoterow['otunnus']]} \n";
+					$kukarow['debugstring'] .= "(E762): JV: {$jiivee[$tuoterow['otunnus']]} \n";
 					$kukarow['debugstring'] .= "<br>\n";
 				}
 
 				// MERKKI-KENTTÄ
-				if (trim($ed_asiakas) != '' and $ed_asiakas == $kerailyniput_tiedot[$key]['nimi'] and trim($ed_ohjausmerkki) != 'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ' and $ed_ohjausmerkki != $ohjausmerkki[$tuoterow['otunnus']]) {
+				if (trim($ed_asiakas) != '' and $ed_asiakas == $kerailyniput_tiedot[$key]['nimi'] and ((trim($ed_ohjausmerkki) != 'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ' and $ed_ohjausmerkki != $ohjausmerkki[$tuoterow['otunnus']]) or (trim($ed_jiivee) != 'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ' and $ed_jiivee != $jiivee[$tuoterow['otunnus']]))) {
+
 					if (isset($kukarow['debugstring'])) {
 						$kukarow['debugstring'] .= "<br>(E780): <br>Erän tilavuus NYT: $eran_koko cm3<br>\n";
 						$kukarow['debugstring'] .= "(E790): Erän pinta-ala NYT: $eran_koko_pintaala cm2<br><br>\n";
@@ -17580,7 +17592,7 @@ if (!function_exists("tee_keraysera")) {
 					}
 
 					if (isset($kukarow['debugstring'])) {
-						$kukarow['debugstring'] .= "(E800): Asiakas ei vaihtunut, mutta merkki vaihtui!<br>\n";
+						$kukarow['debugstring'] .= "(E800): Asiakas ei vaihtunut, mutta merkki tai jv vaihtui!<br>\n";
 						$kukarow['debugstring'] .= "<br>\n";
 					}
 
@@ -18232,7 +18244,7 @@ if (!function_exists("tee_keraysera")) {
 				$ed_asiakas = $kerailyniput_tiedot[$key]['nimi'];
 				$ed_otunnus = $tuoterow['otunnus'];
 				$ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
-				$ed_jiivee = $jiivee[$tuoterow['jv']];
+				$ed_jiivee = $jiivee[$tuoterow['otunnus']];
 			}
 
 			if (mysql_num_rows($tuoteres) > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] != 'K') {

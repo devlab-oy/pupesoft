@@ -52,7 +52,7 @@ VALUES
 	('', 'Sammutinhuolto', 'tyomaarays/tyojono2.php', 'TEHDYT_TYOT', '', '', 'Tehdyt työ', 20, 0, '', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
 	('', 'Sammutinhuolto', 'tyomaarays/tulevat_tyot.php', '', '', '', 'Tulevat työt', 21, 0, '', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
 	('', 'Sammutinhuolto', 'asiakkaan_laite_hallinta.php', '', '', '', 'Asiakkaan laitehallinta', 30, 0, '', '{$kukarow['yhtio']}', '', 'import',NOW(), NOW(), 'import'),
-	('', 'Sammutinhuolto', 'yllapito.php', 'asiakas!!!TURVANASI!!!true', '', '', 'Asiakasylläpito', 40, 0, '', '{$kukarow['yhtio']}', '', 'import',NOW(), NOW(), 'import'),
+	('', 'Sammutinhuolto', 'yllapito.php', 'asiakas', '', '', 'Asiakasylläpito', 40, 0, '', '{$kukarow['yhtio']}', '', 'import',NOW(), NOW(), 'import'),
 	('', 'Sammutinhuolto', 'yllapito.php', 'kohde', '', '', 'Kohteet', 50, 0, '', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('', 'Sammutinhuolto', 'yllapito.php', 'paikka', '', '', 'Paikat', 60, 0, '', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('', 'Sammutinhuolto', 'yllapito.php', 'laite', '', '', 'Laitteet', 80, 0, '', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
@@ -66,7 +66,8 @@ VALUES
 	('', 'Sammutinhuolto', 'tilauskasittely/laitteen_vaihto.php', '', '', '', 'Laitteenvaihto', 400, 0, '', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('', 'Sammutinhuolto', 'tyomaaraysten_generointi.php', '', '', '', 'Työmääräysten generointi', 410, 0, '', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('', 'Sammutinhuolto', 'lasku_siivo.php', '', '', '', 'Työmääräysten poistaminen', 420, 0, '', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
-	('', 'Sammutinhuolto', 'yllapito.php', 'liitetiedostot', '', '', 'Liitetiedostot', 430, 0, '', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import');";
+	('', 'Sammutinhuolto', 'yllapito.php', 'liitetiedostot', '', '', 'Liitetiedostot', 430, 0, '', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
+	('', 'Sammutinhuolto', 'tilauskasittely/kustannusarvio.php', '', '', '', 'Kustannusarvio', 440, 0, '', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import');";
 	pupe_query($query);
 	$query = "
 INSERT INTO `oikeu` (`kuka`, `sovellus`, `nimi`, `alanimi`, `paivitys`, `lukittu`, `nimitys`, `jarjestys`, `jarjestys2`, `profiili`, `yhtio`, `hidden`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
@@ -74,7 +75,7 @@ VALUES
 	('Sammutinhuolto', 'Sammutinhuolto', 'tyomaarays/tyojono2.php', '', '1', '', 'Työjono', 10, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
 	('Sammutinhuolto', 'Sammutinhuolto', 'tyomaarays/tyojono2.php', 'TEHDYT_TYOT', '1', '', 'Tehdyt työ', 20, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
 	('Sammutinhuolto', 'Sammutinhuolto', 'asiakkaan_laite_hallinta.php', '', '1', '', 'Asiakkaan laitehallinta', 30, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
-	('Sammutinhuolto', 'Sammutinhuolto', 'yllapito.php', 'asiakas!!!TURVANASI!!!true', '1', '', 'Asiakasylläpito', 40, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
+	('Sammutinhuolto', 'Sammutinhuolto', 'yllapito.php', 'asiakas', '1', '', 'Asiakasylläpito', 40, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
 	('Sammutinhuolto', 'Sammutinhuolto', 'yllapito.php', 'kohde', '1', '', 'Kohteet', 50, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('Sammutinhuolto', 'Sammutinhuolto', 'yllapito.php', 'paikka', '1', '', 'Paikat', 60, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('Sammutinhuolto', 'Sammutinhuolto', 'yllapito.php', 'laite', '1', '', 'Laitteet', 80, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
@@ -87,7 +88,9 @@ VALUES
 	('Sammutinhuolto', 'Sammutinhuolto', 'tilauskasittely/tilaus_myynti.php', 'TYOMAARAYS', '1', '', 'Työmääräys', 390, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('Sammutinhuolto', 'Sammutinhuolto', 'tilauskasittely/laitteen_vaihto.php', '', '1', '', 'Laitteenvaihto', 400, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('Sammutinhuolto', 'Sammutinhuolto', 'tyomaaraysten_generointi.php', '', '1', '', 'Työmääräysten generointi', 410, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
-	('Sammutinhuolto', 'Sammutinhuolto', 'lasku_siivo.php', '', '1', '', 'Työmääräysten poistaminen', 420, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import');";
+	('Sammutinhuolto', 'Sammutinhuolto', 'lasku_siivo.php', '', '1', '', 'Työmääräysten poistaminen', 420, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
+	('Sammutinhuolto', 'Sammutinhuolto', 'yllapito.php', 'liitetiedostot', '', '', 'Liitetiedostot', 430, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import'),
+	('Sammutinhuolto', 'Sammutinhuolto', 'tilauskasittely/kustannusarvio.php', '', '', '', 'Kustannusarvio', 440, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', '', 'import', NOW(), NOW(), 'import');";
 	pupe_query($query);
 	echo "Ajettu";
 }

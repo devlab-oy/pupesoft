@@ -2278,18 +2278,11 @@
 		echo "<br><font class='message'>".t("Valinnat")."</font><br><br>";
 
 		//n‰ytet‰‰n "toimita varastosta" listauksessa vain varastot joista k‰ytt‰j‰ll‰ on oikeus myyd‰ (jos kuka.varasto on tyhj‰, saa k‰ytt‰j‰ myyd‰ kaikista normaalivarastoista)
-		$query = "	SELECT varasto
-					FROM kuka
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND kuka = '{$kukarow['kuka']}'";
-		$sallitutvarastotres = pupe_query($query);
-		$sallitutvarastot = mysql_fetch_assoc($sallitutvarastotres);
-
-		if ($sallitutvarastot["varasto"] == "") {
+		if ($kukarow["varasto"] == "") {
 			$wherelisa = " AND tyyppi NOT IN ('P', 'E') ";
 		} else {
 			$wherelisa = " AND tyyppi != 'P' ";
-			$wherelisa .= " AND tunnus IN ({$sallitutvarastot["varasto"]})";
+			$wherelisa .= " AND tunnus IN ({$kukarow["varasto"]})";
 		}
 
 		$query = "	SELECT *

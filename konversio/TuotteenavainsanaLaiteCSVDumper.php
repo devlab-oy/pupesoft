@@ -21,8 +21,8 @@ class TuotteenavainsanaLaiteCSVDumper extends CSVDumper {
 //			'paino', //paino ei ole sittenkään pakollinen koska palopostilla ei ole painoa
 		);
 
-		$this->setFilepath("/tmp/konversio/LAITE_s.csv");
-		$this->setSeparator(';');
+		$this->setFilepath("/tmp/konversio/LAITE.csv");
+		$this->setSeparator(';#x#');
 		$this->setKonversioArray($konversio_array);
 		$this->setRequiredFields($required_fields);
 		$this->setTable('tuotteen_avainsanat');

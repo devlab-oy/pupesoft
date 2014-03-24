@@ -2114,11 +2114,6 @@
 			while ($row = mysql_fetch_assoc($result)) {
 				$naytetaanko_toimittajabutton = true;
 
-				// n‰ytet‰‰n vain vialliset rivit
-				if ($row["rivit"] == $row["ok"] and $row["status"] == "X") {
-					continue;
-				}
-
 				$asn_numerot[$row['asn_numero']] = $row['asn_numero'];
 
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {

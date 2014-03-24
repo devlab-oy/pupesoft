@@ -1,27 +1,28 @@
 <?php
+
 if (isset($_POST["tee"])) {
-  if ($_POST["tee"] == 'lataa_tiedosto') {
-    $lataa_tiedosto = 1;
-  }
-  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
-    $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
-  }
+	if ($_POST["tee"] == 'lataa_tiedosto') {
+		$lataa_tiedosto = 1;
+	}
+	if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+		$_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+	}
 }
 
 require_once('../inc/parametrit.inc');
 
 if (isset($tee) and $tee == 'lataa_tiedosto') {
-  $filepath = "/tmp/".$tmpfilenimi;
-  if (file_exists($filepath)) {
-    readfile($filepath);
-    unlink($filepath);
-  }
-  exit;
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+	exit;
 }
 
 if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
-  livesearch_asiakashaku();
-  exit;
+	livesearch_asiakashaku();
+	exit;
 }
 
 enable_ajax();
@@ -32,38 +33,40 @@ echo "<font class='head'>".t("Kustannusarvio").":</font>";
 echo "<hr/>";
 
 if (isset($ala_tee) and $ala_tee == 'tulosta_kustannusarvio' and $valittu_asiakas != '') {
-  if(is_numeric($valittu_asiakas)){
-    if(hae_asiakas($valittu_asiakas) ){
-      if( checkdate($kka, $ppa, $vva) and checkdate($kkl, $ppl, $vvl) ){
-        $alku = date('Y-m-d', strtotime($vva.'-'.$kka.'-'.$ppa));
-        $loppu = date('Y-m-d', strtotime($vvl.'-'.$kkl.'-'.$ppl));
-        $pdf_tiedosto = \PDF\Kustannusarvio\hae_kustannusarvio($valittu_asiakas, $alku, $loppu);
-    }
-    else{
-      $pdf_tiedosto = false;
-      $error = "Tarkista päivämäärät";
-    }
-  }
-  else{
-    $pdf_tiedosto = false;
-    $error = "Asiakasta ei löytynyt";
-  }
-}
-else{
-  $pdf_tiedosto = false;
-  $error = "Asiakasta ei löytynyt";
-}
-if (!empty($pdf_tiedosto)) {
-    echo_tallennus_formi($pdf_tiedosto, t("Kustannusarvio"), 'pdf');
-  }
-  else {
-    if(!isset($error)){ $error = "Ei löytynyt toimenpiteitä"; }
-    echo "<font class='error'>";
-    echo t("Kustannusarvion generointi epäonnistui");
-    echo ' - ';
-    echo t($error);
-    echo "</font>";
-  }
+	if (is_numeric($valittu_asiakas)) {
+		if (hae_asiakas($valittu_asiakas)) {
+			if (checkdate($kka, $ppa, $vva) and checkdate($kkl, $ppl, $vvl)) {
+				$alku = date('Y-m-d', strtotime($vva.'-'.$kka.'-'.$ppa));
+				$loppu = date('Y-m-d', strtotime($vvl.'-'.$kkl.'-'.$ppl));
+				$pdf_tiedosto = \PDF\Kustannusarvio\hae_kustannusarvio($valittu_asiakas, $alku, $loppu);
+			}
+			else {
+				$pdf_tiedosto = false;
+				$error = "Tarkista päivämäärät";
+			}
+		}
+		else {
+			$pdf_tiedosto = false;
+			$error = "Asiakasta ei löytynyt";
+		}
+	}
+	else {
+		$pdf_tiedosto = false;
+		$error = "Asiakasta ei löytynyt";
+	}
+	if (!empty($pdf_tiedosto)) {
+		echo_tallennus_formi($pdf_tiedosto, t("Kustannusarvio"), 'pdf');
+	}
+	else {
+		if (!isset($error)) {
+			$error = "Ei löytynyt toimenpiteitä";
+		}
+		echo "<font class='error'>";
+		echo t("Kustannusarvion generointi epäonnistui");
+		echo ' - ';
+		echo t($error);
+		echo "</font>";
+	}
 }
 
 echo "<form name='kustannusarvio_pdf_form' method = 'post'>";

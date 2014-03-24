@@ -3,6 +3,8 @@
 function dump_seed_data() {
 	global $kukarow, $yhtiorow;
 
+	echo "Ajetaan.....";
+	echo "<br/>";
 	$query = "DELETE FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji = 'TYOM_TYOSTATUS';
 INSERT INTO `avainsana` (`yhtio`, `perhe`, `kieli`, `laji`, `nakyvyys`, `selite`, `selitetark`, `selitetark_2`, `selitetark_3`, `selitetark_4`, `selitetark_5`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
 VALUES
@@ -78,4 +80,6 @@ VALUES
 	('Sammutinhuolto', 'Sammutinhuolto', 'tyomaaraysten_generointi.php', '', '1', '', 'Työmääräysten generointi', 410, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 	('Sammutinhuolto', 'Sammutinhuolto', 'lasku_siivo.php', '', '1', '', 'Työmääräysten poistaminen', 420, 0, 'Sammutinhuolto', '{$kukarow['yhtio']}', 'H', 'import', NOW(), NOW(), 'import'),
 ";
+	pupe_query($query);
+	echo "Ajettu";
 }

@@ -16,7 +16,7 @@ if (trim(empty($argv[1])) and !$debug) {
 	exit;
 }
 else {
-	$yhtio = "lpk";
+	$yhtio = $kukarow['yhtio'];
 }
 
 if (!$debug) {

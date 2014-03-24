@@ -10,14 +10,14 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 
 ini_set("memory_limit", "5G");
 
-$kukarow = hae_kukarow('admin', 'lpk');
+$kukarow = hae_kukarow('admin', $argv[1]);
 
 if ($argv[1] == '') {
 	echo "Anna tiedosto\n";
 	die;
 }
 
-$filepaths = TarkastuksetCSVDumper::split_file($argv[1]);
+$filepaths = TarkastuksetCSVDumper::split_file($argv[2]);
 var_dump($filepaths);
 foreach ($filepaths as $filepath) {
 	echo "{$filepath}<br/><br/>";

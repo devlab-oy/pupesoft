@@ -328,7 +328,7 @@ FROM   laite
        JOIN asiakas
          ON ( asiakas.yhtio = kohde.yhtio
               AND asiakas.tunnus = kohde.asiakas )
-WHERE  laite.yhtio = 'lpk'
+WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
 GROUP  BY 1,
           2,
           3,

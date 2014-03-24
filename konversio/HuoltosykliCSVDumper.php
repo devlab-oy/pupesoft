@@ -498,7 +498,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 					LEFT JOIN huoltosyklit_laitteet AS hl
 					ON ( hl.yhtio = laite.yhtio
 						AND hl.laite_tunnus = laite.tunnus )
-					WHERE laite.yhtio = 'lpk'
+					WHERE laite.yhtio = '{$this->kukarow['yhtio']}'
 					AND laite.tuoteno != 'MUISTUTUS'
 					AND hl.tunnus IS NULL";
 		$result = pupe_query($query);
@@ -526,7 +526,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		  LEFT JOIN huoltosyklit_laitteet AS hl
 		  ON ( hl.yhtio = laite.yhtio
 		  AND hl.laite_tunnus = laite.tunnus )
-		  WHERE  laite.yhtio = 'lpk'
+		  WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
 		  AND laite.tuoteno != 'MUISTUTUS'
 		  AND hl.tunnus IS NULL
 		  GROUP BY laite.tuoteno
@@ -539,7 +539,7 @@ class HuoltosykliCSVDumper extends CSVDumper {
 		  LEFT JOIN huoltosyklit_laitteet AS hl
 		  ON ( hl.yhtio = laite.yhtio
 		  AND hl.laite_tunnus = laite.tunnus )
-		  WHERE  laite.yhtio = 'lpk'
+		  WHERE  laite.yhtio = '{$this->kukarow['yhtio']}'
 		  AND laite.tuoteno != 'MUISTUTUS'
 		  AND hl.tunnus IS NULL
 		  ORDER  BY laite.tuoteno ASC;

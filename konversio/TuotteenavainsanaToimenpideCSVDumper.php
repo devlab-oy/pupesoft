@@ -140,7 +140,7 @@ class TuotteenavainsanaToimenpideCSVDumper extends CSVDumper{
 					ON ( t.yhtio = tuote.yhtio
 						AND t.tuoteno = tuote.tuoteno
 						AND t.laji = 'tyomaarayksen_ryhmittely' )
-					WHERE tuote.yhtio = 'lpk'
+					WHERE tuote.yhtio = '{$this->kukarow['yhtio']}'
 					AND tuote.tuotetyyppi = 'K'
 					AND t.tuoteno IS NULL
 					ORDER BY tuote.tuoteno ASC;";

@@ -297,8 +297,6 @@
 		$sel[$yhtiorow["kieli"]] = "SELECTED";
 	}
 	
-	var_dump($sel);
-
 	echo "<td><select name='kieli'>";
 
 	foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {

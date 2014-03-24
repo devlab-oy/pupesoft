@@ -58,6 +58,15 @@ $query = "	SELECT *
 $maksuehto_result = pupe_query($query);
 $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
+//jos on maksusopimus maksuehto käytössä niin ei saa jakaa tilausta osiin
+if ($maksuehtorow["jaksotettu"] == "o" ) {
+	$query = "	UPDATE lasku
+				SET osatoimitus = 'o'
+				WHERE yhtio     = '{$kukarow['yhtio']}'
+				AND tunnus      = '{$laskurow['tunnus']}'";
+	pupe_query($query);
+}
+
 // Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, E -  kaikki muu ku myyjien tekemä estetään)
 // Jos maksuehto on käteinen, sallitaan luottorajan ylitys
 // samma på erapaivan_ylityksen_raja

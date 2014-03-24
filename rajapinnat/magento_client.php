@@ -133,10 +133,13 @@ class MagentoClient {
 						'position'         			=> 1,
 						'default_sort_by'   		=> 'position',
 						'available_sort_by' 		=> 'position',
-						'include_in_menu'   		=> 1,
-						#// HUOM: Vain jos "Category access control"-moduli on asennettu
-						'accesscontrol_show_group' 	=> 0
+						'include_in_menu'   		=> 1
 					);
+
+					if (isset($categoryaccesscontrol) and $categoryaccesscontrol) {
+						// HUOM: Vain jos "Category access control"-moduli on asennettu
+						$category_data['accesscontrol_show_group'] = 0;
+					}
 
 					// Kutsutaan soap rajapintaa
 					$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',

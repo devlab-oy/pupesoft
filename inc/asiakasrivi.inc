@@ -31,7 +31,7 @@
 
 		if (mysql_num_rows($vresult) > 0) {
 
-			$ulos =  "<td><select name='$nimi'><option value='$i'>" . t("Oletustoimipaikka") . "</option>";
+			$ulos =  "<td><select name='$nimi'><option value='0'>" . t("Oletustoimipaikka") . "</option>";
 
 			while ($vrow = mysql_fetch_array($vresult)) {
 				$sel="";

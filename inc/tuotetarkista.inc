@@ -38,7 +38,7 @@ if (!function_exists("onkotapahtumajariveja")) {
 
 if (!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko, $toiminto;
+		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
 
 		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
 

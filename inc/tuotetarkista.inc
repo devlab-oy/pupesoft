@@ -2,7 +2,7 @@
 
 if (!function_exists("onkotapahtumajariveja")) {
 	function onkotapahtumajariveja($tuoteno) {
-		global $kukarow;
+		global $kukarow, $poistolukko;
 
 		// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
 		$query = "	SELECT yhtio
@@ -27,12 +27,13 @@ if (!function_exists("onkotapahtumajariveja")) {
 
 			if (mysql_num_rows($sdtres) == 0) {
 				// Tapahtumia tai rivej‰ ei oo
-				return false;
+				$poistolukko = "";
+				return;
 			}
 		}
 
 		// Tapahtumia tai rivej‰ on
-		return true;
+		$poistolukko = "TSEKATTU";
 	}
 }
 
@@ -77,8 +78,8 @@ if (!function_exists("tuotetarkista")) {
 			$tem_tuoteno = $t[$i];
 
 			// Onko tuotteella tapahtumia
-			if ($poistolukko != "" and $poistolukko != "LUEDATA" and !onkotapahtumajariveja($tem_tuoteno)) {
-				$poistolukko = "";
+			if ($poistolukko != "" and $poistolukko != "LUEDATA") {
+				onkotapahtumajariveja($tem_tuoteno);
 			}
 		}
 
@@ -219,8 +220,8 @@ if (!function_exists("tuotetarkista")) {
 				if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
 
 					// Onko tuotteella tapahtumia
-					if ($poistolukko != "" and !onkotapahtumajariveja($tem_tuoteno)) {
-						$poistolukko = "";
+					if ($poistolukko != "" and $poistolukko != "TSEKATTU") {
+						onkotapahtumajariveja($tem_tuoteno);
 					}
 
 					if (trim(strtoupper($trow["tuotetyyppi"])) == "") {
@@ -240,8 +241,8 @@ if (!function_exists("tuotetarkista")) {
 		if ($fieldname == "sarjanumeroseuranta") {
 
 			// Onko tuotteella tapahtumia
-			if ($poistolukko != "" and !onkotapahtumajariveja($tem_tuoteno)) {
-				$poistolukko = "";
+			if ($poistolukko != "" and $poistolukko != "TSEKATTU") {
+				onkotapahtumajariveja($tem_tuoteno);
 			}
 
 			if ($poistolukko != "" and $t[$i] != $trow["sarjanumeroseuranta"]) {
@@ -279,8 +280,8 @@ if (!function_exists("tuotetarkista")) {
 				}
 
 				// Onko tuotteella tapahtumia
-				if ($poistolukko != "" and !onkotapahtumajariveja($tem_tuoteno)) {
-					$poistolukko = "";
+				if ($poistolukko != "" and $poistolukko != "TSEKATTU") {
+					onkotapahtumajariveja($tem_tuoteno);
 				}
 
 				if ($poistolukko != "" and isset($trow['ei_saldoa']) and $t[$i] != $trow["ei_saldoa"]) {

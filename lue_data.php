@@ -716,7 +716,7 @@ if ($kasitellaan_tiedosto) {
 			if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUOKKAA/LISAA") $taulunrivit[$taulu][$eriviindex][$postoiminto] = "MUUTA/LISAA";
 			if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA/LISÄÄ") 	$taulunrivit[$taulu][$eriviindex][$postoiminto] = "MUUTA/LISAA";
 			if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA") 		$taulunrivit[$taulu][$eriviindex][$postoiminto] = "POISTA";
-			$toiminto = $taulunrivit[$taulu][$eriviindex][$postoiminto];
+
 			//Jos eri where-ehto array on määritelty
 			if (is_array($wherelliset)) {
 				$indeksi = array_merge($indeksi, $indeksi_where);
@@ -1012,7 +1012,7 @@ if ($kasitellaan_tiedosto) {
 
 						$valinta .= " and {$taulunotsikot[$taulu][$j]} = '$tpttrow[tunnus]' ";
 					}
-				}				
+				}
 				else {
 					$valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
 				}

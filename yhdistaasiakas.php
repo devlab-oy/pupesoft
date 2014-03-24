@@ -15,11 +15,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == 'YHDI
     $ext = strtoupper($path_parts['extension']);
 
     if ($ext != "XLS") {
-      die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font>");
+      die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font><form><br /><br /><input type='submit' value='" . t("Yrit‰ uudestaan") . "' /></form>");
     }
 
     if ($_FILES['userfile']['size'] == 0) {
-      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font><form><br /><br /><input type='submit' value='" . t("Yrit‰ uudestaan") . "' /></form>");
     }
 
     require_once ('excel_reader/reader.php');
@@ -91,13 +91,22 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and ( is_uploaded_file($_FILES[
 
 	echo "<br><form method='post' name='sendfile' enctype='multipart/form-data'>";
   	echo "<input type='hidden' name='tee' value='YHDISTA_TIEDOSTOSTA'>";
-  	echo t("Lue yhdistett‰v‰t asiakkaat tiedostosta")."...<br><br>";
+  	echo t("Lue yhdistett‰v‰t asiakkaat tiedostosta")."...<br /><br />";
+
+    echo "<table>";
+    echo "<tr><th colspan='99'>" . t("Excel-tiedosto seuraavin tiedoin") . ":</th></tr>";
+    echo "<tr><td>ytunnus</td><td>ovttunnus</td><td>toim_ovttunnus</td><td>jata_tama</td></tr>";
+    echo "</table><br />";
+
+    echo t("\"jata_tama\" kentt‰‰n laitetaan arvoksi \"X\" niille riveille joihin edelliset rivit halutaan yhdist‰‰. Jos yhdistett‰vi‰ rivej‰ on paljon, saattaa toimenpide kest‰‰ kauan").".<br /><br />";
+
+
   	echo "<table>";
   	echo "<tr><th>".t("Valitse tiedosto").":</th>";
   	echo "<td><input name='userfile' type='file'></td>";
   	echo "<td class='back'><input type='submit' value='".t("Jatka")."'></td></tr></table><br /></form>";
 
-  	echo "..." . t("tai valitse listasta")."<br><br>";
+  	echo t("Voit myˆs valita yhdistett‰v‰t asiakkaat listasta.")."<br><br>";
 
   	echo "<form method='post'>";
   	echo "<input type='hidden' name='tee' value='YHDISTA'>";

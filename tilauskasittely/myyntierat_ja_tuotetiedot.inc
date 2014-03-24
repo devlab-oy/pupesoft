@@ -2,18 +2,12 @@
 // k‰ytet‰‰n slavea
 $useslave = 1;
 
-//if (isset($lajit)) echo "POLVIPƒƒLLIK÷<br>";
-//if (isset($lajit)) setcookie("avainsanalaji_keksi", serialize($lajit), 52552, "/");
-
-//if (isset($_COOKIE['avainsanalaji_keksi'])) $lajit_array = unserialize($_COOKIE['avainsanalaji_keksi']);
-//else $lajit_array = $lajit;
-
-//echo "MORJENS OLEN $lajit_array<br>";
+if (isset($_COOKIE['avainsanalaji_keksi'])) $lajit_array = unserialize(urldecode($_COOKIE['avainsanalaji_keksi']));
+else $lajit_array = $lajit;
 
 if (!isset($lajit_array) and isset($lajit)) $lajit_array = $lajit;
 if (isset($_POST['piirtele_valikko'])) {
-	// piirrell‰‰n vaihtoehdot aina jos ei olla subattu rapsaa
-	echo "PIIRTELYVALIKKOON MENTY";
+	// piirrell‰‰n valittavat tuotteen avainsanat
 	echo "<br><br>";
 	echo "<font class='head'>".t("Myyntier‰t ja tuotetiedot")."</font>";
 	echo "<br><br>";
@@ -27,10 +21,15 @@ if (isset($_POST['piirtele_valikko'])) {
 	echo "<form>";
 	echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
 	echo "<tr><th>".t("Valitse avainsanat ja kielet")."</th><td>";
-	$query = "	SELECT DISTINCT kieli FROM tuotteen_avainsanat WHERE yhtio='{$yhtiorow['yhtio']}' and kieli != '{$yhtiorow['kieli']}'";
+	
+	$query = "	SELECT DISTINCT kieli 
+				FROM tuotteen_avainsanat 
+				WHERE yhtio='{$yhtiorow['yhtio']}' 
+				AND kieli != '{$yhtiorow['kieli']}'";
 	$ressu = pupe_query($query);
+
 	while ($row = mysql_fetch_assoc($ressu)) {
-		echo "<input type='checkbox' name='kielet[]' value='{$row['kieli']}'> {$row['kieli']}";
+		echo "<input type='checkbox' name='kielet[]' value='{$row['kieli']}'> ".strtoupper($row['kieli'])."<br>";
 	}
 	echo "</td></tr>";
 	$secretcounter = 0;
@@ -76,105 +75,146 @@ if (isset($_POST['piirtele_valikko'])) {
 }
 elseif(isset($lajit_array) and count($lajit_array) > 0) {
 	// t‰‰ll‰ ajellaan rapsa ja tallennetaan henkseliin
-	$keyo = implode("','",$lajit_array);
-	$keyo = "'".$keyo."'";
 
-	//$kveeri = "SELECT * FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow['yhtio']}' AND laji IN ({$keyo}) ORDER BY laji";
-	//$ressu = pupe_query($kveeri);
-	//if (mysql_num_rows($ressu) > 0) {
+	include('inc/pupeExcel.inc');
+
+	$worksheet 	 = new pupeExcel();
+	$format_bold = array("bold" => TRUE);
+	$excelrivi 	 = 0;
+	$excelsarake = 0;
+
+	//piirret‰‰n defaulttisarakkeiden headerit
+	// Tuote
+	$worksheet->write($excelrivi, $excelsarake++, t("Tuotenumero"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Ean-koodi"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Nimitys"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Tuotemerkki"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Tuotesyvyys"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Tuoteleveys"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Tuotekorkeus"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Tuotemassa"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Myyntihinta"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Alv"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Yksikkˆ"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Tullinimike"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Lyhytkuvaus"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Kuvaus"),	$format_bold);
+
+	// Asiakas
+	$worksheet->write($excelrivi, $excelsarake++, t("Asiakkaan kommentti"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Asiakashinta"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Asiakkaan valuutta"),	$format_bold);
+
+	// Tuotteen toimittajat
+	$worksheet->write($excelrivi, $excelsarake++, t("Alkuper‰maa"),	$format_bold);
+
+	$excelrivi++;
+
+	if (!isset($kielet)) $kielet = array();
+	array_unshift($kielet, $yhtiorow['kieli']);
 	
-		include('inc/pupeExcel.inc');
+	//loopataan myyntier‰tiedot per tilausrivi
+	mysql_data_seek($tilausrivit_talteen, 0);
+	$eka_tuote = TRUE;
+	while ($tilausrivi = mysql_fetch_assoc($tilausrivit_talteen)) {
+		// Haetaan tuotteen tiedot
+		$query = "	SELECT * 
+					FROM tuote
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tilausrivi['tuoteno']}'";
+		$tuoteressi = pupe_query($query);
+		$tuoterowi = mysql_fetch_assoc($tuoteressi);
 
-		$worksheet 	 = new pupeExcel();
-		$format_bold = array("bold" => TRUE);
-		$excelrivi 	 = 0;
+		// Haetaan asiakkaan tiedot
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['liitostunnus']}'";
+		$asiakasressi = pupe_query($query);
+		$asiakasrowi = mysql_fetch_assoc($asiakasressi);
+
+		// Haetaan kaikki tuotteen alkuper‰maat
+		$query = "	SELECT group_concat(DISTINCT alkuperamaa) kaikkimaat
+					FROM tuotteen_toimittajat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tilausrivi['tuoteno']}'";
+		$toimittajaressi = pupe_query($query);
+		$alkuperamaat = mysql_fetch_assoc($toimittajaressi);
+		
+		// Haetaan asiakkaan tuotenumero
+		$query = "	SELECT * 
+					FROM asiakaskommentti
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tilausrivi['tuoteno']}'";
+		$spessuressi = pupe_query($query);
+		$spessurowi = mysql_fetch_assoc($spessuressi);
+
 		$excelsarake = 0;
 
-		//piirret‰‰n sarakkeiden headerit
-		$worksheet->write($excelrivi, $excelsarake++, t("Tuotenumero"),	$format_bold);
-		// 			nimitys
-		// 			osasto
-		// 			try
-		// 			tuotemerkki
-		// 			malli
-		// 			mallitarkenne
-		// 			kuvaus
-		// 			lyhytkuvaus
-		// 			mainosteksti
-		// 			aleryhma
-		// 			muuta
-		// 			tilausrivi_kommentti
-		// 			kerayskommentti
-		// 			purkukommentti
-		// 			myyntihinta
-		// 			myyntihinta_maara
-		// 			yksikko
-		// 			ei_saldoa
-		// 			kommentoitava
-		// 			tuotetyyppi
-		// 			myynninseuranta
-		// 			hinnastoon
-		// 			sarjanumeroseuranta
-		// 			suoratoimitus
-		// 			myymalahinta
-		// 			nettohinta
-		// 			halytysraja
-		// 			varmuus_varasto
-		// 			tilausmaara
-		// 			ostoehdotus
-		// 			tahtituote
-		// 			tarrakerroin
-		// 			tarrakpl
-		// 			myynti_era
-		// 			minimi_era
-		// 			valmistuslinja
-		// 			valmistusaika_sekunneissa
-		// 			tullinimike1
-		// 			vienti
-		// 			tuotekorkeus
-		// 			tuoteleveys
-		// 			tuotesyvyys
-		// 			tuotemassa
-		// 			kuluprosentti
-		// 			kuljetusohje
-		// 			myyjanro
-		// 			toiminto
+		//tuoteno
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuoteno']);
+		// ean
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['eankoodi']);
+		// nimitys
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['nimitys']);
+		// tuotemerkki
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotemerkki']);
+		// tuotesyvyys
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotesyvyys']);
+		// tuoteleveys
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuoteleveys']);
+		// tuotekorkeus
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotekorkeus']);
+		// tuotemassa
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotemassa']);
+		// myyntihinta
+		$worksheet->write($excelrivi, $excelsarake++, hintapyoristys($tuoterowi['myyntihinta']), $yhtiorow['hintapyoristys']);
+		// alv
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['alv']);
+		// yksikkˆ
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['yksikko']);
+		// tullinimike1
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tullinimike1']);
+		// lyhytkuvaus
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['lyhytkuvaus']);
+		// kuvaus
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['kuvaus']);
 
-		foreach ($lajit_array as $laji) {
-			$worksheet->write($excelrivi, $excelsarake++, $laji, $format_bold);
-			
-			
-		}
+		// asiakkaan tilausnro
+		$worksheet->write($excelrivi, $excelsarake++, $spessurowi['kommentti']);
+		// asiakashinta
+		$worksheet->write($excelrivi, $excelsarake++, hintapyoristys($tilausrivi['hinta']), $yhtiorow['hintapyoristys']);
+		// asiakkaan valuutta
+		$worksheet->write($excelrivi, $excelsarake++, $laskurow['valkoodi']);
 
-		$excelrivi++;
+		//alkuper‰maa/t
+		$worksheet->write($excelrivi, $excelsarake++, $alkuperamaat['kaikkimaat']);
 
-		//loopataan myyntier‰tiedot per tilausrivi
-		mysql_data_seek($tilausrivit_talteen, 0);
-		while ($tilausrivi = mysql_fetch_assoc($tilausrivit_talteen)) {
-			$excelsarake = 0;
-			
-			$worksheet->write($excelrivi, $excelsarake++, $tilausrivi['tuoteno']);
+		foreach ($lajit_array as $asanalaji) {
 
-			foreach ($lajit_array as $asanalaji) {
-				
+			foreach ($kielet as $kieli) {
+				// etsit‰‰n tuotteen avainsanat per valittu laji ja kaikki kielet
 				$query = "	SELECT *
 							FROM tuotteen_avainsanat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tuoteno = '{$tilausrivi['tuoteno']}'
-							AND laji = '{$asanalaji}'";
+							AND laji = '{$asanalaji}'
+							AND kieli = '{$kieli}'";
 				$result = pupe_query($query);
 
-				if (mysql_num_rows($result) == 1) {
-					$asanase = mysql_fetch_assoc($result);
-					$worksheet->write($excelrivi, $excelsarake++, $asanase['selite']);
-				}
-				else $excelsarake++;
-
+				//laitetaan uusi headeri per valittu kieli vain ekalla rivill‰
+				if ($eka_tuote) $worksheet->write(0, $excelsarake, $asanalaji." ".strtoupper($kieli), $format_bold);
+				
+				$asanase = mysql_fetch_assoc($result);
+				$worksheet->write($excelrivi, $excelsarake++, $asanase['selite']);
 			}
-
-			$excelrivi++;
 		}
-		$excelnimi = $worksheet->close();
+
+		$eka_tuote = FALSE;
+
+		$excelrivi++;
+	}
+	$excelnimi = $worksheet->close();
 	
 	
 	if (isset($excelnimi)) {
@@ -182,12 +222,6 @@ elseif(isset($lajit_array) and count($lajit_array) > 0) {
 		echo "<tr><th>",t("Tallenna tulos"),":</th>";
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tappi' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-		echo "<input type='hidden' name='otunnus' value='$tilausnumero'>";
-		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-		echo "<input type='hidden' name='mista' value = '$mista'>";
-		echo "<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>";
-		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='kaunisnimi' value='Myyntieratiedot.xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
 		echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr></form>";

@@ -2083,8 +2083,9 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.laji = 'asn'
-						AND asn_sanomat.status != 'D'
-						GROUP BY asn_sanomat.paketintunniste, asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
+						AND asn_sanomat.status NOT IN ('X', 'E', 'D')
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+						HAVING count(asn_sanomat.tunnus) != sum(if(asn_sanomat.tilausrivi is NULL, 0, 1))
 						ORDER BY asn_sanomat.asn_numero, asn_sanomat.paketintunniste";
 			$result = pupe_query($query);
 
@@ -2112,11 +2113,6 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 				$naytetaanko_toimittajabutton = true;
-
-				// n‰ytet‰‰n vain vialliset rivit
-				if ($row["rivit"] == $row["ok"] and $row["status"] == "X") {
-					continue;
-				}
 
 				$asn_numerot[$row['asn_numero']] = $row['asn_numero'];
 

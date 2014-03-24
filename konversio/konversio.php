@@ -17,6 +17,7 @@ require_once('TuoteryhmaCSVDumper.php');
 require_once('HuoltosykliCSVDumper.php');
 require_once('TarkastuksetKantaCSVDumper.php');
 require_once('TarkastuksetCSVDumper.php');
+require_once('dump.php');
 
 $request = array(
 	'action'			 => $action,
@@ -40,6 +41,7 @@ $request['konversio_tyypit'] = array(
 	'tarkastukset'			 => t('Tarkastukset'),
 	'paivita_tarkastukset'	 => t('Päivitä seuraavat tulevat tapahtumat'),
 	'kaikki'				 => t('Kaikki'),
+	'dump'					 => t('Parametrit'),
 );
 
 if ($request['action'] == 'aja_konversio') {
@@ -182,6 +184,10 @@ if ($request['action'] == 'aja_konversio') {
 			echo t('Tarkastukset').':';
 //			$dumper = new TarkastuksetCSVDumper($request['kukarow']);
 //			$dumper->aja();
+			break;
+		
+		case 'dump':
+			dump_seed_data();
 			break;
 
 		default:

@@ -95,6 +95,19 @@ else {
 	$asmemolinkki = FALSE;
 }
 
+// Poistetaan liitetiedosto kalenterimerkinnästä
+// mikäli GET-parametreistä löytyy poista_liite
+if( isset($poista_liite) ) {
+	$query = '
+		DELETE FROM liitetiedostot
+		WHERE tunnus = '. mysql_real_escape_string($poista_liite) .'
+		AND liitos = "kalenterimerkintä"
+		AND yhtio = "'. $kukarow[yhtio] .'"
+	';
+
+	mysql_query($query) or pupe_error($query);
+}
+
 echo "<font class='head'>".t("Kalenteri")."</font><hr>";
 
 // ollaan painettu lisää nappia
@@ -219,6 +232,30 @@ if ($tee == 'LISAA') {
 					tapa 		= '$tapa',
 					tyyppi 		= 'kalenteri'";
 		mysql_query($query) or pupe_error($query);
+
+		$uusi_tunnus = mysql_insert_id();
+
+		// Päivitetään liitetiedosto uudelle tunnukselle,
+		// mikäli aikaisempi kalenterimerkintä päivittyi.
+		// Tämä siis sen takia, että kalenterimerkinnän päivitys
+		// tapahtuu poistamalla vanha merkintä ja lisäämällä uusi päivitetty
+		// versio merkinnästä.
+		if ($tunnus != '') {
+			$query = '
+				UPDATE liitetiedostot
+				SET liitostunnus = '. $uusi_tunnus .'
+				WHERE liitostunnus = '. mysql_real_escape_string($tunnus) .'
+				AND liitos = "kalenterimerkintä"
+				AND yhtio = "'. $kukarow['yhtio'] .'"
+			';
+
+			mysql_query($query) or pupe_error($query);
+		}
+
+		// Tallenna liitetiedosto formista
+		if (is_uploaded_file($_FILES['liitetiedosto']['tmp_name']) === TRUE) {
+			tallenna_liite('liitetiedosto', 'kalenterimerkintä', $uusi_tunnus, '');
+		}
 	}
 }
 
@@ -227,6 +264,17 @@ if ($tee == "POISTA") {
 	$query ="	DELETE FROM kalenteri
 				WHERE tunnus = '$tunnus'
 				$konsernit";
+
+	mysql_query($query) or pupe_error($query);
+
+	// Poistetaan myös liitetiedostot tälle kalenterimerkinnälle
+	$query = '
+		DELETE FROM liitetiedostot
+		WHERE liitostunnus = '. mysql_real_escape_string($tunnus) .'
+		AND liitos = "kalenterimerkintä"
+		AND yhtio = "'. $kukarow['yhtio'] .'"
+	';
+
 	mysql_query($query) or pupe_error($query);
 }
 
@@ -281,7 +329,7 @@ if($tee == "SYOTA") {
 	$lisayskello = $kello;
 
 	$lisays =  "
-		<td colspan='10'><form method='POST'>
+		<td colspan='10'><form method='POST' enctype='multipart/form-data'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='valitut' value='$valitut'>
@@ -405,6 +453,37 @@ if($tee == "SYOTA") {
 	$lisays .= "<tr><td valign='top'>".t("Päivärahat").":</td>";
 	$lisays .= "<td>
 		  		<input name='paivarahat' value='$paivarahat'><br>
+		  		</td>
+		  		</tr>";
+
+	$lisays .= "<tr><td valign='top'>".t("Ladatut liitetiedostot").":</td>";
+	$lisays .= "<td><table><tbody>";
+
+	$query = "
+		SELECT *
+		from liitetiedostot
+		where yhtio = '$kukarow[yhtio]'
+		and liitos  = 'kalenterimerkintä'
+		and liitostunnus = '$tunnus'
+	";
+	$liiteres = pupe_query($query);
+
+	if (mysql_num_rows($liiteres) > 0) {
+		while ($liiterow = mysql_fetch_assoc($liiteres)) {
+			$lisays .= '<tr>';
+			$lisays .= "<td><a href=\"#\" onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[filename]</a></td>";
+			$lisays .= '<td><a onclick="if (window.confirm(\'Haluatko poistaa liitteen '. $liiterow['filename'] .'\')===false ) return false;" href="'. $_SERVER['REQUEST_URI'] .'&poista_liite='. $liiterow['tunnus'] .'">Poista</a></td>';
+			$lisays .= '</tr>';
+		}
+	} else {
+		$lisays .= '<tr><td>Ei ladattuja liitetiedostoja</td></tr>';
+	}
+
+	$lisays .= "</tbody></table></td></tr>";
+
+	$lisays .= "<tr><td valign='top'>".t("Lataa uusi Liitetiedosto").":</td>";
+	$lisays .= "<td>
+		  		<input name='liitetiedosto' type='file'><br>
 		  		</td>
 		  		</tr>";
 
@@ -896,7 +975,24 @@ while ($kello_nyt != $whileloppu) {
 					}
 				}
 
-				echo "<br>$row[kentta01]</td>";
+				echo "<br>$row[kentta01]<br />";
+
+				$query = "	SELECT *
+				from liitetiedostot
+				where yhtio = '$kukarow[yhtio]'
+				and liitos  = 'kalenterimerkintä'
+				and liitostunnus = '$row[tunnus]'";
+				$liiteres = pupe_query($query);
+
+				if (mysql_num_rows($liiteres) > 0) {
+					echo "<br />";
+
+					while ($liiterow = mysql_fetch_assoc($liiteres)) {
+						echo "<a href=\"#\" onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[filename]</a>&nbsp;";
+					}
+				}
+
+				echo "</td>";
 			}
 
 			if ($tyhjaa > 0) {

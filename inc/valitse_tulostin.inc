@@ -281,9 +281,8 @@
 
 		$querykieli = "	SELECT kieli, email $lasku_email
 						FROM $mista
-						WHERE
-						tunnus = '$asrow[liitostunnus]'
-						AND yhtio ='$kukarow[yhtio]'";
+						WHERE tunnus = '$asrow[liitostunnus]'
+						AND yhtio    = '$kukarow[yhtio]'";
 		$resultkieli = pupe_query($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
 
@@ -297,27 +296,11 @@
 	else {
 		$sel[$yhtiorow["kieli"]] = "SELECTED";
 	}
-
-	$query  = "	SHOW columns
-				FROM sanakirja";
-	$fields =  pupe_query($query);
-
+	
 	echo "<td><select name='kieli'>";
 
-	while ($apurow = mysql_fetch_array($fields)) {
-		if (strlen($apurow[0]) == 2) {
-			$query = "SELECT DISTINCT nimi FROM maat WHERE koodi = '{$apurow[0]}'";
-			$maare = pupe_query($query);
-
-			$maaro = mysql_fetch_array($maare);
-
-			$maa   = strtolower($maaro["nimi"]);
-			if ($maa=="") $maa = $apurow[0];
-
-			$makkoodi = $apurow[0];
-
-			echo "<option value='$makkoodi' $sel[$makkoodi]>".t("$maa")."</option>";
-		}
+	foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+		echo "<option value='$sanakirja_kieli' $sel[$sanakirja_kieli]>".t($sanakirja_kieli_nimi)."</option>";
 	}
 
 	echo "</select></td></tr>";

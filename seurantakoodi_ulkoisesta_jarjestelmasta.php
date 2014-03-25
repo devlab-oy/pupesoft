@@ -66,7 +66,7 @@
 						list($seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
 					}
 					else {
-						list($devnull, $seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
+						list($posten_lahetenumero, $tilausnumero, $seurantakoodi) = explode(';', $tietue);
 					}
 
 					if (trim($seurantakoodi) == '') continue;
@@ -77,7 +77,7 @@
 					if ($tilausnumero == 0 or trim($seurantakoodi) == '') continue;
 
 					$query = "	UPDATE rahtikirjat SET
-								rahtikirjanro = '{$seurantakoodi}'
+								rahtikirjanro = concat(rahtikirjanro, ' ', '{$seurantakoodi}')
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otsikkonro = '{$tilausnumero}'";
 					pupe_query($query);
@@ -129,6 +129,7 @@
 						}
 					}
 				}
+				rename($path.$file, $path."done/".$file);
 			}
 		}
 

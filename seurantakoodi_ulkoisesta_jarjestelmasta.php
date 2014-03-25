@@ -84,7 +84,6 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otsikkonro = '{$tilausnumero}'";
 					pupe_query($query);
-					var_dump($query);
 					$query = "	SELECT SUM(kilot) kilotyht
 								FROM rahtikirjat
 								WHERE yhtio = '{$kukarow['yhtio']}'

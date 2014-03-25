@@ -1211,6 +1211,7 @@
 				}
 				$vastaaviaoli = array();
 				$delliavaimet = array();
+				$poistolaskuri = 0;
 				// Rajataan saldottomat pois
 				if ($saldotonrajaus != '') {
 					$_tmp = $vastaavastas;
@@ -1246,7 +1247,10 @@
 							
 							if (!isset($vastaavastas[$row_value['tuoteno']])) {
 								if (!isset($vastaavastas["{$isi}"]["{$row_value['tuoteno']}"])) echo "{$isi}***HUOM***{$row_value['tuoteno']} ei osunut issettiin!!! <br>";
-								else echo "{$isi}***HUOM***{$row_value['tuoteno']} osui ja poistetaan!!! <br>";
+								else {
+									echo "{$isi}***HUOM***{$row_value['tuoteno']} osui ja poistetaan!!! <br>";
+									$poistolaskuri++;
+								}
 								unset($vastaavastas["{$isi}"]["{$row_value['tuoteno']}"]);
 								unset($rows["{$row_key}"]);
 							}	
@@ -1498,14 +1502,20 @@
 				echo "tuoteno:{$row['tuoteno']} rk: $row_key<br>";
 				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0 and $row['vastaavat'] != '') {
 					$vastaavarivimaara = $row["vastaavamaara"];
-					if ($saldotonrajaus != '') $vastaavarivimaara = count($vastaavastas[$row['vastaavat'].$row['tuoteno']])+1;
+					echo "vastaavatrivit ENNEN: $vastaavarivimaara tuotteella: {$row['tuoteno']}<br>";
+					//if ($saldotonrajaus != '') $vastaavarivimaara = count($vastaavastas[$row['vastaavat'].$row['tuoteno']])+1;
+					if ($saldotonrajaus != '') $vastaavarivimaara = $vastaavarivimaara - $poistolaskuri;
+					echo "vastaavatrivit $vastaavarivimaara tuotteella: {$row['tuoteno']}<br>";
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
-				elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {
+				elseif ($verkkokauppa == "" and (!isset($row["mikavastaava"]))) {
 					echo "<td class='back'></td>";
 				}
 				else {
 					echo "NORSU";
+					echo "<pre>";
+					var_dump($row);
+					echo "</pre>";
 				}
 
 				$vari = "";

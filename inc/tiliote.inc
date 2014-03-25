@@ -83,6 +83,30 @@
 					require "inc/teemaksutosite.inc";
 				}
 			}
+			else if ($maksuviite != 0) {
+				echo "<font class='message'> ".t("Maksukandidaatti maksuviite & määrä")."</font><br>\n";
+
+				$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+							FROM lasku
+							WHERE viite = '$maksuviite'
+							and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
+							and yhtio	= '$yritirow[yhtio]'
+							and tila	= 'Q'
+							$kohdm_valkoodilisa";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 0) {
+					echo "<font class='error'>".t("Sopivaa maksua")." $maksuviite $kohdm $tilinvaluutta ".t("ei löytynyt")."!</font><br>\n";
+					echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>\n";
+					require "inc/teeselvittely.inc";
+				}
+				else {
+					$trow = mysql_fetch_assoc($result);
+
+					echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>\n";
+					require "inc/teemaksutosite.inc";
+				}
+			}
 			else {
 				switch ($koodi) {
 					case '702' : // Maksettu jotain tililtä, etsitään tilinolla ja summalla....
@@ -800,6 +824,7 @@
 			$iban		 = "";
 			$omataso 	 = substr($tietue, 187, 1);
 			$koodiselite = trim(substr($tietue, 52, 35));
+			$maksuviite  = substr($tietue, 159, 20);
 
 			// Tutkitaan seuraava maksu ja sen avulla laitetaan kuittikoodi ja erialla arvot kuntoon
 			$tdq = "	SELECT tiliotedata.*

@@ -1,16 +1,28 @@
 <?php
-// k‰ytet‰‰n slavea
-$useslave = 1;
 
-if (isset($_COOKIE['avainsanalaji_keksi'])) $lajit_array = unserialize(urldecode($_COOKIE['avainsanalaji_keksi']));
-else $lajit_array = $lajit;
+if ($yhtiorow['tilauksen_myyntieratiedot'] == '') die(t("Yhtiˆn parametrit - Tilauksen_myyntier‰tiedot ei ole aktiivinen"));
 
-if (!isset($lajit_array) and isset($lajit)) $lajit_array = $lajit;
+if (isset($_COOKIE['avainsanalaji_keksi'])) $lajit = unserialize(urldecode($_COOKIE['avainsanalaji_keksi']));
+
 if (isset($_POST['piirtele_valikko'])) {
-	// piirrell‰‰n valittavat tuotteen avainsanat
+	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				$(function() {
+					$('.check_all').on('click', function() {
+						var id = $(this).val();
+
+						if ($(this).is(':checked')) {
+							$('.'+id).attr('checked', true);
+						}
+						else {
+							$('.'+id).attr('checked', false);
+						}
+					});
+				});
+			</script>";
+	
+	// piirrell‰‰n tuotteen_avainsanat-valikko
 	echo "<br><br>";
 	echo "<font class='head'>".t("Myyntier‰t ja tuotetiedot")."</font>";
-	echo "<br><br>";
 
 	$query = "	SELECT distinct laji
 				FROM tuotteen_avainsanat
@@ -20,7 +32,7 @@ if (isset($_POST['piirtele_valikko'])) {
 
 	echo "<form>";
 	echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
-	echo "<tr><th>".t("Valitse avainsanat ja kielet")."</th><td>";
+	echo "<tr><th>".t("Valitse avainsanat sek‰ lis‰kielet")."<br><br><input type='checkbox' class='check_all' value='lajiboksit'>".t("Valitse Kaikki")."</th><td>";
 	
 	$query = "	SELECT DISTINCT kieli 
 				FROM tuotteen_avainsanat 
@@ -28,25 +40,25 @@ if (isset($_POST['piirtele_valikko'])) {
 				AND kieli != '{$yhtiorow['kieli']}'";
 	$ressu = pupe_query($query);
 
+	echo "<input type='checkbox' name='kielet[]' value='{$row['kieli']}' checked disabled> ".strtoupper($yhtiorow['kieli'])."<br>";
 	while ($row = mysql_fetch_assoc($ressu)) {
 		echo "<input type='checkbox' name='kielet[]' value='{$row['kieli']}'> ".strtoupper($row['kieli'])."<br>";
 	}
 	echo "</td></tr>";
+
 	$secretcounter = 0;
 	$eka_ajo = true;
 	while ($row = mysql_fetch_assoc($result)) {
-		//KISSA moro poista lengthrivi - debuggia
-		if (strlen($row['laji']) < 4) continue;
 		$nollaus = false;
 		if ($secretcounter == 0) echo "<tr>";
 		$tsekk = "";
-		foreach ($lajit_array as $osuma) {
+		foreach ($lajit as $osuma) {
 			if ($osuma == $row['laji']) {
 				$tsekk = "CHECKED";
 				break;
 			}
 		}
-		echo "<td align='left' valign='top' width='100'><input type='checkbox' name='lajit[]' value='{$row['laji']}' $tsekk>{$row['laji']}</td>";
+		echo "<td align='left' valign='top' width='100'><input type='checkbox' class='lajiboksit' name='lajit[]' value='{$row['laji']}' $tsekk>{$row['laji']}</td>";
 		if ($secretcounter == 2) {
 			echo "</tr>"; 
 			$secretcounter = 0;
@@ -66,14 +78,14 @@ if (isset($_POST['piirtele_valikko'])) {
 				<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='naantali' value='KIVAPAIKKA'>
-				<input type='submit' name='aja_ja_tallenna' value='".t("Aja rapsa")."'>
+				<input type='submit' name='aja_ja_tallenna' value='".t("Aja myyntier‰ ja tuotetiedot")."'>
 				</form>
 				</td>
 			</tr>";
 	echo "</table>";
 	echo "</form>";
 }
-elseif(isset($lajit_array) and count($lajit_array) > 0) {
+elseif(isset($lajit) and count($lajit) > 0) {
 	// t‰‰ll‰ ajellaan rapsa ja tallennetaan henkseliin
 
 	include('inc/pupeExcel.inc');
@@ -112,10 +124,11 @@ elseif(isset($lajit_array) and count($lajit_array) > 0) {
 
 	if (!isset($kielet)) $kielet = array();
 	array_unshift($kielet, $yhtiorow['kieli']);
-	
-	//loopataan myyntier‰tiedot per tilausrivi
+
 	mysql_data_seek($tilausrivit_talteen, 0);
 	$eka_tuote = TRUE;
+
+	//loopataan myyntier‰tiedot per tilausrivi
 	while ($tilausrivi = mysql_fetch_assoc($tilausrivit_talteen)) {
 		// Haetaan tuotteen tiedot
 		$query = "	SELECT * 
@@ -190,10 +203,10 @@ elseif(isset($lajit_array) and count($lajit_array) > 0) {
 		//alkuper‰maa/t
 		$worksheet->write($excelrivi, $excelsarake++, $alkuperamaat['kaikkimaat']);
 
-		foreach ($lajit_array as $asanalaji) {
-
+		foreach ($lajit as $asanalaji) {
+			
 			foreach ($kielet as $kieli) {
-				// etsit‰‰n tuotteen avainsanat per valittu laji ja kaikki kielet
+				// etsit‰‰n tuotteen avainsanat per valittu laji ja kieli
 				$query = "	SELECT *
 							FROM tuotteen_avainsanat
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -201,7 +214,7 @@ elseif(isset($lajit_array) and count($lajit_array) > 0) {
 							AND laji = '{$asanalaji}'
 							AND kieli = '{$kieli}'";
 				$result = pupe_query($query);
-
+				
 				//laitetaan uusi headeri per valittu kieli vain ekalla rivill‰
 				if ($eka_tuote) $worksheet->write(0, $excelsarake, $asanalaji." ".strtoupper($kieli), $format_bold);
 				
@@ -215,8 +228,7 @@ elseif(isset($lajit_array) and count($lajit_array) > 0) {
 		$excelrivi++;
 	}
 	$excelnimi = $worksheet->close();
-	
-	
+
 	if (isset($excelnimi)) {
 		echo "<br><br><table>";
 		echo "<tr><th>",t("Tallenna tulos"),":</th>";
@@ -231,7 +243,3 @@ elseif(isset($lajit_array) and count($lajit_array) > 0) {
 		echo t("Tallennus ep‰onnistui")."!<br>";
 	}
 }
-
-
-
-

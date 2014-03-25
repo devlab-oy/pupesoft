@@ -19,7 +19,7 @@ if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
 
-if (isset($tappi) and $tappi == "lataa_tiedosto" and isset($tmpfilenimi)) {
+if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($tappi) and $tappi == "lataa_tiedosto" and isset($tmpfilenimi)) {
 	readfile("/tmp/".$tmpfilenimi);
 	exit;
 }
@@ -8776,8 +8776,8 @@ if ($tee == '') {
 						</td>
 					</tr>";
 		}
-		$kukkanen = TRUE;
-		if ($kukarow['extranet'] == "" and $kukkanen and $tilausok == 0 and $rivilaskuri > 0) {
+
+		if ($kukarow['extranet'] == "" and $yhtiorow['tilauksen_myyntieratiedot'] != '' and $tilausok == 0 and $rivilaskuri > 0) {
 
 			if (!isset($piirtele_valikko)) {
 			echo "	<tr>
@@ -8791,7 +8791,7 @@ if ($tee == '') {
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='$tee'>
 						<input type='hidden' name='naantali' value='KIVAPAIKKA'>
-						<input type='submit' name='piirtele_valikko' value='".t("Myyntierätiedot")."'>
+						<input type='submit' name='piirtele_valikko' value='".t("Myyntierät ja tuotetiedot")."'>
 						</form>
 						</td>
 					</tr>";
@@ -8803,7 +8803,7 @@ if ($tee == '') {
 	}
 }
 
-if (isset($naantali) and $naantali == "KIVAPAIKKA") {
+if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($naantali) and $naantali == "KIVAPAIKKA") {
 	require("myyntierat_ja_tuotetiedot.inc");
 }
 

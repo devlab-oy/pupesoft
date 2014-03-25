@@ -70,14 +70,17 @@
 					}
 
 					if (trim($seurantakoodi) == '') continue;
-
+					// Otetaan vain eka ilmentymä tilausnumerosta jos sattuu olemaan monta eroteltuna spacella
+					list($tilausnumero) = explode(' ', $tilausnumero);
+					
 					$tilausnumero = (int) $tilausnumero;
 					$seurantakoodi = mysql_real_escape_string($seurantakoodi);
 
 					if ($tilausnumero == 0 or trim($seurantakoodi) == '') continue;
 
 					$query = "	UPDATE rahtikirjat SET
-								rahtikirjanro = concat(rahtikirjanro, ' ', '{$seurantakoodi}')
+								rahtikirjanro = concat(rahtikirjanro, ' ', '{$seurantakoodi}'),
+								tulostettu  = now()
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otsikkonro = '{$tilausnumero}'";
 					pupe_query($query);

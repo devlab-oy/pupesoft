@@ -72,9 +72,9 @@
 					if (trim($seurantakoodi) == '') continue;
 					// Otetaan vain eka ilmentymä tilausnumerosta jos sattuu olemaan monta eroteltuna spacella
 					list($tilausnumero) = explode(' ', $tilausnumero);
-					
+
 					$tilausnumero = (int) $tilausnumero;
-					$seurantakoodi = mysql_real_escape_string($seurantakoodi);
+					$seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
 
 					if ($tilausnumero == 0 or trim($seurantakoodi) == '') continue;
 
@@ -84,7 +84,7 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otsikkonro = '{$tilausnumero}'";
 					pupe_query($query);
-
+					var_dump($query);
 					$query = "	SELECT SUM(kilot) kilotyht
 								FROM rahtikirjat
 								WHERE yhtio = '{$kukarow['yhtio']}'

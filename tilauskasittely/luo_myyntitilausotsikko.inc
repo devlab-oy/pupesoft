@@ -162,7 +162,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 				if(mysql_num_rows($aov_result) == 1) {
 					$aov = mysql_result($aov_result,0);
 				}
-				elseif($asiakasrow['toimipaikka'] != 0){
+				elseif($asiakasrow['toimipaikka'] != 0 and mysql_num_rows($aov_result) == 0){
 					$toimipaikan_oletusvarasto_query = "	SELECT tunnus
 															FROM varastopaikat
 															WHERE yhtio = '$kukarow[yhtio]'

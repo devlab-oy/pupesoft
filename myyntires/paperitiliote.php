@@ -210,9 +210,9 @@
 		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
 
 		$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30, 72,  $yhtiorow["pankkiiban1"]." ".$yhtiorow["pankkiswift1"],	$firstpage, $norm);
-		$pdf->draw_text(217, 72, $yhtiorow["pankkiiban2"]." ".$yhtiorow["pankkiswift2"],	$firstpage, $norm);
-		$pdf->draw_text(404, 72, $yhtiorow["pankkiiban3"]." ".$yhtiorow["pankkiswift3"],	$firstpage, $norm);
+		$pdf->draw_text(30, 72,  $yhtiorow["pankkiiban1"]."      ".$yhtiorow["pankkiswift1"],	$firstpage, $norm);
+		$pdf->draw_text(217, 72, $yhtiorow["pankkiiban2"]."      ".$yhtiorow["pankkiswift2"],	$firstpage, $norm);
+		$pdf->draw_text(404, 72, $yhtiorow["pankkiiban3"]."      ".$yhtiorow["pankkiswift3"],	$firstpage, $norm);
 
 
 		//Alimmat kolme laatikkoa, yhtiötietoja

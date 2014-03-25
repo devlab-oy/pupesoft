@@ -189,6 +189,45 @@
 		}
 	}
 
+	if(!isset($kukarow_varasto)){
+		$kukarow_varasto = array();
+		if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+	    	$asiakkaan_oletusvarasto_query = " 	SELECT avainsana
+	                      						FROM asiakkaan_avainsanat
+	                      						WHERE yhtio = '$kukarow[yhtio]'
+	                      						AND laji = 'oletusmyyntivarasto'
+	                      						AND liitostunnus = {$laskurow['liitostunnus']}";
+	    	$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
+	    	if(mysql_num_rows($aov_result) > 0){
+	      		while ($aov_row = mysql_fetch_assoc($aov_result)) {
+	        		$kukarow_varasto[] = $aov_row['avainsana'];
+	      		}
+	    	}else{
+	    		$asiakkaan_toimipaikka_query = "SELECT toimipaikka
+	                      						FROM asiakas
+	                     						WHERE yhtio = '$kukarow[yhtio]'
+	                     						AND tunnus = {$laskurow['liitostunnus']}";
+	        	$atp_result = pupe_query($asiakkaan_toimipaikka_query);
+	        	$atp = mysql_result($atp_result,0);
+	        	if ($atp != 0) {
+	        		$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
+	        													FROM varastopaikat
+	        													WHERE yhtio = '$kukarow[yhtio]'
+	        													AND toimipaikka = {$atp}";
+	        		$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
+	        		if(mysql_num_rows($tlv_result) > 0) {
+	        			while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
+	        				$kukarow_varasto[] = $tlv_row['tunnus'];
+	        			}
+	        		}
+	      		}
+	    	}
+	    	if(count($kukarow_varasto) < 1){
+	    		$kukarow_varasto = explode(",", $kukarow["varasto"]);
+	    	}
+	  	}
+  	}
+
 	// Onko päässätty varasto josta myydään
 	if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
 		$varasto = $varasto;
@@ -199,8 +238,8 @@
 	elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
 		$varasto = array((int) $laskurow["varasto"]);
 	}
-	elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
-		$varasto = explode(",", $kukarow["varasto"]);
+	elseif (isset($kukarow_varasto)) {
+		$varasto = $kukarow_varasto;
 	}
 	else {
 		unset($varasto);

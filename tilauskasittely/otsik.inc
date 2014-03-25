@@ -2040,9 +2040,7 @@
 					$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
 																FROM varastopaikat
 																WHERE yhtio = '$kukarow[yhtio]'
-																AND toimipaikka = {$tp}
-																ORDER BY tunnus DESC";
-
+																AND toimipaikka = {$tp}";
 					$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
 					if(mysql_num_rows($tlv_result) > 0) {
 						$varastot_lisa_query = " AND toimipaikka = {$tp}";
@@ -2052,9 +2050,6 @@
 					}
 				}
 			}
-
-
-
 
 			$selectoitu_varasto_toimipaikka = 0;
 

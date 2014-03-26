@@ -1240,7 +1240,7 @@
 							if (!isset($vastaavastas[$row_value['tuoteno']]) and $row_value['tuoteperhe'] == '') {
 								unset($vastaavastas["{$isi}"]["{$row_value['tuoteno']}"]);
 								unset($rows["{$row_key}"]);
-							}	
+							}
 							continue;
 						}
 					}

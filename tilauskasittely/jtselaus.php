@@ -2277,17 +2277,15 @@
 
 		echo "<br><font class='message'>".t("Valinnat")."</font><br><br>";
 
-		//n‰ytet‰‰n "toimita varastosta" listauksessa vain varastot joista k‰ytt‰j‰ll‰ on oikeus myyd‰ (jos kuka.varasto on tyhj‰, saa k‰ytt‰j‰ myyd‰ kaikista normaalivarastoista)
-		if ($kukarow["varasto"] == "") {
-			$wherelisa = " AND tyyppi NOT IN ('P', 'E') ";
-		} else {
-			$wherelisa = " AND tyyppi != 'P' ";
-			$wherelisa .= " AND tunnus IN ({$kukarow["varasto"]})";
+		//n‰ytet‰‰n "toimita varastosta" listauksessa vain varastot joista k‰ytt‰j‰ll‰ on oikeus myyd‰ (jos kuka.varasto on tyhj‰ tai 0, saa k‰ytt‰j‰ myyd‰ kaikista normaalivarastoista)
+		if ($kukarow["varasto"] != "" OR $kukarow["varasto"] != 0) {
+			$wherelisa = " AND tunnus IN ({$kukarow["varasto"]})";
 		}
 
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
+					AND tyyppi != 'P'
 					$wherelisa
 					ORDER BY tyyppi, nimitys";
 		$vtresult = pupe_query($query);

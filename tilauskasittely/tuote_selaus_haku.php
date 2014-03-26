@@ -1462,10 +1462,9 @@
 				}
 
 				echo "<tr class='aktiivi'>";
-				//echo "tuoteno:{$row['tuoteno']} rk: $row_key<br>";
+
 				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0 and $row['vastaavat'] != '' or ($saldotonrajaus != '' and $row['mikavastaava'] != '')) {
 					$vastaavarivimaara = $row["vastaavamaara"];
-					//if ($saldotonrajaus != '') $vastaavarivimaara = count($vastaavastas[$row['vastaavat'].$row['tuoteno']])+1;
 					if ($saldotonrajaus != '') $vastaavarivimaara = 1;
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}

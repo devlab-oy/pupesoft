@@ -4,10 +4,12 @@ require ("inc/parametrit.inc");
 if (!isset($konserni))  $konserni = '';
 if (!isset($tee))     $tee = '';
 if (!isset($oper))    $oper = '';
+if (!isset($ojarj))    $ojarj = '';
+if (!isset($tapa))    $tapa = 'a';
 
 echo "<font class='head'>".t("Yhdist‰ asiakkaita")."</font><hr>";
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == 'YHDISTA_TIEDOSTOSTA') {
+if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == 'YHDISTA_TIEDOSTOSTA') {
 
     $historia = '';
 
@@ -41,18 +43,27 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == 'YHDI
       $headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$x]));
     }
 
+    $taulunrivit = array();
   	// Luetaan tiedosto loppuun ja tehd‰‰n taulukohtainen array koko datasta
     for ($y = 1; $y < $data->sheets[0]['numRows']; $y++) {
       	for ($h = 0; $h < count($headers); $h++) {
-        	$taulunrivit[$y-1][$headers[$h]] = trim($data->sheets[0]['cells'][$y][$h]);
-		}
-	}
+          $taulunrivit[$y-1][$headers[$h]] = trim($data->sheets[0]['cells'][$y][$h]);
+		    }
+    }
 
 	$yhdistykset = array();
 
 	$yr = 0;
 	foreach ($taulunrivit as $r) {
-	    if ( $tunnus = hae_asiakastunnus($r['YTUNNUS'], $r['OVTTUNNUS'], $r['TOIM_OVTTUNNUS']) ) {
+
+      $tunnukset = array();
+
+      if(isset($r['ASIAKASTUNNUS']))    $tunnukset['ASIAKASTUNNUS'] = $r['ASIAKASTUNNUS'];
+      if(isset($r['YTUNNUS']))          $tunnukset['YTUNNUS'] = $r['YTUNNUS'];
+      if(isset($r['OVTTUNNUS']))        $tunnukset['OVTTUNNUS'] = $r['OVTTUNNUS'];
+      if(isset($r['TOIM_OVTTUNNUS']))   $tunnukset['TOIM_OVTTUNNUS'] = $r['TOIM_OVTTUNNUS'];
+
+	    if ( $tunnus = hae_asiakastunnus($tunnukset) ) {
 
 	      	if ( $r['SAMPSAN_SPESSUKENTAT'] == 'X' ) {
 	        	$yhdistykset[$yr]['spessut'] = $tunnus;
@@ -61,7 +72,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == 'YHDI
 	      	if ( $r['JATA_TAMA'] != 'X' ) {
 	        	$yhdistykset[$yr]['yhdista'][] = $tunnus;
 	      	}
-	      	else{
+	      	elseif( isset($yhdistykset[$yr]) and count($yhdistykset[$yr]['yhdista']) > 0 ){
 	        	$yhdistykset[$yr]['jata'] = $tunnus;
 	        	$yr++;
 	      	}
@@ -87,15 +98,32 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
   	echo "<br /><br /><form><input type='submit' value='" . t("Yhdist‰ lis‰‰") . "' /></form>";
 }
 
-if ( ( !isset($jataminut) and !isset($yhdista) ) and ( is_uploaded_file($_FILES['userfile']['tmp_name']) === false ) ) {
+if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']) or is_uploaded_file($_FILES['userfile']['tmp_name']) === false ) ) {
 
-	echo "<br><form method='post' name='sendfile' enctype='multipart/form-data'>";
+    echo "<br><form method='post' name='sendfile' enctype='multipart/form-data'>";
   	echo "<input type='hidden' name='tee' value='YHDISTA_TIEDOSTOSTA'>";
   	echo t("Lue yhdistett‰v‰t asiakkaat tiedostosta")."...<br /><br />";
 
     echo "<table>";
+    echo "<tr><th>" . t("Asiakkaan valintatapa") . ":</th><td>";
+    echo "<select name='tapa' onChange='submit();' >";
+
+    if($tapa == 'b'){$b_sel = 'selected'; $a_sel = '';}else{$a_sel = 'selected'; $b_sel = '';}
+
+    echo "<option value='a' $a_sel>Asiakastunnus</option>";
+    echo "<option value='b' $b_sel>ytunnus, ovttunnus, toim_ovttunnus</option></td></tr>";
+    echo "</table><br />";
+
+    echo "<table>";
     echo "<tr><th colspan='99'>" . t("Excel-tiedosto seuraavin tiedoin") . ":</th></tr>";
-    echo "<tr><td>ytunnus</td><td>ovttunnus</td><td>toim_ovttunnus</td><td>jata_tama</td></tr>";
+
+    if($tapa == 'b'){
+      echo "<tr><td>ytunnus</td><td>ovttunnus</td><td>toim_ovttunnus</td><td>jata_tama</td></tr>";
+    }
+    else{
+      echo "<tr><td>asiakastunnus</td><td>jata_tama</td></tr>";
+    }
+
     echo "</table><br />";
 
     echo t("\"jata_tama\" kentt‰‰n laitetaan arvoksi \"X\" niille riveille joihin edelliset rivit halutaan yhdist‰‰. Jos yhdistett‰vi‰ rivej‰ on paljon, saattaa toimenpide kest‰‰ kauan").".<br /><br />";
@@ -229,7 +257,7 @@ function yhdista_asiakkaita($jataminut, $yhdista, $spessut = 0) {
     // Otetaan j‰tett‰v‰ pois poistettavista jos se on sinne ruksattu
     unset($yhdista[$jataminut]);
 
-    $historia = t("Asiakkaaseen").": ". $jrow["nimi"].", ". t("ytunnus").": ". $jrow["ytunnus"].", ".t("asiakasnro").": ". $asrow["asiakasnro"] ." ".t("liitettiin seuraavat asiakkaat").": <br />";
+    $historia = t("Asiakkaaseen").": ". $jrow["nimi"].", ". t("ytunnus").": ". $jrow["ytunnus"].", ".t("asiakasnro").": ". $jrow["asiakasnro"] ." ".t("liitettiin seuraavat asiakkaat").": <br />";
 
     if( $spessut != 0 ){
       // haetaan s‰ilytett‰vien spesiaalikenttien tiedot
@@ -888,26 +916,33 @@ function yhdista_asiakkaita($jataminut, $yhdista, $spessut = 0) {
     return $historia;
 }
 
-function hae_asiakastunnus($ytunnus, $ovttunnus, $toim_ovttunnus) {
+function hae_asiakastunnus($tunnukset) {
   global $kukarow;
 
-  $query = "  SELECT tunnus
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND laji != 'P'
-        AND ytunnus = '{$ytunnus}'
-        AND ovttunnus = '{$ovttunnus}'
-        AND toim_ovttunnus = '{$toim_ovttunnus}'";
-
-  $result = pupe_query($query);
-  $tunnus = mysql_result($result, 0);
-
-  if ($tunnus != ''){
-    return $tunnus;
+  if($tunnukset['ASIAKASTUNNUS'] != ''){
+    $query = "SELECT tunnus
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji != 'P'
+              AND tunnus = '{$tunnukset['ASIAKASTUNNUS']}'";
+  }
+  else{
+    $query = "SELECT tunnus
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji != 'P'
+              AND ytunnus = '{$tunnukset['YTUNNUS']}'
+              AND ovttunnus = '{$tunnukset['OVTTUNNUS']}'
+              AND toim_ovttunnus = '{$tunnukset['TOIM_OVTTUNNUS']}'";
   }
 
-  return false;
+  $result = pupe_query($query);
 
+  if(mysql_num_rows($result) > 0){
+    $tunnus = mysql_result($result, 0);
+    if ($tunnus != '') return $tunnus;
+  }
+  return false;
 }
 
 

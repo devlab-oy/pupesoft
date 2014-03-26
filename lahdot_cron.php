@@ -74,7 +74,7 @@
 					WHERE yhtio  = '{$kukarow['yhtio']}'
 					AND aktiivi  = ''
 					AND pvm    	 > CURDATE()
-					AND laatija  = 'cron'
+					AND laatija  = 'admin'
 					ORDER BY tunnus";
 	}
 	else {
@@ -83,7 +83,7 @@
 					WHERE yhtio  = '{$kukarow['yhtio']}'
 					AND aktiivi  = ''
 					AND pvm     >= CURDATE()
-					AND laatija  = 'cron'
+					AND laatija  = 'admin'
 					ORDER BY tunnus";
 	}
 

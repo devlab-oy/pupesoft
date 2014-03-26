@@ -24,6 +24,11 @@
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
+	$nayta_myos_siirrot = false;
+	if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+		$nayta_myos_siirrot = true;
+	}
+
 	if (isset($man_aloitus) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and count($checkbox_child) > 0) {
@@ -541,11 +546,16 @@
 
 						if ($lahto_muokkaus_aktiivi == "E") {
 
+							$lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
+							if ($nayta_myos_siirrot) {
+								$lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')) OR (lasku.tila = 'G' AND lasku.alatila IN ('A','B','C')))";
+							}
+
 							$query = "	SELECT tunnus
 										FROM lasku
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND toimitustavan_lahto = '{$lahto}'
-										AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
+										{$lasku_where}";
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) > 0) {
@@ -666,6 +676,17 @@
 
 					foreach ($checkbox_parent as $lahto) {
 
+						if ($nayta_myos_siirrot) {
+							$tilat = "	AND (
+											( tila = 'L' AND alatila = 'B' )
+											OR ( tila = 'G' AND alatila = 'B' )
+										)";
+						}
+						else {
+							$tilat = "	AND tila 	= 'L'
+										AND alatila = 'B'";
+						}
+
 						$sel_ltun = $mergeid_arr = array();
 
 						$lahto = (int) $lahto;
@@ -673,8 +694,7 @@
 						$query = "	SELECT tunnus, toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
 									FROM lasku
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tila 	= 'L'
-									AND alatila = 'B'
+									{$tilat}
 									AND toimitustavan_lahto = '{$lahto}'";
 						$result = pupe_query($query);
 
@@ -2004,6 +2024,13 @@ function hae_yhdistettavat_tilaukset() {
 
 		$ohita_kerays_lapset = array();
 
+		if ($nayta_myos_siirrot) {
+			$lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')) OR (lasku.tila = 'G' AND lasku.alatila IN ('J','A','B','C')))";
+		}
+		else {
+			$lasku_where = "AND ( (lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')) )";
+		}
+
 		$query = "	SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.tunnus
 					FROM lasku
 					JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
@@ -2014,7 +2041,7 @@ function hae_yhdistettavat_tilaukset() {
 						and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 					AND varastopaikat.tunnus = '{$select_varasto}')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
+					{$lasku_where}";
 		$result = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($result)) {
@@ -2111,7 +2138,7 @@ function hae_yhdistettavat_tilaukset() {
 							and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 						AND varastopaikat.tunnus = '{$select_varasto}')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
+						{$lasku_where}
 						GROUP BY 1,2,3,4,5,6,7,8,9
 						ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";
 			$result = pupe_query($query);
@@ -2437,14 +2464,30 @@ function hae_yhdistettavat_tilaukset() {
 
 				switch ($mita_naytetaan) {
 					case 'aloittamatta':
-						$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'N' AND lasku.alatila = 'A')" : "(lasku.tila = 'N' AND lasku.alatila = 'A')";
+						if ($nayta_myos_siirrot) {
+							$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'G' AND lasku.alatila = 'J')" : "(lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'G' AND lasku.alatila = 'J')";
+						}
+						else {
+							$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'N' AND lasku.alatila = 'A')" : "(lasku.tila = 'N' AND lasku.alatila = 'A')";
+						}
+						
 						break;
 					case 'aloitettu':
-						$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila = 'A')" : "(lasku.tila = 'L' AND lasku.alatila = 'A')";
+						if ($nayta_myos_siirrot) {
+							$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila = 'A') OR (lasku.tila = 'G' AND lasku.alatila = 'A')" : "(lasku.tila = 'L' AND lasku.alatila = 'A') OR (lasku.tila = 'G' AND lasku.alatila = 'A')";
+						}
+						else {
+							$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila = 'A')" : "(lasku.tila = 'L' AND lasku.alatila = 'A')";
+						}
 						$kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR kerayserat.tila IN ('K','X')" : "kerayserat.tila IN ('K','X')";
 						break;
 					case 'keratty':
-						$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))" : "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))";
+						if ($nayta_myos_siirrot) {
+							$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')) OR (lasku.tila = 'G' AND lasku.alatila IN ('B', 'C'))" : "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')) OR (lasku.tila = 'G' AND lasku.alatila IN ('B', 'C'))";
+						}
+						else {
+							$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))" : "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))";
+						}
 						$kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR (kerayserat.tila IN ('T','R'))" : "(kerayserat.tila IN ('T','R'))";
 						break;
 				}
@@ -2479,7 +2522,7 @@ function hae_yhdistettavat_tilaukset() {
 						COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
 						SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
 						FROM lasku
-						JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+						LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
 						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
 						JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
@@ -2641,7 +2684,8 @@ function hae_yhdistettavat_tilaukset() {
 				"7" => t("Tehdastilaus"),
 				"8" => t("Muiden mukana"),
 				"A" => t("Työmääräys"),
-				"S" => t("Sarjatilaus")
+				"S" => t("Sarjatilaus"),
+				"G" => t("Varastosiirto"),
 			);
 
 			while ($lahto_row = mysql_fetch_assoc($lahto_res)) {

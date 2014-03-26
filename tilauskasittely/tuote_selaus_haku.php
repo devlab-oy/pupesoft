@@ -1236,22 +1236,12 @@
 						}
 
 						if ($ei_piirreta) {
-							if (!isset($vastaavastas[$row_value['tuoteno']])) {
+							//jos kuulutaan tuoteperheeseen niin ei poisteta
+							if (!isset($vastaavastas[$row_value['tuoteno']]) and $row_value['tuoteperhe'] == '') {
 								unset($vastaavastas["{$isi}"]["{$row_value['tuoteno']}"]);
 								unset($rows["{$row_key}"]);
 							}	
 							continue;
-						}
-					}
-
-					foreach ($vastaavastas as $row_key => $row_value) {
-
-						if (count($row_value) == 0) {
-							unset($vastaavastas[$row_key]);
-
-							if (isset($_tmp[$row_key]) and count($_tmp[$row_key]) > 0) {
-								unset($rows[$row_key]);
-							}
 						}
 					}
 				}

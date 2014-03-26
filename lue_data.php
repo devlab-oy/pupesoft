@@ -2046,30 +2046,33 @@ if ($kasitellaan_tiedosto) {
 							$tassafailissa = FALSE;
 						}
 
-						$funktio = $table_mysql."tarkista";
+						// Tarkistetaan vain ne kentät jotka on tässä excelissä.
+						if ($tassafailissa) {
 
-						if (!function_exists($funktio)) {
-							@include("inc/$funktio.inc");
-						}
+							$funktio = $table_mysql."tarkista";
 
-						unset($virhe);
-
-						if (function_exists($funktio)) {
-							$funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
-						}
-
-						// Ignoorataan virhe jos se ei koske tässä failissa olutta saraketta
-						if ($tassafailissa and isset($virhe[$i]) and $virhe[$i] != "") {
-							switch ($table_mysql) {
-								case "tuote":
-									$virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";
-									break;
-								default:
-									$virheApu = "";
+							if (!function_exists($funktio)) {
+								@include("inc/$funktio.inc");
 							}
 
-							lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." (".$t[$i].")</font><br>");
-							$errori = 1;
+							unset($virhe);
+
+							if (function_exists($funktio)) {
+								$funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
+							}
+
+							if (isset($virhe[$i]) and $virhe[$i] != "") {
+								switch ($table_mysql) {
+									case "tuote":
+										$virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";
+										break;
+									default:
+										$virheApu = "";
+								}
+
+								lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." (".$t[$i].")</font><br>");
+								$errori = 1;
+							}
 						}
 					}
 

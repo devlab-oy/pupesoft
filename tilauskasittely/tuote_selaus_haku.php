@@ -1451,7 +1451,7 @@
 						continue;
 					}
 				}
-				
+
 				if (isset($row["sarjatunnus"]) and $row["sarjatunnus"] > 0 and $kukarow["extranet"] == "" and $verkkokauppa == "" and function_exists("sarjanumeronlisatiedot_popup")) {
 					if ($lisatiedot != "") {
 						echo "<tr class='aktiivi'><td colspan='7' class='back'><br></td></tr>";

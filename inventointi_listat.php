@@ -241,7 +241,7 @@
 
 	echo "</td></tr>";
 
-	if ($yhtiorow['kerayserat'] != '') {
+	if ($yhtiorow['kerayserat'] == 'K') {
 
 		$query = "SELECT count(tunnus) AS cnt FROM varaston_hyllypaikat WHERE yhtio = '{$kukarow['yhtio']}'";
 		$cnt_chk_res = pupe_query($query);

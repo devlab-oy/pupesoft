@@ -938,7 +938,8 @@
 					//p‰ivitet‰‰n tuotepaikan listanumero ja listaaika
 					$query = "	UPDATE tuotepaikat
 								SET inventointilista	= '{$listanro}',
-								inventointilista_aika	= '{$listaaika}'
+								inventointilista_aika	= '{$listaaika}',
+								inventointilista_naytamaara = '{$naytasaldo}'
 								WHERE tuotepaikat.yhtio	= '{$kukarow['yhtio']}'
 								AND tuoteno		= '{$tuoterow['tuoteno']}'
 								AND hyllyalue	= '{$tuoterow['hyllyalue']}'

@@ -8812,7 +8812,7 @@ if ($tee == '') {
 					<input type='hidden' name='orig_tila' value = '$orig_tila'>
 					<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
 					<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>
-					<input type='submit' value='* ".t("Muuta")." $otsikko ".t("normaaliksi ennakkotilaukseksi")."*'>
+					<input type='submit' value='* ".t("Muuta %s normaaliksi ennakkotilaukseksi", "", $otsikko)."*'>
 					</form></td></tr>";
 		}
 		

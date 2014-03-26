@@ -1040,7 +1040,7 @@
 							while ($krow = mysql_fetch_assoc($kores)) {
 
 								if (isset($vastaavamaara)) {
-									//KISSAKIINNI ISKÄ
+									// poimitaan isätuotteet
 									$vastaavastas[$mrow['tuoteno']] = array();
 									$krow["vastaavamaara"] = $vastaavamaara;
 									$rotta = $mrow["vastaavat"].$mrow["tuoteno"];
@@ -1209,18 +1209,12 @@
 						$i++;
 					}
 				}
-				$vastaaviaoli = array();
-				$delliavaimet = array();
-				$poistolaskuri = 0;
+
 				// Rajataan saldottomat pois
 				if ($saldotonrajaus != '') {
 					$_tmp = $vastaavastas;
-					$piilolaskuri = 0;
 					$isi = "";
-					echo "VASTAAVASTAS ENNEN LOOPPIA<br>";
-					echo "<pre>";
-					var_dump($vastaavastas);
-					echo "</pre>";
+
 					foreach ($rows as $row_key => $row_value) { 
 						$ei_piirreta = FALSE;
 						$apunumero = $row_value['tuoteno'];
@@ -1239,48 +1233,27 @@
 
 						if ($myytavissa == 0) {
 							$ei_piirreta = TRUE;
-							//unset($rows["{$row_key}"]);
-							$piilolaskuri++;
 						}
 
 						if ($ei_piirreta) {
-							
 							if (!isset($vastaavastas[$row_value['tuoteno']])) {
-								if (!isset($vastaavastas["{$isi}"]["{$row_value['tuoteno']}"])) echo "{$isi}***HUOM***{$row_value['tuoteno']} ei osunut issettiin!!! <br>";
-								else {
-									echo "{$isi}***HUOM***{$row_value['tuoteno']} osui ja poistetaan!!! <br>";
-									$poistolaskuri++;
-								}
 								unset($vastaavastas["{$isi}"]["{$row_value['tuoteno']}"]);
 								unset($rows["{$row_key}"]);
 							}	
 							continue;
 						}
-	
 					}
-					echo "XMEN";
+
 					foreach ($vastaavastas as $row_key => $row_value) {
-					
-						
+
 						if (count($row_value) == 0) {
 							unset($vastaavastas[$row_key]);
-									echo "<pre>";
-									var_dump($row_key);
-									echo "</pre>";
-							//unset($rows[$row_key]);
-							
+
 							if (isset($_tmp[$row_key]) and count($_tmp[$row_key]) > 0) {
 								unset($rows[$row_key]);
 							}
-							
 						}
 					}
-					echo "<br>KISSAMOI: $piilolaskuri tuotetta poistettiin arraysta ja alkup. arrayssa vastaavia oli:<br>";
-					echo "VASTAAVASTAS LOOPIN JALKEEN <br>";
-					echo "<pre>";
-					var_dump($vastaavastas);
-					echo "</pre>";
-					
 				}
 
 				if ($hae_ja_selaa_row['selite'] == 'B') {
@@ -1499,23 +1472,15 @@
 				}
 
 				echo "<tr class='aktiivi'>";
-				echo "tuoteno:{$row['tuoteno']} rk: $row_key<br>";
-				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0 and $row['vastaavat'] != '') {
+				//echo "tuoteno:{$row['tuoteno']} rk: $row_key<br>";
+				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0 and $row['vastaavat'] != '' or ($saldotonrajaus != '' and $row['mikavastaava'] != '')) {
 					$vastaavarivimaara = $row["vastaavamaara"];
-					echo "vastaavatrivit ENNEN: $vastaavarivimaara tuotteella: {$row['tuoteno']}<br>";
 					//if ($saldotonrajaus != '') $vastaavarivimaara = count($vastaavastas[$row['vastaavat'].$row['tuoteno']])+1;
-					if ($saldotonrajaus != '') $vastaavarivimaara = $vastaavarivimaara - $poistolaskuri;
-					echo "vastaavatrivit $vastaavarivimaara tuotteella: {$row['tuoteno']}<br>";
+					if ($saldotonrajaus != '') $vastaavarivimaara = 1;
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
 				elseif ($verkkokauppa == "" and (!isset($row["mikavastaava"]))) {
 					echo "<td class='back'></td>";
-				}
-				else {
-					echo "NORSU";
-					echo "<pre>";
-					var_dump($row);
-					echo "</pre>";
 				}
 
 				$vari = "";

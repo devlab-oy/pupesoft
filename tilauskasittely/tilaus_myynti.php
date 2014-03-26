@@ -1055,7 +1055,7 @@ if (isset($tyhjenna)) {
 }
 
 if ($tee == "VALMIS"
-and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+	and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
 	and $kateinen != ''
 	and $kukarow['extranet'] == ''
 	and (
@@ -2031,10 +2031,10 @@ if ($tee == "MUUTA_EXT_ENNAKKO" and $kukarow['extranet'] == '') {
 	$jauza = pupe_query($query);
 
 	if (mysql_affected_rows() != 1) {
-		echo "<font class='error'>".t("VIRHE: Tilausta")." $tilausnumero ".t("ei muutettu normaaliksi ennakkotilaukseksi")."!</font><br><br>";
+		echo "<font class='error'>".t("VIRHE: Tilausta %s ei muutettu normaaliksi ennakkotilaukseksi", "", $tilausnumero)."!</font><br><br>";
 	}
 	else {
-		echo "<font class='message'>".t("Tilaus")." $tilausnumero ".t("muutettiin normaaliksi ennakkotilaukseksi")."!</font><br><br>";
+		echo "<font class='message'>".t("Tilaus %s muutettiin normaaliksi ennakkotilaukseksi", "", $tilausnumero)."!</font><br><br>";
 	}
 }
 

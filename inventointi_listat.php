@@ -619,7 +619,7 @@
 
 				if ($from == '') {
 					$yhtiotaulu = "tuotepaikat";
-					$from 		= " FROM tuotepaikat";
+					$from 		= " FROM tuotepaikat ";
 					$join 		= " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
 					$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
 

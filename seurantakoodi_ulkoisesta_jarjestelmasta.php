@@ -66,22 +66,24 @@
 						list($seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
 					}
 					else {
-						list($devnull, $seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
+						list($posten_lahetenumero, $tilausnumero, $seurantakoodi) = explode(';', $tietue);
 					}
 
 					if (trim($seurantakoodi) == '') continue;
+					// Otetaan vain eka ilmentymä tilausnumerosta jos sattuu olemaan monta eroteltuna spacella
+					list($tilausnumero) = explode(' ', $tilausnumero);
 
 					$tilausnumero = (int) $tilausnumero;
-					$seurantakoodi = mysql_real_escape_string($seurantakoodi);
+					$seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
 
 					if ($tilausnumero == 0 or trim($seurantakoodi) == '') continue;
 
 					$query = "	UPDATE rahtikirjat SET
-								rahtikirjanro = '{$seurantakoodi}'
+								rahtikirjanro = concat(rahtikirjanro, ' ', '{$seurantakoodi}'),
+								tulostettu  = now()
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otsikkonro = '{$tilausnumero}'";
 					pupe_query($query);
-
 					$query = "	SELECT SUM(kilot) kilotyht
 								FROM rahtikirjat
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -129,6 +131,7 @@
 						}
 					}
 				}
+				rename($path.$file, $path."done/".$file);
 			}
 		}
 

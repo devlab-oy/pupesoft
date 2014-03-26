@@ -39,7 +39,7 @@ if (!function_exists("onkotapahtumajariveja")) {
 
 if (!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
+		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko, $luedata_toiminto;
 
 		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
 
@@ -78,8 +78,12 @@ if (!function_exists("tuotetarkista")) {
 			$tem_tuoteno = $t[$i];
 
 			// Onko tuotteella tapahtumia
-			if ($poistolukko != "" and $poistolukko != "LUEDATA") {
+			if ($poistolukko != "" and ($poistolukko != "LUEDATA" or ($poistolukko == "LUEDATA" and strtoupper($luedata_toiminto) == "POISTA"))) {
 				onkotapahtumajariveja($tem_tuoteno);
+
+				if ($poistolukko != "" and strtoupper($luedata_toiminto) == "POISTA") {
+					$virhe[$i] = t("Tuotetta ei saa poistaa, koska tuotteella on tilausrivejä/tapahtumia")."!";
+				}
 			}
 		}
 

@@ -247,12 +247,19 @@
 						$virhe = 1;
 					}
 
-					// Jos on syötetty käsin inventointipvm sen pitää olla validi
-					if (isset($paivamaaran_kasisyotto) and !empty($inventointipvm)) {
-						list($yyyy, $mm, $dd) = explode('-', $inventointipvm);
+					// Jos on syötetty käsin inventointipvm pp, kk tai vvvv kokorimpsun pitää olla validi
+					if (isset($paivamaaran_kasisyotto) and (!empty($inventointipvm_pp) or !empty($inventointipvm_kk) or !empty($inventointipvm_vv))) {
+
+						if (!is_numeric($inventointipvm_pp)) $virhe = 1;
+						if (!is_numeric($inventointipvm_kk)) $virhe = 1;
+						if (!is_numeric($inventointipvm_vv)) $virhe = 1;
+
+						$mm = $inventointipvm_kk;
+						$dd = $inventointipvm_pp;
+						$yyyy = $inventointipvm_vv;
 
 						if (!checkdate($mm, $dd, $yyyy)) {
-							echo "<font class='error'>".t("VIRHE: Virheellinen inventointipäivämäärä")."!: $tuoteno ".t("Anna päivämäärä muodossa vvvv-kk-pp")."</font><br>";
+							echo "<font class='error'>".t("VIRHE: Virheellinen inventointipäivämäärä")."!: $tuoteno ".t("Anna päivämäärä muodossa pp-kk-vvvv")."</font><br>";
 							$virhe = 1;
 						}
 						elseif (strtotime("{$yyyy}-{$mm}-{$dd} 23:59:59") > strtotime(date('Y-m-d'))) {
@@ -1275,7 +1282,9 @@
 			echo "<input type='hidden' name='lista' value='$lista'>";
 			echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
 			echo "<input type='hidden' name='alku' value='$alku'>";
-			echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
+			echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+			echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+			echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 			echo "</form>";
 		}
 
@@ -1289,7 +1298,9 @@
 		echo "<input type='hidden' name='alku' value='$alku'>";
 		echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
 		echo "<input type='hidden' name='jarjestys' value='$jarjestys'>";
-		echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
+		echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+		echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+		echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 
 		echo "<table>";
 		echo "<tr><td colspan='7' class='back'>".t("Syötä joko hyllyssä oleva määrä, tai lisättävä määrä + etuliitteellä, tai vähennettävä määrä - etuliitteellä")."</td></tr>";
@@ -1597,8 +1608,10 @@
 		echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
 		echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
 		if (isset($paivamaaran_kasisyotto)) {
-			echo "<tr><th>".t("Syötä inventointipäivämäärä").":</th>";
-			echo "<td><input type='text' size='10' maxlength='10' name='inventointipvm' value='$inventointipvm'></td></tr>";
+			echo "<tr><th>".t("Syötä inventointipäivämäärä (pp-kk-vvvv)").":</th>";
+			echo "<td><input type='text' size='2' maxlength='2' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+			echo "<input type='text' size='2' maxlength='2' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+			echo "<input type='text' size='4' maxlength='4' name='inventointipvm_vv' value='$inventointipvm_vv'></td></tr>";
 		}
 		echo "</table><br><br>";
 
@@ -1651,7 +1664,9 @@
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
 			echo "<input type='hidden' name='tuoteno' value='$noperow[tuoteno]'>";
-			echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
+			echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+			echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+			echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 			echo "<tr><td class='back'><input type='submit' value='".t("Edellinen tuote")."'></td>";
 			echo "</form>";
 
@@ -1672,7 +1687,9 @@
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
 			echo "<input type='hidden' name='tuoteno' value='$yesrow[tuoteno]'>";
-			echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
+			echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+			echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+			echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 			echo "<td class='back'><input type='submit' value='".t("Seuraava tuote")."'></td></tr>";
 			echo "</form>";
 			echo "</table>";
@@ -1682,7 +1699,9 @@
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";
-		echo "<input type='hidden' name='inventointipvm' value='$inventointipvm'>";
+		echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+		echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+		echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 		echo "<br><table>";
 		echo "<tr><th>".t("Tuotenumero:")."</th><td>";
 
@@ -1703,7 +1722,9 @@
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
-				<input type='hidden' name='inventointipvm' value='$inventointipvm'>
+				<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
+				<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
+				<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
 				<br><br>
 				<font class='head'>".t("Inventoi tiedostosta")."</font><hr>
 				<table>
@@ -1759,7 +1780,9 @@
 							<input type='hidden' name='tee' value='INVENTOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
 							<input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
-							<input type='hidden' name='inventointipvm' value='$inventointipvm'>
+							<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
+							<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
+							<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
 							<input type='submit' value='".t("Inventoi")."'>
 							</form>
 						</td>
@@ -1770,7 +1793,9 @@
 							<input type='hidden' name='tee' value='MITATOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
 							<input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
-							<input type='hidden' name='inventointipvm' value='$inventointipvm'>
+							<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
+							<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
+							<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
 							<input type='submit' value='".t("Mitätöi lista")."'>
 							</form>
 						</td>";

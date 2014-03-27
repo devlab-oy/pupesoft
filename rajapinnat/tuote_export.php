@@ -574,6 +574,9 @@
 		// Verkkokaupanhintakentt‰, joko myyntihinta tai myymalahinta
 		if (isset($magento_hintakentta)) $magento_client->setHintakentta($magento_hintakentta);
 
+		// Onko "Category access control"-moduli on asennettu
+		if (isset($categoryaccesscontrol)) $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
+
 		// lisaa_kategoriat
 		if (count($dnstuoteryhma) > 0) {
 			echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

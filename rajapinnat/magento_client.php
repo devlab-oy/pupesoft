@@ -71,6 +71,11 @@ class MagentoClient {
 	private $_hintakentta = "myymalahinta";
 
 	/**
+	 * Onko "Category access control"-moduli on asennettu? Oletukena ei oo.
+	 */
+	private $_categoryaccesscontrol = FALSE;
+
+	/**
 	 * Tämän yhteyden aikana sattuneiden virheiden määrä
 	 */
 	private $_error_count = 0;
@@ -111,6 +116,8 @@ class MagentoClient {
 
 		$this->log("Lisätään kategoriat");
 
+		$categoryaccesscontrol = $this->_categoryaccesscontrol;
+
 		$parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
 		$count = 0;
 
@@ -136,7 +143,7 @@ class MagentoClient {
 						'include_in_menu'   		=> 1
 					);
 
-					if (isset($categoryaccesscontrol) and $categoryaccesscontrol) {
+					if ($categoryaccesscontrol) {
 						// HUOM: Vain jos "Category access control"-moduli on asennettu
 						$category_data['accesscontrol_show_group'] = 0;
 					}
@@ -1004,6 +1011,16 @@ class MagentoClient {
 	 */
 	public function setHintakentta($hintakentta) {
 		$this->_hintakentta = $hintakentta;
+	}
+
+	/**
+	 * Asettaa categoryaccesscontrol-muuttujan
+	 * Oletus FALSE
+	 *
+	 * @param string $$categoryaccesscontrol BOOLEAN
+	 */
+	public function setCategoryaccesscontrol($categoryaccesscontrol) {
+		$this->_categoryaccesscontrol = $categoryaccesscontrol;
 	}
 
 	/**

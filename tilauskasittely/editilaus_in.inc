@@ -1140,6 +1140,17 @@ while ($tietue = fgets($fd)) {
 					$tilausyhteyshenkilo = $yhteysrow['nimi'];
 				}
 
+				if ($arow['toimipaikka'] != 0) {
+					$kukarow_toimipaikka_tmp = $kukarow['toimipaikka'];
+					$kukarow['toimipaikka'] = $arow['toimipaikka'];
+					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+					if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'K') {
+						$kukarow['toimipaikka'] = $kukarow_toimipaikka_tmp;
+						$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+					}
+				}
+
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1225,7 +1236,7 @@ while ($tietue = fgets($fd)) {
 							yhtio_ovttunnus						= '$yhtiorow[ovttunnus]',
 							yhtio_postino						= '$yhtiorow[postino]',
 							yhtio_postitp						= '$yhtiorow[postitp]',
-							yhtio_toimipaikka					= '',
+							yhtio_toimipaikka					= '$kukarow[toimipaikka]',
 							ytunnus			   					= '$arow[ytunnus]',
 							ohjelma_moduli						= '$ohjelmamoduli'";
 				$result = mysql_query($query) or die($query);

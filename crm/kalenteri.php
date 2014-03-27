@@ -66,10 +66,10 @@ $vertaa     = "'".implode("','", $ruksatut)."'";	// tehd‰‰n mysql:n ymm‰rt‰m‰ mu
 
 if (trim($konserni) != '') {
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$konsernit = "";
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		$konsernit .= " '".$row["yhtio"]."' ,";
 	}
 	$konsernit = " and kalenteri.yhtio in (".substr($konsernit, 0, -1).") ";
@@ -86,7 +86,7 @@ $query = "	SELECT yhtio
 			and kuka	= '$kukarow[kuka]'
 			and nimi like '%asiakasmemo.php'
 			and alanimi = ''";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 	$asmemolinkki = TRUE;
@@ -105,7 +105,7 @@ if( isset($poista_liite) ) {
 		AND yhtio = "'. $kukarow[yhtio] .'"
 	';
 
-	mysql_query($query) or pupe_error($query);
+	pupe_query($query);
 }
 
 echo "<font class='head'>".t("Kalenteri")."</font><hr>";
@@ -188,7 +188,7 @@ if ($tee == 'LISAA') {
 						FROM kalenteri
 						WHERE tunnus='$tunnus'
 						$konsernit";
-			mysql_query($query) or pupe_error($query);
+			pupe_query($query);
 		}
 
 		if ($kenelle == "") {
@@ -231,7 +231,7 @@ if ($tee == 'LISAA') {
 					kentta04    = '$paivarahat',
 					tapa 		= '$tapa',
 					tyyppi 		= 'kalenteri'";
-		mysql_query($query) or pupe_error($query);
+		pupe_query($query);
 
 		$uusi_tunnus = mysql_insert_id();
 
@@ -249,7 +249,7 @@ if ($tee == 'LISAA') {
 				AND yhtio = "'. $kukarow['yhtio'] .'"
 			';
 
-			mysql_query($query) or pupe_error($query);
+			pupe_query($query);
 		}
 
 		// Tallenna liitetiedosto formista
@@ -265,7 +265,7 @@ if ($tee == "POISTA") {
 				WHERE tunnus = '$tunnus'
 				$konsernit";
 
-	mysql_query($query) or pupe_error($query);
+	pupe_query($query);
 
 	// Poistetaan myˆs liitetiedostot t‰lle kalenterimerkinn‰lle
 	$query = '
@@ -275,7 +275,7 @@ if ($tee == "POISTA") {
 		AND yhtio = "'. $kukarow['yhtio'] .'"
 	';
 
-	mysql_query($query) or pupe_error($query);
+	pupe_query($query);
 }
 
 // tehd‰‰n lis‰ys ruutu ja laitetaan kaikki muuttujaan jotta voidaan echota sit oikeessa kohdassa
@@ -296,8 +296,8 @@ if($tee == "SYOTA") {
 					$konsernit
 					$kukalisa
 					and tyyppi = 'kalenteri'";
-		$res  = mysql_query($query) or pupe_error($query);
-		$irow = mysql_fetch_array($res);
+		$res  = pupe_query($query);
+		$irow = mysql_fetch_assoc($res);
 
 		$viesti 	= $irow["kentta01"];
 		$kilometrit	= $irow["kentta03"];
@@ -398,7 +398,7 @@ if($tee == "SYOTA") {
 
 	$lisays .= "<tr><td>".t("Tapa").":</td><td><select name='tapa'>";
 
-	while ($vrow=mysql_fetch_array($vresult)) {
+	while ($vrow=mysql_fetch_assoc($vresult)) {
 		$sel="";
  		if ($tapa == $vrow["selitetark"]) {
 			$sel = "selected";
@@ -420,9 +420,9 @@ if($tee == "SYOTA") {
 					and oikeu.nimi		= 'crm/kalenteri.php'
 					and kuka.tunnus <> '$kukarow[tunnus]'
 					ORDER BY kuka.nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$sel = $kenelle == $row['kuka'] ? ' selected' : '';
 			$lisays .= "<option value='$row[kuka]'$sel>$row[nimi]</option>";
 		}
@@ -523,7 +523,7 @@ if ($toim != 'TYOMAARAYS_ASENTAJA') {
 				and kalenteri.kuittaus='K'
 				$konsernit
 				ORDER BY kalenteri.pvmalku desc";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
 	        echo "<table width='100%'>";
@@ -532,7 +532,7 @@ if ($toim != 'TYOMAARAYS_ASENTAJA') {
 	        echo "</tr>";
 
 
-	        while ($prow = mysql_fetch_array ($result)) {
+	        while ($prow = mysql_fetch_assoc ($result)) {
 	                echo "	<form action='kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]' method='post'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<tr>";
@@ -610,7 +610,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 				and kuka in ($vertaa)
 				$konsernit
 				and tyyppi = 'kalenteri'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	//v‰ritet‰‰n t‰m‰n p‰iv‰n pvm omalla v‰rill‰...
 	if ((date("j")==$i) and (date("n")==$kuu) and (date("Y")==$year)) {
@@ -692,9 +692,9 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 				and oikeu.nimi		= 'crm/kalenteri.php'
 				and kuka.tunnus <> '$kukarow[tunnus]'
 				ORDER BY kuka.nimi";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		$checked = '';
 		if (in_array("$row[kuka]", $ruksatut)) {
 			$checked = 'checked';
@@ -723,7 +723,7 @@ $query = "	SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuk
 			and kokopaiva != ''
 			$konsernit
 			order by pvmalku";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 	echo "<table width='100%'>";
@@ -731,15 +731,15 @@ if (mysql_num_rows($result) > 0) {
 	echo "<th colspan='4'>".t("Kokop‰iv‰n tapahtumat")."</th>";
 	echo "</tr>";
 
-	while ($prow = mysql_fetch_array ($result)) {
+	while ($prow = mysql_fetch_assoc ($result)) {
 
 		//haetaan asiakkaan tiedot
 		$query = "	SELECT *
 					from asiakas
 					where yhtio = '$prow[yhtio]'
 					and tunnus  = '$prow[liitostunnus]'";
-		$asres = mysql_query($query) or pupe_error($query);
-		$asiak = mysql_fetch_array($asres);
+		$asres = pupe_query($query);
+		$asiak = mysql_fetch_assoc($asres);
 
 		echo "<tr>";
 		echo "<td>$prow[tapa]</td>";
@@ -829,9 +829,9 @@ while ($date != $whileloppu) {
 				and pvmalku  <= '$year-$kuu-$paiva $date:00'
 				and pvmloppu >= '$year-$kuu-$paiva $date:00'
 				and kokopaiva = ''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
-	while ($row=mysql_fetch_array($result)) {
+	while ($row=mysql_fetch_assoc($result)) {
 		//tutkitaan kuinka monta p‰‰llekk‰ist‰ on parhaimmillaan...
 		if (mysql_num_rows($result)>$max) {
 			$max = mysql_num_rows($result);
@@ -874,7 +874,7 @@ while ($kello_nyt != $whileloppu) {
 				$konsernit
 				HAVING pvmalku  = '$year-$kuu-$paiva $kello_nyt:00'
 				order by kesto desc, pvmalku";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	//lasketaan montako p‰‰llekk‰ist‰ on t‰h‰n kellonaikaan
 	$aquery = "	SELECT
@@ -890,7 +890,7 @@ while ($kello_nyt != $whileloppu) {
 				pvmalku  <= '$year-$kuu-$paiva $kello_nyt:00'
 				and pvmalku > '$year-$kuu-$paiva 00:00:00'
 				and pvmloppu >  '$year-$kuu-$paiva $kello_nyt:00'";
-	$aresult = mysql_query($aquery) or pupe_error($aquery);
+	$aresult = pupe_query($aquery);
 
 	$nyt = mysql_num_rows($aresult);
 	$tyhjaa = $max-$nyt;
@@ -906,7 +906,7 @@ while ($kello_nyt != $whileloppu) {
 
 		if (mysql_num_rows($result) > 0) {
 
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 
 				$kesto=round(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
 
@@ -915,8 +915,8 @@ while ($kello_nyt != $whileloppu) {
 					$query = "	SELECT *
 								from asiakas
 								where tunnus = '$row[liitostunnus]' ".str_ireplace("kalenteri.", "", $konsernit);
-					$asres = mysql_query($query) or pupe_error($query);
-					$asiak = mysql_fetch_array($asres);
+					$asres = pupe_query($query);
+					$asiak = mysql_fetch_assoc($asres);
 				}
 
 				if ($kons == 1) {
@@ -947,8 +947,8 @@ while ($kello_nyt != $whileloppu) {
 								FROM avainsana
 								WHERE laji = 'KALETAPA' and selitetark='$row[tapa]' ".str_ireplace("kalenteri.", "", $konsernit)."
 								ORDER BY selite+0, laji, jarjestys, selite";
-					$varires = mysql_query($query) or pupe_error($query);
-					$varirow = mysql_fetch_array($varires);
+					$varires = pupe_query($query);
+					$varirow = mysql_fetch_assoc($varires);
 
 					if ($varirow["selitetark_2"] != "") {
 						$varilisa = "background-color: $varirow[selitetark_2];";
@@ -1018,5 +1018,3 @@ echo "</tr>";
 echo "</table>";
 
 require ("inc/footer.inc");
-
-?>

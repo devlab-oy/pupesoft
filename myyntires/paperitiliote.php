@@ -210,9 +210,9 @@
 		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
 
 		$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$firstpage, $norm);
-		$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],	$firstpage, $norm);
-		$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"],	$firstpage, $norm);
+		$pdf->draw_text(30, 72,  $yhtiorow["pankkiiban1"]."      ".$yhtiorow["pankkiswift1"],	$firstpage, $norm);
+		$pdf->draw_text(217, 72, $yhtiorow["pankkiiban2"]."      ".$yhtiorow["pankkiswift2"],	$firstpage, $norm);
+		$pdf->draw_text(404, 72, $yhtiorow["pankkiiban3"]."      ".$yhtiorow["pankkiswift3"],	$firstpage, $norm);
 
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
@@ -226,16 +226,16 @@
 		$pdf->draw_text(30, 25, $yhtiorow["maa"],		$firstpage, $pieni);
 
 		$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",		$firstpage, $pieni);
-		$pdf->draw_text(247, 55, $yhtiorow["puhelin"],			$firstpage, $pieni);
+		$pdf->draw_text(252, 55, $yhtiorow["puhelin"],			$firstpage, $pieni);
 		$pdf->draw_text(217, 45, t("Fax", $kieli).":",			$firstpage, $pieni);
-		$pdf->draw_text(247, 45, $yhtiorow["fax"],				$firstpage, $pieni);
+		$pdf->draw_text(252, 45, $yhtiorow["fax"],				$firstpage, $pieni);
 		$pdf->draw_text(217, 35, t("Email", $kieli).":",		$firstpage, $pieni);
-		$pdf->draw_text(247, 35, $yhtiorow["email"],			$firstpage, $pieni);
+		$pdf->draw_text(252, 35, $yhtiorow["email"],			$firstpage, $pieni);
 
 		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",		$firstpage, $pieni);
-		$pdf->draw_text(444, 55, $yhtiorow["ytunnus"],			$firstpage, $pieni);
+		$pdf->draw_text(450, 55, $yhtiorow["ytunnus"],			$firstpage, $pieni);
 		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",	$firstpage, $pieni);
-		$pdf->draw_text(444, 45, $yhtiorow["kotipaikka"],		$firstpage, $pieni);
+		$pdf->draw_text(450, 45, $yhtiorow["kotipaikka"],		$firstpage, $pieni);
 		$pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),		$firstpage, $pieni);
 		$pdf->draw_text(404, 25, t("Alv.rek", $kieli),			$firstpage, $pieni);
 

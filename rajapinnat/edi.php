@@ -94,6 +94,7 @@ class Edi {
 		$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:".$order['shipping_address']['city']."\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:".$order['shipping_address']['postcode']."\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:".$order['shipping_address']['country_id']."\n";
+		$edi_order .= "OSTOTIL.OT_TOIMITUS_PUH:".$order['customer_phone']."\n";
 	   	$edi_order .= "*RE OSTOTIL\n";
 
 		#$items = $order->getItemsCollection();

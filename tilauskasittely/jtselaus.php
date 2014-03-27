@@ -2277,9 +2277,16 @@
 
 		echo "<br><font class='message'>".t("Valinnat")."</font><br><br>";
 
+		//näytetään "toimita varastosta" listauksessa vain varastot joista käyttäjällä on oikeus myydä (jos kuka.varasto on tyhjä tai 0, saa käyttäjä myydä kaikista normaalivarastoista)
+		if (isset($kukarow["varasto"]) AND (int) $kukarow["varasto"] > 0) {
+			$wherelisa = " AND tunnus IN ({$kukarow["varasto"]})";
+		}
+
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tyyppi != 'P'
+					$wherelisa
 					ORDER BY tyyppi, nimitys";
 		$vtresult = pupe_query($query);
 

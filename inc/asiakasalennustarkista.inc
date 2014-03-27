@@ -26,7 +26,7 @@ if(!function_exists("asiakasalennustarkista")) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and laji != 'P'
 							and ytunnus = '$t[$i]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 0) {
 					$virhe[$i] = t("Ytunnuksella ei löydy asiakasta!");
@@ -48,7 +48,7 @@ if(!function_exists("asiakasalennustarkista")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and laji != 'P'
 								and tunnus = '$chastunn'";
-					$chasresult = mysql_query($query) or pupe_error($query);
+					$chasresult = pupe_query($query);
 				}
 
 				if (!isset($chasresult) or (isset($chasresult) and mysql_num_rows($chasresult) != 1)) {
@@ -98,7 +98,7 @@ if(!function_exists("asiakasalennustarkista")) {
 				$query = "	SELECT tuoteno
 							FROM tuote
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) != 1) {
 
@@ -127,7 +127,7 @@ if(!function_exists("asiakasalennustarkista")) {
 				$query = "	SELECT tunnus
 							FROM perusalennus
 							WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) != 1) {
 					$virhe[$i] = t("Aleryhmä puuttuu tai sitä ei löydy!");
@@ -141,7 +141,7 @@ if(!function_exists("asiakasalennustarkista")) {
 			// Ei tsekata turhaan kun rivi dellataan luedatasta
 			if ($chsegmentti > 0 and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 				$preq = "SELECT * FROM dynaaminen_puu where yhtio='$kukarow[yhtio]' and laji='asiakas' and tunnus='$chsegmentti'";
-				$preres = mysql_query($preq) or pupe_error($preq);
+				$preres = pupe_query($preq);
 
 				if (mysql_num_rows($preres) != 1) {
 					$virhe[$i] = t("Asiakassegmentti puuttuu tai sitä ei löydy!");
@@ -157,7 +157,7 @@ if(!function_exists("asiakasalennustarkista")) {
 				$preq = "	SELECT avainsana.selite, avainsana.selitetark
 							FROM avainsana
 							WHERE avainsana.selite='{$chpiiri}' AND avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
-				$preres = mysql_query($preq) or pupe_error($preq);
+				$preres = pupe_query($preq);
 
 				if (mysql_num_rows($preres) != 1) {
 					$virhe[$i] = t("Asiakaspiiri puuttuu tai sitä ei löydy! ");
@@ -256,6 +256,9 @@ if(!function_exists("asiakasalennustarkista")) {
 
 			if ($chryhma != '') 		$and .= " and ryhma = '$chryhma'";
 			if ($chtuoteno != '') 		$and .= " and tuoteno = '$chtuoteno'";
+			if ($chalennuslaji == "" or $chalennuslaji == 0) $chalennuslaji = 1;
+
+			$chminkpl = (int) $chminkpl;
 
 			$aquery = "	SELECT ytunnus
 						FROM asiakasalennus
@@ -267,7 +270,7 @@ if(!function_exists("asiakasalennustarkista")) {
 						and monikerta	= '$chmonikerta'
 						and alennuslaji = $chalennuslaji
 						and tunnus	   != '$trow[$i]'";
-			$dsresult = mysql_query($aquery) or pupe_error($aquery);
+			$dsresult = pupe_query($aquery);
 
 			if (mysql_num_rows($dsresult) > 0) {
 				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
@@ -276,5 +279,3 @@ if(!function_exists("asiakasalennustarkista")) {
 		}
 	}
 }
-
-?>

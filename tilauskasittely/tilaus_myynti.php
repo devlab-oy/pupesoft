@@ -6435,6 +6435,8 @@ if ($tee == '') {
 					}
 				}
 
+				echo '<td>Uusi kolumni</td>';
+
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 					$classvar = $class;
 				}
@@ -8815,7 +8817,7 @@ if ($tee == '') {
 					<input type='submit' value='* ".t("Muuta %s normaaliksi ennakkotilaukseksi", "", $otsikko)."*'>
 					</form></td></tr>";
 		}
-		
+
 		echo "</table>";
 
 	}

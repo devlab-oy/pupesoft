@@ -100,7 +100,7 @@ else {
 if( isset($poista_liite) ) {
 	$query = '
 		DELETE FROM liitetiedostot
-		WHERE tunnus = '. mysql_real_escape_string($poista_liite) .'
+		WHERE tunnus = '. (int)$poista_liite .'
 		AND liitos = "kalenterimerkintä"
 		AND yhtio = "'. $kukarow[yhtio] .'"
 	';
@@ -240,11 +240,11 @@ if ($tee == 'LISAA') {
 		// Tämä siis sen takia, että kalenterimerkinnän päivitys
 		// tapahtuu poistamalla vanha merkintä ja lisäämällä uusi päivitetty
 		// versio merkinnästä.
-		if ($tunnus != '') {
+		if ($tunnus>0 and $uusi_tunnus>0) {
 			$query = '
 				UPDATE liitetiedostot
 				SET liitostunnus = '. $uusi_tunnus .'
-				WHERE liitostunnus = '. mysql_real_escape_string($tunnus) .'
+				WHERE liitostunnus = '. (int)$tunnus .'
 				AND liitos = "kalenterimerkintä"
 				AND yhtio = "'. $kukarow['yhtio'] .'"
 			';
@@ -270,7 +270,7 @@ if ($tee == "POISTA") {
 	// Poistetaan myös liitetiedostot tälle kalenterimerkinnälle
 	$query = '
 		DELETE FROM liitetiedostot
-		WHERE liitostunnus = '. mysql_real_escape_string($tunnus) .'
+		WHERE liitostunnus = '. (int)$tunnus .'
 		AND liitos = "kalenterimerkintä"
 		AND yhtio = "'. $kukarow['yhtio'] .'"
 	';

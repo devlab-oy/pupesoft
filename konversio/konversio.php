@@ -2,6 +2,8 @@
 
 ini_set("memory_limit", "5G");
 
+$compression = FALSE;
+
 require("../inc/parametrit.inc");
 require_once('TuoteCSVDumper.php');
 require_once('AsiakasCSVDumper.php');

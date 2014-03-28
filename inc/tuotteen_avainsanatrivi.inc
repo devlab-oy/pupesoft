@@ -69,13 +69,21 @@
 	if (mysql_field_name($result, $i) == "selite") {
 
 		if (strtolower($tem_laji) == "elinkaari") {
-			$sel = array_fill_keys(array($trow[$i]), " selected") + array('PRE' => '', 'STD' => '', 'ECO' => '');
 
-			$ulos = "<td><select name='{$nimi}'>";
-			$ulos .= "<option value = 'PRE' {$sel['PRE']}>PRE</option>";
-			$ulos .= "<option value = 'STD' {$sel['STD']}>STD</option>";
-			$ulos .= "<option value = 'ECO' {$sel['ECO']}>ECO</option>";
-			$ulos .= "</select></td>";
+			$vresult = t_avainsana("ELINKAARI");
+
+			if (mysql_num_rows($vresult) > 0) {
+				$ulos = "<td><select name='{$nimi}'>";
+				$ulos .= "<option value=''>".t("Ei elinkaarityyppiä")."</option>";
+
+				while ($vrow = mysql_fetch_assoc($vresult)) {
+					$sel = $trow[$i] == $vrow['selite'] ? "selected" : "";
+					$ulos .= "<option value='{$vrow['selite']}' {$sel}>{$vrow['selitetark']}</option>";
+				}
+
+				$ulos .= "</select></td>";
+			}
+
 			$jatko = 0;
 		}
 		elseif ($tem_laji == "tarratyyppi") {

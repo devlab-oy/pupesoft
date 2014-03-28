@@ -94,15 +94,18 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 	$result = pupe_query($query);
 	$row = mysql_fetch_assoc($result);
 
-	$query = "	DELETE tapahtuma
-				FROM tapahtuma
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND laji in ({$row['lajit']})
-				AND laadittu <= '$vv-$kk-$pp 23:59:59'";
-	pupe_query($query);
-	$del = mysql_affected_rows();
+	if ($row['lajit'] != "") {
+		$query = "	DELETE tapahtuma
+					FROM tapahtuma
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND laji in ({$row['lajit']})
+					AND laadittu <= '$vv-$kk-$pp 23:59:59'";
+		pupe_query($query);
+		$del = mysql_affected_rows();
 
-	echo "Arkistoitiin $del tapahtumaa.<br>";
+		echo "Arkistoitiin $del tapahtumaa.<br>";
+	}
+
 
 	# Tilausrivit
 	$query = "	DELETE tilausrivi

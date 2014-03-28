@@ -1503,419 +1503,420 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
-		echo "<font class='error'>".t("Suorituksen tiedot ovat puutteelliset")."!</font>";
-		pupe_error($query);
-	}
-
-	$suoritus = mysql_fetch_assoc($result);
-
-	$asiakas_tunnus 	= $suoritus['asiakas_tunnus'];
-	$suoritus_summa		= $suoritus['summa'];
-	$suoritus_tunnus 	= $suoritus['tunnus'];
-	$suoritus_ttilino 	= $suoritus['ttilino'];
-	$valkoodi 			= $suoritus['valkoodi'];
-
-	//N‰ytet‰‰n suorituksen tiedot!
-	echo "<font class='message'>".t("Asiakas").": $suoritus[nimi] ($suoritus[ytunnus])</font><br>";
-
-	echo "<table>";
-	echo "<tr>";
-	echo "<th>".t("nimi")."</th>";
-	echo "<th>".t("summa")."</th>";
-	echo "<th>".t("valkoodi")."</th>";
-	echo "<th>".t("tieto")."</th>";
-	echo "<th>".t("tilino")."</th>";
-	echo "<th>".t("maksupvm")."</th>";
-	echo "<th>".t("kirjpvm")."</th>";
-	echo "<th>".t("suorituksen saamisettili")."</th>";
-	echo "<th></th>";
-	echo "</tr>";
-
-	echo "<tr>";
-	echo "<td>$suoritus[nimi_maksaja]</td>";
-	echo "<td align='right'>$suoritus[summa]</td>";
-	echo "<td>$suoritus[valkoodi]</td>";
-	echo "<td>$suoritus[tieto]</td>";
-	echo "<td>$suoritus[tilino]</td>";
-	echo "<td>".tv1dateconv($suoritus["maksupvm"])."</td>";
-	echo "<td>".tv1dateconv($suoritus["kirjpvm"])."</td>";
-
-	$sel1 = '';
-	$sel2 = '';
-	$sel3 = '';
-	$sel4 = '';
-	$sel5 = '';
-
-	if ($suoritus['ttilino'] == $yhtiorow["myyntisaamiset"]) {
-		$sel1 = "selected";
-	}
-	if ($suoritus['ttilino'] == $yhtiorow['factoringsaamiset']) {
-		$sel2 = "selected";
-	}
-	if ($suoritus['ttilino'] == $yhtiorow["selvittelytili"]) {
-		$sel3 = "selected";
-	}
-	if ($suoritus['ttilino'] == $suoritus["oletus_selvittelytili"]) {
-		$sel4 = "selected";
-	}
-	if ($suoritus['ttilino'] == $yhtiorow["konsernimyyntisaamiset"]) {
-		$sel5 = "selected";
-	}
-
-	echo "<form method = 'post' action='manuaalinen_suoritusten_kohdistus.php'>";
-	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-	echo "<input type='hidden' name='tunnus' value='$suoritus[tunnus]'>";
-	echo "<input type='hidden' name='tila' value='vaihdasuorituksentili'>";
-	echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas_tunnus'>";
-	echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
-	echo "<input type='hidden' name='suoritus_tunnus' value='$suoritus_tunnus'>";
-
-	echo "<td><select name='vastatili' onchange='submit();'>";
-	echo "<option value='$yhtiorow[myyntisaamiset]' $sel1>"		.t("Myyntisaamiset").		" ($yhtiorow[myyntisaamiset])</option>";
-	echo "<option value='$yhtiorow[factoringsaamiset]' $sel2>"	.t("Factoringsaamiset").	" ($yhtiorow[factoringsaamiset])</option>";
-
-	if ($suoritus["oletus_selvittelytili"] != "") {
-		echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
-	}
-	if ($yhtiorow["konsernimyyntisaamiset"] != $yhtiorow["myyntisaamiset"]) {
-		echo "<option value='$yhtiorow[konsernimyyntisaamiset]' $sel5>".t("Konsernimyyntisaamiset")." ($yhtiorow[konsernimyyntisaamiset])</option>";
-	}
-	echo "</select></td>";
-	echo "<td>";
-
-	if ($kukarow["taso"] == 3) {
-		echo "<input type='checkbox' name='vaihdasuorituksentiliointitunnuksia'>";
+		echo "<font class='error'>".t("VIRHE: Suoritus on jo kohdistettu tai sen tila on muuttunut")."!</font><br><br>";
+		$tila = '';
 	}
 	else {
-		echo "<input type='hidden' name='vaihdasuorituksentiliointitunnuksia' value=''>";
-	}
+		$suoritus = mysql_fetch_assoc($result);
 
-	echo "</td>";
-	echo "</form>\n\n";
+		$asiakas_tunnus 	= $suoritus['asiakas_tunnus'];
+		$suoritus_summa		= $suoritus['summa'];
+		$suoritus_tunnus 	= $suoritus['tunnus'];
+		$suoritus_ttilino 	= $suoritus['ttilino'];
+		$valkoodi 			= $suoritus['valkoodi'];
 
-	echo "</tr>";
+		//N‰ytet‰‰n suorituksen tiedot!
+		echo "<font class='message'>".t("Asiakas").": $suoritus[nimi] ($suoritus[ytunnus])</font><br>";
 
-	echo "</table>";
-
-	$pyocheck='';
-	$osacheck='';
-	if ($osasuoritus == '1') $osacheck = 'checked';
-	if ($pyoristys_virhe_ok == '1') $pyocheck = 'checked';
-
-	echo "<form method = 'post' action='manuaalinen_suoritusten_kohdistus.php' name='summat'>";
-	echo "<table>";
-	echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='0.0' readonly></td>";
-	echo "<th>".t("Erotus")."</th><td><input type='text' name='jaljella' value='$suoritus_summa' readonly></td></tr>";
-	echo "</table>";
-	echo "</form>";
-
-	//N‰ytet‰‰n laskut!
-	$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
-	$kentankoko = array(10,10,15,10,10,15);
-	$array 	= explode(",", $kentat);
-	$count 	= count($array);
-	$lisa	= '';
-	$ulisa	= '';
-
-	for ($i=0; $i<=$count; $i++) {
-		// tarkastetaan onko hakukent‰ss‰ jotakin
-		if (strlen($haku[$i]) > 0) {
-			$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-		}
-	}
-
-	if (strlen($ojarj) > 0) {
-		$jarjestys = $array[$ojarj];
-	}
-	else {
-		$jarjestys = 'erpvm';
-	}
-
-	// Etsit‰‰n ytunnuksella
-	$query  = "	SELECT ytunnus
-				FROM asiakas
-				WHERE tunnus = '$asiakas_tunnus'
-				AND ytunnus != ''
-				AND yhtio = '$kukarow[yhtio]'";
-	$result = pupe_query($query);
-
-	if ($ytunnusrow=mysql_fetch_assoc($result)) {
-		$ytunnus = $ytunnusrow["ytunnus"];
-	}
-	else {
-		echo "<font class='error'>".t("Asiakkaalta ei lˆydy y-tunnusta")."!</font>";
-		pupe_error($query);
-	}
-
-	if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
-		$query = "SELECT summa_valuutassa-saldo_maksettu_valuutassa summa, kasumma_valuutassa kasumma, ";
-	}
-	else {
-		$query = "SELECT summa-saldo_maksettu summa, kasumma, ";
-	}
-
-	$query .= " laskunro, erpcm erpvm, kapvm, viite, ytunnus, lasku.tunnus
-				FROM lasku USE INDEX (yhtio_tila_mapvm)
-	           	WHERE yhtio  = '$kukarow[yhtio]'
-				and tila     = 'U'
-				and mapvm    = '0000-00-00'
-				and valkoodi = '$valkoodi'
-				and (ytunnus = '$ytunnus' or nimi = '$asiakas_nimi' or liitostunnus = '$asiakas_tunnus')
-				$lisa
-				ORDER BY $jarjestys";
-	$result = pupe_query($query);
-
-	echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=$tila&suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi' method = 'post'>";
-	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-	echo "<table><tr><th colspan='2'></th>";
-
-	for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-		echo "<th><a href='$PHP_SELF?suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi&tila=$tila&ojarj=".$i.$ulisa."&lopetus=$lopetus'>" . t(mysql_field_name($result,$i))."</a></th>";
-	}
-
-	echo "<th></th></tr>";
-	echo "<tr><th>L</th><th>K</th>";
-
-	for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-	  echo "<td><input type='text' size='$kentankoko[$i]' name='haku[$i]' value='$haku[$i]'></td>";
-	}
-
-	echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
-	echo"</form>";
-
-	echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)' class='multisubmit'>";
-	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-
-	$laskucount = 0;
-
-	if ($asiakas_nimi != '') echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
-
-	while ($maksurow = mysql_fetch_assoc ($result)) {
-
-	  $query = "	SELECT count(*) maara
-					from tiliointi
-					where yhtio = '$kukarow[yhtio]'
-					and ltunnus = '$maksurow[tunnus]'
-					and tilino = '$suoritus_ttilino'";
-	  $cresult = pupe_query($query);
-	  $maararow = mysql_fetch_assoc ($cresult);
-
-		if ($maararow['maara'] > 0) {
-		  	$laskucount++;
-			$lasku_tunnus = $maksurow['tunnus'];
-			$bruttokale = $maksurow['summa']-$maksurow['kasumma'];
-
-			echo "<tr class='aktiivi'><th>";
-			echo "<input type='checkbox' name='lasku_tunnukset[]' value='$lasku_tunnus' onclick='javascript:paivita1(this)'>";
-			echo "<input type='hidden' name='lasku_summa' value='$maksurow[summa]'>";
-			echo "</th><th>";
-			echo "<input type='checkbox' name='lasku_tunnukset_kale[]' value='$lasku_tunnus' onclick='javascript:paivita2(this)'>";
-			echo "<input type='hidden' name='lasku_kasumma' value='$bruttokale'>";
-			echo "</th>";
-			$errormessage = "";
-		}
-		else {
-			echo "<tr><th></th><th></th>";
-			$errormessage = "<font class='message'>".t('V‰‰r‰ saamisettili')." ($suoritus_ttilino)</font>";
-		}
-
-		echo "<td align='right'>$maksurow[summa]</td>";
-
-		if ($maksurow["kasumma"] != 0) {
-			echo "<td align='right'>$maksurow[kasumma]</td>";
-		}
-		else {
-			echo "<td align='right'></td>";
-		}
-
-		echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/{$palvelin2}myyntires/manuaalinen_suoritusten_kohdistus.php////tunnus=$tunnus//tila=$tila//asiakas_tunnus=$asiakas_tunnus//asiakas_nimi=$asiakas_nimi//suoritus_tunnus=$suoritus_tunnus//vastatili=$vastatili'>$maksurow[laskunro]</a></td>";
-		echo "<td>".tv1dateconv($maksurow["erpvm"])."</td>";
-		echo "<td>".tv1dateconv($maksurow["kapvm"])."</td>";
-		echo "<td>$maksurow[viite]</td>";
-		echo "<td>$maksurow[ytunnus]</td>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("nimi")."</th>";
+		echo "<th>".t("summa")."</th>";
+		echo "<th>".t("valkoodi")."</th>";
+		echo "<th>".t("tieto")."</th>";
+		echo "<th>".t("tilino")."</th>";
+		echo "<th>".t("maksupvm")."</th>";
+		echo "<th>".t("kirjpvm")."</th>";
+		echo "<th>".t("suorituksen saamisettili")."</th>";
 		echo "<th></th>";
-		echo "<td class='back'>$errormessage</td>";
-		echo "</tr>\n";
-	}
+		echo "</tr>";
 
-	echo "<input type='hidden' name='suoritus_tunnus' value='$suoritus_tunnus'>";
-	echo "</th></tr>";
-	echo "<tr><th colspan='10'> ".t("L = lasku ilman kassa-alennusta K = lasku kassa-alennuksella")."</th></tr>";
-	echo "</table>";
-	echo "<table>";
-	echo "<tr><th>".t("Kirjaa erotus kassa-aleen")."</th><td><input type='checkbox' name='pyoristys_virhe_ok' value='1' $pyocheck></td>";
-	echo "<th>".t("Osasuorita lasku")."</th><td><input type='checkbox' name='osasuoritus' value='1' $osacheck onclick='javascript:osasuo(this)'></td></tr>";
-	echo "</table>";
-	echo "<br><input type='submit' value='".t("Kohdista")."'>";
-	echo "</form>\n";
+		echo "<tr>";
+		echo "<td>$suoritus[nimi_maksaja]</td>";
+		echo "<td align='right'>$suoritus[summa]</td>";
+		echo "<td>$suoritus[valkoodi]</td>";
+		echo "<td>$suoritus[tieto]</td>";
+		echo "<td>$suoritus[tilino]</td>";
+		echo "<td>".tv1dateconv($suoritus["maksupvm"])."</td>";
+		echo "<td>".tv1dateconv($suoritus["kirjpvm"])."</td>";
 
-	echo "<script language='JavaScript'><!--
-		function paivita1(checkboxi) {";
+		$sel1 = '';
+		$sel2 = '';
+		$sel3 = '';
+		$sel4 = '';
+		$sel5 = '';
 
-	if ($laskucount==1)
-	     echo "
-			if (checkboxi==document.forms[3].elements['lasku_tunnukset[]']) {
-	       		document.forms[3].elements['lasku_tunnukset_kale[]'].checked=false;
-	    	}";
-	else {
-		echo "
-			for(i=0;i<document.forms[3].elements['lasku_tunnukset[]'].length;i++) {
-	      		if (checkboxi==document.forms[3].elements['lasku_tunnukset[]'][i]) {
-	         		document.forms[3].elements['lasku_tunnukset_kale[]'][i].checked=false;
-	      		}
-	    	}";
-	}
-	echo "
-	  		paivitaSumma();
+		if ($suoritus['ttilino'] == $yhtiorow["myyntisaamiset"]) {
+			$sel1 = "selected";
+		}
+		if ($suoritus['ttilino'] == $yhtiorow['factoringsaamiset']) {
+			$sel2 = "selected";
+		}
+		if ($suoritus['ttilino'] == $yhtiorow["selvittelytili"]) {
+			$sel3 = "selected";
+		}
+		if ($suoritus['ttilino'] == $suoritus["oletus_selvittelytili"]) {
+			$sel4 = "selected";
+		}
+		if ($suoritus['ttilino'] == $yhtiorow["konsernimyyntisaamiset"]) {
+			$sel5 = "selected";
 		}
 
-		function paivita2(checkboxi) {";
+		echo "<form method = 'post' action='manuaalinen_suoritusten_kohdistus.php'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='hidden' name='tunnus' value='$suoritus[tunnus]'>";
+		echo "<input type='hidden' name='tila' value='vaihdasuorituksentili'>";
+		echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas_tunnus'>";
+		echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
+		echo "<input type='hidden' name='suoritus_tunnus' value='$suoritus_tunnus'>";
 
-	if ($laskucount==1) {
-	     echo "
-			if (checkboxi==document.forms[3].elements['lasku_tunnukset_kale[]']) {
-	       		document.forms[3].elements['lasku_tunnukset[]'].checked=false;
-	    	}";
-	}
-	else {
-		echo "
-			for(i=0;i<document.forms[3].elements['lasku_tunnukset_kale[]'].length;i++) {
-	      		if (checkboxi==document.forms[3].elements['lasku_tunnukset_kale[]'][i]) {
-	        		document.forms[3].elements['lasku_tunnukset[]'][i].checked=false;
-	      		}
-	    	}";
-	}
-	echo "	paivitaSumma();
+		echo "<td><select name='vastatili' onchange='submit();'>";
+		echo "<option value='$yhtiorow[myyntisaamiset]' $sel1>"		.t("Myyntisaamiset").		" ($yhtiorow[myyntisaamiset])</option>";
+		echo "<option value='$yhtiorow[factoringsaamiset]' $sel2>"	.t("Factoringsaamiset").	" ($yhtiorow[factoringsaamiset])</option>";
+
+		if ($suoritus["oletus_selvittelytili"] != "") {
+			echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
+		}
+		if ($yhtiorow["konsernimyyntisaamiset"] != $yhtiorow["myyntisaamiset"]) {
+			echo "<option value='$yhtiorow[konsernimyyntisaamiset]' $sel5>".t("Konsernimyyntisaamiset")." ($yhtiorow[konsernimyyntisaamiset])</option>";
+		}
+		echo "</select></td>";
+		echo "<td>";
+
+		if ($kukarow["taso"] == 3) {
+			echo "<input type='checkbox' name='vaihdasuorituksentiliointitunnuksia'>";
+		}
+		else {
+			echo "<input type='hidden' name='vaihdasuorituksentiliointitunnuksia' value=''>";
 		}
 
-		function paivitaSumma() {
-	  		var i;
-	  		var summa=0.0;";
+		echo "</td>";
+		echo "</form>\n\n";
 
-	if ($laskucount == 1) {
-	     echo "
-			if (document.forms[3].elements['lasku_tunnukset[]'].checked) {
-	        	summa+=1.0*document.forms[3].lasku_summa.value;
-	      	}
-	      	if (document.forms[3].elements['lasku_tunnukset_kale[]'].checked) {
-	        		summa+=1.0*document.forms[3].lasku_kasumma.value;
-	      	}";
-	}
-	else {
-		echo "
-			for(i=0;i<document.forms[3].elements['lasku_tunnukset[]'].length;i++) {
-	      		if (document.forms[3].elements['lasku_tunnukset[]'][i].checked) {
-	        		summa+=1.0*document.forms[3].lasku_summa[i].value;
-	      		}
-	    	}
-	    	for(i=0;i<document.forms[3].elements['lasku_tunnukset_kale[]'].length;i++) {
-	      		if (document.forms[3].elements['lasku_tunnukset_kale[]'][i].checked) {
-	        		summa+=1.0*document.forms[3].lasku_kasumma[i].value;
-	      		}
-	    	}";
-	}
+		echo "</tr>";
 
-	echo "	document.forms[1].summa.value=Math.round(summa*100)/100;
+		echo "</table>";
 
-			if ($suoritus_summa < 0 && summa < 0) {
-	  			document.forms[1].jaljella.value=Math.round((summa-($suoritus_summa))*100)/100;
+		$pyocheck='';
+		$osacheck='';
+		if ($osasuoritus == '1') $osacheck = 'checked';
+		if ($pyoristys_virhe_ok == '1') $pyocheck = 'checked';
+
+		echo "<form method = 'post' action='manuaalinen_suoritusten_kohdistus.php' name='summat'>";
+		echo "<table>";
+		echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='0.0' readonly></td>";
+		echo "<th>".t("Erotus")."</th><td><input type='text' name='jaljella' value='$suoritus_summa' readonly></td></tr>";
+		echo "</table>";
+		echo "</form>";
+
+		//N‰ytet‰‰n laskut!
+		$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
+		$kentankoko = array(10,10,15,10,10,15);
+		$array 	= explode(",", $kentat);
+		$count 	= count($array);
+		$lisa	= '';
+		$ulisa	= '';
+
+		for ($i=0; $i<=$count; $i++) {
+			// tarkastetaan onko hakukent‰ss‰ jotakin
+			if (strlen($haku[$i]) > 0) {
+				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+			}
+		}
+
+		if (strlen($ojarj) > 0) {
+			$jarjestys = $array[$ojarj];
+		}
+		else {
+			$jarjestys = 'erpvm';
+		}
+
+		// Etsit‰‰n ytunnuksella
+		$query  = "	SELECT ytunnus
+					FROM asiakas
+					WHERE tunnus = '$asiakas_tunnus'
+					AND ytunnus != ''
+					AND yhtio = '$kukarow[yhtio]'";
+		$result = pupe_query($query);
+
+		if ($ytunnusrow=mysql_fetch_assoc($result)) {
+			$ytunnus = $ytunnusrow["ytunnus"];
+		}
+		else {
+			echo "<font class='error'>".t("Asiakkaalta ei lˆydy y-tunnusta")."!</font>";
+			pupe_error($query);
+		}
+
+		if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
+			$query = "SELECT summa_valuutassa-saldo_maksettu_valuutassa summa, kasumma_valuutassa kasumma, ";
+		}
+		else {
+			$query = "SELECT summa-saldo_maksettu summa, kasumma, ";
+		}
+
+		$query .= " laskunro, erpcm erpvm, kapvm, viite, ytunnus, lasku.tunnus
+					FROM lasku USE INDEX (yhtio_tila_mapvm)
+		           	WHERE yhtio  = '$kukarow[yhtio]'
+					and tila     = 'U'
+					and mapvm    = '0000-00-00'
+					and valkoodi = '$valkoodi'
+					and (ytunnus = '$ytunnus' or nimi = '$asiakas_nimi' or liitostunnus = '$asiakas_tunnus')
+					$lisa
+					ORDER BY $jarjestys";
+		$result = pupe_query($query);
+
+		echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=$tila&suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi' method = 'post'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<table><tr><th colspan='2'></th>";
+
+		for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
+			echo "<th><a href='$PHP_SELF?suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi&tila=$tila&ojarj=".$i.$ulisa."&lopetus=$lopetus'>" . t(mysql_field_name($result,$i))."</a></th>";
+		}
+
+		echo "<th></th></tr>";
+		echo "<tr><th>L</th><th>K</th>";
+
+		for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
+		  echo "<td><input type='text' size='$kentankoko[$i]' name='haku[$i]' value='$haku[$i]'></td>";
+		}
+
+		echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
+		echo"</form>";
+
+		echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)' class='multisubmit'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+
+		$laskucount = 0;
+
+		if ($asiakas_nimi != '') echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
+
+		while ($maksurow = mysql_fetch_assoc ($result)) {
+
+		  $query = "	SELECT count(*) maara
+						from tiliointi
+						where yhtio = '$kukarow[yhtio]'
+						and ltunnus = '$maksurow[tunnus]'
+						and tilino = '$suoritus_ttilino'";
+		  $cresult = pupe_query($query);
+		  $maararow = mysql_fetch_assoc ($cresult);
+
+			if ($maararow['maara'] > 0) {
+			  	$laskucount++;
+				$lasku_tunnus = $maksurow['tunnus'];
+				$bruttokale = $maksurow['summa']-$maksurow['kasumma'];
+
+				echo "<tr class='aktiivi'><th>";
+				echo "<input type='checkbox' name='lasku_tunnukset[]' value='$lasku_tunnus' onclick='javascript:paivita1(this)'>";
+				echo "<input type='hidden' name='lasku_summa' value='$maksurow[summa]'>";
+				echo "</th><th>";
+				echo "<input type='checkbox' name='lasku_tunnukset_kale[]' value='$lasku_tunnus' onclick='javascript:paivita2(this)'>";
+				echo "<input type='hidden' name='lasku_kasumma' value='$bruttokale'>";
+				echo "</th>";
+				$errormessage = "";
 			}
 			else {
-				document.forms[1].jaljella.value=Math.round(($suoritus_summa-summa)*100)/100;
+				echo "<tr><th></th><th></th>";
+				$errormessage = "<font class='message'>".t('V‰‰r‰ saamisettili')." ($suoritus_ttilino)</font>";
 			}
+
+			echo "<td align='right'>$maksurow[summa]</td>";
+
+			if ($maksurow["kasumma"] != 0) {
+				echo "<td align='right'>$maksurow[kasumma]</td>";
+			}
+			else {
+				echo "<td align='right'></td>";
+			}
+
+			echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/{$palvelin2}myyntires/manuaalinen_suoritusten_kohdistus.php////tunnus=$tunnus//tila=$tila//asiakas_tunnus=$asiakas_tunnus//asiakas_nimi=$asiakas_nimi//suoritus_tunnus=$suoritus_tunnus//vastatili=$vastatili'>$maksurow[laskunro]</a></td>";
+			echo "<td>".tv1dateconv($maksurow["erpvm"])."</td>";
+			echo "<td>".tv1dateconv($maksurow["kapvm"])."</td>";
+			echo "<td>$maksurow[viite]</td>";
+			echo "<td>$maksurow[ytunnus]</td>";
+			echo "<th></th>";
+			echo "<td class='back'>$errormessage</td>";
+			echo "</tr>\n";
 		}
 
-		function osasuo(form) {
-			if (document.forms[3].osasuoritus.checked) {
-	   			if (document.forms[1].jaljella.value > 0) {
-	   				alert('".t("Et voi osasuorittaa, jos j‰jell‰ on positiivinen summa")."');
-					document.forms[3].osasuoritus.checked = false;
-	   				return false;
-	   			}
+		echo "<input type='hidden' name='suoritus_tunnus' value='$suoritus_tunnus'>";
+		echo "</th></tr>";
+		echo "<tr><th colspan='10'> ".t("L = lasku ilman kassa-alennusta K = lasku kassa-alennuksella")."</th></tr>";
+		echo "</table>";
+		echo "<table>";
+		echo "<tr><th>".t("Kirjaa erotus kassa-aleen")."</th><td><input type='checkbox' name='pyoristys_virhe_ok' value='1' $pyocheck></td>";
+		echo "<th>".t("Osasuorita lasku")."</th><td><input type='checkbox' name='osasuoritus' value='1' $osacheck onclick='javascript:osasuo(this)'></td></tr>";
+		echo "</table>";
+		echo "<br><input type='submit' value='".t("Kohdista")."'>";
+		echo "</form>\n";
+
+		echo "<script language='JavaScript'><!--
+			function paivita1(checkboxi) {";
+
+		if ($laskucount==1)
+		     echo "
+				if (checkboxi==document.forms[3].elements['lasku_tunnukset[]']) {
+		       		document.forms[3].elements['lasku_tunnukset_kale[]'].checked=false;
+		    	}";
+		else {
+			echo "
+				for(i=0;i<document.forms[3].elements['lasku_tunnukset[]'].length;i++) {
+		      		if (checkboxi==document.forms[3].elements['lasku_tunnukset[]'][i]) {
+		         		document.forms[3].elements['lasku_tunnukset_kale[]'][i].checked=false;
+		      		}
+		    	}";
+		}
+		echo "
+		  		paivitaSumma();
 			}
+
+			function paivita2(checkboxi) {";
+
+		if ($laskucount==1) {
+		     echo "
+				if (checkboxi==document.forms[3].elements['lasku_tunnukset_kale[]']) {
+		       		document.forms[3].elements['lasku_tunnukset[]'].checked=false;
+		    	}";
+		}
+		else {
+			echo "
+				for(i=0;i<document.forms[3].elements['lasku_tunnukset_kale[]'].length;i++) {
+		      		if (checkboxi==document.forms[3].elements['lasku_tunnukset_kale[]'][i]) {
+		        		document.forms[3].elements['lasku_tunnukset[]'][i].checked=false;
+		      		}
+		    	}";
+		}
+		echo "	paivitaSumma();
+			}
+
+			function paivitaSumma() {
+		  		var i;
+		  		var summa=0.0;";
+
+		if ($laskucount == 1) {
+		     echo "
+				if (document.forms[3].elements['lasku_tunnukset[]'].checked) {
+		        	summa+=1.0*document.forms[3].lasku_summa.value;
+		      	}
+		      	if (document.forms[3].elements['lasku_tunnukset_kale[]'].checked) {
+		        		summa+=1.0*document.forms[3].lasku_kasumma.value;
+		      	}";
+		}
+		else {
+			echo "
+				for(i=0;i<document.forms[3].elements['lasku_tunnukset[]'].length;i++) {
+		      		if (document.forms[3].elements['lasku_tunnukset[]'][i].checked) {
+		        		summa+=1.0*document.forms[3].lasku_summa[i].value;
+		      		}
+		    	}
+		    	for(i=0;i<document.forms[3].elements['lasku_tunnukset_kale[]'].length;i++) {
+		      		if (document.forms[3].elements['lasku_tunnukset_kale[]'][i].checked) {
+		        		summa+=1.0*document.forms[3].lasku_kasumma[i].value;
+		      		}
+		    	}";
 		}
 
-		function validate(form) {
-			var maara=0;
-			var kmaara=0;";
+		echo "	document.forms[1].summa.value=Math.round(summa*100)/100;
 
-	if ($laskucount>1) {
-		echo "
-			for(i=0;i<document.forms[3].elements['lasku_tunnukset[]'].length;i++) {
-				if (document.forms[3].elements['lasku_tunnukset[]'][i].checked) {
-	        		maara+=1.0;
+				if ($suoritus_summa < 0 && summa < 0) {
+		  			document.forms[1].jaljella.value=Math.round((summa-($suoritus_summa))*100)/100;
 				}
-	    	}
-	    	for(i=0;i<document.forms[3].elements['lasku_tunnukset_kale[]'].length;i++) {
-	      		if (document.forms[3].elements['lasku_tunnukset_kale[]'][i].checked) {
-	        		kmaara+=1.0;
-	      		}
-	    	}
-
-			maara = maara + kmaara;";
-	}
-	if ($laskucount==1) {
-		echo "
-			if (document.forms[3].elements['lasku_tunnukset[]'].checked) {
-	        	maara=1;
-	    	}
-	    	if (document.forms[3].elements['lasku_tunnukset_kale[]'].checked) {
-	       		kmaara=1;
-	    	}
-
-			maara = maara + kmaara;";
-	}
-
-	echo "	if (document.forms[3].osasuoritus.checked) {
-				if (kmaara!=0) {
-					alert ('".t("Jos osasuoritus, ei voi valita kassa-alennusta")."');
-					return false;
-				}
-				if (maara!=1) {
-					alert ('".t("Jos osasuoritus, pit‰‰ valita vain ja ainoastaan yksi lasku")."! ' + maara + ' valittu');
-					return false;
+				else {
+					document.forms[1].jaljella.value=Math.round(($suoritus_summa-summa)*100)/100;
 				}
 			}
 
-			if ((maara==0) == true) {
-				alert('".t("Jotta voit kohdistaa, on ainakin yksi lasku valittava. Jos mit‰‰n kohdistettavaa ei lˆydy, klikkaa menusta Manuaalikohdistus p‰‰st‰ksesi takaisin alkuun")."');
-
-				skippaa_tama_submitti = true;
-				return false;
+			function osasuo(form) {
+				if (document.forms[3].osasuoritus.checked) {
+		   			if (document.forms[1].jaljella.value > 0) {
+		   				alert('".t("Et voi osasuorittaa, jos j‰jell‰ on positiivinen summa")."');
+						document.forms[3].osasuoritus.checked = false;
+		   				return false;
+		   			}
+				}
 			}
 
-			var jaljella=document.forms[1].jaljella.value;
-			var kokolasku=document.forms[1].summa.value
-			var suoritus_summa=$suoritus_summa;
+			function validate(form) {
+				var maara=0;
+				var kmaara=0;";
 
-			if (suoritus_summa==0) {
-				return true;
-			}
-
-			if (document.forms[3].osasuoritus.checked == false) {
-				var alennusprosentti = Math.round(100*(1-(suoritus_summa/kokolasku)));
-
-				if (jaljella < 0 && document.forms[3].pyoristys_virhe_ok.checked == true) {
-					if (confirm('".t("Haluatko varmasti antaa")." '+alennusprosentti+'% ".t("alennuksen")."?\\n".t("Alennus").": '+(-1.0*jaljella)+' $yhtiorow[valkoodi] \\n\\n".t("HUOM: Alennus kirjataan kassa-alennukseen")."!')) {
-						return true;
+		if ($laskucount>1) {
+			echo "
+				for(i=0;i<document.forms[3].elements['lasku_tunnukset[]'].length;i++) {
+					if (document.forms[3].elements['lasku_tunnukset[]'][i].checked) {
+		        		maara+=1.0;
 					}
-					else {
-						skippaa_tama_submitti = true;
+		    	}
+		    	for(i=0;i<document.forms[3].elements['lasku_tunnukset_kale[]'].length;i++) {
+		      		if (document.forms[3].elements['lasku_tunnukset_kale[]'][i].checked) {
+		        		kmaara+=1.0;
+		      		}
+		    	}
+
+				maara = maara + kmaara;";
+		}
+		if ($laskucount==1) {
+			echo "
+				if (document.forms[3].elements['lasku_tunnukset[]'].checked) {
+		        	maara=1;
+		    	}
+		    	if (document.forms[3].elements['lasku_tunnukset_kale[]'].checked) {
+		       		kmaara=1;
+		    	}
+
+				maara = maara + kmaara;";
+		}
+
+		echo "	if (document.forms[3].osasuoritus.checked) {
+					if (kmaara!=0) {
+						alert ('".t("Jos osasuoritus, ei voi valita kassa-alennusta")."');
+						return false;
+					}
+					if (maara!=1) {
+						alert ('".t("Jos osasuoritus, pit‰‰ valita vain ja ainoastaan yksi lasku")."! ' + maara + ' valittu');
 						return false;
 					}
 				}
-				else if (jaljella < 0) {
-					alert('".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."');
+
+				if ((maara==0) == true) {
+					alert('".t("Jotta voit kohdistaa, on ainakin yksi lasku valittava. Jos mit‰‰n kohdistettavaa ei lˆydy, klikkaa menusta Manuaalikohdistus p‰‰st‰ksesi takaisin alkuun")."');
 
 					skippaa_tama_submitti = true;
 					return false;
 				}
+
+				var jaljella=document.forms[1].jaljella.value;
+				var kokolasku=document.forms[1].summa.value
+				var suoritus_summa=$suoritus_summa;
+
+				if (suoritus_summa==0) {
+					return true;
+				}
+
+				if (document.forms[3].osasuoritus.checked == false) {
+					var alennusprosentti = Math.round(100*(1-(suoritus_summa/kokolasku)));
+
+					if (jaljella < 0 && document.forms[3].pyoristys_virhe_ok.checked == true) {
+						if (confirm('".t("Haluatko varmasti antaa")." '+alennusprosentti+'% ".t("alennuksen")."?\\n".t("Alennus").": '+(-1.0*jaljella)+' $yhtiorow[valkoodi] \\n\\n".t("HUOM: Alennus kirjataan kassa-alennukseen")."!')) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
+					}
+					else if (jaljella < 0) {
+						alert('".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."');
+
+						skippaa_tama_submitti = true;
+						return false;
+					}
+				}
+				return true;
 			}
-			return true;
-		}
-	-->
-	</script>";
+		-->
+		</script>";
+	}
 }
 elseif ($tila == 'kohdistaminen') {
 	$tila = '';

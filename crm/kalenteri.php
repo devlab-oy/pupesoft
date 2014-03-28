@@ -183,10 +183,12 @@ if ($tee == 'LISAA') {
 	}
 
 	if ($ok == "OK") {
-		if ($tunnus != '') {
+		$tunnus = (int) $tunnus;
+
+		if ($tunnus > 0) {
 			$query = "	DELETE
 						FROM kalenteri
-						WHERE tunnus='$tunnus'
+						WHERE tunnus=$tunnus
 						$konsernit";
 			pupe_query($query);
 		}
@@ -240,15 +242,12 @@ if ($tee == 'LISAA') {
 		// Tämä siis sen takia, että kalenterimerkinnän päivitys
 		// tapahtuu poistamalla vanha merkintä ja lisäämällä uusi päivitetty
 		// versio merkinnästä.
-		if ($tunnus>0 and $uusi_tunnus>0) {
-			$query = '
-				UPDATE liitetiedostot
-				SET liitostunnus = '. $uusi_tunnus .'
-				WHERE liitostunnus = '. (int)$tunnus .'
-				AND liitos = "kalenterimerkintä"
-				AND yhtio = "'. $kukarow['yhtio'] .'"
-			';
-
+		if ($tunnus > 0 and $uusi_tunnus > 0) {
+			$query = "  UPDATE liitetiedostot
+						SET liitostunnus = $uusi_tunnus
+						WHERE liitostunnus = $tunnus
+						AND liitos = 'kalenterimerkintä'
+						AND yhtio = '{$kukarow['yhtio']}'";
 			pupe_query($query);
 		}
 
@@ -260,21 +259,19 @@ if ($tee == 'LISAA') {
 }
 
 // ollaan painettu poista nappia
-if ($tee == "POISTA") {
-	$query ="	DELETE FROM kalenteri
-				WHERE tunnus = '$tunnus'
-				$konsernit";
+if ($tee == "POISTA" and (int) $tunnus > 0) {
+	$tunnus = (int) $tunnus;
 
+	$query = "	DELETE FROM kalenteri
+				WHERE tunnus = $tunnus
+				$konsernit";
 	pupe_query($query);
 
 	// Poistetaan myös liitetiedostot tälle kalenterimerkinnälle
-	$query = '
-		DELETE FROM liitetiedostot
-		WHERE liitostunnus = '. (int)$tunnus .'
-		AND liitos = "kalenterimerkintä"
-		AND yhtio = "'. $kukarow['yhtio'] .'"
-	';
-
+	$query = "  DELETE FROM liitetiedostot
+				WHERE liitostunnus = {$tunnus}
+				AND liitos = 'kalenterimerkintä'
+				AND yhtio = '{$kukarow['yhtio']}'";
 	pupe_query($query);
 }
 
@@ -456,9 +453,6 @@ if($tee == "SYOTA") {
 		  		</td>
 		  		</tr>";
 
-	$lisays .= "<tr><td valign='top'>".t("Ladatut liitetiedostot").":</td>";
-	$lisays .= "<td><table><tbody>";
-
 	$query = "
 		SELECT *
 		from liitetiedostot
@@ -469,17 +463,18 @@ if($tee == "SYOTA") {
 	$liiteres = pupe_query($query);
 
 	if (mysql_num_rows($liiteres) > 0) {
+		$lisays .= "<tr><td valign='top'>".t("Ladatut liitetiedostot").":</td>";
+		$lisays .= "<td><table><tbody>";
+
 		while ($liiterow = mysql_fetch_assoc($liiteres)) {
 			$lisays .= '<tr>';
 			$lisays .= "<td><a href=\"#\" onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[filename]</a></td>";
 			$lisays .= '<td><a onclick="if (window.confirm(\'Haluatko poistaa liitteen '. $liiterow['filename'] .'\')===false ) return false;" href="'. $_SERVER['REQUEST_URI'] .'&poista_liite='. $liiterow['tunnus'] .'">Poista</a></td>';
 			$lisays .= '</tr>';
 		}
-	} else {
-		$lisays .= '<tr><td>Ei ladattuja liitetiedostoja</td></tr>';
-	}
 
-	$lisays .= "</tbody></table></td></tr>";
+		$lisays .= "</tbody></table></td></tr>";
+	}
 
 	$lisays .= "<tr><td valign='top'>".t("Lataa uusi Liitetiedosto").":</td>";
 	$lisays .= "<td>

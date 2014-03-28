@@ -416,10 +416,12 @@
 
 				if ($lahdot !== FALSE) {
 					// Otetaan eka lähtö
-					$valitu_lahto = array_shift($lahdot);
+					$valittu_lahto = array_shift($lahdot);
+
+					$valittu_lahto['tunnus'] = 77035;
 
 					$query = "	UPDATE lasku
-								SET toimitustavan_lahto = '{$valitu_lahto['tunnus']}'
+								SET toimitustavan_lahto = '{$valittu_lahto['tunnus']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus  = '{$laskurow['tunnus']}'";
 					pupe_query($query);

@@ -2,8 +2,6 @@
 
 require ("inc/parametrit.inc");
 
-$sanakirja_kielet = array("en", "se", "de", "dk", "ee", "no", "ru");
-
 echo "<font class='head'>".t("Sanakirja")."</font><hr>";
 
 echo "<form method='post' autocomplete='off'>";
@@ -14,22 +12,15 @@ echo "<td><table>";
 $r = 0;
 
 // käydään läpi mahdolliset kielet
-foreach ($sanakirja_kielet as $sanakirja_kieli) {
-
-	$query = "SELECT distinct nimi from maat where koodi='$sanakirja_kieli' and nimi != ''";
-	$maare = mysql_query($query) or pupe_error($query);
-	$maaro = mysql_fetch_array($maare);
-	$maa   = strtolower($maaro["nimi"]);
-
-	if ($maa == "") $maa = $sanakirja_kieli;
+foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+	if ($sanakirja_kieli == "fi") continue;
 
 	$sels = '';
-
 	if (strtoupper($kieli[$r]) == strtoupper($sanakirja_kieli)) {
 		$sels = "CHECKED";
 	}
 
-	echo "<tr><td>".strtoupper(t("$maa"))."</td><td><input type='checkbox' name='kieli[$r]' value='$sanakirja_kieli' $sels></td></tr>";
+	echo "<tr><td>".t($sanakirja_kieli_nimi)."</td><td><input type='checkbox' name='kieli[$r]' value='$sanakirja_kieli' $sels></td></tr>";
 	$r++;
 }
 
@@ -57,23 +48,11 @@ echo "<td><select name='etsi_kieli'>";
 
 echo "<option value=''>".t("Ei etsitä")."</option>";
 
-$sel = "";
-if ($etsi_kieli == "fi") $sel = "selected";
-
-echo "<option value='fi' $sel>".t("fi - suomi")."</option>";
-
-foreach ($sanakirja_kielet as $sanakirja_kieli) {
-	$query = "SELECT distinct nimi from maat where koodi='$sanakirja_kieli' and nimi != ''";
-	$maare = mysql_query($query) or pupe_error($query);
-	$maaro = mysql_fetch_array($maare);
-	$maa   = strtolower($maaro["nimi"]);
-	if ($maa=="") $maa = $sanakirja_kieli;
-
+foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
 	$sel = '';
-
 	if ($sanakirja_kieli == $etsi_kieli) $sel = "SELECTED";
 
-	echo "<option value='$sanakirja_kieli' $sel>".t("$maa")."</option>";
+	echo "<option value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."</option>";
 }
 
 echo "</select></td>";
@@ -91,13 +70,14 @@ echo "</table><br>";
 
 if ($maxtunnus > 0) {
 	// käydään läpi mahdolliset kielet
-	foreach ($sanakirja_kielet as $sanakirja_kieli) {
+	foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
 		for ($i=0; $i<=$maxtunnus; $i++) {
 			// eli etsitään kielen nimisesta arraysta indexillä $i
 			if (${$sanakirja_kieli}[$i] != "") {
 				$value = addslashes(trim(${$sanakirja_kieli}[$i])); // spacella pystyy tyhjentämään kentän, mutta ei tallenneta sitä
+
 				$query = "UPDATE sanakirja set $sanakirja_kieli='$value', muuttaja='$kukarow[kuka]', muutospvm=now() where tunnus='$i'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 	}
@@ -160,7 +140,7 @@ if (count($kieli) > 0) {
 	}
 
 	$query .= " ORDER BY luontiaika desc,fi ";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
 		echo "<table>";

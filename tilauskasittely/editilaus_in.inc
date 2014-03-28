@@ -115,6 +115,7 @@ $loppostitp           	= "";
 $loppostino           	= "";
 $loposoite            	= "";
 $ltoim_maa				= "";
+$ltoim_puh				= "";
 $yhteyshenkilon_puhelin = "";
 $tilausyhteyshenkilo	= "";
 $lopviesti            	= "";
@@ -745,6 +746,11 @@ while ($tietue = fgets($fd)) {
 			// toimitusosoitteen maakoodi
 			$ltoim_maa = substr(trim($tieto), 0, 2);
 			break;
+			
+		case 'OSTOTIL.OT_TOIMITUS_PUH' :
+			// toimitusosoitteen puh
+			$ltoim_puh = trim($tieto);
+			break;
 
 		case 'OSTOTIL.OT_YHTEYSHENKILONPUH' :
 			// yhteyshenkilön puhelinnumero
@@ -904,7 +910,8 @@ while ($tietue = fgets($fd)) {
 					$arow["postitp"]	= $lpostitp;
 					$arow["postino"]	= $lpostino;
 					$arow["maa"]		= $ltoim_maa;
-					$arow["vienti"]		= "";
+					$arow["toim_puh"]	= $ltoim_puh;
+ 					$arow["vienti"]		= "";
 
 					$arow['laskutus_nimi'] 		= $lnimi;
 					$arow['laskutus_nimitark'] 	= $lnimitark;
@@ -1225,6 +1232,7 @@ while ($tietue = fgets($fd)) {
 							toimitustapa 	   					= '$editilaus_toimitustapa',
 							toimvko	 							= '',
 							toim_maa		   					= '$arow[toim_maa]',
+							toim_puh		   					= '$arow[toim_puh]',
 							toim_nimi		   					= '$arow[toim_nimi]',
 							toim_nimitark	   					= '$arow[toim_nimitark]',
 							toim_osoite		   					= '$arow[toim_osoite]',
@@ -2084,6 +2092,7 @@ while ($tietue = fgets($fd)) {
 			$loppostino           	= "";
 			$loposoite            	= "";
 			$ltoim_maa				= "";
+			$ltoim_puh				= "";
 			$yhteyshenkilon_puhelin = "";
 			$tilausyhteyshenkilo	= "";
 			$lopviesti            	= "";

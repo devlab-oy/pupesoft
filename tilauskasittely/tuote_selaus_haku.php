@@ -595,7 +595,7 @@
 		$query	= "	SELECT distinct tuoteno
 					FROM tuotteen_orginaalit
 					WHERE yhtio = '$kukarow[yhtio]'
-					and orig_tuoteno like '%$alkuperaisnumero%'
+					AND orig_tuoteno like '$alkuperaisnumero%'
 					LIMIT 500";
 		$pres = pupe_query($query);
 

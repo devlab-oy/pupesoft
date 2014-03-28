@@ -97,14 +97,13 @@ else {
 
 // Poistetaan liitetiedosto kalenterimerkinnästä
 // mikäli GET-parametreistä löytyy poista_liite
-if( isset($poista_liite) ) {
-	$query = '
-		DELETE FROM liitetiedostot
-		WHERE tunnus = '. (int)$poista_liite .'
-		AND liitos = "kalenterimerkintä"
-		AND yhtio = "'. $kukarow[yhtio] .'"
-	';
+if( isset($poista_liite) and (int) $poista_liite > 0 ) {
+	$poista_liite = (int) $poista_liite;
 
+	$query = "	DELETE FROM liitetiedostot
+				WHERE tunnus = $poista_liite
+				AND liitos = 'kalenterimerkintä'
+				AND yhtio = '$kukarow[yhtio]'";
 	pupe_query($query);
 }
 

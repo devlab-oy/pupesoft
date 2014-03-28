@@ -329,6 +329,7 @@
 				$tee = 'M';
 			}
 		}
+		if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'N';
 	}
 
 	if ($tee == 'N') {
@@ -579,6 +580,7 @@
 				}
 			}
 		}
+		if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'N';
 	}
 
 	if ($tee == 'N') {
@@ -725,6 +727,8 @@
 		$ahyllytaso = '';
 		$asaldo     = '';
 		$tee 		= $uusitee;
+
+		if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'MEGALOMAANINEN_ONNISTUMINEN';
 	}
 
 	// Uusi varstopaikka
@@ -818,12 +822,14 @@
 			}
 			else {
 				echo "<font class='error'>".("Uusi varastopaikka ei kuulu mihinkään varastoon").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
+				$failure = "Y";
 			}
 		}
 		else {
 			echo "<font class='error'>".("Uusi varastopaikka löytyy jo tuotteelta").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 		}
 		$tee = 'M';
+		if ($kutsuja == "varastopaikka_aineistolla.php") $tee = "PALATTIIN_MUUSTA";
 	}
 
 	if ($tee != "") {

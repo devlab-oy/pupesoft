@@ -107,6 +107,7 @@ class Edi {
 
 				// Tuoteno
 				$tuoteno = $item['sku'];
+				if (substr($tuoteno, 0, 4) == "SKU_") $tuoteno = substr($tuoteno, 4);
 
 				// Nimitys
 				$nimitys = $item['name'];

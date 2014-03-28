@@ -80,7 +80,7 @@
 	$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 	// alustetaan arrayt
-	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = array();
+	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = $individual_tuotteet = array();
 
 	if ($ajetaanko_kaikki == "NO") {
 		$muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
@@ -181,23 +181,25 @@
 		echo date("d.m.Y @ G:i:s")." - Haetaan poistettavat tuotteet.\n";
 
 		// Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pitää olla Magentossa
-		$query = "	SELECT DISTINCT tuotteen_avainsanat.selite configurable_tuoteno, tuote.tuoteno
-					FROM tuotteen_avainsanat
-					JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+		$query = "	SELECT DISTINCT tuote.tuoteno, tuotteen_avainsanat.selite configurable_tuoteno
+					FROM tuote
+					LEFT JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio
 					AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
-					AND tuote.status != 'P'
-					AND tuote.tuotetyyppi NOT IN ('A','B')
-					AND tuote.tuoteno != ''
-					AND tuote.nakyvyys != '')
-					WHERE tuotteen_avainsanat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-					AND trim(tuotteen_avainsanat.selite) != ''";
+					AND trim(tuotteen_avainsanat.selite) != '')
+					WHERE tuote.yhtio   = '{$kukarow["yhtio"]}'
+					AND tuote.status   != 'P'
+					AND tuote.tuotetyyppi NOT in ('A','B')
+					AND tuote.tuoteno  != ''
+					AND tuote.nakyvyys != ''";
 		$res = pupe_query($query);
 
 		// Kaikki tuotenumerot arrayseen
 		while ($row = mysql_fetch_array($res)) {
 			$kaikki_tuotteet[] = $row['tuoteno'];
-			$kaikki_tuotteet[] = $row['configurable_tuoteno'];
+
+			if ($row['configurable_tuoteno'] == "") $individual_tuotteet[$row['tuoteno']] = $row['tuoteno'];
+			if ($row['configurable_tuoteno'] != "") $kaikki_tuotteet[] = $row['configurable_tuoteno'];
 		}
 
 		$kaikki_tuotteet = array_unique($kaikki_tuotteet);
@@ -569,6 +571,12 @@
 		// Verkkokaupan "root" kategorian tunnus, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
 		if (isset($magento_parent_id)) $magento_client->setParentID($magento_parent_id);
 
+		// Verkkokaupanhintakenttä, joko myyntihinta tai myymalahinta
+		if (isset($magento_hintakentta)) $magento_client->setHintakentta($magento_hintakentta);
+
+		// Onko "Category access control"-moduli on asennettu
+		if (isset($categoryaccesscontrol)) $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
+
 		// lisaa_kategoriat
 		if (count($dnstuoteryhma) > 0) {
 			echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
@@ -579,7 +587,7 @@
 		// Tuotteet (Simple)
 		if (count($dnstuote) > 0) {
 			echo date("d.m.Y @ G:i:s")." - Päivitetään simple tuotteet\n";
-			$count = $magento_client->lisaa_simple_tuotteet($dnstuote);
+			$count = $magento_client->lisaa_simple_tuotteet($dnstuote, $individual_tuotteet);
 			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (simple)\n";
 		}
 

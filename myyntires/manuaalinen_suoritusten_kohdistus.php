@@ -1473,7 +1473,7 @@ if ($tila == 'suorituksenvalinta') {
 		}
 	}
 }
-
+echo "1476 $tila ja $suoritus_tunnus <br><br>";
 if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 
 	echo "<font class='head'>".t("Manuaalinen suoritusten kohdistaminen (laskujen valinta)")."</font><hr>";
@@ -1503,8 +1503,8 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
-		echo "<font class='error'>".t("Suorituksen tiedot ovat puutteelliset")."!</font>";
-		pupe_error($query);
+		echo "<font class='error'>".t("Suorituksen tila on muuttunut")."!</font>";
+		exit();
 	}
 
 	$suoritus = mysql_fetch_assoc($result);

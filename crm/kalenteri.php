@@ -60,7 +60,9 @@ else {
 	}
 }
 
-$ruksatut   = explode(",", $valitut);					//tata kaytetaan ihan lopussa
+$valitut = urldecode($valitut);
+
+$ruksatut   = explode(",", $valitut);				//tata kaytetaan ihan lopussa
 $ruksattuja = count($ruksatut);   					//taman avulla pohditaan tarvitaanko tarkenteita
 $vertaa     = "'".implode("','", $ruksatut)."'";	// tehd‰‰n mysql:n ymm‰rt‰m‰ muoto
 
@@ -284,8 +286,8 @@ if($tee == "SYOTA") {
 		<td colspan='10'><form method='POST'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
-		<input type='hidden' name='valitut' value='$valitut'>
-		<input type='hidden' name='kenelle' value='$kenelle'>
+		<input type='hidden' name='valitut' value='".urlencode($valitut)."'>
+		<input type='hidden' name='kenelle' value='".urlencode($kenelle)."'>
 		<input type='hidden' name='asyhtio' value='$asyhtio'>
 		<input type='hidden' name='kello' value='$kello'>
 		<input type='hidden' name='year'  value='$year'>
@@ -412,7 +414,7 @@ if($tee == "SYOTA") {
 				<form method='POST'>
 				<input type='hidden' name='tee' value='POISTA'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
-				<input type='hidden' name='valitut' value='$valitut'>
+				<input type='hidden' name='valitut' value='".urlencode($valitut)."'>
 				<input type='hidden' name='year' value='$year'>
 				<input type='hidden' name='kuu' value='$kuu'>
 				<input type='hidden' name='paiva' value='$paiva'>
@@ -818,7 +820,7 @@ while ($kello_nyt != $whileloppu) {
 
 	//kirjoitetaan tiedot tauluun (paitsi jos ollaa lis‰‰m‰ss‰ uutta t‰h‰n ja taulu oisi tyhj‰)
 	echo "<tr>";
-	echo "<td nowrap width='10%'>$kello_nyt <a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>".t("Lis‰‰")."</a></td>";
+	echo "<td nowrap width='10%'>$kello_nyt <a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>".t("Lis‰‰")."</a></td>";
 
 	if ($kello_nyt == $lisayskello) {
 		echo $lisays;
@@ -878,7 +880,7 @@ while ($kello_nyt != $whileloppu) {
 
 				// Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
 				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
-					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
+					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
 				}
 				elseif ($row['tyyppi'] == 'asennuskalenteri') {
 					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>",t("Asennustyˆ")," $row[liitostunnus] ";

@@ -68,7 +68,25 @@
 
 	if (mysql_field_name($result, $i) == "selite") {
 
-		if ($tem_laji == "tarratyyppi") {
+		if (strtolower($tem_laji) == "elinkaari") {
+
+			$vresult = t_avainsana("ELINKAARI");
+
+			if (mysql_num_rows($vresult) > 0) {
+				$ulos = "<td><select name='{$nimi}'>";
+				$ulos .= "<option value=''>".t("Ei elinkaarityyppiä")."</option>";
+
+				while ($vrow = mysql_fetch_assoc($vresult)) {
+					$sel = $trow[$i] == $vrow['selite'] ? "selected" : "";
+					$ulos .= "<option value='{$vrow['selite']}' {$sel}>{$vrow['selitetark']}</option>";
+				}
+
+				$ulos .= "</select></td>";
+			}
+
+			$jatko = 0;
+		}
+		elseif ($tem_laji == "tarratyyppi") {
 
 			$vresult = t_avainsana("TARRATYYPPI");
 

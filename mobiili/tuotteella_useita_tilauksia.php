@@ -85,7 +85,7 @@ if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
 }
 
-$orderby = "tilausrivi_tyyppi DESC, ostotilaus, sorttaus_kpl";
+$orderby = "tilausrivi_tyyppi DESC, tuoteno, ostotilaus, sorttaus_kpl";
 $ascdesc = "desc";
 
 if (isset($sort_by)) {

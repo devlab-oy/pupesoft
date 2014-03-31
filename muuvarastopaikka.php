@@ -767,7 +767,7 @@
 
 				if ($yhtiorow['varastontunniste'] != '') {
 					if (!isset($select_varastontunniste) or trim($select_varastontunniste) == "") $kaikki_ok = false;
-					}
+				}
 
 				if ($kaikki_ok) {
 					echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
@@ -818,6 +818,7 @@
 				}
 				else {
 					echo "<font class='error'>",("Uusi varastopaikka ei löydy tai ei kuulu mihinkään varastoon"),": {$tuoteno} ({$ahyllyalue}, {$ahyllynro}, {$ahyllyvali}, {$ahyllytaso})</font><br />";
+					$failure = "Y";
 				}
 			}
 			else {

@@ -33,24 +33,25 @@
 				// Siivous ja validitytsekit
 				foreach ($kaikki_tiedostorivit as $rowkey => &$tiedr) {
 					// Indeksit:
-					$tuoteno = $tiedr[0] = pupesoft_cleanstring($tiedr[0]);								// 0 - Tuotenumero
-					$kpl = $tiedr[1] = str_replace( ",", ".", pupesoft_cleanstring($tiedr[1]));			// 1 - M‰‰r‰
-					$lahdevarastopk = $tiedr[2] = pupesoft_cleanstring($tiedr[2]);						// 2 - L‰hdevarastopaikka
-					$kohdevarastopk = $tiedr[3] = pupesoft_cleanstring($tiedr[3]);						// 3 - Kohdevarastopaikka
-					$kom = $tiedr[4] = pupesoft_cleanstring($tiedr[4]);									// 4 - Kommentti
-					$poistetaanko_lahde = $tiedr[5] = pupesoft_cleanstring($tiedr[5]);					// 5 - Poistetaanko l‰hdevarastopaikka
+					$tuoteno = $tiedr[0] = pupesoft_cleanstring($tiedr[0]);										// 0 - Tuotenumero
+					$kpl = $tiedr[1] = str_replace( ",", ".", pupesoft_cleanstring($tiedr[1]));					// 1 - M‰‰r‰
+					$lahdevarastopk = $tiedr[2] = str_replace(" ", "", pupesoft_cleanstring($tiedr[2]));		// 2 - L‰hdevarastopaikka
+					$kohdevarastopk = $tiedr[3] = str_replace(" ", "", pupesoft_cleanstring($tiedr[3]));		// 3 - Kohdevarastopaikka
+					$kom = $tiedr[4] = pupesoft_cleanstring($tiedr[4]);											// 4 - Kommentti
+					$poistetaanko_lahde = $tiedr[5] = str_replace(" ", "", pupesoft_cleanstring($tiedr[5]));	// 5 - Poistetaanko l‰hdevarastopaikka
 					if ($poistetaanko_lahde != 'X') $tiedr[5] = '';
 
-					// Jos joku pakollisista tiedoista on tyhj‰ tai v‰‰r‰ poistetaan koko rivi
-					if (in_array("", array($tuoteno, $kpl, $lahdevarastopk, $kohdevarastopk)) or $lahdevarastopk == $kohdevarastopk or ($kpl == 0 or (!is_numeric($kpl) and $kpl != "X"))) {
+					// Jos joku pakollisista tiedoista on tyhj‰ tai v‰‰rin poistetaan koko rivi
+					if (in_array("", array($tuoteno, $kpl, $lahdevarastopk, $kohdevarastopk)) or $lahdevarastopk == $kohdevarastopk or (!is_numeric($kpl) and $kpl != 'X')) {
 						unset($kaikki_tiedostorivit[$rowkey]);
 						continue;
 					}
 
+					// LƒHDEVARASTOPAIKKA
 					list($lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso) = explode(",", $lahdevarastopk);
 
-					// Tarkistetaan onko tuote ja l‰hdevarastopaikka olemassa
-					$query = "	SELECT *
+					// Tarkistetaan onko tuotepaikka ja tuote olemassa
+					$query = "	SELECT *, tuotepaikat.tunnus otatamatalteen
 								FROM tuotepaikat use index (tuote_index), tuote
 								WHERE tuotepaikat.yhtio	  = '$kukarow[yhtio]'
 								and tuotepaikat.tuoteno	  = '$tuoteno'
@@ -68,15 +69,39 @@
 					}
 					else {
 						$ressu = mysql_fetch_assoc($tvresult);
-						$tiedr[2] = $ressu['tunnus'];
+						$tiedr[2] = $ressu['otatamatalteen'];
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $varasto_valinta, '', $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso);
-						if ($kpl > $myytavissa or $kpl == "X") $tiedr[1] = $myytavissa;
+
+						if ($kpl == "X" or $kpl > $myytavissa) $tiedr[1] = $myytavissa;
+						if ($myytavissa == 0 and (isset($ressu['otatamalteen']) or $kpl == 'X')) {
+							echo "<font class='error'>".t("Tuotteen %s annetulla l‰hdevarastopaikalla %s %s %s %s ei ole siirrett‰viss‰ olevaa saldoa", "", $tuoteno, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso)."!</font><br>";
+							unset($kaikki_tiedostorivit[$rowkey]);
+							continue;
+						}
+
 					}
 
+					// Tarkistetaan onko annettu l‰hdevarastopaikka valitussa varastossa
+					$lahdetsekki = kuuluukovarastoon($lhyllyalue, $lhyllynro, $varasto_valinta);
+					if ($lahdetsekki == 0) {
+						echo "<font class='error'>".t("Tuotteen %s l‰hdevarastopaikka %s %s %s %s ei ole valitussa varastossa", "", $tuoteno, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso)."!</font><br>";
+						unset($kaikki_tiedostorivit[$rowkey]);
+						continue;
+					}
+
+					// KOHDEVARASTOPAIKKA
 					list($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso) = explode(",", $kohdevarastopk);
 
-					// Onko kohdevarastopaikka olemassa
-					$query = "	SELECT *
+					// Tarkistetaan onko annettu kohdevarastopaikka valitussa varastossa
+					$kohdetsekki = kuuluukovarastoon($ahyllyalue, $ahyllynro, $varasto_valinta);
+					if ($kohdetsekki == 0) {
+						echo "<font class='error'>".t("Tuotteen %s kohdevarastopaikka %s %s %s %s ei ole valitussa varastossa", "", $tuoteno, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)."!</font><br>";
+						unset($kaikki_tiedostorivit[$rowkey]);
+						continue;
+					}
+
+					// Onko kohdetuotepaikka olemassa
+					$query_ktp = "	SELECT *
 								from tuotepaikat use index (tuote_index)
 								where tuoteno = '$tuoteno'
 								and yhtio	  = '$kukarow[yhtio]'
@@ -84,9 +109,9 @@
 								and hyllynro  = '$ahyllynro'
 								and hyllyvali = '$ahyllyvali'
 								and hyllytaso = '$ahyllytaso'";
-					$kvresult = pupe_query($query);
-
-					// Jos tuotepaikkaa ei lˆydy, yritet‰‰n perustaa sellainen
+					$kvresult = pupe_query($query_ktp);
+					
+					// Jos kohdetuotepaikkaa ei lˆydy, yritet‰‰n perustaa sellainen
 					if (mysql_num_rows($kvresult) == 0) {
 						$tee = "UUSIPAIKKA";
 						$kutsuja = "varastopaikka_aineistolla.php";
@@ -95,15 +120,16 @@
 
 					if (isset($failure)) unset($kaikki_tiedostorivit[$rowkey]);
 					else {
-						// Tsekataan uusiksi ett‰ saadaan tunnus siirtoa varten
-						$kvresult = pupe_query($query);
+						// Jos tehtiin uusi paikka niin haetaan tunnus siirtoa varten
+						$kvresult = pupe_query($query_ktp);
 						if (mysql_num_rows($kvresult) == 0) $virhe = 1;
 						else {
 							$ressi = mysql_fetch_assoc($kvresult);
 							$tiedr[3] = $ressi['tunnus'];
 						} 
-						
+
 					}
+
 					if (in_array('', array($tiedr[2],$tiedr[3]))) $virhe = 1;
 					if ($tee = "PALATTIIN_MUUSTA") $tee = "AJA";
 
@@ -129,10 +155,10 @@
 		// Jos kaikki on ok ja soluja on viel‰ j‰ljell‰
 		if ($virhe == 0) {
 
-			echo "<br><br><font class='message'>".t("Siirret‰‰n %s rivi‰", "", count($kaikki_tiedostorivit))."...<br><br></font>";
+			echo "<br><br><font class='message'>".t("Siirret‰‰n %s tuotepaikan saldo", "", count($kaikki_tiedostorivit))."...<br><br></font>";
 
 			foreach ($kaikki_tiedostorivit as $tkey => $tval) {
-				// Parametrit muu_varastopaikka.phplle
+				// Parametrit muuvarastopaikka.phplle
 				// $asaldo  = siirrett‰v‰ m‰‰r‰
 				// $mista   = tuotepaikan tunnus josta otetaan
 				// $minne   = tuotepaikan tunnus jonne siirret‰‰n
@@ -146,14 +172,33 @@
 
 				$tee = "N";
 				$kutsuja = "varastopaikka_aineistolla.php";
+				require("muuvarastopaikka.php");
+
+				// Merkataan viel‰ l‰hdevarastopaikka poistettavaksi jos se ei ole oletuspaikka
+				if ($poistetaanko_lahde == 'X') {
+					$query = "	UPDATE tuotepaikat
+								SET poistettava = 'D'
+								WHERE tuoteno 	= '{$tuoteno}'
+								AND yhtio 		= '{$kukarow['yhtio']}'
+								AND tunnus 		= '$mista'
+								AND oletus = ''";
+					$ressu =  pupe_query($query);
+					if (mysql_affected_rows() != 0) {
+						echo "<font class='message'>".t("Tuotteen %s l‰hdevarastopaikka merkattiin poistettavaksi", "", $tuoteno)."!</font><br>";
+					}
+					else {
+						echo "<font class='error'>".t("Tuotteen %s l‰hdevarastopaikka on oletuspaikka tai jo merkattu poistettavaksi", "", $tuoteno)."!</font><br>";
+					}
+				}
 			}
 
-			if ($tee == 'MEGALOMAANINEN_ONNISTUMINEN') echo "JEEE JUHLAT KAIKKI TOIMII<br>";
+			if ($tee == 'MEGALOMAANINEN_ONNISTUMINEN') 	echo "<br><font class='message'>".t("Siirto valmis")."!</font><br><br>";
 			$tee = "";
 			$kutsuja = "";
 		}
 		else {
 			$tee = "VALITSE_TIEDOSTO";
+			$kutsuja = "";
 		}
 	}
 
@@ -192,6 +237,7 @@
 		$ohje_sarake_5 = t("Kommentti");
 		$ohje_sarake_6 = t("Arvolla %s l‰hdepaikka poistetaan siirron j‰lkeen, muuten l‰hdepaikkaa ei poisteta", "", "X");
 
+		$ahlopetus 	= $palvelin2."varastopaikka_aineistolla.php////tee=''//kutsuja=''";
 		echo "	<table>
 				<tr><th colspan='6'>".t("Sarkaineroteltu tekstitiedosto tai excel-tiedosto.")."</th></tr>
 				<tr><td title='{$ohje_sarake_1}'>".t("Tuotenumero")."</td>
@@ -202,6 +248,7 @@
 					<td title='{$ohje_sarake_6}'>".t("Poistetaanko l‰hdepaikka lopuksi")."</td></tr>
 				</table><br><font class='message'>".t("Lis‰tietoja saat kohdistamalla kursorin yll‰oleviin sarakkeisiin")."</font><br><br>";
 		echo "	<form name='tiedosto' method='post' enctype='multipart/form-data'>
+				<input type='hidden' name='lopetus' value='{$ahlopetus}'>
 				<input type='hidden' name='varasto_valinta' value='$varasto_valinta'>
 				<input type='hidden' name='tee' value='AJA'>
 				<table>

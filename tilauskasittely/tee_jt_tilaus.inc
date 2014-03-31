@@ -819,6 +819,19 @@
 								$hinta = laskuval($hinta, $isarivirow["vienti_kurssi"]);
 							}
 
+							if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+								$siirtolista_query = "	SELECT tt.tunnus AS tunnus
+														FROM tilausrivin_lisatiedot AS tt
+														JOIN tilausrivi AS t
+														ON (t.yhtio = tt.yhtio
+															AND t.tunnus = tt.tilausrivitunnus
+															AND t.tyyppi = 'G' )
+														WHERE tt.yhtio = '{$kukarow['yhtio']}'
+														AND tt.tilausrivilinkki = {$tunnus_nyt}";
+								$siirtolista_result = pupe_query($siirtolista_query);
+								$siirtolista_row = mysql_fetch_assoc($siirtolista_result);
+							}
+
 							require("lisaarivi.inc");
 
 							$kpl = $talteen_kpl; // lis‰‰rivi rikko t‰n, otetaan haltuun
@@ -834,6 +847,14 @@
 									//Pidet‰‰n muistissa lis‰tyt kappaleet
 									if (isset($luodut_kpl[$tunnus_nyt])) $luodut_kpl[$tunnus_nyt] += $lisataanrow_kpl;
 									else $luodut_kpl[$tunnus_nyt] = $lisataanrow_kpl;
+
+									if (!empty($siirtolista_row)) {
+										$query = "	UPDATE tilausrivin_lisatiedot
+													SET tilausrivilinkki = {$lisatty_tun}
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus = {$siirtolista_row['tunnus']}";
+										pupe_query($query);
+									}
 								}
 							}
 

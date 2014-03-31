@@ -18,29 +18,18 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kieli") {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-		$ulos = "<td><select name='$nimi'>";
-
-		$query  = "SHOW columns from sanakirja";
-		$fields =  mysql_query($query);
-
-		while ($apurow = mysql_fetch_array($fields)) {
+		foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
 			$sel = "";
-			if ($trow[$i] == $apurow[0]) {
+			if ($trow[$i] == $sanakirja_kieli) {
 				$sel = "selected";
 			}
-			if ($apurow[0] != "tunnus") {
-				$query = "select distinct nimi from maat where koodi='$apurow[0]'";
-				$maare = mysql_query($query);
-				$maaro = mysql_fetch_array($maare);
-				$maa   = strtolower($maaro["nimi"]);
-				if ($maa=="") $maa = $apurow[0];
-				$ulos .= "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
-			}
+
+			$ulos .= "<option value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."</option>";
 		}
 
 		$ulos .= "</select></td>";
-
 		$jatko = 0;
 	}
 

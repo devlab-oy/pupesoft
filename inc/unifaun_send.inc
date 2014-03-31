@@ -176,6 +176,10 @@ class Unifaun {
 			$uni_discard_val = $uni_discard->addChild('val', utf8_encode($mergeid));
 			$uni_discard_val->addAttribute('n', 'mergeid');
 		}
+		
+		if (is_numeric($parcelno) and substr($parcelno,0,2) == '00') {
+			$parcelno = substr($parcelno,2);
+		}
 
 		$uni_discard_val = $uni_discard->addChild('val', $parcelno);
 		$uni_discard_val->addAttribute('n', 'parcelno');

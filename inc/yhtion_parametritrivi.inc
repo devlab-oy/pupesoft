@@ -1,8 +1,8 @@
 <?php
 
-	
+
 	if (isset($ytp_fieldname) and $ytp_fieldname != "") {
-		$fieldname = $ytp_fieldname; 
+		$fieldname = $ytp_fieldname;
 	}
 	else {
 		$ulos   = "";
@@ -12,10 +12,10 @@
 		if ($i == 0) { //yhtiötä ei näytetä
 			$tyyppi = 0;
 		}
-	
+
 		$fieldname = mysql_field_name($result, $i);
 	}
-	
+
 	if ($fieldname == "css") {
 		$ulos = "<td><textarea cols='45' rows='7' name='css'>$trow[$i]</textarea><input type='hidden' name='cssi' value='$i'></td>";
 		$jatko = 0;
@@ -2575,20 +2575,6 @@
 		$jatko = 0;
 	}
 
-	if ($fieldname == "vahinkotiedot_tyomaarayksella") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "selected";
-
-		$ulos .= "<option value = ''>".t("Työmääräykselle voi lisätä vahinkotiedot")."</option>";
-		$ulos .= "<option value = 'K' $sel[K]>".t("Työmääräykselle ei voi lisätä vahinkotietoja")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
 
 	if ($fieldname == "tilausrivien_toimitettuaika") {
 

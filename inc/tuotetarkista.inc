@@ -1,42 +1,5 @@
 <?php
 
-if (!function_exists("onkotapahtumajariveja")) {
-	function onkotapahtumajariveja($tuoteno) {
-		global $kukarow, $poistolukko;
-
-		// Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa
-		$query = "	SELECT yhtio
-					FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
-					WHERE yhtio = '$kukarow[yhtio]'
-					and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
-					and tuoteno = '{$tuoteno}'
-					LIMIT 1";
-		$sdtres = pupe_query($query);
-
-		if (mysql_num_rows($sdtres) == 0) {
-			// Ei saa olla myöskään yhtään tilausriviä (Puuterivit sallitaan)
-			$query = "	SELECT yhtio
-						FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tyyppi in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
-						and tuoteno = '{$tuoteno}'
-						and laadittu > '0000-00-00 00:00:00'
-						and var != 'P'
-						LIMIT 1";
-			$sdtres = pupe_query($query);
-
-			if (mysql_num_rows($sdtres) == 0) {
-				// Tapahtumia tai rivejä ei oo
-				$poistolukko = "";
-				return;
-			}
-		}
-
-		// Tapahtumia tai rivejä on
-		$poistolukko = "TSEKATTU";
-	}
-}
-
 if (!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko, $luedata_toiminto;

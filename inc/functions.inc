@@ -17281,12 +17281,12 @@ if (!function_exists("tee_keraysera")) {
 
 			$ohjausmerkki = $jiivee = array();
 
-			$query = "	SELECT lasku.tunnus, 
+			$query = "	SELECT lasku.tunnus,
 						LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
 		 				IFNULL(maksuehto.jv, '') jv
 						FROM lasku
-						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto) 
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tunnus IN ({$tilaukset})";
 			$ohjausmerkki_res = pupe_query($query);
 
@@ -17563,7 +17563,7 @@ if (!function_exists("tee_keraysera")) {
 
 			$ed_ohjausmerkki = 'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ';
 			$ed_jiivee = "ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ";
-			
+
 			$ed_tuote = '';
 
 			foreach ($inner_main_array as $inner_key => &$tuoterow) {
@@ -26601,5 +26601,51 @@ if (!function_exists("korvaavat_kiellot")) {
 		}
 
 		return "";
+	}
+}
+
+if (!function_exists("onkotapahtumajariveja")) {
+	function onkotapahtumajariveja($tuoteno) {
+		global $kukarow, $poistolukko;
+
+		// Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa
+		$query = "	SELECT yhtio
+					FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
+					WHERE yhtio = '$kukarow[yhtio]'
+					and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
+					and tuoteno = '{$tuoteno}'
+					LIMIT 1";
+		$sdtres = pupe_query($query);
+
+		if (mysql_num_rows($sdtres) == 0) {
+			// Ei saa olla myöskään yhtään tilausriviä (Puuterivit sallitaan)
+			$query = "	SELECT yhtio
+						FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tyyppi in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
+						and tuoteno = '{$tuoteno}'
+						and laadittu > '0000-00-00 00:00:00'
+						and var != 'P'
+						LIMIT 1";
+			$sdtres = pupe_query($query);
+
+			if (mysql_num_rows($sdtres) == 0) {
+				$query  = "	SELECT tunnus
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tuoteno = '{$tuoteno}'
+							AND saldo  != 0";
+				$sdtres = pupe_query($query);
+
+				if (mysql_num_rows($sdtres) == 0) {
+					// Ei Tapahtumia, ei rivejä eikä saldoa
+					$poistolukko = "";
+					return;
+				}
+			}
+		}
+
+		// Tapahtumia tai rivejä on
+		$poistolukko = "TSEKATTU";
 	}
 }

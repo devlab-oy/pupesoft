@@ -354,19 +354,6 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 	}
 	else {
 
-		//haetaan browserin oletuskieli
-		$browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
-
-		if ($browkieli == 'sv') {
-			$browkieli = 'se';
-		}
-		elseif ($browkieli == 'ee') {
-			$browkieli = 'ee';
-		}
-		else {
-			$browkieli = 'fi';
-		}
-
 		if (isset($mobile) and $mobile and include_once("mobiili/login.php"));
 		elseif (@include_once("login.php"));
 		elseif (@include_once("login_extranet.php"));

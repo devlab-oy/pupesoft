@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 	if ($_POST["tallennaaineisto"] == "yes") {
 		$lataa_tiedosto=1;

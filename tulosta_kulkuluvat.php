@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;

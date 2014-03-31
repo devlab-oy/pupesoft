@@ -174,6 +174,17 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
 	echo "Arkistoitiin $del ASN-sanomaa.<br>";
 
+	# Automanual-hakuhistoria
+	$query = "	DELETE automanual_hakuhistoria
+				FROM automanual_hakuhistoria
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND luontiaika > 0
+				AND luontiaika <= '$vv-$kk-$pp 23:59:59'";
+	pupe_query($query);
+	$del = mysql_affected_rows();
+
+	echo "Arkistoitiin $del Automanual-hakuhistoriariviä.<br>";
+
 	# Lähdöt
 	$query = "	DELETE lahdot
 				FROM lahdot
@@ -272,6 +283,53 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 	$del = mysql_affected_rows();
 
 	echo "Arkistoitiin $del työmääräystä.<br>";
+
+
+	# Budjetit
+	$budjettiarray = array("budjetti", "budjetti_asiakas", "budjetti_myyja", "budjetti_toimittaja", "budjetti_tuote");
+
+	foreach ($budjettiarray as $budjettitaulu) {
+		$query = "	DELETE $budjettitaulu
+					FROM $budjettitaulu
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND kausi <= '$vv-$kk'";
+		pupe_query($query);
+		$del = mysql_affected_rows();
+
+		echo "Arkistoitiin $del {$budjettitaulu}-riviä.<br>";
+	}
+
+	# Kampanjat
+	$query = "	DELETE kampanjat
+				FROM kampanjat
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND luontiaika > 0
+				AND luontiaika <= '$vv-$kk-$pp 23:59:59'";
+	pupe_query($query);
+	$del = mysql_affected_rows();
+
+	echo "Arkistoitiin $del kampanjaa.<br>";
+
+	$query = "	DELETE kampanja_ehdot
+				FROM kampanja_ehdot
+				LEFT JOIN kampanjat ON (kampanjat.yhtio = kampanja_ehdot.yhtio and kampanjat.tunnus = kampanja_ehdot.kampanja)
+				WHERE kampanja_ehdot.yhtio = '$kukarow[yhtio]'
+				AND kampanjat.tunnus is null";
+	pupe_query($query);
+	$del = mysql_affected_rows();
+
+	echo "Arkistoitiin $del kampanjan ehtoriviä.<br>";
+
+	$query = "	DELETE kampanja_palkinnot
+				FROM kampanja_palkinnot
+				LEFT JOIN kampanjat ON (kampanjat.yhtio = kampanja_palkinnot.yhtio and kampanjat.tunnus = kampanja_palkinnot.kampanja)
+				WHERE kampanja_palkinnot.yhtio = '$kukarow[yhtio]'
+				AND kampanjat.tunnus is null";
+	pupe_query($query);
+	$del = mysql_affected_rows();
+
+	echo "Arkistoitiin $del kampanjan palkinotirivä.<br>";
+
 
 }
 

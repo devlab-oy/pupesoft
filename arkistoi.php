@@ -659,6 +659,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					WHERE korvaavat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.tunnus is null";
 		pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del korvaavat joiden tuote oli poistettu!<br>";
 
@@ -690,6 +691,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					WHERE yhteensopivuus_tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.tunnus is null";
 		$result = pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del yhteensopivuus_tuoteetta joiden tuote oli poistettu!<br>";
 
@@ -700,6 +702,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					WHERE yhteensopivuus_tuote_lisatiedot.yhtio = '{$kukarow["yhtio"]}'
 					AND yhteensopivuus_tuote.tunnus is null";
 		$result = pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del yhteensopivuus_tuote_lisatietoa joiden tuote oli poistettu!<br>";
 
@@ -711,6 +714,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					AND synclog.taulu = 'tuote'
 					AND tuote.tunnus is null";
 		$result = pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del synclogia joiden tuote oli poistettu!<br>";
 
@@ -722,6 +726,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					AND liitetiedostot.liitos = 'tuote'
 					AND tuote.tunnus is null";
 		$result = pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del liitetiedostoa joiden tuote oli poistettu!<br>";
 
@@ -732,6 +737,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					WHERE hinnasto.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.tunnus is null";
 		$result = pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del hinnastoa joiden tuote oli poistettu!<br>";
 
@@ -742,6 +748,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.tunnus is null";
 		$result = pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del budjetti_tuotetta joiden tuote oli poistettu!<br>";
 
@@ -751,7 +758,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					LEFT JOIN tuote ON (asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno)
 					WHERE asiakashinta.yhtio = '{$kukarow["yhtio"]}'
 					AND asiakashinta.tuoteno != ''
-					AND tuoteno.tuoteno is null";
+					AND tuote.tuoteno is null";
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
@@ -763,7 +770,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					LEFT JOIN tuote ON (asiakasalennus.yhtio=tuote.yhtio and asiakasalennus.tuoteno=tuote.tuoteno)
 					WHERE asiakasalennus.yhtio = '{$kukarow["yhtio"]}'
 					AND asiakasalennus.tuoteno != ''
-					AND tuoteno.tuoteno is null";
+					AND tuote.tuoteno is null";
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
@@ -775,7 +782,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					LEFT JOIN tuote ON (toimittajahinta.yhtio=tuote.yhtio and toimittajahinta.tuoteno=tuote.tuoteno)
 					WHERE toimittajahinta.yhtio = '{$kukarow["yhtio"]}'
 					AND toimittajahinta.tuoteno != ''
-					AND tuoteno.tuoteno is null";
+					AND tuote.tuoteno is null";
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
@@ -787,13 +794,11 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					LEFT JOIN tuote ON (toimittajaalennus.yhtio=tuote.yhtio and toimittajaalennus.tuoteno=tuote.tuoteno)
 					WHERE toimittajaalennus.yhtio = '{$kukarow["yhtio"]}'
 					AND toimittajaalennus.tuoteno != ''
-					AND tuoteno.tuoteno is null";
+					AND tuote.tuoteno is null";
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del toimittaja-alennusta joiden tuote oli poistettu!<br>";
-
-
 	}
 
 	##################################################################################################################################
@@ -809,6 +814,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					AND toimi.tyyppi = 'P'
 					AND lasku.tunnus is null";
 		pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del 'P'-toimittajaa joilla ei ollut yhtään laskua!<br>";
 
@@ -820,6 +826,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					AND yhteyshenkilo.tyyppi = 'T'
 					AND toimi.tunnus is null";
 		pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del yhteyshenkilöä joiden toimittaja oli poistettu!<br>";
 
@@ -830,6 +837,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					WHERE budjetti_toimittaja.yhtio = '{$kukarow["yhtio"]}'
 					AND toimi.tunnus is null";
 		pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del toimittajabudjettia joiden toimittaja oli poistettu!<br>";
 
@@ -841,6 +849,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					AND liitetiedostot.liitos = 'toimi'
 					AND toimi.tunnus is null";
 		pupe_query($query);
+		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del liitetiedostoa joiden toimittaja oli poistettu!<br>";
 
@@ -861,7 +870,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					LEFT JOIN toimi ON (toimittajaalennus.yhtio=toimi.yhtio and toimittajaalennus.toimittaja=toimi.tunnus)
 					WHERE toimittajaalennus.yhtio = '{$kukarow["yhtio"]}'
 					AND toimittajaalennus.toimittaja > 0
-					AND toimittaja.tunnus is null";
+					AND toimi.tunnus is null";
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
@@ -873,7 +882,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					LEFT JOIN toimi ON (toimittajaalennus.yhtio=toimi.yhtio and toimittajaalennus.ytunnus=toimi.ytunnus)
 					WHERE toimittajaalennus.yhtio = '{$kukarow["yhtio"]}'
 					AND toimittajaalennus.ytunnus not in ('','0')
-					AND toimittaja.tunnus is null";
+					AND toimi.tunnus is null";
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
@@ -882,10 +891,10 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		// Poistetaan toimittajahinnat joiden asiakkaat dellattu
 		$query = "	DELETE toimittajahinta
 					FROM toimittajahinta
-					LEFT JOIN toimi ON (toimittajaalennus.yhtio=toimi.yhtio and toimittajaalennus.toimittaja=toimi.tunnus)
+					LEFT JOIN toimi ON (toimittajahinta.yhtio=toimi.yhtio and toimittajahinta.toimittaja=toimi.tunnus)
 					WHERE toimittajahinta.yhtio = '{$kukarow["yhtio"]}'
 					AND toimittajahinta.toimittaja > 0
-					AND toimittaja.tunnus is null";
+					AND toimi.tunnus is null";
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
@@ -894,15 +903,14 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		// Poistetaan toimittajahinnat joiden asiakkaat dellattu
 		$query = "	DELETE toimittajahinta
 					FROM toimittajahinta
-					LEFT JOIN toimi ON (toimittajaalennus.yhtio=toimi.yhtio and toimittajaalennus.ytunnus=toimi.ytunnus)
+					LEFT JOIN toimi ON (toimittajahinta.yhtio=toimi.yhtio and toimittajahinta.ytunnus=toimi.ytunnus)
 					WHERE toimittajahinta.yhtio = '{$kukarow["yhtio"]}'
 					AND toimittajahinta.ytunnus not in ('','0')
-					AND toimittaja.tunnus is null";
+					AND toimi.tunnus is null";
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
 		echo "Poistettiin $del toimittajahintaa joiden toimittaja oli poistettu (ytunnus)!<br>";
-
 	}
 
 	##################################################################################################################################

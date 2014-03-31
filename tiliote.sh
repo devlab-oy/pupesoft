@@ -52,13 +52,13 @@ if [ ! -d ${local_dir_ok} ]; then
   exit 1
 fi
 
-for file in `ls ${local_dir}`
+for file in `find "${local_dir}" -maxdepth 1 -type f`
 do
   # Tehdään timestamp
   timestamp=$( date +%Y%d%m-%H%M%S )
 
   # Ajetaan tiliote sitään (huom eka parametri pitää olla "perl")
-  /usr/bin/php ${pupesoft_dir}/tiliote.php perl "${file}"
+  /usr/bin/php "${pupesoft_dir}/tiliote.php" "perl" "${file}"
 
   # Siirretään tiedosto done hakemistoon
   mv -f "${local_dir}/${file}" "${local_dir_ok}/${timestamp}_${file}"

@@ -5,7 +5,7 @@ command -v flock > /dev/null
 
 if [[ $? != 0 ]]; then
   echo "Flock komentoa ei löydy!"
-  exit
+  exit 1
 fi
 
 # Tehdään lukkofile
@@ -39,7 +39,7 @@ if [ -z ${get_hostname} ] || [ -z ${get_remote_dir} ] || [ -z ${get_local_dir} ]
   echo
   echo 'Esim: opuscapita.sh "user@hostname" "~/out/" "/home/opuscapita/tilioteviite/" "user@hostname" "~/in/" "/home/opuscapita/maksuaineisto/" "/home/opuscapita/maksuaineisto/ok/"'
   echo
-  exit
+  exit 1
 fi
 
 # Loopataan läpi kaikki filet remote hakemistosta ja haetaan ne local dirikkaan

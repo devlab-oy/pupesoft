@@ -77,8 +77,17 @@
 							$updres = pupe_query($query);
 
 							$rivi["toimittajan_tunnus"] = $aburow["liitostunnus"];
+
 						} elseif ($rivi['ei_saldoa'] != '') {
-							//jos ollaan erikseen laitettu saldottomalle tuotteelle toimittaja niin ehkä sitä halutaan myös ostaa, mutta jos toimittajaa saldottomalle tuotteelle ei löydy ei tehdä mitään...
+						//jos ollaan erikseen laitettu saldottomalle tuotteelle toimittaja niin ehkä sitä halutaan myös ostaa skipataan siis vaan ne saldottomat tuotteet joille ei ole määritelty toimittajaa
+							if ($rivi['perheid'] == $rivi['rivitunnus']){
+								// saldottomat tuotteet laitetaan jälkkäriin jos ne on tuoteperheen isiä ja toimittajaa ei löydy
+							 	$query = "	UPDATE tilausrivi
+							 				SET var = 'J'
+							 				WHERE yhtio = '$kukarow[yhtio]'
+							 				AND tunnus = '$rivi[rivitunnus]'";
+								$ei_saldoa_res = pupe_query($query);
+							}
 							continue;
 						} else {
 							$tilauksesta_ostotilaus .= "<font class='error'>".t("VIRHE: Toimittajaa ei löydy riville").": '$rivi[tunnus]'<br>";

@@ -5,7 +5,7 @@ command -v flock > /dev/null
 
 if [[ $? != 0 ]]; then
   echo "Flock komentoa ei löydy!"
-  exit
+  exit 1
 fi
 
 # Tehdään lukkofile
@@ -33,7 +33,7 @@ if [ -z ${local_dir} ] || [ -z ${local_dir_ok} ]; then
   echo
   echo 'Esim: tiliote.sh "/home/tiliotteet" "/home/tiliotteet/done"'
   echo
-  exit
+  exit 1
 fi
 
 # Katsotaan, että hakemisto löytyy
@@ -41,7 +41,7 @@ if [ ! -d ${local_dir} ]; then
   echo
   echo "ERROR! Hakemistoa ${local_dir} ei löydy!"
   echo
-  exit
+  exit 1
 fi
 
 # Katsotaan, että hakemisto löytyy
@@ -49,7 +49,7 @@ if [ ! -d ${local_dir_ok} ]; then
   echo
   echo "ERROR! Hakemistoa ${local_dir_ok} ei löydy!"
   echo
-  exit
+  exit 1
 fi
 
 for file in `ls ${local_dir}`

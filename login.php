@@ -11,6 +11,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	if (!isset($uusi1)) $uusi1 = '';
 	if (!isset($uusi2)) $uusi2 = '';
 	if (!isset($yhtio)) $yhtio = '';
+	if (!isset($loginkieli)) $loginkieli = '';
 
 	$params = array(
 		'user' => $user,

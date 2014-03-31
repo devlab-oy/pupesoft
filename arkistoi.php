@@ -129,6 +129,17 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
 	echo "Arkistoitiin $del tilausrivin lisätietoriviä.<br>";
 
+	# Sahkoisen_lahetteen_rivit
+	$query = "	DELETE sahkoisen_lahetteen_rivit
+				FROM sahkoisen_lahetteen_rivit
+				LEFT JOIN lasku ON (lasku.yhtio = sahkoisen_lahetteen_rivit.yhtio and lasku.tunnus = sahkoisen_lahetteen_rivit.otunnus)
+				WHERE sahkoisen_lahetteen_rivit.yhtio = '$kukarow[yhtio]'
+				AND lasku.tunnus is null";
+	pupe_query($query);
+	$del = mysql_affected_rows();
+
+	echo "Arkistoitiin $del sähköisen lähetteen riviä.<br>";
+
 	# Laskujen/tilausten liitetiedostot
 	$query = "	DELETE liitetiedostot
 				FROM liitetiedostot
@@ -310,6 +321,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
 	echo "Arkistoitiin $del kampanjaa.<br>";
 
+	# Kampanjaehdot
 	$query = "	DELETE kampanja_ehdot
 				FROM kampanja_ehdot
 				LEFT JOIN kampanjat ON (kampanjat.yhtio = kampanja_ehdot.yhtio and kampanjat.tunnus = kampanja_ehdot.kampanja)
@@ -320,6 +332,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
 	echo "Arkistoitiin $del kampanjan ehtoriviä.<br>";
 
+	# Kampanjapalkinnot
 	$query = "	DELETE kampanja_palkinnot
 				FROM kampanja_palkinnot
 				LEFT JOIN kampanjat ON (kampanjat.yhtio = kampanja_palkinnot.yhtio and kampanjat.tunnus = kampanja_palkinnot.kampanja)
@@ -330,7 +343,16 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
 	echo "Arkistoitiin $del kampanjan palkinotirivä.<br>";
 
+	# Messenger-viestit
+	$query = "	DELETE messenger
+				FROM messenger
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND luontiaika > 0
+				AND luontiaika <= '$vv-$kk-$pp 23:59:59'";
+	pupe_query($query);
+	$del = mysql_affected_rows();
 
+	echo "Arkistoitiin $del Messenger-viestiä.<br>";
 }
 
 require ("inc/footer.inc");

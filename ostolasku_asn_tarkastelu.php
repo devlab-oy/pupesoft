@@ -772,6 +772,7 @@
 							AND alatila = 'A'
 							AND liitostunnus = '{$toimirow['tunnus']}'
 							AND vanhatunnus = '{$toimipaikka}'
+							AND suoraveloitus != 'S'
 							ORDER BY tunnus
 							DESC LIMIT 1";
 				$res = pupe_query($query);
@@ -1177,7 +1178,7 @@
 								else $values .= ", 0";
 								break;
 							case 'kate_korjattu':
-								$values .= ", 0";
+								$values .= ", NULL";
 								break;
 							default:
 								$values .= ", '".$ostotilausrivirow[$fieldname]."'";
@@ -1399,7 +1400,7 @@
 
 		echo "<br /><hr /><br />";
 
-		echo "<form method='post' action='?tee=uusirivi&valitse={$valitse}&kolli={$kolli}&asn_numero={$asn_numero}&toimittajanumero={$toimittajanumero}&lasku={$lasku}&rivitunnus={$rivitunnus}&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&tuoteno={$tuoteno}&tilaajanrivinro={$tilaajanrivinro}&kpl={$kpl}&toimipaikka={$toimipaikka}&lopetus={$lopetus}'>";
+		echo "<form method='post' action='?tee=uusirivi&valitse={$valitse}&kolli={$kolli}&asn_numero={$asn_numero}&toimittajanumero={$toimittajanumero}&lasku={$lasku}&rivitunnus={$rivitunnus}&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&tuoteno=".urlencode($tuoteno)."&tilaajanrivinro={$tilaajanrivinro}&kpl={$kpl}&toimipaikka={$toimipaikka}&lopetus={$lopetus}'>";
 		echo "<input type='submit' value='",t("Tee uusi tilausrivi"),"' />";
 		echo "</form>";
 		echo "<br />";
@@ -2082,8 +2083,9 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.laji = 'asn'
-						AND asn_sanomat.status != 'D'
-						GROUP BY asn_sanomat.paketintunniste, asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
+						AND asn_sanomat.status NOT IN ('X', 'E', 'D')
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+						HAVING count(asn_sanomat.tunnus) != sum(if(asn_sanomat.tilausrivi is NULL, 0, 1))
 						ORDER BY asn_sanomat.asn_numero, asn_sanomat.paketintunniste";
 			$result = pupe_query($query);
 
@@ -2111,11 +2113,6 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 				$naytetaanko_toimittajabutton = true;
-
-				// n‰ytet‰‰n vain vialliset rivit
-				if ($row["rivit"] == $row["ok"] and $row["status"] == "X") {
-					continue;
-				}
 
 				$asn_numerot[$row['asn_numero']] = $row['asn_numero'];
 

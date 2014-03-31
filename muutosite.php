@@ -1096,7 +1096,7 @@ if ($tee == 'E' or $tee == 'F') {
 			$karhu_result = pupe_query($karhu_query);
 
 			if (mysql_num_rows($karhu_result) > 0) {
-				echo "<tr><th>",t('Karhu / Tratta'),":</th><td>";
+				echo "<tr><th>",t('Maksukehotus / Tratta'),":</th><td>";
 
 				$laskuri = 0;
 

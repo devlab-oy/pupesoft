@@ -58,6 +58,7 @@ class Edi {
 		$edi_order .= "OSTOTIL.OT_MAKSUEHTO:".strip_tags($order['payment']['method'])."\n";
 		$edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
 		$edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
+		$edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
 		$edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
 		$edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";
 		$edi_order .= "OSTOTIL.OT_KLAUSUULI1:\n";
@@ -93,6 +94,7 @@ class Edi {
 		$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:".$order['shipping_address']['city']."\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:".$order['shipping_address']['postcode']."\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:".$order['shipping_address']['country_id']."\n";
+		$edi_order .= "OSTOTIL.OT_TOIMITUS_PUH:".$order['customer_phone']."\n";
 	   	$edi_order .= "*RE OSTOTIL\n";
 
 		#$items = $order->getItemsCollection();
@@ -105,6 +107,7 @@ class Edi {
 
 				// Tuoteno
 				$tuoteno = $item['sku'];
+				if (substr($tuoteno, 0, 4) == "SKU_") $tuoteno = substr($tuoteno, 4);
 
 				// Nimitys
 				$nimitys = $item['name'];

@@ -270,6 +270,16 @@ $pupesoft_dirname = str_replace(array($phpnimi, $palvelin2), array("", ""), $pup
 // Haetaan session
 $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") ? $_COOKIE["pupesoft_session"] : "";
 
+// käytössä olevat kielet
+$sanakirja_kielet = array("fi" => "Suomi",
+						  "en" => "Englanti",
+						  "se" => "Ruotsi",
+						  "ee" => "Viro",
+						  "de" => "Saksa",
+						  "dk" => "Tanska",
+						  "no" => "Norja",
+						  "ru" => "Venäjä");
+
 //Initioidaan pari muuttujaa
 if (!isset($login))		$login = "";
 if (!isset($extranet)) 	$extranet = "";
@@ -667,7 +677,6 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 				if (!stristr($phpnimi, 'indexvas')) {
 					echo livezhat_js_sources();
-					echo add_livezhat();
 				}
 			}
 

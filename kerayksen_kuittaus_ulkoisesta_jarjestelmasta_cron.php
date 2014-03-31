@@ -71,9 +71,20 @@
 					if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and trim($xml->MessageHeader->MessageType) == 'OutboundDeliveryConfirmation') {
 
 						$otunnus = (int) $xml->CustPackingSlip->SalesId;
+
+						// Fallback to pickinglist id
+						if ($otunnus == 0) $otunnus = (int) $xml->CustPackingSlip->PickingListId;
+
 						list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
 						$toimaika = "{$vv}-{$kk}-{$pp}";
 						$toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
+
+						$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$otunnus}'";
+						$laskures = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($laskures);
 
 						$tuotteiden_paino = 0;
 
@@ -85,20 +96,28 @@
 							$eankoodi = mysql_real_escape_string($line->ItemNumber);
 							$keratty = (float) $line->DeliveredQuantity;
 
-							$query = "	SELECT varattu, tuoteno
+							$query = "	SELECT *
 										FROM tilausrivi
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$tilausrivin_tunnus}'";
 							$tilausrivi_res = pupe_query($query);
 							$tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
-							$a = (int) ($tilausrivi_row['varattu'] * 10000);
-							$b = (int) ($keratty * 10000);
+							$varattuupdate = "";
 
-							if ($a != $b) {
-								$kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
-								$kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
-								$keratty = $tilausrivi_row['varattu'];
+							# Verkkokaupassa etuk‰teen maksettu tuote!
+							if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
+								$a = (int) ($tilausrivi_row['tilkpl'] * 10000);
+								$b = (int) ($keratty * 10000);
+
+								if ($a != $b) {
+									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['tilkpl']);
+									$kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+								}
+							}
+							else {
+								// Jos ei oo etuk‰teen maksettu, niin tehd‰‰b ker‰yspoikkeama
+								$varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
 							}
 
 							$query = "	UPDATE tilausrivi
@@ -106,10 +125,10 @@
 										SET tilausrivi.keratty = '{$kukarow['kuka']}',
 										tilausrivi.kerattyaika = '{$toimaika} 00:00:00',
 										tilausrivi.toimitettu = '{$kukarow['kuka']}',
-										tilausrivi.toimitettuaika = '{$toimaika} 00:00:00',
-										tilausrivi.varattu = '{$keratty}'
+										tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'
+										{$varattuupdate}
 										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.tunnus = '{$tilausrivin_tunnus}'";
+										AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
 							pupe_query($query);
 
 							$query = "	SELECT SUM(tuote.tuotemassa) paino
@@ -122,13 +141,6 @@
 
 							$tuotteiden_paino += $painorow['paino'];
 						}
-
-						$query = "	SELECT *
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$otunnus}'";
-						$laskures = pupe_query($query);
-						$laskurow = mysql_fetch_assoc($laskures);
 
 						$query  = "	INSERT INTO rahtikirjat SET
 									kollit 			= 1,
@@ -170,7 +182,8 @@
 							pupesoft_sahkoposti($params);
 						}
 
-						unlink($path.$file);
+						// siirret‰‰n tiedosto done-kansioon
+						rename($path.$file, $path.'done/'.$file);
 					}
 				}
 			}

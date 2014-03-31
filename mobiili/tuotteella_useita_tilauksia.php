@@ -40,9 +40,8 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 			$param_viivakoodi = array();
 
 			foreach ($tuotenumerot as $_tuoteno => $_arr) {
-
-				if (!empty($_arr[0])) {
-					foreach ($_arr as $_liitostunnus) {
+				foreach ($_arr as $_liitostunnus) {
+					if (trim($_liitostunnus) != "") {
 						array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
 					}
 				}
@@ -86,7 +85,7 @@ if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
 }
 
-$orderby = "tilausrivi_tyyppi DESC, ostotilaus, sorttaus_kpl";
+$orderby = "tilausrivi_tyyppi DESC, tuoteno, ostotilaus, sorttaus_kpl";
 $ascdesc = "desc";
 
 if (isset($sort_by)) {

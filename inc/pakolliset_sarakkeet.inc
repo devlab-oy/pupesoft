@@ -31,6 +31,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				}
 
 				$wherelliset = array("TUOTENO");
+				$saakopoistaa = TRUE;
 				break;
 			case "tuotepaikat" :
 				$pakolliset = array("TUOTENO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO", "OLETUS");
@@ -118,6 +119,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				}
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$joinattavat = array("YTUNNUS" => "asiakas");
+				$saakopoistaa = TRUE;
 				break;
 			case "avainsana" :
 				$pakolliset = array("LAJI", "SELITE");

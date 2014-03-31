@@ -24,6 +24,7 @@ if ($tee == "file") {
 		$monistettavat	= array();
 		$suoraanlasku 	= array();
 		$korjaarahdit 	= array();
+		$kaytetaanhyvityshintoja = array();
 
 		while ($rivi = fgets($file, 4096)) {
 
@@ -36,8 +37,10 @@ if ($tee == "file") {
 			$lasku = trim($rivi[0]);
 			$alvik = trim($rivi[1]);
 			$hyvit = trim($rivi[2]);
-			$slask = trim($rivi[3]);
-			$krahd = trim($rivi[4]);
+			$rekla = trim($rivi[3]);
+			$slask = trim($rivi[4]);
+			$krahd = trim($rivi[5]);
+			$rekla_hinnat = trim($rivi[6]);
 
 			$query = "	SELECT tunnus
 						FROM lasku
@@ -56,6 +59,9 @@ if ($tee == "file") {
 				if ($hyvit != '') {
 					$monistettavat[$row["tunnus"]] = "HYVITA";
 				}
+				elseif ($rekla != '') {
+					$monistettavat[$row["tunnus"]] = "REKLAMA";
+				}
 				else {
 					$monistettavat[$row["tunnus"]] = "MONISTA";
 				}
@@ -63,6 +69,7 @@ if ($tee == "file") {
 				$korjaaalvit[$row["tunnus"]]  = $alvik;
 				$suoraanlasku[$row["tunnus"]] = $slask;
 				$korjaarahdit[$row["tunnus"]] = $krahd;
+				$kaytetaanhyvityshintoja[$row['tunnus']] = $rekla_hinnat;
 			}
 		}
 
@@ -72,6 +79,8 @@ if ($tee == "file") {
 		$hyvit 		= "";
 		$slask 		= "";
 		$krahd		= "";
+		$rekla 		= "";
+		$rekla_hinnat = "";
 
 		fclose($file);
 	}
@@ -89,7 +98,13 @@ if ($tee == 'mikrotila') {
 			<tr><th colspan='7'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
 			<tr>";
 
-	echo "	<td>".t("Laskunro")."</td><td>".t("Korjaa alvit")."</td><td>".t("Hyvitä")."</td><td>".t("Suoraan laskutukseen")."</td><td>".t("Laske rahtiveloitus uudestaan")."</td>";
+	echo "<td>".t("Laskunro")."</td>";
+	echo "<td>".t("Korjaa alvit")."</td>";
+	echo "<td>".t("Hyvitä")."</td>";
+	echo "<td>".t("Reklamaatio")."</td>";
+	echo "<td>".t("Suoraan laskutukseen")."</td>";
+	echo "<td>".t("Laske rahtiveloitus uudestaan")."</td>";
+	echo "<td>".t("Käytetäänkö reklamaatiossa hyvityshintoja")."</td>";
 
 	echo "	</tr>
 			</table>

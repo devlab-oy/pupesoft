@@ -42,7 +42,7 @@ while ($rivi = fgets($fd)) {
 			}
 
  			$query = "	UPDATE kuka
-						SET kesken=0
+						SET kesken = 0
 						WHERE session = '$session'";
 			$result = pupe_query($query);
 
@@ -77,27 +77,29 @@ while ($rivi = fgets($fd)) {
 				continue;
  			}
 
- 			$arow = mysql_fetch_array($result);
+ 			$arow = mysql_fetch_assoc($result);
 
-			$id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"]);
+			$id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"], "", "", "", "", "", "", "", $tilaus_ketjutus);
 
  			echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
 
  			// haetaan tilauksen tiedot
- 			$query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
- 			$result   = mysql_query($query) or die($query);
- 			$laskurow = mysql_fetch_array($result);
-
+ 			$query = "	SELECT *
+						FROM lasku
+						WHERE tunnus = '$id'
+						AND yhtio    = '$kukarow[yhtio]'";
+ 			$result   = pupe_query($query);
+ 			$laskurow = mysql_fetch_assoc($result);
  		}
 
  		$query = "	SELECT *
  					FROM tuote
  					WHERE tuoteno = '$tuoteno'
-					and yhtio = '$kukarow[yhtio]'";
+					and yhtio     = '$kukarow[yhtio]'";
  		$rarresult = pupe_query($query);
 
  		if (mysql_num_rows($rarresult) == 1) {
- 			$trow = mysql_fetch_array($rarresult);
+ 			$trow = mysql_fetch_assoc($rarresult);
 
 			$ytunnus         = $laskurow["ytunnus"];
 			$kpl             = (float) str_replace(",", ".", $rivi[3]);
@@ -133,10 +135,10 @@ while ($rivi = fgets($fd)) {
  		$edytunnus = $tarkytunnus;
 
 	}
-	
+
 }
 
-if (isset($tilaus_valmiiksi)) {
+if (isset($tilaus_valmiiksi) and $tilaus_valmiiksi != "") {
 	require("tilaus-valmis.inc");
 }
 

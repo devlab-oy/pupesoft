@@ -3,19 +3,24 @@
 
 	echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 
+	if (isset($bruttopaino)) $bruttopaino = str_replace(",", ".", $bruttopaino);
+	if (isset($lisattava_era)) $lisattava_era = str_replace(",", ".", $lisattava_era);
+	if (isset($vahennettava_era)) $vahennettava_era = str_replace(",", ".", $vahennettava_era);
+
 	if ($tapa == "tuonti" and $tee != "") {
 
 		$query = "SELECT *
 				  FROM lasku
-				  WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+				  WHERE tunnus in ($otunnus)
+				  and yhtio = '$kukarow[yhtio]'";
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "laskua ei löydy";
 			exit;
 		}
 		else {
-			$laskurow = mysql_fetch_array ($result);
+			$laskurow = mysql_fetch_assoc($result);
 		}
 
 		if ($tee == "update") {
@@ -23,27 +28,28 @@
 			$ultilno = tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
 			$query = "	UPDATE lasku
-						SET maa_maara = '$maa_maara',
-						maa_lahetys = '$maa_lahetys',
-						kauppatapahtuman_luonne = '$kauppatapahtuman_luonne',
-						kuljetusmuoto = '$kuljetusmuoto',
-						sisamaan_kuljetus = '$sisamaan_kuljetus',
-						sisamaan_kuljetusmuoto  = '$sisamaan_kuljetusmuoto',
-						sisamaan_kuljetus_kansallisuus = '$sisamaan_kuljetus_kansallisuus',
-						kontti  = '$kontti',
-						aktiivinen_kuljetus = '$aktiivinen_kuljetus',
+						SET maa_maara 					 = '$maa_maara',
+						maa_lahetys 					 = '$maa_lahetys',
+						kauppatapahtuman_luonne 		 = '$kauppatapahtuman_luonne',
+						kuljetusmuoto 					 = '$kuljetusmuoto',
+						sisamaan_kuljetus 				 = '$sisamaan_kuljetus',
+						sisamaan_kuljetusmuoto  		 = '$sisamaan_kuljetusmuoto',
+						sisamaan_kuljetus_kansallisuus 	 = '$sisamaan_kuljetus_kansallisuus',
+						kontti  						 = '$kontti',
+						aktiivinen_kuljetus 			 = '$aktiivinen_kuljetus',
 						aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
-						poistumistoimipaikka = '$poistumistoimipaikka',
-						poistumistoimipaikka_koodi = '$poistumistoimipaikka_koodi',
-						bruttopaino = '$bruttopaino',
-						lisattava_era = '$lisattava_era',
-						vahennettava_era = '$vahennettava_era',
-						ultilno = '$ultilno'
-						WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			
+						poistumistoimipaikka 			 = '$poistumistoimipaikka',
+						poistumistoimipaikka_koodi 		 = '$poistumistoimipaikka_koodi',
+						bruttopaino 					 = '$bruttopaino',
+						lisattava_era 					 = '$lisattava_era',
+						vahennettava_era 				 = '$vahennettava_era',
+						ultilno 						 = '$ultilno'
+						WHERE tunnus in ($otunnus)
+						and yhtio = '$kukarow[yhtio]'";
+			$result = pupe_query($query);
+
 			$tee = "";
-						
+
 			if ($lopetus != "") {
 				lopetus($lopetus, 'meta');
 			}
@@ -66,9 +72,10 @@
 			$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
-			$painoresult = mysql_query($query) or pupe_error($query);
-			$painorow = mysql_fetch_array($painoresult);
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.otunnus in ($otunnus)";
+			$painoresult = pupe_query($query);
+			$painorow = mysql_fetch_assoc($painoresult);
 
 			if ($painorow["kpl"] > 0) {
 				$osumapros = round($painorow["kplok"] / $painorow["kpl"] * 100, 2);
@@ -91,9 +98,10 @@
 
 			$query = "SELECT sum(kollit) kollit, sum(kilot) kilot
 					  FROM rahtikirjat
-					  WHERE otsikkonro in ($otunnus) and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$rahtirow = mysql_fetch_array ($result);
+					  WHERE otsikkonro in ($otunnus)
+					  and yhtio = '$kukarow[yhtio]'";
+			$result = pupe_query($query);
+			$rahtirow = mysql_fetch_assoc($result);
 
 			if ($laskurow["bruttopaino"] == 0) $laskurow["bruttopaino"] = $rahtirow["kilot"];
 
@@ -111,16 +119,16 @@
 						FROM maat
 						where nimi != ''
 						ORDER BY koodi";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "<option value=''>".t("Valitse")."</option>";
 
-			while($row = mysql_fetch_array($result)){
+			while($row = mysql_fetch_assoc($result)){
 				$sel = '';
-				if($row[0] == $laskurow["maa_lahetys"]) {
+				if ($row["koodi"] == $laskurow["maa_lahetys"]) {
 					$sel = 'selected';
 				}
-				echo "<option value='$row[0]' $sel>$row[1]</option>";
+				echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
 			}
 			echo "</select></td>";
 			echo "</tr>";
@@ -134,16 +142,16 @@
 						FROM maat
 						where nimi != ''
 						ORDER BY koodi";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if ($laskurow["maa_maara"] == "") $laskurow["maa_maara"] = $yhtiorow["maa"];
 
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 				$sel = '';
-				if($row[0] == $laskurow["maa_maara"]) {
+				if ($row["koodi"] == $laskurow["maa_maara"]) {
 					$sel = 'selected';
 				}
-				echo "<option value='$row[0]' $sel>$row[1]</option>";
+				echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
 			}
 			echo "</select></td>";
 			echo "</tr>";
@@ -164,7 +172,7 @@
 
 			echo "<option value=''>".t("Valitse")."</option>";
 
-			while($row = mysql_fetch_array($result)){
+			while($row = mysql_fetch_assoc($result)){
 				$sel = '';
 				if($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
 					$sel = 'selected';
@@ -184,7 +192,7 @@
 
 			echo "<option value=''>".t("Valitse")."</option>";
 
-			while($row = mysql_fetch_array($result)){
+			while($row = mysql_fetch_assoc($result)){
 				$sel = '';
 				if($row["selite"] == $laskurow["kuljetusmuoto"]) {
 					$sel = 'selected';
@@ -229,18 +237,18 @@
 					$query = "	SELECT sum(kilot) kilot
 								FROM rahtikirjat
 								WHERE otsikkonro = '$otun' and yhtio='$kukarow[yhtio]'";
-					$result   = mysql_query($query) or pupe_error($query);
-					$rahtirow = mysql_fetch_array ($result);
+					$result   = pupe_query($query);
+					$rahtirow = mysql_fetch_assoc ($result);
 					$bruttopaino = $rahtirow['kilot'];
 				}
 
 				$query = "SELECT varasto from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$otun'";
-				$laskun_res = mysql_query($query) or pupe_error($query);
-				$laskun_row = mysql_fetch_array($laskun_res);
+				$laskun_res = pupe_query($query);
+				$laskun_row = mysql_fetch_assoc($laskun_res);
 
 				$query = "SELECT maa from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$laskun_row[varasto]'";
-				$varaston_res = mysql_query($query) or pupe_error($query);
-				$varaston_row = mysql_fetch_array($varaston_res);
+				$varaston_res = pupe_query($query);
+				$varaston_row = mysql_fetch_assoc($varaston_res);
 
 				$ultilno = tarvitaanko_intrastat($varaston_row["maa"], $maa_maara);
 
@@ -263,7 +271,7 @@
 							comments						= '$lomake_lisatiedot',
 							ultilno							= '$ultilno'
 							WHERE tunnus = '$otun' and yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				//päivitetään alatila vain jos tilaus ei vielä ole laskutettu
 				$query = "	UPDATE lasku
@@ -272,7 +280,7 @@
 							and tunnus = '$otun'
 							and tila = 'L'
 							and alatila NOT IN ('X', 'J')";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			$tee = '';
@@ -294,27 +302,27 @@
 			$query = "SELECT *
 					  FROM lasku
 					  WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$laskurow = mysql_fetch_array($result);
+			$result = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($result);
 
 			$query = "SELECT sum(kollit) kollit, sum(kilot) kilot
 					  FROM rahtikirjat
 					  WHERE otsikkonro in ($otunnus) and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$rahtirow = mysql_fetch_array($result);
+			$result = pupe_query($query);
+			$rahtirow = mysql_fetch_assoc($result);
 
 			if ($laskurow["bruttopaino"] == 0) $laskurow["bruttopaino"] = $rahtirow["kilot"];
 
 			$query = "SELECT * from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$asiakasrow = mysql_fetch_array($result);
+			$result = pupe_query($query);
+			$asiakasrow = mysql_fetch_assoc($result);
 
 			$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
-			$painoresult = mysql_query($query) or pupe_error($query);
-			$painorow = mysql_fetch_array($painoresult);
+			$painoresult = pupe_query($query);
+			$painorow = mysql_fetch_assoc($painoresult);
 
 			if ($painorow["kpl"] > 0) {
 				$osumapros = round($painorow["kplok"] / $painorow["kpl"] * 100, 2);
@@ -350,17 +358,17 @@
 						FROM maat
 						where nimi != ''
 						ORDER BY koodi";
-			$maat_result = mysql_query($query) or pupe_error($query);
+			$maat_result = pupe_query($query);
 
 			echo "<select name='maa_maara' style='width:300px;'>";
 			echo "<option value=''>".t("Valitse")."</option>";
 
-			while ($row = mysql_fetch_array($maat_result)) {
+			while ($row = mysql_fetch_assoc($maat_result)) {
 				$sel = '';
-				if ($row[0] == $laskurow["maa_maara"]) {
+				if ($row["koodi"] == $laskurow["maa_maara"]) {
 					$sel = 'selected';
 				}
-				echo "<option value='$row[0]' $sel>$row[1]</option>";
+				echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
 			}
 			echo "</select>";
 			echo "</td>";
@@ -376,13 +384,15 @@
 
 				echo "<select name='sisamaan_kuljetus_kansallisuus' style='width:100px;'>";
 				echo "<option value=''>".t("Valitse")."</option>";
+
 				mysql_data_seek($maat_result, 0);
-				while ($row = mysql_fetch_array($maat_result)) {
+
+				while ($row = mysql_fetch_assoc($maat_result)) {
 					$sel = '';
-					if ($row[0] == $laskurow["sisamaan_kuljetus_kansallisuus"]) {
+					if ($row["koodi"] == $laskurow["sisamaan_kuljetus_kansallisuus"]) {
 						$sel = 'selected';
 					}
-					echo "<option value='$row[0]' $sel>$row[1]</option>";
+					echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
 				}
 				echo "</select>";
 
@@ -400,7 +410,7 @@
 
 				echo "<option value=''>".t("Valitse")."</option>";
 
-				while($row = mysql_fetch_array($result)){
+				while($row = mysql_fetch_assoc($result)){
 					$sel = '';
 					if($row["selite"] == $laskurow["sisamaan_kuljetusmuoto"]) {
 						$sel = 'selected';
@@ -434,15 +444,15 @@
 				echo "<input type='text' name='aktiivinen_kuljetus' style='width:200px;' value='$laskurow[aktiivinen_kuljetus]'>";
 				echo "<select name='aktiivinen_kuljetus_kansallisuus' style='width:100px;'>";
 				echo "<option value=''>".t("Valitse")."</option>";
-			
+
 				mysql_data_seek($maat_result, 0);
-			
-				while ($row = mysql_fetch_array($maat_result)) {
+
+				while ($row = mysql_fetch_assoc($maat_result)) {
 					$sel = '';
-					if ($row[0] == $laskurow["aktiivinen_kuljetus_kansallisuus"]) {
+					if ($row["koodi"] == $laskurow["aktiivinen_kuljetus_kansallisuus"]) {
 						$sel = 'selected';
 					}
-					echo "<option value='$row[0]' $sel>$row[1]</option>";
+					echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
 				}
 				echo "</select>";
 
@@ -461,14 +471,14 @@
 
 			echo "<option value=''>".t("Valitse")."</option>";
 
-			while($row = mysql_fetch_array($result)){
+			while($row = mysql_fetch_assoc($result)){
 				$sel = '';
 				if($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
 					$sel = 'selected';
 				}
 				echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 			}
-		
+
 			echo "</select></td>";
 			echo "<td class='back'>".t("Pakollinen kenttä")."</td>";
 			echo "</tr>";
@@ -483,7 +493,7 @@
 
 			echo "<option value=''>".t("Valitse")."</option>";
 
-			while($row = mysql_fetch_array($result)){
+			while($row = mysql_fetch_assoc($result)){
 				$sel = '';
 				if($row["selite"] == $laskurow["kuljetusmuoto"]) {
 					$sel = 'selected';
@@ -504,7 +514,7 @@
 
 				$vresult = t_avainsana("TULLI");
 
-				while ($vrow = mysql_fetch_array($vresult)) {
+				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel = "";
 					if ($laskurow["poistumistoimipaikka_koodi"] == $vrow["selite"]) {
 						$sel = "selected";
@@ -560,30 +570,30 @@
 			require ("raportit/naytatilaus.inc");
 		}
 	}
-	
+
 	// meillä ei ole valittua tilausta
 	if ($tee == '' and $toim == "MUOKKAA") {
-		
+
 		$formi  = "find";
 		$kentta = "etsi";
 
 		// tehdään etsi valinta
 		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
-		
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>";
 		echo t("Valitse tapa");
 		echo "</th>";
 		echo "<td>";
-		
+
 		$seltuoteni = "";
-		
+
 		if ($tapa == "tuonti") {
 			$seltuoteni = "SELECTED";
 		}
-		
+
 		echo "<select name='tapa'>";
 		echo "<option value='vienti'>".t("Vienti")."</option>";
 		echo "<option value='tuonti' $seltuoteni>".t("Tuonti")."</option>";
@@ -601,7 +611,7 @@
 		echo "</table>";
 		echo "<br><input type='Submit' value='".t("Etsi")."'>";
 		echo "</form><br><br>";
-		
+
 		if (trim($etsi) != "") {
 
 			$haku = '';
@@ -612,16 +622,16 @@
 			else $tila = " and lasku.tila in ('L','U') and lasku.alatila IN ('X', 'J') ";
 
 			$query = "	SELECT lasku.laskunro, lasku.nimi, lasku.luontiaika, kuka.nimi laatija, lasku.vienti, lasku.tapvm, group_concat(lasku.tunnus) tunnus
-						FROM lasku 
+						FROM lasku
 						LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
-						and lasku.vienti != '' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.vienti != ''
 						$tila
 						$haku
 						GROUP BY lasku.laskunro
 						ORDER BY lasku.tapvm desc
 						LIMIT 50";
-			$tilre = mysql_query($query) or pupe_error($query);
+			$tilre = pupe_query($query);
 
 			echo "<table>";
 
@@ -638,7 +648,7 @@
 
 				echo "</tr>";
 
-				while ($tilrow = mysql_fetch_array($tilre)) {
+				while ($tilrow = mysql_fetch_assoc($tilre)) {
 
 					echo "<tr>";
 
@@ -666,10 +676,10 @@
 				echo "<th colspan='5'>".t("Yhtään laskua ei löytynyt")."!</th>";
 				echo "</tr>";
 			}
-			
+
 			echo "</table>";
 		}
-	}	
+	}
 	elseif ($tee == '') {
 
 		$formi="find";
@@ -694,7 +704,7 @@
 					AND vienti in ('K','E')
 					$haku
 					ORDER by 5,6,7,8,9,10,11,12,13,14";
-		$tilre = mysql_query($query) or pupe_error($query);
+		$tilre = pupe_query($query);
 
 		echo "<br><br>";
 
@@ -722,13 +732,13 @@
 			$lisattava_era		= '';
 			$vahennettava_era	= '';
 
-			while ($tilrow = mysql_fetch_array($tilre)) {
+			while ($tilrow = mysql_fetch_assoc($tilre)) {
 				$query = "	SELECT sum(if(varattu>0,1,0))	veloitus, sum(if(varattu<0,1,0)) hyvitys
 							from tilausrivi
 							where yhtio = '$kukarow[yhtio]'
 							and otunnus = '$tilrow[tilaus]'";
-				$hyvre = mysql_query($query) or pupe_error($query);
-				$hyvrow = mysql_fetch_array($hyvre);
+				$hyvre = pupe_query($query);
+				$hyvrow = mysql_fetch_assoc($hyvre);
 
 				if ($ketjutus == '' and $erpcm == $tilrow["erpcm"] and $ytunnus == $tilrow["ytunnus"] and $nimi == $tilrow["nimi"] and $nimitark == $tilrow["nimitark"] and $postino == $tilrow["postino"] and $postitp == $tilrow["postitp"] and $maksuehto == $tilrow["maksuehto"] and $lisattava_era == $tilrow["lisattava_era"] and $vahennettava_era == $tilrow["vahennettava_era"]) {
 					$tunnukset .= $tilrow["tilaus"].",";
@@ -756,8 +766,11 @@
 
 				echo "\n\n<tr>";
 
-				for ($i=0; $i<mysql_num_fields($tilre)-18; $i++)
-					echo "<td>$tilrow[$i]</td>";
+				for ($i=0; $i < mysql_num_fields($tilre)-18; $i++) {
+					$fieldname = mysql_field_name($tilre, $i);
+
+					echo "<td>$tilrow[$fieldname]</td>";
+				}
 
 				if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
 					$teksti = "Veloitus";

@@ -16663,12 +16663,6 @@ if (!function_exists("tee_keraysera")) {
 					(lasku2.tila = 'N' AND lasku2.alatila = 'A')
 					OR (lasku2.tila = 'G' AND lasku2.alatila = 'J')
 				)";
-			$tilat = "AND (
-					(lasku1.tila = 'G' AND lasku1.alatila = 'J')
-				)";
-			$tilat2 = "AND (
-					(lasku2.tila = 'G' AND lasku2.alatila = 'J')
-				)";
 		}
 
 		# Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään
@@ -16719,9 +16713,9 @@ if (!function_exists("tee_keraysera")) {
 					LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
 					{$tilat2}
-					AND lasku2.vakisin_kerays = '' #MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
+					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
-					#AND kuka2.tunnus is null #MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
+					AND kuka2.tunnus is null
 					GROUP BY 1,2,3,4,5,6)
 					ORDER BY 1,2,3,4,5,6";
 		$res = pupe_query($query);
@@ -16868,7 +16862,7 @@ if (!function_exists("tee_keraysera")) {
 						LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 						WHERE lasku2.yhtio 			= '{$kukarow['yhtio']}'
 						{$tilat2}
-						AND lasku2.vakisin_kerays = ''#MUOKATTU JOTTA SIIRTOLISTAT TULEE KIVEMMIN LÄPI, POISTA TÄMÄN RIVIN MUOKKAUKSET KUN DONE
+						AND lasku2.vakisin_kerays != ''
 						AND lasku2.varasto	 		= '{$varasto}'
 						AND kuka2.tunnus is null
 						GROUP BY 1,2,3,4,5,6

@@ -1602,7 +1602,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 }
 
-if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and ($tee == "VAHINKO" or $tee == "LEPAA")) or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and $yhtiorow['reklamaation_kasittely'] != 'U'))) {
+if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == "LEPAA") or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and $yhtiorow['reklamaation_kasittely'] != 'U'))) {
 	require("tyomaarays/tyomaarays.inc");
 }
 
@@ -2353,22 +2353,6 @@ if ($tee == '') {
 					<input type='hidden' name='orig_tila' value='$orig_tila'>
 					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
 					<input type='submit' value='".t("Malliselain")."'>
-					</form>";
-		}
-
-		if ($kukarow["extranet"] == "" and $yhtiorow["vahinkotiedot_tyomaarayksella"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
-
-			echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='mista' value='$mista'>
-					<input type='hidden' name='tee' value='VAHINKO'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
-					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-					<input type='hidden' name='projektilla' value='$projektilla'>
-					<input type='hidden' name='orig_tila' value='$orig_tila'>
-					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
-					<input type='Submit' value='".t("Lisää vahinkotiedot")."'>
 					</form>";
 		}
 
@@ -3629,11 +3613,6 @@ if ($tee == '') {
 				</tr>
 			</table>
 			<br>";
-	}
-
-	if ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
-		$tee_tyomaarays = "MAARAAIKAISHUOLLOT";
-		//require('tyomaarays/tyomaarays.inc');
 	}
 
 	//Kuitataan OK-var riville
@@ -8815,7 +8794,7 @@ if ($tee == '') {
 					<input type='submit' value='* ".t("Muuta %s normaaliksi ennakkotilaukseksi", "", $otsikko)."*'>
 					</form></td></tr>";
 		}
-		
+
 		echo "</table>";
 
 	}

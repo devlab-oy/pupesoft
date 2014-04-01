@@ -26588,7 +26588,7 @@ if (!function_exists("kululaskelma")) {
 		global $kukarow, $yhtiorow;
 
 		if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') {
-			return number_format($summa,2,","," ");
+			return number_format($summa,$yhtiorow['hintapyoristys'],","," ");
 		}
 
 		$query = "	SELECT toimi.kulujen_laskeminen_hintoihin
@@ -26606,7 +26606,7 @@ if (!function_exists("kululaskelma")) {
 		$result = pupe_query($query);
 
 		if(mysql_result($result, 0) == 'E'){
-			return number_format($summa,2,","," ");
+			return number_format($summa,$yhtiorow['hintapyoristys'],","," ");
 		}
 
 		$query = "	SELECT tunnus
@@ -26618,7 +26618,7 @@ if (!function_exists("kululaskelma")) {
 		$result = pupe_query($query);
 
 		if(mysql_num_rows($result) > 0){
-			return number_format($summa,2,","," ");
+			return number_format($summa,$yhtiorow['hintapyoristys'],","," ");
 		}
 
 		$query = "	SELECT kuluprosentti
@@ -26630,7 +26630,7 @@ if (!function_exists("kululaskelma")) {
 
 		if ($tyyppi == "hinta") {
 			$tulos = $summa / ((100 - $kuluprosentti) / 100);
-			return number_format($tulos,2,","," ");
+			return number_format($tulos,$yhtiorow['hintapyoristys'],","," ");
 		}
 		elseif ($tyyppi == "kate") {
 			$query = "	SELECT myyntihinta
@@ -26643,8 +26643,7 @@ if (!function_exists("kululaskelma")) {
 			$ostohinta = $myyntihinta - $summa;
 			$uusi_ostohinta = hinta_kuluineen($tuotenumero, $ostohinta);
 			$tulos = $myyntihinta - $uusi_ostohinta;
-
-			return number_format($tulos,2,","," ");
+			return number_format($tulos,$yhtiorow['hintapyoristys'],","," ");
 		}
 	}
 }

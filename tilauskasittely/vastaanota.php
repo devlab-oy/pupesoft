@@ -8,15 +8,18 @@
 	if (!isset($boob)) 			$boob = "";
 	if (!isset($maa)) 			$maa = "";
 	if (!isset($varastorajaus))	$varastorajaus = "";
+	if (!isset($echotaanko))	$echotaanko = true;
 
-	if ($toim == "MYYNTITILI") {
-		echo "<font class='head'>".t("Toimita myyntitili asiakkaalle").":</font><hr>";
-	}
-	elseif ($toim == "MYYNTITILIVASTAANOTA") {
-		echo "<font class='head'>".t("Vastaanota myyntitili asiakkaalta").":</font><hr>";
-	}
-	else {
-		echo "<font class='head'>".t("Vastaanota siirtolista").":</font><hr>";
+	if ($echotaanko) {
+		if ($toim == "MYYNTITILI") {
+			echo "<font class='head'>".t("Toimita myyntitili asiakkaalle").":</font><hr>";
+		}
+		elseif ($toim == "MYYNTITILIVASTAANOTA") {
+			echo "<font class='head'>".t("Vastaanota myyntitili asiakkaalta").":</font><hr>";
+		}
+		else {
+			echo "<font class='head'>".t("Vastaanota siirtolista").":</font><hr>";
+		}
 	}
 
 	if ($tee == 'kommentista') {
@@ -218,7 +221,9 @@
 			$tilausrivirow = mysql_fetch_assoc($result);
 
 			if (mysql_num_rows($result) != 1) {
-				echo "<font class='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
+				if ($echotaanko) {
+					echo "<font class='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
+				}
 			}
 			elseif ($tilausrivirow["ei_saldoa"] == "") {
 
@@ -302,20 +307,27 @@
 							$result = pupe_query($query);
 							$paikkarow = mysql_fetch_assoc($result);
 
-							if ($toim == "MYYNTITILI") {
-								echo "<font class='message'>".t("Tuote")." $tilausrivirow[tuoteno] ".t("siirretty myyntitiliin").".</font><br>";
+							if ($echotaanko) {
+								if ($toim == "MYYNTITILI") {
+									echo "<font class='message'>".t("Tuote")." $tilausrivirow[tuoteno] ".t("siirretty myyntitiliin").".</font><br>";
+								}
+								else {
+									echo "<font class='message'>".t("Perustan")." ".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tun]-$t2[$tun]-$t3[$tun]-$t4[$tun]</font><br>";
+								}
 							}
-							else {
-								echo "<font class='message'>".t("Perustan")." ".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tun]-$t2[$tun]-$t3[$tun]-$t4[$tun]</font><br>";
-							}
+							
 						}
 						else {
-							echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhjää varastopaikkaa")."!</font><br>";
+							if ($echotaanko) {
+								echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhjää varastopaikkaa")."!</font><br>";
+							}
 							$virheita++;
 						}
 					}
 					else {
-						echo "<font class='error'>".t("VIRHE: Syöttämäsi varastopaikka ei kuulu kohdevaraston alueeseen")."!</font><br>";
+						if ($echotaanko) {
+							echo "<font class='error'>".t("VIRHE: Syöttämäsi varastopaikka ei kuulu kohdevaraston alueeseen")."!</font><br>";
+						}
 
 						$t1[$tun] = '';
 						$t2[$tun] = '';
@@ -329,7 +341,9 @@
 					$paikkarow = mysql_fetch_assoc($result);
 
 					if ($paikkarow["inventointilista_aika"] > 0) {
-						echo "<font class='error'>$paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
+						if ($echotaanko) {
+							echo "<font class='error'>$paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
+						}
 						$virheita++;
 					}
 
@@ -364,7 +378,9 @@
 			$prow = mysql_fetch_assoc($presult);
 
 			if ($prow["inventointilista_aika"] > 0) {
-				echo "<font class='error'>$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: Lähdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
+				if ($echotaanko) {
+					echo "<font class='error'>$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: Lähdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
+				}
 				$virheita++;
 			}
 		}
@@ -404,7 +420,9 @@
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
-				echo "<font style='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
+				if ($echotaanko) {
+					echo "<font style='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
+				}
 
 			}
 			else {
@@ -429,7 +447,9 @@
 					$presult = pupe_query($query);
 
 					if (mysql_num_rows($presult) != 1) {
-						echo "<font style='error'>".t("VIRHE: Antavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
+						if ($echotaanko) {
+							echo "<font style='error'>".t("VIRHE: Antavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
+						}
 						exit;
 					}
 					else {
@@ -450,7 +470,9 @@
 					$presult = pupe_query($query);
 
 					if (mysql_num_rows($presult) != 1) {
-						echo "<font style='error'>".t("VIRHE: Vastaanottavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
+						if ($echotaanko) {
+							echo "<font style='error'>".t("VIRHE: Vastaanottavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
+						}
 					}
 					else {
 						$prow = mysql_fetch_assoc($presult);
@@ -525,7 +547,9 @@
 
 					if ($tee != 'X') {
 						if ($oletuspaiv != '') {
-							echo "<font class='message'>".t("Siirretään oletuspaikka")."</font><br><br>";
+							if ($echotaanko) {
+								echo "<font class='message'>".t("Siirretään oletuspaikka")."</font><br><br>";
+							}
 
 							$query = "	UPDATE tuotepaikat
 										SET oletus 	= '',
@@ -632,7 +656,9 @@
 			}
 		}
 
-		echo "<br><br>";
+		if ($echotaanko) {
+			echo "<br><br>";
+		}
 
 		if ($virheita == 0) {
 
@@ -691,7 +717,7 @@
 	if ($id == '') $id = 0;
 
 	// meillä ei ole valittua tilausta
-	if ($id == '0') {
+	if ($id == '0' and $echotaanko) {
 
 		$formi  = "find";
 		$kentta = "etsi";
@@ -1291,4 +1317,6 @@
 
 	}
 
-	require ("inc/footer.inc");
+	if ($echotaanko) {
+		require ("inc/footer.inc");
+	}

@@ -26983,6 +26983,26 @@ if (!function_exists('array_column')) {
 
 }
 
+if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
+	function tee_kirjanpidollinen_varastosiirto($myyntitilaus_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == '') {
+			return false;
+		}
+
+		$myyntitilaus = hae_lasku($myyntitilaus_tunnus);
+		$varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtion_toimipaikka']);
+
+		//Yhtiön toimipaikalla voi olla monta varastoa. Alkuksi verrataan vain ensimmäistä.
+		//@TODO muutetaan ehkä jossain vaiheessa niin, että verrataan kaikkiin yhtiön toimipaikan varastoihin
+		if ($myyntitilaus['varasto'] != $varastot[0]['tunnus']) {
+			//Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
+			tilauksesta_varastosiirto($myyntitilaus_tunnus, true);
+		}
+	}
+}
+
 if (!function_exists("onkotapahtumajariveja")) {
 	function onkotapahtumajariveja($tuoteno) {
 		global $kukarow, $poistolukko;

@@ -43,6 +43,7 @@
 		// otetaan tietokanta connect
 		require("inc/connect.inc");
 		require("inc/functions.inc");
+		require('tilauskasittely/tilauksesta_varastosiirto.inc');
 
 		// hmm.. j‰nn‰‰
 		$kukarow['yhtio'] = $argv[1];
@@ -121,6 +122,7 @@
 		}
 
 		require("../inc/parametrit.inc");
+		require('tilauskasittely/tilauksesta_varastosiirto.inc');
 	}
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -1696,6 +1698,12 @@
 				while ($row = mysql_fetch_assoc($res)) {
 					// laskutus tarttee kukarow[kesken]
 					$kukarow['kesken']=$row['tunnus'];
+
+					tee_kirjanpidollinen_varastosiirto($row['tunnus']);
+					if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K') {
+						
+						tilauksesta_varastosiirto($row['tunnus']);
+					}
 
 					require("laskutus.inc");
 					$laskutetttu++;

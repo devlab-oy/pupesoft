@@ -319,32 +319,6 @@
 		if ($toim == "SIIRTOTYOMAARAYS") {
 			echo "<br><table>";
 			echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot")."</th></tr>";
-			echo "<tr>
-					<td>Rek. no:</td><td><input type='text' name='rekno' size='15' value='$srow[rekno]'></td>
-					<td>Kotipuh:</td><td><input type='text' name='kotipuh' size='35' value='$srow[kotipuh]'></td></tr>";
-			echo "<tr>
-					<td>Valm. nro:</td><td><input type='text' name='valmnro' size='35' value='$srow[valmnro]'></td>
-					<td>Työpuh:</td><td><input type='text' name='tyopuh' size='35' value='$srow[tyopuh]'></td></tr>";
-			echo "<tr>
-					<td>Mittarilukema:</td><td><input type='text' name='mittarilukema' size='35' value='$srow[mittarilukema]'></td>
-					<td>Myyjäliike:</td><td><input type='text' name='myyjaliike' size='35' value='$srow[myyjaliike]'></td></tr>";
-
-			if ($srow["ostopvm"] == "" or $srow["ostopvm"] == "0000-00-00") {
-				$luvattupp = date("d");
-				$luvattukk = date("m");
-				$luvattuvv = date("Y");
-			}
-			else {
-				list($ostopvmvv, $ostopvmkk, $ostopvmpp) = explode('-', $srow["ostopvm"]);
-			}
-			if ($srow["tuotu"] == "" or $srow["tuotu"] == "0000-00-00") {
-				$tuotupp = date("d");
-				$tuotukk = date("m");
-				$tuotuvv = date("Y");
-			}
-			else {
-				list($tuotuvv, $tuotukk, $tuotupp) = explode('-', $srow["tuotu"]);
-			}
 
 			if ($srow["luvattu"] == "" or $srow["luvattu"] == "0000-00-00") {
 				$luvattupp = date("d");
@@ -355,33 +329,7 @@
 				list($luvattuvv, $luvattukk, $luvattupp) = explode('-', $srow["luvattu"]);
 			}
 
-			echo "<tr><td>Ostopvm:</td>
-					<td>
-					<input type='text' name='ostopvmpp' size='3' value='$ostopvmpp'>-
-					<input type='text' name='ostopvmkk' size='3' value='$ostopvmkk'>-
-					<input type='text' name='ostopvmvv' size='6' value='$ostopvmvv'>
-					</td>
-					<td>Merkki ja malli:</td><td><input type='text' name='merkki' size='11' value='$srow[merkki]'>&nbsp;";
-			echo "<select name='merkki2'><option value='eimenu'>Valitse malli";
-
-
-			$query = "	SELECT distinct malli
-						FROM huollot order by malli";
-			$result = mysql_query($query) or pupe_error($query);
-
-			while($row = mysql_fetch_array($result)){
-				echo "<option value = '$row[0]'>$row[0]";
-			}
-
-			echo "</select></td></tr>";
-			echo "<tr><td>Tuotu:</td>
-					<td>
-					<input type='text' name='tuotupp' size='3' value='$tuotupp'>-
-					<input type='text' name='tuotukk' size='3' value='$tuotukk'>-
-					<input type='text' name='tuotuvv' size='6' value='$tuotuvv'>
-					</td>
-					<td>Malli/Värikoodi:</td><td><input type='text' name='mallivari' size='35' value='$srow[mallivari]'></td></tr>";
-			echo "<tr><td>Luvattu:</td><td>
+			echo "<tr><td>".t("Luvattu").":</td><td>
 					<input type='text' name='luvattupp' size='3' value='$luvattupp'>-
 					<input type='text' name='luvattukk' size='3' value='$luvattukk'>-
 					<input type='text' name='luvattuvv' size='6' value='$luvattuvv'>

@@ -909,6 +909,21 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "kirjanpidollinen_varastosiirto_myyntitilaukselta") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksesta ei luoda kirjanpidollisia varastosiirtoja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksesta luodaan kirjanpidollisia varastosiirtoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "automaattinen_jt_toimitus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

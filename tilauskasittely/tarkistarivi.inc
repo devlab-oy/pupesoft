@@ -356,7 +356,7 @@
 		// jos yhtiön parametreissä jt-rivit varaavat saldoa, laitetaan "varattu kpl"-määrä, muuten "jt kpl"-määrä
 		$kpl_st = $yhtiorow['varaako_jt_saldoa'] != '' ? $row['varattu'] : $row['jt'];
 	}
-	elseif($row["var"] == 'P') {
+	elseif ($row["var"] == 'P') {
 		$kpl_st = $row['tilkpl'];
 	}
 	else {
@@ -497,7 +497,7 @@
 						varastopaikat.tunnus varasto,
 						varastopaikat.tyyppi varastotyyppi,
 						concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-						if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+						if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
 						$pepvmlisa1
 						group_concat(sarjanumeroseuranta.ostorivitunnus) ostorivitunnus
 			 			FROM tuote
@@ -522,7 +522,7 @@
 			$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 						tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 						concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi, '' era
+						varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi, '' era
 			 			FROM tuote
 						JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -646,14 +646,8 @@
 
 						// jos toimitetaan erikoisvarastosta, niin käyttäjän pitää hyväksyä se
 						if ($alkurow['varasto'] != $laskurow["varasto"] and $tm_toimitustaparow["nouto"] == "" and $sel != '' and !in_array($row["var2"], array("OK", "PK")) and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
-
-							if ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0' and $tm_toimitustaparow["vak_kielto"] == 'K') {
-								$varaosavirhe .= t("HUOM: VAK-tuotteita ei toimiteta tällä toimitustavalla")."!<br/>";
-							}
-							else {
-								$varaosavirhe .= t("HUOM: toimitetaan erikoisvarastosta, toimitusaika 2pv. Haluatko hyväksyä")."?<br/>";
-								$saako_hyvaksya++;
-							}
+							$varaosavirhe .= t("HUOM: toimitetaan erikoisvarastosta, toimitusaika 2pv. Haluatko hyväksyä")."?<br/>";
+							$saako_hyvaksya++;
 
 							$riviok++;
 							$tilausok++;
@@ -672,9 +666,9 @@
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
-				if($myytavissa > 0 and ($alkurow["varastotyyppi"] == "E" or $alkurow["hyllyalue"] == "!!M") and (($alkurow['vakkoodi'] == '' or $alkurow['vakkoodi'] == '0') or ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0' and $tm_toimitustaparow["vak_kielto"] != 'K'))) {
+				if ($myytavissa > 0 and ($alkurow["varastotyyppi"] == "E" or $alkurow["hyllyalue"] == "!!M") and (($alkurow['vakkoodi'] == '' or $alkurow['vakkoodi'] == '0') or ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0' and $tm_toimitustaparow["vak_kielto"] != 'K'))) {
 
-					if($kukarow["extranet"] != "") {
+					if ($kukarow["extranet"] != "") {
 						if ($laskurow["toim_maa"] == $alkurow["varastomaa"]) {
 
 							$ale_lisa_kala = generoi_alekentta_php($row, 'M', 'kerto');
@@ -693,9 +687,6 @@
 					}
 
 					break;
-				}
-				else if ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0' and $tm_toimitustaparow["vak_kielto"] == 'K') {
-					$varaosavirhe .= t("HUOM: VAK-tuotteita ei toimiteta tällä toimitustavalla")."!<br/>";
 				}
 			}
 
@@ -858,7 +849,7 @@
 		$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 					tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 					concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-					varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi, '' era
+					varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi, '' era
 		 			FROM tuote
 					JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.hyllyalue != '!!M'
 					JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -1058,7 +1049,7 @@
 				$backlinkki = "tilaus_myynti.php////toim={$toim}//tee={$tee}//tilausnumero={$tilausnumero}//mista={$mista}//tila={$tila}//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}";
 				$ostotilaus_linkkilisa = "<a href='{$palvelin2}tilauskasittely/tilaus_osto.php?tee=AKTIVOI&tilausnumero={$suoratoimostorow['otunnus']}&from=MYYNTITILAUS&lopetus={$backlinkki}'>";
 			}
-			elseif($suoratoimostorow["tila"] == "V" or $suoratoimostorow["tila"] == "W") {
+			elseif ($suoratoimostorow["tila"] == "V" or $suoratoimostorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
 			}
 
@@ -1186,7 +1177,7 @@
 											avainsana.selitetark_3,
 											avainsana.selitetark_4,
 											avainsana.selitetark_5,
-											if(tt.jarjestys = 0, 9999, tt.jarjestys) sorttauskentta
+											if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttauskentta
 											FROM tuotteen_toimittajat AS tt
 											JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
 											LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['yhtio_toimipaikka']}' AND toimi.tunnus = avainsana.selitetark)
@@ -1325,7 +1316,7 @@
 					avainsana.selitetark_3,
 					avainsana.selitetark_4,
 					avainsana.selitetark_5,
-					if(tt.jarjestys = 0, 9999, tt.jarjestys) sorttauskentta
+					if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttauskentta
 					FROM tuotteen_toimittajat AS tt
 					JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
 					LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['yhtio_toimipaikka']}' AND toimi.tunnus = avainsana.selitetark)

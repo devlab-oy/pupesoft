@@ -4,6 +4,12 @@ if(!function_exists("yhtiotarkista")) {
 	function yhtiotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 
+		if (mysql_field_name($result, $i) == "kuluprosentti"){
+			if ($t[$i] >= 100 or $t[$i] < 0) {
+				$virhe[$i] = t("Syötä luku väliltä 0-99");
+			}
+		}
+
 		if ((mysql_field_name($result, $i) == "kotipaikka") or
 			(mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "kieli") or
@@ -51,7 +57,7 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
 			(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
 			(mysql_field_name($result, $i) == "varastonmuutos_inventointi") or
-			(mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or		
+			(mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or
 			(mysql_field_name($result, $i) == "konsernisaamiset") or
 			(mysql_field_name($result, $i) == "konsernivelat") or
 			(mysql_field_name($result, $i) == "konserniostovelat") or
@@ -92,7 +98,7 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
 			(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
 			(mysql_field_name($result, $i) == "varastonmuutos_inventointi") or
-			(mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or			
+			(mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or
 			(mysql_field_name($result, $i) == "konsernisaamiset") or
 			(mysql_field_name($result, $i) == "konsernivelat") or
 			(mysql_field_name($result, $i) == "konserniostovelat") or

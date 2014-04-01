@@ -647,8 +647,8 @@
 						// jos toimitetaan erikoisvarastosta, niin käyttäjän pitää hyväksyä se
 						if ($alkurow['varasto'] != $laskurow["varasto"] and $tm_toimitustaparow["nouto"] == "" and $sel != '' and !in_array($row["var2"], array("OK", "PK")) and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
 
-							if ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0') {
-								$varaosavirhe .= t("HUOM: VAK-tuotteita ei toimiteta erikoisvarastosta")."!<br/>";
+							if ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0' and $tm_toimitustaparow["vak_kielto"] == 'K') {
+								$varaosavirhe .= t("HUOM: VAK-tuotteita ei toimiteta tällä toimitustavalla")."!<br/>";
 							}
 							else {
 								$varaosavirhe .= t("HUOM: toimitetaan erikoisvarastosta, toimitusaika 2pv. Haluatko hyväksyä")."?<br/>";
@@ -672,7 +672,7 @@
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
-				if($myytavissa > 0 and ($alkurow["varastotyyppi"] == "E" or $alkurow["hyllyalue"] == "!!M")) {
+				if($myytavissa > 0 and ($alkurow["varastotyyppi"] == "E" or $alkurow["hyllyalue"] == "!!M") and (($alkurow['vakkoodi'] == '' or $alkurow['vakkoodi'] == '0') or ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0' and $tm_toimitustaparow["vak_kielto"] != 'K'))) {
 
 					if($kukarow["extranet"] != "") {
 						if ($laskurow["toim_maa"] == $alkurow["varastomaa"]) {
@@ -693,6 +693,9 @@
 					}
 
 					break;
+				}
+				else if ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0' and $tm_toimitustaparow["vak_kielto"] == 'K') {
+					$varaosavirhe .= t("HUOM: VAK-tuotteita ei toimiteta tällä toimitustavalla")."!<br/>";
 				}
 			}
 

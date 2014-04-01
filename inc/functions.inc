@@ -26573,43 +26573,53 @@ if (!function_exists("korvaavat_kiellot")) {
 
 if (!function_exists("hinta_kuluineen")) {
 	function hinta_kuluineen($tuotenumero, $hinta) {
-		return kululaskelma($tuotenumero, $hinta, "hinta");
+		global $kukarow, $yhtiorow;
+
+		$kuluprosentti = hinnan_kuluprosentti($tuotenumero);
+
+		if ($kuluprosentti === false) {
+			return $hinta;
+		}
+
+		$tulos = $hinta / ((100 - $kuluprosentti) / 100);
+		return number_format($tulos, $yhtiorow['hintapyoristys'], ",", " ");
 	}
 }
 
-if (!function_exists("kate_kuluineen")) {
-	function kate_kuluineen($tuotenumero, $kate) {
-		return kululaskelma($tuotenumero, $kate, "kate");
+if (!function_exists("tilausrivin_kate")) {
+	function tilausrivin_kate($tilausrivitunnus, $pvm = null) {
+		global $kukarow, $yhtiorow;
+
+		#TODO: tähän koodi
 	}
 }
 
-if (!function_exists("kululaskelma")) {
-	function kululaskelma($tuotenumero, $summa, $tyyppi) {
+if (!function_exists("hinnan_kuluprosentti")) {
+	function hinnan_kuluprosentti($tuotenumero) {
 		global $kukarow, $yhtiorow;
 
 		if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') {
-			return number_format($summa,$yhtiorow['hintapyoristys'],","," ");
+			return false;
 		}
 
 		$query = "	SELECT toimi.kulujen_laskeminen_hintoihin
-					FROM tuote
-					JOIN tuotteen_toimittajat
-					ON ( tuotteen_toimittajat.yhtio = tuote.yhtio
-						AND tuotteen_toimittajat.tuoteno = tuote.tuoteno )
-					JOIN toimi
-					ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-						AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
-					WHERE tuote.yhtio =  '{$kukarow['yhtio']}'
-					AND tuote.tuoteno = '{$tuotenumero}'
-					ORDER BY toimi.tunnus ASC
+					FROM tuotteen_toimittajat
+					JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+					AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
+					WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
+					AND tuotteen_toimittajat.tuoteno = '{$tuotenumero}'
+					ORDER BY
+					if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
+					tuotteen_toimittajat.tunnus ASC
 					LIMIT 1";
 		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
 
-		if(mysql_result($result, 0) == 'E'){
-			return number_format($summa,$yhtiorow['hintapyoristys'],","," ");
+		if ($row['kulujen_laskeminen_hintoihin'] == 'E') {
+			return false;
 		}
 
-		$query = "	SELECT tunnus
+		$query = "  SELECT tunnus
 					FROM yhtion_toimipaikat_parametrit
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND toimipaikka = '{$kukarow['toimipaikka']}'
@@ -26617,33 +26627,10 @@ if (!function_exists("kululaskelma")) {
 					AND arvo = 'E'";
 		$result = pupe_query($query);
 
-		if(mysql_num_rows($result) > 0){
-			return number_format($summa,$yhtiorow['hintapyoristys'],","," ");
+		if (mysql_num_rows($result) > 0) {
+			return false;
 		}
 
-		$query = "	SELECT kuluprosentti
-					FROM yhtio
-					WHERE yhtio = '{$kukarow['yhtio']}'";
-
-		$result = pupe_query($query);
-		$kuluprosentti = mysql_result($result, 0);
-
-		if ($tyyppi == "hinta") {
-			$tulos = $summa / ((100 - $kuluprosentti) / 100);
-			return number_format($tulos,$yhtiorow['hintapyoristys'],","," ");
-		}
-		elseif ($tyyppi == "kate") {
-			$query = "	SELECT myyntihinta
-						FROM tuote
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tuoteno = '{$tuotenumero}'";
-			$result = pupe_query($query);
-
-			$myyntihinta = mysql_result($result, 0);
-			$ostohinta = $myyntihinta - $summa;
-			$uusi_ostohinta = hinta_kuluineen($tuotenumero, $ostohinta);
-			$tulos = $myyntihinta - $uusi_ostohinta;
-			return number_format($tulos,$yhtiorow['hintapyoristys'],","," ");
-		}
+		return $yhtiorow['kuluprosentti']
 	}
 }

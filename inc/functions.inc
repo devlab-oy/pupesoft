@@ -26631,6 +26631,6 @@ if (!function_exists("hinnan_kuluprosentti")) {
 			return false;
 		}
 
-		return $yhtiorow['kuluprosentti']
+		return $yhtiorow['kuluprosentti'];
 	}
 }

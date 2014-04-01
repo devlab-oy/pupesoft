@@ -437,7 +437,7 @@
 			$query = "UID FETCH $uid (BODY[HEADER.FIELDS (From)])";
 			$fetch_from = sqimap_run_command_list($imapConnection, $query, true, $response, $message, '');
 
-			if (!preg_match("/[a-z\.]*?@$domain/i", $fetch_from[0][1], $matches)) {
+			if  (($domain!= '') and (!preg_match("/[a-z\.]*?@$domain/i", $fetch_from[0][1], $matches))) {
 				echo "Laskuja hyväksytään vain $domain domainista, ".$fetch_from[0][1]."\n";
 			}
 			else {

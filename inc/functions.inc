@@ -17298,12 +17298,12 @@ if (!function_exists("tee_keraysera")) {
 
 			$ohjausmerkki = $jiivee = array();
 
-			$query = "	SELECT lasku.tunnus, 
+			$query = "	SELECT lasku.tunnus,
 						LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
 		 				IFNULL(maksuehto.jv, '') jv
 						FROM lasku
-						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto) 
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tunnus IN ({$tilaukset})";
 			$ohjausmerkki_res = pupe_query($query);
 
@@ -17580,7 +17580,7 @@ if (!function_exists("tee_keraysera")) {
 
 			$ed_ohjausmerkki = '种种种种种种种种';
 			$ed_jiivee = "种种种种种种种种";
-			
+
 			$ed_tuote = '';
 
 			foreach ($inner_main_array as $inner_key => &$tuoterow) {
@@ -26618,69 +26618,5 @@ if (!function_exists("korvaavat_kiellot")) {
 		}
 
 		return "";
-	}
-}
-
-if (!function_exists("hinta_kuluineen")) {
-	function hinta_kuluineen($tuotenumero, $hinta) {
-		global $kukarow, $yhtiorow;
-
-		$kuluprosentti = hinnan_kuluprosentti($tuotenumero);
-
-		if ($kuluprosentti === false) {
-			return $hinta;
-		}
-
-		$tulos = $hinta / ((100 - $kuluprosentti) / 100);
-		return number_format($tulos, $yhtiorow['hintapyoristys'], ",", " ");
-	}
-}
-
-if (!function_exists("tilausrivin_kate")) {
-	function tilausrivin_kate($tilausrivitunnus, $pvm = null) {
-		global $kukarow, $yhtiorow;
-
-		#TODO: t鋒鋘 koodi
-	}
-}
-
-if (!function_exists("hinnan_kuluprosentti")) {
-	function hinnan_kuluprosentti($tuotenumero) {
-		global $kukarow, $yhtiorow;
-
-		if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') {
-			return false;
-		}
-
-		$query = "	SELECT toimi.kulujen_laskeminen_hintoihin
-					FROM tuotteen_toimittajat
-					JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-					AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
-					WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
-					AND tuotteen_toimittajat.tuoteno = '{$tuotenumero}'
-					ORDER BY
-					if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
-					tuotteen_toimittajat.tunnus ASC
-					LIMIT 1";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
-
-		if ($row['kulujen_laskeminen_hintoihin'] == 'E') {
-			return false;
-		}
-
-		$query = "  SELECT tunnus
-					FROM yhtion_toimipaikat_parametrit
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND toimipaikka = '{$kukarow['toimipaikka']}'
-					AND parametri = 'kulujen_laskeminen_hintoihin'
-					AND arvo = 'E'";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) > 0) {
-			return false;
-		}
-
-		return $yhtiorow['kuluprosentti'];
 	}
 }

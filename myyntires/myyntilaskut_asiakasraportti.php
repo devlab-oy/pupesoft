@@ -773,12 +773,15 @@
 										tilino in ($ratiro[rahatilit]) and
 										korjattu = ''";
 							$lasktilitre = pupe_query($query);
-
+							query_dump($query);
 							// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
 							if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
+								echo "kissa";
 								while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
+									echo "kissa";
 									if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
 										echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+										
 									}
 									else {
 										echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";

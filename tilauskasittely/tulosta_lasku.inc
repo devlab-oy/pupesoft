@@ -242,7 +242,8 @@ if (!function_exists('alku')) {
 		$rivi_ind = $laskutyyppi == 17 ? 2 : 1;
 
 		$pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Eräpäivä", $kieli), 									$page_lasku[$sivu], $pieni);
-		if ($laskurow["kateistyyppi"] != '') $erapaiva = t('MAKSETTU', $kieli);
+		if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and $laskurow['saldo_maksettu'] != 0) $erapaiva = t('OSASUORITETTU', $kieli);
+		elseif ($laskurow["kateistyyppi"] != '') $erapaiva = t('MAKSETTU', $kieli);
 		else $erapaiva = tv1dateconv($laskurow["erpcm"]);
 		$pdf_lasku->draw_text(430, $arvo[$rivi_ind], $erapaiva, 												$page_lasku[$sivu], $norm);
 		$laskutyyppi == 17 ? $rivi_ind-- : $rivi_ind++;
@@ -584,7 +585,10 @@ if (!function_exists('uusi_sivu')) {
 		$pdf_lasku->draw_text(310, 782, tv1dateconv($laskurow["tapvm"]),	$thispage, $norm);
 		$pdf_lasku->draw_text(430, 792, t("Eräpäivä", $kieli), 			$thispage, $pieni);
 
-		if ($laskurow["kateistyyppi"] != '') {
+		if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and $laskurow['saldo_maksettu'] != 0) {
+			$erapaiva = t('OSASUORITETTU', $kieli);
+		}
+		elseif ($laskurow["kateistyyppi"] != '') {
 			$erapaiva = t('MAKSETTU', $kieli);
 		}
 		else {
@@ -1704,7 +1708,10 @@ if (!function_exists('loppu')) {
 
 		$pdf_lasku->draw_text(30,  102+$vientikala+$barcode_korkeus, t("Eräpäivä", $kieli),	$thispage, $pieni);
 
-		if ($laskurow["kateistyyppi"] != '') {
+		if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and $laskurow['saldo_maksettu'] != 0) {
+			$erapaiva = t('OSASUORITETTU', $kieli);
+		}
+		elseif ($laskurow["kateistyyppi"] != '') {
 			$erapaiva = t('MAKSETTU', $kieli);
 		}
 		else {

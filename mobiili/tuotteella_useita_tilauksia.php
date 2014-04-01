@@ -263,7 +263,7 @@ echo "<div class='main'>
 <table>
 <tr>";
 
-$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=".urlencode($tuotenumero);
+$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}".urlencode($tuotenumero);
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
 	echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>",t("Ostotilaus"), "</a>&nbsp;";
@@ -285,8 +285,9 @@ echo $sort_by_direction_hylly == 'asc' ? "<img src='{$palvelin2}pics/lullacons/a
 echo "</th>";
 echo "</tr>";
 
-// otetaan saapuminen rivilooppia varten talteen
+// otetaan saapuminen rivilooppia varten talteen ja luodaan ennaltakohdistettu muuttuja, jolla hallitaan ennalta kohdistetut rivit (aka poikkeustapaukset)
 $_saapuminen = $saapuminen;
+$ennaltakohdistettu = FALSE;
 
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {
@@ -297,8 +298,14 @@ while($row = mysql_fetch_assoc($result)) {
 	}
 
 	# Jos rivi on jo kohdistettu eri saapumiselle
-	if ($row['uusiotunnus'] != 0) $saapuminen = $row['uusiotunnus'];
-	else $saapuminen = $_saapuminen;
+	if ($row['uusiotunnus'] != 0) {
+		$saapuminen = $row['uusiotunnus'];
+		$ennaltakohdistettu = TRUE;
+
+	} else {
+		$saapuminen = $_saapuminen;
+		$ennaltakohdistettu = FALSE;
+	}
 
 	if ($orig_tilausten_lukumaara != $tilausten_lukumaara) $tilausten_lukumaara = $orig_tilausten_lukumaara;
 
@@ -310,7 +317,8 @@ while($row = mysql_fetch_assoc($result)) {
 			'manuaalisesti_syotetty_ostotilausnro'  => $manuaalisesti_syotetty_ostotilausnro,
 			'tilausten_lukumaara' => $tilausten_lukumaara,
 			'viivakoodi' => $viivakoodi,
-			'tuotenumero' => $tuotenumero,)
+			'tuotenumero' => $tuotenumero,
+			'ennaltakohdistettu' => $ennaltakohdistettu,)
 		);
 
 	echo "<tr>";

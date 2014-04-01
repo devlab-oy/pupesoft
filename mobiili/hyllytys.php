@@ -74,9 +74,12 @@ else {
         $saapuminen = uusi_saapuminen($toimittaja, $kukarow['toimipaikka']);
     }
 
-    // P‰ivitet‰‰n kuka.kesken
-    $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
-    $updated = pupe_query($update_kuka);
+    //jos ollaan ennaltakohdistetussa (mutta ei tuloutetussa) riviss‰, niin se on poikkeustapaus, jolloin kukarow.kesken tietoa ei tule p‰ivitt‰‰ -> muuten seuraavien rivien p‰ivitys menee sekaisin ja tuloutetaan rivej‰ v‰‰r‰lle saapumiselle
+	if (!$ennaltakohdistettu) {
+    	// P‰ivitet‰‰n kuka.kesken
+    	$update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+    	$updated = pupe_query($update_kuka);
+	}
 }
 
 # Kontrolleri

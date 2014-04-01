@@ -41,8 +41,14 @@
 					$poistetaanko_lahde = $tiedr[5] = str_replace(" ", "", pupesoft_cleanstring($tiedr[5]));	// 5 - Poistetaanko l‰hdevarastopaikka
 					if ($poistetaanko_lahde != 'X') $tiedr[5] = '';
 
-					// Jos joku pakollisista tiedoista on tyhj‰ tai v‰‰rin poistetaan koko rivi
+					// Jos joku pakollisista tiedoista on tyhj‰ tai v‰‰rin hyl‰t‰‰n koko rivi
 					if (in_array("", array($tuoteno, $kpl, $lahdevarastopk, $kohdevarastopk)) or $lahdevarastopk == $kohdevarastopk or (!is_numeric($kpl) and $kpl != 'X')) {
+						$seliseli = "";
+						if (in_array("", array($tuoteno, $kpl, $lahdevarastopk, $kohdevarastopk))) $seliseli .= "-".t("Tuotenumero, kappalem‰‰r‰, l‰hde- tai kohdevarastopaikka ei saa olla tyhj‰").".<br>";
+						if ($lahdevarastopk == $kohdevarastopk) $seliseli .= "-".t("L‰hde- ja kohdevarastopaikka olivat identtisi‰").".<br>";
+						if (!is_numeric($kpl) and $kpl != 'X') $seliseli .= "-".t("Kappalem‰‰r‰ksi kelpaa %s tai numeerinen arvo", "", "X").".<br>";
+						if ($seliseli != '') $seliseli = "<br>".$seliseli;
+						echo "<font class='error'>".t("Virhe sis‰‰nluettavan tiedoston rivill‰ %s, rivi‰ ei huomioida", "", $rowkey+1)."...$seliseli</font><br>";
 						unset($kaikki_tiedostorivit[$rowkey]);
 						continue;
 					}

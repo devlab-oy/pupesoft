@@ -1214,17 +1214,20 @@
 				if ($saldotonrajaus != '') {
 					$_tmp = $vastaavastas;
 					$isi = "";
+					$poistettavat_perheet = array();
 
 					foreach ($rows as $row_key => $row_value) { 
 						$ei_piirreta = FALSE;
 						$apunumero = $row_value['tuoteno'];
 						if (isset($vastaavastas[$row_value['tuoteno']])) $isi = $row_key;
 
-						if ($row_value["tuoteperhe"] == "") {
+						if ($row_value["tuoteperhe"] == "" and $row_value['ei_saldoa'] == '') {
 							list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 						}
-						else {
+						elseif ($row_value['ei_saldoa'] == '') {
+
 							$myytavissa_tp = tuoteperhe_myytavissa($row_value["tuoteno"], "", "KAIKKI", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+
 							$myytavissa = 0;
 							foreach ($myytavissa_tp as $varasto => $myytakissa) {
 								$myytavissa += $myytakissa;
@@ -1236,13 +1239,22 @@
 						}
 
 						if ($ei_piirreta) {
-							//jos kuulutaan tuoteperheeseen niin ei poisteta
+							// Poistetaan tuoteperheettömiä
 							if (!isset($vastaavastas[$row_value['tuoteno']]) and $row_value['tuoteperhe'] == '') {
 								unset($vastaavastas["{$isi}"]["{$row_value['tuoteno']}"]);
 								unset($rows["{$row_key}"]);
 							}
+							else {
+						 	// Poistettavat tuoteperheet koppi
+								if($row_value['tuoteperhe'] != '') $poistettavat_perheet[] = $row_value['tuoteperhe'];
+							}
 							continue;
 						}
+					}
+
+					// Poistetaan vielä kokonaiset tuoteperheet jos oli saldottomia lapsia
+					foreach ($rows as $row_key => $row_value) {
+						if (in_array($row_value['tuoteperhe'], $poistettavat_perheet) and $row_value['tuoteperhe'] != '') unset($rows[$row_key]);
 					}
 				}
 

@@ -1234,7 +1234,8 @@
 							}
 						}
 
-						if ($myytavissa == 0) {
+						// Vain saldolliset tuotteet voivat triggeraa tämän
+						if ($myytavissa == 0 and $row_value['ei_saldoa'] == '') {
 							$ei_piirreta = TRUE;
 						}
 
@@ -1480,7 +1481,7 @@
 					if ($saldotonrajaus != '') $vastaavarivimaara = 1;
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
-				elseif ($verkkokauppa == "" and (!isset($row["mikavastaava"]))) {
+				elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {
 					echo "<td class='back'></td>";
 				}
 

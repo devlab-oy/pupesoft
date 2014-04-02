@@ -22,7 +22,7 @@ $sort_by_direction_hylly		= (!isset($sort_by_direction_hylly) or $sort_by_direct
 $viivakoodi = (isset($_viivakoodi) and $_viivakoodi != "") ? $_viivakoodi : $viivakoodi;
 
 $params = array();
-
+echo "25 $ostotilaus $tuotenumero $viivakoodi <br><br>";
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
@@ -65,7 +65,7 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 }
 else {
 	# T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo ostotilaus.php:ss‰
-	echo t("Parametrivirhe");
+	echo t("68Parametrivirhe");
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus.php'>";
 	exit();
 }
@@ -204,7 +204,7 @@ if (isset($submit)) {
 
 			break;
 		case 'cancel':
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}&backsaapuminen={$backsaapuminen}'>";
 			exit;
 		default:
 			echo "Virhe";
@@ -237,14 +237,29 @@ if (isset($virhe)) {
 
 # Result alkuun
 mysql_data_seek($result, 0);
+echo "240 $saapuminen <br><br>";
+//otetaan haltuun se tapaus, jos heti halutaan menn‰ takasin hakuruutuun ja meill‰ ei ole viel‰ tehtyn‰ uutta saapumista -> pit‰‰ setata erillinen muuttuja, jotta saapumistunnuksen settaaminen kukarow.keskeniin ohitettaisiin kun palataan hakuun ostotilaus.php
+if (!isset($saapuminen)) {
+	$backsaapuminen = "";
+} 
+else {
+	$backsaapuminen = $saapuminen;
+}
 
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
+$url_lisa .= "&backsaapuminen={$backsaapuminen}";
+echo "242 $backsaapuminen <br><br>";
+if (isset($backsaapuminen)) {
+	echo "it is SET!<br><br>";
+} else {
+	echo "it is NOT set.. :( <br><br>";
+}
 
 ### UI ###
 echo "<div class='header'>
 	<button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
 	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
-
+echo "247 $ennaltakohdistettu <br><br>";
 $viivakoodi_formi_urli = "?tuotenumero=".urlencode($tuotenumero)."&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
 
 echo "<div class='main'>
@@ -263,7 +278,7 @@ echo "<div class='main'>
 <table>
 <tr>";
 
-$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}".urlencode($tuotenumero);
+$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}&backsaapuminen={$backsaapuminen}".urlencode($tuotenumero);
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
 	echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>",t("Ostotilaus"), "</a>&nbsp;";
@@ -288,7 +303,7 @@ echo "</tr>";
 // otetaan saapuminen rivilooppia varten talteen ja luodaan ennaltakohdistettu muuttuja, jolla hallitaan ennalta kohdistetut rivit (aka poikkeustapaukset)
 $_saapuminen = $saapuminen;
 $ennaltakohdistettu = FALSE;
-
+echo "291 alaviiva $_saapuminen, saapuminen $saapuminen ja ennalta $ennaltakohdistettu <br><br>";
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {
 
@@ -306,7 +321,7 @@ while($row = mysql_fetch_assoc($result)) {
 		$saapuminen = $_saapuminen;
 		$ennaltakohdistettu = FALSE;
 	}
-
+echo "309 {$row["tuoteno"]} alaviiva $_saapuminen, saapuminen $saapuminen ja ennalta $ennaltakohdistettu <br><br>";
 	if ($orig_tilausten_lukumaara != $tilausten_lukumaara) $tilausten_lukumaara = $orig_tilausten_lukumaara;
 
 	$url = http_build_query(

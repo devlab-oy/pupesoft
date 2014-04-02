@@ -19,7 +19,7 @@ if (!isset($hyllytaso)) $hyllytaso = "";
 
 $hae_hyllypaikalla = $hae_tuotenumerolla = $hae_viivakoodilla = false;
 $params = array();
-
+echo "22 ($hyllyalue != '' and $hyllynro != '' and $hyllyvali != '' and $hyllytaso != '') or $tuotenumero != '' or $viivakoodi != '')<br><br>";
 # Joku parametri tarvii olla setattu.
 if (($hyllyalue != '' and $hyllynro != '' and $hyllyvali != '' and $hyllytaso != '') or $tuotenumero != '' or $viivakoodi != '') {
 
@@ -64,7 +64,7 @@ if (($hyllyalue != '' and $hyllynro != '' and $hyllyvali != '' and $hyllytaso !=
 }
 else {
 	# T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo hyllysiirrot.php:ss‰
-	echo t("Parametrivirhe");
+	echo t("67Parametrivirhe");
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=hyllysiirrot.php'>";
 	exit();
 }

@@ -256,7 +256,7 @@ else {
 	echo "</table>";
 	echo "<div class='controls'>";
 	echo "<button name='submit' class='button left' id='haku_nappi' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>";
-	echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>";
+	echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("!!UUSI KERÄYSPAIKKA"),"</button>";
 	echo "</div>";
 	echo "</form>";
 

@@ -762,23 +762,65 @@
 						if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['korkolaspvm']).tv1dateconv($maksurow["korkolaspvm"])."</td>";
 						else echo "<td></td>";
 
-						echo "<td align='right'>";
+						echo "<td align='right' nowrap>";
 
 						// jos rahatilejä löytyy etsitään suoritukst
 						if ($ratiro["rahatilit"] != "") {
+
+							// KASSALIPAS-BLOKKI
+							$tilinolisa = '';
+							$kassa_arska = $pankkikortti_arska = $luottokortti_arska = array();
+							// Katsotaan onko laskun tunnuksella olevilla tiliöinneillä
+							$query = "	SELECT group_concat(DISTINCT kustp) kustannuspaikat 
+										FROM tiliointi USE INDEX (tositerivit_index) 
+										WHERE yhtio='$kukarow[yhtio]' 
+										AND ltunnus = $maksurow[tunnus]
+										AND korjattu = ''
+										AND kustp != 0";
+							$kustpre = pupe_query($query);
+
+							if (mysql_num_rows($kustpre) == 1)  {
+
+								$kustpro = mysql_fetch_assoc($kustpre);
+								// Jos laskun tiliöinneiltä löytyy kustannuspaikka voidaan etsiä sen perusteella kassalipastilinumeroita
+								$query = "	SELECT DISTINCT kustp,kassa,pankkikortti,luottokortti 
+											FROM kassalipas 
+											WHERE yhtio='$kukarow[yhtio]' 
+											AND kustp IN ({$kustpro['kustannuspaikat']})";
+								$keijo = pupe_query($query);
+
+								while ($ressukka = mysql_fetch_assoc($keijo)) {
+									$kassa_arska[] = $ressukka['kassa'];
+									$pankkikortti_arska[] = $ressukka['pankkikortti'];
+									$luottokortti_arska[] =	$ressukka['luottokortti'];
+								}
+
+								//siivous
+								$kassa_arska = array_unique($kassa_arska);
+								$pankkikortti_arska = array_unique($pankkikortti_arska);
+								$luottokortti_arska = array_unique($luottokortti_arska);
+
+								$dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
+								if (count($dipoli) > 0) $tilinolisa = ",".implode(",", $dipoli);
+							}
+
 							$query = "	SELECT *
 										FROM tiliointi USE INDEX (tositerivit_index)
 										WHERE yhtio = '$kukarow[yhtio]' and
 										ltunnus = '$maksurow[tunnus]' and
-										tilino in ($ratiro[rahatilit]) and
+										tilino in ({$ratiro['rahatilit']}{$tilinolisa}) and
 										korjattu = ''";
 							$lasktilitre = pupe_query($query);
-							query_dump($query);
+
 							// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
 							if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
-								echo "kissa";
+
 								while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
-									echo "kissa";
+
+									if (in_array($lasktilitro['tilino'], $kassa_arska)) echo "Käteisellä: ";
+									if (in_array($lasktilitro['tilino'], $pankkikortti_arska)) echo "Pankkikortilla: ";
+									if (in_array($lasktilitro['tilino'], $luottokortti_arska)) echo "Luottokortilla: ";
+
 									if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
 										echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
 										
@@ -786,6 +828,10 @@
 									else {
 										echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
 									}
+								}
+
+								while ($kateistapahtuma = mysql_fetch_array($kateisressu)) {
+									
 								}
 							}
 						}

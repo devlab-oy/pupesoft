@@ -5202,8 +5202,8 @@ if ($tee == '') {
 			$sarakkeet++;
 		}
 
-		$headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
-		$sarakkeet += 3;
+		$headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th><th>".t("Hinta")."</th><th>".t("Lukitse hinta")."</th>";
+		$sarakkeet += 5;
 
 		if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
@@ -5432,8 +5432,56 @@ if ($tee == '') {
 				}
 			}
 
+			// Kootaan hintalaskurien datat valmiiksi.
+			$rows = [];
+			$hinta_laskurit = [];
 			while ($row = mysql_fetch_assoc($result)) {
+				$rows[] = $row;
+				$perheid = $row['perheid'];
 
+				// Alustetaan hinta_kokoelma jos sellaista ei viel‰ ole.
+				if (isset($hinta_laskurit[$perheid])===false)
+					$hinta_laskurit[$perheid] = [
+						'raakaaineiden_kehahinta_summa' => 0,
+						'valmisteiden_kehahinta_summa' => 0,
+						'valmisteiden_kpl_summa' => 0,
+						'valmisteissa_hinnaton' => false,
+						'valmisteiden_painoarvot' => [],
+						'valmisteet' => [],
+					];
+
+				if ($row["tyyppi"] != "W") {
+					$hinta_laskurit[$perheid]['raakaaineiden_kehahinta_summa'] += $row["kehahin"] * $row["tilkpl"];
+				}
+				else {
+					$hinta_laskurit[$perheid]['valmisteet'][] = $row;
+					$hinta_laskurit[$perheid]['valmisteiden_kehahinta_summa'] += $row['kehahin'] * $row["tilkpl"];
+					$hinta_laskurit[$perheid]['valmisteiden_kpl_summa'] += $row["tilkpl"];
+
+					if ($row['kehahin']==0)
+						$hinta_laskurit[$perheid]['valmisteissa_hinnaton'] = true;
+				}
+			}
+
+			foreach( $hinta_laskurit as $perheid => $hinta_kokoelma ) {
+				// Jos valmisteissa ei ole hinnatonta, painoarvot lasketaan keskihankintahintojen mukaan.
+				if ($hinta_kokoelma['valmisteissa_hinnaton']===false) {
+					foreach ($hinta_kokoelma['valmisteet'] as $valmiste) {
+						$hinta_laskurit[$perheid]['valmisteiden_painoarvot'][ $valmiste['tunnus'] ] = $valmiste['kehahin'] * $valmiste["tilkpl"] / $hinta_laskurit[$perheid]['valmisteiden_kehahinta_summa'];
+					}
+				}
+				// Jos valmisteissa on hinnaton, painoarvot lasketaan kappalem‰‰rien mukaan.
+				else {
+					foreach ($hinta_kokoelma['valmisteet'] as $valmiste) {
+						$hinta_laskurit[$perheid]['valmisteiden_painoarvot'][ $valmiste['tunnus'] ] = $valmiste["tilkpl"] / $hinta_laskurit[$perheid]['valmisteiden_kpl_summa'];
+					}
+				}
+			}
+
+			echo '<input type="hidden" id="hinta_laskurit" value=\''.json_encode($hinta_laskurit).'\' />';
+			echo '<input type="hidden" id="desimaalia" value="'.$yhtiorow['hintapyoristys'].'" />';
+
+			foreach ($rows as $row) {
 				// Tuoteperheen lapset, jotka on merkitty puutteeksi
 				if ($kukarow['extranet'] != '' and $row['tunnus'] != $row['perheid'] and strtoupper($row['var']) == 'P' and $row['perheid'] != 0) {
 
@@ -6435,8 +6483,6 @@ if ($tee == '') {
 					}
 				}
 
-				echo '<td>Uusi kolumni</td>';
-
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 					$classvar = $class;
 				}
@@ -6463,7 +6509,23 @@ if ($tee == '') {
 					}
 				}
 
-				echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
+				echo "<td $class align='center' valign='top'>$var_temp&nbsp;</td>";
+
+				echo "<td $class>";
+				if ($row['tyyppi']=='W' and count($hinta_laskurit[$row['perheid']]['valmisteet'])>1) {
+					echo '<input type="text" name="valmiste_valuutta['.$row['tunnus'].']" data-tunnus="'.$row['tunnus'].'" data-perheid="'.$row['perheid'].'" />';
+					echo '<input type="hidden" name="valmiste_painoarvo['.$row['tunnus'].']" data-tunnus="'.$row['tunnus'].'" data-perheid="'.$row['perheid'].'" />';
+				}
+				else {
+					echo round($row['kehahin'] * $row['tilkpl'], $yhtiorow['hintapyoristys']);
+				}
+				echo '</td>';
+
+				echo "<td $classvar>";
+				if ($row['tyyppi']=='W')
+					echo '<input type="checkbox" class="valmiste_lukko" data-tunnus="'.$row['tunnus'].'" data-perheid="'.$row['perheid'].'" />';
+				echo '</td>';
+
 
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 

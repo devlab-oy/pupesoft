@@ -1737,11 +1737,11 @@ if (!function_exists('loppu')) {
 			}
 			elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $boldi);
-				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa_valuutassa"]), $thispage, $boldi);
+				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["saldo_maksettu_valuutassa"]), $thispage, $boldi);
 			}
 			else {
 				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa"]), $boldi);
-				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa"]), $thispage, $boldi);
+				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa"]-$laskurow["saldo_maksettu"]), $thispage, $boldi);
 			}
 
 			$pdf_lasku->draw_text(550, 92+$vientikala+$barcode_korkeus,  $laskurow["valkoodi"],				$thispage, $boldi);
@@ -2150,7 +2150,7 @@ if (!function_exists('alvierittely')) {
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$summa_valuutassa = $kassa_ale != '' ? ($laskurow["summa_valuutassa"]+$laskurow["pyoristys_valuutassa"]) * (1-$kassa_ale/100) : $laskurow["summa_valuutassa"]+$laskurow["pyoristys_valuutassa"];
-
+			
 			$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $summa_valuutassa), $norm);
 			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa_valuutassa),				$thispage, $norm);
 			$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 									$thispage, $norm);
@@ -2195,6 +2195,13 @@ if (!function_exists('alvierittely')) {
 				$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 								$thispage, $norm);
 			}
 		}
+
+		$kala -= 10;
+
+		$pdf_lasku->draw_text(360, $kala, t("Osasuoritukset yhteensä", $kieli).":",					$thispage, $norm);
+		$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow['saldo_maksettu']), $norm);
+		$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow['saldo_maksettu'] - $pyoristys * -1),$thispage, $norm);
+		$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 								$thispage, $norm);
 
 		$kala -= 10;
 

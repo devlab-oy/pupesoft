@@ -817,22 +817,18 @@
 
 								while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
 
-									if (in_array($lasktilitro['tilino'], $kassa_arska)) echo "Käteisellä: ";
-									if (in_array($lasktilitro['tilino'], $pankkikortti_arska)) echo "Pankkikortilla: ";
-									if (in_array($lasktilitro['tilino'], $luottokortti_arska)) echo "Luottokortilla: ";
+									if (in_array($lasktilitro['tilino'], $kassa_arska)) echo t("Käteisellä").": ";
+									if (in_array($lasktilitro['tilino'], $pankkikortti_arska)) echo t("Pankkikortilla").": ";
+									if (in_array($lasktilitro['tilino'], $luottokortti_arska)) echo t("Luottokortilla").": ";
 
 									if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
 										echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
-										
 									}
 									else {
 										echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
 									}
 								}
 
-								while ($kateistapahtuma = mysql_fetch_array($kateisressu)) {
-									
-								}
 							}
 						}
 						echo "</td>";

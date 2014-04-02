@@ -16,45 +16,33 @@ if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_nam
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $ext = strtoupper($path_parts['extension']);
 
-    if ($ext != "XLS") {
-      die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font><form><br /><br /><input type='submit' value='" . t("Yritä uudestaan") . "' /></form>");
+    if ($_FILES['userfile']['size']==0) {
+      die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
     }
 
-    if ($_FILES['userfile']['size'] == 0) {
-      die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font><form><br /><br /><input type='submit' value='" . t("Yritä uudestaan") . "' /></form>");
+    $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+
+    if ($retval !== TRUE) {
+      die ("<font class='error'><br>".t("Väärä tiedostomuoto")."!</font>");
     }
 
-    require_once ('excel_reader/reader.php');
-
-    // ExcelFile
-    $data = new Spreadsheet_Excel_Reader();
-
-    // Set output Encoding.
-    $data->setOutputEncoding('CP1251');
-    $data->setRowColOffset(0);
-    $data->read($_FILES['userfile']['tmp_name']);
-
-    echo "<font class='message'>".t("Yhdistetään asiakkaita")."...<br><br></font>";
-
-    // luetaan eka rivi tiedostosta..
+    $excelrivit = pupeFileReader($_FILES['userfile']['tmp_name'], $ext);
     $headers = array();
-
-  	for ($x = 0; $x < $data->sheets[0]['numCols']; $x++) {
-      $headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$x]));
-    }
+    $headers = $excelrivit[0];
+    unset($excelrivit[0]);
+    $excelrivit = array_values($excelrivit);
 
     $taulunrivit = array();
-  	// Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta
-    for ($y = 1; $y < $data->sheets[0]['numRows']; $y++) {
-      	for ($h = 0; $h < count($headers); $h++) {
-          $taulunrivit[$y-1][$headers[$h]] = trim($data->sheets[0]['cells'][$y][$h]);
-		    }
+    for ($y = 0; $y < count($excelrivit); $y++) {
+      for ($h = 0; $h < count($headers); $h++) {
+        $taulunrivit[$y][strtoupper(trim($headers[$h]))] = $excelrivit[$y][$h];
+      }
     }
 
-	$yhdistykset = array();
+  $yhdistykset = array();
 
-	$yr = 0;
-	foreach ($taulunrivit as $r) {
+  $yr = 0;
+  foreach ($taulunrivit as $r) {
 
       $tunnukset = array();
 
@@ -63,46 +51,46 @@ if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_nam
       if(isset($r['OVTTUNNUS']))        $tunnukset['OVTTUNNUS'] = $r['OVTTUNNUS'];
       if(isset($r['TOIM_OVTTUNNUS']))   $tunnukset['TOIM_OVTTUNNUS'] = $r['TOIM_OVTTUNNUS'];
 
-	    if ( $tunnus = hae_asiakastunnus($tunnukset) ) {
+      if ( $tunnus = hae_asiakastunnus($tunnukset) ) {
 
-	      	if ( $r['SAMPSAN_SPESSUKENTAT'] == 'X' ) {
-	        	$yhdistykset[$yr]['spessut'] = $tunnus;
-	      	}
+          if ( $r['SAMPSAN_SPESSUKENTAT'] == 'X' ) {
+            $yhdistykset[$yr]['spessut'] = $tunnus;
+          }
 
-	      	if ( $r['JATA_TAMA'] != 'X' ) {
-	        	$yhdistykset[$yr]['yhdista'][] = $tunnus;
-	      	}
-	      	elseif( isset($yhdistykset[$yr]) and count($yhdistykset[$yr]['yhdista']) > 0 ){
-	        	$yhdistykset[$yr]['jata'] = $tunnus;
-	        	$yr++;
-	      	}
-	    }
-	}
+          if ( $r['JATA_TAMA'] != 'X' ) {
+            $yhdistykset[$yr]['yhdista'][] = $tunnus;
+          }
+          elseif( isset($yhdistykset[$yr]) and count($yhdistykset[$yr]['yhdista']) > 0 ){
+            $yhdistykset[$yr]['jata'] = $tunnus;
+            $yr++;
+          }
+      }
+  }
 
-	if ($yr == 0) {
-	  echo t("Ei löytynyt yhdistettäviä asiakkaita")."...<br />";
-	}
+  if ($yr == 0) {
+    echo t("Ei löytynyt yhdistettäviä asiakkaita")."...<br />";
+  }
 
-	foreach ($yhdistykset as $y) {
-    	if(!isset($y['spessut'])) {
-    		$y['spessut'] = 0;
-    	}
-      	echo yhdista_asiakkaita( $y['jata'], $y['yhdista'], $y['spessut'] );
-      	echo '<hr>';
-  	}
-	echo "<br /><br /><form><input type='submit' value='" . t("Yhdistä lisää") . "' /></form>";
+  foreach ($yhdistykset as $y) {
+      if(!isset($y['spessut'])) {
+        $y['spessut'] = 0;
+      }
+        echo yhdista_asiakkaita( $y['jata'], $y['yhdista'], $y['spessut'] );
+        echo '<hr>';
+    }
+  echo "<br /><br /><form><input type='submit' value='" . t("Yhdistä lisää") . "' /></form>";
 }
 
 if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
-	echo yhdista_asiakkaita( $jataminut, $yhdista );
-  	echo "<br /><br /><form><input type='submit' value='" . t("Yhdistä lisää") . "' /></form>";
+  echo yhdista_asiakkaita( $jataminut, $yhdista );
+    echo "<br /><br /><form><input type='submit' value='" . t("Yhdistä lisää") . "' /></form>";
 }
 
 if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']) or is_uploaded_file($_FILES['userfile']['tmp_name']) === false ) ) {
 
     echo "<br><form method='post' name='sendfile' enctype='multipart/form-data'>";
-  	echo "<input type='hidden' name='tee' value='YHDISTA_TIEDOSTOSTA'>";
-  	echo t("Lue yhdistettävät asiakkaat tiedostosta")."...<br /><br />";
+    echo "<input type='hidden' name='tee' value='YHDISTA_TIEDOSTOSTA'>";
+    echo t("Lue yhdistettävät asiakkaat tiedostosta")."...<br /><br />";
 
     echo "<table>";
     echo "<tr><th>" . t("Asiakkaan valintatapa") . ":</th><td>";
@@ -129,49 +117,49 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
     echo t("\"jata_tama\" kenttään laitetaan arvoksi \"X\" niille riveille joihin edelliset rivit halutaan yhdistää. Jos yhdistettäviä rivejä on paljon, saattaa toimenpide kestää kauan").".<br /><br />";
 
 
-  	echo "<table>";
-  	echo "<tr><th>".t("Valitse tiedosto").":</th>";
-  	echo "<td><input name='userfile' type='file'></td>";
-  	echo "<td class='back'><input type='submit' value='".t("Jatka")."'></td></tr></table><br /></form>";
+    echo "<table>";
+    echo "<tr><th>".t("Valitse tiedosto").":</th>";
+    echo "<td><input name='userfile' type='file'></td>";
+    echo "<td class='back'><input type='submit' value='".t("Jatka")."'></td></tr></table><br /></form>";
 
-  	echo t("Voit myös valita yhdistettävät asiakkaat listasta.")."<br><br>";
+    echo t("Voit myös valita yhdistettävät asiakkaat listasta.")."<br><br>";
 
-  	echo "<form method='post'>";
-  	echo "<input type='hidden' name='tee' value='YHDISTA'>";
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='tee' value='YHDISTA'>";
 
-  	$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
-  	$monivalintalaatikot_normaali = array();
+    $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
+    $monivalintalaatikot_normaali = array();
 
-  	require ("tilauskasittely/monivalintalaatikot.inc");
+    require ("tilauskasittely/monivalintalaatikot.inc");
 
-  	$kentat    = "asiakas.ytunnus::asiakas.ytunnus::asiakas.nimi>>asiakas.toim_nimi::asiakas.osoite>>asiakas.toim_osoite::asiakas.postino>>asiakas.toim_postino::asiakas.postitp>>asiakas.toim_postitp::asiakas.asiakasnro";
-  	$jarjestys = 'ytunnus, nimi, selaus, tunnus';
+    $kentat    = "asiakas.ytunnus::asiakas.ytunnus::asiakas.nimi>>asiakas.toim_nimi::asiakas.osoite>>asiakas.toim_osoite::asiakas.postino>>asiakas.toim_postino::asiakas.postitp>>asiakas.toim_postitp::asiakas.asiakasnro";
+    $jarjestys = 'ytunnus, nimi, selaus, tunnus';
 
-  	$array = explode("::", $kentat);
-  	$count = count($array);
+    $array = explode("::", $kentat);
+    $count = count($array);
 
-  	for ($i = 0; $i <= $count; $i++) {
-    	if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
-      		if ($array[$i] == "asiakas.ytunnus" || $array[$i] == "asiakas.asiakasnro") {
-        		$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-        		$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-      		}
-      		else {
-        		$toimlisa = explode(">>", $array[$i]);
-        		$lisa .= " and (" . $toimlisa[0] . " like '%" . $haku[$i] . "%'";
-        		$lisa .= " or " . $toimlisa[1] . " like '%" . $haku[$i] . "%')";
-        		$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-      		}
-    	}
-  	}
+    for ($i = 0; $i <= $count; $i++) {
+      if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
+          if ($array[$i] == "asiakas.ytunnus" || $array[$i] == "asiakas.asiakasnro") {
+            $lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+            $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+          }
+          else {
+            $toimlisa = explode(">>", $array[$i]);
+            $lisa .= " and (" . $toimlisa[0] . " like '%" . $haku[$i] . "%'";
+            $lisa .= " or " . $toimlisa[1] . " like '%" . $haku[$i] . "%')";
+            $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+          }
+      }
+    }
 
-  	if (strlen($ojarj) > 0) {
-    	$jarjestys = $ojarj;
-  	}
+    if (strlen($ojarj) > 0) {
+      $jarjestys = $ojarj;
+    }
 
-  	$lisa .= " and asiakas.laji != 'P' ";
+    $lisa .= " and asiakas.laji != 'P' ";
 
-  	$query = "  SELECT
+    $query = "  SELECT
         asiakas.tunnus,
         asiakas.ytunnus,
         concat(asiakas.nimi ,'<br>', asiakas.toim_nimi,'<br>',  asiakas.laskutus_nimi) 'nimi'  ,
@@ -185,57 +173,57 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
         $lisa
         ORDER BY $jarjestys
         LIMIT 500";
-  	$result = pupe_query($query);
+    $result = pupe_query($query);
 
-  	echo "<br><table>";
-  	echo "<tr>";
+    echo "<br><table>";
+    echo "<tr>";
 
-  	for ($i = 1; $i < mysql_num_fields($result)-1; $i++) { // HAKUKENTÄT
-    	echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
+    for ($i = 1; $i < mysql_num_fields($result)-1; $i++) { // HAKUKENTÄT
+      echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
 
-    	if  (mysql_field_len($result,$i)>20) $size='20';
-    	elseif  (mysql_field_len($result,$i)<=20)  $size='10';
-    	else  $size='10';
+      if  (mysql_field_len($result,$i)>20) $size='20';
+      elseif  (mysql_field_len($result,$i)<=20)  $size='10';
+      else  $size='10';
 
-    	if (!isset($haku[$i])) $haku[$i] = '';
+      if (!isset($haku[$i])) $haku[$i] = '';
 
-    	echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
-    	echo "</th>";
-  	}
+      echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+      echo "</th>";
+    }
 
-  	echo "<th>".t("Yhdistä")."</th><th>".t("jätä tämä")."</th>";
-  	echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi / yhdistä")."'></td></tr>\n\n";
+    echo "<th>".t("Yhdistä")."</th><th>".t("jätä tämä")."</th>";
+    echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi / yhdistä")."'></td></tr>\n\n";
 
-  	$kalalask = 1;
+    $kalalask = 1;
 
-  	while ($trow = mysql_fetch_array ($result)) { // tiedot
-    	echo "<tr class='aktiivi'>";
+    while ($trow = mysql_fetch_array ($result)) { // tiedot
+      echo "<tr class='aktiivi'>";
 
-    	for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
+      for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 
-      		if ($i == 1) {
-        		if (trim($trow[1]) == '') $trow[1] = t("*tyhjä*");
-        		echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."yhdistaasiakas.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
-      		}
-      		elseif (mysql_field_name($result,$i) == 'ytunnus') {
-        		echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."yhdistaasiakas.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
-      		}
-      		else {
-        		echo "<td>$trow[$i]</td>";
-      		}
-    	}
+          if ($i == 1) {
+            if (trim($trow[1]) == '') $trow[1] = t("*tyhjä*");
+            echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."yhdistaasiakas.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
+          }
+          elseif (mysql_field_name($result,$i) == 'ytunnus') {
+            echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."yhdistaasiakas.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
+          }
+          else {
+            echo "<td>$trow[$i]</td>";
+          }
+      }
 
-    	echo "<td><input type='checkbox' name='yhdista[$trow[tunnus]]' value='$trow[tunnus]' $sel/></td>";
-    	echo "<td><input type='radio' name='jataminut' value='$trow[tunnus]'/></td>";
-    	echo "</tr>\n\n";
+      echo "<td><input type='checkbox' name='yhdista[$trow[tunnus]]' value='$trow[tunnus]' $sel/></td>";
+      echo "<td><input type='radio' name='jataminut' value='$trow[tunnus]'/></td>";
+      echo "</tr>\n\n";
 
-    	$kalalask++;
-  	}
+      $kalalask++;
+    }
 
-  	echo "</table><br><br>";
+    echo "</table><br><br>";
 
-  	echo "<input type='submit' value='".t("Yhdistä asiakkaat")."'>";
-  	echo "</form>";
+    echo "<input type='submit' value='".t("Yhdistä asiakkaat")."'>";
+    echo "</form>";
 
 }
 

@@ -394,7 +394,9 @@
 			$tee = '';
 		}
 
-		echo "<br><br>";
+		if ($echotaanko) {
+			echo "<br><br>";
+		}
 	}
 
 	if ($tee == 'valmis') {

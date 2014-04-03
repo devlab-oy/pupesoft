@@ -21,16 +21,32 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 		}
 
 		$myyntitilaus = hae_lasku($myyntitilaus_tunnus);
-		$myyntitilaus['tilausrivit'] = hae_tilausrivit($myyntitilaus_tunnus);
-		$keys = array(
-			'lahdevarasto_tunnus',
-			'kohdevarasto_tunnus'
-		);
-		$lahde_ja_kohde_varasto_yhdistelmat = array_find_unique_values($myyntitilaus['tilausrivit'], $keys);
+		$myyntitilaus['tilausrivit'] = hae_tilausrivit($myyntitilaus_tunnus, $kirjanpidollinen_varastosiirto);
+
+		if ($kirjanpidollinen_varastosiirto) {
+			//Kirjanpidollisessa varastosiirrossa yhdellä myyntitilauksella voi olla vain 1 lähde-kohdevarasto kombinaatio.
+			//Kombinaatio muodostuu Lähde: lasku.varasto kohde: lasku.yhtio_toimipaikka.varasto.first
+			$toimipaikan_varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
+			$lahde_ja_kohde_varasto_yhdistelmat = array();
+			$lahde_ja_kohde_varasto_yhdistelma = array(
+				'lahdevarasto_tunnus'	 => $myyntitilaus['varasto'],
+				'kohdevarasto_tunnus'	 => $toimipaikan_varastot[0]['tunnus'],
+			);
+
+			array_push($lahde_ja_kohde_varasto_yhdistelmat, $lahde_ja_kohde_varasto_yhdistelma);
+		}
+		else {
+			//Jokaiselle tilausriville voi määrittää erikseen lähde sekä kohde varaston
+			//Mahdolliset kombinaatiot muodostuvat avainsana.laji = SIIRTOVARASTOT, lasku.varasto tai lasku.yhtio_toimipaikka.varastot perusteella
+			$keys = array(
+				'lahdevarasto_tunnus',
+				'kohdevarasto_tunnus'
+			);
+			$lahde_ja_kohde_varasto_yhdistelmat = array_find_unique_values($myyntitilaus['tilausrivit'], $keys);
+		}
 
 		$tilausrivi_tunnukset = array();
 		$kommentit = array();
-		$siirtolistarivit = array();
 		foreach ($lahde_ja_kohde_varasto_yhdistelmat as $lahde_ja_kohde_varasto_yhdistelma) {
 			$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
 
@@ -45,7 +61,6 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 			aseta_kukarow_kesken($siirtolista['tunnus']);
 			foreach ($myyntitilausrivit as $tilausrivi) {
 				$lisatyt_rivit1 = luo_siirtolistarivi($siirtolista, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus']);
-				$siirtolistarivit[] = $lisatyt_rivit1[0];
 				$tilausrivi_tunnukset[] = $tilausrivi['tunnus'];
 
 				linkkaa_myyntitilausrivi_siirtolistariviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
@@ -54,15 +69,33 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 			}
 		}
 
-		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
+		if (!$kirjanpidollinen_varastosiirto) {
+			aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
+		}
 		aseta_kukarow_kesken($myyntitilaus_tunnus);
 
 		if ($kirjanpidollinen_varastosiirto) {
-			$siirtolistarivit = hae_siirtolistarivit($siirtolistarivit);
+			//Kirjallisessa varastosiirrossa $lahde_ja_kohde_varasto_yhdistelmat loopataan vain kerran läpi.
+			//Tästä syystä voimme käyttää tässä kohtaa $siirtolista['tunnus']
+			$siirtolistarivit = hae_tilausrivit($siirtolista['tunnus'], $kirjanpidollinen_varastosiirto);
 
 			foreach ($siirtolistarivit as $siirtolistarivi) {
 				$lahde_varasto_tuotepaikka = hae_tuotepaikka($siirtolistarivi['tuoteno'], $siirtolistarivi['hyllyalue'], $siirtolistarivi['hyllynro'], $siirtolistarivi['hyllytaso'], $siirtolistarivi['hyllyvali']);
-				$kohde_varasto_tuotepaikka = hae_tuotepaikka($siirtolistarivi['tuoteno'], $siirtolistarivi['kohde_hyllyalue'], $siirtolistarivi['kohde_hyllynro'], $siirtolistarivi['kohde_hyllytaso'], $siirtolistarivi['kohde_hyllyvali']);
+				$kohde_varasto_tuotepaikat = hae_tuotteen_tuotepaikat($siirtolistarivi['tuoteno']);
+				if (empty($kohde_varasto_tuotepaikat)) {
+					//Jos kohde varastossa ei ole tälle tuotteelle hyllypaikkaa niin luodaan ns. default-paikka
+					//$siirtolista['clearing'] = kohdevarasto tunnus
+					$kohde_varasto_tuotepaikka = luo_tuotepaikka($siirtolistarivi['tuoteno'], false, false, false, false, $siirtolista['clearing']);
+				}
+				else {
+					$kohde_varasto_tuotepaikka = $kohde_varasto_tuotepaikat[0];
+				}
+
+				$tilausrivi['kohde_hyllyalue'] = $kohde_varasto_tuotepaikka['hyllyalue'];
+				$tilausrivi['kohde_hyllynro'] = $kohde_varasto_tuotepaikka['hyllynro'];
+				$tilausrivi['kohde_hyllyvali'] = $kohde_varasto_tuotepaikka['hyllyvalie'];
+				$tilausrivi['kohde_hyllytaso'] = $kohde_varasto_tuotepaikka['hyllytaso'];
+
 				$params = array(
 					'kappaleet'						 => $siirtolistarivi['tilkpl'],
 					'lisavaruste'					 => '',
@@ -77,7 +110,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 				);
 				hyllysiirto($params);
 
-				aseta_varastosiirtorivi_vastaanotetuksi();
+				aseta_varastosiirtorivi_vastaanotetuksi($siirtolistarivi);
 			}
 		}
 
@@ -225,34 +258,49 @@ if (!function_exists('linkkaa_myyntitilausrivi_siirtolistariviin')) {
 
 if (!function_exists('hae_tilausrivit')) {
 
-	function hae_tilausrivit($otunnus) {
+	function hae_tilausrivit($otunnus, $kirjanpidollinen_varastosiirto = false) {
 		global $kukarow, $yhtiorow;
 
-		$query = "	SELECT t.*,
-					t.hyllyalue AS lahde_hyllyalue,
-					t.hyllynro AS lahde_hyllynro,
-					tl.toimittajan_tunnus,
-					tl.kohde_hyllyalue AS kohde_hyllyalue,
-					tl.kohde_hyllynro AS kohde_hyllynro,
-					v_lahdevarasto.yhtio AS lahdevarasto_yhtio,
-					v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
-					v_kohdevarasto.yhtio AS kohdevarasto_yhtio,
-					v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
-					a.selitetark_2 AS toimitustapa_tunnus
-					FROM tilausrivi AS t
-					JOIN tilausrivin_lisatiedot AS tl
-					ON (tl.yhtio = t.yhtio
-						AND tl.tilausrivitunnus = t.tunnus )
+		$tilausrivi_where = '';
+		$varasto_avainsana_join = '';
+		$select = '';
+		if (!$kirjanpidollinen_varastosiirto) {
+			$tilausrivi_where = "AND t.var = 'S'";
+			$varasto_avainsana_join = '
 					JOIN avainsana AS a
 					ON ( a.yhtio = tl.yhtio
 						AND a.tunnus = tl.toimittajan_tunnus )
 					JOIN varastopaikat AS v_lahdevarasto
 					ON ( v_lahdevarasto.tunnus = a.selite )
 					JOIN varastopaikat AS v_kohdevarasto
-					ON ( v_kohdevarasto.tunnus = a.selitetark )
+					ON ( v_kohdevarasto.tunnus = a.selitetark )';
+
+			$select = '	v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
+						v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
+						a.selitetark_2 AS toimitustapa_tunnus,';
+		}
+
+		$query = "	SELECT t.*,
+					{$select}
+					t.hyllyalue AS lahde_hyllyalue,
+					t.hyllynro AS lahde_hyllynro,
+					tl.toimittajan_tunnus,
+					tl.kohde_hyllyalue AS kohde_hyllyalue,
+					tl.kohde_hyllynro AS kohde_hyllynro,
+					tl.kohde_hyllytaso AS kohde_hyllytaso,
+					tl.kohde_hyllyvali AS kohde_hyllyvali
+					FROM tilausrivi AS t
+					JOIN tuote
+					ON ( tuote.yhtio = t.yhtio
+						AND tuote.tuoteno = t.tuoteno
+						AND tuote.ei_saldoa = '')
+					JOIN tilausrivin_lisatiedot AS tl
+					ON (tl.yhtio = t.yhtio
+						AND tl.tilausrivitunnus = t.tunnus )
+					{$varasto_avainsana_join}
 					WHERE t.yhtio = '{$kukarow['yhtio']}'
 					AND t.otunnus = {$otunnus}
-					AND t.var = 'S'
+					{$tilausrivi_where}
 					AND t.tyyppi != 'D'";
 		$result = pupe_query($query);
 
@@ -262,58 +310,6 @@ if (!function_exists('hae_tilausrivit')) {
 		}
 
 		return $tilausrivit;
-	}
-
-}
-
-if (!function_exists('hae_siirtolistarivit')) {
-
-	function hae_siirtolistarivit(array $tilausrivi_tunnukset) {
-		global $kukarow, $yhtiorow;
-
-		if (empty($tilausrivi_tunnukset)) {
-			return array();
-		}
-
-		$query = "	SELECT t.*,
-					tl.kohde_hyllyalue AS kohde_hyllyalue,
-					tl.kohde_hyllynro AS kohde_hyllynro,
-					tl.kohde_hyllytaso AS kohde_hyllytaso,
-					tl.kohde_hyllyvali AS kohde_hyllyvali
-					FROM tilausrivi AS t
-					JOIN tilausrivin_lisatiedot AS tl
-					ON (tl.yhtio = t.yhtio
-						AND tl.tilausrivitunnus = t.tunnus )
-					WHERE t.yhtio = '{$kukarow['yhtio']}'
-					AND t.tunnus IN (".implode(',', $tilausrivi_tunnukset).")";
-		$result = pupe_query($query);
-
-		$siirtolistarivit = array();
-		while ($siirtolistarivi = mysql_fetch_assoc($result)) {
-			$siirtolistarivit[] = $siirtolistarivi;
-		}
-
-		return $siirtolistarivit;
-	}
-
-}
-
-if (!function_exists('hae_tuotepaikka')) {
-
-	function hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali) {
-		global $kukarow, $yhtiorow;
-
-		$query = "	SELECT *
-					FROM tuotepaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tuoteno = '{$tuoteno}'
-					AND hyllyalue = '{$hyllyalue}'
-					AND hyllynro = '{$hyllynro}'
-					AND hyllytaso = '{$hyllytaso}'
-					AND hyllyvali = '{$hyllyvali}'";
-		$result = pupe_query($query);
-
-		return mysql_fetch_assoc($result);
 	}
 
 }
@@ -332,10 +328,10 @@ if (!function_exists('aseta_varastosiirtorivi_vastaanotetuksi')) {
 		$vainlistaus = '';
 		$echotaanko = false;
 		$tunnus = array($tilausrivi['tunnus']);
-		$t1[$tunnus] = $tilausrivi['kohde_hyllyalue'];
-		$t2[$tunnus] = $tilausrivi['kohde_hyllynro'];
-		$t3[$tunnus] = $tilausrivi['kohde_hyllyvali'];
-		$t4[$tunnus] = $tilausrivi['kohde_hyllytaso'];
+		$t1[$tilausrivi['tunnus']] = $tilausrivi['kohde_hyllyalue'];
+		$t2[$tilausrivi['tunnus']] = $tilausrivi['kohde_hyllynro'];
+		$t3[$tilausrivi['tunnus']] = $tilausrivi['kohde_hyllyvali'];
+		$t4[$tilausrivi['tunnus']] = $tilausrivi['kohde_hyllytaso'];
 
 		require('vastaanota.php');
 

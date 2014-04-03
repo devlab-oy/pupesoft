@@ -1,6 +1,8 @@
 <?php
 
-	require ("../inc/parametrit.inc");
+	if (!isset($echotaanko) or (isset($echotaanko) and $echotaanko) ) {
+		require ("../inc/parametrit.inc");
+	}
 
 	if (!isset($tee)) 			$tee = "";
 	if (!isset($etsi)) 			$etsi = "";

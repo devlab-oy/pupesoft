@@ -43,7 +43,6 @@
 		// otetaan tietokanta connect
 		require("inc/connect.inc");
 		require("inc/functions.inc");
-		require('tilauskasittely/tilauksesta_varastosiirto.inc');
 
 		// hmm.. j‰nn‰‰
 		$kukarow['yhtio'] = $argv[1];
@@ -122,7 +121,6 @@
 		}
 
 		require("../inc/parametrit.inc");
-		require('tilauskasittely/tilauksesta_varastosiirto.inc');
 	}
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -376,7 +374,12 @@
 						yhteyshenkilo as kt READ,
 						yhtio READ,
 						yhtion_parametrit READ,
-						yhtion_toimipaikat READ";
+						yhtion_toimipaikat READ,
+						tilausrivin_lisatiedot AS tl READ,
+						varastopaikat AS v_lahdevarasto READ,
+						varastopaikat AS v_kohdevarasto READ,
+						korvaavat_kiellot READ,
+						oikeu READ";
 			$locre = pupe_query($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -1700,10 +1703,6 @@
 					$kukarow['kesken']=$row['tunnus'];
 
 					tee_kirjanpidollinen_varastosiirto($row['tunnus']);
-					if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K') {
-						
-						tilauksesta_varastosiirto($row['tunnus']);
-					}
 
 					require("laskutus.inc");
 					$laskutetttu++;

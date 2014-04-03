@@ -135,7 +135,7 @@ if (!function_exists("korjaalaskut")) {
 			$hinta_chk_res = pupe_query($query);
 			$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
-			$uusi_varastonmuutos = $hinta_chk_row['tapahtuman_hinta'];
+			$uusi_varastonmuutos = (float) $hinta_chk_row['tapahtuman_hinta'];
 
 			$kate_muuttuja = $tilausrivi['kate_korjattu'] === NULL ? $tilausrivi['kate'] : $tilausrivi['kate_korjattu'];
 			$vanha_varastonmuutos = ($tilausrivi['rivihinta'] - $kate_muuttuja);
@@ -148,7 +148,7 @@ if (!function_exists("korjaalaskut")) {
 
 			// jos ei löydetä varastonmuutostiliöintiä ja meillä on varastonmuutosta
 			if ($tilikpl == 0 and $uusi_varastonmuutos <> 0) {
-				$uusi_varastonmuutos = round($uusi_varastonmuutos * -1, 2);
+				$uusi_varastonmuutos_kp = round($uusi_varastonmuutos * -1, 2);
 				/*
 				katsotaan onko $lasku[tapvm] suljetulla tilikaudella, jos on, laitetaan pvm ensimmäinen sallittu pvm (eli avoimen tilikauden ensimmäinen pvm)
 				*/
@@ -168,7 +168,7 @@ if (!function_exists("korjaalaskut")) {
 							kohde	 	= '{$kohde_ins}',
 							projekti 	= '{$projekti_ins}',
 							tapvm 		= '{$pvm}',
-							summa		= '$uusi_varastonmuutos',
+							summa		= '$uusi_varastonmuutos_kp',
 							vero		= 0,
 							selite 		= 'Varastostamyynti $lasku[nimi]',
 							lukko 		= '',
@@ -188,7 +188,7 @@ if (!function_exists("korjaalaskut")) {
 							kohde	 	= '{$kohde_ins}',
 							projekti 	= '{$projekti_ins}',
 							tapvm 		= '{$pvm}',
-							summa 		= $uusi_varastonmuutos * -1,
+							summa 		= $uusi_varastonmuutos_kp * -1,
 							vero 		= 0,
 							selite 		= 'Varastostamyynti $lasku[nimi]',
 							lukko 		= '',

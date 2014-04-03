@@ -105,7 +105,7 @@
 							and tila	= '$row[tila]'
 							and alatila = 'K'";
 				$chkresult4 = pupe_query($query);
-				
+
 				$query = "	UPDATE tilausrivi
 							SET varattu	= 0
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -435,7 +435,7 @@
 				$valmkpl = str_replace(',', '.', $valmkpl);
 
 				//Haetaan valmisteet
-				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta
+				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta, tuote.epakurantti25pvm
 							FROM tilausrivi
 							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -447,6 +447,11 @@
 
 				if (mysql_num_rows($roxresult) > 0) {
 					while ($tilrivirow = mysql_fetch_assoc($roxresult)) {
+
+						if ($tilrivirow["epakurantti25pvm"] != '0000-00-00') {
+							echo "<font class='error'>".t("VIRHE: Tuote %s on ep‰kurantti, sit‰ ei saa valmistaa", "", $tilrivirow["tuoteno"])."!</font><br>";
+							$tee = "VALMISTA";
+						}
 
 						if ($valmkpl < 0 or $tilrivirow["varattu"] < 0) {
 							echo "<font class='error'>".t("VIRHE: Negatiivista kappalem‰‰r‰‰ ei voi valmistaa")."!</font><br>";
@@ -781,7 +786,7 @@
 								and tila	= '$row[tila]'
 								and alatila = 'K'";
 					$chkresult4 = pupe_query($query);
-					
+
 					$query = "	UPDATE tilausrivi
 								SET varattu	= 0
 								WHERE yhtio = '$kukarow[yhtio]'

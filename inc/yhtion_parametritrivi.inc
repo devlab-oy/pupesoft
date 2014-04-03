@@ -1,8 +1,8 @@
 <?php
 
-	
+
 	if (isset($ytp_fieldname) and $ytp_fieldname != "") {
-		$fieldname = $ytp_fieldname; 
+		$fieldname = $ytp_fieldname;
 	}
 	else {
 		$ulos   = "";
@@ -12,10 +12,10 @@
 		if ($i == 0) { //yhtiötä ei näytetä
 			$tyyppi = 0;
 		}
-	
+
 		$fieldname = mysql_field_name($result, $i);
 	}
-	
+
 	if ($fieldname == "css") {
 		$ulos = "<td><textarea cols='45' rows='7' name='css'>$trow[$i]</textarea><input type='hidden' name='cssi' value='$i'></td>";
 		$jatko = 0;
@@ -894,6 +894,21 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "tee_siirtolista_myyntitilaukselta") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myyntitilaukselta ei voi luoda siirtolistoja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilaukselta voi luoda siirtolistoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "automaattinen_jt_toimitus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -926,6 +941,23 @@
 		$ulos .= "<option value='J' $sel[J]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja siirretään tulostusjonoon automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Asiakkaalle sekä myyntitilaukselta varastoon valmistetut jälkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if ($fieldname == "automaattinen_jt_toimitus_siirtolista") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos .= "<option value=''>".t("Siirtolistarivejä ei toimiteta eikä kohdisteta automaattisesti")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti vastaanoton yhteydessä")."</option>";
+		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti vastaanoton yhteydessä, jos käyttäjällä on päivitysoikeus JT-selaukseen")."</option>";
+		$ulos .= "<option value='J' $sel[J]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti vastaanoton yhteydessä")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle myydyt jälkitoimitusrivit kohdistetaan ja siirretään tulostusjonoon automaattisesti siirtolistan vastaanoton yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2543,20 +2575,6 @@
 		$jatko = 0;
 	}
 
-	if ($fieldname == "vahinkotiedot_tyomaarayksella") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "selected";
-
-		$ulos .= "<option value = ''>".t("Työmääräykselle voi lisätä vahinkotiedot")."</option>";
-		$ulos .= "<option value = 'K' $sel[K]>".t("Työmääräykselle ei voi lisätä vahinkotietoja")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
 
 	if ($fieldname == "tilausrivien_toimitettuaika") {
 

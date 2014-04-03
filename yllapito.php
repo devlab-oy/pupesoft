@@ -1183,7 +1183,7 @@
 
 				$lisa = substr($lisa, 0, -3).")";
 			}
-			elseif (($yhtiorow['livetuotehaku_hakutapa'] == "F" or $yhtiorow['livetuotehaku_hakutapa'] == "G") and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys")) {
+			elseif (($yhtiorow['livetuotehaku_hakutapa'] == "F" or $yhtiorow['livetuotehaku_hakutapa'] == "G") and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys") and !$tarkkahaku) {
 				 $lisa .= " and match ($array[$i]) against ('{$haku[$i]}*' IN BOOLEAN MODE) ";
 			}
 			else {

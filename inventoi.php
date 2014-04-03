@@ -8,16 +8,17 @@
 	if (!isset($filusta))			$filusta = "";
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
+	if (!isset($laadittuaika))		$laadittuaika = "";
 
-	if (strtolower($toim) == 'oletusvarasto') {
+	$validi_kasinsyotetty_inventointipaivamaara = 0;
 
+	if (stripos($toim, "oletusvarasto") !== FALSE) {
 		if ($kukarow['oletus_varasto'] == 0) {
 			echo "<font class='error'>",t("Oletusvarastoa ei ole asetettu käyttäjälle"),".</font><br />";
 
 			if ($mobiili != "YES") {
 				require ("inc/footer.inc");
 			}
-
 			exit;
 		}
 
@@ -25,6 +26,10 @@
 	}
 	else {
 		$oletusvarasto_chk = 0;
+	}
+
+	if (stripos($toim, "paivamaara") !== FALSE) {
+		$paivamaaran_kasisyotto = "JOO";
 	}
 
 	if ($livesearch_tee == "TUOTEHAKU") {
@@ -188,6 +193,7 @@
 				$poikkeama  		= 0;
 				$skp				= 0;
 				$inven_laji_tilino	= "";
+				$laadittuaika 		= "now()";
 
 				if ($fileesta == "ON") {
 					$inven_laji = $lajis[$i];
@@ -239,6 +245,52 @@
 					if ($inven_laji != "" and trim($lisaselite) == "") {
 						echo "<font class='error'>".t("VIRHE: Inventointiselite on syötettävä")."!: $tuoteno</font><br>";
 						$virhe = 1;
+					}
+
+					// Jos on syötetty käsin inventointipvm pp, kk tai vvvv kokorimpsun pitää olla validi
+					if (isset($paivamaaran_kasisyotto) and (!empty($inventointipvm_pp) or !empty($inventointipvm_kk) or !empty($inventointipvm_vv))) {
+
+						if (!is_numeric($inventointipvm_pp)) $virhe = 1;
+						if (!is_numeric($inventointipvm_kk)) $virhe = 1;
+						if (!is_numeric($inventointipvm_vv)) $virhe = 1;
+
+						$mm = $inventointipvm_kk;
+						$dd = $inventointipvm_pp;
+						$yyyy = $inventointipvm_vv;
+
+						if (!checkdate($mm, $dd, $yyyy)) {
+							echo "<font class='error'>".t("VIRHE: Virheellinen inventointipäivämäärä")."!: $tuoteno ".t("Anna päivämäärä muodossa pp-kk-vvvv")."</font><br>";
+							$virhe = 1;
+						}
+						elseif (strtotime("{$yyyy}-{$mm}-{$dd} 23:59:59") > strtotime(date('Y-m-d'))) {
+							echo "<font class='error'>".t("VIRHE: Virheellinen inventointipäivämäärä")."!: $tuoteno ".t("Käsinsyötetyn päivämäärän tulee olla pienempi kuin nykyinen päivämäärä")."</font><br>";
+							$virhe = 1;
+						}
+						elseif (strtotime("{$yyyy}-{$mm}-{$dd}") < strtotime($yhtiorow['tilikausi_alku']) or strtotime("{$yyyy}-{$mm}-{$dd}") > strtotime($yhtiorow['tilikausi_loppu'])) {
+							echo "<font class='error'>".t("VIRHE: Virheellinen inventointipäivämäärä")."!: $tuoteno ".t("Päivämäärä ei ole avoimella tilikaudella")."</font><br>";
+							$virhe = 1;
+						}
+
+						if ($virhe == 0) {
+							$laadittuaika = "'$yyyy-$mm-$dd 23:59:59'";
+
+							# Inventointipvm käsisyöttöfallbacki - ei sallita päivämäärää jos sen jälkeen on tuloja, valmistuksia tai epäkuranttiajoja
+							$query = "	SELECT *
+										FROM tapahtuma
+										WHERE yhtio 	= '$kukarow[yhtio]'
+										and tuoteno 	= '$tuote_row[tuoteno]'
+										and laji IN ('tulo', 'valmistus', 'epäkurantti')
+										and laadittu   >= {$laadittuaika}";
+							$ressu = pupe_query($query);
+
+							if (mysql_num_rows($ressu) > 0) {
+								echo "<font class='error'>".t("VIRHE: Virheellinen inventointipäivämäärä")."!: $tuoteno ".t("Tuotteella on varastonarvoon vaikuttavia tapahtumia annetun päivämäärän jälkeen")."</font><br>";
+								$virhe = 1;
+							}
+							else {
+								$validi_kasinsyotetty_inventointipaivamaara = 1;
+							}
+						}
 					}
 
 					// käydään kaikki ruudulla näkyvät läpi ja katsotaan onko joku niistä uusi
@@ -416,12 +468,21 @@
 					if (mysql_num_rows($result) == 1 and $virhe != 1) {
 						$row = mysql_fetch_assoc($result);
 
-						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
+
+						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
+
+							if ($validi_kasinsyotetty_inventointipaivamaara) {
+								$row['inventointilista_aika'] = $laadittuaika;
+							}
+							else {
+								$row['inventointilista_aika'] = "'".$row['inventointilista_aika']."'";
+							}
+
 							//jos invataan raportin avulla niin tehdään päivämäärätsekit ja lasketaan saldo takautuvasti
 							$saldomuutos = 0;
 							$kerattymuut = 0;
 
-							if ($row["sarjanumeroseuranta"] == "" and $row["inventointilista_aika"] != "0000-00-00 00:00:00" and $mobiili != "YES") {
+							if ($row["sarjanumeroseuranta"] == "" and $row["inventointilista_aika"] != "'0000-00-00 00:00:00'" and $mobiili != "YES") {
 								//katotaan paljonko saldot on muuttunut listan ajoajankohdasta
 								$query = "	SELECT sum(tapahtuma.kpl) muutos
 											FROM tapahtuma
@@ -432,11 +493,10 @@
 											and tilausrivi.hyllytaso 	= '$hyllytaso'
 											WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 											and tapahtuma.tuoteno = '$tuoteno'
-											and tapahtuma.laadittu >= '$row[inventointilista_aika]'
+											and tapahtuma.laadittu >= {$row[inventointilista_aika]}
 											and tapahtuma.kpl <> 0
 											and laji != 'Inventointi'";
 								$result = pupe_query($query);
-
 								$trow = mysql_fetch_assoc ($result);
 
 								if ($trow["muutos"] != 0) {
@@ -450,9 +510,9 @@
 											and tyyppi 		in ('L','G','V')
 											and tuoteno		= '$tuoteno'
 											and varattu    <> 0
-											and kerattyaika		< '$row[inventointilista_aika]'
+											and kerattyaika		< {$row[inventointilista_aika]}
 											and kerattyaika		> '0000-00-00 00:00:00'
-											and (laskutettuaika	> '$row[inventointilista_aika]' or laskutettuaika	= '0000-00-00 00:00:00')
+											and (laskutettuaika	> {$row[inventointilista_aika]} or laskutettuaika	= '0000-00-00 00:00:00')
 											and hyllyalue	= '$hyllyalue'
 											and hyllynro 	= '$hyllynro'
 											and hyllyvali 	= '$hyllyvali'
@@ -675,7 +735,7 @@
 										hyllytaso 	= '$hyllytaso',
 										selite  	= '$selite',
 										laatija  	= '$kukarow[kuka]',
-										laadittu 	= now()";
+										laadittu 	= $laadittuaika";
 							$result = pupe_query($query);
 
 							// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -695,7 +755,7 @@
 							}
 
 							$query .= " saldoaika 				= now(),
-										inventointiaika 		= now(),
+										inventointiaika 		= {$laadittuaika},
 										inventointipoikkeama 	= '$poikkeama',
 										inventointilista_aika	= '0000-00-00 00:00:00',
 										muuttaja			 	= '$kukarow[kuka]',
@@ -1222,6 +1282,9 @@
 			echo "<input type='hidden' name='lista' value='$lista'>";
 			echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
 			echo "<input type='hidden' name='alku' value='$alku'>";
+			echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+			echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+			echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 			echo "</form>";
 		}
 
@@ -1235,6 +1298,9 @@
 		echo "<input type='hidden' name='alku' value='$alku'>";
 		echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
 		echo "<input type='hidden' name='jarjestys' value='$jarjestys'>";
+		echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+		echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+		echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 
 		echo "<table>";
 		echo "<tr><td colspan='7' class='back'>".t("Syötä joko hyllyssä oleva määrä, tai lisättävä määrä + etuliitteellä, tai vähennettävä määrä - etuliitteellä")."</td></tr>";
@@ -1541,6 +1607,12 @@
 
 		echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
 		echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
+		if (isset($paivamaaran_kasisyotto)) {
+			echo "<tr><th>".t("Syötä inventointipäivämäärä (pp-kk-vvvv)").":</th>";
+			echo "<td><input type='text' size='2' maxlength='2' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+			echo "<input type='text' size='2' maxlength='2' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+			echo "<input type='text' size='4' maxlength='4' name='inventointipvm_vv' value='$inventointipvm_vv'></td></tr>";
+		}
 		echo "</table><br><br>";
 
 
@@ -1592,6 +1664,9 @@
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
 			echo "<input type='hidden' name='tuoteno' value='$noperow[tuoteno]'>";
+			echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+			echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+			echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 			echo "<tr><td class='back'><input type='submit' value='".t("Edellinen tuote")."'></td>";
 			echo "</form>";
 
@@ -1612,6 +1687,9 @@
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
 			echo "<input type='hidden' name='tuoteno' value='$yesrow[tuoteno]'>";
+			echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+			echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+			echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 			echo "<td class='back'><input type='submit' value='".t("Seuraava tuote")."'></td></tr>";
 			echo "</form>";
 			echo "</table>";
@@ -1621,7 +1699,9 @@
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";
-
+		echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+		echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+		echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 		echo "<br><table>";
 		echo "<tr><th>".t("Tuotenumero:")."</th><td>";
 
@@ -1642,6 +1722,9 @@
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
+				<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
+				<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
+				<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
 				<br><br>
 				<font class='head'>".t("Inventoi tiedostosta")."</font><hr>
 				<table>
@@ -1697,6 +1780,9 @@
 							<input type='hidden' name='tee' value='INVENTOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
 							<input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
+							<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
+							<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
+							<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
 							<input type='submit' value='".t("Inventoi")."'>
 							</form>
 						</td>
@@ -1707,6 +1793,9 @@
 							<input type='hidden' name='tee' value='MITATOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
 							<input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
+							<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
+							<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
+							<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
 							<input type='submit' value='".t("Mitätöi lista")."'>
 							</form>
 						</td>";

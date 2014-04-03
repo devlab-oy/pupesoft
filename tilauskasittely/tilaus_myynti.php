@@ -672,17 +672,14 @@ if(isset($laskurow)){
 	        	$kukarow_varasto[] = $aov_row['avainsana'];
 	      	}
 	    }else{
-	    	$asiakkaan_toimipaikka_query = "SELECT toimipaikka
-	                      					FROM asiakas
-	                     					WHERE yhtio = '$kukarow[yhtio]'
-	                     					AND tunnus = {$laskurow['liitostunnus']}";
-	        $atp_result = pupe_query($asiakkaan_toimipaikka_query);
-	        $atp = mysql_result($atp_result,0);
-	        if ($atp != 0) {
+
+	    	$ytp = $laskurow['yhtio_toimipaikka'];
+
+	        if ($ytp != 0) {
 	        	$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
 	        												FROM varastopaikat
 	        												WHERE yhtio = '$kukarow[yhtio]'
-	        												AND toimipaikka = {$atp}";
+	        												AND toimipaikka = {$ytp}";
 	        	$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
 	        	if(mysql_num_rows($tlv_result) > 0) {
 	        		while ($tlv_row = mysql_fetch_assoc($tlv_result)) {

@@ -2654,8 +2654,13 @@ if (!function_exists("tulosta_lasku")) {
 				$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 				$liite = $pdf_laskufilenimi;
 
-				// l‰hetet‰‰n cc aina postittaja osoitteeseen
-				$sahkoposti_cc = $yhtiorow["postittaja_email"];
+				// l‰hetet‰‰n cc aina talhal/postittaja osoitteeseen
+				if ($yhtiorow["sahkopostilasku_cc_email"] != "") {
+					$sahkoposti_cc = $yhtiorow["sahkopostilasku_cc_email"];
+				}
+				else {
+					$sahkoposti_cc = "";
+				}
 
 				include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 			}

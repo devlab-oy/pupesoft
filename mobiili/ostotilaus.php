@@ -12,12 +12,12 @@ elseif (@include_once("inc/parametrit.inc"));
 if(!isset($errors)) $errors = array();
 
 // Jos uusi parametri on setattu nollataan kuka.kesken
-if (isset($uusi)) {
+if (isset($uusi) AND !isset($virhe)) {
 	$nollaus_query = "UPDATE kuka SET kesken=0 WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
 	$result = pupe_query($nollaus_query);
 }
 // Katsotaan onko käyttäjälle keskeneräistä saapumista
-else {
+elseif (!isset($virhe)) {
 	$query = "	SELECT kesken
 				FROM kuka
 				JOIN lasku ON (kuka.yhtio=lasku.yhtio AND kuka.kesken=lasku.tunnus AND lasku.tila='K' AND lasku.alatila NOT IN ('X','I'))

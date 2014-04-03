@@ -86,7 +86,7 @@ else {
 if (isset($submit)) {
 
     $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}".urlencode($tuotenumero);
-echo "89 $url <br><br>";
+
     switch($submit) {
         case 'ok':
             # Vahvista keräyspaikka
@@ -134,9 +134,9 @@ $url_lisa .= "&ennaltakohdistettu={$ennaltakohdistettu}";
 # Otsikko
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"{$url_prelisa}?{$url_lisa}\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>",t("137HYLLYTYS")."</h1>";
+echo "<h1>",t("HYLLYTYS")."</h1>";
 echo "</div>";
-echo "139 $ennaltakohdistettu <br><br>";
+
 # Main
 echo "<div class='main'>
 <form name='f1' method='post' action=''>

@@ -42,7 +42,7 @@ if(!isset($row)) {
 				AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
 	$row = mysql_fetch_assoc(pupe_query($query));
 }
-echo "45 {$row["otunnus"]}";
+
 # Jos parametrina hylly, eli ollaan muutettu tuotteen keräyspaikkaa
 if(isset($hylly)) {
 	$hylly = explode(",", $hylly);
@@ -330,7 +330,7 @@ if (isset($hyllytys)) {
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"$paluu_url\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("VAHVISTA KERÄYSPAIKKA"),"</h1></div>";
-echo "333 $ennaltakohdistettu <br><br>";
+
 # Virheet
 if (isset($errors)) {
 	echo "<span class='error'>";

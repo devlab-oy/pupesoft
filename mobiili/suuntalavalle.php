@@ -129,7 +129,7 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
         }
 
         # Kaikki ok
-        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$url}?ostotilaus={$tilausrivi['otunnus']}&ennaltakohdistettu={$ennaltakohdistettu}'>";
+        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$url}?ostotilaus={$tilausrivi['otunnus']}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}'>";
         exit();
     }
 }
@@ -156,8 +156,8 @@ echo "<div class='header'>";
 
 if ($tullaan == 'vahvista_kerayspaikka') echo "<button onclick='window.location.href=\"vahvista_kerayspaikka.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
 else echo "<button onclick='window.location.href=\"hyllytys.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
+
 echo "<h1>",t("SUUNTALAVALLE"), "</h1></div>";
-echo "159 $ennaltakohdistettu <br><br>";
 echo "<div class='main'>
 <form method='post' action=''>
 

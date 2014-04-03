@@ -10,8 +10,7 @@ if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
-echo "13 backsaapuminen <br><br>";
-if (isset($backsaapuminen)) echo "set <br><br>";
+
 // Jos uusi parametri on setattu nollataan kuka.kesken
 if (isset($uusi) AND !isset($virhe)) {
 	$nollaus_query = "UPDATE kuka SET kesken=0 WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";

@@ -461,8 +461,8 @@ elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
 // View
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"$paluu_url\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>",t("463UUSI KERÄYSPAIKKA"),"</h1></div>";
-echo "464 $ennaltakohdistettu <br><br>";
+echo "<h1>",t("UUSI KERÄYSPAIKKA"),"</h1></div>";
+
 // Virheet
 if (isset($errors)) {
 	echo "<span class='error'>";

@@ -2152,7 +2152,7 @@ if (!function_exists('alvierittely')) {
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$summa_valuutassa = $kassa_ale != '' ? ($laskurow["summa_valuutassa"]+$laskurow["pyoristys_valuutassa"]) * (1-$kassa_ale/100) : $laskurow["summa_valuutassa"]+$laskurow["pyoristys_valuutassa"];
-			
+
 			$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $summa_valuutassa), $norm);
 			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa_valuutassa),				$thispage, $norm);
 			$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 									$thispage, $norm);

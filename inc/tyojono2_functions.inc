@@ -418,6 +418,13 @@ function echo_tyomaaraykset_table($request = array()) {
 				echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
 				echo "<input type='submit' value='".t("Tallenna tarkastuspyötäkirja PDF")."' />";
 				echo "</form>";
+				echo "<br/>";
+				echo "<form class='multisubmit' name='tulosta_laskutuspoytakirja'>";
+				echo "<input type='hidden' name='ala_tee' value='tulosta_laskutuspoytakirja' />";
+				echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
+				echo "<input type='hidden' name='lasku_tunnukset' value='".implode(',', $tyomaarays['lasku_tunnukset'])."' />";
+				echo "<input type='submit' value='".t("Tallenna laskutuspyötäkirja PDF")."' />";
+				echo "</form>";
 				echo "</td>";
 			}
 			else {

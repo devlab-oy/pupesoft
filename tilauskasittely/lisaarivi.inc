@@ -518,6 +518,31 @@
 		$toimittajan_tunnus	= "";
 	}
 
+	// Jos kyseessä on rivi joka halutaan siirtää varastosiirtona (siirtolista) var = S
+	$kohde_varasto_update = "";
+	$lahde_varasto_update = "";
+	$paivita_hyllyt_varastosiirto = false;
+	if (substr($paikka,0,3) == "¡¡S") {
+		$paivita_hyllyt_varastosiirto = true;
+		$var 		 		= "S";
+		$varasto_tunnukset = explode('¡¡S', $paikka);
+		$toimittajan_tunnus = $varasto_tunnukset[1];
+		$kohde_ja_lahde_varasto = hae_mahdolliset_siirto_varastot(array($varasto_tunnukset[3]));
+		$kohde_ja_lahde_varasto = search_array_key_for_value_recursive($kohde_ja_lahde_varasto, 'tunnus', $varasto_tunnukset[1]);
+		$kohde_ja_lahde_varasto = $kohde_ja_lahde_varasto[0];
+		$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '{$kohde_ja_lahde_varasto['kohde_alkuhyllyalue']}', tilausrivin_lisatiedot.kohde_hyllynro = '{$kohde_ja_lahde_varasto['kohde_alkuhyllynro']}',";
+		$lahde_varasto_hyllyalue = $kohde_ja_lahde_varasto['lahde_alkuhyllyalue'];
+		$lahde_varasto_hyllynro = $kohde_ja_lahde_varasto['lahde_alkuhyllynro'];
+	}
+	elseif ($var == "S" and substr($paikka,0,3) != "¡¡S" and substr($paikka,0,3) != "¡¡S") {
+		$paivita_hyllyt_varastosiirto = true;
+		$var 				= "";
+		$toimittajan_tunnus	= "";
+		$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '', tilausrivin_lisatiedot.kohde_hyllynro = '',";
+		$lahde_varasto_hyllyalue = '';
+		$lahde_varasto_hyllynro = '';
+	}
+
 	$perhelisa = "";
 
 	//Haetaan myös tuoteperheet tai reseptit, tässä parametrit niille.
@@ -2397,6 +2422,10 @@
 						$varattu 	= $kpl;
 						$jt 		= 0;
 						break;
+					case 'S':
+						$varattu = $kpl;
+						$jt = 0;
+						break;
 					case '' :
 						$varattu 	= 0;
 						$jt 		= 0;
@@ -2811,6 +2840,11 @@
 				$var2 = 'PK';
 			}
 
+			if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $paivita_hyllyt_varastosiirto) {
+				$p_hyllyalue = $lahde_varasto_hyllyalue;
+				$p_hyllynro = $lahde_varasto_hyllynro;
+			}
+
 			// lisätään puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue 		= '$p_hyllyalue',
@@ -2928,6 +2962,7 @@
 							SET
 							positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 							toimittajan_tunnus	= '$toimittajan_tunnus',
+							{$kohde_varasto_update}
 							rekisterinumero		= '{$rekisterinumero}',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]',
@@ -2951,6 +2986,7 @@
 							SET yhtio			= '$kukarow[yhtio]',
 							positio 			= '{$positio}',
 							toimittajan_tunnus	= '$toimittajan_tunnus',
+							{$kohde_varasto_update}
 							tilausrivitunnus	= '$lisatty_tun',
 							jarjestys			= '$jarjestys',
 							vanha_otunnus		= '$kukarow[kesken]',

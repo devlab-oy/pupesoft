@@ -770,7 +770,7 @@
 							// KASSALIPAS-BLOKKI
 							$tilinolisa = '';
 							$kassa_arska = $pankkikortti_arska = $luottokortti_arska = array();
-							// Katsotaan onko laskun tunnuksella olevilla tiliöinneillä
+							// Katsotaan onko laskun tunnuksella olevilla tiliöinneillä kustannuspaikkaa
 							$query = "	SELECT group_concat(DISTINCT kustp) kustannuspaikat 
 										FROM tiliointi USE INDEX (tositerivit_index) 
 										WHERE yhtio='$kukarow[yhtio]' 
@@ -801,6 +801,10 @@
 								$luottokortti_arska = array_unique($luottokortti_arska);
 
 								$dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
+								// wrapataan tilinumerot vielä hipsuilla jos sattuu olemaan ei-numeerisia
+								foreach ($dipoli as &$dip) {
+									$dip = "'".$dip."'";
+								}
 								if (count($dipoli) > 0) $tilinolisa = ",".implode(",", $dipoli);
 							}
 

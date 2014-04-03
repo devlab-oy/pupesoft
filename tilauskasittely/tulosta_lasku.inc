@@ -1736,12 +1736,14 @@ if (!function_exists('loppu')) {
 				$pdf_lasku->draw_text(490, 92+$vientikala + $barcode_korkeus,  sprintf('%.2f', $summa),			$thispage, $boldi);
 			}
 			elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $boldi);
-				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["saldo_maksettu_valuutassa"]), $thispage, $boldi);
+				$summavaluutassa = ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and $laskurow['saldo_maksettu'] != 0) ? $laskurow["summa_valuutassa"]-$laskurow["saldo_maksettu_valuutassa"] : $laskurow["summa_valuutassa"];
+				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $summavaluutassa, $boldi));
+				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $summavaluutassa), $thispage, $boldi);
 			}
 			else {
-				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa"]), $boldi);
-				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa"]-$laskurow["saldo_maksettu"]), $thispage, $boldi);
+				$summanormi = ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and $laskurow['saldo_maksettu'] != 0) ? $laskurow["summa"]-$laskurow["saldo_maksettu"] : $laskurow["summa"];
+				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $summanormi), $boldi);
+				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $summanormi), $thispage, $boldi);
 			}
 
 			$pdf_lasku->draw_text(550, 92+$vientikala+$barcode_korkeus,  $laskurow["valkoodi"],				$thispage, $boldi);
@@ -2198,12 +2200,130 @@ if (!function_exists('alvierittely')) {
 
 		$kala -= 10;
 
-		$pdf_lasku->draw_text(360, $kala, t("Osasuoritukset yhteensä", $kieli).":",					$thispage, $norm);
-		$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow['saldo_maksettu']), $norm);
-		$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow['saldo_maksettu'] - $pyoristys * -1),$thispage, $norm);
-		$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 								$thispage, $norm);
+		// Käteismaksutavat ja osasuoritukset - erittely
+		if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and $laskurow['saldo_maksettu'] != 0 and $toim != 'PROFORMA') {
+			$kala -= 10;
 
-		$kala -= 10;
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$pyoristys = $kassa_ale != '' ? $laskurow["pyoristys_valuutassa"] * (1-$kassa_ale/100) : $laskurow["pyoristys_valuutassa"];
+				$pdf_lasku->draw_text(360, $kala, t("Osasuoritukset yhteensä", $kieli).":",					$thispage, $norm);
+				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow['saldo_maksettu_valuutassa']), $norm);
+				$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow['saldo_maksettu_valuutassa'] - $pyoristys * -1),$thispage, $norm);
+				$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 								$thispage, $norm);
+			}
+			else {
+				$pyoristys = $kassa_ale != '' ? $laskurow["pyoristys"] * (1-$kassa_ale/100) : $laskurow["pyoristys"];
+				$pdf_lasku->draw_text(360, $kala, t("Osasuoritukset yhteensä", $kieli).":",					$thispage, $norm);
+				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow['saldo_maksettu']), $norm);
+				$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow['saldo_maksettu'] - $pyoristys * -1),$thispage, $norm);
+				$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 								$thispage, $norm);
+			}
+
+			$kala -= 10;
+
+			$tilinolisa = '';
+			$kassa_arska = $pankkikortti_arska = $luottokortti_arska = array();
+			// Katsotaan onko laskun tunnuksella olevilla tiliöinneillä kustannuspaikkaa
+			$query = "	SELECT group_concat(DISTINCT kustp) kustannuspaikat 
+						FROM tiliointi USE INDEX (tositerivit_index) 
+						WHERE yhtio='$kukarow[yhtio]' 
+						AND ltunnus = $laskurow[tunnus]
+						AND korjattu = ''
+						AND kustp != 0";
+			$kustpre = pupe_query($query);
+
+			if (mysql_num_rows($kustpre) == 1)  {
+
+				$kustpro = mysql_fetch_assoc($kustpre);
+				// Jos laskun tiliöinneiltä löytyy kustannuspaikka voidaan etsiä sen perusteella kassalipastilinumeroita
+				$query = "	SELECT DISTINCT kustp,kassa,pankkikortti,luottokortti 
+							FROM kassalipas 
+							WHERE yhtio='$kukarow[yhtio]' 
+							AND kustp IN ({$kustpro['kustannuspaikat']})";
+				$keijo = pupe_query($query);
+
+				while ($ressukka = mysql_fetch_assoc($keijo)) {
+					$kassa_arska[] = $ressukka['kassa'];
+					$pankkikortti_arska[] = $ressukka['pankkikortti'];
+					$luottokortti_arska[] =	$ressukka['luottokortti'];
+				}
+
+				//siivous
+				$kassa_arska = array_unique($kassa_arska);
+				$pankkikortti_arska = array_unique($pankkikortti_arska);
+				$luottokortti_arska = array_unique($luottokortti_arska);
+
+				$dipoli = array_merge($kassa_arska, $pankkikortti_arska, $luottokortti_arska);
+				// wrapataan tilinumerot vielä hipsuilla jos sattuu olemaan ei-numeerisia
+				foreach ($dipoli as &$dip) {
+					$dip = "'".$dip."'";
+				}
+
+				if (count($dipoli) > 0) $tilinolisa = implode(",", $dipoli);
+			}
+
+			$query = "	SELECT *
+						FROM tiliointi USE INDEX (tositerivit_index)
+						WHERE yhtio = '$kukarow[yhtio]' and
+						ltunnus = '$laskurow[tunnus]' and
+						tilino in ({$tilinolisa}) and
+						korjattu = '' and
+						tilino != ''";
+			$lasktilitre = pupe_query($query);
+
+			// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
+			if ($laskurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 0) {
+
+				while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
+					$ueloes = '';
+					if (in_array($lasktilitro['tilino'], $kassa_arska)) $ueloes = t("Käteisellä", $kieli).":";
+					if (in_array($lasktilitro['tilino'], $pankkikortti_arska)) $ueloes = t("Pankkikortilla", $kieli).":";
+					if (in_array($lasktilitro['tilino'], $luottokortti_arska)) $ueloes = t("Luottokortilla", $kieli).":";
+
+					if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
+						$ueloesrivi = sprintf('%.2f', $lasktilitro['summa_valuutassa'] - $pyoristys * -1)." ".$lasktilitro['valkoodi']." (".sprintf('%.2f', $lasktilitro['summa']- $pyoristys * -1)." ".$yhtiorow["valkoodi"].") ".tv1dateconv($lasktilitro["tapvm"]);
+						$ueloesrivi = trim($ueloesrivi);
+						$pdf_lasku->draw_text(360, $kala, " - ".$ueloes, $thispage, $norm);
+						$oikpos = $pdf_lasku->strlen($ueloesrivi, $norm);
+						$jou = $pdf_lasku->strlen($laskurow["valkoodi"], $norm);
+						$pdf_lasku->draw_text(550+$jou-$oikpos, $kala, $ueloesrivi,$thispage, $norm);
+					}
+					else {
+						$ueloesrivi = sprintf('%.2f', $lasktilitro['summa'] - $pyoristys * -1)." ".$laskurow["valkoodi"]." ".tv1dateconv($lasktilitro["tapvm"]);
+						$ueloesrivi = trim($ueloesrivi);
+						$pdf_lasku->draw_text(360, $kala, " - ".$ueloes, $thispage, $norm);
+						$oikpos = $pdf_lasku->strlen($ueloesrivi, $norm);
+						$jou = $pdf_lasku->strlen($laskurow["valkoodi"], $norm);
+						$pdf_lasku->draw_text(550+$jou-$oikpos, $kala, $ueloesrivi, $thispage, $norm);
+					}
+
+					$kala -= 10;
+				}
+
+			}
+
+			$kala -= 10;
+
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$pyoristys = $kassa_ale != '' ? $laskurow["pyoristys_valuutassa"] * (1-$kassa_ale/100) : $laskurow["pyoristys_valuutassa"];
+				$pdf_lasku->draw_text(360, $kala, t("Maksettavaa yhteensä", $kieli).":",					$thispage, $norm);
+				$summeli = sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["saldo_maksettu_valuutassa"]);
+				$oikpos = $pdf_lasku->strlen($summeli, $norm);
+				$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summeli - $pyoristys * -1),$thispage, $norm);
+				$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 								$thispage, $norm);
+			}
+			else {
+				$pyoristys = $kassa_ale != '' ? $laskurow["pyoristys"] * (1-$kassa_ale/100) : $laskurow["pyoristys"];
+				$pdf_lasku->draw_text(360, $kala, t("Maksettavaa yhteensä", $kieli).":",					$thispage, $norm);
+				$summeli = sprintf('%.2f', $laskurow["summa"]-$laskurow["saldo_maksettu"]);
+				$oikpos = $pdf_lasku->strlen($summeli, $norm);
+				$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summeli - $pyoristys * -1),$thispage, $norm);
+				$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 								$thispage, $norm);
+			}
+
+			$kala -= 10;
+
+		}
 
 		return $kala;
 	}

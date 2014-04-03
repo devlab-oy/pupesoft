@@ -56,6 +56,7 @@
 			if ($ext == 'TC' or $ext == 'TXT') {
 
 				$filehandle = fopen($path.$file, "r");
+				$rahtikirja_hukassa = false;
 
 				while ($tietue = fgets($filehandle)) {
 
@@ -84,6 +85,12 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otsikkonro = '{$tilausnumero}'";
 					pupe_query($query);
+
+					if (mysql_affected_rows() == 0) {
+						$rahtikirja_hukassa = true;
+						break;
+					}
+
 					$query = "	SELECT SUM(kilot) kilotyht
 								FROM rahtikirjat
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -131,7 +138,8 @@
 						}
 					}
 				}
-				rename($path.$file, $path."done/".$file);
+				// Jos rahtikirjaa ei löydetty niin ei siirretä done-kansioon
+				if (!$rahtikirja_hukassa) rename($path.$file, $path."done/".$file);
 			}
 		}
 

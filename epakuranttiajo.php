@@ -21,9 +21,9 @@
 			echo "<input type = 'hidden' name = 'ajo_tee' value = 'NAYTA'>";
 			echo "<input type = 'submit' value = '".t("Näytä epäkurantoitavat tuotteet")."'>";
 			echo "</form><br>";
+			echo "<br><br><br>";
 		}
 
-		echo "<br><br><br>";
 		echo "<font class='head'>".t("Tutki epäkurantoitavia tuotteita")."</font><hr>";
 		echo "<br><form method='post'>";
 		echo "<input type = 'hidden' name = 'ajo_tee' value = 'NAYTAPV'>";
@@ -35,7 +35,7 @@
 			</tr><tr>";
 		echo "</table><br>";
 		echo "<input type = 'submit' value = '".t("Näytä tuotteet")."'>";
-		echo "</form><br>";
+		echo "</form><br><br>";
 
 
 		$php_cli 	  = FALSE;
@@ -130,8 +130,6 @@
 		if (!$php_cli) {
 
 			if ($ajo_tee == "NAYTAPV") {
-				echo t("Syötetty päivä").": ".tv1dateconv("$vva-$kka-$ppa");
-
 				// Simuloidaan tulevaisuuteen
 				$today = $syotetty_paiva;
 			}

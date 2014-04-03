@@ -148,7 +148,7 @@ if (!function_exists("korjaalaskut")) {
 
 			// jos ei löydetä varastonmuutostiliöintiä ja meillä on varastonmuutosta
 			if ($tilikpl == 0 and $uusi_varastonmuutos <> 0) {
-
+				$uusi_varastonmuutos = round($uusi_varastonmuutos * -1, 2);
 				/*
 				katsotaan onko $lasku[tapvm] suljetulla tilikaudella, jos on, laitetaan pvm ensimmäinen sallittu pvm (eli avoimen tilikauden ensimmäinen pvm)
 				*/

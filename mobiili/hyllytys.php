@@ -209,7 +209,7 @@ $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&man
 # Napit
 echo "<div class='controls'>";
 echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}&ennaltakohdistettu={$ennaltakohdistettu}'\">",t("OK"),"</button>";
-echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("211UUSI KERÄYSPAIKKA"),"</button>";
+echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>";
 
 if ($yhtiorow['suuntalavat'] != "") {
     echo "<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}&ennaltakohdistettu={$ennaltakohdistettu}'\">",t("SUUNTALAVALLE"),"</button>";

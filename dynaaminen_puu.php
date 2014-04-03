@@ -754,6 +754,7 @@
 
 			jQuery.ajax({
 				data: params,
+				async: false,
 				success: function(retval) {
 					if (params.tee == 'hae_laji') {
 						jQuery("#keywords_value_select").html(retval);
@@ -765,25 +766,15 @@
 						return false;
 					}
 					else if (params.tee == 'lisaa_avainsana') {
-						var showaddbox_keywords = jQuery('#showaddbox_keywords');
-						jQuery(editbox).show();
+						var nodebox_keywords	= jQuery("#nodebox_keywords");
 						jQuery(nodebox_keywords).hide();
-						showaddbox_keywords.show();
+
+						jQuery(editbox).show();
+
+						var showaddbox_keywords = jQuery('#showaddbox_keywords');
+						jQuery(showaddbox_keywords).show();
 
 						params.tee = 'hae_avainsana_lista';
-						jQuery.ajax({
-							data: params,
-							async: false,
-							success: function(retval) {
-								jQuery('#infobox_keywords_list').html(retval);
-								jQuery('#keywords_category > option').each(function() {
-									$(this).removeAttr('selected');
-								});
-								jQuery('#keywords_value > option').each(function() {
-									$(this).removeAttr('selected');
-								});
-							}
-						});
 					}
 					else {
 						jQuery("#infobox_keywords").html(retval);
@@ -791,6 +782,23 @@
 					}
 				}
 			});
+
+			if (params.tee == 'hae_avainsana_lista') {
+				jQuery.ajax({
+					data: params,
+					async: false,
+					success: function(retval) {
+						jQuery('#infobox_keywords_list').html(retval);
+
+						jQuery('#keywords_category > option').each(function() {
+							$(this).removeAttr('selected');
+						});
+						jQuery('#keywords_value > option').each(function() {
+							$(this).removeAttr('selected');
+						});
+					}
+				});
+			}
 
 			return false;
 		}

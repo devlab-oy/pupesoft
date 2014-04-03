@@ -681,6 +681,18 @@
 		$jatko = 0;
 	}
 
+	if (($avain_sel["DPAVAINSANA"] == "SELECTED" or $avain_sel["DPAVAINSANALAJI"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_2") {
+
+		$sel = $trow[$i] == 'TUOTE' ? "selected" : "";
+
+		$ulos = "<td><select name = '{$nimi}'>";
+		$ulos .= "<option value = 'ASIAKAS'>".t("Asiakas")."</option>";
+		$ulos .= "<option value = 'TUOTE' {$sel}>".t("Tuote")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($avain_sel["DPAVAINSANA"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$vresult = t_avainsana("DPAVAINSANALAJI");
@@ -691,6 +703,7 @@
 			$sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
 			$ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selitetark"]}</option>";
 		}
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

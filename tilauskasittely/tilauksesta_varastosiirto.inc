@@ -106,10 +106,14 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 					'minnerow'						 => $kohde_varasto_tuotepaikka,
 					'sarjano_array'					 => array(),
 					'selite'						 => '',
-					'tun'							 => 0,
+					'tun'							 => $siirtolista['tunnus'],
 				);
 				hyllysiirto($params);
+
+				paivita_myyntitilausrivin_tuotepaikat($siirtolistarivi);
 			}
+
+			linkkaa_varastosiirto_myyntitilaukseen($siirtolista, $myyntitilaus);
 
 			aseta_varastosiirto_vastaanotetuksi($siirtolistarivit);
 		}
@@ -285,6 +289,8 @@ if (!function_exists('hae_tilausrivit')) {
 					t.hyllyalue AS lahde_hyllyalue,
 					t.hyllynro AS lahde_hyllynro,
 					tl.toimittajan_tunnus,
+					tl.tilausrivitunnus AS tilausrivitunnus,
+					tl.tilausrivilinkki AS tilausrivilinkki,
 					tl.kohde_hyllyalue AS kohde_hyllyalue,
 					tl.kohde_hyllynro AS kohde_hyllynro,
 					tl.kohde_hyllytaso AS kohde_hyllytaso,
@@ -337,6 +343,49 @@ if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
 		}
 
 		require('vastaanota.php');
+
+		return true;
+	}
+
+}
+
+if (!function_exists('paivita_myyntitilausrivin_tuotepaikat')) {
+
+	function paivita_myyntitilausrivin_tuotepaikat($siirtolistarivi) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($siirtolistarivi) or empty($siirtolistarivi['tilausrivilinkki'])) {
+			return false;
+		}
+
+		$query = "	UPDATE tilausrivi SET
+					hyllyalue = '{$siirtolistarivi['kohde_hyllyalue']}',
+					hyllynro = '{$siirtolistarivi['kohde_hyllynro']}',
+					hyllytaso = '{$siirtolistarivi['kohde_hyllytaso']}',
+					hyllyvali = '{$siirtolistarivi['kohde_hyllyvali']}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = {$siirtolistarivi['tilausrivilinkki']}";
+		pupe_query($query);
+
+		return true;
+	}
+
+}
+
+if (!function_exists('linkkaa_varastosiirto_myyntitilaukseen')) {
+
+	function linkkaa_varastosiirto_myyntitilaukseen($siirtolista, $myyntitilaus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($siirtolista) or empty($myyntitilaus)) {
+			return false;
+		}
+
+		$query = "	UPDATE lasku SET
+					vanhatunnus = {$siirtolista['tunnus']}
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = {$myyntitilaus['tunnus']}";
+		pupe_query($query);
 
 		return true;
 	}

@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '') {
+	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '', $ei_ketjutus = '') {
 		global $kukarow, $yhtiorow, $session;
 
 		$query	= "	SELECT *
@@ -118,7 +118,14 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$tilausvahvistus	= $asiakasrow["tilausvahvistus"];
 			$laskutusvkopv 		= $asiakasrow["laskutusvkopv"];
 			$vienti 			= $asiakasrow["vienti"];
-			$ketjutus 			= $asiakasrow["ketjutus"];
+
+			if ($ei_ketjutus != "") {
+				$ketjutus 		= 'o';
+			}
+			else {
+				$ketjutus		= $asiakasrow["ketjutus"];
+			}
+
 			$valkoodi 			= $asiakasrow["valkoodi"];
 			$sisviesti1			= $asiakasrow["sisviesti1"];
 			$rahtivapaa 		= $asiakasrow["rahtivapaa"];

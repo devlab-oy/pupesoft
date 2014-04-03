@@ -330,7 +330,7 @@
 
 		$query = "	SELECT
 					if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-					if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi = 'R'), 1, 0) reklamaatiot_lasku,
+					if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi in ('R', 'U')), 1, 0) reklamaatiot_lasku,
 					lasku.tunnus,
 					lasku.luontiaika,
 					lasku.chn,

@@ -79,21 +79,18 @@
 
 			echo "<tr><th>".t("Kieli").":</th><td><select name='hinkieli'>";
 
-			$query  = "SHOW columns from sanakirja";
-			$fields =  pupe_query($query);
-
-			while ($apurow = mysql_fetch_array($fields)) {
-				if (strlen($apurow[0]) == 2) {
+			foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+				if (strlen($sanakirja_kieli) == 2) {
 					$sel = "";
 
-					if ($hinkieli == $apurow[0]) {
+					if ($hinkieli == $sanakirja_kieli) {
 						$sel = "SELECTED";
 					}
-					elseif ($asiakasrow["kieli"] == $apurow[0] and $hinkieli == "") {
+					elseif ($asiakasrow["kieli"] == $sanakirja_kieli and $hinkieli == "") {
 						$sel = "SELECTED";
 					}
 
-					echo "<option value='$apurow[0]' $sel>$apurow[0] - ".maa($apurow[0])."</option>";
+					echo "<option value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."</option>";
 				}
 			}
 

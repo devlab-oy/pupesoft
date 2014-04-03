@@ -163,6 +163,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Tuotteen valmistuslinja")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HAMMASTUS") 		$ulos .= "<option value='HAMMASTUS' $avain_sel[HAMMASTUS]>					".t("Tuotteen hammastus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "OLETUSPAIKKA") 		$ulos .= "<option value='OLETUSPAIKKA' $avain_sel[OLETUSPAIKKA]>			".t("Tuoteryhmän tai tuotestatuksen oletuspaikka")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ELINKAARI") 		$ulos .= "<option value='ELINKAARI' {$avain_sel['ELINKAARI']}>			".t("Tuotteen elinkaarityyppi")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -357,25 +358,26 @@
 
 			$query = "	SELECT group_concat(kieli) kielet
 						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and perhe='$perhe' and laji = '$laji'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and perhe   = '$perhe'
+						and laji    = '$laji'";
 			$res = pupe_query($query);
 			$kilerow = mysql_fetch_array($res);
 			$kielet = $kilerow["kielet"];
 		}
 
-		$query  = "SHOW columns from sanakirja";
-		$fields =  mysql_query($query);
-
-		while ($apurow = mysql_fetch_array($fields)) {
-			if (strlen($apurow[0]) == 2 and (strpos($kielet,$apurow[0]) === false or $apurow[0] == $trow[$i])) {
+		foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+			if (strpos($kielet,$sanakirja_kieli) === FALSE or $sanakirja_kieli == $trow[$i]) {
 				$sel = "";
-				if ($trow[$i] == $apurow[0]) {
+
+				if ($trow[$i] == $sanakirja_kieli) {
 					$sel = "SELECTED";
 				}
-				elseif ($trow[$i] == "" and $apurow[0] == $yhtiorow["kieli"]) {
+				elseif ($trow[$i] == "" and $sanakirja_kieli == $yhtiorow["kieli"]) {
 					$sel = "SELECTED";
 				}
-				$ulos .= "<option value='$apurow[0]' $sel>$apurow[0] - ".maa($apurow[0])."</option>";
+
+				$ulos .= "<option value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."</option>";
 			}
 		}
 
@@ -816,8 +818,8 @@
 
 		$jatko = 0;
 	}
-	
-	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {	
+
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$query = "	SELECT *
 					FROM kuka
@@ -842,7 +844,7 @@
 		$jatko = 0;
 	}
 
-	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {	
+	if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
 
 		$query = "	SELECT *
 					FROM varastopaikat

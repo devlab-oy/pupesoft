@@ -53,11 +53,7 @@ if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_nam
 
       if ( $tunnus = hae_asiakastunnus($tunnukset) ) {
 
-          if ( $r['SAMPSAN_SPESSUKENTAT'] == 'X' ) {
-            $yhdistykset[$yr]['spessut'] = $tunnus;
-          }
-
-          if ( $r['JATA_TAMA'] != 'X' ) {
+          if ( strtoupper($r['JATA_TAMA']) != 'X' ) {
             $yhdistykset[$yr]['yhdista'][] = $tunnus;
           }
           elseif( isset($yhdistykset[$yr]) and count($yhdistykset[$yr]['yhdista']) > 0 ){
@@ -75,7 +71,7 @@ if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_nam
       if(!isset($y['spessut'])) {
         $y['spessut'] = 0;
       }
-        echo yhdista_asiakkaita( $y['jata'], $y['yhdista'], $y['spessut'] );
+        echo yhdista_asiakkaita( $y['jata'], $y['yhdista'] );
         echo '<hr>';
     }
   echo "<br /><br /><form><input type='submit' value='" . t("Yhdistä lisää") . "' /></form>";
@@ -98,18 +94,18 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
 
     if($tapa == 'b'){$b_sel = 'selected'; $a_sel = '';}else{$a_sel = 'selected'; $b_sel = '';}
 
-    echo "<option value='a' $a_sel>Asiakastunnus</option>";
-    echo "<option value='b' $b_sel>ytunnus, ovttunnus, toim_ovttunnus</option></td></tr>";
+    echo "<option value='a' $a_sel>" . t("Asiakastunnus") . "</option>";
+    echo "<option value='b' $b_sel>" . t("ytunnus") . ", " .  t("ovttunnus") . ", " .  t("toim_ovttunnus") . "</option></td></tr>";
     echo "</table><br />";
 
     echo "<table>";
     echo "<tr><th colspan='99'>" . t("Excel-tiedosto seuraavin tiedoin") . ":</th></tr>";
 
     if($tapa == 'b'){
-      echo "<tr><td>ytunnus</td><td>ovttunnus</td><td>toim_ovttunnus</td><td>jata_tama</td></tr>";
+      echo "<tr><td>ytunnus</td><td>" .  t("ovttunnus") . "</td><td>" . t("toim_ovttunnus") . "</td><td>jata_tama</td></tr>";
     }
     else{
-      echo "<tr><td>asiakastunnus</td><td>jata_tama</td></tr>";
+      echo "<tr><td>" . t("asiakastunnus") . "</td><td>" . t("jata_tama") . "</td></tr>";
     }
 
     echo "</table><br />";
@@ -229,7 +225,7 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
 
 require ("inc/footer.inc");
 
-function yhdista_asiakkaita($jataminut, $yhdista, $spessut = 0) {
+function yhdista_asiakkaita($jataminut, $yhdista) {
   global $kukarow;
 
     // tässä on jätettävän asiakkaan tiedot
@@ -246,26 +242,6 @@ function yhdista_asiakkaita($jataminut, $yhdista, $spessut = 0) {
     unset($yhdista[$jataminut]);
 
     $historia = t("Asiakkaaseen").": ". $jrow["nimi"].", ". t("ytunnus").": ". $jrow["ytunnus"].", ".t("asiakasnro").": ". $jrow["asiakasnro"] ." ".t("liitettiin seuraavat asiakkaat").": <br />";
-
-    if( $spessut != 0 ){
-      // haetaan säilytettävien spesiaalikenttien tiedot
-      $spessu_query = " SELECT laji, piiri, osasto, luokka
-            FROM asiakas
-            where yhtio = '$kukarow[yhtio]'
-            and tunnus = '$spessut' ";
-      $spessu_result = pupe_query($spessu_query);
-      $spessu_row = mysql_fetch_assoc($spessu_result);
-
-      // muutetaan säilytettävän asiakkaan spesiaalikentät
-        $paivitys = " UPDATE asiakas SET
-                laji    =   '{$spessu_row['laji']}',
-                piiri   =   '{$spessu_row['piiri']}',
-                osasto  =   '{$spessu_row['osasto']}',
-                luokka  =   '{$spessu_row['luokka']}'
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus =  '$jrow[tunnus]'";
-        pupe_query($paivitys);
-    }
 
     foreach ($yhdista as $haettava) {
 

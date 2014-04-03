@@ -135,7 +135,7 @@
 		echo "<br /><font class='error'>",t("VIRHE: Et valinnut mitään rajausta"),"!</font><br /><br />";
 	}
 
-	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'aloitettu' => ' checked');
+	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked');
 	if (!isset($volyymisuure)) $volyymisuure = "rivit";
 	if (!isset($ajankohta)) $ajankohta = "present";
 	if (!isset($future_date_pp_alku)) $future_date_pp_alku = date("d",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
@@ -150,7 +150,7 @@
 	if (!isset($past_date_pp_loppu)) $past_date_pp_loppu = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($past_date_kk_loppu)) $past_date_kk_loppu = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($past_date_vv_loppu)) $past_date_vv_loppu = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-	if (!isset($nayta_valinnat) or count($nayta_valinnat) == 1) $nayta_valinnat = array('aloittamatta', 'aloitettu');
+	if (!isset($nayta_valinnat) or count($nayta_valinnat) == 1) $nayta_valinnat = array('aloittamatta');
 
 	$wherelisa = "";
 	$kerayserat_tilalisa = "";

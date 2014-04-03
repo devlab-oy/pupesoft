@@ -51,18 +51,24 @@
 				$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selite = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
 
 				if ($saamuokata) {
-					echo "<a href='#'>";
+					echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;";
 				}
 
 				echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne]";
 
-				if ($saamuokata) {
-					echo "</a>";
-				}
 
 				echo "<br />";
 			}
 
+			exit;
+		}
+		elseif ($tee == 'poista_avainsana' and !empty($avainsanan_tunnus)) {
+			$avainsanan_tunnus = (int) $avainsanan_tunnus;
+
+			$query = "	DELETE FROM dynaaminen_puu_avainsanat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$avainsanan_tunnus}'";
+			$delres = pupe_query($query);
 			exit;
 		}
 
@@ -414,6 +420,18 @@
 					return false;
 				});
 
+				jQuery(".remove_keyword").live('click', function(e) {
+					e.preventDefault();
+
+					if (confirm("<?php echo t("Poista avainsana"); ?>")) {
+						params["tee"] = 'poista_avainsana';
+						params['avainsanan_tunnus'] = $(this).attr('id');
+						editNode_keywords(params);
+					}
+
+					return false;
+				});
+
 				jQuery("#moveform").submit(function() {
 					params["kohdetaso"]	= jQuery("#kohdetaso").val();
 					params["tee"]		= "siirrataso";
@@ -450,7 +468,7 @@
 						ORDER BY laji, avainsana, tarkenne";
 			$dpavainsanat_res = pupe_query($query);
 
-			echo "<div id='infobox_keywords_list'>";
+			echo "<div id='infobox_keywords_list' style='line-height: 16px;'>";
 
 			if (mysql_num_rows($dpavainsanat_res) > 0) {
 
@@ -458,14 +476,10 @@
 					$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selite = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
 
 					if ($saamuokata) {
-						echo "<a href='#'>";
+						echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;";
 					}
 
 					echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne]";
-
-					if ($saamuokata) {
-						echo "</a>";
-					}
 
 					echo "<br />";
 				}
@@ -748,7 +762,7 @@
 		function editNode_keywords(params) {
 			var editbox = jQuery("#editbuttons_keywords");
 
-			if (params.tee != 'hae_laji' && params.tee != 'lisaa_avainsana') {
+			if (params.tee != 'hae_laji' && params.tee != 'lisaa_avainsana' && params.tee != 'poista_avainsana') {
 				jQuery(editbox).hide().after(loadimg);
 			}
 
@@ -774,6 +788,9 @@
 						var showaddbox_keywords = jQuery('#showaddbox_keywords');
 						jQuery(showaddbox_keywords).show();
 
+						params.tee = 'hae_avainsana_lista';
+					}
+					else if (params.tee == 'poista_avainsana') {
 						params.tee = 'hae_avainsana_lista';
 					}
 					else {

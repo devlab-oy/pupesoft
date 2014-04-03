@@ -796,6 +796,8 @@
 						jQuery('#keywords_value > option').each(function() {
 							$(this).removeAttr('selected');
 						});
+
+						jQuery('#nodebox_keywords_err').hide();
 					}
 				});
 			}

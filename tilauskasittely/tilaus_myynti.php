@@ -852,6 +852,7 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 
 if ($sahkoinen_lahete and $kukarow["extranet"] == "" and (int) $kukarow['kesken'] > 0 and !empty($laskurow)) {
 
+	# Tarkenne kentt‰ merkkaa sit‰ ett‰ voidaan k‰ytt‰‰ t‰t‰ ominaisuutta reklamaation puolella
 	$query = "	SELECT asiakkaan_avainsanat.*
 				FROM asiakkaan_avainsanat
 				WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'

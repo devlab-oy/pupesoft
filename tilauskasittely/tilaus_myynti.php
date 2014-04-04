@@ -6521,7 +6521,7 @@ if ($tee == '') {
 				echo "<td $class align='center' valign='top'>$var_temp&nbsp;</td>";
 
 				echo "<td $class>";
-				if ($row['tyyppi']=='W' and count($hinta_laskurit[$row['perheid']]['valmisteet'])>1) {
+				if ($row['tyyppi'] == 'W' and count($hinta_laskurit[$row['perheid']]['valmisteet']) > 1 and $hinta_laskurit[$row['perheid']]['raakaaineiden_kehahinta_summa']>0) {
 					echo '<input type="text" name="valmiste_valuutta['.$row['tunnus'].']" data-tunnus="'.$row['tunnus'].'" data-perheid="'.$row['perheid'].'" />';
 				}
 				else {

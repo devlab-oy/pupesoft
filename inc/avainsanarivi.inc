@@ -163,6 +163,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Tuotteen valmistuslinja")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HAMMASTUS") 		$ulos .= "<option value='HAMMASTUS' $avain_sel[HAMMASTUS]>					".t("Tuotteen hammastus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "OLETUSPAIKKA") 		$ulos .= "<option value='OLETUSPAIKKA' $avain_sel[OLETUSPAIKKA]>			".t("Tuoteryhmän tai tuotestatuksen oletuspaikka")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ELINKAARI") 		$ulos .= "<option value='ELINKAARI' {$avain_sel['ELINKAARI']}>			".t("Tuotteen elinkaarityyppi")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";

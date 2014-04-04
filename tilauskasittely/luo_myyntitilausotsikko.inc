@@ -316,12 +316,6 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
 				$varasto = $yhtiorow['takuuvarasto'];
 			}
-			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and isset($aov)) {
-				$varasto = $aov;
-			}
-			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and isset($tov)) {
-				$varasto = $tov;
-			}
 			elseif (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
 				// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
 				$varasto = $kukarow['varasto'];

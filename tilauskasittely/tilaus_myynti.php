@@ -590,8 +590,8 @@ if ((int) $kukarow["kesken"] > 0) {
 
 	$laskurow = mysql_fetch_assoc($result);
 
-	if ($kukarow['toimipaikka'] != $laskurow['toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
-		$kukarow['toimipaikka'] = $laskurow['toimipaikka'];
+	if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+		$kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 	}
 

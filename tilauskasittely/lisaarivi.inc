@@ -36,6 +36,11 @@
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 
+	if ($kukarow['toimipaikka'] != $laskurow['toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+		$kukarow['toimipaikka'] = $laskurow['toimipaikka'];
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+	}
+
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
 

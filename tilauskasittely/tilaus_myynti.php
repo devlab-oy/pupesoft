@@ -590,6 +590,11 @@ if ((int) $kukarow["kesken"] > 0) {
 
 	$laskurow = mysql_fetch_assoc($result);
 
+	if ($kukarow['toimipaikka'] != $laskurow['toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+		$kukarow['toimipaikka'] = $laskurow['toimipaikka'];
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+	}
+
 	if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0 and $yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0) {
 		$yhtiorow["suoratoim_ulkomaan_alarajasumma"] = round(laskuval($yhtiorow["suoratoim_ulkomaan_alarajasumma"], $laskurow["vienti_kurssi"]),0);
 	}

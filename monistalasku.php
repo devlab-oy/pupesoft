@@ -1733,6 +1733,15 @@ if ($tee == 'MONISTA') {
 								$rvalues .= ", '".$rivirow[$i]."'";
 							}
 							break;
+						case 'suuntalava':
+							if ($toim == 'OSTOTILAUS') {
+								//ei kopsata suuntalavan tietoa aka must be 0!
+								$rvalues .= ", 0";
+							}
+							else {
+								$rvalues .= ", '".$rivirow[$i]."'";
+							}
+							break;
 						default:
 							$rvalues .= ", '".$rivirow[$i]."'";
 					}

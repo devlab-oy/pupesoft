@@ -313,30 +313,6 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			// Jos on varasto setattuna, p‰ss‰t‰‰n eteenp‰in
 			$varasto = 0;
 
-			// Katsotaan onko asiakkaaseen tai toimipaikkaan liitetty varastoja
-			if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
-				$asiakkaan_oletusvarasto_query = "	SELECT avainsana
-													FROM asiakkaan_avainsanat
-													WHERE yhtio = '$kukarow[yhtio]'
-													AND laji = 'oletusmyyntivarasto'
-													AND liitostunnus = {$asiakasrow['tunnus']}";
-				$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
-				if(mysql_num_rows($aov_result) == 1) {
-					$aov = mysql_result($aov_result,0);
-				}
-				elseif($asiakasrow['toimipaikka'] != 0){
-					$toimipaikan_oletusvarasto_query = "	SELECT tunnus
-															FROM varastopaikat
-															WHERE yhtio = '$kukarow[yhtio]'
-															AND toimipaikka = {$asiakasrow['toimipaikka']}
-															ORDER BY tunnus DESC";
-					$tov_result = pupe_query($toimipaikan_oletusvarasto_query);
-					if(mysql_num_rows($tov_result) == 1) {
-						$tov = mysql_result($tov_result,0);
-					}
-				}
-			}
-
 			if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
 				$varasto = $yhtiorow['takuuvarasto'];
 			}

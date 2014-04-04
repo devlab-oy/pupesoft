@@ -3445,7 +3445,7 @@ if ($tee == '') {
 		$numres_saatavt = mysql_num_rows($numres);
 	}
 
-	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
+	if ($kukarow['extranet'] == '' and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
 
 		js_popup();
 
@@ -3465,7 +3465,7 @@ if ($tee == '') {
 		$retval = ob_get_contents();
 		ob_end_clean();
 
-		if (trim ($retval) != "" and $kukarow['hinnat'] == 0) {
+		if (trim ($retval) != "" AND $kukarow['hinnat'] == 0 AND ($kukarow['kassamyyja'] == '' OR $kukarow['saatavat'] == '1')) {
 			echo "<br>$retval";
 		}
 

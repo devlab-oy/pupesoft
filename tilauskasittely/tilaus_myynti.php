@@ -18,29 +18,6 @@ $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
 $sahkoinen_lahete_toim = array('RIVISYOTTO','PIKATILAUS');
 
-if ($sahkoinen_lahete and $kukarow["extranet"] == "" and (int) $kukarow['kesken'] > 0) {
-
-	$query = "	SELECT liitostunnus
-				FROM lasku
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$kukarow['kesken']}'";
-	$liitostunnus_res = pupe_query($query);
-	$liitostunnus_row = mysql_fetch_assoc($liitostunnus_res);
-
-	$query = "	SELECT asiakkaan_avainsanat.*
-				FROM asiakkaan_avainsanat
-				WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
-				and asiakkaan_avainsanat.laji = 'futur_sahkoinen_lahete'
-				and asiakkaan_avainsanat.avainsana != ''
-				and asiakkaan_avainsanat.tarkenne != ''
-				AND asiakkaan_avainsanat.liitostunnus = '{$liitostunnus_row['liitostunnus']}'";
-	$as_avain_chk_res = pupe_query($query);
-
-	if (mysql_num_rows($as_avain_chk_res) > 0) {
-		array_push($sahkoinen_lahete_toim, 'REKLAMAATIO');
-	}
-}
-
 require('validation/Validation.php');
 
 if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
@@ -871,6 +848,29 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 	}
 
 	$tyhjenna 	= "JOO";
+}
+
+if ($sahkoinen_lahete and $kukarow["extranet"] == "" and (int) $kukarow['kesken'] > 0) {
+
+	$query = "	SELECT liitostunnus
+				FROM lasku
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$kukarow['kesken']}'";
+	$liitostunnus_res = pupe_query($query);
+	$liitostunnus_row = mysql_fetch_assoc($liitostunnus_res);
+
+	$query = "	SELECT asiakkaan_avainsanat.*
+				FROM asiakkaan_avainsanat
+				WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+				and asiakkaan_avainsanat.laji = 'futur_sahkoinen_lahete'
+				and asiakkaan_avainsanat.avainsana != ''
+				and asiakkaan_avainsanat.tarkenne != ''
+				AND asiakkaan_avainsanat.liitostunnus = '{$liitostunnus_row['liitostunnus']}'";
+	$as_avain_chk_res = pupe_query($query);
+
+	if (mysql_num_rows($as_avain_chk_res) > 0) {
+		array_push($sahkoinen_lahete_toim, 'REKLAMAATIO');
+	}
 }
 
 // Poistetaan tilaus

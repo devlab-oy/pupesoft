@@ -430,7 +430,9 @@
 
 					$i = 0;
 
-					$divit = "<div id='div_$tuoterow[tuoteno]' class='popup'>";
+					$trimtuoteno = str_replace(" ", "_", $tuoterow["tuoteno"]);
+
+					$divit = "<div id='div_$trimtuoteno' class='popup'>";
 					$divit .= "<table><tr><td valign='top'><table>";
 					$divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuperäisnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
 
@@ -449,7 +451,7 @@
 					$divit .= "</table>";
 					$divit .= "</div>";
 
-					echo "&nbsp;&nbsp;<a src='#' class='tooltip' id='$tuoterow[tuoteno]'><img src='pics/lullacons/info.png' height='13'></a>";
+					echo "&nbsp;&nbsp;<a src='#' class='tooltip' id='$trimtuoteno'><img src='pics/lullacons/info.png' height='13'></a>";
 
 				}
 			}

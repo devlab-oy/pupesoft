@@ -3010,8 +3010,9 @@
 											$osre = pupe_query($query);
 
 											if (mysql_num_rows($osre) > 0) {
-												$osrow = mysql_fetch_assoc($osre);
-												$row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='_top'>{$osrow['sarjanumero']}</a><br>";
+												while ($osrow = mysql_fetch_assoc($osre)) {
+													$row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='_top'>{$osrow['sarjanumero']}</a><br>";
+												}
 											}
 										}
 										$row[$ken_nimi] = substr($row[$ken_nimi], 0, -4);

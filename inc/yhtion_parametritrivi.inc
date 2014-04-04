@@ -901,6 +901,7 @@
 		$ulos .= "<option value='A' $sel[A]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sekä myyntitilaukselta varastoon tilatut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "<option value='U' $sel[U]>".t("Osatoimituskiellossa olevien tilausten jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2531,21 +2532,6 @@
 
 		$ulos .= "<option value = ''>".t("Tarjoukselle voi lisätä työmääräystietoja")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Tarjoukselle ei voi lisätä työmääräystietoja")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "vahinkotiedot_tyomaarayksella") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "selected";
-
-		$ulos .= "<option value = ''>".t("Työmääräykselle voi lisätä vahinkotiedot")."</option>";
-		$ulos .= "<option value = 'K' $sel[K]>".t("Työmääräykselle ei voi lisätä vahinkotietoja")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

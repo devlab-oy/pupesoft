@@ -1029,7 +1029,7 @@
 		if (function_exists("pupesoft_sahkoposti") and !empty($laheta_karhuemail_myyjalle)) {
 
 			$polkupyora = pathinfo($pdffilenimi);
-			$params = array( 	
+			$params = array(
 				"to" 		=> $laheta_karhuemail_myyjalle,
 				"subject"	=> t("Maksukehotuskopio"),
 				"ctype"		=> "text",
@@ -1054,7 +1054,7 @@
 			require("inc/sahkoposti.inc");
 		}
 		else {
-			$kirjoitin = $kirjoitin = 0 ? $kukarow['kirjoitin'] : $kirjoitin;
+			$kirjoitin = $kirjoitin == 0 ? $kukarow['kirjoitin'] : $kirjoitin;
 
 			// itse print komento...
 			$query = "	SELECT komento

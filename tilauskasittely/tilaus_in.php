@@ -23,6 +23,7 @@ echo "<script type='text/javascript'>
 			});
 		});
 </script>";
+
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
 	$path_parts = pathinfo($filename);
@@ -114,7 +115,9 @@ else {
 		 		<option value='multi'>".t("Useita asiakkaita")."</option>
 				<option value='asnui'>".t("ASN-sanoma")."</option>
 				</select>";
-	echo "<div id='keijo' style='display: none;'><br>".t("Tilaukset suoraan valmis-tilaan")." <input type='checkbox' name='tilaus_valmiiksi' ></div>";
+	echo "<div id='keijo' style='display: none;'>
+			<br>".t("Tilaukset suoraan valmis-tilaan")." <input type='checkbox' name='tilaus_valmiiksi' >
+			<br>".t("Tilauksesta oma lasku")." <input type='checkbox' name='tilaus_ketjutus' ></div>";
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";

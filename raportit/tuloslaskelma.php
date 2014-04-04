@@ -834,6 +834,7 @@
 					            $laskujoini
 					            $asiakasjoini
 					            $konsernijoini
+								$tilijoini
 					            WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					            and tiliointi.korjattu = ''
 					            and tiliointi.tapvm >= '$totalalku'

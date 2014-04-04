@@ -18,6 +18,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 		}
 
 		$tilausrivi_tunnukset = array();
+		$kommentit = array();
 		foreach ($lahde_ja_kohde_varasto_yhdistelmat as $lahde_ja_kohde_varasto_yhdistelma) {
 			$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
 
@@ -35,6 +36,8 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 				$tilausrivi_tunnukset[] = $tilausrivi['tunnus'];
 
 				linkkaa_myyntitilausrivi_siirtolistariviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
+
+				$kommentit[] = t('Tilauksen')." {$myyntitilaus['tunnus']} ".t('tilausrivi')." {$tilausrivi['tuoteno']} - {$tilausrivi['tilkp']} {$tilausrivi['yksikko']} ".t('lisättiin siirtolistalle')." {$siirtolista['tunnus']}";
 			}
 
 			tilaus_valmis_siirtolista($siirtolista);
@@ -42,6 +45,12 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 
 		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
 		aseta_kukarow_kesken($myyntitilaus_tunnus);
+
+		foreach ($kommentit as $kommentti) {
+			echo "<font class='message'>$kommentti</font>";
+			echo "<br/>";
+		}
+		echo "<br/>";
 
 		return true;
 	}

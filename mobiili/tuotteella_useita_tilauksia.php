@@ -85,7 +85,7 @@ if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
 }
 
-$orderby = "tilausrivi_tyyppi DESC, ostotilaus, sorttaus_kpl";
+$orderby = "tilausrivi_tyyppi DESC, tuoteno, ostotilaus, sorttaus_kpl";
 $ascdesc = "desc";
 
 if (isset($sort_by)) {
@@ -285,6 +285,9 @@ echo $sort_by_direction_hylly == 'asc' ? "<img src='{$palvelin2}pics/lullacons/a
 echo "</th>";
 echo "</tr>";
 
+// otetaan saapuminen rivilooppia varten talteen
+$_saapuminen = $saapuminen;
+
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {
 
@@ -295,6 +298,7 @@ while($row = mysql_fetch_assoc($result)) {
 
 	# Jos rivi on jo kohdistettu eri saapumiselle
 	if ($row['uusiotunnus'] != 0) $saapuminen = $row['uusiotunnus'];
+	else $saapuminen = $_saapuminen;
 
 	if ($orig_tilausten_lukumaara != $tilausten_lukumaara) $tilausten_lukumaara = $orig_tilausten_lukumaara;
 

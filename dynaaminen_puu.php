@@ -20,21 +20,21 @@
 
 		if ($tee == 'hae_laji') {
 
-			if ($laji != '') {
-				$vresult = t_avainsana("DPAVAINSANA", "", "and avainsana.selite = '{$laji}' and avainsana.selitetark_2 = '{$toim}'");
+			$val = '';
 
-				echo "<select id='keywords_value' name='keywords_value'>";
-				echo "<option value=''>",t("Valitse"),"</option>";
+			if (isset($avainsanan_tunnus)) {
+				$avainsanan_tunnus = (int) $avainsanan_tunnus;
 
-				while($row = mysql_fetch_assoc($vresult)) {
-					echo "<option value='{$row['selitetark']}'>{$row['selitetark']}</option>";
-				}
-
-				echo "</select>";
+				$query = "	SELECT *
+							FROM dynaaminen_puu_avainsanat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$avainsanan_tunnus}'";
+				$res = pupe_query($query);
+				$row = mysql_fetch_assoc($res);
+				$val = $row['tarkenne'];
 			}
-			else {
-				echo "<p>",t("virhe: laji puuttuu"),"</p>";
-			}
+
+			echo "<input type='text' id='keywords_value' name='keywords_value' value='{$val}' />";
 
 			exit;
 		}
@@ -51,7 +51,9 @@
 				$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selite = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
 
 				if ($saamuokata) {
-					echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;";
+					echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;&nbsp;";
+					echo "<a style='float: right;' class='edit_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa'),"'/></a>";
+					echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
 				}
 
 				echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne]";
@@ -432,6 +434,21 @@
 					return false;
 				});
 
+				jQuery(".edit_keyword").live('click', function(e) {
+					e.preventDefault();
+
+					var nodebox_keywords = jQuery("#nodebox_keywords");
+
+					jQuery("#nodebox_keywords_title").html("Lis‰‰ avainsana");
+					jQuery("#showaddbox_keywords").hide();
+					jQuery("#showaddbox_keywords").after(nodebox_keywords);
+					nodebox_keywords.show();
+
+					params["tee"] = 'hae_laji';
+					params["avainsanan_tunnus"] = $(this).attr('id');
+					editNode_keywords(params);
+				});
+
 				jQuery("#moveform").submit(function() {
 					params["kohdetaso"]	= jQuery("#kohdetaso").val();
 					params["tee"]		= "siirrataso";
@@ -476,7 +493,9 @@
 					$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selite = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
 
 					if ($saamuokata) {
-						echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;";
+						echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;&nbsp;";
+						echo "<a style='float: right;' class='edit_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa'),"'/></a>";
+						echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
 					}
 
 					echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne]";
@@ -773,9 +792,18 @@
 					if (params.tee == 'hae_laji') {
 						jQuery("#keywords_value_select").html(retval);
 
-						jQuery("#keywords_value_select > select").live('change', function() {
+						jQuery("#keywords_value_select > input").live('keyup', function() {
 							$('#keywordsform').closest('#tee').val('lisaa_avainsana');
 						});
+
+						if (params.avainsanan_tunnus) {
+
+							var laji = jQuery('#'+params["avainsanan_tunnus"]+'_class').val().toLowerCase();
+
+							jQuery('#keywords_category > option').each(function() {
+								$(this).prop('selected', ($(this).val().toLowerCase() == laji));
+							});
+						}
 
 						return false;
 					}
@@ -810,10 +838,8 @@
 						jQuery('#keywords_category > option').each(function() {
 							$(this).removeAttr('selected');
 						});
-						jQuery('#keywords_value > option').each(function() {
-							$(this).removeAttr('selected');
-						});
 
+						jQuery('#keywords_value > input').val('');
 						jQuery('#nodebox_keywords_err').hide();
 					}
 				});

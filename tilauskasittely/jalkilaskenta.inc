@@ -147,8 +147,7 @@ if (!function_exists("korjaalaskut")) {
 			if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Uusikate = $tilausrivi[rivihinta] - $tilausrivi[kpl] * $kehahin (muutos = $muutos)</font><br>";
 
 			// jos ei löydetä varastonmuutostiliöintiä ja meillä on varastonmuutosta
-			if ($tilikpl == 0 and $uusi_varastonmuutos <> 0) {
-				$uusi_varastonmuutos_kp = round($uusi_varastonmuutos * -1, 2);
+			if ($tilikpl == 0 and $uusi_varastonmuutos <> 0) {				
 				/*
 				katsotaan onko $lasku[tapvm] suljetulla tilikaudella, jos on, laitetaan pvm ensimmäinen sallittu pvm (eli avoimen tilikauden ensimmäinen pvm)
 				*/
@@ -159,6 +158,9 @@ if (!function_exists("korjaalaskut")) {
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $xrivi["kustp"], $xrivi["kohde"], $xrivi["projekti"]);
 
+				$uusi_varastonmuutos_kp = round($uusi_varastonmuutos, 2);
+				$uusi_varasto_kp = round($uusi_varastonmuutos * -1, 2);
+								
 				// Kirjataan 'varasto'-tilille
 				$query = "	INSERT into tiliointi set
 							yhtio 		= '$kukarow[yhtio]',
@@ -168,7 +170,7 @@ if (!function_exists("korjaalaskut")) {
 							kohde	 	= '{$kohde_ins}',
 							projekti 	= '{$projekti_ins}',
 							tapvm 		= '{$pvm}',
-							summa		= '$uusi_varastonmuutos_kp',
+							summa		= $uusi_varasto_kp,
 							vero		= 0,
 							selite 		= 'Varastostamyynti $lasku[nimi]',
 							lukko 		= '',
@@ -188,7 +190,7 @@ if (!function_exists("korjaalaskut")) {
 							kohde	 	= '{$kohde_ins}',
 							projekti 	= '{$projekti_ins}',
 							tapvm 		= '{$pvm}',
-							summa 		= $uusi_varastonmuutos_kp * -1,
+							summa 		= $uusi_varastonmuutos_kp,
 							vero 		= 0,
 							selite 		= 'Varastostamyynti $lasku[nimi]',
 							lukko 		= '',

@@ -24222,10 +24222,28 @@ if (!function_exists('hyllysiirto')) {
 				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
 			}
 
+			$query = "	SELECT toimi.tilino,
+						toimi.kustannuspaikka AS kustp,
+						toimi.kohde AS kohde,
+						toimi.projekti AS projekti
+						FROM tuotteen_toimittajat
+						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND toimi.tyyppi != 'P')
+						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
+						ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+						LIMIT 1";
+			$result = pupe_query($query);
+			$toimirow = mysql_fetch_assoc($result);
+
 			if ($mistatoimipaikka_row['tunnus'] > 0) {
 				if ($mista_kustp == 0)    $mista_kustp    = $mistatoimipaikka_row['kustp'];
 				if ($mista_kohde == 0)    $mista_kohde    = $mistatoimipaikka_row['kohde'];
 				if ($mista_projekti == 0) $mista_projekti = $mistatoimipaikka_row['projekti'];
+			}
+			else {
+				if ($mista_kustp == 0)    $mista_kustp    = $toimirow['kustp'];
+				if ($mista_kohde == 0)    $mista_kohde    = $toimirow['kohde'];
+				if ($mista_projekti == 0) $mista_projekti = $toimirow['projekti'];
 			}
 
 			if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0) {
@@ -24316,16 +24334,6 @@ if (!function_exists('hyllysiirto')) {
 						$result = pupe_query($query);
 						$laskuid = mysql_insert_id();
 					}
-
-					$query = "	SELECT toimi.tilino
-								FROM tuotteen_toimittajat
-								JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND toimi.tyyppi != 'P')
-								WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-								AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
-								ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
-								LIMIT 1";
-					$result = pupe_query($query);
-					$toimirow = mysql_fetch_assoc($result);
 
 					// Mistä varasto
 					$query = "	INSERT into tiliointi set
@@ -27024,6 +27032,39 @@ if (!function_exists('hae_tuotepaikka')) {
 
 }
 
+if (!function_exists('hae_tuotepaikat')) {
+
+	function hae_tuotepaikat($tuoteno, $hyllyalue, $hyllynro, $hyllytaso = false, $hyllyvali = false) {
+		global $kukarow, $yhtiorow;
+
+		$tuotepaikka_where = "";
+		if (!empty($hyllytaso)) {
+			$tuotepaikka_where .= "	AND hyllytaso = '{$hyllytaso}'";
+		}
+
+		if (!empty($hyllyvali)) {
+			$tuotepaikka_where .= "	AND hyllyvali = '{$hyllyvali}'";
+		}
+
+		$query = "	SELECT *
+					FROM tuotepaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'
+					AND hyllyalue = '{$hyllyalue}'
+					AND hyllynro = '{$hyllynro}'
+					{$tuotepaikka_where}";
+		$result = pupe_query($query);
+
+		$tuotepaikat = array();
+		while($tuotepaikka = mysql_fetch_assoc($result)) {
+			$tuotepaikat[] = $tuotepaikka;
+		}
+
+		return $tuotepaikat;
+	}
+
+}
+
 if (!function_exists('hae_tuotteen_tuotepaikat')) {
 
 	function hae_tuotteen_tuotepaikat($tuoteno) {
@@ -27090,7 +27131,7 @@ if (!function_exists('hae_varasto')) {
 	function hae_varasto($tunnus) {
 		global $kukarow, $yhtiorow;
 
-		if (!empty($tunnus)) {
+		if (empty($tunnus)) {
 			return false;
 		}
 

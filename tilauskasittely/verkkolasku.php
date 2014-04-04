@@ -379,7 +379,8 @@
 						varastopaikat AS v_lahdevarasto READ,
 						varastopaikat AS v_kohdevarasto READ,
 						korvaavat_kiellot READ,
-						oikeu READ";
+						oikeu READ,
+						toimi READ";
 			$locre = pupe_query($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten

@@ -224,6 +224,8 @@ unset($alv_laskelman_sallittu_erotus);
 unset($e3_params);
 unset($tee_keraysera_debugdir);
 
+unset($loginkieli);
+
 $pupe_query_debug = 0;
 $aika_debug_array = array();
 $quer_debug_array = array();
@@ -269,6 +271,16 @@ $pupesoft_dirname = str_replace(array($phpnimi, $palvelin2), array("", ""), $pup
 
 // Haetaan session
 $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") ? $_COOKIE["pupesoft_session"] : "";
+
+// käytössä olevat kielet
+$sanakirja_kielet = array("fi" => "Suomi",
+						  "en" => "Englanti",
+						  "se" => "Ruotsi",
+						  "ee" => "Viro",
+						  "de" => "Saksa",
+						  "dk" => "Tanska",
+						  "no" => "Norja",
+						  "ru" => "Venäjä");
 
 //Initioidaan pari muuttujaa
 if (!isset($login))		$login = "";
@@ -342,20 +354,24 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 	if ($phpnimi != 'index.php') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
 	}
-	else {
-
-		//haetaan browserin oletuskieli
-		$browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
-
-		if ($browkieli == 'sv') {
-			$browkieli = 'se';
-		}
-		elseif ($browkieli == 'ee') {
-			$browkieli = 'ee';
+	else { 
+		if (isset($loginkieli)) {
+		 	$browkieli = $loginkieli;
 		}
 		else {
-			$browkieli = 'fi';
-		}
+			//haetaan browserin oletuskieli
+			$browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
+
+			if ($browkieli == 'sv') {
+				$browkieli = 'se';
+			}
+			elseif ($browkieli == 'ee') {
+				$browkieli = 'ee';
+			}
+			else {
+				$browkieli = 'fi';
+			}
+		}		
 
 		if (isset($mobile) and $mobile and include_once("mobiili/login.php"));
 		elseif (@include_once("login.php"));
@@ -667,7 +683,6 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 				if (!stristr($phpnimi, 'indexvas')) {
 					echo livezhat_js_sources();
-					echo add_livezhat();
 				}
 			}
 

@@ -9,6 +9,14 @@
 	echo "	<script type='text/javascript' language='JavaScript'>
 				$(document).ready(function() {
 
+					$('#tulosta_kaikki_namiska').on('click', function() {
+						$('#tulosta_kaikki').val('JOO');
+						var c  = confirm('".t('Oletko varma ett‰ haluat tulostaa kaikki ker‰yser‰t')."?');
+						if (c) {
+							$('#tee_keraysera_formi').submit();
+						}
+					});
+
 					$('.notoggle').click(function(event){
 						event.stopPropagation();
 					});
@@ -29,6 +37,8 @@
 	if (!isset($keraajalist)) 	 $keraajalist = '';
 	if (!isset($select_varasto)) $select_varasto = '';
 	if (!isset($keraajanro)) 	 $keraajanro = '';
+	if (!isset($tulosta_kaikki)) $tulosta_kaikki = '';
+	$naytetaan_tulosta_kaikki = 0;
 
 	if ($tee == 'tee_arpajaiset') {
 		if (isset($palaa)) {
@@ -51,7 +61,6 @@
 	if ($tee == '') {
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='selaa' />";
-
 		echo "<table>";
 
 		$query = "	SELECT *
@@ -430,7 +439,7 @@
 			// Valitun ker‰‰j‰n tiedot
 			$keraajarow = mysql_fetch_assoc($result);
 
-			echo "<form method='post'>";
+			echo "<form method='post' id='tee_keraysera_formi'>";
 
 			if ($tee != 'muuta' and $tee != 'muokkaa') {
 				echo "<input type='hidden' name='tee' value='keraysera' />";
@@ -494,7 +503,17 @@
 
 				echo "</select></td>";
 
-				echo "<td class='back'><input type='submit' value='",t("Hae ker‰yser‰"),"' /></td>";
+				echo "<td class='back'><input type='submit' value='",t("Hae ker‰yser‰"),"' />";
+				
+				// Tsekataan onko k‰ytt‰j‰ll‰ oikeus tulostaa kaikki t‰ss‰ varastossa
+				$ktkre = t_avainsana("KERAYSERA_TK", "", "and avainsana.selite  = '{$keraajarow['kuka']}' AND avainsana.selitetark = '{$select_varasto}' ");
+				$ktkrow = mysql_fetch_assoc($ktkre);
+
+				if ($ktkrow['selite'] != "") $naytetaan_tulosta_kaikki = 1;
+ 
+				if ($naytetaan_tulosta_kaikki) echo "<input type='button' id='tulosta_kaikki_namiska' value='",t("Tulosta kaikki"),"' />";
+				echo "<input type='hidden' id='tulosta_kaikki' name='tulosta_kaikki' value='' />";
+				echo "</td>";
 			}
 
 			echo "</tr></table>";
@@ -514,59 +533,76 @@
 				// HUOM: Generoidaan ker‰yser‰ valitulle k‰ytt‰j‰lle
 				$kukarow = $keraajarow;
 
-				// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
-				$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
+				$loop_counter = TRUE;
 
-				if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
+				if ($tulosta_kaikki == "JOO" and $naytetaan_tulosta_kaikki == 0) {
+					//jos yritet‰‰n tulostaa kaikki niin tsekataan viel‰ k‰yttˆoikeudet
+					$tulosta_kaikki = "";
+					echo "<font class='message'>",t("Yritit tulostaa kaikki ker‰yser‰t mutta k‰yttˆoikeus puuttuu"),".</font><br />";
+				}
 
-					// Tallennetaan ker‰yser‰
-					require('inc/tallenna_keraysera.inc');
+				while ($loop_counter) {
 
-					// N‰m‰ tilaukset tallennettin ker‰yser‰‰n
+					// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
+					$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
+
+					if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
+
+						// Tallennetaan ker‰yser‰
+						require('inc/tallenna_keraysera.inc');
+
+						// N‰m‰ tilaukset tallennettin ker‰yser‰‰n
+						if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
+
+							$otunnukset = implode(",", $lisatyt_tilaukset);
+							$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+
+							$query = "	SELECT *
+										FROM lasku
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus IN ($otunnukset)";
+							$res = pupe_query($query);
+							$laskurow = mysql_fetch_assoc($res);
+
+							$tilausnumeroita  	  = $otunnukset;
+							$valittu_tulostin 	  = $kerayslistatulostin;
+							$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
+							$laskuja 			  = count($erat['tilaukset']);
+							$lukotetaan 		  = FALSE;
+
+							require("tilauskasittely/tilaus-valmis-tulostus.inc");
+
+							// Jos tulostus feilasi, niin dellataan ker‰yser‰
+							if ($virheellinen == "X" and $kerayseran_numero > 0) {
+								$query = "	DELETE FROM kerayserat
+											WHERE yhtio	= '{$kukarow['yhtio']}'
+											AND nro		= '{$kerayseran_numero}' ";
+								pupe_query($query);
+							}
+						}
+						else {
+							$tulosta_kaikki = "";
+						}
+
+						$loop_counter = $tulosta_kaikki == "JOO" ? TRUE : FALSE;
+					}
+					else {
+						echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";
+						$loop_counter = FALSE;
+					}
+
+					// lukitaan tableja
+			 		$query = "UNLOCK TABLES";
+					$result = pupe_query($query);
+
 					if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
-						$otunnukset = implode(",", $lisatyt_tilaukset);
-						$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+						// Tulostetaan kollilappu
+						require('inc/tulosta_reittietiketti.inc');
 
-						$query = "	SELECT *
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus IN ($otunnukset)";
-						$res = pupe_query($query);
-						$laskurow = mysql_fetch_assoc($res);
-
-						$tilausnumeroita  	  = $otunnukset;
-						$valittu_tulostin 	  = $kerayslistatulostin;
-						$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
-						$laskuja 			  = count($erat['tilaukset']);
-						$lukotetaan 		  = FALSE;
-
-						require("tilauskasittely/tilaus-valmis-tulostus.inc");
-
-						// Jos tulostus feilasi, niin dellataan ker‰yser‰
-						if ($virheellinen == "X" and $kerayseran_numero > 0) {
-							$query = "	DELETE FROM kerayserat
-										WHERE yhtio	= '{$kukarow['yhtio']}'
-										AND nro		= '{$kerayseran_numero}' ";
-							pupe_query($query);
+						if ($erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K") {
+							require("inc/kardex_send.inc");
 						}
-					}
-				}
-				else {
-					echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";
-				}
-
-				// lukitaan tableja
-		 		$query = "UNLOCK TABLES";
-				$result = pupe_query($query);
-
-				if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
-
-					// Tulostetaan kollilappu
-					require('inc/tulosta_reittietiketti.inc');
-
-					if ($erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K") {
-						require("inc/kardex_send.inc");
 					}
 				}
 

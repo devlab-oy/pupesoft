@@ -15,14 +15,31 @@
 			exit;
 		}
 
-		echo "<font class='head'>".t("Ep‰kuranttiajo")."</font><hr>";
-		echo "<br><form method='post'>";
-		echo "<input type = 'hidden' name = 'ajo_tee' value = 'NAYTA'>";
-		echo "<input type = 'submit' value = '".t("N‰yt‰ ep‰kurantoitavat tuotteet")."'>";
-		echo "</form><br>";
+		if (!isset($ajo_tee) or $ajo_tee != "NAYTAPV") {
+			echo "<font class='head'>".t("Ep‰kuranttiajo")."</font><hr>";
+			echo "<br><form method='post'>";
+			echo "<input type = 'hidden' name = 'ajo_tee' value = 'NAYTA'>";
+			echo "<input type = 'submit' value = '".t("N‰yt‰ ep‰kurantoitavat tuotteet")."'>";
+			echo "</form><br>";
+			echo "<br><br><br>";
+		}
 
-		$php_cli 		= FALSE;
-		$kaikkiepakur	= "";
+		echo "<font class='head'>".t("Tutki ep‰kurantoitavia tuotteita")."</font><hr>";
+		echo "<br><form method='post'>";
+		echo "<input type = 'hidden' name = 'ajo_tee' value = 'NAYTAPV'>";
+		echo "<table>";
+		echo "<tr><th>".t("P‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
+			<td><input type='text' name='kka' value='$kka' size='3'></td>
+			<td><input type='text' name='vva' value='$vva' size='5'></td>
+			</tr><tr>";
+		echo "</table><br>";
+		echo "<input type = 'submit' value = '".t("N‰yt‰ tuotteet")."'>";
+		echo "</form><br><br>";
+
+
+		$php_cli 	  = FALSE;
+		$kaikkiepakur = "";
 	}
 	else {
 		if (!isset($argv[1])) {
@@ -53,10 +70,26 @@
 		}
 	}
 
-	if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "EPAKURANTOI"))) {
+	if (isset($ajo_tee) and $ajo_tee == "NAYTAPV") {
+
+		$kka = sprintf("%02d", $kka);
+		$ppa = sprintf("%02d", $ppa);
+
+		$syotetty_paiva = (int) date("U", mktime(0, 0, 0, $kka, $ppa, $vva));
+
+		if ($syotetty_paiva <= time()) {
+			echo t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on oltava tulevaisuudessa")."!";
+			$ajo_tee = "";
+		}
+	}
+
+	if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAPV" or $ajo_tee == "EPAKURANTOI"))) {
 
 		// Viimeisimm‰st‰ tulosta ja laskutuksesta n‰in monta p‰iv‰‰ HOUM: t‰n voi laittaa myˆs salasanat.php:seen.
 		if (!isset($epakurtasot_array)) $epakurtasot_array = array("100%" => 913, "75%" => 820, "50%" => 730, "25%" => 547);
+
+		// T‰m‰ p‰iv‰
+		$today = time();
 
 		// Tehd‰‰n kaikki tapahtumat samalle tositteelle!
 		$tapahtumat_samalle_tositteelle = "kylla";
@@ -95,6 +128,12 @@
 		$excelsarake = 0;
 
 		if (!$php_cli) {
+
+			if ($ajo_tee == "NAYTAPV") {
+				// Simuloidaan tulevaisuuteen
+				$today = $syotetty_paiva;
+			}
+
 			echo "<br><table>";
 			echo "<tr>";
 			echo "<th>".t("Tuote")."</th>";
@@ -191,7 +230,6 @@
 				list($vv1, $kk1, $pp1) = explode("-", substr($tulorow["laadittu"], 0, 10));
 				list($vv2, $kk2, $pp2) = explode("-", substr($laskutusrow["laadittu"], 0, 10));
 
-				$today = (int) date("U");
 				$viimeinen_tulo = (int) date("U", mktime(0, 0, 0, $kk1, $pp1, $vv1));
 				$viimeinen_laskutus = (int) date("U", mktime(0, 0, 0, $kk2, $pp2, $vv2));
 
@@ -362,7 +400,7 @@
 					if (!$php_cli) echo "<td align='right'>{$vararvo_nyt}</td>";
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $vararvo_nyt);
 
-					if ($tee != '' OR $ajo_tee == 'NAYTA') {
+					if ($tee != "" or $ajo_tee == "NAYTA" or $ajo_tee == "NAYTAPV") {
 						if ($mikataso == 100) {
 							$vararvo_sit = 0;
 						}
@@ -464,10 +502,12 @@
 				echo "<td class='back'><input type='submit' value='".t("Tallenna excel")."'></td></tr></form>";
 				echo "</table><br>";
 
-				echo "<br><br><form name = 'valinta' method='post'>";
-				echo "<input type = 'hidden' name = 'ajo_tee' value = 'EPAKURANTOI'>";
-				echo "<input type = 'submit' value = '".t("Tee ep‰kuranttiusp‰ivitykset")."'>";
-				echo "</form><br>";
+				if ($ajo_tee != "NAYTAPV") {
+					echo "<br><br><form name = 'valinta' method='post'>";
+					echo "<input type = 'hidden' name = 'ajo_tee' value = 'EPAKURANTOI'>";
+					echo "<input type = 'submit' value = '".t("Tee ep‰kuranttiusp‰ivitykset")."'>";
+					echo "</form><br>";
+				}
 
 				require ("inc/footer.inc");
 			}
@@ -488,4 +528,3 @@
 			}
 		}
 	}
-?>

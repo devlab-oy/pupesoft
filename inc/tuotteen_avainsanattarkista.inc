@@ -9,7 +9,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			$tem_tuoteno = trim($t[$i]);
 			$tem_tuoteno_i = $i;
-			
+
 			if ($tem_tuoteno != '') {
 				$query = "	SELECT tuoteno
 							FROM tuote
@@ -47,13 +47,10 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 				$virhe[$i] = t("Kieltä ei voi jättää tyhjäksi")."!";
 			}
 			else {
-				$query  = "SHOW columns from sanakirja";
-				$fields =  pupe_query($query);
-
 				$loytyyko = FALSE;
 
-				while ($apurow = mysql_fetch_array($fields)) {
-					if (strtoupper($apurow[0]) == strtoupper($t[$i])) {
+				foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+					if ($sanakirja_kieli == $t[$i]) {
 						$loytyyko = TRUE;
 						break;
 					}
@@ -77,7 +74,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 		if (mysql_field_name($result, $i) == "selite") {
 
 			$tem_selite = trim($t[$i]);
-			
+
 			if ($t[$i] == '') {
 				$virhe[$i] = t("Tieto puuttuu")."!";
 			}

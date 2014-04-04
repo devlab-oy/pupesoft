@@ -60,16 +60,18 @@ else {
 	}
 }
 
-$ruksatut   = explode(",", $valitut);					//tata kaytetaan ihan lopussa
+$valitut = urldecode($valitut);
+
+$ruksatut   = explode(",", $valitut);				//tata kaytetaan ihan lopussa
 $ruksattuja = count($ruksatut);   					//taman avulla pohditaan tarvitaanko tarkenteita
 $vertaa     = "'".implode("','", $ruksatut)."'";	// tehd‰‰n mysql:n ymm‰rt‰m‰ muoto
 
 if (trim($konserni) != '') {
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$konsernit = "";
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		$konsernit .= " '".$row["yhtio"]."' ,";
 	}
 	$konsernit = " and kalenteri.yhtio in (".substr($konsernit, 0, -1).") ";
@@ -86,13 +88,25 @@ $query = "	SELECT yhtio
 			and kuka	= '$kukarow[kuka]'
 			and nimi like '%asiakasmemo.php'
 			and alanimi = ''";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 	$asmemolinkki = TRUE;
 }
 else {
 	$asmemolinkki = FALSE;
+}
+
+// Poistetaan liitetiedosto kalenterimerkinn‰st‰
+// mik‰li GET-parametreist‰ lˆytyy poista_liite
+if( isset($poista_liite) and (int) $poista_liite > 0 ) {
+	$poista_liite = (int) $poista_liite;
+
+	$query = "	DELETE FROM liitetiedostot
+				WHERE tunnus = $poista_liite
+				AND liitos = 'kalenterimerkint‰'
+				AND yhtio = '$kukarow[yhtio]'";
+	pupe_query($query);
 }
 
 echo "<font class='head'>".t("Kalenteri")."</font><hr>";
@@ -170,12 +184,14 @@ if ($tee == 'LISAA') {
 	}
 
 	if ($ok == "OK") {
-		if ($tunnus != '') {
+		$tunnus = (int) $tunnus;
+
+		if ($tunnus > 0) {
 			$query = "	DELETE
 						FROM kalenteri
-						WHERE tunnus='$tunnus'
+						WHERE tunnus=$tunnus
 						$konsernit";
-			mysql_query($query) or pupe_error($query);
+			pupe_query($query);
 		}
 
 		if ($kenelle == "") {
@@ -218,16 +234,46 @@ if ($tee == 'LISAA') {
 					kentta04    = '$paivarahat',
 					tapa 		= '$tapa',
 					tyyppi 		= 'kalenteri'";
-		mysql_query($query) or pupe_error($query);
+		pupe_query($query);
+
+		$uusi_tunnus = mysql_insert_id();
+
+		// P‰ivitet‰‰n liitetiedosto uudelle tunnukselle,
+		// mik‰li aikaisempi kalenterimerkint‰ p‰ivittyi.
+		// T‰m‰ siis sen takia, ett‰ kalenterimerkinn‰n p‰ivitys
+		// tapahtuu poistamalla vanha merkint‰ ja lis‰‰m‰ll‰ uusi p‰ivitetty
+		// versio merkinn‰st‰.
+		if ($tunnus > 0 and $uusi_tunnus > 0) {
+			$query = "  UPDATE liitetiedostot
+						SET liitostunnus = $uusi_tunnus
+						WHERE liitostunnus = $tunnus
+						AND liitos = 'kalenterimerkint‰'
+						AND yhtio = '{$kukarow['yhtio']}'";
+			pupe_query($query);
+		}
+
+		// Tallenna liitetiedosto formista
+		if (is_uploaded_file($_FILES['liitetiedosto']['tmp_name']) === TRUE) {
+			tallenna_liite('liitetiedosto', 'kalenterimerkint‰', $uusi_tunnus, '');
+		}
 	}
 }
 
 // ollaan painettu poista nappia
-if ($tee == "POISTA") {
-	$query ="	DELETE FROM kalenteri
-				WHERE tunnus = '$tunnus'
+if ($tee == "POISTA" and (int) $tunnus > 0) {
+	$tunnus = (int) $tunnus;
+
+	$query = "	DELETE FROM kalenteri
+				WHERE tunnus = $tunnus
 				$konsernit";
-	mysql_query($query) or pupe_error($query);
+	pupe_query($query);
+
+	// Poistetaan myˆs liitetiedostot t‰lle kalenterimerkinn‰lle
+	$query = "  DELETE FROM liitetiedostot
+				WHERE liitostunnus = {$tunnus}
+				AND liitos = 'kalenterimerkint‰'
+				AND yhtio = '{$kukarow['yhtio']}'";
+	pupe_query($query);
 }
 
 // tehd‰‰n lis‰ys ruutu ja laitetaan kaikki muuttujaan jotta voidaan echota sit oikeessa kohdassa
@@ -248,8 +294,8 @@ if($tee == "SYOTA") {
 					$konsernit
 					$kukalisa
 					and tyyppi = 'kalenteri'";
-		$res  = mysql_query($query) or pupe_error($query);
-		$irow = mysql_fetch_array($res);
+		$res  = pupe_query($query);
+		$irow = mysql_fetch_assoc($res);
 
 		$viesti 	= $irow["kentta01"];
 		$kilometrit	= $irow["kentta03"];
@@ -281,11 +327,11 @@ if($tee == "SYOTA") {
 	$lisayskello = $kello;
 
 	$lisays =  "
-		<td colspan='10'><form method='POST'>
+		<td colspan='10'><form method='POST' enctype='multipart/form-data'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
-		<input type='hidden' name='valitut' value='$valitut'>
-		<input type='hidden' name='kenelle' value='$kenelle'>
+		<input type='hidden' name='valitut' value='".urlencode($valitut)."'>
+		<input type='hidden' name='kenelle' value='".urlencode($kenelle)."'>
 		<input type='hidden' name='asyhtio' value='$asyhtio'>
 		<input type='hidden' name='kello' value='$kello'>
 		<input type='hidden' name='year'  value='$year'>
@@ -350,7 +396,7 @@ if($tee == "SYOTA") {
 
 	$lisays .= "<tr><td>".t("Tapa").":</td><td><select name='tapa'>";
 
-	while ($vrow=mysql_fetch_array($vresult)) {
+	while ($vrow=mysql_fetch_assoc($vresult)) {
 		$sel="";
  		if ($tapa == $vrow["selitetark"]) {
 			$sel = "selected";
@@ -372,9 +418,9 @@ if($tee == "SYOTA") {
 					and oikeu.nimi		= 'crm/kalenteri.php'
 					and kuka.tunnus <> '$kukarow[tunnus]'
 					ORDER BY kuka.nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$sel = $kenelle == $row['kuka'] ? ' selected' : '';
 			$lisays .= "<option value='$row[kuka]'$sel>$row[nimi]</option>";
 		}
@@ -408,11 +454,38 @@ if($tee == "SYOTA") {
 		  		</td>
 		  		</tr>";
 
+	$query = "	SELECT *
+				from liitetiedostot
+				where yhtio = '$kukarow[yhtio]'
+				and liitos  = 'kalenterimerkint‰'
+				and liitostunnus = '$tunnus'";
+	$liiteres = pupe_query($query);
+
+	if (mysql_num_rows($liiteres) > 0) {
+		$lisays .= "<tr><td valign='top'>".t("Liitetiedostot").":</td>";
+		$lisays .= "<td><table><tbody>";
+
+		while ($liiterow = mysql_fetch_assoc($liiteres)) {
+			$lisays .= '<tr>';
+			$lisays .= "<td><a href=\"#\" onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[filename]</a></td>";
+			$lisays .= '<td><a onclick="if (window.confirm(\'Haluatko poistaa liitteen '. $liiterow['filename'] .'\')===false ) return false;" href="'. $_SERVER['REQUEST_URI'] .'&poista_liite='. $liiterow['tunnus'] .'">Poista</a></td>';
+			$lisays .= '</tr>';
+		}
+
+		$lisays .= "</tbody></table></td></tr>";
+	}
+
+	$lisays .= "<tr><td valign='top'>".t("Lis‰‰ uusi Liitetiedosto").":</td>";
+	$lisays .= "<td>
+		  		<input name='liitetiedosto' type='file'><br>
+		  		</td>
+		  		</tr>";
+
 	$lisays .= "<tr><td><input type='submit' value='".t("Lis‰‰")."'></td></form>
 				<form method='POST'>
 				<input type='hidden' name='tee' value='POISTA'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
-				<input type='hidden' name='valitut' value='$valitut'>
+				<input type='hidden' name='valitut' value='".urlencode($valitut)."'>
 				<input type='hidden' name='year' value='$year'>
 				<input type='hidden' name='kuu' value='$kuu'>
 				<input type='hidden' name='paiva' value='$paiva'>
@@ -444,7 +517,7 @@ if ($toim != 'TYOMAARAYS_ASENTAJA') {
 				and kalenteri.kuittaus='K'
 				$konsernit
 				ORDER BY kalenteri.pvmalku desc";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
 	        echo "<table width='100%'>";
@@ -453,7 +526,7 @@ if ($toim != 'TYOMAARAYS_ASENTAJA') {
 	        echo "</tr>";
 
 
-	        while ($prow = mysql_fetch_array ($result)) {
+	        while ($prow = mysql_fetch_assoc ($result)) {
 	                echo "	<form action='kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]' method='post'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<tr>";
@@ -486,7 +559,7 @@ echo "<td class='back' valign='top' rowspan='3' align='left'>";
 
 echo "<table width='100%'>
 		<tr><td class='back' align='center' colspan='8'>
-		<form action = '?valitut=$valitut&year=$year&paiva=1&konserni=$konserni' method='post'>
+		<form action = '?valitut=".urlencode($valitut)."&year=$year&paiva=1&konserni=$konserni' method='post'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
 		<input type='hidden' name='tyomaarays' value='$tyomaarays'>
@@ -531,7 +604,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 				and kuka in ($vertaa)
 				$konsernit
 				and tyyppi = 'kalenteri'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	//v‰ritet‰‰n t‰m‰n p‰iv‰n pvm omalla v‰rill‰...
 	if ((date("j")==$i) and (date("n")==$kuu) and (date("Y")==$year)) {
@@ -552,7 +625,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 		$class = "tumma";
 	}
 
-	echo "<td align='center' style='$style' class='$class'><a href='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$i&konserni=$konserni&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>$fn1 $i $fn2</a></td>";
+	echo "<td align='center' style='$style' class='$class'><a href='$PHP_SELF?valitut=".urlencode($valitut)."&year=$year&kuu=$kuu&paiva=$i&konserni=$konserni&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>$fn1 $i $fn2</a></td>";
 
 	// tehd‰‰n rivinvaihto jos kyseess‰ on sunnuntai ja seuraava p‰iv‰ on olemassa..
 	if ((weekday_number($i, $kuu, $year)==6) and (days_in_month($kuu, $year)>$i)) {
@@ -568,7 +641,7 @@ for ($i=0; $i<6 - weekday_number(days_in_month($kuu, $year), $kuu, $year); $i++)
 
 echo "</tr>";
 
-echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?valitut=$valitut&kuu=$backmonth&year=$backyear&paiva=1&konserni=$konserni&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>".t("Edellinen")."</a>  - <a href='$PHP_SELF?valitut=$valitut&kuu=$nextmonth&year=$nextyear&paiva=1&konserni=$konserni&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>".t("Seuraava")."</a><br><br></td></tr>";
+echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?valitut=".urlencode($valitut)."&kuu=$backmonth&year=$backyear&paiva=1&konserni=$konserni&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>".t("Edellinen")."</a>  - <a href='$PHP_SELF?valitut=".urlencode($valitut)."&kuu=$nextmonth&year=$nextyear&paiva=1&konserni=$konserni&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>".t("Seuraava")."</a><br><br></td></tr>";
 echo "</table>";
 
 if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
@@ -580,7 +653,7 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 
 	//konsernivalinta
 	if ($yhtiorow["konserni"] != "") {
-		echo "<form action = '?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
+		echo "<form action = '?valitut=".urlencode($valitut)."&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tyomaarays' value='$tyomaarays'>";
@@ -613,9 +686,9 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 				and oikeu.nimi		= 'crm/kalenteri.php'
 				and kuka.tunnus <> '$kukarow[tunnus]'
 				ORDER BY kuka.nimi";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		$checked = '';
 		if (in_array("$row[kuka]", $ruksatut)) {
 			$checked = 'checked';
@@ -644,7 +717,7 @@ $query = "	SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuk
 			and kokopaiva != ''
 			$konsernit
 			order by pvmalku";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 	echo "<table width='100%'>";
@@ -652,15 +725,15 @@ if (mysql_num_rows($result) > 0) {
 	echo "<th colspan='4'>".t("Kokop‰iv‰n tapahtumat")."</th>";
 	echo "</tr>";
 
-	while ($prow = mysql_fetch_array ($result)) {
+	while ($prow = mysql_fetch_assoc ($result)) {
 
 		//haetaan asiakkaan tiedot
 		$query = "	SELECT *
 					from asiakas
 					where yhtio = '$prow[yhtio]'
 					and tunnus  = '$prow[liitostunnus]'";
-		$asres = mysql_query($query) or pupe_error($query);
-		$asiak = mysql_fetch_array($asres);
+		$asres = pupe_query($query);
+		$asiak = mysql_fetch_assoc($asres);
 
 		echo "<tr>";
 		echo "<td>$prow[tapa]</td>";
@@ -693,9 +766,9 @@ echo "<td class='back' valign='top' nowrap width='100%'>";
 
 echo "<table width='100%'>
 		<tr>
-			<th nowrap><a href='$PHP_SELF?valitut=$valitut&year=$edelyear&kuu=$edelmonth&paiva=$edelday&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'><< ".t("Edellinen")."</a></th>
+			<th nowrap><a href='$PHP_SELF?valitut=".urlencode($valitut)."&year=$edelyear&kuu=$edelmonth&paiva=$edelday&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'><< ".t("Edellinen")."</a></th>
 			<th style='text-align:center' nowrap>$paiva. $MONTH_ARRAY[$kuu] $year</th>
-			<th style='text-align:right' nowrap><a href='$PHP_SELF?valitut=$valitut&year=$seuryear&kuu=$seurmonth&paiva=$seurday&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>".t("Seuraava")." >></a></th>
+			<th style='text-align:right' nowrap><a href='$PHP_SELF?valitut=".urlencode($valitut)."&year=$seuryear&kuu=$seurmonth&paiva=$seurday&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>".t("Seuraava")." >></a></th>
 		</tr>
 		</table>";
 
@@ -750,9 +823,9 @@ while ($date != $whileloppu) {
 				and pvmalku  <= '$year-$kuu-$paiva $date:00'
 				and pvmloppu >= '$year-$kuu-$paiva $date:00'
 				and kokopaiva = ''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
-	while ($row=mysql_fetch_array($result)) {
+	while ($row=mysql_fetch_assoc($result)) {
 		//tutkitaan kuinka monta p‰‰llekk‰ist‰ on parhaimmillaan...
 		if (mysql_num_rows($result)>$max) {
 			$max = mysql_num_rows($result);
@@ -795,7 +868,7 @@ while ($kello_nyt != $whileloppu) {
 				$konsernit
 				HAVING pvmalku  = '$year-$kuu-$paiva $kello_nyt:00'
 				order by kesto desc, pvmalku";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	//lasketaan montako p‰‰llekk‰ist‰ on t‰h‰n kellonaikaan
 	$aquery = "	SELECT
@@ -811,14 +884,14 @@ while ($kello_nyt != $whileloppu) {
 				pvmalku  <= '$year-$kuu-$paiva $kello_nyt:00'
 				and pvmalku > '$year-$kuu-$paiva 00:00:00'
 				and pvmloppu >  '$year-$kuu-$paiva $kello_nyt:00'";
-	$aresult = mysql_query($aquery) or pupe_error($aquery);
+	$aresult = pupe_query($aquery);
 
 	$nyt = mysql_num_rows($aresult);
 	$tyhjaa = $max-$nyt;
 
 	//kirjoitetaan tiedot tauluun (paitsi jos ollaa lis‰‰m‰ss‰ uutta t‰h‰n ja taulu oisi tyhj‰)
 	echo "<tr>";
-	echo "<td nowrap width='10%'>$kello_nyt <a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>".t("Lis‰‰")."</a></td>";
+	echo "<td nowrap width='10%'>$kello_nyt <a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>".t("Lis‰‰")."</a></td>";
 
 	if ($kello_nyt == $lisayskello) {
 		echo $lisays;
@@ -827,7 +900,7 @@ while ($kello_nyt != $whileloppu) {
 
 		if (mysql_num_rows($result) > 0) {
 
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 
 				$kesto=round(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
 
@@ -836,8 +909,8 @@ while ($kello_nyt != $whileloppu) {
 					$query = "	SELECT *
 								from asiakas
 								where tunnus = '$row[liitostunnus]' ".str_ireplace("kalenteri.", "", $konsernit);
-					$asres = mysql_query($query) or pupe_error($query);
-					$asiak = mysql_fetch_array($asres);
+					$asres = pupe_query($query);
+					$asiak = mysql_fetch_assoc($asres);
 				}
 
 				if ($kons == 1) {
@@ -868,8 +941,8 @@ while ($kello_nyt != $whileloppu) {
 								FROM avainsana
 								WHERE laji = 'KALETAPA' and selitetark='$row[tapa]' ".str_ireplace("kalenteri.", "", $konsernit)."
 								ORDER BY selite+0, laji, jarjestys, selite";
-					$varires = mysql_query($query) or pupe_error($query);
-					$varirow = mysql_fetch_array($varires);
+					$varires = pupe_query($query);
+					$varirow = mysql_fetch_assoc($varires);
 
 					if ($varirow["selitetark_2"] != "") {
 						$varilisa = "background-color: $varirow[selitetark_2];";
@@ -878,7 +951,7 @@ while ($kello_nyt != $whileloppu) {
 
 				// Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
 				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
-					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
+					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
 				}
 				elseif ($row['tyyppi'] == 'asennuskalenteri') {
 					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>",t("Asennustyˆ")," $row[liitostunnus] ";
@@ -896,7 +969,24 @@ while ($kello_nyt != $whileloppu) {
 					}
 				}
 
-				echo "<br>$row[kentta01]</td>";
+				echo "<br>$row[kentta01]<br />";
+
+				$query = "	SELECT *
+							from liitetiedostot
+							where yhtio = '$kukarow[yhtio]'
+							and liitos  = 'kalenterimerkint‰'
+							and liitostunnus = '$row[tunnus]'";
+				$liiteres = pupe_query($query);
+
+				if (mysql_num_rows($liiteres) > 0) {
+					echo "<br />";
+
+					while ($liiterow = mysql_fetch_assoc($liiteres)) {
+						echo "<a href=\"#\" onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[filename]</a>&nbsp;";
+					}
+				}
+
+				echo "</td>";
 			}
 
 			if ($tyhjaa > 0) {
@@ -922,5 +1012,3 @@ echo "</tr>";
 echo "</table>";
 
 require ("inc/footer.inc");
-
-?>

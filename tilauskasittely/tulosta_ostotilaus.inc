@@ -419,15 +419,18 @@
 				else {
 
 					if ($row["toim_tuoteno"] != "") {
-						$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],$thispage, $norm);
+						list($ff_string, $ff_font) = pdf_fontfit($row["toim_tuoteno"], 140, $pdf, $norm);
+						$pdf->draw_text(45,  $kala, $ff_string,$thispage, $ff_font);
 					}
 					else {
-						$pdf->draw_text(45,  $kala, $row["tuoteno"], $thispage, $norm);
+						list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+						$pdf->draw_text(45,  $kala, $ff_string, $thispage, $ff_font);
 					}
 
-					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"])) {
-						$oikpos = $pdf->strlen("(".$row["tuoteno"].")", $pieni);
-						$pdf->draw_text(290-$oikpos, $kala, "(".$row["tuoteno"].")", $thispage, $pieni);
+					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"]) AND strtoupper($row["toim_tuoteno"] != "")) {
+						list($ff_string, $ff_font) = pdf_fontfit("(".$row["tuoteno"].")", 110, $pdf, $pieni);
+						$oikpos = $pdf->strlen($ff_string, $ff_font);
+						$pdf->draw_text(290-$oikpos, $kala, $ff_string, $thispage, $ff_font);
 					}
 				}
 

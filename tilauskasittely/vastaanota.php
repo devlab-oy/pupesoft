@@ -339,13 +339,15 @@
 					$t4[$tun] = $paikkarow['hyllytaso'];
 				}
 			}
-			if ($eankoodi[$tun]!= '') {
+
+			if ($eankoodi[$tun] != '') {
 				$query = "	UPDATE tuote
 							SET eankoodi = '$eankoodi[$tun]',
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tilausrivirow[tuoteno]'";
+							AND tuoteno = '$tilausrivirow[tuoteno]'
+							AND eankoodi != '$eankoodi[$tun]'";
 				$resulteankoodi = pupe_query($query);
 			}
 

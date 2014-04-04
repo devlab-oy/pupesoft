@@ -42,7 +42,7 @@
 	}
 
 	// haetaan halutut varastotaphtumat
-	$query  = "	SELECT yhtio, tunnus, tapvm, month(tapvm) KUUKAUSI
+	$query  = "	SELECT yhtio, tunnus, date_format(tapvm, '%Y%m%d') tapvm, month(tapvm) KUUKAUSI
 				FROM lasku
 				WHERE yhtio  = '$kukarow[yhtio]'
 				and tila     = 'U'
@@ -60,7 +60,7 @@
 
 		while ($laskurow = mysql_fetch_assoc($result)) {
 
-			$query  = "	SELECT round(sum(tilausrivi.rivihinta-tilausrivi.kate), 2) varmuutos, group_concat(tilausrivi.tunnus) tunnukset
+			$query  = "	SELECT round(sum(tilausrivi.rivihinta-ifnull(tilausrivi.kate_korjattu, tilausrivi.kate)), 2) varmuutos, group_concat(tilausrivi.tunnus) tunnukset
 						FROM tilausrivi
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
@@ -71,7 +71,11 @@
 
 			if ($rivirow['tunnukset'] != "") {
 
-				$query  = "	SELECT sum(summa) varmuutos, count(*) varmuma, group_concat(tunnus) varmuutokset
+				$query  = "	SELECT sum(summa) varmuutos, count(*) varmuma, group_concat(tunnus) varmuutokset,
+							max(tapvm) maxtapvm,
+							if(max(tapvm) >= '2014-01-01', 1, 0) crossyearerror,
+							group_concat(if(tapvm >= '2014-01-01', tunnus, 0)) tanvuodentunnarit,
+							group_concat(if(tapvm  < '2014-01-01', tunnus, 0)) viimevuodentunnarit
 							FROM tiliointi
 							WHERE yhtio  = '$kukarow[yhtio]'
 							and ltunnus  = $laskurow[tunnus]
@@ -80,7 +84,11 @@
 				$tilires = pupe_query($query);
 				$tilirow = mysql_fetch_assoc($tilires);
 
-				$query  = "	SELECT sum(summa) varasto, group_concat(tunnus) varastot
+				$query  = "	SELECT sum(summa) varasto, group_concat(tunnus) varastot,
+							max(tapvm) maxtapvm,
+							if(max(tapvm) >= '2014-01-01', 1, 0) crossyearerror,
+							group_concat(if(tapvm >= '2014-01-01', tunnus, 0)) tanvuodentunnarit,
+							group_concat(if(tapvm  < '2014-01-01', tunnus, 0)) viimevuodentunnarit
 							FROM tiliointi
 							WHERE yhtio  = '$kukarow[yhtio]'
 							and ltunnus  = $laskurow[tunnus]
@@ -109,15 +117,106 @@
 
 				if (abs($ero1) > 0.5 or abs($ero2) > 0.5 or abs($ero3) > 0.5) {
 
-					if ($korjaa) {
+					if ($korjaa and (int) $laskurow['tapvm'] < 20140101) {
+
+						 if ($tilirow['crossyearerror'] == 1) {
+	 						// Uusin varastonmuutos
+	 						$maxmuutos = explode(",", $tilirow["tanvuodentunnarit"]);
+							$tapvm     = $tilirow["maxtapvm"];
+						 }
+						 else {
+ 	 						// Uusin varastonmuutos viime vuoden puolelta
+ 	 						$maxmuutos = explode(",", $tilirow["viimevuodentunnarit"]);
+							$tapvm     = "2014-01-01";
+						 }
+
+						sort($maxmuutos);
+
+						$varmuutun = array_pop($maxmuutos);
+
+						// Tehdään uusi varastonmuutostiliöinti
+						$params = array(
+							'summa' 		=> round($tilirow["varmuutos"] * -1, 2),
+							'tapvm'			=> $tapvm,
+							'korjattu' 		=> '',
+							'korjausaika' 	=> '',
+							'selite' 		=> "Korjausajo 20.3.2014",
+							'laatija' 		=> $kukarow['kuka'],
+							'laadittu' 		=> date('Y-m-d H:i:s'),
+						);
+
+						// Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
+						kopioitiliointi($varmuutun, "", $params);
+
+						// Tehdään uusi varastonmuutostiliöinti
+						$params = array(
+							'summa' 		=> round($rivirow["varmuutos"], 2),
+							'tapvm'			=> $tapvm,
+							'korjattu' 		=> '',
+							'korjausaika' 	=> '',
+							'selite' 		=> "Korjausajo 20.3.2014",
+							'laatija' 		=> $kukarow['kuka'],
+							'laadittu' 		=> date('Y-m-d H:i:s'),
+						);
+
+						// Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
+						kopioitiliointi($varmuutun, "", $params);
+
+						################################################################################################
+
+						 if ($tilirow['crossyearerror'] == 1) {
+	 						// Uusin varasto
+	 						$maxmuutos = explode(",", $vararow["tanvuodentunnarit"]);
+							$tapvm     = $vararow["maxtapvm"];
+						 }
+						 else {
+		 					// Uusin varasto viime vuoden puolelta
+		 					$maxmuutos = explode(",", $vararow["viimevuodentunnarit"]);
+							$tapvm     = "2014-01-01";
+						 }
+
+						sort($maxmuutos);
+
+						$vartun = array_pop($maxmuutos);
+
+						// Tehdään uusi varastonmuutostiliöinti
+						$params = array(
+							'summa' 		=> round($vararow["varasto"] * -1, 2),
+							'tapvm'			=> $tapvm,
+							'korjattu' 		=> '',
+							'korjausaika' 	=> '',
+							'selite' 		=> "Korjausajo 20.3.2014",
+							'laatija' 		=> $kukarow['kuka'],
+							'laadittu' 		=> date('Y-m-d H:i:s'),
+						);
+
+						// Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
+						kopioitiliointi($vartun, "", $params);
+
+						// Tehdään uusi varastonmuutostiliöinti
+						$params = array(
+							'summa' 		=> round($rivirow["varmuutos"]*-1, 2),
+							'tapvm'			=> $tapvm,
+							'korjattu' 		=> '',
+							'korjausaika' 	=> '',
+							'selite' 		=> "Korjausajo 20.3.2014",
+							'laatija' 		=> $kukarow['kuka'],
+							'laadittu' 		=> date('Y-m-d H:i:s'),
+						);
+
+						// Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
+						kopioitiliointi($vartun, "", $params);
+					}
+					elseif ($korjaa) {
 						// Korjataan tositteet
 						if ($tilirow['varmuutokset'] != "") {
 
 							// Tehdään uusi varastonmuutostiliöinti
 							$params = array(
-								'summa' 		=> round($taparow["varmuutos"], 2),
+								'summa' 		=> round($rivirow["varmuutos"], 2),
 								'korjattu' 		=> '',
 								'korjausaika' 	=> '',
+								'selite' 		=> "Korjausajo 20.3.2014",
 								'laatija' 		=> $kukarow['kuka'],
 								'laadittu' 		=> date('Y-m-d H:i:s'),
 							);
@@ -142,9 +241,10 @@
 
 							// Tehdään uusi varastonmuutostiliöinti
 							$params = array(
-								'summa' 		=> round($taparow["varmuutos"] * -1, 2),
+								'summa' 		=> round($rivirow["varmuutos"] * -1, 2),
 								'korjattu' 		=> '',
 								'korjausaika' 	=> '',
+								'selite' 		=> "Korjausajo 20.3.2014",
 								'laatija' 		=> $kukarow['kuka'],
 								'laadittu' 		=> date('Y-m-d H:i:s'),
 							);
@@ -166,7 +266,7 @@
 						}
 					}
 
-					$eroyht += $ero2;
+					$eroyht += $ero1;
 				}
 			}
 

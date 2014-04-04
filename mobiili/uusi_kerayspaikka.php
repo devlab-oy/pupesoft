@@ -37,6 +37,7 @@ else {
 		'tilausten_lukumaara' => $tilausten_lukumaara,
 		'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
 		'tuotenumero' => $tuotenumero,
+		'ennaltakohdistettu' => $ennaltakohdistettu,
 	);
 
 	$url = http_build_query($data);

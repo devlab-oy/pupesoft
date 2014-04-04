@@ -396,7 +396,15 @@ find ${BACKUPDIR} -type f -mtime +${BACKUPPAIVAT} -delete
 
 # Synkataan backuppi Amazon S3:een
 if [ ! -z "${S3BUCKET}" ]; then
-	s3cmd --no-progress --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
+
+	# Katsotaan mistä löytyy config file
+	if [ -f "/home/devlab/secret/s3cfg" ]; then
+		S3CONFIG="/home/devlab/secret/s3cfg"
+	else
+		S3CONFIG="/root/.s3cfg"
+	fi
+
+	s3cmd --config=${S3CONFIG} --no-progress --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
 	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 	echo ": S3 copy done."
 fi

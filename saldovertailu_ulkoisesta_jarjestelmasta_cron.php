@@ -133,7 +133,8 @@
 							pupesoft_sahkoposti($params);
 						}
 
-						unlink($path.$file);
+						// siirret‰‰n tiedosto done-kansioon
+						rename($path.$file, $path.'done/'.$file);
 					}
 				}
 			}

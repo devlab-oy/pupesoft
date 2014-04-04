@@ -233,36 +233,21 @@ if ($tee == "SYOTA") {
 
 	echo "<tr><th>".t("Kieli").":&nbsp;</th><td>";
 
-	$query  = "show columns from sanakirja";
-	$fields =  mysql_query($query);
-
 	if (!isset($lang)) $lang = array();
 
-	while ($apurow = mysql_fetch_array($fields)) {
+	foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
 		$sel = "";
 
-		if ($tunnus == 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "laatija" and $apurow[0] != "luontiaika" and $apurow[0] != "muutospvm" and $apurow[0] != "muuttaja" and $apurow[0] != "synkronoi") {
-			if ($rivi["kieli"] == $apurow[0] or ($rivi["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"]) and count($lang) == 0) $sel = "CHECKED";
-			if (in_array($apurow[0], $lang)) $sel = "CHECKED";
+		if ($tunnus == 0) {
+			if ($rivi["kieli"] == $sanakirja_kieli or ($rivi["kieli"] == "" and $sanakirja_kieli == $yhtiorow["kieli"]) and count($lang) == 0) $sel = "CHECKED";
+			if (in_array($sanakirja_kieli, $lang)) $sel = "CHECKED";
 
-			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
-			$maare = mysql_query($query);
-			$maaro = mysql_fetch_array($maare);
-			$maa   = strtolower($maaro["nimi"]);
-			if ($maa=="") $maa = $apurow[0];
-			echo "<input type='checkbox' name='lang[]' value='$apurow[0]' $sel>".t($maa)."<br>";
+			echo "<input type='checkbox' name='lang[]' value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."<br>";
 		}
-		elseif($tunnus > 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "laatija" and $apurow[0] != "luontiaika" and $apurow[0] != "muutospvm" and $apurow[0] != "muuttaja" and $apurow[0] != "synkronoi") {
-			if ($rivi["kieli"] == $apurow[0]) {
-				$sel = "CHECKED";
-			}
+		elseif ($tunnus > 0) {
+			if ($rivi["kieli"] == $sanakirja_kieli) $sel = "CHECKED";
 
-			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
-			$maare = mysql_query($query);
-			$maaro = mysql_fetch_array($maare);
-			$maa   = strtolower($maaro["nimi"]);
-			if ($maa=="") $maa = $apurow[0];
-			echo "<input type='radio' name='lang[]' value='$apurow[0]' $sel>".t($maa)."<br>";
+			echo "<input type='radio' name='lang[]' value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."<br>";
 		}
 	}
 	echo "</td>";

@@ -815,6 +815,11 @@
 			$saldoaikalisa = "";
 		}
 
+		// Jos ollaan automaattisesti toimittamassa JT-rivejä ja halutaan vaan toimittaa vain osatoimituskiellossa olevia tilauksia
+		if ($yhtiorow["automaattinen_jt_toimitus"] == "U" and $from_varastoon_inc == "varastoon.inc") {
+			$laskulisa .= " and lasku.osatoimitus != '' ";
+		}
+
 		$summarajauslisa = '';
 		$summarajausfail = '';
 		$query_ale_lisa = generoi_alekentta('M');
@@ -921,15 +926,23 @@
 							lasku.jtkielto,
 							'' as jt_manual
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
-							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
+								and lasku.tunnus = tilausrivi.otunnus
+								and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X'))
+								$laskulisa
+								$summarajauslisa)
+							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
+								and tuote.tuoteno = tilausrivi.tuoteno
+								$tuotelisa)
 							$toimittajalisa
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi 			= 'E'
 							and tilausrivi.var 		   	   != 'O'
 							and tilausrivi.laskutettuaika 	= '0000-00-00'
 							and tilausrivi.varattu 			> 0
-							and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
+							and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0)
+								or (tilausrivi.tunnus = tilausrivi.perheid2)
+								or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
 							$tilausrivilisa
 							$order
 							$limit";
@@ -2277,16 +2290,10 @@
 
 		echo "<br><font class='message'>".t("Valinnat")."</font><br><br>";
 
-		//näytetään "toimita varastosta" listauksessa vain varastot joista käyttäjällä on oikeus myydä (jos kuka.varasto on tyhjä tai 0, saa käyttäjä myydä kaikista normaalivarastoista)
-		if (isset($kukarow["varasto"]) AND (int) $kukarow["varasto"] > 0) {
-			$wherelisa = " AND tunnus IN ({$kukarow["varasto"]})";
-		}
-
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tyyppi != 'P'
-					$wherelisa
 					ORDER BY tyyppi, nimitys";
 		$vtresult = pupe_query($query);
 

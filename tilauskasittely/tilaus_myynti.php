@@ -850,14 +850,7 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 	$tyhjenna 	= "JOO";
 }
 
-if ($sahkoinen_lahete and $kukarow["extranet"] == "" and (int) $kukarow['kesken'] > 0) {
-
-	$query = "	SELECT liitostunnus
-				FROM lasku
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$kukarow['kesken']}'";
-	$liitostunnus_res = pupe_query($query);
-	$liitostunnus_row = mysql_fetch_assoc($liitostunnus_res);
+if ($sahkoinen_lahete and $kukarow["extranet"] == "" and (int) $kukarow['kesken'] > 0 and !empty($laskurow)) {
 
 	$query = "	SELECT asiakkaan_avainsanat.*
 				FROM asiakkaan_avainsanat
@@ -865,7 +858,7 @@ if ($sahkoinen_lahete and $kukarow["extranet"] == "" and (int) $kukarow['kesken'
 				and asiakkaan_avainsanat.laji = 'futur_sahkoinen_lahete'
 				and asiakkaan_avainsanat.avainsana != ''
 				and asiakkaan_avainsanat.tarkenne != ''
-				AND asiakkaan_avainsanat.liitostunnus = '{$liitostunnus_row['liitostunnus']}'";
+				AND asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'";
 	$as_avain_chk_res = pupe_query($query);
 
 	if (mysql_num_rows($as_avain_chk_res) > 0) {

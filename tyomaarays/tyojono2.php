@@ -56,6 +56,7 @@ if ($ajax_request) {
 require_once('tilauskasittely/tarkastuspoytakirja_pdf.php');
 require_once('tilauskasittely/poikkeamaraportti_pdf.php');
 require_once('tilauskasittely/tyolista_pdf.php');
+require_once('tilauskasittely/laskutuspoytakirja_pdf.php');
 
 echo "<font class='head'>".t("Laitehuoltojen työjono").":</font>";
 echo "<hr/>";
@@ -114,6 +115,16 @@ if ($toim == 'TEHDYT_TYOT') {
 			if (!empty($pdf_tiedosto)) {
 				echo_tallennus_formi($pdf_tiedosto, ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? t("Tarkastuspöytakirja") : t("Poikkeamaraportti")), 'pdf');
 			}
+		}
+	}
+	if ($request['ala_tee'] == 'tulosta_laskutuspoytakirja') {
+		$pdf_tiedosto = \PDF\Laskutuspoytakirja\hae_laskutuspoytakirja($request['lasku_tunnukset']);
+
+		if (!empty($pdf_tiedosto)) {
+			echo_tallennus_formi($pdf_tiedosto, 'Laskutuspoytakirja', 'pdf');
+		}
+		else {
+			echo t("Laskutuspoytäkirjan generointi epäonnistui");
 		}
 	}
 }

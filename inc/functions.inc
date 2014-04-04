@@ -16649,9 +16649,9 @@ if (!function_exists("tee_keraysera")) {
 			$kukarow['debugstring'] .= "<font class='head'>".t("Keräyserädebug")."</font><hr><br><br>\n";
 			$kukarow['debugstring'] .= "<font class='head'>".t("Kerääjä").": $kukarow[kuka], $kukarow[nimi]. ($kukarow[keraajanro])</font><br><br>\n";
 		}
-		
+
 		$tilat = "'N'";
-		
+
 		if ($kerataanko_myös_varastosiirrot) {
 			$tilat = "'N','A'";
 		}

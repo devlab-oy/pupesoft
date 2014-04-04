@@ -506,13 +506,18 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 			// Jos on useampi valmiste
 			if ((float) $kaikenkaikkiaan > 1) {
 
-				if ((float) $kaikenkaikkiaan_arvot > 0) {
-					//jyvitetään $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan
-					$uusiarvo = round($uusiarvo * (($isavarattu * $valmisterow["kehahin"])/$kaikenkaikkiaan_arvot), 6);
+				if( isset($valmisterow['valmistus_painoarvo']) ) {
+					$uusiarvo = $valmisterow["kehahin"] * $kaikenkaikkiaan_arvot;
 				}
 				else {
-					//jyvitetään $uusiarvo valmisteille valmisteiden määrän mukaan
-					$uusiarvo = round($uusiarvo/$kaikenkaikkiaan, 6);
+					if ((float) $kaikenkaikkiaan_arvot > 0) {
+						//jyvitetään $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan
+						$uusiarvo = round($uusiarvo * (($isavarattu * $valmisterow["kehahin"])/$kaikenkaikkiaan_arvot), 6);
+					}
+					else {
+						//jyvitetään $uusiarvo valmisteille valmisteiden määrän mukaan
+						$uusiarvo = round($uusiarvo/$kaikenkaikkiaan, 6);
+					}
 				}
 			}
 

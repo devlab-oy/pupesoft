@@ -7,8 +7,8 @@ $(document).ready(function() {
 
 	// Liipaise hintalaskurit käyntiin.
 	$.each(hinta_laskurit, function(perheid, hinta_laskuri) {
-		// Jos vain korkeintaan yksi valmiste, ei laskuria tarvita.
-		if( hinta_laskuri.valmisteet.length<2 )
+		// Jos vain korkeintaan yksi valmiste tai ei raaka-aineita, ei laskuria tarvita.
+		if( hinta_laskuri.valmisteet.length<2 || hinta_laskuri.raakaaineiden_kehahinta_summa==0 )
 			return true;
 
 		new Hinta_laskuri(perheid, hinta_laskuri.raakaaineiden_kehahinta_summa, hinta_laskuri.valmisteiden_painoarvot);
@@ -73,13 +73,6 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
 		me.valmiste_lukko_inputit[ $input.data('tunnus') ] = $input;
 	});
 
-	// Painoarvo-hiddeninputit, tunnus ja jQuery elementti avaimena ja arvona.
-	this.valmiste_painoarvo_inputit = {};
-	$('input[name^="valmiste_painoarvo"][data-perheid="'+ this.perheid +'"]').each(function(index, input) {
-		var $input = $(input);
-		me.valmiste_painoarvo_inputit[ $input.data('tunnus') ] = $input;
-	});
-
 	$.each(this.valmiste_hinta_inputit, function(tunnus, $input) {
 		// Kun valmisteinput fokusoidaan, tallennetaan vanha arvo ja checkataan lukko päälle.
 		$input.focus(function() {
@@ -126,8 +119,10 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
 			var painoarvo = $input.val() / me.raakaaineiden_kehahinta_summa;
 
 			me.valmisteiden_painoarvot[tunnus] = painoarvo;
-			me.valmiste_painoarvo_inputit[tunnus].val(painoarvo);
 		});
+
+		// Päivitä painoarvot kantaan aina kun ne päivittyvät.
+		$.post('', {ajax_toiminto: 'tallenna_painoarvot', no_head: 'yes', painoarvot: this.valmisteiden_painoarvot});
 	};
 
 	// Laske valmisteiden hinnat painoarvojen mukaan.

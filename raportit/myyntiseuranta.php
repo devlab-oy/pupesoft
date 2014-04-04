@@ -275,6 +275,7 @@
 			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($alv_prosentit != '')		$alv_prosentitchk 		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
+			if ($ytun_yhteyshenk != '')		$ytun_yhteyshenkchk		= "CHECKED";
 			if ($naytatoimtuoteno != '')	$naytatoimtuotenochk 	= "CHECKED";
 
 			echo "<table>
@@ -304,6 +305,7 @@
 				<option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
 				</select></td></tr>
 				<tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytun_laajattied' value='laajat' {$ytun_laajattiedchk}></td></tr>
+				<tr><td class='spec'>".t("Näytä yhteyshenkilöiden tiedot").":</td><td><input type='checkbox' name='ytun_yhteyshenk' value='yhteyshenkilot' {$ytun_yhteyshenkchk}></td></tr>
 				</table>
 				</tr>
 				<tr>

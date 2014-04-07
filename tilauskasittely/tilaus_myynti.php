@@ -693,7 +693,7 @@ if(isset($laskurow)){
 	        	}
 	      	}
 	    }
-	    if(count($kukarow_varasto) < 1){
+	    if(count($kukarow_varasto) < 1 and $kukarow_varasto[0] != ""){
 	    	$kukarow_varasto = explode(",", $kukarow["varasto"]);
 	    }
 	}

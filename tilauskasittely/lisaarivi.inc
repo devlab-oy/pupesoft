@@ -240,7 +240,7 @@
 	elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
 		$varasto = array((int) $laskurow["varasto"]);
 	}
-	elseif (isset($kukarow_varasto)) {
+	elseif (isset($kukarow_varasto) and count($kukarow_varasto) > 0) {
 		$varasto = $kukarow_varasto;
 	}
 	else {

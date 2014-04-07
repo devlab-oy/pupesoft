@@ -1,6 +1,5 @@
 <?php
 
-	if (!isset($piilota_tuoteperheen_lapset)) $piilota_tuoteperheen_lapset = '';
 
 	if (@include("../inc/parametrit.inc"));
 	elseif (@include("parametrit.inc"));
@@ -426,8 +425,7 @@
 			$jarjestys = 'tuote.tuoteno';
 		}
 	}
-
-	$piilota_tuoteperheen_lapset = isset($_COOKIE['piilota_tuoteperheen_lapset']) ? $_COOKIE['piilota_tuoteperheen_lapset'] : '' ;
+	if (!isset($piilota_tuoteperheen_lapset)) $piilota_tuoteperheen_lapset = '';
 	if ($piilota_tuoteperheen_lapset != '') {
 		$ptlcheck = "CHECKED";
 		$ulisa .= "&piilota_tuoteperheen_lapset=checked"; 

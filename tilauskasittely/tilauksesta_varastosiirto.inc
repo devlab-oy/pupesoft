@@ -117,7 +117,7 @@ if (!function_exists('normaali_varastosiirto')) {
 		$tilausrivi_tunnukset = array_column($myyntitilaus['tilausrivit'], 'tunnus');
 		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
 
-		aseta_kukarow_kesken($varastosiirto['tunnus']);
+		aseta_kukarow_kesken($myyntitilaus['tunnus']);
 
 		foreach ($kommentit as $kommentti) {
 			echo "<font class='message'>$kommentti</font>";
@@ -221,6 +221,10 @@ if (!function_exists('aseta_kukarow_kesken')) {
 
 	function aseta_kukarow_kesken($kesken) {
 		global $kukarow, $yhtiorow;
+
+		if ($kesken === '' or $kesken === null) {
+			return false;
+		}
 
 		$query = "	UPDATE kuka
 					SET kesken = {$kesken}

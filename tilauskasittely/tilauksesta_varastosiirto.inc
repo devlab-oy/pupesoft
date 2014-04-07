@@ -14,7 +14,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 	 * @return boolean
 	 */
 	function tilauksesta_varastosiirto($myyntitilaus_tunnus, $kirjanpidollinen_varastosiirto = false) {
-		global $yhtiorow, $kukarow, $toim, $pupe_root_polku;
+		global $yhtiorow, $kukarow;
 
 		if (empty($myyntitilaus_tunnus)) {
 			return false;

@@ -657,6 +657,49 @@
 		}
 
 		if ($poistettu > 0) echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
+
+		$query = "	SELECT t.*
+					FROM tuotepaikat AS t
+					JOIN varastopaikat AS v
+					ON ( v.yhtio = t.yhtio
+					AND v.alkuhyllyalue = t.hyllyalue
+					AND v.alkuhyllynro = t.hyllynro )
+					WHERE t.yhtio = '{$kukarow['yhtio']}'
+					AND t.saldo = 0";
+		$result = pupe_query($query);
+
+		$poistettu = 0;
+		while($poistettava_tuotepaikka = mysql_fetch_assoc($result)) {
+			$query = "	SELECT *
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$poistettava_tuotepaikka['tuoteno']}'
+						AND hyllyalue = '{$poistettava_tuotepaikka['hyllyalue']}'
+						AND hyllynro = '{$poistettava_tuotepaikka['hyllynro']}'
+						AND hyllytaso = '{$poistettava_tuotepaikka['hyllytaso']}'
+						AND hyllyvali = '{$poistettava_tuotepaikka['hyllyvali']}'
+						AND laskutettuaika = '0000-00-00'";
+			$avoinrivi_result = pupe_query($query);
+			if (mysql_num_rows($avoinrivi_result) > 0) {
+				continue;
+			}
+
+			$query = "	DELETE
+						FROM tuotepaikat AS t
+						JOIN varastopaikat AS v
+						ON ( v.yhtio = t.yhtio
+						AND v.alkuhyllyalue = t.hyllyalue
+						AND v.alkuhyllynro = t.hyllynro )
+						WHERE t.yhtio = '{$kukarow['yhtio']}'
+						AND t.tunnus = {$poistettava_tuotepaikka['tunnus']}";
+			$result = pupe_query($query);
+
+			if (mysql_affected_rows() > 0) {
+				$poistettu++;
+			}
+		}
+
+		if ($poistettu > 0) echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu saldo = 0 ja default varastopaikka tuotepaikkaa.\n";
 	}
 
 	if (!$php_cli) {

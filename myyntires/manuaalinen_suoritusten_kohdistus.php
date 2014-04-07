@@ -195,7 +195,6 @@ if ($tila == 'tee_kohdistus') {
 				suoritus.valkoodi valkoodi,
 				suoritus.kurssi kurssi,
 				suoritus.asiakas_tunnus asiakastunnus,
-				suoritus.kirjpvm maksupvm,
 				suoritus.maksupvm maksupvm_clean,
 				suoritus.ltunnus ltunnus,
 				suoritus.nimi_maksaja nimi_maksaja,
@@ -240,8 +239,14 @@ if ($tila == 'tee_kohdistus') {
 		$maksupvmint   = (int) date('Ymd', mktime(0,0,0, $makpvm[1], $makpvm[2], $makpvm[0]));
 
 		if ($maksupvmint < $myyresktilalk) {
-			$maksupvm    = $yhtiorow["myyntireskontrakausi_alku"];
-			$maksupvmint = $myyresktilalk;
+			if ($yhtiorow["vanhojen_suoritusten_kohdistus"] == "") {
+				$maksupvm    = $yhtiorow["myyntireskontrakausi_alku"];
+				$maksupvmint = $myyresktilalk;
+			}
+			elseif ($yhtiorow["vanhojen_suoritusten_kohdistus"] == "K") {
+				$maksupvm = date('Y-m-d');
+				$maksupvmint = date('Ymd');
+			}
 		}
 		elseif ($maksupvmint > $myyresktillop) {
 			$maksupvm    = $yhtiorow["myyntireskontrakausi_loppu"];
@@ -490,7 +495,7 @@ if ($tila == 'tee_kohdistus') {
 		// Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
 		$lapvm = explode("-", $lasku["tapvm"]);
 		$lapvmint = (int) date('Ymd', mktime(0,0,0, $lapvm[1], $lapvm[2], $lapvm[0]));
-
+echo "507 laskupvm $lapvm laskupvmInt $lapvmint maksupvmint $maksupvmint <br><br>";
 		// Jos suoritus on vanhempi kuin lasku, niin merkataan lasku maksetuksi laskun p‰iv‰m‰‰r‰ll‰
 		if ($maksupvmint < $lapvmint) {
 			$laskun_maksupvm = $lasku["tapvm"];

@@ -3511,6 +3511,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'vanhojen_suoritusten_kohdistus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Suoritukset kohdistetaan per avoimen kauden ensimm‰inen p‰iv‰")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Suoritukset kohdistetaan kohdistusp‰iv‰m‰‰r‰n mukaan")."</option>";
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'luottorajan_ylitys') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

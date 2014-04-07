@@ -128,6 +128,14 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	mysql_data_seek($tilausrivit_talteen, 0);
 	$eka_tuote = TRUE;
 
+	// Haetaan asiakkaan tiedot
+	$query = "	SELECT *
+				FROM asiakas
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$laskurow['liitostunnus']}'";
+	$asiakasressi = pupe_query($query);
+	$asiakasrowi = mysql_fetch_assoc($asiakasressi);
+
 	//loopataan myyntierätiedot per tilausrivi
 	while ($tilausrivi = mysql_fetch_assoc($tilausrivit_talteen)) {
 		// Haetaan tuotteen tiedot
@@ -137,14 +145,6 @@ elseif(isset($lajit) and count($lajit) > 0) {
 					AND tuoteno = '{$tilausrivi['tuoteno']}'";
 		$tuoteressi = pupe_query($query);
 		$tuoterowi = mysql_fetch_assoc($tuoteressi);
-
-		// Haetaan asiakkaan tiedot
-		$query = "	SELECT *
-					FROM asiakas
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$laskurow['liitostunnus']}'";
-		$asiakasressi = pupe_query($query);
-		$asiakasrowi = mysql_fetch_assoc($asiakasressi);
 
 		// Haetaan kaikki tuotteen alkuperämaat
 		$query = "	SELECT group_concat(DISTINCT alkuperamaa) kaikkimaat

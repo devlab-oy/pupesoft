@@ -20,7 +20,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 
 			aseta_kukarow_kesken(0);
 			//Kaikilla myyntitilausriveillä on sama toimitustapa, joka määritellään avainsanoissa SIIRTOVARASTOT. Tällöin voidaan viitata indeksillä.
-			$siirtolista = luo_siirtolista($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], $lahde_ja_kohde_varasto_yhdistelma['kohdevarasto_tunnus'], $myyntitilausrivit[0]['toimitustapa_tunnus']);
+			$siirtolista = luo_siirtolista($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], $lahde_ja_kohde_varasto_yhdistelma['kohdevarasto_tunnus'], $myyntitilausrivit[0]['toimitustapa_tunnus'], $myyntitilaus);
 
 			if (empty($siirtolista)) {
 				return false;
@@ -115,7 +115,7 @@ if (!function_exists('luo_siirtolistarivi')) {
 
 if (!function_exists('luo_siirtolista')) {
 
-	function luo_siirtolista($lahdevarasto_tunnus, $kohdevaraston_tunnus, $toimitustapa_tunnus) {
+	function luo_siirtolista($lahdevarasto_tunnus, $kohdevaraston_tunnus, $toimitustapa_tunnus, $myyntitilaus) {
 		global $kukarow, $yhtiorow;
 
 		$jatka = 'joo';
@@ -125,11 +125,14 @@ if (!function_exists('luo_siirtolista')) {
 		$toimpp = $kerpp = date("j");
 		$toimkk = $kerkk = date("n");
 		$toimvv = $kervv = date("Y");
-		$comments = $kukarow["nimi"]." ".t("Automaattinen varastosiirron luonti myyntitilauksen perusteella");
-		$viesti = $kukarow["nimi"]." ".t("Automaattinen varastosiirron luonti myyntitilauksen perusteella");
+		$comments = $kukarow["nimi"]." ".t("Automaattinen varastosiirron luonti myyntitilauksen perusteella").": {$myyntitilaus['tunnus']}";
+		$viesti = $kukarow["nimi"]." ".t("Automaattinen varastosiirron luonti myyntitilauksen perusteella").": {$myyntitilaus['tunnus']}";
 		$varasto = $lahdevarasto_tunnus;
 		$toimitustapa = $toimitustapa_tunnus;
 		$toim = "SIIRTOLISTA";
+
+		$lahdevarasto = hae_varasto($lahdevarasto_tunnus);
+		$yhtio_toimipaikka = $lahdevarasto['toimipaikka'];
 
 		require ("otsik_siirtolista.inc");
 

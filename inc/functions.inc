@@ -26904,3 +26904,23 @@ if (!function_exists("onkotapahtumajariveja")) {
 		$poistolukko = "TSEKATTU";
 	}
 }
+
+if (!function_exists('hae_varasto')) {
+
+	function hae_varasto($tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($tunnus)) {
+			return false;
+		}
+
+		$query = "	SELECT *
+ 					FROM varastopaikat
+ 					WHERE yhtio = '{$kukarow['yhtio']}'
+ 					AND tunnus = {$tunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+
+}

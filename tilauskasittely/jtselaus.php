@@ -1040,6 +1040,22 @@
 						}
 					}
 
+					if ($mista_tullaan == 'MYYNTITILAUKSELTA' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $onko_suoratoimi == '') {
+						$query = "	SELECT t.tunnus AS siirtolistarivi_tunnus
+									FROM tilausrivin_lisatiedot AS tl
+									JOIN tilausrivi AS t
+									ON ( t.yhtio = tl.yhtio
+										AND t.tunnus = tl.tilausrivitunnus
+										AND t.tyyppi = 'G')
+									WHERE tl.yhtio = '{$kukarow['yhtio']}'
+									AND tl.tilausrivilinkki = {$jtrow['tunnus']}";
+						$siirtolista_result = pupe_query($query);
+
+						if (mysql_num_rows($siirtolista_result) > 0) {
+							$onko_suoratoimi = "ON";
+						}
+					}
+
 					// Ei näytetä suoratoimitusrivejä, ellei $suoratoimit ole ruksattu, sillon näytetään pelkästään suoratoimitukset
 					// Jos $suoratoimitus_rivit muuttuja on setattu niin huomioidaan sekä normit, että suoratoimit
 					if (($onko_suoratoimi == "" and $suoratoimit == "") or ($onko_suoratoimi == "ON" and $suoratoimit != "") or count($suoratoimitus_rivit) > 0) {

@@ -1,6 +1,5 @@
 <?php
 
-
 	if (@include("../inc/parametrit.inc"));
 	elseif (@include("parametrit.inc"));
 	else exit;

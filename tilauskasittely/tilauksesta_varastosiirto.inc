@@ -24,28 +24,73 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 		$myyntitilaus['tilausrivit'] = hae_tilausrivit($myyntitilaus_tunnus, $kirjanpidollinen_varastosiirto);
 
 		if ($kirjanpidollinen_varastosiirto) {
-			//Kirjanpidollisessa varastosiirrossa yhdell‰ myyntitilauksella voi olla vain 1 l‰hde-kohdevarasto kombinaatio.
-			//Kombinaatio muodostuu L‰hde: lasku.varasto kohde: lasku.yhtio_toimipaikka.varasto.first
-			$toimipaikan_varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
-			$lahde_ja_kohde_varasto_yhdistelmat = array();
-			$lahde_ja_kohde_varasto_yhdistelma = array(
-				'lahdevarasto_tunnus'	 => $myyntitilaus['varasto'],
-				'kohdevarasto_tunnus'	 => $toimipaikan_varastot[0]['tunnus'],
-			);
-
-			array_push($lahde_ja_kohde_varasto_yhdistelmat, $lahde_ja_kohde_varasto_yhdistelma);
+			$ok = kirjanpidollinen_varastosiirto($myyntitilaus);
 		}
 		else {
-			//Jokaiselle tilausriville voi m‰‰ritt‰‰ erikseen l‰hde sek‰ kohde varaston
-			//Mahdolliset kombinaatiot muodostuvat avainsana.laji = SIIRTOVARASTOT, lasku.varasto tai lasku.yhtio_toimipaikka.varastot perusteella
-			$keys = array(
-				'lahdevarasto_tunnus',
-				'kohdevarasto_tunnus'
-			);
-			$lahde_ja_kohde_varasto_yhdistelmat = array_find_unique_values($myyntitilaus['tilausrivit'], $keys);
+			$ok = normaali_varastosiirto($myyntitilaus);
 		}
 
-		$tilausrivi_tunnukset = array();
+		return $ok;
+	}
+
+}
+
+if (!function_exists('kirjanpidollinen_varastosiirto')) {
+
+	function kirjanpidollinen_varastosiirto($myyntitilaus) {
+		global $kukarow, $yhtiorow;
+
+		//Kirjanpidollisessa varastosiirrossa yhdell‰ myyntitilauksella voi olla vain 1 l‰hde-kohdevarasto kombinaatio.
+		//Kombinaatio muodostuu L‰hde: lasku.varasto kohde: lasku.yhtio_toimipaikka.varasto.first
+		$toimipaikan_varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
+		$lahde_ja_kohde_varasto_yhdistelma = array(
+			'lahdevarasto_tunnus'	 => $myyntitilaus['varasto'],
+			'kohdevarasto_tunnus'	 => $toimipaikan_varastot[0]['tunnus'],
+		);
+
+		$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
+
+		aseta_kukarow_kesken(0);
+		//Kaikilla myyntitilausriveill‰ on sama toimitustapa, joka m‰‰ritell‰‰n avainsanoissa SIIRTOVARASTOT. T‰llˆin voidaan viitata indeksill‰.
+		$varastosiirto = luo_varastosiirto($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], $lahde_ja_kohde_varasto_yhdistelma['kohdevarasto_tunnus'], $myyntitilausrivit[0]['toimitustapa_tunnus'], $myyntitilaus['tunnus']);
+
+		if (empty($varastosiirto)) {
+			return false;
+		}
+
+		aseta_kukarow_kesken($varastosiirto['tunnus']);
+		foreach ($myyntitilausrivit as $tilausrivi) {
+			$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus']);
+			linkkaa_myyntitilausrivi_varastosiirtoriviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
+		}
+
+		aseta_kukarow_kesken($myyntitilaus['tunnus']);
+
+		$varastosiirtorivit = hae_tilausrivit($varastosiirto['tunnus'], true);
+
+		$varastosiirtorivit = aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit);
+
+		paivita_myyntitilausrivien_tuotepaikat($varastosiirtorivit);
+		linkkaa_varastosiirto_myyntitilaukseen($varastosiirto, $myyntitilaus);
+
+		return true;
+	}
+
+}
+
+if (!function_exists('normaali_varastosiirto')) {
+
+	function normaali_varastosiirto($myyntitilaus) {
+		global $kukarow, $yhtiorow;
+
+		//Jokaiselle tilausriville voi m‰‰ritt‰‰ erikseen l‰hde sek‰ kohde varaston
+		//Mahdolliset kombinaatiot muodostuvat avainsana.laji = SIIRTOVARASTOT, lasku.varasto tai lasku.yhtio_toimipaikka.varastot perusteella
+		$keys = array(
+			'lahdevarasto_tunnus',
+			'kohdevarasto_tunnus'
+		);
+		$lahde_ja_kohde_varasto_yhdistelmat = array_find_unique_values($myyntitilaus['tilausrivit'], $keys);
+
 		$kommentit = array();
 		foreach ($lahde_ja_kohde_varasto_yhdistelmat as $lahde_ja_kohde_varasto_yhdistelma) {
 			$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
@@ -69,59 +114,16 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 			}
 		}
 
-		if (!$kirjanpidollinen_varastosiirto) {
-			aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
-		}
-		aseta_kukarow_kesken($myyntitilaus_tunnus);
+		$tilausrivi_tunnukset = array_column($myyntitilaus['tilausrivit'], 'tunnus');
+		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
 
-		if ($kirjanpidollinen_varastosiirto) {
-			//Kirjallisessa varastosiirrossa $lahde_ja_kohde_varasto_yhdistelmat loopataan vain kerran l‰pi.
-			//T‰st‰ syyst‰ voimme k‰ytt‰‰ t‰ss‰ kohtaa $siirtolista['tunnus']
-			$varastosiirtorivit = hae_tilausrivit($varastosiirto['tunnus'], $kirjanpidollinen_varastosiirto);
+		aseta_kukarow_kesken($varastosiirto['tunnus']);
 
-			$t1 = $t2 = $t3 = $t4 = $tunnus = array();
-			$tee = 'paikat';
-			$vainlistaus = '';
-			$echotaanko = false;
-			$id = $varastosiirto['tunnus'];
-
-			foreach ($varastosiirtorivit as &$varastosiirtorivi) {
-				$kohde_varasto = hae_varasto($varastosiirto['clearing']);
-				$kohde_varasto_tuotepaikat = hae_tuotepaikat($varastosiirtorivi['tuoteno'], $kohde_varasto['alkuhyllyalue'], $kohde_varasto['alkuhyllynro']);
-				if (empty($kohde_varasto_tuotepaikat)) {
-					//Jos kohde varastossa ei ole t‰lle tuotteelle hyllypaikkaa niin luodaan ns. default-paikka
-					//$siirtolista['clearing'] = kohdevarasto tunnus
-					$kohde_varasto_tuotepaikka = luo_tuotepaikka($varastosiirtorivi['tuoteno'], false, false, false, false, $varastosiirto['clearing']);
-				}
-				else {
-					$kohde_varasto_tuotepaikka = $kohde_varasto_tuotepaikat[0];
-				}
-
-				$varastosiirtorivi['kohde_hyllyalue'] = $kohde_varasto_tuotepaikka['hyllyalue'];
-				$varastosiirtorivi['kohde_hyllynro'] = $kohde_varasto_tuotepaikka['hyllynro'];
-				$varastosiirtorivi['kohde_hyllyvali'] = $kohde_varasto_tuotepaikka['hyllyvali'];
-				$varastosiirtorivi['kohde_hyllytaso'] = $kohde_varasto_tuotepaikka['hyllytaso'];
-
-				$tunnus[] = $varastosiirtorivi['tunnus'];
-				$t1[$varastosiirtorivi['tunnus']] = $varastosiirtorivi['kohde_hyllyalue'];
-				$t2[$varastosiirtorivi['tunnus']] = $varastosiirtorivi['kohde_hyllynro'];
-				$t3[$varastosiirtorivi['tunnus']] = $varastosiirtorivi['kohde_hyllyvali'];
-				$t4[$varastosiirtorivi['tunnus']] = $varastosiirtorivi['kohde_hyllytaso'];
-			}
-
-			require('vastaanota.php');
-
-			paivita_myyntitilausrivien_tuotepaikat($varastosiirtorivit);
-			linkkaa_varastosiirto_myyntitilaukseen($varastosiirto, $myyntitilaus);
-		}
-
-		if (!$kirjanpidollinen_varastosiirto) {
-			foreach ($kommentit as $kommentti) {
-				echo "<font class='message'>$kommentti</font>";
-				echo "<br/>";
-			}
+		foreach ($kommentit as $kommentti) {
+			echo "<font class='message'>$kommentti</font>";
 			echo "<br/>";
 		}
+		echo "<br/>";
 
 		return true;
 	}
@@ -233,6 +235,48 @@ if (!function_exists('aseta_kukarow_kesken')) {
 		}
 
 		return false;
+	}
+
+}
+
+if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
+
+	function aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit) {
+		global $kukarow, $yhtiorow;
+
+		$t1 = $t2 = $t3 = $t4 = $tunnus = array();
+		$tee = 'paikat';
+		$vainlistaus = '';
+		$echotaanko = false;
+		$id = $varastosiirto['tunnus'];
+
+		foreach ($varastosiirtorivit as &$varastosiirtorivi) {
+			$kohde_varasto = hae_varasto($varastosiirto['clearing']);
+			$kohde_varasto_tuotepaikat = hae_tuotepaikat($varastosiirtorivi['tuoteno'], $kohde_varasto['alkuhyllyalue'], $kohde_varasto['alkuhyllynro']);
+			if (empty($kohde_varasto_tuotepaikat)) {
+				//Jos kohde varastossa ei ole t‰lle tuotteelle hyllypaikkaa niin luodaan ns. default-paikka
+				//$siirtolista['clearing'] = kohdevarasto tunnus
+				$kohde_varasto_tuotepaikka = luo_tuotepaikka($varastosiirtorivi['tuoteno'], false, false, false, false, $varastosiirto['clearing']);
+			}
+			else {
+				$kohde_varasto_tuotepaikka = $kohde_varasto_tuotepaikat[0];
+			}
+
+			$varastosiirtorivi['kohde_hyllyalue'] = $kohde_varasto_tuotepaikka['hyllyalue'];
+			$varastosiirtorivi['kohde_hyllynro'] = $kohde_varasto_tuotepaikka['hyllynro'];
+			$varastosiirtorivi['kohde_hyllyvali'] = $kohde_varasto_tuotepaikka['hyllyvali'];
+			$varastosiirtorivi['kohde_hyllytaso'] = $kohde_varasto_tuotepaikka['hyllytaso'];
+
+			$tunnus[] = $varastosiirtorivi['tunnus'];
+			$t1[$varastosiirtorivi['tunnus']] = $varastosiirtorivi['kohde_hyllyalue'];
+			$t2[$varastosiirtorivi['tunnus']] = $varastosiirtorivi['kohde_hyllynro'];
+			$t3[$varastosiirtorivi['tunnus']] = $varastosiirtorivi['kohde_hyllyvali'];
+			$t4[$varastosiirtorivi['tunnus']] = $varastosiirtorivi['kohde_hyllytaso'];
+		}
+
+		require('vastaanota.php');
+
+		return $varastosiirtorivit;
 	}
 
 }

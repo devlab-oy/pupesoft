@@ -471,6 +471,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				setcookie('tilausrivi_alvillisuus', $tilausrivi_alvillisuus, time()+60*60*24*90, "/");
 			}
 		}
+		
+		if ($phpnimi == 'tuote_selaus_haku.php') {
+			if (isset($piilota_tuoteperheen_lapset)) {
+				setcookie('piilota_tuoteperheen_lapset', $piilota_tuoteperheen_lapset, strtotime('+90 days'), "/");
+				$_COOKIE['piilota_tuoteperheen_lapset'] = $piilota_tuoteperheen_lapset;
+			}
+		}
 
 		if ($phpnimi == 'generoi_siirtolista.php') {
 			if (isset($lapsituotteet)) {

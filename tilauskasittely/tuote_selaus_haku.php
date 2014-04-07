@@ -1,5 +1,7 @@
 <?php
 
+	if (!isset($piilota_tuoteperheen_lapset)) $piilota_tuoteperheen_lapset = '';
+
 	if (@include("../inc/parametrit.inc"));
 	elseif (@include("parametrit.inc"));
 	else exit;
@@ -425,6 +427,12 @@
 		}
 	}
 
+	$piilota_tuoteperheen_lapset = isset($_COOKIE['piilota_tuoteperheen_lapset']) ? $_COOKIE['piilota_tuoteperheen_lapset'] : '' ;
+	if ($piilota_tuoteperheen_lapset != '') {
+		$ptlcheck = "CHECKED";
+		$ulisa .= "&piilota_tuoteperheen_lapset=checked"; 
+	}
+
 	if (!isset($poistetut)) {
 		$poistetut = '';
 	}
@@ -743,6 +751,10 @@
 			}
 			echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
 			echo "<tr><th>".t("Lisätiedot")."</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
+		}
+		
+		if ($kukarow['extranet'] == "" and $verkkokauppa == "") {
+			echo "<tr><th>".t("Piilota tuoteperherakenne")."</th><td><input type='checkbox' name='piilota_tuoteperheen_lapset' $ptlcheck></td></tr>";
 		}
 
 		echo "</table><br/>";
@@ -1195,6 +1207,12 @@
 					}
 				}
 
+				if ($piilota_tuoteperheen_lapset != '') {
+					foreach ($rows as $row_key => $row_value) { 
+						if($row_value['tuoteperhe'] != '' and $row_value['tuoteperhe'] != $row_value['tuoteno']) unset($rows[$row_key]);
+					}
+				}
+
 				if ($hae_ja_selaa_row['selite'] == 'B') {
 					echo "&raquo;  ".count($rows)." ",t("tuotetta")."</h3>";
 				}
@@ -1447,7 +1465,13 @@
 				// Peek ahead
 				$row_seuraava = current($rows);
 
-				if (($row["tuoteperhe"] == $row["tuoteno"] and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"] and $row_seuraava["tuoteperhe"] != "") or
+
+				if ($piilota_tuoteperheen_lapset != '' and $row["tuoteperhe"] == $row["tuoteno"]) {
+					$classleft = "style='border-bottom: 1px solid #555555; border-left: 1px solid #555555; border-top: 1px solid #555555;' ";
+					$classmidl = "style='border-bottom: 1px solid #555555; border-top: 1px solid #555555;' ";
+					$classrigh = "style='border-bottom: 1px solid #555555; border-right: 1px solid #555555; border-top: 1px solid #555555;' ";
+				}
+				elseif (($row["tuoteperhe"] == $row["tuoteno"] and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"] and $row_seuraava["tuoteperhe"] != "") or
 					($row["osaluettelo"] == $row["tuoteno"] and $row["osaluettelo"] != $row_seuraava["osaluettelo"] and $row_seuraava["osaluettelo"] != "")) {
 					$classleft = "";
 					$classmidl = "";

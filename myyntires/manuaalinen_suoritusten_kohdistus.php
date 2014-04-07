@@ -495,7 +495,7 @@ if ($tila == 'tee_kohdistus') {
 		// Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
 		$lapvm = explode("-", $lasku["tapvm"]);
 		$lapvmint = (int) date('Ymd', mktime(0,0,0, $lapvm[1], $lapvm[2], $lapvm[0]));
-echo "507 laskupvm $lapvm laskupvmInt $lapvmint maksupvmint $maksupvmint <br><br>";
+
 		// Jos suoritus on vanhempi kuin lasku, niin merkataan lasku maksetuksi laskun p‰iv‰m‰‰r‰ll‰
 		if ($maksupvmint < $lapvmint) {
 			$laskun_maksupvm = $lasku["tapvm"];

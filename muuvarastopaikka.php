@@ -568,7 +568,7 @@
 								laadittu 	= now()";
 					$result = pupe_query($query);
 
-					echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso])<br>";
+					echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue]-$minnerow[hyllynro]-$minnerow[hyllyvali]-$minnerow[hyllytaso])<br>";
 				}
 				else {
 					$lisavartprow = mysql_fetch_array($result);
@@ -704,7 +704,7 @@
 
 
 		// Päivitetään lisävausteiden sarjanumerot
-		if (count($lisavar_sarj) > 0) {
+		if (isset($lisavar_sarj) and count($lisavar_sarj) > 0) {
 			foreach($lisavar_sarj as $sarjano) {
 				if ($sarjano > 0) {
 					$query = "	UPDATE sarjanumeroseuranta
@@ -770,7 +770,7 @@
 				}
 
 				if ($kaikki_ok) {
-					echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
+					echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue-$ahyllynro-$ahyllyvali-$ahyllytaso)</font><br>";
 
 					$query = "	SELECT oletus
 								FROM tuotepaikat

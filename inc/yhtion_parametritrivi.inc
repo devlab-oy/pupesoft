@@ -2168,6 +2168,21 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "myyntitilauksen_toimipaikka") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = 'K' $sel[K]>".t("K‰ytet‰‰n ensisijaisesti k‰ytt‰j‰n toimipaikkaa")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n ensisijaisesti asiakkaan toimipaikkaa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "logo" or $fieldname == "lasku_logo") {
 		$tyyppi = 5;
 	}
@@ -2578,7 +2593,6 @@
 
 		$jatko = 0;
 	}
-
 
 	if ($fieldname == "tilausrivien_toimitettuaika") {
 

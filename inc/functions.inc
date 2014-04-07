@@ -16656,6 +16656,7 @@ if (!function_exists("tee_keraysera")) {
 		$tilat2 = "AND (
 					(lasku2.tila = 'N' AND lasku2.alatila = 'A')
 				)";
+
 		if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
 			$tilat = "AND (
 					(lasku1.tila = 'N' AND lasku1.alatila = 'A')

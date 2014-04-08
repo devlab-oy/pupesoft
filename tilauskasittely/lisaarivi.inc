@@ -2462,9 +2462,7 @@
 							$var 	= "";
 							$varattu = $kpl;
 
-							if ($toim == "REKLAMAATIO" and $laskurow['tilaustyyppi'] == 'U') {
-								$reklamaatiohyvitys = true;
-							}
+							$reklamaatiohyvitys = true;
 						}
 						// Normaalisti kaikki menee puutteeksi.
 						else {

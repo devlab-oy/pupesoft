@@ -1010,6 +1010,27 @@
 							$select .= "{$ytgfe}concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)){$ytgft} postitp, ";
 						}
 
+						if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '') {
+							$select .= "yhteyshenkilo.nimi AS yhteyshenkilon_nimi, ";
+							$select .= "yhteyshenkilo.rooli AS yhteyshenkilon_rooli, ";
+							$select .= "yhteyshenkilo.nimitarkenne AS yhteyshenkilon_nimitarkenne, ";
+							$select .= "yhteyshenkilo.osoite AS yhteyshenkilon_katuosoite, ";
+							$select .= "yhteyshenkilo.postino AS yhteyshenkilon_postinumero, ";
+							$select .= "yhteyshenkilo.postitp AS yhteyshenkilon_postitoimipaikka, ";
+							$select .= "yhteyshenkilo.suoramarkkinointi AS yhteyshenkilon_suoramarkkinointi, ";
+							$select .= "yhteyshenkilo.email AS yhteyshenkilon_email, ";
+							$select .= "yhteyshenkilo.fakta AS yhteyshenkilon_fakta, ";
+							$select .= "yhteyshenkilo.tilausyhteyshenkilo AS yhteyshenkilon_tilausyhteyshenkilo, ";
+
+							$yhteyshenkilo_join = " LEFT JOIN yhteyshenkilo
+													ON ( yhteyshenkilo.yhtio = asiakas.yhtio
+														AND yhteyshenkilo.liitostunnus = asiakas.tunnus
+														AND yhteyshenkilo.tyyppi = 'A' )";
+
+							$gluku += 10;
+							$group .= ',yhteyshenkilon_nimi,yhteyshenkilon_rooli,yhteyshenkilon_nimitarkenne,yhteyshenkilon_katuosoite,yhteyshenkilon_postinumero,yhteyshenkilon_postitoimipaikka,yhteyshenkilon_suoramarkkinointi,yhteyshenkilon_email,yhteyshenkilon_fakta,yhteyshenkilon_tilausyhteyshenkilo';
+						}
+
 						if (strpos($select, "'asiakaslista',") === FALSE) $select .= "asiakas.tunnus 'asiakaslista', ";
 						$order  .= "{$etuliite}.ytunnus,";
 						$gluku++;
@@ -2147,7 +2168,8 @@
 								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
 								JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$asiakaslisa})
 								LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite)
-								{$lisatiedot_join}
+								{$yhteyshenkilo_join}
+                                {$lisatiedot_join}
 								{$varasto_join}
 								{$kantaasiakas_join}
 								{$maksuehto_join}

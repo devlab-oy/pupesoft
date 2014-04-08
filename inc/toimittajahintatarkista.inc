@@ -138,10 +138,16 @@ if(!function_exists("toimittajahintatarkista")) {
 			$t[$i] = str_replace(",", ".", $t[$i]);
 			$chminkpl = (int) $t[$i];
 		}
+		else {
+			$chminkpl = 0;
+		}
 
 		if (mysql_field_name($result, $i) == "maxkpl") {
 			$t[$i] = str_replace(",", ".", $t[$i]);
 			$chmaxkpl = (int) $t[$i];
+		}
+		else {
+			$chmaxkpl = 0;
 		}
 
 		if (mysql_field_name($result, $i) == "alkupvm") {

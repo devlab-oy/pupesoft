@@ -629,14 +629,16 @@
 						count(*) yhteensa_kpl,
 						sum(if (maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), maksupositio.summa,0)) laskuttamatta,
 						sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', maksupositio.summa, 0)) laskutettu,
-						sum(maksupositio.summa) yhteensa
+						sum(maksupositio.summa) yhteensa,
+						lasku.tila
 						FROM lasku
 						JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
 						JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
 						LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus = uusiolasku.tunnus
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu > 0
-						and lasku.tila in ('L','N','R','A') and lasku.alatila != 'X'
+						and lasku.tila in ('L','N','R','A', 'D')
+						and lasku.alatila != 'X'
 						GROUP BY jaksotettu, nimi
 						HAVING yhteensa_kpl > laskutettu_kpl
 						ORDER BY jaksotettu desc";
@@ -673,6 +675,23 @@
 			echo "<tbody>";
 
 			while ($row = mysql_fetch_assoc($result)) {
+
+				//onko poistetun tilauksen takana loppulaskutusta odottava tilaus?
+				if ($row["tila"] == 'D') {
+					$query = "	SELECT tunnus
+								FROM lasku
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND vanhatunnus = '{$row['jaksotettu']}'
+								AND tila IN ('L','N','R','A')
+								AND alatila != 'X'";
+					$deleteds = pupe_query($query);
+
+					if (mysql_num_rows($deleteds) == 0) {
+						continue;
+					}
+
+				}
+
 				// seuraava positio on tämä siis
 				$query = "	SELECT maksupositio.*, maksuehto.teksti, maksuehto.teksti
 							FROM maksupositio

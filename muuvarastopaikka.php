@@ -763,7 +763,7 @@
 					$ahyllytaso = strtoupper($ahyllytaso);
 
 					$kaikki_ok = tarkista_varaston_hyllypaikka($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
-					}
+				}
 
 				if ($yhtiorow['varastontunniste'] != '') {
 					if (!isset($select_varastontunniste) or trim($select_varastontunniste) == "") $kaikki_ok = false;
@@ -786,18 +786,24 @@
 						$oletus = "X";
 					}
 
+					if (!isset($ahalytysraja)) $ahalytysraja = 0;
+					if (!isset($atilausmaara)) $atilausmaara = 0;
 
-					$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, laatija, luontiaika)
-							  VALUES (
-								'$kukarow[yhtio]',
-								'$ahyllyalue',
-								'$ahyllynro',
-								'$ahyllyvali',
-								'$ahyllytaso',
-								'$oletus',
-								'$tuoteno',
-								'$kukarow[kuka]',
-								now())";
+					$ahalytysraja = (float) $ahalytysraja;
+					$atilausmaara = (float) $atilausmaara;
+
+					$query = " INSERT into tuotepaikat SET
+								yhtio 		= '$kukarow[yhtio]',
+								hyllyalue	= '$ahyllyalue',
+								hyllynro	= '$ahyllynro',
+								hyllyvali	= '$ahyllyvali',
+								hyllytaso	= '$ahyllytaso',
+								oletus		= '$oletus',
+								tuoteno 	= '$tuoteno',
+							    halytysraja = '$ahalytysraja',
+							    tilausmaara = '$atilausmaara',
+								laatija 	= '$kukarow[kuka]',
+								luontiaika	= now()";
 					$result = pupe_query($query);
 
 					$query = "	INSERT into tapahtuma set

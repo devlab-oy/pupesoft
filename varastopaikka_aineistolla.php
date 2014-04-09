@@ -35,12 +35,13 @@
 				// Siivous ja validitytsekit
 				foreach ($kaikki_tiedostorivit as $rowkey => &$tiedr) {
 					// Indeksit:
-					$tuoteno = $tiedr[0] = pupesoft_cleanstring($tiedr[0]);										// 0 - Tuotenumero
-					$kpl = $tiedr[1] = str_replace(",", ".", pupesoft_cleanstring($tiedr[1]));					// 1 - M‰‰r‰
-					$lahdevarastopk = $tiedr[2] = str_replace(" ", "", pupesoft_cleanstring($tiedr[2]));		// 2 - L‰hdevarastopaikka
-					$kohdevarastopk = $tiedr[3] = str_replace(" ", "", pupesoft_cleanstring($tiedr[3]));		// 3 - Kohdevarastopaikka
-					$kom = $tiedr[4] = pupesoft_cleanstring($tiedr[4]);											// 4 - Kommentti
-					$poistetaanko_lahde = $tiedr[5] = str_replace(" ", "", pupesoft_cleanstring($tiedr[5]));	// 5 - Poistetaanko l‰hdevarastopaikka
+					$tuoteno 			= $tiedr[0] = pupesoft_cleanstring($tiedr[0]);							// 0 - Tuotenumero
+					$kpl 				= $tiedr[1] = str_replace(",", ".", pupesoft_cleanstring($tiedr[1]));	// 1 - M‰‰r‰
+					$lahdevarastopk 	= $tiedr[2] = str_replace(" ", "", pupesoft_cleanstring($tiedr[2]));	// 2 - L‰hdevarastopaikka
+					$kohdevarastopk 	= $tiedr[3] = str_replace(" ", "", pupesoft_cleanstring($tiedr[3]));	// 3 - Kohdevarastopaikka
+					$kom 				= $tiedr[4] = pupesoft_cleanstring($tiedr[4]);							// 4 - Kommentti
+					$poistetaanko_lahde = $tiedr[5] = str_replace(" ", "", strtoupper(pupesoft_cleanstring($tiedr[5])));	// 5 - Poistetaanko l‰hdevarastopaikka
+
 					if ($poistetaanko_lahde != 'X') $tiedr[5] = '';
 
 					// Jos joku pakollisista tiedoista on tyhj‰ tai v‰‰rin hyl‰t‰‰n koko rivi
@@ -50,7 +51,9 @@
 						if ($lahdevarastopk == $kohdevarastopk) $seliseli .= "-".t("L‰hde- ja kohdevarastopaikka olivat identtisi‰").".<br>";
 						if (!is_numeric($kpl) and $kpl != 'X') $seliseli .= "-".t("Kappalem‰‰r‰ksi kelpaa %s tai numeerinen arvo", "", "X").".<br>";
 						if ($seliseli != '') $seliseli = "<br>".$seliseli;
+
 						echo "<font class='error'>".t("Virhe sis‰‰nluettavan tiedoston rivill‰ %s, rivi‰ ei huomioida", "", $rowkey+1)."...$seliseli</font><br>";
+
 						unset($kaikki_tiedostorivit[$rowkey]);
 						continue;
 					}
@@ -59,16 +62,15 @@
 					list($lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso) = explode("-", $lahdevarastopk);
 
 					// Tarkistetaan onko tuotepaikka ja tuote olemassa
-					$query = "	SELECT *, tuotepaikat.tunnus otatamatalteen
-								FROM tuotepaikat use index (tuote_index), tuote
+					$query = "	SELECT tuotepaikat.*
+								FROM tuotepaikat use index (tuote_index)
+								JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
 								WHERE tuotepaikat.yhtio	  = '$kukarow[yhtio]'
 								and tuotepaikat.tuoteno	  = '$tuoteno'
 								and tuotepaikat.hyllyalue = '$lhyllyalue'
 								and tuotepaikat.hyllynro  = '$lhyllynro'
 								and tuotepaikat.hyllyvali = '$lhyllyvali'
-								and tuotepaikat.hyllytaso = '$lhyllytaso'
-								and tuote.tuoteno		  = tuotepaikat.tuoteno
-								and tuote.yhtio			  = tuotepaikat.yhtio";
+								and tuotepaikat.hyllytaso = '$lhyllytaso'";
 					$tvresult = pupe_query($query);
 
 					if (mysql_num_rows($tvresult) == 0) {
@@ -76,17 +78,13 @@
 						continue;
 					}
 					else {
-						$ressu = mysql_fetch_assoc($tvresult);
-						$tiedr[2] = $ressu['otatamatalteen'];
+						$tvrow = mysql_fetch_assoc($tvresult);
+
+						$tiedr[2] = $tvrow['tunnus'];
+
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $varasto_valinta, '', $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso);
 
 						if ($kpl == "X" or $kpl > $myytavissa) $tiedr[1] = $myytavissa;
-
-						if ($myytavissa == 0 and (isset($ressu['otatamalteen']) or $kpl == 'X')) {
-							echo "<font class='error'>".t("Tuotteen %s annetulla l‰hdevarastopaikalla %s %s %s %s ei ole siirrett‰viss‰ olevaa saldoa", "", $tuoteno, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso)."!</font><br>";
-							unset($kaikki_tiedostorivit[$rowkey]);
-							continue;
-						}
 					}
 
 					// Tarkistetaan onko annettu l‰hdevarastopaikka valitussa varastossa
@@ -123,8 +121,17 @@
 
 					// Jos kohdetuotepaikkaa ei lˆydy, yritet‰‰n perustaa sellainen
 					if (mysql_num_rows($kvresult) == 0) {
-						$tee = "UUSIPAIKKA";
-						$kutsuja = "varastopaikka_aineistolla.php";
+						$tee 	  	  = "UUSIPAIKKA";
+						$kutsuja  	  = "varastopaikka_aineistolla.php";
+						$ahalytysraja = 0;
+						$atilausmaara = 0;
+
+						// Jos l‰hdepaikka poistetaan, niin siirret‰‰n halytysraja ja tilausmaara uudelle paikalle.
+						if ($poistetaanko_lahde == "X") {
+							$ahalytysraja = $tvrow['halytysraja'];
+							$atilausmaara = $tvrow['tilausmaara'];
+						}
+
 						require("muuvarastopaikka.php");
 					}
 
@@ -137,11 +144,10 @@
 							$ressi = mysql_fetch_assoc($kvresult);
 							$tiedr[3] = $ressi['tunnus'];
 						}
-
 					}
 
 					if (in_array('', array($tiedr[2],$tiedr[3]))) $virhe = 1;
-					if ($tee = "PALATTIIN_MUUSTA") $tee = "AJA";
+					if ($tee == "PALATTIIN_MUUSTA") $tee = "AJA";
 				}
 			}
 			else {
@@ -171,15 +177,17 @@
 				// $minne   = tuotepaikan tunnus jonne siirret‰‰n
 				// $tuoteno = tuotenumero jota siirret‰‰n
 				$tuoteno = $tval[0];				// 0 - Tuotenumero
-				$asaldo = $tval[1];					// 1 - M‰‰r‰
-				$mista = $tval[2];					// 2 - L‰hdevarastopaikka - tunnus
-				$minne = $tval[3];					// 3 - Kohdevarastopaikka - tunnus
-				$selite = $tval[4];					// 4 - Kommentti - menee hyllysiirto-funkkarin tapahtuman selitteen loppuun
+				$asaldo  = $tval[1];				// 1 - M‰‰r‰
+				$mista   = $tval[2];				// 2 - L‰hdevarastopaikka - tunnus
+				$minne   = $tval[3];				// 3 - Kohdevarastopaikka - tunnus
+				$selite  = $tval[4];				// 4 - Kommentti - menee hyllysiirto-funkkarin tapahtuman selitteen loppuun
 				$poistetaanko_lahde = $tval[5];		// 5 - Poistetaanko l‰hdevarastopaikka
 
-				$tee = "N";
-				$kutsuja = "varastopaikka_aineistolla.php";
-				require("muuvarastopaikka.php");
+				if ($asaldo != 0) {
+					$tee = "N";
+					$kutsuja = "varastopaikka_aineistolla.php";
+					require("muuvarastopaikka.php");
+				}
 
 				// Merkataan viel‰ l‰hdevarastopaikka poistettavaksi jos se ei ole oletuspaikka
 				if ($poistetaanko_lahde == 'X') {
@@ -188,8 +196,8 @@
 								WHERE tuoteno 	= '{$tuoteno}'
 								AND yhtio 		= '{$kukarow['yhtio']}'
 								AND tunnus 		= '$mista'
-								AND oletus = ''";
-					$ressu =  pupe_query($query);
+								AND oletus 		= ''";
+					pupe_query($query);
 
 					if (mysql_affected_rows() != 0) {
 						echo "<font class='message'>".t("Tuotteen %s l‰hdevarastopaikka merkattiin poistettavaksi", "", $tuoteno)."!</font><br>";
@@ -265,9 +273,9 @@
 				<table>
 				<tr><th>".t("Valitse tiedosto").":</th>
 				<td><input name='userfile' type='file'></td>
-				</tr>				
+				</tr>
 				</table>
-				<br><input type='submit' value='".t("L‰het‰")."'> <font class='error'>{$virheviesti}</font>				
+				<br><input type='submit' value='".t("L‰het‰")."'> <font class='error'>{$virheviesti}</font>
 				</form>";
 	}
 

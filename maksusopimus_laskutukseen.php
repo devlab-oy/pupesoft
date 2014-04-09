@@ -629,13 +629,13 @@
 			$query = "	SELECT
 						lasku.jaksotettu jaksotettu,
 						concat_ws(' ',lasku.nimi, lasku.nimitark) nimi,
-						sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) laskutettu_kpl,
+						lasku.tila,
+						sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) AS laskutettu_kpl,
 						sum(if (maksupositio.uusiotunnus = 0, 1, 0)) tekematta_kpl,
-						count(*) yhteensa_kpl,
+						count(*) AS yhteensa_kpl,
 						sum(if (maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), maksupositio.summa,0)) laskuttamatta,
 						sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', maksupositio.summa, 0)) laskutettu,
-						sum(maksupositio.summa) yhteensa,
-						lasku.tila
+						sum(maksupositio.summa) yhteensa
 						FROM lasku
 						JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
 						JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
@@ -644,8 +644,8 @@
 						and lasku.jaksotettu > 0
 						and lasku.tila in ('L','N','R','A','D')
 						and lasku.alatila != 'X'
-						GROUP BY jaksotettu, nimi
-						HAVING yhteensa_kpl > laskutettu_kpl
+						GROUP BY jaksotettu, nimi, tila
+						HAVING count(*) > sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0))
 						ORDER BY jaksotettu desc";
 			$result = pupe_query($query);
 

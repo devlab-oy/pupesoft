@@ -16,7 +16,9 @@
 			$query = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus = '$tunnus' and tila in ('L','N','R') and alatila != 'X'";
+						and tunnus = '$tunnus'
+						and tila in ('L','N','R')
+						and alatila != 'X'";
 			$stresult = pupe_query($query);
 
 			if (mysql_num_rows($stresult) == 0) {
@@ -387,10 +389,11 @@
 			global $kukarow, $yhtiorow;
 
 			///* Tutkitaan alkuperäisten tilausten tiloja *///
-			$query = "	SELECT sum(if (tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if (tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
+			$query = "	SELECT sum(if(tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if (tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						and jaksotettu = '$tunnus' and tila != 'D' and tila in ('L','N','R')";
+						and jaksotettu = '$tunnus'
+						and tila in ('L','N','R')";
 			$stresult = pupe_query($query);
 
 			if (mysql_num_rows($stresult) == 0) {
@@ -399,10 +402,12 @@
 			}
 			else {
 				$row = mysql_fetch_assoc($stresult);
+
 				if ($row["kaikki"] - ($row["toimitus_valmis"] + $row["rojekti"]) <> 0) {
 					echo "<font class='error'>Laskutussopimuksella on kaikki tilaukset oltava toimitettuna ennen loppulaskutusta.</font><br><br>";
 					return 0;
 				}
+
 				$vikatunnus = $row["vikatunnus"];
 			}
 
@@ -637,7 +642,7 @@
 						LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus = uusiolasku.tunnus
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu > 0
-						and lasku.tila in ('L','N','R','A', 'D')
+						and lasku.tila in ('L','N','R','A','D')
 						and lasku.alatila != 'X'
 						GROUP BY jaksotettu, nimi
 						HAVING yhteensa_kpl > laskutettu_kpl
@@ -689,7 +694,6 @@
 					if (mysql_num_rows($deleteds) == 0) {
 						continue;
 					}
-
 				}
 
 				// seuraava positio on tämä siis
@@ -713,16 +717,22 @@
 				$rahres = pupe_query($query);
 				$laskurow = mysql_fetch_assoc($rahres);
 
-				$query = "	SELECT group_concat(tunnus SEPARATOR '<br>') tunnukset
+				$query = "	SELECT tunnus
 							FROM lasku
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and jaksotettu  = '$row[jaksotettu]'
-							and tila in ('L','N','R')";
+							and tila in ('L','N','R')
+							ORDER BY tunnus";
 				$rahres = pupe_query($query);
-				$laskurow2 = mysql_fetch_assoc($rahres);
 
 				echo "<tr>";
-				echo "<td valign='top'>$laskurow2[tunnukset]</td>";
+				echo "<td valign='top'>";
+
+				while ($laskurow2 = mysql_fetch_assoc($rahres)) {
+					echo "<a target='_naytatilaus' href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$laskurow2[tunnus]'>$laskurow2[tunnus]</a><br>";
+				}
+
+				echo "</td>";
 				echo "<td valign='top'>$row[nimi]</td>";
 				echo "<td valign='top'>$row[laskutettu_kpl] / $row[yhteensa_kpl]</td>";
 				echo "	<td valign='top' align='right'>$row[laskuttamatta]</td>
@@ -760,7 +770,7 @@
 					$tarkres = pupe_query($query);
 					$tarkrow = mysql_fetch_assoc($tarkres);
 
-					if ($tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
+					if (mysql_num_rows($tarkres) == 0 or $tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
 						echo "<td class='back'>";
 						echo "<font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";
 

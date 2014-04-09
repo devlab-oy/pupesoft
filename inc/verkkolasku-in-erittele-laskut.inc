@@ -25,6 +25,8 @@
 					$type 			 = "FINVOICE";
 					$finvoiceversion = (float) $lnversion[1];
 
+					$ln = substr($ln, stripos($ln, "<Finvoice"));
+
 					// 	lisätään varmasti oikeat DOCTYPE määritys
 					//	Tämä siksi että haluamme käyttää paikallista kuvausta eikä ladata kuvausta verkosta!
 

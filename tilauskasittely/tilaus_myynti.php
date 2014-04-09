@@ -5445,23 +5445,23 @@ if ($tee == '') {
 			}
 
 			// Kootaan hintalaskurien datat valmiiksi.
-			$rows = [];
-			$hinta_laskurit = [];
+			$rows = array();
+			$hinta_laskurit = array();
 			while ($row = mysql_fetch_assoc($result)) {
 				$rows[] = $row;
 				$perheid = $row['perheid'];
 
 				// Alustetaan hinta_kokoelma jos sellaista ei vielä ole.
 				if (isset($hinta_laskurit[$perheid])===false)
-					$hinta_laskurit[$perheid] = [
+					$hinta_laskurit[$perheid] = array(
 						'raakaaineiden_kehahinta_summa' => 0,
 						'valmisteiden_kehahinta_summa' => 0,
 						'valmisteiden_kpl_summa' => 0,
 						'valmisteissa_hinnaton' => false,
 						'valmisteissa_painoarvoton' => false,
-						'valmisteiden_painoarvot' => [],
-						'valmisteet' => [],
-					];
+						'valmisteiden_painoarvot' => array(),
+						'valmisteet' => array(),
+					);
 
 				// Jos kyseessä raaka-aine
 				if ($row["tyyppi"] != "W") {

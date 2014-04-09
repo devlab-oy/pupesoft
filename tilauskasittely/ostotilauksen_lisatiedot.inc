@@ -356,7 +356,8 @@ if ($tee == "") {
 		echo "<th valign='top'>",t("Toimipaikka"),"</th>";
 		echo "<td valign='top' colspan='3'>";
 		echo "<select name='toimipaikka'>";
-		echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+		echo "<option value=''>",t("Valitse"),"</option>";
+		echo "<option value='0'>".t('Ei toimipaikkaa')."</option>";
 
 		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 			$sel = $laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus'] ? ' selected' : '';

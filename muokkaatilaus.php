@@ -691,6 +691,7 @@
 
 				echo "<td><select name='toimipaikka' onchange='submit();'>";
 				echo "<option value=''>",t("Valitse"),"</option>";
+				echo "<option value='0'>".t('Ei toimipaikkaa')."</option>";
 
 				while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
 					if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {

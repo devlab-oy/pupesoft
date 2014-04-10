@@ -739,6 +739,38 @@
 
 		echo "</select></td></tr>";
 
+		$toimipaikat_result = hae_yhtion_toimipaikat($kukarow['yhtio']);
+		$toimipaikat = array();
+		$toimipaikat[] = array(
+			'tunnus' => 'kaikki',
+			'nimi' => t('Kaikki toimipaikat')
+		);
+		$toimipaikat[] = array(
+			'tunnus' => '0',
+			'nimi' => t('Ei toimipaikkaa')
+		);
+		while ($toimipaikka = mysql_fetch_assoc($toimipaikat_result)) {
+			$toimipaikat[] = $toimipaikka;
+		}
+		echo "<tr>";
+		echo "<th>";
+		echo t('Toimipaikka');
+		echo "</th>";
+		echo "<td>";
+		echo "<select name='toimipaikkarajaus'>";
+		$sel = '';
+		foreach ($toimipaikat as $toimipaikka) {
+			if (isset($toimipaikkarajaus) and $toimipaikkarajaus === $toimipaikka['tunnus']) {
+				$sel = 'SELECTED';
+			}
+
+			echo "<option value='{$toimipaikka['tunnus']}' {$sel}>{$toimipaikka['nimi']}</option>";
+			$sel = "";
+		}
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
+
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''
@@ -770,6 +802,10 @@
 
 		if (isset($varastorajaus) and !empty($varastorajaus)) {
 			$varasto .= ' AND lasku.clearing = '.(int) $varastorajaus;
+		}
+
+		if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {
+			$varasto .= " AND lasku.yhtio_toimipaikka = {$toimipaikkarajaus}";
 		}
 
 		if (isset($maa) and !empty($maa)) {

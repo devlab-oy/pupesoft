@@ -248,11 +248,11 @@
 	if ($tee == 'VALITSE_TIEDOSTO' and $varasto_valinta != '') {
 
 		$ohje_sarake_1 = t("Siirrett‰v‰n tuotteen tuotenumero");
-		$ohje_sarake_2 = t("Anna siirrett‰v‰ kappalem‰‰r‰. Siirett‰v‰ kappalem‰‰r‰ ei voi ikin‰ ylitt‰‰ tuotteen myyt‰viss‰ olevaa kappalem‰‰r‰‰. Kappalem‰‰r‰ksi voi syˆtt‰‰ avainsanan %s jolloin k‰ytet‰‰n automaattisesti myyt‰viss‰ olevaa m‰‰r‰‰.", "", "X");
+		$ohje_sarake_2 = t("Siirrett‰v‰ m‰‰r‰. Siirett‰v‰ kappalem‰‰r‰ ei voi ylitt‰‰ tuotteen myyt‰viss‰ olevaa m‰‰r‰‰. Kappalem‰‰r‰ksi voi syˆtt‰‰ avainsanan %s jolloin k‰ytet‰‰n automaattisesti koko myyt‰viss‰ olevaa m‰‰r‰‰. K‰ytt‰m‰ll‰ avainsanaa %s k‰sitell‰‰n myˆs nollasaldoiset tuotteet.", "", "X");
 		$ohje_sarake_3 = t("Varastopaikka mist‰ siirret‰‰n. Hyllyalue-hyllynumero-hyllyv‰li-hyllytaso v‰liviivalla eroteltuna.");
 		$ohje_sarake_4 = t("Varastopaikka mihin siirret‰‰n. Hyllyalue-hyllynumero-hyllyv‰li-hyllytaso v‰liviivalla eroteltuna. Jos paikkaa ei lˆydy niin sellainen luodaan annetuilla parametreill‰");
 		$ohje_sarake_5 = t("Kommentti liitet‰‰n hyllysiirron yhteydess‰ teht‰v‰‰n tapahtumaan");
-		$ohje_sarake_6 = t("Arvolla %s l‰hdepaikka poistetaan siirron j‰lkeen, muuten l‰hdepaikkaa ei poisteta", "", "X");
+		$ohje_sarake_6 = t("Arvolla %s l‰hdepaikka poistetaan siirron j‰lkeen, muuten l‰hdepaikkaa ei poisteta. L‰hdepaikan h‰lytysraja ja tilausm‰‰r‰ siirret‰‰n kohdepaikalle jos l‰hdepaikka merkit‰‰n poistettavaksi.", "", "X");
 
 		$ahlopetus 	= $palvelin2."varastopaikka_aineistolla.php////tee=''//kutsuja=''";
 

@@ -2271,30 +2271,40 @@ if (!function_exists('alvierittely')) {
 						tilino != ''";
 			$lasktilitre = pupe_query($query);
 
-			// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
+			// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on
 			if ($laskurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 0) {
 
 				while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
 					$ueloes = '';
-					if (in_array($lasktilitro['tilino'], $kassa_arska)) $ueloes = t("Käteisellä", $kieli).":";
-					if (in_array($lasktilitro['tilino'], $pankkikortti_arska)) $ueloes = t("Pankkikortilla", $kieli).":";
-					if (in_array($lasktilitro['tilino'], $luottokortti_arska)) $ueloes = t("Luottokortilla", $kieli).":";
+					$paivvaa = tv1dateconv($lasktilitro["tapvm"]);
+
+					// haetaan pisin osasuoritustavan nimitys
+					$olen_pena = 0;
+					foreach (array(t("Käteisellä"), t("Pankkikortilla"), t("Luottokortilla")) as $arggi) {
+						$pitkulainen = $pdf_lasku->strlen($arggi, $norm);
+						if ($pitkulainen > $olen_pena) $olen_pena = $pitkulainen;
+					}
+
+					if (in_array($lasktilitro['tilino'], $kassa_arska)) $ueloes = t("Käteisellä", $kieli);
+					if (in_array($lasktilitro['tilino'], $pankkikortti_arska)) $ueloes = t("Pankkikortilla", $kieli);
+					if (in_array($lasktilitro['tilino'], $luottokortti_arska)) $ueloes = t("Luottokortilla", $kieli);
 
 					if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
-						$ueloesrivi = sprintf('%.2f', $lasktilitro['summa_valuutassa'] - $pyoristys * -1)." ".$lasktilitro['valkoodi']." (".sprintf('%.2f', $lasktilitro['summa']- $pyoristys * -1)." ".$yhtiorow["valkoodi"].") ".tv1dateconv($lasktilitro["tapvm"]);
-						$ueloesrivi = trim($ueloesrivi);
+						$ueloesrivi = sprintf('%.2f', $lasktilitro['summa_valuutassa'] - $pyoristys * -1);
 						$pdf_lasku->draw_text(360, $kala, " - ".$ueloes, $thispage, $norm);
+
 						$oikpos = $pdf_lasku->strlen($ueloesrivi, $norm);
-						$jou = $pdf_lasku->strlen($laskurow["valkoodi"], $norm);
-						$pdf_lasku->draw_text(550+$jou-$oikpos, $kala, $ueloesrivi,$thispage, $norm);
+						$pdf_lasku->draw_text(535-$oikpos, $kala, $ueloesrivi ,$thispage, $norm);
+						$pdf_lasku->draw_text(550, $kala, $lasktilitro["valkoodi"], $thispage, $norm);
 					}
 					else {
-						$ueloesrivi = sprintf('%.2f', $lasktilitro['summa'] - $pyoristys * -1)." ".$laskurow["valkoodi"]." ".tv1dateconv($lasktilitro["tapvm"]);
-						$ueloesrivi = trim($ueloesrivi);
+						$ueloesrivi = sprintf('%.2f', $lasktilitro['summa'] - $pyoristys * -1);
 						$pdf_lasku->draw_text(360, $kala, " - ".$ueloes, $thispage, $norm);
+						$oikpos = $pdf_lasku->strlen($paivvaa, $norm);
+						$pdf_lasku->draw_text(370+$olen_pena , $kala, $paivvaa, $thispage, $norm);
 						$oikpos = $pdf_lasku->strlen($ueloesrivi, $norm);
-						$jou = $pdf_lasku->strlen($laskurow["valkoodi"], $norm);
-						$pdf_lasku->draw_text(550+$jou-$oikpos, $kala, $ueloesrivi, $thispage, $norm);
+						$pdf_lasku->draw_text(535-$oikpos, $kala, $ueloesrivi, $thispage, $norm);
+						$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], $thispage, $norm);
 					}
 
 					$kala -= 10;

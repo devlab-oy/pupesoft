@@ -1191,7 +1191,6 @@
 
 		$ulos .= "<option value = ''>".t("Käytetään yhtiön oletuksia")."</option>";
 		$ulos .= "<option value = 'A' {$sel['A']}>".t("Asiakkaan laskutusosoitteella")."</option>";
-		$ulos .= "<option value = 'T' {$sel['T']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
 		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, hyvitykset erikseen")."</option>";
 		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, hyvitykset erikseen")."</option>";
 

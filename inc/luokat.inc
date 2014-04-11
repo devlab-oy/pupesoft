@@ -1,5 +1,5 @@
 <?php
-	$otsikko = 'Asiakasluokat';
-	$kentat = 'tunnus, tunniste, selite';
-	$jarjestys = 'tunniste';
+  $otsikko = 'Asiakasluokat';
+  $kentat = 'tunnus, tunniste, selite';
+  $jarjestys = 'tunniste';
 ?>

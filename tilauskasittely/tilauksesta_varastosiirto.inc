@@ -178,6 +178,9 @@ if (!function_exists('luo_siirtolista')) {
 		$varasto = $lahdevarasto_tunnus;
 		$toim = "SIIRTOLISTA";
 
+		$lahdevarasto = hae_varasto($lahdevarasto_tunnus);
+		$toimipaikka = $lahdevarasto['toimipaikka'];
+
 		require ("otsik_siirtolista.inc");
 
 		return hae_lasku($id);

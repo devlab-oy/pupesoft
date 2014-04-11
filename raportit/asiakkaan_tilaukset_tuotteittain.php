@@ -64,6 +64,12 @@
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='tee' value='ETSI'>";
 
+		if (isset($vaihda)) {
+			unset($asiakasid);
+			unset($toimittajaid);
+			unset($ytunnus);
+		}
+
 	if ($kka == '')
 		$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 	if ($vva == '')
@@ -101,13 +107,14 @@
 		$pvm_select2 = "";
 	}
 
-
-	if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
+	if ((int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 		if ($toim == 'MYYNTI') {
 			echo "<td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
+			echo "<input type='Submit' name='vaihda' value = '".t("Vaihda asiakasta")."'>";
 		}
 		if ($toim == 'OSTO') {
 			echo "<td colspan='3'>$toimittajarow[nimi] $toimittajarow[nimitark]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
+			echo "<input type='Submit' name='vaihda' value = '".t("Vaihda toimittajaa")."'>";
 		}
 	}
 	else {

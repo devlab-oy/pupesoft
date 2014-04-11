@@ -1456,6 +1456,9 @@ while ($tietue = fgets($fd)) {
 							}
 						}
 					}
+					
+					// spessukeissi, hinnastoon E tuotteita ei löydetä
+					$kieltolisa .= " and hinnastoon != 'E'";
 				}
 
 				$query = "	SELECT *

@@ -256,43 +256,18 @@ if (!function_exists("toimitarkista")) {
 							tuotteen_toimittajat.liitostunnus 	= $tunnus,
 							tuotteen_toimittajat.valuutta		= '$tmp_valkoodi',
 							tuotteen_toimittajat.alkuperamaa	= '$tmp_maakoodi'";
-				$vres = pupe_query($query);
+				pupe_query($query);
 			}
 
 			if ($toimtyyppi == "PP" and $tunnus > 0 and $errori != 1) {
 				// poistetaan tuotteen_toimittajat kaikille tuotteille
-				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT tilausrivi.otunnus) tilaukset
-							from lasku
-							join tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' and tilausrivi.varattu != 0
-							where lasku.yhtio		= '$kukarow[yhtio]'
-							and lasku.liitostunnus	= '$tunnus'
-							and lasku.tila = 'O'
-							group by 1";
-				$tyychkre1 = pupe_query($query);
-
-				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT lasku.laskunro) tilaukset
-							from lasku
-							where lasku.yhtio		= '$kukarow[yhtio]'
-							and lasku.liitostunnus	= '$tunnus'
-							and lasku.tila 	= 'K'
-							and lasku.alatila != 'X'
-							and lasku.vanhatunnus = 0
-							group by 1";
-				$tyychkre2 = pupe_query($query);
-
-				if (mysql_num_rows($tyychkre1) == 0 and mysql_num_rows($tyychkre2) == 0) {
-
-					$query = "	DELETE FROM tuotteen_toimittajat
-								WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'
-								and tuotteen_toimittajat.liitostunnus 	= $tunnus";
-					$vres = pupe_query($query);
-				}
-				else {
-					$tyychkro1 = mysql_fetch_array($tyychkre1);
-					$tyychkro2 = mysql_fetch_array($tyychkre2);
-
-					$virhe[$i] = "Tuotteen toimittajia ei voitu poistaa!<br>Tilaukset: ($tyychkro1[tilaukset]) ovat auki.<br>Keikat: ($tyychkro2[tilaukset]) ovat auki.";
-				}
+				$query = "	DELETE tuotteen_toimittajat
+							FROM tuotteen_toimittajat
+							LEFT JOIN tilausrivi ON (tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tilausrivi.tyyppi='O' and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tilausrivi.varattu != 0)
+							WHERE tuotteen_toimittajat.yhtio	  = '$kukarow[yhtio]'
+							and tuotteen_toimittajat.liitostunnus = $tunnus
+							and tilausrivi.tunnus IS NULL";
+				pupe_query($query);
 			}
 		}
 

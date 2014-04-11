@@ -445,6 +445,10 @@ if ($kasitellaan_tiedosto) {
 		require('inc/ProgressBar.class.php');
 	}
 
+	// Otetaan pupen talut haltuun
+	$query  = "SHOW TABLES FROM $dbkanta";
+	$tableresult = pupe_query($query);
+
 	$taulunrivit_keys = array_keys($taulunrivit);
 
 	for ($tril = 0; $tril < count($taulunrivit); $tril++) {
@@ -481,103 +485,120 @@ if ($kasitellaan_tiedosto) {
 		// jos tullaan jotenkin hassusti, nmiin ei tehdä mitään
 		if (trim($table_mysql) == "") continue;
 
-		// Haetaan valitun taulun sarakkeet
-		$query = "SHOW COLUMNS FROM $table_mysql";
-		$fres  = pupe_query($query);
 
-		while ($row = mysql_fetch_array($fres)) {
-			// Pushataan arrayseen kaikki sarakenimet ja tietuetyypit
-			$trows[$table_mysql.".".strtoupper($row[0])] = $row[1];
+		// Katotaan, että valittu taulu on validi
+		mysql_data_seek($tableresult, 0);
 
-			$tlengthpit = preg_replace("/[^0-9,]/", "", $row[1]);
+		$validtable = FALSE;
 
-			if (strpos($tlengthpit, ",") !== FALSE) {
-				// Otetaan desimaalien määrä talteen
-				$tdecimal[$table_mysql.".".strtoupper($row[0])] = (int) substr($tlengthpit, strpos($tlengthpit, ",")+1);
-				$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
-			}
-
-			if (substr($row[1], 0, 7) == "decimal" or substr($row[1], 0, 3) == "int") {
-				// Sallitaan myös miinusmerkki...
-				$tlengthpit++;
-			}
-
-			$tlength[$table_mysql.".".strtoupper($row[0])] = trim($tlengthpit);
+		while ($tables = mysql_fetch_row($tableresult)) {
+			if ($tables[0] == $table_mysql) $validtable = TRUE;
 		}
 
-		// Nämä ovat pakollisia dummysarakkeita jotka ohitetaan lopussa automaattisesti!
-		if (in_array($table_mysql, array("yhteyshenkilo", "asiakkaan_avainsanat"))) {
-			$apu_sarakkeet = array("YTUNNUS");
-		}
+		if ($validtable) {
 
-		if (count($apu_sarakkeet) > 0) {
-			foreach($apu_sarakkeet as $s) {
-				$trows[$table_mysql.".".strtoupper($s)] = "";
+			// Haetaan valitun taulun sarakkeet
+			$query = "SHOW COLUMNS FROM $table_mysql";
+			$fres  = pupe_query($query);
+
+			while ($row = mysql_fetch_array($fres)) {
+				// Pushataan arrayseen kaikki sarakenimet ja tietuetyypit
+				$trows[$table_mysql.".".strtoupper($row[0])] = $row[1];
+
+				$tlengthpit = preg_replace("/[^0-9,]/", "", $row[1]);
+
+				if (strpos($tlengthpit, ",") !== FALSE) {
+					// Otetaan desimaalien määrä talteen
+					$tdecimal[$table_mysql.".".strtoupper($row[0])] = (int) substr($tlengthpit, strpos($tlengthpit, ",")+1);
+					$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
+				}
+
+				if (substr($row[1], 0, 7) == "decimal" or substr($row[1], 0, 3) == "int") {
+					// Sallitaan myös miinusmerkki...
+					$tlengthpit++;
+				}
+
+				$tlength[$table_mysql.".".strtoupper($row[0])] = trim($tlengthpit);
 			}
-		}
 
-		if ($table_mysql == 'tullinimike') {
-			$tulli_ei_kielta = "";
-			$tulli_ei_toimintoa = "";
-
-			if (in_array("KIELI", $taulunotsikot[$taulu]) === FALSE) {
-				$tulli_ei_kielta = "PUUTTUU";
-				$taulunotsikot[$taulu][] = "KIELI";
+			// Nämä ovat pakollisia dummysarakkeita jotka ohitetaan lopussa automaattisesti!
+			if (in_array($table_mysql, array("yhteyshenkilo", "asiakkaan_avainsanat"))) {
+				$apu_sarakkeet = array("YTUNNUS");
 			}
-			if (in_array("TOIMINTO", $taulunotsikot[$taulu]) === FALSE) {
-				$taulunotsikot[$taulu][] = "TOIMINTO";
-				$tulli_ei_toimintoa = "PUUTTUU";
+
+			if (count($apu_sarakkeet) > 0) {
+				foreach($apu_sarakkeet as $s) {
+					$trows[$table_mysql.".".strtoupper($s)] = "";
+				}
 			}
-		}
 
-		// Otetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
-		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
+			if ($table_mysql == 'tullinimike') {
+				$tulli_ei_kielta = "";
+				$tulli_ei_toimintoa = "";
 
-		// $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
-		// $taulunotsikot[$taulu] sisältää kaikki sarakkeet saadusta tiedostosta
-		foreach ($taulunotsikot[$taulu] as $key => $column) {
-			if ($column != '') {
-				if ($column == "TOIMINTO") {
-					//TOIMINTO sarakkeen positio tiedostossa
-					$postoiminto = (string) array_search($column, $taulunotsikot[$taulu]);
+				if (in_array("KIELI", $taulunotsikot[$taulu]) === FALSE) {
+					$tulli_ei_kielta = "PUUTTUU";
+					$taulunotsikot[$taulu][] = "KIELI";
+				}
+				if (in_array("TOIMINTO", $taulunotsikot[$taulu]) === FALSE) {
+					$taulunotsikot[$taulu][] = "TOIMINTO";
+					$tulli_ei_toimintoa = "PUUTTUU";
+				}
+			}
+
+			// Otetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
+			list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
+
+			// $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
+			// $taulunotsikot[$taulu] sisältää kaikki sarakkeet saadusta tiedostosta
+			foreach ($taulunotsikot[$taulu] as $key => $column) {
+				if ($column != '') {
+					if ($column == "TOIMINTO") {
+						//TOIMINTO sarakkeen positio tiedostossa
+						$postoiminto = (string) array_search($column, $taulunotsikot[$taulu]);
+					}
+					else {
+						if (!isset($trows[$table_mysql.".".$column]) and $column != "AVK_TUNNUS") {
+							lue_data_echo("<font class='error'>".t("Saraketta")." \"$column\" ".t("ei löydy")." $table_mysql-".t("taulusta")."!</font><br>");
+							$vikaa++;
+						}
+
+						// yhtio ja tunnus kenttiä ei saa koskaan muokata...
+						if ($column == 'YHTIO' or $column == 'TUNNUS') {
+							lue_data_echo("<font class='error'>".t("Yhtiö- ja tunnussaraketta ei saa muuttaa")." $table_mysql-".t("taulussa")."!</font><br>");
+							$vikaa++;
+						}
+
+						if (in_array($column, $pakolliset)) {
+							// pushataan positio indeksiin, että tiedetään missä kohtaa avaimet tulevat
+							$pos = array_search($column, $taulunotsikot[$taulu]);
+							$indeksi[$column] = $pos;
+							$tarkea++;
+						}
+
+						if (in_array($column, $kielletyt)) {
+							// katotaan ettei kiellettyjä sarakkeita muuteta
+							$viesti .= t("Sarake").": $column ".t("on kielletty sarake")." $table_mysql-".t("taulussa")."!<br>";
+							$kielletty++;
+						}
+
+						if (is_array($wherelliset) and in_array($column, $wherelliset)) {
+							// katotaan että määritellyt where lausekkeen ehdot löytyvät
+							$pos = array_search($column, $taulunotsikot[$taulu]);
+							$indeksi_where[$column] = $pos;
+							$wheretarkea++;
+						}
+					}
 				}
 				else {
-					if (!isset($trows[$table_mysql.".".$column]) and $column != "AVK_TUNNUS") {
-						lue_data_echo("<font class='error'>".t("Saraketta")." \"$column\" ".t("ei löydy")." $table_mysql-".t("taulusta")."!</font><br>");
-						$vikaa++;
-					}
-
-					// yhtio ja tunnus kenttiä ei saa koskaan muokata...
-					if ($column == 'YHTIO' or $column == 'TUNNUS') {
-						lue_data_echo("<font class='error'>".t("Yhtiö- ja tunnussaraketta ei saa muuttaa")." $table_mysql-".t("taulussa")."!</font><br>");
-						$vikaa++;
-					}
-
-					if (in_array($column, $pakolliset)) {
-						// pushataan positio indeksiin, että tiedetään missä kohtaa avaimet tulevat
-						$pos = array_search($column, $taulunotsikot[$taulu]);
-						$indeksi[$column] = $pos;
-						$tarkea++;
-					}
-
-					if (in_array($column, $kielletyt)) {
-						// katotaan ettei kiellettyjä sarakkeita muuteta
-						$viesti .= t("Sarake").": $column ".t("on kielletty sarake")." $table_mysql-".t("taulussa")."!<br>";
-						$kielletty++;
-					}
-
-					if (is_array($wherelliset) and in_array($column, $wherelliset)) {
-						// katotaan että määritellyt where lausekkeen ehdot löytyvät
-						$pos = array_search($column, $taulunotsikot[$taulu]);
-						$indeksi_where[$column] = $pos;
-						$wheretarkea++;
-					}
+					$vikaa++;
+					lue_data_echo("<font class='error'>".t("Tiedostossa on tyhjiä sarakkeiden otsikoita")."!</font><br>");
 				}
 			}
-			else {
-				$vikaa++;
-				lue_data_echo("<font class='error'>".t("Tiedostossa on tyhjiä sarakkeiden otsikoita")."!</font><br>");
-			}
+		}
+		else {
+			$vikaa++;
+			lue_data_echo("<font class='error'>".t("VIRHE: Sarakeotsikko viittaa tauluun jota ei ole olemassa").": '$table_mysql'!</font><br>");
 		}
 
 		// Oli virheellisiä sarakkeita tai pakollisia ei löytynyt..

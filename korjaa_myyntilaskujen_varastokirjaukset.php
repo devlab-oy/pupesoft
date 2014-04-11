@@ -17,10 +17,10 @@
 		exit;
 	}
 
-	// Yhtiˆ
+	// Yhti√∂
 	$yhtio = $argv[1];
 
-	// T‰st‰ eteenp‰in tapahtumia korjataan
+	// T√§st√§ eteenp√§in tapahtumia korjataan
 	$accident_date     = $argv[2];
 	$accident_date_end = $argv[3];
 
@@ -37,7 +37,7 @@
 	$kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 	if (!isset($kukarow)) {
-		echo utf8_encode("VIRHE: admin-k‰ytt‰j‰‰ ei lˆydy!")."\n";
+		echo utf8_encode("VIRHE: admin-k√§ytt√§j√§√§ ei l√∂ydy!")."\n";
 		exit;
 	}
 
@@ -134,7 +134,7 @@
 
 						$varmuutun = array_pop($maxmuutos);
 
-						// Tehd‰‰n uusi varastonmuutostiliˆinti
+						// Tehd√§√§n uusi varastonmuutostili√∂inti
 						$params = array(
 							'summa' 		=> round($tilirow["varmuutos"] * -1, 2),
 							'tapvm'			=> $tapvm,
@@ -145,10 +145,10 @@
 							'laadittu' 		=> date('Y-m-d H:i:s'),
 						);
 
-						// Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+						// Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
 						kopioitiliointi($varmuutun, "", $params);
 
-						// Tehd‰‰n uusi varastonmuutostiliˆinti
+						// Tehd√§√§n uusi varastonmuutostili√∂inti
 						$params = array(
 							'summa' 		=> round($rivirow["varmuutos"], 2),
 							'tapvm'			=> $tapvm,
@@ -159,7 +159,7 @@
 							'laadittu' 		=> date('Y-m-d H:i:s'),
 						);
 
-						// Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+						// Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
 						kopioitiliointi($varmuutun, "", $params);
 
 						################################################################################################
@@ -179,7 +179,7 @@
 
 						$vartun = array_pop($maxmuutos);
 
-						// Tehd‰‰n uusi varastonmuutostiliˆinti
+						// Tehd√§√§n uusi varastonmuutostili√∂inti
 						$params = array(
 							'summa' 		=> round($vararow["varasto"] * -1, 2),
 							'tapvm'			=> $tapvm,
@@ -190,10 +190,10 @@
 							'laadittu' 		=> date('Y-m-d H:i:s'),
 						);
 
-						// Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+						// Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
 						kopioitiliointi($vartun, "", $params);
 
-						// Tehd‰‰n uusi varastonmuutostiliˆinti
+						// Tehd√§√§n uusi varastonmuutostili√∂inti
 						$params = array(
 							'summa' 		=> round($rivirow["varmuutos"]*-1, 2),
 							'tapvm'			=> $tapvm,
@@ -204,14 +204,14 @@
 							'laadittu' 		=> date('Y-m-d H:i:s'),
 						);
 
-						// Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+						// Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
 						kopioitiliointi($vartun, "", $params);
 					}
 					elseif ($korjaa) {
 						// Korjataan tositteet
 						if ($tilirow['varmuutokset'] != "") {
 
-							// Tehd‰‰n uusi varastonmuutostiliˆinti
+							// Tehd√§√§n uusi varastonmuutostili√∂inti
 							$params = array(
 								'summa' 		=> round($rivirow["varmuutos"], 2),
 								'korjattu' 		=> '',
@@ -223,10 +223,10 @@
 
 							$ekamuutos = explode(",", $tilirow['varmuutokset']);
 
-							// Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+							// Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
 							kopioitiliointi($ekamuutos[0], "", $params);
 
-							// Yliviivataan alkuper‰iset varastonmuutostiliˆinnit
+							// Yliviivataan alkuper√§iset varastonmuutostili√∂innit
 							$query = "	UPDATE tiliointi
 										SET korjattu = '{$kukarow['kuka']}', korjausaika = now()
 										WHERE yhtio  = '$kukarow[yhtio]'
@@ -239,7 +239,7 @@
 
 						if ($vararow['varastot'] != "") {
 
-							// Tehd‰‰n uusi varastonmuutostiliˆinti
+							// Tehd√§√§n uusi varastonmuutostili√∂inti
 							$params = array(
 								'summa' 		=> round($rivirow["varmuutos"] * -1, 2),
 								'korjattu' 		=> '',
@@ -251,10 +251,10 @@
 
 							$ekamuutos = explode(",", $vararow['varastot']);
 
-							// Tehd‰‰n vastakirjaus alkuper‰iselle varastonmuutostiliˆinnille
+							// Tehd√§√§n vastakirjaus alkuper√§iselle varastonmuutostili√∂innille
 							kopioitiliointi($ekamuutos[0], "", $params);
 
-							// Yliviivataan alkuper‰iset varastonmuutostiliˆinnit
+							// Yliviivataan alkuper√§iset varastonmuutostili√∂innit
 							$query = "	UPDATE tiliointi
 										SET korjattu = '{$kukarow['kuka']}', korjausaika = now()
 										WHERE yhtio  = '$kukarow[yhtio]'
@@ -271,7 +271,7 @@
 			}
 
 			if ($laskurow["KUUKAUSI"] != $edkuukausi and $edkuukausi != 0) {
-				if ($eroyht != 0) echo utf8_encode("$yhtiorow[nimi] / $edkuukausi ero yhteens‰: $eroyht")."\n";
+				if ($eroyht != 0) echo utf8_encode("$yhtiorow[nimi] / $edkuukausi ero yhteens√§: $eroyht")."\n";
 				flush();
 				$eroyht = 0;
 			}
@@ -279,7 +279,7 @@
 			$edkuukausi = $laskurow["KUUKAUSI"];
 		}
 
-		if ($eroyht != 0) echo utf8_encode("$yhtiorow[nimi] / $edkuukausi ero yhteens‰: $eroyht")."\n";
+		if ($eroyht != 0) echo utf8_encode("$yhtiorow[nimi] / $edkuukausi ero yhteens√§: $eroyht")."\n";
 		echo "\n";
 		flush();
 	}

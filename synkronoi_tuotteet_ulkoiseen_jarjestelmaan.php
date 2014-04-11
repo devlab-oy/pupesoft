@@ -4,7 +4,7 @@
 
 	if (!isset($tee)) $tee = '';
 
-	echo "<font class='head'>",t("Synkronoi tuotteet ulkoiseen j‰rjestelm‰‰n"),"</font><hr><br />";
+	echo "<font class='head'>",t("Synkronoi tuotteet ulkoiseen j√§rjestelm√§√§n"),"</font><hr><br />";
 
 	if ($ftp_posten_logistik_host == '' or $ftp_posten_logistik_user == '' or $ftp_posten_logistik_pass == '' or $ftp_posten_logistik_path == '') {
 
@@ -29,12 +29,12 @@
 		if ($tee == '') {
 
 			echo "<font class='message'>",t("Tuotteet joita ei ole synkronoitu"),"</font><br />";
-			echo "<font class='message'>",t("Yhteens‰ %d kappaletta", "", mysql_num_rows($res)),"</font><br /><br />";
+			echo "<font class='message'>",t("Yhteens√§ %d kappaletta", "", mysql_num_rows($res)),"</font><br /><br />";
 
 			echo "<form action='' method='post'>";
 			echo "<table>";
 			echo "<tr><td class='back' colspan='2'>";
-			echo "<input type='submit' name='tee' value='",t("L‰het‰"),"' />";
+			echo "<input type='submit' name='tee' value='",t("L√§het√§"),"' />";
 			echo "</td></tr>";
 			echo "<tr>";
 			echo "<th>",t("Tuotenumero"),"</th>";
@@ -154,7 +154,7 @@
 		if ($tee == '') {
 
 			echo "<tr><td class='back' colspan='2'>";
-			echo "<input type='submit' name='tee' value='",t("L‰het‰"),"' />";
+			echo "<input type='submit' name='tee' value='",t("L√§het√§"),"' />";
 			echo "</td></tr>";
 			echo "</table>";
 			echo "</form>";
@@ -175,7 +175,7 @@
 				require ("inc/ftp-send.inc");
 			}
 			else {
-				echo "<br /><font class='error'>",t("Tiedoston luonti ep‰onnistui"),"</font><br />";
+				echo "<br /><font class='error'>",t("Tiedoston luonti ep√§onnistui"),"</font><br />";
 			}
 		}
 	}

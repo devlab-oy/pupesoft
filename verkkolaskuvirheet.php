@@ -1,6 +1,6 @@
 <?php
 
-	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") {
@@ -48,7 +48,7 @@
 
 	enable_ajax();
 
-	// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ss‰
+	// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ss√§
 	$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
 	$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok"     : rtrim($verkkolaskut_ok, "/");
 	$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig"   : rtrim($verkkolaskut_orig, "/");
@@ -61,23 +61,23 @@
 
 	echo "<font class='head'>".t("Virheelliset verkkolaskut")."</font><hr>";
 
-	// VIRHE: verkkolasku-kansiot on v‰‰rin m‰‰ritelty!
+	// VIRHE: verkkolasku-kansiot on v√§√§rin m√§√§ritelty!
 	if (!is_dir($verkkolaskuvirheet_poistetut) or !is_dir($verkkolaskuvirheet_vaarat) or !is_dir($verkkolaskuvirheet_kasittele)) {
 		echo t("Kansioissa ongelmia").": $verkkolaskuvirheet_poistetut, $verkkolaskuvirheet_vaarat, $verkkolaskuvirheet_kasittele<br>";
 		exit;
 	}
 
-	// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
+	// ekotetaan javascripti√§ jotta saadaan pdf:√§t uuteen ikkunaan
 	js_openFormInNewWindow();
 
 	if (isset($tiedosto)) {
 		if ($tapa == 'U') {
 			rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
-			echo "<font class='message'>".t("Tiedosto k‰sitell‰‰n uudestaan")."</font><br>";
+			echo "<font class='message'>".t("Tiedosto k√§sitell√§√§n uudestaan")."</font><br>";
 		}
 
 		if ($tapa == 'U_JA_P') {
-			// P‰ivitet‰‰n toimittajan tunnus aineistoon, niin saadaan lasku reskontraan
+			// P√§ivitet√§√§n toimittajan tunnus aineistoon, niin saadaan lasku reskontraan
 			if ($kumpivoice == "FINVOICE") {
 				$finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
 
@@ -92,7 +92,7 @@
 						$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $toimittaja['tunnus']);
 						$muutos_ok = true;
 					}
-					//unsetataan, ettei p‰ivity domin formeihin
+					//unsetataan, ettei p√§ivity domin formeihin
 					unset($toimittaja_haku);
 				}
 			}
@@ -103,7 +103,7 @@
 					$finkkari->InvoiceHeader->SellerParty->PartyNumber = $toimittaja['toimittajanro'];
 					$muutos_ok = true;
 				}
-				//unsetataan, ettei p‰ivity domin formeihin
+				//unsetataan, ettei p√§ivity domin formeihin
 				unset($toimittaja_haku);
 			}
 
@@ -111,7 +111,7 @@
 				file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
 
 				rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
-				echo "<font class='message'>".t("Tiedosto k‰sitell‰‰n uudestaan")."</font><br>";
+				echo "<font class='message'>".t("Tiedosto k√§sitell√§√§n uudestaan")."</font><br>";
 			}
 			else {
 				echo "<font class='message'>".t("Tiedoston korjaamisessa tapahtui virhe")."</font><br>";
@@ -120,7 +120,7 @@
 
 		if ($tapa == 'P') {
 			rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_poistetut."/".$tiedosto);
-			echo "<font class='message'>".t("Tiedosto hyl‰ttiin")."</font><br>";
+			echo "<font class='message'>".t("Tiedosto hyl√§ttiin")."</font><br>";
 		}
 	}
 
@@ -134,7 +134,7 @@
 		require ("inc/verkkolasku-in.inc");
 
 		echo "<table><tr>";
-		echo "<th>".t("Vastaanottaja")."<br>".t("Yhtiˆ")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
+		echo "<th>".t("Vastaanottaja")."<br>".t("Yhti√∂")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
 		while (($file = readdir($handle)) !== FALSE) {
 
@@ -142,7 +142,7 @@
 				unset($yhtiorow);
 				unset($xmlstr);
 
-				// Napataan alkuper‰inen kukarow
+				// Napataan alkuper√§inen kukarow
 				$vv_kukarow = $kukarow;
 
 				$returni = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
@@ -157,25 +157,25 @@
 
 					$luotiinlaskuja = erittele_laskut($verkkolaskuvirheet_vaarat."/".$file);
 
-					// Jos tiedostosta luotiin laskuja siirret‰‰n se tielt‰ pois
+					// Jos tiedostosta luotiin laskuja siirret√§√§n se tielt√§ pois
 					if ($luotiinlaskuja > 0) {
 						rename($verkkolaskuvirheet_vaarat."/".$file, $verkkolaskut_orig."/".$file);
 					}
 
-					$lasku_yhtio["yhtio"] = "EI KIITOS TƒLLƒ KERTAA";
+					$lasku_yhtio["yhtio"] = "EI KIITOS T√ÑLL√Ñ KERTAA";
 				}
 
-				// Palautetaan alkuper‰inen kukarow
+				// Palautetaan alkuper√§inen kukarow
 				$kukarow = $vv_kukarow;
 
 				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") {
 
 					$valitutlaskut++;
 
-					// Otetaan tarvittavat muuttujat t‰nnekin
+					// Otetaan tarvittavat muuttujat t√§nnekin
 					$xml = simplexml_load_string($xmlstr);
 
-					// Katsotaan mit‰ aineistoa k‰pistell‰‰n
+					// Katsotaan mit√§ aineistoa k√§pistell√§√§n
 					if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or strpos($file, "apix") !== false) {
 						require("inc/verkkolasku-in-finvoice.inc");
 						$kumpivoice = "FINVOICE";
@@ -228,12 +228,12 @@
 						echo "<td>$yhtio<br>$yhtiorow[nimi]</td>";
 					}
 					else {
-						echo "<td>$yhtio<br>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja ep‰selv‰")."!</font></td>";
+						echo "<td>$yhtio<br>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja ep√§selv√§")."!</font></td>";
 					}
 
 					echo "<td nowrap>";
 
-					// Olisiko toimittaja sittenkin jossain (v‰‰rin perustettu)
+					// Olisiko toimittaja sittenkin jossain (v√§√§rin perustettu)
 					if ($lasku_toimittaja["tunnus"] == 0) {
 
 						$toimittaja_array = array();
@@ -249,7 +249,7 @@
 						$laskun_toimitunnus 			= (int) $laskun_toimitunnus;
 
 						if ($laskun_toimitunnus > 0) {
-							// 0 etsit‰‰n toimittaja tunnuksella
+							// 0 etsit√§√§n toimittaja tunnuksella
 							$query  = "	SELECT *
 										FROM toimi
 										WHERE tunnus = '{$laskun_toimitunnus}'
@@ -263,7 +263,7 @@
 						}
 
 						if (!isset($trow) and $laskuttajan_ovt != "") {
-							// 1 etsit‰‰n toimittaja ovttunnuksella
+							// 1 etsit√§√§n toimittaja ovttunnuksella
 							$query  = "	SELECT *
 										FROM toimi
 										WHERE ovttunnus = '$laskuttajan_ovt'
@@ -278,7 +278,7 @@
 						}
 
 						if (!isset($trow) and $laskuttajan_ovt != "") {
-							// 2 etsit‰‰n toimittaja ovt-tunnuksella ilman tarkenteita
+							// 2 etsit√§√§n toimittaja ovt-tunnuksella ilman tarkenteita
 							$yovt = substr($laskuttajan_ovt, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
 							$query  = "	SELECT *
@@ -295,7 +295,7 @@
 						}
 
 						if (!isset($trow) and $laskuttajan_vat != "") {
-							// 3 etsit‰‰n toimittaja vat-numerolla
+							// 3 etsit√§√§n toimittaja vat-numerolla
 							$query  = "	SELECT *
 										FROM toimi
 										WHERE ovttunnus = '$laskuttajan_vat'
@@ -310,7 +310,7 @@
 						}
 
 						if (!isset($trow) and $laskuttajan_vat != "") {
-							// 4 etsit‰‰n toimittaja vat-numerolla
+							// 4 etsit√§√§n toimittaja vat-numerolla
 							$query  = "	SELECT *
 										FROM toimi
 										WHERE ytunnus = '$laskuttajan_vat'
@@ -325,7 +325,7 @@
 						}
 
 						if (!isset($trow) and $laskuttajan_ovt != "") {
-							// 5 etsit‰‰n toimittaja ytunnuksella
+							// 5 etsit√§√§n toimittaja ytunnuksella
 							$yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
 							$yovt2 = (int) $yovt1; // ilman etunollaa
 
@@ -346,7 +346,7 @@
 							$intvat = preg_replace("/[^0-9]/", "", $laskuttajan_vat);
 							$intvat2 = (int) $intvat; // ilman etunollaa
 
-							// 6 etsit‰‰n toimittaja vat-numerolla ilman FI-etuliitett‰
+							// 6 etsit√§√§n toimittaja vat-numerolla ilman FI-etuliitett√§
 							$query  = "	SELECT *
 										FROM toimi
 										WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
@@ -361,7 +361,7 @@
 						}
 
 						if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
-							// 9 etsit‰‰n toimittaja teccomi-specific
+							// 9 etsit√§√§n toimittaja teccomi-specific
 							$query = "	SELECT *
 										FROM toimi
 										WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -375,7 +375,7 @@
 						}
 
 						if (!isset($trow) and $laskuttajan_nimi != "") {
-							// 7 etsit‰‰n toimittaja nimell‰
+							// 7 etsit√§√§n toimittaja nimell√§
 							$query = "	SELECT *
 										FROM toimi
 										WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -393,7 +393,7 @@
 
 							$laskuttajan_nimi = str_replace(" ", "", $laskuttajan_nimi);
 
-							// 8 etsit‰‰n IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-tyˆnnetaan laskun nimi-kentt‰‰n...)
+							// 8 etsit√§√§n IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-ty√∂nnetaan laskun nimi-kentt√§√§n...)
 							$query = "	SELECT *
 										FROM toimi
 										WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -444,7 +444,7 @@
 						if (count($toimittaja_array) > 0) {
 
 							if ($kumpivoice == "FINVOICE") {
-								echo t("Valitse toimittaja ja k‰sittele lasku uudestaan").":<br>";
+								echo t("Valitse toimittaja ja k√§sittele lasku uudestaan").":<br>";
 								echo "<form method='post'>
 										<input type='hidden' name = 'tiedosto' value='$file'>
 										<input type='hidden' name = 'tapa' value='U_JA_P'>
@@ -455,7 +455,7 @@
 									echo "<option value='$lahellarow[tunnus]'>$lahellarow[nimi] $lahellarow[nimitark]</option>";
 								}
 
-								echo "</select><input type='submit' value ='".t("K‰sittele uudestaan")."'></form><br><br>";
+								echo "</select><input type='submit' value ='".t("K√§sittele uudestaan")."'></form><br><br>";
 							}
 
 							echo t("Muuta toimittajan tietoja").":<br>";
@@ -468,7 +468,7 @@
 								echo "<option value='$lahellarow[tunnus]'>$lahellarow[nimi] $lahellarow[nimitark]</option>";
 							}
 
-							echo "</select><input type='submit' value ='".t("P‰ivit‰")."'></form><br><br>";
+							echo "</select><input type='submit' value ='".t("P√§ivit√§")."'></form><br><br>";
 						}
 
 						echo "<form name='toimittajahaku_form' action='' method='POST'>";
@@ -476,9 +476,9 @@
 						echo "<input type='hidden' name = 'kumpivoice' value='$kumpivoice'>";
 						echo "<input type='hidden' name='tapa' value='U_JA_P' />";
 
-						echo t('Etsi toimittaja ja k‰sittele lasku uudestaan').':<br>';
+						echo t('Etsi toimittaja ja k√§sittele lasku uudestaan').':<br>';
 						echo livesearch_kentta("eisaaollaoikee", "TOIMITTAJAHAKU", "toimittaja_haku", 140, $toimittaja_haku, '', '', 'toimittaja_haku', 'ei_break_all');
-						echo "<input type='submit' value='".t("K‰sittele uudestaan")."' />";
+						echo "<input type='submit' value='".t("K√§sittele uudestaan")."' />";
 						echo "</form>";
 						echo "<br/>";
 						echo "<br/>";
@@ -499,18 +499,18 @@
 								<input type='submit' value = '".t("Perusta")."'></form><br><br>";
 					}
 					else {
-						echo t("K‰sittele lasku uudestaan").":<br>";
+						echo t("K√§sittele lasku uudestaan").":<br>";
 						echo "<form method='post'>
 								<input type='hidden' name = 'tiedosto' value ='$file'>
 								<input type='hidden' name = 'tapa' value ='U'>
-								<input type='submit' value = '".t("K‰sittele uudestaan")."'></form><br><br>";
+								<input type='submit' value = '".t("K√§sittele uudestaan")."'></form><br><br>";
 					}
 
-					echo t("Hylk‰‰ lasku").":<br>";
+					echo t("Hylk√§√§ lasku").":<br>";
 					echo "<form method='post'>
 							<input type='hidden' name = 'tiedosto' value ='$file'>
 							<input type='hidden' name = 'tapa' value ='P'>
-							<input type='submit' value = '".t("Hylk‰‰")."'></form>";
+							<input type='submit' value = '".t("Hylk√§√§")."'></form>";
 
 					echo "</td>";
 
@@ -530,11 +530,11 @@
 						$digest	 = md5($urlmain . "&" . $salasana);
 						$url	 = $urlhead.$urlmain."&DIGEST=$digest";
 
-						echo "<a href='$url' target='laskuikkuna'>". t('N‰yt‰ lasku')."</a>";
+						echo "<a href='$url' target='laskuikkuna'>". t('N√§yt√§ lasku')."</a>";
 					}
 					else {
 
-						// Maventa- tai APIX-lasku, niin yritet‰‰n hakea laskun kuva mukaan
+						// Maventa- tai APIX-lasku, niin yritet√§√§n hakea laskun kuva mukaan
 						if (preg_match("/(maventa|apix)_(.*?)_(maventa|apix)/", basename($file), $match)) {
 
 							// Haetaan liitteet
@@ -547,7 +547,7 @@
 										echo "<form id='form_1_$valitutlaskut' name='form_1_$valitutlaskut' method='post'>
 											<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
 											<input type='hidden' name = 'pdf' value ='".urlencode(file_get_contents($liitefile))."'>
-											<input type='submit' value = '".t("N‰yt‰ Pdf")."' onClick=\"js_openFormInNewWindow('form_1_$valitutlaskut', 'form_1_$valitutlaskut'); return false;\"></form>";
+											<input type='submit' value = '".t("N√§yt√§ Pdf")."' onClick=\"js_openFormInNewWindow('form_1_$valitutlaskut', 'form_1_$valitutlaskut'); return false;\"></form>";
 									}
 								}
 							}
@@ -556,7 +556,7 @@
 						echo "<form id='form_2_$valitutlaskut' name='form_2_$valitutlaskut' method='post'>
 							<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
 							<input type='hidden' name = 'xml' value ='".urlencode($xmlstr)."'>
-							<input type='submit' value = '".t("N‰yt‰ Finvoice")."' onClick=\"js_openFormInNewWindow('form_2_$valitutlaskut', 'form_2_$valitutlaskut'); return false;\"></form>";
+							<input type='submit' value = '".t("N√§yt√§ Finvoice")."' onClick=\"js_openFormInNewWindow('form_2_$valitutlaskut', 'form_2_$valitutlaskut'); return false;\"></form>";
 					}
 
 					echo "</td>";
@@ -575,7 +575,7 @@
 	}
 
 	if ($valitutlaskut == 0) {
-		echo "<font class='message'>".t("Ei hyl‰ttyj‰ laskuja")."</font><br>";
+		echo "<font class='message'>".t("Ei hyl√§ttyj√§ laskuja")."</font><br>";
 	}
 
 	require "inc/footer.inc";

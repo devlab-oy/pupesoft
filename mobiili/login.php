@@ -68,12 +68,12 @@ echo "
 
 echo "
 <body>
-<div class='header'><h1>",t("SISƒƒNKIRJAUTUMINEN", $browkieli),"</h1></div>";
+<div class='header'><h1>",t("SIS√Ñ√ÑNKIRJAUTUMINEN", $browkieli),"</h1></div>";
 
 if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 
 	if (count($return['usea']) == 0) {
-		echo t("Sinulle lˆytyi monta k‰ytt‰j‰tunnusta, muttei yht‰‰n yrityst‰", $browkieli),"!";
+		echo t("Sinulle l√∂ytyi monta k√§ytt√§j√§tunnusta, muttei yht√§√§n yrityst√§", $browkieli),"!";
 		exit;
 	}
 
@@ -112,7 +112,7 @@ else {
 	echo "<table class='login'>
 			<form name='login' target='_top' action='' method='post'>
 
-			<tr><th>",t("K‰ytt‰j‰tunnus",$browkieli),":</th><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+			<tr><th>",t("K√§ytt√§j√§tunnus",$browkieli),":</th><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
 			<tr><th>",t("Salasana",$browkieli),":</th><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 		</table>";
 
@@ -120,7 +120,7 @@ else {
 			echo "<br /><font class='error'>{$return['error']}</font><br />";
 	}
 
-	echo "	<br /><input type='submit' class='button' value='",t("Sis‰‰n",$browkieli),"'>
+	echo "	<br /><input type='submit' class='button' value='",t("Sis√§√§n",$browkieli),"'>
 			</form>";
 
 	echo "<script LANGUAGE='JavaScript'>window.document.{$formi}.{$kentta}.focus();</script>";

@@ -29,7 +29,7 @@
 
 
 		if (mysql_num_rows($result) > 100) {
-			echo "<font class='message'>".t("Tuloksesksi tuli yli 100 laskua. Anna pienempi v‰li")."</font>";
+			echo "<font class='message'>".t("Tuloksesksi tuli yli 100 laskua. Anna pienempi v√§li")."</font>";
 			exit;
 		}
 		echo "<table><tr>";

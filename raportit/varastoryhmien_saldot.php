@@ -5,9 +5,9 @@
 	 *
 	 */
 
-	// Kutsutaanko CLI:stä
+	// Kutsutaanko CLI:stÃ¤
 	if (php_sapi_name() != 'cli') {
-		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+		die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 	}
 
 	$kukarow = array();
@@ -18,7 +18,7 @@
 	require 'inc/connect.inc';
 	require 'inc/functions.inc';
 
-	echo date("d.m.Y @ G:i:s")." - Varastoryhmien päivitys\n";
+	echo date("d.m.Y @ G:i:s")." - Varastoryhmien pÃ¤ivitys\n";
 
 	// poistetaan kaikki varastoryhma-tuotteen_avainsanat
 	$query = "	DELETE FROM tuotteen_avainsanat
@@ -34,7 +34,7 @@
 	$avainsana_res = mysql_query($query) or die("Virhe haettaessa varastoryhma avainsanoja!\n".mysql_error($query)."\n\n");
 
 	if (mysql_num_rows($avainsana_res) == 0) {
-		echo date("d.m.Y @ G:i:s")." - Varastoryhmiä ei ole perustettu.\n";
+		echo date("d.m.Y @ G:i:s")." - VarastoryhmiÃ¤ ei ole perustettu.\n";
 	}
 	else {
 		$query = "	SELECT tuote.tuoteno, ifnull((SELECT isatuoteno FROM tuoteperhe WHERE tuoteperhe.yhtio = tuote.yhtio AND tuoteperhe.isatuoteno = tuote.tuoteno AND tuoteperhe.tyyppi = 'P' LIMIT 1), '') isa
@@ -42,7 +42,7 @@
 					WHERE tuote.yhtio = '$kukarow[yhtio]'";
 		$res = mysql_query($query) or die("Virhe haettaessa tuotteita!\n".mysql_error($query)."\n\n");
 
-		echo date("d.m.Y @ G:i:s")." - Aloitetaan ".mysql_num_rows($res)." tuotteen päivitys. ($kukarow[yhtio])\n";
+		echo date("d.m.Y @ G:i:s")." - Aloitetaan ".mysql_num_rows($res)." tuotteen pÃ¤ivitys. ($kukarow[yhtio])\n";
 
 		while ($row = mysql_fetch_assoc($res)) {
 
@@ -80,5 +80,5 @@
 			}
 		}
 	}
-	echo date("d.m.Y @ G:i:s")." - Varastoryhmien päivitys. Done!\n\n";
+	echo date("d.m.Y @ G:i:s")." - Varastoryhmien pÃ¤ivitys. Done!\n\n";
 ?>

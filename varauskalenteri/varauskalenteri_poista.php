@@ -33,7 +33,7 @@
 		}
 	}
 	else {
-		echo "<br><br>".t("Ethän poista muitten varauksia")."!";
+		echo "<br><br>".t("EthÃ¤n poista muitten varauksia")."!";
 		$jatko = 0;
 	}
 ?>

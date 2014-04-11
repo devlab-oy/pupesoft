@@ -2,7 +2,7 @@
 <?php
 
 	if (php_sapi_name() != 'cli') {
-		die("1, Voidaan ajaa vain komentoriviltä\r\n\r\n");
+		die("1, Voidaan ajaa vain komentoriviltÃ¤\r\n\r\n");
 	}
 
 	require('inc/connect.inc');
@@ -14,7 +14,7 @@
 
 	echo "\nSTART: $hname :$dbkanta\n";
 
-	//$dbkanta --> tulee salasanat.php:stä
+	//$dbkanta --> tulee salasanat.php:stÃ¤
 	$query  = "SHOW TABLES FROM $dbkanta";
 	$tabresult = pupe_query($query);
 
@@ -80,7 +80,7 @@
 
 			$default = $fields["Key"] == "PRI" ? "" : $default;
 
-			// Päivitetään vain jos on päivitettävää
+			// PÃ¤ivitetÃ¤Ã¤n vain jos on pÃ¤ivitettÃ¤vÃ¤Ã¤
 			if ($default != "" and ($column_null != $null or $column_default != str_replace("'", "", $default))) {
 				#echo "$tables[0]: $column_name $column_type $column_null default $column_default -->  MODIFY COLUMN $column_name $column_type $null default $default\n";
 				$sql .= " MODIFY COLUMN $column_name $column_type $null default $default,\n";

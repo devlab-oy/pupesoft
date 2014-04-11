@@ -12,7 +12,7 @@
 	function laske_hinta($laskurow, $tunnus) {
 		global $kukarow, $yhtiorow;
 
-		// katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
+		// katsotaan onko t√§lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
 		$query = "	SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, valkoodi, vienti
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -28,22 +28,22 @@
 			$kulurow = mysql_fetch_array($result);
 		}
 		else {
-			$kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => ""); // muuten tyhj‰‰
+			$kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => ""); // muuten tyhj√§√§
 		}
 
-		// jos ollaan liitetty jo vaihto-omaisuuslasku, k‰ytet‰‰n sen vientikentt‰‰
+		// jos ollaan liitetty jo vaihto-omaisuuslasku, k√§ytet√§√§n sen vientikentt√§√§
 		if ($kulurow["vienti"] != "") $laskurow["vienti"] = $kulurow["vienti"];
 
 		$alvti = " if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) ";
 
-		// jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
+		// jos kysess√§ on kotimainen vaihto-omaisuuslasku, pit√§√§ lis√§t√§ tuotteen hintaan alvi
 		if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 
 			// Lasketaan verokanta
 			if ($kulurow["arvo"] != 0) $simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
 			else $simualv = 0;
 
-			// Onko miell‰ oletuksista poikkeava alvi. Verokantoja ennen viimeisint‰ alv-muutosta.
+			// Onko miell√§ oletuksista poikkeava alvi. Verokantoja ennen viimeisint√§ alv-muutosta.
 			if (in_array($simualv, array(23, 13, 9))) {
 				$alvti = $simualv;
 				$alvit = $simualv;
@@ -53,7 +53,7 @@
 			}
 
 			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
-				// tutkitaan ollaanko siell‰ alv-rekisterˆity
+				// tutkitaan ollaanko siell√§ alv-rekister√∂ity
 				$alhqur = "	SELECT *
 							FROM yhtion_toimipaikat
 							WHERE yhtio		= '{$kukarow['yhtio']}'
@@ -61,7 +61,7 @@
 							AND vat_numero != ''";
 				$alhire = pupe_query($alhqur);
 
-				// ollaan alv-rekisterˆity
+				// ollaan alv-rekister√∂ity
 				if (mysql_num_rows($alhire) == 1) {
 					$alvit = "tuotteen_alv.alv";
 					$alvti = " ifnull(tuotteen_alv.alv, 0) ";
@@ -126,7 +126,7 @@
 
 	                $suuntalavan_tunnus = "";
 
-	                // Tehd‰‰n uusi suuntalava
+	                // Tehd√§√§n uusi suuntalava
 	                $tee = "lisaa";
 	                // $otunnus = $keikan_tunnus;
 	                $sscc = "Suoratoimitus";
@@ -161,7 +161,7 @@
 	            $suuntalava_querylisa = ", suuntalava = $suuntalavan_tunnus ";
 	        }
 	        else {
-	            // toistaiseksi ei p‰ivitet‰ suuntalavaa tilausriville kohdistuksen yhteydess‰ automaattisesti
+	            // toistaiseksi ei p√§ivitet√§ suuntalavaa tilausriville kohdistuksen yhteydess√§ automaattisesti
 	            // $suuntalava = hae_suuntalava($otunnus, $valittutunnus);
 	            // $suuntalava_querylisa = ", suuntalava = $suuntalava ";
 	        }
@@ -174,7 +174,7 @@
 			$updatelisa = "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale_saapuminen = '{$laskurow['erikoisale_saapuminen']}' ";
 		}
 
-	    // Haetaan rivit ennen p‰ivityst‰
+	    // Haetaan rivit ennen p√§ivityst√§
 	    $vanhathinnat = array();
 
 	    $updquery = "   SELECT tunnus
@@ -188,7 +188,7 @@
 	        $vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
 	    }
 
-		// Vied‰‰n varastoon (varastoon=1) kun r‰pl‰t‰‰n ruksia
+		// Vied√§√§n varastoon (varastoon=1) kun r√§pl√§t√§√§n ruksia
 	    $query = "  UPDATE tilausrivi use index (yhtio_otunnus) SET
 	                uusiotunnus = '{$otunnus}',
 					varastoon = 1
@@ -200,8 +200,8 @@
 
 	    if ($otunnus == 0 and $valittutunnus != '') {
 
-	    	// Katsotaan lˆytyykˆ rivi asn_sanomat-tauluun kohdistettuna laskuun
-	    	// Jos lˆytyy, poistetaan kohdistus
+	    	// Katsotaan l√∂ytyyk√∂ rivi asn_sanomat-tauluun kohdistettuna laskuun
+	    	// Jos l√∂ytyy, poistetaan kohdistus
 	    	$query = "	SELECT *
 	    				FROM asn_sanomat
 	    				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -227,7 +227,7 @@
 	    	}
 	    }
 
-	    // Haetaan p‰ivitetyt rivit
+	    // Haetaan p√§ivitetyt rivit
 	    $uudethinnat = array();
 	    mysql_data_seek($selresult, 0);
 
@@ -242,7 +242,7 @@
 	        'suuntalava_sscc' => ''
 	    );
 
-	    // Tuotteet p‰ivitet‰‰n kohdistuksissa automaattisesti oikeille suuntalavoille, mik‰li sellainen on jo perustettu (suuntalavan m‰‰riteltyjen varastopaikkojen sek‰ ker‰ysvyˆhykkeen mukaan)
+	    // Tuotteet p√§ivitet√§√§n kohdistuksissa automaattisesti oikeille suuntalavoille, mik√§li sellainen on jo perustettu (suuntalavan m√§√§riteltyjen varastopaikkojen sek√§ ker√§ysvy√∂hykkeen mukaan)
 	    if ($yhtiorow['suuntalavat'] == 'S' and $otunnus > 0) {
 	        if ($suuntalavan_tunnus > 0) {
 
@@ -273,7 +273,7 @@
 	            }
 	        }
 	        else {
-	            // toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydess‰ automaattisesti
+	            // toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydess√§ automaattisesti
 	            // $data['suuntalava'] = $suuntalava;
 	            $data['suuntalava'] = 0;
 	        }
@@ -417,7 +417,7 @@
 		$tunnus		= $_POST['tunnus'];
 		$otunnus 	= $_POST['otunnus'];
 
-		// p‰ivitet‰‰n haluttu hinta tilausriville
+		// p√§ivitet√§√§n haluttu hinta tilausriville
 		$query  = "UPDATE tilausrivi set hinta='{$hinta}' where yhtio='{$kukarow['yhtio']}' and tunnus='{$tunnus}' and hinta<>'{$hinta}'";
 		$result = pupe_query($query);
 
@@ -472,7 +472,7 @@
 		$uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
 
 		# Toiminta funktioitu
-		# p‰ivitet‰‰n lapset
+		# p√§ivitet√§√§n lapset
 		$kaikki_ok = paivita_tilausrivin_kpl($tunnus, $uuden_rivin_kpl, $otunnus, TRUE);
 
 		echo json_encode(array('paivitetaanko' => $kaikki_ok));
@@ -530,7 +530,7 @@
 
 		$suuntalavan_tunnus = lisaa_suuntalava($otunnus, $params);
 
-		// Koska kyseess‰ on kopioitu tilausrivi, varmistetaan viel‰ ett‰ juuri luotu suuntalava setataan uudelle riville
+		// Koska kyseess√§ on kopioitu tilausrivi, varmistetaan viel√§ ett√§ juuri luotu suuntalava setataan uudelle riville
 		$query = "	UPDATE tilausrivi
 					SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

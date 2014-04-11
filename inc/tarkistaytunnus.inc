@@ -5,7 +5,7 @@ $tulo    = 0;
 // sallitaan vain numerot 0-9
 $ytunnus = preg_replace("/[^0-9]/", "", $ytunnus);
 
-// tehd‰‰n kaheksen merkki‰ pitk‰ksi
+// tehd√§√§n kaheksen merkki√§ pitk√§ksi
 $ytunnus = sprintf("%08.8s",$ytunnus);
 
 // loopataan ytunnus

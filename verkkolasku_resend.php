@@ -1,6 +1,6 @@
 <?php
 
-	// Kutsutaanko CLI:st‰
+	// Kutsutaanko CLI:st√§
 	$php_cli = FALSE;
 
 	if (php_sapi_name() == 'cli') {
@@ -22,10 +22,10 @@
 		$pupe_root_polku = dirname(__FILE__);
 	}
 
-	// Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
+	// Sallitaan vain yksi instanssi t√§st√§ skriptist√§ kerrallaan
 	pupesoft_flock();
 
-	// jos verkkolaskun l‰hetys on feilannut niin koitetaan l‰hett‰‰ verkkolasku-tiedosto uudelleen
+	// jos verkkolaskun l√§hetys on feilannut niin koitetaan l√§hett√§√§ verkkolasku-tiedosto uudelleen
 	// PUPEVOICE
 	$kansio = "{$pupe_root_polku}/dataout/pupevoice_error/";
 
@@ -156,7 +156,7 @@
 
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-				// T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
+				// T√§ytet√§√§n api_keys, n√§ill√§ kirjaudutaan Maventaan
 				$api_keys = array();
 				$api_keys["user_api_key"] 	= $yhtiorow['maventa_api_avain'];
 				$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
@@ -173,18 +173,18 @@
 					// Tuotanto
 					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-					// Haetaan tarvittavat tiedot filest‰
+					// Haetaan tarvittavat tiedot filest√§
 					$files_out = unserialize(file_get_contents($kansio.$lasku));
 
 					$status = maventa_invoice_put_file($client, $api_keys, $matsit[2], "", $kukarow['kieli'], $files_out);
 
-					// Siirret‰‰n dataout kansioon jos kaikki meni ok
+					// Siirret√§√§n dataout kansioon jos kaikki meni ok
 					rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
 
 					echo  "Maventa-lasku $matsit[2]: $status<br>\n";
 				}
 				catch (Exception $exVirhe) {
-					echo "VIRHE: Yhteys Maventaan ep‰onnistui: ".$exVirhe->getMessage()."\n";
+					echo "VIRHE: Yhteys Maventaan ep√§onnistui: ".$exVirhe->getMessage()."\n";
 				}
 			}
 		}
@@ -207,7 +207,7 @@
 
 				$status = apix_invoice_put_file("", $kukarow['kieli'], $lasku);
 
-				echo "APIX-l‰hetys $status<br>\n";
+				echo "APIX-l√§hetys $status<br>\n";
 			}
 		}
 

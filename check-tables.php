@@ -1,9 +1,9 @@
 #!/usr/bin/php
 <?php
 
-	// Kutsutaanko CLI:stä
+	// Kutsutaanko CLI:stÃ¤
 	if (php_sapi_name() != 'cli') {
-		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+		die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 	}
 
 	require ("inc/connect.inc");
@@ -41,7 +41,7 @@
 			echo "$query -> $chkro[Msg_text]\n";
 		}
 
-		// varmistetaan vielä indexien käytössäolo
+		// varmistetaan vielÃ¤ indexien kÃ¤ytÃ¶ssÃ¤olo
 		$query = "show index from $table";
 		$chkre = mysql_query($query);
 

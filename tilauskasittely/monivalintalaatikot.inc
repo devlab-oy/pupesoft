@@ -23,7 +23,7 @@
 		$piirra_otsikot = TRUE;
 	}
 
-	// N‰ytet‰‰nkˆ osaston ja tuoteryhm‰n selitteet
+	// N√§ytet√§√§nk√∂ osaston ja tuoteryhm√§n selitteet
 	if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == "K") {
 		$orderlisa = "ORDER BY avainsana.selitetark";
 	}
@@ -190,7 +190,7 @@
 		}
 	}
 
-	// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehd‰‰n niill‰ rajaukset muihin dropdowneihin
+	// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehd√§√§n niill√§ rajaukset muihin dropdowneihin
 	if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0 or trim($dynaaminen_check) != '') {
 		if (count($mul_osasto) > 0) {
 			$osastot = '';
@@ -368,7 +368,7 @@
 						$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
 
 						if ($kaikki_puun_tunnukset_row["tunnukset"] != "") {
-							// Nollataan joinit t‰ss‰ vaiheessa n‰in, koska syvempi puun taso rajaa enemm‰n kuin edelliset tasot, joten turha joinata monta kertaa
+							// Nollataan joinit t√§ss√§ vaiheessa n√§in, koska syvempi puun taso rajaa enemm√§n kuin edelliset tasot, joten turha joinata monta kertaa
 							$lisa_dynaaminen[$param] = "";
 							$lisa_dynaaminen_liitokset[$param] = "";
 
@@ -883,7 +883,7 @@
 						echo "<label>";
 					}
 
-					echo t("Tuoteryhm‰");
+					echo t("Tuoteryhm√§");
 
 					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 						echo "</label>";
@@ -921,7 +921,7 @@
 						$ruksitchk = "CHECKED";
 					}
 
-					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[try]' size='2' value='$jarjestys[try]'> ".t("Tuoteryhmitt‰in")." <input type='checkbox' name='ruksit[try]' value='try' $ruksitchk></th></tr>";
+					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[try]' size='2' value='$jarjestys[try]'> ".t("Tuoteryhmitt√§in")." <input type='checkbox' name='ruksit[try]' value='try' $ruksitchk></th></tr>";
 				}
 
 				echo "</table></div>";
@@ -1044,7 +1044,7 @@
 						$ruksitchk = "CHECKED";
 					}
 
-					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[tuotemerkki]' size='2' value='$jarjestys[tuotemerkki]'> ".t("Tuotemerkeitt‰in")." <input type='checkbox' name='ruksit[tuotemerkki]' value='tuotemerkki' $ruksitchk></th></tr>";
+					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[tuotemerkki]' size='2' value='$jarjestys[tuotemerkki]'> ".t("Tuotemerkeitt√§in")." <input type='checkbox' name='ruksit[tuotemerkki]' value='tuotemerkki' $ruksitchk></th></tr>";
 				}
 
 				echo "</table></div>";
@@ -1372,7 +1372,7 @@
 
 				while ($looppirow = mysql_fetch_assoc($sxresult2)) {
 
-					// Suljetaan selectboxi ja tehd‰‰n seuraava kun taso vaihtuu
+					// Suljetaan selectboxi ja tehd√§√§n seuraava kun taso vaihtuu
 					if ($looppirow["syvyys"] != $edsyvyys) {
 
 						if ($edsyvyys > 0) {
@@ -1411,7 +1411,7 @@
 
 					$show_node = FALSE;
 
-					// Skipataanko vai n‰ytet‰‰nkˆ
+					// Skipataanko vai n√§ytet√§√§nk√∂
 					if (count($sallitut_valit) > 0) {
 
 						$raj_syvyys = 0;
@@ -1424,7 +1424,7 @@
 							}
 						}
 
-						// L‰hin vasemmanpuolinen rajaava taso
+						// L√§hin vasemmanpuolinen rajaava taso
 						if ($raj_syvyys > 0) {
 							foreach ($sallitut_valit[$raj_syvyys] as $lft_rgt) {
 								if ($looppirow['lft'] > $lft_rgt[0] and $looppirow['rgt'] < $lft_rgt[1]) {
@@ -1451,7 +1451,7 @@
 
 							$sel = ' SELECTED';
 
-							// T‰m‰ rajaa tulevia tasoja/nodeja
+							// T√§m√§ rajaa tulevia tasoja/nodeja
 							$sallitut_valit[$looppirow['syvyys']][] = array($looppirow['lft'], $looppirow['rgt']);
 						}
 
@@ -1461,7 +1461,7 @@
 					$edsyvyys = $looppirow["syvyys"];
 				}
 
-				// Suljetaan viel‰ vika selectboxi
+				// Suljetaan viel√§ vika selectboxi
 				echo "</select><input type='hidden' name='dynaaminen{$tree}maxsyvyys' value='$edsyvyys'></td>";
 				echo "</tr>";
 
@@ -1485,7 +1485,7 @@
 
 			$parametri = substr($monivalintalaatikko, 10);
 
-			// N‰ytet‰‰n parametrit jos ollaan valittu osasto tai  tuoteryhm‰ tai rajattu segmenteill‰
+			// N√§ytet√§√§n parametrit jos ollaan valittu osasto tai  tuoteryhm√§ tai rajattu segmenteill√§
 			if ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen["tuote"] != "") {
 
 				if ($kukarow["extranet"] == "" and $verkkokauppa == "") {
@@ -1602,12 +1602,12 @@
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
 			if ($piirra_otsikot) {
-				echo "<tr><th>",t("Myyj‰"),"</th></tr>";
+				echo "<tr><th>",t("Myyj√§"),"</th></tr>";
 			}
 
 			echo "<tr>";
 
-			// tehd‰‰n query
+			// tehd√§√§n query
 			$query = "	SELECT DISTINCT myyja, nimi, tunnus
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -1640,7 +1640,7 @@
 					$ruksitchk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[laskumyyja]' size='2' value='$jarjestys[laskumyyja]'> ".t("Myyjitt‰in")." <input type='checkbox' name='ruksit[laskumyyja]' value='laskumyyja' $ruksitchk></th></tr>";
+				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[laskumyyja]' size='2' value='$jarjestys[laskumyyja]'> ".t("Myyjitt√§in")." <input type='checkbox' name='ruksit[laskumyyja]' value='laskumyyja' $ruksitchk></th></tr>";
 			}
 
 			echo "</table></div>";
@@ -1694,12 +1694,12 @@
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
 			if ($piirra_otsikot) {
-				echo "<tr><th>",t("Tuotemyyj‰"),"</th></tr>";
+				echo "<tr><th>",t("Tuotemyyj√§"),"</th></tr>";
 			}
 
 			echo "<tr>";
 
-			// tehd‰‰n query
+			// tehd√§√§n query
 			$query = "	SELECT DISTINCT myyja, nimi
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -1732,7 +1732,7 @@
 					$ruksitchk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[tuotemyyja]' size='2' value='$jarjestys[tuotemyyja]'> ".t("Tuotemyyjitt‰in")." <input type='checkbox' name='ruksit[tuotemyyja]' value='tuotemyyja' $ruksitchk></th></tr>";
+				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[tuotemyyja]' size='2' value='$jarjestys[tuotemyyja]'> ".t("Tuotemyyjitt√§in")." <input type='checkbox' name='ruksit[tuotemyyja]' value='tuotemyyja' $ruksitchk></th></tr>";
 			}
 
 			echo "</table></div>";
@@ -1742,12 +1742,12 @@
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
 			if ($piirra_otsikot) {
-				echo "<tr><th>",t("Asiakasmyyj‰"),"</th></tr>";
+				echo "<tr><th>",t("Asiakasmyyj√§"),"</th></tr>";
 			}
 
 			echo "<tr>";
 
-			// tehd‰‰n query
+			// tehd√§√§n query
 			$query = "	SELECT DISTINCT myyja, nimi
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -1780,7 +1780,7 @@
 					$ruksitchk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakasmyyja]' size='2' value='$jarjestys[asiakasmyyja]'> ".t("Asiakasmyyjitt‰in")." <input type='checkbox' name='ruksit[asiakasmyyja]' value='asiakasmyyja' $ruksitchk></th></tr>";
+				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakasmyyja]' size='2' value='$jarjestys[asiakasmyyja]'> ".t("Asiakasmyyjitt√§in")." <input type='checkbox' name='ruksit[asiakasmyyja]' value='asiakasmyyja' $ruksitchk></th></tr>";
 			}
 
 			echo "</table></div>";
@@ -1881,7 +1881,7 @@
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
 			if ($piirra_otsikot) {
-				echo "<tr><th>",t("Asiakasryhm‰"),"</th></tr>";
+				echo "<tr><th>",t("Asiakasryhm√§"),"</th></tr>";
 			}
 
 			echo "<tr>";
@@ -1915,7 +1915,7 @@
 					$ruksitchk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakasryhma]' size='2' value='$jarjestys[asiakasryhma]'> ".t("Asiakasryhmitt‰in")." <input type='checkbox' name='ruksit[asiakasryhma]' value='asiakasryhma' $ruksitchk></th></tr>";
+				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakasryhma]' size='2' value='$jarjestys[asiakasryhma]'> ".t("Asiakasryhmitt√§in")." <input type='checkbox' name='ruksit[asiakasryhma]' value='asiakasryhma' $ruksitchk></th></tr>";
 			}
 
 			echo "</table></div>";
@@ -1959,7 +1959,7 @@
 					$ruksitchk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakaspiiri]' size='2' value='$jarjestys[asiakaspiiri]'> ".t("Asiakaspiireitt‰in")." <input type='checkbox' name='ruksit[asiakaspiiri]' value='asiakaspiiri' $ruksitchk><br>";
+				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakaspiiri]' size='2' value='$jarjestys[asiakaspiiri]'> ".t("Asiakaspiireitt√§in")." <input type='checkbox' name='ruksit[asiakaspiiri]' value='asiakaspiiri' $ruksitchk><br>";
 
 				echo "<input type='radio' name='piirivalinta' value='lasku' {$laskuvalintachk}>",t("Laskuilta");
 				echo "<input type='radio' name='piirivalinta' value='asiakas' {$asiakasvalintachk}>",t("Asiakkailta");

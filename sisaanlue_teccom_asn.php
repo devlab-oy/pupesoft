@@ -1,6 +1,6 @@
 <?php
 
-	// Kutsutaanko CLI:st‰
+	// Kutsutaanko CLI:st√§
 	if (php_sapi_name() != 'cli') {
 		require ("inc/parametrit.inc");
 	}
@@ -12,7 +12,7 @@
 		require ("inc/functions.inc");
 
 		if ($argv[1] == '') {
-			echo "Yhtiˆt‰ ei ole annettu, ei voida toimia\n";
+			echo "Yhti√∂t√§ ei ole annettu, ei voida toimia\n";
 			die;
 		}
 		else {
@@ -20,7 +20,7 @@
 		}
 	}
 
-	// m‰‰ritell‰‰n polut
+	// m√§√§ritell√§√§n polut
 	if (!isset($teccomkansio)) {
 		$teccomkansio = "/home/teccom";
 	}
@@ -31,7 +31,7 @@
 		$teccomkansio_error = "/home/teccom/error";
 	}
 
-	// setataan k‰ytetyt muuttujat:
+	// setataan k√§ytetyt muuttujat:
 	$asn_numero					= "";
 	$kukarow["kuka"] 			= "admin";
 	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317","123441","123080","123007","123453","123506","123110");
@@ -57,7 +57,7 @@
 
 		foreach ($xml_element as $key => $element) {
 
-			// T‰m‰ on tuote-elementti
+			// T√§m√§ on tuote-elementti
 			if ($key == "PkgItem") {
 
 				$tuote					= (string) $element->ProductId->ProductNumber;
@@ -84,7 +84,7 @@
 						$tuote = $chk_row['toim_tuoteno'];
 					}
 					else if (mysql_num_rows($chk_res) == 0) {
-						// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myˆs hakea vaihtoehtoinen tuotenumero ilman ett‰
+						// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan my√∂s hakea vaihtoehtoinen tuotenumero ilman ett√§
 						$chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuote, $tavarantoimittajanumero);
 
 						if (mysql_num_rows($chk_res) != 0) {
@@ -127,7 +127,7 @@
 						}
 					}
 
-					// t‰m‰ siksi ettei haluta tallentaa 0 rivej‰ kantaan.
+					// t√§m√§ siksi ettei haluta tallentaa 0 rivej√§ kantaan.
 					$sqlinsert =  " INSERT INTO asn_sanomat SET
 									yhtio 				= '$kukarow[yhtio]',
 									laji				= 'asn',
@@ -151,7 +151,7 @@
 				}
 			}
 
-			// T‰m‰ on paketti-elementti
+			// T√§m√§ on paketti-elementti
 			if ($key == "Package") {
 				$paketti_nro++;
 
@@ -228,15 +228,15 @@
 
 				$tiedosto = $teccomkansio."/".$file;
 
-				// Otetaan tiedoston sis‰ltˆ muuttujaan
+				// Otetaan tiedoston sis√§lt√∂ muuttujaan
 				$xml_content = file_get_contents($tiedosto);
 				// Poistetaan kaikki "non-printable" merkit
 				$xml_content = preg_replace("/[^[:print:]]/", "", $xml_content);
-				// Korvataan "UTF-16" string "UTF-8":lla, koska XML pit‰‰ olla UTF-8
+				// Korvataan "UTF-16" string "UTF-8":lla, koska XML pit√§√§ olla UTF-8
 				$xml_content = str_replace("\"UTF-16\"", "\"UTF-8\"", $xml_content);
-				// Muutetaan muuttujan enkoodaus viel‰ UTF-8:ksi
+				// Muutetaan muuttujan enkoodaus viel√§ UTF-8:ksi
 				$xml_content = iconv("UTF-8", "UTF-8//IGNORE", $xml_content);
-				// Tehd‰‰n muuttujasta XML olio
+				// Tehd√§√§n muuttujasta XML olio
 				$xml = @simplexml_load_string($xml_content);
 
 				$tiedosto_sisalto = file_get_contents($tiedosto);
@@ -244,7 +244,7 @@
 
 				if ($xml !== FALSE) {
 
-					// $tavarantoimittajanumero ja $asn_numero arvoa pit‰‰ olla tai ei tule toimimaan.
+					// $tavarantoimittajanumero ja $asn_numero arvoa pit√§√§ olla tai ei tule toimimaan.
 					$tavarantoimittajanumero = (string) $xml->DesAdvHeader->SellerParty->PartyNumber;
 					$tavarantoimittajanumero = utf8_decode($tavarantoimittajanumero);
 
@@ -274,11 +274,11 @@
 					$vastaanottaja = (string) $xml->DesAdvHeader->DeliveryParty->PartyNumber." , ".trim($xml->DesAdvHeader->DeliveryParty->Address->Name1);
 					$vastaanottaja = utf8_decode($vastaanottaja);
 
-					// Haetaan pakkauslistan referenssinumero, mik‰li lˆytyy
+					// Haetaan pakkauslistan referenssinumero, mik√§li l√∂ytyy
 					if (isset($xml->Package->Package->PkgRef->PkgRefNumber) and $xml->Package->Package->PkgRef->PkgRefNumber != "") {
 						$pakkauslista = $xml->Package->Package->PkgRef->PkgRefNumber;
 						$pakkauslista = utf8_decode($pakkauslista);
-						// Mik‰li paketin sis‰ll‰ on paketti
+						// Mik√§li paketin sis√§ll√§ on paketti
 					}
 					elseif (isset($xml->Package->PkgRef->PkgRefNumber) and $xml->Package->PkgRef->PkgRefNumber != "") {
 						$pakkauslista = $xml->Package->PkgRef->PkgRefNumber;
@@ -295,7 +295,7 @@
 					}
 					else {
 						$pakkauslista = $asn_numero;
-						// jos mik‰‰n ei m‰ts‰‰, niin laitetaan asn-numero
+						// jos mik√§√§n ei m√§ts√§√§, niin laitetaan asn-numero
 					}
 
 					$parameters = array(
@@ -306,7 +306,7 @@
 						"pakkauslista"				=> $pakkauslista,
 						);
 
-					// t‰ss‰ kohdassa tarkistetaan ett‰ lˆytyykˆ ASN-sanoma jo kannasta, jos ei niin kutsutaan rekursiivista funkkaria.
+					// t√§ss√§ kohdassa tarkistetaan ett√§ l√∂ytyyk√∂ ASN-sanoma jo kannasta, jos ei niin kutsutaan rekursiivista funkkaria.
 
 					if ($tavarantoimittajanumero != "" and $asn_numero != "") {
 
@@ -318,11 +318,11 @@
 						$checkinsertresult = pupe_query($tarkinsert);
 
 						if (mysql_num_rows($checkinsertresult) > 0) {
-							echo "Sanomalle $asn_numero ja toimittajalle $tavarantoimittajanumero lˆytyy tietokannasta jo sanomat, ei lis‰t‰ uudestaan sanomia\n";
+							echo "Sanomalle $asn_numero ja toimittajalle $tavarantoimittajanumero l√∂ytyy tietokannasta jo sanomat, ei lis√§t√§ uudestaan sanomia\n";
 							rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
 						}
 						else {
-							// loop_packet funktio tekee kaikki lis‰ykset asn-sanomatauluun ja palauttaa viimeisen lis‰tyn rivin mysql_id() joka laitetaan liitetiedostoon.
+							// loop_packet funktio tekee kaikki lis√§ykset asn-sanomatauluun ja palauttaa viimeisen lis√§tyn rivin mysql_id() joka laitetaan liitetiedostoon.
 							$tunnus_liitetiedostoon = loop_packet($xml, $parameters);
 
 							$filesize = strlen($tiedosto_sisalto);
@@ -349,7 +349,7 @@
 						}
 					}
 					else {
-						echo t("Virhe! Tavarantoimittajan numero puuttuu sek‰ ASN-numero puuttuu, tai materiaali ei ole ASN-sanoma")."\n";
+						echo t("Virhe! Tavarantoimittajan numero puuttuu sek√§ ASN-numero puuttuu, tai materiaali ei ole ASN-sanoma")."\n";
 						rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
 					}
 				}
@@ -364,5 +364,5 @@
 
 	}
 	else {
-		echo "Hakemistoa $teccomkansio ei lˆydy\n";
+		echo "Hakemistoa $teccomkansio ei l√∂ydy\n";
 	}

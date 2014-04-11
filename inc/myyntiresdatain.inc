@@ -27,6 +27,6 @@ if (file_exists($filename)) {
 } 
 
 else {
-    echo "$filename ".t("ei löydy")."<br>";
+    echo "$filename ".t("ei lÃ¶ydy")."<br>";
 }
 ?>

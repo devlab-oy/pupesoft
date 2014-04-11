@@ -1,8 +1,8 @@
 <?php
 
-//tämä on huipputärkeä ominaisuus.. ;) t. joni
+//tÃ¤mÃ¤ on huipputÃ¤rkeÃ¤ ominaisuus.. ;) t. joni
 
-$ketka = array('Jarmo Rosenqvist', 'Johan Tötterman', 'Joni Kanerva');
+$ketka = array('Jarmo Rosenqvist', 'Johan TÃ¶tterman', 'Joni Kanerva');
 shuffle($ketka);
 for ($i=0; $i<count($ketka); $i++) $copyright .= $ketka[$i].", ";
 

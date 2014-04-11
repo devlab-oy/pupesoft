@@ -23,7 +23,7 @@ if ($yhtiorow['suuntalavat'] != "") {
 
 echo "<li><a href='ostotilaus.php?uusi' class='button'>",t("Ostotilaus"),"</a>";
 
-echo "<a href='ostotilaus.php' class='button'><font color='chucknorris'>(".t("Jatka edellist‰").")</font></a>";
+echo "<a href='ostotilaus.php' class='button'><font color='chucknorris'>(".t("Jatka edellist√§").")</font></a>";
 
 echo "</li>";
 

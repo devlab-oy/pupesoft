@@ -60,9 +60,9 @@ if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 }
 
-// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, ett‰ se on ovtmuodossa
+// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, ett√§ se on ovtmuodossa
 if (strlen($yhtio) != 18 or strtoupper(substr($yhtio,0,2)) != "FI") {
-	// Varmistetaan, ett‰ tunnus on ovtunnus muodossa
+	// Varmistetaan, ett√§ tunnus on ovtunnus muodossa
 	$yhtio = preg_replace("/[^0-9]/", "", $yhtio);
 
 	if (strpos($yhtio, "0037") === FALSE) {
@@ -86,11 +86,11 @@ if ($laskun_summa_eur == 0) {
 	$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceDetails->InvoiceTotalVatIncludedAmount);
 }
 
-// Varmistetaan, ett‰ tunnus on ytunnus muodossa (Finvoicessa t‰‰ll‰ tulee siis vastanottajan ytunnus FI etuliitteell‰)
+// Varmistetaan, ett√§ tunnus on ytunnus muodossa (Finvoicessa t√§√§ll√§ tulee siis vastanottajan ytunnus FI etuliitteell√§)
 $verkkotunnus_vas = preg_replace("/[^0-9]/", "", $verkkotunnus_vas);
 
 if ($laskun_tyyppi == "INV02") {
-	// Hyvityslaskut pit‰‰ merkata hyvitykseksi jotta ne osataan k‰sitell‰ oikein
+	// Hyvityslaskut pit√§√§ merkata hyvitykseksi jotta ne osataan k√§sitell√§ oikein
 	$laskun_tyyppi = "381";
 }
 
@@ -120,7 +120,7 @@ if (count($tuotetiedot) > 0) {
 			// maventa-case
 			$rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
 
-			// Tallennetaan riville jos t‰m‰ on kauttalaskutusta
+			// Tallennetaan riville jos t√§m√§ on kauttalaskutusta
 			if ($kauttalaskutus == "KAUTTALASKUTUS") {
 				$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 			}
@@ -155,7 +155,7 @@ if (count($tuotetiedot) > 0) {
 			}
 
 			if ($tuotetieto->RowIdentifierUrlText != "") {
-				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuper‰inen tilausnumero rivikommenttiin mukaan
+				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuper√§inen tilausnumero rivikommenttiin mukaan
 			}
 
 			$rtuoteno[$i]["kommentti"] = trim(pupesoft_cleanstring($rtuoteno[$i]["kommentti"]));
@@ -167,7 +167,7 @@ if (count($tuotetiedot) > 0) {
 			$rtuoteno[$i]["lapsi"] = "";
 		}
 		else {
-			//	Poistetaan t‰m‰ tietue
+			//	Poistetaan t√§m√§ tietue
 			unset($rtuoteno[$i]);
 			$i--;
 		}

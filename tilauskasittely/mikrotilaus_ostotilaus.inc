@@ -13,7 +13,7 @@
 			}
 
 			if ($_FILES['userfile']['size']==0) {
-				die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+				die ("<font class='error'><br>".t("Tiedosto on tyhj√§")."!</font>");
 			}
 
 			if (strtoupper($ext)=="XLS") {
@@ -28,10 +28,10 @@
 				$data->read($_FILES['userfile']['tmp_name']);
 			}
 			else {
-				$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+				$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep√§onnistui")."!");
 			}
 
-			// luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
+			// luetaan tiedosto loppuun ja tehd√§√§n array koko datasta
 			$excelrivi = array();
 
 			if (strtoupper($ext) == "XLS") {
@@ -132,7 +132,7 @@
 						require('lisaarivi.inc');
 					}
 					else {
-						echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
+						echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei l√∂ydy")."!</font><br>";
 					}
 				}
 
@@ -180,7 +180,7 @@
 				</td>
 				</tr>
 				<tr><th colspan='7'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
-				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td><td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Paikka (#!°!#-eroteltu)")."</td></tr>
+				<tr><td>".t("Tuoteno")."</td><td>".t("M√§√§r√§")."</td><td>".t("Arvioitu toimitusp√§iv√§ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Paikka (#!¬°!#-eroteltu)")."</td></tr>
 				</table>
 
 				<br>
@@ -188,7 +188,7 @@
 				<tr>
 				<th>".t("Valitse tiedosto").":</th>
 				<td><input name='userfile' type='file'></td>
-				<td class='back'><input type='submit' value='".t("L‰heta")."'></td>
+				<td class='back'><input type='submit' value='".t("L√§heta")."'></td>
 				</tr>
 				</table>
 				</form>";

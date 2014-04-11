@@ -1,18 +1,18 @@
 <?php
 
-	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
-	// Kutsutaanko CLI:st‰
+	// Kutsutaanko CLI:st√§
 	if (php_sapi_name() != 'cli') {
-		die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+		die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 	}
 
 	require('inc/connect.inc');
 	require('inc/functions.inc');
 
 	if ($argv[1] != "") {
-		// ja yhtio rivilt‰ ensimm‰inen arg
+		// ja yhtio rivilt√§ ensimm√§inen arg
 		$yhtio = mysql_real_escape_string($argv[1]);
 		$yhtiorow = hae_yhtion_parametrit($yhtio);
 	}
@@ -29,11 +29,11 @@
 		exit;
 	}
 
-	// tilausrivi.kerayspvm => poikkeava alkup‰iv‰
-	// tilausrivi.toimaika => poikkeava loppup‰iv‰
+	// tilausrivi.kerayspvm => poikkeava alkup√§iv√§
+	// tilausrivi.toimaika => poikkeava loppup√§iv√§
 
-	// Haetaan kaikki 30 p‰iv‰n p‰‰st‰ vanhenevat sopimukset/sopimusrivit
-	// Datediff -30 tarkoittaa ett‰ 30 pv kuluttua sopimus menee umpeen ja 30 tarkoittaa ett‰ meni 30 pv sitten umpeen.
+	// Haetaan kaikki 30 p√§iv√§n p√§√§st√§ vanhenevat sopimukset/sopimusrivit
+	// Datediff -30 tarkoittaa ett√§ 30 pv kuluttua sopimus menee umpeen ja 30 tarkoittaa ett√§ meni 30 pv sitten umpeen.
 	$query = "	(SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakkaan_tilausnumero, lasku.valkoodi
 				FROM lasku
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio
@@ -63,7 +63,7 @@
 		exit;
 	}
 
-	// Tehd‰‰n email
+	// Tehd√§√§n email
 	$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
 	$header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 

@@ -8,7 +8,7 @@
 	$yhtio 					= "20428100"; 		//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
 	$verkkotunnus_vas		= "003720428100";	//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber; 	// joissakin materiaaleissa viallista materiaalia.
 	$laskun_tyyppi 			= "380";
-	$laskun_numero 			= $xml->InvoiceHeader->InvoiceId; // T‰m‰ on l‰hett‰j‰n laskunnumero
+	$laskun_numero 			= $xml->InvoiceHeader->InvoiceId; // T√§m√§ on l√§hett√§j√§n laskunnumero
 	$laskun_ebid 			= "TECCOM-INVOICE";
 	$laskun_tilausviite		= "";
 
@@ -117,7 +117,7 @@
 		}
 		if (is_array($rivi)) {
 			$rivi = array_unique($rivi); // otetaan uniikit
-			$rivi = array_values($rivi); // poistetaan turhat v‰lit
+			$rivi = array_values($rivi); // poistetaan turhat v√§lit
 			$laskun_tilausviite = implode(",",$rivi);
 		}
 	}
@@ -139,11 +139,11 @@
 	$toim_asiakkaantiedot["toim_ovttunnus"] = "";
 	$toim_asiakkaantiedot["ytunnus"] = "";
 
-	// Ensiksi deliveryst‰
+	// Ensiksi deliveryst√§
 	if (isset($xml->InvoiceHeader->DeliveryParty->Address->Name1)) {
 		$toim_asiakkaantiedot["nimi"] = trim(utf8_decode($xml->InvoiceHeader->DeliveryParty->Address->Name1));
 	}
-	else { // jos ei lˆytynyt, niin laitetaan laskutusosoite
+	else { // jos ei l√∂ytynyt, niin laitetaan laskutusosoite
 		$toim_asiakkaantiedot["nimi"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Name1));
 	}
 
@@ -205,7 +205,7 @@
 		$laskuttajan_valkoodi = $xml->InvoiceHeader->Currency;
 	}
 
-	// K‰sitell‰‰n tuoterivit
+	// K√§sitell√§√§n tuoterivit
 	$tuotetiedot			= $xml->InvoiceDetail;
 	$i						= 0;
 	$rtuoteno				= array();
@@ -230,7 +230,7 @@
 			$chk_res = pupe_query($query);
 
 			if (mysql_num_rows($chk_res) == 0) {
-				// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myˆs hakea vaihtoehtoinen tuotenumero ilman ett‰
+				// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan my√∂s hakea vaihtoehtoinen tuotenumero ilman ett√§
 				$chk_res = tuotteen_toimittajat_tuotenumerot_haku($rtuoteno[$i]['tuoteno'], $laskuttajan_toimittajanumero);
 
 				if (mysql_num_rows($chk_res) != 0) {
@@ -315,8 +315,8 @@
 					}
 				}
 
-				// otetaan talteen "AllowOrCharge" kent‰t.
-				// t‰‰lt‰ tulevat alennukset ja runko-, rahti- ja muutkulut
+				// otetaan talteen "AllowOrCharge" kent√§t.
+				// t√§√§lt√§ tulevat alennukset ja runko-, rahti- ja muutkulut
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)) {
 
 					if (isset($tuotetieto->UnitPrice->Amount) and $tuotetieto->UnitPrice->Amount != '') {
@@ -332,8 +332,8 @@
 
 						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
 
-						// ei oteta alennuksia huomioon Klokkerholm-keississ‰
-						// eik‰ ZF-keississ‰ (123007), eik‰ Valeolla ( 123342)
+						// ei oteta alennuksia huomioon Klokkerholm-keississ√§
+						// eik√§ ZF-keississ√§ (123007), eik√§ Valeolla ( 123342)
 						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418" and $laskuttajan_toimittajanumero != "123007" and $laskuttajan_toimittajanumero != "123342") {
 
 							if (!isset($rtuoteno[$i]['ale1'])) {
@@ -397,7 +397,7 @@
 								($laskuttajan_toimittajanumero == "123007" and ($charge_code == "zcwr" or strpos($charge_description, "at.wert (rechnung)") !== FALSE)) or
 								(in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
-								// Jos rivill‰ tulee runkoveloitus, niin pit‰‰ tehd‰ rungosta oma lapsirivi
+								// Jos rivill√§ tulee runkoveloitus, niin pit√§√§ tehd√§ rungosta oma lapsirivi
 								$query = "	SELECT tuote.tuoteno, tuote.nimitys
 											FROM toimi
 											JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
@@ -427,7 +427,7 @@
 									$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
 									$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
 
-									// GKN-case: ilmoittavat yksikkˆhinnan Amountissa.
+									// GKN-case: ilmoittavat yksikk√∂hinnan Amountissa.
 									if ($laskuttajan_toimittajanumero == "123084") {
 										$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount) * $rtuoteno[$x]['kpl'];
 										$rtuoteno[$x]['hinta']				= (float) str_replace(",", ".", $node->Amount);
@@ -467,8 +467,8 @@
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu_alv = $laskun_alv;
 
-								// ZF -keississ‰ otetaan rahti pois rivihinnasta.
-								// Bosch -keississ‰ ($charge_description == 'freight charges') otetaan myˆs rahti pois rivihinnasta
+								// ZF -keississ√§ otetaan rahti pois rivihinnasta.
+								// Bosch -keississ√§ ($charge_description == 'freight charges') otetaan my√∂s rahti pois rivihinnasta
 								if ($charge_code == 'freightcharges' or $charge_description == 'freight charges') {
 									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node->Amount);
 								}
@@ -516,7 +516,7 @@
 				}
 			}
 			else {
-				//	Poistetaan t‰m‰ tietue
+				//	Poistetaan t√§m√§ tietue
 				unset($rtuoteno[$i]);
 				$i--;
 			}

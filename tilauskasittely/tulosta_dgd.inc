@@ -61,13 +61,13 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawLine(mm_pt(58), mm_pt(197), mm_pt(101), mm_pt(202));
 
 		// 9 Additional handling information
-		$pdf->pages[$sivu]->drawText(t("H‰t‰puhelinnumero", $kieli)." {$yhtiorow["puhelin"]}", mm_pt(105), mm_pt(202), 'LATIN1');
+		$pdf->pages[$sivu]->drawText(t("H√§t√§puhelinnumero", $kieli)." {$yhtiorow["puhelin"]}", mm_pt(105), mm_pt(202), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(105), mm_pt(196), 'LATIN1');
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
 
 		if ($kukarow["yhtio"] == "mast") {
-			$nimirow = array("nimi" => "Virpi Kivel‰");
+			$nimirow = array("nimi" => "Virpi Kivel√§");
 		}
 		else {
 			$query = "	SELECT nimi
@@ -126,10 +126,10 @@ if (!function_exists('uusi_sivu_dgd')) {
 			${$key} = $val;
 		}
 
-		// Loadataan lis‰sivun pohja omaan olioon
+		// Loadataan lis√§sivun pohja omaan olioon
 		$pdf2 = Zend_Pdf::load($GLOBALS["pupe_root_polku"]."/tilauskasittely/DGDpohja_lisasivu.pdf");
 
-		// Kloonataan sivu jotta saadaan se liitetty‰ alkuper‰iseen dokumenttiin
+		// Kloonataan sivu jotta saadaan se liitetty√§ alkuper√§iseen dokumenttiin
 		$pdf->pages[] = clone $pdf2->pages[0];
 
 		$pdf->pages[$sivu]->setFont($norm, 10);
@@ -298,12 +298,12 @@ if (!function_exists('print_pdf_dgd')) {
 		}
 
 		if ($tee == 'NAYTATILAUS') {
-			//Tyˆnnet‰‰n tuo pdf vaan putkeen!
+			//Ty√∂nnet√§√§n tuo pdf vaan putkeen!
 			echo $pdf->render();
 		}
 		else {
 
-			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+			//keksit√§√§n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
 			$pdffilenimi = "/tmp/DGD-".md5(uniqid(mt_rand(), true)).".pdf";

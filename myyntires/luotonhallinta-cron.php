@@ -1,11 +1,11 @@
 <?php
 
-	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	//* T√§m√§ skripti k√§ytt√§√§ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
-	// Kutsutaanko CLI:st‰
+	// Kutsutaanko CLI:st√§
 	if (php_sapi_name() != 'cli') {
-		die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+		die ("T√§t√§ scripti√§ voi ajaa vain komentorivilt√§!");
 	}
 
 	require ("../inc/connect.inc");
@@ -14,10 +14,10 @@
 	// Tarvitaan 3 parametria
 	// 1 = Yhtio
 	// 2 = Luottorajaprosentti
-	// 3 = S‰hkopostiosoite
+	// 3 = S√§hkopostiosoite
 
 	if (!isset($argv[1]) or $argv[1] == '') {
-		echo "Anna yhtiˆ!!!\n";
+		echo "Anna yhti√∂!!!\n";
 		die;
 	}
 
@@ -27,7 +27,7 @@
 	}
 
 	if (!isset($argv[3]) or $argv[3] == '') {
-		echo "Anna s‰hkopostiosoite!!!\n";
+		echo "Anna s√§hkopostiosoite!!!\n";
 		die;
 	}
 
@@ -36,7 +36,7 @@
 	$luottorajaprosentti = (float) $argv[2];
 	$email = trim($argv[3]);
 
-	// Meilinl‰hetyksen oletustiedot
+	// Meilinl√§hetyksen oletustiedot
 	$content_subject	= "Luotonhallintaraportti ".date("d.m.y");
 	$content_body		= "";
 	$ctype				= "html";
@@ -46,11 +46,11 @@
 
 
 	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-		// k‰sitell‰‰n luottorajoja per ytunnus
+		// k√§sitell√§√§n luottorajoja per ytunnus
 		$kasittely_periaate = "asiakas.ytunnus";
 	}
 	else {
-		// k‰sitell‰‰n luottorajoja per asiakas
+		// k√§sitell√§√§n luottorajoja per asiakas
 		$kasittely_periaate = "asiakas.tunnus";
 	}
 
@@ -76,7 +76,7 @@
 	$content_body .= "<title>".htmlentities($content_subject)."</title>";
 	$content_body .= "</head>";
 	$content_body .= "<body>";
-	$content_body .= "<h3>".htmlentities("Asiakkaat, jotka ovat k‰ytt‰neet yli $luottorajaprosentti% luottorajastaan").":</h3>";
+	$content_body .= "<h3>".htmlentities("Asiakkaat, jotka ovat k√§ytt√§neet yli $luottorajaprosentti% luottorajastaan").":</h3>";
 
 	$content_body .= "<table summary='".htmlentities($content_subject)."'>";
 	$content_body .= "<tr>";
@@ -86,7 +86,7 @@
 	$content_body .= "<th>".t("Avoimet")."<br>".t("tilaukset")."</th>";
 	$content_body .= "<th>".t("Kaatotili")."</th>";
 	$content_body .= "<th>".t("Luottotilanne nyt")."</th>";
-	$content_body .= "<th>".t("Luottorajasta k‰ytetty")."</th>";
+	$content_body .= "<th>".t("Luottorajasta k√§ytetty")."</th>";
 	$content_body .= "<th>".t("Luottoraja")."<br>$yhtiorow[valkoodi]</th>";
 	$content_body .= "<th>".t("Myyntikielto")."</th>";
 	$content_body .= "</tr>";
@@ -113,7 +113,7 @@
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
 					WHERE lasku.yhtio = '$yhtiorow[yhtio]'
 					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
-					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyv‰ksynt‰‰
+					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyv√§ksynt√§√§
 					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
 					)
 					AND lasku.liitostunnus in ($asiakasrow[liitostunnukset])";
@@ -134,7 +134,7 @@
 		// Lasketaan luottotilanne nyt
 		$luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"],2);
 
-		// N‰yt‰ vain asiakkaat, jotka ovat t‰ytt‰neet $luottorajaprosentti prosenttia luottorajasta tai sen yli
+		// N√§yt√§ vain asiakkaat, jotka ovat t√§ytt√§neet $luottorajaprosentti prosenttia luottorajasta tai sen yli
 		if ((1-($luottotilanne_nyt / $asiakasrow["luottoraja"]))*100 < $luottorajaprosentti) {
 			continue;
 		}

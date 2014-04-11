@@ -14,13 +14,13 @@ if (!function_exists("puun_alkiotarkista")) {
 			$tem_laji = $t[$i];
 
 			if ($t[$i] == '') {
-				$virhe[$i] = t("Lajia ei voi j‰tt‰‰ tyhj‰ksi")."!";
+				$virhe[$i] = t("Lajia ei voi j√§tt√§√§ tyhj√§ksi")."!";
 			}
 		}
 
 		if (mysql_field_name($result, $i) == "puun_tunnus") {
 			if ($t[$i] == '') {
-				$virhe[$i] = t("Puun tunnusta ei voi j‰tt‰‰ tyhj‰ksi")."!";
+				$virhe[$i] = t("Puun tunnusta ei voi j√§tt√§√§ tyhj√§ksi")."!";
 			}
 		}
 
@@ -33,7 +33,7 @@ if (!function_exists("puun_alkiotarkista")) {
 			$asiakkaan_haku_res = pupe_query($query);
 
 			if (mysql_num_rows($asiakkaan_haku_res) == 0) {
-				$virhe[$i] = $virhe[$liitos_ind] = t("Asiakasta ei lˆydy")."!";
+				$virhe[$i] = $virhe[$liitos_ind] = t("Asiakasta ei l√∂ydy")."!";
 			}
 		}
 
@@ -46,7 +46,7 @@ if (!function_exists("puun_alkiotarkista")) {
 			$asiakkaan_haku_res = pupe_query($query);
 
 			if (mysql_num_rows($asiakkaan_haku_res) == 0) {
-				$virhe[$i] = $virhe[$liitos_ind] = t("Tuotetta ei lˆydy")."!";
+				$virhe[$i] = $virhe[$liitos_ind] = t("Tuotetta ei l√∂ydy")."!";
 			}
 		}
 	}

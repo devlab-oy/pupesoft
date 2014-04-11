@@ -1,6 +1,6 @@
 <?php
 
-	// Kutsutaanko CLI:stä
+	// Kutsutaanko CLI:stÃ¤
 	$php_cli = FALSE;
 
 	if (php_sapi_name() == 'cli') {
@@ -53,7 +53,7 @@
 
 		$kala = exec("$mysql_dump_path -u $dbuser --host=$dbhost --password=$dbpass $dbkanta --no-data", $ulos);
 
-		if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
+		if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epÃ¤onnistui!");
 
 		foreach ($ulos as $print) {
 			// poistetaan mysql-sarakkeen kommentti koska se kaataa sqlupdate-ohjelman
@@ -106,7 +106,7 @@
 			}
 		}
 
-		// Löytyykö custom updateja?
+		// LÃ¶ytyykÃ¶ custom updateja?
 		$ch  = curl_init();
 		curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/sqlupdate.sql");
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);

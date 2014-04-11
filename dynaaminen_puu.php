@@ -50,12 +50,12 @@
 			// muokkaustoiminnot
 			if (isset($tee) and $tee != '') {
 				if ($saamuokata) {
-					// Siirret‰‰n haaraa j‰rjestyksess‰ ylˆs tai alas
+					// Siirret√§√§n haaraa j√§rjestyksess√§ yl√∂s tai alas
 					if ($tee == 'ylos' or $tee == 'alas') {
 						$src['lft'] = $noderow['lft'];
 						$src['rgt'] = $noderow['rgt'];
 
-						// $tee:ssa on suunta mihin siirret‰‰n
+						// $tee:ssa on suunta mihin siirret√§√§n
 						$kohde = SiirraTaso($toim, $src, $tee);
 					}
 					elseif ($tee == 'lisaa' and isset($uusi_nimi) and trim($uusi_nimi) != "") {
@@ -158,10 +158,10 @@
 			echo "<hr /><div id='editbuttons'>";
 			if ($saamuokata) {
 				echo "	<a href='#' id='showeditbox' id='muokkaa'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/> ".t('Muokkaa tason tietoja')."</a><br /><br />
-						<a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='",t('Siirr‰ ylˆsp‰in'),"'/> ".t('Siirr‰ tasoa ylˆsp‰in')."</a><br />
-						<a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirr‰ alasp‰in'),"'/> ".t('Siirr‰ tasoa alasp‰in')."</a><br /><br />
-						<a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='",t('Siirr‰ alatasoksi'),"'/> ".t('Siirr‰ oksa alatasoksi')."</a><br /><br />
-						<a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰'),"'/>".t('Lis‰‰ uusi lapsitaso')."</a><br /><br />";
+						<a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='",t('Siirr√§ yl√∂sp√§in'),"'/> ".t('Siirr√§ tasoa yl√∂sp√§in')."</a><br />
+						<a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirr√§ alasp√§in'),"'/> ".t('Siirr√§ tasoa alasp√§in')."</a><br /><br />
+						<a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='",t('Siirr√§ alatasoksi'),"'/> ".t('Siirr√§ oksa alatasoksi')."</a><br /><br />
+						<a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis√§√§'),"'/>".t('Lis√§√§ uusi lapsitaso')."</a><br /><br />";
 
 				// poistonappi aktiivinen vain jos ei ole liitoksia
 				if ($own_items > 0 or $child_items > 0) {
@@ -195,14 +195,14 @@
 			echo "<div id='movebox' style='display: none'>
 					<form id='moveform'>
 					<fieldset>
-						<legend style='font-weight: bold'>".t("Siirr‰ valitun tason alatasoksi")."</legend>
+						<legend style='font-weight: bold'>".t("Siirr√§ valitun tason alatasoksi")."</legend>
 						<ul style='list-style:none; padding: 5px'>
 							<li style='padding: 3px'>
 								<label style='display: inline-block; width: 125px'>".t("Kohdetason tunnus")." <font class='error'>*</font></label>
 								<input size='5' id='kohdetaso' autocomplete='off' />
 							</li>
 						</ul>
-						<input type='submit' id='movesubmitbtn' value='".t("Siirr‰")."' />
+						<input type='submit' id='movesubmitbtn' value='".t("Siirr√§")."' />
 						</form>
 					</div>
 					";
@@ -223,7 +223,7 @@
 						</li>
 					</ul>
 					<input type='hidden' id='tee' />
-					<p style='display: none; color: red' id='nodeboxerr'>".t("Nimi tai koodi ei saa olla tyhj‰").".</p>
+					<p style='display: none; color: red' id='nodeboxerr'>".t("Nimi tai koodi ei saa olla tyhj√§").".</p>
 					<input type='submit' id='editsubmitbtn' value='".t("Tallenna")."' />
 				</fieldset>
 				</form>
@@ -261,7 +261,7 @@
 
 				addboxbutton.click(function() {
 					tee.val("lisaa");
-					nodeboxtitle.html("Lis‰‰ taso");
+					nodeboxtitle.html("Lis√§√§ taso");
 					addboxbutton.replaceWith(nodebox);
 					nodeboxname.val("").focus();
 					nodebox.show();

@@ -18,13 +18,13 @@
 
 	foreach ($dnsryhma as $key => $osasto) {
 
-		// Osasto on joka rivill‰ sama, otetaan ekalta rivilt‰ tiedot
+		// Osasto on joka rivill√§ sama, otetaan ekalta rivilt√§ tiedot
 		$group = $information->addChild('group');
 		$group->addAttribute('extSystemID',$key);
-		// setataan muuttuja joka seuraavassa luupissa Osaston vaihtuessa tehd‰‰n yhden kerran groupname-xml kirjoitus	
+		// setataan muuttuja joka seuraavassa luupissa Osaston vaihtuessa tehd√§√§n yhden kerran groupname-xml kirjoitus	
 		$vain_ekalla = 1;
 
-		// Loopataan osaston tuoteryhm‰t
+		// Loopataan osaston tuoteryhm√§t
 		foreach ($osasto as $try) {
 			
 			if ($vain_ekalla == 1) {

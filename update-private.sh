@@ -5,7 +5,7 @@ PRIVATEDIR=$1
 
 if [ ! -d ${PUPEDIR} ] || [ ! -d ${PRIVATEDIR} ]; then
 	echo
-	echo "ERROR! Hakemistoja ei löydy!"
+	echo "ERROR! Hakemistoja ei lÃ¶ydy!"
 	echo
 	exit
 fi

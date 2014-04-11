@@ -1,17 +1,17 @@
 <?php
 
 	### !!! HUOMHUOM !!! ###
-	### T‰m‰ ominaisuus on deprikoitu, k‰yt‰ functions.inc:ss‰ m‰‰ritelty‰ pupesoft_sahkoposti -funktiota s‰hkˆpostin l‰hett‰miseen!! ###
+	### T√§m√§ ominaisuus on deprikoitu, k√§yt√§ functions.inc:ss√§ m√§√§ritelty√§ pupesoft_sahkoposti -funktiota s√§hk√∂postin l√§hett√§miseen!! ###
 
-	// T‰m‰ ohjelma haluaa $liite muuttujan jossa on tiedostonnimi joka liitet‰‰n
-	// Jos liite halutaan nimet‰ uudestaan annetaan uusi nimi $liitenimi muuttujassa
+	// T√§m√§ ohjelma haluaa $liite muuttujan jossa on tiedostonnimi joka liitet√§√§n
+	// Jos liite halutaan nimet√§ uudestaan annetaan uusi nimi $liitenimi muuttujassa
 	// Ja $kutsu jossa on tiedoston kuvaus
-	// $ctype muuttuja jossa on liitett‰v‰n tiedoston MIME tyyppi
+	// $ctype muuttuja jossa on liitett√§v√§n tiedoston MIME tyyppi
 	// $content_body on viestin body
 	// $subject tai $content_subject on poikkeava subject
 
-	///*Kasataan k‰ytt‰j‰lle l‰hetett‰v‰ meili *///
-	//t‰ssa on kaikki failit jotka tarvitaan
+	///*Kasataan k√§ytt√§j√§lle l√§hetett√§v√§ meili *///
+	//t√§ssa on kaikki failit jotka tarvitaan
 
 	$varaposti 		= '';
 	$varaposti_trig = FALSE;
@@ -154,9 +154,9 @@
 
 	$boob = mail($kukarow["eposti"], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
-	if ($boob === FALSE) echo t("S‰hkˆpostin l‰hetys ep‰onnistui").": $kukarow[eposti]<br>";
+	if ($boob === FALSE) echo t("S√§hk√∂postin l√§hetys ep√§onnistui").": $kukarow[eposti]<br>";
 
-	//N‰‰ muuttujat voi olla aika isoja joten unsetataan ne
+	//N√§√§ muuttujat voi olla aika isoja joten unsetataan ne
 	unset($content);
 	unset($content_body);
 	unset($content_subject);

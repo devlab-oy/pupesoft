@@ -39,13 +39,13 @@
                             $t[$i] = $asiakasid;
                         }
                         else {
-                            $virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
+                            $virhe[$i] = t("Asiakas puuttuu tai sitÃ¤ ei lÃ¶ydy!");
                         }
                     }
                 }
 
                 if (!isset($virhe[$i]) and $chastunn == '') {
-                    $virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
+                    $virhe[$i] = t("Asiakas puuttuu tai sitÃ¤ ei lÃ¶ydy!");
                 }
             }
 		}

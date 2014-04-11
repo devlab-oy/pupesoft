@@ -29,7 +29,7 @@
 	}
 
 	if (isset($muutparametrit) and $muutparametrit != '') {
-		list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi, $ohjausmerkki, $tilaustyyppi, $viesti, $myytavissasummaus, $ed_ytunnus) = explode("!°!", urldecode($muutparametrit));
+		list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi, $ohjausmerkki, $tilaustyyppi, $viesti, $myytavissasummaus, $ed_ytunnus) = explode("!¬°!", urldecode($muutparametrit));
 
 		$kohdevarastot = unserialize($kohdevarastot);
 		$mul_osasto    = unserialize($mul_osasto);
@@ -46,7 +46,7 @@
 
 		$ytunnus = mysql_real_escape_string($ytunnus);
 
-		$muutparametrit = urlencode($tee."!°!".serialize($kohdevarastot)."!°!".serialize($mul_osasto)."!°!".serialize($mul_try)."!°!".serialize($mul_tme)."!°!".$abcrajaus."!°!".$generoi."!°!".$ohjausmerkki."!°!".$tilaustyyppi."!°!".$viesti."!°!".$myytavissasummaus."!°!".$ed_ytunnus);
+		$muutparametrit = urlencode($tee."!¬°!".serialize($kohdevarastot)."!¬°!".serialize($mul_osasto)."!¬°!".serialize($mul_try)."!¬°!".serialize($mul_tme)."!¬°!".$abcrajaus."!¬°!".$generoi."!¬°!".$ohjausmerkki."!¬°!".$tilaustyyppi."!¬°!".$viesti."!¬°!".$myytavissasummaus."!¬°!".$ed_ytunnus);
 
 		require ("inc/kevyt_toimittajahaku.inc");
 
@@ -55,9 +55,9 @@
 		}
 	}
 
-	echo "<font class='head'>",t("Luo ostotilaus tuotepaikkojen h‰lytysrajojen perusteella"),"</font><hr /><br />";
+	echo "<font class='head'>",t("Luo ostotilaus tuotepaikkojen h√§lytysrajojen perusteella"),"</font><hr /><br />";
 
-	// org_rajausta tarvitaan yhdess‰ selectiss‰ joka triggerˆi taas toisen asian.
+	// org_rajausta tarvitaan yhdess√§ selectiss√§ joka trigger√∂i taas toisen asian.
 	$org_rajaus = $abcrajaus;
 	list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
 
@@ -66,7 +66,7 @@
 
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
-	// T‰ll‰ ollaan, jos olemme syˆtt‰m‰ss‰ tiedostoa ja muuta
+	// T√§ll√§ ollaan, jos olemme sy√∂tt√§m√§ss√§ tiedostoa ja muuta
 	echo "<form name = 'valinta' method='post'>
 			<input type='hidden' name='tee' value='M'>
 			<table>";
@@ -110,7 +110,7 @@
 
 	echo "</table></td></tr>";
 
-	echo "<tr><th>",t("Lis‰rajaukset"),"</th><td>";
+	echo "<tr><th>",t("Lis√§rajaukset"),"</th><td>";
 
 	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 	$monivalintalaatikot_normaali = array();
@@ -128,7 +128,7 @@
 
 		if (mysql_num_rows($keraysvyohyke_res) > 0) {
 
-			echo "<tr><th>",t("Ker‰ysvyˆhyke"),"</th>";
+			echo "<tr><th>",t("Ker√§ysvy√∂hyke"),"</th>";
 			echo "<td>";
 			echo "<table>";
 
@@ -246,7 +246,7 @@
 		$sel = array($tilaustyyppi => "selected") + array(1 => '', 2 => '');
 
 		echo "<option value='2' {$sel[2]}>",t("Normaalitilaus"),"</option>";
-		echo "<option value='1' {$sel[1]}>",t("Pikal‰hetys"),"</option>";
+		echo "<option value='1' {$sel[1]}>",t("Pikal√§hetys"),"</option>";
 	}
 
 	echo "</select></td>";
@@ -273,7 +273,7 @@
 
 		if (count($keraysvyohyke) > 1) {
 
-			// ensimm‰inen alkio on 'default' ja se otetaan pois
+			// ensimm√§inen alkio on 'default' ja se otetaan pois
 			array_shift($keraysvyohyke);
 
 			$keraysvyohykelisa = "	JOIN varaston_hyllypaikat AS vh ON (
@@ -297,7 +297,7 @@
 		// Otetaan luodut otsikot talteen
 		$otsikot  = array();
 
-		// tehd‰‰n jokaiselle valitulle kohdevarastolle erikseen
+		// tehd√§√§n jokaiselle valitulle kohdevarastolle erikseen
 		foreach ($kohdevarastot as $kohdevarasto) {
 
 			$query = "	SELECT *
@@ -323,7 +323,7 @@
 						ORDER BY tuotepaikat.tuoteno";
 			$resultti = pupe_query($query);
 
-			//	Varmistetaan ett‰ aloitetaan aina uusi otsikko uudelle varastolle
+			//	Varmistetaan ett√§ aloitetaan aina uusi otsikko uudelle varastolle
 			$tehtyriveja 		= 0;
 			$tuotteet    		= array();
 			$kasitellyt_ketjut	= array();
@@ -358,14 +358,14 @@
 									$paras_vastaava = "";
 
 									foreach ($_vastaavat_tuotteet as $_tuote) {
-										// Otetaan p‰‰tuote, tai jos se ei oo setattu, niin otetaan se tuote joka on l‰himp‰n‰ p‰‰tuotetta
+										// Otetaan p√§√§tuote, tai jos se ei oo setattu, niin otetaan se tuote joka on l√§himp√§n√§ p√§√§tuotetta
 										if (isset($tuotteet[$_tuote["tuoteno"]])) {
 											$paras_vastaava = $_tuote["tuoteno"];
 											break;
 										}
 									}
 
-									// Lis‰t‰‰n lˆydetyt vastaavat mahdollisten myyt‰vien joukkoon
+									// Lis√§t√§√§n l√∂ydetyt vastaavat mahdollisten myyt√§vien joukkoon
 									foreach ($_vastaavat_tuotteet as $_tuote) {
 										if (strtoupper($paras_vastaava) != strtoupper($_tuote['tuoteno'])) {
 
@@ -376,7 +376,7 @@
 											$_vasennpois		= 0;
 											$_vasjt				= 0;
 
-											// Jos tuote ei osunut p‰‰queryyn, niin haetaan sen tiedot t‰ss‰
+											// Jos tuote ei osunut p√§√§queryyn, niin haetaan sen tiedot t√§ss√§
 											if (!isset($tuotteet[$_tuote["tuoteno"]])) {
 												$query = "	SELECT tuotepaikat.tuoteno,
 															tuotepaikat.saldo,
@@ -417,7 +417,7 @@
 												}
 											}
 
-											// Siirret‰‰n kaikki luvut "p‰‰tuotteelle"
+											// Siirret√§√§n kaikki luvut "p√§√§tuotteelle"
 											$tuotteet[$paras_vastaava][$_indeksi]["halytysraja"]	+= $_vashalytysraja;
 											$tuotteet[$paras_vastaava][$_indeksi]["saldo"] 		 	+= $_vassaldo;
 											$tuotteet[$paras_vastaava][$_indeksi]["tilattu"] 		+= $_vastilattu;
@@ -453,21 +453,21 @@
 
 					/*
 					echo "<br>Tuoteno: $pairow[tuoteno]<br>";
-					echo "H‰lytysraja: {$pairow['halytysraja']}<br>";
+					echo "H√§lytysraja: {$pairow['halytysraja']}<br>";
 					echo "Saldo: {$pairow['saldo']}<br>";
 					echo "Tilattu: {$pairow['tilattu']}<br>";
 					echo "Valmistuksessa: {$pairow['valmistuksessa']}<br>";
 					echo "Varattu: {$pairow['ennpois']}<br>";
 					echo "Jt: {$pairow['jt']}<br>";
-					echo "Osto_er‰: {$pairow['osto_era']}<br>";
-					echo "Tilausm‰‰r‰: {$pairow['tilausmaara']}<br>";
+					echo "Osto_er√§: {$pairow['osto_era']}<br>";
+					echo "Tilausm√§√§r√§: {$pairow['tilausmaara']}<br>";
 					echo "Tarve: $ostettavahaly<br>";
 					*/
 
-					//	Onko meill‰ jo otsikko vai pit‰‰kˆ tehd‰ uusi?
+					//	Onko meill√§ jo otsikko vai pit√§√§k√∂ tehd√§ uusi?
 					if ($tehtyriveja == 0) {
 
-						// Nollataan kun tehd‰‰n uusi otsikko
+						// Nollataan kun tehd√§√§n uusi otsikko
 						$tehtyriveja = 0;
 
 						$query = "UPDATE kuka SET kesken = 0 WHERE yhtio = '{$kukarow['yhtio']}' and kuka = '{$kukarow['kuka']}'";
@@ -475,7 +475,7 @@
 
 						$kukarow["kesken"] = 0;
 
-						// Otetaan osoite toimipaikalta jos varaston tiedoissa sit‰ ei oo
+						// Otetaan osoite toimipaikalta jos varaston tiedoissa sit√§ ei oo
 						if ($varow['osoite'] == "" and $varow['toimipaikka'] > 0) {
 							$query = "	SELECT nimi, osoite, postino, postitp, maa
 										FROM yhtion_toimipaikat
@@ -509,7 +509,7 @@
 							'ohjausmerkki'	 			=> $ohjausmerkki,
 							'tilaustyyppi'	 			=> $tilaustyyppi,
 							'myytil_viesti'				=> $viesti,
-							'ostotilauksen_kasittely'	=> "GEN", # t‰ll‰ erotellaan generoidut ja k‰sin tehdyt ostotilaukset
+							'ostotilauksen_kasittely'	=> "GEN", # t√§ll√§ erotellaan generoidut ja k√§sin tehdyt ostotilaukset
 						);
 
 						$laskurow = luo_ostotilausotsikko($params);
@@ -541,7 +541,7 @@
 						$hinta 				= "";
 						$netto 				= "";
 						$var				= "";
-						$paikka 			= "$pairow[hyllyalue]#!°!#$pairow[hyllynro]#!°!#$pairow[hyllyvali]#!°!#$pairow[hyllytaso]";
+						$paikka 			= "$pairow[hyllyalue]#!¬°!#$pairow[hyllynro]#!¬°!#$pairow[hyllyvali]#!¬°!#$pairow[hyllytaso]";
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							${'ale'.$alepostfix} = "";
@@ -564,17 +564,17 @@
 
 						$tehtyriveja++;
 
-						echo "<font class='info'>",t("Ostotilaukselle lis‰ttiin %s tuotetta %s", "", $ostettavahaly." ".$trow["yksikko"], $trow["tuoteno"]),"</font><br />";
+						echo "<font class='info'>",t("Ostotilaukselle lis√§ttiin %s tuotetta %s", "", $ostettavahaly." ".$trow["yksikko"], $trow["tuoteno"]),"</font><br />";
 					}
 					else {
-						echo t("VIRHE: Tuotetta ei lˆydy"),"!<br />";
+						echo t("VIRHE: Tuotetta ei l√∂ydy"),"!<br />";
 					}
 				}
 			}
 		}
 
 		if (count($otsikot) == 0) {
-			echo "<br><font class='error'>",t("Yht‰‰n ostotilausta ei luotu"),"!</font><br />";
+			echo "<br><font class='error'>",t("Yht√§√§n ostotilausta ei luotu"),"!</font><br />";
 		}
 		else {
 			echo "<font class='message'>",t("Luotiin %s ostotilausta", $kieli, count($otsikot)),"</font><br /><br /><br />";

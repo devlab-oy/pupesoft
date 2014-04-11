@@ -10,7 +10,7 @@ if(!function_exists("tilitarkista")) {
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sresult) > 0) {
-				$virhe[$i] = t("Tämä tilinumero on jo perustettu.");
+				$virhe[$i] = t("TÃ¤mÃ¤ tilinumero on jo perustettu.");
 			}
 
 		}
@@ -30,17 +30,17 @@ if(!function_exists("tilitarkista")) {
 			$tpres = pupe_query($tpque);
 
 			if (mysql_num_rows($tpres) == 0) {
-				$virhe[$i] .= t("Tilin tarkennetta ei löydy")."!";
+				$virhe[$i] .= t("Tilin tarkennetta ei lÃ¶ydy")."!";
 			}
 		}
 
 		if (mysql_field_name($result, $i) == "ulkoinen_taso" and trim($t[$i]) == "") {
-			$virhe[$i] = t("Ulkoinen taso on syötettävä")."!";
+			$virhe[$i] = t("Ulkoinen taso on syÃ¶tettÃ¤vÃ¤")."!";
 		}
 
 		if (mysql_field_name($result, $i) == "oletus_alv" and trim($t[$i]) == "") {
 
-			// Jos on tyhjä niin laitetaan stringi NULL, joka tarkoittaa 'ei oletusta'
+			// Jos on tyhjÃ¤ niin laitetaan stringi NULL, joka tarkoittaa 'ei oletusta'
 			$t[$i] = "NULL";
 		}
 	}

@@ -2704,10 +2704,22 @@
 				$vlask++;
 			}
 
-
 			echo "</table><br><br>";
 			echo "<table>";
 			echo "<tr><th colspan='4'>".t("Omat hälytysraportit")."</th></tr>";
+
+			echo "<input type='Submit' name='POISTA' value = '".t("Poista raporttipohja")."'>";
+
+			if (isset($POISTA) AND isset($rappari) AND $rappari != "") {
+				$query = "	DELETE FROM avainsana
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND selite = '$rappari'";
+				pupe_query($query);
+				echo "<font class='error'>".t("Raporttipohja poistettu")."! </font><br>";
+
+				echo "<input type = 'hidden' name = 'tee' value = ''>";
+			}
+
 			echo "<tr><th>".t("Luo uusi oma raportti").":</th><td colspan='3'><input type='text' size='40' name='uusirappari' value=''></td></tr>";
 			echo "<tr><th>".t("Valitse raportti").":</th><td colspan='3'>";
 
@@ -2731,6 +2743,8 @@
 
 				echo "<option value='$srow[selite]' $sel>$srow[nimi]</option>";
 			}
+
+
 			echo "</select>";
 
 			echo "</td></tr>";

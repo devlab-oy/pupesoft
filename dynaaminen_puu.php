@@ -19,8 +19,8 @@
     }
 
     // tarvii romplata tekstimuuttujia kun tehdaan jQuery.ajaxin kanssa
-    $uusi_nimi  = (isset($uusi_nimi)) ? utf8_decode($uusi_nimi): "";
-    $uusi_koodi  = (isset($uusi_koodi)) ? utf8_decode($uusi_koodi): "";
+    $uusi_nimi  = (isset($uusi_nimi)) ? $uusi_nimi: "";
+    $uusi_koodi  = (isset($uusi_koodi)) ? $uusi_koodi: "";
 
     function getnoderow ($toim, $nodeid) {
       global $yhtiorow, $kukarow;

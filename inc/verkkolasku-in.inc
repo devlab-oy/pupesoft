@@ -1378,8 +1378,8 @@
             if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
               $kustp = $oletuskust;
 
-              $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"])) : "";
-              $tuote = isset($rtuoteno[$i]["tuoteno"])  ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["tuoteno"])) : "";
+              $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? mysql_real_escape_string($rtuoteno[$i]["riviinfo"]) : "";
+              $tuote = isset($rtuoteno[$i]["tuoteno"])  ? mysql_real_escape_string($rtuoteno[$i]["tuoteno"]) : "";
 
               $query = "  SELECT tilino, kustp
                     FROM tiliointisaanto

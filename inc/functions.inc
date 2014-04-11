@@ -19116,7 +19116,7 @@ if (!function_exists('pupeFileReaderXLSRows')) {
     $sharedStringsArray = array();
 
     foreach ($sharedStrings->si as $string) {
-      $sharedStringsArray[] = utf8_decode($string->t);
+      $sharedStringsArray[] = $string->t;
     }
 
     foreach ($sheetData->sheetData->row as $row) {
@@ -19183,7 +19183,7 @@ if (!function_exists('pupeFileReaderXLSRow')) {
       foreach ($cellIterator as $cell) {
         $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
 
-        $excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+        $excelrivit[$rowIndex][$colIndex] = trim($cell->getCalculatedValue());
       }
     }
 

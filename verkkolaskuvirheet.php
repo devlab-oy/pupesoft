@@ -196,30 +196,30 @@
           $laskuttajan_tilino   = "";
 
           if ($kumpivoice == "PUPEVOICE") {
-            $laskuttajan_osoite   = utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC059.3042.1')));
-            $laskuttajan_postitp   = utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3164')));
-            $laskuttajan_postino   = utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3251')));
-            $laskuttajan_maa     = utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3207')));
+            $laskuttajan_osoite   = array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC059.3042.1'));
+            $laskuttajan_postitp   = array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3164'));
+            $laskuttajan_postino   = array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3251'));
+            $laskuttajan_maa     = array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3207'));
 
-            $laskuttajan_tilino   = utf8_decode(array_shift($xml->xpath('Group2/FII[@e3035="BF"]/@eC078.3194')));
+            $laskuttajan_tilino   = array_shift($xml->xpath('Group2/FII[@e3035="BF"]/@eC078.3194'));
           }
           elseif ($kumpivoice == "TECCOM") {
-            $laskuttajan_osoite   = utf8_decode($xml->InvoiceHeader->SellerParty->Address->Street1);
-            $laskuttajan_postitp   = utf8_decode($xml->InvoiceHeader->SellerParty->Address->City);
-            $laskuttajan_postino   = utf8_decode($xml->InvoiceHeader->SellerParty->Address->PostalCode);
-            $laskuttajan_maa     = utf8_decode($xml->InvoiceHeader->SellerParty->Address->CountryCode);
+            $laskuttajan_osoite   = $xml->InvoiceHeader->SellerParty->Address->Street1;
+            $laskuttajan_postitp   = $xml->InvoiceHeader->SellerParty->Address->City;
+            $laskuttajan_postino   = $xml->InvoiceHeader->SellerParty->Address->PostalCode;
+            $laskuttajan_maa     = $xml->InvoiceHeader->SellerParty->Address->CountryCode;
              $laskuttajan_tilino    = $lasku_toimittaja["ultilno"];
             $laskuttajan_ovt    = $lasku_toimittaja["ovt_tunnus"];
             $laskuttajan_vat    = $lasku_toimittaja["ytunnus"];
 
           }
           elseif ($kumpivoice == "FINVOICE") {
-            $laskuttajan_osoite   = utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerStreetName);
-            $laskuttajan_postitp   = utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerTownName);
-            $laskuttajan_postino   = utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerPostCodeIdentifier);
-            $laskuttajan_maa     = utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->CountryCode);
+            $laskuttajan_osoite   = $xml->SellerPartyDetails->SellerPostalAddressDetails->SellerStreetName;
+            $laskuttajan_postitp   = $xml->SellerPartyDetails->SellerPostalAddressDetails->SellerTownName;
+            $laskuttajan_postino   = $xml->SellerPartyDetails->SellerPostalAddressDetails->SellerPostCodeIdentifier;
+            $laskuttajan_maa     = $xml->SellerPartyDetails->SellerPostalAddressDetails->CountryCode;
 
-            $laskuttajan_tilino    = utf8_decode($xml->SellerInformationDetails->SellerAccountDetails->SellerAccountID);
+            $laskuttajan_tilino    = $xml->SellerInformationDetails->SellerAccountDetails->SellerAccountID;
           }
 
           echo "<tr>";

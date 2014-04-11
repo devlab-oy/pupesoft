@@ -61,9 +61,9 @@
       if ($key == "PkgItem") {
 
         $tuote          = (string) $element->ProductId->ProductNumber;
-        $tuote          = utf8_decode(trim($tuote));
+        $tuote          = trim($tuote);
         $tuote2          = (string) $element->ProductId->BuyerProductNumber;
-        $tuote2          = utf8_decode(trim($tuote2));
+        $tuote2          = trim($tuote2);
         $kpl          = (float) $element->DeliveredQuantity->Quantity;
         $tilausrivinpositio    = (int) $element->OrderItemRef->BuyerOrderItemRef;
         $tuotteelta_tilausno  = (int) $element->OrderRef->BuyerOrderNumber;
@@ -166,7 +166,7 @@
 
         if (isset($element->PkgId->PkgIdentNumber) and $tavarantoimittajanumero != "123007") {
             $laatikko = (string) $element->PkgId->PkgIdentNumber;
-            $laatikko = utf8_decode($laatikko);
+            $laatikko = $laatikko;
             $koodi = $laatikko;
 
             if (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108" or $tavarantoimittajanumero == "123506" or $tavarantoimittajanumero == "123110") and strlen($laatikko) >10) {
@@ -244,7 +244,7 @@
 
           // $tavarantoimittajanumero ja $asn_numero arvoa pitää olla tai ei tule toimimaan.
           $tavarantoimittajanumero = (string) $xml->DesAdvHeader->SellerParty->PartyNumber;
-          $tavarantoimittajanumero = utf8_decode($tavarantoimittajanumero);
+          $tavarantoimittajanumero = $tavarantoimittajanumero;
 
           if (strtoupper($tavarantoimittajanumero) == "ELRING") {
             $tavarantoimittajanumero = "123312";
@@ -266,21 +266,21 @@
           }
 
           $asn_numero  = (string) $xml->DesAdvHeader->DesAdvId;
-          $asn_numero = utf8_decode($asn_numero);
+          $asn_numero = $asn_numero;
 
           $toimituspvm = tv3dateconv($xml->DesAdvHeader->DeliveryDate->Date);
           $vastaanottaja = (string) $xml->DesAdvHeader->DeliveryParty->PartyNumber." , ".trim($xml->DesAdvHeader->DeliveryParty->Address->Name1);
-          $vastaanottaja = utf8_decode($vastaanottaja);
+          $vastaanottaja = $vastaanottaja;
 
           // Haetaan pakkauslistan referenssinumero, mikäli löytyy
           if (isset($xml->Package->Package->PkgRef->PkgRefNumber) and $xml->Package->Package->PkgRef->PkgRefNumber != "") {
             $pakkauslista = $xml->Package->Package->PkgRef->PkgRefNumber;
-            $pakkauslista = utf8_decode($pakkauslista);
+            $pakkauslista = $pakkauslista;
             // Mikäli paketin sisällä on paketti
           }
           elseif (isset($xml->Package->PkgRef->PkgRefNumber) and $xml->Package->PkgRef->PkgRefNumber != "") {
             $pakkauslista = $xml->Package->PkgRef->PkgRefNumber;
-            $pakkauslista = utf8_decode($pakkauslista);
+            $pakkauslista = $pakkauslista;
             // normaali tapaus
           }
           elseif (in_array($tavarantoimittajanumero, $poikkeukset)) {

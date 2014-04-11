@@ -265,7 +265,7 @@
             foreach ($cellIterator as $cell) {
                 $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
 
-            $excelrivi[$rowIndex][$colIndex] = utf8_decode($cell->getCalculatedValue());
+            $excelrivi[$rowIndex][$colIndex] = $cell->getCalculatedValue();
             }
         }
 

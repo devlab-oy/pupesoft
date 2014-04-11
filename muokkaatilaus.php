@@ -2259,10 +2259,10 @@
                 $requester = simplexml_load_string($requester);
                 $assignee = simplexml_load_string($assignee);
 
-                echo "<br><br><table><tr><th>Requester</th><td>".utf8_decode($requester->{"name"})."</td></tr>";
-                echo "<tr><th>Subject</th><td>".utf8_decode($xml->{"subject"})."</td></tr>";
+                echo "<br><br><table><tr><th>Requester</th><td>".$requester->{"name"}."</td></tr>";
+                echo "<tr><th>Subject</th><td>".$xml->{"subject"}."</td></tr>";
                 echo "<tr><th>Status</th><td>".$statukset[(int) $xml->{"status-id"}]."</td></tr>";
-                echo "<tr><th>Assignee</th><td>".utf8_decode($assignee->{"name"})."</td></tr></table>";
+                echo "<tr><th>Assignee</th><td>".$assignee->{"name"}."</td></tr></table>";
               }
 
               echo "</td>";

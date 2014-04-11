@@ -29,8 +29,8 @@
   }
 
   $laskuttajan_ovt        = "";
-  $laskuttajan_nimi        = utf8_decode($xml->InvoiceHeader->SellerParty->Address->Name1);
-  $laskuttajan_toimittajanumero  = utf8_decode($xml->InvoiceHeader->SellerParty->PartyNumber);
+  $laskuttajan_nimi        = $xml->InvoiceHeader->SellerParty->Address->Name1;
+  $laskuttajan_toimittajanumero  = $xml->InvoiceHeader->SellerParty->PartyNumber;
   $laskun_pankkiviite        = "";
   $laskuttajan_vat        = "";
   $laskun_asiakastunnus      = "";
@@ -141,31 +141,31 @@
 
   // Ensiksi deliverystä
   if (isset($xml->InvoiceHeader->DeliveryParty->Address->Name1)) {
-    $toim_asiakkaantiedot["nimi"] = trim(utf8_decode($xml->InvoiceHeader->DeliveryParty->Address->Name1));
+    $toim_asiakkaantiedot["nimi"] = trim($xml->InvoiceHeader->DeliveryParty->Address->Name1);
   }
   else { // jos ei löytynyt, niin laitetaan laskutusosoite
-    $toim_asiakkaantiedot["nimi"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Name1));
+    $toim_asiakkaantiedot["nimi"] = trim($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Name1);
   }
 
   if (isset($xml->InvoiceHeader->DeliveryParty->Address->Street1)) {
-    $toim_asiakkaantiedot["osoite"] = trim(utf8_decode($xml->InvoiceHeader->DeliveryParty->Address->Street1));
+    $toim_asiakkaantiedot["osoite"] = trim($xml->InvoiceHeader->DeliveryParty->Address->Street1);
   }
   else {
-    $toim_asiakkaantiedot["osoite"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Street1));
+    $toim_asiakkaantiedot["osoite"] = trim($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Street1);
   }
 
   if (isset($xml->InvoiceHeader->DeliveryParty->Address->PostalCode)) {
-    $toim_asiakkaantiedot["postino"] = trim(utf8_decode($xml->InvoiceHeader->DeliveryParty->Address->PostalCode));
+    $toim_asiakkaantiedot["postino"] = trim($xml->InvoiceHeader->DeliveryParty->Address->PostalCode);
   }
   else {
-    $toim_asiakkaantiedot["postino"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->PostalCode));
+    $toim_asiakkaantiedot["postino"] = trim($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->PostalCode);
   }
 
   if (isset($xml->InvoiceHeader->DeliveryParty->Address->City)) {
-    $toim_asiakkaantiedot["postitp"] = trim(utf8_decode($xml->InvoiceHeader->DeliveryParty->Address->City));
+    $toim_asiakkaantiedot["postitp"] = trim($xml->InvoiceHeader->DeliveryParty->Address->City);
   }
   else {
-    $toim_asiakkaantiedot["postitp"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->City));
+    $toim_asiakkaantiedot["postitp"] = trim($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->City);
   }
 
   // Sama ostaja_tiedoille...
@@ -174,31 +174,31 @@
   $ostaja_asiakkaantiedot["ytunnus"] = "";
 
   if (isset($xml->InvoiceHeader->BuyerParty->Address->Name1)) {
-    $ostaja_asiakkaantiedot["nimi"] = trim(utf8_decode($xml->InvoiceHeader->BuyerParty->Address->Name1));
+    $ostaja_asiakkaantiedot["nimi"] = trim($xml->InvoiceHeader->BuyerParty->Address->Name1);
   }
   else {
-    $ostaja_asiakkaantiedot["nimi"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Name1));
+    $ostaja_asiakkaantiedot["nimi"] = trim($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Name1);
   }
 
   if (isset($xml->InvoiceHeader->BuyerParty->Address->Street1)) {
-    $ostaja_asiakkaantiedot["osoite"] = trim(utf8_decode($xml->InvoiceHeader->BuyerParty->Address->Street1));
+    $ostaja_asiakkaantiedot["osoite"] = trim($xml->InvoiceHeader->BuyerParty->Address->Street1);
   }
   else {
-    $ostaja_asiakkaantiedot["osoite"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Street1));
+    $ostaja_asiakkaantiedot["osoite"] = trim($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->Street1);
   }
 
   if (isset($xml->InvoiceHeader->BuyerParty->Address->PostalCode)) {
-    $ostaja_asiakkaantiedot["postino"] = trim(utf8_decode($xml->InvoiceHeader->BuyerParty->Address->PostalCode));
+    $ostaja_asiakkaantiedot["postino"] = trim($xml->InvoiceHeader->BuyerParty->Address->PostalCode);
   }
   else {
-    $ostaja_asiakkaantiedot["postino"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->PostalCode));
+    $ostaja_asiakkaantiedot["postino"] = trim($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->PostalCode);
   }
 
   if (isset($xml->InvoiceHeader->BuyerParty->Address->City)) {
-    $ostaja_asiakkaantiedot["postitp"] = trim(utf8_decode($xml->InvoiceHeader->BuyerParty->Address->City));
+    $ostaja_asiakkaantiedot["postitp"] = trim($xml->InvoiceHeader->BuyerParty->Address->City);
   }
   else {
-    $ostaja_asiakkaantiedot["postitp"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->City));
+    $ostaja_asiakkaantiedot["postitp"] = trim($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->City);
   }
 
   if (isset($xml->InvoiceHeader->Currency)) {
@@ -219,7 +219,7 @@
     foreach ($tuotetiedot as $tuotetieto) {
 
       // tuotekoodi
-      $rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
+      $rtuoteno[$i]["tuoteno"] = $tuotetieto->ProductId->ProductNumber;
 
       $query = "  SELECT tt.*
             FROM tuotteen_toimittajat AS tt
@@ -506,7 +506,7 @@
 
         $ealvi[$i]                = $laskun_alv;
         $rtuoteno[$i]["alv"]          = $laskun_alv;
-        $rtuoteno[$i]["nimitys"]       = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
+        $rtuoteno[$i]["nimitys"]       = pupesoft_cleanstring($tuotetieto->ProductDescription->ProductName1);
         $rtuoteno[$i]['rivihinta_verolli']   = round($rtuoteno[$i]['rivihinta'] * (1 + ($laskun_alv / 100)), 2);
 
         if ($onko_hyvityslasku_kerroin != 1) {

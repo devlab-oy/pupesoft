@@ -14,7 +14,7 @@ $laskun_erapaiva    = array_shift($xml->xpath('Group8[PAT/@e4279="1"]/DTM[@eC507
 $laskun_kapvm       = "";
 $laskun_kasumma     = "";
 $laskuttajan_ovt    = array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC082.3039'));
-$laskuttajan_nimi    = utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC080.3036.1')));
+$laskuttajan_nimi    = array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC080.3036.1'));
 $laskuttajan_vat    = array_shift($xml->xpath('Group2/Group3/RFF[@eC506.1153="VA"]/@eC506.1154'));
 $laskuttajan_valkoodi   = "";
 $laskun_pankkiviite    = array_shift($xml->xpath('Group1/RFF[@eC506.1153="PQ"]/@eC506.1154'));
@@ -27,27 +27,27 @@ $laskun_toimitunnus    = 0;
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"]  = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039')));
 $toim_asiakkaantiedot["ytunnus"]     = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039')));
-$toim_asiakkaantiedot["nimi"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC080.3036.1'))));
-$toim_asiakkaantiedot["osoite"]     = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC059.3042.1'))));
-$toim_asiakkaantiedot["postino"]     = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3251'))));
-$toim_asiakkaantiedot["postitp"]     = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3164'))));
+$toim_asiakkaantiedot["nimi"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC080.3036.1')));
+$toim_asiakkaantiedot["osoite"]     = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC059.3042.1')));
+$toim_asiakkaantiedot["postino"]     = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3251')));
+$toim_asiakkaantiedot["postitp"]     = trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3164')));
 
 $ostaja_asiakkaantiedot = array();
 $ostaja_asiakkaantiedot["toim_ovttunnus"]  = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC082.3039')));
 $ostaja_asiakkaantiedot["ytunnus"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC082.3039')));
-$ostaja_asiakkaantiedot["nimi"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC080.3036.1'))));
-$ostaja_asiakkaantiedot["osoite"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC059.3042.1'))));
-$ostaja_asiakkaantiedot["postino"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3251'))));
-$ostaja_asiakkaantiedot["postitp"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3164'))));
+$ostaja_asiakkaantiedot["nimi"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC080.3036.1')));
+$ostaja_asiakkaantiedot["osoite"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC059.3042.1')));
+$ostaja_asiakkaantiedot["postino"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3251')));
+$ostaja_asiakkaantiedot["postitp"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3164')));
 
 /// Jos BY tiedot puuttuu niin otetaan IV kentistä
 if ($ostaja_asiakkaantiedot["nimi"] == '') {
   $ostaja_asiakkaantiedot["toim_ovttunnus"]  = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC082.3039')));
   $ostaja_asiakkaantiedot["ytunnus"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC082.3039')));
-  $ostaja_asiakkaantiedot["nimi"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC080.3036.1'))));
-  $ostaja_asiakkaantiedot["osoite"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC059.3042.1'))));
-  $ostaja_asiakkaantiedot["postino"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3251'))));
-  $ostaja_asiakkaantiedot["postitp"]       = trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3164'))));
+  $ostaja_asiakkaantiedot["nimi"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC080.3036.1')));
+  $ostaja_asiakkaantiedot["osoite"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC059.3042.1')));
+  $ostaja_asiakkaantiedot["postino"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3251')));
+  $ostaja_asiakkaantiedot["postitp"]       = trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3164')));
 }
 
 $laskuttajan_toimittajanumero = "";

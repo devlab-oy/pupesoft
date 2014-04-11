@@ -2743,8 +2743,6 @@
 
 				echo "<option value='$srow[selite]' $sel>$srow[nimi]</option>";
 			}
-
-
 			echo "</select>";
 
 			echo "</td></tr>";

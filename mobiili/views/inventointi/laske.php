@@ -19,9 +19,9 @@
 				<?php if( $tuote['inventointilista_naytamaara']!='' ) { ?>
 					<strong>
 						<?php if( $tuote['inventointilista_naytamaara']==='H' ) { ?>
-							Hyllyssä: <?php echo sprintf('%.2f', $tuote['saldo']-$hylrow['keratty']); ?>
+							(hyllyssä: <?php echo sprintf('%.2f', $tuote['saldo']-$hylrow['keratty']); ?>)
 						<?php } elseif( $tuote['inventointilista_naytamaara']==='S' ) { ?>
-							Saldo: <?php echo sprintf('%.2f', $tuote['saldo']); ?>
+							(saldo: <?php echo sprintf('%.2f', $tuote['saldo']); ?>)
 						<?php } ?>
 					</strong>
 				<?php } ?>

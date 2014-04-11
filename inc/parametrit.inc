@@ -245,7 +245,7 @@ else exit;
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
-mysql_set_charset("latin1");
+mysql_set_charset("utf8");
 
 // pupesoft_cleanstring ALL THE COOKIES!!
 $_COOKIE = array_map("pupesoft_cleanstring", $_COOKIE);

@@ -36,7 +36,7 @@ if ($useslave > 0) {
 if (isset($tempdbhost) and $tempdbhost != "") {
   $temporarylink = mysql_connect($tempdbhost, $tempdbuser, $tempdbpass) or die ("Ongelma tietokantapalvelimessa $tempdbhost");
   mysql_select_db($tempdbkanta, $temporarylink) or die ("Tietokantaa $tempdbkanta ei löydy palvelimelta $tempdbhost! (connect.inc)");
-  mysql_set_charset("latin1", $temporarylink);
+  mysql_set_charset("utf8", $temporarylink);
 }
 
 // Käytetään slave kantaa
@@ -44,7 +44,7 @@ if ($useslave > 0) {
   // Otetaan yhteys myös master-kantaan koska tietyissä paikoissa tätä tarvitaan
   $masterlink = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
   mysql_select_db($dbkanta, $masterlink) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
-  mysql_set_charset("latin1", $masterlink);
+  mysql_set_charset("utf8", $masterlink);
   mysql_query("set group_concat_max_len=1000000", $masterlink);
 
   $link = mysql_connect($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
@@ -55,7 +55,7 @@ else {
 }
 
 mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
-mysql_set_charset("latin1", $link);
+mysql_set_charset("utf8", $link);
 mysql_query("set group_concat_max_len=1000000", $link);
 
 // jos debugataan pienillä arvoilla, ni pakotetaan myös queryt kuntoon!

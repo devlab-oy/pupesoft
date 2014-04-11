@@ -2716,8 +2716,6 @@
 							AND selite = '$rappari'";
 				pupe_query($query);
 				echo "<font class='error'>".t("Raporttipohja poistettu")."! </font><br>";
-
-				echo "<input type = 'hidden' name = 'tee' value = ''>";
 			}
 
 			echo "<tr><th>".t("Luo uusi oma raportti").":</th><td colspan='3'><input type='text' size='40' name='uusirappari' value=''></td></tr>";

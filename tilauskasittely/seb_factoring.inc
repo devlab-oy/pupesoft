@@ -57,7 +57,7 @@
     //tässa on kaikki failit jotka tarvitaan
     $bound = uniqid(time()."_") ;
 
-    $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\r\n";
+    $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\r\n";
     $header .= "MIME-Version: 1.0\r\n" ;
     $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
 
@@ -72,7 +72,7 @@
 
     $subjekti = $frow["sopimusnumero"]." ".$pdffilenimi;
 
-    if($frow["email"] == '' or !mail($frow["email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]")) {
+    if($frow["email"] == '' or !mail($frow["email"], mb_encode_mimeheader($subjekti, "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]")) {
       $sebfact_ulos .= sprintf(t("VIRHE: Laskutuksen factoring-sähköpostisiirtoa ei voitu suorittaa osoitteeseen: %s"),$frow["email"])."<br>\r\n";
     }
     else {
@@ -80,7 +80,7 @@
     }
 
     //lähetetään meili myös yhtiön adminille
-    mail($yhtiorow["alert_email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    mail($yhtiorow["alert_email"], mb_encode_mimeheader($subjekti, "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
     //echotaan rudulle jos kyseessä ei ole batch-ajo
     if ($tulos_ulos == "") {

@@ -795,7 +795,7 @@
       echo "<br>";
 
       // Lähetetään viesti adminille!
-      mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SEPA Error", "ISO-8859-1", "Q"), $xml_virheet."\n", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+      mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SEPA Error", "UTF-8", "Q"), $xml_virheet."\n", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
     }
 
     if ($tiedostonimi == "") {

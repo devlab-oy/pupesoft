@@ -217,7 +217,7 @@
 
         //  Lähetetään mailia tästä eteenpäin jos meillä on vastaanottajia
         if ($yhtiorow["tuotekopio_email"] != "") {
-          $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+          $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
           $header .= "MIME-Version: 1.0\n" ;
 
           $query = "  SELECT *
@@ -228,7 +228,7 @@
 
           $content = $kukarow["nimi"]." ".t("kopioi yhtiön")." $yrow[nimi] ".t("tuotteen")." '$tuoteno' ".t("yhtiön")." $yhtiorow[nimi] ".t("tuotteeksi")." '$uustuoteno'\n\n";
 
-          mail($yhtiorow["tuotekopio_email"], mb_encode_mimeheader(t("Tuotteita kopioitu"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+          mail($yhtiorow["tuotekopio_email"], mb_encode_mimeheader(t("Tuotteita kopioitu"), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
         }
 
         $toim   = 'tuote';

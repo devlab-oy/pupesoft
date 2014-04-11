@@ -32,7 +32,7 @@
 
   $bound = uniqid(time()."_") ;
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
 
   if (isset($sahkoposti_cc) and $sahkoposti_cc != "") {
     $header .= "Cc: $sahkoposti_cc\n";
@@ -152,7 +152,7 @@
     }
   }
 
-  $boob = mail($kukarow["eposti"], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+  $boob = mail($kukarow["eposti"], mb_encode_mimeheader($subject, "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
   if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";
 

@@ -379,7 +379,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
   // Kompostoidaan meili
   $bound = uniqid(time()."_") ;
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
   $header .= "MIME-Version: 1.0\n";
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 
@@ -400,13 +400,13 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
   if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
     unset($boob);
-    $boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    $boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
     if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
   }
 
   if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
     unset($boob);
-    $boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    $boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
     if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
   }
 }

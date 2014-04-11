@@ -1347,7 +1347,7 @@ while ($tietue = fgets($fd)) {
             // lähetetään meili
             $bound   = uniqid(time()."_") ;
 
-            $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+            $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
             $header .= "MIME-Version: 1.0\n" ;
             $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -1363,7 +1363,7 @@ while ($tietue = fgets($fd)) {
             $mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
             $mail .= "--$bound--\n";
 
-            #$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sisäänluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+            #$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sisäänluvussa", "UTF-8", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
           }
         }
       }
@@ -2129,7 +2129,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
   $bound   = uniqid(time()."_") ;
   $kutsu   = $yhtiorow["yhtio"]."-ediorder.txt";
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
   $header .= "MIME-Version: 1.0\n" ;
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -2151,7 +2151,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
   $content .= "\n";
   $content .= "--$bound--\n";
 
-  $boob = mail($yhtiorow["edi_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+  $boob = mail($yhtiorow["edi_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }
 else {
   echo "\n";

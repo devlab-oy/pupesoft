@@ -684,7 +684,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
       $bound = uniqid(time()."_") ;
       $ny = date("d-m-Y");
 
-      $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\r\n";
+      $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\r\n";
           $header  .= "MIME-Version: 1.0\r\n" ;
           $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
 
@@ -699,7 +699,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
 
       $content .= "--$bound\r\n";
 
-      $boob = mail($mailiosoite, mb_encode_mimeheader(t("tarveraportti")." ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+      $boob = mail($mailiosoite, mb_encode_mimeheader(t("tarveraportti")." ".date("d.m.Y"), "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
     }
   }
 }

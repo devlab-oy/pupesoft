@@ -233,7 +233,7 @@
 
     $bound = uniqid(time()."_") ;
 
-    $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\r\n";
+    $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\r\n";
     $header .= "MIME-Version: 1.0\r\n" ;
     $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
 
@@ -265,6 +265,6 @@
 
     $to = $kukarow['eposti'];
 
-    mail($to, mb_encode_mimeheader(t("Asiakkaan tietopaketti")." $row[ytunnus] $row[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    mail($to, mb_encode_mimeheader(t("Asiakkaan tietopaketti")." $row[ytunnus] $row[nimi]", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
   }
 ?>

@@ -64,7 +64,7 @@
   }
 
   // Tehdään email
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
+  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
   $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
   $out  = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
@@ -143,4 +143,4 @@
   $out .= "</body>";
   $out .= "</html>";
 
-  $postia = mail($to_email, mb_encode_mimeheader("{$yhtiorow["nimi"]} - ".t("Vanhenevat sopimukset", $kieli), "ISO-8859-1", "Q"), $out, $header, "-f {$yhtiorow["postittaja_email"]}");
+  $postia = mail($to_email, mb_encode_mimeheader("{$yhtiorow["nimi"]} - ".t("Vanhenevat sopimukset", $kieli), "UTF-8", "Q"), $out, $header, "-f {$yhtiorow["postittaja_email"]}");

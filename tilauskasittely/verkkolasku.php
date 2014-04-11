@@ -2680,7 +2680,7 @@
           // Tehdään maili, että siirretään laskut operaattorille
           $bound = uniqid(time()."_") ;
 
-          $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+          $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
           $verkkolasheader .= "MIME-Version: 1.0\n" ;
           $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -2704,7 +2704,7 @@
           $verkkolasmail .= "\n" ;
           $verkkolasmail .= "--$bound--\n";
 
-          $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("Pupevoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+          $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("Pupevoice-aineiston siirto Itellaan"), "UTF-8", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
           require("inc/ftp-send.inc");
 
@@ -2793,7 +2793,7 @@
           // Tehdään maili, että siirretään laskut operaattorille
           $bound = uniqid(time()."_") ;
 
-          $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+          $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
           $verkkolasheader .= "MIME-Version: 1.0\n" ;
           $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -2817,7 +2817,7 @@
           $verkkolasmail .= "\n" ;
           $verkkolasmail .= "--$bound--\n";
 
-          $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("iPost Finvoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+          $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("iPost Finvoice-aineiston siirto Itellaan"), "UTF-8", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
           require("inc/ftp-send.inc");
 
@@ -2852,7 +2852,7 @@
           // Tehdään maili, että siirretään laskut operaattorille
           $bound = uniqid(time()."_") ;
 
-          $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+          $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
           $verkkolasheader .= "MIME-Version: 1.0\n" ;
           $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -2876,7 +2876,7 @@
           $verkkolasmail .= "\n" ;
           $verkkolasmail .= "--$bound--\n";
 
-          $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("EDI-inhouse-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+          $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("EDI-inhouse-aineiston siirto Itellaan"), "UTF-8", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
           require("inc/ftp-send.inc");
 
@@ -2901,7 +2901,7 @@
           // Tehdään maili, että siirretään laskut operaattorille
           $bound = uniqid(time()."_") ;
 
-          $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+          $verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
           $verkkolasheader .= "MIME-Version: 1.0\n" ;
           $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -2925,7 +2925,7 @@
           $verkkolasmail .= "\n" ;
           $verkkolasmail .= "--$bound--\n";
 
-          $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("Pupesoft-Finvoice-aineiston siirto eteenpäin"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+          $silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("Pupesoft-Finvoice-aineiston siirto eteenpäin"), "UTF-8", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
           require("inc/ftp-send.inc");
 
@@ -3092,7 +3092,7 @@
         //echotaan ruudulle ja lähetetään meili yhtiorow[admin]:lle
         $bound = uniqid(time()."_") ;
 
-        $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+        $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
         $header .= "MIME-Version: 1.0\n" ;
         $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -3107,7 +3107,7 @@
         $content .= "\n";
         $content .= "--$bound--\n";
 
-        mail($yhtiorow["talhal_email"],  mb_encode_mimeheader("$yhtiorow[nimi] - Laskutusajo", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+        mail($yhtiorow["talhal_email"],  mb_encode_mimeheader("$yhtiorow[nimi] - Laskutusajo", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
       }
     }
 

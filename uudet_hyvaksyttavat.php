@@ -94,7 +94,7 @@
       if ($trow['eposti'] != $veposti) {
         if ($veposti != '') {
           $meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;
-          $tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyväksyttävät laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+          $tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyväksyttävät laskusi"), "UTF-8", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
         }
         $meili = '';
         $veposti = $trow['eposti'];
@@ -109,7 +109,7 @@
 
   if ($meili != '') {
     $meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;
-    $tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyväksyttävät laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+    $tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyväksyttävät laskusi"), "UTF-8", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
   }
 
 ?>

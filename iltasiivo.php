@@ -565,11 +565,11 @@
 
     if ($iltasiivo != "") {
       if (isset($iltasiivo_email) and $iltasiivo_email == 1) {
-        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
         $header .= "MIME-Version: 1.0\n" ;
         $subject = "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
 
-        mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
+        mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "UTF-8", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
       }
     }
 

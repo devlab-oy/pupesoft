@@ -606,7 +606,7 @@ if ($error == 0 and $tee == "file") {
           $email_osoite = $posti['eposti'];
         }
 
-        $tulos = mail($email_osoite, mb_encode_mimeheader(t("Tuotteiden tuotenumerot on vaihtuneet")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["postittaja_email"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+        $tulos = mail($email_osoite, mb_encode_mimeheader(t("Tuotteiden tuotenumerot on vaihtuneet")." $yhtiorow[nimi]", "UTF-8", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["postittaja_email"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
       }
     }
   }

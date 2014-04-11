@@ -236,7 +236,7 @@
 
     $bound = uniqid(time()."_") ;
 
-    $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+    $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
     $header .= "MIME-Version: 1.0\n" ;
     $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -254,11 +254,11 @@
     $content .= "\n" ;
 
     if ($tee == "lahetalista") {
-      mail($kukarow['eposti'], mb_encode_mimeheader("Asiakkaiden tiedot", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+      mail($kukarow['eposti'], mb_encode_mimeheader("Asiakkaiden tiedot", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
       echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font><br><br><br>";
     }
     else {
-      mail($kukarow['eposti'], mb_encode_mimeheader("Viikkosunnitelmapohja", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+      mail($kukarow['eposti'], mb_encode_mimeheader("Viikkosunnitelmapohja", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
       echo "<br><br><font class='message'>".t("Suunnitelmapohja lähetetty sähköpostiisi")."!</font><br><br><br>";
     }
 

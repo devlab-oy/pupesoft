@@ -31,7 +31,7 @@
   pupesoft_flock();
 
   if ($operaattori == "") {
-    mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sisäänluvussa ongelma, ei operaattoria valittuna. Tutki asia!", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
+    mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "UTF-8", "Q"), "FTP-get sisäänluvussa ongelma, ei operaattoria valittuna. Tutki asia!", "From: ".mb_encode_mimeheader("Pupesoft", "UTF-8", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
     exit;
   }
 
@@ -127,5 +127,5 @@
     }
   }
   else {
-    mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sisäänluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on väärin (operaattori: $operaattori)", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
+    mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "UTF-8", "Q"), "FTP-get sisäänluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on väärin (operaattori: $operaattori)", "From: ".mb_encode_mimeheader("Pupesoft", "UTF-8", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
   }

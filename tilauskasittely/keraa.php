@@ -1363,7 +1363,7 @@
           $rivit .= "</tr>";
         }
 
-        $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+        $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
         $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
         $ulos  = "<html>\n<head>\n";
@@ -1422,7 +1422,7 @@
 
         // Lähetetään keräyspoikkeama asiakkaalle
         if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
-          $boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
+          $boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "UTF-8", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
           if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
         }
 
@@ -1445,7 +1445,7 @@
 
           $ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
-          $boob = mail($laskurow["kukamail"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
+          $boob = mail($laskurow["kukamail"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "UTF-8", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
           if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
         }
 
@@ -1453,7 +1453,7 @@
           $uloslisa .= t("Tilauksen keräsi").": $keraaja[nimi]<br><br>";
           $ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
-          $boob = mail($yhtiorow['extranet_kerayspoikkeama_email'], mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f {$yhtiorow['postittaja_email']}");
+          $boob = mail($yhtiorow['extranet_kerayspoikkeama_email'], mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "UTF-8", "Q"), $ulos, $header, "-f {$yhtiorow['postittaja_email']}");
           if ($boob === FALSE) echo " - ",t("\"Extranet keräyspoikkeama\"-sähköpostin lähetys epäonnistui"),"!<br>";
         }
 

@@ -238,7 +238,7 @@ if (!function_exists("pupe_error")) {
     $puperror .= "$query\n\n";
 
     // lähetetään se meilitse adminille
-    mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SQL Error", "ISO-8859-1", "Q"), $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+    mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SQL Error", "UTF-8", "Q"), $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
     if (ob_get_level() > 1) {
       $fleur = ob_get_contents();
@@ -19815,7 +19815,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
     $content = "";
     $bound = uniqid(time()."_") ;
-    $header = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
+    $header = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
 
     if ($email_cc != "") {
       $header .= "Cc: $email_cc\n";
@@ -19917,7 +19917,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
     // Vikassa boundissa pitää olla -- lopussa.
     $content .= "--\n";
 
-    $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
+    $boob = mail($email_to, mb_encode_mimeheader($email_subject, "UTF-8", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
 
     if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $email_to<br>";
 

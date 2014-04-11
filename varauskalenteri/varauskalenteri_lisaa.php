@@ -58,7 +58,7 @@
       $meili .= "Vieraslukumäärä:\n$kentta08\n\n\n";
       $meili .= "Juomatoivomus:\n$kentta10\n";
 
-      $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+      $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "UTF-8", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "UTF-8", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "UTF-8", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
     }
     else{
       echo "<br><br>Tarkista, ett&auml; kaikki tiedot on sy&ouml;tetty!";

@@ -868,7 +868,7 @@
 
       $bound = uniqid(time()."_") ;
 
-      $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+      $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
       $header .= "MIME-Version: 1.0\n";
       $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 
@@ -926,11 +926,11 @@
       // katotaan lähetetäänkö meili käyttäjälle
       if (($lahetys == "mina" or $lahetys == "mole" or $lahetys == "test") and $kukarow["eposti"] != "") {
         // jä lähetetään käyttäjälle
-        mail($kukarow["eposti"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+        mail($kukarow["eposti"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
       }
 
       // ja aina adminille
-      mail($yhtiorow["alert_email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+      mail($yhtiorow["alert_email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "UTF-8", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
     }
     else {

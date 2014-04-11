@@ -44,7 +44,7 @@
 
       $bound     = uniqid(time()."_") ;
 
-      $headeri   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+      $headeri   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
       $headeri  .= "MIME-Version: 1.0\n" ;
       $headeri  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -57,7 +57,7 @@
       $content .= "\n" ;
       $content .= "--$bound\n";
 
-      $boob     = mail($kukarow["eposti"], mb_encode_mimeheader(t("Tavarakatelista"), "ISO-8859-1", "Q"), $content, $headeri, "-f $yhtiorow[postittaja_email]");
+      $boob     = mail($kukarow["eposti"], mb_encode_mimeheader(t("Tavarakatelista"), "UTF-8", "Q"), $content, $headeri, "-f $yhtiorow[postittaja_email]");
 
       echo t("Tavarakatelista lähetettiin osoitteeseen"). " $kukarow[eposti].<br><br>";
     }

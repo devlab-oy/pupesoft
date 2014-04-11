@@ -50,7 +50,7 @@
 			$dpavainsanat_res = pupe_query($query);
 
 			while ($dp_row = mysql_fetch_assoc($dpavainsanat_res)) {
-				$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selite = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
+				$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
 
 				if ($saamuokata) {
 					echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;&nbsp;";
@@ -127,7 +127,7 @@
 						echo "<input type='hidden' id='newid' value='{$uusirivi['tunnus']}' />
 							  <input type='hidden' id='newcode' value='{$uusirivi['koodi']}' />";
 					}
-					elseif ($tee == 'lisaa_avainsana' and !empty($laji) and !empty($avainsana)) {
+					elseif ($tee == 'lisaa_avainsana' and !empty($laji) and !empty($avainsana) and !empty($toim)) {
 
 						if (!empty($avainsanan_tunnus)) {
 							$avainsanan_tunnus = (int) $avainsanan_tunnus;
@@ -379,15 +379,16 @@
 					nodebox_keywords_title.html("Lisää avainsana");
 					addboxbutton_keywords.hide();
 					addboxbutton_keywords.after(nodebox_keywords);
+					jQuery('#keywords_value').hide();
 					nodebox_keywords.show();
 					return false;
 				});
 
 				keywords_category.on('change', function() {
 
-					if (!jQuery('#avainsanan_tunnus')) {
+					if (jQuery('#avainsanan_tunnus').val() !== 'undefined') {
 						params["tee"] = 'hae_laji';
-						params["laji"] = jQuery("#keywords_category").val();
+						params["laji"] = jQuery("#keywords_category option:selected").html();
 
 						editNode_keywords(params);
 					}
@@ -425,12 +426,12 @@
 				});
 
 				jQuery("#keywordsform").live('submit', function() {
-					params["laji"] 			= jQuery("#keywords_category").val();
+					params["laji"] 			= jQuery("#keywords_category option:selected").html();
 					params["avainsana"] 	= jQuery("#keywords_value").val();
 					params["tee"]			= 'lisaa_avainsana';
 					params["toim"]			= jQuery("#toim").val();
 
-					if (params["laji"] == "" || params['avainsana'] == "") {
+					if (jQuery("#keywords_category option:selected").val() == "" || params['avainsana'] == "") {
 						jQuery("#nodebox_keywords_err").show();
 						return false;
 					}
@@ -510,7 +511,7 @@
 			if (mysql_num_rows($dpavainsanat_res) > 0) {
 
 				while ($dp_row = mysql_fetch_assoc($dpavainsanat_res)) {
-					$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selite = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
+					$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
 
 					if ($saamuokata) {
 						echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;&nbsp;";
@@ -818,10 +819,12 @@
 
 						if (params.avainsanan_tunnus) {
 
-							var laji = jQuery('#'+params["avainsanan_tunnus"]+'_class').val().toLowerCase();
+							var laji_chk = jQuery('#'+params["avainsanan_tunnus"]+'_class').val();
+
+							if (params.laji) laji_chk = params.laji;
 
 							jQuery('#keywords_category > option').each(function() {
-								$(this).prop('selected', ($(this).val().toLowerCase() == laji));
+								$(this).prop('selected', ($(this).html() == laji_chk));
 							});
 						}
 

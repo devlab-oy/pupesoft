@@ -10888,7 +10888,7 @@ if (!function_exists("hae_kukarow")) {
 }
 
 if (!function_exists("hae_yhtion_parametrit")) {
-	function hae_yhtion_parametrit($yhtio) {
+	function hae_yhtion_parametrit($yhtio, $toimipaikka = '') {
 		global $kukarow, $konserni_yhtiot, $konsernivarasto_yhtiot;
 
 		$query = "	SELECT *
@@ -10943,11 +10943,14 @@ if (!function_exists("hae_yhtion_parametrit")) {
 			}
 		}
 
-		if (isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0) {
+		if ((isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0) or $toimipaikka != '') {
+			if ($toimipaikka == '') {
+				$toimipaikka = $kukarow['toimipaikka'];
+			}
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
 						WHERE yhtio = '$yhtio'
-						and tunnus  = '$kukarow[toimipaikka]'";
+						and tunnus  = '$toimipaikka'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -26872,6 +26875,26 @@ if (!function_exists("korvaavat_kiellot")) {
 
 		return "";
 	}
+}
+
+if (!function_exists('hae_varasto')) {
+
+	function hae_varasto($tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($tunnus)) {
+			return false;
+		}
+
+		$query = "	SELECT *
+ 					FROM varastopaikat
+ 					WHERE yhtio = '{$kukarow['yhtio']}'
+ 					AND tunnus = {$tunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+
 }
 
 if (!function_exists("onkotapahtumajariveja")) {

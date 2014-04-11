@@ -19,7 +19,11 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 
 		$tilausrivi_tunnukset = array();
 		$kommentit = array();
+		$yhtiorow_temp = $yhtiorow;
 		foreach ($lahde_ja_kohde_varasto_yhdistelmat as $lahde_ja_kohde_varasto_yhdistelma) {
+			$lahdevarasto = hae_varasto($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus']);
+			$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $lahdevarasto['toimipaikka']);
+
 			$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
 
 			aseta_kukarow_kesken(0);
@@ -52,12 +56,15 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 		}
 		echo "<br/>";
 
+		$yhtiorow = $yhtiorow_temp;
+
 		return true;
 	}
 
 }
 
 if (!function_exists('tilaus_valmis_siirtolista')) {
+
 	function tilaus_valmis_siirtolista($laskurow) {
 		global $kukarow, $yhtiorow;
 
@@ -66,6 +73,7 @@ if (!function_exists('tilaus_valmis_siirtolista')) {
 
 		require('tilauskasittely/tilaus-valmis-siirtolista.inc');
 	}
+
 }
 
 if (!function_exists('hae_toimitustapa')) {

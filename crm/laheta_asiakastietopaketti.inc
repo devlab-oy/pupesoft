@@ -239,7 +239,7 @@
 
     $content = "--$bound\r\n" ;
 
-    $content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\r\n";
+    $content .= "Content-Type: text/plain; charset=\"UTF-8\"\r\n";
     $content .= "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
     $content .= "$viesti\r\n\r\n";
 

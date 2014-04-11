@@ -201,7 +201,7 @@ if (!function_exists('finvoice_otsik')) {
       $asiakasrow = mysql_fetch_assoc($asiakasre);
 
       //laitetaan setit kuntoon..
-      fputs($tootfinvoice, "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\r\n");
+      fputs($tootfinvoice, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
 
       if ($nosoap == "NOSOAP") {
         fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"{$palvelin2}datain/Finvoice.dtd\">\r\n");

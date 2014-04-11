@@ -243,7 +243,7 @@
 
         if ($inputFileType == "CSV") {
           $objReader->setDelimiter("\t");
-          $objReader->setInputEncoding("ISO-8859-1");
+          $objReader->setInputEncoding("UTF-8");
         }
 
         /** Ladataan file halutuilla parametreilla **/

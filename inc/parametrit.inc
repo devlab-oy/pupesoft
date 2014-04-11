@@ -338,7 +338,7 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
   if ($phpnimi != 'index.php') {
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
   }
-  else { 
+  else {
     if (isset($loginkieli)) {
        $browkieli = $loginkieli;
     }
@@ -355,7 +355,7 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       else {
         $browkieli = 'fi';
       }
-    }    
+    }
 
     if (isset($mobile) and $mobile and include_once("mobiili/login.php"));
     elseif (@include_once("login.php"));
@@ -600,15 +600,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       $css = $yhtiorow['css'];
     }
 
-    if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
-      $charset = "utf-8";
-    }
-    else {
-      $charset = "iso-8859-1";
-    }
-
     if (!headers_sent()) {
-      header("Content-Type: text/html; charset=$charset");
+      header("Content-Type: text/html; charset=UTF-8");
       header("Pragma: public");
       header("Expires: 0");
       header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -631,7 +624,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       echo "<meta http-equiv='cache-control' content='no-cache'>\n";
       echo "<meta http-equiv='pragma' content='no-cache'>\n";
       echo "<meta http-equiv='expires' content='-1'>\n";
-      echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
+      echo "<meta http-equiv='content-type' content='text/html; charset=UTF-8'>\n";
 
       # Jos mobile on setattu, otetaan auto-zoom pois käytöstä
       if (isset($mobile) and $mobile) {

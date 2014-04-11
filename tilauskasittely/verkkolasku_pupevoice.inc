@@ -8,7 +8,7 @@ if (!function_exists('pupevoice_otsik')) {
 
     if ($fstat["size"] == 0) {
       //tehdään verkkolasku oliot
-      fputs($tootxml, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
+      fputs($tootxml, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
       fputs($tootxml, "<Pupevoice Version=\"0.99\">\n");
     }
 

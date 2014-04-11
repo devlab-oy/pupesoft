@@ -65,7 +65,7 @@
 
   // Tehdään email
   $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
-  $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
+  $header .= "Content-type: text/html; charset=\"UTF-8\"\n";
 
   $out  = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
   $out .= "<html>";

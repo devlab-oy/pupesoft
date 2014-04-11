@@ -19827,10 +19827,10 @@ if (!function_exists("pupesoft_sahkoposti")) {
     if ($email_body != "") {
       $content .= "--$bound\n";
       if ($email_ctype == "HTML") {
-        $content .= "Content-Type: text/html; charset=\"iso-8859-1\"\n";
+        $content .= "Content-Type: text/html; charset=\"UTF-8\"\n";
       }
       else {
-        $content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
+        $content .= "Content-Type: text/plain; charset=\"UTF-8\"\n";
       }
       $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 

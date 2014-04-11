@@ -44,7 +44,7 @@
   if (isset($content_body) and $content_body != "") {
     $content .= "--$bound\n";
     if ($ctype == "html") {
-      $content .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
+      $content .= "Content-type: text/html; charset=\"UTF-8\"\n";
     }
     else {
       $content .= "Content-type: text/plain; charset=utf-8\n";

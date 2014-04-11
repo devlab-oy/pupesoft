@@ -1364,7 +1364,7 @@
         }
 
         $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "UTF-8", "Q")." <$yhtiorow[postittaja_email]>\n";
-        $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
+        $header .= "Content-type: text/html; charset=\"UTF-8\"\n";
 
         $ulos  = "<html>\n<head>\n";
         $ulos .= "<style type='text/css'>$css</style>\n";

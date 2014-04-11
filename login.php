@@ -35,7 +35,7 @@ $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
 
 if (!headers_sent()) {
-  header("Content-Type: text/html; charset=iso-8859-1");
+  header("Content-Type: text/html; charset=utf-8");
   header("Pragma: public");
   header("Expires: 0");
   header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -60,7 +60,7 @@ echo "
 
 echo "
   <meta http-equiv='Pragma' content='no-cache'>
-  <meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
   </head>
 
 <style type='text/css'>

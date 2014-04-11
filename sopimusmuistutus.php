@@ -70,7 +70,7 @@
   $out  = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
   $out .= "<html>";
   $out .= "<head>";
-  $out .= "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-15'>";
+  $out .= "<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>";
   $out .= "<style type='text/css'>{$yhtiorow["css"]}</style>";
   $out .= "<title></title>";
   $out .= "</head>";

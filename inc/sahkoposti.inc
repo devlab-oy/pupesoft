@@ -47,7 +47,7 @@
       $content .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
     }
     else {
-      $content .= "Content-type: text/plain; charset=iso-8859-1\n";
+      $content .= "Content-type: text/plain; charset=utf-8\n";
     }
     $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
     $content .= "$content_body\n\n";

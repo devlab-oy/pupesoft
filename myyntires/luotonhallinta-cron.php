@@ -71,7 +71,7 @@
   $content_body .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
   $content_body .= "<html>";
   $content_body .= "<head>";
-  $content_body .= "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-15'>";
+  $content_body .= "<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>";
   $content_body .= "<style type='text/css'>{$yhtiorow["css"]}</style>";
   $content_body .= "<title>".htmlentities($content_subject)."</title>";
   $content_body .= "</head>";

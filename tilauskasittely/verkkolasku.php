@@ -2685,7 +2685,7 @@
           $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
           $verkkolasmail = "--$bound\n";
-          $verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
+          $verkkolasmail .= "Content-type: text/plain; charset=utf-8\n";
           $verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
           $verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
           $verkkolasmail .= t("Aineiston laskut").":\n";
@@ -2798,7 +2798,7 @@
           $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
           $verkkolasmail = "--$bound\n";
-          $verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
+          $verkkolasmail .= "Content-type: text/plain; charset=utf-8\n";
           $verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
           $verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
           $verkkolasmail .= t("Aineiston laskut").":\n";
@@ -2857,7 +2857,7 @@
           $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
           $verkkolasmail = "--$bound\n";
-          $verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
+          $verkkolasmail .= "Content-type: text/plain; charset=utf-8\n";
           $verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
           $verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
           $verkkolasmail .= t("Aineiston laskut").":\n";
@@ -2906,7 +2906,7 @@
           $verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
           $verkkolasmail = "--$bound\n";
-          $verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
+          $verkkolasmail .= "Content-type: text/plain; charset=utf-8\n";
           $verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
           $verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
           $verkkolasmail .= t("Aineiston laskut").":\n";
@@ -3098,7 +3098,7 @@
 
         $content = "--$bound\n";
 
-        $content .= "Content-Type: text/html;charset=iso-8859-1\n" ;
+        $content .= "Content-Type: text/html;charset=utf-8\n" ;
         $content .= "Content-Transfer-Encoding: quoted-printable\n";
 
         $content .= "<html><body>\n";

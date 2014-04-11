@@ -1352,7 +1352,7 @@ while ($tietue = fgets($fd)) {
             $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
             $mail  = "--$bound\n";
-            $mail .= "Content-Type: text/plain;charset=iso-8859-1\n" ;
+            $mail .= "Content-Type: text/plain;charset=utf-8\n" ;
             $mail .= "Content-Transfer-Encoding: quoted-printable\n";
             $mail .= "\n";
             $mail .= "Tilausnumero: $id\n";
@@ -2134,7 +2134,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
   $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
   $content  = "--$bound\n";
-  $content .= "Content-Type: text/plain;charset=iso-8859-1\n" ;
+  $content .= "Content-Type: text/plain;charset=utf-8\n" ;
   $content .= "Content-Transfer-Encoding: quoted-printable\n";
   $content .= $edi_ulos.t("Käsitelty tiedosto liitteenä").".\n\n";
 

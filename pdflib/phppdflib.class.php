@@ -226,6 +226,10 @@ class pdffile
             $this->_push_error(6003, "Font was not found");
             return false;
         }
+
+        // UTF8 --> ISO
+        $text = iconv("UTF-8", "ISO-8859-15//TRANSLIT", $text);
+
         if (isset($attrib["rotation"])) {
             $n["rotation"] = $attrib["rotation"];
         }

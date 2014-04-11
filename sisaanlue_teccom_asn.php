@@ -234,8 +234,6 @@
         $xml_content = preg_replace("/[^[:print:]]/", "", $xml_content);
         // Korvataan "UTF-16" string "UTF-8":lla, koska XML pitää olla UTF-8
         $xml_content = str_replace("\"UTF-16\"", "\"UTF-8\"", $xml_content);
-        // Muutetaan muuttujan enkoodaus vielä UTF-8:ksi
-        $xml_content = iconv("UTF-8", "UTF-8//IGNORE", $xml_content);
         // Tehdään muuttujasta XML olio
         $xml = @simplexml_load_string($xml_content);
 

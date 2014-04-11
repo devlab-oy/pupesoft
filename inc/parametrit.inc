@@ -18,25 +18,9 @@ $timeparts    = explode(" ",microtime());
 $starttime    = $timeparts[1].substr($timeparts[0],1);
 unset($_GET["param_clean"], $_POST["param_clean"], $_REQUEST["param_clean"]);
 
-if (!function_exists("pupe_iconv")) {
-  function pupe_iconv(&$item, $key) {
-    $item = iconv("UTF-8", "latin1//TRANSLIT", $item);
-  }
-}
-
 if (!function_exists("pupe_register_globals")) {
   function pupe_register_globals($param_clean) {
     foreach ($param_clean as $key => $value) {
-
-      if (isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] == "UTF-8") {
-        if (is_array($param_clean[$key])) {
-          array_walk_recursive($param_clean[$key], "pupe_iconv");
-        }
-        else {
-          $param_clean[$key] = iconv("UTF-8", "latin1//TRANSLIT", $param_clean[$key]);
-        }
-      }
-
       $param_clean[$key] = $GLOBALS[$key] = str_replace(array("\"","'","<",">","\\", ";"), "", $param_clean[$key]);
     }
 

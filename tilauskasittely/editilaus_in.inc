@@ -163,9 +163,9 @@ if ($filename == "") die('Tiedostonimi puuttui!\n');
 // Mutetaan ISO-merkistöön jos UTF8:ia
 $encoding = exec("file -b --mime-encoding $filename");
 
-if (preg_match("/(utf\-8|binary)/i", $encoding)) {
-  $convert = exec("iconv -c -f utf-8 -t ISO8859-1  $filename > $filename.ISO");
-  rename($filename.".ISO", $filename);
+if (!preg_match("/(utf\-8|binary)/i", $encoding)) {
+  $convert = exec("iconv -c -f ISO8859-1 -t utf-8 $filename > $filename.UTF");
+  rename($filename.".UTF", $filename);
 }
 
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui")."!\n");
@@ -746,7 +746,7 @@ while ($tietue = fgets($fd)) {
       // toimitusosoitteen maakoodi
       $ltoim_maa = substr(trim($tieto), 0, 2);
       break;
-      
+
     case 'OSTOTIL.OT_TOIMITUS_PUH' :
       // toimitusosoitteen puh
       $ltoim_puh = trim($tieto);
@@ -993,7 +993,7 @@ while ($tietue = fgets($fd)) {
                   ORDER BY muutospvm DESC
                   LIMIT 1";
             $ressu = pupe_query($query);
-          
+
             // - jos löytyy niin käytetään sitä
             if (mysql_num_rows($ressu) == 1) {
               $ftc = mysql_fetch_assoc($ressu);
@@ -1456,7 +1456,7 @@ while ($tietue = fgets($fd)) {
               }
             }
           }
-          
+
           // spessukeissi, hinnastoon E tuotteita ei löydetä
           $kieltolisa .= " and hinnastoon != 'E'";
         }

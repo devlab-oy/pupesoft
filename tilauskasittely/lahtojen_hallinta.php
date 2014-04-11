@@ -2969,11 +2969,11 @@ function hae_yhdistettavat_tilaukset() {
 
     $suljetut_lahdot = array();
     $suljetut_lahdot[] = array(
-      'dropdown_text' => ($ajax_request == 1 ? utf8_encode(t("Valitse liitettävä lähtö")) : t("Valitse liitettävä lähtö")),
+      'dropdown_text' => ($ajax_request == 1 ? t("Valitse liitettävä lähtö") : t("Valitse liitettävä lähtö")),
       'tilaukset' => 0,
     );
     while ($suljetut_lahdot_row = mysql_fetch_assoc($suljetut_lahdot_result)) {
-      $suljetut_lahdot_row['dropdown_text'] = ($ajax_request == 1 ? utf8_encode($suljetut_lahdot_row['dropdown_text']) : $suljetut_lahdot_row['dropdown_text']);
+      $suljetut_lahdot_row['dropdown_text'] = ($ajax_request == 1 ? $suljetut_lahdot_row['dropdown_text'] : $suljetut_lahdot_row['dropdown_text']);
       $suljetut_lahdot[] = $suljetut_lahdot_row;
     }
 

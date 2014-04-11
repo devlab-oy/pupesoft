@@ -134,10 +134,10 @@ if ($kollityht > 0) {
     // SHIP TO
     $shipto            = $xml->OpenShipment->addChild('ShipTo');
 //    $customerid         = $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiä, R
-    $companyorname         = $shipto->addChild('CompanyOrName', utf8_encode($ups_laskurow['toim_nimi'])); // max 35 merkkiä, R
+    $companyorname         = $shipto->addChild('CompanyOrName', $ups_laskurow['toim_nimi']); // max 35 merkkiä, R
 
     if ($yhteyshenkiloasiakas['nimi'] != '') {
-      $attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkiloasiakas['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+      $attention = $shipto->addChild('Attention', substr($yhteyshenkiloasiakas['nimi'], 0, 35)); // max 35 merkkiä, R (riippuu maasta)
     }
     elseif ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
       $query = "  SELECT *
@@ -150,7 +150,7 @@ if ($kollityht > 0) {
       if ($yhteyshenkilo_kaupallinen_row['nimi'] == '') {
         $yhteyshenkilo_kaupallinen_row['nimi'] = '.';
       }
-      $attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_kaupallinen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+      $attention = $shipto->addChild('Attention', substr($yhteyshenkilo_kaupallinen_row['nimi'], 0, 35)); // max 35 merkkiä, R (riippuu maasta)
     }
     elseif ($ups_laskurow['yhteyshenkilo_tekninen'] != '') {
       $query = "  SELECT *
@@ -163,16 +163,16 @@ if ($kollityht > 0) {
       if ($yhteyshenkilo_tekninen_row['nimi'] == '') {
         $yhteyshenkilo_tekninen_row['nimi'] = '.';
       }
-      $attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_tekninen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+      $attention = $shipto->addChild('Attention', substr($yhteyshenkilo_tekninen_row['nimi'], 0, 35)); // max 35 merkkiä, R (riippuu maasta)
     }
     else {
       $attention = $shipto->addChild('Attention', '.'); // max 35 merkkiä, R (riippuu maasta)
     }
 
-    $address1          = $shipto->addChild('Address1', utf8_encode($ups_laskurow['toim_osoite'])); // max 35 merkkiä, R
+    $address1          = $shipto->addChild('Address1', $ups_laskurow['toim_osoite']); // max 35 merkkiä, R
     $countryterritory       = $shipto->addChild('CountryTerritory', $ups_laskurow['toim_maa']); // max 30 merkkiä, R
     $postalcode          = $shipto->addChild('PostalCode', $ups_laskurow['toim_postino']); // max 9 merkkiä, C (riippuu maasta)
-    $cityortown          = $shipto->addChild('CityOrTown', utf8_encode($ups_laskurow['toim_postitp'])); // max 30 merkkiä, R
+    $cityortown          = $shipto->addChild('CityOrTown', $ups_laskurow['toim_postitp']); // max 30 merkkiä, R
     $telephone          = $ups_laskurow['puhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['puhelin']) :
                     ($ups_laskurow['gsm'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['gsm']) :
                     ($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiä, C
@@ -190,7 +190,7 @@ if ($kollityht > 0) {
     // laitetaan veikkolan varaston tiedot
     $shipfrom          = $xml->OpenShipment->addChild('ShipFrom');
     $customerid         = $shipfrom->addChild('CustomerID', $yhtiorow['ytunnus']); // max 35 merkkiä, R
-    $companyorname         = $shipfrom->addChild('CompanyOrName', utf8_encode($yhtiorow['nimi'])); // max 35 merkkiä, R
+    $companyorname         = $shipfrom->addChild('CompanyOrName', $yhtiorow['nimi']); // max 35 merkkiä, R
     $attention           = $shipfrom->addChild('Attention', substr('.', 0, 35)); // max 35 merkkiä, R (riippuu maasta)
     $address1          = $shipfrom->addChild('Address1', "Teollisuustie 8-10"); // max 35 merkkiä, R
     $countryterritory       = $shipfrom->addChild('CountryTerritory', $yhtiorow['maa']); // max 30 merkkiä, R
@@ -463,8 +463,8 @@ if ($kollityht > 0) {
     // vastaanottaja
     $qvnrecipientandnotificationtypes  = $qvnoption->addChild('QVNRecipientAndNotificationTypes');
     $companyorname            = $qvnrecipientandnotificationtypes->addChild('CompanyOrName', ''); // WS 10.0 will populate ShipTo information
-    $contactname            = $qvnrecipientandnotificationtypes->addChild('ContactName', utf8_encode($asiakkaan_sahkopostiosoite_nimi));
-    $emailaddress            = $qvnrecipientandnotificationtypes->addChild('EMailAddress', utf8_encode($asiakkaan_sahkopostiosoite));
+    $contactname            = $qvnrecipientandnotificationtypes->addChild('ContactName', $asiakkaan_sahkopostiosoite_nimi);
+    $emailaddress            = $qvnrecipientandnotificationtypes->addChild('EMailAddress', $asiakkaan_sahkopostiosoite);
     $ship                = $qvnrecipientandnotificationtypes->addChild('Ship', 'Y'); // lähetetään meili kun paketti lähtee
     $exception              = $qvnrecipientandnotificationtypes->addChild('Exception', 'N'); // ??
     $delivery              = $qvnrecipientandnotificationtypes->addChild('Delivery', 'N'); // ??

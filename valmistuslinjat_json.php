@@ -68,7 +68,7 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
     // Lisätään yhtiokohtaiset tapahtumat
     foreach($yhtiokohtaiset_tapahtumat as $tapahtuma) {
       $json = array();
-      $json['title']   = utf8_encode($tapahtuma['tyyppi']);
+      $json['title']   = $tapahtuma['tyyppi'];
       $json['start']   = $tapahtuma['pvmalku'];
       $json['end']   = $tapahtuma['pvmloppu'];
       $json['allDay'] = false;
@@ -136,7 +136,7 @@ if (isset($_GET['valmistukset']) and $_GET['valmistukset'] == 'true') {
       }
       */
 
-      $json['title'] = utf8_encode($title);
+      $json['title'] = $title;
       $json['allDay'] = false;
       $json['tunnus'] = $valmistus['otunnus'];
       $json['resource'] = $linja['id'];

@@ -175,7 +175,7 @@ class pupeExcel {
 
     while ($shared_row = mysql_fetch_assoc($result)) {
       $si = $sharedStrings->addChild("si", "");
-      $si->addChild("t", utf8_encode($shared_row["string"]));
+      $si->addChild("t", $shared_row["string"]);
 
       $stringCount += $shared_row["times_used"];
     }

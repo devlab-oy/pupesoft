@@ -13,7 +13,7 @@
   $pupe_root_polku = dirname(dirname(__FILE__));
 
   if (!isset($argv[1]) or !isset($argv[2]) or !isset($argv[3])) {
-    echo utf8_encode("VIRHE: pakollisia parametreja puuttu!")."\n";
+    echo "VIRHE: pakollisia parametreja puuttu!"."\n";
     exit;
   }
 
@@ -37,7 +37,7 @@
   $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 
   if (!isset($kukarow)) {
-    echo utf8_encode("VIRHE: admin-käyttäjää ei löydy!")."\n";
+    echo "VIRHE: admin-käyttäjää ei löydy!"."\n";
     exit;
   }
 
@@ -271,7 +271,7 @@
       }
 
       if ($laskurow["KUUKAUSI"] != $edkuukausi and $edkuukausi != 0) {
-        if ($eroyht != 0) echo utf8_encode("$yhtiorow[nimi] / $edkuukausi ero yhteensä: $eroyht")."\n";
+        if ($eroyht != 0) echo "$yhtiorow[nimi] / $edkuukausi ero yhteensä: $eroyht"."\n";
         flush();
         $eroyht = 0;
       }
@@ -279,7 +279,7 @@
       $edkuukausi = $laskurow["KUUKAUSI"];
     }
 
-    if ($eroyht != 0) echo utf8_encode("$yhtiorow[nimi] / $edkuukausi ero yhteensä: $eroyht")."\n";
+    if ($eroyht != 0) echo "$yhtiorow[nimi] / $edkuukausi ero yhteensä: $eroyht"."\n";
     echo "\n";
     flush();
   }

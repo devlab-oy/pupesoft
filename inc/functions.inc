@@ -1911,7 +1911,7 @@ if (!function_exists("lpr")) {
       $str = str_replace($from, $to, $str);
     }
     elseif ($kirjoitin["merkisto"] == 4) {
-      $str = utf8_encode($str);                                // UTF8 charset käännös suoraan yhellä rivillä
+      $str = $str;                                // UTF8 charset käännös suoraan yhellä rivillä
     }
     elseif ($kirjoitin["merkisto"] == 5) {
       $to  = array('a','a','o','A','A','O',' ');                        // Ääkköset kokonaan pois
@@ -17277,12 +17277,12 @@ if (!function_exists("tee_keraysera")) {
 
       $ohjausmerkki = $jiivee = array();
 
-      $query = "  SELECT lasku.tunnus, 
+      $query = "  SELECT lasku.tunnus,
             LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
              IFNULL(maksuehto.jv, '') jv
             FROM lasku
-            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto) 
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tunnus IN ({$tilaukset})";
       $ohjausmerkki_res = pupe_query($query);
 
@@ -17559,7 +17559,7 @@ if (!function_exists("tee_keraysera")) {
 
       $ed_ohjausmerkki = 'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ';
       $ed_jiivee = "ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ";
-      
+
       $ed_tuote = '';
 
       foreach ($inner_main_array as $inner_key => &$tuoterow) {
@@ -18993,15 +18993,7 @@ if (!function_exists("pupeFileReader")) {
 
           while ($rivi = fgets($file)) {
             /** Luetaan CSV rivi tiedostosta **/
-
-            // Katsotaan onko UTF-8 muodossa
-            if (mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
-              $rivi = str_getcsv(utf8_decode($rivi));
-            }
-            else {
-              $rivi = str_getcsv($rivi);
-            }
-
+            $rivi = str_getcsv($rivi);
             $excelrivit[] = $rivi;
           }
 
@@ -25641,7 +25633,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $filename = $pupe_root_polku."/dataout/outbounddelivery_".md5(uniqid()).".xml";
 
-    if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
+    if (file_put_contents($filename, $xml->asXML())) {
       echo "<br /><font class='message'>",t("Tiedoston luonti onnistui"),"</font><br />";
 
       $ftphost = $ftp_posten_logistik_host;

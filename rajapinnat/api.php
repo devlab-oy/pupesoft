@@ -18,7 +18,7 @@
 
   function rest_virhe_header($viesti) {
     // Mikäli kutsutaan esimerkiksi "asiakastarkista-funktiota" ja se palauttaa tekstimuodossa virheen, niin $virhe pitää myös utf8-encodata, tai tulee "500"-virhettä.
-    $viesti = utf8_encode($viesti);
+    $viesti = $viesti;
     header("HTTP/1.0 400 Bad Request");
     echo json_encode(array("status" => $viesti));
     die();
@@ -27,7 +27,7 @@
   function rest_ok_header($viesti) {
     // Malli ratkaisu:
     // rest_ok_header("Päivitit asiakkaan: $muuttuja");
-    $viesti = utf8_encode($viesti);
+    $viesti = $viesti;
     header("HTTP/1.0 200 OK");
     echo json_encode(array("statuscode" => "OK", "status" => $viesti));
     die();
@@ -221,7 +221,7 @@
 
     require("lue_data.php");
 
-    $api_output = utf8_encode(strip_tags($api_output));
+    $api_output = strip_tags($api_output);
 
     if ($api_status === FALSE) {
       rest_virhe_header($api_output);

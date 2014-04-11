@@ -4,7 +4,6 @@ require ("../inc/parametrit.inc");
 
 if ($ajax_request == 1 and $kateisoton_luonne == 1) {
     $luonteet = hae_kateisoton_luonteet();
-    array_walk_recursive($luonteet, 'array_utf8_encode');
 
     echo json_encode($luonteet,false);
     exit;
@@ -632,10 +631,4 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
     echo "</table>";
 }
 
-function array_utf8_encode(&$item, $key) {
-    $item = utf8_encode($item);
-}
-
-require("../inc/footer.inc");
-
-?>
+require("inc/footer.inc");

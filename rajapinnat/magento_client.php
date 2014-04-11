@@ -128,7 +128,7 @@ class MagentoClient {
         // Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
         $category_tree = $this->getCategories();
 
-        $kategoria['try_fi'] = utf8_encode($kategoria['try_fi']);
+        $kategoria['try_fi'] = $kategoria['try_fi'];
 
         // Kasotaan löytyykö tuoteryhmä
         if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
@@ -216,7 +216,7 @@ class MagentoClient {
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
 
       // Etsitään kategoria_id tuoteryhmällä
-      $category_id = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      $category_id = $this->findCategory($tuote['try_nimi'], $category_tree['children']);
 
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
@@ -229,9 +229,9 @@ class MagentoClient {
       $tuote_data = array(
           'categories'            => array($category_id),
           'websites'              => explode(" ", $tuote['nakyvyys']),
-          'name'                  => utf8_encode($tuote['nimi']),
-          'description'           => utf8_encode($tuote['kuvaus']),
-          'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+          'name'                  => $tuote['nimi'],
+          'description'           => $tuote['kuvaus'],
+          'short_description'     => $tuote['lyhytkuvaus'],
           'weight'                => $tuote['tuotemassa'],
           'status'                => self::ENABLED,
           'visibility'            => $visibility,
@@ -241,9 +241,9 @@ class MagentoClient {
           'meta_title'            => '',
           'meta_keyword'          => '',
           'meta_description'      => '',
-          'campaign_code'         => utf8_encode($tuote['campaign_code']),
-          'onsale'                => utf8_encode($tuote['onsale']),
-          'target'                => utf8_encode($tuote['target']),
+          'campaign_code'         => $tuote['campaign_code'],
+          'onsale'                => $tuote['onsale'],
+          'target'                => $tuote['target'],
         );
 
       // Lisätään tai päivitetään tuote
@@ -372,13 +372,13 @@ class MagentoClient {
       $configurable = array(
         'categories'      => array($category_id),
         'websites'        => explode(" ", $tuotteet[0]['nakyvyys']),
-        'name'          => utf8_encode($tuotteet[0]['nimitys']),
-        'description'           => utf8_encode($tuotteet[0]['kuvaus']),
-        'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
-        'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
-        'onsale'                => utf8_encode($tuotteet[0]['onsale']),
-        'target'                => utf8_encode($tuotteet[0]['target']),
-        'featured_priority'    => utf8_encode($tuotteet[0]['jarjestys']),
+        'name'          => $tuotteet[0]['nimitys'],
+        'description'           => $tuotteet[0]['kuvaus'],
+        'short_description'     => $tuotteet[0]['lyhytkuvaus'],
+        'campaign_code'         => $tuotteet[0]['campaign_code'],
+        'onsale'                => $tuotteet[0]['onsale'],
+        'target'                => $tuotteet[0]['target'],
+        'featured_priority'    => $tuotteet[0]['jarjestys'],
         'weight'                => $tuotteet[0]['tuotemassa'],
         'status'                => self::ENABLED,
         'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
@@ -409,8 +409,8 @@ class MagentoClient {
           }
 
           $simple_tuote_data = array(  'price'          => $tuote[$hintakentta],
-                        'short_description'    => utf8_encode($tuote['lyhytkuvaus']),
-                        'featured_priority'    => utf8_encode($tuote['jarjestys']),
+                        'short_description'    => $tuote['lyhytkuvaus'],
+                        'featured_priority'    => $tuote['jarjestys'],
                         'visibility'      => self::NOT_VISIBLE_INDIVIDUALLY,
                         'additional_attributes' => array('multi_data' => $multi_data),
                         );
@@ -1117,7 +1117,7 @@ class MagentoClient {
 
     if (self::LOGGING == true) {
       $timestamp = date('d.m.y H:i:s');
-      $message = utf8_encode($message);
+      $message = $message;
 
       if ($exception != '') {
         $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;

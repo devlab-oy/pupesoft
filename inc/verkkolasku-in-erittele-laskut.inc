@@ -161,8 +161,8 @@
 
         // Jos data ei oo UTF-8 muodossa niin laitetaan se siihen
         if (mb_detect_encoding($xmldata, 'UTF-8', true) === FALSE) {
-              $xmldata = utf8_encode($xmldata);
-            }
+          $xmldata = $xmldata;
+        }
 
         $save = file_put_contents($file, $xmldata);
         $path_parts = pathinfo($file);

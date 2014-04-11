@@ -36,8 +36,6 @@ if ($ajax_request) {
       $yhtio = "EPAVALIDI";
     }
     $varastot = hae_varastot(array(), $yhtio);
-    array_walk_recursive($varastot, 'array_utf8_encode');
-
     echo json_encode($varastot);
     exit;
   }
@@ -47,8 +45,6 @@ if ($ajax_request) {
       $yhtio = "EPAVALIDI";
     }
     $inventointi_lajit = hae_inventointilajit(array(), $yhtio);
-    array_walk_recursive($inventointi_lajit, 'array_utf8_encode');
-
     echo json_encode($inventointi_lajit);
     exit;
   }
@@ -58,8 +54,6 @@ if ($ajax_request) {
       $yhtio = "EPAVALIDI";
     }
     $tilikaudet = hae_tilikaudet(array(), $yhtio);
-    array_walk_recursive($tilikaudet, 'array_utf8_encode');
-
     echo json_encode($tilikaudet);
     exit;
   }
@@ -1684,8 +1678,4 @@ function echo_tallennus_formi($xls_filename) {
   echo "</table>";
   echo "</form>";
   echo "<br/>";
-}
-
-function array_utf8_encode(&$item, $key) {
-  $item = utf8_encode($item);
 }

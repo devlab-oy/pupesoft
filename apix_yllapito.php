@@ -50,7 +50,7 @@
           </Content>
           </Request>";
 
-    $xmlfile = utf8_encode($xmlfile);
+    $xmlfile = $xmlfile;
 
     #$url = "https://test-api.apix.fi/registration";
     $url = "https://api.apix.fi/registration";

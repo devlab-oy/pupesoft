@@ -763,12 +763,12 @@
     $dom = new DOMDocument('1.0');
     $dom->preserveWhiteSpace = true;
     $dom->formatOutput = true;
-    $dom->loadXML(str_replace(array("\n", "\r"), "", utf8_encode($xml->asXML())));
+    $dom->loadXML(str_replace(array("\n", "\r"), "", $xml->asXML()));
     fwrite($toot, ($dom->saveXML()));
     */
 
     // Kirjoitetaaan XML ja tehdään UTF8 encode
-    fwrite($toot, str_replace(chr(10), "", utf8_encode($xml->asXML())));
+    fwrite($toot, str_replace(chr(10), "", $xml->asXML()));
     fclose($toot);
 
     // Tehdään vielä tässä vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(

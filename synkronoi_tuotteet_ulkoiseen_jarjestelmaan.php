@@ -163,7 +163,7 @@
 
       $filename = $pupe_root_polku."/dataout/materialmaster_".md5(uniqid()).".xml";
 
-      if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
+      if (file_put_contents($filename, $xml->asXML())) {
         echo "<br /><font class='message'>",t("Tiedoston luonti onnistui"),"</font><br />";
 
         $ftphost = $ftp_posten_logistik_host;

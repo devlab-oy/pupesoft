@@ -25,7 +25,7 @@
     }
 
     if (trim($argv[1]) == '-help') {
-      echo utf8_encode("\n
+      echo "\n
         \rCron-ajon parametrit\n
         \r1. yhtiö\n
         \r2. lähdevarastot pilkulla eroteltuna\n
@@ -42,8 +42,7 @@
         \r13. Siirrä myös tuoteperheen lapsituotteet, arvona X\n
         \r14. Huomioi siirrettävän tuotteen myyntierä, arvona X\n
         \r15. Rivejä per siirtolista (tyhjä = 20)\n
-        \r16. Ei siirretä jos tarve on suurempi tai yhtä suuri kuin saatavilla oleva määrä, arvona X\n
-      ");
+        \r16. Ei siirretä jos tarve on suurempi tai yhtä suuri kuin saatavilla oleva määrä, arvona X\n";
       exit;
     }
 

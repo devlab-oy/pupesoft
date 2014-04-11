@@ -26,17 +26,17 @@ if [ ! -z $7 ]; then
 	EXTRABACKUP=$7
 	REMOTEHOST=$8
 	REMOTEUSER=$9
-	REMOTEPASS=${10}
-	REMOTEREMDIR=${11}
-	REMOTELOCALDIR=${12}
+	REMOTEPASS=substr($, 10, 1)
+	REMOTEREMDIR=substr($, 11, 1)
+	REMOTELOCALDIR=substr($, 12, 1)
 fi
 
-if [ ! -z ${13} ]; then
-	S3BUCKET=${13}
+if [ ! -z substr($, 13, 1) ]; then
+	S3BUCKET=substr($, 13, 1)
 fi
 
 # Tehdäänkö mysql-backuppi vai ei.
-if [ ! -z ${14} ]; then
+if [ ! -z substr($, 14, 1) ]; then
 	MYSQLBACKUP=false;
 else
 	MYSQLBACKUP=true;

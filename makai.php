@@ -739,8 +739,8 @@
                 //onko tämä laskun euromäärä alle 50 000 eur?
                 if ($laskusumma < 50000 and strtoupper($laskuvaluutta) == 'EUR') {
                   // täsmääkö maatunnukset
-                  $tinoalut = $laskutilino{0}.$laskutilino{1};
-                  $swiftmaa = $laskuswift{4}.$laskuswift{5};
+                  $tinoalut = substr($laskutilino, 0, 1).substr($laskutilino, 1, 1);
+                  $swiftmaa = substr($laskuswift, 4, 1).substr($laskuswift, 5, 1);
 
                   if ($tinoalut == $swiftmaa) {
                     //onko EU maksun saaja EU alueella?

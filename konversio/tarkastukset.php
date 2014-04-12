@@ -20,7 +20,7 @@ if ($argv[1] == '') {
 $filepaths = TarkastuksetCSVDumper::split_file($argv[2]);
 var_dump($filepaths);
 foreach ($filepaths as $filepath) {
-	echo "{$filepath}<br/><br/>";
+//	echo "{$filepath}<br/><br/>";
 	$dumper = new TarkastuksetCSVDumper($kukarow, $filepath);
 	$dumper->aja();
 }

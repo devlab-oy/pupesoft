@@ -92,31 +92,31 @@ abstract class CSVDumper {
 
 		$this->konvertoi_rivit();
 
-		echo "<br/>";
+//		echo "<br/>";
 
 		$this->dump_data();
 
-		echo "<br/>";
-
-		if (empty($this->errors)) {
-			echo t('Kaikki ok ajetaan data kantaan');
-			echo "<br/>";
-		}
-		else {
-			echo t('Virheiden lukumäärä').': '.count($this->errors);
-			echo "<br/>";
-			foreach ($this->errors as $rivinumero => $row_errors) {
-				echo t('Rivillä')." {$rivinumero} ".t('oli seuraavat virheet').":";
-				echo "<br/>";
-				foreach ($row_errors as $row_error) {
-					echo $row_error;
-					echo "<br/>";
-				}
-				echo "<br/>";
-			}
-		}
-
-		echo "<br/>";
+//		echo "<br/>";
+//
+//		if (empty($this->errors)) {
+//			echo t('Kaikki ok ajetaan data kantaan');
+//			echo "<br/>";
+//		}
+//		else {
+//			echo t('Virheiden lukumäärä').': '.count($this->errors);
+//			echo "<br/>";
+//			foreach ($this->errors as $rivinumero => $row_errors) {
+//				echo t('Rivillä')." {$rivinumero} ".t('oli seuraavat virheet').":";
+//				echo "<br/>";
+//				foreach ($row_errors as $row_error) {
+//					echo $row_error;
+//					echo "<br/>";
+//				}
+//				echo "<br/>";
+//			}
+//		}
+//
+//		echo "<br/>";
 
 		$this->tarkistukset();
 	}

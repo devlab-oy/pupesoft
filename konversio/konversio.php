@@ -2,6 +2,9 @@
 
 ini_set("memory_limit", "5G");
 
+//86400 = 1day
+set_time_limit(86400);
+
 $compression = FALSE;
 
 require("../inc/parametrit.inc");

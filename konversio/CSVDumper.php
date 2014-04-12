@@ -122,11 +122,11 @@ abstract class CSVDumper {
 	}
 
 	protected function lue_csv_tiedosto() {
-		if ($this->is_proggressbar_on) {
-			$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
-			$progress_bar = new ProgressBar(t('Luetaan rivit'));
-			$progress_bar->initialize(count($number_of_lines));
-		}
+//		if ($this->is_proggressbar_on) {
+//			$number_of_lines = intval(exec("wc -l '{$this->filepath}'"));
+//			$progress_bar = new ProgressBar(t('Luetaan rivit'));
+//			$progress_bar->initialize(count($number_of_lines));
+//		}
 
 		$csv_headerit = $this->lue_csv_tiedoston_otsikot();
 		$file = fopen($this->filepath, "r") or die("Ei aukea!\n");
@@ -159,9 +159,9 @@ abstract class CSVDumper {
 
 			$i++;
 
-			if ($this->is_proggressbar_on and $progress_bar instanceof ProgressBar) {
-				$progress_bar->increase();
-			}
+//			if ($this->is_proggressbar_on and $progress_bar instanceof ProgressBar) {
+//				$progress_bar->increase();
+//			}
 		}
 
 		fclose($file);
@@ -203,10 +203,10 @@ abstract class CSVDumper {
 	}
 
 	protected function dump_data() {
-		if ($this->is_proggressbar_on) {
-			$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
-			$progress_bar->initialize(count($this->rivit));
-		}
+//		if ($this->is_proggressbar_on) {
+//			$progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan').' : '.count($this->rivit));
+//			$progress_bar->initialize(count($this->rivit));
+//		}
 		foreach ($this->rivit as $rivi) {
 			$query = "	INSERT INTO {$this->table}
 						(".implode(", ", array_keys($rivi)).")
@@ -217,9 +217,9 @@ abstract class CSVDumper {
 			$query = str_replace("'now()'", 'now()', $query);
 			pupe_query($query);
 
-			if ($this->is_proggressbar_on and $progress_bar instanceof ProgressBar) {
-				$progress_bar->increase();
-			}
+//			if ($this->is_proggressbar_on and $progress_bar instanceof ProgressBar) {
+//				$progress_bar->increase();
+//			}
 		}
 	}
 

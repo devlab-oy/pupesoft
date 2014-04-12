@@ -159,7 +159,7 @@ abstract class CSVDumper {
 
 			$i++;
 
-			if ($this->is_proggressbar_on) {
+			if ($this->is_proggressbar_on and $progress_bar instanceof ProgressBar) {
 				$progress_bar->increase();
 			}
 		}
@@ -217,7 +217,7 @@ abstract class CSVDumper {
 			$query = str_replace("'now()'", 'now()', $query);
 			pupe_query($query);
 
-			if ($this->is_proggressbar_on) {
+			if ($this->is_proggressbar_on and $progress_bar instanceof ProgressBar) {
 				$progress_bar->increase();
 			}
 		}

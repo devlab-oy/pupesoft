@@ -1,6 +1,7 @@
 <?php
 
 ini_set("memory_limit", "5G");
+set_time_limit(0);
 
 $debug = true;
 if (php_sapi_name() != 'cli' and !$debug) {

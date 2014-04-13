@@ -197,6 +197,12 @@ class KalustoraporttiPDF
         rescue
         end
 
+        begin
+          valmistus_paiva_year = Date.parse(device['valm_pvm']).year.to_s
+        rescue
+          valmistus_paiva_year = ' '
+        end
+
         table_cells << [
             device['oma_numero'],
             device['paikka_nimi'],
@@ -205,7 +211,7 @@ class KalustoraporttiPDF
             device['ponnop_nro'],
             device['sammutin_tyyppi'],
             device['palo_luokka'],
-            Date.parse(device['valm_pvm']).year.to_s,
+            valmistus_paiva_year,
             device['huoltovali'],
             tarkastus,
             huolto,

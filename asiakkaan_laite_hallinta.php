@@ -121,7 +121,6 @@ if (!empty($request['haettu_asiakas'])) {
 if (!empty($request['haettu_asiakas'])) {
 	$asiakkaan_kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
 
-
 	$pdf_tiedostot = array();
 
 	if ($request['ala_tee'] == 'tulosta_kalustoraportti') {

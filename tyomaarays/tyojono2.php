@@ -159,6 +159,7 @@ else {
 		}
 		else {
 			$lasku_tunnukset = explode(',', $lasku_tunnukset);
+			$lasku_tunnukset_temp = $lasku_tunnukset;
 		}
 
 		$pdf_tiedosto = \PDF\Tyolista\hae_tyolistat($lasku_tunnukset, $multi);

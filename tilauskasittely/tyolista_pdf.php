@@ -25,9 +25,15 @@ function hae_tyolistat($lasku_tunnukset, $multi = false) {
 		}
 
 		$filepath = kirjoita_json_tiedosto($tyomaarays_rivit, "tyolista_".uniqid()."");
-		$pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
-
-		return $pdf_tiedosto;
+		
+		if (!empty($filepath)) {
+			$pdf_tiedosto = aja_ruby($filepath, 'tyolista_pdf');
+			
+			return $pdf_tiedosto;
+		}
+		else {
+			return false;
+		}
 	}
 }
 

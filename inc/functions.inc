@@ -24111,7 +24111,11 @@ if (!function_exists('kirjoita_json_tiedosto')) {
 
 		array_walk_recursive($data, 'array_utf8_encode');
 
-		file_put_contents($filepath, json_encode($data));
+		$ok = file_put_contents($filepath, json_encode($data));
+		
+		if (!$ok) {
+			return false;
+		}
 
 		return $filepath;
 	}

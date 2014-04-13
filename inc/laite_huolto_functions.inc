@@ -71,7 +71,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 				JOIN huoltosyklit_laitteet
 				ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
 					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus
-					AND IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 90) DAY) )
+					AND IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 30) DAY) )
 				JOIN huoltosykli
 				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
 					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )

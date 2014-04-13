@@ -76,6 +76,9 @@ class LaiteCSVDumper extends CSVDumper {
 
 					$rivi_temp[$konvertoitu_header] = $tuoteno;
 				}
+				else if ($konvertoitu_header == 'valm_pvm')  {
+					$rivi_temp[$konvertoitu_header] = "{$rivi[$csv_header]}-01-01";
+				}
 				else {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
 				}

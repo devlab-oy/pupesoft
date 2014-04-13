@@ -234,7 +234,7 @@ function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltos
 			$paivaa_edellisesta_koeponnistuksesta = $sekunttia_edellisesta_koeponnistuksesta / 86400;
 			$paivaa_seuraavaan_koeponnistukseen = $huollettavan_laitteen_huoltosyklirivi['huoltovali'] - $paivaa_edellisesta_koeponnistuksesta;
 			//jos seuraavaan koeponnistukseen on enemmän kuin 2kk aikaa, ei generoida työmääräystä.
-			if ($paivaa_seuraavaan_koeponnistukseen > 60) {
+			if ($paivaa_seuraavaan_koeponnistukseen > 90) {
 				continue;
 			}
 		}

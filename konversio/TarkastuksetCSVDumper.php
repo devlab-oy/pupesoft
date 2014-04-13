@@ -183,10 +183,9 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		foreach ($this->rivit as $rivi) {
 			$asiakas = $this->asiakkaat[$rivi['liitostunnus']];
 			$toimenpide_tuote = $this->tuotteet[$rivi['toimenpide']];
-			$laite_tuote = $this->tuotteet[$rivi['laite_tuoteno']];
 			$tyomaarays_tunnus = $this->luo_tyomaarays($asiakas, $rivi['toimaika'], $rivi['hinta'], true);
 
-			$this->luo_tilausrivi($tyomaarays_tunnus, $toimenpide_tuote, $laite_tuote, $rivi['toimaika'], $rivi['toimitettu'], true);
+			$this->luo_tilausrivi($tyomaarays_tunnus, $toimenpide_tuote, $rivi['laite'], $rivi['toimaika'], $rivi['toimitettu'], true);
 
 			paivita_viimenen_tapahtuma_laitteen_huoltosyklille($rivi['laite'], $rivi['tehtava_huolto']['huoltosykli_tunnus'], $rivi['toimaika']);
 
@@ -686,7 +685,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		return $tunnus;
 	}
 
-	private function luo_tilausrivi($tyomaarays_tunnus, $tuote, $laite, $toimaika, $toimitettu, $alv_23 = true) {
+	private function luo_tilausrivi($tyomaarays_tunnus, $tuote, $laite_tunnus, $toimaika, $toimitettu, $alv_23 = true) {
 		$kuka = $this->kukarow;
 		$yhtio = $this->yhtio;
 		if ($alv_23) {
@@ -737,7 +736,7 @@ class TarkastuksetCSVDumper extends CSVDumper {
 		$query = "	INSERT INTO tilausrivin_lisatiedot SET
 					yhtio = '{$kuka['yhtio']}',
 					tilausrivitunnus = '{$tunnus}',
-					asiakkaan_positio = '{$laite['tunnus']}',
+					asiakkaan_positio = '{$laite_tunnus}',
 					vanha_otunnus = '{$tyomaarays_tunnus}',
 					luontiaika = NOW(),
 					laatija = 'import'";

@@ -85,7 +85,12 @@ function hae_tyomaaraykset($request) {
 
 	if (!empty($request['toimitusaika'])) {
 		if (is_numeric($request['toimitusaika'])) {
-			$lasku_where .= "	AND lasku.toimaika < DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)";
+			if ($request['toim'] == 'TEHDYT_TYOT') {
+				$lasku_where .= "	AND lasku.toimaika > DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)";
+			}
+			else {
+				$lasku_where .= "	AND lasku.toimaika < DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)";
+			}
 		}
 		else if ($request['toimitusaika'] == 'X') {
 			//Näytä myöhässä olevat

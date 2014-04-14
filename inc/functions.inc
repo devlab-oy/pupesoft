@@ -20451,28 +20451,42 @@ if (!function_exists('splittaa_tilausrivi')) {
 }
 
 if (!function_exists('lisaa_tuotepaikka')) {
-	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '', $halytysraja = 0, $tilausmaara = 0) {
+	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '', $halytysraja = 0, $tilausmaara = 0, $varasto = 0) {
 		global $kukarow;
 
 		# Isot kirjaimet
-		$hyllyalue 	= strtoupper($hyllyalue);
-		$hyllynro 	= strtoupper($hyllynro);
-		$hyllyvali 	= strtoupper($hyllyvali);
-		$hyllytaso 	= strtoupper($hyllytaso);
+		$hyllyalue 	= strtoupper(trim($hyllyalue));
+		$hyllynro 	= strtoupper(trim($hyllynro));
+		$hyllyvali 	= strtoupper(trim($hyllyvali));
+		$hyllytaso 	= strtoupper(trim($hyllytaso));
+
+		if (empty($hyllyalue) and !empty($varasto)) {
+			//Hyllyä ei ole annettu mutta varasto on. Luodaan annettuun varastoon tuotteelle default-tuotepaikka.
+			$varasto = hae_varasto($varasto);
+
+			$hyllyalue = $varasto['alkuhyllyalue'];
+			$hyllynro  = $varasto['alkuhyllynro'];
+			$hyllyvali = 0;
+			$hyllytaso = 0;
+		}
+		elseif (empty($hyllyalue) and empty($varasto)) {
+			return false;
+		}
 
 		$query = "	INSERT INTO tuotepaikat SET
-					yhtio     = '{$kukarow['yhtio']}',
-					tuoteno	  = '{$tuoteno}',
-					hyllyalue = '{$hyllyalue}',
-					hyllynro  = '{$hyllynro}',
-					hyllyvali = '{$hyllyvali}',
-					hyllytaso = '{$hyllytaso}',
-					oletus    = '{$oletus}',
+					yhtio       = '{$kukarow['yhtio']}',
+					tuoteno	    = '{$tuoteno}',
+					hyllyalue   = '{$hyllyalue}',
+					hyllynro    = '{$hyllynro}',
+					hyllyvali   = '{$hyllyvali}',
+					hyllytaso   = '{$hyllytaso}',
+					oletus      = '{$oletus}',
 					halytysraja = '{$halytysraja}',
 					tilausmaara = '{$tilausmaara}',
-					laatija	  = '{$kukarow['kuka']}',
-					luontiaika= now()";
-		$result = pupe_query($query);
+					laatija	    = '{$kukarow['kuka']}',
+					luontiaika  = now()";
+		pupe_query($query);
+		$lisatty_tun = mysql_insert_id();
 
 		$query = "	INSERT INTO tapahtuma SET
 					yhtio 		= '{$kukarow['yhtio']}',
@@ -20485,10 +20499,12 @@ if (!function_exists('lisaa_tuotepaikka')) {
 					hyllynro 	= '{$hyllynro}',
 					hyllyvali 	= '{$hyllyvali}',
 					hyllytaso 	= '{$hyllytaso}',
-					selite 		= '".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}',
+					selite 		= trim('".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}'),
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
-		$result = pupe_query($query);
+		pupe_query($query);
+
+		return array("hyllyalue" => $hyllyalue, "hyllynro" => $hyllynro, "hyllytaso" => $hyllytaso, "hyllyvali" => $hyllyvali, "tuotepaikan_tunnus" => $lisatty_tun);
 	}
 }
 
@@ -27007,7 +27023,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
 		//@TODO muutetaan ehkä jossain vaiheessa niin, että verrataan kaikkiin yhtiön toimipaikan varastoihin
 		if ($myyntitilaus['varasto'] != $varastot[0]['tunnus']) {
 			require('tilauskasittely/tilauksesta_varastosiirto.inc');
-			
+
 			//Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
 			tilauksesta_varastosiirto($myyntitilaus_tunnus, true);
 		}
@@ -27015,23 +27031,21 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
 }
 
 if (!function_exists('hae_tuotepaikka')) {
-
 	function hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT *
 					FROM tuotepaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tuoteno = '{$tuoteno}'
+					WHERE yhtio   = '{$kukarow['yhtio']}'
+					AND tuoteno   = '{$tuoteno}'
 					AND hyllyalue = '{$hyllyalue}'
-					AND hyllynro = '{$hyllynro}'
+					AND hyllynro  = '{$hyllynro}'
 					AND hyllytaso = '{$hyllytaso}'
 					AND hyllyvali = '{$hyllyvali}'";
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);
 	}
-
 }
 
 if (!function_exists('hae_tuotepaikat')) {
@@ -27088,42 +27102,6 @@ if (!function_exists('hae_tuotteen_tuotepaikat')) {
 		}
 
 		return $tuotepaikat;
-	}
-
-}
-
-if (!function_exists('luo_tuotepaikka')) {
-
-	function luo_tuotepaikka($tuoteno, $hyllyalue = false, $hyllynro = false, $hyllyvali = false, $hyllytaso = false, $varasto = false) {
-		global $kukarow, $yhtiorow;
-
-		if (!$hyllyalue and !$hyllynro and !$hyllyvali and !$hyllytaso and !empty($varasto)) {
-			//Hyllyä ei ole annettu mutta varasto on. Luodaan annettuun varastoon tuotteelle default-tuotepaikka.
-			$varasto = hae_varasto($varasto);
-
-			$hyllyalue = $varasto['alkuhyllyalue'];
-			$hyllynro = $varasto['alkuhyllynro'];
-			$hyllyvali = 0;
-			$hyllytaso = 0;
-		}
-		elseif (!$hyllyalue and !$hyllynro and !$hyllyvali and !$hyllytaso and empty($varasto)) {
-			return false;
-		}
-
-		$query = "	INSERT into tuotepaikat set
-					yhtio 		= '{$kukarow['yhtio']}',
-					tuoteno 	= '{$tuoteno}',
-					hyllyalue	= '{$hyllyalue}',
-					hyllynro	= '{$hyllynro}',
-					hyllyvali	= '{$hyllyvali}',
-					hyllytaso	= '{$hyllytaso}',
-					laatija 	= '{$kukarow['kuka']}',
-					luontiaika 	= NOW(),
-					muutospvm 	= NOW(),
-					muuttaja	= '{$kukarow['kuka']}'";
-		pupe_query($query);
-
-		return hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali);
 	}
 
 }

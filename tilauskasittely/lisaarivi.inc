@@ -2563,7 +2563,7 @@
 							$oletus_tuotepaikka_res = pupe_query($query);
 							$oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
 
-							lisaa_tuotepaikka($trow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], '0', '0', 'Tuotetta lisättäessä');
+							lisaa_tuotepaikka($trow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "Tuotetta lisättäessä", "", 0, 0, 0);
 
 							$p_hyllyalue	= $oletus_tuotepaikka_row["alkuhyllyalue"];
 							$p_hyllynro		= $oletus_tuotepaikka_row["alkuhyllynro"];

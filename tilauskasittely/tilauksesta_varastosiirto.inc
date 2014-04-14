@@ -237,7 +237,6 @@ if (!function_exists('aseta_kukarow_kesken')) {
 
 		return false;
 	}
-
 }
 
 if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
@@ -257,7 +256,7 @@ if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
 			if (empty($kohde_varasto_tuotepaikat)) {
 				//Jos kohde varastossa ei ole tälle tuotteelle hyllypaikkaa niin luodaan ns. default-paikka
 				//$siirtolista['clearing'] = kohdevarasto tunnus
-				$kohde_varasto_tuotepaikka = luo_tuotepaikka($varastosiirtorivi['tuoteno'], false, false, false, false, $varastosiirto['clearing']);
+				$kohde_varasto_tuotepaikka = lisaa_tuotepaikka($varastosiirtorivi['tuoteno'], "", "", "", "", "", "", 0, 0, $varastosiirto['clearing']);
 			}
 			else {
 				$kohde_varasto_tuotepaikka = $kohde_varasto_tuotepaikat[0];

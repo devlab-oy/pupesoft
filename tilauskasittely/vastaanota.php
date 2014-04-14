@@ -280,31 +280,12 @@
 						}
 
 						if ($t1[$tun] != '' and $t2[$tun] != '' and $t3[$tun] != '' and $t4[$tun] != '') {
-							$query = "	INSERT into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, laatija, luontiaika)
-										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
-							$ynsre = pupe_query($query);
-							$uusipaikka = mysql_insert_id();
-
-							$tapahtumaquery = "	INSERT into tapahtuma set
-												yhtio 		= '$kukarow[yhtio]',
-												tuoteno 	= '$tilausrivirow[tuoteno]',
-												kpl 		= 0,
-												kplhinta	= 0,
-												hinta 		= 0,
-												laji 		= 'uusipaikka',
-												hyllyalue 	= '$t1[$tun]',
-												hyllynro 	= '$t2[$tun]',
-												hyllyvali 	= '$t3[$tun]',
-												hyllytaso 	= '$t4[$tun]',
-												selite 		= '".t("Tuotteella ei varastopaikkaa, luotiin uusi paikka ")." $t1[$tun] $t2[$tun] $t3[$tun] $t4[$tun]',
-												laatija 	= '$kukarow[kuka]',
-												laadittu 	= now()";
-							$tapahtumaresult = pupe_query($tapahtumaquery);
+							$lisatty_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"], $t1[$tun], $t2[$tun], $t3[$tun], $t4[$tun], "Varastosiirron vastaanotossa", $oletus, 0, 0, 0);
 
 							$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
 										from tuotepaikat
 										WHERE yhtio	= '$kukarow[yhtio]'
-										and tunnus 	= '$uusipaikka'
+										and tunnus 	= '{$lisatty_paikka["tuotepaikan_tunnus"]}'
 										and tuoteno	= '$tilausrivirow[tuoteno]'";
 							$result = pupe_query($query);
 							$paikkarow = mysql_fetch_assoc($result);
@@ -317,7 +298,7 @@
 									echo "<font class='message'>".t("Perustan")." ".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tun]-$t2[$tun]-$t3[$tun]-$t4[$tun]</font><br>";
 								}
 							}
-							
+
 						}
 						else {
 							if ($echotaanko) {

@@ -189,8 +189,9 @@ elseif ($edi_tyyppi == "edifact911") {
 	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
 
-	$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
-	$order_tietosisalto = explode("'", $order_tietosisalto);
+	//$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+	//$order_tietosisalto = explode("'", $order_tietosisalto);
+	$order_tietosisalto = explode("\n", $order_tietosisalto);
 
 	// Tallennetaan NAD+SE -segmentti, koska se tulee muuten liian myˆh‰isess‰ vaiheessa...
 	$nadse_segmentti = "";
@@ -222,7 +223,7 @@ elseif ($edi_tyyppi == "edifact911") {
 }
 elseif ($edi_tyyppi == "edifact911_crossdock") {
 		$edi_subj = "Sis‰‰ntuleva Orders 91.1 CrossDock tilaus";
-		$edi_laatija = "Orders911 CrossDock";
+		$edi_laatija = "EDI CrossDock";
 
 		// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 		$order_tietosisalto = file_get_contents($filename);
@@ -231,19 +232,10 @@ elseif ($edi_tyyppi == "edifact911_crossdock") {
 		$order_tietosisalto = explode("'", $order_tietosisalto);
 
 		// CrossDock-versiossa ostaja ja tuotetiedot tulevat eri j‰rjestyksess‰ joten muutetaan malliin joka osataan lukea
-		require("konvertoi_crossdock_desadv_tilaus.inc");
-
+		require("splittaa_crossdock_editilaus.inc");
+		// Tyyppi vaihtuu
+		$edi_tyyppi = "EDI";
 		unset($order_tietosisalto);
-
-		// Luodaan tiedosto
-		$tiedosto = "/tmp/ediorders911_crossdock".uniqid(time()."_").".txt";
-		file_put_contents($tiedosto, $edi_rivi);
-
-		// Avataan tiedosto uudestaan
-		if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus ep‰onnistui")."!\n");
-
-		// Jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
-		$mailfile = $tiedosto;
 }
 else {
 	$edi_subj = t("Sis‰‰ntuleva EIH 1.4 EDI-tilaus");
@@ -251,7 +243,7 @@ else {
 }
 
 $edi_ulos .= "$edi_subj\n";
-
+var_dump($tietue);
 while ($tietue = fgets($fd)) {
 
 	// Tyhj‰t rivit skipataan

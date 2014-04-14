@@ -76,6 +76,14 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "</pre>";
 	}
 
+	if ($tyyppi == 'edifact911_crossdock') {
+		// tarvitaan $filename
+		echo "<pre>";
+		$edi_tyyppi = "edifact911_crossdock";
+		require ("editilaus_in.inc");
+		echo "</pre>";
+	}
+
 	if ($tyyppi == 'yct') {
 		// tarvitaan $filename
 		require ("inc/tilaus_in.inc");
@@ -112,6 +120,7 @@ else {
 		 		<option value='pos'>".t("Kassap‰‰te")."</option>
 		 		<option value='yct'>Yamaha Center</option>
 				<option value='edifact911'>Orders 91.1</option>
+				<option value='edifact911_crossdock'>Orders 91.1 CrossDock</option>
 		 		<option value='multi'>".t("Useita asiakkaita")."</option>
 				<option value='asnui'>".t("ASN-sanoma")."</option>
 				</select>";

@@ -220,6 +220,31 @@ elseif ($edi_tyyppi == "edifact911") {
 	//jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
 	$mailfile = $tiedosto;
 }
+elseif ($edi_tyyppi == "edifact911_crossdock") {
+		$edi_subj = "Sis‰‰ntuleva Orders 91.1 CrossDock tilaus";
+		$edi_laatija = "Orders911 CrossDock";
+
+		// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
+		$order_tietosisalto = file_get_contents($filename);
+
+		$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+		$order_tietosisalto = explode("'", $order_tietosisalto);
+
+		// CrossDock-versiossa ostaja ja tuotetiedot tulevat eri j‰rjestyksess‰ joten muutetaan malliin joka osataan lukea
+		require("konvertoi_crossdock_desadv_tilaus.inc");
+
+		unset($order_tietosisalto);
+
+		// Luodaan tiedosto
+		$tiedosto = "/tmp/ediorders911_crossdock".uniqid(time()."_").".txt";
+		file_put_contents($tiedosto, $edi_rivi);
+
+		// Avataan tiedosto uudestaan
+		if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus ep‰onnistui")."!\n");
+
+		// Jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
+		$mailfile = $tiedosto;
+}
 else {
 	$edi_subj = t("Sis‰‰ntuleva EIH 1.4 EDI-tilaus");
 	$edi_laatija = "EDI";
@@ -2151,6 +2176,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
 	$content .= "\n";
 	$content .= "--$bound--\n";
 
+//kissa
+	$yhtiorow["edi_email"] = "mika@devlab.fi";
 	$boob = mail($yhtiorow["edi_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }
 else {

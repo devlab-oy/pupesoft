@@ -1187,12 +1187,11 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('T' => '', 'U' => '', 'V' => '');
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('A' => '', 'U' => '');
 
 		$ulos .= "<option value = ''>".t("Käytetään yhtiön oletuksia")."</option>";
-		$ulos .= "<option value = 'A' {$sel['A']}>".t("Asiakkaan laskutusosoitteella")."</option>";
-		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, hyvitykset erikseen")."</option>";
-		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, hyvitykset erikseen")."</option>";
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Veloitukset ja hyvitykset samalle laskulle")."</option>";
+		$ulos .= "<option value = 'U' {$sel['U']}>".t("Veloitukset ja hyvitykset erikseen")."</option>";
 
 		$ulos .= "</select></td>";
 

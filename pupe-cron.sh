@@ -26,7 +26,7 @@ if [ -n "${DBHOST}" ]; then
   if [ -n "${host_array[1]}" ]; then
     DBHOSTLISA="--host=${host_array[0]} --port=${host_array[1]}"
   else
-    DBHOSTLISA="-h ${DBHOST}"
+    DBHOSTLISA="--host=${DBHOST}"
   fi
 else
   DBHOSTLISA=""

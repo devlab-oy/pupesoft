@@ -374,7 +374,13 @@
 						yhteyshenkilo as kt READ,
 						yhtio READ,
 						yhtion_parametrit READ,
-						yhtion_toimipaikat READ";
+						yhtion_toimipaikat READ,
+						tilausrivin_lisatiedot AS tl READ,
+						varastopaikat AS v_lahdevarasto READ,
+						varastopaikat AS v_kohdevarasto READ,
+						korvaavat_kiellot READ,
+						oikeu READ,
+						toimi READ";
 			$locre = pupe_query($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -1696,6 +1702,8 @@
 				while ($row = mysql_fetch_assoc($res)) {
 					// laskutus tarttee kukarow[kesken]
 					$kukarow['kesken']=$row['tunnus'];
+
+					tee_kirjanpidollinen_varastosiirto($row['tunnus']);
 
 					require("laskutus.inc");
 					$laskutetttu++;

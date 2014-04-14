@@ -191,8 +191,9 @@ function hae_tyomaaraykset($request) {
 					AND a2.selite = tyomaarays.tyostatus )
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				{$lasku_where}
-				ORDER BY kohde.tunnus ASC,
-				lasku.toimaika ASC";
+				ORDER BY lasku.toimaika ASC,
+				kohde.tunnus ASC,
+				laite.oma_numero ASC";
 	$result = pupe_query($query);
 
 	$tyomaaraykset = array();

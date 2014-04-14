@@ -86,10 +86,12 @@ function hae_tyomaaraykset($request) {
 	if (!empty($request['toimitusaika'])) {
 		if (is_numeric($request['toimitusaika'])) {
 			if ($request['toim'] == 'TEHDYT_TYOT') {
-				$lasku_where .= "	AND lasku.toimaika > DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)";
+				$lasku_where .= "	AND lasku.toimaika > DATE_SUB(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)
+									AND lasku.toimaika < CURRENT_DATE";
 			}
 			else {
-				$lasku_where .= "	AND lasku.toimaika < DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)";
+				$lasku_where .= "	AND lasku.toimaika < DATE_ADD(CURRENT_DATE, INTERVAL {$request['toimitusaika']} DAY)
+									AND lasku.toimaika > DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)";
 			}
 		}
 		else if ($request['toimitusaika'] == 'X') {
@@ -166,7 +168,8 @@ function hae_tyomaaraykset($request) {
 					AND poistettu_laite.tunnus = poikkeus_toimenpide_tilausrivi_lisatiedot.asiakkaan_positio )
 				JOIN laite
 				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
-					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio
+					AND laite.tila != 'P' )
 				JOIN tuote
 				ON ( tuote.yhtio = laite.yhtio
 					AND tuote.tuoteno = laite.tuoteno )

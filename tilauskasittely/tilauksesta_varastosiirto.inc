@@ -40,6 +40,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 		//Kirjanpidollisessa varastosiirrossa yhdellä myyntitilauksella voi olla vain 1 lähde-kohdevarasto kombinaatio.
 		//Kombinaatio muodostuu Lähde: lasku.varasto kohde: lasku.yhtio_toimipaikka.varasto.first
 		$toimipaikan_varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
+
 		$lahde_ja_kohde_varasto_yhdistelma = array(
 			'lahdevarasto_tunnus'	 => $myyntitilaus['varasto'],
 			'kohdevarasto_tunnus'	 => $toimipaikan_varastot[0]['tunnus'],
@@ -48,6 +49,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 		$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
 
 		aseta_kukarow_kesken(0);
+
 		//Kaikilla myyntitilausriveillä on sama toimitustapa, joka määritellään avainsanoissa SIIRTOVARASTOT. Tällöin voidaan viitata indeksillä.
 		$varastosiirto = luo_varastosiirto($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], $lahde_ja_kohde_varasto_yhdistelma['kohdevarasto_tunnus'], $myyntitilausrivit[0]['toimitustapa_tunnus'], $myyntitilaus['tunnus']);
 
@@ -56,6 +58,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 		}
 
 		aseta_kukarow_kesken($varastosiirto['tunnus']);
+
 		foreach ($myyntitilausrivit as $tilausrivi) {
 			$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus']);
 			linkkaa_myyntitilausrivi_varastosiirtoriviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
@@ -261,7 +264,7 @@ if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
 			}
 
 			$varastosiirtorivi['kohde_hyllyalue'] = $kohde_varasto_tuotepaikka['hyllyalue'];
-			$varastosiirtorivi['kohde_hyllynro'] = $kohde_varasto_tuotepaikka['hyllynro'];
+			$varastosiirtorivi['kohde_hyllynro']  = $kohde_varasto_tuotepaikka['hyllynro'];
 			$varastosiirtorivi['kohde_hyllyvali'] = $kohde_varasto_tuotepaikka['hyllyvali'];
 			$varastosiirtorivi['kohde_hyllytaso'] = $kohde_varasto_tuotepaikka['hyllytaso'];
 
@@ -303,8 +306,10 @@ if (!function_exists('hae_tilausrivit')) {
 		$tilausrivi_where = '';
 		$varasto_avainsana_join = '';
 		$select = '';
+
 		if (!$kirjanpidollinen_varastosiirto) {
 			$tilausrivi_where = "AND t.var = 'S'";
+
 			$varasto_avainsana_join = '
 					JOIN avainsana AS a
 					ON ( a.yhtio = tl.yhtio
@@ -346,6 +351,7 @@ if (!function_exists('hae_tilausrivit')) {
 		$result = pupe_query($query);
 
 		$tilausrivit = array();
+
 		while ($tilausrivi = mysql_fetch_assoc($result)) {
 			$tilausrivit[] = $tilausrivi;
 		}

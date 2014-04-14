@@ -840,6 +840,7 @@
 			else {
 				$kohde_varastot = array();
 			}
+
 			$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
 			foreach ($siirto_varastot as $siirto_varasto) {

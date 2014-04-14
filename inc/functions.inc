@@ -26877,6 +26877,7 @@ if (!function_exists('hae_yhtion_toimipaikan_varastot')) {
 					AND toimipaikka = '{$yhtio_toimipaikka}'";
 		$varastopaikat_result = pupe_query($query);
 		$varastopaikat = array();
+
 		while($varastopaikka = mysql_fetch_assoc($varastopaikat_result)) {
 			$varastopaikat[] = $varastopaikka;
 		}
@@ -27006,6 +27007,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
 		//@TODO muutetaan ehkä jossain vaiheessa niin, että verrataan kaikkiin yhtiön toimipaikan varastoihin
 		if ($myyntitilaus['varasto'] != $varastot[0]['tunnus']) {
 			require('tilauskasittely/tilauksesta_varastosiirto.inc');
+			
 			//Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
 			tilauksesta_varastosiirto($myyntitilaus_tunnus, true);
 		}

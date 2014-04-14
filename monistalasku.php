@@ -643,7 +643,7 @@ if ($tee == "ETSILASKU") {
 								LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '{$otsikot_row['liitostunnus']}')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.otunnus IN ({$otsikot_row['otsikot']})
-								AND tilausrivi.tyyppi != 'D'";
+								AND tilausrivi.tyyppi  = 'L'";
 					$nayta_rivit_res = pupe_query($query);
 
 					if (mysql_num_rows($nayta_rivit_res) > 0) {

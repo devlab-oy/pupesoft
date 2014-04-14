@@ -16649,9 +16649,9 @@ if (!function_exists("tee_keraysera")) {
 			$kukarow['debugstring'] .= "<font class='head'>".t("Keräyserädebug")."</font><hr><br><br>\n";
 			$kukarow['debugstring'] .= "<font class='head'>".t("Kerääjä").": $kukarow[kuka], $kukarow[nimi]. ($kukarow[keraajanro])</font><br><br>\n";
 		}
-		
+
 		$tilat = "'N'";
-		
+
 		if ($kerataanko_myös_varastosiirrot) {
 			$tilat = "'N','A'";
 		}
@@ -27190,4 +27190,24 @@ if (!function_exists("onkotapahtumajariveja")) {
 		// Tapahtumia tai rivejä on
 		$poistolukko = "TSEKATTU";
 	}
+}
+
+if (!function_exists('hae_varasto')) {
+
+	function hae_varasto($tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($tunnus)) {
+			return false;
+		}
+
+		$query = "	SELECT *
+ 					FROM varastopaikat
+ 					WHERE yhtio = '{$kukarow['yhtio']}'
+ 					AND tunnus = {$tunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+
 }

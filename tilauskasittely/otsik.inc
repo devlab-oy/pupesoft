@@ -854,6 +854,22 @@
 		$alv_velvollisuus = "";
 		$alkuperainen_toimipaikka = $yhtiorow['toimipaikka'];
 
+		// jos toimipaikka otetaan asiakkaan mukaan, mutta asiakkaalle ei ole kytketty t-paikkaa,
+		// k‰ytet‰‰n k‰ytt‰j‰n t-paikkaa. jos k‰ytt‰j‰ll‰k‰‰n ei ole t-paikkaa niin mik‰‰n ei muutu :)
+		if( $yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and isset($srow['toimipaikka']) and (int) $srow['toimipaikka'] === 0 ) {
+			$srow['toimipaikka'] = $kukarow['toimipaikka'];
+		}
+
+		if (isset($srow['yhtiotoimipaikka'])) { // juuri vaihdettu dropdownista
+			$kukarow['toimipaikka'] = $srow['yhtiotoimipaikka'];
+		}
+		elseif (!empty($srow['yhtio_toimipaikka'])) { // tultiin muokkaamaan tallennettua
+			$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
+		}
+		elseif( $yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $srow['toimipaikka'] != 0 ){
+			$kukarow['toimipaikka'] = $srow['toimipaikka'];
+		}
+
 		if (!isset($srow['yhtio_toimipaikka']) and !empty($srow['maa'])) {
 			$alhqur = "	SELECT tunnus
 						FROM yhtion_toimipaikat
@@ -866,9 +882,6 @@
 				$alhiro  = mysql_fetch_assoc($alhire);
 				$kukarow['toimipaikka'] = $alhiro['tunnus'];
 			}
-		}
-		elseif (!empty($srow['yhtio_toimipaikka'])) {
-			$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
 		}
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -1974,22 +1987,68 @@
 				$vasen++;
 			}
 
-
 			$oikea_sarake[$oikea] = "<td>".t("Myy varastosta").":</td>";
-			$oikea_sarake[$oikea] .= "<td><select name='varasto'><option value='0'>".t("Kaikista")."</option>";
+			$oikea_sarake[$oikea] .= "<td>";
 
-			$varastot_array = array();
 			$varastot_lisa_query = "";
 
-			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
-				$yhtiorow['takuuvarasto'] = (int) $yhtiorow['takuuvarasto'];
-				$varastot_lisa_query = " and varastopaikat.tunnus = '{$yhtiorow['takuuvarasto']}'";
-				$varastot_array = array($yhtiorow['takuuvarasto']);
+			if( (int) $kukarow["varasto"] > 0 ){
+				$varastot_lisa_query = " AND tunnus IN ({$kukarow["varasto"]})";
 			}
-			elseif ($kukarow["varasto"] != "") {
-				$varastot_array = explode(",", $kukarow["varasto"]);
-				$varastot_lista = mysql_real_escape_string($kukarow["varasto"]);
-				$varastot_lisa_query = " and varastopaikat.tunnus in ($varastot_lista) ";
+
+			if( $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0 ) {
+				$varastot_lisa_query = " AND tunnus = {$kukarow['oletus_varasto']}";
+			}
+
+			$asiakkaan_oletusvarasto_query = "	SELECT avainsana
+												FROM asiakkaan_avainsanat
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND laji = 'oletusmyyntivarasto'
+												AND liitostunnus = {$srow['liitostunnus']}";
+			$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
+			$aov = array();
+
+			while ($aov_row = mysql_fetch_assoc($aov_result)) {
+				$aov[] = $aov_row['avainsana'];
+			}
+
+			if(count($aov) == 1){
+				$oletusvarasto = $aov[0];
+			}
+
+			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
+				$takuuvarasto = (int) $yhtiorow['takuuvarasto'];
+				$varastot_lisa_query = " and tunnus = {$takuuvarasto}";
+			}
+			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and count($aov) > 0) {
+				$aov = implode(",", $aov);
+				$varastot_lisa_query = " AND tunnus IN ($aov)";
+			}
+			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+
+				if (isset($srow['yhtiotoimipaikka'])) {
+					$tp = $srow['yhtiotoimipaikka'];
+				}
+				elseif (isset($srow['yhtio_toimipaikka'])) {
+					$tp = $srow['yhtio_toimipaikka'];
+				}
+				elseif (isset($srow['toimipaikka'])) {
+					$tp = $srow['toimipaikka'];
+				}
+
+				if($tp != 0){
+					$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
+																FROM varastopaikat
+																WHERE yhtio = '$kukarow[yhtio]'
+																AND toimipaikka = {$tp}";
+					$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
+					if(mysql_num_rows($tlv_result) > 0) {
+						$varastot_lisa_query = " AND toimipaikka = {$tp}";
+					}
+					if(mysql_num_rows($tlv_result) == 1) {
+						$ainoa_tp_varasto = mysql_result($tlv_result, 0);
+					}
+				}
 			}
 
 			$selectoitu_varasto_toimipaikka = 0;
@@ -2000,36 +2059,49 @@
 						$varastot_lisa_query
 						AND tyyppi != 'P'
 						order by tyyppi, nimitys";
+
 			$vares = pupe_query($query);
 
-			while ($varow = mysql_fetch_assoc($vares)) {
+			$oikea_sarake[$oikea] .= "<select name='varasto'><option value='0'>".t("Kaikista")."</option>";
 
-				if ($varow["tyyppi"] == '' or in_array($varow["tunnus"], $varastot_array)) {
+			if (mysql_num_rows($vares) > 0) {
 
-					$sel = '';
+				while ($varow = mysql_fetch_assoc($vares)) {
 
-					if ($toim == "REKLAMAATIO" and $srow['varasto'] == '' and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] == $varow['tunnus']) {
-						$sel = 'selected';
-					}
-					// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
-					elseif ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '') {
-						$sel = 'selected';
-					}
-					// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan k‰ytt‰j‰n oletus varasto
-					elseif ($kukarow["kesken"] == 0 and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and $varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '') {
-						$sel = 'selected';
-					}
-					elseif ($varow['tunnus'] == $srow["varasto"]) {
-						$sel = 'selected';
-					}
+						$sel = '';
 
-					if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
+						if ($toim == "REKLAMAATIO" and $srow['varasto'] == '' and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] == $varow['tunnus']) {
+							$sel = 'selected';
+						}
+						// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
+						elseif ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '') {
+							$sel = 'selected';
+						}
+						// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan k‰ytt‰j‰n oletus varasto
+						elseif ($kukarow["kesken"] == 0 and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and $varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '') {
+							$sel = 'selected';
+						}
+						elseif ($varow['tunnus'] == $srow["varasto"]) {
+							$sel = 'selected';
+						}
+						elseif (isset($oletusvarasto) and $oletusvarasto == $varow['tunnus']) {
+							$sel = 'selected';
+						}
+						elseif (isset($ainoa_tp_varasto) and $ainoa_tp_varasto == $varow['tunnus']) {
+							$sel = 'selected';
+						}
 
-					$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+						if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
+
+						$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}
+				$oikea_sarake[$oikea] .= "</select>";
+			}
+			else{
+				$oikea_sarake[$oikea] .= "<option value='0'>".t("Kaikista")."</option></select>";
 			}
 
-			$oikea_sarake[$oikea] .= "</select></td>";
+			$oikea_sarake[$oikea] .= "</td>";
 			$oikea++;
 
 			$tresult = t_avainsana("TV");
@@ -2054,19 +2126,31 @@
 
 				$predefined_yhtiotoimipaikka = 0;
 
-				$oikea_sarake[$oikea] .= "<td><select name='yhtiotoimipaikka'>";
+				$oikea_sarake[$oikea] .= "<td><select name='yhtiotoimipaikka' onchange='this.form.submit()''>";
 				$oikea_sarake[$oikea] .= "<option value='0'>".t("Yhtiˆn perustiedot")."</option>";
 
 				while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
-
 					$sel = "";
 
-					if (!isset($srow['yhtio_toimipaikka'])) {
-						if ($alv_velvollisuus != "" and $yht_toimpaik_row['tunnus'] == $alhiro['tunnus']) $sel = "selected";
-						if ($sel == "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+
+					if ( !isset($srow['yhtio_toimipaikka']) ) { // ollaan luomassa uutta
+
+						if ($alv_velvollisuus != "" and $yht_toimpaik_row['tunnus'] == $alhiro['tunnus']) { $sel = "selected"; }
+
+						if ( !isset($srow['yhtiotoimipaikka']) ) { // ei olla viel‰ valittu dropdownilla
+							if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
+								if ($sel == "" and $srow['toimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }
+							}
+							else {
+								if ($sel == "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }
+							}
+						}
+						else{ // valittiin dropdownilla, selectoidaan siis valittu
+							if ($sel == "" and $srow['yhtiotoimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }
+						}
 					}
-					else {
-						if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+					else { // tultiin muokkaamaan vanhaa
+						if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) { $sel = "selected"; }
 					}
 
 					if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
@@ -2999,6 +3083,7 @@
 			echo "<tr><td class='back'>";
 			echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
 			echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+			echo "<input type='hidden' name='klikkaus' value='1'>";
 			echo "<input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td>";
 			echo "<td class='back'><input type='submit' name='vaihdatoim_asiakas' value='".t("Hae toimitusosoite")."'></td>";
 			echo "</form>";
@@ -3481,6 +3566,14 @@
 
 		// K‰ytt‰j‰n toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
 		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
+
+		// T‰m‰ tehd‰‰n vain pikatilauksissa, ei jos edet‰‰n klikkaamalla
+		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and !isset($klikkaus)){
+			$queryx = "SELECT toimipaikka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$asiakasid}";
+			$resultx = pupe_query($queryx);
+			$asiakkaan_toimipaikkax = mysql_result($resultx, 0);
+			if ( (int) $asiakkaan_toimipaikkax !== 0 ) { $kukarow['toimipaikka'] = $asiakkaan_toimipaikkax; }
+		}
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
@@ -4079,8 +4172,7 @@
 		}
 	}
 
-	// Palutetaan puhtaat kukarow ja yhtiˆrow
+	// Palutetaan puhdas kukarow
 	$kukarow  = hae_kukarow($kukarow['kuka'], $kukarow['yhtio']);
-	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 	unset($alv);

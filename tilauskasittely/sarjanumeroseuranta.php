@@ -1305,8 +1305,13 @@
 
 			echo "<td valign='top' nowrap>";
 
+			//otetaan viivan paikka, jotta saadaan k‰‰nnetty‰ jos PUUTTUU ei olekkaan suomeksi
+			$viiva = strpos($sarjarow['sarjanumero'], "-");
+			if ($viiva === FALSE) {
+				$viiva = 0;
+			}
 			//jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki, Jos myyntirivi on laskutettu niin ei muokata
-			if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php" or strpos($_SERVER['SCRIPT_NAME'], "tervetuloa.php") !== FALSE or $PHP_SELF == "tervetuloa.php") and ($sarjarow["myynti_laskaika"] == "" or $sarjarow["myynti_laskaika"] == "0000-00-00" or substr($sarjarow['sarjanumero'], 0,7) == "PUUTTUU")) {
+			if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE OR $PHP_SELF == "sarjanumeroseuranta.php" OR strpos($_SERVER['SCRIPT_NAME'], "tervetuloa.php") !== FALSE OR $PHP_SELF == "tervetuloa.php") AND ($sarjarow["myynti_laskaika"] == "" OR $sarjarow["myynti_laskaika"] == "0000-00-00" OR (substr($sarjarow['sarjanumero'], 0,$viiva) == "PUUTTUU" OR substr($sarjarow['sarjanumero'], 0,$viiva) == t("PUUTTUU") OR substr($sarjarow['sarjanumero'], 0,$viiva) == t("PUUTTUU", $yhtiorow["kieli"])))) {
 				echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=".urlencode($tuoteno_haku)."&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat'>".t("Muokkaa")."</a>";
 			}
 

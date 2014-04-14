@@ -60,7 +60,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 		aseta_kukarow_kesken($varastosiirto['tunnus']);
 
 		foreach ($myyntitilausrivit as $tilausrivi) {
-			$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus']);
+			$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], TRUE);
 			linkkaa_myyntitilausrivi_varastosiirtoriviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 		}
 
@@ -130,25 +130,27 @@ if (!function_exists('normaali_varastosiirto')) {
 }
 
 if (!function_exists('luo_varastosiirtorivi')) {
-	function luo_varastosiirtorivi($laskurow, $tilausrivi, $lahdevarasto_tunnus) {
+	function luo_varastosiirtorivi($laskurow, $tilausrivi, $lahdevarasto_tunnus, $kpidollinen = FALSE) {
 		global $kukarow, $yhtiorow;
 
 		$trow = hae_tuote($tilausrivi['tuoteno']);
 
-		$tuoteno_echo = $trow['tuoteno'];
-		$yksikko_echo = $trow['yksikko'];
-		$toimaika = $laskurow["toimaika"];
-		$kerayspvm = $laskurow["kerayspvm"];
-		$tuoteno = $trow["tuoteno"];
-		$kpl = $tilausrivi['tilkpl'];
-		$jtkielto = $laskurow['jtkielto'];
-		$varasto = $lahdevarasto_tunnus;
-		$hinta = "";
-		$netto = "";
-		$var = "";
-		$korvaavakielto = 1;
-		$perhekielto = $lapsituotteet == "" ? 1 : 0;
+		$tuoteno_echo     = $trow['tuoteno'];
+		$yksikko_echo     = $trow['yksikko'];
+		$toimaika         = $laskurow["toimaika"];
+		$kerayspvm        = $laskurow["kerayspvm"];
+		$tuoteno          = $trow["tuoteno"];
+		$kpl              = $tilausrivi['varattu'];
+		$jtkielto         = $laskurow['jtkielto'];
+		$varasto          = $lahdevarasto_tunnus;
+		$hinta            = "";
+		$netto            = "";
+		$korvaavakielto   = 1;
+		$perhekielto      = $lapsituotteet == "" ? 1 : 0;
 		$orvoteikiinnosta = "EITOD";
+
+		// Kirjanpidollisessa siirret‰‰n aina ne rivit jotka on tilauksella.
+		$var = $kpidollinen ? "H" : "";
 
 		//Laitetaan tuote tuotteen oletuspaikalle jos sellainen on. Muussa tapauksessa "varastoon" eli hyllyalue ja hyllynro vain merkittyn‰
 		$tuotteen_oletuspaikka = tuotteen_oletuspaikka($tilausrivi['tuoteno'], $tilausrivi['kohdevarasto_tunnus']);
@@ -200,8 +202,8 @@ if (!function_exists('luo_varastosiirto')) {
 		$toimpp 		= $kerpp = date("j");
 		$toimkk 		= $kerkk = date("n");
 		$toimvv 		= $kervv = date("Y");
-		$comments 		= $kukarow["nimi"]." ".t("Automaattinen varastosiirron luonti myyntitilauksen perusteella").": {$myyntitilaus_tunnus}";
-		$viesti 		= $kukarow["nimi"]." ".t("Automaattinen varastosiirron luonti myyntitilauksen perusteella").": {$myyntitilaus_tunnus}";
+		$comments 		= $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
+		$viesti 		= $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
 		$varasto 		= $lahdevarasto_tunnus;
 		$toimitustapa	= $toimitustapa_tunnus;
 		$toim 			= "SIIRTOLISTA";

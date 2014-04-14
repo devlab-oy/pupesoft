@@ -192,16 +192,19 @@ if(!function_exists("toimittajahintatarkista")) {
 			if ($chryhma != '') 		$and .= " and ryhma = '$chryhma'";
 			if ($chtuoteno != '') 		$and .= " and tuoteno = '$chtuoteno'";
 
+			$chminkpl = (int) $chminkpl;
+			$chmaxkpl = (int) $chmaxkpl;
+
 			$aquery = "	SELECT ytunnus
 						FROM toimittajahinta
 						WHERE yhtio='$kukarow[yhtio]'
 						$and
-						and alkupvm = '$chalkupvm'
-						and loppupvm = '$chloppupvm'
-						and minkpl = $chminkpl
-						and maxkpl = $chmaxkpl
-						and tunnus != '$trow[$i]'";
-			$dsresult = mysql_query($aquery) or pupe_error($aquery);
+						AND alkupvm = '$chalkupvm'
+						AND loppupvm = '$chloppupvm'
+						AND minkpl = $chminkpl
+						AND maxkpl = $chmaxkpl
+						AND tunnus != '$trow[$i]'";
+			$dsresult = mysql_query($aquery) OR pupe_error($aquery);
 
 			if (mysql_num_rows($dsresult) > 0) {
 				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi

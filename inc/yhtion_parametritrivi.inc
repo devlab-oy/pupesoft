@@ -938,6 +938,7 @@
 		$ulos .= "<option value='A' $sel[A]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sekä myyntitilaukselta varastoon tilatut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "<option value='U' $sel[U]>".t("Osatoimituskiellossa olevien tilausten jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

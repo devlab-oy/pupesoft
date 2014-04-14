@@ -1013,7 +1013,7 @@
 						and tuote.tuoteno = tilausrivi.tuoteno
 						and tyyppi in ('V','W','M','L','D','O')
 						$korjataan
-						ORDER BY perheid desc, tyyppi in ('W','M','L','D','O','V'), tunnus";
+						ORDER BY if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) $yhtiorow[tilauksen_jarjestys_suunta], tyyppi in ('W','M','L','D','O','V'), tunnus";
 			$presult = pupe_query($query);
 			$riveja = mysql_num_rows($presult);
 
@@ -1037,7 +1037,13 @@
 
 			echo "</tr>";
 
-			$rivkpl = mysql_num_rows($presult);
+			if ($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
+				$rivkpl = 0;
+			}
+			else {
+				$rivkpl = mysql_num_rows($presult)+1;
+			}
+
 			$voikokorjata = 0;
 
 			$vanhaid = "KALA";
@@ -1055,6 +1061,13 @@
 
 				if ($vanhaid != $prow["perheid"] and $vanhaid != 'KALA') {
 					echo "<tr><td class='back' colspan='7'><br></td></tr>";
+				}
+
+				if ($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
+					$rivkpl++;
+				}
+				else {
+					$rivkpl--;
 				}
 
 				if ($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
@@ -1078,9 +1091,7 @@
 				}
 
 				echo "<tr>";
-
 				echo "<td valign='top' class='$class'>$rivkpl</td>";
-				$rivkpl--;
 
 				$sarjavalinta = "";
 

@@ -1091,8 +1091,8 @@
 
 				if ($mrow["korvaavat"] == $mrow["tuoteno"] and $mrow["vastaavat"] == $mrow["tuoteno"]) {
 					$rows[$mrow["tuoteno"]] = $mrow;
-
-					if ($mrow["tuoteperhe"] == $mrow["tuoteno"]) {
+					$mennaan = ($piilota_tuoteperheen_lapset == $saldotonrajaus or $saldotonrajaus != '') ? TRUE : FALSE;
+					if ($mrow["tuoteperhe"] == $mrow["tuoteno"] and $mennaan) {
 						$riikoko 		= 1;
 						$isat_array 	= array();
 						$kaikki_array 	= array($mrow["tuoteno"]);
@@ -1106,7 +1106,7 @@
 						}
 					}
 
-					if ($mrow["osaluettelo"] == $mrow["tuoteno"]) {
+					if ($mrow["osaluettelo"] == $mrow["tuoteno"] and $mennaan) {
 						//$mrow["osaluettelo"] == $mrow["tuoteno"]
 						$riikoko 		= 1;
 						$isat_array 	= array();
@@ -1219,23 +1219,6 @@
 					}
 				}
 
-
-				/*
-
-				YO MIKAMIES: Tämä iffi veks ja tehdään homma niin, että kun tää ruski on ruksattu, niin ei kutsuta ollenkaan tuoteselaushaku_tuoteperhe()-funkkaria.
-
-				if ($piilota_tuoteperheen_lapset != '') {
-					foreach ($rows as $row_key => $row_value) {
-						if($row_value['tuoteperhe'] != '' and $row_value['tuoteperhe'] != $row_value['tuoteno']) unset($rows[$row_key]);
-
-						// Poistetaan vielä kokonaiset tuoteperheet jos oli saldottomia lapsia
-						foreach ($rows as $row_key => $row_value) {
-							if (in_array($row_value['tuoteperhe'], $poistettavat_perheet) and $row_value['tuoteperhe'] != '') unset($rows[$row_key]);
-						}
-					}
-				}
-				*/
-
 				// Rajataan saldottomat pois
 				if ($saldotonrajaus != '') {
 					$_tmp = $vastaavastas;
@@ -1282,6 +1265,8 @@
 					// Poistetaan vielä kokonaiset tuoteperheet jos oli saldottomia lapsia
 					foreach ($rows as $row_key => $row_value) {
 						if (in_array($row_value['tuoteperhe'], $poistettavat_perheet) and $row_value['tuoteperhe'] != '') unset($rows[$row_key]);
+						// Jos on täpätty tuoteperheen rakenteen piilotus niin poistetaan vielä kaikki lapsituotteet kaikista tuoteperheistä
+						if($row_value['tuoteperhe'] != '' and $row_value['tuoteperhe'] != $row_value['tuoteno'] and $piilota_tuoteperheen_lapset != '') unset($rows[$row_key]);
 					}
 				}
 

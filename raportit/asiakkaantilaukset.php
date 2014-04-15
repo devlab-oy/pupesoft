@@ -33,6 +33,12 @@
 
 		$cleantoim = $toim;
 	}
+	
+	if (isset($vaihda)) {
+		unset($asiakasid);
+		unset($toimittajaid);
+		unset($ytunnus);
+	}
 
 	if (!isset($kka))
 		$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -315,7 +321,7 @@
 			$result = pupe_query($query);
 			$asiakasrow 	= mysql_fetch_array($result);
 
-			echo "<table><tr><th>".t("Valittu asiakas").":</th><td>$asiakasrow[nimi]</td></tr></table><br>";
+			echo "<table><tr><th>".t("Valittu asiakas").":</th><td>$asiakasrow[nimi]</td></td><td class='back'><input type='Submit' name='vaihda' value = '".t("Vaihda asiakasta")."'></td></tr></table><br>";
 		}
 		elseif ($toimittajaid > 0) {
 			$query  = "	SELECT concat_ws(' ', nimi, nimitark) nimi
@@ -325,7 +331,7 @@
 			$result = pupe_query($query);
 			$asiakasrow 	= mysql_fetch_array($result);
 
-			echo "<table><tr><th>".("Valittu toimittaja").":</th><td>$asiakasrow[nimi]</td></tr></table><br>";
+			echo "<table><tr><th>".("Valittu toimittaja").":</th><td>$asiakasrow[nimi]</td><td class='back'><input type='Submit' name='vaihda' value = '".t("Vaihda toimittajaa")."'></td></td></tr></table><br>";
 		}
 
 		echo "<table>";

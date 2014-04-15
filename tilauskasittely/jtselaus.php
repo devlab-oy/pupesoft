@@ -815,6 +815,11 @@
 			$saldoaikalisa = "";
 		}
 
+		// Jos ollaan automaattisesti toimittamassa JT-rivejä ja halutaan vaan toimittaa vain osatoimituskiellossa olevia tilauksia
+		if ($yhtiorow["automaattinen_jt_toimitus"] == "U" and $from_varastoon_inc == "varastoon.inc") {
+			$laskulisa .= " and lasku.osatoimitus != '' ";
+		}
+
 		$summarajauslisa = '';
 		$summarajausfail = '';
 		$query_ale_lisa = generoi_alekentta('M');
@@ -921,15 +926,23 @@
 							lasku.jtkielto,
 							'' as jt_manual
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
-							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
+								and lasku.tunnus = tilausrivi.otunnus
+								and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X'))
+								$laskulisa
+								$summarajauslisa)
+							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
+								and tuote.tuoteno = tilausrivi.tuoteno
+								$tuotelisa)
 							$toimittajalisa
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi 			= 'E'
 							and tilausrivi.var 		   	   != 'O'
 							and tilausrivi.laskutettuaika 	= '0000-00-00'
 							and tilausrivi.varattu 			> 0
-							and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
+							and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0)
+								or (tilausrivi.tunnus = tilausrivi.perheid2)
+								or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
 							$tilausrivilisa
 							$order
 							$limit";
@@ -1036,6 +1049,22 @@
 						$sjtres = pupe_query($query);
 
 						if (mysql_num_rows($sjtres) > 0) {
+							$onko_suoratoimi = "ON";
+						}
+					}
+
+					if ($mista_tullaan == 'MYYNTITILAUKSELTA' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $onko_suoratoimi == '') {
+						$query = "	SELECT t.tunnus AS siirtolistarivi_tunnus
+									FROM tilausrivin_lisatiedot AS tl
+									JOIN tilausrivi AS t
+									ON ( t.yhtio = tl.yhtio
+										AND t.tunnus = tl.tilausrivitunnus
+										AND t.tyyppi = 'G')
+									WHERE tl.yhtio = '{$kukarow['yhtio']}'
+									AND tl.tilausrivilinkki = {$jtrow['tunnus']}";
+						$siirtolista_result = pupe_query($query);
+
+						if (mysql_num_rows($siirtolista_result) > 0) {
 							$onko_suoratoimi = "ON";
 						}
 					}

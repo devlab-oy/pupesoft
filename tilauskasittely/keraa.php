@@ -1293,36 +1293,7 @@
 							$sresults = mysql_fetch_assoc($hakures);
 
 							if (mysql_num_rows($hakures) == 0) {
-								// lis‰t‰‰n tuotteelle tapahtuma
-								$select = "	INSERT into tuotepaikat set
-											yhtio 		= '$yhtiorow[yhtio]',
-											tuoteno 	= '{$rivin_puhdas_tuoteno[$apui]}',
-											hyllyalue	= '$reklahyllyalue',
-											hyllynro	= '$reklahyllynro',
-											hyllyvali	= '$reklahyllyvali',
-											hyllytaso	= '$reklahyllytaso',
-											laatija 	= '$kukarow[kuka]',
-											luontiaika 	= now(),
-											muutospvm 	= now(),
-											muuttaja	= '$kukarow[kuka]' ";
-								$result = pupe_query($select);
-
-								// tehd‰‰n tapahtuma
-								$select = "	INSERT into tapahtuma set
-											yhtio 		= '$kukarow[yhtio]',
-											tuoteno 	= '{$rivin_puhdas_tuoteno[$apui]}',
-											kpl 		= '0',
-											kplhinta	= '0',
-											hinta 		= '0',
-											laji 		= 'uusipaikka',
-											hyllyalue	= '$reklahyllyalue',
-											hyllynro	= '$reklahyllynro',
-											hyllyvali	= '$reklahyllyvali',
-											hyllytaso	= '$reklahyllytaso',
-											selite 		= '".t("Lis‰ttiin tuotepaikka")." $reklahyllyalue $reklahyllynro $reklahyllyvali $reklahyllytaso',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now()";
-								$result = pupe_query($select);
+								lisaa_tuotepaikka($rivin_puhdas_tuoteno[$apui], $reklahyllyalue, $reklahyllynro, $reklahyllyvali, $reklahyllytaso, "Reklamaation vastaanotossa", "", 0, 0, 0);
 							}
 						}
 					}

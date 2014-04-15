@@ -421,8 +421,8 @@
 			$toim_maa = $vtrow['maa'];
 		}
 
-		if (!isset($toimipaikka) or (isset($toimipaikka) and $toimipaikka === '')) {
-			$toimipaikka = $kukarow['toimipaikka'];
+		if (!isset($yhtio_toimipaikka)) {
+			$yhtio_toimipaikka = $kukarow['toimipaikka'];
 		}
 
 		$query .= "	lasku SET
@@ -433,7 +433,7 @@
 					yhtio_maa			= '$yhtiorow[maa]',
 					yhtio_ovttunnus		= '$yhtiorow[ovttunnus]',
 					yhtio_kotipaikka	= '$yhtiorow[kotipaikka]',
-					yhtio_toimipaikka	= '$toimipaikka',
+					yhtio_toimipaikka	= '{$yhtio_toimipaikka}',
 					clearing			= '$clearing',
 					maa					= '$vtrow[maa]',
 					nimi 				= '$vtrow[nimitys]',

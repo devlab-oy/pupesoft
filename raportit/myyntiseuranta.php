@@ -2615,6 +2615,9 @@
 										elseif ($vnim == "kateproskumul") {
 											if ($valisummat["myyntikumul"] <> 0)	$vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100,2);
 										}
+										elseif ($vnim == "kateproskumuled") {
+											if ($valisummat["myyntikumuled"] <> 0)	$vsum = round($valisummat["katekumuled"] / $valisummat["myyntikumuled"] * 100,2);
+										}
 										elseif ((string) $vsum != '') {
 											$vsum = sprintf("%.2f", $vsum);
 										}
@@ -3010,8 +3013,9 @@
 											$osre = pupe_query($query);
 
 											if (mysql_num_rows($osre) > 0) {
-												$osrow = mysql_fetch_assoc($osre);
-												$row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='_top'>{$osrow['sarjanumero']}</a><br>";
+												while ($osrow = mysql_fetch_assoc($osre)) {
+													$row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='_top'>{$osrow['sarjanumero']}</a><br>";
+												}
 											}
 										}
 										$row[$ken_nimi] = substr($row[$ken_nimi], 0, -4);
@@ -3157,6 +3161,9 @@
 								elseif ($vnim == "kateproskumul") {
 									if ($valisummat["myyntikumul"] <> 0)	$vsum = round($valisummat["katekumul"] / $valisummat["myyntikumul"] * 100,2);
 								}
+								elseif ($vnim == "kateproskumuled") {
+									if ($valisummat["myyntikumuled"] <> 0)	$vsum = round($valisummat["katekumuled"] / $valisummat["myyntikumuled"] * 100,2);
+								}
 								elseif ((string) $vsum != '') {
 									$vsum = sprintf("%.2f", $vsum);
 								}
@@ -3211,6 +3218,9 @@
 							}
 							if ($vnim == "kateproskumul") {
 								if ($totsummat["myyntikumul"] <> 0)		$vsum = round($totsummat["katekumul"] / $totsummat["myyntikumul"] * 100,2);
+							}
+							if ($vnim == "kateproskumuled") {
+								if ($totsummat["myyntikumuled"] <> 0)	$vsum = round($totsummat["katekumuled"] / $totsummat["myyntikumuled"] * 100,2);
 							}
 
 							if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";

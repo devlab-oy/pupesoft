@@ -657,7 +657,7 @@
 
 		if ($poistettu > 0) echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
 
-		$query = "	SELECT CONCAT(t.tuoteno,t.hyllyalue,t.hyllynro,t.hyllytaso,t.hyllyvali) AS id
+		$query = "	SELECT t.tunnus, CONCAT(t.tuoteno,t.hyllyalue,t.hyllynro,t.hyllytaso,t.hyllyvali) AS id
 					FROM tuotepaikat AS t
 					JOIN varastopaikat AS v
 					ON ( v.yhtio = t.yhtio
@@ -666,12 +666,14 @@
 					WHERE t.yhtio = '{$kukarow['yhtio']}'
 					AND t.saldo = 0
 					AND t.hyllytaso = 0
-					AND t.hyllyvali = 0";
+					AND t.hyllyvali = 0
+					AND t.oletus = ''
+					GROUP BY 1";
 		$result = pupe_query($query);
 
 		$query = "	SELECT CONCAT(tuoteno,hyllyalue,hyllynro,hyllytaso,hyllyvali) AS id
 					FROM tilausrivi
-					WHERE t.yhtio = '{$kukarow['yhtio']}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laskutettuaika = '0000-00-00'
 					AND tyyppi IN ('L','O','G')";
 		$avoinrivi_result = pupe_query($query);
@@ -689,10 +691,10 @@
 			}
 
 			$query = "	DELETE
-						FROM tuotepaikat AS t
-						WHERE t.yhtio = '{$kukarow['yhtio']}'
-						AND t.tunnus = {$poistettava_tuotepaikka['tunnus']}";
-			$result = pupe_query($query);
+						FROM tuotepaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = {$poistettava_tuotepaikka['tunnus']}";
+			$result2 = pupe_query($query);
 			if (mysql_affected_rows() > 0) {
 				$poistettu++;
 			}

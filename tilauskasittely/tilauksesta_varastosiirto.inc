@@ -367,6 +367,9 @@ if (!function_exists('hae_tilausrivit')) {
 						v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
 						a.selitetark_2 AS toimitustapa_tunnus,';
 		}
+		else {
+			$tilausrivi_where = " AND t.var not in ('P','J','O','S')";
+		}
 
 		$query = "	SELECT t.*,
 					{$select}
@@ -391,7 +394,7 @@ if (!function_exists('hae_tilausrivit')) {
 					WHERE t.yhtio = '{$kukarow['yhtio']}'
 					AND t.otunnus = {$otunnus}
 					{$tilausrivi_where}
-					AND t.tyyppi != 'D'";
+					AND t.tyyppi = 'L'";
 		$result = pupe_query($query);
 
 		$tilausrivit = array();

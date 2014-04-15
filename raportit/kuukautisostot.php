@@ -1066,7 +1066,10 @@
 				$result   = pupe_query($query);
 				$kulutrow = mysql_fetch_assoc($result);
 
-				$ennp = kappaleet_tila($row['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
+				$ennp_myynti = kappaleet_tila_myynti($row['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
+				$ennp_osto = kappaleet_tila_osto($row['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa);
+
+				$ennp = $ennp_myynti + $ennp_osto;
 
 				$saldo = array();
 				$saldo = saldo_funktio($row['tuoteno'], $varastot_yhtiot, $varastot, $paikoittain, $lisa, $row['yhtio']);
@@ -1889,7 +1892,10 @@
 									$ostohinta = substr($ostohinta, 0, -3);
 									$tuotteen_toimittajat_string = substr($tuotteen_toimittajat_string, 0, -3);
 
-									$vastaava_ennp = kappaleet_tila($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
+									$vastaava_ennp_myynti = kappaleet_tila_myynti($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
+									$vastaava_ennp_osto = kappaleet_tila_osto($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa);
+
+									$vastaava_ennp = $vastaava_ennp_myynti + $vastaava_ennp_osto;
 
 									if ($valitut["SARAKE{$_x}"] != '') {
 										//tuoteno
@@ -2901,25 +2907,41 @@
 		return $tuotteen_toimittajat;
 	}
 
-	function kappaleet_tila($tuoteno, $row_yhtio, $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa) {
+	function kappaleet_tila_myynti($tuoteno, $row_yhtio, $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT
-					sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
-					sum(if(tyyppi = 'O', varattu, 0)) tilattu,
-					sum(if((tyyppi = 'O' and kpl = 0 and varattu != 0 and uusiotunnus != 0), varattu, 0)) saapuneet,
+					sum(if(tyyppi IN ('W','M'), varattu, 0)) valmistuksessa,
 					sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
-					sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois,
-					sum(if(tyyppi in ('L','G') and var in ('J','S'), jt $lisavarattu, 0)) jt
+					sum(if(tyyppi IN ('L','V') AND var NOT IN ('P','J','O','S'), varattu, 0)) ennpois,
+					sum(if(tyyppi IN ('L','G') AND var IN ('J','S'), jt $lisavarattu, 0)) jt
 					$varastolisa
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 					{$ei_vienteja_lisa}
 					{$ei_asiakkaan_myynteja_lisa}
 					WHERE tilausrivi.yhtio = '{$row_yhtio}'
-					and tilausrivi.tyyppi in ('L','V','O','G','E','W','M')
-					and tilausrivi.tuoteno = '{$tuoteno}'
-					and tilausrivi.laskutettuaika = '0000-00-00'
-					and (tilausrivi.varattu+tilausrivi.jt > 0)";
+					AND tilausrivi.tyyppi IN ('L','V','G','E','W','M')
+					AND tilausrivi.tuoteno = '{$tuoteno}'
+					AND tilausrivi.laskutettuaika = '0000-00-00'
+					AND (tilausrivi.varattu+tilausrivi.jt > 0)";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+
+	function kappaleet_tila_osto($tuoteno, $row_yhtio, $lisavarattu, $varastolisa) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT
+					sum(if(tyyppi = 'O', varattu, 0)) tilattu,
+					sum(if((tyyppi = 'O' and kpl = 0 and varattu != 0 and uusiotunnus != 0), varattu, 0)) saapuneet
+					$varastolisa
+					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+					WHERE tilausrivi.yhtio = '{$row_yhtio}'
+					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.tuoteno = '{$tuoteno}'
+					AND tilausrivi.laskutettuaika = '0000-00-00'
+					AND (tilausrivi.varattu+tilausrivi.jt > 0)";
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);

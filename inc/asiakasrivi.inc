@@ -1190,9 +1190,8 @@
 		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('A' => '', 'U' => '');
 
 		$ulos .= "<option value = ''>".t("Käytetään yhtiön oletuksia")."</option>";
-		$ulos .= "<option value = 'A' {$sel['A']}>".t("Veloitukset ja hyvitykset samalle laskulle")."</option>";
-		$ulos .= "<option value = 'U' {$sel['U']}>".t("Veloitukset ja hyvitykset erikseen")."</option>";
-
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Reklamaatio-/takuutilauksia ei jaeta omalle laskulle")."</option>";
+		$ulos .= "<option value = 'U' {$sel['U']}>".t("Reklamaatio-/takuutilaukset laskutetaan omalla laskulla")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

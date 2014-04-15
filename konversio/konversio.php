@@ -1,7 +1,7 @@
 <?php
 
 ini_set("memory_limit", "5G");
-
+$compression=false;
 require("../inc/parametrit.inc");
 require_once('VauriopoytakirjaCSVDumper.php');
 

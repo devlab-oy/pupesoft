@@ -2239,6 +2239,7 @@ if (!$cli and !isset($api_kentat)) {
 		'asiakkaan_avainsanat'            => 'Asiakkaan avainsanat',
 		'avainsana'                       => 'Avainsanat',
 		'budjetti'                        => 'Budjetti',
+		'dynaaminen_puu_avainsanat'		  => 'Dynaamisen puun avainsanat',
 		'etaisyydet'                      => 'Etäisyydet varastosta',
 		'extranet_kayttajan_lisatiedot'   => 'Extranet-käyttäjän lisätietoja',
 		'hinnasto'                        => 'Hinnasto',

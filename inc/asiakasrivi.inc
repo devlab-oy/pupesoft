@@ -1183,7 +1183,19 @@
 
 		$jatko = 0;
 	}
+	if (mysql_field_name($result, $i) == "koontilaskut_yhdistetaan") {
 
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('A' => '', 'U' => '');
+
+		$ulos .= "<option value = ''>".t("Käytetään yhtiön oletuksia")."</option>";
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Reklamaatio-/takuutilauksia ei jaeta omalle laskulle")."</option>";
+		$ulos .= "<option value = 'U' {$sel['U']}>".t("Reklamaatio-/takuutilaukset laskutetaan omalla laskulla")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 	if (mysql_field_name($result, $i) == 'kerayserat') {
 
 		if ($yhtiorow['kerayserat'] == 'A') {

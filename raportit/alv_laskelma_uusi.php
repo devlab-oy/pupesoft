@@ -13,7 +13,6 @@
 	306 "Vero palveluostoista muista EU maista"
 	307 "Kohdekuukauden vähennettävä vero"
 	309 "0-verokannan alainen liikevaihto"
-	310 "Muu arvonlisäveroton liikevaihto"
 	311 "Tavaran myynti muihin EU-maihin"
 	312 "Palveluiden myynti muihin EU-maihin"
 	313 "Tavaraostot muista EU-maista"
@@ -234,15 +233,9 @@
 			// Palveluostot muista EU-maista
 			$taso = 'fi306';
 		}
-		elseif ($ryhma == 'fi309' or $ryhma == 'fi310') {
+		elseif ($ryhma == 'fi309') {
 			// Muu/0-verokannan alainen liikevaihto
-			if ($ryhma == 'fi309') {
-				$taso = "fi309%' or alv_taso like '%fi300";
-			}
-			else {
-				$taso = "fi310%";
-			}
-
+			$taso = "fi309%' or alv_taso like '%fi300";
 			$kerroin = ' * -1 ';
 		}
 		else {
@@ -954,9 +947,6 @@
 			// 309 sääntö fi309
 			$fi309 = laskeveroja('fi309','summa') * -1;
 
-			// 310 sääntö fi310
-			$fi310 = laskeveroja('fi310','summa') * -1;
-
 			// 311 sääntö fi311
 			$fi311 = laskeveroja('fi311','summa');
 
@@ -1022,7 +1012,6 @@
 
 			echo "<tr><th colspan='2'></th></tr>";
 			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi309&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>309</a> ",t("0-verokannan alainen liikevaihto"),"</td><td align='right'>".sprintf('%.2f',$fi309)."</td></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi310&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>310</a> ",t("Muu arvonlisäveroton liikevaihto"),"</td><td align='right'>".sprintf('%.2f',$fi310)."</td></tr>";
 
 			echo "<tr><th colspan='2'></th></tr>";
 			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi311&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>311</a> ",t("Tavaran myynti muihin EU-maihin"),"</td><td align='right'>".sprintf('%.2f',$fi311)."</td></tr>";
@@ -1126,7 +1115,6 @@
 				$file .= "307:".round($fi307*100,0)."\n";
 				$file .= "308:".round($fi308*100,0)."\n";
 				$file .= "309:".round($fi309*100,0)."\n";
-				$file .= "310:".round($fi310*100,0)."\n";
 				$file .= "311:".round($fi311*100,0)."\n";
 				$file .= "312:".round($fi312*100,0)."\n";
 				$file .= "313:".round($fi313*100,0)."\n";

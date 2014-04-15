@@ -41,7 +41,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 
 				linkkaa_myyntitilausrivi_siirtolistariviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 
-				$kommentit[] = t('Tilauksen')." {$myyntitilaus['tunnus']} ".t('tilausrivi')." {$tilausrivi['tuoteno']} - {$tilausrivi['tilkp']} {$tilausrivi['yksikko']} ".t('lisättiin siirtolistalle')." {$siirtolista['tunnus']}";
+				$kommentit[] = t('Tilauksen')." {$myyntitilaus['tunnus']} ".t('tilausrivi')." {$tilausrivi['tuoteno']} - {$tilausrivi['tilkpl']} {$tilausrivi['yksikko']} ".t('lisättiin siirtolistalle')." {$siirtolista['tunnus']}";
 			}
 
 			tilaus_valmis_siirtolista($siirtolista);

@@ -363,12 +363,17 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
 		#Poistetaan vanha backuppi
 		if $MYSQLBACKUP; then
 			rm -f ${REMOTELOCALDIR}/${DBKANTA}-backup-*
+			rm -f ${REMOTELOCALDIR}/${DBKANTA}-binlog-*
 		fi
 
 		rm -f ${REMOTELOCALDIR}/linux-backup-*
 
 		# Siirretään tämä
-		cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTELOCALDIR}
+		if $MYSQLBACKUP; then
+			cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTELOCALDIR}
+			cp ${BACKUPDIR}/${DBKANTA}-binlog-${FILEDATE}* ${REMOTELOCALDIR}
+		fi
+
 		cp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTELOCALDIR}
 
 		umount ${REMOTELOCALDIR}
@@ -379,7 +384,7 @@ fi
 if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
 	# Siirretään failit remoteserverille
 	if $MYSQLBACKUP; then
-		scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+		scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${BACKUPDIR}/${DBKANTA}-binlog-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
 	fi
 
 	scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
@@ -389,6 +394,15 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
 
 	# Pidetään master serverillä vain uusin backuppi
 	BACKUPPAIVAT=1
+fi
+
+#Siirretäänkö tuorein backuppi myös ftp-serverille jos sellainen on konffattu
+if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "FTP" ]; then
+	if $MYSQLBACKUP; then
+		ncftpput -u ${REMOTEUSER} -p ${REMOTEPASS} ${REMOTEHOST} ${REMOTEREMDIR} ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${BACKUPDIR}/${DBKANTA}-binlog-${FILEDATE}*
+	fi
+
+	ncftpput -u ${REMOTEUSER} -p ${REMOTEPASS} ${REMOTEHOST} ${REMOTEREMDIR} ${BACKUPDIR}/linux-backup-${FILEDATE}*
 fi
 
 # Siivotaan vanhat backupit pois

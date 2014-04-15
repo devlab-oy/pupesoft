@@ -1265,8 +1265,8 @@ if (!function_exists('rivi_lahete')) {
 			$page[$sivu] = $thispage;
 		}
 
-		// JT-rivit pikkasen alaspäin omalla otsikolla
-		if ((!isset($jtid) or $jtid == 0) and $row["jtsort"] == 1) {
+		// JT-rivit pikkasen alaspäin omalla otsikolla (ei tehdä JT-otsikkoa, jos tilausta ei osatoimiteta)
+		if ((!isset($jtid) or $jtid == 0) and $row["jtsort"] == 1 and $laskurow['osatoimitus'] == '') {
 
 			if (isset($jtid)) $kala = $kala-10;
 
@@ -1556,7 +1556,7 @@ if (!function_exists('rivi_lahete')) {
 				$row['varattu_viivakoodi'] = $kpl_rivilla*1;
 			}
 			else {
-				if ($row["var"] == 'J' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') { // jälkitoimitus
+				if ($row["var"] == 'J' and $laskurow['osatoimitus'] == '' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') { // jälkitoimitus
 					$row['varattu'] = t("**JT**", $kieli);
 					$row['varattu_viivakoodi'] = 0;
 				}

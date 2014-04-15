@@ -536,7 +536,7 @@ else {
 			$result = pupe_query($query);
 		}
 
-		if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+		if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
 			require("inc/sahkoinen_lahete.class.inc");
 
@@ -983,7 +983,7 @@ else {
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
 
-				if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+				if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
 					require("inc/sahkoinen_lahete.class.inc");
 
@@ -1837,7 +1837,7 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
-					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+					if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
 						require("inc/sahkoinen_lahete.class.inc");
 
@@ -1879,7 +1879,7 @@ else {
 						laheta_tilausvahvistus($params_tilausvahvistus);
 					}
 
-					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+					if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
 						require("inc/sahkoinen_lahete.class.inc");
 

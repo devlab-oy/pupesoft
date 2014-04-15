@@ -1588,7 +1588,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 	$jtoikeudetres = pupe_query($query);
 
 	if ((mysql_num_rows($jtoikeudetres) > 0 and $yhtiorow["automaattinen_jt_toimitus"] != "") or
-		in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A'))) {
+		in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A', 'U'))) {
 
 		$jtoikeudetrow = mysql_fetch_assoc($jtoikeudetres);
 		$mista = 'varastoon.inc';
@@ -1610,16 +1610,16 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 			$jt_huomioi_pvm = "";
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','S','V')) and count($jtrivit) > 0) {
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','S','V','U')) and count($jtrivit) > 0) {
 			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "vakisin", "JATKA", '', '', $jt_huomioi_pvm, 'TULOUTUS');
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A'))) {
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','U'))) {
 			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "", "tosi_automaaginen", "JATKA", '', '', $jt_huomioi_pvm);
 		}
 
 		//	Laitetaan tavarat liikkeelle jos sallitaan!
-		if (($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','S','V'))) or in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A'))) {
+		if (($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','S','V'))) or in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A', 'U'))) {
 			jt_toimita("", "", "", "", "", "dummy", "TOIMITA", '', '', $jt_huomioi_pvm);
 		}
 	}

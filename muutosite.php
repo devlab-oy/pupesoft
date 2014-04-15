@@ -1208,6 +1208,15 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
 		}
 
+		if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K') {
+			echo "<tr>";
+			echo "<th>".t('Varastosiirtotosite')."</th>";
+			echo "<td colspan='5'>";
+			echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus={$trow['vanhatunnus']}&lopetus={$palvelin2}myyntires/myyntilaskuhaku.php////tee=N'>".t('Varastosiirto').": {$trow['vanhatunnus']}</a>";
+			echo "</td>";
+			echo "</tr>";
+		}
+
 		echo "<tr><th colspan='3'>".t("Selite tiliöinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
 
 		// Lopetaaan koko table

@@ -2703,6 +2703,7 @@
 
 				$vlask++;
 			}
+
 			echo "</table><br><br>";
 			echo "<table>";
 			echo "<tr><th colspan='4'>".t("Omat hälytysraportit")."</th></tr>";
@@ -2726,6 +2727,7 @@
 						and laji = 'HALYRAP'
 						ORDER BY selite";
 			$sresult = pupe_query($query);
+
 			echo "<select name='rappari' onchange='submit()'>";
 			echo "<option value=''>".t("Näytä kaikki")."</option>";
 
@@ -2738,12 +2740,9 @@
 
 				echo "<option value='$srow[selite]' $sel>$srow[nimi]</option>";
 			}
-
 			echo "<input type='Submit' name='POISTA' value = '".t("Poista valittu raporttipohja")."'>";
 
 			echo "</select>";
-
-
 
 			echo "</td></tr>";
 

@@ -61,6 +61,7 @@
 		$avain_sel['ASIAKASLUOKKA'] == "SELECTED" or
 		$avain_sel['ASIAKASOSASTO'] == "SELECTED" or
 		$avain_sel['ASIAKASRYHMA'] == "SELECTED" or
+		$avain_sel['DPAVAINSANALAJI'] == "SELECTED" or
 		$avain_sel['HENKILO_OSASTO'] == "SELECTED" or
 		$avain_sel['INVEN_LAJI'] == "SELECTED" or
 		$avain_sel['KAANTALVVIESTI'] == "SELECTED" or
@@ -261,6 +262,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON") 	 	$ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>        	".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")  	$ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>	".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")	$ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>	".t("Saldovahvistuksen viesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") 		$ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>				".t("Dynaamisen puun avainsanojen laji")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -672,6 +674,18 @@
 			$sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
 			$ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]} - {$row["selitetark"]}</option>";
 		}
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if ($avain_sel["DPAVAINSANALAJI"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
+
+		$sel = $trow[$i] == 'TUOTE' ? "selected" : "";
+
+		$ulos = "<td><select name = '{$nimi}'>";
+		$ulos .= "<option value = 'ASIAKAS'>".t("Asiakas")."</option>";
+		$ulos .= "<option value = 'TUOTE' {$sel}>".t("Tuote")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

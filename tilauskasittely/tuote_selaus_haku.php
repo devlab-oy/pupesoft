@@ -425,6 +425,12 @@
 		}
 	}
 
+	if (!isset($saldotonrajaus)) $saldotonrajaus = '';
+	if ($saldotonrajaus != '') {
+		$saldotoncheck = "CHECKED";
+		$ulisa .= "&saldotonrajaus=checked";
+	}
+	
 	if (!isset($poistetut)) {
 		$poistetut = '';
 	}
@@ -745,6 +751,10 @@
 			echo "<tr><th>".t("Lisätiedot")."</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
 		}
 
+		if ($kukarow['extranet'] == "" and $verkkokauppa == "") {
+			echo "<tr><th>".t("Näytä vain saldolliset tuotteet")."</th><td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td></tr>";
+		}
+
 		echo "</table><br/>";
 
 		if ($hae_ja_selaa_row['selite'] == 'B') {
@@ -1009,7 +1019,8 @@
 		if (mysql_num_rows($result) > 0) {
 
 			$rows = array();
-
+			$vastaavastas = array();
+			$rotta = "";
 			// Rakennetaan array ja laitetaan vastaavat ja korvaavat mukaan
 			while ($mrow = mysql_fetch_assoc($result)) {
 
@@ -1029,11 +1040,15 @@
 							while ($krow = mysql_fetch_assoc($kores)) {
 
 								if (isset($vastaavamaara)) {
+									// poimitaan isätuotteet
+									$vastaavastas[$mrow['tuoteno']] = array();
 									$krow["vastaavamaara"] = $vastaavamaara;
+									$rotta = $mrow["vastaavat"].$mrow["tuoteno"];
 									unset($vastaavamaara);
 								}
 								else {
 									$krow["mikavastaava"] = $mrow["tuoteno"];
+									$vastaavastas[$rotta][$krow['tuoteno']] = $krow['tuoteno'];
 								}
 
 								if (!isset($rows[$mrow["vastaavat"].$krow["tuoteno"]])) $rows[$mrow["vastaavat"].$krow["tuoteno"]] = $krow;
@@ -1192,6 +1207,55 @@
 						echo t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tme'", "", "", "selite")." ";
 
 						$i++;
+					}
+				}
+
+				// Rajataan saldottomat pois
+				if ($saldotonrajaus != '') {
+					$_tmp = $vastaavastas;
+					$isi = "";
+					$poistettavat_perheet = array();
+
+					foreach ($rows as $row_key => $row_value) { 
+						$ei_piirreta = FALSE;
+						$apunumero = $row_value['tuoteno'];
+						if (isset($vastaavastas[$row_value['tuoteno']])) $isi = $row_key;
+
+						if ($row_value["tuoteperhe"] == "" and $row_value['ei_saldoa'] == '') {
+							list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+						}
+						elseif ($row_value['ei_saldoa'] == '') {
+
+							$myytavissa_tp = tuoteperhe_myytavissa($row_value["tuoteno"], "", "KAIKKI", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+
+							$myytavissa = 0;
+							foreach ($myytavissa_tp as $varasto => $myytakissa) {
+								$myytavissa += $myytakissa;
+							}
+						}
+
+						// Vain saldolliset tuotteet voivat triggeraa tämän
+						if ($myytavissa == 0 and $row_value['ei_saldoa'] == '') {
+							$ei_piirreta = TRUE;
+						}
+
+						if ($ei_piirreta) {
+							// Poistetaan tuoteperheettömiä
+							if (!isset($vastaavastas[$row_value['tuoteno']]) and $row_value['tuoteperhe'] == '') {
+								unset($vastaavastas["{$isi}"]["{$row_value['tuoteno']}"]);
+								unset($rows["{$row_key}"]);
+							}
+							else {
+						 	// Poistettavat tuoteperheet koppi
+								if($row_value['tuoteperhe'] != '') $poistettavat_perheet[] = $row_value['tuoteperhe'];
+							}
+							continue;
+						}
+					}
+
+					// Poistetaan vielä kokonaiset tuoteperheet jos oli saldottomia lapsia
+					foreach ($rows as $row_key => $row_value) {
+						if (in_array($row_value['tuoteperhe'], $poistettavat_perheet) and $row_value['tuoteperhe'] != '') unset($rows[$row_key]);
 					}
 				}
 
@@ -1378,7 +1442,8 @@
 			}
 
 			$isan_kuva = '';
-			foreach ($rows as &$row) {
+
+			foreach ($rows as $row_key => &$row) {
 
 				if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
 					$hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];
@@ -1411,8 +1476,10 @@
 
 				echo "<tr class='aktiivi'>";
 
-				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
-					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$row["vastaavamaara"]}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
+				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0 and $row['vastaavat'] != '' or ($saldotonrajaus != '' and $row['mikavastaava'] != '')) {
+					$vastaavarivimaara = $row["vastaavamaara"];
+					if ($saldotonrajaus != '') $vastaavarivimaara = 1;
+					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$vastaavarivimaara}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
 				elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {
 					echo "<td class='back'></td>";

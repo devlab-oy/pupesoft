@@ -233,8 +233,7 @@ elseif ($edi_tyyppi == "edifact911_crossdock") {
 
 		// CrossDock-versiossa ostaja ja tuotetiedot tulevat eri järjestyksessä joten muutetaan malliin joka osataan lukea
 		require("splittaa_crossdock_editilaus.inc");
-		// Tyyppi vaihtuu
-		$edi_tyyppi = "EDI";
+
 		unset($order_tietosisalto);
 }
 else {
@@ -243,7 +242,7 @@ else {
 }
 
 $edi_ulos .= "$edi_subj\n";
-var_dump($tietue);
+
 while ($tietue = fgets($fd)) {
 
 	// Tyhjät rivit skipataan
@@ -584,7 +583,7 @@ while ($tietue = fgets($fd)) {
 							and toim_ovttunnus not in ('','0')
 							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
-
+				query_dump($query);
 				if (mysql_num_rows($result) == 1) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
@@ -916,7 +915,7 @@ while ($tietue = fgets($fd)) {
 				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
 				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_array($meapu);
-
+				
 				$maksaja = $apuro['merahti'];
 
 				// Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
@@ -1553,7 +1552,7 @@ while ($tietue = fgets($fd)) {
 							$kieltolisa
 							ORDER BY tunnus";
 				$result = mysql_query($query) or die($query);
-
+				query_dump($query);
 				if (mysql_num_rows($result) == 0) {
 					///* Lisätään tilaukselle dummytuote ja kommentti *///
 					$edi_ulos .= t("Rivi")." $rivinumero EAN '$tieto' ".t("ei löydy")."!\n";
@@ -1651,22 +1650,23 @@ while ($tietue = fgets($fd)) {
 				// BGM kentässä tulee 'BGM+QQQ+ABCDEFGHIJKLM'
 				// QQQ = arvot, 105=tilaus, 640=toimituskehoitus, 221=plokkitilaus/ennakkotilaus
 				// ABCDEFGHIJKLM = tossa tulee myymälän tilausnumero, joka pitäisi olla sama kuin RFF+VN kentän arvo.
-
 				if ($asiakkaan_tilausnumero == "" and $kentat_bgm[0] == '105' and $kentat_bgm[1] != "") {
 					$asiakkaan_tilausnumero = $kentat_bgm[1];
 					$viite = $kentat_bgm[1]. ' ';
-					break;
+					//break;
 				}
 
 				// Orders 91.1 tulee kaksi RFF segmenttiä (VN ja WS). VN otsikon viite, joten ei liity tilausriveihin. WS on tilausrivin loppumisen merkki.
 				if ($kentat[0] == "VN" and $asiakkaan_tilausnumero == "") {
 					$asiakkaan_tilausnumero = $kentat[1];
 					$viite = $kentat[1]. ' ';
-					break;
+					//break;
 				}
 			}
-
+			echo "ennnen otsikkoa\n";
+			if ($editilaus_otsikko_ok == "KYLLA") echo "MALLIKAS $editilaus_otsikko_ok\n";
 			if ($editilaus_otsikko_ok == "KYLLA") {
+				echo "OTSIKKO OK\n";
 		 		// jos tuote on löytynyt ok
 				if ($tuoteerror == 0) {
 
@@ -1904,6 +1904,7 @@ while ($tietue = fgets($fd)) {
 								tyyppi 		= '$editilaus_tyyppi',
 								kommentti 	= '$kommentti'";
 					$result = mysql_query($query) or die($query);
+
 				}
 			}
 

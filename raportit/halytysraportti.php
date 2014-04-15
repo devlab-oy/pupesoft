@@ -2740,9 +2740,10 @@
 
 				echo "<option value='$srow[selite]' $sel>$srow[nimi]</option>";
 			}
-			echo "<input type='Submit' name='POISTA' value = '".t("Poista valittu raporttipohja")."'>";
 
 			echo "</select>";
+			
+			echo "<input type='Submit' name='POISTA' value = '".t("Poista valittu raporttipohja")."'>";
 
 			echo "</td></tr>";
 

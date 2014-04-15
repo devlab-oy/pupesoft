@@ -508,6 +508,7 @@ function echo_laitteet_table($laitteet = array()) {
 
 	echo "<table class='laitteet_table_hidden'>";
 	echo "<tr>";
+	echo "<th>".t("Oma numero")."</th>";
 	echo "<th>".t("Tuotenumero")."</th>";
 	echo "<th>".t("Tuotteen nimi")."</th>";
 	echo "<th>".t("Sijainti")."</th>";
@@ -520,6 +521,10 @@ function echo_laitteet_table($laitteet = array()) {
 
 	foreach ($laitteet as $laite) {
 		echo "<tr>";
+		
+		echo "<td>";
+		echo $laite['oma_numero'];
+		echo "</td>";
 
 		echo "<td>";
 		if (empty($kukarow['extranet'])) {

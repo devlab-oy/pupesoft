@@ -70,9 +70,11 @@ function hae_tyomaaraykset($request) {
 	if ($request['toim'] == 'TEHDYT_TYOT') {
 		$lasku_where .= "	AND lasku.tila = 'L'
 							AND lasku.alatila = 'D'";
+		$lasku_order = " lasku.toimaika DESC,";
 	}
 	else {
 		$lasku_where .= "	AND lasku.tila = 'A'";
+		$lasku_order = " lasku.toimaika ASC,";
 	}
 
 	if (!empty($request['asiakas_tunnus'])) {
@@ -194,7 +196,7 @@ function hae_tyomaaraykset($request) {
 					AND a2.selite = tyomaarays.tyostatus )
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				{$lasku_where}
-				ORDER BY lasku.toimaika ASC,
+				ORDER BY {$lasku_order}
 				kohde.tunnus ASC,
 				laite.oma_numero ASC";
 	$result = pupe_query($query);

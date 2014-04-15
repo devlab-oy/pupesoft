@@ -2703,18 +2703,16 @@
 
 				$vlask++;
 			}
-
 			echo "</table><br><br>";
 			echo "<table>";
 			echo "<tr><th colspan='4'>".t("Omat hälytysraportit")."</th></tr>";
-
-			echo "<input type='Submit' name='POISTA' value = '".t("Poista raporttipohja")."'>";
 
 			if (isset($POISTA) AND isset($rappari) AND $rappari != "") {
 				$query = "	DELETE FROM avainsana
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND selite = '$rappari'";
 				pupe_query($query);
+				$rappari = "";
 				echo "<font class='error'>".t("Raporttipohja poistettu")."! </font><br>";
 			}
 
@@ -2728,7 +2726,6 @@
 						and laji = 'HALYRAP'
 						ORDER BY selite";
 			$sresult = pupe_query($query);
-
 			echo "<select name='rappari' onchange='submit()'>";
 			echo "<option value=''>".t("Näytä kaikki")."</option>";
 
@@ -2741,9 +2738,16 @@
 
 				echo "<option value='$srow[selite]' $sel>$srow[nimi]</option>";
 			}
+
+			echo "<input type='Submit' name='POISTA' value = '".t("Poista valittu raporttipohja")."'>";
+
 			echo "</select>";
 
+
+
 			echo "</td></tr>";
+
+
 
 			$lask = 0;
 			echo "<tr>";

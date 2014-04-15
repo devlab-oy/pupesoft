@@ -26,21 +26,20 @@
 	}
 
 	if ($yhtiorow['vauriopoytakirja'] == 'K') {
-		$try_result = t_avainsana('try', '', " AND selite IN ({$kukarow['try']}) AND selitetark_3 = ''");
+		if (!empty($kukarow['try'])) {
+			$try_result = t_avainsana('try', '', " AND selite IN ({$kukarow['try']}) AND selitetark_3 = ''");
 
-		$tuoteryhmat = array();
-		while($tuoteryhma = mysql_fetch_assoc($try_result)) {
-			if (in_array($tuoteryhma['selite'], explode(',', $kukarow['try']))) {
-				$tuoteryhmat[] = $tuoteryhma['selite'];
+			$tuoteryhmat = array();
+			while($tuoteryhma = mysql_fetch_assoc($try_result)) {
+				if (in_array($tuoteryhma['selite'], explode(',', $kukarow['try']))) {
+					$tuoteryhmat[] = $tuoteryhma['selite'];
+				}
 			}
 		}
 
+		//admin näkee kaikki tuotteet
 		if (!empty($tuoteryhmat) and !stristr($kukarow['profiilit'], 'admin')) {
 			$rajauslisa = "	AND tuote.try IN (".implode(',', $tuoteryhmat).")";
-		}
-		else {
-			//admin näkee kaikki tuotteet
-			$rajauslisa = "	AND tuote.try IN ({$kukarow['try']})";
 		}
 	}
 

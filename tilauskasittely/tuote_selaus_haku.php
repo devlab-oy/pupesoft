@@ -1458,7 +1458,7 @@
 
 			$isan_kuva = '';
 
-			foreach ($rows as $row_key => &$row) {
+			foreach ($rows as $row_key => $row) {
 
 				if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
 					$hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];

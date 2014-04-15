@@ -2746,8 +2746,6 @@
 
 			echo "</td></tr>";
 
-
-
 			$lask = 0;
 			echo "<tr>";
 

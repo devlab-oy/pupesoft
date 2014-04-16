@@ -154,6 +154,7 @@ abstract class CSVDumper {
 
 			array_walk($rivi, array($this, 'escape_single_quotes'));
 			array_walk($rivi, 'trim');
+			array_walk($rivi, array($this, 'decode_utf8'));
 
 			$rivit[] = $rivi;
 
@@ -241,6 +242,10 @@ abstract class CSVDumper {
 
 	private function escape_single_quotes(&$item, $key) {
 		$item = str_replace("'", "\'", $item);
+	}
+
+	private function decode_utf8(&$item, $key) {
+		$item = utf8_decode($item);
 	}
 
 	protected function all_required_keys_found($rivi) {

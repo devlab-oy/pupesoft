@@ -58,10 +58,10 @@ class TuoteCSVDumper extends CSVDumper {
 					$rivi_temp[$konvertoitu_header] = substr($rivi[$csv_header], 0, 2);
 				}
 				else if ($konvertoitu_header == 'tuotetyyppi') {
-					if (trim(strtolower($rivi[$csv_header])) == 'tuote') {
+					if (trim(strtolower($rivi[$csv_header])) == 'tuote' or trim($rivi[$csv_header]) == 'R') {
 						$rivi_temp[$konvertoitu_header] = 'R';
 					}
-					else if (trim(strtolower($rivi[$csv_header])) == 'palvelutuote') {
+					else if (trim(strtolower($rivi[$csv_header])) == 'palvelutuote' or trim($rivi[$csv_header]) == 'K') {
 						$rivi_temp[$konvertoitu_header] = 'K';
 					}
 					else {
@@ -69,7 +69,7 @@ class TuoteCSVDumper extends CSVDumper {
 					}
 				}
 				else if ($konvertoitu_header == 'ei_saldoa') {
-					if (trim(strtolower($rivi[$csv_header])) == 'palvelutuote') {
+					if (trim(strtolower($rivi[$csv_header])) == 'palvelutuote' or trim(strtolower($rivi[$csv_header])) == 'o') {
 						$rivi_temp[$konvertoitu_header] = 'o';
 					}
 					else {

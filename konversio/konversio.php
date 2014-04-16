@@ -208,11 +208,11 @@ if ($request['action'] == 'aja_konversio') {
 		$dumper = new TuotteenavainsanaToimenpideCSVDumper($request['kukarow']);
 		$dumper->aja();
 
-		$dumper = new TuoteryhmaCSVDumper($request['kukarow']);
-		$dumper->aja();
-
-		$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
-		$dumper->aja();
+//		$dumper = new TuoteryhmaCSVDumper($request['kukarow']);
+//		$dumper->aja();
+//
+//		$dumper = new TuotteenavainsanaLaiteCSVDumper($request['kukarow']);
+//		$dumper->aja();
 
 		$dumper = new TuotteenavainsanaLaite2CSVDumper($request['kukarow']);
 		$dumper->aja();

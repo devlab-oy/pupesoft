@@ -91,7 +91,7 @@
 					FROM lasku
 					LEFT JOIN tilausrivi on( tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.tila in ('N','E','L')
+					AND lasku.tila in ('N','E','L', 'G')
 					AND lasku.alatila != 'X'
 					AND tilausrivi.tunnus is null";
 		$result = pupe_query($query);
@@ -126,7 +126,7 @@
 					from lasku
 					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					where lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila in ('N','E','L')
+					and lasku.tila in ('N','E','L','G')
 					and lasku.alatila != 'X'
 					group by 1,2
 					having dellatut > 0 and kaikki = dellatut";

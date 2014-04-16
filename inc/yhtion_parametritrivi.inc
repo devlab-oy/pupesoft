@@ -298,8 +298,8 @@
 
 		$ulos .= "<option value = ''>".t("Asiakkaan laskutusosoitteella")."</option>";
 		$ulos .= "<option value = 'T' {$sel['T']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
-		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot erikseen")."</option>";
-		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot erikseen")."</option>";
+		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot/takuut erikseen")."</option>";
+		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot/takuut erikseen")."</option>";
 
 		$ulos .= "</select></td>";
 
@@ -909,6 +909,21 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "kirjanpidollinen_varastosiirto_myyntitilaukselta") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksesta ei luoda kirjanpidollisia varastosiirtoja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksesta luodaan kirjanpidollisia varastosiirtoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "automaattinen_jt_toimitus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -923,6 +938,7 @@
 		$ulos .= "<option value='A' $sel[A]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sekä myyntitilaukselta varastoon tilatut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "<option value='U' $sel[U]>".t("Osatoimituskiellossa olevien tilausten jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -37,6 +37,7 @@ else {
 		'tilausten_lukumaara' => $tilausten_lukumaara,
 		'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
 		'tuotenumero' => $tuotenumero,
+		'ennaltakohdistettu' => $ennaltakohdistettu,
 	);
 
 	$url = http_build_query($data);
@@ -207,7 +208,7 @@ if (isset($submit) and trim($submit) != '') {
 						$_viesti = 'Saapumisessa';
 					}
 
-					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, '', $halytysraja, $tilausmaara);
+					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, "", $halytysraja, $tilausmaara);
 				}
 				else {
 					// Nollataan poistettava kenttä varmuuden vuoksi
@@ -504,8 +505,8 @@ echo "	<tr>
 		</tr>";
 
 /*
-Jos yhtiöllä ei ole ns. oletuspaikka-käsitettä (varastoja on paljon ja ei ole "päävarastoa", joten ei tiedetä missä on oletuspaikka), 
-niin ei anneta siirtää saldoja tai vaihtaa oletuspaikkaa 
+Jos yhtiöllä ei ole ns. oletuspaikka-käsitettä (varastoja on paljon ja ei ole "päävarastoa", joten ei tiedetä missä on oletuspaikka),
+niin ei anneta siirtää saldoja tai vaihtaa oletuspaikkaa
 */
 $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 

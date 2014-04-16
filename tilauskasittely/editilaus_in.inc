@@ -6,7 +6,7 @@ $edi_ulos = "\n";
 // Kutsutaanko CLI:stä
 $php_cli = FALSE;
 
-if (php_sapi_name() == 'cli') {
+if (php_sapi_name() == 'cli' and !isset($kasitellaan_splitattuja_crossdock_edifact911)) {
 	$php_cli = TRUE;
 }
 
@@ -33,7 +33,6 @@ if ($php_cli) {
 
 	// Pupeasennuksen root
 	$pupe_root_polku = dirname(dirname(__FILE__));
-	if (isset($kasitellaan_splitattuja_crossdock_edifact911)) $edi_tyyppi = "edifact911";
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
@@ -2192,6 +2191,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
 	$content .= "--$bound--\n";
 
 //kissa
+	echo "LOLTS tänne lähtis -> {$yhtiorow['edi_email']}\n";
 	$yhtiorow["edi_email"] = "mika@devlab.fi";
 	$boob = mail($yhtiorow["edi_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }

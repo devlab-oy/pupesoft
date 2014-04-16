@@ -108,17 +108,17 @@ foreach ($arska as $key => &$value) {
 
 		// Splitist‰ oletaan takaisin lukukelpoisia edifact 91.1 tilauksia
 		$edi_tyyppi = $tyyppi = "edifact911";
+
 		// avataan tiedosto uudestaan
 		if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus ep‰onnistui")."!\n");
 
 		//jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
 		$mailfile = $filename;
-		var_dump($edi_rivi);
 		require("editilaus_in.inc");
+
 		$edi_rivi = $filename = $mailfile = '';
 		$laskuri++;
 	}
-	else continue;
 }
 
 echo "\nSplitatut tilaukset ajettu sis‰‰n. Niit‰ oli $laskuri kappaletta";

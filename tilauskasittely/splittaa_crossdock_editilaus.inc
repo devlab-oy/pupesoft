@@ -18,7 +18,7 @@ foreach ($order_tietosisalto as $key => $value) {
 
 		if (substr($value, 0, 3) == "LOC") {
 			// Toimitusosoite
-			//$value = str_replace("LOC+8", "NAD+DP", $value);
+			$value = str_replace("LOC+8", "NAD+DP", $value);
 			$arska[$value][] = array();
 			$current_customer = $value;
 		}
@@ -57,26 +57,29 @@ foreach ($order_tietosisalto as $key => $value) {
 	}
 }
 
-// Etsit‰‰n sanomarivin alun index
+// Etsit‰‰n otsikon p‰‰tt‰v‰n rivin index
 $found = array_search("UNS+D", $edi_rivi_temp);
-
+$otsikonloppu = $edi_rivi_temp[$found];
+unset($edi_rivi_temp[$found]);
 // Erotellaan sanoman alku ja loppu
-$edi_rivi_loppu = array_splice($edi_rivi_temp, $found+1);
+$edi_rivi_loppu = array_splice($edi_rivi_temp, $found);
 $edi_rivi_alku = array_diff($edi_rivi_temp, $edi_rivi_loppu);
 
 $edi_rivi_alku = implode("\n", $edi_rivi_alku);
 $edi_rivi_loppu = implode("\n", $edi_rivi_loppu);
-var_dump($edi_rivi_alku);
+
 foreach ($arska as $key => &$value) {
 	
-	// Tuunataan jokaiselle asiakkaalle oma editilaus ja ajetaan sis‰‰n
+	// Tuunataan jokaiselle toimitusosoitteelle oma editilaus ja ajetaan sis‰‰n
 	if ($key != '') {
-
-		$edi_rivi = $edi_rivi_alku;
+		// Laitetaan toimitusosoite viel‰ header-segmenttiin($edi_rivi_alku) ennen headerin lopputagia
+		$edi_rivi = $edi_rivi_alku."\n$key\n";
+		$edi_rivi .= $otsikonloppu."\n";
 		// echo "----TOIMITUSOSOITE-----\n";
 		// echo $key."\n";
 		// echo "----TILASI TUOTTEET----\n";
-		$edi_rivi .= "\n".$key."\n";
+		//$edi_rivi .= "\n".$key."\n";
+
 		foreach ($value as $k => $v) { 
 			foreach ($v as $kii => $kippari) {
 				$edi_rivi .= $kii."\n";
@@ -84,6 +87,7 @@ foreach ($arska as $key => &$value) {
 				$edi_rivi .= $kippari[0]."\n";
 				$edi_rivi .= $kippari[3]."\n";
 				$edi_rivi .= $kippari[1]."\n";
+				$edi_rivi .= "PCD+12\n";
 				// echo "TNO: {$kii}\n";
 				// echo "KUVAUS: {$kippari[2]}\n";
 				// echo "{$kippari[0]} KAPPALETTA\n";
@@ -91,29 +95,15 @@ foreach ($arska as $key => &$value) {
 				// echo "TOIMITUSPVM {$kippari[3]}\n";
 			}
 		}
+		// Lis‰t‰‰n koko sanoman lopputagit
 		$edi_rivi .= $edi_rivi_loppu;
-		// Paramit editilaus_in.incille
-		//$filename = generoitu_faili;
-		$tilaus_tyyppi = "edifact911";
 		
 		// Luodaan tiedosto
-		$tiedosto = "/tmp/ediorders911_crossdock_split".uniqid(time()."_").".txt";
-		file_put_contents($tiedosto, $edi_rivi);
+		$filename = "/tmp/ediorders911_crossdock_split".uniqid(time()."_").".txt";
+		file_put_contents($filename, $edi_rivi);
 
-		// Avataan tiedosto uudestaan
-		if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus ep‰onnistui")."!\n");
-
-		// Jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
-		$mailfile = $tiedosto;
-		echo $tiedosto;
-		//require("editilaus_in.inc");
+		require("editilaus_in.inc");
 	}
+
 	echo "\n\n";
 }
-
-//var_dump($arska);
-//echo "tunkattu array: \n";
-//var_dump($arska);
-//$edi_rivi = 
-
-exit;

@@ -12,7 +12,6 @@ if (php_sapi_name() == 'cli') {
 
 // jos meillä ei ole sessiota ja meillä on komentoriviparametri annettuna
 if ($php_cli) {
-
 	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
@@ -172,7 +171,7 @@ if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui"
 
 //jotta filenimi ei varmasti katoaisi matkalla
 $mailfile = $filename;
-
+echo "MORJENS OLEN $edi_tyyppi";
 if ($edi_tyyppi == "futursoft") {
 	$edi_subj = "Sisääntuleva Futursoft-tilaus";
 	$edi_laatija = "FuturSoft";
@@ -231,6 +230,8 @@ elseif ($edi_tyyppi == "edifact911_crossdock") {
 		$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
 		$order_tietosisalto = explode("'", $order_tietosisalto);
 
+		// Splitistä oletaan takaisin lukukelpoisia edifact 91.1 tilauksia
+		$edi_tyyppi = "edifact911";
 		// CrossDock-versiossa ostaja ja tuotetiedot tulevat eri järjestyksessä joten muutetaan malliin joka osataan lukea
 		require("splittaa_crossdock_editilaus.inc");
 
@@ -728,28 +729,29 @@ while ($tietue = fgets($fd)) {
 				// Jos kenttä ei sisältänyt toimitusosoitetta vaan pelkästään toim_ovttunnuksen
 				if (empty($tosoite) or empty($tpostino) or empty($tpostitp) or empty($tnimi)) {
 					echo "MERKILLISTÄ";
-					list ($toimovttunnus) = explode(':', $kentat[2]);
-					$edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
+					var_dump($kentat);
+					list ($toimovttunnus) = explode(':', $kentat[1]);
+					if ($toimovttunnus != '') {
 
-					$query = "	SELECT *
-								FROM asiakas
-								WHERE yhtio = '$kukarow[yhtio]'
-								and toim_ovttunnus = '$toimovttunnus'
-								and toim_ovttunnus not in ('','0')
-								and laji not in ('R','P')";
-					$result = mysql_query($query) or die($query);
-					query_dump($query);
-					if (mysql_num_rows($result) == 1) {
-						$abrow = mysql_fetch_array($result);
-
-						$tnimi = $abrow['toim_nimi'];
-						$tnimitark = $abrow['toim_nimitark'];
-						$tpostitp = $abrow['toim_postitp'];
-						$tpostino = $abrow['toim_postino'];
-						$tosoite = $abrow['toim_osoite'];
-						$edi_ulos .= "$abrow[toim_nimi]\n";
+						$query = "	SELECT *
+									FROM asiakas
+									WHERE yhtio = '$kukarow[yhtio]'
+									and toim_ovttunnus = '$toimovttunnus'
+									and toim_ovttunnus not in ('','0')
+									and laji not in ('R','P')";
+						$result = mysql_query($query) or die($query);
+						query_dump($query);
+						if (mysql_num_rows($result) == 1) {
+							$abrow = mysql_fetch_array($result);
+							$edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
+							$tnimi = $abrow['toim_nimi'];
+							$tnimitark = $abrow['toim_nimitark'];
+							$tpostitp = $abrow['toim_postitp'];
+							$tpostino = $abrow['toim_postino'];
+							$tosoite = $abrow['toim_osoite'];
+							$edi_ulos .= "$abrow[toim_nimi]\n";
+						}
 					}
-
 				}
 			}
 			break;
@@ -1673,26 +1675,29 @@ while ($tietue = fgets($fd)) {
 			if ($edi_tyyppi == "edifact911") {
 				$kentat = explode(":", $tieto);
 				$kentat_bgm = explode("+", $tieto);
+
+				echo "TUNNUS1 $tunnus";
+				var_dump($kentat);
+				echo "TUNNUS2 $tunnus";
+				var_dump($kentat_bgm);
 				// BGM kentässä tulee 'BGM+QQQ+ABCDEFGHIJKLM'
 				// QQQ = arvot, 105=tilaus, 640=toimituskehoitus, 221=plokkitilaus/ennakkotilaus
 				// ABCDEFGHIJKLM = tossa tulee myymälän tilausnumero, joka pitäisi olla sama kuin RFF+VN kentän arvo.
 				if ($asiakkaan_tilausnumero == "" and $kentat_bgm[0] == '105' and $kentat_bgm[1] != "") {
 					$asiakkaan_tilausnumero = $kentat_bgm[1];
 					$viite = $kentat_bgm[1]. ' ';
-					//break;
+					break;
 				}
 
 				// Orders 91.1 tulee kaksi RFF segmenttiä (VN ja WS). VN otsikon viite, joten ei liity tilausriveihin. WS on tilausrivin loppumisen merkki.
 				if ($kentat[0] == "VN" and $asiakkaan_tilausnumero == "") {
 					$asiakkaan_tilausnumero = $kentat[1];
 					$viite = $kentat[1]. ' ';
-					//break;
+					break;
 				}
 			}
-			echo "ennnen otsikkoa\n";
-			if ($editilaus_otsikko_ok == "KYLLA") echo "MALLIKAS $editilaus_otsikko_ok\n";
+
 			if ($editilaus_otsikko_ok == "KYLLA") {
-				echo "OTSIKKO OK\n";
 		 		// jos tuote on löytynyt ok
 				if ($tuoteerror == 0) {
 

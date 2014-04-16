@@ -345,7 +345,7 @@ class TyolistaPDF
       file.write Base64.decode64 @logo
     }
     @pdf.float do
-      @pdf.image filepath, :scale => 0.7, :at => [0, 555.28]
+      @pdf.image filepath, :width => 139, :height => 76, :at => [0, 555.28]
     end
   end
 

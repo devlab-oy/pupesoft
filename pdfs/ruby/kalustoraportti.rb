@@ -79,7 +79,7 @@ class KalustoraporttiPDF
     File.open(filepath, 'a+') { |file|
       file.write Base64.decode64 @logo
     }
-    @pdf.image filepath, :scale => 0.7
+    @pdf.image filepath, :width => 139, :height => 76
   end
 
   def company_info

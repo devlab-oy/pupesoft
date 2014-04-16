@@ -181,7 +181,7 @@ class KustannusarvioPDF
       file.write Base64.decode64 @logo
     }
     pdf.float do
-      pdf.image filepath, :scale => 0.7, :at => [pdf.bounds.left, pdf.bounds.top]
+      pdf.image filepath, :width => 139, :height => 76, :at => [pdf.bounds.left, pdf.bounds.top]
     end
   end
 

@@ -155,7 +155,7 @@ class PoikkeamaraporttiPDF
     file = File.new('/tmp/logo.jpeg', 'a+')
     file.write Base64.decode64 @data['logo']
     file.close
-    @pdf.image file.path, :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    @pdf.image file.path, :width => 139, :height => 76, :at => [@pdf_x, @pdf_y]
   end
 
   def company_info

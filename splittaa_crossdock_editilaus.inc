@@ -1,6 +1,6 @@
 <?php
 
-// Asiakas ja tuotetiedot
+// Toimitus ja tuotetiedot
 $arska = array();
 
 $current_customer = '';
@@ -17,19 +17,20 @@ foreach ($order_tietosisalto as $key => $value) {
 	if ($value != "") {
 
 		if (substr($value, 0, 3) == "LOC") {
-			// Asiakas
+			// Toimitusosoite
+			//$value = str_replace("LOC+8", "NAD+DP", $value);
 			$arska[$value][] = array();
 			$current_customer = $value;
 		}
 		elseif (substr($value, 0, 3) == "LIN") {
-			// Asiakas - Tuotteet
+			// Toimitusosoite - Tuotteet
 			// Tuotteen vaihtuessa nollataan current_customer ja price
 			if ($current_product != $value) {
 				$current_customer = '';
 				$current_product_price = '';
 			}
 
-			$arska[$current_customer][] = $value;#[] = $value;#array();
+			$arska[$current_customer][] = $value;
 			$current_product = $value;
 		}
 		elseif (substr($value, 0, 3) == "PRI") {
@@ -45,7 +46,7 @@ foreach ($order_tietosisalto as $key => $value) {
 			if (!empty($current_product)) $delivery_date = $value;
 		}
 		elseif (substr($value, 0, 3) == "QTY") {
-			// Asiakas - Tuote -> Kpl - Hinta
+			// Toimitusosoite - Tuote -> Kpl - Hinta
 			if (!empty($current_product) and !empty($current_customer)) $arska[$current_customer][][$current_product] = array($value, $current_product_price, $current_product_desc, $delivery_date);
 		}
 		else {
@@ -72,7 +73,7 @@ foreach ($arska as $key => &$value) {
 	if ($key != '') {
 
 		$edi_rivi = $edi_rivi_alku;
-		// echo "----ASIAKAS-----\n";
+		// echo "----TOIMITUSOSOITE-----\n";
 		// echo $key."\n";
 		// echo "----TILASI TUOTTEET----\n";
 		$edi_rivi .= "\n".$key."\n";
@@ -104,7 +105,7 @@ foreach ($arska as $key => &$value) {
 
 		// Jotta filenimi ei varmasti katoaisi matkalla, tämä ylikirjoittaa edellisen mailfilen.
 		$mailfile = $tiedosto;
-		
+		echo $tiedosto;
 		//require("editilaus_in.inc");
 	}
 	echo "\n\n";

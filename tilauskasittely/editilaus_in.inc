@@ -718,13 +718,39 @@ while ($tietue = fgets($fd)) {
 		// NAD-DP segmentissä, tulee kerralla kaikki toimitusosoitteen tiedot
 		// Toimitusosoitteen nimi-kentässä on kovakoodattu teksti "TAVARAN VASTAANOTTAJA" (by Servinet)
 			$kentat = explode("+", $tieto);
-
+			
 			if ($kentat[3] != "TAVARAN VASTAANOTTAJA") {
 				$tnimi = $kentat[3];
 				$tnimitark = "";
 				$tpostitp = $kentat[5];
 				$tpostino = $kentat[7];
 				$tosoite = $kentat[4];
+				// Jos kenttä ei sisältänyt toimitusosoitetta vaan pelkästään toim_ovttunnuksen
+				if (empty($tosoite) or empty($tpostino) or empty($tpostitp) or empty($tnimi)) {
+					echo "MERKILLISTÄ";
+					list ($toimovttunnus) = explode(':', $kentat[2]);
+					$edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
+
+					$query = "	SELECT *
+								FROM asiakas
+								WHERE yhtio = '$kukarow[yhtio]'
+								and toim_ovttunnus = '$toimovttunnus'
+								and toim_ovttunnus not in ('','0')
+								and laji not in ('R','P')";
+					$result = mysql_query($query) or die($query);
+					query_dump($query);
+					if (mysql_num_rows($result) == 1) {
+						$abrow = mysql_fetch_array($result);
+
+						$tnimi = $abrow['toim_nimi'];
+						$tnimitark = $abrow['toim_nimitark'];
+						$tpostitp = $abrow['toim_postitp'];
+						$tpostino = $abrow['toim_postino'];
+						$tosoite = $abrow['toim_osoite'];
+						$edi_ulos .= "$abrow[toim_nimi]\n";
+					}
+
+				}
 			}
 			break;
 

@@ -30,6 +30,22 @@
 		$korjaa = TRUE;
 	}
 
+	// Kirjanputokauden ensimmäinen avoin päivä. Jos laskun tapvm on tätä pienempi, niin siiretään korjaus kpitokauden ekalle päivälle.
+	$kpitokausi_auki = 00000000;
+	$kpitokausi_auki_pvm = "0000-00-00";
+
+	if (isset($argv[5]) and $argv[5] != "") {
+		$kpitokausi_auki = $argv[5];
+
+		if (strlen($kpitokausi_auki) != 8) {
+			die("Päivämäärä muodossa vvvvkkpp");
+		}
+
+		$kpitokausi_auki_pvm = substr($kpitokausi_auki, 0, 4)."-".substr($kpitokausi_auki, 4, 2)."-".substr($kpitokausi_auki, 6, 2);
+	}
+
+	$tanaan = date("d.m.Y");
+
 	require("inc/connect.inc");
 	require("inc/functions.inc");
 
@@ -73,9 +89,9 @@
 
 				$query  = "	SELECT sum(summa) varmuutos, count(*) varmuma, group_concat(tunnus) varmuutokset,
 							max(tapvm) maxtapvm,
-							if(max(tapvm) >= '2014-01-01', 1, 0) crossyearerror,
-							group_concat(if(tapvm >= '2014-01-01', tunnus, 0)) tanvuodentunnarit,
-							group_concat(if(tapvm  < '2014-01-01', tunnus, 0)) viimevuodentunnarit
+							if(max(tapvm) >= '$kpitokausi_auki_pvm', 1, 0) crossyearerror,
+							group_concat(if(tapvm >= '$kpitokausi_auki_pvm', tunnus, 0)) tanvuodentunnarit,
+							group_concat(if(tapvm  < '$kpitokausi_auki_pvm', tunnus, 0)) viimevuodentunnarit
 							FROM tiliointi
 							WHERE yhtio  = '$kukarow[yhtio]'
 							and ltunnus  = $laskurow[tunnus]
@@ -86,9 +102,9 @@
 
 				$query  = "	SELECT sum(summa) varasto, group_concat(tunnus) varastot,
 							max(tapvm) maxtapvm,
-							if(max(tapvm) >= '2014-01-01', 1, 0) crossyearerror,
-							group_concat(if(tapvm >= '2014-01-01', tunnus, 0)) tanvuodentunnarit,
-							group_concat(if(tapvm  < '2014-01-01', tunnus, 0)) viimevuodentunnarit
+							if(max(tapvm) >= '$kpitokausi_auki_pvm', 1, 0) crossyearerror,
+							group_concat(if(tapvm >= '$kpitokausi_auki_pvm', tunnus, 0)) tanvuodentunnarit,
+							group_concat(if(tapvm  < '$kpitokausi_auki_pvm', tunnus, 0)) viimevuodentunnarit
 							FROM tiliointi
 							WHERE yhtio  = '$kukarow[yhtio]'
 							and ltunnus  = $laskurow[tunnus]
@@ -117,18 +133,18 @@
 
 				if (abs($ero1) > 0.5 or abs($ero2) > 0.5 or abs($ero3) > 0.5) {
 
-					if ($korjaa and (int) $laskurow['tapvm'] < 20140101) {
-
-						 if ($tilirow['crossyearerror'] == 1) {
+					if ($korjaa and (int) $laskurow['tapvm'] < $kpitokausi_auki) {
+						
+						if ($tilirow['crossyearerror'] == 1) {
 	 						// Uusin varastonmuutos
 	 						$maxmuutos = explode(",", $tilirow["tanvuodentunnarit"]);
 							$tapvm     = $tilirow["maxtapvm"];
-						 }
-						 else {
+						}
+						else {
  	 						// Uusin varastonmuutos viime vuoden puolelta
  	 						$maxmuutos = explode(",", $tilirow["viimevuodentunnarit"]);
-							$tapvm     = "2014-01-01";
-						 }
+							$tapvm     = $kpitokausi_auki_pvm;
+						}
 
 						sort($maxmuutos);
 
@@ -140,7 +156,7 @@
 							'tapvm'			=> $tapvm,
 							'korjattu' 		=> '',
 							'korjausaika' 	=> '',
-							'selite' 		=> "Korjausajo 20.3.2014",
+							'selite' 		=> "Korjausajo $tanaan",
 							'laatija' 		=> $kukarow['kuka'],
 							'laadittu' 		=> date('Y-m-d H:i:s'),
 						);
@@ -154,7 +170,7 @@
 							'tapvm'			=> $tapvm,
 							'korjattu' 		=> '',
 							'korjausaika' 	=> '',
-							'selite' 		=> "Korjausajo 20.3.2014",
+							'selite' 		=> "Korjausajo $tanaan",
 							'laatija' 		=> $kukarow['kuka'],
 							'laadittu' 		=> date('Y-m-d H:i:s'),
 						);
@@ -172,7 +188,7 @@
 						 else {
 		 					// Uusin varasto viime vuoden puolelta
 		 					$maxmuutos = explode(",", $vararow["viimevuodentunnarit"]);
-							$tapvm     = "2014-01-01";
+							$tapvm     = $kpitokausi_auki_pvm;
 						 }
 
 						sort($maxmuutos);
@@ -185,7 +201,7 @@
 							'tapvm'			=> $tapvm,
 							'korjattu' 		=> '',
 							'korjausaika' 	=> '',
-							'selite' 		=> "Korjausajo 20.3.2014",
+							'selite' 		=> "Korjausajo $tanaan",
 							'laatija' 		=> $kukarow['kuka'],
 							'laadittu' 		=> date('Y-m-d H:i:s'),
 						);
@@ -199,7 +215,7 @@
 							'tapvm'			=> $tapvm,
 							'korjattu' 		=> '',
 							'korjausaika' 	=> '',
-							'selite' 		=> "Korjausajo 20.3.2014",
+							'selite' 		=> "Korjausajo $tanaan",
 							'laatija' 		=> $kukarow['kuka'],
 							'laadittu' 		=> date('Y-m-d H:i:s'),
 						);
@@ -216,7 +232,7 @@
 								'summa' 		=> round($rivirow["varmuutos"], 2),
 								'korjattu' 		=> '',
 								'korjausaika' 	=> '',
-								'selite' 		=> "Korjausajo 20.3.2014",
+								'selite' 		=> "Korjausajo $tanaan",
 								'laatija' 		=> $kukarow['kuka'],
 								'laadittu' 		=> date('Y-m-d H:i:s'),
 							);
@@ -244,7 +260,7 @@
 								'summa' 		=> round($rivirow["varmuutos"] * -1, 2),
 								'korjattu' 		=> '',
 								'korjausaika' 	=> '',
-								'selite' 		=> "Korjausajo 20.3.2014",
+								'selite' 		=> "Korjausajo $tanaan",
 								'laatija' 		=> $kukarow['kuka'],
 								'laadittu' 		=> date('Y-m-d H:i:s'),
 							);

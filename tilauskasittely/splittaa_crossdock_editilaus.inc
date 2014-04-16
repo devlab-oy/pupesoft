@@ -1,5 +1,11 @@
 <?php
 
+// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
+$order_tietosisalto = file_get_contents($filename);
+
+$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+$order_tietosisalto = explode("'", $order_tietosisalto);
+
 // Toimitus ja tuotetiedot
 $arska = array();
 
@@ -56,17 +62,21 @@ foreach ($order_tietosisalto as $key => $value) {
 
 	}
 }
+unset($order_tietosisalto);
 
 // Etsit‰‰n otsikon p‰‰tt‰v‰n rivin index
 $found = array_search("UNS+D", $edi_rivi_temp);
 $otsikonloppu = $edi_rivi_temp[$found];
 unset($edi_rivi_temp[$found]);
+
 // Erotellaan sanoman alku ja loppu
 $edi_rivi_loppu = array_splice($edi_rivi_temp, $found);
 $edi_rivi_alku = array_diff($edi_rivi_temp, $edi_rivi_loppu);
 
 $edi_rivi_alku = implode("\n", $edi_rivi_alku);
 $edi_rivi_loppu = implode("\n", $edi_rivi_loppu);
+$laskuri = 0;
+$kasitellaan_splitattuja_crossdock_edifact911 = "JOO";
 
 foreach ($arska as $key => &$value) {
 	
@@ -75,24 +85,18 @@ foreach ($arska as $key => &$value) {
 		// Laitetaan toimitusosoite viel‰ header-segmenttiin($edi_rivi_alku) ennen headerin lopputagia
 		$edi_rivi = $edi_rivi_alku."\n$key\n";
 		$edi_rivi .= $otsikonloppu."\n";
-		// echo "----TOIMITUSOSOITE-----\n";
-		// echo $key."\n";
-		// echo "----TILASI TUOTTEET----\n";
-		//$edi_rivi .= "\n".$key."\n";
 
 		foreach ($value as $k => $v) { 
 			foreach ($v as $kii => $kippari) {
+				// EAN-koodi
 				$edi_rivi .= $kii."\n";
+				// Tuotekuvaus
 				$edi_rivi .= $kippari[2]."\n";
+				// Kappalemaara
 				$edi_rivi .= $kippari[0]."\n";
+				// Toimituspaivamaara
 				$edi_rivi .= $kippari[3]."\n";
-				$edi_rivi .= $kippari[1]."\n";
 				$edi_rivi .= "PCD+12\n";
-				// echo "TNO: {$kii}\n";
-				// echo "KUVAUS: {$kippari[2]}\n";
-				// echo "{$kippari[0]} KAPPALETTA\n";
-				// echo "KAPPALEHINTA {$kippari[1]} EUROA\n";
-				// echo "TOIMITUSPVM {$kippari[3]}\n";
 			}
 		}
 		// Lis‰t‰‰n koko sanoman lopputagit
@@ -102,8 +106,19 @@ foreach ($arska as $key => &$value) {
 		$filename = "/tmp/ediorders911_crossdock_split".uniqid(time()."_").".txt";
 		file_put_contents($filename, $edi_rivi);
 
-		require("editilaus_in.inc");
-	}
+		// Splitist‰ oletaan takaisin lukukelpoisia edifact 91.1 tilauksia
+		$edi_tyyppi = $tyyppi = "edifact911";
+		// avataan tiedosto uudestaan
+		if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus ep‰onnistui")."!\n");
 
-	echo "\n\n";
+		//jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
+		$mailfile = $filename;
+		var_dump($edi_rivi);
+		require("editilaus_in.inc");
+		$edi_rivi = $filename = $mailfile = '';
+		$laskuri++;
+	}
+	else continue;
 }
+
+echo "\nSplitatut tilaukset ajettu sis‰‰n. Niit‰ oli $laskuri kappaletta";

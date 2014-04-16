@@ -33,6 +33,7 @@ if ($php_cli) {
 
 	// Pupeasennuksen root
 	$pupe_root_polku = dirname(dirname(__FILE__));
+	if (isset($kasitellaan_splitattuja_crossdock_edifact911)) $edi_tyyppi = "edifact911";
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
@@ -171,7 +172,7 @@ if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui"
 
 //jotta filenimi ei varmasti katoaisi matkalla
 $mailfile = $filename;
-echo "MORJENS OLEN $edi_tyyppi";
+
 if ($edi_tyyppi == "futursoft") {
 	$edi_subj = "Sisääntuleva Futursoft-tilaus";
 	$edi_laatija = "FuturSoft";
@@ -182,16 +183,21 @@ elseif ($edi_tyyppi == "magento") {
 	$editilaus_rahtivapaa = "o";
 }
 elseif ($edi_tyyppi == "edifact911") {
+
 	$edi_subj = "Sisääntuleva Orders 91.1 tilaus";
 	$edi_laatija = "Orders911";
 
 	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meidän pitää heti tässä vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
 
-	//$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
-	//$order_tietosisalto = explode("'", $order_tietosisalto);
-	$order_tietosisalto = explode("\n", $order_tietosisalto);
-
+	// Jos käsitellään splitattuja edifact911 niin rakenne on erilainen
+	if (isset($kasitellaan_splitattuja_crossdock_edifact911)) {
+		$order_tietosisalto = explode("\n", $order_tietosisalto);
+	}
+	else {
+		$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+		$order_tietosisalto = explode("'", $order_tietosisalto);
+	}
 	// Tallennetaan NAD+SE -segmentti, koska se tulee muuten liian myöhäisessä vaiheessa...
 	$nadse_segmentti = "";
 
@@ -210,32 +216,22 @@ elseif ($edi_tyyppi == "edifact911") {
 
 	unset($order_tietosisalto);
 
-	// Luodaan arraysta => tiedosto
-	$tiedosto = "/tmp/ediorders911".uniqid(time()."_").".txt";
-	file_put_contents($tiedosto, $edi_rivi);
+	// Jos käsitellään splitattuja edifact911 niin meillä on jo tiedosto valmiina
+	if (!isset($kasitellaan_splitattuja_crossdock_edifact911)) {
+		// Luodaan arraysta => tiedosto
+		$tiedosto = "/tmp/ediorders911".uniqid(time()."_").".txt";
+		file_put_contents($tiedosto, $edi_rivi);
 
-	// avataan tiedosto uudestaan
-	if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus epäonnistui")."!\n");
+		// avataan tiedosto uudestaan
+		if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus epäonnistui")."!\n");
 
-	//jotta filenimi ei varmasti katoaisi matkalla, tämä ylikirjoittaa edellisen mailfilen.
-	$mailfile = $tiedosto;
+		//jotta filenimi ei varmasti katoaisi matkalla, tämä ylikirjoittaa edellisen mailfilen.
+		$mailfile = $tiedosto;
+	}
 }
 elseif ($edi_tyyppi == "edifact911_crossdock") {
-		$edi_subj = "Sisääntuleva Orders 91.1 CrossDock tilaus";
-		$edi_laatija = "EDI CrossDock";
-
-		// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meidän pitää heti tässä vaiheessa kaivaa jo vastaanottajan tiedot
-		$order_tietosisalto = file_get_contents($filename);
-
-		$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
-		$order_tietosisalto = explode("'", $order_tietosisalto);
-
-		// Splitistä oletaan takaisin lukukelpoisia edifact 91.1 tilauksia
-		$edi_tyyppi = "edifact911";
-		// CrossDock-versiossa ostaja ja tuotetiedot tulevat eri järjestyksessä joten muutetaan malliin joka osataan lukea
-		require("splittaa_crossdock_editilaus.inc");
-
-		unset($order_tietosisalto);
+	$edi_subj = t("Sisääntuleva Orders 91.1 CrossDock tilaus");
+	require_once("splittaa_crossdock_editilaus.inc");
 }
 else {
 	$edi_subj = t("Sisääntuleva EIH 1.4 EDI-tilaus");
@@ -584,7 +580,7 @@ while ($tietue = fgets($fd)) {
 							and toim_ovttunnus not in ('','0')
 							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
-				query_dump($query);
+
 				if (mysql_num_rows($result) == 1) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
@@ -726,10 +722,9 @@ while ($tietue = fgets($fd)) {
 				$tpostitp = $kentat[5];
 				$tpostino = $kentat[7];
 				$tosoite = $kentat[4];
-				// Jos kenttä ei sisältänyt toimitusosoitetta vaan pelkästään toim_ovttunnuksen
+				// Jos kenttä ei sisältänyt toimitusosoitetta niin koitetaan oliko siellä toim_ovttunnus
 				if (empty($tosoite) or empty($tpostino) or empty($tpostitp) or empty($tnimi)) {
-					echo "MERKILLISTÄ";
-					var_dump($kentat);
+
 					list ($toimovttunnus) = explode(':', $kentat[1]);
 					if ($toimovttunnus != '') {
 
@@ -740,7 +735,7 @@ while ($tietue = fgets($fd)) {
 									and toim_ovttunnus not in ('','0')
 									and laji not in ('R','P')";
 						$result = mysql_query($query) or die($query);
-						query_dump($query);
+
 						if (mysql_num_rows($result) == 1) {
 							$abrow = mysql_fetch_array($result);
 							$edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
@@ -1580,7 +1575,7 @@ while ($tietue = fgets($fd)) {
 							$kieltolisa
 							ORDER BY tunnus";
 				$result = mysql_query($query) or die($query);
-				query_dump($query);
+
 				if (mysql_num_rows($result) == 0) {
 					///* Lisätään tilaukselle dummytuote ja kommentti *///
 					$edi_ulos .= t("Rivi")." $rivinumero EAN '$tieto' ".t("ei löydy")."!\n";
@@ -1676,10 +1671,6 @@ while ($tietue = fgets($fd)) {
 				$kentat = explode(":", $tieto);
 				$kentat_bgm = explode("+", $tieto);
 
-				echo "TUNNUS1 $tunnus";
-				var_dump($kentat);
-				echo "TUNNUS2 $tunnus";
-				var_dump($kentat_bgm);
 				// BGM kentässä tulee 'BGM+QQQ+ABCDEFGHIJKLM'
 				// QQQ = arvot, 105=tilaus, 640=toimituskehoitus, 221=plokkitilaus/ennakkotilaus
 				// ABCDEFGHIJKLM = tossa tulee myymälän tilausnumero, joka pitäisi olla sama kuin RFF+VN kentän arvo.

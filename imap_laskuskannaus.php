@@ -68,7 +68,6 @@
 	        $sid = sqimap_session_id($unique_id);
 	        fputs ($imap_stream, $sid . ' ' . $query . "\r\n");
 	        $read = sqimap_read_data_list ($imap_stream, $sid, $handle_errors, $response, $message, $query );
-
 	        return $read;
 	    }
 		else {
@@ -100,7 +99,6 @@
 	    $sRead = $sReadRem = '';
 	    // NB: fread can also stop at end of a packet on sockets.
 	    while ($iRetrieved < $iSize) {
-
 	        $sRead = fread($imap_stream,$iBufferSize);
 	        $iLength = strlen($sRead);
 	        $iRetrieved += $iLength ;
@@ -487,11 +485,10 @@
 						//siivotaan ylimääräset tekstit pois jos niitä on niin saadaan tiedoston sisältö oikein
 						$nokpos = strpos($attachmentbody, ">");
 						if ($nokpos !== FALSE) {
-							$attachmentbody = substr($attachmentbody, $nokpos + 1);						
-							$sop = strrpos($attachmentbody, "--", -3); 
-							$attachmentbody = substr($attachmentbody, 0, $sop);						
-
-						}					
+							$attachmentbody = substr($attachmentbody, $nokpos + 1);
+							$sop = strrpos($attachmentbody, "--", -3);
+							$attachmentbody = substr($attachmentbody, 0, $sop);
+						}
 						$attachmentbody = base64_decode($attachmentbody);
 
 						// Katotaan, ettei samalla nimellä oo jo laskua jonossa

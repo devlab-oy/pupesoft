@@ -106,6 +106,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	$worksheet->write($excelrivi, $excelsarake++, t("Tuotekorkeus"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Tuotemassa"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Myyntihinta"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Myyntierä"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Alv"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Yksikkö"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Tullinimike"),	$format_bold);
@@ -126,6 +127,13 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	array_unshift($kielet, $yhtiorow['kieli']);
 
 	mysql_data_seek($tilausrivit_talteen, 0);
+	
+	while ($row = mysql_fetch_array($tilausrivit_talteen)) {
+	    $rows[] = $row;
+	}
+	// Reversataan että tilausrivit on excelissä samassa järjestyksessä kuin ruudulla
+	array_reverse($rows);
+
 	$eka_tuote = TRUE;
 
 	// Haetaan asiakkaan tiedot
@@ -137,7 +145,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	$asiakasrowi = mysql_fetch_assoc($asiakasressi);
 
 	//loopataan myyntierätiedot per tilausrivi
-	while ($tilausrivi = mysql_fetch_assoc($tilausrivit_talteen)) {
+	foreach ($rows as $tilausrivi) {
 		// Haetaan tuotteen tiedot
 		$query = "	SELECT * 
 					FROM tuote
@@ -173,17 +181,19 @@ elseif(isset($lajit) and count($lajit) > 0) {
 		// tuotemerkki
 		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotemerkki']);
 		// tuotesyvyys
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotesyvyys']);
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['tuotesyvyys']));
 		// tuoteleveys
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuoteleveys']);
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['tuoteleveys']));
 		// tuotekorkeus
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotekorkeus']);
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['tuotekorkeus']));
 		// tuotemassa
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotemassa']);
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['tuotemassa']));
 		// myyntihinta
-		$worksheet->write($excelrivi, $excelsarake++, hintapyoristys($tuoterowi['myyntihinta']), $yhtiorow['hintapyoristys']);
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tuoterowi['myyntihinta']), $yhtiorow['hintapyoristys']));
+		// myyntierä
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['myynti_era']));
 		// alv
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['alv']);
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['alv']));
 		// yksikkö
 		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['yksikko']);
 		// tullinimike1
@@ -196,7 +206,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 		// asiakkaan tilausnro
 		$worksheet->write($excelrivi, $excelsarake++, $spessurowi['kommentti']);
 		// asiakashinta
-		$worksheet->write($excelrivi, $excelsarake++, hintapyoristys($tilausrivi['hinta']), $yhtiorow['hintapyoristys']);
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tilausrivi['hinta']), $yhtiorow['hintapyoristys']));
 		// asiakkaan valuutta
 		$worksheet->write($excelrivi, $excelsarake++, $laskurow['valkoodi']);
 
@@ -219,6 +229,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 				if ($eka_tuote) $worksheet->write(0, $excelsarake, $asanalaji." ".strtoupper($kieli), $format_bold);
 				
 				$asanase = mysql_fetch_assoc($result);
+				if (is_numeric($asanase['selite'])) $asanase['selite'] = str_replace(".", ",", $asanase['selite']);
 				$worksheet->write($excelrivi, $excelsarake++, $asanase['selite']);
 			}
 		}

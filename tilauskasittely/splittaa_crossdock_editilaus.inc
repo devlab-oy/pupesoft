@@ -75,7 +75,7 @@ $edi_rivi_alku = array_diff($edi_rivi_temp, $edi_rivi_loppu);
 
 $edi_rivi_alku = implode("\n", $edi_rivi_alku);
 $edi_rivi_loppu = implode("\n", $edi_rivi_loppu);
-$laskuri = 0;
+
 $kasitellaan_splitattuja_crossdock_edifact911 = "JOO";
 
 foreach ($arska as $key => &$value) {
@@ -106,7 +106,7 @@ foreach ($arska as $key => &$value) {
 		$filename = "/tmp/ediorders911_crossdock_split".uniqid(time()."_").".txt";
 		file_put_contents($filename, $edi_rivi);
 
-		// Splitist‰ oletaan takaisin lukukelpoisia edifact 91.1 tilauksia
+		// Splitist‰ oletaan takaisin lukukelpoisia edifact 91.1 tilauksia editilaus_in.incille
 		$edi_tyyppi = $tyyppi = "edifact911";
 
 		// avataan tiedosto uudestaan
@@ -117,8 +117,5 @@ foreach ($arska as $key => &$value) {
 		require("editilaus_in.inc");
 
 		$edi_rivi = $filename = $mailfile = '';
-		$laskuri++;
 	}
 }
-
-echo "\nSplitatut tilaukset ajettu sis‰‰n. Niit‰ oli $laskuri kappaletta";

@@ -2190,9 +2190,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
 	$content .= "\n";
 	$content .= "--$bound--\n";
 
-//kissa
-	echo "LOLTS tänne lähtis -> {$yhtiorow['edi_email']}\n";
-	$yhtiorow["edi_email"] = "mika@devlab.fi";
 	$boob = mail($yhtiorow["edi_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }
 else {

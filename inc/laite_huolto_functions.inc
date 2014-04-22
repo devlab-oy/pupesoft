@@ -1,7 +1,13 @@
 <?php
 
 $filepath = dirname(__FILE__);
-require_once("{$filepath}/../tilauskasittely/luo_myyntitilausotsikko.inc");
+if (file_exists($filepath.'/../tilauskasittely/luo_myyntitilausotsikko.inc')) {
+	require_once("{$filepath}/../tilauskasittely/luo_myyntitilausotsikko.inc");
+}
+else {
+	require_once("{$filepath}/luo_myyntitilausotsikko.inc");
+}
+
 
 function hae_laitteelle_mahdolliset_huoltosyklit($laite_tyyppi = '', $laite_koko = '', $paikan_olosuhde = '') {
 	global $kukarow, $yhtiorow;

@@ -339,12 +339,14 @@
 	echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
 
 	// Haetaan kaikki asiakkaat
-	$query = "	SELECT asiakas.nimi,
-				asiakas.osoite,
-				asiakas.postino,
-				asiakas.postitp,
-				asiakas.email
+	// Asiakassiirtoa varten poimitaan myös lisäkenttiä asiakkaan_avainsanat ja yhteyshenkilo-tauluista
+	$query = "	SELECT asiakas.*,
+				asiakkaan_avainsanat.tarkenne,
+				yhteyshenkilo.nimi yhenk_nimi, 
+				yhteyshenkilo.email yhenk_email
 				FROM asiakas
+				LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = asiakas.yhtio AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus AND asiakkaan_avainsanat.avainsana = 'magento_tunnus')
+				LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
 				WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
 				AND asiakas.laji != 'P'
 				$muutoslisa";
@@ -357,6 +359,22 @@
 								'postino'	=> $row["postino"],
 								'postitp'	=> $row["postitp"],
 								'email'		=> $row["email"],
+								'aleryhma'	=> $row["ryhma"],
+								'asiakasnro'=> $row["asiakasnro"],
+
+								'toim_nimi'		=> $row["toim_nimi"],
+								'toim_osoite'	=> $row["toim_osoite"],
+								'toim_postino'	=> $row["toim_postino"],
+								'toim_postitp'	=> $row["toim_postitp"],
+
+								'laskutus_nimi'		=> $row["laskutus_nimi"],
+								'laskutus_osoite'	=> $row["laskutus_osoite"],
+								'laskutus_postino'	=> $row["laskutus_postino"],
+								'laskutus_postitp'	=> $row["laskutus_postitp"],
+
+								'yhenk_nimi'		=> $row["yhenk_nimi"],
+								'yhenk_email'		=> $row["yhenk_email"],
+								'magento_tunnus'	=> $row["tarkenne"],
 								);
 	}
 

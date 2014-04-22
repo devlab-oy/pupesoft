@@ -2187,7 +2187,7 @@
 
 			$autom_siirto_myytil = false;
 
-			if ($yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS"))) {
+			if ($rivityyppi == 'L' and $yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS"))) {
 
 				if (!empty($laskurow['varasto'])) {
 					$kohde_varastot = array($laskurow['varasto']);

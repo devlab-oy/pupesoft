@@ -81,6 +81,7 @@ inc/tuotehaku.inc
 inc/tyojono2_functions.inc
 indexvas.php
 korvaavat.class.php
+laite_huolto_functions.inc
 raportit/asiakasinfo.php
 raportit/naytatilaus.inc
 raportit/osasto_tuotemerkeittain.php

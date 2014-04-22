@@ -20,9 +20,9 @@ if [ -z ${COMMAND} ] || [ -z ${TARGET} ]; then
   echo
   echo "Ohje: exranet_siirto.sh siirtotyyppi kohdehakemisto [lisää_filejä] ..."
   echo
-  echo "Esim: exranet_siirto.sh cp /path/to/extranet"
-  echo "Esim: exranet_siirto.sh scp user@host.example.com:/path/to/extranet"
-  echo "Esim: exranet_siirto.sh cp /path/to/extranet /copy/one/more/file/from/here /and/one/here"
+  echo "Esim: extranet_siirto.sh cp /path/to/extranet"
+  echo "Esim: extranet_siirto.sh scp user@host.example.com:/path/to/extranet"
+  echo "Esim: extranet_siirto.sh cp /path/to/extranet /copy/one/more/file/from/here /and/one/here"
   echo
   exit
 fi

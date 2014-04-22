@@ -238,17 +238,17 @@ function echo_kalustoraportti_form($haettu_asiakas) {
 	echo "<input type='submit' value='".t("Tallenna kalustoraportti PDF")."' />";
 	echo "</form>";
 
-
 	$lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakasid={$haettu_asiakas['tunnus']}";
 
-
-	echo "<form method='POST' action='' name='huoltosyklien_massapaivitys'>";
-	echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
-	echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}' />";
-	echo "<input type='hidden' id='ala_tee' name='ala_tee' value='echo_massapaivitys_form' />";
-	echo "<input type='hidden' id='asiakasid' name='asiakasid' value='{$haettu_asiakas['tunnus']}' />";
-	echo "<input type='submit' value='".t("Huoltovälien massapäivitys")."' />";
-	echo "</form>";
+	if (empty($kukarow['extranet'])) {
+		echo "<form method='POST' action='' name='huoltosyklien_massapaivitys'>";
+		echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
+		echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}' />";
+		echo "<input type='hidden' id='ala_tee' name='ala_tee' value='echo_massapaivitys_form' />";
+		echo "<input type='hidden' id='asiakasid' name='asiakasid' value='{$haettu_asiakas['tunnus']}' />";
+		echo "<input type='submit' value='".t("Huoltovälien massapäivitys")."' />";
+		echo "</form>";
+	}
 }
 
 function echo_massapaivitys_form($laitteiden_huoltosyklit, $asiakas) {

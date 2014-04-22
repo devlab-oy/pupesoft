@@ -73,6 +73,7 @@ inc/hinnastorivivienti.inc
 inc/jquery-ui-extranet.css
 inc/jquery-ui.js
 inc/jquery.min.js
+inc/laite_huolto_functions.inc
 inc/laskutyyppi.inc
 inc/parametrit.inc
 inc/ProgressBar.class.php
@@ -81,7 +82,6 @@ inc/tuotehaku.inc
 inc/tyojono2_functions.inc
 indexvas.php
 korvaavat.class.php
-laite_huolto_functions.inc
 raportit/asiakasinfo.php
 raportit/naytatilaus.inc
 raportit/osasto_tuotemerkeittain.php

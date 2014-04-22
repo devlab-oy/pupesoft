@@ -32,6 +32,7 @@ if (!empty($kukarow['extranet'])) {
 	pupesoft_require('inc/tyojono2_functions.inc');
 	pupesoft_require('tilauskasittely/tarkastuspoytakirja_pdf.php');
 	pupesoft_require('tilauskasittely/poikkeamaraportti_pdf.php');
+	pupesoft_require('tilauskasittely/laskutuspoytakirja_pdf.php');
 }
 
 if ($tee == 'lataa_tiedosto') {
@@ -127,13 +128,21 @@ if (!empty($request['haettu_asiakas'])) {
 		$asiakkaan_kohteet['yhtio'] = $yhtiorow;
 		$asiakkaan_kohteet['asiakas'] = $request['haettu_asiakas'];
 		$asiakkaan_kohteet['logo'] = base64_encode(hae_yhtion_lasku_logo());
-		$request['pdf_filepath'] = tulosta_kalustoraportti($asiakkaan_kohteet);
+		$pdf_tiedostot = array(tulosta_kalustoraportti($asiakkaan_kohteet));
+		$pdf_nimi = t('Kalustoraportti');
 
 		unset($request['ala_tee']);
 		$asiakkaan_kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
 	}
 	else if ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' or $request['ala_tee'] == 'tulosta_poikkeamaraportti') {
 		$pdf_tiedostot = ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirjat($request['lasku_tunnukset']) : PDF\Poikkeamaraportti\hae_poikkeamaraportit($request['lasku_tunnukset']));
+		$pdf_nimi = ($request['ala_tee'] == 'tulosta_tarkastuspoytakirja' ? t('Tarkastuspöytäkirja') : t('Poikkeamaraportti'));
+		//lasku_tunnukset pitää unsetata koska niitä käytetään hae_tyomaarays funkkarissa
+		unset($request['lasku_tunnukset']);
+	}
+	else if ($request['ala_tee'] == 'tulosta_laskutuspoytakirja') {
+		$pdf_tiedostot = array(\PDF\Laskutuspoytakirja\hae_laskutuspoytakirja($request['lasku_tunnukset']));
+		$pdf_nimi = t('Laskutuspyötäkirja');
 		//lasku_tunnukset pitää unsetata koska niitä käytetään hae_tyomaarays funkkarissa
 		unset($request['lasku_tunnukset']);
 	}
@@ -173,6 +182,14 @@ if (!empty($request['haettu_asiakas'])) {
 		echo "</div>";
 		echo "<br/>";
 		echo "<br/>";
+	}
+	else if (empty($kukarow['extranet']) and !empty($pdf_tiedostot)) {
+		foreach ($pdf_tiedostot as $pdf_tiedosto) {
+			if (!empty($pdf_tiedosto)) {
+				
+				echo_tallennus_formi($pdf_tiedosto, $pdf_nimi, 'pdf');
+			}
+		}
 	}
 
 	if ($request['ala_tee'] != 'echo_massapaivitys_form') {
@@ -366,13 +383,6 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
 	echo_kalustoraportti_form($haettu_asiakas);
 	echo "<br/>";
 	echo "<br/>";
-
-	if (!empty($request['pdf_filepath'])) {
-		$tiedostot = explode(' ', $request['pdf_filepath']);
-		foreach ($tiedostot as $tiedosto) {
-			echo_tallennus_formi($tiedosto, t("Kalustoraportti"), 'pdf');
-		}
-	}
 
 	echo "<table>";
 

@@ -34,6 +34,10 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 	if (empty($lasku_tunnukset)) {
 		return false;
 	}
+	
+	if (is_array($lasku_tunnukset)) {
+		$lasku_tunnukset = implode(",", $lasku_tunnukset);
+	}
 
 	//queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
 	$query = "	SELECT lasku.*,
@@ -58,7 +62,7 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 				ON ( kohde.yhtio = paikka.yhtio
 					AND kohde.tunnus = paikka.kohde )
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tunnus IN('".implode("','", $lasku_tunnukset)."')";
+				AND lasku.tunnus IN({$lasku_tunnukset})";
 
 	$result = pupe_query($query);
 
@@ -116,7 +120,9 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 					AND paikka.tunnus = laite.paikka )
 				JOIN tuote AS laite_tuote
 				ON ( laite_tuote.yhtio = laite.yhtio
-					AND laite_tuote.tuoteno = laite.tuoteno )
+					AND laite_tuote.tuoteno = laite.tuoteno
+					AND laite_tuote.tuotetyyppi = ''
+					AND laite_tuote.tuoteno != 'MUISTUTUS')
 				JOIN tuotteen_avainsanat AS sammutin_koko
 				ON ( sammutin_koko.yhtio = laite_tuote.yhtio
 					AND sammutin_koko.tuoteno = laite_tuote.tuoteno

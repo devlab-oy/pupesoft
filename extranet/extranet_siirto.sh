@@ -90,6 +90,7 @@ tilauskasittely/editilaus_out_futur.inc
 tilauskasittely/jtselaus.php
 tilauskasittely/laskealetuudestaan.inc
 tilauskasittely/laskutus.inc
+tilauskasittely/laskutuspoytakirja_pdf.php
 tilauskasittely/lisaarivi.inc
 tilauskasittely/luo_myyntitilausotsikko.inc
 tilauskasittely/mikrotilaus.inc

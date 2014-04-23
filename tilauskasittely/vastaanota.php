@@ -738,7 +738,7 @@
 
 		while ($varow = mysql_fetch_assoc($vares)) {
 			$sel='';
-			if (isset($varastorajaus) and $varow['tunnus'] == $varastorajaus) $sel = 'selected';
+			if ( (isset($varastorajaus) and $varow['tunnus'] == $varastorajaus) or ($varastorajaus == '' and $kukarow['oletus_varasto'] == $varow['tunnus']) ) $sel = 'selected';
 
 			$varastomaa = '';
 			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
@@ -781,6 +781,9 @@
 
 		if (isset($varastorajaus) and !empty($varastorajaus)) {
 			$varasto .= ' AND lasku.clearing = '.(int) $varastorajaus;
+		}
+		else if (empty($varastorajaus) and !empty($kukarow['oletus_varasto'])) {
+			$varasto .= ' AND lasku.clearing = '.(int) $kukarow['oletus_varasto'];
 		}
 
 		if (isset($maa) and !empty($maa)) {

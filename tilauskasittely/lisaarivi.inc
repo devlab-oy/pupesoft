@@ -1781,6 +1781,8 @@
 										$jarjestys = 0;
 									}
 
+									$autoid = !empty($autoid) ? $autoid : 0;
+
 									$query = "	INSERT INTO tilausrivin_lisatiedot
 												SET yhtio				= '$kukarow[yhtio]',
 												positio 				= '{$positio}',
@@ -1791,6 +1793,7 @@
 												ohita_kerays			= '{$myy_ohita_kerays[$indeksi]}',
 												vanha_otunnus			= '$kukarow[kesken]',
 												rekisterinumero			= '{$rekisterinumero}',
+												autoid					= '{$autoid}',
 												jarjestys				= '$jarjestys',
 												luontiaika				= now(),
 												laatija 				= '$kukarow[kuka]'
@@ -2984,6 +2987,8 @@
 					$jarjestys = 0;
 				}
 
+				$autoid = !empty($autoid) ? $autoid : 0;
+
 				$query = "	INSERT INTO tilausrivin_lisatiedot
 							SET yhtio			= '$kukarow[yhtio]',
 							positio 			= '{$positio}',
@@ -2995,6 +3000,7 @@
 							ei_nayteta			= '{$puu_ein[$i]}',
 							ohita_kerays 		= '{$puu_ohiker[$i]}',
 							rekisterinumero		= '{$rekisterinumero}',
+							autoid				= '{$autoid}',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
 							{$tlisatied_lisa}

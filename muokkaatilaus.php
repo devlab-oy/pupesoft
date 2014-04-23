@@ -6,9 +6,69 @@
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+
+		if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
+			$no_head = "yes";
+		}
+
 		require("inc/parametrit.inc");
 		require('valmistuslinjat.inc');
 		require('validation/Validation.php');
+
+		if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
+
+			$otunnus = (int) $_REQUEST['otunnus'];
+
+			$query = "	SELECT nimi, kuka
+						FROM kuka
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND kesken  = '{$otunnus}'
+						AND kesken != 0
+						AND kuka != '{$kukarow['kuka']}'";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) != 0) {
+				$row = mysql_fetch_assoc($result);
+				echo t("Tilaus on aktiivisena k‰ytt‰j‰ll‰")," {$row['nimi']} ({$row['kuka']}). ",t("Tilausta ei voi t‰ll‰ hetkell‰ muokata");
+			}
+			else {
+				echo false;
+			}
+
+			exit;
+		}
+
+
+		echo "	<script type='text/javascript'>
+					$(function() {
+
+						$.ajaxSetup({
+							url: 'muokkaatilaus.php?ajax=OK',
+							type: 'POST',
+							cache: false
+						});
+
+						$('.myyntiformi').on('click', '.check_kesken', function(e) {
+
+							e.preventDefault();
+
+							$.ajax({
+								data: {
+									otunnus: $(this).siblings('.tilausnumero').val()
+								},
+								success: function(retval) {
+									if (retval) {
+										alert(retval);
+										window.location.replace('{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1');
+									}
+									else {
+										$('.myyntiformi').submit();
+									}
+								}
+							});
+						});
+					});
+				</script>";
 	}
 
 	if (!isset($toim)) $toim = '';
@@ -792,7 +852,13 @@
 				$mt_order_by = "ORDER BY $hakusarake $hakusuunta";
 			}
 			else {
-				$mt_order_by = "ORDER BY lasku.luontiaika DESC";
+
+				if ($toim == 'EXTRANET') {
+					$mt_order_by = "ORDER BY lasku.luontiaika ASC";
+				}
+				else {
+					$mt_order_by = "ORDER BY lasku.luontiaika DESC";
+				}
 
 				if ($toim == "OSTO" or $toim == "OSTOSUPER") {
 					$mt_order_by = "ORDER BY kuka_ext, lasku.luontiaika DESC";
@@ -1959,6 +2025,19 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
+				if ($row["tila"] == 'N' and $row["alatila"] == 'F') {
+					// katsotaan onko muilla aktiivisena
+					$query = "	SELECT tunnus
+								FROM kuka
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND kesken  = '{$row['tilaus']}'
+								AND kesken != 0
+								AND kuka != '{$kukarow['kuka']}'";
+					$result = pupe_query($query);
+
+					if (mysql_num_rows($result) != 0) continue;
+				}
+
 				if ($toim == 'OSTO' and $row['kuka_ext'] != '' and $ext_chk != '' and (int) $ext_chk != (int) $row['kuka_ext']) {
 					echo "</table>";
 					echo "<br/><br/><font class='head'>";
@@ -2619,7 +2698,7 @@
 								<input type='hidden' name='tee' value='AKTIVOI'>";
 					}
 					else {
-						echo "<form method='post' action='tilauskasittely/tilaus_myynti.php' $javalisa>";
+						echo "<form method='post' class='myyntiformi' action='tilauskasittely/tilaus_myynti.php' $javalisa>";
 					}
 
 					//	Projektilla hyp‰t‰‰n aina p‰‰otsikolle..
@@ -2632,19 +2711,22 @@
 							<input type='hidden' name='toim'		 value='$aputoim1'>
 							<input type='hidden' name='orig_tila'	 value='{$row["tila"]}'>
 							<input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
-							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>
+							<input type='hidden' class='tilausnumero' name='tilausnumero' value='$row[tunnus]'>
 							<input type='hidden' name='kaytiin_otsikolla' value='{$kaytiin_otsikolla}' />";
 
 					if ($toim == "VASTAANOTA_REKLAMAATIO") {
 						echo "	<input type='hidden' name='mista' value='vastaanota'>";
 					}
 
+					$_class = $whiletoim == "EXTRANET" ? "check_kesken" : "";
+
 					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
-						echo "<input type='submit' name='$aputoim2' value='$lisa2' $button_disabled>";
+
+						echo "<input type='submit' class='{$_class}' name='$aputoim2' value='$lisa2' $button_disabled>";
 
 					}
 
-					echo "<input type='submit' name='$aputoim1' value='$lisa1' $button_disabled>";
+					echo "<input type='submit' class='{$_class}' name='$aputoim1' value='$lisa1' $button_disabled>";
 					echo "</form></td>";
 
 					if (($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous and $kukarow["mitatoi_tilauksia"] == "") {

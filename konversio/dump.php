@@ -5,6 +5,24 @@ function dump_seed_data() {
 
 	echo "Ajetaan.....";
 	echo "<br/>";
+	$query = "DELETE FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji = 'SAMMUTIN_KOKO'";
+	pupe_query($query);
+	$query = "
+INSERT INTO `avainsana` (`yhtio`, `perhe`, `kieli`, `laji`, `nakyvyys`, `selite`, `selitetark`, `selitetark_2`, `selitetark_3`, `selitetark_4`, `selitetark_5`, `jarjestys`, `laatija`, `luontiaika`, `muutospvm`, `muuttaja`)
+VALUES
+	('{$kukarow['yhtio']}', 382090, 'fi', 'SAMMUTIN_KOKO', '', '1', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:00', '2013-11-18 11:13:00', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '2', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:17', '2013-11-18 11:13:17', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '3', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:45', '2013-11-18 11:13:45', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '4', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:48', '2013-11-18 11:13:48', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '5', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:49', '2013-11-18 11:13:49', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '6', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:50', '2013-11-18 11:13:50', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '7', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:52', '2013-11-18 11:13:52', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '8', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:54', '2013-11-18 11:13:54', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '9', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:55', '2013-11-18 11:13:55', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '10', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:57', '2013-11-18 11:13:57', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '11', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:13:58', '2013-11-18 11:13:58', 'joonas'),
+	('{$kukarow['yhtio']}', 382091, 'fi', 'SAMMUTIN_KOKO', '', '12', '', '', '', '', NULL, 0, 'joonas', '2013-11-18 11:14:00', '2013-11-18 11:14:00', 'joonas');";
+	pupe_query($query);
 	$query = "DELETE FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji IN ('TYOM_TYOSTATUS','LAITE_TILA');";
 	pupe_query($query);
 	$query = "

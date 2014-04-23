@@ -8791,7 +8791,7 @@ if ($tee == '') {
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='$tee'>
 						<input type='hidden' name='naantali' value='KIVAPAIKKA'>
-						<input type='submit' name='piirtele_valikko' value='".t("Myyntierät ja tuotetiedot")."'>
+						<input type='submit' name='piirtele_valikko' value='".t("Tuotetiedot")."'>
 						</form>
 						</td>
 					</tr>";

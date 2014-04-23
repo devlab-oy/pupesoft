@@ -22,7 +22,6 @@ if (isset($_POST['piirtele_valikko'])) {
 
 	// piirrell‰‰n tuotteen_avainsanat-valikko
 	echo "<br><br>";
-	echo "<font class='head'>".t("Tuotetietojen tallennus")."</font>";
 
 	$query = "	SELECT distinct laji
 				FROM tuotteen_avainsanat
@@ -78,7 +77,7 @@ if (isset($_POST['piirtele_valikko'])) {
 				<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='naantali' value='KIVAPAIKKA'>
-				<input type='submit' name='aja_ja_tallenna' value='".t("Tallenna tuotetiedot")."'>
+				<input type='submit' name='aja_ja_tallenna' value='".t("Valmis")."'>
 				</form>
 				</td>
 			</tr>";

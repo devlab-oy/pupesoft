@@ -244,7 +244,7 @@
 						if (mysql_num_rows($jtsre) == 0) {
 
 							$suoratoimitus = "";
-
+echo "247: $tunnus, $otunnus, $tyyppi <br><br>"; 
 							// Onko suoratoimitus
 							if ($tyyppi == "U" or ($tyyppi == 'KAIKKI' and $yhtiorow["tee_osto_myyntitilaukselta"] == 'Q')) {
 								$suoratoimitus = " , suoraveloitus = 'S' ";
@@ -316,8 +316,9 @@
 						if (in_array($ostotilauksen_kasittely, array('1','3','5'))) $tunnukset[$tunnus] = $tunnus;
 
 						//Haetaan myˆs ns. lis‰varusteperheet.
-						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
+						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl, tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
 									FROM tilausrivi
+									LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 									LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 									where tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus = '$otunnus'
@@ -325,7 +326,7 @@
 									and (tilausrivi.tunnus='$rivi[tunnus]' or tilausrivi.perheid2='$rivi[tunnus]')
 									order by tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
 						$tilrivires = pupe_query($query);
-
+echo "$query <br><br>";
 						$pid = 0;
 
 						while ($tilrivirow = mysql_fetch_assoc($tilrivires)) {
@@ -357,7 +358,7 @@
 										LIMIT 1";
 							$jtsre = pupe_query($query);
 							$jtstu = mysql_fetch_assoc($jtsre);
-
+echo "360: $tunnus, $otunnus, $tilrivirow[tilausrivilinkki] <br><br>"; 
 							// varattu m‰‰r‰‰ saa p‰ivitt‰‰ vaan jos kpl = 0 ja uusiotunnus = 0, tila = O, alatila =''
 							$query =  "	SELECT tilausrivi.*
 										FROM tilausrivi

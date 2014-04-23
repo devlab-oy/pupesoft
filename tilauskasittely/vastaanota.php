@@ -760,7 +760,7 @@
 		echo "<select name='toimipaikkarajaus'>";
 		$sel = '';
 		foreach ($toimipaikat as $toimipaikka) {
-			if (isset($toimipaikkarajaus) and $toimipaikkarajaus === $toimipaikka['tunnus']) {
+			if  ((isset($toimipaikkarajaus) and $toimipaikkarajaus === $toimipaikka['tunnus']) or (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] == $toimipaikka['tunnus']) ) {
 				$sel = 'SELECTED';
 			}
 
@@ -806,6 +806,9 @@
 
 		if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {
 			$varasto .= " AND lasku.yhtio_toimipaikka = {$toimipaikkarajaus}";
+		}
+		else if (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] != 0) {
+			$varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
 		}
 
 		if (isset($maa) and !empty($maa)) {

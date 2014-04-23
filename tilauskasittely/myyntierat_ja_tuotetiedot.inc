@@ -22,7 +22,7 @@ if (isset($_POST['piirtele_valikko'])) {
 	
 	// piirrell‰‰n tuotteen_avainsanat-valikko
 	echo "<br><br>";
-	echo "<font class='head'>".t("Myyntier‰t ja tuotetiedot")."</font>";
+	echo "<font class='head'>".t("Tallenna tuotetiedot")."</font>";
 
 	$query = "	SELECT distinct laji
 				FROM tuotteen_avainsanat
@@ -78,7 +78,7 @@ if (isset($_POST['piirtele_valikko'])) {
 				<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='naantali' value='KIVAPAIKKA'>
-				<input type='submit' name='aja_ja_tallenna' value='".t("Aja myyntier‰ ja tuotetiedot")."'>
+				<input type='submit' name='aja_ja_tallenna' value='".t("Tallenna tuotetiedot")."'>
 				</form>
 				</td>
 			</tr>";
@@ -132,7 +132,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	    $rows[] = $row;
 	}
 	// Reversataan ett‰ tilausrivit on exceliss‰ samassa j‰rjestyksess‰ kuin ruudulla
-	array_reverse($rows);
+//	array_reverse($rows);
 
 	$eka_tuote = TRUE;
 
@@ -245,7 +245,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 		echo "<tr><th>",t("Tallenna tulos"),":</th>";
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tappi' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Myyntieratiedot.xlsx'>";
+		echo "<input type='hidden' name='kaunisnimi' value='Tuotetiedot.xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
 		echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr></form>";
 		echo "</table><br>";

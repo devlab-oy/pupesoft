@@ -787,7 +787,9 @@
 			$varasto .= " AND varastopaikat.maa = '".mysql_real_escape_string($maa)."'";
 		}
 
-		$query = "	SELECT tilausrivi.otunnus
+		$query = "	SELECT tilausrivi.otunnus,
+					lahdot.tunnus AS lahdot_tunnus,
+					lahdot.aktiivi AS aktiivi
 					FROM tilausrivi
 					JOIN lasku on lasku.yhtio = tilausrivi.yhtio
 						and lasku.tunnus = tilausrivi.otunnus
@@ -795,6 +797,9 @@
 						and lasku.alatila in ('C','B','D')
 						$myytili
 					LEFT JOIN varastopaikat ON lasku.clearing=varastopaikat.tunnus
+					LEFT JOIN lahdot
+						ON ( lahdot.yhtio = lasku.yhtio
+							AND lahdot.tunnus = lasku.toimitustavan_lahto )
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.keratty != ''
@@ -805,6 +810,12 @@
 		$selectlisa = $toim == "" ? ", viesti AS Viite" : "";
 
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
+
+			if ($yhtiorow['siirtolistan_tulostustapa'] == 'U' and !empty($tilrow['lahdot_tunnus']) and $tilrow['aktiivi'] != 'S') {
+				//Jos siirtolistan_tulostustapa = Siirtolistat tulostetaan keräyserien kautta
+				//Ei näytetä siirtolistoja, joihin on liitetty aukioleva lähtö
+				continue;
+			}
 
 			if ($toim == "MYYNTITILI") {
 				$qnimi1 = 'Myyntitili';

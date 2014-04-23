@@ -12,6 +12,11 @@
 		exit;
 	}
 
+	if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+		echo "<font class='error'>".t("HUOM: Ohjelma ei ole käytössä kun siirtolistoja (Siirtolistan_tulostustapa) tulostetaan keräyserien kautta")."!</font>";
+		exit;
+	}
+
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 

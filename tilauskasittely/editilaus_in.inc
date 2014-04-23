@@ -714,7 +714,7 @@ while ($tietue = fgets($fd)) {
 		// NAD-DP segmentissä, tulee kerralla kaikki toimitusosoitteen tiedot
 		// Toimitusosoitteen nimi-kentässä on kovakoodattu teksti "TAVARAN VASTAANOTTAJA" (by Servinet)
 			$kentat = explode("+", $tieto);
-			
+
 			if ($kentat[3] != "TAVARAN VASTAANOTTAJA") {
 				$tnimi = $kentat[3];
 				$tnimitark = "";
@@ -738,12 +738,36 @@ while ($tietue = fgets($fd)) {
 						if (mysql_num_rows($result) == 1) {
 							$abrow = mysql_fetch_array($result);
 							$edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
-							$tnimi = $abrow['toim_nimi'];
-							$tnimitark = $abrow['toim_nimitark'];
-							$tpostitp = $abrow['toim_postitp'];
-							$tpostino = $abrow['toim_postino'];
-							$tosoite = $abrow['toim_osoite'];
+							
+							// haetaan toimitustavan tiedot tiedot
+							$toimiq = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
+							$toimir = pupe_query($toimiq);
+							$toimiro = mysql_fetch_array($toimir);
+							
+							// Jos kyseessä on koontikuljetuskeissi niin setataan lopullinen toimitusosoite 
+							if ($toimiro['tulostustapa'] == "L" or $toimiro['tulostustapa'] == "K") {
+								//laskun sisviesti1 kenttään menee $lopnumero\n$lopnimi\n$loposoite\n$loppostino\n$loppostitp
+								$lopnimi = $abrow['toim_nimi'];
+								$loppostitp = $abrow['toim_postitp'];
+								$loppostino = $abrow['toim_postino'];
+								$loposoite = $abrow['toim_osoite'];
+								//KISSA ja Z on terminaalitoimitus??? liittyykö vai ei
+								//$editilaus_tila   = "Z";
+								//$editilaus_tyyppi = "Z";
+							}
+							else {
+								$tnimi = $abrow['toim_nimi'];
+								$tnimitark = $abrow['toim_nimitark'];
+								$tpostitp = $abrow['toim_postitp'];
+								$tpostino = $abrow['toim_postino'];
+								$tosoite = $abrow['toim_osoite'];
+							}
+							
+							
 							$edi_ulos .= "$abrow[toim_nimi]\n";
+						}
+						else {
+							$edi_ulos .= t("Toimitusosoitteita löytyi %s kpl tunnuksella", "", mysql_num_rows($result))." $toimovttunnus -> ";
 						}
 					}
 				}
@@ -937,7 +961,7 @@ while ($tietue = fgets($fd)) {
 				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
 				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_array($meapu);
-				
+
 				$maksaja = $apuro['merahti'];
 
 				// Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin

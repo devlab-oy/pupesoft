@@ -122,7 +122,8 @@
 						JOIN yhtio ON (yhtio.yhtio = lasku.yhtio) 
 						JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi='L') 
 						JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno) 
-						JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '' ) 
+						JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '' )
+						JOIN tuote AS tiliointi ON (tiliointi.yhtio = tilausrivi.yhtio AND tiliointi.tuoteno = tilausrivi.tuoteno $lisa)
 						LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite)
 						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 						AND lasku.tila = 'U'
@@ -131,6 +132,7 @@
 						AND lasku.tapvm <= '$loppu_pvm'";
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
+			query_dump($query);
 
 			$tulosseuranta["myynti"]["summa"] = $row["myyntinyt"];
 			$tulosseuranta["myynti"]["nimi"]  = "Myynti";

@@ -36,6 +36,11 @@
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 
+	if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+		$kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+	}
+
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
 
@@ -189,6 +194,42 @@
 		}
 	}
 
+	if(!isset($kukarow_varasto)){
+		$kukarow_varasto = array();
+		if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+	    	$asiakkaan_oletusvarasto_query = " 	SELECT avainsana
+	                      						FROM asiakkaan_avainsanat
+	                      						WHERE yhtio = '$kukarow[yhtio]'
+	                      						AND laji = 'oletusmyyntivarasto'
+	                      						AND liitostunnus = {$laskurow['liitostunnus']}";
+	    	$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
+	    	if(mysql_num_rows($aov_result) > 0){
+	      		while ($aov_row = mysql_fetch_assoc($aov_result)) {
+	        		$kukarow_varasto[] = $aov_row['avainsana'];
+	      		}
+	    	}else{
+
+	    		$ytp = $laskurow['yhtio_toimipaikka'];
+
+	        	if ($ytp != 0) {
+	        		$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
+	        													FROM varastopaikat
+	        													WHERE yhtio = '$kukarow[yhtio]'
+	        													AND toimipaikka = {$ytp}";
+	        		$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
+	        		if(mysql_num_rows($tlv_result) > 0) {
+	        			while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
+	        				$kukarow_varasto[] = $tlv_row['tunnus'];
+	        			}
+	        		}
+	      		}
+	    	}
+	    	if(count($kukarow_varasto) < 1){
+	    		$kukarow_varasto = explode(",", $kukarow["varasto"]);
+	    	}
+	  	}
+  	}
+
 	// Onko p‰‰ss‰tty varasto josta myyd‰‰n
 	if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
 		$varasto = $varasto;
@@ -199,8 +240,8 @@
 	elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
 		$varasto = array((int) $laskurow["varasto"]);
 	}
-	elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
-		$varasto = explode(",", $kukarow["varasto"]);
+	elseif (isset($kukarow_varasto)) {
+		$varasto = $kukarow_varasto;
 	}
 	else {
 		unset($varasto);
@@ -477,6 +518,31 @@
 	elseif ($var == "R" and substr($paikka,0,3) != "°°V" and substr($paikka,0,3) != "°°V") {
 		$var 				= "";
 		$toimittajan_tunnus	= "";
+	}
+
+	// Jos kyseess‰ on rivi joka halutaan siirt‰‰ varastosiirtona (siirtolista) var = S
+	$kohde_varasto_update = "";
+	$lahde_varasto_update = "";
+	$paivita_hyllyt_varastosiirto = false;
+	if (substr($paikka,0,3) == "°°S") {
+		$paivita_hyllyt_varastosiirto = true;
+		$var 		 		= "S";
+		$varasto_tunnukset = explode('°°S', $paikka);
+		$toimittajan_tunnus = $varasto_tunnukset[1];
+		$kohde_ja_lahde_varasto = hae_mahdolliset_siirto_varastot(array($varasto_tunnukset[3]));
+		$kohde_ja_lahde_varasto = search_array_key_for_value_recursive($kohde_ja_lahde_varasto, 'tunnus', $varasto_tunnukset[1]);
+		$kohde_ja_lahde_varasto = $kohde_ja_lahde_varasto[0];
+		$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '{$kohde_ja_lahde_varasto['kohde_alkuhyllyalue']}', tilausrivin_lisatiedot.kohde_hyllynro = '{$kohde_ja_lahde_varasto['kohde_alkuhyllynro']}',";
+		$lahde_varasto_hyllyalue = $kohde_ja_lahde_varasto['lahde_alkuhyllyalue'];
+		$lahde_varasto_hyllynro = $kohde_ja_lahde_varasto['lahde_alkuhyllynro'];
+	}
+	elseif ($var == "S" and substr($paikka,0,3) != "°°S" and substr($paikka,0,3) != "°°S") {
+		$paivita_hyllyt_varastosiirto = true;
+		$var 				= "";
+		$toimittajan_tunnus	= "";
+		$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '', tilausrivin_lisatiedot.kohde_hyllynro = '',";
+		$lahde_varasto_hyllyalue = '';
+		$lahde_varasto_hyllynro = '';
 	}
 
 	$perhelisa = "";
@@ -2119,8 +2185,44 @@
 				$trow = mysql_fetch_assoc($tuoteresult);
 			}
 
+			$autom_siirto_myytil = false;
+
+			if ($rivityyppi == 'L' and $yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS"))) {
+
+				if (!empty($laskurow['varasto'])) {
+					$kohde_varastot = array($laskurow['varasto']);
+				}
+				else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+					$kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
+					$kohde_varastot = array_column($kohde_varastot, 'tunnus');
+				}
+				else {
+					$kohde_varastot = array();
+				}
+
+				$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $trow['tuoteno']);
+
+				foreach ($siirto_varastot as $siirto_varasto) {
+					if ($siirto_varasto['tuote']['myytavissa'] <= 0) {
+						continue;
+					}
+
+					if ($siirto_varasto['tuote']['myytavissa'] >= $kpl) {
+						$var = "S";
+						$autom_siirto_myytil = true;
+						$toimittajan_tunnus = $siirto_varasto['tunnus'];
+
+						$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '{$siirto_varasto['kohde_alkuhyllyalue']}', tilausrivin_lisatiedot.kohde_hyllynro = '{$siirto_varasto['kohde_alkuhyllynro']}',";
+						$lahde_varasto_hyllyalue = $siirto_varasto['lahde_alkuhyllyalue'];
+						$lahde_varasto_hyllynro = $siirto_varasto['lahde_alkuhyllynro'];
+						$paivita_hyllyt_varastosiirto = true;
+						break;
+					}
+				}
+			}
+
 			// Tehd‰‰nkˆ puute- tai jt-rivist‰ automaattisesti osto/suoratoimitus?
-			if ((int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $var != 'V' and $var != 'H') {
+			if (!$autom_siirto_myytil and (int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and !in_array($var, array('V','H'))) {
 
 				if ((
 						$kukarow["extranet"] == ""
@@ -2358,6 +2460,10 @@
 						$varattu 	= $kpl;
 						$jt 		= 0;
 						break;
+					case 'S':
+						$varattu = $kpl;
+						$jt = 0;
+						break;
 					case '' :
 						$varattu 	= 0;
 						$jt 		= 0;
@@ -2493,7 +2599,7 @@
 							$oletus_tuotepaikka_res = pupe_query($query);
 							$oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
 
-							lisaa_tuotepaikka($trow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], '0', '0', 'Tuotetta lis‰tt‰ess‰');
+							lisaa_tuotepaikka($trow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "Tuotetta lis‰tt‰ess‰", "", 0, 0, 0);
 
 							$p_hyllyalue	= $oletus_tuotepaikka_row["alkuhyllyalue"];
 							$p_hyllynro		= $oletus_tuotepaikka_row["alkuhyllynro"];
@@ -2772,6 +2878,11 @@
 				$var2 = 'PK';
 			}
 
+			if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $paivita_hyllyt_varastosiirto) {
+				$p_hyllyalue = $lahde_varasto_hyllyalue;
+				$p_hyllynro = $lahde_varasto_hyllynro;
+			}
+
 			// lis‰t‰‰n puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue 		= '$p_hyllyalue',
@@ -2889,6 +3000,7 @@
 							SET
 							positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 							toimittajan_tunnus	= '$toimittajan_tunnus',
+							{$kohde_varasto_update}
 							rekisterinumero		= '{$rekisterinumero}',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]',
@@ -2912,6 +3024,7 @@
 							SET yhtio			= '$kukarow[yhtio]',
 							positio 			= '{$positio}',
 							toimittajan_tunnus	= '$toimittajan_tunnus',
+							{$kohde_varasto_update}
 							tilausrivitunnus	= '$lisatty_tun',
 							jarjestys			= '$jarjestys',
 							vanha_otunnus		= '$kukarow[kesken]',

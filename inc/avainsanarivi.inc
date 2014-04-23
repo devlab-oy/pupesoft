@@ -206,7 +206,8 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "SSCC")			 	$ulos .= "<option value='SSCC' $avain_sel[SSCC]>							".t("SSCC-koodi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAKKAUSKV") 		$ulos .= "<option value='PAKKAUSKV' $avain_sel[PAKKAUSKV]>					".t("Pakkaustiedon kieliversio")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "INVASTEPAIKKA")		$ulos .= "<option value='INVASTEPAIKKA' {$avain_sel['INVASTEPAIKKA']}>		".t("Inventointiaste-raportin hylk‰‰m‰t tuotepaikat")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSERA_TK") 		$ulos .= "<option value='KERAYSERA_TK' $avain_sel[KERAYSERA_TK]>".t("K‰ytt‰j‰n oikeus tulostaa kaikki ker‰yser‰t varastossa")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "SIIRTOVARASTOT")	$ulos .= "<option value='SIIRTOVARASTOT' {$avain_sel['SIIRTOVARASTOT']}>	".t("Varastosta-varastoon myyntitilauksesta siirtolista sallinta")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSERA_TK") 		$ulos .= "<option value='KERAYSERA_TK' $avain_sel[KERAYSERA_TK]>			".t("K‰ytt‰j‰n oikeus tulostaa kaikki ker‰yser‰t varastossa")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tyˆm‰‰r‰ysten avainsanat")."'>";
@@ -299,6 +300,49 @@
 		}
 
 		$jatko = 0;
+	}
+
+	if ($avain_sel['SIIRTOVARASTOT'] == 'SELECTED' and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark")) {
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi = ''
+					ORDER BY nimitys ASC";
+		$varasto_result = pupe_query($query);
+
+		$ulos .= "<td><select name = '$nimi'>";
+		$sel = "";
+		while($varasto = mysql_fetch_assoc($varasto_result)) {
+			if ($varasto['tunnus'] == $trow[$i]) {
+				$sel = "SELECTED";
+			}
+			$ulos .= "<option value = '{$varasto['tunnus']}' {$sel}>{$varasto['nimitys']}</option>";
+			$sel = "";
+		}
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if ($avain_sel['SIIRTOVARASTOT'] == 'SELECTED' and mysql_field_name($result, $i) == "selitetark_2") {
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$toimitustapa_result = pupe_query($query);
+
+		$ulos .= "<td><select name = '$nimi'>";
+		$sel = "";
+		while ($toimitustapa = mysql_fetch_assoc($toimitustapa_result)) {
+			if ($toimitustapa['tunnus'] == $trow[$i]) {
+				$sel = "SELECTED";
+			}
+			$ulos .= "<option value = '{$toimitustapa['tunnus']}' {$sel}>{$toimitustapa['selite']}</option>";
+			$sel = "";
+		}
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+		$tyyppi = 1;
 	}
 
 	if ($avain_sel['OLETUSPAIKKA'] == 'SELECTED') {

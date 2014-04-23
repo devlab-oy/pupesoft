@@ -20,6 +20,31 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "toimipaikka") {
+
+		$query = "	SELECT *
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND vat_numero = ''
+					ORDER BY nimi";
+		$vresult = pupe_query($query);
+
+		if (mysql_num_rows($vresult) > 0) {
+
+			$ulos =  "<td><select name='$nimi'><option value='0'>" . t("Oletustoimipaikka") . "</option>";
+
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$sel="";
+				if ($trow[$i] == $vrow['tunnus']) {
+					$sel = "selected";
+				}
+				$ulos .= "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
+			}
+			$ulos .= "</select></td>";
+			$jatko = 0;
+		}
+	}
+
 	if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
 		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka

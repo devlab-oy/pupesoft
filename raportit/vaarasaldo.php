@@ -39,7 +39,7 @@
 					JOIN lasku ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					{$aikalisa}
-					and tilausrivi.var not in ('P','J','O')
+					and tilausrivi.var not in ('P','J','O','S')
 					and tilausrivi.tilkpl <> tilausrivi.kpl
 					ORDER BY sorttauskentta, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);

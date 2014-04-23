@@ -1,4 +1,9 @@
 <?php
+
+	if (!isset($kukarow_varasto)) {
+		$kukarow_varasto = explode(",", $kukarow["varasto"]);
+	}
+
 	//sis‰‰n tulee $row jossa on tilausrivi kaikki tiedot
 
 	$riviok 				= 0;
@@ -170,7 +175,7 @@
 		$tilausok++;
 	}
 
-	if (in_array($row['var'], array('U','T', 'R')) and $trow['epakurantti25pvm'] != '0000-00-00') {
+	if (in_array($row['var'], array('U','T','R')) and $trow['epakurantti25pvm'] != '0000-00-00') {
 		$varaosavirhe .= t("HUOM: tuote on ep‰kurantti!")."<br>";
 	}
 
@@ -213,9 +218,8 @@
 		// A - Myyntitilirivi joka laskutetaan asiakkaalta
 		// B - Myyntitilirivi joka palautetaan myyntitilist‰ omaan varastoon
 		// R - Rakennettava rivi
-		// S - who knows?
+		// S - Myyntitilaukselle korvamerkitty varastosiirto
 		// O - Optio
-
 
 		$varaosavirhe .= t("VIRHE: Var voi olla tyhj‰, P, J, H, S, T, U, V, A, B, O tai R!")."<br>";
 		$riviok++;
@@ -534,11 +538,8 @@
 		}
 
 		$omavarastores  = pupe_query($query);
-		$varastot_array = array();
+		$varastot_array = $kukarow_varasto;
 
-		if ($kukarow["varasto"] != "") {
-			$varastot_array = explode(",", $kukarow["varasto"]);
-		}
 
 		// K‰yd‰‰n l‰pi oman varaston paikat
 		if (
@@ -827,6 +828,37 @@
 			}
 		}
 
+		if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS"))) {
+			$sel4 = "";
+			if (!empty($laskurow['varasto'])) {
+				$kohde_varastot = array($laskurow['varasto']);
+			}
+			else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+				$kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
+				$kohde_varastot = array_column($kohde_varastot, 'tunnus');
+			}
+			else {
+				$kohde_varastot = array();
+			}
+
+			$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
+
+			foreach ($siirto_varastot as $siirto_varasto) {
+				if ($siirto_varasto['tuote']['myytavissa'] <= 0) {
+					continue;
+				}
+
+				if ($row['var'] == 'S' and $siirto_varasto['tunnus'] == $row['toimittajan_tunnus']) {
+					$sel4 = "SELECTED";
+				}
+
+				$siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myyt‰viss‰').": {$siirto_varasto['tuote']['myytavissa']}";
+				$paikat .= "<option value='°°S{$siirto_varasto['tunnus']}°°S{$siirto_varasto['lahde_tunnus']}°°S{$siirto_varasto['kohde_tunnus']}' {$sel4}>{$siirto_varastot_text}</option>";
+				$paikatlask++;
+				$sel4 = "";
+			}
+		}
+
 		if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
 			$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
 		}
@@ -859,11 +891,7 @@
 					and tuote.tuoteno = '$row[tuoteno]'
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 		$omavarastores  = pupe_query($query);
-		$varastot_array = array();
-
-		if ($kukarow["varasto"] != "") {
-			$varastot_array = explode(",", $kukarow["varasto"]);
-		}
+		$varastot_array = $kukarow_varasto;
 
 		if (!isset($paikatlask)) $paikatlask = 0;
 
@@ -1117,7 +1145,7 @@
 
 						$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
 
-						$chk_varasto = $laskurow['varasto'] == 0 ? explode(",", $kukarow['varasto']) : $laskurow['varasto'];
+						$chk_varasto = $laskurow['varasto'] == 0 ? $kukarow_varasto : $laskurow['varasto'];
 
 						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $chk_varasto);
 

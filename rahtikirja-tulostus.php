@@ -260,7 +260,7 @@
 							SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 							WHERE otunnus  = '$row[tunnus]'
 							AND yhtio 	   = '$kukarow[yhtio]'
-							AND var not in ('P','J','O')
+							AND var not in ('P','J','O','S')
 							AND keratty    != ''
 							AND toimitettu  = ''
 							AND tyyppi 	 	= 'L'";
@@ -659,7 +659,7 @@
 								SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 								WHERE otunnus in ($otunnukset)
 								AND yhtio 	   = '$kukarow[yhtio]'
-								AND var not in ('P','J','O')
+								AND var not in ('P','J','O','S')
 								AND keratty    != ''
 								AND toimitettu  = ''
 								AND tyyppi 	 	= 'L'";

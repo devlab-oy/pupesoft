@@ -19,10 +19,10 @@ if (isset($_POST['piirtele_valikko'])) {
 					});
 				});
 			</script>";
-	
+
 	// piirrell‰‰n tuotteen_avainsanat-valikko
 	echo "<br><br>";
-	echo "<font class='head'>".t("Tallenna tuotetiedot")."</font>";
+	echo "<font class='head'>".t("Tuotetietojen tallennus")."</font>";
 
 	$query = "	SELECT distinct laji
 				FROM tuotteen_avainsanat
@@ -132,7 +132,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	    $rows[] = $row;
 	}
 	// Reversataan ett‰ tilausrivit on exceliss‰ samassa j‰rjestyksess‰ kuin ruudulla
-//	array_reverse($rows);
+	$rows = array_reverse($rows);
 
 	$eka_tuote = TRUE;
 

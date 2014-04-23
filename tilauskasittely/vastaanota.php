@@ -606,13 +606,13 @@
 		if ((mysql_num_rows($jtoikeudetres) <> 0 and $yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "") or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
 			$jtoikeudetrow  = mysql_fetch_assoc($jtoikeudetres);
 			$jtrivit = array();
-			$varastosta = '';
+			$varastoon = '';
 
 			if ($yhtiorow['automaattinen_jt_toimitus_siirtolista'] == 'S') {
 				//Haetaan JT-rivit jotka mäppäytyvät siirtolistariveihin
 				$query = "	SELECT tilausrivin_lisatiedot.tilausrivilinkki AS jtrivi,
-							tilausrivi.hyllyalue,
-							tilausrivi.hyllynro
+							tilausrivin_lisatiedot.kohde_hyllyalue hyllyalue,
+							tilausrivin_lisatiedot.kohde_hyllynro hyllynro
 							FROM tilausrivin_lisatiedot
 							JOIN tilausrivi
 							ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
@@ -625,19 +625,21 @@
 					// Mitkä suoratoimitukset valmistettiin tällä keikalla
 					$jtrivit[$varastoon_row["jtrivi"]] = $varastoon_row["jtrivi"];
 
-					$varastosta = array(kuuluukovarastoon($varastoon_row['hyllyalue'], $varastoon_row['hyllynro']));
+					$varastoon = array(kuuluukovarastoon($varastoon_row['hyllyalue'], $varastoon_row['hyllynro']));
 				}
 			}
+			else {
+				$varastoon = array(kuuluukovarastoon($tilausrivirow['hyllyalue'], $tilausrivirow['hyllynro']));
+			}
 
-			$varastosta = array(kuuluukovarastoon($tilausrivirow['hyllyalue'], $tilausrivirow['hyllynro']));
-
-			jt_toimita("", "", $varastosta, $jtrivit, array(), "tosi_automaaginen", "JATKA", '', '', '', '');
+			jt_toimita("", "", $varastoon, $jtrivit, array(), "tosi_automaaginen", "JATKA", '', '', '', '');
 
 			if ( ($jtoikeudetrow["paivitys"] == 1
 					and ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "T" or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "S")
 				)
 				or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
 				jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
+
 			}
 		}
 

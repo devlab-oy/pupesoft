@@ -982,7 +982,156 @@ class MagentoClient {
 		// Palautetaan tuotekuvat
 		return $tuotekuvat;
 	}
+	
+	/**
+	 * Lisää päivitettyjä asiakkaita Magento-verkkokauppaan.
+	 *
+	 * @param  array  $dnsasiakas 	Pupesoftin tuote_exportin palauttama asiakas array
+	 * @return int  	         	Lisättyjen asiakkaiden määrä
+	*/
+	public function lisaa_asiakkaat(array $dnsasiakas) {
 
+		$this->log("Lisätään asiakkaita");
+
+		// Asiakas countteri
+		$count = 0;
+
+		try {
+			// Tarvitaan kategoriat
+			$category_tree = $this->getCategories();
+
+			// Populoidaan attributeSet
+			$this->_attributeSet = $this->getAttributeSet();
+
+			// Haetaan storessa olevat tuotenumerot
+			$skus_in_store = $this->getProductList(true);
+		}
+		catch (Exception $e) {
+			$this->_error_count++;
+			$this->log("Virhe! Asiakkaiden lisäyksessä", $e);
+			return;
+		}
+
+		// Lisätään asiakkaat erissä
+		foreach ($dnsasiakas as $asiakas) {
+			$asiakas_clean = $asiakas['tuoteno'];
+
+			if (is_numeric($asiakas['tuoteno'])) $asiakas['tuoteno'] = "SKU_".$asiakas['tuoteno'];
+
+			// Lyhytkuvaus ei saa olla magentossa tyhjä.
+			// Käytetään kuvaus kentän tietoja jos lyhytkuvaus on tyhjä.
+			if ($asiakas['lyhytkuvaus'] == '') {
+				$asiakas['lyhytkuvaus'] = '&nbsp;';
+			}
+
+			$asiakas['kuluprosentti'] = ($asiakas['kuluprosentti'] == 0) ? '' : $asiakas['kuluprosentti'];
+
+			// Etsitään kategoria_id tuoteryhmällä
+			//$category_id = $this->findCategory(utf8_encode($asiakas['try_nimi']), $category_tree['children']);
+
+			// Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
+			/*if (isset($individual_tuotteet[$asiakas_clean])) {
+				$visibility = self::CATALOG_SEARCH;
+			}
+			else {
+				$visibility = self::NOT_VISIBLE_INDIVIDUALLY;
+			}*/
+
+			$asiakas_data = array(
+					
+					'categories'            => array($category_id),
+					'websites'              => explode(" ", $asiakas['nakyvyys']),
+					'name'                  => utf8_encode($asiakas['nimi']),
+					'description'           => utf8_encode($asiakas['kuvaus']),
+					'short_description'     => utf8_encode($asiakas['lyhytkuvaus']),
+					'weight'                => $asiakas['tuotemassa'],
+					'status'                => self::ENABLED,
+					'visibility'            => $visibility,
+					'price'                 => $asiakas[$hintakentta],
+					'special_price'         => $asiakas['kuluprosentti'],
+					'tax_class_id'          => $this->getTaxClassID(),
+					'meta_title'            => '',
+					'meta_keyword'          => '',
+					'meta_description'      => '',
+					'campaign_code'         => utf8_encode($asiakas['campaign_code']),
+					'onsale'                => utf8_encode($asiakas['onsale']),
+					'target'                => utf8_encode($asiakas['target']),
+				);
+
+			// Lisätään tai päivitetään asiakas
+
+			// Jos asiakasta ei ole olemassa (sillä ei ole magento_id:tä) niin lisätään se
+			if (empty($asiakas['magento_id'])) {
+				try {
+
+					$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
+						array(
+							'simple',
+							$this->_attributeSet['set_id'],
+							$asiakas['tuoteno'], # sku
+							$asiakas_data,
+							)
+						);
+					$this->log("Tuote '{$asiakas['tuoteno']}' lisätty (simple) " . print_r($asiakas_data, true));
+
+					// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
+					$stock_data = array(
+						'qty'          => 0,
+						'is_in_stock'  => 0,
+						'manage_stock' => 1
+					);
+
+					$result = $this->_proxy->call(
+					    $this->_session,
+					    'product_stock.update',
+					    array(
+					        $asiakas['tuoteno'], # sku
+					        $stock_data
+					    ));
+				}
+				catch (Exception $e) {
+					$this->_error_count++;
+					$this->log("Virhe! Asiakkaan '{$asiakas['tuoteno']}' lisäys epäonnistui (simple) " . print_r($asiakas_data, true), $e);
+				}
+			}
+			// Asiakas on jo olemassa, päivitetään
+			else {
+				try {
+					$this->_proxy->call($this->_session, 'customer.update',
+
+					array(
+						$asiakas['tuoteno'], # sku
+						$asiakas_data)
+					);
+
+					// Haetaan asiakkaan Magenton ID
+					//$result = $this->_proxy->call($this->_session, 'catalog_product.info', $asiakas['tuoteno']);
+					//$product_id = $result['product_id'];
+
+					$this->log("Asiakas '{$asiakas['tuoteno']}' päivitetty " . print_r($asiakas_data, true));
+				}
+				catch (Exception $e) {
+					$this->_error_count++;
+					$this->log("Virhe! Asiakkaan '{$asiakas['tuoteno']}' päivitys epäonnistui " . print_r($asiakas_data, true), $e);
+				}
+			}
+
+			// Haetaan tuotekuvat Pupesoftista
+			$tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
+
+			// Lisätään kuvat Magentoon
+			$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+
+			// Lisätään asiakas countteria
+			$count++;
+
+		}
+
+		$this->log("$count asiakasta päivitetty");
+
+		// Palautetaan pävitettyjen tuotteiden määrä
+		return $count;
+	}
 	/**
 	 * Asettaa tax_class_id:n
 	 * Oletus 0

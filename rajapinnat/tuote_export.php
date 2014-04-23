@@ -341,7 +341,7 @@
 	// Haetaan kaikki asiakkaat
 	// Asiakassiirtoa varten poimitaan myös lisäkenttiä asiakkaan_avainsanat ja yhteyshenkilo-tauluista
 	$query = "	SELECT asiakas.*,
-				asiakkaan_avainsanat.tarkenne,
+				asiakkaan_avainsanat.tarkenne magento_id,
 				yhteyshenkilo.nimi yhenk_nimi, 
 				yhteyshenkilo.email yhenk_email
 				FROM asiakas
@@ -361,6 +361,7 @@
 								'email'		=> $row["email"],
 								'aleryhma'	=> $row["ryhma"],
 								'asiakasnro'=> $row["asiakasnro"],
+								'ytunnus'	=> $row["ytunnus"],
 
 								'toim_nimi'		=> $row["toim_nimi"],
 								'toim_osoite'	=> $row["toim_osoite"],
@@ -374,7 +375,8 @@
 
 								'yhenk_nimi'		=> $row["yhenk_nimi"],
 								'yhenk_email'		=> $row["yhenk_email"],
-								'magento_tunnus'	=> $row["tarkenne"],
+								'magento_id'		=> $row["magento_id"],
+								// lisäksi joku kenttä mistä löytyy tieto kuuluuko asiakas magenton piiriin eli kuuluuko siirtää
 								);
 	}
 

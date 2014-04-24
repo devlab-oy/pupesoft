@@ -34,7 +34,7 @@
 			$query = "SELECT * FROM lasku WHERE tunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
 			$monistares = pupe_query($query);
 			$monistarow = mysql_fetch_array($monistares);
-echo "37 "; var_dump($monistarow); echo "<br><br>";
+
 			$tehdaan_uusi_otsikko = TRUE;
 
 			// Katsotaan löytyykö jo sopiva otsikko, jos ei niin tehdään uusi, eli tässä tapauksessa ei kopsata vanhaa

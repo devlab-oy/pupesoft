@@ -2185,8 +2185,44 @@
 				$trow = mysql_fetch_assoc($tuoteresult);
 			}
 
+			$autom_siirto_myytil = false;
+
+			if ($rivityyppi == 'L' and $yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS"))) {
+
+				if (!empty($laskurow['varasto'])) {
+					$kohde_varastot = array($laskurow['varasto']);
+				}
+				else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+					$kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
+					$kohde_varastot = array_column($kohde_varastot, 'tunnus');
+				}
+				else {
+					$kohde_varastot = array();
+				}
+
+				$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $trow['tuoteno']);
+
+				foreach ($siirto_varastot as $siirto_varasto) {
+					if ($siirto_varasto['tuote']['myytavissa'] <= 0) {
+						continue;
+					}
+
+					if ($siirto_varasto['tuote']['myytavissa'] >= $kpl) {
+						$var = "S";
+						$autom_siirto_myytil = true;
+						$toimittajan_tunnus = $siirto_varasto['tunnus'];
+
+						$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '{$siirto_varasto['kohde_alkuhyllyalue']}', tilausrivin_lisatiedot.kohde_hyllynro = '{$siirto_varasto['kohde_alkuhyllynro']}',";
+						$lahde_varasto_hyllyalue = $siirto_varasto['lahde_alkuhyllyalue'];
+						$lahde_varasto_hyllynro = $siirto_varasto['lahde_alkuhyllynro'];
+						$paivita_hyllyt_varastosiirto = true;
+						break;
+					}
+				}
+			}
+
 			// Tehdäänkö puute- tai jt-rivistä automaattisesti osto/suoratoimitus?
-			if ((int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $var != 'V' and $var != 'H') {
+			if (!$autom_siirto_myytil and (int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and !in_array($var, array('V','H'))) {
 
 				if ((
 						$kukarow["extranet"] == ""

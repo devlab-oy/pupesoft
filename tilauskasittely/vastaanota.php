@@ -30,7 +30,7 @@
 			$query = "	SELECT tunnus, kommentti
 						from tilausrivi
 						where tyyppi='G'
-						and otunnus 	= '$id'
+						and otunnus 	IN ($id)
 						and yhtio		= '$kukarow[yhtio]'";
 			$alkuresult = pupe_query($query);
 

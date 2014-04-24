@@ -996,7 +996,7 @@ class MagentoClient {
 		// Asiakas countteri
 		$count = 0;
 
-		try {
+		/*try {
 			// Tarvitaan kategoriat
 			$category_tree = $this->getCategories();
 
@@ -1010,118 +1010,81 @@ class MagentoClient {
 			$this->_error_count++;
 			$this->log("Virhe! Asiakkaiden lis‰yksess‰", $e);
 			return;
-		}
+		}*/
 
-		// Lis‰t‰‰n asiakkaat eriss‰
+		// Lis‰t‰‰n asiakkaat ja osoitteet eriss‰
 		foreach ($dnsasiakas as $asiakas) {
-			$asiakas_clean = $asiakas['tuoteno'];
-
-			if (is_numeric($asiakas['tuoteno'])) $asiakas['tuoteno'] = "SKU_".$asiakas['tuoteno'];
-
-			// Lyhytkuvaus ei saa olla magentossa tyhj‰.
-			// K‰ytet‰‰n kuvaus kent‰n tietoja jos lyhytkuvaus on tyhj‰.
-			if ($asiakas['lyhytkuvaus'] == '') {
-				$asiakas['lyhytkuvaus'] = '&nbsp;';
-			}
-
-			$asiakas['kuluprosentti'] = ($asiakas['kuluprosentti'] == 0) ? '' : $asiakas['kuluprosentti'];
-
-			// Etsit‰‰n kategoria_id tuoteryhm‰ll‰
-			//$category_id = $this->findCategory(utf8_encode($asiakas['try_nimi']), $category_tree['children']);
-
-			// Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
-			/*if (isset($individual_tuotteet[$asiakas_clean])) {
-				$visibility = self::CATALOG_SEARCH;
-			}
-			else {
-				$visibility = self::NOT_VISIBLE_INDIVIDUALLY;
-			}*/
 
 			$asiakas_data = array(
-					
-					'categories'            => array($category_id),
-					'websites'              => explode(" ", $asiakas['nakyvyys']),
-					'name'                  => utf8_encode($asiakas['nimi']),
-					'description'           => utf8_encode($asiakas['kuvaus']),
-					'short_description'     => utf8_encode($asiakas['lyhytkuvaus']),
-					'weight'                => $asiakas['tuotemassa'],
-					'status'                => self::ENABLED,
-					'visibility'            => $visibility,
-					'price'                 => $asiakas[$hintakentta],
-					'special_price'         => $asiakas['kuluprosentti'],
-					'tax_class_id'          => $this->getTaxClassID(),
-					'meta_title'            => '',
-					'meta_keyword'          => '',
-					'meta_description'      => '',
-					'campaign_code'         => utf8_encode($asiakas['campaign_code']),
-					'onsale'                => utf8_encode($asiakas['onsale']),
-					'target'                => utf8_encode($asiakas['target']),
-				);
+					'firstname'				=> $asiakas['nimi'],
+					'lastname'				=> $asiakas['nimi'],
+					'website_id'			=> SALASANAT.INC,
+					'store_id'				=> SALASANAT.INC,
+					'group_id'				=> $asiakas['ryhma'],
+			);
+			
+			$laskutus_osoite_data = array(
+					'firstname'				=> $asiakas['laskutus_nimi'],
+					'lastname'				=> $asiakas['laskutus_nimi'],
+					'street'				=> array($asiakas['laskutus_osoite']),
+					'postcode'				=> $asiakas['laskutus_postino'],
+					'city'					=> $asiakas['laskutus_postitp'],
+					'country_id'			=> $asiakas['maa'],
+					'is_default_billing'  	=> true,
+			);
+			
+			$toimitus_osoite_data =array(
+					'firstname'				=> $asiakas['toimitus_nimi'],
+					'lastname'				=> $asiakas['toimitus_nimi'],
+					'street'				=> array($asiakas['toimitus_osoite']),
+					'postcode'				=> $asiakas['toimitus_postino'],
+					'city'					=> $asiakas['toimitus_postitp'],
+					'country_id'			=> $asiakas['maa'],
+					'is_default_shipping' => true
+			);
 
 			// Lis‰t‰‰n tai p‰ivitet‰‰n asiakas
 
-			// Jos asiakasta ei ole olemassa (sill‰ ei ole magento_id:t‰) niin lis‰t‰‰n se
+			// Jos asiakasta ei ole olemassa (sill‰ ei ole pupessa magento_id:t‰) niin lis‰t‰‰n se
 			if (empty($asiakas['magento_id'])) {
 				try {
-
-					$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
-						array(
-							'simple',
-							$this->_attributeSet['set_id'],
-							$asiakas['tuoteno'], # sku
-							$asiakas_data,
-							)
-						);
-					$this->log("Tuote '{$asiakas['tuoteno']}' lis‰tty (simple) " . print_r($asiakas_data, true));
-
-					// Pit‰‰ k‰yd‰ tekem‰ss‰ viel‰ stock.update kutsu, ett‰ saadaan Manage Stock: YES
-					$stock_data = array(
-						'qty'          => 0,
-						'is_in_stock'  => 0,
-						'manage_stock' => 1
-					);
-
 					$result = $this->_proxy->call(
-					    $this->_session,
-					    'product_stock.update',
-					    array(
-					        $asiakas['tuoteno'], # sku
-					        $stock_data
-					    ));
+						$this->_session, 
+						'customer.create', 
+						 array(
+						        $asiakas_data
+						));
+
+					$this->log("Asiakas '{$asiakas['tunnus']}' lis‰tty " . print_r($asiakas_data, true));
+					
+					
 				}
 				catch (Exception $e) {
 					$this->_error_count++;
-					$this->log("Virhe! Asiakkaan '{$asiakas['tuoteno']}' lis‰ys ep‰onnistui (simple) " . print_r($asiakas_data, true), $e);
+					$this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' lis‰ys ep‰onnistui " . print_r($asiakas_data, true), $e);
 				}
 			}
 			// Asiakas on jo olemassa, p‰ivitet‰‰n
 			else {
 				try {
-					$this->_proxy->call($this->_session, 'customer.update',
+					$result = $this->_proxy->call(
+						$this->_session, 
+						'customer.update', 
+						 array(
+						        $asiakas['magento_id'],
+						        $asiakas_data
+					));
 
-					array(
-						$asiakas['tuoteno'], # sku
-						$asiakas_data)
-					);
-
-					// Haetaan asiakkaan Magenton ID
-					//$result = $this->_proxy->call($this->_session, 'catalog_product.info', $asiakas['tuoteno']);
-					//$product_id = $result['product_id'];
-
-					$this->log("Asiakas '{$asiakas['tuoteno']}' p‰ivitetty " . print_r($asiakas_data, true));
+					$this->log("Asiakas '{$asiakas['tunnus']}' p‰ivitetty " . print_r($asiakas_data, true));
 				}
 				catch (Exception $e) {
 					$this->_error_count++;
-					$this->log("Virhe! Asiakkaan '{$asiakas['tuoteno']}' p‰ivitys ep‰onnistui " . print_r($asiakas_data, true), $e);
+					$this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' p‰ivitys ep‰onnistui " . print_r($asiakas_data, true), $e);
 				}
 			}
-
-			// Haetaan tuotekuvat Pupesoftista
-			$tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
-
-			// Lis‰t‰‰n kuvat Magentoon
-			$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-
+			// Deletoidaan ensin kaikki asiakkaan osoitetiedot
+			// Lis‰t‰‰n toimitus/laskutus osoitteet
+			
 			// Lis‰t‰‰n asiakas countteria
 			$count++;
 

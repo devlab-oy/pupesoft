@@ -602,6 +602,8 @@ if ($yhtiorow['kerayserat'] == 'K') {
 	}
 }
 
+# Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
+# ei ole saldoa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
 $query = "	SELECT t.tunnus, CONCAT(t.tuoteno,t.hyllyalue,t.hyllynro,t.hyllytaso,t.hyllyvali) AS id
 			FROM tuotepaikat AS t
 			JOIN varastopaikat AS v
@@ -616,6 +618,7 @@ $query = "	SELECT t.tunnus, CONCAT(t.tuoteno,t.hyllyalue,t.hyllynro,t.hyllytaso,
 			GROUP BY 1";
 $result = pupe_query($query);
 
+# Haetaan avoimet tilausrivit (myynti, osto, siirtolistat)
 $query = "	SELECT CONCAT(tuoteno,hyllyalue,hyllynro,hyllytaso,hyllyvali) AS id
 			FROM tilausrivi
 			WHERE yhtio = '{$kukarow['yhtio']}'

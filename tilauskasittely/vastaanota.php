@@ -972,7 +972,7 @@
 					if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, '<br>', toim_nimi)) asiakkaan_nimi,
 					liitostunnus asiakkaan_tunnus
 					FROM lasku
-					WHERE tunnus = '$id'
+					WHERE tunnus IN ({$id})
 					and tila = 'G'
 					and yhtio = '$kukarow[yhtio]'
 					and alatila in ('B','C','D')";
@@ -1113,7 +1113,7 @@
 					JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 					JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.otunnus = '$id'
+					and tilausrivi.otunnus IN ({$id})
 					and tilausrivi.tyyppi  = 'G'
 					and tilausrivi.varattu != 0
 					and var not in ('P','J','O','S')

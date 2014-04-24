@@ -559,23 +559,10 @@ if ($myyntitili > 0) {
 	$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $myyntitili tyhjää myyntitilin varastopaikkaa.\n";
 }
 
-if ($iltasiivo != "" or $php_cli) {
-	echo $iltasiivo;
-	echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]. Done!\n\n";
-}
-
-if ($iltasiivo != "") {
-	if (isset($iltasiivo_email) and $iltasiivo_email == 1) {
-		$header	 = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-		$header .= "MIME-Version: 1.0\n" ;
-		$subject = "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
-
-		mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
-	}
-}
-
 # Poistetaan tuotepaikat joiden saldo on 0 ja ne on määritelty reservipaikoiksi (ei kuitenkaan oletuspaikkaa)
 if ($yhtiorow['kerayserat'] == 'K') {
+	$poistettu = 0;
+
 	$query = "	SELECT tuotepaikat.*
 				FROM tuotepaikat
 				JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tuotepaikat.yhtio
@@ -599,8 +586,13 @@ if ($yhtiorow['kerayserat'] == 'K') {
 					AND tunnus = '{$tuotepaikkarow['tunnus']}'
 					AND saldo = 0";
 		pupe_query($query);
+		$poistettu++;
 	}
+
+	if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $poistettu reservi-tuotepaikkaa poistetuksi.\n";
 }
+
+$poistettu = 0;
 
 # Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
 # ei ole saldoa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
@@ -644,7 +636,10 @@ while ($poistettava_tuotepaikka = mysql_fetch_assoc($result)) {
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus = {$poistettava_tuotepaikka['tunnus']}";
 	$result2 = pupe_query($query);
+	$poistettu++;
 }
+
+if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $poistettu 'generoitua varastonalkupaikkaa' poistettavaksi.\n";
 
 /**
  * Poistetaan poistettavaksi merkatut tuotepaikat joilla ei ole saldoa
@@ -690,7 +685,22 @@ while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
 	pupe_query($tapahtuma_query);
 }
 
-if ($poistettu > 0) echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
+if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
+
+if ($iltasiivo != "" or $php_cli) {
+	echo $iltasiivo;
+	echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]. Done!\n\n";
+}
+
+if ($iltasiivo != "") {
+	if (isset($iltasiivo_email) and $iltasiivo_email == 1) {
+		$header	 = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+		$header .= "MIME-Version: 1.0\n" ;
+		$subject = "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
+
+		mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
+	}
+}
 
 if (!$php_cli) {
 	echo "</pre>";

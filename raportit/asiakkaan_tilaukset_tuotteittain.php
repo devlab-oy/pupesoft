@@ -64,9 +64,16 @@
 		require ('inc/tuotehaku.inc');
 	}
 
+	// Pikku scripti formin tyhjentämiseen
+	echo "<script type='text/javascript' language='javascript'>
+	function vaihdaClick() {
+		document.etsiform.etsinappi.name='vaihda';
+		document.etsiform.etsinappi.click();
+	}
+	</script>";
 
 	//Etsi-kenttä
-	echo "<br><table><form method='post'>
+	echo "<br><table><form method='post' id='etsiform' name='etsiform'>
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='tee' value='ETSI'>";
 
@@ -109,16 +116,29 @@
 
 	if ((int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 		if ($toim == 'MYYNTI') {
-			echo "<td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td><td class='back'><input type='Submit' name='vaihda' value = '".t("Vaihda asiakasta")."'></td></tr>";
+			echo "<td colspan='3'>";
+			echo "$asiakasrow[nimi] $asiakasrow[nimitark]";
+			echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
+			echo "</td>";
+			echo "<td class='back'>";
+			echo "<input type='button' onclick='vaihdaClick();' value='".t("Vaihda asiakasta")."'>";
+			echo "</td>";
 		}
 		if ($toim == 'OSTO') {
-			echo "<td colspan='3'>$toimittajarow[nimi] $toimittajarow[nimitark]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td><td class='back'><input type='Submit' name='vaihda' value = '".t("Vaihda toimittajaa")."'></td></tr>";
+			echo "<td colspan='3'>";
+			echo "$toimittajarow[nimi] $toimittajarow[nimitark]";
+			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+			echo "</td>";
+			echo "<td class='back'>";
+			echo "<input type='button' onclick='vaihdaClick();'  value='".t("Vaihda toimittajaa")."'>";
+			echo "</td>";
 		}
 	}
 	else {
-		echo "<td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>";
+		echo "<td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td>";
 	}
 
+	echo "</tr>";
 	echo "	<tr><th>".t("Syötä tuotenumero").":</th>
 			<td colspan='3'>";
 
@@ -155,7 +175,7 @@
 			</select></td>";
 	}
 
-	echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td></tr></form></table>";
+	echo "<td class='back'><input id='etsinappi' type='submit' value='".t("Etsi")."'></td></tr></form></table>";
 
 	if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 

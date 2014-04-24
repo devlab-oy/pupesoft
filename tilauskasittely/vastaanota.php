@@ -787,25 +787,43 @@
 			$varasto .= " AND varastopaikat.maa = '".mysql_real_escape_string($maa)."'";
 		}
 
-		$query = "	SELECT tilausrivi.otunnus
+		$lahdotrajaus = "";
+
+		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' and !empty($haku)) {
+			$query = "	SELECT GROUP_CONCAT(DISTINCT toimitustavan_lahto) lahto
+						FROM lasku
+						WHERE tila = 'G'
+						{$haku}
+						{$myytili}
+						and yhtio = '{$kukarow['yhtio']}'
+						and alatila in ('C','B','D')";
+			$lahto_chk_res = pupe_query($query);
+			$lahto_chk_row = mysql_fetch_assoc($lahto_chk_res);
+
+			if ($lahto_chk_row['lahto'] != "") {
+				$lahdotrajaus = "and lasku.toimitustavan_lahto IN ({$lahto_chk_row['lahto']})";
+			}
+		}
+
+		$query = "	SELECT GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
 					FROM tilausrivi
 					JOIN lasku on lasku.yhtio = tilausrivi.yhtio
 						and lasku.tunnus = tilausrivi.otunnus
 						and lasku.tila = 'G'
 						and lasku.alatila in ('C','B','D')
+						{$lahdotrajaus}
 						$myytili
 					LEFT JOIN varastopaikat ON lasku.clearing=varastopaikat.tunnus
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.keratty != ''
-					$varasto
-					GROUP BY tilausrivi.otunnus";
+					$varasto";
 		$tilre = pupe_query($query);
 
-		$selectlisa = $toim == "" ? "viesti AS viite," : "";
+		$selectlisa = $toim == "" ? ", viesti AS viite" : "";
 
 		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-			$groupbylisa = "GROUP BY 1,2,3,4,5,6";
+			$groupbylisa = "GROUP BY 1,2,3,4,5,6,7";
 		}
 		else {
 			$groupbylisa = "";
@@ -824,14 +842,14 @@
 
 			// etsit‰‰n sopivia tilauksia
 			$query = "	SELECT varasto,
+						tunnus,
 						IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) lahto,
 						nimi,
 						date_format(luontiaika, '%Y-%m-%d') laadittu,
-						laatija,
+						laatija
 						{$selectlisa}
-						GROUP_CONCAT(tunnus) AS tunnus
 						FROM lasku
-						WHERE tunnus = '{$tilrow['otunnus']}'
+						WHERE tunnus IN ({$tilrow['otunnus']})
 						and tila = 'G'
 						{$haku}
 						{$myytili}
@@ -885,9 +903,16 @@
 					echo "<td>{$row['laadittu']}</td>";
 					echo "<td>{$row['laatija']}</td>";
 
+					if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+						$_id =  $tilrow['otunnus'];
+					}
+					else {
+						$_id = $row['tunnus'];
+					}
+
 					echo "<td>";
 					echo "<form method='post'><td class='back'>
-						  	<input type='hidden' name='id' value='{$row['tunnus']}'>
+						  	<input type='hidden' name='id' value='{$_id}'>
 							<input type='hidden' name='varastorajaus' value='{$varastorajaus}'>
 							<input type='hidden' name='maa' value='{$maa}'>
 						  	<input type='hidden' name='toim' value='{$toim}'>";

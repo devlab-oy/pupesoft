@@ -804,19 +804,31 @@
 
 		$selectlisa = $toim == "" ? ", viesti AS Viite" : "";
 
+		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+			$groupbylisa = "GROUP BY 1,2,3,4,5,6";
+		}
+		else {
+			$groupbylisa = "";
+		}
+
+		if ($toim == "MYYNTITILI") {
+			$qnimi1 = 'Myyntitili';
+			$qnimi2 = 'Vastaanottaja';
+		}
+		else {
+			$qnimi1 = 'Siirtolista';
+			$qnimi2 = 'Vastaanottava varasto';
+		}
+
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
 
-			if ($toim == "MYYNTITILI") {
-				$qnimi1 = 'Myyntitili';
-				$qnimi2 = 'Vastaanottaja';
-			}
-			else {
-				$qnimi1 = 'Siirtolista';
-				$qnimi2 = 'Vastaanottava varasto';
-			}
-
 			// etsit‰‰n sopivia tilauksia
-			$query = "	SELECT tunnus '$qnimi1', nimi '$qnimi2' {$selectlisa} , date_format(luontiaika, '%Y-%m-%d') Laadittu, Laatija
+			$query = "	SELECT IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) toimitustavan_lahto,
+						tunnus '{$qnimi1}',
+						nimi '{$qnimi2}'
+						{$selectlisa} ,
+						date_format(luontiaika, '%Y-%m-%d') Laadittu,
+						Laatija
 						FROM lasku
 						WHERE tunnus = '$tilrow[otunnus]'
 						and tila = 'G'
@@ -824,6 +836,7 @@
 						$myytili
 						and yhtio = '$kukarow[yhtio]'
 						and alatila in ('C','B','D')
+						{$groupbylisa}
 						ORDER by laadittu DESC";
 			$result = pupe_query($query);
 

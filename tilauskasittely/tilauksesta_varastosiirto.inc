@@ -124,10 +124,8 @@ if (!function_exists('normaali_varastosiirto')) {
 
 		$tilausrivi_tunnukset = array_column($myyntitilaus['tilausrivit'], 'tunnus');
 		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
-		aseta_tilausrivien_suoraan_laskutukseen($tilausrivi_tunnukset, 'o');
 
 		aseta_kukarow_kesken($myyntitilaus['tunnus']);
-		aseta_eilahetetta($myyntitilaus['tunnus'], 'o');
 
 		foreach ($kommentit as $kommentti) {
 			echo "<font class='message'>$kommentti</font>";
@@ -444,24 +442,6 @@ if (!function_exists('linkkaa_varastosiirto_myyntitilaukseen')) {
 					vanhatunnus = {$varastosiirto['tunnus']}
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = {$myyntitilaus['tunnus']}";
-		pupe_query($query);
-
-		return true;
-	}
-}
-
-if (!function_exists('aseta_tilausrivien_suoraan_laskutukseen')) {
-	function aseta_tilausrivien_suoraan_laskutukseen($tilausrivi_tunnukset, $suoraan_laskutukseen) {
-		global $kukarow, $yhtiorow;
-
-		if (empty($tilausrivi_tunnukset)) {
-			return false;
-		}
-		
-		$query = "	UPDATE tilausrivin_lisatiedot
-					SET suoraan_laskutukseen = '{$suoraan_laskutukseen}'
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivitunnus IN (".implode(",", $tilausrivi_tunnukset).")";
 		pupe_query($query);
 
 		return true;

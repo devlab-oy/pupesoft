@@ -26700,33 +26700,6 @@ if (!function_exists('aseta_tilausrivien_var')) {
 					AND tunnus IN (".implode(",", $tilausrivi_tunnukset).")";
 		pupe_query($query);
 
-		if ($var == 'J') {
-			$query = "	UPDATE tilausrivi
-						SET jt = varattu,
-						varattu = 0
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus IN (".implode(",", $tilausrivi_tunnukset).")";
-			pupe_query($query);
-		}
-
-		return true;
-	}
-}
-
-if (!function_exists('aseta_eilahetetta')) {
-	function aseta_eilahetetta($myyntitilaus_tunnus, $ei_lahetetta) {
-		global $kukarow, $yhtiorow;
-
-		if (empty($myyntitilaus_tunnus)) {
-			return false;
-		}
-
-		$query = "	UPDATE lasku
-					SET eilahetetta = '{$ei_lahetetta}'
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = {$myyntitilaus_tunnus}";
-		pupe_query($query);
-
 		return true;
 	}
 }

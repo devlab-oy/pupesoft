@@ -85,7 +85,8 @@ if (!function_exists('normaali_varastosiirto')) {
 		//Mahdolliset kombinaatiot muodostuvat avainsana.laji = SIIRTOVARASTOT, lasku.varasto tai lasku.yhtio_toimipaikka.varastot perusteella
 		$keys = array(
 			'lahdevarasto_tunnus',
-			'kohdevarasto_tunnus'
+			'kohdevarasto_tunnus',
+			'keraysvyohyke'
 		);
 		$lahde_ja_kohde_varasto_yhdistelmat = array_find_unique_values($myyntitilaus['tilausrivit'], $keys);
 
@@ -361,11 +362,18 @@ if (!function_exists('hae_tilausrivit')) {
 					JOIN varastopaikat AS v_lahdevarasto
 					ON ( v_lahdevarasto.tunnus = a.selite )
 					JOIN varastopaikat AS v_kohdevarasto
-					ON ( v_kohdevarasto.tunnus = a.selitetark )';
+					ON ( v_kohdevarasto.tunnus = a.selitetark )
+					LEFT JOIN varaston_hyllypaikat
+					ON ( varaston_hyllypaikat.yhtio = t.yhtio
+						AND varaston_hyllypaikat.hyllyalue = t.hyllyalue 
+						AND varaston_hyllypaikat.hyllynro = t.hyllynro 
+						AND varaston_hyllypaikat.hyllyvali = t.hyllyvali 
+						AND varaston_hyllypaikat.hyllytaso = t.hyllytaso)';
 
 			$select = '	v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
 						v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
-						a.selitetark_2 AS toimitustapa_tunnus,';
+						a.selitetark_2 AS toimitustapa_tunnus,
+						varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,';
 		}
 		else {
 			$tilausrivi_where = " AND t.var not in ('P','J','O','S')";

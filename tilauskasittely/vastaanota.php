@@ -805,7 +805,7 @@
 		$selectlisa = $toim == "" ? ", viesti AS Viite" : "";
 
 		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-			$groupbylisa = "GROUP BY 1,2,3,4,5,6";
+			$groupbylisa = "GROUP BY 1,2,3,4,5,6,7";
 		}
 		else {
 			$groupbylisa = "";
@@ -824,6 +824,7 @@
 
 			// etsit‰‰n sopivia tilauksia
 			$query = "	SELECT IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) toimitustavan_lahto,
+						varasto,
 						tunnus '{$qnimi1}',
 						nimi '{$qnimi2}'
 						{$selectlisa} ,
@@ -850,14 +851,14 @@
 
 						echo "<table>";
 						echo "<tr>";
-						for ($y=0; $y<mysql_num_fields($result); $y++)
+						for ($y=2; $y<mysql_num_fields($result); $y++)
 							echo "<th align='left'>".t(mysql_field_name($result,$y))."</th>";
 						echo "</tr>";
 					}
 
 					echo "<tr class='aktiivi'>";
 
-					for ($y=0; $y<mysql_num_fields($result); $y++)
+					for ($y=2; $y<mysql_num_fields($result); $y++)
 						echo "<td>$row[$y]</td>";
 
 					echo "<form method='post'><td class='back'>

@@ -679,21 +679,21 @@
 
 		if ((int) $listaus > 0) {
 
-			foreach (explode(",", $id) as $_id) {
-				$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$_id}'";
-				$result = pupe_query($query);
-				$laskurow = mysql_fetch_assoc($result);
+			$_id = explode(",", $id);
 
-				$query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
-				$komres = pupe_query($query);
-				$komrow = mysql_fetch_assoc($komres);
-				$komento["Vastaanotetut"] = $komrow['komento'];
+			$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$_id[0]}'";
+			$result = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($result);
 
-				$otunnus = $laskurow["tunnus"];
-				$mista = 'vastaanota';
+			$query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
+			$komres = pupe_query($query);
+			$komrow = mysql_fetch_assoc($komres);
+			$komento["Vastaanotetut"] = $komrow['komento'];
 
-				require('tulosta_purkulista.inc');
-			}
+			$otunnus = $id;
+			$mista = 'vastaanota';
+
+			require('tulosta_purkulista.inc');
 		}
 
 		$id 	 = 0;

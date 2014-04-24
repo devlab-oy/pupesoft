@@ -1100,6 +1100,7 @@
 		//siirtolistan rivit
 		$query = "	SELECT tilausrivi.nimitys,
 					tilausrivi.tuoteno,
+					tilausrivi.otunnus,
 					tilausrivi.tunnus,
 					tilausrivi.varattu,
 					tilausrivi.toimitettu,
@@ -1129,6 +1130,11 @@
 
 		//itse rivit
 		echo "<tr>";
+
+		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+			echo "<th>",t("Siirtolista"),"</th>";
+		}
+
 		echo "<th>".t("Nimitys")."</th>";
 		echo "<th>".t("Tuoteno")."</th>";
 		echo "<th>".t("Paikka")."</th>";
@@ -1200,6 +1206,11 @@
 
 			echo "<tr>";
 			echo "<input type='hidden' name='tunnus[]' value='$rivirow[tunnus]'>";
+
+			if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+				echo "<td>{$rivirow['otunnus']}</td>";
+			}
+
 			echo "<td>".t_tuotteen_avainsanat($rivirow, 'nimitys')."</td>";
 			echo "<td>$rivirow[tuoteno]</td>";
 

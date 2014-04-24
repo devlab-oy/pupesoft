@@ -802,10 +802,10 @@
 					GROUP BY tilausrivi.otunnus";
 		$tilre = pupe_query($query);
 
-		$selectlisa = $toim == "" ? ", viesti AS Viite" : "";
+		$selectlisa = $toim == "" ? "viesti AS viite," : "";
 
 		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-			$groupbylisa = "GROUP BY 1,2,3,4,5,6,7";
+			$groupbylisa = "GROUP BY 1,2,3,4,5,6";
 		}
 		else {
 			$groupbylisa = "";
@@ -823,61 +823,90 @@
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
 
 			// etsit‰‰n sopivia tilauksia
-			$query = "	SELECT IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) toimitustavan_lahto,
-						varasto,
-						tunnus '{$qnimi1}',
-						nimi '{$qnimi2}'
-						{$selectlisa} ,
-						date_format(luontiaika, '%Y-%m-%d') Laadittu,
-						Laatija
+			$query = "	SELECT varasto,
+						IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) lahto,
+						nimi,
+						date_format(luontiaika, '%Y-%m-%d') laadittu,
+						laatija,
+						{$selectlisa}
+						GROUP_CONCAT(tunnus) AS tunnus
 						FROM lasku
-						WHERE tunnus = '$tilrow[otunnus]'
+						WHERE tunnus = '{$tilrow['otunnus']}'
 						and tila = 'G'
-						$haku
-						$myytili
-						and yhtio = '$kukarow[yhtio]'
+						{$haku}
+						{$myytili}
+						and yhtio = '{$kukarow['yhtio']}'
 						and alatila in ('C','B','D')
 						{$groupbylisa}
-						ORDER by laadittu DESC";
+						ORDER by lahto, laadittu DESC";
 			$result = pupe_query($query);
 
 			//piirret‰‰n taulukko...
 			if (mysql_num_rows($result) != 0) {
 
-				while ($row = mysql_fetch_row($result)) {
-					// piirret‰‰n vaan kerran taulukko-otsikot
-					if ($boob == '') {
-						$boob = 'kala';
+				echo "<table>";
+				echo "<tr>";
 
-						echo "<table>";
-						echo "<tr>";
-						for ($y=2; $y<mysql_num_fields($result); $y++)
-							echo "<th align='left'>".t(mysql_field_name($result,$y))."</th>";
-						echo "</tr>";
-					}
+				if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+					echo "<th align='left'>",t("L‰htˆ"),"</th>";
+				}
+
+				echo "<th align='left'>",t($qnimi1),"</th>";
+				echo "<th align='left'>",t($qnimi2),"</th>";
+
+				if ($toim == "") {
+					echo "<th align='left'>",t("Viite"),"</th>";
+				}
+
+				echo "<th align='left'>",t("Laadittu"),"</th>";
+				echo "<th align='left'>",t("Laatija"),"</th>";
+
+				echo "</tr>";
+
+				$ed_lahto = 0;
+
+				while ($row = mysql_fetch_assoc($result)) {
+
+					if ($ed_lahto != $row['lahto']) echo "<tr><td class='back'>&nbsp;</td></tr>";
 
 					echo "<tr class='aktiivi'>";
 
-					for ($y=2; $y<mysql_num_fields($result); $y++)
-						echo "<td>$row[$y]</td>";
+					if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+						echo "<td>{$row['lahto']}</td>";
+					}
 
+					echo "<td>{$row['tunnus']}</td>";
+					echo "<td>{$row['nimi']}</td>";
+
+					if ($toim == "") {
+						echo "<td>{$row['viite']}</td>";
+					}
+
+					echo "<td>{$row['laadittu']}</td>";
+					echo "<td>{$row['laatija']}</td>";
+
+					echo "<td>";
 					echo "<form method='post'><td class='back'>
-						  	<input type='hidden' name='id' value='$row[0]'>
-							<input type='hidden' name='varastorajaus' value='$varastorajaus'>
-							<input type='hidden' name='maa' value='$maa'>
-						  	<input type='hidden' name='toim' value='$toim'>";
+						  	<input type='hidden' name='id' value='{$row['tunnus']}'>
+							<input type='hidden' name='varastorajaus' value='{$varastorajaus}'>
+							<input type='hidden' name='maa' value='{$maa}'>
+						  	<input type='hidden' name='toim' value='{$toim}'>";
 
 					if ($toim == "MYYNTITILI") {
-						echo "<input type='submit' name='tila' value='".t("Toimita")."'></td></tr></form>";
+						echo "<input type='submit' name='tila' value='".t("Toimita")."'>";
 					}
 					else {
-						echo "<input type='submit' name='tila' value='".t("Vastaanota")."'></td></tr></form>";
+						echo "<input type='submit' name='tila' value='".t("Vastaanota")."'>";
 					}
+
+					echo "</form></td></tr>";
+
+					$ed_lahto = $row['lahto'];
 				}
 			}
 		}
 
-		if ($boob != '') {
+		if (mysql_num_rows($tilre) > 0) {
 			echo "</table>";
 		}
 		else {

@@ -3,6 +3,9 @@
 // Kutsutaanko CLI:stä
 $php_cli = FALSE;
 
+// Tämä vaatii paljon muistia
+ini_set("memory_limit", "5G");
+
 if (php_sapi_name() == 'cli') {
 	$php_cli = TRUE;
 }
@@ -14,10 +17,6 @@ if ($php_cli) {
 		die;
 	}
 
-	//tarvitaan yhtiö
-	$kukarow['yhtio'] = $argv[1];
-	$kukarow['kuka'] = "admin";
-
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
@@ -26,7 +25,10 @@ if ($php_cli) {
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");
 
-	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+	// Haetaan yhtiörow ja kukarow
+	$yhtiorow = hae_yhtion_parametrit($argv[1]);
+	$kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
 	$aja = 'run';
 
 	echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]\n";
@@ -48,6 +50,9 @@ else {
 
 	echo "<pre>";
 }
+
+# Ei query debuggia, vie turhaa muistia.
+unset($pupe_query_debug);
 
 $iltasiivo = "";
 $laskuri   = 0;
@@ -300,9 +305,8 @@ while ($row = mysql_fetch_assoc($result)) {
 	}
 }
 
-if ($lask + $lask2 > 0) {
-	$iltasiivo .= date("d.m.Y @ G:i:s").": Tuhottiin $lask orpoa perhettä, ja $lask2 lapsetonta isää (eli perheid nollattiin)\n";
-}
+if ($lask > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Korjattiin $lask tilausriviä joissa tuoteperheen lapsituotteelta puuttui isätuote\n";
+if ($lask2 > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Korjattiin $lask2 tilausriviä joissa tuoteperheen isätuotteella ei ollut lapsituotteita\n";
 
 $lasktuote = 0;
 $laskpois = 0;
@@ -329,9 +333,7 @@ while ($row = mysql_fetch_assoc($result)) {
 	$laskpois += mysql_affected_rows();
 }
 
-if ($lasktuote > 0) {
-	$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaatti tuotteen_toimittajaa\n";
-}
+if ($lasktuote > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaattia toimittajaa\n";
 
 $kukaquery = "	UPDATE kuka
 				SET taso = '2'
@@ -418,9 +420,8 @@ if (table_exists('suorituskykyloki')) {
 				AND luontiaika < date_sub(now(), INTERVAL 1 YEAR)";
 	pupe_query($query);
 
-	if (mysql_affected_rows() > 0) {
-		$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin ".mysql_affected_rows()." riviä suorituskykylokista.\n";
-	}
+	$laskuri = mysql_affected_rows();
+	if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri riviä suorituskykylokista.\n";
 }
 
 // Dellataan rogue oikeudet
@@ -457,9 +458,7 @@ while ($laskurow = mysql_fetch_assoc($result)) {
 	$myyntitili++;
 }
 
-if ($myyntitili > 0) {
-	$iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $myyntitili myyntitiliä valmiiksi.\n";
-}
+if ($myyntitili > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $myyntitili myyntitiliä valmiiksi.\n";
 
 // Poistetaan kaikki yhden tuotteen korvaavuusketjut
 $query = "	SELECT group_concat(tunnus) as tunnus, id
@@ -529,9 +528,7 @@ while ($row = mysql_fetch_assoc($result)) {
 	$valmkorj++;
 }
 
-if ($valmkorj > 0) {
-	$iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $valmkorj vaömistustilausta takaisin alkuperäisille alatiloille.\n";
-}
+if ($valmkorj > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $valmkorj vaömistustilausta takaisin alkuperäisille alatiloille.\n";
 
 // Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 $query = "	SELECT tunnus, tuoteno
@@ -555,9 +552,7 @@ while ($iltatuotepaikatrow = mysql_fetch_assoc($iltatuotepaikatresult)) {
 	$myyntitili++;
 }
 
-if ($myyntitili > 0) {
-	$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $myyntitili tyhjää myyntitilin varastopaikkaa.\n";
-}
+if ($myyntitili > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $myyntitili tyhjää myyntitilin varastopaikkaa.\n";
 
 # Poistetaan tuotepaikat joiden saldo on 0 ja ne on määritelty reservipaikoiksi (ei kuitenkaan oletuspaikkaa)
 if ($yhtiorow['kerayserat'] == 'K') {
@@ -592,54 +587,60 @@ if ($yhtiorow['kerayserat'] == 'K') {
 	if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $poistettu reservi-tuotepaikkaa poistetuksi.\n";
 }
 
-$poistettu = 0;
-
 # Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
 # ei ole saldoa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
-$query = "	SELECT t.tunnus, CONCAT(t.tuoteno,t.hyllyalue,t.hyllynro,t.hyllytaso,t.hyllyvali) AS id
-			FROM tuotepaikat AS t
-			JOIN varastopaikat AS v
-			ON ( v.yhtio = t.yhtio
-				AND v.alkuhyllyalue = t.hyllyalue
-				AND v.alkuhyllynro = t.hyllynro )
-			WHERE t.yhtio = '{$kukarow['yhtio']}'
-			AND t.saldo = 0
-			AND t.hyllytaso = 0
-			AND t.hyllyvali = 0
-			AND t.oletus = ''
-			GROUP BY 1";
-$result = pupe_query($query);
+if ($yhtiorow['kerayserat'] == 'K') {
+	$poistettu = 0;
 
-# Haetaan avoimet tilausrivit (myynti, osto, siirtolistat)
-$query = "	SELECT CONCAT(tuoteno,hyllyalue,hyllynro,hyllytaso,hyllyvali) AS id
-			FROM tilausrivi
-			WHERE yhtio = '{$kukarow['yhtio']}'
-			AND laskutettuaika = '0000-00-00'
-			AND tyyppi IN ('L','O','G')";
-$avoinrivi_result = pupe_query($query);
-$avoimet_rivit = array();
+	$query = "	SELECT tuotepaikat.tunnus,
+				tuotepaikat.tuoteno,
+				tuotepaikat.hyllyalue,
+				tuotepaikat.hyllynro,
+				tuotepaikat.hyllytaso,
+				tuotepaikat.hyllyvali
+				FROM tuotepaikat
+				JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+				AND varastopaikat.alkuhyllyalue = tuotepaikat.hyllyalue
+				AND varastopaikat.alkuhyllynro = tuotepaikat.hyllynro)
+				WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+				AND tuotepaikat.saldo = 0
+				AND tuotepaikat.hyllytaso = 0
+				AND tuotepaikat.hyllyvali = 0
+				AND tuotepaikat.oletus = ''
+				GROUP BY 1";
+	$result = pupe_query($query);
 
-while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
-	$avoimet_rivit[] = $avoinrivi['id'];
-}
+	while ($poistettava_tuotepaikka = mysql_fetch_assoc($result)) {
 
-while ($poistettava_tuotepaikka = mysql_fetch_assoc($result)) {
+		# Katsotaan onko tällä paikalla avoimia tilausrivejä (myynti, osto, siirtolistat)
+		$query = "	SELECT tunnus
+					FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$poistettava_tuotepaikka['tuoteno']}'
+					AND hyllyalue = '{$poistettava_tuotepaikka['hyllyalue']}'
+					AND hyllynro = '{$poistettava_tuotepaikka['hyllynro']}'
+					AND hyllytaso = '{$poistettava_tuotepaikka['hyllytaso']}'
+					AND hyllyvali = '{$poistettava_tuotepaikka['hyllyvali']}'
+					AND laskutettuaika = '0000-00-00'
+					AND tyyppi IN ('L','O','G')";
+		$avoinrivi_result = pupe_query($query);
 
-	// Ei poisteta jos avoimia
-	if (in_array($poistettava_tuotepaikka['id'], $avoimet_rivit)) {
-		continue;
+		// Ei poisteta jos avoimia
+		if (mysql_num_rows($avoinrivi_result) > 0) {
+			continue;
+		}
+
+		# Merkataan paikka poistettavaksi
+		$query = "	UPDATE tuotepaikat
+					SET poistettava = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = {$poistettava_tuotepaikka['tunnus']}";
+		$result2 = pupe_query($query);
+		$poistettu++;
 	}
 
-	# Merkataan paikka poistettavaksi
-	$query = "	UPDATE tuotepaikat
-				SET poistettava = 'D'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = {$poistettava_tuotepaikka['tunnus']}";
-	$result2 = pupe_query($query);
-	$poistettu++;
+	if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $poistettu 'generoitua varaston alkupaikkaa' poistettavaksi.\n";
 }
-
-if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $poistettu 'generoitua varastonalkupaikkaa' poistettavaksi.\n";
 
 /**
  * Poistetaan poistettavaksi merkatut tuotepaikat joilla ei ole saldoa
@@ -687,10 +688,8 @@ while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
 
 if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
 
-if ($iltasiivo != "" or $php_cli) {
-	echo $iltasiivo;
-	echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]. Done!\n\n";
-}
+echo $iltasiivo;
+echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]. Done!\n\n";
 
 if ($iltasiivo != "") {
 	if (isset($iltasiivo_email) and $iltasiivo_email == 1) {

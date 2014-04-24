@@ -17,7 +17,7 @@ if ($php_cli) {
     die;
   }
 
-  $inc_path = dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear"
+  $inc_path = dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear";
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$inc_path);
   error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
   ini_set("display_errors", 0);
@@ -52,6 +52,10 @@ else {
   echo "<pre>";
 }
 
+function is_log($str) {
+  return date("d.m.Y @ G:i:s") . ": $str\n";
+}
+
 # Ei query debuggia, vie turhaa muistia.
 unset($pupe_query_debug);
 
@@ -62,7 +66,7 @@ $laskuri   = 0;
 $query = "SELECT toimi.tunnus, tuotteen_toimittajat.tunnus toimtunnus
           FROM tuotteen_toimittajat
           LEFT JOIN toimi on (toimi.yhtio = tuotteen_toimittajat.yhtio
-            AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+            AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
           WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
           HAVING toimi.tunnus is null";
 $result = pupe_query($query);
@@ -73,7 +77,10 @@ while ($row = mysql_fetch_assoc($result)) {
   $laskuri++;
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri poistetun toimittajan tuoteliitosta.\n";
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Poistettiin $laskuri poistetun toimittajan tuoteliitosta.");
+}
+
 $laskuri = 0;
 
 // poistetaan kaikki tuotteen_toimittajat liitokset joiden tuote on poistettu
@@ -91,7 +98,9 @@ while ($row = mysql_fetch_assoc($result)) {
   $laskuri++;
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri poistetun tuotteen tuoteliitosta.\n";
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Poistettiin $laskuri poistetun tuotteen tuoteliitosta.");
+}
 
 $laskuri = 0;
 $laskuri2 = 0;
@@ -140,8 +149,13 @@ while ($row = mysql_fetch_assoc($result)) {
   pupe_query($query);
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri rivitöntä tilausta.\n";
-if ($laskuri2 > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin toimitetuksi $laskuri2 rivitöntä tilausta.\n";
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Poistettiin $laskuri rivitöntä tilausta.");
+}
+
+if ($laskuri2 > 0) {
+  $iltasiivo .= is_log("Merkattiin toimitetuksi $laskuri2 rivitöntä tilausta.");
+}
 
 $laskuri = 0;
 
@@ -160,7 +174,7 @@ $query = "SELECT lasku.tunnus laskutunnus,
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (2)<br>";
+  $komm = "({$kukarow['kuka']}@".date('Y-m-d').") ".t("Mitätöi ohjelmassa iltasiivo.php")." (2)<br>";
 
   $query = "UPDATE lasku set
             alatila = '$row[tila]',
@@ -179,7 +193,9 @@ while ($row = mysql_fetch_assoc($result)) {
   pupe_query($query);
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri tilausta joilla oli pelkkiä mitätöityjä rivejä.\n";
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Mitätöitiin $laskuri tilausta joilla oli pelkkiä mitätöityjä rivejä.");
+}
 
 $laskuri = 0;
 
@@ -198,7 +214,7 @@ $query = "SELECT lasku.tunnus laskutunnus
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (3)<br>";
+  $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mitätöi ohjelmassa iltasiivo.php")." (3)<br>";
 
   $query = "UPDATE tilausrivi SET
             tyyppi = 'D'
@@ -209,7 +225,9 @@ while ($row = mysql_fetch_assoc($result)) {
   $laskuri++;
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri mitätöidyn tilauksen rivit. (Rivit jostain syystä ei dellattuja)\n";
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Mitätöitiin $laskuri mitätöidyn tilauksen rivit.");
+}
 
 $laskuri = 0;
 
@@ -235,7 +253,7 @@ while ($row = mysql_fetch_assoc($result)) {
   $laskuri++;
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Arkistoitiin $laskuri ostotilausta.\n";
+if ($laskuri > 0) $iltasiivo .= is_log("Arkistoitiin $laskuri ostotilausta.");
 
 $laskuri = 0;
 
@@ -292,7 +310,9 @@ while ($pos_chk_row = mysql_fetch_assoc($pos_chk_result)) {
   }
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Vapautettiin {$laskuri} myyntitilausta tulostusjonoon.\n";
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Vapautettiin {$laskuri} myyntitilausta tulostusjonoon.");
+}
 
 $laskuri = 0;
 
@@ -319,7 +339,7 @@ $query = "SELECT distinct lasku.tunnus laskutunnus
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")."<br>";
+  $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mitätöi ohjelmassa iltasiivo.php")."<br>";
 
   $query = "UPDATE lasku SET
             alatila = tila,
@@ -331,7 +351,9 @@ while ($row = mysql_fetch_assoc($result)) {
   $laskuri++;
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri tyhjää saapumista.\n";
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Mitätöitiin $laskuri tyhjää saapumista.");
+}
 
 // tässä tehdään isittömistä perheistä ei-perheitä ja myös perheistä joissa ei ole lapsia eli nollataan perheid
 $lask = 0;
@@ -379,8 +401,13 @@ while ($row = mysql_fetch_assoc($result)) {
   }
 }
 
-if ($lask > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Korjattiin $lask tilausriviä joissa tuoteperheen lapsituotteelta puuttui isätuote\n";
-if ($lask2 > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Korjattiin $lask2 tilausriviä joissa tuoteperheen isätuotteella ei ollut lapsituotteita\n";
+if ($lask > 0) {
+  $iltasiivo .= is_log("Korjattiin $lask tilausriviä joissa tuoteperheen lapsituotteelta puuttui isätuote");
+}
+
+if ($lask2 > 0) {
+  $iltasiivo .= is_log("Korjattiin $lask2 tilausriviä joissa tuoteperheen isätuotteella ei ollut lapsituotteita");
+}
 
 $lasktuote = 0;
 $laskpois = 0;
@@ -407,7 +434,9 @@ while ($row = mysql_fetch_assoc($result)) {
   $laskpois += mysql_affected_rows();
 }
 
-if ($lasktuote > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaattia toimittajaa\n";
+if ($lasktuote > 0) {
+  $iltasiivo .= is_log("Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaattia toimittajaa");
+}
 
 $kukaquery = "UPDATE kuka
               SET taso = '2'
@@ -462,7 +491,7 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
       }
     }
 
-    $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (4)<br>";
+    $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mitätöi ohjelmassa iltasiivo.php")." (4)<br>";
 
     $query = "UPDATE lasku SET
               alatila = 'N',
@@ -489,7 +518,9 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
     $laskuri++;
   }
 
-  if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri extranet-tilausta, jotka olivat $aikaraja tuntia vanhoja.\n";
+  if ($laskuri > 0) {
+    $iltasiivo .= is_log("Mitätöitiin $laskuri extranet-tilausta, jotka olivat $aikaraja tuntia vanhoja.");
+  }
 }
 
 if (table_exists('suorituskykyloki')) {
@@ -499,7 +530,7 @@ if (table_exists('suorituskykyloki')) {
   pupe_query($query);
 
   $laskuri = mysql_affected_rows();
-  if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri riviä suorituskykylokista.\n";
+  if ($laskuri > 0) $iltasiivo .= is_log("Poistettiin $laskuri riviä suorituskykylokista.");
 }
 
 // Dellataan rogue oikeudet
@@ -541,7 +572,9 @@ while ($laskurow = mysql_fetch_assoc($result)) {
   $myyntitili++;
 }
 
-if ($myyntitili > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $myyntitili myyntitiliä valmiiksi.\n";
+if ($myyntitili > 0) {
+  $iltasiivo .= is_log("Merkattiin $myyntitili myyntitiliä valmiiksi.");
+}
 
 // Poistetaan kaikki yhden tuotteen korvaavuusketjut
 $query = "SELECT group_concat(tunnus) as tunnus, id
@@ -560,7 +593,7 @@ while ($row = mysql_fetch_assoc($result)) {
   }
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri yhden tuotteen korvaavuusketjua.\n";
+if ($laskuri > 0) $iltasiivo .= is_log("Poistettiin $laskuri yhden tuotteen korvaavuusketjua.");
 $laskuri = 0;
 
 // Poistetaan kaikki yhden tuotteen vastaavuusketjut
@@ -580,7 +613,10 @@ while ($row = mysql_fetch_assoc($result)) {
   }
 }
 
-if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri yhden tuotteen vastaavuusketjua.\n";
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Poistettiin $laskuri yhden tuotteen vastaavuusketjua.");
+}
+
 $laskuri = 0;
 
 // Tsekataan jos joku valmistus tai valmistusmyynti on jäänyt alatila = K tilaan
@@ -611,7 +647,9 @@ while ($row = mysql_fetch_assoc($result)) {
   $valmkorj++;
 }
 
-if ($valmkorj > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $valmkorj vaömistustilausta takaisin alkuperäisille alatiloille.\n";
+if ($valmkorj > 0) {
+  $iltasiivo .= is_log("Merkattiin $valmkorj vaömistustilausta takaisin alkuperäisille alatiloille.");
+}
 
 // Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 $query = "SELECT tunnus, tuoteno
@@ -635,7 +673,9 @@ while ($iltatuotepaikatrow = mysql_fetch_assoc($iltatuotepaikatresult)) {
   $myyntitili++;
 }
 
-if ($myyntitili > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $myyntitili tyhjää myyntitilin varastopaikkaa.\n";
+if ($myyntitili > 0) {
+  $iltasiivo .= is_log("Poistettiin $myyntitili tyhjää myyntitilin varastopaikkaa.");
+}
 
 # Poistetaan tuotepaikat joiden saldo on 0 ja ne on määritelty reservipaikoiksi
 # Ei poisteta kuitenkaan jos se on oletuspaikka
@@ -668,7 +708,9 @@ if ($yhtiorow['kerayserat'] == 'K') {
     $poistettu++;
   }
 
-  if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $poistettu reservi-tuotepaikkaa poistetuksi.\n";
+  if ($poistettu > 0) {
+    $iltasiivo .= is_log("Merkattiin $poistettu reservi-tuotepaikkaa poistetuksi.");
+  }
 }
 
 # Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
@@ -723,7 +765,9 @@ if ($yhtiorow['kerayserat'] == 'K') {
     $poistettu++;
   }
 
-  if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $poistettu 'generoitua varaston alkupaikkaa' poistettavaksi.\n";
+  if ($poistettu > 0) {
+    $iltasiivo .= is_log("Merkattiin $poistettu 'generoitua varaston alkupaikkaa' poistettavaksi.");
+  }
 }
 
 /**
@@ -776,7 +820,9 @@ while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
   pupe_query($tapahtuma_query);
 }
 
-if ($poistettu > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
+if ($poistettu > 0) {
+  $iltasiivo .= is_log("Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.");
+}
 
 echo $iltasiivo;
 echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]. Done!\n\n";

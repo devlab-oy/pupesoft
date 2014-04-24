@@ -142,7 +142,7 @@
 					$query = "	SELECT *
 								from tilausrivi
 								where tyyppi='G'
-								and otunnus 	= '$id'
+								and otunnus 	IN ($id)
 								and	tuoteno		= '$tuoteno'
 								and yhtio		= '$kukarow[yhtio]'
 								and hyllyalue  	= '$paikka[0]'

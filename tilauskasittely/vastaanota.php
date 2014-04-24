@@ -648,27 +648,29 @@
 		if ($virheita == 0) {
 
 			//päivitetään otsikko vastaanotetuksi ja tapvmmään päivä
-			$query  = "	SELECT sum(rivihinta) rivihinta
+			$query  = "	SELECT otunnus, sum(rivihinta) rivihinta
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND otunnus = '$id'
-						AND tyyppi  = 'G'";
+						AND otunnus IN ($id)
+						AND tyyppi  = 'G'
+						GROUP BY 1";
 			$result = pupe_query($query);
-			$apusummarow = mysql_fetch_assoc($result);
 
-			// Nää oli tossa updatessa mutta muuttujia ei ollut eikä tullut
-			#bruttopaino 		= '$aputoimirow[bruttopaino]',
-			#lisattava_era 		= '$aputoimirow[lisattava_era]',
-			#vahennettava_era	= '$aputoimirow[vahennettava_era]'
+			while ($apusummarow = mysql_fetch_assoc($result)) {
+				// Nää oli tossa updatessa mutta muuttujia ei ollut eikä tullut
+				#bruttopaino 		= '$aputoimirow[bruttopaino]',
+				#lisattava_era 		= '$aputoimirow[lisattava_era]',
+				#vahennettava_era	= '$aputoimirow[vahennettava_era]'
 
-			$query = "	UPDATE lasku
-						SET alatila		= 'V',
-						tapvm			= now(),
-						summa			= '$apusummarow[rivihinta]'
-						WHERE tunnus	= '$id'
-						and yhtio		= '$kukarow[yhtio]'
-						and tila		= 'G'";
-			$result = pupe_query($query);
+				$query = "	UPDATE lasku
+							SET alatila		= 'V',
+							tapvm			= now(),
+							summa			= '$apusummarow[rivihinta]'
+							WHERE tunnus	= '{$apusummarow['otunnus']}'
+							and yhtio		= '$kukarow[yhtio]'
+							and tila		= 'G'";
+				$result = pupe_query($query);
+			}
 		}
 	}
 
@@ -676,19 +678,22 @@
 	if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI") {
 
 		if ((int) $listaus > 0) {
-			$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
-			$result = pupe_query($query);
-			$laskurow = mysql_fetch_assoc($result);
 
-			$query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
-			$komres = pupe_query($query);
-			$komrow = mysql_fetch_assoc($komres);
-			$komento["Vastaanotetut"] = $komrow['komento'];
+			foreach (explode(",", $id) as $_id) {
+				$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$_id}'";
+				$result = pupe_query($query);
+				$laskurow = mysql_fetch_assoc($result);
 
-			$otunnus = $laskurow["tunnus"];
-			$mista = 'vastaanota';
+				$query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
+				$komres = pupe_query($query);
+				$komrow = mysql_fetch_assoc($komres);
+				$komento["Vastaanotetut"] = $komrow['komento'];
 
-			require('tulosta_purkulista.inc');
+				$otunnus = $laskurow["tunnus"];
+				$mista = 'vastaanota';
+
+				require('tulosta_purkulista.inc');
+			}
 		}
 
 		$id 	 = 0;

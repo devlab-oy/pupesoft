@@ -356,7 +356,7 @@
 						AND lasku.clearing NOT IN ('EXTENNAKKO','EXTTARJOUS')
 						AND lasku.luontiaika < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
 			$result = pupe_query($query);
-			
+
 			while ($row = mysql_fetch_assoc($result)) {
 				// laitetaan kaikki poimitut extranet jt-rivit takaisin omille vanhoille tilauksille
 				$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus
@@ -576,39 +576,69 @@
 		if ($yhtiorow['kerayserat'] == 'K') {
 			$query = "	SELECT tuotepaikat.*
 						FROM tuotepaikat
-						JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tuotepaikat.yhtio AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro AND varaston_hyllypaikat.hyllyvali = tuotepaikat.hyllyvali AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso AND varaston_hyllypaikat.reservipaikka = 'K')
-						WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
-						AND tuotepaikat.saldo=0
+						JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tuotepaikat.yhtio
+							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue
+							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro
+							AND varaston_hyllypaikat.hyllyvali = tuotepaikat.hyllyvali
+							AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso
+							AND varaston_hyllypaikat.reservipaikka = 'K')
+						WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotepaikat.saldo = 0
 						AND tuotepaikat.oletus = ''
 						AND tuotepaikat.inventointilista_aika='0000-00-00 00:00:00'";
 			$tuotepaikat = pupe_query($query);
 
 			# Poistetaan löydetyt rivit ja tehdään tapahtuma
 			while ($tuotepaikkarow = mysql_fetch_assoc($tuotepaikat)) {
-				# Poistetaan paikka
-				$query = "	DELETE FROM tuotepaikat
-							WHERE yhtio='{$kukarow['yhtio']}'
-							AND tunnus='{$tuotepaikkarow['tunnus']}'
-							AND saldo=0";
-				pupe_query($query);
-
-				# Tehdään tapahtuma
-				$query = "	INSERT INTO tapahtuma SET
-							yhtio 		= '$kukarow[yhtio]',
-							tuoteno 	= '$tuotepaikkarow[tuoteno]',
-							kpl			= '0',
-							kplhinta	= '0',
-							hinta		= '0',
-							hyllyalue	= '$tuotepaikkarow[hyllyalue]',
-							hyllynro	= '$tuotepaikkarow[hyllynro]',
-							hyllyvali	= '$tuotepaikkarow[hyllyvali]',
-							hyllytaso	= '$tuotepaikkarow[hyllytaso]',
-							laji		= 'poistettupaikka',
-							selite		= '".t("Poistettiin tuotepaikka")." $tuotepaikkarow[hyllyalue] $tuotepaikkarow[hyllynro] $tuotepaikkarow[hyllyvali] $tuotepaikkarow[hyllytaso]',
-							laatija		= '$kukarow[kuka]',
-							laadittu	= now()";
+				# Merkataan paikka poistettavaksi
+				$query = "	UPDATE tuotepaikat
+							SET poistettava = 'D'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tuotepaikkarow['tunnus']}'
+							AND saldo = 0";
 				pupe_query($query);
 			}
+		}
+
+		$query = "	SELECT t.tunnus, CONCAT(t.tuoteno,t.hyllyalue,t.hyllynro,t.hyllytaso,t.hyllyvali) AS id
+					FROM tuotepaikat AS t
+					JOIN varastopaikat AS v
+					ON ( v.yhtio = t.yhtio
+						AND v.alkuhyllyalue = t.hyllyalue
+						AND v.alkuhyllynro = t.hyllynro )
+					WHERE t.yhtio = '{$kukarow['yhtio']}'
+					AND t.saldo = 0
+					AND t.hyllytaso = 0
+					AND t.hyllyvali = 0
+					AND t.oletus = ''
+					GROUP BY 1";
+		$result = pupe_query($query);
+
+		$query = "	SELECT CONCAT(tuoteno,hyllyalue,hyllynro,hyllytaso,hyllyvali) AS id
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laskutettuaika = '0000-00-00'
+					AND tyyppi IN ('L','O','G')";
+		$avoinrivi_result = pupe_query($query);
+		$avoimet_rivit = array();
+
+		while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
+			$avoimet_rivit[] = $avoinrivi['id'];
+		}
+
+		while ($poistettava_tuotepaikka = mysql_fetch_assoc($result)) {
+
+			// Ei poisteta jos avoimia
+			if (in_array($poistettava_tuotepaikka['id'], $avoimet_rivit)) {
+				continue;
+			}
+
+			# Merkataan paikka poistettavaksi
+			$query = "	UPDATE tuotepaikat
+						SET poistettava = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = {$poistettava_tuotepaikka['tunnus']}";
+			$result2 = pupe_query($query);
 		}
 
 		/**
@@ -656,51 +686,6 @@
 		}
 
 		if ($poistettu > 0) echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
-
-		$query = "	SELECT t.tunnus, CONCAT(t.tuoteno,t.hyllyalue,t.hyllynro,t.hyllytaso,t.hyllyvali) AS id
-					FROM tuotepaikat AS t
-					JOIN varastopaikat AS v
-					ON ( v.yhtio = t.yhtio
-						AND v.alkuhyllyalue = t.hyllyalue
-						AND v.alkuhyllynro = t.hyllynro )
-					WHERE t.yhtio = '{$kukarow['yhtio']}'
-					AND t.saldo = 0
-					AND t.hyllytaso = 0
-					AND t.hyllyvali = 0
-					AND t.oletus = ''
-					GROUP BY 1";
-		$result = pupe_query($query);
-
-		$query = "	SELECT CONCAT(tuoteno,hyllyalue,hyllynro,hyllytaso,hyllyvali) AS id
-					FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laskutettuaika = '0000-00-00'
-					AND tyyppi IN ('L','O','G')";
-		$avoinrivi_result = pupe_query($query);
-		$avoimet_rivit = array();
-		while($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
-			$avoimet_rivit[] = $avoinrivi['id'];
-		}
-
-		$poistettu = 0;
-		$avoin = 0;
-		while($poistettava_tuotepaikka = mysql_fetch_assoc($result)) {
-			if (in_array($poistettava_tuotepaikka['id'], $avoimet_rivit)) {
-				$avoin++;
-				continue;
-			}
-
-			$query = "	DELETE
-						FROM tuotepaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = {$poistettava_tuotepaikka['tunnus']}";
-			$result2 = pupe_query($query);
-			if (mysql_affected_rows() > 0) {
-				$poistettu++;
-			}
-		}
-
-		echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu saldo = 0 ja default varastopaikka tuotepaikkaa. avoimia {$avoin}\n";
 	}
 
 	if (!$php_cli) {

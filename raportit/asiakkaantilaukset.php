@@ -305,7 +305,15 @@
 	}
 
 	if ($ytunnus != '') {
-		echo "<form method='post' autocomplete='off'>
+		// Pikku scripti formin tyhjentämiseen
+		echo "<script type='text/javascript' language='javascript'>
+		function vaihdaClick() {
+			document.etsiform.etsinappi.name='vaihda';
+			document.etsiform.etsinappi.click();
+		}
+		</script>";
+		
+		echo "<form method='post' autocomplete='off' id='etsiform' name='etsiform'>
 				<input type='hidden' name='ytunnus' value='$ytunnus'>
 				<input type='hidden' name='asiakasid' value='$asiakasid'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -321,7 +329,7 @@
 			$result = pupe_query($query);
 			$asiakasrow 	= mysql_fetch_array($result);
 
-			echo "<table><tr><th>".t("Valittu asiakas").":</th><td>$asiakasrow[nimi]</td></td><td class='back'><input type='Submit' name='vaihda' value = '".t("Vaihda asiakasta")."'></td></tr></table><br>";
+			echo "<table><tr><th>".t("Valittu asiakas").":</th><td>$asiakasrow[nimi]</td></td><td class='back'><input type='button' onclick='vaihdaClick();' value = '".t("Vaihda asiakasta")."'></td></tr></table><br>";
 		}
 		elseif ($toimittajaid > 0) {
 			$query  = "	SELECT concat_ws(' ', nimi, nimitark) nimi
@@ -331,7 +339,7 @@
 			$result = pupe_query($query);
 			$asiakasrow 	= mysql_fetch_array($result);
 
-			echo "<table><tr><th>".("Valittu toimittaja").":</th><td>$asiakasrow[nimi]</td><td class='back'><input type='Submit' name='vaihda' value = '".t("Vaihda toimittajaa")."'></td></td></tr></table><br>";
+			echo "<table><tr><th>".("Valittu toimittaja").":</th><td>$asiakasrow[nimi]</td><td class='back'><input type='button' onclick='vaihdaClick();' value = '".t("Vaihda toimittajaa")."'></td></td></tr></table><br>";
 		}
 
 		echo "<table>";
@@ -508,7 +516,7 @@
 		}
 
 		echo "<td class='back'>";
-		echo "<input type='submit' value='".t("Hae")."'>";
+		echo "<input id='etsinappi' type='submit' value='".t("Hae")."'>";
 		echo "</td></tr>";
 		echo "</table>";
 		echo "</form>";

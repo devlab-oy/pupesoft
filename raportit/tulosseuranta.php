@@ -84,6 +84,7 @@
 	$noautosubmit = TRUE;
 	$piirra_otsikot = FALSE;
 	$lisa = "";
+	$lisa_haku_kustp = "";
 
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
@@ -138,7 +139,8 @@
 			AND lasku.tapvm >= '$alku_pvm'
 			AND lasku.tapvm <= '$loppu_pvm'
 			AND tuote.myynninseuranta = ''  
-			AND tilausrivi.tuoteno != 'MAKSUERÄ'";
+			AND tilausrivi.tuoteno != 'MAKSUERÄ'
+			$lisa_haku_kustp";
 			
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);

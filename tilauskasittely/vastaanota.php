@@ -1114,7 +1114,7 @@
 		$query  = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$row[clearing]'";
+					and tunnus = '{$_clearing}'";
 		$vares = pupe_query($query);
 		$varow2 = mysql_fetch_assoc($vares);
 

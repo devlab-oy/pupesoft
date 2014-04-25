@@ -39,6 +39,11 @@ foreach ($order_tietosisalto as $key => $value) {
 			$arska[$current_customer][] = $value;
 			$current_product = $value;
 		}
+		elseif (substr($value, 0, 6) == "NAD+CZ") {
+			// Joissakin keisseiss‰ NAD+SE puuttuu mutta tilalla on NAD+CZ
+			$value = str_replace("NAD+CZ", "NAD+SE", $value);
+			$edi_rivi_temp[] = $value;
+		}
 		elseif (substr($value, 0, 3) == "PRI") {
 			// Tuotehinta
 			if (!empty($current_product)) $current_product_price = $value;
@@ -62,6 +67,9 @@ foreach ($order_tietosisalto as $key => $value) {
 
 	}
 }
+echo "<pre>";
+var_dump($arska);
+echo "</pre>";
 unset($order_tietosisalto);
 
 // Etsit‰‰n otsikon p‰‰tt‰v‰n rivin index

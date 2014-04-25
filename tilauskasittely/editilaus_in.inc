@@ -207,7 +207,7 @@ elseif ($edi_tyyppi == "edifact911") {
 		if ($value != "") {
 			$edi_rivi .= $value."\n";
 
-			if (substr($value, 0, 6) == "NAD+SE") {
+			if (substr($value, 0, 6) == "NAD+SE" or substr($value, 0, 6) == "NAD+CZ") {
 				$nadse_segmentti = $value;
 			}
 		}
@@ -331,7 +331,7 @@ while ($tietue = fgets($fd)) {
 		case 'NADSE':
 		//Tilauksen vastaanottaja
 			$edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
-
+			echo "MOROROMOROROROR $tieto\n";
 			$query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
 			$result = mysql_query($query) or die($query);
 

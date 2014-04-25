@@ -245,9 +245,10 @@
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					JOIN tapahtuma ON tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus and tapahtuma.kpl > 0 and laji = 'siirto'
+					JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.otunnus IN ({$otunnus})
 					and tilausrivi.yhtio='$kukarow[yhtio]'
-					ORDER BY tilausrivi.otunnus, sorttauskentta, tuote.tuoteno";
+					ORDER BY tilausrivin_lisatiedot.tilausrivilinkki, sorttauskentta, tuote.tuoteno";
 	}
 	elseif ($mista == "vastaanota" and $vainlistaus != '') {
 		$query = "	SELECT tuote.tuoteno,
@@ -272,7 +273,7 @@
 					JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.otunnus IN ({$otunnus})
 					and tilausrivi.yhtio='$kukarow[yhtio]'
-					ORDER BY tilausrivi.otunnus, sorttauskentta, tuote.tuoteno";
+					ORDER BY tilausrivin_lisatiedot.tilausrivilinkki, sorttauskentta, tuote.tuoteno";
 	}
 	else {
 		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno,

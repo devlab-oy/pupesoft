@@ -201,9 +201,10 @@
 			foreach ($tulosseuranta as $taso => $row) {
 
 				$summa = $row["summa"];
-				var_dump($row);
 
-				if (!empty($row["nettokate"])) continue;
+				// Piilotetaan nettokate-solu
+				if (strtolower($row["nimi"]) == strtolower("nettokate")) continue;
+
 				// Jos tasoon halutaan summata mukaan muita tasoja
 				foreach (explode(",", $row["summattava_taso"]) as $summattava_taso) {
 					$summattava_taso = trim($summattava_taso);

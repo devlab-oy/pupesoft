@@ -1082,11 +1082,6 @@
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='paikat'>";
 
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t("P‰ivitet‰‰n oletuspaikka")."</th>";
-		echo "</tr>";
-
 		if ($toim == "") {
 			echo "<input type='hidden' name='varasto' value='{$_clearing}'>";
 		}
@@ -1102,20 +1097,18 @@
 		}
 
 		if ($toim == "") {
+			echo "<table>";
 			echo "<tr>";
+			echo "<th>".t("P‰ivitet‰‰n oletuspaikka")."</th>";
 			echo "<td>";
-			$chk = '';
 
-			if ($oletuspaiv != '') {
-				$chk = 'checked';
-			}
+			$chk = $oletuspaiv != '' ? 'checked' : '';
 
 			echo "<input type='checkbox' name='oletuspaiv' $chk>";
 			echo "</td>";
 			echo "</tr>";
+			echo "</table><br>";
 		}
-
-		echo "</table><br>";
 
 		//vastaanottavan varaston tiedot
 		$query  = "	SELECT *

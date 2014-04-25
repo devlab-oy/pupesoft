@@ -810,7 +810,7 @@
 			}
 		}
 
-		$query = "	SELECT GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
+		$query = "	SELECT lasku.toimitustavan_lahto, GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
 					FROM tilausrivi
 					JOIN lasku on lasku.yhtio = tilausrivi.yhtio
 						and lasku.tunnus = tilausrivi.otunnus
@@ -822,7 +822,8 @@
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.keratty != ''
-					$varasto";
+					$varasto
+					GROUP BY 1";
 		$tilre = pupe_query($query);
 
 		$selectlisa = $toim == "" ? ", viesti AS viite" : "";
@@ -841,6 +842,28 @@
 		else {
 			$qnimi1 = 'Siirtolista';
 			$qnimi2 = 'Vastaanottava varasto';
+		}
+
+		if (mysql_num_rows($tilre) > 0) {
+
+			echo "<table>";
+			echo "<tr>";
+
+			if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+				echo "<th align='left'>",t("Lähtö"),"</th>";
+			}
+
+			echo "<th align='left'>",t($qnimi1),"</th>";
+			echo "<th align='left'>",t($qnimi2),"</th>";
+
+			if ($toim == "") {
+				echo "<th align='left'>",t("Viite"),"</th>";
+			}
+
+			echo "<th align='left'>",t("Laadittu"),"</th>";
+			echo "<th align='left'>",t("Laatija"),"</th>";
+
+			echo "</tr>";
 		}
 
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
@@ -867,30 +890,13 @@
 			//piirretään taulukko...
 			if (mysql_num_rows($result) != 0) {
 
-				echo "<table>";
-				echo "<tr>";
-
-				if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-					echo "<th align='left'>",t("Lähtö"),"</th>";
-				}
-
-				echo "<th align='left'>",t($qnimi1),"</th>";
-				echo "<th align='left'>",t($qnimi2),"</th>";
-
-				if ($toim == "") {
-					echo "<th align='left'>",t("Viite"),"</th>";
-				}
-
-				echo "<th align='left'>",t("Laadittu"),"</th>";
-				echo "<th align='left'>",t("Laatija"),"</th>";
-
-				echo "</tr>";
-
 				$ed_lahto = 0;
 
 				while ($row = mysql_fetch_assoc($result)) {
 
-					if ($ed_lahto != $row['lahto']) echo "<tr><td class='back'>&nbsp;</td></tr>";
+					if ($ed_lahto != $row['lahto']) {
+						echo "<tr><td class='back'>&nbsp;</td></tr>";
+					}
 
 					echo "<tr class='aktiivi'>";
 
@@ -905,18 +911,18 @@
 						echo "<td>{$row['viite']}</td>";
 					}
 
-					echo "<td>{$row['laadittu']}</td>";
+					echo "<td>",tv1dateconv($row['laadittu']),"</td>";
 					echo "<td>{$row['laatija']}</td>";
 
 					if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-						$_id =  $tilrow['otunnus'];
+						$_id =  $row['lahto'] != '' ? $tilrow['otunnus'] : $row['tunnus'];
 					}
 					else {
 						$_id = $row['tunnus'];
 					}
 
-					echo "<td>";
-					echo "<form method='post'><td class='back'>
+					echo "<td class='back'>";
+					echo "<form method='post'>
 						  	<input type='hidden' name='id' value='{$_id}'>
 							<input type='hidden' name='varastorajaus' value='{$varastorajaus}'>
 							<input type='hidden' name='maa' value='{$maa}'>
@@ -982,7 +988,6 @@
 					and yhtio = '$kukarow[yhtio]'
 					and alatila in ('B','C','D')";
 		$result = pupe_query($query);
-		$row = mysql_fetch_array($result);
 
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
@@ -1019,71 +1024,75 @@
 		}
 
 		echo "</tr>";
-		echo "<tr>";
 
-		for ($y=0; $y<mysql_num_fields($result)-1; $y++) {
-			echo "<td>$row[$y]</td>";
-		}
+		while ($row = mysql_fetch_array($result)) {
+			echo "<tr>";
 
-		if ($toim == "") {
-			echo "<form method='post'>";
-			echo "<input type='hidden' name='id' value='$id'>";
-			echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
-			echo "<input type='hidden' name='maa' value='$maa'>";
-			echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
-			echo "<input type='hidden' name='tee' value='mikrotila'>";
-			echo "<td>";
-			echo "<input type='submit' value='".t("Valitse tiedosto")."'>";
-			echo "</td>";
-			echo "</form>";
-
-			echo "<form method='post'>";
-			echo "<input type='hidden' name='id' value='$id'>";
-			echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
-			echo "<input type='hidden' name='maa' value='$maa'>";
-			echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
-			echo "<input type='hidden' name='tee' value='kommentista'>";
-			echo "<td>";
-			echo "<input type='submit' value='".t("Lue rivikommentista")."'>";
-			echo "</td>";
-			echo "</form>";
-		}
-
-		//hakukentät
-		echo "<form method='post' name='siirtolistaformi'>";
-		echo "<input type='hidden' name='id' value='$id'>";
-		echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
-		echo "<input type='hidden' name='maa' value='$maa'>";
-		echo "<input type='hidden' name='toim' value='$toim'>";
-		echo "<input type='hidden' name='tee' value='paikat'>";
-
-		if ($toim == "") {
-			echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
-		}
-		else {
-			$query = "	SELECT tunnus
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
-						and alkuhyllyalue = '!!M'
-						and loppuhyllyalue = '!!M'";
-			$tresult = pupe_query($query);
-			$mrow = mysql_fetch_assoc($tresult);
-			echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
-		}
-
-		if ($toim == "") {
-			echo "<td>";
-			$chk = '';
-
-			if ($oletuspaiv != '') {
-				$chk = 'checked';
+			for ($y=0; $y<mysql_num_fields($result)-1; $y++) {
+				echo "<td>$row[$y]</td>";
 			}
 
-			echo "<input type='checkbox' name='oletuspaiv' $chk>";
-			echo "</td>";
+			if ($toim == "") {
+				echo "<form method='post'>";
+				echo "<input type='hidden' name='id' value='$id'>";
+				echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
+				echo "<input type='hidden' name='maa' value='$maa'>";
+				echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
+				echo "<input type='hidden' name='tee' value='mikrotila'>";
+				echo "<td>";
+				echo "<input type='submit' value='".t("Valitse tiedosto")."'>";
+				echo "</td>";
+				echo "</form>";
+
+				echo "<form method='post'>";
+				echo "<input type='hidden' name='id' value='$id'>";
+				echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
+				echo "<input type='hidden' name='maa' value='$maa'>";
+				echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
+				echo "<input type='hidden' name='tee' value='kommentista'>";
+				echo "<td>";
+				echo "<input type='submit' value='".t("Lue rivikommentista")."'>";
+				echo "</td>";
+				echo "</form>";
+			}
+
+			//hakukentät
+			echo "<form method='post' name='siirtolistaformi'>";
+			echo "<input type='hidden' name='id' value='$id'>";
+			echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
+			echo "<input type='hidden' name='maa' value='$maa'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
+			echo "<input type='hidden' name='tee' value='paikat'>";
+
+			if ($toim == "") {
+				echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
+			}
+			else {
+				$query = "	SELECT tunnus
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and alkuhyllyalue = '!!M'
+							and loppuhyllyalue = '!!M'";
+				$tresult = pupe_query($query);
+				$mrow = mysql_fetch_assoc($tresult);
+				echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
+			}
+
+			if ($toim == "") {
+				echo "<td>";
+				$chk = '';
+
+				if ($oletuspaiv != '') {
+					$chk = 'checked';
+				}
+
+				echo "<input type='checkbox' name='oletuspaiv' $chk>";
+				echo "</td>";
+			}
+
+			echo "</tr>";
 		}
 
-		echo "</tr>";
 		echo "</table><br>";
 
 		//vastaanottavan varaston tiedot

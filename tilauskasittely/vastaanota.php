@@ -973,6 +973,8 @@
 			$qnimi2 = 'Vastaanottava varasto';
 		}
 
+		if (!empty($id_talteen)) $id = $id_talteen;
+
 		//tässä on valittu tilaus
 		$query = "	SELECT tunnus '$qnimi1',
 					nimi '$qnimi2',

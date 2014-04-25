@@ -2187,7 +2187,7 @@
 
 			$autom_siirto_myytil = false;
 
-			if ($rivityyppi == 'L' and $yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS"))) {
+			if ($rivitunnus == 0 and $rivityyppi == 'L' and $yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and !in_array($var, array('V','H'))) {
 
 				if (!empty($laskurow['varasto'])) {
 					$kohde_varastot = array($laskurow['varasto']);

@@ -117,19 +117,29 @@
 		if (mysql_num_rows($result) != 0) {
 
 			// Haetaan myynti/kate tilausriveiltä
-			$query = "	SELECT  sum(if(tilausrivi.laskutettuaika >= '$alku_pvm' and tilausrivi.laskutettuaika <= '$loppu_pvm', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm' and tilausrivi.laskutettuaika <= '$loppu_pvm', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokatenyt
-						FROM lasku use index (yhtio_tila_tapvm) 
-						JOIN yhtio ON (yhtio.yhtio = lasku.yhtio) 
-						JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi='L') 
-						JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno) 
-						JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '' )
-						JOIN tuote AS tiliointi ON (tiliointi.yhtio = tilausrivi.yhtio AND tiliointi.tuoteno = tilausrivi.tuoteno $lisa)
-						LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite)
-						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-						AND lasku.tila = 'U'
-						AND lasku.alatila = 'X'
-						AND lasku.tapvm >= '$alku_pvm'
-						AND lasku.tapvm <= '$loppu_pvm'";
+			$query = "SELECT tuote.yhtio, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm' 
+			AND tilausrivi.laskutettuaika <= '$loppu_pvm', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm' 
+			AND tilausrivi.laskutettuaika <= '$loppu_pvm', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokatenyt
+			FROM lasku use index (yhtio_tila_tapvm)
+			JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
+			JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio 
+			AND tilausrivi.uusiotunnus=lasku.tunnus 
+			AND tilausrivi.tyyppi='L')
+			JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio 
+			and tuote.tuoteno=tilausrivi.tuoteno)
+			JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio 
+			AND asiakas.tunnus = lasku.liitostunnus  
+			AND asiakas.myynninseuranta = '' )
+			LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio 
+			and lasku.toimitustapa=toimitustapa.selite)
+			WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+			AND lasku.tila = 'U'
+			AND lasku.alatila = 'X'
+			AND lasku.tapvm >= '$alku_pvm'
+			AND lasku.tapvm <= '$loppu_pvm'
+			AND tuote.myynninseuranta = ''  
+			AND tilausrivi.tuoteno != 'MAKSUERÄ'";
+			
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 

@@ -810,7 +810,7 @@
 			}
 		}
 
-		$query = "	SELECT lasku.toimitustavan_lahto, GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
+		$query = "	SELECT lasku.toimitustavan_lahto, lasku.clearing, GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
 					FROM tilausrivi
 					JOIN lasku on lasku.yhtio = tilausrivi.yhtio
 						and lasku.tunnus = tilausrivi.otunnus
@@ -823,7 +823,7 @@
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.keratty != ''
 					$varasto
-					GROUP BY 1";
+					GROUP BY 1,2";
 		$tilre = pupe_query($query);
 
 		$selectlisa = $toim == "" ? ", viesti AS viite" : "";
@@ -1020,10 +1020,13 @@
 		if ($toim == "") {
 			echo "<th>".t("Lue paikat tiedostosta")."</th>";
 			echo "<th>".t("Lue paikat rivikommentista")."</th>";
-			echo "<th>".t("P‰ivitet‰‰n oletuspaikka")."</th>";
 		}
 
 		echo "</tr>";
+
+		if (empty($id_talteen)) $id_talteen = $id;
+
+		$_clearing = '';
 
 		while ($row = mysql_fetch_array($result)) {
 			echo "<tr>";
@@ -1034,7 +1037,8 @@
 
 			if ($toim == "") {
 				echo "<form method='post'>";
-				echo "<input type='hidden' name='id' value='$id'>";
+				echo "<input type='hidden' name='id' value='{$row[0]}'>";
+				echo "<input type='hidden' name='id_talteen' value='{$id_talteen}'>";
 				echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
 				echo "<input type='hidden' name='maa' value='$maa'>";
 				echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
@@ -1045,7 +1049,8 @@
 				echo "</form>";
 
 				echo "<form method='post'>";
-				echo "<input type='hidden' name='id' value='$id'>";
+				echo "<input type='hidden' name='id' value='{$row[0]}'>";
+				echo "<input type='hidden' name='id_talteen' value='{$id_talteen}'>";
 				echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
 				echo "<input type='hidden' name='maa' value='$maa'>";
 				echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
@@ -1056,40 +1061,54 @@
 				echo "</form>";
 			}
 
-			//hakukent‰t
-			echo "<form method='post' name='siirtolistaformi'>";
-			echo "<input type='hidden' name='id' value='$id'>";
-			echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
-			echo "<input type='hidden' name='maa' value='$maa'>";
-			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<input type='hidden' name='tee' value='paikat'>";
+			$_clearing = $row['clearing'];
 
-			if ($toim == "") {
-				echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
+			echo "</tr>";
+		}
+
+		echo "</table><br>";
+
+		if (!empty($id_talteen)) $id = $id_talteen;
+
+		//hakukent‰t
+		echo "<form method='post' name='siirtolistaformi'>";
+		echo "<input type='hidden' name='id' value='{$id}'>";
+		echo "<input type='hidden' name='id_talteen' value='{$id_talteen}'>";
+		echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
+		echo "<input type='hidden' name='maa' value='$maa'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='tee' value='paikat'>";
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("P‰ivitet‰‰n oletuspaikka")."</th>";
+		echo "</tr>";
+
+		if ($toim == "") {
+			echo "<input type='hidden' name='varasto' value='{$_clearing}'>";
+		}
+		else {
+			$query = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						and alkuhyllyalue = '!!M'
+						and loppuhyllyalue = '!!M'";
+			$tresult = pupe_query($query);
+			$mrow = mysql_fetch_assoc($tresult);
+			echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
+		}
+
+		if ($toim == "") {
+			echo "<tr>";
+			echo "<td>";
+			$chk = '';
+
+			if ($oletuspaiv != '') {
+				$chk = 'checked';
 			}
-			else {
-				$query = "	SELECT tunnus
-							FROM varastopaikat
-							WHERE yhtio = '$kukarow[yhtio]'
-							and alkuhyllyalue = '!!M'
-							and loppuhyllyalue = '!!M'";
-				$tresult = pupe_query($query);
-				$mrow = mysql_fetch_assoc($tresult);
-				echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
-			}
 
-			if ($toim == "") {
-				echo "<td>";
-				$chk = '';
-
-				if ($oletuspaiv != '') {
-					$chk = 'checked';
-				}
-
-				echo "<input type='checkbox' name='oletuspaiv' $chk>";
-				echo "</td>";
-			}
-
+			echo "<input type='checkbox' name='oletuspaiv' $chk>";
+			echo "</td>";
 			echo "</tr>";
 		}
 
@@ -1330,7 +1349,11 @@
 		}
 
 		if ($toim != "MYYNTITILI") {
-			echo "<tr><td colspan='4' class='back' align='right' valign='center'>",t("T‰yt‰ kaikki kent‰t"),":</td>";
+			$_colspan = 4;
+
+			if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') $_colspan++;
+
+			echo "<tr><td colspan='{$_colspan}' class='back' align='right' valign='center'>",t("T‰yt‰ kaikki kent‰t"),":</td>";
 			echo "<td><input type='text' id='taytasarake_t1' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' id='taytasarake_t2' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' id='taytasarake_t3' maxlength='5' size='5'></td>";

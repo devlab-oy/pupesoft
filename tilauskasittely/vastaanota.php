@@ -808,6 +808,7 @@
 
 			if ($lahto_chk_row['lahto'] != "") {
 				$lahdotrajaus = "and lasku.toimitustavan_lahto IN ({$lahto_chk_row['lahto']})";
+				$haku = "";
 			}
 		}
 
@@ -867,6 +868,8 @@
 			echo "</tr>";
 		}
 
+		$ed_lahto = null;
+
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
 
 			// etsit‰‰n sopivia tilauksia
@@ -891,13 +894,13 @@
 			//piirret‰‰n taulukko...
 			if (mysql_num_rows($result) != 0) {
 
-				$ed_lahto = 0;
-
 				while ($row = mysql_fetch_assoc($result)) {
 
-					if ($ed_lahto != $row['lahto']) {
+					if (!is_null($ed_lahto) and $ed_lahto != $row['lahto']) {
 						echo "<tr><td class='back'>&nbsp;</td></tr>";
 					}
+
+					$ed_lahto = $row['lahto'];
 
 					echo "<tr class='aktiivi'>";
 
@@ -937,8 +940,6 @@
 					}
 
 					echo "</form></td></tr>";
-
-					$ed_lahto = $row['lahto'];
 				}
 			}
 		}

@@ -508,7 +508,7 @@
 
 			while ($row = mysql_fetch_array($result)) {
 
-				if ($mista == "vastaanota" and $row['otunnus'] != $laskurow['tunnus']) {
+				if ($mista == "vastaanota" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' and $row['otunnus'] != $laskurow['tunnus']) {
 
 					$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$row['otunnus']}'";
 					$result = pupe_query($query);

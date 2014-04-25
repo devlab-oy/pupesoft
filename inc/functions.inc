@@ -27025,7 +27025,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
 			require('tilauskasittely/tilauksesta_varastosiirto.inc');
 
 			//Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
-			tilauksesta_varastosiirto($myyntitilaus_tunnus, true);
+			tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K');
 		}
 	}
 }

@@ -532,7 +532,10 @@
 		$kohde_ja_lahde_varasto = hae_mahdolliset_siirto_varastot(array($varasto_tunnukset[3]));
 		$kohde_ja_lahde_varasto = search_array_key_for_value_recursive($kohde_ja_lahde_varasto, 'tunnus', $varasto_tunnukset[1]);
 		$kohde_ja_lahde_varasto = $kohde_ja_lahde_varasto[0];
-		$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '{$kohde_ja_lahde_varasto['kohde_alkuhyllyalue']}', tilausrivin_lisatiedot.kohde_hyllynro = '{$kohde_ja_lahde_varasto['kohde_alkuhyllynro']}',";
+		$kohde_varasto_update = "	tilausrivin_lisatiedot.kohde_hyllyalue = '{$kohde_ja_lahde_varasto['kohde_alkuhyllyalue']}',
+									tilausrivin_lisatiedot.kohde_hyllynro = '{$kohde_ja_lahde_varasto['kohde_alkuhyllynro']}',
+									tilausrivin_lisatiedot.kohde_hyllytaso = '0',
+									tilausrivin_lisatiedot.kohde_hyllyvali = '0',";
 
 		$tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($kohde_ja_lahde_varasto['lahde_tunnus']));
 		$tuotepaikka = $tuotepaikkojen_saldot[0];
@@ -545,7 +548,10 @@
 		$paivita_hyllyt_varastosiirto = false;
 		$var 				= "";
 		$toimittajan_tunnus	= "";
-		$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '', tilausrivin_lisatiedot.kohde_hyllynro = '',";
+		$kohde_varasto_update = "	tilausrivin_lisatiedot.kohde_hyllyalue = '0',
+									tilausrivin_lisatiedot.kohde_hyllynro = '0',
+									tilausrivin_lisatiedot.kohde_hyllytaso = '0',
+									tilausrivin_lisatiedot.kohde_hyllyvali = '0',";
 	}
 
 	$perhelisa = "";

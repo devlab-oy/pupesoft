@@ -27060,6 +27060,52 @@ if (!function_exists('hae_tuotepaikka')) {
 	}
 }
 
+if (!function_exists('tuotepaikka')) {
+	function luo_tuotepaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $tuoteno) {
+		global $kukarow, $yhtiorow;
+
+		$tuotepaikka = hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali);
+		if (empty($tuotepaikka)) {
+			luo_tapahtuma($tuoteno, 'uusipaikka', $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali);
+			$query = "	INSERT INTO tuotepaikat
+						SET yhtio = '{$kukarow['yhtio']}',
+						tuoteno = '{$tuoteno}',
+						hyllyalue = '{$hyllyalue}',
+						hyllynro = '{$hyllynro}',
+						hyllytaso = '{$hyllytaso}',
+						hyllyvali = '{$hyllyvali}',
+						laatija = '{$kukarow['kuka']}',
+						luontiaika = NOW(),
+						muutospvm = NOW(),
+						muuttaja = '{$kukarow['yhtio']}'";
+			pupe_query($query);
+		}
+	}
+}
+
+if (!function_exists('luo_tapahtuma')) {
+	function luo_tapahtuma($tuoteno, $laji, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali, $kpl = 0.00, $hinta = 0.00, $kplhinta = 0.00, $selite = '', $tilausrivitunnus = 0) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	INSERT INTO tapahtuma
+					SET yhtio = '{$kukarow['yhtio']}',
+					tuoteno = '{$tuoteno}',
+					laji = '{$laji}',
+					kpl = {$kpl},
+					hinta = {$hinta}
+					kplhinta = {$kplhinta}
+					selite = '{$selite}'
+					laatija = '{$kukarow['yhtio']}'
+					laadittu = NOW(),
+					rivitunnus = {$tilausrivitunnus}
+					hyllyalue = '{$hyllyalue}'
+					hyllynro = '{$hyllynro}'
+					hyllyvali = '{$hyllyvali}'
+					hyllytaso = '{$hyllytaso}'";
+		pupe_query($query);
+	}
+}
+
 if (!function_exists('hae_tuotepaikat')) {
 
 	function hae_tuotepaikat($tuoteno, $hyllyalue, $hyllynro, $hyllytaso = false, $hyllyvali = false) {

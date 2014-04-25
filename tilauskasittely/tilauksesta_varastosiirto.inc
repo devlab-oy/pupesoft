@@ -121,6 +121,8 @@ if (!function_exists('normaali_varastosiirto')) {
 			}
 
 			tilaus_valmis_siirtolista($varastosiirto);
+
+			paivita_myyntitilausrivien_tuotepaikat($myyntitilausrivit, false);
 		}
 
 		$tilausrivi_tunnukset = array_column($myyntitilaus['tilausrivit'], 'tunnus');
@@ -208,6 +210,9 @@ if (!function_exists('luo_varastosiirtorivi')) {
 			$kohde_nro = $tilausrivi["kohde_hyllynro"];
 			$kohde_vali = 0;
 			$kohde_taso = 0;
+
+			//Jos tuotteella ei ole oletuspaikkaa ja se laitetaan ns. "varastoon" niin pitää varmistaa, että varastosta löytyy kyseiselle tuotteelle tällainen tuotepaikka
+			luo_tuotepaikka($kohde_alue, $kohde_nro, $kohde_vali, $kohde_taso, $tuoteno);
 		}
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -416,21 +421,27 @@ if (!function_exists('hae_tilausrivit')) {
 }
 
 if (!function_exists('paivita_myyntitilausrivien_tuotepaikat')) {
-	function paivita_myyntitilausrivien_tuotepaikat($varastosiirtorivit) {
+	function paivita_myyntitilausrivien_tuotepaikat($tilausrivit, $onko_varastosiirtorivi = true) {
 		global $kukarow, $yhtiorow;
 
-		if (empty($varastosiirtorivit)) {
+		if (empty($tilausrivit)) {
 			return false;
 		}
 
-		foreach ($varastosiirtorivit as $varastosiirtorivi) {
+		foreach ($tilausrivit as $tilausrivi) {
+			luo_tuotepaikka($tilausrivi['kohde_hyllyalue'], $tilausrivi['kohde_hyllynro'], $tilausrivi['kohde_hyllytaso'], $tilausrivi['kohde_hyllyvali'], $tilausrivi['tuoteno']);
+			//Jos kyseessä ei ole varastosiirtorivi niin kyseessä on myyntitilausrivi
+			$update = "AND tunnus = {$tilausrivi['tunnus']}";
+			if ($onko_varastosiirtorivi) {
+				$update = "AND tunnus = {$tilausrivi['tilausrivilinkki']}";
+			}
 			$query = "	UPDATE tilausrivi SET
-						hyllyalue = '{$varastosiirtorivi['kohde_hyllyalue']}',
-						hyllynro = '{$varastosiirtorivi['kohde_hyllynro']}',
-						hyllytaso = '{$varastosiirtorivi['kohde_hyllytaso']}',
-						hyllyvali = '{$varastosiirtorivi['kohde_hyllyvali']}'
+						hyllyalue = '{$tilausrivi['kohde_hyllyalue']}',
+						hyllynro = '{$tilausrivi['kohde_hyllynro']}',
+						hyllytaso = '{$tilausrivi['kohde_hyllytaso']}',
+						hyllyvali = '{$tilausrivi['kohde_hyllyvali']}'
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = {$varastosiirtorivi['tilausrivilinkki']}";
+						{$update}";
 			pupe_query($query);
 		}
 

@@ -330,8 +330,11 @@ while ($tietue = fgets($fd)) {
 		case 'OSTOTIL.OT_OVTTUNNUS':
 		case 'NADSE':
 		//Tilauksen vastaanottaja
+			$type = explode("@", $tieto);
+			$tieto = trim($type[0]);
+
 			$edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
-			echo "MOROROMOROROROR $tieto\n";
+
 			$query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
 			$result = mysql_query($query) or die($query);
 
@@ -548,6 +551,36 @@ while ($tietue = fgets($fd)) {
 			if ($tieto == "") {
 				break;
 			}
+			
+			if ($edi_tyyppi == "edifact911" and $tunnus == "NADCN") {
+				// Tarkistetaan onko kyseessä koontikuljetuskeissi
+				// haetaan toimitustavan tiedot tiedot
+				$toimiq = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
+				$toimir = pupe_query($toimiq);
+				$toimiro = mysql_fetch_array($toimir);
+				
+				// Jos kyseessä on koontikuljetuskeissi niin setataan välietappi
+				if ($toimiro['tulostustapa'] == "L" or $toimiro['tulostustapa'] == "K") {
+					$query = "	SELECT *
+								FROM asiakas
+								WHERE yhtio = '$kukarow[yhtio]'
+								and toim_ovttunnus = '$tieto'
+								and toim_ovttunnus not in ('','0')
+								and laji not in ('R','P')";
+					$result = mysql_query($query) or die($query);
+
+					if (mysql_num_rows($result) == 1) {
+						$abrow = mysql_fetch_array($result);
+						//laskun sisviesti1 kenttään menee tavaran ensimmäinen vastaanottaja(terminaali)
+						$lopnimi = $abrow['toim_nimi'];
+						$loppostitp = $abrow['toim_postitp'];
+						$loppostino = $abrow['toim_postino'];
+						$loposoite = $abrow['toim_osoite'];
+					}
+					// Koontikeississä ei haluta enää jatkaa
+					break;
+				}
+			}
 
 			// Otetaan talteen
 			$OT_ASIAKASNRO = $tieto;
@@ -738,29 +771,13 @@ while ($tietue = fgets($fd)) {
 						if (mysql_num_rows($result) == 1) {
 							$abrow = mysql_fetch_array($result);
 							$edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
-							
-							// haetaan toimitustavan tiedot tiedot
-							$toimiq = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
-							$toimir = pupe_query($toimiq);
-							$toimiro = mysql_fetch_array($toimir);
-							
-							// Jos kyseessä on koontikuljetuskeissi niin setataan lopullinen toimitusosoite 
-							if ($toimiro['tulostustapa'] == "L" or $toimiro['tulostustapa'] == "K") {
-								//laskun sisviesti1 kenttään menee $lopnumero\n$lopnimi\n$loposoite\n$loppostino\n$loppostitp
-								$lopnimi = $abrow['toim_nimi'];
-								$loppostitp = $abrow['toim_postitp'];
-								$loppostino = $abrow['toim_postino'];
-								$loposoite = $abrow['toim_osoite'];
-							}
-							else {
-								$tnimi = $abrow['toim_nimi'];
-								$tnimitark = $abrow['toim_nimitark'];
-								$tpostitp = $abrow['toim_postitp'];
-								$tpostino = $abrow['toim_postino'];
-								$tosoite = $abrow['toim_osoite'];
-							}
-							
-							
+
+							$tnimi = $abrow['toim_nimi'];
+							$tnimitark = $abrow['toim_nimitark'];
+							$tpostitp = $abrow['toim_postitp'];
+							$tpostino = $abrow['toim_postino'];
+							$tosoite = $abrow['toim_osoite'];
+
 							$edi_ulos .= "$abrow[toim_nimi]\n";
 						}
 						else {
@@ -1022,8 +1039,7 @@ while ($tietue = fgets($fd)) {
 				}
 
 				// jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSÄ ON KOONTIKULJETUSKEISSI)
-				if (($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
-
+				if (true or(($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L")) {
 					if ($tnimi == "" and $tnimitark != "") {
 						$tnimi = $tnimitark;
 						$tnimitark = "";

@@ -67,9 +67,7 @@ foreach ($order_tietosisalto as $key => $value) {
 
 	}
 }
-echo "<pre>";
-var_dump($arska);
-echo "</pre>";
+
 unset($order_tietosisalto);
 
 // Etsit‰‰n otsikon p‰‰tt‰v‰n rivin index

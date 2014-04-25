@@ -241,7 +241,8 @@
 					tilausrivi.hyllytaso trhyllytaso,
 					concat(lpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'),lpad(upper(tapahtuma.hyllyvali), 5, '0'),lpad(upper(tapahtuma.hyllytaso), 5, '0')) sorttauskentta,
 					tuote.purkukommentti,
-					tilausrivi.laadittu
+					tilausrivi.laadittu,
+					tilausrivin_lisatiedot.tilausrivilinkki
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					JOIN tapahtuma ON tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus and tapahtuma.kpl > 0 and laji = 'siirto'
@@ -267,7 +268,8 @@
 					tilausrivi.hyllytaso trhyllytaso,
 					concat(lpad(upper(tilausrivin_lisatiedot.kohde_hyllyalue), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllynro), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllyvali), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllytaso), 5, '0')) sorttauskentta,
 					tuote.purkukommentti,
-					tilausrivi.laadittu
+					tilausrivi.laadittu,
+					tilausrivin_lisatiedot.tilausrivilinkki
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -840,6 +842,23 @@
 							$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]);
 						}
 					}
+				}
+
+				if ($mista == "vastaanota" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' and $row['tilausrivilinkki'] != 0) {
+
+					$query = "	SELECT trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi
+								tilausrivin_lisatiedot.rekisterinumero
+								FROM tilausrivi
+								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.tunnus = '{$row['tilausrivilinkki']}'";
+					$lisakommentti_res = pupe_query($query);
+					$lisakommentti_row = mysql_fetch_assoc($lisakommentti_res);
+
+					$row["kommentti"] .= " \n".$lisakommentti_row['nimi'];
+
+					if ($lisakommentti_row['rekisterinumero'] != '') $row['kommentti'] .= " - {$lisakommentti_row['rekisterinumero']}";
 				}
 
 				if (trim($row['purkukommentti']) !="") {

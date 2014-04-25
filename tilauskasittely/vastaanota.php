@@ -71,6 +71,7 @@
 
 		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 		echo "<input type='hidden' name='id' value='$id'>";
+		echo "<input type='hidden' name='id_talteen' value='$id_talteen'>";
 		echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
 		echo "<input type='hidden' name='maa' value='$maa'>";
 		echo "<input type='hidden' name='varasto' value='$row[clearing]'>";

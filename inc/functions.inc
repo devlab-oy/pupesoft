@@ -26598,13 +26598,8 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 }
 
 if (!function_exists('varaston_tuotepaikkojen_saldo')) {
-	function varaston_tuotepaikkojen_saldo($tuoteno, $yhtiot = array(), $varastot = array()) {
+	function varaston_tuotepaikkojen_saldo($tuoteno, $varastot = array()) {
 		global $kukarow, $yhtiorow;
-
-		$where = "";
-		if (!empty($yhtiot)) {
-			$where = "AND tuote.yhtio IN ('".implode("','", $yhtiot)."')";
-		}
 
 		$varastopaikat_join = "";
 		if (!empty($varastot)) {
@@ -26643,7 +26638,6 @@ if (!function_exists('varaston_tuotepaikkojen_saldo')) {
 						{$varastopaikat_join})
 					WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 					AND tuote.tuoteno = '{$tuoteno}'
-					{$where}
 					ORDER BY tuotepaikat.oletus DESC,
 					varastopaikat.nimitys,
 					sorttauskentta";

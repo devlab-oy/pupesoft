@@ -533,16 +533,19 @@
 		$kohde_ja_lahde_varasto = search_array_key_for_value_recursive($kohde_ja_lahde_varasto, 'tunnus', $varasto_tunnukset[1]);
 		$kohde_ja_lahde_varasto = $kohde_ja_lahde_varasto[0];
 		$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '{$kohde_ja_lahde_varasto['kohde_alkuhyllyalue']}', tilausrivin_lisatiedot.kohde_hyllynro = '{$kohde_ja_lahde_varasto['kohde_alkuhyllynro']}',";
-		$lahde_varasto_hyllyalue = $kohde_ja_lahde_varasto['lahde_alkuhyllyalue'];
-		$lahde_varasto_hyllynro = $kohde_ja_lahde_varasto['lahde_alkuhyllynro'];
+
+		$tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($kohde_ja_lahde_varasto['lahde_tunnus']));
+		$tuotepaikka = $tuotepaikkojen_saldot[0];
+		$myy_hyllyalue_temp = $tuotepaikka['hyllyalue'];
+		$myy_hyllynro_temp = $tuotepaikka['hyllynro'];
+		$myy_hyllytaso_temp = $tuotepaikka['hyllytaso'];
+		$myy_hyllyvali_temp = $tuotepaikka['hyllyvali'];
 	}
 	elseif ($var == "S" and substr($paikka,0,3) != "°°S" and substr($paikka,0,3) != "°°S") {
-		$paivita_hyllyt_varastosiirto = true;
+		$paivita_hyllyt_varastosiirto = false;
 		$var 				= "";
 		$toimittajan_tunnus	= "";
 		$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '', tilausrivin_lisatiedot.kohde_hyllynro = '',";
-		$lahde_varasto_hyllyalue = '';
-		$lahde_varasto_hyllynro = '';
 	}
 
 	$perhelisa = "";
@@ -1671,6 +1674,13 @@
 
 								if ($yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
 									$var2 = 'PK';
+								}
+
+								if (isset($myy_hyllyalue_temp) and $myy_hyllyalue_temp != '') {
+									$myy_hyllyalue[$indeksi] = $myy_hyllyalue_temp;
+									$myy_hyllynro[$indeksi] = $myy_hyllynro_temp;
+									$myy_hyllytaso[$indeksi] = $myy_hyllytaso_temp;
+									$myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
 								}
 
 								$query = "	INSERT into tilausrivi set
@@ -2843,8 +2853,10 @@
 			}
 
 			if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $paivita_hyllyt_varastosiirto) {
-				$p_hyllyalue = $lahde_varasto_hyllyalue;
-				$p_hyllynro = $lahde_varasto_hyllynro;
+				$p_hyllyalue = $myy_hyllyalue_temp;
+				$p_hyllynro = $myy_hyllynro_temp;
+				$p_hyllytaso = $myy_hyllytaso_temp;
+				$p_hyllyvali = $myy_hyllyvali_temp;
 			}
 
 			// lis‰t‰‰n puuterivi

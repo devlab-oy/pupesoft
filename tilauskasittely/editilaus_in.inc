@@ -751,9 +751,6 @@ while ($tietue = fgets($fd)) {
 								$loppostitp = $abrow['toim_postitp'];
 								$loppostino = $abrow['toim_postino'];
 								$loposoite = $abrow['toim_osoite'];
-								//KISSA ja Z on terminaalitoimitus??? liittyykö vai ei
-								//$editilaus_tila   = "Z";
-								//$editilaus_tyyppi = "Z";
 							}
 							else {
 								$tnimi = $abrow['toim_nimi'];

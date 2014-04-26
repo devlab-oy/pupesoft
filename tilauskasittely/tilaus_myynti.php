@@ -4584,7 +4584,13 @@ if ($tee == '') {
 		$tpares = pupe_query($query);
 
 		if (mysql_num_rows($tpares) > 0) {
-			$headerit .= "<th>".t("Palauta toimittajalle")."</th>";
+			$siirtovarastot = hae_mahdolliset_siirto_varastot(array($laskurow['varasto']));
+			if (!empty($siirtovarastot)) {
+				$headerit .= "<th>".t("Palauta toimittajalle")."<br/>".t('Palauta varastoon')."</th>";
+			}
+			else {
+				$headerit .= "<th>".t("Palauta toimittajalle")."</th>";
+			}
 			$sarakkeet++;
 
 			$toimpalautusasiakkat = "";
@@ -6076,7 +6082,7 @@ if ($tee == '') {
 
 							$lahde_kohde_varastot = hae_mahdolliset_siirto_varastot(array($laskurow['varasto']));
 
-							if (!empty($lahde_kohde_varastot)) {
+							if (!empty($lahde_kohde_varastot) and saako_palauttaa_siirtovarastoon($row['tuoteno'])) {
 
 								$paltoimiulos .= "<br/>";
 								$paltoimiulos .= "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='lisatietoja'>

@@ -27172,6 +27172,31 @@ if (!function_exists("onkotapahtumajariveja")) {
 	}
 }
 
+if (!function_exists('saako_palauttaa_siirtovarastoon')) {
+	function saako_palauttaa_siirtovarastoon($tuoteno) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'
+					AND laji = 'varastopalautus'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			return true;
+		}
+
+		$row = mysql_fetch_assoc($result);
+
+		if ($row['selite'] == 'K') {
+			return true;
+		}
+
+		return false;
+	}
+}
+
 if (!function_exists('hae_varasto')) {
 
 	function hae_varasto($tunnus) {

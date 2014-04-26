@@ -50,8 +50,11 @@
 			$pdf->draw_text(155, $kala-20, $sivu, 								$firstpage, $p);
 
 			if ($mista == 'vastaanota') {
-				$pdf->draw_text(280,  $kala-10, t("Tilaus", $kieli),				$firstpage, $pieni);
-				$pdf->draw_text(280,  $kala-20, $laskurow["tunnus"],				$firstpage, $p);
+
+				if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] != 'K') {
+					$pdf->draw_text(280,  $kala-10, t("Tilaus", $kieli),				$firstpage, $pieni);
+					$pdf->draw_text(280,  $kala-20, $laskurow["tunnus"],				$firstpage, $p);
+				}
 			}
 			else {
 				$pdf->draw_text(280,  $kala-10, t("Saapumisnumero", $kieli),		$firstpage, $pieni);
@@ -70,6 +73,10 @@
 
 			if ($mista == 'vastaanota') {
 				$pdf->draw_text(30, $kala-35, t("Tuotekoodi", $kieli),			$firstpage, $pieni);
+
+				if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+					$pdf->draw_text(30, $kala-42, t("Tilaus", $kieli),			$firstpage, $pieni);
+				}
 			}
 			else {
 				$pdf->draw_text(30,  $kala-35, t("Toimittajan koodi /", $kieli),	$firstpage, $pieni);
@@ -483,8 +490,8 @@
 
 			if ($row['otunnus'] != $laskurow['tunnus']) {
 				$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$row['otunnus']}'";
-				$result = pupe_query($query);
-				$laskurow = mysql_fetch_assoc($result);
+				$result_lasku = pupe_query($query);
+				$laskurow = mysql_fetch_assoc($result_lasku);
 			}
 
 			$firstpage = alku_purku();
@@ -511,17 +518,15 @@
 				if ($mista == "vastaanota" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' and $row['otunnus'] != $laskurow['tunnus']) {
 
 					$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$row['otunnus']}'";
-					$result = pupe_query($query);
-					$laskurow = mysql_fetch_assoc($result);
+					$result_lasku = pupe_query($query);
+					$laskurow = mysql_fetch_assoc($result_lasku);
+
+					$kala -= 15;
 
 					if ($kala - 55 < 50) {
 						$sivu++;
 						$firstpage = alku_purku();
 						$kala = 500;
-					}
-					else {
-						$firstpage = alku_purku($kala, $firstpage);
-						$kala -= 55;
 					}
 				}
 				elseif ($yhtiorow['suuntalavat'] == 'S' and $edellinen_sscc != $row['sscc']) {
@@ -628,6 +633,10 @@
 
 				if ($mista == "vastaanota") {
 					$pdf->draw_text(30, $kala, $row["tuoteno"], 		$firstpage, $p);
+
+					if ($mista == "vastaanota" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+						$pdf->draw_text(30, $kala-10, $row["otunnus"], $firstpage, $p);
+					}
 				}
 				else {
 					$pdf->draw_text(30,  $kala, $row["toim_tuoteno"],	$firstpage, $b);
@@ -846,7 +855,7 @@
 
 				if ($mista == "vastaanota" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' and $row['tilausrivilinkki'] != 0) {
 
-					$query = "	SELECT trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi
+					$query = "	SELECT trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,
 								tilausrivin_lisatiedot.rekisterinumero
 								FROM tilausrivi
 								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)

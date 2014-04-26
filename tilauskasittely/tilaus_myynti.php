@@ -1431,6 +1431,11 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		require("tyomaarays/tyomaarays.inc");
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO")) {
+		if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'C' and $laskurow['alatila'] == '' and empty($tulosta)) {
+			require('tilauksesta_varastosiirto.inc');
+
+			tilauksesta_varastosiirto($laskurow['tunnus'], 'P');
+		}
 		// Työmääräys valmis
 		require("tyomaarays/tyomaarays.inc");
 	}
@@ -1557,18 +1562,10 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
 			}
 
-			if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and in_array($laskurow['tila'], array('N','C')) and $laskurow['alatila'] == '') {
+			if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
 				require('tilauksesta_varastosiirto.inc');
 
-				if ($laskurow['tila'] == 'N') {
-					//N = normaali
-					$varastosiirtotyyppi = 'N';
-				}
-				else {
-					//P = palautus
-					$varastosiirtotyyppi = 'P';
-				}
-				tilauksesta_varastosiirto($laskurow['tunnus'], $varastosiirtotyyppi);
+				tilauksesta_varastosiirto($laskurow['tunnus'], 'N');
 			}
 
 			if ($kukarow["extranet"] != "") {

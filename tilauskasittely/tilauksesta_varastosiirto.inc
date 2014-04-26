@@ -63,7 +63,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 		aseta_kukarow_kesken($varastosiirto['tunnus']);
 
 		foreach ($myyntitilausrivit as $tilausrivi) {
-			$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], TRUE);
+			$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], 'K');
 			linkkaa_myyntitilausrivi_varastosiirtoriviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 		}
 
@@ -108,7 +108,7 @@ if (!function_exists('normaali_varastosiirto')) {
 
 			aseta_kukarow_kesken($varastosiirto['tunnus']);
 			foreach ($myyntitilausrivit as $tilausrivi) {
-				$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus']);
+				$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], 'N');
 
 				linkkaa_myyntitilausrivi_varastosiirtoriviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 
@@ -159,7 +159,7 @@ if (!function_exists('palautus_varastosiirto')) {
 
 			aseta_kukarow_kesken($varastosiirto['tunnus']);
 			foreach ($myyntitilausrivit as $tilausrivi) {
-				$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['varasto']);
+				$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['varasto'], 'P');
 
 				linkkaa_myyntitilausrivi_varastosiirtoriviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
 
@@ -180,7 +180,7 @@ if (!function_exists('palautus_varastosiirto')) {
 }
 
 if (!function_exists('luo_varastosiirtorivi')) {
-	function luo_varastosiirtorivi($laskurow, $tilausrivi, $lahdevarasto_tunnus, $kpidollinen = FALSE) {
+	function luo_varastosiirtorivi($laskurow, $tilausrivi, $lahdevarasto_tunnus, $varastosiirtotyyppi = 'N') {
 		global $kukarow, $yhtiorow;
 
 		$trow = hae_tuote($tilausrivi['tuoteno']);
@@ -190,7 +190,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
 		$toimaika			 = $laskurow["toimaika"];
 		$kerayspvm			 = $laskurow["kerayspvm"];
 		$tuoteno			 = $trow["tuoteno"];
-		$kpl				 = $tilausrivi['varattu'];
+		$kpl				 = ($varastosiirtotyyppi == 'P' ? $tilausrivi['varattu'] * -1 : $tilausrivi['varattu']);
 		$jtkielto			 = $laskurow['jtkielto'];
 		$varasto			 = $lahdevarasto_tunnus;
 		$hinta				 = "";
@@ -200,7 +200,12 @@ if (!function_exists('luo_varastosiirtorivi')) {
 		$orvoteikiinnosta	 = "EITOD";
 
 		// Kirjanpidollisessa siirret‰‰n aina ne rivit jotka on tilauksella.
-		$var = $kpidollinen ? "H" : "";
+		if ($varastosiirtotyyppi == 'K') {
+			$var = 'H';
+		}
+		else {
+			$var = '';
+		}
 
 		//Laitetaan tuote tuotteen oletuspaikalle jos sellainen on. Muussa tapauksessa "varastoon" eli hyllyalue ja hyllynro vain merkittyn‰
 		$tuotteen_oletuspaikka = tuotteen_oletuspaikka($tilausrivi['tuoteno'], $tilausrivi['kohdevarasto_tunnus']);
@@ -383,7 +388,7 @@ if (!function_exists('hae_tilausrivit')) {
 				$lasku_join	 = "	JOIN lasku AS l
 								ON ( l.yhtio = t.yhtio
 									AND l.tunnus = t.otunnus )";
-				$select		 = "l.varasto AS varasto";
+				$select		 = "l.varasto AS varasto, ";
 			}
 		}
 
@@ -400,6 +405,7 @@ if (!function_exists('hae_tilausrivit')) {
 					tl.kohde_hyllytaso AS kohde_hyllytaso,
 					tl.kohde_hyllyvali AS kohde_hyllyvali
 					FROM tilausrivi AS t
+					{$lasku_join}
 					JOIN tuote
 					ON ( tuote.yhtio = t.yhtio
 						AND tuote.tuoteno = t.tuoteno
@@ -478,8 +484,8 @@ if (!function_exists('hae_avoin_varastosiirto')) {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tila = 'G'
 						AND alatila = ''
-						AND varasto = '{$kohdevarasto_tunnus}'
-						AND clearing = '{$lahdevarasto_tunnus}'";
+						AND varasto = '{$lahdevarasto_tunnus}'
+						AND clearing = '{$kohdevarasto_tunnus}'";
 		$result	 = pupe_query($query);
 
 		return mysql_fetch_assoc($result);

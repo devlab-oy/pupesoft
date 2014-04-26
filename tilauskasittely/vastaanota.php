@@ -72,6 +72,21 @@
 
 	echo "	<script type='text/javascript'>
 				$(function() {
+
+					$('#siirtotable').on('click', '#yhdista_kaikki', function() {
+
+						if ($('input.siirtolistan_vastaanotto:checked').length > 0) {
+							$('input.siirtolistan_vastaanotto').each(function() {
+								$(this).prop('checked', false);
+							});
+						}
+						else {
+							$('input.siirtolistan_vastaanotto').each(function() {
+								$(this).prop('checked', true);
+							});
+						}
+					});
+
 					$('#siirtotable').on('click', '#yhdistabutton', function(e) {
 
 						e.preventDefault();
@@ -940,7 +955,8 @@
 				echo "<input type='hidden' name='toim' value='' />";
 				echo "<input type='hidden' name='tee' value='yhdista' />";
 				echo "<input type='hidden' id='yhdistettavat_siirtolistat' name='yhdistettavat_siirtolistat' value='' />";
-				echo "<input type='button' id='yhdistabutton' value='",t("Yhdistä"),"' />";
+				echo "<input type='button' id='yhdistabutton' value='",t("Yhdistä"),"' /> ";
+				echo "<input type='checkbox' id='yhdista_kaikki' value='' />";
 				echo "</form>";
 				echo "</th>";
 

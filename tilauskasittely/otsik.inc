@@ -1490,21 +1490,35 @@
 				echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$row[tunnus]'>$row[merahti]</div>";
 			}
 
+			$vasen_sarake[$vasen] = "<td>".t("Toimitustapa").":</td>";
+			$vasen_sarake[$vasen] .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
+
 			mysql_data_seek($tresult, 0);
 
 			$vasen_sarake[$vasen] = "<td>".t("Toimitustapa").":</td>";
 			$vasen_sarake[$vasen] .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
 
-			while ($row = mysql_fetch_assoc($tresult)) {
+			$toimitustavat = hae_toimitustavat();
+			$asiakkaan_toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $srow['toimitustapa']);
+			$asiakkaan_toimitustapa = $asiakkaan_toimitustapa[0];
+			$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($srow['yhtio_toimipaikka']);
+			array_push($toimipaikan_toimitustavat, $asiakkaan_toimitustapa);
 
-				$sel = "";
-				if ($row["selite"] == $srow["toimitustapa"]) {
-					$sel = 'selected';
+			foreach ($toimipaikan_toimitustavat as $toimitustapa) {
+				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
+					continue;
 				}
 
-				$vasen_sarake[$vasen] .= "<option id='toimitustapa_$row[tunnus]' value='$row[selite]' $sel>";
-				$vasen_sarake[$vasen] .= t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-				$vasen_sarake[$vasen] .= "</option>";
+				if (in_array($toimitustapa['extranet'], array('','M')) or $toimitustapa['selite'] != $srow['toimitustapa']) {
+					$sel = "";
+					if ($toimitustapa["selite"] == $srow["toimitustapa"]) {
+						$sel = 'selected';
+					}
+
+					$vasen_sarake[$vasen] .= "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
+					$vasen_sarake[$vasen] .= t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");
+					$vasen_sarake[$vasen] .= "</option>";
+				}
 			}
 			$vasen_sarake[$vasen] .= "</select>";
 

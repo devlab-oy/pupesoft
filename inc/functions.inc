@@ -27235,6 +27235,34 @@ if (!function_exists('hae_toimitustavan_toimipaikat')) {
 	}
 }
 
+if (!function_exists('hae_toimipaikan_toimitustavat')) {
+	function hae_toimipaikan_toimitustavat($toimipaikka_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($toimipaikka_tunnus)) {
+			return array();
+		}
+
+		$query = "	SELECT t.*,
+					tt.toimitustapa_tunnus AS toimitustapa_tunnus,
+					tt.toimipaikka_tunnus AS toimipaikka_tunnus
+					FROM toimitustapa AS t
+					JOIN toimitustavat_toimipaikat AS tt
+					ON ( tt.toimitustapa_tunnus = t.tunnus
+						AND tt.toimipaikka_tunnus = '{$toimipaikka_tunnus}')
+					WHERE t.yhtio = '{$kukarow['yhtio']}'";
+
+		$result = pupe_query($query);
+
+		$toimitustavat = array();
+		while($toimitustapa = mysql_fetch_assoc($result)) {
+			$toimitustavat[] = $toimitustapa;
+		}
+
+		return $toimitustavat;
+	}
+}
+
 if (!function_exists('hae_varasto')) {
 
 	function hae_varasto($tunnus) {

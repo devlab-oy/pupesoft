@@ -12,6 +12,88 @@
 	if (!isset($varastorajaus))	$varastorajaus = "";
 	if (!isset($echotaanko))	$echotaanko = true;
 
+	if ($tee == 'yhdista') {
+
+		if (!empty($yhdistettavat_siirtolistat)) {
+			$query = "LOCK TABLES avainsana WRITE";
+			$res   = pupe_query($query);
+
+			$query = "	SELECT selite
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji 	= 'SIIRTO_VASTNRO'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
+
+			$vastaanottonro = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+
+			if (trim($row['selite']) == '') {
+
+				$query = "	INSERT INTO avainsana SET
+							yhtio 			= '{$kukarow['yhtio']}',
+							perhe 			= '666',
+							kieli 			= '{$kukarow['kieli']}',
+							laji 			= 'SIIRTO_VASTNRO',
+							nakyvyys 		= '',
+							selite 			= '{$vastaanottonro}',
+							selitetark	 	= '',
+							selitetark_2 	= '',
+							selitetark_3 	= '',
+							jarjestys 		= 0,
+							laatija 		= '{$kukarow['kuka']}',
+							luontiaika 		= now(),
+							muutospvm 		= now(),
+							muuttaja 		= '{$kukarow['kuka']}'";
+				$insert_res = pupe_query($query);
+			}
+			else {
+				$query = "	UPDATE avainsana
+							SET selite  = '{$vastaanottonro}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji	= 'SIIRTO_VASTNRO'";
+				$update_res = pupe_query($query);
+			}
+
+			// poistetaan lukko
+			$query = "UNLOCK TABLES";
+			$res   = pupe_query($query);
+
+			$yhdistettavat_siirtolistat = mysql_real_escape_string($yhdistettavat_siirtolistat);
+
+			$query = "	UPDATE lasku SET
+						siirtolistan_vastaanotto = '{$vastaanottonro}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus IN ({$yhdistettavat_siirtolistat})";
+			$updres = pupe_query($query);
+		}
+
+		$tee = '';
+	}
+
+	echo "	<script type='text/javascript'>
+				$(function() {
+					$('#siirtotable').on('click', '#yhdistabutton', function(e) {
+
+						e.preventDefault();
+
+						if ($('.siirtolistan_vastaanotto:checked').length > 1) {
+
+							nrot = [];
+
+							$('.siirtolistan_vastaanotto:checked').each(function() {
+								nrot.push($(this).val());
+							});
+
+							$('#yhdistettavat_siirtolistat').val(nrot.join());
+							$('#yhdistaformi').submit();
+						}
+						else {
+							alert('",t("Valitse vähintään 2 siirtolistaa"),"');
+						}
+					});
+				});
+			</script>";
+
 	if ($echotaanko) {
 		if ($toim == "MYYNTITILI") {
 			echo "<font class='head'>".t("Toimita myyntitili asiakkaalle").":</font><hr>";
@@ -812,7 +894,8 @@
 			}
 		}
 
-		$query = "	SELECT lasku.toimitustavan_lahto, lasku.clearing, GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
+		$query = "	SELECT IF(lasku.siirtolistan_vastaanotto != 0, lasku.siirtolistan_vastaanotto, IF(lasku.toimitustavan_lahto != 0, lasku.toimitustavan_lahto, lasku.clearing)) lahto_tai_vastaanotto,
+					GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
 					FROM tilausrivi
 					JOIN lasku on lasku.yhtio = tilausrivi.yhtio
 						and lasku.tunnus = tilausrivi.otunnus
@@ -825,13 +908,13 @@
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.keratty != ''
 					$varasto
-					GROUP BY 1,2";
+					GROUP BY 1";
 		$tilre = pupe_query($query);
 
 		$selectlisa = $toim == "" ? ", viesti AS viite" : "";
 
 		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-			$groupbylisa = "GROUP BY 1,2,3,4,5,6,7";
+			$groupbylisa = "GROUP BY 1,2,3,4,5,6,7,8";
 		}
 		else {
 			$groupbylisa = "";
@@ -848,11 +931,22 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 
-			echo "<table>";
+			echo "<table id='siirtotable'>";
 			echo "<tr>";
 
-			if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-				echo "<th align='left'>",t("Lähtö"),"</th>";
+			if ($toim == "") {
+				echo "<th align='left'>",t("Vastaanottonumero"),"<br>";
+				echo "<form id='yhdistaformi' method='post' action=''>";
+				echo "<input type='hidden' name='toim' value='' />";
+				echo "<input type='hidden' name='tee' value='yhdista' />";
+				echo "<input type='hidden' id='yhdistettavat_siirtolistat' name='yhdistettavat_siirtolistat' value='' />";
+				echo "<input type='button' id='yhdistabutton' value='",t("Yhdistä"),"' />";
+				echo "</form>";
+				echo "</th>";
+
+				if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+					echo "<th align='left'>",t("Lähtö"),"</th>";
+				}
 			}
 
 			echo "<th align='left'>",t($qnimi1),"</th>";
@@ -868,7 +962,7 @@
 			echo "</tr>";
 		}
 
-		$ed_lahto = null;
+		$ed_lahto = $ed_vastaanottonro = null;
 
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
 
@@ -876,6 +970,7 @@
 			$query = "	SELECT varasto,
 						tunnus,
 						IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) lahto,
+						IF(siirtolistan_vastaanotto = 0, '', siirtolistan_vastaanotto) siirtolistan_vastaanotto,
 						nimi,
 						date_format(luontiaika, '%Y-%m-%d') laadittu,
 						laatija
@@ -888,7 +983,7 @@
 						and yhtio = '{$kukarow['yhtio']}'
 						and alatila in ('C','B','D')
 						{$groupbylisa}
-						ORDER by lahto, laadittu DESC";
+						ORDER by siirtolistan_vastaanotto, lahto, laadittu DESC";
 			$result = pupe_query($query);
 
 			//piirretään taulukko...
@@ -896,16 +991,26 @@
 
 				while ($row = mysql_fetch_assoc($result)) {
 
-					if (!is_null($ed_lahto) and $ed_lahto != $row['lahto']) {
+					if (!is_null($ed_vastaanottonro) and $ed_vastaanottonro != $row['siirtolistan_vastaanotto']) {
+						echo "<tr><td class='back'>&nbsp;</td></tr>";
+					}
+					elseif (!is_null($ed_lahto) and $ed_lahto != $row['lahto'] and $row['siirtolistan_vastaanotto'] == '') {
 						echo "<tr><td class='back'>&nbsp;</td></tr>";
 					}
 
 					$ed_lahto = $row['lahto'];
+					$ed_vastaanottonro = $row['siirtolistan_vastaanotto'];
 
 					echo "<tr class='aktiivi'>";
 
-					if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-						echo "<td>{$row['lahto']}</td>";
+					if ($toim == "") {
+						echo "<td>";
+						echo "<input type='checkbox' class='siirtolistan_vastaanotto' name='siirtolistan_vastaanotto[]' value='{$row['tunnus']}' /> {$row['siirtolistan_vastaanotto']}";
+						echo "</td>";
+
+						if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
+							echo "<td>{$row['lahto']}</td>";
+						}
 					}
 
 					echo "<td>{$row['tunnus']}</td>";
@@ -918,8 +1023,8 @@
 					echo "<td>",tv1dateconv($row['laadittu']),"</td>";
 					echo "<td>{$row['laatija']}</td>";
 
-					if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-						$_id =  $row['lahto'] != '' ? $tilrow['otunnus'] : $row['tunnus'];
+					if ($toim == "" and ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' or $row['siirtolistan_vastaanotto'] != '')) {
+						$_id =  ($row['lahto'] != '' or $row['siirtolistan_vastaanotto'] != '') ? $tilrow['otunnus'] : $row['tunnus'];
 					}
 					else {
 						$_id = $row['tunnus'];

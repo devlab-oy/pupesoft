@@ -809,6 +809,29 @@
 		$jatko = 0;
 	}
 
+	if ($echo_toimipaikat) {
+		$echo_toimipaikat = false;
+
+		$ulos = "<td>";
+
+		$toimipaikat = hae_toimipaikat();
+
+		$toimitustavan_toimipaikat = hae_toimitustavan_toimipaikat($trow['tunnus']);
+
+		$chk = '';
+		foreach ($toimipaikat as $toimipaikka) {
+			if (in_array($toimipaikka['tunnus'], $toimitustavan_toimipaikat)) {
+				$chk = 'CHECKED';
+			}
+			$ulos .= "<input type='checkbox' name='toimipaikat[]' value='{$toimipaikka['tunnus']}' {$chk}/> {$toimipaikka['nimi']}";
+			$ulos .= "<br/>";
+			$chk = '';
+		}
+
+		$ulos .= "</td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "jvkulu" OR
 		mysql_field_name($result, $i) == "kuluprosentti" OR
 		mysql_field_name($result, $i) == "ulkomaanlisa" OR

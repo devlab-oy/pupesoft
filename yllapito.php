@@ -2043,6 +2043,10 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'toimitustapa') {
+			echo "<iframe id='toimitustavat_iframe' name='toimitustavat_iframe' src='yllapito.php?toim=toimitustavat_toimipaikat&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+		}
+
 		if ($trow["tunnus"] > 0 and $errori == "" and $from != "yllapito" and $toim == "tuote" and $laji != "V") {
 
 			$lukitse_avaimeen = urlencode($tuoteno);

@@ -3012,25 +3012,42 @@ if ($tee == '') {
 			}
 
 			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("toimitustapa", 200).">";
-
-			// Otetaan toimitustavan tiedot ja käytetään niitä läpi tilausmyynnin!
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
-			mysql_data_seek($tresult, 0);
+			
+			$query = "	SELECT GROUP_CONCAT(toimitustapa.tunnus) AS toimitustapa_tunnukset
+						FROM asiakkaan_avainsanat
+						JOIN toimitustapa
+						ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
+							AND toimitustapa.selite = asiakkaan_avainsanat.avainsana )
+						WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+						AND asiakkaan_avainsanat.laji = 'editilaus_toimitustapa'
+						AND asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'";
+			$asiakas_toimitustapa_result = pupe_query($query);
+			$asiakkaan_toimitustavat = mysql_fetch_assoc($asiakas_toimitustapa_result);
+			$asiakkaan_toimitustavat = explode(',', $asiakkaan_toimitustavat['toimitustapa_tunnukset']);
 
-			$toimitustavan_tunnus = 0;
+			$asiakkaan_toimitustavat = hae_toimitustavat($asiakkaan_toimitustavat);
+			$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($laskurow['yhtio_toimipaikka']);
+			$toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
 
-			while ($row = mysql_fetch_assoc($tresult)) {
+			foreach ($toimipaikan_toimitustavat as $toimitustapa) {
 
-				$sel = "";
-				if ($row["selite"] == $laskurow["toimitustapa"]) {
-					$sel = 'selected';
-					$tm_toimitustaparow = $row;
-					$toimitustavan_tunnus = $row['tunnus'];
+				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $laskurow['toim_maa'])) {
+					continue;
 				}
 
-				echo "<option value='{$row['selite']}' {$sel}>";
-				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-				echo "</option>";
+				if (in_array($toimitustapa['extranet'], array('','M')) or $toimitustapa['selite'] != $laskurow['toimitustapa']) {
+					$sel = "";
+					if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
+						$sel = 'selected';
+						$tm_toimitustaparow = $toimitustapa;
+						$toimitustavan_tunnus = $toimitustapa['tunnus'];
+					}
+
+					echo "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
+					echo t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");
+					echo "</option>";
+				}
 			}
 			echo "</select>";
 

@@ -1498,11 +1498,21 @@
 			$vasen_sarake[$vasen] = "<td>".t("Toimitustapa").":</td>";
 			$vasen_sarake[$vasen] .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
 
-			$toimitustavat = hae_toimitustavat();
-			$asiakkaan_toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $srow['toimitustapa']);
-			$asiakkaan_toimitustapa = $asiakkaan_toimitustapa[0];
+			$query = "	SELECT GROUP_CONCAT(toimitustapa.tunnus) AS toimitustapa_tunnukset
+						FROM asiakkaan_avainsanat
+						JOIN toimitustapa
+						ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
+							AND toimitustapa.selite = asiakkaan_avainsanat.avainsana )
+						WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+						AND asiakkaan_avainsanat.laji = 'editilaus_toimitustapa'
+						AND asiakkaan_avainsanat.liitostunnus = '{$srow['liitostunnus']}'";
+			$asiakas_toimitustapa_result = pupe_query($query);
+			$asiakkaan_toimitustavat = mysql_fetch_assoc($asiakas_toimitustapa_result);
+			$asiakkaan_toimitustavat = explode(',', $asiakkaan_toimitustavat['toimitustapa_tunnukset']);
+
+			$asiakkaan_toimitustavat = hae_toimitustavat($asiakkaan_toimitustavat);
 			$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($srow['yhtio_toimipaikka']);
-			array_push($toimipaikan_toimitustavat, $asiakkaan_toimitustapa);
+			$toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
 
 			foreach ($toimipaikan_toimitustavat as $toimitustapa) {
 				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {

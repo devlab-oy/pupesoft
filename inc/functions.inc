@@ -27191,12 +27191,17 @@ if (!function_exists('hae_toimipaikat')) {
 }
 
 if (!function_exists('hae_toimitustavat')) {
-	function hae_toimitustavat() {
+	function hae_toimitustavat($toimitustapa_tunnukset = array()) {
 		global $kukarow, $yhtiorow;
 
+		$where = "";
+		if (!empty($toimitustapa_tunnukset)) {
+			$where = " AND tunnus IN (".implode(',', $toimitustapa_tunnukset).")";
+		}
 		$query = "	SELECT *
 					FROM toimitustapa
-					WHERE yhtio = '{$kukarow['yhtio']}'";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					{$where}";
 		$result = pupe_query($query);
 
 		$toimitustavat = array();

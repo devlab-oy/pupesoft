@@ -24687,6 +24687,39 @@ if (!function_exists('paivita_ohjausmerkki')) {
 			}
 		}
 
+		if ($laskurow['toimitustavan_lahto'] != 0) {
+
+			$query = "	SELECT ohjausmerkki
+						FROM lahdot
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$laskurow['toimitustavan_lahto']}'";
+			$chkres = pupe_query($query);
+			$chkrow = mysql_fetch_array($chkres);
+
+			if ($chkrow['ohjausmerkki'] != "") {
+
+				// Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
+				// Ei haluta lisätä tekstiä kahteen kertaan
+				if (stripos($laskurow['ohjausmerkki'], $chkrow['ohjausmerkki']) === FALSE) {
+
+					if ($laskurow['ohjausmerkki'] != "") {
+						$updlisa = " ohjausmerkki = CONCAT('{$chkrow['ohjausmerkki']}', ' / ', ohjausmerkki)";
+						$laskurow['ohjausmerkki'] = "{$chkrow['ohjausmerkki']} / {$laskurow['ohjausmerkki']}";
+					}
+					else {
+						$updlisa = " ohjausmerkki = '{$chkrow['ohjausmerkki']}'";
+						$laskurow['ohjausmerkki'] = $chkrow['ohjausmerkki'];
+					}
+
+					$query = "	UPDATE lasku SET
+								{$updlisa}
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$laskurow['tunnus']}'";
+					$updres = pupe_query($query);
+				}
+			}
+		}
+
 		return $laskurow['ohjausmerkki'];
 	}
 }

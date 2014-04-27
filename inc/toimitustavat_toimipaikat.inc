@@ -1,5 +1,5 @@
 <?php
 
 $otsikko	 = "Toimitustapojen toimipaikat";
-$kentat		 = "tunnus, toimitustapa_tunnus, toimipaikka_tunnus";
+$kentat		 = "tunnus, toimitustapa_tunnus, IF(toimipaikka_tunnus = 0, '".t('Ei toimipaikkaa')."', (SELECT nimi FROM yhtion_toimipaikat WHERE yhtion_toimipaikat.yhtio = '{$kukarow['yhtio']}' AND yhtion_toimipaikat.tunnus = toimipaikka_tunnus)) toimipaikka_tunnus";
 $jarjestys	 = "toimitustapa_tunnus ASC, toimipaikka_tunnus ASC";

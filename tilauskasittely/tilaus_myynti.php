@@ -7766,7 +7766,8 @@ if ($tee == '') {
 
 						$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
 
-						echo "<option value='{$lahdot_row['tunnus']}' selected>",tv1dateconv($lahto, "PITKA"),"</option>";
+						$ohjausmerkki_teksti = !empty($lahdot_row['ohjausmerkki']) ? " ({$lahdot_row['ohjausmerkki']})" : "";
+						echo "<option value='{$lahdot_row['tunnus']}' selected>",tv1dateconv($lahto, "PITKA"),"{$ohjausmerkki_teksti}</option>";
 
 						$toimitustavan_lahto[$lahdot_row['varasto']] = $lahdot_row['tunnus'];
 
@@ -7842,7 +7843,8 @@ if ($tee == '') {
 									$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
 								}
 
-								echo "<option value='{$lahdot_row['tunnus']}'{$sel}>",tv1dateconv($lahto, "PITKA"),"</option>";
+								$ohjausmerkki_teksti = !empty($lahdot_row['ohjausmerkki']) ? " ({$lahdot_row['ohjausmerkki']})" : "";
+								echo "<option value='{$lahdot_row['tunnus']}'{$sel}>",tv1dateconv($lahto, "PITKA"),"{$ohjausmerkki_teksti}</option>";
 							}
 
 							echo "</select>";

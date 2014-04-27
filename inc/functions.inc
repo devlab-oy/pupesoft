@@ -23564,6 +23564,24 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 	}
 }
 
+if (!function_exists("tee_tiliointi")) {
+	function tee_tiliointi($parametrit) {
+		global $kukarow, $yhtiorow;
+
+		// Tarvitaan
+		$tunnus   = (!empty($parametrit['tunnus'])) ? $parametrit['tunnus'] : 0;
+		$tili     = (!empty($parametrit['tili'])) ? $parametrit['tili'] : '';
+		$summa    = (!empty($parametrit['summa'])) ? $parametrit['summa'] : 0;
+		$vero     = (!empty($parametrit['vero'])) ? $parametrit['vero'] : 0;
+		$kustp    = (!empty($parametrit['kustp'])) ? $parametrit['kustp'] : 0;
+		$kohde    = (!empty($parametrit['kohde'])) ? $parametrit['kohde'] : 0;
+		$projekti = (!empty($parametrit['projekti'])) ? $parametrit['projekti'] : 0;
+		$selite   = (!empty($parametrit['selite'])) ? $parametrit['selite'] : '';
+
+		require('inc/teetiliointi.inc');
+	}
+}
+
 if (!function_exists("lisaa_rivi")) {
 	function lisaa_rivi($parametrit) {
 		global $kukarow, $yhtiorow;

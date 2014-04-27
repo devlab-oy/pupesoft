@@ -526,19 +526,19 @@
 				$tilausnumerot_temp = explode(',', $tilausnumeroita);
 				foreach ($tilausnumerot_temp as $tilausnumero) {
 					$lasku_temp = hae_lasku($tilausnumero);
-					if ($lasku_temp['tila'] == 'L') {
-						$query = "	UPDATE lasku SET
-									tila = 'N'
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tila = 'L'
-									and tunnus in ($tilausnumero)";
-					}
-					else {
+					if ($lasku_temp['tila'] == 'G') {
 						$query = "	UPDATE lasku SET
 									alatila = 'J'
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tila = 'G'
-									and tunnus in ($tilausnumero)";
+									and tunnus = $tilausnumero";
+					}
+					else {
+						$query = "	UPDATE lasku SET
+									tila = 'N'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tila = 'L'
+									and tunnus = $tilausnumero";
 					}
 					$result = pupe_query($query);
 				}

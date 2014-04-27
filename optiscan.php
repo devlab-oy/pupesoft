@@ -220,21 +220,20 @@
 							$otunnukset_temp = explode(',', $otunnukset);
 							foreach ($otunnukset_temp as $o) {
 								$lasku_temp = hae_lasku($o);
-								if ($lasku_temp['tila'] == 'N') {
+								if ($lasku_temp['tila'] == 'G') {
+									$query = "	UPDATE lasku SET
+												lahetepvm = now(),
+												kerayslista = '{$kerayslistatunnus}'
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = {$o}";
+								}
+								else {
 									$query = "	UPDATE lasku SET
 												tila 	  = 'L',
 												lahetepvm = now(),
 												kerayslista = '{$kerayslistatunnus}'
 												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus in ({$otunnukset})";
-								}
-								else {
-									$query = "	UPDATE lasku SET
-												tila 	  = 'G',
-												lahetepvm = now(),
-												kerayslista = '{$kerayslistatunnus}'
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus in ({$otunnukset})";
+												AND tunnus = {$o}";
 								}
 								pupe_query($query);
 							}

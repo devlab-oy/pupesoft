@@ -102,7 +102,7 @@
 
 	$tilaus_toimitetuksi = false;
 	//Siirtolistat ker‰t‰‰n ker‰yserien kautta ja siihen linkattu myyntitilaus halutaan laittaa toimitetuksi kun siirtolista on vastaanotettu kohdevarastossa
-	if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U' and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+	if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U' and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
 		$query = "	SELECT *
 					FROM tilausrivi AS t
 					JOIN tilausrivin_lisatiedot AS tt

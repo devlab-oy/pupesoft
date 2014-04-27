@@ -27176,10 +27176,10 @@ if (!function_exists('hae_toimipaikat')) {
 	function hae_toimipaikat() {
 		global $kukarow, $yhtiorow;
 
-		$query = "	SELECT *
-					FROM yhtion_toimipaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'";
-		$result = pupe_query($query);
+		$query	 = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'";
+		$result	 = pupe_query($query);
 
 		$toimipaikat = array();
 		while ($toimipaikka = mysql_fetch_assoc($result)) {
@@ -27198,14 +27198,14 @@ if (!function_exists('hae_toimitustavat')) {
 		if (!empty($toimitustapa_tunnukset)) {
 			$where = " AND tunnus IN (".implode(',', $toimitustapa_tunnukset).")";
 		}
-		$query = "	SELECT *
-					FROM toimitustapa
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					{$where}";
-		$result = pupe_query($query);
+		$query	 = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						{$where}";
+		$result	 = pupe_query($query);
 
-		$toimitustavat = array();
-		while ($toimitustapa = mysql_fetch_assoc($result)) {
+		$toimitustavat	 = array();
+		while ($toimitustapa	 = mysql_fetch_assoc($result)) {
 			$toimitustavat[] = $toimitustapa;
 		}
 
@@ -27221,18 +27221,19 @@ if (!function_exists('hae_toimitustavan_toimipaikat')) {
 			return array();
 		}
 
-		$query = "	SELECT yt.*,
-					tt.toimitustapa_tunnus AS toimitustapa_tunnus,
-					tt.toimipaikka_tunnus AS toimipaikka_tunnus
-					FROM yhtion_toimipaikat AS yt
-					JOIN toimitustavat_toimipaikat AS tt
-					ON ( tt.toimipaikka_tunnus = yt.tunnus
-						AND tt.toimitustapa_tunnus = '{$toimitustapa_tunnus}')
-					WHERE yt.yhtio = '{$kukarow['yhtio']}'";
-		$result = pupe_query($query);
+		$query	 = "	SELECT yt.*,
+						tt.toimitustapa_tunnus AS toimitustapa_tunnus,
+						tt.toimipaikka_tunnus AS toimipaikka_tunnus
+						FROM yhtion_toimipaikat AS yt
+						JOIN toimitustavat_toimipaikat AS tt
+						ON ( tt.yhtio = yt.yhtio
+							AND tt.toimipaikka_tunnus = yt.tunnus
+							AND tt.toimitustapa_tunnus = '{$toimitustapa_tunnus}')
+						WHERE yt.yhtio = '{$kukarow['yhtio']}'";
+		$result	 = pupe_query($query);
 
 		$toimipaikat = array();
-		while($toimipaikka = mysql_fetch_assoc($result)) {
+		while ($toimipaikka = mysql_fetch_assoc($result)) {
 			$toimipaikat[] = $toimipaikka;
 		}
 
@@ -27244,8 +27245,27 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 	function hae_toimipaikan_toimitustavat($toimipaikka_tunnus) {
 		global $kukarow, $yhtiorow;
 
-		if (empty($toimipaikka_tunnus)) {
+		//toimipaikka_tunnus = 0 = ei toimipaikkaa = p‰‰kallopaikka
+		if (empty($toimipaikka_tunnus) and !is_numeric($toimipaikka_tunnus)) {
 			return array();
+		}
+
+		$toimitustavat = array();
+
+		//Ensin haetaan kaikki toimitustavat, jotka ei kuulu mihink‰‰n toimipaikkaan taakse yhteensopivuuden takia
+		$query	 = "	SELECT t.*,
+						tt.toimitustapa_tunnus AS toimitustapa_tunnus,
+						tt.toimipaikka_tunnus AS toimipaikka_tunnus
+						FROM toimitustapa AS t
+						LEFT JOIN toimitustavat_toimipaikat AS tt
+						ON ( tt.yhtio = t.yhtio
+							AND tt.toimitustapa_tunnus = t.tunnus )
+						WHERE t.yhtio = '{$kukarow['yhtio']}'
+						AND tt.tunnus IS NULL";
+		$result	 = pupe_query($query);
+
+		while ($toimitustapa = mysql_fetch_assoc($result)) {
+			$toimitustavat[] = $toimitustapa;
 		}
 
 		$query = "	SELECT t.*,
@@ -27253,14 +27273,14 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 					tt.toimipaikka_tunnus AS toimipaikka_tunnus
 					FROM toimitustapa AS t
 					JOIN toimitustavat_toimipaikat AS tt
-					ON ( tt.toimitustapa_tunnus = t.tunnus
-						AND tt.toimipaikka_tunnus = '{$toimipaikka_tunnus}')
+					ON ( tt.yhtio = t.yhtio
+						AND tt.toimitustapa_tunnus = t.tunnus
+						AND tt.toimipaikka_tunnus = {$toimipaikka_tunnus})
 					WHERE t.yhtio = '{$kukarow['yhtio']}'";
 
 		$result = pupe_query($query);
 
-		$toimitustavat = array();
-		while($toimitustapa = mysql_fetch_assoc($result)) {
+		while ($toimitustapa = mysql_fetch_assoc($result)) {
 			$toimitustavat[] = $toimitustapa;
 		}
 

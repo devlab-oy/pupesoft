@@ -1498,6 +1498,10 @@
 			$vasen_sarake[$vasen] = "<td>".t("Toimitustapa").":</td>";
 			$vasen_sarake[$vasen] .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
 
+			//Ekassa page reloadissa toimipaikkaa ei ole setattu. Asetetaan yhtiön oletustoimipaikka
+			if ($srow['yhtiotoimipaikka'] === null) {
+				$srow['yhtiotoimipaikka'] = 0;
+			}
 			$query = "	SELECT GROUP_CONCAT(toimitustapa.tunnus) AS toimitustapa_tunnukset
 						FROM asiakkaan_avainsanat
 						JOIN toimitustapa
@@ -1511,8 +1515,19 @@
 			$asiakkaan_toimitustavat = explode(',', $asiakkaan_toimitustavat['toimitustapa_tunnukset']);
 
 			$asiakkaan_toimitustavat = hae_toimitustavat($asiakkaan_toimitustavat);
-			$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($srow['yhtio_toimipaikka']);
+			$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($srow['yhtiotoimipaikka']);
 			$toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
+
+			if (!in_array($srow['toimitustapa'], array_column($toimipaikan_toimitustavat, 'selite'))) {
+				//Kun muutetaan toimipaikkaa niin toimitustavat muuttuu. Jos mennään tähän haaraan niin se tarkoittaa, että otsikolle valittu toimitustapa ei ole enää toimipaikan valittavien listalla
+				//Päivitetään otsikolle asiakkaan toimitustavoista ensimmäinen toimitustapa
+				$query = "	UPDATE lasku
+							SET toimitustapa = '{$asiakkaan_toimitustavat[0]['selite']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = {$srow['tunnus']}";
+				pupe_query($query);
+				$srow['toimitustapa'] = $asiakkaan_toimitustavat[0]['selite'];
+			}
 
 			foreach ($toimipaikan_toimitustavat as $toimitustapa) {
 				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {

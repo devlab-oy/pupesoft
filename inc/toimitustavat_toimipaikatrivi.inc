@@ -10,7 +10,13 @@ if (mysql_field_name($result, $i) == "tunnus" or
 }
 
 if (mysql_field_name($result, $i) == "toimipaikka_tunnus") {
-	$toimipaikat = hae_toimipaikat();
+	$toimipaikat	 = hae_toimipaikat();
+	$ei_toimipaikkaa = array(
+		'tunnus' => 0,
+		'nimi'	 => t('Ei toimipaikkaa')
+	);
+
+	array_unshift($toimipaikat, $ei_toimipaikkaa);
 
 	$ulos = "<td>";
 	$ulos .= "<select name='$nimi'>";

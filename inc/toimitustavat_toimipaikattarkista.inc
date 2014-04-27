@@ -28,6 +28,8 @@ if (!function_exists("toimitustavat_toimipaikattarkista")) {
 		if ((mysql_field_name($result, $i) == "toimipaikka_tunnus")) {
 			$toimipaikat			 = hae_toimipaikat();
 			$toimipaikka_tunnukset	 = array_column($toimipaikat, 'tunnus');
+			//Pääkallopaikan "ei toimipaikkaa" relaatio tehdään 0. Tämä on siis myös sallittu arvo
+			$toimipaikka_tunnukset[] = 0;
 
 			if (!in_array($t[$i], $toimipaikka_tunnukset)) {
 				$virhe[$i] = t("Toimipaikkaa ei ole olemassa");

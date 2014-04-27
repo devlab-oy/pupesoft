@@ -581,9 +581,9 @@
 				$tilausnumerot_temp = explode(',', $tilausnumeroita);
 				foreach ($tilausnumerot_temp as $tilausnumero) {
 					$lasku_temp = hae_lasku($tilausnumero);
-					if ($lasku_temp['tila'] == 'L') {
+					if ($lasku_temp['tila'] == 'G') {
 						$query = "	UPDATE lasku SET
-									tila = 'L',
+									tila = 'G',
 									lahetepvm = now(),
 									hyvak3 = '{$kukarow['kuka']}',
 									h3time = NOW(),
@@ -594,7 +594,7 @@
 					}
 					else {
 						$query = "	UPDATE lasku SET
-									tila = 'G',
+									tila = 'L',
 									lahetepvm = now(),
 									hyvak3 = '{$kukarow['kuka']}',
 									h3time = NOW(),

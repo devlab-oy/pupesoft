@@ -758,33 +758,43 @@ if ($yhtiorow['kerayserat'] == 'K') {
  * tuotepaikat.poistettava = 'D' ja tuotepaikat.saldo=0
  * Ei poisteta oletuspaikkaa
 */
-$query = "SELECT *
+$query = "SELECT tunnus,
+          tuoteno,
+          hyllyalue,
+          hyllynro,
+          hyllytaso,
+          hyllyvali,
+          CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
           FROM tuotepaikat
           WHERE yhtio     = '{$kukarow['yhtio']}'
           AND poistettava = 'D'
           AND saldo       = 0
           AND oletus     = ''";
 $poistettavat_tuotepaikat = pupe_query($query);
+
 $poistettu = 0;
+$avoimet_rivit = array();
+
+// Jos on poistettavia, haetaan avoimet
+if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
+  // Haetaan avoimet tilausrivit arrayseen (myynti, osto, siirtolistat)
+  $query = "  SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laskutettuaika = '0000-00-00'
+              AND tyyppi IN ('L','O','G')";
+  $avoinrivi_result = pupe_query($query);
+
+  while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
+    $avoimet_rivit[] = $avoinrivi['id'];
+  }
+}
 
 // Loopataan poistettavat tuotepaikat läpi
 while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
 
-  # Katsotaan onko tällä paikalla avoimia tilausrivejä (myynti, osto, siirtolistat)
-  $query = "SELECT tunnus
-            FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$tuotepaikka['tuoteno']}'
-            AND hyllyalue = '{$tuotepaikka['hyllyalue']}'
-            AND hyllynro = '{$tuotepaikka['hyllynro']}'
-            AND hyllytaso = '{$tuotepaikka['hyllytaso']}'
-            AND hyllyvali = '{$tuotepaikka['hyllyvali']}'
-            AND laskutettuaika = '0000-00-00'
-            AND tyyppi IN ('L','O','G')";
-  $avoinrivi_result = pupe_query($query);
-
   // Ei poisteta jos avoimia
-  if (mysql_num_rows($avoinrivi_result) > 0) {
+  if (in_array($tuotepaikka['id'], $avoimet_rivit)) {
     continue;
   }
 

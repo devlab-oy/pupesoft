@@ -889,9 +889,10 @@
 
 										$query = "	UPDATE sarjanumeroseuranta
 													SET myyntirivitunnus = '$lisrow[tunnus]'
-													WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-													and sarjanumeroseuranta.tuoteno = '$lisataanrow[tuoteno]'
-													and sarjanumeroseuranta.myyntirivitunnus  = '$lisataanrow[tunnus]'
+													WHERE yhtio 		 = '$kukarow[yhtio]'
+													and tuoteno 		 = '$lisataanrow[tuoteno]'
+													and myyntirivitunnus = '$lisataanrow[tunnus]'
+													ORDER BY tunnus
 													LIMIT $lisrow[varattu]";
 										$cores = pupe_query($query);
 									}

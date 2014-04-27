@@ -9,7 +9,7 @@
 	if (!isset($id)) 			$id = "";
 	if (!isset($boob)) 			$boob = "";
 	if (!isset($maa)) 			$maa = "";
-	if (!isset($varastorajaus))	$varastorajaus = "";
+	if (!isset($varastorajaus))	$varastorajaus = 0;
 	if (!isset($echotaanko))	$echotaanko = true;
 
 	if ($echotaanko) {
@@ -737,8 +737,11 @@
 		$vares = pupe_query($query);
 
 		while ($varow = mysql_fetch_assoc($vares)) {
-			$sel='';
-			if (isset($varastorajaus) and $varow['tunnus'] == $varastorajaus) $sel = 'selected';
+
+			$sel = '';
+			if ( (!empty($varastorajaus) and $varow['tunnus'] == $varastorajaus) or ($varastorajaus === 0 and $kukarow['oletus_varasto'] == $varow['tunnus']) ) {
+				$sel = 'selected';
+			}
 
 			$varastomaa = '';
 			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
@@ -813,6 +816,9 @@
 
 		if (isset($varastorajaus) and !empty($varastorajaus)) {
 			$varasto .= ' AND lasku.clearing = '.(int) $varastorajaus;
+		}
+		else if ($varastorajaus === 0 and !empty($kukarow['oletus_varasto'])) {
+			$varasto .= ' AND lasku.clearing = '.(int) $kukarow['oletus_varasto'];
 		}
 
 		if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {

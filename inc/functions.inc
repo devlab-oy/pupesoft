@@ -27228,7 +27228,7 @@ if (!function_exists('hae_toimitustavat')) {
 
 		$toimitustavat	 = array();
 		while ($toimitustapa	 = mysql_fetch_assoc($result)) {
-			$toimitustavat[] = $toimitustapa;
+			$toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
 		}
 
 		return $toimitustavat;
@@ -27276,9 +27276,7 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 		$toimitustavat = array();
 
 		//Ensin haetaan kaikki toimitustavat, jotka ei kuulu mihinkään toimipaikkaan taakse yhteensopivuuden takia
-		$query	 = "	SELECT t.*,
-						tt.toimitustapa_tunnus AS toimitustapa_tunnus,
-						tt.toimipaikka_tunnus AS toimipaikka_tunnus
+		$query	 = "	SELECT t.*
 						FROM toimitustapa AS t
 						LEFT JOIN toimitustavat_toimipaikat AS tt
 						ON ( tt.yhtio = t.yhtio
@@ -27288,7 +27286,7 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 		$result	 = pupe_query($query);
 
 		while ($toimitustapa = mysql_fetch_assoc($result)) {
-			$toimitustavat[] = $toimitustapa;
+			$toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
 		}
 
 		$query = "	SELECT t.*,
@@ -27304,7 +27302,7 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 		$result = pupe_query($query);
 
 		while ($toimitustapa = mysql_fetch_assoc($result)) {
-			$toimitustavat[] = $toimitustapa;
+			$toimitustavat["t{$toimitustapa['toimitustapa_tunnus']}"] = $toimitustapa;
 		}
 
 		return $toimitustavat;

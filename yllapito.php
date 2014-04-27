@@ -2130,6 +2130,7 @@
 			$toim == "yhteensopivuus_tuote" or
 			$toim == "yhteensopivuus_tuote_lisatiedot" or
 		   ($toim == "toimitustapa" and $poistolukko == "") or
+			$toim == "toimitustavat_toimipaikat" or
 			$toim == "kirjoittimet" or
 			$toim == "hinnasto" or
 			$toim == "rahtimaksut" or

@@ -3030,6 +3030,8 @@ if ($tee == '') {
 			$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($laskurow['yhtio_toimipaikka']);
 			$toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
 
+			asort($toimipaikan_toimitustavat);
+
 			foreach ($toimipaikan_toimitustavat as $toimitustapa) {
 
 				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $laskurow['toim_maa'])) {

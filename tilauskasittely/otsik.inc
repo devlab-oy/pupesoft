@@ -1529,6 +1529,8 @@
 				$srow['toimitustapa'] = $asiakkaan_toimitustavat[0]['selite'];
 			}
 
+			asort($toimipaikan_toimitustavat);
+
 			foreach ($toimipaikan_toimitustavat as $toimitustapa) {
 				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
 					continue;

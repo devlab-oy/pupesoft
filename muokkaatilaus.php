@@ -2031,7 +2031,9 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				if ($row["tila"] == 'N' and $row["alatila"] == 'F') {
+				$piilotarivi = "";
+
+				if ($toim == "EXTRANET" and $row["tila"] == 'N' and $row["alatila"] == 'F') {
 					// katsotaan onko muilla aktiivisena
 					$query = "	SELECT tunnus
 								FROM kuka
@@ -2039,9 +2041,9 @@
 								AND kesken  = '{$row['tilaus']}'
 								AND kesken != 0
 								AND kuka != '{$kukarow['kuka']}'";
-					$result = pupe_query($query);
+					$res_x = pupe_query($query);
 
-					if (mysql_num_rows($result) != 0) continue;
+					if (mysql_num_rows($result) != 0) $piilotarivi = "kylla";
 				}
 
 				if ($toim == 'OSTO' and $row['kuka_ext'] != '' and $ext_chk != '' and (int) $ext_chk != (int) $row['kuka_ext']) {
@@ -2157,7 +2159,6 @@
 					$whiletoim = $toim;
 				}
 
-				$piilotarivi = "";
 				$pitaako_varmistaa = "";
 
 				// jos kyseessä on "odottaa JT tuotteita rivi"

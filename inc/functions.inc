@@ -26537,7 +26537,8 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 					v_kohde.nimitys AS kohde_nimi,
 					v_kohde.tunnus AS kohde_tunnus,
 					v_kohde.alkuhyllyalue AS kohde_alkuhyllyalue,
-					v_kohde.alkuhyllynro AS kohde_alkuhyllynro
+					v_kohde.alkuhyllynro AS kohde_alkuhyllynro,
+					toimitustapa.selite AS toimitustapa_selite
 					FROM avainsana AS a
 					JOIN varastopaikat AS v_lahde
 					ON ( v_lahde.yhtio = a.yhtio
@@ -26545,6 +26546,9 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 					JOIN varastopaikat AS v_kohde
 					ON ( v_kohde.yhtio = a.yhtio
 						AND v_kohde.tunnus = a.selitetark )
+					JOIN toimitustapa
+					ON ( toimitustapa.yhtio = a.yhtio
+						AND toimitustapa.tunnus = a.selitetark_2 )
 					WHERE a.yhtio = '{$kukarow['yhtio']}'
 					AND a.laji = 'SIIRTOVARASTOT'
 					{$avainsana_where}

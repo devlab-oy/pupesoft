@@ -921,6 +921,19 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "siirtolistat_vastaanotetaan_per_lahto") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Ei")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "kirjanpidollinen_varastosiirto_myyntitilaukselta") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

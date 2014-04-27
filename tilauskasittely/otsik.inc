@@ -281,8 +281,11 @@
 				$varasto_result = pupe_query($query);
 				$varaston_toimipaikka = mysql_fetch_assoc($varasto_result);
 				$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($varaston_toimipaikka['toimipaikka']);
-				$toimipaikan_toimitustapojen_tunnukset = array_column($toimipaikan_toimitustavat, 'tunnus');
-				if (!in_array($toimipaikka, $toimipaikan_toimitustapojen_tunnukset)) {
+				$toimipaikan_toimitustapojen_selitteet = array_column($toimipaikan_toimitustavat, 'selite');
+
+				$asiakkaan_toimitustavat = hae_asiakkaan_toimitustavat($asiakasid);
+				$asiakkaan_toimitustapojen_selitteet = array_column($asiakkaan_toimitustavat, 'selite');
+				if (!in_array($toimitustapa, $toimipaikan_toimitustapojen_selitteet) and !in_array($toimitustapa, $asiakkaan_toimitustapojen_selitteet)) {
 					echo "<font class='error'>".t("VIRHE: Varaston toimipaikalla ei ole valittua toimitustapaa")."!</font><br>";
 					$tee = "OTSIK";
 					$tila = "";

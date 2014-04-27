@@ -548,7 +548,7 @@
 
 							$lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
 							if ($nayta_myos_siirrot) {
-								$lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')) OR (lasku.tila = 'G' AND lasku.alatila IN ('A','B','C')))";
+								$lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')) OR (lasku.tila = 'G' AND lasku.alatila IN ('J',A','B','C')))";
 							}
 
 							$query = "	SELECT tunnus

@@ -27212,18 +27212,22 @@ if (!function_exists('hae_toimipaikat')) {
 	}
 }
 
-if (!function_exists('hae_toimitustavat')) {
-	function hae_toimitustavat($toimitustapa_tunnukset = array()) {
+if (!function_exists('hae_asiakkaan_toimitustavat')) {
+	function hae_asiakkaan_toimitustavat($asiakas_tunnus) {
 		global $kukarow, $yhtiorow;
 
-		$where = "";
-		if (!empty($toimitustapa_tunnukset)) {
-			$where = " AND tunnus IN (".implode(',', $toimitustapa_tunnukset).")";
+		if (empty($asiakas_tunnus)) {
+			return array();
 		}
-		$query	 = "	SELECT *
-						FROM toimitustapa
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						{$where}";
+
+		$query	 = "	SELECT toimitustapa.*
+						FROM asiakkaan_avainsanat
+						JOIN toimitustapa
+						ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
+							AND toimitustapa.selite = asiakkaan_avainsanat.avainsana )
+						WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+						AND asiakkaan_avainsanat.laji = 'editilaus_toimitustapa'
+						AND asiakkaan_avainsanat.liitostunnus = '{$asiakas_tunnus}'";
 		$result	 = pupe_query($query);
 
 		$toimitustavat	 = array();
@@ -27306,6 +27310,23 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 		}
 
 		return $toimitustavat;
+	}
+}
+
+if (!function_exists('hae_toimitustavat')) {
+	function hae_toimitustavat($asiakas_tunnus, $toimipaikka) {
+		$asiakkaan_toimitustavat = hae_asiakkaan_toimitustavat($asiakas_tunnus);
+
+		$toimipaikan_toimitustavat	 = hae_toimipaikan_toimitustavat($toimipaikka);
+		$toimipaikan_toimitustavat	 = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
+
+		$sort = array();
+		foreach ($toimipaikan_toimitustavat as $index => $toimipaikan_toimitustapa) {
+			$sort[$index] = $toimipaikan_toimitustapa['selite'];
+		}
+		array_multisort($sort, SORT_ASC, $toimipaikan_toimitustavat);
+
+		return $toimipaikan_toimitustavat;
 	}
 }
 

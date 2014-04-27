@@ -1502,40 +1502,10 @@
 			if ($srow['yhtiotoimipaikka'] === null) {
 				$srow['yhtiotoimipaikka'] = 0;
 			}
-			$query = "	SELECT GROUP_CONCAT(toimitustapa.tunnus) AS toimitustapa_tunnukset
-						FROM asiakkaan_avainsanat
-						JOIN toimitustapa
-						ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
-							AND toimitustapa.selite = asiakkaan_avainsanat.avainsana )
-						WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
-						AND asiakkaan_avainsanat.laji = 'editilaus_toimitustapa'
-						AND asiakkaan_avainsanat.liitostunnus = '{$srow['liitostunnus']}'";
-			$asiakas_toimitustapa_result = pupe_query($query);
-			$asiakkaan_toimitustavat = mysql_fetch_assoc($asiakas_toimitustapa_result);
-			$asiakkaan_toimitustavat = explode(',', $asiakkaan_toimitustavat['toimitustapa_tunnukset']);
 
-			$asiakkaan_toimitustavat = hae_toimitustavat($asiakkaan_toimitustavat);
-			$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($srow['yhtiotoimipaikka']);
-			$toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
+			$toimitustavat = hae_toimitustavat($srow['liitostunnus'], $srow['yhtiotoimipaikka']);
 
-			if (!in_array($srow['toimitustapa'], array_column($toimipaikan_toimitustavat, 'selite'))) {
-				//Kun muutetaan toimipaikkaa niin toimitustavat muuttuu. Jos mennään tähän haaraan niin se tarkoittaa, että otsikolle valittu toimitustapa ei ole enää toimipaikan valittavien listalla
-				//Päivitetään otsikolle asiakkaan toimitustavoista ensimmäinen toimitustapa
-				$query = "	UPDATE lasku
-							SET toimitustapa = '{$asiakkaan_toimitustavat[0]['selite']}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = {$srow['tunnus']}";
-				pupe_query($query);
-				$srow['toimitustapa'] = $asiakkaan_toimitustavat[0]['selite'];
-			}
-
-			$sort = array();
-			foreach ($toimipaikan_toimitustavat as $index => $toimipaikan_toimitustapa) {
-				$sort[$index] = $toimipaikan_toimitustapa['selite'];
-			}
-			array_multisort($sort, SORT_ASC, $toimipaikan_toimitustavat);
-
-			foreach ($toimipaikan_toimitustavat as $toimitustapa) {
+			foreach ($toimitustavat as $toimitustapa) {
 				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
 					continue;
 				}

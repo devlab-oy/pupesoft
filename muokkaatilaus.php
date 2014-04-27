@@ -2043,7 +2043,7 @@
 								AND kuka != '{$kukarow['kuka']}'";
 					$res_x = pupe_query($query);
 
-					if (mysql_num_rows($result) != 0) $piilotarivi = "kylla";
+					if (mysql_num_rows($res_x) != 0) $piilotarivi = "kylla";
 				}
 
 				if ($toim == 'OSTO' and $row['kuka_ext'] != '' and $ext_chk != '' and (int) $ext_chk != (int) $row['kuka_ext']) {

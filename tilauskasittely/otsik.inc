@@ -816,6 +816,11 @@
 				}
 			}
 
+			if ($yhtiotoimipaikka != $srow['yhtio_toimipaikka']) {
+				unset($srow['eilahetetta']);
+				unset($srow['osatoimitus']);
+			}
+
 			if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
 
 				$toim_asiakasid = mysql_real_escape_string($toim_asiakasid);

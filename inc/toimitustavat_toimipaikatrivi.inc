@@ -36,21 +36,6 @@ if (mysql_field_name($result, $i) == "toimipaikka_tunnus") {
 }
 
 if (mysql_field_name($result, $i) == "toimitustapa_tunnus") {
-	$toimitustavat = hae_toimitustavat();
-
-	$ulos = "<td>";
-	$ulos .= "<select name='$nimi'>";
-
-	$sel = '';
-	foreach ($toimitustavat as $toimitustapa) {
-		if (isset($trow[$i]) and $trow[$i] == $toimitustapa['tunnus'] or $lukitse_avaimeen == $toimitustapa['tunnus']) {
-			$sel = 'SELECTED';
-		}
-		$ulos .= "<option value='{$toimitustapa['tunnus']}' {$sel}>{$toimitustapa['selite']}</option>";
-		$sel = '';
-	}
-
-	$ulos .= "</select>";
-	$ulos .= "</td>";
+	$tyyppi = 4;
 	$jatko = 0;
 }

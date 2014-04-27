@@ -2599,7 +2599,10 @@
 				'varasto_toimipaikka' => $selectoitu_varasto_toimipaikka
 			);
 			$toimitustavat = hae_toimitustavat($params);
-
+			$toimitustapojen_selitteet = array_column($toimitustavat, 'selite');
+			if (!in_array($srow['toimitustapa'], $toimitustapojen_selitteet)) {
+				$asiakas = hae_asiakas($srow['liitostunnus']);
+			}
 			foreach ($toimitustavat as $toimitustapa) {
 				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
 					continue;
@@ -2607,7 +2610,10 @@
 
 				if (in_array($toimitustapa['extranet'], array('','M')) or $toimitustapa['selite'] != $srow['toimitustapa']) {
 					$sel = "";
-					if ($toimitustapa["selite"] == $srow["toimitustapa"]) {
+					if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
+						$sel = 'selected';
+					}
+					else if (!empty($asiakas) and $toimitustapa["selite"] == $asiakas["toimitustapa"]) {
 						$sel = 'selected';
 					}
 

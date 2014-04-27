@@ -3030,7 +3030,11 @@ if ($tee == '') {
 			$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($laskurow['yhtio_toimipaikka']);
 			$toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
 
-			asort($toimipaikan_toimitustavat);
+			$sort = array();
+			foreach ($toimipaikan_toimitustavat as $index => $toimipaikan_toimitustapa) {
+				$sort[$index] = $toimipaikan_toimitustapa['selite'];
+			}
+			array_multisort($sort, SORT_ASC, $toimipaikan_toimitustavat);
 
 			foreach ($toimipaikan_toimitustavat as $toimitustapa) {
 

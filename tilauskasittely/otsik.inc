@@ -2068,7 +2068,7 @@
 
 			$vares = pupe_query($query);
 
-			$oikea_sarake[$oikea] .= "<select name='varasto'><option value='0'>".t("Kaikista")."</option>";
+			$oikea_sarake[$oikea] .= "<select name='varasto' onchange='this.form.submit()'><option value='0'>".t("Kaikista")."</option>";
 
 			if (mysql_num_rows($vares) > 0) {
 

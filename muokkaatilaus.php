@@ -51,9 +51,11 @@
 
 							e.preventDefault();
 
+							var otunnus = $(this).siblings('.tilausnumero').val();
+
 							$.ajax({
 								data: {
-									otunnus: $(this).siblings('.tilausnumero').val()
+									otunnus: otunnus
 								},
 								success: function(retval) {
 									if (retval) {
@@ -61,7 +63,7 @@
 										window.location.replace('{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1');
 									}
 									else {
-										$('.myyntiformi').submit();
+										$('#myyntiformi_'+otunnus).submit();
 									}
 								}
 							});
@@ -2704,7 +2706,7 @@
 								<input type='hidden' name='tee' value='AKTIVOI'>";
 					}
 					else {
-						echo "<form method='post' class='myyntiformi' action='tilauskasittely/tilaus_myynti.php' $javalisa>";
+						echo "<form method='post' class='myyntiformi' id='myyntiformi_{$row['tunnus']}' action='tilauskasittely/tilaus_myynti.php' $javalisa>";
 					}
 
 					//	Projektilla hyp‰t‰‰n aina p‰‰otsikolle..

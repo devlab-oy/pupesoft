@@ -37,5 +37,4 @@ if (mysql_field_name($result, $i) == "toimipaikka_tunnus") {
 
 if (mysql_field_name($result, $i) == "toimitustapa_tunnus") {
 	$tyyppi = 4;
-	$jatko = 0;
 }

@@ -27115,7 +27115,7 @@ if (!function_exists('hae_tuotepaikka')) {
 	}
 }
 
-if (!function_exists('tuotepaikka')) {
+if (!function_exists('luo_tuotepaikka')) {
 	function luo_tuotepaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $tuoteno) {
 		global $kukarow, $yhtiorow;
 

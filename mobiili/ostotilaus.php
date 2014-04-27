@@ -17,7 +17,7 @@ if (isset($uusi) AND !isset($virhe)) {
 	$result = pupe_query($nollaus_query);
 }
 // Katsotaan onko käyttäjälle keskeneräistä saapumista
-elseif (!isset($virhe)) {
+elseif (!isset($virhe) AND (!isset($backsaapuminen) OR $backsaapuminen != "")) {
 	$query = "	SELECT kesken
 				FROM kuka
 				JOIN lasku ON (kuka.yhtio=lasku.yhtio AND kuka.kesken=lasku.tunnus AND lasku.tila='K' AND lasku.alatila NOT IN ('X','I'))

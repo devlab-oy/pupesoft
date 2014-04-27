@@ -464,39 +464,9 @@ if (!function_exists("tuotetarkista")) {
 						$paikka_chk_res = pupe_query($query);
 
 						if (mysql_num_rows($paikka_chk_res) == 0) {
+							lisaa_tuotepaikka($tem_tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, "Tuoteyll‰pidossa", "", 0, 0, 0);
 
-							$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
-							 						yhtio			= '{$kukarow['yhtio']}',
-										 			tuoteno     	= '{$tem_tuoteno}',
-										 			oletus      	= '{$oletus_x}',
-								   		 			saldoaika   	= now(),
-													hyllyalue   	= '{$hyllyalue}',
-													hyllynro    	= '{$hyllynro}',
-													hyllyvali   	= '{$hyllyvali}',
-													hyllytaso   	= '{$hyllytaso}',
-													luontiaika		= now(),
-													laatija			= '{$kukarow['kuka']}',
-													muutospvm		= now(),
-													muuttaja		= '{$kukarow['kuka']}'";
-							$tuotepaikka_result = pupe_query($tuotepaikka_query);
-
-							$tapahtumaquery = "	INSERT into tapahtuma set
-												yhtio 		= '{$kukarow['yhtio']}',
-												tuoteno 	= '{$tem_tuoteno}',
-												kpl 		= 0,
-												kplhinta	= 0,
-												hinta 		= 0,
-												laji 		= 'uusipaikka',
-												hyllyalue   = '{$hyllyalue}',
-												hyllynro    = '{$hyllynro}',
-												hyllyvali   = '{$hyllyvali}',
-												hyllytaso   = '{$hyllytaso}',
-												selite 		= '".t("Tuoteyll‰pidossa lis‰ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
-												laatija 	= '$kukarow[kuka]',
-												laadittu 	= now()";
-							$tapahtumaresult = pupe_query($tapahtumaquery);
-
-							if ($trow["luedata_from"] == "LUEDATA") { // jos tullaan lue datasta voidaan ja pit‰‰ k‰ytt‰‰ lue datan omaa echo funkkaria!
+							if ($trow["luedata_from"] == "LUEDATA") {
 								lue_data_echo("<font class='message'>".t("Lis‰ttiin varastopaikka")." {$_tuotepaikka}</font></br>");
 							}
 							else {

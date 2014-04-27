@@ -298,8 +298,8 @@
 
 		$ulos .= "<option value = ''>".t("Asiakkaan laskutusosoitteella")."</option>";
 		$ulos .= "<option value = 'T' {$sel['T']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
-		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot erikseen")."</option>";
-		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot erikseen")."</option>";
+		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot/takuut erikseen")."</option>";
+		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot/takuut erikseen")."</option>";
 
 		$ulos .= "</select></td>";
 
@@ -860,6 +860,18 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "tee_automaattinen_siirto_myyntitilaukselta") {
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$ulos .= "<option value=''>".t("Ei k‰ytˆss‰")."</option>";
+		$ulos .= "<option value='K' {$sel}>".t("Tehd‰‰n siirtoja jos l‰hdevaraston myyt‰viss‰m‰‰r‰ riitt‰‰")."</option>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "tee_automaattinen_osto_myyntitilaukselta") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -909,6 +921,21 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "kirjanpidollinen_varastosiirto_myyntitilaukselta") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksesta ei luoda kirjanpidollisia varastosiirtoja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksesta luodaan kirjanpidollisia varastosiirtoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "automaattinen_jt_toimitus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -923,6 +950,7 @@
 		$ulos .= "<option value='A' $sel[A]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ ker‰ysp‰iv‰n mukaisesti")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sek‰ myyntitilaukselta varastoon tilatut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
+		$ulos .= "<option value='U' $sel[U]>".t("Osatoimituskiellossa olevien tilausten j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

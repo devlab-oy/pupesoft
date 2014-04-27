@@ -39,6 +39,8 @@
 		// Enaboidaan ajax kikkare
 		enable_ajax();
 	}
+	
+	if (!isset($lopetus)) $lopetus = "";
 
 	if (strtolower($toim) == 'oletusvarasto' and $kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
 		$oletusvarasto_chk = $kukarow['oletus_varasto'];
@@ -329,6 +331,7 @@
 				$tee = 'M';
 			}
 		}
+		if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'N';
 	}
 
 	if ($tee == 'N') {
@@ -533,41 +536,14 @@
 
 				// Vastaanottavaa paikkaa ei löydy, perustetaan se
 				if (mysql_num_rows($result) == 0) {
-					$query = "	INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, laatija, luontiaika)
-							  	VALUES (
-								'$kukarow[yhtio]',
-								'$minnerow[hyllyalue]',
-								'$minnerow[hyllynro]',
-								'$minnerow[hyllyvali]',
-								'$minnerow[hyllytaso]',
-								'$tuotteet[$iii]',
-								'$kukarow[kuka]',
-								now())";
-					$result = pupe_query($query);
-					$lisatty_tun = mysql_insert_id();
+					$lisatty_paikka = lisaa_tuotepaikka($tuotteet[$iii], $minnerow["hyllyalue"], $minnerow["hyllynro"], $minnerow["hyllyvali"], $minnerow["hyllytaso"], "Varastopaikkojen muutosessa", "", 0, 0, 0);
 
 					// Tuotepaikka jonne lisävaruste viedään
 					if ($lisavaruste[$iii] == "LISAVARUSTE") {
-						$siirretaan[$iii] = $lisatty_tun;
+						$siirretaan[$iii] = $lisatty_paikka["tuotepaikan_tunnus"];
 					}
 
-					$query = "	INSERT into tapahtuma set
-								yhtio 		= '$kukarow[yhtio]',
-								tuoteno 	= '$tuotteet[$iii]',
-								kpl 		= '0',
-								kplhinta	= '0',
-								hinta 		= '0',
-								laji 		= 'uusipaikka',
-								hyllyalue	= '$minnerow[hyllyalue]',
-								hyllynro 	= '$minnerow[hyllynro]',
-								hyllyvali	= '$minnerow[hyllyvali]',
-								hyllytaso	= '$minnerow[hyllytaso]',
-								selite 		= '".t("Lisättiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now()";
-					$result = pupe_query($query);
-
-					echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso])<br>";
+					echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue]-$minnerow[hyllynro]-$minnerow[hyllyvali]-$minnerow[hyllytaso])<br>";
 				}
 				else {
 					$lisavartprow = mysql_fetch_array($result);
@@ -579,6 +555,7 @@
 				}
 			}
 		}
+		if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'N';
 	}
 
 	if ($tee == 'N') {
@@ -702,7 +679,7 @@
 
 
 		// Päivitetään lisävausteiden sarjanumerot
-		if (count($lisavar_sarj) > 0) {
+		if (isset($lisavar_sarj) and count($lisavar_sarj) > 0) {
 			foreach($lisavar_sarj as $sarjano) {
 				if ($sarjano > 0) {
 					$query = "	UPDATE sarjanumeroseuranta
@@ -725,6 +702,8 @@
 		$ahyllytaso = '';
 		$asaldo     = '';
 		$tee 		= $uusitee;
+
+		if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'MEGALOMAANINEN_ONNISTUMINEN';
 	}
 
 	// Uusi varstopaikka
@@ -738,10 +717,10 @@
 		//Tarkistetaan onko paikka validi
 		$query = "	SELECT oletus
 					FROM tuotepaikat
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tuoteno = '$tuoteno'
+					WHERE yhtio   = '$kukarow[yhtio]'
+					and tuoteno   = '$tuoteno'
 					and hyllyalue = '$ahyllyalue'
-					and hyllynro = '$ahyllynro'
+					and hyllynro  = '$ahyllynro'
 					and hyllytaso = '$ahyllytaso'
 					and hyllyvali = '$ahyllyvali'";
 		$result = pupe_query($query);
@@ -754,19 +733,19 @@
 				if ($yhtiorow['kerayserat'] == 'K') {
 
 					$ahyllyalue = strtoupper($ahyllyalue);
-					$ahyllynro = strtoupper($ahyllynro);
+					$ahyllynro  = strtoupper($ahyllynro);
 					$ahyllyvali = strtoupper($ahyllyvali);
 					$ahyllytaso = strtoupper($ahyllytaso);
 
 					$kaikki_ok = tarkista_varaston_hyllypaikka($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
-					}
+				}
 
 				if ($yhtiorow['varastontunniste'] != '') {
 					if (!isset($select_varastontunniste) or trim($select_varastontunniste) == "") $kaikki_ok = false;
-					}
+				}
 
 				if ($kaikki_ok) {
-					echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
+					echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue-$ahyllynro-$ahyllyvali-$ahyllytaso)</font><br>";
 
 					$query = "	SELECT oletus
 								FROM tuotepaikat
@@ -782,48 +761,29 @@
 						$oletus = "X";
 					}
 
+					if (!isset($ahalytysraja)) $ahalytysraja = 0;
+					if (!isset($atilausmaara)) $atilausmaara = 0;
 
-					$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, laatija, luontiaika)
-							  VALUES (
-								'$kukarow[yhtio]',
-								'$ahyllyalue',
-								'$ahyllynro',
-								'$ahyllyvali',
-								'$ahyllytaso',
-								'$oletus',
-								'$tuoteno',
-								'$kukarow[kuka]',
-								now())";
-					$result = pupe_query($query);
+					$ahalytysraja = (float) $ahalytysraja;
+					$atilausmaara = (float) $atilausmaara;
 
-					$query = "	INSERT into tapahtuma set
-								yhtio 		= '$kukarow[yhtio]',
-								tuoteno 	= '$tuoteno',
-								kpl 		= '0',
-								kplhinta	= '0',
-								hinta 		= '0',
-								laji 		= 'uusipaikka',
-								hyllyalue	= '$ahyllyalue',
-								hyllynro 	= '$ahyllynro',
-								hyllyvali	= '$ahyllyvali',
-								hyllytaso	= '$ahyllytaso',
-								selite 		= '".t("Lisättiin tuotepaikka")." $ahyllyalue $ahyllynro $ahyllyvali $ahyllytaso',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now()";
-					$result = pupe_query($query);
+					lisaa_tuotepaikka($tuoteno, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, "Varastopaikkojen muutoksessa", $oletus, $ahalytysraja, $atilausmaara, 0);
 				}
 				else {
 					echo "<font class='error'>",("Uusi varastopaikka ei löydy tai ei kuulu mihinkään varastoon"),": {$tuoteno} ({$ahyllyalue}, {$ahyllynro}, {$ahyllyvali}, {$ahyllytaso})</font><br />";
+					$failure = "Y";
 				}
 			}
 			else {
 				echo "<font class='error'>".("Uusi varastopaikka ei kuulu mihinkään varastoon").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
+				$failure = "Y";
 			}
 		}
 		else {
 			echo "<font class='error'>".("Uusi varastopaikka löytyy jo tuotteelta").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 		}
 		$tee = 'M';
+		if ($kutsuja == "varastopaikka_aineistolla.php") $tee = "PALATTIIN_MUUSTA";
 	}
 
 	if ($tee != "") {
@@ -944,7 +904,7 @@
 				}
 
 				if ($myytavissa > 0) {
-					echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
+					echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
 				}
 			}
 		}
@@ -982,7 +942,7 @@
 					$invalisa2 = "";
 				}
 
-				echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
+				echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
 			}
 		}
 		echo "</select></td>";
@@ -1090,6 +1050,7 @@
 
 		echo "<table>";
 		echo "<tr>";
+		echo "<th>",t("Varasto"),"</th>";
 		echo "<th>",t("Varastopaikka"),"</th>";
 		echo "<th>",t("Saldo"),"</th>";
 		echo "<th>",t("Hyllyssä"),"</th>";
@@ -1125,7 +1086,9 @@
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-				echo "<tr><td>";
+				echo "<tr>";
+				echo "<td>$saldorow[nimitys]</td>";
+				echo "<td>";
 
 				if (tarkista_oikeus('inventoi.php', '', 1)) {
 					echo "<a href='{$palvelin2}inventoi.php?tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
@@ -1179,7 +1142,7 @@
 				echo "</tr>";
 			}
 		}
-		echo "<tr><td colspan='9'><input type = 'submit' value = '".t("Päivitä")."'></td></table></form><br>";
+		echo "<tr><td colspan='10'><input type = 'submit' value = '".t("Päivitä")."'></td></table></form><br>";
 
 		$ahyllyalue	= '';
 		$ahyllynro	= '';

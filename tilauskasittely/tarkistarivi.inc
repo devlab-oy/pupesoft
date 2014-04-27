@@ -155,13 +155,16 @@
 		}
 	}
 
-	if (in_array($row['var'], array('U','T')) and $meapurow['kateinen'] != '') {
+	if (in_array($row['var'], array('U','T','S')) and $meapurow['kateinen'] != '') {
 
 		if ($row['var'] == 'U') {
 			$varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta asiakkaalle, koska maksuehto on käteinen!")."<br>";
 		}
-		else {
+		elseif ($row['var'] == 'T') {
 			$varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta varastoon, koska maksuehto on käteinen!")."<br>";
+		}
+		else {
+			$varaosavirhe .= t("VIRHE: Et voi tehdä varastosiirtoa, koska maksuehto on käteinen!")."<br>";
 		}
 
 		$riviok++;
@@ -834,19 +837,13 @@
 				$kohde_varastot = array($laskurow['varasto']);
 			}
 			else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
-				$query = "	SELECT *
-							FROM varastopaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
-				$varastopaikat_result = pupe_query($query);
-				$kohde_varastot = array();
-				while($varastopaikka = mysql_fetch_assoc($varastopaikat_result)) {
-					$kohde_varastot[] = $varastopaikka['tunnus'];
-				}
+				$kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
+				$kohde_varastot = array_column($kohde_varastot, 'tunnus');
 			}
 			else {
 				$kohde_varastot = array();
 			}
+
 			$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
 			foreach ($siirto_varastot as $siirto_varasto) {
@@ -858,7 +855,7 @@
 					$sel4 = "SELECTED";
 				}
 
-				$siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$siirto_varasto['tuote']['myytavissa']}";
+				$siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$siirto_varasto['tuote']['myytavissa']} ({$siirto_varasto['toimitustapa_selite']})";
 				$paikat .= "<option value='¡¡S{$siirto_varasto['tunnus']}¡¡S{$siirto_varasto['lahde_tunnus']}¡¡S{$siirto_varasto['kohde_tunnus']}' {$sel4}>{$siirto_varastot_text}</option>";
 				$paikatlask++;
 				$sel4 = "";

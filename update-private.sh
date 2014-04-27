@@ -5,17 +5,20 @@ PRIVATEDIR=$1
 
 if [ ! -d ${PUPEDIR} ] || [ ! -d ${PRIVATEDIR} ]; then
 	echo
-	echo "ERROR! Hakemistoja ei l�ydy!"
+	echo "ERROR! Hakemistoja ei löydy!"
 	echo
 	exit
 fi
 
 echo
-echo "Paivitetaan ${PRIVATEDIR}"
+echo "Päivitetään ${PRIVATEDIR}"
 
 cd ${PRIVATEDIR}
-git checkout .             # revertataan kaikki local muutokset
-git pull origin master     # paivitetaan aina varmasti master branchi
+git fetch origin        # paivitetaan lokaali repo remoten tasolle
+git checkout .          # revertataan kaikki local muutokset
+git checkout master     # varmistetaan, etta on master branchi kaytossa
+git pull origin master  # paivitetaan master branchi
+git remote prune origin # poistetaan ylimääriset branchit
 
 cp -Rf ${PRIVATEDIR}/* ${PUPEDIR}/
 

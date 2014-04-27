@@ -127,6 +127,8 @@
 	$laskuri = 0;
 	$valitutlaskut = 0;
 
+	require ("inc/verkkolasku-in-erittele-laskut.inc");
+
 	if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
 		require ("inc/verkkolasku-in.inc");
@@ -143,7 +145,25 @@
 				// Napataan alkuperäinen kukarow
 				$vv_kukarow = $kukarow;
 
-				list($lasku_yhtio, $lasku_toimittaja) = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
+				$returni = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
+
+				if (is_array($returni)) {
+					$lasku_yhtio		= $returni[0];
+					$lasku_toimittaja	= $returni[1];
+				}
+				elseif (stripos($returni, "ei ole validi XML") !== FALSE) {
+
+					$laskut = $verkkolaskuvirheet_vaarat;
+
+					$luotiinlaskuja = erittele_laskut($verkkolaskuvirheet_vaarat."/".$file);
+
+					// Jos tiedostosta luotiin laskuja siirretään se tieltä pois
+					if ($luotiinlaskuja > 0) {
+						rename($verkkolaskuvirheet_vaarat."/".$file, $verkkolaskut_orig."/".$file);
+					}
+
+					$lasku_yhtio["yhtio"] = "EI KIITOS TÄLLÄ KERTAA";
+				}
 
 				// Palautetaan alkuperäinen kukarow
 				$kukarow = $vv_kukarow;

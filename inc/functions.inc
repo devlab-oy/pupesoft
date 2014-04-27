@@ -20451,28 +20451,42 @@ if (!function_exists('splittaa_tilausrivi')) {
 }
 
 if (!function_exists('lisaa_tuotepaikka')) {
-	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '', $halytysraja = 0, $tilausmaara = 0) {
+	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '', $halytysraja = 0, $tilausmaara = 0, $varasto = 0) {
 		global $kukarow;
 
 		# Isot kirjaimet
-		$hyllyalue 	= strtoupper($hyllyalue);
-		$hyllynro 	= strtoupper($hyllynro);
-		$hyllyvali 	= strtoupper($hyllyvali);
-		$hyllytaso 	= strtoupper($hyllytaso);
+		$hyllyalue 	= strtoupper(trim($hyllyalue));
+		$hyllynro 	= strtoupper(trim($hyllynro));
+		$hyllyvali 	= strtoupper(trim($hyllyvali));
+		$hyllytaso 	= strtoupper(trim($hyllytaso));
+
+		if (empty($hyllyalue) and !empty($varasto)) {
+			//Hyllyä ei ole annettu mutta varasto on. Luodaan annettuun varastoon tuotteelle default-tuotepaikka.
+			$varasto = hae_varasto($varasto);
+
+			$hyllyalue = $varasto['alkuhyllyalue'];
+			$hyllynro  = $varasto['alkuhyllynro'];
+			$hyllyvali = 0;
+			$hyllytaso = 0;
+		}
+		elseif (empty($hyllyalue) and empty($varasto)) {
+			return false;
+		}
 
 		$query = "	INSERT INTO tuotepaikat SET
-					yhtio     = '{$kukarow['yhtio']}',
-					tuoteno	  = '{$tuoteno}',
-					hyllyalue = '{$hyllyalue}',
-					hyllynro  = '{$hyllynro}',
-					hyllyvali = '{$hyllyvali}',
-					hyllytaso = '{$hyllytaso}',
-					oletus    = '{$oletus}',
+					yhtio       = '{$kukarow['yhtio']}',
+					tuoteno	    = '{$tuoteno}',
+					hyllyalue   = '{$hyllyalue}',
+					hyllynro    = '{$hyllynro}',
+					hyllyvali   = '{$hyllyvali}',
+					hyllytaso   = '{$hyllytaso}',
+					oletus      = '{$oletus}',
 					halytysraja = '{$halytysraja}',
 					tilausmaara = '{$tilausmaara}',
-					laatija	  = '{$kukarow['kuka']}',
-					luontiaika= now()";
-		$result = pupe_query($query);
+					laatija	    = '{$kukarow['kuka']}',
+					luontiaika  = now()";
+		pupe_query($query);
+		$lisatty_tun = mysql_insert_id();
 
 		$query = "	INSERT INTO tapahtuma SET
 					yhtio 		= '{$kukarow['yhtio']}',
@@ -20485,10 +20499,12 @@ if (!function_exists('lisaa_tuotepaikka')) {
 					hyllynro 	= '{$hyllynro}',
 					hyllyvali 	= '{$hyllyvali}',
 					hyllytaso 	= '{$hyllytaso}',
-					selite 		= '".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}',
+					selite 		= trim('".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}'),
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
-		$result = pupe_query($query);
+		pupe_query($query);
+
+		return array("hyllyalue" => $hyllyalue, "hyllynro" => $hyllynro, "hyllytaso" => $hyllytaso, "hyllyvali" => $hyllyvali, "tuotepaikan_tunnus" => $lisatty_tun);
 	}
 }
 
@@ -24222,10 +24238,28 @@ if (!function_exists('hyllysiirto')) {
 				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
 			}
 
+			$query = "	SELECT toimi.tilino,
+						toimi.kustannuspaikka AS kustp,
+						toimi.kohde AS kohde,
+						toimi.projekti AS projekti
+						FROM tuotteen_toimittajat
+						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND toimi.tyyppi != 'P')
+						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
+						ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+						LIMIT 1";
+			$result = pupe_query($query);
+			$toimirow = mysql_fetch_assoc($result);
+
 			if ($mistatoimipaikka_row['tunnus'] > 0) {
 				if ($mista_kustp == 0)    $mista_kustp    = $mistatoimipaikka_row['kustp'];
 				if ($mista_kohde == 0)    $mista_kohde    = $mistatoimipaikka_row['kohde'];
 				if ($mista_projekti == 0) $mista_projekti = $mistatoimipaikka_row['projekti'];
+			}
+			else {
+				if ($mista_kustp == 0)    $mista_kustp    = $toimirow['kustp'];
+				if ($mista_kohde == 0)    $mista_kohde    = $toimirow['kohde'];
+				if ($mista_projekti == 0) $mista_projekti = $toimirow['projekti'];
 			}
 
 			if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0) {
@@ -24316,16 +24350,6 @@ if (!function_exists('hyllysiirto')) {
 						$result = pupe_query($query);
 						$laskuid = mysql_insert_id();
 					}
-
-					$query = "	SELECT toimi.tilino
-								FROM tuotteen_toimittajat
-								JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND toimi.tyyppi != 'P')
-								WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-								AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
-								ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
-								LIMIT 1";
-					$result = pupe_query($query);
-					$toimirow = mysql_fetch_assoc($result);
 
 					// Mistä varasto
 					$query = "	INSERT into tiliointi set
@@ -26513,7 +26537,8 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 					v_kohde.nimitys AS kohde_nimi,
 					v_kohde.tunnus AS kohde_tunnus,
 					v_kohde.alkuhyllyalue AS kohde_alkuhyllyalue,
-					v_kohde.alkuhyllynro AS kohde_alkuhyllynro
+					v_kohde.alkuhyllynro AS kohde_alkuhyllynro,
+					toimitustapa.selite AS toimitustapa_selite
 					FROM avainsana AS a
 					JOIN varastopaikat AS v_lahde
 					ON ( v_lahde.yhtio = a.yhtio
@@ -26521,6 +26546,9 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 					JOIN varastopaikat AS v_kohde
 					ON ( v_kohde.yhtio = a.yhtio
 						AND v_kohde.tunnus = a.selitetark )
+					JOIN toimitustapa
+					ON ( toimitustapa.yhtio = a.yhtio
+						AND toimitustapa.tunnus = a.selitetark_2 )
 					WHERE a.yhtio = '{$kukarow['yhtio']}'
 					AND a.laji = 'SIIRTOVARASTOT'
 					{$avainsana_where}
@@ -26857,6 +26885,249 @@ if (!function_exists("korvaavat_kiellot")) {
 
 		return "";
 	}
+}
+
+if (!function_exists('hae_yhtion_toimipaikan_varastot')) {
+	function hae_yhtion_toimipaikan_varastot($yhtio_toimipaikka) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND toimipaikka = '{$yhtio_toimipaikka}'";
+		$varastopaikat_result = pupe_query($query);
+		$varastopaikat = array();
+
+		while($varastopaikka = mysql_fetch_assoc($varastopaikat_result)) {
+			$varastopaikat[] = $varastopaikka;
+		}
+
+		return $varastopaikat;
+	}
+}
+
+/**
+ * This file is part of the array_column library
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @copyright Copyright (c) 2013 Ben Ramsey <http://benramsey.com>
+ * @license http://opensource.org/licenses/MIT MIT
+ */
+if (!function_exists('array_column')) {
+
+	/**
+	 * Returns the values from a single column of the input array, identified by
+	 * the $columnKey.
+	 *
+	 * Optionally, you may provide an $indexKey to index the values in the returned
+	 * array by the values from the $indexKey column in the input array.
+	 *
+	 * @param array $input A multi-dimensional array (record set) from which to pull
+	 *                     a column of values.
+	 * @param mixed $columnKey The column of values to return. This value may be the
+	 *                         integer key of the column you wish to retrieve, or it
+	 *                         may be the string key name for an associative array.
+	 * @param mixed $indexKey (Optional.) The column to use as the index/keys for
+	 *                        the returned array. This value may be the integer key
+	 *                        of the column, or it may be the string key name.
+	 * @return array
+	 */
+	function array_column($input = null, $columnKey = null, $indexKey = null) {
+		// Using func_get_args() in order to check for proper number of
+		// parameters and trigger errors exactly as the built-in array_column()
+		// does in PHP 5.5.
+		$argc = func_num_args();
+		$params = func_get_args();
+
+		if ($argc < 2) {
+			trigger_error("array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING);
+			return null;
+		}
+
+		if (!is_array($params[0])) {
+			trigger_error('array_column() expects parameter 1 to be array, '.gettype($params[0]).' given', E_USER_WARNING);
+			return null;
+		}
+
+		if (!is_int($params[1]) && !is_float($params[1]) && !is_string($params[1]) && $params[1] !== null && !(is_object($params[1]) && method_exists($params[1], '__toString'))
+		) {
+			trigger_error('array_column(): The column key should be either a string or an integer', E_USER_WARNING);
+			return false;
+		}
+
+		if (isset($params[2]) && !is_int($params[2]) && !is_float($params[2]) && !is_string($params[2]) && !(is_object($params[2]) && method_exists($params[2], '__toString'))
+		) {
+			trigger_error('array_column(): The index key should be either a string or an integer', E_USER_WARNING);
+			return false;
+		}
+
+		$paramsInput = $params[0];
+		$paramsColumnKey = ($params[1] !== null) ? (string)$params[1] : null;
+
+		$paramsIndexKey = null;
+		if (isset($params[2])) {
+			if (is_float($params[2]) || is_int($params[2])) {
+				$paramsIndexKey = (int)$params[2];
+			}
+			else {
+				$paramsIndexKey = (string)$params[2];
+			}
+		}
+
+		$resultArray = array();
+
+		foreach ($paramsInput as $row) {
+
+			$key = $value = null;
+			$keySet = $valueSet = false;
+
+			if ($paramsIndexKey !== null && array_key_exists($paramsIndexKey, $row)) {
+				$keySet = true;
+				$key = (string)$row[$paramsIndexKey];
+			}
+
+			if ($paramsColumnKey === null) {
+				$valueSet = true;
+				$value = $row;
+			}
+			elseif (is_array($row) && array_key_exists($paramsColumnKey, $row)) {
+				$valueSet = true;
+				$value = $row[$paramsColumnKey];
+			}
+
+			if ($valueSet) {
+				if ($keySet) {
+					$resultArray[$key] = $value;
+				}
+				else {
+					$resultArray[] = $value;
+				}
+			}
+		}
+
+		return $resultArray;
+	}
+
+}
+
+if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
+	function tee_kirjanpidollinen_varastosiirto($myyntitilaus_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == '') {
+			return false;
+		}
+
+		$myyntitilaus = hae_lasku($myyntitilaus_tunnus);
+		$varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtion_toimipaikka']);
+
+		//Yhtiön toimipaikalla voi olla monta varastoa. Alkuksi verrataan vain ensimmäistä.
+		//@TODO muutetaan ehkä jossain vaiheessa niin, että verrataan kaikkiin yhtiön toimipaikan varastoihin
+		if ($myyntitilaus['varasto'] != $varastot[0]['tunnus']) {
+			require('tilauskasittely/tilauksesta_varastosiirto.inc');
+
+			//Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
+			tilauksesta_varastosiirto($myyntitilaus_tunnus, true);
+		}
+	}
+}
+
+if (!function_exists('hae_tuotepaikka')) {
+	function hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM tuotepaikat
+					WHERE yhtio   = '{$kukarow['yhtio']}'
+					AND tuoteno   = '{$tuoteno}'
+					AND hyllyalue = '{$hyllyalue}'
+					AND hyllynro  = '{$hyllynro}'
+					AND hyllytaso = '{$hyllytaso}'
+					AND hyllyvali = '{$hyllyvali}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('hae_tuotepaikat')) {
+
+	function hae_tuotepaikat($tuoteno, $hyllyalue, $hyllynro, $hyllytaso = false, $hyllyvali = false) {
+		global $kukarow, $yhtiorow;
+
+		$tuotepaikka_where = "";
+		if (!empty($hyllytaso)) {
+			$tuotepaikka_where .= "	AND hyllytaso = '{$hyllytaso}'";
+		}
+
+		if (!empty($hyllyvali)) {
+			$tuotepaikka_where .= "	AND hyllyvali = '{$hyllyvali}'";
+		}
+
+		$query = "	SELECT *
+					FROM tuotepaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'
+					AND hyllyalue = '{$hyllyalue}'
+					AND hyllynro = '{$hyllynro}'
+					{$tuotepaikka_where}";
+		$result = pupe_query($query);
+
+		$tuotepaikat = array();
+		while($tuotepaikka = mysql_fetch_assoc($result)) {
+			$tuotepaikat[] = $tuotepaikka;
+		}
+
+		return $tuotepaikat;
+	}
+
+}
+
+if (!function_exists('hae_tuotteen_tuotepaikat')) {
+
+	function hae_tuotteen_tuotepaikat($tuoteno) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($tuoteno)) {
+			return array();
+		}
+
+		$query = "	SELECT *
+					FROM tuotepaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+
+		$tuotepaikat = array();
+		while ($tuotepaikka = mysql_fetch_assoc($result)) {
+			$tuotepaikat[] = $tuotepaikka;
+		}
+
+		return $tuotepaikat;
+	}
+
+}
+
+if (!function_exists('hae_varasto')) {
+
+	function hae_varasto($tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($tunnus)) {
+			return false;
+		}
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = {$tunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+
 }
 
 if (!function_exists("onkotapahtumajariveja")) {

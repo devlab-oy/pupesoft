@@ -23564,6 +23564,24 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 	}
 }
 
+if (!function_exists("tee_tiliointi")) {
+	function tee_tiliointi($parametrit) {
+		global $kukarow, $yhtiorow;
+
+		// Tarvitaan
+		$tunnus   = (!empty($parametrit['tunnus'])) ? $parametrit['tunnus'] : 0;
+		$tili     = (!empty($parametrit['tili'])) ? $parametrit['tili'] : '';
+		$summa    = (!empty($parametrit['summa'])) ? $parametrit['summa'] : 0;
+		$vero     = (!empty($parametrit['vero'])) ? $parametrit['vero'] : 0;
+		$kustp    = (!empty($parametrit['kustp'])) ? $parametrit['kustp'] : 0;
+		$kohde    = (!empty($parametrit['kohde'])) ? $parametrit['kohde'] : 0;
+		$projekti = (!empty($parametrit['projekti'])) ? $parametrit['projekti'] : 0;
+		$selite   = (!empty($parametrit['selite'])) ? $parametrit['selite'] : '';
+
+		require('inc/teetiliointi.inc');
+	}
+}
+
 if (!function_exists("lisaa_rivi")) {
 	function lisaa_rivi($parametrit) {
 		global $kukarow, $yhtiorow;
@@ -26537,7 +26555,8 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 					v_kohde.nimitys AS kohde_nimi,
 					v_kohde.tunnus AS kohde_tunnus,
 					v_kohde.alkuhyllyalue AS kohde_alkuhyllyalue,
-					v_kohde.alkuhyllynro AS kohde_alkuhyllynro
+					v_kohde.alkuhyllynro AS kohde_alkuhyllynro,
+					toimitustapa.selite AS toimitustapa_selite
 					FROM avainsana AS a
 					JOIN varastopaikat AS v_lahde
 					ON ( v_lahde.yhtio = a.yhtio
@@ -26545,6 +26564,9 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
 					JOIN varastopaikat AS v_kohde
 					ON ( v_kohde.yhtio = a.yhtio
 						AND v_kohde.tunnus = a.selitetark )
+					JOIN toimitustapa
+					ON ( toimitustapa.yhtio = a.yhtio
+						AND toimitustapa.tunnus = a.selitetark_2 )
 					WHERE a.yhtio = '{$kukarow['yhtio']}'
 					AND a.laji = 'SIIRTOVARASTOT'
 					{$avainsana_where}

@@ -831,7 +831,7 @@
 			}
 		}
 
-		if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS"))) {
+		if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS", "REKLAMAATIO"))) {
 			$sel4 = "";
 			if (!empty($laskurow['varasto'])) {
 				$kohde_varastot = array($laskurow['varasto']);

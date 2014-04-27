@@ -38,12 +38,11 @@
 			exit;
 		}
 
-
 		echo "	<script type='text/javascript'>
 					$(function() {
 
 						$.ajaxSetup({
-							url: 'muokkaatilaus.php?ajax=OK',
+							url: '{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1&ajax=OK',
 							type: 'POST',
 							cache: false
 						});

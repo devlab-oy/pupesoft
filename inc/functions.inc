@@ -27227,6 +27227,155 @@ if (!function_exists("onkotapahtumajariveja")) {
 	}
 }
 
+if (!function_exists('hae_toimipaikat')) {
+	function hae_toimipaikat() {
+		global $kukarow, $yhtiorow;
+
+		$query	 = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'";
+		$result	 = pupe_query($query);
+
+		$toimipaikat = array();
+		while ($toimipaikka = mysql_fetch_assoc($result)) {
+			$toimipaikat[] = $toimipaikka;
+		}
+
+		return $toimipaikat;
+	}
+}
+
+if (!function_exists('hae_asiakkaan_toimitustavat')) {
+	function hae_asiakkaan_toimitustavat($asiakas_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($asiakas_tunnus)) {
+			return array();
+		}
+
+		$query	 = "	SELECT toimitustapa.*
+						FROM asiakkaan_avainsanat
+						JOIN toimitustapa
+						ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
+							AND toimitustapa.selite = asiakkaan_avainsanat.avainsana )
+						WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+						AND asiakkaan_avainsanat.laji = 'editilaus_toimitustapa'
+						AND asiakkaan_avainsanat.liitostunnus = '{$asiakas_tunnus}'";
+		$result	 = pupe_query($query);
+
+		$toimitustavat	 = array();
+		while ($toimitustapa	 = mysql_fetch_assoc($result)) {
+			$toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
+		}
+
+		return $toimitustavat;
+	}
+}
+
+if (!function_exists('hae_toimitustavan_toimipaikat')) {
+	function hae_toimitustavan_toimipaikat($toimitustapa_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($toimitustapa_tunnus)) {
+			return array();
+		}
+
+		$query	 = "	SELECT yt.*,
+						tt.toimitustapa_tunnus AS toimitustapa_tunnus,
+						tt.toimipaikka_tunnus AS toimipaikka_tunnus,
+						tt.tunnus AS toimitustavat_toimipaikat_tunnus
+						FROM yhtion_toimipaikat AS yt
+						JOIN toimitustavat_toimipaikat AS tt
+						ON ( tt.yhtio = yt.yhtio
+							AND tt.toimipaikka_tunnus = yt.tunnus
+							AND tt.toimitustapa_tunnus = '{$toimitustapa_tunnus}')
+						WHERE yt.yhtio = '{$kukarow['yhtio']}'";
+		$result	 = pupe_query($query);
+
+		$toimipaikat = array();
+		while ($toimipaikka = mysql_fetch_assoc($result)) {
+			$toimipaikat[] = $toimipaikka;
+		}
+
+		return $toimipaikat;
+	}
+}
+
+if (!function_exists('hae_toimipaikan_toimitustavat')) {
+	function hae_toimipaikan_toimitustavat($toimipaikka_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		//toimipaikka_tunnus = 0 = ei toimipaikkaa = pääkallopaikka
+		if (empty($toimipaikka_tunnus) and !is_numeric($toimipaikka_tunnus)) {
+			return array();
+		}
+
+		$toimitustavat = array();
+
+		//Ensin haetaan kaikki toimitustavat, jotka ei kuulu mihinkään toimipaikkaan taakse yhteensopivuuden takia
+		$query	 = "	SELECT t.*
+						FROM toimitustapa AS t
+						LEFT JOIN toimitustavat_toimipaikat AS tt
+						ON ( tt.yhtio = t.yhtio
+							AND tt.toimitustapa_tunnus = t.tunnus )
+						WHERE t.yhtio = '{$kukarow['yhtio']}'
+						AND tt.tunnus IS NULL";
+		$result	 = pupe_query($query);
+
+		while ($toimitustapa = mysql_fetch_assoc($result)) {
+			$toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
+		}
+
+		$query = "	SELECT t.*,
+					tt.toimitustapa_tunnus AS toimitustapa_tunnus,
+					tt.toimipaikka_tunnus AS toimipaikka_tunnus
+					FROM toimitustapa AS t
+					JOIN toimitustavat_toimipaikat AS tt
+					ON ( tt.yhtio = t.yhtio
+						AND tt.toimitustapa_tunnus = t.tunnus
+						AND tt.toimipaikka_tunnus = {$toimipaikka_tunnus})
+					WHERE t.yhtio = '{$kukarow['yhtio']}'";
+
+		$result = pupe_query($query);
+
+		while ($toimitustapa = mysql_fetch_assoc($result)) {
+			$toimitustavat["t{$toimitustapa['toimitustapa_tunnus']}"] = $toimitustapa;
+		}
+
+		return $toimitustavat;
+	}
+}
+
+if (!function_exists('hae_toimitustavat')) {
+	function hae_toimitustavat(array $params) {
+		global $kukarow, $yhtiorow;
+
+		$asiakas_tunnus = $params['asiakas_tunnus'];
+		$lasku_toimipaikka = $params['lasku_toimipaikka'];
+		$varasto_toimipaikka = $params['varasto_toimipaikka'];
+
+		if (isset($varasto_toimipaikka) and $varasto_toimipaikka != '') {
+			$toimipaikka = $varasto_toimipaikka;
+		}
+		else {
+			$toimipaikka = $lasku_toimipaikka;
+		}
+
+		$asiakkaan_toimitustavat = hae_asiakkaan_toimitustavat($asiakas_tunnus);
+
+		$toimipaikan_toimitustavat	 = hae_toimipaikan_toimitustavat($toimipaikka);
+		$toimipaikan_toimitustavat	 = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
+
+		$sort = array();
+		foreach ($toimipaikan_toimitustavat as $index => $toimipaikan_toimitustapa) {
+			$sort[$index] = $toimipaikan_toimitustapa['selite'];
+		}
+		array_multisort($sort, SORT_ASC, $toimipaikan_toimitustavat);
+
+		return $toimipaikan_toimitustavat;
+	}
+}
+
 if (!function_exists('hae_varasto')) {
 
 	function hae_varasto($tunnus) {

@@ -3012,25 +3012,34 @@ if ($tee == '') {
 			}
 
 			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("toimitustapa", 200).">";
-
-			// Otetaan toimitustavan tiedot ja käytetään niitä läpi tilausmyynnin!
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
-			mysql_data_seek($tresult, 0);
 
-			$toimitustavan_tunnus = 0;
+			$_varasto = hae_varasto($laskurow['varasto']);
+			$params = array(
+				'asiakas_tunnus' => $laskurow['liitostunnus'],
+				'lasku_toimipaikka' => $laskurow['yhtiotoimipaikka'],
+				'varasto_toimipaikka' => $_varasto['toimipaikka']
+			);
+			$toimitustavat = hae_toimitustavat($params);
 
-			while ($row = mysql_fetch_assoc($tresult)) {
+			foreach ($toimitustavat as $toimitustapa) {
 
-				$sel = "";
-				if ($row["selite"] == $laskurow["toimitustapa"]) {
-					$sel = 'selected';
-					$tm_toimitustaparow = $row;
-					$toimitustavan_tunnus = $row['tunnus'];
+				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $laskurow['toim_maa'])) {
+					continue;
 				}
 
-				echo "<option value='{$row['selite']}' {$sel}>";
-				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-				echo "</option>";
+				if (in_array($toimitustapa['extranet'], array('','M')) or $toimitustapa['selite'] != $laskurow['toimitustapa']) {
+					$sel = "";
+					if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
+						$sel = 'selected';
+						$tm_toimitustaparow = $toimitustapa;
+						$toimitustavan_tunnus = $toimitustapa['tunnus'];
+					}
+
+					echo "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
+					echo t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");
+					echo "</option>";
+				}
 			}
 			echo "</select>";
 

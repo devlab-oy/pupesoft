@@ -27245,7 +27245,8 @@ if (!function_exists('hae_toimitustavan_toimipaikat')) {
 
 		$query	 = "	SELECT yt.*,
 						tt.toimitustapa_tunnus AS toimitustapa_tunnus,
-						tt.toimipaikka_tunnus AS toimipaikka_tunnus
+						tt.toimipaikka_tunnus AS toimipaikka_tunnus,
+						tt.tunnus AS toimitustavat_toimipaikat_tunnus
 						FROM yhtion_toimipaikat AS yt
 						JOIN toimitustavat_toimipaikat AS tt
 						ON ( tt.yhtio = yt.yhtio

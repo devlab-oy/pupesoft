@@ -27314,7 +27314,20 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 }
 
 if (!function_exists('hae_toimitustavat')) {
-	function hae_toimitustavat($asiakas_tunnus, $toimipaikka) {
+	function hae_toimitustavat(array $params) {
+		global $kukarow, $yhtiorow;
+
+		$asiakas_tunnus = $params['asiakas_tunnus'];
+		$lasku_toimipaikka = $params['lasku_toimipaikka'];
+		$varasto_toimipaikka = $params['varasto_toimipaikka'];
+
+		if (isset($varasto_toimipaikka) and $varasto_toimipaikka != '') {
+			$toimipaikka = $varasto_toimipaikka;
+		}
+		else {
+			$toimipaikka = $lasku_toimipaikka;
+		}
+
 		$asiakkaan_toimitustavat = hae_asiakkaan_toimitustavat($asiakas_tunnus);
 
 		$toimipaikan_toimitustavat	 = hae_toimipaikan_toimitustavat($toimipaikka);

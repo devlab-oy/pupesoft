@@ -3014,7 +3014,13 @@ if ($tee == '') {
 			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("toimitustapa", 200).">";
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
 
-			$toimitustavat = hae_toimitustavat($laskurow['liitostunnus'], $laskurow['yhtio_toimipaikka']);
+			$_varasto = hae_varasto($laskurow['varasto']);
+			$params = array(
+				'asiakas_tunnus' => $laskurow['liitostunnus'],
+				'lasku_toimipaikka' => $laskurow['yhtiotoimipaikka'],
+				'varasto_toimipaikka' => $_varasto['toimipaikka']
+			);
+			$toimitustavat = hae_toimitustavat($params);
 
 			foreach ($toimitustavat as $toimitustapa) {
 

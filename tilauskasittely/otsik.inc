@@ -1512,39 +1512,9 @@
 
 			mysql_data_seek($tresult, 0);
 
-			$vasen_sarake[$vasen] = "<td>".t("Toimitustapa").":</td>";
-			$vasen_sarake[$vasen] .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
-
-			//Ekassa page reloadissa toimipaikkaa ei ole setattu. Asetetaan yhtiön oletustoimipaikka
-			if ($srow['yhtiotoimipaikka'] === null) {
-				$srow['yhtiotoimipaikka'] = 0;
-			}
-
-			$toimitustavat = hae_toimitustavat($srow['liitostunnus'], $srow['yhtiotoimipaikka']);
-
-			foreach ($toimitustavat as $toimitustapa) {
-				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
-					continue;
-				}
-
-				if (in_array($toimitustapa['extranet'], array('','M')) or $toimitustapa['selite'] != $srow['toimitustapa']) {
-					$sel = "";
-					if ($toimitustapa["selite"] == $srow["toimitustapa"]) {
-						$sel = 'selected';
-					}
-
-					$vasen_sarake[$vasen] .= "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
-					$vasen_sarake[$vasen] .= t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");
-					$vasen_sarake[$vasen] .= "</option>";
-				}
-			}
-			$vasen_sarake[$vasen] .= "</select>";
-
-			// HUOM: jos varsinainen on disabloitu niin siirretään tieto hidddenissä
-			if ($state_chk == 'disabled') {
-				echo "<input type='hidden' name='toimitustapa' value='$srow[toimitustapa]'>";
-			}
-
+			//Tehdään dummy toimitustapa td, jotta alempana voidaan luoda oikea toimitustapa selecti valikoidun varaston perusteella.
+			$vasen_sarake[$vasen] = "<td>".t("Toimitustapa").":</td><td>";
+			$vasen_sarake[$vasen] .= "";
 			$vasen_sarake[$vasen] .= "</td>";
 			$vasen++;
 
@@ -2611,6 +2581,48 @@
 				$vasen++;
 			}
 
+			$string = "<td>".t("Toimitustapa").":</td>";
+			$string .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
+
+			//Ekassa page reloadissa toimipaikkaa ei ole setattu. Asetetaan yhtiön oletustoimipaikka
+			if ($srow['yhtiotoimipaikka'] === null) {
+				$srow['yhtiotoimipaikka'] = 0;
+			}
+
+			$params = array(
+				'asiakas_tunnus' => $srow['liitostunnus'],
+				'lasku_toimipaikka' => $srow['yhtiotoimipaikka'],
+				'varasto_toimipaikka' => $selectoitu_varasto_toimipaikka
+			);
+			$toimitustavat = hae_toimitustavat($params);
+
+			foreach ($toimitustavat as $toimitustapa) {
+				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
+					continue;
+				}
+
+				if (in_array($toimitustapa['extranet'], array('','M')) or $toimitustapa['selite'] != $srow['toimitustapa']) {
+					$sel = "";
+					if ($toimitustapa["selite"] == $srow["toimitustapa"]) {
+						$sel = 'selected';
+					}
+
+					$string .= "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
+					$string .= t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");
+					$string .= "</option>";
+				}
+			}
+			$string .= "</select>";
+
+			// HUOM: jos varsinainen on disabloitu niin siirretään tieto hidddenissä
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='toimitustapa' value='$srow[toimitustapa]'>";
+			}
+
+			$string .= "</td>";
+
+			$vasen_sarake[2] = $string;
+			
 			// Ekotetan sarakkeet!
 			$rivicount = count($vasen_sarake) > count($oikea_sarake) ? count($vasen_sarake) : count($oikea_sarake);
 

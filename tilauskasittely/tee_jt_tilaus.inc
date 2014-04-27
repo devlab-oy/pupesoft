@@ -819,7 +819,7 @@
 								$hinta = laskuval($hinta, $isarivirow["vienti_kurssi"]);
 							}
 
-							if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+							if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
 								$siirtolista_query = "	SELECT tt.tunnus AS tunnus
 														FROM tilausrivin_lisatiedot AS tt
 														JOIN tilausrivi AS t

@@ -272,6 +272,23 @@
 				$tila = "";
 				unset($jatka);
 			}
+
+			if (isset($jatka) and $varasto != '0') {
+				$query = "	SELECT toimipaikka
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = {$varasto}";
+				$varasto_result = pupe_query($query);
+				$varaston_toimipaikka = mysql_fetch_assoc($varasto_result);
+				$toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($varaston_toimipaikka['toimipaikka']);
+				$toimipaikan_toimitustapojen_tunnukset = array_column($toimipaikan_toimitustavat, 'tunnus');
+				if (!in_array($toimipaikka, $toimipaikan_toimitustapojen_tunnukset)) {
+					echo "<font class='error'>".t("VIRHE: Varaston toimipaikalla ei ole valittua toimitustapaa")."!</font><br>";
+					$tee = "OTSIK";
+					$tila = "";
+					unset($jatka);
+				}
+			}
 		}
 
 		if ($yhtiorow["tilauksen_yhteyshenkilot"] == 'P' and ($tilausyhteyshenkilo == '' and $yhteyshenkilo_tilaus == '') and in_array($toim, array("PROJEKTI", "TARJOUS", "EXTTARJOUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "RIVISYOTTO", "REKLAMAATIO"))) {

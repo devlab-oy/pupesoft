@@ -860,6 +860,18 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "tee_automaattinen_siirto_myyntitilaukselta") {
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$ulos .= "<option value=''>".t("Ei k‰ytˆss‰")."</option>";
+		$ulos .= "<option value='K' {$sel}>".t("Tehd‰‰n siirtoja jos l‰hdevaraston myyt‰viss‰m‰‰r‰ riitt‰‰")."</option>";
+
+		$jatko = 0;
+	}
+
 	if ($fieldname == "tee_automaattinen_osto_myyntitilaukselta") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -904,6 +916,19 @@
 
 		$ulos .= "<option value = ''>".t("Myyntitilaukselta ei voi luoda siirtolistoja")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilaukselta voi luoda siirtolistoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if ($fieldname == "siirtolistat_vastaanotetaan_per_lahto") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Ei")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Kyll‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

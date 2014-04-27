@@ -1423,6 +1423,18 @@ else {
 
 				// Intrastat-tiedot
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
+
+				// Haetaan aina oikean toimipaikan yhtiön parametrit
+        		$query = "	SELECT toimipaikka
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus = {$varasto}";
+        		$_tp_res = pupe_query($query);
+        		$_tp_row = mysql_fetch_assoc($_tp_res);
+
+				$kukarow['toimipaikka'] = $_tp_row['yhtio_toimipaikka'];
+				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				// omalle_tilaukselle - tilauksia ei splitata muuten ku omiksi tilauksiksi (eli ei esim splitata varastoittain tai vyöhykkeittäin)
 				if ((	((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or
@@ -1638,6 +1650,9 @@ else {
 				}
 			}
 
+			$kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
+			$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
 			// Valitaan paras varasto ja tulostusalue alkuperäiselle osalla
 			asort($varasto_kpl_array);
 			asort($tulalue_kpl_array);
@@ -1760,36 +1775,41 @@ else {
 			}
 
 			// Varmistetaan, että jokaisella tilauksella on lähtö
-			if ($yhtiorow['kerayserat'] == 'K') {
-				foreach ($tilausnumerot as $tilausnumero) {
-					$query = "	SELECT *
-								FROM lasku
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus 	= '$tilausnumero'
-								AND toimitustavan_lahto = 0";
-					$result = pupe_query($query);
+			foreach ($tilausnumerot as $tilausnumero) {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus 	= '$tilausnumero'
+							AND toimitustavan_lahto = 0";
+				$result = pupe_query($query);
 
-					if (mysql_num_rows($result) > 0) {
-						$lahtorow = mysql_fetch_assoc($result);
+				if (mysql_num_rows($result) > 0) {
+					$lahtorow = mysql_fetch_assoc($result);
 
-						// Tilaustyyppi 2, eli varastotäydennys, siirretään aina yhden päivän eteenpäin
-						$eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
+					$kukarow['toimipaikka'] = $lahtorow['yhtio_toimipaikka'];
+					$yhtiorow_chk = hae_yhtion_parametrit($lahtorow['yhtio']);
 
-						$lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
+					if ($yhtiorow_chk['kerayserat'] != 'K') continue;
 
-						if ($lahdot !== FALSE) {
-							// Otetaan eka lähtö
-							$valitu_lahto = array_shift($lahdot);
+					// Tilaustyyppi 2, eli varastotäydennys, siirretään aina yhden päivän eteenpäin
+					$eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
 
-							$query = "	UPDATE lasku
-										SET toimitustavan_lahto = '$valitu_lahto[tunnus]'
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tunnus  = '$tilausnumero'";
-							$upresult = pupe_query($query);
-						}
+					$lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
+
+					if ($lahdot !== FALSE) {
+						// Otetaan eka lähtö
+						$valitu_lahto = array_shift($lahdot);
+
+						$query = "	UPDATE lasku
+									SET toimitustavan_lahto = '$valitu_lahto[tunnus]'
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus  = '$tilausnumero'";
+						$upresult = pupe_query($query);
 					}
 				}
 			}
+
+			$kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
 
 			foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
 				if ($laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and $_ulkoinen_jarjestelma == 'P') {
@@ -1856,6 +1876,9 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
+					$kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
+					$yhtiorow = hae_yhtion_parametrit($laskurow['yhtio']);
+
 					// Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
 					if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
 						$laskurow['tilausvahvistus'] = "";
@@ -1895,70 +1918,76 @@ else {
 
 			// katsotaan onko yhtään jt-riviä tilauksella
 			// jos jt-rivejä löytyy ja yhtiön parametreissä jt_email ei ole tyhjä, lähetetään jälkitoimitus-sähköposti jt-email-kentässä olevaan sähköpostiosoitteeseen
-			if ($yhtiorow['jt_email'] != '') {
+			foreach ($tilausnumerot as $tilausnumero) {
 
-				foreach ($tilausnumerot as $tilausnumero) {
+				$query = "	SELECT lasku.nimi,
+							lasku.nimitark,
+							lasku.ytunnus,
+							lasku.yhtio_toimipaikka,
+							asiakas.asiakasnro,
+							tilausrivi.tuoteno,
+							tilausrivi.hyllyalue,
+							tilausrivi.hyllynro,
+							tilausrivi.hyllyvali,
+							tilausrivi.hyllytaso,
+							tuote.nimitys,
+							tuote.tuotemerkki,
+							tuote.tahtituote,
+							tuote.hinnastoon,
+							tuote.status,
+							tilausrivi.jt+tilausrivi.varattu kpl
+							FROM lasku
+							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND
+												tilausrivi.otunnus = lasku.tunnus AND
+												tilausrivi.tyyppi != 'D' AND
+												tilausrivi.var = 'J' AND
+												tilausrivi.tyyppi in ('L','G') AND
+												tilausrivi.jt+tilausrivi.varattu > 0)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND lasku.tunnus = '$tilausnumero'";
+				$jt_chk_res = pupe_query($query);
 
-					$query = "	SELECT lasku.nimi,
-								lasku.nimitark,
-								lasku.ytunnus,
-								asiakas.asiakasnro,
-								tilausrivi.tuoteno,
-								tilausrivi.hyllyalue,
-								tilausrivi.hyllynro,
-								tilausrivi.hyllyvali,
-								tilausrivi.hyllytaso,
-								tuote.nimitys,
-								tuote.tuotemerkki,
-								tuote.tahtituote,
-								tuote.hinnastoon,
-								tuote.status,
-								tilausrivi.jt+tilausrivi.varattu kpl
-								FROM lasku
-								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND
-													tilausrivi.otunnus = lasku.tunnus AND
-													tilausrivi.tyyppi != 'D' AND
-													tilausrivi.var = 'J' AND
-													tilausrivi.tyyppi in ('L','G') AND
-													tilausrivi.jt+tilausrivi.varattu > 0)
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								AND lasku.tunnus = '$tilausnumero'";
-					$jt_chk_res = pupe_query($query);
+				if (mysql_num_rows($jt_chk_res) > 0) {
 
-					if (mysql_num_rows($jt_chk_res) > 0) {
+					$kutsu = "";
+					$subject = "";
+					$content_body = "";
 
-						$kutsu = "";
-						$subject = "";
-						$content_body = "";
+					$jt_chk_row = mysql_fetch_assoc($jt_chk_res);
 
-						$jt_chk_row = mysql_fetch_assoc($jt_chk_res);
+					$kukarow['toimipaikka'] = $jt_chk_row['yhtio_toimipaikka'];
+					$yhtiorow = hae_yhtion_parametrit($jt_chk_row['yhtio']);
 
-						$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-						$kutsu = "Jälkitoimitus";
-						$subject = t("Tuotetta jätetty jälkitoimitukseen");
-						$content_body = $yhtiorow['nimi']."\n".t("Asiakas", $kieli).": $jt_chk_row[nimi] $jt_chk_row[nimitark]\n\n";
-						$content_body .= t("Ytunnus", $kieli).": $jt_chk_row[ytunnus]\n";
-						$content_body .= t("Asiakasnumero", $kieli).": $jt_chk_row[asiakasnro]\n\n";
+					if ($yhtiorow['jt_email'] == '') continue;
 
-						mysql_data_seek($jt_chk_res, 0);
+					$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+					$kutsu = "Jälkitoimitus";
+					$subject = t("Tuotetta jätetty jälkitoimitukseen");
+					$content_body = $yhtiorow['nimi']."\n".t("Asiakas", $kieli).": $jt_chk_row[nimi] $jt_chk_row[nimitark]\n\n";
+					$content_body .= t("Ytunnus", $kieli).": $jt_chk_row[ytunnus]\n";
+					$content_body .= t("Asiakasnumero", $kieli).": $jt_chk_row[asiakasnro]\n\n";
 
-						while ($jt_chk_row = mysql_fetch_assoc($jt_chk_res)) {
-							$content_body .= "$jt_chk_row[kpl] kpl ".t("jälkitoimituksen tuotenumerosta")." $jt_chk_row[tuoteno] ".t("tilauksella")." $tilausnumero\n\n";
-							$content_body .= t("Tuotepaikka").": $jt_chk_row[hyllyalue]-$jt_chk_row[hyllynro]-$jt_chk_row[hyllyvali]-$jt_chk_row[hyllyvtaso]\n\n";
-							$content_body .= t("Nimitys").": $jt_chk_row[nimitys]\n";
-							$content_body .= t("Tuotemerkki").": $jt_chk_row[tuotemerkki]\n";
-							$content_body .= t("Tahtituote").": $jt_chk_row[tahtituote]\n";
-							$content_body .= t("Hinnastoon").": $jt_chk_row[hinnastoon]\n";
-							$content_body .= t("Status").": $jt_chk_row[status]\n\n\n";
-						}
+					mysql_data_seek($jt_chk_res, 0);
 
-						mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
-						echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
+					while ($jt_chk_row = mysql_fetch_assoc($jt_chk_res)) {
+						$content_body .= "$jt_chk_row[kpl] kpl ".t("jälkitoimituksen tuotenumerosta")." $jt_chk_row[tuoteno] ".t("tilauksella")." $tilausnumero\n\n";
+						$content_body .= t("Tuotepaikka").": $jt_chk_row[hyllyalue]-$jt_chk_row[hyllynro]-$jt_chk_row[hyllyvali]-$jt_chk_row[hyllyvtaso]\n\n";
+						$content_body .= t("Nimitys").": $jt_chk_row[nimitys]\n";
+						$content_body .= t("Tuotemerkki").": $jt_chk_row[tuotemerkki]\n";
+						$content_body .= t("Tahtituote").": $jt_chk_row[tahtituote]\n";
+						$content_body .= t("Hinnastoon").": $jt_chk_row[hinnastoon]\n";
+						$content_body .= t("Status").": $jt_chk_row[status]\n\n\n";
 					}
+
+					mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
+					echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
 				}
 			}
+
+			$kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
+			$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 		}
 	} // end jos yksikin rivi kerätty else haara
 }

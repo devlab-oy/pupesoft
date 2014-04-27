@@ -2043,6 +2043,13 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'toimitustapa') {
+			if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavat_toimipaikat%", "", "OK")) !== FALSE) {
+				echo "<br>";
+				echo "<iframe id='toimitustavat_iframe' name='toimitustavat_iframe' src='yllapito.php?toim=toimitustavat_toimipaikat&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; height: 300px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		if ($trow["tunnus"] > 0 and $errori == "" and $from != "yllapito" and $toim == "tuote" and $laji != "V") {
 
 			$lukitse_avaimeen = urlencode($tuoteno);
@@ -2123,6 +2130,7 @@
 			$toim == "yhteensopivuus_tuote" or
 			$toim == "yhteensopivuus_tuote_lisatiedot" or
 		   ($toim == "toimitustapa" and $poistolukko == "") or
+			$toim == "toimitustavat_toimipaikat" or
 			$toim == "kirjoittimet" or
 			$toim == "hinnasto" or
 			$toim == "rahtimaksut" or

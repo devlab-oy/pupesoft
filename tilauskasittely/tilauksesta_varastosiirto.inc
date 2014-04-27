@@ -22,7 +22,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 		$myyntitilaus				 = hae_lasku($myyntitilaus_tunnus);
 		$myyntitilaus['tilausrivit'] = hae_tilausrivit($myyntitilaus_tunnus, $varastosiirto_tyyppi);
 
-		if ($varastosiirto_tyyppi == 'N') {
+		if ($varastosiirto_tyyppi == 'K') {
 			$ok = kirjanpidollinen_varastosiirto($myyntitilaus);
 		}
 		else if ($varastosiirto_tyyppi == 'N') {

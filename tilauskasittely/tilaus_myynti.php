@@ -1748,6 +1748,10 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 		echo "<font class='message'>".t("Reklamaatio: %s kuitattu vastaanotetuksi", '', $tilausnumero).".</font><br><br>";
 	}
 
+	require('tilauksesta_varastosiirto.inc');
+
+	tilauksesta_varastosiirto($laskurow['tunnus'], 'P');
+
 	$tee				= '';
 	$tilausnumero		= '';
 	$laskurow			= '';

@@ -3590,6 +3590,22 @@ if ($tee == '') {
 		}
 	}
 
+	if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == 'F' and $laskurow['sisviesti3'] != '') {
+
+		echo "<br>";
+
+		echo "<table>";
+		echo "<tr><th>",t("Sisäinen viesti"),"</th></tr>";
+
+		foreach (explode("\n", $laskurow['sisviesti3']) as $_sisviesti3) {
+			$_sisviesti3 = str_replace("|||", " ", $_sisviesti3);
+			echo "<tr><td>{$_sisviesti3}</td></tr>";
+		}
+
+		echo "</table>";
+
+	}
+
 	echo "<br>";
 
 	// Tarkastetaan onko asiakas myyntikiellossa

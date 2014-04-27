@@ -400,7 +400,7 @@
 				$tulostetaan = "OK";
 			}
 
-			if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+			if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'

@@ -31,8 +31,6 @@ if ($php_cli) {
   $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 
   $aja = 'run';
-
-  echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]\n";
 }
 else {
   require ("inc/parametrit.inc");
@@ -53,13 +51,19 @@ else {
 }
 
 function is_log($str) {
-  return date("d.m.Y @ G:i:s") . ": $str\n";
+  global $php_cli;
+
+  $str = date("d.m.Y @ G:i:s") . ": $str\n";
+
+  if ($php_cli) echo $str;
+
+  return $str;
 }
 
 # Ei query debuggia, vie turhaa muistia.
 unset($pupe_query_debug);
 
-$iltasiivo = "";
+$iltasiivo = is_log("Iltasiivo $yhtiorow[nimi]");
 $laskuri   = 0;
 
 // poistetaan kaikki tuotteen_toimittajat liitokset joiden toimittaja on poistettu
@@ -682,7 +686,7 @@ if ($myyntitili > 0) {
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
 
-  $query = "SELECT tuotepaikat.*
+  $query = "SELECT tuotepaikat.tunnus
             FROM tuotepaikat
             JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tuotepaikat.yhtio
               AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue
@@ -693,6 +697,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
             WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
             AND tuotepaikat.saldo = 0
             AND tuotepaikat.oletus = ''
+            AND tuotepaikat.poistettava != 'D'
             AND tuotepaikat.inventointilista_aika='0000-00-00 00:00:00'";
   $tuotepaikat = pupe_query($query);
 
@@ -718,12 +723,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
 
-  $query = "SELECT tuotepaikat.tunnus,
-            tuotepaikat.tuoteno,
-            tuotepaikat.hyllyalue,
-            tuotepaikat.hyllynro,
-            tuotepaikat.hyllytaso,
-            tuotepaikat.hyllyvali
+  $query = "SELECT tuotepaikat.tunnus
             FROM tuotepaikat
             JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
             AND varastopaikat.alkuhyllyalue = tuotepaikat.hyllyalue
@@ -733,34 +733,17 @@ if ($yhtiorow['kerayserat'] == 'K') {
             AND tuotepaikat.hyllytaso = 0
             AND tuotepaikat.hyllyvali = 0
             AND tuotepaikat.oletus = ''
+            AND tuotepaikat.poistettava != 'D'
             GROUP BY 1";
   $result = pupe_query($query);
 
   while ($poistettava_tuotepaikka = mysql_fetch_assoc($result)) {
-
-    # Katsotaan onko tällä paikalla avoimia tilausrivejä (myynti, osto, siirtolistat)
-    $query = "SELECT tunnus
-              FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$poistettava_tuotepaikka['tuoteno']}'
-              AND hyllyalue = '{$poistettava_tuotepaikka['hyllyalue']}'
-              AND hyllynro = '{$poistettava_tuotepaikka['hyllynro']}'
-              AND hyllytaso = '{$poistettava_tuotepaikka['hyllytaso']}'
-              AND hyllyvali = '{$poistettava_tuotepaikka['hyllyvali']}'
-              AND laskutettuaika = '0000-00-00'
-              AND tyyppi IN ('L','O','G')";
-    $avoinrivi_result = pupe_query($query);
-
-    // Ei poisteta jos avoimia
-    if (mysql_num_rows($avoinrivi_result) > 0) {
-      continue;
-    }
-
     # Merkataan paikka poistettavaksi
     $query = "UPDATE tuotepaikat
               SET poistettava = 'D'
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = {$poistettava_tuotepaikka['tunnus']}";
+              AND tunnus = {$poistettava_tuotepaikka['tunnus']}
+              AND saldo = 0";
     $result2 = pupe_query($query);
     $poistettu++;
   }
@@ -786,6 +769,24 @@ $poistettu = 0;
 
 // Loopataan poistettavat tuotepaikat läpi
 while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
+
+  # Katsotaan onko tällä paikalla avoimia tilausrivejä (myynti, osto, siirtolistat)
+  $query = "SELECT tunnus
+            FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuotepaikka['tuoteno']}'
+            AND hyllyalue = '{$tuotepaikka['hyllyalue']}'
+            AND hyllynro = '{$tuotepaikka['hyllynro']}'
+            AND hyllytaso = '{$tuotepaikka['hyllytaso']}'
+            AND hyllyvali = '{$tuotepaikka['hyllyvali']}'
+            AND laskutettuaika = '0000-00-00'
+            AND tyyppi IN ('L','O','G')";
+  $avoinrivi_result = pupe_query($query);
+
+  // Ei poisteta jos avoimia
+  if (mysql_num_rows($avoinrivi_result) > 0) {
+    continue;
+  }
 
   // Poistetaan tuotepaikka
   $query = "DELETE FROM tuotepaikat
@@ -824,8 +825,7 @@ if ($poistettu > 0) {
   $iltasiivo .= is_log("Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.");
 }
 
-echo $iltasiivo;
-echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]. Done!\n\n";
+$iltasiivo .= is_log("Iltasiivo $yhtiorow[nimi]. Done!");
 
 if ($iltasiivo != "") {
   if (isset($iltasiivo_email) and $iltasiivo_email == 1) {
@@ -839,6 +839,7 @@ if ($iltasiivo != "") {
 }
 
 if (!$php_cli) {
+  echo $iltasiivo;
   echo "</pre>";
   require('inc/footer.inc');
 }

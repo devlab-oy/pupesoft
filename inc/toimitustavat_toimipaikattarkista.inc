@@ -13,7 +13,7 @@ if (!function_exists("toimitustavat_toimipaikattarkista")) {
 			);
 			$onko_jo_kannassa	 = array_find($toimitustavan_toimipaikat, $values);
 
-			if (!empty($onko_jo_kannassa)) {
+			if (!empty($onko_jo_kannassa) and $tunnus != $onko_jo_kannassa[0]['toimitustavat_toimipaikat_tunnus']) {
 				$virhe[$i] = t("Toimitustapa toimipaikka kombinaatio on jo tietokannassa");
 			}
 

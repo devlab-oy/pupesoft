@@ -2045,7 +2045,8 @@
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'toimitustapa') {
 			if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavat_toimipaikat%", "", "OK")) !== FALSE) {
-				echo "<iframe id='toimitustavat_iframe' name='toimitustavat_iframe' src='yllapito.php?toim=toimitustavat_toimipaikat&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<br>";
+				echo "<iframe id='toimitustavat_iframe' name='toimitustavat_iframe' src='yllapito.php?toim=toimitustavat_toimipaikat&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; height: 300px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
 

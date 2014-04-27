@@ -57,7 +57,20 @@
 	// JT-selaus päivitysoikeus, joko JT-selaus päivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivejä
 	$jtselaus_paivitys_oikeus = FALSE;
 
-	if ($oikeurow['paivitys'] == '1' or ((strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "verkkolasku-in.php") !== FALSE) and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
+	if (
+			$oikeurow['paivitys'] == '1'
+			or (
+					(
+					strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE
+					or strpos($_SERVER['SCRIPT_NAME'], "verkkolasku-in.php") !== FALSE
+					or strpos($_SERVER['SCRIPT_NAME'], "vastaanota.php") !== FALSE
+					)
+					and (
+							in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A'))
+							or in_array($yhtiorow["automaattinen_jt_toimitus_siirtolista"], array('J', 'S', 'K'))
+						)
+				)
+		) {
 		$jtselaus_paivitys_oikeus = TRUE;
 	}
 
@@ -1053,7 +1066,7 @@
 						}
 					}
 
-					if ($mista_tullaan == 'MYYNTITILAUKSELTA' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $onko_suoratoimi == '') {
+					if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and $onko_suoratoimi == '') {
 						$query = "	SELECT t.tunnus AS siirtolistarivi_tunnus
 									FROM tilausrivin_lisatiedot AS tl
 									JOIN tilausrivi AS t

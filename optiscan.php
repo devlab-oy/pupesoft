@@ -211,15 +211,27 @@
 						$otunnukset = implode(",", $lisatyt_tilaukset);
 						$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
 
-						// tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
-						$query = "	UPDATE lasku SET
-									tila 	  = 'L',
-									lahetepvm = now(),
-									kerayslista = '{$kerayslistatunnus}'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus in ({$otunnukset})";
-						$upd_res = pupe_query($query);
-
+						$otunnukset_temp = explode(',', $otunnukset);
+						foreach ($otunnukset_temp as $o) {
+							$lasku_temp = hae_lasku($o);
+							if ($lasku_temp['tila'] == 'G') {
+								$query = "	UPDATE lasku SET
+											lahetepvm = now(),
+											kerayslista = '{$kerayslistatunnus}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = {$o}";
+							}
+							else {
+								$query = "	UPDATE lasku SET
+											tila 	  = 'L',
+											lahetepvm = now(),
+											kerayslista = '{$kerayslistatunnus}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = {$o}";
+							}
+							pupe_query($query);
+						}
+						
 						// Haetaan ker‰tt‰v‰t rivit
 						$query = "	SELECT min(nro) nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
 									FROM kerayserat

@@ -704,38 +704,64 @@
 		if ((mysql_num_rows($jtoikeudetres) <> 0 and $yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "") or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
 			$jtoikeudetrow  = mysql_fetch_assoc($jtoikeudetres);
 			$jtrivit = array();
-			$varastosta = '';
+			$jtrivit_paikat	 = array();
+			$varastoon = '';
+			$automaaginen = 'tosi_automaaginen';
 
 			if ($yhtiorow['automaattinen_jt_toimitus_siirtolista'] == 'S') {
+
+				$automaaginen = 'vakisin';
+
 				//Haetaan JT-rivit jotka m‰pp‰ytyv‰t siirtolistariveihin
 				$query = "	SELECT tilausrivin_lisatiedot.tilausrivilinkki AS jtrivi,
-							tilausrivi.hyllyalue,
-							tilausrivi.hyllynro
+							tilausrivin_lisatiedot.kohde_hyllyalue hyllyalue,
+							tilausrivin_lisatiedot.kohde_hyllynro hyllynro,
+							tapahtuma.tunnus AS tapahtumatunnus
 							FROM tilausrivin_lisatiedot
 							JOIN tilausrivi
 							ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
 								AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus )
+							JOIN tapahtuma
+							ON ( tapahtuma.yhtio = tilausrivin_lisatiedot.yhtio
+								AND tapahtuma.laji = 'siirto'
+								AND tapahtuma.rivitunnus = tilausrivin_lisatiedot.tilausrivitunnus
+								AND tapahtuma.kpl > 0)
 							WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivin_lisatiedot.tilausrivitunnus IN (".implode(',', $tunnus).")";
 				$varastoon_result = pupe_query($query);
 
 				while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
-					// Mitk‰ suoratoimitukset valmistettiin t‰ll‰ keikalla
+					// Mitk‰ myyntitilausrivit vastaanotettiin t‰ll‰ siirtolistalla
 					$jtrivit[$varastoon_row["jtrivi"]] = $varastoon_row["jtrivi"];
-
-					$varastosta = array(kuuluukovarastoon($varastoon_row['hyllyalue'], $varastoon_row['hyllynro']));
+					// Katotaan mille paikalle n‰‰ meni, jotta myyntitilaus voidaan laukasta t‰lt‰ paikalta
+					$jtrivit_paikat[$varastoon_row["jtrivi"]] = $varastoon_row["tapahtumatunnus"];
+					
+					// haetaan $varastoon vain kerran
+					if ($varastoon == '') {
+						$varastoon = array(kuuluukovarastoon($varastoon_row['hyllyalue'], $varastoon_row['hyllynro']));
+					}
 				}
 			}
+			else {
+				// kohdevarasto voi olla siirtolistalla vain yksi varasto, joten teh‰‰n t‰‰ loopin (~388) ulkopuolella yhden kerran (viimeinen rivi)
+				$query = "	SELECT tilausrivin_lisatiedot.kohde_hyllyalue hyllyalue,
+							tilausrivin_lisatiedot.kohde_hyllynro hyllynro
+							FROM tilausrivin_lisatiedot
+							WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivin_lisatiedot.tilausrivitunnus = '$tun'";
+				$varastoon_result = pupe_query($query);
+				$varastoon_row = mysql_fetch_assoc($varastoon_result);
+				$varastoon = array(kuuluukovarastoon($varastoon_row['hyllyalue'], $varastoon_row['hyllynro']));
+			}
 
-			$varastosta = array(kuuluukovarastoon($tilausrivirow['hyllyalue'], $tilausrivirow['hyllynro']));
-
-			jt_toimita("", "", $varastosta, $jtrivit, array(), "tosi_automaaginen", "JATKA", '', '', '', '');
+			jt_toimita("", "", $varastoon, $jtrivit, $jtrivit_paikat, $automaaginen, "JATKA", '', '', '', '');
 
 			if ( ($jtoikeudetrow["paivitys"] == 1
 					and ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "T" or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "S")
 				)
 				or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
 				jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
+
 			}
 		}
 
@@ -938,8 +964,12 @@
 		$lahdotrajaus = "";
 
 		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' and !empty($haku)) {
+
 			$query = "	SELECT GROUP_CONCAT(DISTINCT toimitustavan_lahto) lahto
 						FROM lasku
+						LEFT JOIN lahdot
+						ON ( lahdot.yhtio = lasku.yhtio
+							AND lahdot.tunnus = lasku.toimitustavan_lahto )
 						WHERE tila = 'G'
 						{$haku}
 						{$myytili}
@@ -954,7 +984,8 @@
 			}
 		}
 
-		$query = "	SELECT IF(lasku.siirtolistan_vastaanotto != 0, lasku.siirtolistan_vastaanotto, IF(lasku.toimitustavan_lahto != 0, lasku.toimitustavan_lahto, lasku.clearing)) lahto_tai_vastaanotto,
+		$query = "	SELECT IF(lasku.siirtolistan_vastaanotto != 0, lasku.siirtolistan_vastaanotto,  IF(lasku.toimitustavan_lahto != 0, lasku.toimitustavan_lahto, lasku.clearing)) lahto_tai_vastaanotto,
+					lahdot.aktiivi AS lahdon_aktiivi,
 					GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
 					FROM tilausrivi
 					JOIN lasku on lasku.yhtio = tilausrivi.yhtio
@@ -964,11 +995,14 @@
 						{$lahdotrajaus}
 						$myytili
 					LEFT JOIN varastopaikat ON lasku.clearing=varastopaikat.tunnus
+					LEFT JOIN lahdot
+						ON ( lahdot.yhtio = lasku.yhtio
+							AND lahdot.tunnus = lasku.toimitustavan_lahto )
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.keratty != ''
 					$varasto
-					GROUP BY 1";
+					GROUP BY 1,2";
 		$tilre = pupe_query($query);
 
 		$selectlisa = $toim == "" ? ", viesti AS viite" : "";
@@ -1026,6 +1060,12 @@
 		$ed_lahto = $ed_vastaanottonro = null;
 
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
+
+			if ($yhtiorow['siirtolistan_tulostustapa'] == 'U' and !is_null($tilrow['lahdon_aktiivi']) and $tilrow['lahdon_aktiivi'] != 'S') {
+				//Jos siirtolistan_tulostustapa = Siirtolistat tulostetaan ker‰yserien kautta
+				//Ei n‰ytet‰ siirtolistoja, joihin on liitetty aukioleva l‰htˆ
+				continue;
+			}
 
 			// etsit‰‰n sopivia tilauksia
 			$query = "	SELECT varasto,

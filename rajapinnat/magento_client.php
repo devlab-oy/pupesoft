@@ -992,35 +992,20 @@ class MagentoClient {
 	public function lisaa_asiakkaat(array $dnsasiakas) {
 
 		$this->log("Lisätään asiakkaita");
-
 		// Asiakas countteri
 		$count = 0;
 
-		/*try {
-			// Tarvitaan kategoriat
-			$category_tree = $this->getCategories();
-
-			// Populoidaan attributeSet
-			$this->_attributeSet = $this->getAttributeSet();
-
-			// Haetaan storessa olevat tuotenumerot
-			$skus_in_store = $this->getProductList(true);
-		}
-		catch (Exception $e) {
-			$this->_error_count++;
-			$this->log("Virhe! Asiakkaiden lisäyksessä", $e);
-			return;
-		}*/
-
 		// Lisätään asiakkaat ja osoitteet erissä
 		foreach ($dnsasiakas as $asiakas) {
-
 			$asiakas_data = array(
+					'email'					=> $asiakas['yhenk_email'],
 					'firstname'				=> $asiakas['nimi'],
 					'lastname'				=> $asiakas['nimi'],
-					'website_id'			=> SALASANAT.INC,
-					'store_id'				=> SALASANAT.INC,
-					'group_id'				=> $asiakas['ryhma'],
+					'website_id'			=> $asiakas['magento_website_id'],
+					'store_id'				=> $asiakas['magento_store_id'],
+					'taxvat'				=> $asiakas['ytunnus'],
+					//'group_id'				=> 1,
+					//'group_id'				=> $asiakas['aleryhma'],
 			);
 			
 			$laskutus_osoite_data = array(
@@ -1030,16 +1015,20 @@ class MagentoClient {
 					'postcode'				=> $asiakas['laskutus_postino'],
 					'city'					=> $asiakas['laskutus_postitp'],
 					'country_id'			=> $asiakas['maa'],
+					'telephone'				=> '111-2222',
+					'company'				=> $asiakas['nimi'],
 					'is_default_billing'  	=> true,
 			);
 			
-			$toimitus_osoite_data =array(
+			$toimitus_osoite_data = array(
 					'firstname'				=> $asiakas['toimitus_nimi'],
 					'lastname'				=> $asiakas['toimitus_nimi'],
 					'street'				=> array($asiakas['toimitus_osoite']),
 					'postcode'				=> $asiakas['toimitus_postino'],
 					'city'					=> $asiakas['toimitus_postitp'],
 					'country_id'			=> $asiakas['maa'],
+					'telephone'				=> '111-3333',
+					'company'				=> $asiakas['nimi'],
 					'is_default_shipping' => true
 			);
 
@@ -1055,9 +1044,15 @@ class MagentoClient {
 						        $asiakas_data
 						));
 
-					$this->log("Asiakas '{$asiakas['tunnus']}' lisätty " . print_r($asiakas_data, true));
-					
-					
+					$this->log("Asiakas '{$asiakas['tunnus']}' / {$result} lisätty " . print_r($asiakas_data, true));
+
+					// Päivitetään magento_id
+					$query = "	UPDATE asiakkaan_avainsanat
+								SET tarkenne = '{$result}'
+								WHERE yhtio = '{$asiakas['yhtio']}'
+								AND liitostunnus = '{$asiakas['tunnus']}'
+								AND avainsana = 'magento_tunnus'";
+					pupe_query($query);
 				}
 				catch (Exception $e) {
 					$this->_error_count++;
@@ -1075,16 +1070,52 @@ class MagentoClient {
 						        $asiakas_data
 					));
 
-					$this->log("Asiakas '{$asiakas['tunnus']}' päivitetty " . print_r($asiakas_data, true));
+					$this->log("Asiakas '{$asiakas['tunnus']}' / {$asiakas['magento_id']} päivitetty " . print_r($asiakas_data, true));
 				}
 				catch (Exception $e) {
 					$this->_error_count++;
 					$this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' päivitys epäonnistui " . print_r($asiakas_data, true), $e);
 				}
 			}
-			// Deletoidaan ensin kaikki asiakkaan osoitetiedot
-			// Lisätään toimitus/laskutus osoitteet
-			
+
+			// Haetaan ensin asiakkaan laskutus- ja toimitusosoitteet
+			$address_array = $this->_proxy->call(
+				$this->_session,
+				'customer_address.list',
+				 $asiakas['magento_id']);
+			// Ja poistetaan ne
+			if (count($address_array) > 0) {
+				foreach ($address_array as $address) {
+					$result = $this->_proxy->call(
+						$this->_session, 'customer_address.delete', $address['customer_address_id']);
+				}
+			}
+
+			if (isset($laskutus_osoite_data['firstname'])) {
+				try {
+					// Lisätään laskutusosoite
+					$result = $this->_proxy->call(
+						$this->_session,
+						'customer_address.create',
+						array('customerId' => $asiakas['magento_id'], 'addressdata' => ($laskutus_osoite_data)));
+				}
+				catch (Exception $e) {
+					$this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' laskutusosoitteen päivitys epäonnistui " . print_r($laskutus_osoite_data, true), $e);
+				}
+			}
+
+			if (isset($toimitus_osoite_data['firstname'])) {
+				try {
+					// Lisätään toimitusosoite
+					$result = $this->_proxy->call(
+						$this->_session,
+						'customer_address.create',
+						array('customerId' => $asiakas['magento_id'], 'addressdata' => ($toimitus_osoite_data)));
+				}
+				catch (Exception $e) {
+					$this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' toimitusosoitteen päivitys epäonnistui " . print_r($toimitus_osoite_data, true), $e);
+				}
+			}
 			// Lisätään asiakas countteria
 			$count++;
 
@@ -1092,7 +1123,7 @@ class MagentoClient {
 
 		$this->log("$count asiakasta päivitetty");
 
-		// Palautetaan pävitettyjen tuotteiden määrä
+		// Palautetaan pävitettyjen asiakkaiden määrä
 		return $count;
 	}
 	/**

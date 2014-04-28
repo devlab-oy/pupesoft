@@ -337,7 +337,8 @@
 	}
 
 	echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
-
+//KISSA - poist
+$muutoslisa = '';
 	// Haetaan kaikki asiakkaat
 	// Asiakassiirtoa varten poimitaan myös lisäkenttiä asiakkaan_avainsanat ja yhteyshenkilo-tauluista
 	$query = "	SELECT asiakas.*,
@@ -349,6 +350,8 @@
 				LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
 				WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
 				AND asiakas.laji != 'P'
+				and yhteyshenkilo.rooli = 'magento'
+				and yhteyshenkilo.email != ''
 				$muutoslisa";
 	$res = pupe_query($query);
 
@@ -362,11 +365,16 @@
 								'aleryhma'	=> $row["ryhma"],
 								'asiakasnro'=> $row["asiakasnro"],
 								'ytunnus'	=> $row["ytunnus"],
+								'tunnus'	=> $row["tunnus"],
+								'maa'		=> $row["maa"],
+								
+								'magento_website_id'=> $magento_website_id,
+								'magento_store_id'	=> $magento_store_id,
 
-								'toim_nimi'		=> $row["toim_nimi"],
-								'toim_osoite'	=> $row["toim_osoite"],
-								'toim_postino'	=> $row["toim_postino"],
-								'toim_postitp'	=> $row["toim_postitp"],
+								'toimitus_nimi'		=> $row["toim_nimi"],
+								'toimitus_osoite'	=> $row["toim_osoite"],
+								'toimitus_postino'	=> $row["toim_postino"],
+								'toimitus_postitp'	=> $row["toim_postitp"],
 
 								'laskutus_nimi'		=> $row["laskutus_nimi"],
 								'laskutus_osoite'	=> $row["laskutus_osoite"],
@@ -631,6 +639,13 @@
 			// HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
 			$count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
 			echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
+		}
+
+		// Päivitetaan magento-asiakkaat ja osoitetiedot kauppaan
+		if (count($dnsasiakas) > 0) {
+			echo date("d.m.Y @ G:i:s")." - Päivitetään asiakkaat\n";
+			$count = $magento_client->lisaa_asiakkaat($dnsasiakas);
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";
 		}
 
 		$tuote_export_error_count = $magento_client->getErrorCount();

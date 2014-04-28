@@ -160,10 +160,11 @@
 						WHERE tunnus = '$sarjatunnus'";
 			$sarres = pupe_query($query);
 			$sarrow = mysql_fetch_assoc($sarres);
+			
+			$era_kpl = (float) str_replace(",", ".", $era_kpl);
 
 			if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
-				$era_kpl = (float) str_replace(",", ".", $era_kpl);
-
+				
 				$query = "	UPDATE sarjanumeroseuranta
 							SET lisatieto 	= '$lisatieto',
 							sarjanumero 	= '$sarjanumero',
@@ -184,7 +185,9 @@
 							muuttaja		= '$kukarow[kuka]',
 							muutospvm		= now(),
 							takuu_alku		= '$tvva-$tkka-$tppa',
-							takuu_loppu		= '$tvvl-$tkkl-$tppl'
+							takuu_loppu		= '$tvvl-$tkkl-$tppl',
+							era_kpl			= '$era_kpl',
+							parasta_ennen 	= '$pevva-$pekka-$peppa'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$sarjatunnus'";
 				$sarjares = pupe_query($query);

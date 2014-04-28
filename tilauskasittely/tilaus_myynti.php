@@ -1431,6 +1431,11 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		require("tyomaarays/tyomaarays.inc");
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO")) {
+		if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'C' and $laskurow['alatila'] == '' and empty($tulosta)) {
+			require('tilauksesta_varastosiirto.inc');
+
+			tilauksesta_varastosiirto($laskurow['tunnus'], 'P');
+		}
 		// Työmääräys valmis
 		require("tyomaarays/tyomaarays.inc");
 	}
@@ -1560,7 +1565,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
 				require('tilauksesta_varastosiirto.inc');
 
-				tilauksesta_varastosiirto($laskurow['tunnus']);
+				tilauksesta_varastosiirto($laskurow['tunnus'], 'N');
 			}
 
 			if ($kukarow["extranet"] != "") {
@@ -1742,6 +1747,10 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 	else {
 		echo "<font class='message'>".t("Reklamaatio: %s kuitattu vastaanotetuksi", '', $tilausnumero).".</font><br><br>";
 	}
+
+	require('tilauksesta_varastosiirto.inc');
+
+	tilauksesta_varastosiirto($laskurow['tunnus'], 'P');
 
 	$tee				= '';
 	$tilausnumero		= '';
@@ -3742,7 +3751,7 @@ if ($tee == '') {
 	}
 
 	//Muokataan tilausrivin lisätietoa
-	if ($kukarow["extranet"] == "" and ($tila == "LISATIETOJA_RIVILLE" or $tila == "ASPOSITIO_RIVILLE") and (int) $kukarow["kesken"] > 0) {
+	if ($kukarow["extranet"] == "" and ($tila == "LISATIETOJA_RIVILLE" or $tila == "ASPOSITIO_RIVILLE" or $tila == "PALAUTUSVARASTO") and (int) $kukarow["kesken"] > 0) {
 
 		$query = "	SELECT tilausrivi.tunnus
 					FROM tilausrivi use index (yhtio_otunnus)
@@ -3757,8 +3766,11 @@ if ($tee == '') {
 		if ($tila == "LISATIETOJA_RIVILLE") {
 			$updlisa = "positio = '$positio',";
 		}
-		else {
+		else if ($tila == "ASPOSITIO_RIVILLE") {
 			$updlisa = "asiakkaan_positio = '$asiakkaan_positio',";
+		}
+		else {
+			$updlisa = "palautus_varasto = '{$palautus_varasto}',";
 		}
 
 		while ($lapsi = mysql_fetch_assoc($lapsires)) {
@@ -4601,7 +4613,13 @@ if ($tee == '') {
 		$tpares = pupe_query($query);
 
 		if (mysql_num_rows($tpares) > 0) {
-			$headerit .= "<th>".t("Palauta toimittajalle")."</th>";
+			$siirtovarastot = hae_mahdolliset_siirto_varastot(array($laskurow['varasto']));
+			if (!empty($siirtovarastot)) {
+				$headerit .= "<th>".t("Palauta toimittajalle")."<br/>".t('Palauta varastoon')."</th>";
+			}
+			else {
+				$headerit .= "<th>".t("Palauta toimittajalle")."</th>";
+			}
 			$sarakkeet++;
 
 			$toimpalautusasiakkat = "";
@@ -6038,11 +6056,19 @@ if ($tee == '') {
 										ORDER BY sorttaus";
 							$abures = pupe_query($query);
 
+							$toimittajat = array();
 							if (mysql_num_rows($abures) > 0) {
+								while ($trrow = mysql_fetch_assoc($abures)) {
+									$toimittajat[] = array(
+										'tunnus' => $trrow['tunnus'],
+										'nimi' => $trrow['nimi']
+									);
+								}
+							}
 
+							if (!empty($toimittajat)) {
 								$disalisa = "";
-
-								if ($row["asiakkaan_positio"] < 0) {
+								if ($row["asiakkaan_positio"] < 0 or $row['palautus_varasto'] > 0) {
 									$disalisa = "DISABLED";
 								}
 
@@ -6065,13 +6091,57 @@ if ($tee == '') {
 
 								$paltoimiulos .= "<option value=''>".t("Ei palauteta")."</option>";
 
-								while ($trrow = mysql_fetch_assoc($abures)) {
+								foreach ($toimittajat as $toimittaja) {
 									$sel = "";
-									if ($trrow["tunnus"]==abs($row["asiakkaan_positio"])) $sel = 'selected';
-									$paltoimiulos .= "<option value='$trrow[tunnus]' $sel>$trrow[nimi]</option>";
+									if ($toimittaja["tunnus"] == abs($row["asiakkaan_positio"])) {
+										$sel = 'selected';
+									}
+									$paltoimiulos .= "<option value='{$toimittaja['tunnus']}' {$sel}>{$toimittaja['nimi']}</option>";
 								}
 
-								$paltoimiulos .= "</select></form>";
+								$paltoimiulos .= "</select>";
+								$paltoimiulos .= "</form>";
+
+								$disalisa = "";
+								if ($row["asiakkaan_positio"] > 0) {
+									$disalisa = "DISABLED";
+								}
+
+							}
+
+							$lahde_kohde_varastot = hae_mahdolliset_siirto_varastot(array($laskurow['varasto']));
+
+							if (!empty($lahde_kohde_varastot) and saako_palauttaa_siirtovarastoon($row['tuoteno'])) {
+
+								$paltoimiulos .= "<br/>";
+								$paltoimiulos .= "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='lisatietoja'>
+													<input type='hidden' name='toim' value='$toim'>
+													<input type='hidden' name='lopetus' value='$lopetus'>
+													<input type='hidden' name='ruutulimit' value='$ruutulimit'>
+													<input type='hidden' name='projektilla' value='$projektilla'>
+													<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+													<input type='hidden' name='mista' value = '$mista'>
+													<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+													<input type='hidden' name='ale_peruste' value = '$row[ale_peruste]'>
+													<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
+													<input type='hidden' name='menutila' value='$menutila'>
+													<input type='hidden' name='tila' value = 'PALAUTUSVARASTO'>
+													<input type='hidden' name='orig_tila' value='$orig_tila'>
+													<input type='hidden' name='orig_alatila' value='$orig_alatila'>
+													<select name='palautus_varasto' onchange='submit();' $state $disalisa>";
+
+								$paltoimiulos .= "<option value=''>".t("Ei palauteta")."</option>";
+
+								foreach ($lahde_kohde_varastot as $lahde_kohde_varasto) {
+									$sel = "";
+									if ($lahde_kohde_varasto["lahde_tunnus"] == abs($row["palautus_varasto"])) {
+										$sel = 'selected';
+									}
+									$paltoimiulos .= "<option value='{$lahde_kohde_varasto['lahde_tunnus']}' {$sel}>".t('Varasto').": {$lahde_kohde_varasto['lahde_nimi']}</option>";
+								}
+
+								$paltoimiulos .= "</select>";
+								$paltoimiulos .= "</form>";
 							}
 							else {
 								$paltoimiulos = t("Ei voida palauttaa");

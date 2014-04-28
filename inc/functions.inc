@@ -27092,7 +27092,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
 			require('tilauskasittely/tilauksesta_varastosiirto.inc');
 
 			//Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
-			tilauksesta_varastosiirto($myyntitilaus_tunnus, true);
+			tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K');
 		}
 	}
 }
@@ -27147,15 +27147,15 @@ if (!function_exists('luo_tapahtuma')) {
 					tuoteno = '{$tuoteno}',
 					laji = '{$laji}',
 					kpl = {$kpl},
-					hinta = {$hinta}
-					kplhinta = {$kplhinta}
-					selite = '{$selite}'
-					laatija = '{$kukarow['yhtio']}'
+					hinta = {$hinta},
+					kplhinta = {$kplhinta},
+					selite = '{$selite}',
+					laatija = '{$kukarow['yhtio']}',
 					laadittu = NOW(),
-					rivitunnus = {$tilausrivitunnus}
-					hyllyalue = '{$hyllyalue}'
-					hyllynro = '{$hyllynro}'
-					hyllyvali = '{$hyllyvali}'
+					rivitunnus = {$tilausrivitunnus},
+					hyllyalue = '{$hyllyalue}',
+					hyllynro = '{$hyllynro}',
+					hyllyvali = '{$hyllyvali}',
 					hyllytaso = '{$hyllytaso}'";
 		pupe_query($query);
 	}
@@ -27282,6 +27282,31 @@ if (!function_exists("onkotapahtumajariveja")) {
 
 		// Tapahtumia tai rivejä on
 		$poistolukko = "TSEKATTU";
+	}
+}
+
+if (!function_exists('saako_palauttaa_siirtovarastoon')) {
+	function saako_palauttaa_siirtovarastoon($tuoteno) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'
+					AND laji = 'varastopalautus'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			return true;
+		}
+
+		$row = mysql_fetch_assoc($result);
+
+		if ($row['selite'] == 'K') {
+			return true;
+		}
+
+		return false;
 	}
 }
 

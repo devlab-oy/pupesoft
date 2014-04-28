@@ -873,6 +873,9 @@
 		$ulos .= "<option value=''>".t("Ei k‰ytˆss‰")."</option>";
 		$ulos .= "<option value='K' {$sel}>".t("Tehd‰‰n siirtoja jos l‰hdevaraston myyt‰viss‰m‰‰r‰ riitt‰‰")."</option>";
 
+		$ulos .= "</select>";
+		$ulos .= "</td>";
+
 		$jatko = 0;
 	}
 

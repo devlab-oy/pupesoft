@@ -27,6 +27,25 @@ if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
 
 enable_ajax();
 
+if (!isset($ppa)) {
+	$ppa = '01';
+}
+if (!isset($kka)) {
+	$kka = '01';
+}
+if (!isset($vva)) {
+	$vva = date('Y');
+}
+if (!isset($ppl)) {
+	$ppl = '01';
+}
+if (!isset($kkl)) {
+	$kkl = '01';
+}
+if (!isset($vvl)) {
+	$vvl = date('Y') + 1;
+}
+
 require_once('tilauskasittely/kustannusarvio_pdf.php');
 
 echo "<font class='head'>".t("Kustannusarvio").":</font>";
@@ -36,23 +55,23 @@ if (isset($ala_tee) and $ala_tee == 'tulosta_kustannusarvio' and $valittu_asiaka
 	if (is_numeric($valittu_asiakas)) {
 		if (hae_asiakas($valittu_asiakas)) {
 			if (checkdate($kka, $ppa, $vva) and checkdate($kkl, $ppl, $vvl)) {
-				$alku = date('Y-m-d', strtotime($vva.'-'.$kka.'-'.$ppa));
-				$loppu = date('Y-m-d', strtotime($vvl.'-'.$kkl.'-'.$ppl));
-				$pdf_tiedosto = \PDF\Kustannusarvio\hae_kustannusarvio($valittu_asiakas, $alku, $loppu);
+				$alku			 = date('Y-m-d', strtotime($vva.'-'.$kka.'-'.$ppa));
+				$loppu			 = date('Y-m-d', strtotime($vvl.'-'.$kkl.'-'.$ppl));
+				$pdf_tiedosto	 = \PDF\Kustannusarvio\hae_kustannusarvio($valittu_asiakas, $alku, $loppu);
 			}
 			else {
-				$pdf_tiedosto = false;
-				$error = "Tarkista päivämäärät";
+				$pdf_tiedosto	 = false;
+				$error			 = "Tarkista päivämäärät";
 			}
 		}
 		else {
-			$pdf_tiedosto = false;
-			$error = "Asiakasta ei löytynyt";
+			$pdf_tiedosto	 = false;
+			$error			 = "Asiakasta ei löytynyt";
 		}
 	}
 	else {
-		$pdf_tiedosto = false;
-		$error = "Asiakasta ei löytynyt";
+		$pdf_tiedosto	 = false;
+		$error			 = "Asiakasta ei löytynyt";
 	}
 	if (!empty($pdf_tiedosto)) {
 		echo_tallennus_formi($pdf_tiedosto, t("Kustannusarvio"), 'pdf');

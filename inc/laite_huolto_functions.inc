@@ -101,7 +101,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 				AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
 				AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
 				ORDER BY laite_tunnus ASC,
-				tuotteen_avainsanat.jarjestys ASC,
+				tuotteen_avainsanat.selitetark ASC,
 				kohde.tunnus ASC";
 	$result = pupe_query($query);
 
@@ -164,10 +164,9 @@ function hae_laitteet_ja_niiden_huoltosyklit_ajalta($start, $end, $asiakas) {
 				AND laite.tila IN ('N', 'V', 'K')/*Normaali, varalaite, kateissa*/
 				AND ( laite.omistaja = '' OR laite.omistaja IS NULL )
 				AND DATE_ADD( huoltosyklit_laitteet.viimeinen_tapahtuma, INTERVAL huoltosyklit_laitteet.huoltovali DAY) BETWEEN '{$start}' AND '{$end}'
-				AND DATE_ADD( huoltosyklit_laitteet.viimeinen_tapahtuma, INTERVAL huoltosyklit_laitteet.huoltovali DAY) > NOW()
 				{$asiakas_and}
 				ORDER BY laite_tunnus ASC,
-				tuotteen_avainsanat.jarjestys ASC";
+				tuotteen_avainsanat.selitetark ASC";
 
 	$result = pupe_query($query);
 

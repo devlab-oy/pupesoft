@@ -1,4 +1,5 @@
 <?php
+
 namespace PDF\Laskutuspoytakirja;
 
 $filepath = dirname(__FILE__);
@@ -10,7 +11,6 @@ else {
 	require_once($filepath.'/parametrit.inc');
 	require_once($filepath.'/tyojono2_functions.inc');
 }
-
 function hae_laskutuspoytakirja($lasku_tunnukset) {
 	if (!empty($lasku_tunnukset)) {
 		$tyomaaraykset = \PDF\Laskutuspoytakirja\pdf_hae_tyomaaraykset($lasku_tunnukset);
@@ -18,10 +18,16 @@ function hae_laskutuspoytakirja($lasku_tunnukset) {
 		foreach ($tyomaaraykset as $key1 => $value1) {
 
 			foreach ($value1['rivit'] as $key2 => $value2) {
-				$a1 = $value2;
-				$a2 = array("tuoteno" => "1", "nimitys" => "x", "kpl" => 1, "hinta" => 1, "ale1" => 1);
-				$uusi_rivi = array_intersect_key($a1,$a2);
-				$uudet_rivit[] = $uusi_rivi;
+				$a1				 = $value2;
+				$a2				 = array(
+					"tuoteno"	 => "1",
+					"nimitys"	 => "x",
+					"kpl"		 => 1,
+					"hinta"		 => 1,
+					"ale1"		 => 1
+				);
+				$uusi_rivi		 = array_intersect_key($a1, $a2);
+				$uudet_rivit[]	 = $uusi_rivi;
 			}
 
 			$groups = array();
@@ -31,55 +37,56 @@ function hae_laskutuspoytakirja($lasku_tunnukset) {
 			foreach ($uudet_rivit as $index => $uusi_rivi) {
 
 				$full_total += $uusi_rivi['hinta'];
-			    $tuoteno = $uusi_rivi['tuoteno'];
+				$tuoteno = $uusi_rivi['tuoteno'];
 
-			    if (!isset($groups[$tuoteno])) {
-			    	$count = 1;
-			        $groups[$tuoteno] = 1;
-			    } else {
-			    	$count += 1;
-			    	unset($uudet_rivit[$index-1]);
-			    }
+				if (!isset($groups[$tuoteno])) {
+					$count				 = 1;
+					$groups[$tuoteno]	 = 1;
+				}
+				else {
+					$count += 1;
+					unset($uudet_rivit[$index - 1]);
+				}
 
-			    if(isset($uudet_rivit[$index])){
-					$uudet_rivit[$index]['kpl'] = $count;
-					$uudet_rivit[$index]['hinta'] = number_format($uudet_rivit[$index]['hinta'], 2);
-					$total = $uudet_rivit[$index]['kpl'] * $uudet_rivit[$index]['hinta'];
-					$total = $total - ( ( $total/100 ) * $uudet_rivit[$index]['ale1'] );
-					$uudet_rivit[$index]['total'] = number_format($total, 2);
+				if (isset($uudet_rivit[$index])) {
+					$uudet_rivit[$index]['kpl']		 = $count;
+					$uudet_rivit[$index]['hinta']	 = number_format($uudet_rivit[$index]['hinta'], 2);
+					$total							 = $uudet_rivit[$index]['kpl'] * $uudet_rivit[$index]['hinta'];
+					$total							 = $total - ( ( $total / 100 ) * $uudet_rivit[$index]['ale1'] );
+					$uudet_rivit[$index]['total']	 = number_format($total, 2);
 				}
 			}
-			$uudet_rivit = array_values($uudet_rivit);
-			usort($uudet_rivit,"\PDF\Laskutuspoytakirja\kpl_sort");
-			$tyomaaraykset[$key1]['full_total'] = number_format($full_total, 2);
-			$tyomaaraykset[$key1]['rivit'] = $uudet_rivit;
-			$filepath = kirjoita_json_tiedosto($tyomaaraykset[$key1], "laskutuspoytakirja_{$tyomaaraykset[$key1]['tunnus']}");
-			$pdf_tiedosto = aja_ruby($filepath, 'laskutuspoytakirja_pdf');
+			$uudet_rivit						 = array_values($uudet_rivit);
+			usort($uudet_rivit, "\PDF\Laskutuspoytakirja\kpl_sort");
+			$tyomaaraykset[$key1]['full_total']	 = number_format($full_total, 2);
+			$tyomaaraykset[$key1]['rivit']		 = $uudet_rivit;
+			$filepath							 = kirjoita_json_tiedosto($tyomaaraykset[$key1], "laskutuspoytakirja_{$tyomaaraykset[$key1]['tunnus']}");
+			$pdf_tiedosto						 = aja_ruby($filepath, 'laskutuspoytakirja_pdf');
 		}
 	}
 	return $pdf_tiedosto;
 }
-
 function kpl_sort($a, $b) {
-    if ($a['kpl'] < $b['kpl']) {
-        return 1;
-    } else if ($a['kpl,'] > $b['kpl']) {
-        return -1;
-    } else {
-        return 0;
-    }
+	if ($a['kpl'] < $b['kpl']) {
+		return 1;
+	}
+	else if ($a['kpl,'] > $b['kpl']) {
+		return -1;
+	}
+	else {
+		return 0;
+	}
 }
-
 function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 	global $kukarow, $yhtiorow;
 
 	if (empty($lasku_tunnukset)) {
 		return false;
 	}
-	
+
 	if (is_array($lasku_tunnukset)) {
 		$lasku_tunnukset = implode(",", $lasku_tunnukset);
-	} 
+	}
 
 	//queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
 	$query = "	SELECT lasku.*,
@@ -108,8 +115,8 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 
 	$result = pupe_query($query);
 
-	$tyomaaraykset = array();
-	while ($tyomaarays = mysql_fetch_assoc($result)) {
+	$tyomaaraykset	 = array();
+	while ($tyomaarays		 = mysql_fetch_assoc($result)) {
 		//vaikka työmääräyksen kaikki tiedot saisi yllä olevasta querystä,
 		//haetaan ne silti erillisillä queryillä,
 		//koska ruby:lle pässättävästä arraystä halutaan multidimensional array.
@@ -121,18 +128,17 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 			}
 		}
 		else {
-			$tyomaarays['rivit'] = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays['tunnus']);
-			$tyomaarays['kohde'] = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
-			$tyomaarays['asiakas'] = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
-			$tyomaarays['yhtio'] = $yhtiorow;
-			$tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
-			$tyomaaraykset[$tyomaarays['kohde_tunnus']] = $tyomaarays;
+			$tyomaarays['rivit']						 = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_rivit($tyomaarays['tunnus']);
+			$tyomaarays['kohde']						 = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
+			$tyomaarays['asiakas']						 = \PDF\Laskutuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
+			$tyomaarays['yhtio']						 = $yhtiorow;
+			$tyomaarays['logo']							 = base64_encode(hae_yhtion_lasku_logo());
+			$tyomaaraykset[$tyomaarays['kohde_tunnus']]	 = $tyomaarays;
 		}
 	}
 
 	return $tyomaaraykset;
 }
-
 function hae_tyomaarayksen_rivit($lasku_tunnus) {
 	global $kukarow, $yhtiorow;
 
@@ -187,8 +193,8 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
 	$result = pupe_query($query);
 
-	$rivit = array();
-	while ($rivi = mysql_fetch_assoc($result)) {
+	$rivit	 = array();
+	while ($rivi	 = mysql_fetch_assoc($result)) {
 
 		$rivi['laite'] = \PDF\Laskutuspoytakirja\hae_rivin_laite($rivi['asiakkaan_positio']);
 
@@ -205,61 +211,58 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
 	return $rivit;
 }
-
 function hae_rivin_laite($laite_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT laite.*,
-				concat_ws(' ', tuote.nimitys, tuote.tuoteno) as nimitys,
-				sammutin_koko.selite as sammutin_koko,
-				sammutin_tyyppi.selite as sammutin_tyyppi
-				FROM laite
-				JOIN tuote
-				ON ( tuote.yhtio = laite.yhtio
-					AND tuote.tuoteno = laite.tuoteno )
-				JOIN tuotteen_avainsanat as sammutin_koko
-				ON ( sammutin_koko.yhtio = tuote.yhtio
-					AND sammutin_koko.tuoteno = tuote.tuoteno
-					AND sammutin_koko.laji = 'sammutin_koko' )
-				JOIN tuotteen_avainsanat as sammutin_tyyppi
-				ON ( sammutin_tyyppi.yhtio = tuote.yhtio
-					AND sammutin_tyyppi.tuoteno = tuote.tuoteno
-					AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
-				WHERE laite.yhtio = '{$kukarow['yhtio']}'
-				AND laite.tunnus = '{$laite_tunnus}'";
-	$result = pupe_query($query);
+	$query	 = "	SELECT laite.*,
+					concat_ws(' ', tuote.nimitys, tuote.tuoteno) as nimitys,
+					sammutin_koko.selite as sammutin_koko,
+					sammutin_tyyppi.selite as sammutin_tyyppi
+					FROM laite
+					JOIN tuote
+					ON ( tuote.yhtio = laite.yhtio
+						AND tuote.tuoteno = laite.tuoteno )
+					JOIN tuotteen_avainsanat as sammutin_koko
+					ON ( sammutin_koko.yhtio = tuote.yhtio
+						AND sammutin_koko.tuoteno = tuote.tuoteno
+						AND sammutin_koko.laji = 'sammutin_koko' )
+					JOIN tuotteen_avainsanat as sammutin_tyyppi
+					ON ( sammutin_tyyppi.yhtio = tuote.yhtio
+						AND sammutin_tyyppi.tuoteno = tuote.tuoteno
+						AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
+					WHERE laite.yhtio = '{$kukarow['yhtio']}'
+					AND laite.tunnus = '{$laite_tunnus}'";
+	$result	 = pupe_query($query);
 
 	$laite = mysql_fetch_assoc($result);
 
 	return $laite;
 }
-
 function hae_tyomaarayksen_asiakas($asiakas_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT *
-				FROM asiakas
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$asiakas_tunnus}'";
-	$result = pupe_query($query);
+	$query	 = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$asiakas_tunnus}'";
+	$result	 = pupe_query($query);
 
 	return mysql_fetch_assoc($result);
 }
-
 function hae_tyomaarayksen_kohde($laite_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT kohde.*
-				FROM kohde
-				JOIN paikka
-				ON ( paikka.yhtio = kohde.yhtio
-					AND paikka.kohde = kohde.tunnus )
-				JOIN laite
-				ON ( laite.yhtio = kohde.yhtio
-					AND laite.paikka = paikka.tunnus
-					AND laite.tunnus = '{$laite_tunnus}')
-				WHERE kohde.yhtio = '{$kukarow['yhtio']}'";
-	$result = pupe_query($query);
+	$query	 = "	SELECT kohde.*
+					FROM kohde
+					JOIN paikka
+					ON ( paikka.yhtio = kohde.yhtio
+						AND paikka.kohde = kohde.tunnus )
+					JOIN laite
+					ON ( laite.yhtio = kohde.yhtio
+						AND laite.paikka = paikka.tunnus
+						AND laite.tunnus = '{$laite_tunnus}')
+					WHERE kohde.yhtio = '{$kukarow['yhtio']}'";
+	$result	 = pupe_query($query);
 
 	return mysql_fetch_assoc($result);
 }

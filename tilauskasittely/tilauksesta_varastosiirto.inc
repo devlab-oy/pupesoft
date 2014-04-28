@@ -406,7 +406,7 @@ if (!function_exists('linkkaa_myyntitilausrivi_varastosiirtoriviin')) {
 }
 
 if (!function_exists('hae_tilausrivit')) {
-	function hae_tilausrivit($otunnus, $kirjanpidollinen_varastosiirto = 'N') {
+	function hae_tilausrivit($otunnus, $varastosiirtotyyppi = 'N') {
 		global $kukarow, $yhtiorow;
 
 		$tilausrivi_where		 = '';
@@ -414,7 +414,7 @@ if (!function_exists('hae_tilausrivit')) {
 		$select					 = '';
 		$lasku_join				 = "";
 
-		if ($kirjanpidollinen_varastosiirto == 'N') {
+		if ($varastosiirtotyyppi == 'N') {
 			$tilausrivi_where = "AND t.var = 'S'";
 
 			$varasto_avainsana_join = '
@@ -441,7 +441,7 @@ if (!function_exists('hae_tilausrivit')) {
 			//Kirjanpidollinen ja palautus tähän haaraan
 			$tilausrivi_where = " AND t.var not in ('P','J','O','S')";
 
-			if ($kirjanpidollinen_varastosiirto == 'P') {
+			if ($varastosiirtotyyppi == 'P') {
 				$lasku_join	 = "	JOIN lasku AS l
 								ON ( l.yhtio = t.yhtio
 									AND l.tunnus = t.otunnus )";

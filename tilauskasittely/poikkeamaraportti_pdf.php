@@ -41,7 +41,7 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
 				JOIN tyomaarays
 				ON ( tyomaarays.yhtio = lasku.yhtio
 					AND tyomaarays.otunnus = lasku.tunnus )
-				JOIN kuka
+				LEFT JOIN kuka
 				ON ( kuka.yhtio = tyomaarays.yhtio
 					AND kuka.kuka = tyomaarays.tyojono )
 				JOIN tilausrivi

@@ -506,7 +506,11 @@ function echo_laitteen_vaihto_form($request = array()) {
 	echo "</select>";
 	echo "<select name='uusi_laite[vv]'>";
 	$sel = "";
-	foreach (range(1900, date('Y', strtotime('now + 4 years'))) as $vuosi) {
+	if (empty($vuosi_vaihteluvali)) {
+		$vuosi_vaihteluvali['min'] = 1970;
+		$vuosi_vaihteluvali['max'] = date('Y', strtotime('now + 4 years'));
+	}
+	foreach (range($vuosi_vaihteluvali['min'], $vuosi_vaihteluvali['max']) as $vuosi) {
 		if ($vva == $vuosi) {
 			$sel = "SELECTED";
 		}

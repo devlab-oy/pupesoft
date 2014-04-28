@@ -1935,6 +1935,7 @@ else {
 							tuote.tahtituote,
 							tuote.hinnastoon,
 							tuote.status,
+							lasku.yhtio,
 							tilausrivi.jt+tilausrivi.varattu kpl
 							FROM lasku
 							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND

@@ -12,6 +12,11 @@
 		exit;
 	}
 
+	if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+		echo "<font class='error'>".t("HUOM: Ohjelma ei ole käytössä kun siirtolistoja (Siirtolistan_tulostustapa) tulostetaan keräyserien kautta")."!</font>";
+		exit;
+	}
+
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
@@ -128,8 +133,16 @@
 	}
 	else {
 		echo "<font class='head'>",t("Kerää tilaus"),":</font><hr>";
-		$tila = "'L'";
-		$tyyppi = "'L'";
+		if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+			$tila = "'L','G'";
+			$alatila = "'A'";
+			$tyyppi = "'L','G'";
+		}
+		else {
+			$tila = "'L'";
+			$alatila = "'A'";
+			$tyyppi = "'L'";
+		}
 		$tilaustyyppi = "";
 	}
 
@@ -2235,6 +2248,10 @@
 			}
 
 			if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+				$asiakas_join = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)";
+				if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+					$asiakas_join = "";
+				}
 				$query = "	SELECT lasku.yhtio AS 'yhtio',
 							lasku.yhtio_nimi AS 'yhtio_nimi',
 							kerayserat.nro AS 'keraysera',
@@ -2252,20 +2269,20 @@
 							JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (
 								tilausrivi.yhtio = lasku.yhtio AND
 								tilausrivi.otunnus = lasku.tunnus AND
-								tilausrivi.tyyppi = 'L' AND
+								tilausrivi.tyyppi IN ({$tyyppi}) AND
 								tilausrivi.var IN ('', 'H') AND
 								tilausrivi.keratty = ''
 								{$tilausrivi_join_ehto}
 								AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND
 								((tilausrivi.laskutettu = '' AND tilausrivi.laskutettuaika 	= '0000-00-00') OR lasku.mapvm != '0000-00-00'))
 							JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus AND kerayserat.tila = 'K' {$kerayserahaku})
-							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+							{$asiakas_join}
 							LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.hyvak3)
 							WHERE lasku.{$logistiikka_yhtiolisa}
+							AND lasku.tila IN ({$tila})
+							AND lasku.alatila IN ({$alatila})
 							{$valmistuslinja_where}
 							{$kerayspaiva_where}
-							AND lasku.tila = 'L'
-							AND lasku.alatila = 'A'
 							{$haku}
 							GROUP BY 1,2,3
 							{$jarjx}";
@@ -2628,7 +2645,7 @@
 			$asiakas_join_lisa = "";
 
 			// Jos keräyserät käytössä, pitää hakea asiakkaankin tiedot (myyntipuolella toim="")
-			if ($yhtiorow['kerayserat'] != '' and $toim == "") {
+			if ($yhtiorow['kerayserat'] != '' and $toim == "" and $yhtiorow['siirtolistan_tulostustapa'] != 'U') {
 				$select_lisa .= "asiakas.kerayserat,";
 				$asiakas_join_lisa = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)";
 			}

@@ -81,7 +81,6 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 }
 
 if (!function_exists('normaali_varastosiirto')) {
-
 	function normaali_varastosiirto($myyntitilaus) {
 		global $kukarow, $yhtiorow;
 
@@ -89,13 +88,22 @@ if (!function_exists('normaali_varastosiirto')) {
 		//Mahdolliset kombinaatiot muodostuvat avainsana.laji = SIIRTOVARASTOT, lasku.varasto tai lasku.yhtio_toimipaikka.varastot perusteella
 		$keys = array(
 			'lahdevarasto_tunnus',
-			'kohdevarasto_tunnus'
+			'kohdevarasto_tunnus',
+			'keraysvyohyke'
 		);
 
 		$lahde_ja_kohde_varasto_yhdistelmat = array_find_unique_values($myyntitilaus['tilausrivit'], $keys);
 
+		if (empty($lahde_ja_kohde_varasto_yhdistelmat)) {
+			return false;
+		}
+
 		$kommentit = array();
+		$yhtiorow_temp = $yhtiorow;
 		foreach ($lahde_ja_kohde_varasto_yhdistelmat as $lahde_ja_kohde_varasto_yhdistelma) {
+			$lahdevarasto = hae_varasto($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus']);
+			$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $lahdevarasto['toimipaikka']);
+
 			$myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
 
 			aseta_kukarow_kesken(0);
@@ -114,6 +122,10 @@ if (!function_exists('normaali_varastosiirto')) {
 
 				$kommentit[] = t('Tilauksen')." {$myyntitilaus['tunnus']} ".t('tilausrivi')." {$tilausrivi['tuoteno']} - {$tilausrivi['tilkpl']} {$tilausrivi['yksikko']} ".t('lisättiin siirtolistalle')." {$varastosiirto['tunnus']}";
 			}
+
+			tilaus_valmis_siirtolista($varastosiirto);
+
+			paivita_myyntitilausrivien_tuotepaikat($myyntitilausrivit, false);
 		}
 
 		$tilausrivi_tunnukset = array_column($myyntitilaus['tilausrivit'], 'tunnus');
@@ -126,6 +138,8 @@ if (!function_exists('normaali_varastosiirto')) {
 			echo "<br/>";
 		}
 		echo "<br/>";
+
+		$yhtiorow = $yhtiorow_temp;
 
 		return true;
 	}
@@ -179,6 +193,37 @@ if (!function_exists('palautus_varastosiirto')) {
 	}
 }
 
+if (!function_exists('tilaus_valmis_siirtolista')) {
+
+	function tilaus_valmis_siirtolista($laskurow) {
+		global $kukarow, $yhtiorow;
+
+		$toim = "SIIRTOLISTA";
+		$tulostetaan = '';
+
+		require('tilauskasittely/tilaus-valmis-siirtolista.inc');
+	}
+
+}
+
+if (!function_exists('hae_toimitustapa')) {
+	function hae_toimitustapa($toimitustapa_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($toimitustapa_tunnus)) {
+			return false;
+		}
+
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = {$toimitustapa_tunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
 if (!function_exists('luo_varastosiirtorivi')) {
 	function luo_varastosiirtorivi($laskurow, $tilausrivi, $lahdevarasto_tunnus, $varastosiirtotyyppi = 'N') {
 		global $kukarow, $yhtiorow;
@@ -221,6 +266,9 @@ if (!function_exists('luo_varastosiirtorivi')) {
 			$kohde_nro	 = $tilausrivi["kohde_hyllynro"];
 			$kohde_vali	 = 0;
 			$kohde_taso	 = 0;
+
+			//Jos tuotteella ei ole oletuspaikkaa ja se laitetaan ns. "varastoon" niin pitää varmistaa, että varastosta löytyy kyseiselle tuotteelle tällainen tuotepaikka
+			luo_tuotepaikka($kohde_alue, $kohde_nro, $kohde_vali, $kohde_taso, $tuoteno);
 		}
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -250,21 +298,23 @@ if (!function_exists('luo_varastosiirto')) {
 	function luo_varastosiirto($lahdevarasto_tunnus, $kohdevaraston_tunnus, $toimitustapa_tunnus, $myyntitilaus_tunnus) {
 		global $kukarow, $yhtiorow;
 
-		$jatka			 = 'joo';
-		$tilausnumero	 = 0;
-		$clearing		 = $kohdevaraston_tunnus;
-		$chn			 = 'GEN'; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
-		$toimpp			 = $kerpp			 = date("j");
-		$toimkk			 = $kerkk			 = date("n");
-		$toimvv			 = $kervv			 = date("Y");
-		$comments		 = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
-		$viesti			 = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
-		$varasto		 = $lahdevarasto_tunnus;
-		$toimitustapa	 = $toimitustapa_tunnus;
-		$toim			 = "SIIRTOLISTA";
+		$toimitustapa = hae_toimitustapa($toimitustapa_tunnus);
+		$toimitustapa = $toimitustapa['selite'];
 
-		$lahdevarasto		 = hae_varasto($lahdevarasto_tunnus);
-		$yhtio_toimipaikka	 = $lahdevarasto['toimipaikka'];
+		$jatka 			= 'joo';
+		$tilausnumero 	= 0;
+		$clearing 		= $kohdevaraston_tunnus;
+		$chn 			= 'GEN'; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
+		$toimpp 		= $kerpp = date("j");
+		$toimkk 		= $kerkk = date("n");
+		$toimvv 		= $kervv = date("Y");
+		$comments 		= $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
+		$viesti 		= $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
+		$varasto 		= $lahdevarasto_tunnus;
+		$toim 			= "SIIRTOLISTA";
+
+		$lahdevarasto = hae_varasto($lahdevarasto_tunnus);
+		$yhtio_toimipaikka = $lahdevarasto['toimipaikka'];
 
 		require ("otsik_siirtolista.inc");
 
@@ -374,11 +424,18 @@ if (!function_exists('hae_tilausrivit')) {
 					JOIN varastopaikat AS v_lahdevarasto
 					ON ( v_lahdevarasto.tunnus = a.selite )
 					JOIN varastopaikat AS v_kohdevarasto
-					ON ( v_kohdevarasto.tunnus = a.selitetark )';
+					ON ( v_kohdevarasto.tunnus = a.selitetark )
+					LEFT JOIN varaston_hyllypaikat
+					ON ( varaston_hyllypaikat.yhtio = t.yhtio
+						AND varaston_hyllypaikat.hyllyalue = t.hyllyalue
+						AND varaston_hyllypaikat.hyllynro = t.hyllynro
+						AND varaston_hyllypaikat.hyllyvali = t.hyllyvali
+						AND varaston_hyllypaikat.hyllytaso = t.hyllytaso)';
 
 			$select = '	v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
 						v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
-						a.selitetark_2 AS toimitustapa_tunnus,';
+						a.selitetark_2 AS toimitustapa_tunnus,
+						varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,';
 		}
 		else {
 			//Kirjanpidollinen ja palautus tähän haaraan
@@ -431,21 +488,27 @@ if (!function_exists('hae_tilausrivit')) {
 }
 
 if (!function_exists('paivita_myyntitilausrivien_tuotepaikat')) {
-	function paivita_myyntitilausrivien_tuotepaikat($varastosiirtorivit) {
+	function paivita_myyntitilausrivien_tuotepaikat($tilausrivit, $onko_varastosiirtorivi = true) {
 		global $kukarow, $yhtiorow;
 
-		if (empty($varastosiirtorivit)) {
+		if (empty($tilausrivit)) {
 			return false;
 		}
 
-		foreach ($varastosiirtorivit as $varastosiirtorivi) {
+		foreach ($tilausrivit as $tilausrivi) {
+			luo_tuotepaikka($tilausrivi['kohde_hyllyalue'], $tilausrivi['kohde_hyllynro'], $tilausrivi['kohde_hyllytaso'], $tilausrivi['kohde_hyllyvali'], $tilausrivi['tuoteno']);
+			//Jos kyseessä ei ole varastosiirtorivi niin kyseessä on myyntitilausrivi
+			$update = "AND tunnus = {$tilausrivi['tunnus']}";
+			if ($onko_varastosiirtorivi) {
+				$update = "AND tunnus = {$tilausrivi['tilausrivilinkki']}";
+			}
 			$query = "	UPDATE tilausrivi SET
-						hyllyalue = '{$varastosiirtorivi['kohde_hyllyalue']}',
-						hyllynro = '{$varastosiirtorivi['kohde_hyllynro']}',
-						hyllytaso = '{$varastosiirtorivi['kohde_hyllytaso']}',
-						hyllyvali = '{$varastosiirtorivi['kohde_hyllyvali']}'
+						hyllyalue = '{$tilausrivi['kohde_hyllyalue']}',
+						hyllynro = '{$tilausrivi['kohde_hyllynro']}',
+						hyllytaso = '{$tilausrivi['kohde_hyllytaso']}',
+						hyllyvali = '{$tilausrivi['kohde_hyllyvali']}'
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = {$varastosiirtorivi['tilausrivilinkki']}";
+						{$update}";
 			pupe_query($query);
 		}
 

@@ -119,18 +119,11 @@
 			$jatko = 0;
 		}
 		elseif ($tem_laji == "varastopalautus") {
-			$sel = "";
-
-			if ($trow[$i] == "K") {
-				$selk = "SELECTED";
-			}
-			else {
-				$sele = "SELECTED";
-			}
+			$sel = array_fill_keys(array($trow[$i]), " selected") + array('P' => '', 'L' => '');
 
 			$ulos = "<td><select name='$nimi'>";
-			$ulos .= "<option value='K' $selk>".t("Tuote voidaan reklamaatiolla merkata sallittuihin varastoihin palautettavaksi")."</option>";
-			$ulos .= "<option value='E' $sele>".t("Tuotetta EI voida merkata sallittuihin varastoihin palautettavaksi")."</option>";
+			$ulos .= "<option value='K' {$sel['K']}>".t("Tuote voidaan reklamaatiolla merkata sallittuihin varastoihin palautettavaksi")."</option>";
+			$ulos .= "<option value='E' {$sel['E']}>".t("Tuotetta EI voida merkata sallittuihin varastoihin palautettavaksi")."</option>";
 			$ulos .= "</select></td>";
 
 			$jatko = 0;

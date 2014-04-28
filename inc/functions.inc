@@ -27147,15 +27147,15 @@ if (!function_exists('luo_tapahtuma')) {
 					tuoteno = '{$tuoteno}',
 					laji = '{$laji}',
 					kpl = {$kpl},
-					hinta = {$hinta}
-					kplhinta = {$kplhinta}
-					selite = '{$selite}'
-					laatija = '{$kukarow['yhtio']}'
+					hinta = {$hinta},
+					kplhinta = {$kplhinta},
+					selite = '{$selite}',
+					laatija = '{$kukarow['yhtio']}',
 					laadittu = NOW(),
-					rivitunnus = {$tilausrivitunnus}
-					hyllyalue = '{$hyllyalue}'
-					hyllynro = '{$hyllynro}'
-					hyllyvali = '{$hyllyvali}'
+					rivitunnus = {$tilausrivitunnus},
+					hyllyalue = '{$hyllyalue}',
+					hyllynro = '{$hyllynro}',
+					hyllyvali = '{$hyllyvali}',
 					hyllytaso = '{$hyllytaso}'";
 		pupe_query($query);
 	}

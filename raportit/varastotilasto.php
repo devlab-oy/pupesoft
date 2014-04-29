@@ -108,7 +108,11 @@
 					tuote.try,
 					tuote.myyntihinta,
 					tuote.varmuus_varasto,
-					tuote.kehahin
+					tuote.kehahin,
+					tuote.epakurantti25pvm,
+					tuote.epakurantti50pvm,
+					tuote.epakurantti75pvm,
+					tuote.epakurantti100pvm
 					FROM tuote
 					{$toimittaja_join}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
@@ -316,7 +320,12 @@
 				}
 
 				$row["varmuus_varasto"] = ((int) $row["varmuus_varasto"] == 0) ? "" : $row["varmuus_varasto"];
-				$varastonarvo = round($saldo * $row["kehahin"], 2);
+				if 		($row["epakurantti100pvm"] != '0000-00-00') $kehahin = 0;
+				elseif 	($row["epakurantti75pvm"]  != '0000-00-00') $kehahin = round($row["kehahin"] * 0.25, 6);
+				elseif 	($row["epakurantti50pvm"]  != '0000-00-00') $kehahin = round($row["kehahin"] * 0.5, 6);
+				elseif	($row["epakurantti25pvm"]  != '0000-00-00') $kehahin = round($row["kehahin"] * 0.75, 6);
+				else $kehahin = $row["kehahin"];
+				$varastonarvo = round($saldo * $kehahin, 2);
 				$varastonarvo = ((float) $varastonarvo == 0) ? "" : $varastonarvo;
 				$varattu = ((int) $varattu == 0) ? "" : $varattu;
 				$saldo = ((int) $saldo == 0) ? "" : $saldo;

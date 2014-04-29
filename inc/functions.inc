@@ -26926,6 +26926,24 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
 	}
 }
 
+if (!function_exists('hae_maksuehdot')) {
+	function hae_maksuehdot() {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM maksuehdot
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
+
+		$maksuehdot = array();
+		while($maksuehto = mysql_fetch_assoc($result)) {
+			$maksuehdot[] = $maksuehto;
+		}
+
+		return $maksuehdot;
+	}
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

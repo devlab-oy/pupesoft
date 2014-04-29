@@ -479,6 +479,99 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 	return $tyomaarays_tunnus;
 }
 
+function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true) {
+	global $kukarow, $yhtiorow;
+
+	if ($alv_23) {
+		$alv = '23.00';
+	}
+	else {
+		$alv = '24.00';
+	}
+	$maksuehdot = hae_maksuehdot();
+	$maksuehto = $maksuehdot[0];
+	if (empty($maksuehto)) {
+		$maksuehto['tunnus'] = 0;
+	}
+
+	$query	 = "	INSERT INTO lasku SET
+					yhtio = '{$kukarow['yhtio']}',
+					yhtio_nimi = '{$yhtiorow['nimi']}',
+					yhtio_osoite = '{$yhtiorow['osoite']}',
+					yhtio_postino = '{$yhtiorow['postino']}',
+					yhtio_postitp = '{$yhtiorow['postitp']}',
+					yhtio_maa = '{$yhtiorow['maa']}',
+					yhtio_ovttunnus = '{$yhtiorow['ovttunnus']}',
+					yhtio_kotipaikka = '{$yhtiorow['kotipaikka']}',
+					yhtio_toimipaikka = '{$yhtiorow['toimipaikka']}',
+					nimi = '{$asiakas['nimi']}',
+					nimitark = '{$asiakas['nimitark']}',
+					osoite = '{$asiakas['osoite']}',
+					osoitetark = '{$asiakas['osoitetark']}',
+					postino = '{$asiakas['postino']}',
+					postitp = '{$asiakas['postitp']}',
+					maa = '{$asiakas['maa']}',
+					toim_nimi = '{$asiakas['toim_nimi']}',
+					toim_nimitark = '{$asiakas['toim_nimitark']}',
+					toim_osoite = '{$asiakas['osoite']}',
+					toim_postino = '{$asiakas['postino']}',
+					toim_postitp = '{$asiakas['postitp']}',
+					toim_maa = '{$asiakas['maa']}',
+					valkoodi = 'EUR',
+					alv = '{$alv}',
+					toimaika = '{$toimaika}',
+					summa = '{$summa}',
+					hinta = '{$summa}',
+					laatija = 'import',
+					luontiaika = NOW(),
+					lahetetyyppi = 'tulosta_lahete_eiale_eihinta.inc',
+					laskutyyppi = '-9',
+					myyja = '{$kukarow['tunnus']}',
+					maksuehto = '{$maksuehto['tunnus']}'
+					toimitustapa = 'Nouto',
+					ytunnus = '{$asiakas['ytunnus']}',
+					ovttunnus = '{$asiakas['ovttunnus']}',
+					toim_ovttunnus = '{$asiakas['ovttunnus']}',
+				chn = '100',
+					mapvm = '0000-00-00',
+					popvm = '0000-00-00 00:00:00',
+					alv_tili = '{$yhtiorow['alv']}',
+					tila = 'L',
+					alatila = 'D',
+					muutospvm = NOW(),
+					muuttaja = 'import',
+					tilaustyyppi = 'A',
+					liitostunnus = '{$asiakas['tunnus']}',
+					ohjelma_moduli = 'PUPESOFT',";
+	pupe_query($query);
+	$tunnus	 = mysql_insert_id();
+
+	$query = "	INSERT INTO laskun_lisatiedot SET
+					yhtio = '{$kukarow['yhtio']}',
+					otunnus = '{$tunnus}',
+					kolm_ovttunnus = 'FI',
+					kolm_maa = '{$asiakas['maa']}',
+					laskutus_nimi = '{$asiakas['nimi']}',
+					laskutus_osoite = '{$asiakas['osoite']}',
+					laskutus_postino = '{$asiakas['postino']}',
+					laskutus_postitp = '{$asiakas['postitp']}',
+					laskutus_maa = '{$asiakas['maa']}',
+					laatija = 'import',
+					luontiaika = NOW()";
+	pupe_query($query);
+
+	$query = "	INSERT INTO tyomaarays SET
+					yhtio = '{$kukarow['yhtio']}',
+					laatija = 'import',
+					luontiaika = NOW(),
+					tyostatus = 'X',
+					tyojono = 'import',
+					otunnus = '{$tunnus}'";
+	pupe_query($query);
+
+	return $tunnus;
+}
+
 function paivita_laite_tunnus_toimenpiteen_tilausriville_temp($laite, $tilausrivit) {
 	global $kukarow, $yhtiorow;
 

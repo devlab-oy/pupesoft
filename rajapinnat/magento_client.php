@@ -1,4 +1,4 @@
-<?php
+	<?php
 /**
  * SOAP-clientin wrapperi Magento-verkkokaupan p‰ivitykseen
  *
@@ -226,6 +226,11 @@ class MagentoClient {
 				$visibility = self::NOT_VISIBLE_INDIVIDUALLY;
 			}
 
+			$tuote_ryhmahinta_data = array(
+				array('website_id' => 'lexxa', 'cust_group' => 0, 'price' => 300),
+				array('website_id' => 'lexxa', 'cust_group' => 1, 'price' => 400),
+			);
+
 			$tuote_data = array(
 					'categories'            => array($category_id),
 					'websites'              => explode(" ", $tuote['nakyvyys']),
@@ -244,6 +249,7 @@ class MagentoClient {
 					'campaign_code'         => utf8_encode($tuote['campaign_code']),
 					'onsale'                => utf8_encode($tuote['onsale']),
 					'target'                => utf8_encode($tuote['target']),
+					'group_price'			=> $tuote_ryhmahinta_data,
 				);
 
 			// Lis‰t‰‰n tai p‰ivitet‰‰n tuote

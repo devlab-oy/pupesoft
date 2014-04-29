@@ -209,6 +209,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "INVASTEPAIKKA")		$ulos .= "<option value='INVASTEPAIKKA' {$avain_sel['INVASTEPAIKKA']}>		".t("Inventointiaste-raportin hylk‰‰m‰t tuotepaikat")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SIIRTOVARASTOT")	$ulos .= "<option value='SIIRTOVARASTOT' {$avain_sel['SIIRTOVARASTOT']}>	".t("Varastosta-varastoon myyntitilauksesta siirtolista sallinta")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSERA_TK") 		$ulos .= "<option value='KERAYSERA_TK' $avain_sel[KERAYSERA_TK]>			".t("K‰ytt‰j‰n oikeus tulostaa kaikki ker‰yser‰t varastossa")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TOIMMYYNTI")		$ulos .= "<option value='TOIMMYYNTI' {$avain_sel['TOIMMYYNTI']}>			".t("Toimipaikan myyntioikeus")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tyˆm‰‰r‰ysten avainsanat")."'>";
@@ -341,6 +342,56 @@
 			$sel = "";
 		}
 		$ulos .= "</select></td>";
+
+		$jatko = 0;
+		$tyyppi = 1;
+	}
+
+	if ($avain_sel['TOIMMYYNTI'] == 'SELECTED' and mysql_field_name($result, $i) == "selite") {
+		$toimipaikat = hae_toimipaikat();
+
+		$ei_toimipaikkaa = array(
+			'tunnus' => 0,
+			'nimi' => t('Ei toimipaikkaa'),
+		);
+		array_unshift($toimipaikat, $ei_toimipaikkaa);
+
+		$ulos .= "<td>";
+		$ulos .= "<select name = '$nimi'>";
+		$sel = "";
+		foreach ($toimipaikat as $toimipaikka) {
+			if ($toimipaikka['tunnus'] == $trow[$i]) {
+				$sel = "SELECTED";
+			}
+			$ulos .= "<option value = '{$toimipaikka['tunnus']}' {$sel}>{$toimipaikka['nimi']}</option>";
+			$sel = "";
+		}
+		$ulos .= "</select>";
+		$ulos .= "</td>";
+
+		$jatko = 0;
+		$tyyppi = 1;
+	}
+
+	if ($avain_sel['TOIMMYYNTI'] == 'SELECTED' and mysql_field_name($result, $i) == "selitetark") {
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					ORDER BY nimitys ASC";
+		$varasto_result = pupe_query($query);
+
+		$ulos .= "<td>";
+		$ulos .= "<select name = '$nimi'>";
+		$sel = "";
+		while($varasto = mysql_fetch_assoc($varasto_result)) {
+			if ($varasto['tunnus'] == $trow[$i]) {
+				$sel = "SELECTED";
+			}
+			$ulos .= "<option value = '{$varasto['tunnus']}' {$sel}>{$varasto['nimitys']}</option>";
+			$sel = "";
+		}
+		$ulos .= "</select>";
+		$ulos .= "</td>";
 
 		$jatko = 0;
 		$tyyppi = 1;

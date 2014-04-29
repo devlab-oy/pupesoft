@@ -1110,7 +1110,9 @@
 
 			if ($onkolaajattoimipaikat) {
 
-				$sel = $toimipaikka == '0' ? "selected" : "";
+				if ($toimipaikka == 0 or $kukarow['toimipaikka'] == 0) {
+					$sel = 'selected';
+				}
 
 				echo "<br /><hr />";
 				echo "<a href='#' name='RajaaToimipaikalla'></a>";

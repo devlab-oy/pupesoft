@@ -753,7 +753,12 @@
 				echo "<td><select name='toimipaikka' onchange='submit();'>";
 				echo "<option value=''>",t("Valitse"),"</option>";
 
-				$sel = (isset($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
+				$sel = "";
+				$toimipaikka_requestista = (isset($toimipaikka) and $toimipaikka == 0);
+				$toimipaikka_kayttajalta = (!isset($toimipaikka) and $kukarow['toimipaikka'] == 0);
+				if ($toimipaikka_requestista or $toimipaikka_kayttajalta) {
+					$sel = "selected";
+				}
 
 				echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
 

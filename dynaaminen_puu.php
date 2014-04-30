@@ -6,6 +6,8 @@
 
 	require('inc/parametrit.inc');
 
+	if (!isset($mista)) $mista = $laji;
+
 	if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 		// tarkistetaan oikeuksia ja katsotaan etta muokataanko puuta vai puuliitoksia
 		$saamuokata = false;
@@ -197,7 +199,7 @@
 				}
 				elseif ($saamuokataliitosta) {
 					if ($tee == 'addtotree') {
-						TuotteenAlkiot($toim, $liitos, $nodeid, $kieli);
+						TuotteenAlkiot($toim, $liitos, $nodeid, $kieli, $mista);
 					}
 					elseif ($tee == 'removefromtree') {
 						$qu = "	DELETE FROM puun_alkio
@@ -580,7 +582,6 @@
 		exit;
 	}
 
-
 	if (strtoupper($toim) == "TUOTE") {
 		$otsikko = t("Tuotepuu");
 	}
@@ -592,6 +593,7 @@
 	}
 
 	echo "<font class='head'>{$otsikko}</font><hr /><br />";
+	echo "<input type='hidden' id='mista' value='{$mista}' />";
 
 	$saamuokata = false;
 	$saamuokataliitoksia = false;
@@ -652,6 +654,7 @@
 					<legend>".t("Luo uusi puu")."</legend>
 					<label>".t("Nimi").": </label><input type='text' name='uusi_nimi' />
 					<input type='hidden' name='toim' value='".$toim."' />
+					<input type='hidden' name='mista' value='{$mista}' />
 					<input type='hidden' name='tee' value='paakat' />
 					<input type='submit' value='".t("Tallenna")."' />
 				</fieldset>
@@ -706,6 +709,8 @@
 		var loadimg = "<img src='pics/loading_orange.gif' id='loading' />";
 		var activenode;
 
+		var mista = jQuery('#mista').val();
+
 		jQuery.ajaxSetup({
 			url: "dynaaminen_puu.php?ajax=OK",
 			type: "POST",
@@ -744,6 +749,8 @@
 		function editNode(params) {
 			var editbox = jQuery("#editbuttons");
 			jQuery(editbox).hide().after(loadimg);
+
+			params.mista = mista;
 
 			jQuery.ajax({
 				data: params,

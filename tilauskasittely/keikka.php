@@ -39,6 +39,7 @@ if (!isset($ostotil)) 			$ostotil = "";
 if (!isset($toimittajaid)) 		$toimittajaid = "";
 if (!isset($kauttalaskutus)) 	$kauttalaskutus = "";
 if (!isset($mobiili_keikka)) 	$mobiili_keikka = "";
+if (!isset($toimipaikka))		$toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 

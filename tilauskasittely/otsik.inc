@@ -3627,7 +3627,7 @@
 		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
 		// T‰m‰ tehd‰‰n vain pikatilauksissa, ei jos edet‰‰n klikkaamalla
-		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and !isset($klikkaus)){
+		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and !isset($klikkaus) and !empty($asiakasid)){
 			$queryx = "SELECT toimipaikka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$asiakasid}";
 			$resultx = pupe_query($queryx);
 			$asiakkaan_toimipaikkax = mysql_result($resultx, 0);

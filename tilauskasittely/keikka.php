@@ -1013,8 +1013,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 	}
 
 	if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
-		$joinlisa .= " JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = lasku.yhtio AND yhtion_toimipaikat.tunnus = lasku.yhtio_toimipaikka)";
-		$selectlisa .= ", yhtion_toimipaikat.nimi as toimipaikka_nimi";
+		$joinlisa .= " LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = lasku.yhtio AND yhtion_toimipaikat.tunnus = lasku.yhtio_toimipaikka)";
+		$selectlisa .= ", IF(yhtion_toimipaikat.tunnus IS NULL, '".t('Ei toimipaikkaa')."', yhtion_toimipaikat.nimi) as toimipaikka_nimi";
 	}
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	SELECT lasku.tunnus,

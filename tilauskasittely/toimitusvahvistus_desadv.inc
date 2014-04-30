@@ -141,7 +141,7 @@
 			}
 
 			if ($desadv_version == 'fi0089') {
-				$desadv_message .= "NAD+CZ+{$yhtiorow['ovttunnus']}::100++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
+				$desadv_message .= "NAD+SE+{$yhtiorow['ovttunnus']}::100++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
 				$x++;
 			}
 

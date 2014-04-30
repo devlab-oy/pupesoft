@@ -582,7 +582,7 @@
 				if ($valitut['EIASIAKKAANMYYNTEJA'] != '') {
 					$ei_asiakkaan_myynteja_lisa = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta != 'E')";
 					$ei_asiakkaan_myynteja_lisa2 = "AND a.myynninseuranta != 'E'";
-					$ei_asiakkaan_myynteja_lisa3 = "JOIN asiakas ON (asiakas.yhtio = l.yhtio AND asiakas.tunnus = l.liitostunnus AND asiakas.myynninseuranta != 'E'";
+					$ei_asiakkaan_myynteja_lisa3 = "JOIN asiakas ON (asiakas.yhtio = l.yhtio AND asiakas.tunnus = l.liitostunnus AND asiakas.myynninseuranta != 'E')";
 				}
 				else {
 					$ei_asiakkaan_myynteja_lisa = "";
@@ -1134,6 +1134,7 @@
 								{$selectlisa}
 								FROM tilausrivi t use index (yhtio_tyyppi_tuoteno_laskutettuaika),
 								lasku l use index(PRIMARY)
+								{$ei_asiakkaan_myynteja_lisa3}
 								WHERE t.yhtio = '$row[yhtio]'
 								and t.tyyppi = 'L'
 								and t.tuoteno = '$row[tuoteno]'
@@ -1142,10 +1143,10 @@
 								and l.yhtio = t.yhtio
 								and l.tunnus = t.otunnus
 								{$ei_vienteja_lisa2}
-								{$ei_asiakkaan_myynteja_lisa3}
 								and l.liitostunnus 	= '$asiakasid'";
 					$asresult = pupe_query($query);
 					$asrow = mysql_fetch_assoc($asresult);
+//echo "1150 $query <br><br>";
 				}
 
 				if ($valitut['EHDOTETTAVAT'] == '' or $ostettavahalytilausmaara > 0 or $ostettavahaly > 0 or $ostettava4kk > 0) {

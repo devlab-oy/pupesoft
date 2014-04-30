@@ -575,6 +575,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 	##################################################################################################################################
 	if ($dellataan) {
 
+/* poistetaan tämä toistaiseksi, on liian hidas
 		// Poistetaan "P" tuotteita joilla ei ole laskutusta eikä saldoa
 		$query = "	SELECT tuoteno
 					FROM tuote
@@ -601,7 +602,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		}
 
 		is_log("Poistettiin $del 'P'-tuotetta joilla ei ollut yhtään tapahtumaa!");
-
+*/
 		// Poistetaan tuotepaikat joiden tuotteet dellattu
 		$query = "	DELETE tuotepaikat
 					FROM tuotepaikat
@@ -658,16 +659,18 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
 		is_log("Poistettiin $del tuotteen avainsanaa joiden tuote oli poistettu!");
 
-		// Poistetaan tuotteen_orginaalit joiden tuotteet dellattu
-		$query = "	DELETE tuotteen_orginaalit
-					FROM tuotteen_orginaalit
-					LEFT JOIN tuote ON (tuotteen_orginaalit.yhtio=tuote.yhtio and tuotteen_orginaalit.tuoteno=tuote.tuoteno)
-					WHERE tuotteen_orginaalit.yhtio = '{$kukarow["yhtio"]}'
-					AND tuote.tunnus is null";
-		pupe_query($query);
-		$del = mysql_affected_rows();
+		if (table_exists("tuotteen_orginaalit")) {
+			// Poistetaan tuotteen_orginaalit joiden tuotteet dellattu
+			$query = "	DELETE tuotteen_orginaalit
+						FROM tuotteen_orginaalit
+						LEFT JOIN tuote ON (tuotteen_orginaalit.yhtio=tuote.yhtio and tuotteen_orginaalit.tuoteno=tuote.tuoteno)
+						WHERE tuotteen_orginaalit.yhtio = '{$kukarow["yhtio"]}'
+						AND tuote.tunnus is null";
+			pupe_query($query);
+			$del = mysql_affected_rows();
 
-		is_log("Poistettiin $del tuotteen_orginaalit joiden tuote oli poistettu!");
+			is_log("Poistettiin $del tuotteen_orginaalit joiden tuote oli poistettu!");
+		}
 
 		// Poistetaan tuotteen_toimittajat joiden tuotteet dellattu
 		$query = "	DELETE tuotteen_toimittajat
@@ -696,7 +699,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					FROM vastaavat
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					GROUP BY id
-					HAVING maara = 1";
+					HAVING count(*) = 1";
 		$result = pupe_query($query);
 
 		$del = 0;
@@ -728,7 +731,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 					FROM korvaavat
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					GROUP BY id
-					HAVING maara = 1";
+					HAVING count(*) = 1";
 		$result = pupe_query($query);
 
 		$del = 0;
@@ -744,27 +747,29 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 
 		is_log("Poistettiin $del korvaavuusketjua joissa oli vain yksi tuote!");
 
-		// Poistetaan yhteensopivuus_tuotteet joiden tuotteet dellattu
-		$query = "	DELETE yhteensopivuus_tuote
-					FROM yhteensopivuus_tuote
-					LEFT JOIN tuote ON (yhteensopivuus_tuote.yhtio=tuote.yhtio and yhteensopivuus_tuote.tuoteno=tuote.tuoteno)
-					WHERE yhteensopivuus_tuote.yhtio = '{$kukarow["yhtio"]}'
-					AND tuote.tunnus is null";
-		$result = pupe_query($query);
-		$del = mysql_affected_rows();
+		if (table_exists("yhteensopivuus_tuote")) {
+			// Poistetaan yhteensopivuus_tuotteet joiden tuotteet dellattu
+			$query = "	DELETE yhteensopivuus_tuote
+						FROM yhteensopivuus_tuote
+						LEFT JOIN tuote ON (yhteensopivuus_tuote.yhtio=tuote.yhtio and yhteensopivuus_tuote.tuoteno=tuote.tuoteno)
+						WHERE yhteensopivuus_tuote.yhtio = '{$kukarow["yhtio"]}'
+						AND tuote.tunnus is null";
+			$result = pupe_query($query);
+			$del = mysql_affected_rows();
 
-		is_log("Poistettiin $del yhteensopivuus_tuoteetta joiden tuote oli poistettu!");
+			is_log("Poistettiin $del yhteensopivuus_tuoteetta joiden tuote oli poistettu!");
 
-		// Poistetaan yhteensopivuus_tuote_lisatiedot joiden tuotteet dellattu
-		$query = "	DELETE yhteensopivuus_tuote_lisatiedot
-					FROM yhteensopivuus_tuote_lisatiedot
-					LEFT JOIN yhteensopivuus_tuote ON (yhteensopivuus_tuote_lisatiedot.yhtio=yhteensopivuus_tuote.yhtio and yhteensopivuus_tuote_lisatiedot.yhteensopivuus_tuote_tunnus=yhteensopivuus_tuote.tunnus)
-					WHERE yhteensopivuus_tuote_lisatiedot.yhtio = '{$kukarow["yhtio"]}'
-					AND yhteensopivuus_tuote.tunnus is null";
-		$result = pupe_query($query);
-		$del = mysql_affected_rows();
+			// Poistetaan yhteensopivuus_tuote_lisatiedot joiden tuotteet dellattu
+			$query = "	DELETE yhteensopivuus_tuote_lisatiedot
+						FROM yhteensopivuus_tuote_lisatiedot
+						LEFT JOIN yhteensopivuus_tuote ON (yhteensopivuus_tuote_lisatiedot.yhtio=yhteensopivuus_tuote.yhtio and yhteensopivuus_tuote_lisatiedot.yhteensopivuus_tuote_tunnus=yhteensopivuus_tuote.tunnus)
+						WHERE yhteensopivuus_tuote_lisatiedot.yhtio = '{$kukarow["yhtio"]}'
+						AND yhteensopivuus_tuote.tunnus is null";
+			$result = pupe_query($query);
+			$del = mysql_affected_rows();
 
-		is_log("Poistettiin $del yhteensopivuus_tuote_lisatietoa joiden tuote oli poistettu!");
+			is_log("Poistettiin $del yhteensopivuus_tuote_lisatietoa joiden tuote oli poistettu!");
+		}
 
 		// Poistetaan synclogit joiden tuotteet dellattu
 		$query = "	DELETE synclog
@@ -977,16 +982,19 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 	#SEKALAISET
 	##################################################################################################################################
 	if ($dellataan) {
-		# Automanual-hakuhistoria
-		$query = "	DELETE automanual_hakuhistoria
-					FROM automanual_hakuhistoria
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND luontiaika > 0
-					AND luontiaika <= '$vv-$kk-$pp 23:59:59'";
-		pupe_query($query);
-		$del = mysql_affected_rows();
 
-		is_log("Poistettiin $del Automanual-hakuhistoriariviä.");
+		if (table_exists("automanual_hakuhistoria")) {
+			# Automanual-hakuhistoria
+			$query = "	DELETE automanual_hakuhistoria
+						FROM automanual_hakuhistoria
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND luontiaika > 0
+						AND luontiaika <= '$vv-$kk-$pp 23:59:59'";
+			pupe_query($query);
+			$del = mysql_affected_rows();
+
+			is_log("Poistettiin $del Automanual-hakuhistoriariviä.");
+		}
 
 		# Lähdöt
 		$query = "	DELETE lahdot

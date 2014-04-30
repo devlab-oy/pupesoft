@@ -1146,7 +1146,7 @@
 								and l.liitostunnus 	= '$asiakasid'";
 					$asresult = pupe_query($query);
 					$asrow = mysql_fetch_assoc($asresult);
-//echo "1150 $query <br><br>";
+
 				}
 
 				if ($valitut['EHDOTETTAVAT'] == '' or $ostettavahalytilausmaara > 0 or $ostettavahaly > 0 or $ostettava4kk > 0) {

@@ -677,11 +677,15 @@ if(isset($laskurow)){
 	      	while ($aov_row = mysql_fetch_assoc($aov_result)) {
 	        	$kukarow_varasto[] = $aov_row['avainsana'];
 	      	}
-	    }else{
+	    }
+		else{
+
+			$toimipaikan_myyntioikeus_varastot = hae_toimipaikan_myyntioikeus_varastot($laskurow['yhtio_toimipaikka']);
+			$kukarow_varasto = array_column($toimipaikan_myyntioikeus_varastot, 'tunnus');
 
 	    	$ytp = $laskurow['yhtio_toimipaikka'];
 
-	        if ($ytp != 0) {
+	        if ($ytp != 0 and empty($kukarow_varasto)) {
 	        	$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
 	        												FROM varastopaikat
 	        												WHERE yhtio = '$kukarow[yhtio]'

@@ -2027,6 +2027,24 @@
 				$oletusvarasto = $aov[0];
 			}
 
+			if (empty($aov)) {
+				//Jos asiakkaalla ei ole oletusmyyntivarastoja, niin haetaan laskun toimipaikan myyntioikeus varastoja
+				if (isset($srow['yhtiotoimipaikka'])) {
+					$tp = $srow['yhtiotoimipaikka'];
+				}
+				elseif (isset($srow['yhtio_toimipaikka'])) {
+					$tp = $srow['yhtio_toimipaikka'];
+				}
+				elseif (isset($srow['toimipaikka'])) {
+					$tp = $srow['toimipaikka'];
+				}
+				$toimipaikan_myyntioikeus_varastot = hae_toimipaikan_myyntioikeus_varastot($tp);
+
+				if (count($toimipaikan_myyntioikeus_varastot) == 1) {
+					$oletusvarasto = $toimipaikan_myyntioikeus_varastot[0]['tunnus'];
+				}
+			}
+
 			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
 				$takuuvarasto = (int) $yhtiorow['takuuvarasto'];
 				$varastot_lisa_query = " and tunnus = {$takuuvarasto}";
@@ -2034,6 +2052,10 @@
 			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and count($aov) > 0) {
 				$aov = implode(",", $aov);
 				$varastot_lisa_query = " AND tunnus IN ($aov)";
+			}
+			else if (count($aov) == 0 and count($toimipaikan_myyntioikeus_varastot) != 0) {
+				$toimipaikan_myyntioikeus_varastojen_varastotunnukset = array_column($toimipaikan_myyntioikeus_varastot, 'tunnus');
+				$varastot_lisa_query = " AND tunnus IN (".implode(',', $toimipaikan_myyntioikeus_varastojen_varastotunnukset).")";
 			}
 			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
 

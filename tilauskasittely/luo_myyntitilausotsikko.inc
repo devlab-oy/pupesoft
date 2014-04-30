@@ -191,12 +191,25 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and isset($tov)) {
 				$varasto = $tov;
 			}
-			elseif (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
+			elseif (!isset($aov) and !isset($tov)) {
+				if ($yhtiotoimipaikka != '') {
+					$_toimipaikka = $yhtiotoimipaikka;
+				}
+				else {
+					$_toimipaikka = $kukarow['toimipaikka'];
+				}
+				$toimipaikan_myyntioikeus_varastot = hae_toimipaikan_myyntioikeus_varastot($_toimipaikka);
+				if (!empty($toimipaikan_myyntioikeus_varastot)) {
+					$varasto = $toimipaikan_myyntioikeus_varastot[0]['tunnus'];
+				}
+			}
+
+			if (empty($varasto) and strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
 				// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
 				$varasto = $kukarow['varasto'];
 			}
 			// valitaan käyttäjän oletus varasto
-			elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
+			elseif (empty($varasto) and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
 				// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletusvarasto
 				$varasto = $kukarow['oletus_varasto'];
 			}

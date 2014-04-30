@@ -27478,3 +27478,30 @@ if (!function_exists('hae_varasto')) {
 	}
 
 }
+
+if (!function_exists('hae_toimipaikan_myyntioikeus_varastot')) {
+	function hae_toimipaikan_myyntioikeus_varastot($toimipaikka_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (!is_integer((int)$toimipaikka_tunnus)) {
+			return array();
+		}
+
+		$query	 = "	SELECT v.*
+						FROM avainsana AS a
+						JOIN varastopaikat AS v
+						ON (v.yhtio = a.yhtio
+							AND v.tunnus = a.selitetark )
+						WHERE a.yhtio = '{$kukarow['yhtio']}'
+						AND a.selite = {$toimipaikka_tunnus}
+						ORDER BY a.jarjestys ASC";
+		$result	 = pupe_query($query);
+
+		$varastot	 = array();
+		while ($varasto	 = mysql_fetch_assoc($result)) {
+			$varastot[] = $varasto;
+		}
+
+		return $varastot;
+	}
+}

@@ -27493,6 +27493,7 @@ if (!function_exists('hae_toimipaikan_myyntioikeus_varastot')) {
 						ON (v.yhtio = a.yhtio
 							AND v.tunnus = a.selitetark )
 						WHERE a.yhtio = '{$kukarow['yhtio']}'
+						AND a.laji = 'TOIMMYYNTI'
 						AND a.selite = {$toimipaikka_tunnus}
 						ORDER BY a.jarjestys ASC";
 		$result	 = pupe_query($query);

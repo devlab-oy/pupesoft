@@ -202,46 +202,46 @@
 		if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
 
 			// Katsotaan saako tälle asiakkaalle myydä vain jostain varastoista
-	    	$asiakkaan_oletusvarasto_query = " 	SELECT avainsana
-	                      						FROM asiakkaan_avainsanat
-	                      						WHERE yhtio = '$kukarow[yhtio]'
-	                      						AND laji = 'oletusmyyntivarasto'
-	                      						AND liitostunnus = {$laskurow['liitostunnus']}";
-	    	$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
+			$asiakkaan_oletusvarasto_query = " 	SELECT avainsana
+												FROM asiakkaan_avainsanat
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND laji = 'oletusmyyntivarasto'
+												AND liitostunnus = {$laskurow['liitostunnus']}";
+			$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
 
-	    	// Jos asiakkaalta löytyy varastoja
-	    	if (mysql_num_rows($aov_result) > 0) {
-	      		while ($aov_row = mysql_fetch_assoc($aov_result)) {
-	        		$kukarow_varasto[] = $aov_row['avainsana'];
-	      		}
-	    	}
+			// Jos asiakkaalta löytyy varastoja
+			if (mysql_num_rows($aov_result) > 0) {
+				while ($aov_row = mysql_fetch_assoc($aov_result)) {
+					$kukarow_varasto[] = $aov_row['avainsana'];
+				}
+			}
 			else {
 				// Haetaan varastot joita toimipaikka saa käyttää
 				$toimipaikan_myyntioikeus_varastot = hae_toimipaikan_myyntioikeus_varastot($laskurow['yhtio_toimipaikka']);
 				$kukarow_varasto = array_column($toimipaikan_myyntioikeus_varastot, 'tunnus');
 
-	    		$ytp = $laskurow['yhtio_toimipaikka'];
+				$ytp = $laskurow['yhtio_toimipaikka'];
 
-	        	if ($ytp != 0 and empty($kukarow_varasto)) {
-	        		// Etsitään onko tällä toimipaikalla jotain varastoja
-	        		$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
-	        													FROM varastopaikat
-	        													WHERE yhtio = '$kukarow[yhtio]'
-	        													AND toimipaikka = {$ytp}";
-	        		$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
+				if ($ytp != 0 and empty($kukarow_varasto)) {
+					// Etsitään onko tällä toimipaikalla jotain varastoja
+					$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
+																FROM varastopaikat
+																WHERE yhtio = '$kukarow[yhtio]'
+																AND toimipaikka = {$ytp}";
+					$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
 
-        			while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
-        				$kukarow_varasto[] = $tlv_row['tunnus'];
-        			}
-	      		}
-	    	}
+					while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
+						$kukarow_varasto[] = $tlv_row['tunnus'];
+					}
+				}
+			}
 
-	    	// Ei löytynyt yhtään varastoa, otetaan varastot käyttäjän tiedoista
-	    	if (count($kukarow_varasto) == 0) {
-	    		$kukarow_varasto = explode(",", $kukarow["varasto"]);
-	    	}
-	  	}
-  	}
+			// Ei löytynyt yhtään varastoa, otetaan varastot käyttäjän tiedoista
+			if (count($kukarow_varasto) == 0) {
+				$kukarow_varasto = explode(",", $kukarow["varasto"]);
+			}
+		}
+	}
 
 	// Onko päässätty varasto josta myydään
 	if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
@@ -795,7 +795,7 @@
 							$korvaavan_hinta_ylaraja_halvin_netto = $korva_netto;
 						}
 
-					 	if ($krow2["myytavissa"] > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
+						if ($krow2["myytavissa"] > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
 							$kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
 							if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilapäisesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
 							else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
@@ -889,7 +889,7 @@
 								sarjanumeroseuranta.sarjanumero era,
 								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
 								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
-					 			FROM tuote
+								FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 								and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
@@ -920,7 +920,7 @@
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.prio,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
 								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, '' era
-					 			FROM tuote
+								FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 								and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
@@ -953,14 +953,14 @@
 					// hoidetaan pois problematiikka jos meillä on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
 					if ($orvot > 0) {
 						if ($myytavissa >= $orvot) {
-					 		// poistaan orpojen varaamat tuotteet tältä paikalta
-					 		$myytavissa = $myytavissa - $orvot;
-					 		$orvot = 0;
+							// poistaan orpojen varaamat tuotteet tältä paikalta
+							$myytavissa = $myytavissa - $orvot;
+							$orvot = 0;
 						}
 						elseif ($orvot > $myytavissa) {
-					 		// poistetaan niin paljon orpojen saldoa ku voidaan
-					 		$orvot = $orvot - $myytavissa;
-					 		$myytavissa = 0;
+							// poistetaan niin paljon orpojen saldoa ku voidaan
+							$orvot = $orvot - $myytavissa;
+							$myytavissa = 0;
 						}
 					}
 
@@ -2328,7 +2328,7 @@
 
 						// ...kielletään tilaamasta asiakkaalle jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
 						if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))
-						 	and !in_array($trow['suoratoimitus'], array('S', 'U'))) {				// vain S ja U sallivat tilauksen asiakkaalle
+							and !in_array($trow['suoratoimitus'], array('S', 'U'))) {				// vain S ja U sallivat tilauksen asiakkaalle
 							$tmp_asiakkaalle = 0;
 						}
 

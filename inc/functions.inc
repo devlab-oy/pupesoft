@@ -186,9 +186,6 @@ if (!function_exists("pupe_query")) {
 			$starttime = $timeparts[1].substr($timeparts[0], 1);
 		}
 
-		// trimmataan, tabit, rivinvaihdot ja tuplaspacet pois querystä..
-		$query = trim(preg_replace("/  +/", " ", str_replace(array("\t","\n","\r"), " ", $query)));
-
 		if (is_resource($link)) {
 			$res = mysql_query($query, $link) or pupe_error($query);
 		}

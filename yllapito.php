@@ -1080,6 +1080,9 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
+			elseif ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
+				$lisa .= " AND asiakas.toimipaikka {$hakuehto} ";
+			}
 			elseif ($from == "" and $toim == 'toimi' and $alias_set == "KAYTTAJA") {
 				$ashak = "	SELECT group_concat(concat('\'',kuka,'\'')) kukat
 							FROM kuka
@@ -1432,6 +1435,28 @@
 							echo "<option value=''></option>";
 							echo "<option value='@E'{$sel['@E']}>",t("Ei"),"</option>";
 							echo "<option value='@K'{$sel['@K']}>",t("Kyllä"),"</option>";
+						}
+
+						echo "</select>";
+					}
+					elseif ($toim == "asiakas" and $yhtiorow['toimipaikkakasittely'] == 'L' and mysql_field_name($result, $i) == "toimipaikka") {
+
+						echo "<br />";
+						echo "<select name='haku[{$i}]'>";
+
+						echo "<option value=''></option>";
+
+						$query = "	SELECT DISTINCT nimi, tunnus
+									FROM yhtion_toimipaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									ORDER BY nimi";
+						$toimipaikka_chk_res = pupe_query($query);
+
+						while ($toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res)) {
+
+							$sel = (isset($haku[$i]) and $haku[$i] == "@".$toimipaikka_chk_row['tunnus']) ? ' selected' : '';
+
+							echo "<option value='@{$toimipaikka_chk_row['tunnus']}'{$sel}>{$toimipaikka_chk_row['nimi']}</option>";
 						}
 
 						echo "</select>";

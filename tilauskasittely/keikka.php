@@ -1026,7 +1026,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				lasku.luontiaika,
 				lasku.laatija,
 				lasku.rahti_etu,
-				lasku.kohdistettu
+				lasku.kohdistettu,
+				lasku.yhtio_toimipaikka
 				{$selectlisa}
 				FROM lasku USE INDEX (tila_index)
 				{$joinlisa}
@@ -1230,7 +1231,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				echo "<td align='right'>";
 				echo "<form method='post'>";
 				echo "<input type='hidden' name='toimittajaid' 	value='$toimittajaid'>";
-				echo "<input type='hidden' name='toimipaikka' 	value='$toimipaikka'>";
+				echo "<input type='hidden' name='toimipaikka' 	value='$row[yhtio_toimipaikka]'>";
 				echo "<input type='hidden' name='otunnus' 		value='$row[tunnus]'>";
 				echo "<input type='hidden' name='ytunnus' 		value='$ytunnus'>";
 				echo "<input type='hidden' name='keikkaid' 		value='$row[laskunro]'>";

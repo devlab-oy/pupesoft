@@ -2053,7 +2053,7 @@
 				$aov = implode(",", $aov);
 				$varastot_lisa_query = " AND tunnus IN ($aov)";
 			}
-			else if (count($aov) == 0 and count($toimipaikan_myyntioikeus_varastot) != 0) {
+			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and count($aov) == 0 and count($toimipaikan_myyntioikeus_varastot) > 0) {
 				$toimipaikan_myyntioikeus_varastojen_varastotunnukset = array_column($toimipaikan_myyntioikeus_varastot, 'tunnus');
 				$varastot_lisa_query = " AND tunnus IN (".implode(',', $toimipaikan_myyntioikeus_varastojen_varastotunnukset).")";
 			}
@@ -2106,12 +2106,12 @@
 						if ($toim == "REKLAMAATIO" and $srow['varasto'] == '' and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] == $varow['tunnus']) {
 							$sel = 'selected';
 						}
-						// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
-						elseif ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '') {
+						// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto'] (paitsi jos on as.avainsanojen OLETUSMYYNTIVARASTO tai avainsanojen TOIMMYYNTI)
+						elseif ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and count($toimipaikan_myyntioikeus_varastot) == 0 and count($aov) == 0) {
 							$sel = 'selected';
 						}
-						// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
-						elseif ($kukarow["kesken"] == 0 and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and $varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '') {
+						// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto (paitsi jos on as.avainsanojen OLETUSMYYNTIVARASTO tai avainsanojen TOIMMYYNTI)
+						elseif ($kukarow["kesken"] == 0 and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and $varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '' and count($toimipaikan_myyntioikeus_varastot) == 0 and count($aov) == 0) {
 							$sel = 'selected';
 						}
 						elseif ($varow['tunnus'] == $srow["varasto"]) {

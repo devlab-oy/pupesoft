@@ -194,41 +194,50 @@
 		}
 	}
 
-	if(!isset($kukarow_varasto)){
+	if (!isset($kukarow_varasto)) {
+
 		$kukarow_varasto = array();
+
+		// Käytetään myyntitilauksella ensisijaisesti asiakkaan toimipaikkaa
 		if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+
+			// Katsotaan saako tälle asiakkaalle myydä vain jostain varastoista
 	    	$asiakkaan_oletusvarasto_query = " 	SELECT avainsana
 	                      						FROM asiakkaan_avainsanat
 	                      						WHERE yhtio = '$kukarow[yhtio]'
 	                      						AND laji = 'oletusmyyntivarasto'
 	                      						AND liitostunnus = {$laskurow['liitostunnus']}";
 	    	$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
-	    	if(mysql_num_rows($aov_result) > 0){
+
+	    	// Jos asiakkaalta löytyy varastoja
+	    	if (mysql_num_rows($aov_result) > 0) {
 	      		while ($aov_row = mysql_fetch_assoc($aov_result)) {
 	        		$kukarow_varasto[] = $aov_row['avainsana'];
 	      		}
 	    	}
-			else{
-
+			else {
+				// Haetaan varastot joita toimipaikka saa käyttää
 				$toimipaikan_myyntioikeus_varastot = hae_toimipaikan_myyntioikeus_varastot($laskurow['yhtio_toimipaikka']);
 				$kukarow_varasto = array_column($toimipaikan_myyntioikeus_varastot, 'tunnus');
 
 	    		$ytp = $laskurow['yhtio_toimipaikka'];
 
 	        	if ($ytp != 0 and empty($kukarow_varasto)) {
+	        		// Etsitään onko tällä toimipaikalla jotain varastoja
 	        		$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
 	        													FROM varastopaikat
 	        													WHERE yhtio = '$kukarow[yhtio]'
 	        													AND toimipaikka = {$ytp}";
 	        		$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
-	        		if(mysql_num_rows($tlv_result) > 0) {
-	        			while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
-	        				$kukarow_varasto[] = $tlv_row['tunnus'];
-	        			}
-	        		}
+
+        			while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
+        				$kukarow_varasto[] = $tlv_row['tunnus'];
+        			}
 	      		}
 	    	}
-	    	if(count($kukarow_varasto) < 1){
+
+	    	// Ei löytynyt yhtään varastoa, otetaan varastot käyttäjän tiedoista
+	    	if (count($kukarow_varasto) == 0) {
 	    		$kukarow_varasto = explode(",", $kukarow["varasto"]);
 	    	}
 	  	}

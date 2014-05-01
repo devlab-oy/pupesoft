@@ -1444,7 +1444,7 @@
 						echo "<br />";
 						echo "<select name='haku[{$i}]'>";
 
-						echo "<option value=''></option>";
+						echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
 
 						$query = "	SELECT DISTINCT nimi, tunnus
 									FROM yhtion_toimipaikat

@@ -1450,12 +1450,13 @@
 						echo "<br />";
 						echo "<select name='haku[{$i}]'>";
 
+						echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
 						$sel = strtolower($haku[$i]) == "kaikki" ? "selected" : "";
 
 						echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
 
 						$sel = '';
-						echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
 
 						$query = "	SELECT DISTINCT nimi, tunnus
 									FROM yhtion_toimipaikat

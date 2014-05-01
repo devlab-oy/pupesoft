@@ -1081,7 +1081,7 @@
 				}
 			}
 			elseif ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
-				$lisa .= " AND asiakas.toimipaikka {$hakuehto} ";
+				if (strpos($hakuehto, 'kaikki') === false) $lisa .= " AND asiakas.toimipaikka {$hakuehto} ";
 			}
 			elseif ($from == "" and $toim == 'toimi' and $alias_set == "KAYTTAJA") {
 				$ashak = "	SELECT group_concat(concat('\'',kuka,'\'')) kukat
@@ -1194,6 +1194,12 @@
 			}
 
 			$ulisa .= "&haku[$i]=".urlencode($haku[$i]);
+    	}
+    	elseif (!isset($haku[$i])) {
+    		if ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
+				if ($kukarow['toimipaikka'] != 0) $lisa .= " AND asiakas.toimipaikka = '{$kukarow['toimipaikka']}' ";
+			}
+
     	}
     }
 
@@ -1444,7 +1450,12 @@
 						echo "<br />";
 						echo "<select name='haku[{$i}]'>";
 
-						echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+						$sel = strtolower($haku[$i]) == "kaikki" ? "selected" : "";
+
+						echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
+
+						$sel = '';
+						echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
 
 						$query = "	SELECT DISTINCT nimi, tunnus
 									FROM yhtion_toimipaikat
@@ -1455,6 +1466,8 @@
 						while ($toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res)) {
 
 							$sel = (isset($haku[$i]) and $haku[$i] == "@".$toimipaikka_chk_row['tunnus']) ? ' selected' : '';
+
+							if (!isset($haku[$i]) and $kukarow['toimipaikka'] != 0 and $kukarow['toimipaikka'] == $toimipaikka_chk_row['tunnus']) $sel = 'selected';
 
 							echo "<option value='@{$toimipaikka_chk_row['tunnus']}'{$sel}>{$toimipaikka_chk_row['nimi']}</option>";
 						}

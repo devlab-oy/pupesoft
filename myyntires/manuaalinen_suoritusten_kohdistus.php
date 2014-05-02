@@ -1230,8 +1230,40 @@ if ($tila == 'tee_kohdistus') {
 					}
 				}
 
+				//tarkistetaan viel‰ ett‰ jos ollaan tehty osasuorituksia laskulle jo aiemmin niin laitetaan viimeisen osasuorituksen maksup‰iv‰m‰‰r‰ laskun maksettup‰iv‰m‰‰r‰ksi
+				if ($lasku["summa"] != $lasku["alkup_summa"]) {
+					//haetaan eka myyntisaamistilit
+					$query = "	SELECT myyntisaamiset, factoringsaamiset, konsernimyyntisaamiset FROM yhtio
+								WHERE yhtio = '{$kukarow["yhtio"]}'";
+					$mstresult = pupe_query($query);
+					$myyntisaamistilit = mysql_fetch_assoc($mstresult);
+					$myyntisaamistilit = implode(", ", $myyntisaamistilit);
+
+					//sitten katsotaan milloin n‰m‰ osasuoritukset on tehty
+					$query = "	SELECT tapvm
+								FROM tiliointi
+					 			WHERE yhtio = '{$kukarow["yhtio"]}'
+								AND tilino IN ($myyntisaamistilit)
+								AND summa < 0
+								AND ltunnus = {$lasku["tunnus"]}
+								ORDER BY tapvm DESC
+								LIMIT 1";
+					$uusinresult = pupe_query($query);
+					$uusin = mysql_fetch_assoc($uusinresult);
+
+					if ($uusin["tapvm"] > $laskun_maksupvm) {
+						$laskun_maksupvm_laskulle = $uusin["tapvm"];
+					}
+					else {
+						$laskun_maksupvm_laskulle = $laskun_maksupvm;
+					}
+				}
+				else {
+					$laskun_maksupvm_laskulle = $laskun_maksupvm;
+				}
+
 				$query = "	UPDATE lasku
-							SET mapvm 		= '$laskun_maksupvm',
+							SET mapvm 		= '$laskun_maksupvm_laskulle',
 							viikorkoeur 	= '$korkosumma',
 							saldo_maksettu 	= 0,
 							saldo_maksettu_valuutassa = 0

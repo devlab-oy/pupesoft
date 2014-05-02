@@ -344,7 +344,8 @@ $muutoslisa = '';
 	$query = "	SELECT asiakas.*,
 				asiakkaan_avainsanat.tarkenne magento_id,
 				yhteyshenkilo.nimi yhenk_nimi, 
-				yhteyshenkilo.email yhenk_email
+				yhteyshenkilo.email yhenk_email,
+				asiakas.yhtio ayhtio
 				FROM asiakas
 				LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = asiakas.yhtio AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus AND asiakkaan_avainsanat.avainsana = 'magento_tunnus')
 				LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
@@ -367,6 +368,7 @@ $muutoslisa = '';
 								'ytunnus'	=> $row["ytunnus"],
 								'tunnus'	=> $row["tunnus"],
 								'maa'		=> $row["maa"],
+								'yhtio'		=> $row["ayhtio"],
 								
 								'magento_website_id'=> $magento_website_id,
 								'magento_store_id'	=> $magento_store_id,

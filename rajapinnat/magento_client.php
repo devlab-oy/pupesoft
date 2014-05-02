@@ -1,4 +1,4 @@
-	<?php
+<?php
 /**
  * SOAP-clientin wrapperi Magento-verkkokaupan p‰ivitykseen
  *
@@ -227,8 +227,8 @@ class MagentoClient {
 			}
 
 			$tuote_ryhmahinta_data = array(
-				array('website_id' => 'lexxa', 'cust_group' => 0, 'price' => 300),
-				array('website_id' => 'lexxa', 'cust_group' => 1, 'price' => 400),
+				array('website' => 1, 'customer_group_id' => 1, 'qty' => 2,'price' => 50.00),
+				//array('website_id' => 'lexxa', 'cust_group' => 1, 'qty' => 1,'price' => 400),
 			);
 
 			$tuote_data = array(
@@ -240,7 +240,7 @@ class MagentoClient {
 					'weight'                => $tuote['tuotemassa'],
 					'status'                => self::ENABLED,
 					'visibility'            => $visibility,
-					'price'                 => $tuote[$hintakentta],
+					'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
 					'special_price'         => $tuote['kuluprosentti'],
 					'tax_class_id'          => $this->getTaxClassID(),
 					'meta_title'            => '',
@@ -249,7 +249,7 @@ class MagentoClient {
 					'campaign_code'         => utf8_encode($tuote['campaign_code']),
 					'onsale'                => utf8_encode($tuote['onsale']),
 					'target'                => utf8_encode($tuote['target']),
-					'group_price'			=> $tuote_ryhmahinta_data,
+					'tier_price'			=> $tuote_ryhmahinta_data,
 				);
 
 			// Lis‰t‰‰n tai p‰ivitet‰‰n tuote
@@ -303,6 +303,11 @@ class MagentoClient {
 					$product_id = $result['product_id'];
 
 					$this->log("Tuote '{$tuote['tuoteno']}' p‰ivitetty (simple) " . print_r($tuote_data, true));
+
+					// Update tier prices
+					$result = $this->_proxy->call($this->_session, 'product_tier_price.update', array($tuote['tuoteno'], $tuote_ryhmahinta_data));
+
+					$this->log("Tuotteen '{$tuote['tuoteno']}' erikoishinnasto $result p‰ivitetty " . print_r($tuote_ryhmahinta_data, true));
 				}
 				catch (Exception $e) {
 					$this->_error_count++;
@@ -1010,7 +1015,8 @@ class MagentoClient {
 					'website_id'			=> $asiakas['magento_website_id'],
 					'store_id'				=> $asiakas['magento_store_id'],
 					'taxvat'				=> $asiakas['ytunnus'],
-					//'group_id'				=> 1,
+					'external_id'			=> $asiakas['asiakasnro'],
+					'group_id'				=> 1,
 					//'group_id'				=> $asiakas['aleryhma'],
 			);
 			
@@ -1051,8 +1057,9 @@ class MagentoClient {
 						));
 
 					$this->log("Asiakas '{$asiakas['tunnus']}' / {$result} lis‰tty " . print_r($asiakas_data, true));
+					$asiakas['magento_id'] = $result;
 
-					// P‰ivitet‰‰n magento_id
+					// P‰ivitet‰‰n magento_id pupeen
 					$query = "	UPDATE asiakkaan_avainsanat
 								SET tarkenne = '{$result}'
 								WHERE yhtio = '{$asiakas['yhtio']}'

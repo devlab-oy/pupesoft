@@ -170,8 +170,6 @@
 
     $rows = tilausrivin_tarkistus_riveittain($parametrit);
 
-
-
     foreach($rows as $row) {
 
       $parametrit = array();
@@ -192,25 +190,64 @@
 
       if ($tryrow['selitetark'] != "") $row['tuoteryhma'] = $row['tuoteryhma']." - ".$tryrow['selitetark'];
 
+      $myyntiVA = round($row['myyntiVA']);
+      $kateVA = round($row['kateVA']);
+      if( $myyntiVA != 0){
+        $kateprosVA = round($kateVA / $myyntiVA * 100, 1);
+      }
+      else{
+       $kateprosVA = 0;
+      }
+
+      $myyntiEDVA = round($row['myyntiVA']);
+      $kateEDVA = round($row['kateVA']);
+      if( $myyntiEDVA != 0){
+        $kateprosEDVA = round($kateEDVA / $myyntiEDVA * 100, 1);
+      }
+      else{
+       $kateprosEDVA = 0;
+      }
+
+      $myyntiED = round($row['myyntiED']);
+      $kateED = round($row['kateED']);
+      if( $myyntiED != 0){
+        $kateprosED = round($kateED / $myyntiED * 100, 1);
+      }
+      else{
+       $kateprosED = 0;
+      }
+
+      $myynti12 = round($row['myynti12']);
+      $kate12 = round($row['kate12']);
+      if( $myynti12 != 0){
+        $katepros12 = round($kate12 / $myynti12 * 100, 1);
+      }
+      else{
+       $katepros12 = 0;
+      }
+
       echo "<tr>";
       echo "<td>".$row['osasto']."</td>";
       echo "<td>".$row['tuoteryhma']."</td>";
-      echo "<td align='right'>".round($row['myyntiVA'])."</td>";
-      echo "<td align='right'>".round($row['kateVA'])."</td>";
-      echo "<td align='right'>".round($row['kateVA'] / $row['myyntiVA'] * 100, 1)."</td>";
-      echo "<td align='right'>".round($row['myyntiEDVA'])."</td>";
-      echo "<td align='right'>".round($row['kateEDVA'])."</td>";
-      echo "<td align='right'>".round($row['myyntiEDVA'] / $row['kateEDVA'] * 100, 1)."</td>";
-      echo "<td align='right'>".round($row['myyntiED'])."</td>";
-      echo "<td align='right'>".round($row['kateED'])."</td>";
-      echo "<td align='right'>".round($row['kateED'] / $row['myyntiED'] * 100, 1)."</td>";
-      echo "<td align='right'>".round($row['myynti12'])."</td>";
-      echo "<td align='right'>".round($row['kate12'])."</td>";
-      echo "<td align='right'>".round($row['kate12'] / $row['myynti12'] * 100, 1)."</td>";
+      echo "<td align='right'>".$myyntiVA."</td>";
+      echo "<td align='right'>".$kateVA."</td>";
+      echo "<td align='right'>".$kateprosVA."</td>";
+
+      echo "<td align='right'>".$myyntiEDVA."</td>";
+      echo "<td align='right'>".$kateEDVA."</td>";
+      echo "<td align='right'>".$kateprosEDVA."</td>";
+
+      echo "<td align='right'>".$myyntiED."</td>";
+      echo "<td align='right'>".$kateED."</td>";
+      echo "<td align='right'>".$kateprosED."</td>";
+
+      echo "<td align='right'>".$myynti12."</td>";
+      echo "<td align='right'>".$kate12."</td>";
+      echo "<td align='right'>".$katepros12."</td>";
       echo "<td align='right'></td>";
       echo "<td align='right'></td>";
-      echo "<td align='right'>$arvo_hetkella_1</td>";
-      echo "<td align='right'>$arvo_hetkella_2</td>";
+      echo "<td align='right'>".$arvo_hetkella_1."</td>";
+      echo "<td align='right'>".$arvo_hetkella_2."</td>";
       echo "</tr>";
     }
 

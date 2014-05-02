@@ -27495,9 +27495,9 @@ if (!function_exists('sallitut_varastot')) {
 		$toimitus_maa		 = isset($params['toimitus_maa']) ? $params['toimitus_maa'] : '';
 		$varastotyyppi		 = isset($params['varastotyyppi']) ? $params['varastotyyppi'] : '';
 
-		$varastotyyppi_join = "";
+		$varastotyyppi_lisa = "";
 		if ($varastotyyppi == 'normaali_varasto') {
-			$varastotyyppi_join = "AND varastopaikat.tyyppi=''";
+			$varastotyyppi_lisa = "AND varastopaikat.tyyppi=''";
 		}
 
 		// Katsotaan saako tälle asiakkaalle myydä vain jostain varastoista
@@ -27527,7 +27527,7 @@ if (!function_exists('sallitut_varastot')) {
 							ON (v.yhtio = a.yhtio
 								AND v.tunnus = a.selitetark
 								AND (v.sallitut_maat like '%$toimitus_maa%' or v.sallitut_maat = '')
-								{$varastotyyppi_join} )
+								{$varastotyyppi_lisa} )
 							WHERE a.yhtio = '{$kukarow['yhtio']}'
 							AND a.laji = 'TOIMMYYNTI'
 							AND a.selite = {$toimipaikka_tunnus}
@@ -27547,7 +27547,8 @@ if (!function_exists('sallitut_varastot')) {
 								FROM varastopaikat
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND toimipaikka = {$toimipaikka_tunnus}
-								AND (varastopaikat.sallitut_maat like '%$toimitus_maa%' or varastopaikat.sallitut_maat = '')";
+								AND (varastopaikat.sallitut_maat like '%$toimitus_maa%' or varastopaikat.sallitut_maat = '')
+								$varastotyyppi_lisa";
 			$tlv_result	 = pupe_query($query);
 
 			while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
@@ -27564,7 +27565,24 @@ if (!function_exists('sallitut_varastot')) {
 		}
 
 		// Ei löytynyt yhtään varastoa, otetaan varastot käyttäjän tiedoista
-		$kukarow_varasto = explode(",", $kukarow["varasto"]);
+		if (trim($kukarow['varasto']) != '') {
+			return explode(",", $kukarow["varasto"]);
+		}
+
+		$query		 = "	SELECT tunnus
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND (varastopaikat.sallitut_maat like '%$toimitus_maa%' or varastopaikat.sallitut_maat = '')
+							$varastotyyppi_lisa";
+		$result	 = pupe_query($query);
+
+		while ($tlv_row = mysql_fetch_assoc($result)) {
+			$kukarow_varasto[] = $tlv_row['tunnus'];
+		}
+
+		if (count($kukarow_varasto) > 0) {
+			return $kukarow_varasto;
+		}
 
 		return $kukarow_varasto;
 	}

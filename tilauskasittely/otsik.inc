@@ -273,7 +273,7 @@
 				unset($jatka);
 			}
 
-			if (isset($jatka) and $varasto != '0') {
+			if (isset($jatka) and isset($varasto) and $varasto != '0') {
 				$query = "	SELECT toimipaikka
 							FROM varastopaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2003,85 +2003,55 @@
 
 			$varastot_lisa_query = "";
 
-			if( (int) $kukarow["varasto"] > 0 ){
-				$varastot_lisa_query = " AND tunnus IN ({$kukarow["varasto"]})";
+			if (isset($srow['yhtiotoimipaikka'])) {
+				$tp = $srow['yhtiotoimipaikka'];
+			}
+			elseif (isset($srow['yhtio_toimipaikka'])) {
+				$tp = $srow['yhtio_toimipaikka'];
+			}
+			elseif (isset($srow['toimipaikka'])) {
+				$tp = $srow['toimipaikka'];
+			}
+			else {
+				$tp = 0;
+			}
+			
+			$params = array(
+				'asiakas_tunnus' => $srow['liitostunnus'],
+				'toimipaikka_tunnus' => $tp,
+			);
+
+			$varastot = sallitut_varastot($params);
+
+			if (count($varastot) > 0) {
+				$varastot_lisa_query = " AND tunnus IN (".implode(',', $varastot).")";
 			}
 
-			if( $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0 ) {
-				$varastot_lisa_query = " AND tunnus = {$kukarow['oletus_varasto']}";
+			// Jos ollaan valittu varasto k‰yttˆliittym‰st‰
+			if ((isset($varasto) and $varasto != 0)) {
+				$oletusvarasto = $varasto;
 			}
-
-			$asiakkaan_oletusvarasto_query = "	SELECT avainsana
-												FROM asiakkaan_avainsanat
-												WHERE yhtio = '$kukarow[yhtio]'
-												AND laji = 'oletusmyyntivarasto'
-												AND liitostunnus = {$srow['liitostunnus']}";
-			$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
-			$aov = array();
-
-			while ($aov_row = mysql_fetch_assoc($aov_result)) {
-				$aov[] = $aov_row['avainsana'];
+			// Jos meill‰ ei ole tilausta kesken (= tullaan ekaa kertaa otsikolle)
+			elseif ($kukarow["kesken"] == 0) {
+				// jos "Esivalitaan myyntitilaukselle k‰ytt‰j‰n oletusvarasto"
+				if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O') {
+					$oletusvarasto = $kukarow['oletus_varasto'];
+				}
+				elseif (count(implode(',', $kukarow['varasto'])) == 1) {
+					$oletusvarasto = $kukarow['varasto'];
+				}
 			}
-
-			if(count($aov) == 1){
-				$oletusvarasto = $aov[0];
+			// Meill‰ on varasto kannassa
+			elseif (isset($srow["varasto"]) and $srow["varasto"] != 0) {
+				$oletusvarasto = $srow["varasto"];
 			}
-
-			if (empty($aov)) {
-				//Jos asiakkaalla ei ole oletusmyyntivarastoja, niin haetaan laskun toimipaikan myyntioikeus varastoja
-				if (isset($srow['yhtiotoimipaikka'])) {
-					$tp = $srow['yhtiotoimipaikka'];
-				}
-				elseif (isset($srow['yhtio_toimipaikka'])) {
-					$tp = $srow['yhtio_toimipaikka'];
-				}
-				elseif (isset($srow['toimipaikka'])) {
-					$tp = $srow['toimipaikka'];
-				}
-				$toimipaikan_myyntioikeus_varastot = hae_toimipaikan_myyntioikeus_varastot($tp);
-
-				if (count($toimipaikan_myyntioikeus_varastot) == 1) {
-					$oletusvarasto = $toimipaikan_myyntioikeus_varastot[0]['tunnus'];
-				}
+			else {
+				$oletusvarasto = 0;
 			}
 
 			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
-				$takuuvarasto = (int) $yhtiorow['takuuvarasto'];
-				$varastot_lisa_query = " and tunnus = {$takuuvarasto}";
-			}
-			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and count($aov) > 0) {
-				$aov = implode(",", $aov);
-				$varastot_lisa_query = " AND tunnus IN ($aov)";
-			}
-			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and count($aov) == 0 and count($toimipaikan_myyntioikeus_varastot) > 0) {
-				$toimipaikan_myyntioikeus_varastojen_varastotunnukset = array_column($toimipaikan_myyntioikeus_varastot, 'tunnus');
-				$varastot_lisa_query = " AND tunnus IN (".implode(',', $toimipaikan_myyntioikeus_varastojen_varastotunnukset).")";
-			}
-			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
-
-				if (isset($srow['yhtiotoimipaikka'])) {
-					$tp = $srow['yhtiotoimipaikka'];
-				}
-				elseif (isset($srow['yhtio_toimipaikka'])) {
-					$tp = $srow['yhtio_toimipaikka'];
-				}
-				elseif (isset($srow['toimipaikka'])) {
-					$tp = $srow['toimipaikka'];
-				}
-
-				if($tp != 0){
-					$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
-																FROM varastopaikat
-																WHERE yhtio = '$kukarow[yhtio]'
-																AND toimipaikka = {$tp}";
-					$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
-					if(mysql_num_rows($tlv_result) > 0) {
-						$varastot_lisa_query = " AND toimipaikka = {$tp}";
-					}
-					if(mysql_num_rows($tlv_result) == 1) {
-						$ainoa_tp_varasto = mysql_result($tlv_result, 0);
-					}
-				}
+				$oletusvarasto = (int) $yhtiorow['takuuvarasto'];
+				$varastot_lisa_query = " and tunnus = {$oletusvarasto}";
 			}
 
 			$selectoitu_varasto_toimipaikka = 0;
@@ -2101,28 +2071,7 @@
 
 				while ($varow = mysql_fetch_assoc($vares)) {
 
-						$sel = '';
-
-						if ($toim == "REKLAMAATIO" and $srow['varasto'] == '' and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] == $varow['tunnus']) {
-							$sel = 'selected';
-						}
-						// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto'] (paitsi jos on as.avainsanojen OLETUSMYYNTIVARASTO tai avainsanojen TOIMMYYNTI)
-						elseif ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and count($toimipaikan_myyntioikeus_varastot) == 0 and count($aov) == 0) {
-							$sel = 'selected';
-						}
-						// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan k‰ytt‰j‰n oletus varasto (paitsi jos on as.avainsanojen OLETUSMYYNTIVARASTO tai avainsanojen TOIMMYYNTI)
-						elseif ($kukarow["kesken"] == 0 and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and $varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '' and count($toimipaikan_myyntioikeus_varastot) == 0 and count($aov) == 0) {
-							$sel = 'selected';
-						}
-						elseif ($varow['tunnus'] == $srow["varasto"]) {
-							$sel = 'selected';
-						}
-						elseif (isset($oletusvarasto) and $oletusvarasto == $varow['tunnus']) {
-							$sel = 'selected';
-						}
-						elseif (isset($ainoa_tp_varasto) and $ainoa_tp_varasto == $varow['tunnus']) {
-							$sel = 'selected';
-						}
+						$sel = ($oletusvarasto == $varow['tunnus']) ? "SELECTED" : '';
 
 						if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
 
@@ -3649,7 +3598,7 @@
 		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
 		// T‰m‰ tehd‰‰n vain pikatilauksissa, ei jos edet‰‰n klikkaamalla
-		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and !isset($klikkaus)){
+		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and !isset($klikkaus) and !empty($asiakasid)){
 			$queryx = "SELECT toimipaikka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$asiakasid}";
 			$resultx = pupe_query($queryx);
 			$asiakkaan_toimipaikkax = mysql_result($resultx, 0);

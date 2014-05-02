@@ -194,72 +194,6 @@
 		}
 	}
 
-	if (!isset($kukarow_varasto)) {
-
-		$kukarow_varasto = array();
-
-		// K‰ytet‰‰n myyntitilauksella ensisijaisesti asiakkaan toimipaikkaa
-		if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
-
-			// Katsotaan saako t‰lle asiakkaalle myyd‰ vain jostain varastoista
-			$asiakkaan_oletusvarasto_query = " 	SELECT avainsana
-												FROM asiakkaan_avainsanat
-												WHERE yhtio = '$kukarow[yhtio]'
-												AND laji = 'oletusmyyntivarasto'
-												AND liitostunnus = {$laskurow['liitostunnus']}";
-			$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
-
-			// Jos asiakkaalta lˆytyy varastoja
-			if (mysql_num_rows($aov_result) > 0) {
-				while ($aov_row = mysql_fetch_assoc($aov_result)) {
-					$kukarow_varasto[] = $aov_row['avainsana'];
-				}
-			}
-			else {
-				// Haetaan varastot joita toimipaikka saa k‰ytt‰‰
-				$toimipaikan_myyntioikeus_varastot = hae_toimipaikan_myyntioikeus_varastot($laskurow['yhtio_toimipaikka']);
-				$kukarow_varasto = array_column($toimipaikan_myyntioikeus_varastot, 'tunnus');
-
-				$ytp = $laskurow['yhtio_toimipaikka'];
-
-				if ($ytp != 0 and empty($kukarow_varasto)) {
-					// Etsit‰‰n onko t‰ll‰ toimipaikalla jotain varastoja
-					$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
-																FROM varastopaikat
-																WHERE yhtio = '$kukarow[yhtio]'
-																AND toimipaikka = {$ytp}";
-					$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
-
-					while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
-						$kukarow_varasto[] = $tlv_row['tunnus'];
-					}
-				}
-			}
-
-			// Ei lˆytynyt yht‰‰n varastoa, otetaan varastot k‰ytt‰j‰n tiedoista
-			if (count($kukarow_varasto) == 0) {
-				$kukarow_varasto = explode(",", $kukarow["varasto"]);
-			}
-		}
-	}
-
-	// Onko p‰‰ss‰tty varasto josta myyd‰‰n
-	if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
-		$varasto = $varasto;
-	}
-	elseif (isset($varasto) and (int) $varasto > 0) {
-		$varasto = array((int) $varasto);
-	}
-	elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
-		$varasto = array((int) $laskurow["varasto"]);
-	}
-	elseif (isset($kukarow_varasto) and count($kukarow_varasto) > 0) {
-		$varasto = $kukarow_varasto;
-	}
-	else {
-		unset($varasto);
-	}
-
 	if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ",var_dump($varasto),"<br>";
 
 	// katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
@@ -422,6 +356,27 @@
 	}
 	else {
 		$rivityyppi = 'L'; // Myyntitilausrivi
+	}
+
+	// Onko p‰‰ss‰tty varasto josta myyd‰‰n
+	if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
+		$varasto = $varasto;
+	}
+	elseif (isset($varasto) and (int) $varasto > 0) {
+		$varasto = array((int) $varasto);
+	}
+	elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
+		$varasto = array((int) $laskurow["varasto"]);
+	}
+	elseif ($rivityyppi == 'L') {
+		$params = array(
+			'asiakas_tunnus' => $laskurow['liitostunnus'],
+			'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
+		);
+		$varasto = sallitut_varastot($params);
+	}
+	else {
+		unset($varasto);
 	}
 
 	if ($kpl > 0 and (($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') or $trow['minimi_era'] > 0) and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'ENNAKKO' or $toim == 'EXTRANET' or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))) {

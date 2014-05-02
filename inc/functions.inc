@@ -27479,30 +27479,90 @@ if (!function_exists('hae_varasto')) {
 
 }
 
-if (!function_exists('hae_toimipaikan_myyntioikeus_varastot')) {
-	function hae_toimipaikan_myyntioikeus_varastot($toimipaikka_tunnus) {
+if (!function_exists('sallitut_varastot')) {
+	function sallitut_varastot(array $params) {
 		global $kukarow, $yhtiorow;
 
-		if (!is_integer((int)$toimipaikka_tunnus)) {
-			return array();
+		// Palaitetaan tämä array
+		$kukarow_varasto = array();
+
+		// Parametrit
+		$asiakas_tunnus		 = isset($params['asiakas_tunnus']) ? (int)$params['asiakas_tunnus'] : 0;
+		$toimipaikka_tunnus	 = isset($params['toimipaikka_tunnus']) ? (int)$params['toimipaikka_tunnus'] : 0;
+		$toimitus_maa		 = isset($params['toimitus_maa']) ? $params['toimitus_maa'] : '';
+		$varastotyyppi		 = isset($params['varastotyyppi']) ? $params['varastotyyppi'] : '';
+
+		$varastotyyppi_join = "";
+		if ($varastotyyppi == 'normaali_varasto') {
+			$varastotyyppi_join = "AND varastopaikat.tyyppi=''";
 		}
 
-		$query	 = "	SELECT v.*
-						FROM avainsana AS a
-						JOIN varastopaikat AS v
-						ON (v.yhtio = a.yhtio
-							AND v.tunnus = a.selitetark )
-						WHERE a.yhtio = '{$kukarow['yhtio']}'
-						AND a.laji = 'TOIMMYYNTI'
-						AND a.selite = {$toimipaikka_tunnus}
-						ORDER BY a.jarjestys ASC";
-		$result	 = pupe_query($query);
+		// Katsotaan saako tälle asiakkaalle myydä vain jostain varastoista
+		if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $asiakas_tunnus != 0) {
+			$query		 = " 	SELECT avainsana
+								FROM asiakkaan_avainsanat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND laji = 'oletusmyyntivarasto'
+								AND liitostunnus = {$asiakas_tunnus}";
+			$aov_result	 = pupe_query($query);
 
-		$varastot	 = array();
-		while ($varasto	 = mysql_fetch_assoc($result)) {
-			$varastot[] = $varasto;
+			// Jos asiakkaalta löytyy varastoja
+			while ($aov_row = mysql_fetch_assoc($aov_result)) {
+				$kukarow_varasto[] = $aov_row['avainsana'];
+			}
+
+			if (count($kukarow_varasto) > 0) {
+				return $kukarow_varasto;
+			}
 		}
 
-		return $varastot;
+		if ($toimipaikka_tunnus != 0) {
+			// Haetaan varastot joita toimipaikka saa käyttää
+			$query	 = "	SELECT v.tunnus
+							FROM avainsana AS a
+							JOIN varastopaikat AS v
+							ON (v.yhtio = a.yhtio
+								AND v.tunnus = a.selitetark
+								AND (v.sallitut_maat like '%$toimitus_maa%' or v.sallitut_maat = '')
+								{$varastotyyppi_join} )
+							WHERE a.yhtio = '{$kukarow['yhtio']}'
+							AND a.laji = 'TOIMMYYNTI'
+							AND a.selite = {$toimipaikka_tunnus}
+							ORDER BY a.jarjestys ASC";
+			$result	 = pupe_query($query);
+
+			while ($varasto = mysql_fetch_assoc($result)) {
+				$kukarow_varasto[] = $varasto['tunnus'];
+			}
+
+			if (count($kukarow_varasto) > 0) {
+				return $kukarow_varasto;
+			}
+
+			// Etsitään onko tällä toimipaikalla jotain varastoja
+			$query		 = "	SELECT tunnus
+								FROM varastopaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND toimipaikka = {$toimipaikka_tunnus}
+								AND (varastopaikat.sallitut_maat like '%$toimitus_maa%' or varastopaikat.sallitut_maat = '')";
+			$tlv_result	 = pupe_query($query);
+
+			while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
+				$kukarow_varasto[] = $tlv_row['tunnus'];
+			}
+
+			if (count($kukarow_varasto) > 0) {
+				return $kukarow_varasto;
+			}
+		}
+
+		if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int)$kukarow["oletus_varasto"] > 0) {
+			return array($kukarow['oletus_varasto']);
+		}
+
+		// Ei löytynyt yhtään varastoa, otetaan varastot käyttäjän tiedoista
+		$kukarow_varasto = explode(",", $kukarow["varasto"]);
+
+		return $kukarow_varasto;
 	}
 }

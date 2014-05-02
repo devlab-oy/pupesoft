@@ -145,7 +145,7 @@ abstract class CSVDumper {
 				$i++;
 				echo "Rivi: {$i} Aineisto viallinen riviä ei konvertoida <br/>";
 				if ($this->is_proggressbar_on) {
-					$progress_bar->increase();
+//					$progress_bar->increase();
 				}
 				continue;
 			}

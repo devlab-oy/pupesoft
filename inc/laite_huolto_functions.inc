@@ -69,7 +69,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 				asiakas.tunnus AS asiakas_tunnus,
 				kohde.tunnus AS kohde_tunnus,
 				kohde.nimi AS kohde_nimi,
-				kohde.vastuuhenkilo,
+				kohde.vastuuhenkilo AS kohde_vastuuhenkilo,
 				paikka.nimi AS paikka_nimi,
 				tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
 				tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
@@ -378,7 +378,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 
 	$edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
 	$asiakas = hae_asiakas($huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
-	$tyomaarays_tunnus = luo_tyomaarays($asiakas, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")), 0.00);
+	$tyomaarays_tunnus = luo_tyomaarays($asiakas, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")), 0.00, $huollettavan_laitteen_huoltosyklirivi['kohde_vastuuhenkilo']);
 
 	//jos uusi laite, niin laitetaan työmääräyksen toimitusajankohta NOW
 	//HUOM jos huoltosyklirivin toimenpide_tuotteen_tyyppi = koeponnistus niin viimeinen_tapahtuma ei ole ikinä tyhjä. Luonti vaiheessa sinne asetetaan laite.valm_pvm
@@ -480,7 +480,7 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 	return $tyomaarays_tunnus;
 }
 
-function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true) {
+function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true, $vastuuhenkilo = '') {
 	global $kukarow, $yhtiorow;
 
 	if ($alv_23) {
@@ -569,7 +569,7 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true) {
 				laatija = '{$kukarow['kuka']}',
 				luontiaika = NOW(),
 				tyostatus = 'X',
-				tyojono = '',
+				tyojono = '{$vastuuhenkilo}',
 				otunnus = '{$tunnus}'";
 	pupe_query($query);
 

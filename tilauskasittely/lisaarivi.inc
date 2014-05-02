@@ -38,7 +38,7 @@
 
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
-	
+
 	if (!isset($rivitunnus)) $rivitunnus = 0;
 	else $rivitunnus = (int) $rivitunnus;
 

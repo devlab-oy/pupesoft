@@ -506,7 +506,7 @@
 	$toimitusvahvistus_desadv_lahetys = FALSE;
 
 	//jos on laitettu kollikentt‰‰n 0 niin ei yritet‰ luoda siirtotiedostoa
-	if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
+	if (true) {#($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
 
 		//	Haetaan otsikkotiedot pohjalle
 		$query = "	SELECT lasku.*, laskun_lisatiedot.*,

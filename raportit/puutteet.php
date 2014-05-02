@@ -81,6 +81,7 @@
 						and tilausrivi.tyyppi	='L'
 						$lisaasiakas
 						and tuote.status NOT IN ('P','X')
+						and lasku.tila != 'D'
 						GROUP BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus
 						HAVING puutekpl <> 0
 						ORDER BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus";
@@ -100,6 +101,7 @@
 						and tilausrivi.var in ('P','H','')
 						$lisaasiakas
 						and tuote.status NOT IN ('P','X')
+						and lasku.tila != 'D'
 						GROUP BY tilausrivi.osasto, tilausrivi.try $sellisa
 						$rivilisa
 						ORDER BY tilausrivi.osasto, tilausrivi.try $sellisa";

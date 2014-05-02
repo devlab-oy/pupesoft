@@ -27601,3 +27601,72 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
 	  return $tuotteet;
 	}
 }
+
+
+if (!function_exists("hinta_kuluineen")) {
+  function hinta_kuluineen($tuotenumero, $hinta) {
+    global $kukarow, $yhtiorow;
+
+    $kuluprosentti = hinnan_kuluprosentti($tuotenumero);
+
+    if ($kuluprosentti === false) {
+      return $hinta;
+    }
+
+    $tulos = $hinta / ((100 - $kuluprosentti) / 100);
+    return $tulos;
+  }
+}
+
+if (!function_exists("hinnan_kuluprosentti")) {
+  function hinnan_kuluprosentti($tuotenumero) {
+    global $kukarow, $yhtiorow;
+
+    if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') {
+      return false;
+    }
+
+    $query = "  SELECT toimi.kulujen_laskeminen_hintoihin
+          FROM tuotteen_toimittajat
+          JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+          AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
+          WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
+          AND tuotteen_toimittajat.tuoteno = '{$tuotenumero}'
+          ORDER BY
+          if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
+          tuotteen_toimittajat.tunnus ASC
+          LIMIT 1";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+
+    if ($row['kulujen_laskeminen_hintoihin'] == 'E') {
+      return false;
+    }
+
+    $query = "  SELECT tunnus
+          FROM yhtion_toimipaikat_parametrit
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND toimipaikka = '{$kukarow['toimipaikka']}'
+          AND parametri = 'kulujen_laskeminen_hintoihin'
+          AND arvo = 'E'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      return false;
+    }
+
+    return $yhtiorow['kuluprosentti'];
+  }
+}
+
+
+
+if (!function_exists("kate_kuluineen")) {
+  function kate_kuluineen($tuoteno, $hinta, $kate) {
+    global $kukarow, $yhtiorow;
+    $ostohinta = $hinta - $kate;
+    $ostohinta = hinta_kuluineen($tuoteno, $ostohinta);
+    $kate = $hinta - $ostohinta;
+    return $kate;
+  }
+}

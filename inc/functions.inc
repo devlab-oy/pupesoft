@@ -27523,10 +27523,11 @@ if (!function_exists('sallitut_varastot')) {
 			// Haetaan varastot joita toimipaikka saa k‰ytt‰‰
 			$query	 = "	SELECT v.tunnus
 							FROM avainsana AS a
-							JOIN varastopaikat AS v
-							ON (v.yhtio = a.yhtio
-								AND v.tunnus = a.selitetark
-								AND (v.sallitut_maat like '%$toimitus_maa%' or v.sallitut_maat = '')
+							JOIN varastopaikat
+							ON (varastopaikat.yhtio = a.yhtio
+								AND varastopaikat.tunnus = a.selitetark
+								AND (varastopaikat.sallitut_maat like '%$toimitus_maa%' or varastopaikat.sallitut_maat = '')
+								AND varastopaikat.tyyppi != 'P'
 								{$varastotyyppi_lisa} )
 							WHERE a.yhtio = '{$kukarow['yhtio']}'
 							AND a.laji = 'TOIMMYYNTI'
@@ -27548,6 +27549,7 @@ if (!function_exists('sallitut_varastot')) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND toimipaikka = {$toimipaikka_tunnus}
 								AND (varastopaikat.sallitut_maat like '%$toimitus_maa%' or varastopaikat.sallitut_maat = '')
+								AND varastopaikat.tyyppi != 'P'
 								$varastotyyppi_lisa";
 			$tlv_result	 = pupe_query($query);
 
@@ -27573,6 +27575,7 @@ if (!function_exists('sallitut_varastot')) {
 							FROM varastopaikat
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND (varastopaikat.sallitut_maat like '%$toimitus_maa%' or varastopaikat.sallitut_maat = '')
+							varastopaikat.tyyppi != 'P'
 							$varastotyyppi_lisa";
 		$result	 = pupe_query($query);
 
@@ -27584,6 +27587,6 @@ if (!function_exists('sallitut_varastot')) {
 			return $kukarow_varasto;
 		}
 
-		return $kukarow_varasto;
+		return array(0);
 	}
 }

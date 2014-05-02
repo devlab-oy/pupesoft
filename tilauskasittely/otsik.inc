@@ -2067,21 +2067,12 @@
 
 			$oikea_sarake[$oikea] .= "<select name='varasto' onchange='this.form.submit()'><option value='0'>".t("Kaikista")."</option>";
 
-			if (mysql_num_rows($vares) > 0) {
-
-				while ($varow = mysql_fetch_assoc($vares)) {
-
-						$sel = ($oletusvarasto == $varow['tunnus']) ? "SELECTED" : '';
-
-						if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
-
-						$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
-				}
-				$oikea_sarake[$oikea] .= "</select>";
+			while ($varow = mysql_fetch_assoc($vares)) {
+				$sel = ($oletusvarasto == $varow['tunnus']) ? "SELECTED" : '';
+				if ($sel != '')	$selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
+				$oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 			}
-			else{
-				$oikea_sarake[$oikea] .= "<option value='0'>".t("Kaikista")."</option></select>";
-			}
+			$oikea_sarake[$oikea] .= "</select>";
 
 			$oikea_sarake[$oikea] .= "</td>";
 			$oikea++;

@@ -2067,7 +2067,7 @@
 				if ($tuoterow["ei_saldoa"] == "") {
 					echo "<tr class='aktiivi'>";
 					echo "<td colspan='5'>".t("Varastonarvo nyt").":</td>";
-					echo "<td align='right'>".$_kehahin."</td>";
+					echo "<td align='right'>".round($_kehahin,2)."</td>";
 					echo "<td align='right'></td>";
 					echo "<td align='right'>$vararvo_nyt</td>";
 					echo "<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$_kehahin)."</td>";
@@ -2182,7 +2182,7 @@
 						echo "<td nowrap align='right' valign='top'>".$prow['kpl']."</td>";
 						echo "<td nowrap align='right' valign='top'>".hintapyoristys($prow["kplhinta"])."</td>";
 						$_hinta = hinta_kuluineen($tuoterow['tuoteno'], $prow['hinta']);
-						echo "<td nowrap align='right' valign='top'>".$_hinta."</td>";
+						echo "<td nowrap align='right' valign='top'>".round($_hinta,2)."</td>";
 
 						if ($prow["laji"] == "laskutus") {
 							$kate = $kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta'] );

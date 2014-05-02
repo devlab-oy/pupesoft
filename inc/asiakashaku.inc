@@ -480,13 +480,13 @@ if ($monta > 1 and $monta <= $limit) {
 
 		echo "<th>",t("ytunnus"),"</th>";
 		echo "<th>",t("asnro"),"</th>";
+		echo "<th>",t("lasknimi/toimnimi"),"</th>";
+		echo "<th colspan='3'>",t("laskosoite/toimosoite"),"</th>";
 
 		if ($yhtiorow['toimipaikkakasittely'] == 'L') {
 			echo "<th>",t("Toimipaikka"),"</th>";
 		}
 
-		echo "<th>",t("lasknimi/toimnimi"),"</th>";
-		echo "<th colspan='3'>",t("laskosoite/toimosoite"),"</th>";
 		echo "<td class='back'></td></tr>";
 	}
 
@@ -533,6 +533,10 @@ if ($monta > 1 and $monta <= $limit) {
 
 			echo "<td>{$asiakas['ytunnus']}</td>";
 			echo "<td>{$asiakas['asiakasnro']}</td>";
+			echo "<td>{$asiakas['nimi']} {$asiakas['nimitark']} {$brnim}</td>";
+			echo "<td>{$asiakas['osoite']} {$bros}</td>";
+			echo "<td>{$asiakas['postino']} {$brpostino}</td>";
+			echo "<td>{$asiakas['postitp']} {$brpostitp}</td>";
 
 			if ($yhtiorow['toimipaikkakasittely'] == 'L') {
 
@@ -551,11 +555,6 @@ if ($monta > 1 and $monta <= $limit) {
 
 				echo "</td>";
 			}
-
-			echo "<td>{$asiakas['nimi']} {$asiakas['nimitark']} {$brnim}</td>";
-			echo "<td>{$asiakas['osoite']} {$bros}</td>";
-			echo "<td>{$asiakas['postino']} {$brpostino}</td>";
-			echo "<td>{$asiakas['postitp']} {$brpostitp}</td>";
 
 			echo "<form method='post'>";
 			echo "<td class='back'>";

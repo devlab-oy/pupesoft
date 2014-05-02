@@ -27596,7 +27596,6 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
 	    if (!isset($tuotteet[$tuote['tuoteno']])) {
 	      $tuotteet[$tuote['tuoteno']] = $yhtiorow['kuluprosentti'];
 	    }
-
 	  }
 	  return $tuotteet;
 	}
@@ -27609,7 +27608,6 @@ if (!function_exists("hinnan_kuluprosentti")) {
     if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') {
       return false;
     }
-
     $query = "  SELECT toimi.kulujen_laskeminen_hintoihin
           FROM tuotteen_toimittajat
           JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
@@ -27626,7 +27624,6 @@ if (!function_exists("hinnan_kuluprosentti")) {
     if ($row['kulujen_laskeminen_hintoihin'] == 'E') {
       return false;
     }
-
     $query = "  SELECT tunnus
           FROM yhtion_toimipaikat_parametrit
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -27638,8 +27635,17 @@ if (!function_exists("hinnan_kuluprosentti")) {
     if (mysql_num_rows($result) > 0) {
       return false;
     }
-
     return $yhtiorow['kuluprosentti'];
+  }
+}
+
+if (!function_exists("hinta_kuluineen")) {
+  function hinta_kuluineen($tuotenumero, $hinta) {
+    global $kukarow, $yhtiorow;
+    $kuluprosentti = hinnan_kuluprosentti($tuotenumero);
+    if ($kuluprosentti === false) { return $hinta; }
+    $tulos = $hinta / ((100 - $kuluprosentti) / 100);
+    return $tulos;
   }
 }
 

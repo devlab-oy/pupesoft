@@ -26931,7 +26931,7 @@ if (!function_exists('hae_maksuehdot')) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT *
-					FROM maksuehdot
+					FROM maksuehto
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
 

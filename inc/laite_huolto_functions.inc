@@ -377,7 +377,8 @@ function generoi_tyomaarays($huollettavan_laitteen_huoltosyklirivi, $laitteiden_
 	$kukarow['kesken'] = 0;
 
 	$edellinen_tyomaarays = hae_laitteen_edellinen_tyomaarays($huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
-	$tyomaarays_tunnus = luo_myyntitilausotsikko("TYOMAARAYS", $huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
+	$asiakas = hae_asiakas($huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
+	$tyomaarays_tunnus = luo_tyomaarays($asiakas, date("Y-m-d", strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']." + {$huollettavan_laitteen_huoltosyklirivi['huoltovali']} days")), 0.00);
 
 	//jos uusi laite, niin laitetaan työmääräyksen toimitusajankohta NOW
 	//HUOM jos huoltosyklirivin toimenpide_tuotteen_tyyppi = koeponnistus niin viimeinen_tapahtuma ei ole ikinä tyhjä. Luonti vaiheessa sinne asetetaan laite.valm_pvm
@@ -520,53 +521,56 @@ function luo_tyomaarays($asiakas, $toimaika, $summa, $alv_23 = true) {
 					valkoodi = 'EUR',
 					alv = '{$alv}',
 					toimaika = '{$toimaika}',
+					kerayspvm = NOW(),
 					summa = '{$summa}',
 					hinta = '{$summa}',
-					laatija = 'import',
-					luontiaika = NOW(),
 					lahetetyyppi = 'tulosta_lahete_eiale_eihinta.inc',
 					laskutyyppi = '-9',
 					myyja = '{$kukarow['tunnus']}',
-					maksuehto = '{$maksuehto['tunnus']}'
+					maksuehto = '{$maksuehto['tunnus']}',
 					toimitustapa = 'Nouto',
 					ytunnus = '{$asiakas['ytunnus']}',
 					ovttunnus = '{$asiakas['ovttunnus']}',
 					toim_ovttunnus = '{$asiakas['ovttunnus']}',
-				chn = '100',
+					chn = '100',
 					mapvm = '0000-00-00',
 					popvm = '0000-00-00 00:00:00',
 					alv_tili = '{$yhtiorow['alv']}',
-					tila = 'L',
-					alatila = 'D',
+					tila = 'A',
+					alatila = '',
 					muutospvm = NOW(),
-					muuttaja = 'import',
+					muuttaja = '{$kukarow['kuka']}',
+					laatija = '{$kukarow['kuka']}',
+					luontiaika = NOW(),
 					tilaustyyppi = 'A',
 					liitostunnus = '{$asiakas['tunnus']}',
-					ohjelma_moduli = 'PUPESOFT',";
+					ohjelma_moduli = 'PUPESOFT'";
 	pupe_query($query);
 	$tunnus	 = mysql_insert_id();
 
 	$query = "	INSERT INTO laskun_lisatiedot SET
-					yhtio = '{$kukarow['yhtio']}',
-					otunnus = '{$tunnus}',
-					kolm_ovttunnus = 'FI',
-					kolm_maa = '{$asiakas['maa']}',
-					laskutus_nimi = '{$asiakas['nimi']}',
-					laskutus_osoite = '{$asiakas['osoite']}',
-					laskutus_postino = '{$asiakas['postino']}',
-					laskutus_postitp = '{$asiakas['postitp']}',
-					laskutus_maa = '{$asiakas['maa']}',
-					laatija = 'import',
-					luontiaika = NOW()";
+				yhtio = '{$kukarow['yhtio']}',
+				otunnus = '{$tunnus}',
+				kolm_ovttunnus = 'FI',
+				kolm_maa = '{$asiakas['maa']}',
+				laskutus_nimi = '{$asiakas['nimi']}',
+				laskutus_osoite = '{$asiakas['osoite']}',
+				laskutus_postino = '{$asiakas['postino']}',
+				laskutus_postitp = '{$asiakas['postitp']}',
+				laskutus_maa = '{$asiakas['maa']}',
+				muutospvm = NOW(),
+				muuttaja = '{$kukarow['kuka']}',
+				laatija = '{$kukarow['kuka']}',
+				luontiaika = NOW()";
 	pupe_query($query);
 
 	$query = "	INSERT INTO tyomaarays SET
-					yhtio = '{$kukarow['yhtio']}',
-					laatija = 'import',
-					luontiaika = NOW(),
-					tyostatus = 'X',
-					tyojono = 'import',
-					otunnus = '{$tunnus}'";
+				yhtio = '{$kukarow['yhtio']}',
+				laatija = '{$kukarow['kuka']}',
+				luontiaika = NOW(),
+				tyostatus = 'X',
+				tyojono = '',
+				otunnus = '{$tunnus}'";
 	pupe_query($query);
 
 	return $tunnus;

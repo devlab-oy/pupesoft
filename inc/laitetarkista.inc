@@ -76,28 +76,6 @@ if (!function_exists("laitetarkista")) {
 			if (empty($sarjanro)) {
 				$virhe[$i] = t("Sarjanumero on pakollinen").'!';
 			}
-			else {
-				$validator = new FormValidator();
-				if (!$validator->validateItem($sarjanro, 'numero')) {
-					$virhe[$i] = t("Sarjanumero pit‰‰ olla numero").'!';
-				}
-
-				$sarjanumero_where = "";
-				if (!empty($trow['tunnus'])) {
-					//kun p‰ivitet‰‰n hyv‰ksyt‰‰n kannassa oleva sama sarjanro
-					$sarjanumero_where = "AND tunnus != '{$trow['tunnus']}'";
-				}
-				$query = "	SELECT sarjanro
-							FROM laite
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND sarjanro = '{$sarjanro}'
-							{$sarjanumero_where}";
-				$sarjanro_result = pupe_query($query);
-
-				if (mysql_num_rows($sarjanro_result) > 0) {
-					$virhe[$i] = t("Sarjanumero pit‰‰ olla uniikki").'!';
-				}
-			}
 		}
 
 		if (mysql_field_name($result, $i) == "tila") {

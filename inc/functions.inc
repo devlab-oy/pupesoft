@@ -27602,22 +27602,6 @@ if (!function_exists("tuotteiden_kulutarkistus")) {
 	}
 }
 
-
-if (!function_exists("hinta_kuluineen")) {
-  function hinta_kuluineen($tuotenumero, $hinta) {
-    global $kukarow, $yhtiorow;
-
-    $kuluprosentti = hinnan_kuluprosentti($tuotenumero);
-
-    if ($kuluprosentti === false) {
-      return $hinta;
-    }
-
-    $tulos = $hinta / ((100 - $kuluprosentti) / 100);
-    return $tulos;
-  }
-}
-
 if (!function_exists("hinnan_kuluprosentti")) {
   function hinnan_kuluprosentti($tuotenumero) {
     global $kukarow, $yhtiorow;
@@ -27658,8 +27642,6 @@ if (!function_exists("hinnan_kuluprosentti")) {
     return $yhtiorow['kuluprosentti'];
   }
 }
-
-
 
 if (!function_exists("kate_kuluineen")) {
   function kate_kuluineen($tuoteno, $hinta, $kate) {

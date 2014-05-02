@@ -1080,6 +1080,9 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
+			elseif ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
+				if (strpos($hakuehto, 'kaikki') === false) $lisa .= " AND asiakas.toimipaikka {$hakuehto} ";
+			}
 			elseif ($from == "" and $toim == 'toimi' and $alias_set == "KAYTTAJA") {
 				$ashak = "	SELECT group_concat(concat('\'',kuka,'\'')) kukat
 							FROM kuka
@@ -1192,6 +1195,12 @@
 
 			$ulisa .= "&haku[$i]=".urlencode($haku[$i]);
     	}
+    	elseif (!isset($haku[$i])) {
+    		if ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
+				if ($kukarow['toimipaikka'] != 0) $lisa .= " AND asiakas.toimipaikka = '{$kukarow['toimipaikka']}' ";
+			}
+
+    	}
     }
 
     //	S‰ilytet‰‰n ohjeen tila
@@ -1281,6 +1290,7 @@
 			echo "' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'mista' value = '{$mista}' />
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
@@ -1435,6 +1445,36 @@
 
 						echo "</select>";
 					}
+					elseif ($toim == "asiakas" and $yhtiorow['toimipaikkakasittely'] == 'L' and mysql_field_name($result, $i) == "toimipaikka") {
+
+						echo "<br />";
+						echo "<select name='haku[{$i}]'>";
+
+						echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+						$sel = strtolower($haku[$i]) == "kaikki" ? "selected" : "";
+
+						echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
+
+						$sel = '';
+
+						$query = "	SELECT DISTINCT nimi, tunnus
+									FROM yhtion_toimipaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									ORDER BY nimi";
+						$toimipaikka_chk_res = pupe_query($query);
+
+						while ($toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res)) {
+
+							$sel = (isset($haku[$i]) and $haku[$i] == "@".$toimipaikka_chk_row['tunnus']) ? ' selected' : '';
+
+							if (!isset($haku[$i]) and $kukarow['toimipaikka'] != 0 and $kukarow['toimipaikka'] == $toimipaikka_chk_row['tunnus']) $sel = 'selected';
+
+							echo "<option value='@{$toimipaikka_chk_row['tunnus']}'{$sel}>{$toimipaikka_chk_row['nimi']}</option>";
+						}
+
+						echo "</select>";
+					}
 					elseif (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
 						// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
 						if (!isset($haku[$i])) $haku[$i] = "";
@@ -1497,10 +1537,10 @@
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_float($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhj‰*");
 
-						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
+						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?mista=$mista&ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
 
 						if ($from == "" and $lopetus == "") {
-							echo "&lopetus=".$palvelin2."yllapito.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
+							echo "&lopetus=".$palvelin2."yllapito.php////mista=$mista//ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
 						}
 						else {
 							echo "&lopetus=$lopetus";
@@ -1626,6 +1666,7 @@
 
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' $javalisasubmit enctype='multipart/form-data'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
+		echo "<input type = 'hidden' name = 'mista' value = '{$mista}' />";
 		echo "<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 		echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
@@ -1956,6 +1997,11 @@
 
 			if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=asiakas%", "", "OK")) !== FALSE) {
 				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+
+			if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote&mista=asiakas%", "", "OK")) !== FALSE) {
+				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&mista=asiakas&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@{$trow['tunnus']}&lukitse_avaimeen={$trow['tunnus']}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<br />";
 			}
 
 			if (($toikrow = tarkista_oikeus("yllapito.php", "rahtisopimukset%", "", "OK")) !== FALSE) {

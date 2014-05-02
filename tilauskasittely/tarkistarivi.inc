@@ -1199,7 +1199,6 @@
 							if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 
 								$query = "	SELECT tt.tehdas_saldo,
-											tt.tehdas_saldo_paivitetty,
 											tt.liitostunnus,
 											tt.toim_tuoteno,
 											tt.tunnus AS tt_tunnus,
@@ -1220,7 +1219,6 @@
 								$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
 
 							 	$tuotteen_toimittajan_tunnus = $tehdas_saldo_row['liitostunnus'];
-							 	$tehtaan_saldon_font = $tehdas_saldo_row['tehdas_saldo'] < 1 ? "error" : "ok";
 
 						 		$_tilattu = (int) $row['tilkpl'];
 					 			$_tuote['toim_tuoteno'] = $tehdas_saldo_row['toim_tuoteno'];
@@ -1239,18 +1237,27 @@
 							 	}
 
 							 	if ($tehdas_saldo_row['selitetark_2'] == '') {
-							 		$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</font>";
+
+									if (!empty($laskurow['varasto'])) {
+										$kohde_varastot = array($laskurow['varasto']);
+									}
+									else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+										$kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
+										$kohde_varastot = array_column($kohde_varastot, 'tunnus');
+									}
+									else {
+										$kohde_varastot = array();
+									}
+
+									$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $_tuote['tuoteno']);
+
+									$_siirrettavissa = $siirto_varastot[0]['tuote']['myytavissa'];
+								 	$siirrettavissa_saldon_font = $_siirrettavissa < 1 ? "error" : "ok";
+
+							 		$vastaavat_table .= "<font class='{$siirrettavissa_saldon_font}'>".sprintf("%.2f", $_siirrettavissa)."</font>";
 							 	}
 
 								$vastaavat_table .= "</td>";
-
-								if ($tehdas_saldo_row['selitetark_2'] != "") {
-									$vastaavat_table .= "<td align='right'></td>";
-								}
-								else {
-									$vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tehdas_saldo_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
-								}
-
 								$vastaavat_table .= "<td>";
 
 								if ($tehdas_saldo_row['selitetark_2'] != "") {
@@ -1296,7 +1303,7 @@
 						$vastaavat_html .= "<tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
 
 						if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
-							$vastaavat_html .= "<th>".t("Toimittaja")."</th><th>".t("Toimittajan saldo")."</th><th>".t("Toimittajan saldo päivitetty")."</th>";
+							$vastaavat_html .= "<th>".t("Toimittaja")."</th><th>".t("Siirrettävissä")."</th>";
 							$vastaavat_html .= "<th>".t("Tarkista toimittajan saldo")."</th>";
 						}
 
@@ -1338,7 +1345,6 @@
 	if ($sahkoinen_tilausliitanta and (!isset($vastaavat_html) or trim($vastaavat_html) == '') and (!isset($vastaavat_table) or trim($vastaavat_table) == '') and in_array($row['var'], array('U','T'))) {
 
 		$query = "	SELECT tt.tehdas_saldo,
-					tt.tehdas_saldo_paivitetty,
 					tt.liitostunnus,
 					tt.toim_tuoteno,
 					tt.tunnus AS tt_tunnus,

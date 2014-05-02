@@ -11,7 +11,7 @@
 	if (!isset($tapahtumalaji))  $tapahtumalaji = "";
 	if (!isset($tilalehinta))  	 $tilalehinta = "";
 	if (!isset($historia))  	 $historia = "";
-	if (!isset($toimipaikka))	 $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
+	if (!isset($toimipaikka))	 $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : 0;
 
 	$onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
@@ -879,7 +879,7 @@
 
 				//saldot per varastopaikka
 				if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G") {
-					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, varastopaikat.toimipaikka AS varasto_toimipaikka,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
 								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
@@ -903,7 +903,7 @@
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
 				else {
-					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, varastopaikat.toimipaikka AS varasto_toimipaikka,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
 								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
@@ -929,7 +929,7 @@
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
 
-						if ($saldorow["yhtio"] == $kukarow["yhtio"]) {
+						if ($saldorow["yhtio"] == $kukarow["yhtio"] and (($toimipaikka == $saldorow['varasto_toimipaikka']) or $toimipaikka == 'kaikki' )) {
 							$kokonaissaldo_tapahtumalle += $saldo;
 						}
 
@@ -1103,7 +1103,10 @@
 
 			if ($onkolaajattoimipaikat) {
 
-				$sel = $toimipaikka == '0' ? "selected" : "";
+				$sel = '';
+				if ($toimipaikka == 0 or $kukarow['toimipaikka'] == 0) {
+					$sel = 'selected';
+				}
 
 				echo "<br /><hr />";
 				echo "<a href='#' name='RajaaToimipaikalla'></a>";

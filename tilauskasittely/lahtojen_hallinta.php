@@ -2470,7 +2470,7 @@ function hae_yhdistettavat_tilaukset() {
 						else {
 							$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'N' AND lasku.alatila = 'A')" : "(lasku.tila = 'N' AND lasku.alatila = 'A')";
 						}
-						
+
 						break;
 					case 'aloitettu':
 						if ($nayta_myos_siirrot) {
@@ -2576,7 +2576,7 @@ function hae_yhdistettavat_tilaukset() {
 
 			$priorities = array();
 
-			mysql_data_seek($lahto_res, 0);
+			if (mysql_num_rows($lahto_res) > 0) mysql_data_seek($lahto_res, 0);
 
 			while ($lahto_row = mysql_fetch_assoc($lahto_res)) {
 				$priorities[$lahto_row['prioriteetti']] = $lahto_row['prioriteetti'];
@@ -2672,7 +2672,7 @@ function hae_yhdistettavat_tilaukset() {
 			echo "<th class='sort_row_by' id='row_weight__{$row['lahdon_tunnus']}__{$y}'>",t("Paino")," <img class='row_direction_weight' /></th>";
 			echo "</tr>";
 
-			mysql_data_seek($lahto_res, 0);
+			if (mysql_num_rows($lahto_res) > 0) mysql_data_seek($lahto_res, 0);
 
 			$x = 0;
 

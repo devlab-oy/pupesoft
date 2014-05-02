@@ -827,6 +827,7 @@
 					if (tuotetyyppi='K','Tyˆ','Varaosa') tuotetyyppi,
 					tuote.myyntihinta,
 					tuote.kehahin,
+					tuote.tuoteno,
 					tuote.sarjanumeroseuranta,
 					tuote.myyntihinta_maara,
 					tuote.status,
@@ -1393,6 +1394,7 @@
 						$kate = "";
 					}
 					elseif ($row["rivihinta"] != 0) {
+						$row["kate"] = kate_kuluineen($row["tuoteno"], $row["rivihinta"], $row["kate"]);
 						if ($row["kate"] < 0) {
 							$kate = sprintf('%.2f', -1 * abs(100 * $row["kate"] / $row["rivihinta"]))."%";
 						}
@@ -1410,7 +1412,7 @@
 					if ($kpl > 0) {
 						//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
 						$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
-
+						$ostohinta = hinta_kuluineen($row["tuoteno"], $ostohinta);
 						// Kate = Hinta - Ostohinta
 						if ($row["rivihinta"] != 0) {
 							$kate = sprintf('%.2f',100*($row["rivihinta"] - ($ostohinta * $kpl))/$row["rivihinta"])."%";
@@ -1452,8 +1454,8 @@
 										LIMIT 1";
 							$sarjares1 = pupe_query($query);
 							$sarjarow1 = mysql_fetch_assoc($sarjares1);
-
-							$ostohinta += $sarjarow1["ostohinta"];
+							$oh = hinta_kuluineen($arow['tuoteno'], $sarjarow1['ostohinta']);
+							$ostohinta += $oh;
 						}
 
 						// Kate = Hinta - Alkuper‰inen ostohinta
@@ -1476,7 +1478,9 @@
 						$kate = "";
 					}
 					elseif ($row["rivihinta"] != 0) {
-						$kate = sprintf('%.2f',100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])))/$row["rivihinta"])."%";
+						$khh = kehahin($row["tuoteno"]);
+						$khh = hinta_kuluineen($row['tuoteno'], $khh);
+						$kate = round(100 * ($row["rivihinta"] - ($khh*($row["varattu"]+$row["jt"]+$row['m‰‰r‰']))) / $row["rivihinta"], 2) . "%";
 					}
 					elseif (kehahin($row["tuoteno"]) != 0) {
 						$kate = "-100.00%";
@@ -1639,7 +1643,12 @@
 
 			$colspan += $yhtiorow['myynnin_alekentat'] - 1;
 
-			echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Veroton yhteens‰").":</td><td class='spec' align='right'>".sprintf('%.2f',$arvo_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+			echo "<tr>
+					<td class='back' colspan='$colspan'></td>
+					<td class='spec' colspan='3' align='right' nowrap>".t("Veroton yhteens‰").":</td>
+					<td class='spec' align='right'>".sprintf('%.2f',$arvo_yht)."</td>
+					<td class='spec'>$laskurow[valkoodi]</td>
+				</tr>";
 
 
 			// Haetaan kaikki alvikannat riveilt‰

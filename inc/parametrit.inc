@@ -354,7 +354,7 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 	if ($phpnimi != 'index.php') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
 	}
-	else { 
+	else {
 		if (isset($loginkieli)) {
 		 	$browkieli = $loginkieli;
 		}
@@ -371,7 +371,7 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 			else {
 				$browkieli = 'fi';
 			}
-		}		
+		}
 
 		if (isset($mobile) and $mobile and include_once("mobiili/login.php"));
 		elseif (@include_once("login.php"));
@@ -478,6 +478,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 			if (isset($myyntiera)) {
 				setcookie('myyntiera', $myyntiera, time()+60*60*24*90, "/");
+			}
+			if (isset($kesken)) {
+				setcookie('kesken', $kesken, time()+60*60*24*90, "/");
 			}
 		}
 

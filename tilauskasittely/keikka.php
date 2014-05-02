@@ -39,6 +39,7 @@ if (!isset($ostotil)) 			$ostotil = "";
 if (!isset($toimittajaid)) 		$toimittajaid = "";
 if (!isset($kauttalaskutus)) 	$kauttalaskutus = "";
 if (!isset($mobiili_keikka)) 	$mobiili_keikka = "";
+if (!isset($toimipaikka))		$toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
@@ -1013,8 +1014,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 	}
 
 	if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
-		$joinlisa .= " JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = lasku.yhtio AND yhtion_toimipaikat.tunnus = lasku.yhtio_toimipaikka)";
-		$selectlisa .= ", yhtion_toimipaikat.nimi as toimipaikka_nimi";
+		$joinlisa .= " LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = lasku.yhtio AND yhtion_toimipaikat.tunnus = lasku.yhtio_toimipaikka)";
+		$selectlisa .= ", IF(yhtion_toimipaikat.tunnus IS NULL, '".t('Ei toimipaikkaa')."', yhtion_toimipaikat.nimi) as toimipaikka_nimi";
 	}
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	SELECT lasku.tunnus,
@@ -1025,7 +1026,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				lasku.luontiaika,
 				lasku.laatija,
 				lasku.rahti_etu,
-				lasku.kohdistettu
+				lasku.kohdistettu,
+				lasku.yhtio_toimipaikka
 				{$selectlisa}
 				FROM lasku USE INDEX (tila_index)
 				{$joinlisa}
@@ -1229,7 +1231,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				echo "<td align='right'>";
 				echo "<form method='post'>";
 				echo "<input type='hidden' name='toimittajaid' 	value='$toimittajaid'>";
-				echo "<input type='hidden' name='toimipaikka' 	value='$toimipaikka'>";
+				echo "<input type='hidden' name='toimipaikka' 	value='$row[yhtio_toimipaikka]'>";
 				echo "<input type='hidden' name='otunnus' 		value='$row[tunnus]'>";
 				echo "<input type='hidden' name='ytunnus' 		value='$ytunnus'>";
 				echo "<input type='hidden' name='keikkaid' 		value='$row[laskunro]'>";

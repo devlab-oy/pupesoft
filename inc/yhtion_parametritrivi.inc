@@ -3917,8 +3917,8 @@
 		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('S' => '', 'A' => '');
 
 		$ulos .= "<option value = ''>".t("Vastaavat tuotteet näytetään normaalisti")."</option>";
-		$ulos .= "<option value = 'S' {$sel['S']}>".t("Vastaavat tuotteet näytetään vaikka saldo on nolla. Näytetään myös toimittajan tehtaan saldo.")."</option>";
-		$ulos .= "<option value = 'A' {$sel['A']}>".t("Vastaavat tuotteet näytetään aina, jos rivi on puute. Näytetään myös toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "<option value = 'S' {$sel['S']}>".t("Vastaavat tuotteet näytetään vaikka saldo on nolla. Näytetään myös siirrettävä saldo.")."</option>";
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Vastaavat tuotteet näytetään aina, jos rivi on puute. Näytetään myös siirrettävä saldo.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -12,16 +12,16 @@
 		else {
 			$apu_asiakasnumero = (int) $t[$pointer];
 		}
-		
+
 		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
 		$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-					FROM yhtio 
+					FROM yhtio
 					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-					where konserni	 = '$yhtiorow[konserni]' 
+					where konserni	 = '$yhtiorow[konserni]'
 					and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
-		$vresult2 = mysql_query($query) or pupe_error($query);			
+		$vresult2 = mysql_query($query) or pupe_error($query);
 		$srowapu = mysql_fetch_array($vresult2);
-		
+
 		if ($srowapu["yhtiot"] != "") {
 			$tarkyhtio = $srowapu["yhtiot"];
 		}
@@ -62,7 +62,7 @@
 							WHERE yhtio in ($tarkyhtio)
 							AND asiakasnro+0 = $apu_asiakasnumero";
 				$vresult = mysql_query($query) or pupe_error($query);
-			
+
 				$counteri++;
 
 				if ($counteri > 999) {
@@ -86,11 +86,18 @@
 	}
 
 	enable_ajax();
-	
+
 	$otsikko 	= 'Asiakkaat';
-	
-	$kentat 	= "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ', nimi, nimitark), concat_ws(' ', toim_nimi, toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', asiakasnro 'Asiakasnumero', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', laji HIDDEN_laji ";
-	$hakukentat = "tunnus, ytunnus, nimi/nimitark/toim_nimi/toim_nimitark, postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus";
+
+	$kentatlisa = $hakukentatlisa = "";
+
+	if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+		$kentatlisa = "if(asiakas.toimipaikka != 0, (select nimi from yhtion_toimipaikat where yhtio='{$kukarow['yhtio']}' and tunnus = asiakas.toimipaikka), '') toimipaikka,";
+		$hakukentatlisa = ",toimipaikka";
+	}
+
+	$kentat 	= "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ', nimi, nimitark), concat_ws(' ', toim_nimi, toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', asiakasnro 'Asiakasnumero', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', {$kentatlisa} laji HIDDEN_laji ";
+	$hakukentat = "tunnus, ytunnus, nimi/nimitark/toim_nimi/toim_nimitark, postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus {$hakukentatlisa}";
 
 	$jarjestys 	= 'selaus, nimi';
 
@@ -123,4 +130,3 @@
 			$rajauslisa = " and asiakas.laji != 'R' ";
 		}
 	}
-?>

@@ -735,7 +735,7 @@
 					$jtrivit[$varastoon_row["jtrivi"]] = $varastoon_row["jtrivi"];
 					// Katotaan mille paikalle n‰‰ meni, jotta myyntitilaus voidaan laukasta t‰lt‰ paikalta
 					$jtrivit_paikat[$varastoon_row["jtrivi"]] = $varastoon_row["tapahtumatunnus"];
-					
+
 					// haetaan $varastoon vain kerran
 					if ($varastoon == '') {
 						$varastoon = array(kuuluukovarastoon($varastoon_row['hyllyalue'], $varastoon_row['hyllynro']));
@@ -932,13 +932,13 @@
 		echo "</select></td><td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr></table></form><br>";
 
 		$haku = '';
-		if (is_string($etsi) and $etsi != "")  $haku = " and nimi LIKE '%$etsi%' ";
-		if (is_numeric($etsi) and $etsi > 0) $haku = " and tunnus='$etsi' ";
+		if (is_string($etsi) and $etsi != "")  $haku = " and lasku.nimi LIKE '%$etsi%' ";
+		if (is_numeric($etsi) and $etsi > 0) $haku = " and lasku.tunnus='$etsi' ";
 
 		$myytili = " and tilaustyyppi != 'M' ";
 
 		if ($toim == "MYYNTITILI") {
-			$myytili = " and tilaustyyppi = 'M' ";
+			$myytili = " and lasku.tilaustyyppi = 'M' ";
 		}
 
 		$varasto = '';
@@ -965,16 +965,16 @@
 
 		if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' and !empty($haku)) {
 
-			$query = "	SELECT GROUP_CONCAT(DISTINCT toimitustavan_lahto) lahto
+			$query = "	SELECT GROUP_CONCAT(DISTINCT lasku.toimitustavan_lahto) lahto
 						FROM lasku
 						LEFT JOIN lahdot
 						ON ( lahdot.yhtio = lasku.yhtio
 							AND lahdot.tunnus = lasku.toimitustavan_lahto )
-						WHERE tila = 'G'
+						WHERE lasku.tila = 'G'
 						{$haku}
 						{$myytili}
-						and yhtio = '{$kukarow['yhtio']}'
-						and alatila in ('C','B','D')";
+						and lasku.yhtio = '{$kukarow['yhtio']}'
+						and lasku.alatila in ('C','B','D')";
 			$lahto_chk_res = pupe_query($query);
 			$lahto_chk_row = mysql_fetch_assoc($lahto_chk_res);
 

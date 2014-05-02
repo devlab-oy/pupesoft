@@ -478,11 +478,16 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<th>".t("yhtiö")."</th>";
 		}
 
-		echo "<th>".t("ytunnus")."</th>
-				<th>".t("asnro")."</th>
-				<th>".t("lasknimi/toimnimi")."</th>
-				<th colspan='3'>".t("laskosoite/toimosoite")."</th>
-				<td class='back'></td></tr>";
+		echo "<th>",t("ytunnus"),"</th>";
+		echo "<th>",t("asnro"),"</th>";
+		echo "<th>",t("lasknimi/toimnimi"),"</th>";
+		echo "<th colspan='3'>",t("laskosoite/toimosoite"),"</th>";
+
+		if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+			echo "<th>",t("Toimipaikka"),"</th>";
+		}
+
+		echo "<td class='back'></td></tr>";
 	}
 
 	while ($asiakas = mysql_fetch_array($result)) {
@@ -526,12 +531,30 @@ if ($monta > 1 and $monta <= $limit) {
 				$brnim .= "<br><font class='error'>".t("HUOM: Tämä on korjaamo-asiakas")."</font>";
 			}
 
-			echo "<td>$asiakas[ytunnus]</td>
-					<td>$asiakas[asiakasnro]</td>
-					<td>$asiakas[nimi] $asiakas[nimitark] $brnim</td>
-					<td>$asiakas[osoite] $bros</td>
-					<td>$asiakas[postino] $brpostino</td>
-					<td>$asiakas[postitp] $brpostitp</td>";
+			echo "<td>{$asiakas['ytunnus']}</td>";
+			echo "<td>{$asiakas['asiakasnro']}</td>";
+			echo "<td>{$asiakas['nimi']} {$asiakas['nimitark']} {$brnim}</td>";
+			echo "<td>{$asiakas['osoite']} {$bros}</td>";
+			echo "<td>{$asiakas['postino']} {$brpostino}</td>";
+			echo "<td>{$asiakas['postitp']} {$brpostitp}</td>";
+
+			if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+
+				echo "<td>";
+
+				if ($asiakas['toimipaikka'] != 0) {
+
+					$toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio'], $asiakas['toimipaikka']);
+
+					if (mysql_num_rows($toimipaikkares) > 0)  {
+
+						$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+						echo $toimipaikkarow['nimi'];
+					}
+				}
+
+				echo "</td>";
+			}
 
 			echo "<form method='post'>";
 			echo "<td class='back'>";

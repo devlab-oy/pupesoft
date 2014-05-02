@@ -6738,7 +6738,8 @@ if ($tee == '') {
 						}
 						elseif ($kukarow['extranet'] == '') {
 							if ($kotisumma_alviton != 0) {
-								$kate = sprintf('%.2f',100*($kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
+								$kehahin = hinta_kuluineen($row["tuoteno"], $row["kehahin"]);
+								$kate = round((100 * ($kotisumma_alviton - ($kehahin*($row["varattu"]+$row["jt"]))) / $kotisumma_alviton),2) ."%";
 							}
 							elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) > 0) {
 								$kate = "-100.00%";
@@ -6747,7 +6748,6 @@ if ($tee == '') {
 								$kate = "100.00%";
 							}
 						}
-
 						echo "<td $class align='right' valign='top' nowrap>$kate</td>";
 					}
 

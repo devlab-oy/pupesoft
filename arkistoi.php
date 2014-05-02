@@ -1,11 +1,52 @@
 <?php
 
-require ("inc/parametrit.inc");
+// Kutsutaanko CLI:stä
+$php_cli = (php_sapi_name() == 'cli') ? true : false;
 
-echo "<font class='head'>".t("Arkistoidaan asioita")."</font><hr><br>";
+if ($php_cli) {
+	// Pupesoft root include_pathiin
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
-echo "<br>";
-echo "<table><form method='post'>";
+	// Otetaan tietokanta connect
+	require ("inc/connect.inc");
+	require ("inc/functions.inc");
+
+	if (!isset($argv[1])) {
+		echo "Anna yhtio!\n";
+		die;
+	}
+
+	if (!isset($argv[2])) {
+		echo "Anna pvm vvvv-kk-pp\n";
+		die;
+	}
+
+	// Tehdään parametrit
+	list($vv, $kk, $pp) = explode("-", $argv[2]);
+	$teearkistointi = "joo";
+
+	// Haetaan yhtiörow ja kukarow
+	$yhtio = pupesoft_cleanstring($argv[1]);
+	$yhtiorow = hae_yhtion_parametrit($yhtio);
+	$kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+}
+else {
+	require ("inc/parametrit.inc");
+}
+
+// Tämä vaatii paljon muistia
+error_reporting(E_ALL);
+ini_set("memory_limit", "5G");
+ini_set("display_errors", 1);
+unset($pupe_query_debug);
+
+function is_log($str) {
+	global $php_cli;
+
+	$lf = ($php_cli) ? "\n" : "<br>";
+
+	echo date("d.m.Y @ G:i:s") . ": {$str}{$lf}";
+}
 
 if (!isset($kk))
 	$kk = 12;
@@ -14,14 +55,33 @@ if (!isset($vv))
 if (!isset($pp))
 	$pp = 31;
 
-echo "<input type='hidden' name='teearkistointi' value='joo'>";
-echo "<tr><th>".t("Syötä päivämäärä (pp-kk-vvvv)")."</th>
-		<td><input type='text' name='pp' value='$pp' size='3'></td>
-		<td><input type='text' name='kk' value='$kk' size='3'></td>
-		<td><input type='text' name='vv' value='$vv' size='5'></td>";
+if (!checkdate($kk, $pp, $vv)) {
+	echo "Virheellinen päivämäärä!";
+	exit;
+}
 
-echo "<td class='back'><input type='submit' value='".t("Arkistoi")."'></td></tr></table>";
-echo "</form><br><br>";
+if ($php_cli) {
+	echo "\n";
+	is_log("Poistetaan vanhaa dataa tietokannasta");
+}
+else {
+	echo "<font class='head'>".t("Poistetaan vanhaa dataa tietokannasta")."</font><hr><br>";
+
+	echo "<br>";
+	echo t("Poista kaikki tapahtumat kannasta ennen tätä päivää");
+	echo "<br>";
+
+	echo "<table><form method='post'>";
+
+	echo "<input type='hidden' name='teearkistointi' value='joo'>";
+	echo "<tr><th>".t("Syötä päivämäärä (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='pp' value='$pp' size='3'></td>
+			<td><input type='text' name='kk' value='$kk' size='3'></td>
+			<td><input type='text' name='vv' value='$vv' size='5'></td>";
+
+	echo "<td class='back'><input type='submit' value='".t("Arkistoi")."'></td></tr></table>";
+	echo "</form><br><br>";
+}
 
 if (isset($teearkistointi) and $teearkistointi != "") {
 
@@ -43,7 +103,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del ostolaskua.<br>";
+		is_log("Poistettiin $del ostolaskua.");
 	}
 
 	##################################################################################################################################
@@ -63,7 +123,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del saapumista.<br>";
+		is_log("Poistettiin $del saapumista.");
 
 		# Saapumisen liitosotsikot
 		$query = "	DELETE lasku
@@ -76,7 +136,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del saapumisen liitosotsikkoa.<br>";
+		is_log("Poistettiin $del saapumisen liitosotsikkoa.");
 
 		# Ostotilaukset
 		$query = "	DELETE lasku
@@ -88,7 +148,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del ostotilausta.<br>";
+		is_log("Poistettiin $del ostotilausta.");
 
 		# ASN-sanomat
 		$query = "	DELETE asn_sanomat
@@ -99,7 +159,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del ASN-sanomaa.<br>";
+		is_log("Poistettiin $del ASN-sanomaa.");
 	}
 
 	##################################################################################################################################
@@ -118,7 +178,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del myyntilaskua.<br>";
+		is_log("Poistettiin $del myyntilaskua.");
 
 		# Myyntitilaukset
 		$query = "	DELETE lasku FROM lasku
@@ -129,7 +189,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del laskutettua myntitilausta.<br>";
+		is_log("Poistettiin $del laskutettua myntitilausta.");
 
 		# Laskun lisätiedot
 		$query = "	DELETE laskun_lisatiedot
@@ -140,7 +200,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del laskun lisätietoriviä.<br>";
+		is_log("Poistettiin $del laskun lisätietoriviä.");
 
 		# Tapahtumat
 		$query = "	SELECT group_concat(distinct concat('\'',laji,'\'')) lajit
@@ -158,7 +218,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 			pupe_query($query);
 			$del = mysql_affected_rows();
 
-			echo "Poistettiin $del tapahtumaa.<br>";
+			is_log("Poistettiin $del tapahtumaa.");
 
 			// Orvot tapahtumat
 			$query = "	DELETE tapahtuma
@@ -170,7 +230,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 			pupe_query($query);
 			$del = mysql_affected_rows();
 
-			echo "Poistettiin $del orpoa-tapahtumariviä.<br>";
+			is_log("Poistettiin $del orpoa-tapahtumariviä.");
 		}
 
 		# Tilausrivit
@@ -182,7 +242,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tilausriviä.<br>";
+		is_log("Poistettiin $del tilausriviä.");
 
 		# Tilausrivin_lisatiedot
 		$query = "	DELETE tilausrivin_lisatiedot
@@ -193,7 +253,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tilausrivin lisätietoriviä.<br>";
+		is_log("Poistettiin $del tilausrivin lisätietoriviä.");
 
 		# Sahkoisen_lahetteen_rivit
 		$query = "	DELETE sahkoisen_lahetteen_rivit
@@ -204,7 +264,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del sähköisen lähetteen riviä.<br>";
+		is_log("Poistettiin $del sähköisen lähetteen riviä.");
 
 		# Laskujen/tilausten liitetiedostot
 		$query = "	DELETE liitetiedostot
@@ -216,7 +276,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del liitetiedostoa.<br>";
+		is_log("Poistettiin $del liitetiedostoa.");
 
 		# Maksupositio
 		$query = "	DELETE maksupositio
@@ -227,7 +287,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del laskun maksusopimusta.<br>";
+		is_log("Poistettiin $del laskun maksusopimusta.");
 
 		# Rahtikirjat
 		$query = "	DELETE rahtikirjat
@@ -239,7 +299,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del rahtikirjaa.<br>";
+		is_log("Poistettiin $del rahtikirjaa.");
 
 		# Työmääräykset
 		$query = "	DELETE tyomaarays
@@ -250,7 +310,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del työmääräystä.<br>";
+		is_log("Poistettiin $del työmääräystä.");
 	}
 
 	##################################################################################################################################
@@ -268,7 +328,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tositetta.<br>";
+		is_log("Poistettiin $del tositetta.");
 
 		# Tiliöinnit
 		$query = "	DELETE tiliointi
@@ -278,7 +338,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tiliöintiä.<br>";
+		is_log("Poistettiin $del tiliöintiä.");
 
 		# Tiliotteet
 		$query = "	DELETE tiliotedata
@@ -289,7 +349,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tiliotetta.<br>";
+		is_log("Poistettiin $del tiliotetta.");
 	}
 
 	##################################################################################################################################
@@ -305,7 +365,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del suoritusta.<br>";
+		is_log("Poistettiin $del suoritusta.");
 
 		# Karhukirjeet
 		$query = "	DELETE karhu_lasku
@@ -315,7 +375,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del maksukehotusta.<br>";
+		is_log("Poistettiin $del maksukehotusta.");
 
 		# Karhukierrokset
 		$query = "	DELETE karhukierros
@@ -325,7 +385,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del maksukehotuskierrosta.<br>";
+		is_log("Poistettiin $del maksukehotuskierrosta.");
 	}
 
 	##################################################################################################################################
@@ -342,7 +402,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del 'P'-asiakasta joilla ei ollut yhtään myyntiä!<br>";
+		is_log("Poistettiin $del 'P'-asiakasta joilla ei ollut yhtään myyntiä!");
 
 		// Poistetaan asiakasalet joiden asiakkaat dellattu
 		$query = "	DELETE asiakasalennus
@@ -354,7 +414,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakasalennusta joiden asiakas oli poistettu (asiakas)!<br>";
+		is_log("Poistettiin $del asiakasalennusta joiden asiakas oli poistettu (asiakas)!");
 
 		// Poistetaan asiakasalet joiden asiakkaat dellattu
 		$query = "	DELETE asiakasalennus
@@ -366,7 +426,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakasalennusta joiden asiakas oli poistettu (ytunnus)!<br>";
+		is_log("Poistettiin $del asiakasalennusta joiden asiakas oli poistettu (ytunnus)!");
 
 		// Poistetaan asiakashinnat joiden asiakkaat dellattu
 		$query = "	DELETE asiakashinta
@@ -378,7 +438,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakashintaa joiden asiakas oli poistettu (asiakas)!<br>";
+		is_log("Poistettiin $del asiakashintaa joiden asiakas oli poistettu (asiakas)!");
 
 		// Poistetaan asiakashinnat joiden asiakkaat dellattu
 		$query = "	DELETE asiakashinta
@@ -390,7 +450,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakashintaa joiden asiakas oli poistettu (ytunnus)!<br>";
+		is_log("Poistettiin $del asiakashintaa joiden asiakas oli poistettu (ytunnus)!");
 
 		// Poistetaan asiakaskommentit joiden asiakkaat dellattu
 		$query = "	DELETE asiakaskommentti
@@ -401,7 +461,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakaskommenttia joiden asiakas oli poistettu!<br>";
+		is_log("Poistettiin $del asiakaskommenttia joiden asiakas oli poistettu!");
 
 		// Poistetaan asiakkaan_avainsanat joiden asiakkaat dellattu
 		$query = "	DELETE asiakkaan_avainsanat
@@ -412,7 +472,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakkaan_avainsanaa joiden asiakas oli poistettu!<br>";
+		is_log("Poistettiin $del asiakkaan_avainsanaa joiden asiakas oli poistettu!");
 
 		// Poistetaan budjetti_asiakaat joiden asiakkaat dellattu
 		$query = "	DELETE budjetti_asiakas
@@ -423,7 +483,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakasbudjettia joiden asiakas oli poistettu!<br>";
+		is_log("Poistettiin $del asiakasbudjettia joiden asiakas oli poistettu!");
 
 		// Poistetaan yhteyshenkilo joiden asiakkaat dellattu
 		$query = "	DELETE yhteyshenkilo
@@ -435,7 +495,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del yhteyshenkilöä joiden asiakas oli poistettu!<br>";
+		is_log("Poistettiin $del yhteyshenkilöä joiden asiakas oli poistettu!");
 
 		// Poistetaan rahtisopimukset joiden asiakkaat dellattu
 		$query = "	DELETE rahtisopimukset
@@ -447,7 +507,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del rahtisopimusta joiden asiakas oli poistettu (asiakas)!<br>";
+		is_log("Poistettiin $del rahtisopimusta joiden asiakas oli poistettu (asiakas)!");
 
 		// Poistetaan rahtisopimukset joiden asiakkaat dellattu
 		$query = "	DELETE rahtisopimukset
@@ -459,7 +519,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del rahtisopimusta joiden asiakas oli poistettu (ytunnus)!<br>";
+		is_log("Poistettiin $del rahtisopimusta joiden asiakas oli poistettu (ytunnus)!");
 
 		// Poistetaan liitetiedostot joiden asiakkaat dellattu
 		$query = "	DELETE liitetiedostot
@@ -471,7 +531,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del liitetiedostoa joiden asiakas oli poistettu!<br>";
+		is_log("Poistettiin $del liitetiedostoa joiden asiakas oli poistettu!");
 
 		// Poistetaan korvaavat_kiellot joiden asiakkaat dellattu
 		$query = "	DELETE korvaavat_kiellot
@@ -483,7 +543,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del korvaavuuskieltoa joiden asiakas oli poistettu!<br>";
+		is_log("Poistettiin $del korvaavuuskieltoa joiden asiakas oli poistettu!");
 
 		// Poistetaan kohteet joiden asiakkaat dellattu
 		$query = "	DELETE kohde
@@ -495,7 +555,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del kohdetta joiden asiakas oli poistettu!<br>";
+		is_log("Poistettiin $del kohdetta joiden asiakas oli poistettu!");
 
 		// Poistetaan synclogit joiden asiakkaat dellattu
 		$query = "	DELETE synclog
@@ -507,7 +567,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del synclogia joiden asiakas oli poistettu!<br>";
+		is_log("Poistettiin $del synclogia joiden asiakas oli poistettu!");
 	}
 
 	##################################################################################################################################
@@ -515,6 +575,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 	##################################################################################################################################
 	if ($dellataan) {
 
+/* poistetaan tämä toistaiseksi, on liian hidas
 		// Poistetaan "P" tuotteita joilla ei ole laskutusta eikä saldoa
 		$query = "	SELECT tuoteno
 					FROM tuote
@@ -540,8 +601,8 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 			}
 		}
 
-		echo "Poistettiin $del 'P'-tuotetta joilla ei ollut yhtään tapahtumaa!<br>";
-
+		is_log("Poistettiin $del 'P'-tuotetta joilla ei ollut yhtään tapahtumaa!");
+*/
 		// Poistetaan tuotepaikat joiden tuotteet dellattu
 		$query = "	DELETE tuotepaikat
 					FROM tuotepaikat
@@ -552,7 +613,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tuotepaikkaa joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del tuotepaikkaa joiden tuote oli poistettu!");
 
 		// Poistetaan tuoteperheiden lapset joiden tuotteet dellattu
 		$query = "	DELETE tuoteperhe
@@ -563,7 +624,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tuoteperheiden lasta joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del tuoteperheiden lasta joiden tuote oli poistettu!");
 
 		// Poistetaan tuoteperheet joiden isätuotteet dellattu
 		$query = "	DELETE tuoteperhe
@@ -574,7 +635,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tuoteperhettä joiden isätuote oli poistettu!<br>";
+		is_log("Poistettiin $del tuoteperhettä joiden isätuote oli poistettu!");
 
 		// Poistetaan tuotteen_alvit joiden tuotteet dellattu
 		$query = "	DELETE tuotteen_alv
@@ -585,7 +646,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tuotteen alvia joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del tuotteen alvia joiden tuote oli poistettu!");
 
 		// Poistetaan tuotteen_avainsanat joiden tuotteet dellattu
 		$query = "	DELETE tuotteen_avainsanat
@@ -596,18 +657,20 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tuotteen avainsanaa joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del tuotteen avainsanaa joiden tuote oli poistettu!");
 
-		// Poistetaan tuotteen_orginaalit joiden tuotteet dellattu
-		$query = "	DELETE tuotteen_orginaalit
-					FROM tuotteen_orginaalit
-					LEFT JOIN tuote ON (tuotteen_orginaalit.yhtio=tuote.yhtio and tuotteen_orginaalit.tuoteno=tuote.tuoteno)
-					WHERE tuotteen_orginaalit.yhtio = '{$kukarow["yhtio"]}'
-					AND tuote.tunnus is null";
-		pupe_query($query);
-		$del = mysql_affected_rows();
+		if (table_exists("tuotteen_orginaalit")) {
+			// Poistetaan tuotteen_orginaalit joiden tuotteet dellattu
+			$query = "	DELETE tuotteen_orginaalit
+						FROM tuotteen_orginaalit
+						LEFT JOIN tuote ON (tuotteen_orginaalit.yhtio=tuote.yhtio and tuotteen_orginaalit.tuoteno=tuote.tuoteno)
+						WHERE tuotteen_orginaalit.yhtio = '{$kukarow["yhtio"]}'
+						AND tuote.tunnus is null";
+			pupe_query($query);
+			$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tuotteen_orginaalit joiden tuote oli poistettu!<br>";
+			is_log("Poistettiin $del tuotteen_orginaalit joiden tuote oli poistettu!");
+		}
 
 		// Poistetaan tuotteen_toimittajat joiden tuotteet dellattu
 		$query = "	DELETE tuotteen_toimittajat
@@ -618,7 +681,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tuotteen toimittajaa joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del tuotteen toimittajaa joiden tuote oli poistettu!");
 
 		// Poistetaan vastaavat joiden tuotteet dellattu
 		$query = "	DELETE vastaavat
@@ -629,14 +692,14 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del vastaavat joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del vastaavat joiden tuote oli poistettu!");
 
 		// Poistetaan vastaavat joiden ketjussa on vain yksi tuote
 		$query = "	SELECT id, count(*) maara, group_concat(tunnus) tunnari
 					FROM vastaavat
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					GROUP BY id
-					HAVING maara = 1";
+					HAVING count(*) = 1";
 		$result = pupe_query($query);
 
 		$del = 0;
@@ -650,7 +713,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 			$del++;
 		}
 
-		echo "Poistettiin $del vastaavaketjua joissa oli vain yksi tuote!<br>";
+		is_log("Poistettiin $del vastaavaketjua joissa oli vain yksi tuote!");
 
 		// Poistetaan korvaavat joiden tuotteet dellattu
 		$query = "	DELETE korvaavat
@@ -661,14 +724,14 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del korvaavat joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del korvaavat joiden tuote oli poistettu!");
 
 		// Korvaavat joiden ketjussa on vain yksi tuote
 		$query = "	SELECT id, count(*) maara, group_concat(tunnus) tunnari
 					FROM korvaavat
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					GROUP BY id
-					HAVING maara = 1";
+					HAVING count(*) = 1";
 		$result = pupe_query($query);
 
 		$del = 0;
@@ -682,29 +745,31 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 			$del++;
 		}
 
-		echo "Poistettiin $del korvaavuusketjua joissa oli vain yksi tuote!<br>";
+		is_log("Poistettiin $del korvaavuusketjua joissa oli vain yksi tuote!");
 
-		// Poistetaan yhteensopivuus_tuotteet joiden tuotteet dellattu
-		$query = "	DELETE yhteensopivuus_tuote
-					FROM yhteensopivuus_tuote
-					LEFT JOIN tuote ON (yhteensopivuus_tuote.yhtio=tuote.yhtio and yhteensopivuus_tuote.tuoteno=tuote.tuoteno)
-					WHERE yhteensopivuus_tuote.yhtio = '{$kukarow["yhtio"]}'
-					AND tuote.tunnus is null";
-		$result = pupe_query($query);
-		$del = mysql_affected_rows();
+		if (table_exists("yhteensopivuus_tuote")) {
+			// Poistetaan yhteensopivuus_tuotteet joiden tuotteet dellattu
+			$query = "	DELETE yhteensopivuus_tuote
+						FROM yhteensopivuus_tuote
+						LEFT JOIN tuote ON (yhteensopivuus_tuote.yhtio=tuote.yhtio and yhteensopivuus_tuote.tuoteno=tuote.tuoteno)
+						WHERE yhteensopivuus_tuote.yhtio = '{$kukarow["yhtio"]}'
+						AND tuote.tunnus is null";
+			$result = pupe_query($query);
+			$del = mysql_affected_rows();
 
-		echo "Poistettiin $del yhteensopivuus_tuoteetta joiden tuote oli poistettu!<br>";
+			is_log("Poistettiin $del yhteensopivuus_tuoteetta joiden tuote oli poistettu!");
 
-		// Poistetaan yhteensopivuus_tuote_lisatiedot joiden tuotteet dellattu
-		$query = "	DELETE yhteensopivuus_tuote_lisatiedot
-					FROM yhteensopivuus_tuote_lisatiedot
-					LEFT JOIN yhteensopivuus_tuote ON (yhteensopivuus_tuote_lisatiedot.yhtio=yhteensopivuus_tuote.yhtio and yhteensopivuus_tuote_lisatiedot.yhteensopivuus_tuote_tunnus=yhteensopivuus_tuote.tunnus)
-					WHERE yhteensopivuus_tuote_lisatiedot.yhtio = '{$kukarow["yhtio"]}'
-					AND yhteensopivuus_tuote.tunnus is null";
-		$result = pupe_query($query);
-		$del = mysql_affected_rows();
+			// Poistetaan yhteensopivuus_tuote_lisatiedot joiden tuotteet dellattu
+			$query = "	DELETE yhteensopivuus_tuote_lisatiedot
+						FROM yhteensopivuus_tuote_lisatiedot
+						LEFT JOIN yhteensopivuus_tuote ON (yhteensopivuus_tuote_lisatiedot.yhtio=yhteensopivuus_tuote.yhtio and yhteensopivuus_tuote_lisatiedot.yhteensopivuus_tuote_tunnus=yhteensopivuus_tuote.tunnus)
+						WHERE yhteensopivuus_tuote_lisatiedot.yhtio = '{$kukarow["yhtio"]}'
+						AND yhteensopivuus_tuote.tunnus is null";
+			$result = pupe_query($query);
+			$del = mysql_affected_rows();
 
-		echo "Poistettiin $del yhteensopivuus_tuote_lisatietoa joiden tuote oli poistettu!<br>";
+			is_log("Poistettiin $del yhteensopivuus_tuote_lisatietoa joiden tuote oli poistettu!");
+		}
 
 		// Poistetaan synclogit joiden tuotteet dellattu
 		$query = "	DELETE synclog
@@ -716,7 +781,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		$result = pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del synclogia joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del synclogia joiden tuote oli poistettu!");
 
 		// Poistetaan liitetiedostot joiden tuotteet dellattu
 		$query = "	DELETE liitetiedostot
@@ -728,7 +793,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		$result = pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del liitetiedostoa joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del liitetiedostoa joiden tuote oli poistettu!");
 
 		// Poistetaan hinnastot joiden tuotteet dellattu
 		$query = "	DELETE hinnasto
@@ -739,7 +804,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		$result = pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del hinnastoa joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del hinnastoa joiden tuote oli poistettu!");
 
 		// Poistetaan budjetti_tuotteet joiden tuotteet dellattu
 		$query = "	DELETE budjetti_tuote
@@ -750,7 +815,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		$result = pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del budjetti_tuotetta joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del budjetti_tuotetta joiden tuote oli poistettu!");
 
 		// Poistetaan asiakashinnat joiden tuotteet dellattu
 		$query = "	DELETE asiakashinta
@@ -762,7 +827,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakashintaa joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del asiakashintaa joiden tuote oli poistettu!");
 
 		// Poistetaan asiakasalennukset joiden tuotteet dellattu
 		$query = "	DELETE asiakasalennus
@@ -774,7 +839,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del asiakasalennusta joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del asiakasalennusta joiden tuote oli poistettu!");
 
 		// Poistetaan toimittajahinnat joiden tuotteet dellattu
 		$query = "	DELETE toimittajahinta
@@ -786,7 +851,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del toimittajahintaa joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del toimittajahintaa joiden tuote oli poistettu!");
 
 		// Poistetaan toimittaja-alennukset joiden tuotteet dellattu
 		$query = "	DELETE toimittajaalennus
@@ -798,7 +863,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del toimittaja-alennusta joiden tuote oli poistettu!<br>";
+		is_log("Poistettiin $del toimittaja-alennusta joiden tuote oli poistettu!");
 	}
 
 	##################################################################################################################################
@@ -816,7 +881,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del 'P'-toimittajaa joilla ei ollut yhtään laskua!<br>";
+		is_log("Poistettiin $del 'P'-toimittajaa joilla ei ollut yhtään laskua!");
 
 		// Poistetaan yhteyshenkilöt joiden toimittajat dellattu
 		$query = "	DELETE yhteyshenkilo
@@ -828,7 +893,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del yhteyshenkilöä joiden toimittaja oli poistettu!<br>";
+		is_log("Poistettiin $del yhteyshenkilöä joiden toimittaja oli poistettu!");
 
 		// Poistetaan budjetti_toimittaja joiden toimittajat dellattu
 		$query = "	DELETE budjetti_toimittaja
@@ -839,7 +904,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del toimittajabudjettia joiden toimittaja oli poistettu!<br>";
+		is_log("Poistettiin $del toimittajabudjettia joiden toimittaja oli poistettu!");
 
 		// Poistetaan liitetiedostot joiden toimittajat dellattu
 		$query = "	DELETE liitetiedostot
@@ -851,7 +916,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del liitetiedostoa joiden toimittaja oli poistettu!<br>";
+		is_log("Poistettiin $del liitetiedostoa joiden toimittaja oli poistettu!");
 
 		// Poistetaan tuotteen_toimittajat joiden tuotteet dellattu
 		$query = "	DELETE tuotteen_toimittajat
@@ -862,7 +927,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del tuotteen toimittajaa joiden toimittaja oli poistettu!<br>";
+		is_log("Poistettiin $del tuotteen toimittajaa joiden toimittaja oli poistettu!");
 
 		// Poistetaan toimittajaalet joiden asiakkaat dellattu
 		$query = "	DELETE toimittajaalennus
@@ -874,7 +939,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del toimittajaalennusta joiden toimittaja oli poistettu (toimittaja)!<br>";
+		is_log("Poistettiin $del toimittajaalennusta joiden toimittaja oli poistettu (toimittaja)!");
 
 		// Poistetaan toimittajaalet joiden asiakkaat dellattu
 		$query = "	DELETE toimittajaalennus
@@ -886,7 +951,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del toimittajaalennusta joiden toimittaja oli poistettu (ytunnus)!<br>";
+		is_log("Poistettiin $del toimittajaalennusta joiden toimittaja oli poistettu (ytunnus)!");
 
 		// Poistetaan toimittajahinnat joiden asiakkaat dellattu
 		$query = "	DELETE toimittajahinta
@@ -898,7 +963,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del toimittajahintaa joiden toimittaja oli poistettu (toimittaja)!<br>";
+		is_log("Poistettiin $del toimittajahintaa joiden toimittaja oli poistettu (toimittaja)!");
 
 		// Poistetaan toimittajahinnat joiden asiakkaat dellattu
 		$query = "	DELETE toimittajahinta
@@ -910,23 +975,26 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del toimittajahintaa joiden toimittaja oli poistettu (ytunnus)!<br>";
+		is_log("Poistettiin $del toimittajahintaa joiden toimittaja oli poistettu (ytunnus)!");
 	}
 
 	##################################################################################################################################
 	#SEKALAISET
 	##################################################################################################################################
 	if ($dellataan) {
-		# Automanual-hakuhistoria
-		$query = "	DELETE automanual_hakuhistoria
-					FROM automanual_hakuhistoria
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND luontiaika > 0
-					AND luontiaika <= '$vv-$kk-$pp 23:59:59'";
-		pupe_query($query);
-		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del Automanual-hakuhistoriariviä.<br>";
+		if (table_exists("automanual_hakuhistoria")) {
+			# Automanual-hakuhistoria
+			$query = "	DELETE automanual_hakuhistoria
+						FROM automanual_hakuhistoria
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND luontiaika > 0
+						AND luontiaika <= '$vv-$kk-$pp 23:59:59'";
+			pupe_query($query);
+			$del = mysql_affected_rows();
+
+			is_log("Poistettiin $del Automanual-hakuhistoriariviä.");
+		}
 
 		# Lähdöt
 		$query = "	DELETE lahdot
@@ -937,7 +1005,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del lähtöä.<br>";
+		is_log("Poistettiin $del lähtöä.");
 
 		# Kalenteritapahtumat
 		$query = "	DELETE kalenteri
@@ -949,7 +1017,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del kalenteritapahtumaa.<br>";
+		is_log("Poistettiin $del kalenteritapahtumaa.");
 
 		# Keräyserät
 		$query = "	DELETE kerayserat
@@ -960,7 +1028,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del keräyseräriviä.<br>";
+		is_log("Poistettiin $del keräyseräriviä.");
 
 		# Budjetit
 		$budjettiarray = array("budjetti", "budjetti_asiakas", "budjetti_myyja", "budjetti_toimittaja", "budjetti_tuote");
@@ -973,7 +1041,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 			pupe_query($query);
 			$del = mysql_affected_rows();
 
-			echo "Poistettiin $del {$budjettitaulu}-riviä.<br>";
+			is_log("Poistettiin $del {$budjettitaulu}-riviä.");
 		}
 
 		# Kampanjat
@@ -985,7 +1053,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del kampanjaa.<br>";
+		is_log("Poistettiin $del kampanjaa.");
 
 		# Kampanjaehdot
 		$query = "	DELETE kampanja_ehdot
@@ -996,7 +1064,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del kampanjan ehtoriviä.<br>";
+		is_log("Poistettiin $del kampanjan ehtoriviä.");
 
 		# Kampanjapalkinnot
 		$query = "	DELETE kampanja_palkinnot
@@ -1007,7 +1075,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del kampanjan palkinotirivä.<br>";
+		is_log("Poistettiin $del kampanjan palkinotirivä.");
 
 		# Messenger-viestit
 		$query = "	DELETE messenger
@@ -1018,8 +1086,12 @@ if (isset($teearkistointi) and $teearkistointi != "") {
 		pupe_query($query);
 		$del = mysql_affected_rows();
 
-		echo "Poistettiin $del Messenger-viestiä.<br>";
+		is_log("Poistettiin $del Messenger-viestiä.");
 	}
+
+	is_log("Valmis!");
 }
 
-require ("inc/footer.inc");
+if (!$php_cli) {
+	require ("inc/footer.inc");
+}

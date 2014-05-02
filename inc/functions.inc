@@ -5616,8 +5616,10 @@ if (!function_exists("alehinta")) {
 			$GLOBALS['ale_peruste']  = $g_ale_peruste;
 			$GLOBALS['ale_peruste'] .= " XXXHINTAPERUSTE:$hintaperuste ";
 
-			foreach($aleperuste as $aile) {
-				$GLOBALS['ale_peruste'] .= " XXXALEPERUSTE:$aile ";
+			if (is_array($aleperuste)) {
+				foreach($aleperuste as $aile) {
+					$GLOBALS['ale_peruste'] .= " XXXALEPERUSTE:$aile ";
+				}
 			}
 		}
 

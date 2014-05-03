@@ -27356,6 +27356,20 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
 			$toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
 		}
 
+		$query	 = "	SELECT toimitustapa.*
+						FROM asiakas
+						JOIN toimitustapa
+						ON (toimitustapa.yhtio = asiakas.yhtio
+							AND toimitustapa.selite = asiakas.toimitustapa )
+						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+						AND asiakas.tunnus = '{$asiakas_tunnus}'";
+		$result	 = pupe_query($query);
+
+		if (mysql_num_rows($result) != 0) {
+			$toimitustapa = mysql_fetch_assoc($result);
+			$toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
+		}
+
 		return $toimitustavat;
 	}
 }

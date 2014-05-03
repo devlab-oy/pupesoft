@@ -43,6 +43,26 @@ if (!isset($toimipaikka))		$toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
+if ($onkolaajattoimipaikat and isset($otunnus)) {
+
+	$otunnus = (int) $otunnus;
+
+	// Saapuminen
+	$query = "	SELECT *
+				from lasku
+				where tunnus = '{$otunnus}'
+				and tila = 'K'
+				and yhtio = '{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) > 0) {
+		$laskurow = mysql_fetch_assoc($result);
+
+		$kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+	}
+}
+
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
 if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {

@@ -1687,11 +1687,6 @@
 									$myy_hyllynro[$indeksi] = $myy_hyllynro_temp;
 									$myy_hyllytaso[$indeksi] = $myy_hyllytaso_temp;
 									$myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
-
-									$myy_hyllyalue_temp = "";
-									$myy_hyllynro_temp = "";
-									$myy_hyllytaso_temp = "";
-									$myy_hyllyvali_temp = "";
 								}
 
 								$query = "	INSERT into tilausrivi set
@@ -2916,11 +2911,6 @@
 				$p_hyllynro = $myy_hyllynro_temp;
 				$p_hyllytaso = $myy_hyllytaso_temp;
 				$p_hyllyvali = $myy_hyllyvali_temp;
-
-				$myy_hyllyalue_temp = "";
-				$myy_hyllynro_temp = "";
-				$myy_hyllytaso_temp = "";
-				$myy_hyllyvali_temp = "";
 			}
 
 			// lis‰t‰‰n puuterivi

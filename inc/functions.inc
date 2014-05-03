@@ -27591,7 +27591,7 @@ if (!function_exists('sallitut_varastot')) {
 							FROM varastopaikat
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND (varastopaikat.sallitut_maat like '%$toimitus_maa%' or varastopaikat.sallitut_maat = '')
-							varastopaikat.tyyppi != 'P'
+							AND varastopaikat.tyyppi != 'P'
 							$varastotyyppi_lisa";
 		$result	 = pupe_query($query);
 

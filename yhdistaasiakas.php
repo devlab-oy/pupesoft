@@ -851,6 +851,18 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           echo "<font class='error'>".t("Ei löytynyt laskuja asiakkaalta")."</font><br><br>";
         }
 
+        $_query = " UPDATE kuka SET
+                    oletus_asiakas = '{$jataminut}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND oletus_asiakas = '{$asrow['tunnus']}'";
+        $upd_res = pupe_query($_query);
+
+        $_query = " UPDATE kuka SET
+                    oletus_asiakastiedot = '{$jataminut}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND oletus_asiakastiedot = '{$asrow['tunnus']}'";
+        $upd_res = pupe_query($_query);
+
         // Muutetaan asiakkaan laji = 'P', jätetään varmuudeksi talteen, toistaiseksi.
         $paivitys = "UPDATE asiakas set laji='P' where yhtio ='$kukarow[yhtio]' AND tunnus = '$asrow[tunnus]'";
         $pairesult = pupe_query($paivitys);

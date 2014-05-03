@@ -737,7 +737,6 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                   where yhtio       = '$kukarow[yhtio]'
                   and liitos      = '$ahrow[liitos]'
                   and liitostunnus  = '$jrow[tunnus]'
-                  and data      = '".mysql_real_escape_string($ahrow["data"])."'
                   and selite      = '$ahrow[selite]'
                   and kieli       = '$ahrow[kieli]'
                   and filename    = '$ahrow[filename]'
@@ -777,7 +776,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // !!!!!!!! PUUN_ALKIO OSIO !!!!!!!!!!!!
-        $hquery = " SELECT *
+        $hquery = " SELECT *, if(kutsuja = '', laji, kutsuja) AS kutsuja
               FROM puun_alkio
               WHERE yhtio = '$kukarow[yhtio]'
               AND laji = 'Asiakas'
@@ -797,16 +796,19 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                   and liitos    = '$jrow[tunnus]'
                   and kieli     = '$ahrow[kieli]'
                   and laji    = '$ahrow[laji]'
+                  and kutsuja = '{$ahrow['kutsuja']}'
                   and puun_tunnus = '$ahrow[puun_tunnus]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
 
             if ($ahy == 0) {
+
               $ahinsert = "INSERT INTO puun_alkio SET
                     yhtio   = '$kukarow[yhtio]',
                     liitos    = '$jrow[tunnus]',
                     kieli     = '$ahrow[kieli]',
                     laji    = '$ahrow[laji]',
+                    kutsuja    = '{$ahrow['kutsuja']}',
                     puun_tunnus = '$ahrow[puun_tunnus]',
                     jarjestys   = '$ahrow[jarjestys]',
                     laatija     = '$kukarow[kuka]',

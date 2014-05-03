@@ -446,6 +446,7 @@ if (!function_exists('hae_tilausrivit')) {
 								ON ( l.yhtio = t.yhtio
 									AND l.tunnus = t.otunnus )";
 				$select		 = "l.varasto AS varasto, ";
+				$tilausrivi_where .= " AND tl.palautus_varasto != 0 ";
 			}
 		}
 

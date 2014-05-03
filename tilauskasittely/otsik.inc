@@ -816,11 +816,6 @@
 				}
 			}
 
-			if (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != $srow['yhtio_toimipaikka']) {
-				unset($srow['eilahetetta']);
-				unset($srow['osatoimitus']);
-			}
-
 			if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
 
 				$toim_asiakasid = mysql_real_escape_string($toim_asiakasid);
@@ -911,6 +906,13 @@
 		}
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+		if (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != $srow['yhtio_toimipaikka']) {
+			unset($srow['eilahetetta']);
+
+			if ($yhtiorow['myyntitilaus_osatoimitus'] == 'E') $srow['osatoimitus'] = 'o';
+			else unset($srow['osatoimitus']);
+		}
 
 		// jos meillä on lasku menossa ulkomaille
 		if ($yhtiorow['maa'] == $srow['maa'] and $yhtiorow['vat_numero'] != '') {
@@ -2637,7 +2639,7 @@
 			$string .= "</td>";
 
 			$vasen_sarake[2] = $string;
-			
+
 			// Ekotetan sarakkeet!
 			$rivicount = count($vasen_sarake) > count($oikea_sarake) ? count($vasen_sarake) : count($oikea_sarake);
 

@@ -6132,12 +6132,26 @@ if ($tee == '') {
 
 								$paltoimiulos .= "<option value=''>".t("Ei palauteta")."</option>";
 
-								foreach ($lahde_kohde_varastot as $lahde_kohde_varasto) {
+								$_varastot = array();
+
+								foreach ($lahde_kohde_varastot as $_varasto) {
+									$_varastot[$_varasto['lahde_tunnus']] = array(
+										'lahde_nimi' => $_varasto['lahde_nimi'],
+										'lahde_tunnus' => $_varasto['lahde_tunnus']
+									);
+								}
+
+								foreach ($_varastot as $lahde_kohde_varasto) {
+
 									$sel = "";
+
 									if ($lahde_kohde_varasto["lahde_tunnus"] == abs($row["palautus_varasto"])) {
 										$sel = 'selected';
 									}
-									$paltoimiulos .= "<option value='{$lahde_kohde_varasto['lahde_tunnus']}' {$sel}>".t('Varasto').": {$lahde_kohde_varasto['lahde_nimi']}</option>";
+
+									$paltoimiulos .= "<option value='{$lahde_kohde_varasto['lahde_tunnus']}' {$sel}>";
+									$paltoimiulos .= t('Varasto').": {$lahde_kohde_varasto['lahde_nimi']}";
+									$paltoimiulos .= "</option>";
 								}
 
 								$paltoimiulos .= "</select>";

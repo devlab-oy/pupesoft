@@ -27341,18 +27341,32 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
 			return array();
 		}
 
-		$query	 = "	SELECT toimitustapa.*
-						FROM asiakkaan_avainsanat
-						JOIN toimitustapa
-						ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
-							AND toimitustapa.selite = asiakkaan_avainsanat.avainsana )
-						WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
-						AND asiakkaan_avainsanat.laji = 'editilaus_toimitustapa'
-						AND asiakkaan_avainsanat.liitostunnus = '{$asiakas_tunnus}'";
-		$result	 = pupe_query($query);
+		$toimitustavat = array();
 
-		$toimitustavat	 = array();
-		while ($toimitustapa	 = mysql_fetch_assoc($result)) {
+		$query = "	SELECT toimitustapa.*
+					FROM asiakkaan_avainsanat
+					JOIN toimitustapa ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
+						AND toimitustapa.selite = asiakkaan_avainsanat.avainsana )
+					WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+					AND asiakkaan_avainsanat.laji = 'editilaus_toimitustapa'
+					AND asiakkaan_avainsanat.liitostunnus = '{$asiakas_tunnus}'";
+		$result = pupe_query($query);
+
+		while ($toimitustapa = mysql_fetch_assoc($result)) {
+			$toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
+		}
+
+		$query = "	SELECT toimitustapa.*
+					FROM asiakas
+					JOIN toimitustapa
+					ON (toimitustapa.yhtio = asiakas.yhtio
+						AND toimitustapa.selite = asiakas.toimitustapa )
+					WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+					AND asiakas.tunnus = '{$asiakas_tunnus}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 1) {
+			$toimitustapa = mysql_fetch_assoc($result);
 			$toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
 		}
 

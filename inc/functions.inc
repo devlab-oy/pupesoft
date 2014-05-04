@@ -27672,21 +27672,30 @@ if (!function_exists('tilauksen_toimipaikka')) {
 	function tilauksen_toimipaikka(Array $args) {
 		global $kukarow, $yhtiorow;
 
+		# Jos täällä käytetään yhtiön parametreja,
+		# niin ne parametrit eivät voi olla toimipaikkakohtaisia.
+
 		$asiakasid = isset($args['asiakasid']) ? (int) $args['asiakasid'] : 0;
-		$maa = isset($args['maa']) ? $args['maa'] : '';
-		$toimipaikka = isset($args['toimipaikka']) ? $args['toimipaikka'] : null;
+		$maa = isset($args['maa']) ? trim($args['maa']) : '';
 
-		if ($yhtiorow['vat_numero'] != '') {
+		$_onko_toimipaikkaa = (isset($args['toimipaikka']) and trim($args['toimipaikka']) != '');
+		$toimipaikka = $_onko_toimipaikkaa ? (int) $args['toimipaikka'] : null;
 
+		if ($maa != "") {
+
+			// tutkitaan ollaanko siellä alv-rekisteröity
 			$query = "	SELECT tunnus
 						FROM yhtion_toimipaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND maa = '{$maa}'
-						AND vat_numero = '{$yhtiorow['vat_numero']}'";
+						WHERE yhtio     = '{$kukarow['yhtio']}'
+						AND maa         = '{$maa}'
+						AND vat_numero != ''";
 			$yhtion_toimipaikat_res = pupe_query($query);
-			$yhtion_toimipaikat_row = mysql_fetch_assoc($yhtion_toimipaikat_res);
 
-			return $yhtion_toimipaikat_row['tunnus'];
+			if (mysql_num_rows($yhtion_toimipaikat_res) == 1) {
+				$yhtion_toimipaikat_row = mysql_fetch_assoc($yhtion_toimipaikat_res);
+
+				return $yhtion_toimipaikat_row['tunnus'];
+			}
 		}
 
 		if (!is_null($toimipaikka)) {

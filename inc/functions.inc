@@ -27506,10 +27506,16 @@ if (!function_exists('sallitut_varastot')) {
 		$kukarow_varasto = array();
 
 		// Parametrit
-		$asiakas_tunnus		 = isset($params['asiakas_tunnus']) ? (int)$params['asiakas_tunnus'] : 0;
-		$toimipaikka_tunnus	 = isset($params['toimipaikka_tunnus']) ? (int)$params['toimipaikka_tunnus'] : 0;
-		$toimitus_maa		 = isset($params['toimitus_maa']) ? $params['toimitus_maa'] : '';
-		$varastotyyppi		 = isset($params['varastotyyppi']) ? $params['varastotyyppi'] : '';
+		$asiakas_tunnus     = isset($params['asiakas_tunnus']) ? (int)$params['asiakas_tunnus'] : 0;
+		$toimipaikka_tunnus = isset($params['toimipaikka_tunnus']) ? (int)$params['toimipaikka_tunnus'] : 0;
+		$toimitus_maa       = isset($params['toimitus_maa']) ? $params['toimitus_maa'] : '';
+		$varastotyyppi      = isset($params['varastotyyppi']) ? $params['varastotyyppi'] : '';
+		$toim               = isset($params['toim']) ? $params['toim'] : '';
+		$tilaustyyppi       = isset($params['tilaustyyppi']) ? $params['tilaustyyppi'] : '';
+
+		if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
+			return $yhtiorow['takuuvarasto'];
+		}
 
 		$varastotyyppi_lisa = "";
 		if ($varastotyyppi == 'normaali_varasto') {

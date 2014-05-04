@@ -553,10 +553,18 @@
 	}
 
 	if ($tila == "" and !isset($jatka)) {
+
+		if (!isset($tilaustyyppi) and isset($laskurow['tilaustyyppi'])) {
+			$tilaustyyppi = $laskurow['tilaustyyppi'];
+		}
+		elseif (!isset($tilaustyyppi) and isset($srow['tilaustyyppi'])) {
+			$tilaustyyppi = $srow['tilaustyyppi'];
+		}
+
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
 		}
-		elseif ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U')) {
+		elseif ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U') {
 			echo "<font class='head'>".t("Takuu otsikko")."</font><hr>";
 		}
 		elseif ($toim == "REKLAMAATIO") {
@@ -600,7 +608,7 @@
 		elseif ($toim == "YLLAPITO") {
 			echo "<font class='head'>".t("Ylläpitosopimuksen otsikko")."</font><hr>";
 		}
-		elseif ($toim == "ENNAKKO" or $srow["tilaustyyppi"] == 'E' or $laskurow["tilaustyyppi"] == 'E') {
+		elseif ($toim == "ENNAKKO" or $tilaustyyppi == 'E') {
 			echo "<font class='head'>".t("Ennakkotilauksen otsikko")."</font><hr>";
 		}
 		else {
@@ -862,6 +870,8 @@
 		$params = array(
 			'asiakas_tunnus' => $srow['liitostunnus'],
 			'toimipaikka_tunnus' => $yhtiotoimipaikka,
+			'toim' => $toim,
+			'tilaustyyppi' => $tilaustyyppi,
 		);
 
 		$varastot = sallitut_varastot($params);
@@ -3051,6 +3061,8 @@
 		$params = array(
 			'asiakas_tunnus' => $asiakasid,
 			'toimipaikka_tunnus' => $yhtiotoimipaikka,
+			'toim' => $toim,
+			'tilaustyyppi' => $tilaustyyppi,
 		);
 
 		$varastot = sallitut_varastot($params);

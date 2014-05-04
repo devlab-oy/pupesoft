@@ -2177,12 +2177,18 @@
 
 			$autom_siirto_myytil = false;
 
-			if ($rivitunnus == 0 and $rivityyppi == 'L' and $yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and
-				(	$toim == "TARJOUS" or
-					($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) or
-					(isset($mista_tullaan) and $mista_tullaan == 'ORUMNET' and $toim == 'EXTRANET')
-				)
-				and !in_array($var, array('V','H'))) {
+			$_tarjouksella = ($toim == "TARJOUS");
+			$_myyntitilauksella = ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS');
+			$_extranetista = (isset($mista_tullaan) and $mista_tullaan == 'ORUMNET' and $toim == 'EXTRANET');
+			$_osto_myyntitilaukselta = ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and $_myyntitilauksella);
+
+			if ($rivitunnus == 0 and
+				$rivityyppi == 'L' and
+				$yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and
+				$yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and
+				$laskurow["tilaustyyppi"] != "U" and
+				($_tarjouksella or $_osto_myyntitilaukselta or $_extranetista) and
+				!in_array($var, array('V','H'))) {
 
 				if (!empty($laskurow['varasto'])) {
 					$kohde_varastot = array($laskurow['varasto']);

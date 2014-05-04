@@ -831,8 +831,15 @@
 			}
 		}
 
-		if ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS", "REKLAMAATIO"))) {
+		$_siirtolista_myyntitilaukselta = ($yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K');
+		$_ei_ole_takuu = ($laskurow["tilaustyyppi"] != "U");
+
+		if ($_siirtolista_myyntitilaukselta and
+			$_ei_ole_takuu and
+			!in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS", "REKLAMAATIO"))) {
+
 			$sel4 = "";
+
 			if (!empty($laskurow['varasto'])) {
 				$kohde_varastot = array($laskurow['varasto']);
 			}

@@ -6130,6 +6130,8 @@ if ($tee == '') {
 													<input type='hidden' name='orig_alatila' value='$orig_alatila'>
 													<select name='palautus_varasto' onchange='submit();' $state $disalisa>";
 
+								$disalisa = "";
+
 								$paltoimiulos .= "<option value=''>".t("Ei palauteta")."</option>";
 
 								$_varastot = array();

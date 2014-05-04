@@ -27609,3 +27609,94 @@ if (!function_exists('sallitut_varastot')) {
 		return array(0);
 	}
 }
+
+if (!function_exists('valitse_oletusvarasto')) {
+	function valitse_oletusvarasto($args) {
+		global $kukarow, $yhtiorow;
+
+		$varasto = isset($args['varasto']) ? (int) $args['varasto'] : 0;
+
+		if (isset($args['varastot']) and is_array($args['varastot'])) {
+			$varastot = $args['varastot'];
+		}
+		else {
+			$varastot = array();
+		}
+
+
+		// Jos ollaan valittu varasto käyttöliittymästä
+		if ((isset($varasto) and $varasto != 0)) {
+			return $varasto;
+		}
+
+		// Jos meillä ei ole tilausta kesken (= tullaan ekaa kertaa otsikolle)
+		if ($kukarow["kesken"] == 0) {
+
+			// jos "Esivalitaan myyntitilaukselle käyttäjän oletusvarasto"
+			if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O') {
+				return $kukarow['oletus_varasto'];
+			}
+
+			// Jos käyttäjätiedoissa on sallittu vain yksi varasto
+			if (count(implode(',', $kukarow['varasto'])) == 1) {
+				return $kukarow['varasto'];
+			}
+
+			// Jos varastolistassa on vain yksi
+			if (count($varastot) == 1) {
+				return $varastot[0];
+			}
+		}
+
+		// Jos käyttäjällä on tilaus kesken
+		if ($kukarow['kesken'] != 0) {
+
+			$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$kukarow['kesken']}'";
+			$laskures = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($laskures);
+
+			// Meillä on varasto kannassa
+			if ($laskurow["varasto"] != 0) {
+				return $laskurow["varasto"];
+			}
+		}
+
+		return 0;
+	}
+}
+
+if (!function_exists('tilauksen_toimipaikka')) {
+	function tilauksen_toimipaikka(Array $args) {
+		global $kukarow, $yhtiorow;
+
+		$asiakasid = isset($args['asiakasid']) ? (int) $asiakasid : 0;
+
+		if ($kukarow['kesken'] != 0) {
+			$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$kukarow['kesken']}'";
+			$laskures = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($laskures);
+
+			return $laskurow['yhtio_toimipaikka'];
+		}
+
+		if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $asiakasid != 0) {
+			$asiakasrow = hae_asiakas($asiakasid);
+
+			if ($asiakasrow['toimipaikka'] != 0) {
+				return $asiakasrow['toimipaikka'];
+			}
+		}
+
+		if ($kukarow['toimipaikka'] != 0) {
+			return $kukarow['toimipaikka'];
+		}
+
+		return 0;
+	}
+}

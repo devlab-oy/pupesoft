@@ -2002,18 +2002,9 @@
 
 			$varastot_lisa_query = "";
 
-			if (isset($srow['yhtiotoimipaikka'])) {
-				$tp = $srow['yhtiotoimipaikka'];
-			}
-			elseif (isset($srow['yhtio_toimipaikka'])) {
-				$tp = $srow['yhtio_toimipaikka'];
-			}
-			elseif (isset($srow['toimipaikka'])) {
-				$tp = $srow['toimipaikka'];
-			}
-			else {
-				$tp = 0;
-			}
+			$args = array('asiakasid' => $srow['liitostunnus']);
+
+			$tp = tilauksen_toimipaikka($args);
 
 			$params = array(
 				'asiakas_tunnus' => $srow['liitostunnus'],
@@ -2026,27 +2017,12 @@
 				$varastot_lisa_query = " AND tunnus IN (".implode(',', $varastot).")";
 			}
 
-			// Jos ollaan valittu varasto käyttöliittymästä
-			if ((isset($varasto) and $varasto != 0)) {
-				$oletusvarasto = $varasto;
-			}
-			// Jos meillä ei ole tilausta kesken (= tullaan ekaa kertaa otsikolle)
-			elseif ($kukarow["kesken"] == 0) {
-				// jos "Esivalitaan myyntitilaukselle käyttäjän oletusvarasto"
-				if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O') {
-					$oletusvarasto = $kukarow['oletus_varasto'];
-				}
-				elseif (count(implode(',', $kukarow['varasto'])) == 1) {
-					$oletusvarasto = $kukarow['varasto'];
-				}
-			}
-			// Meillä on varasto kannassa
-			elseif (isset($srow["varasto"]) and $srow["varasto"] != 0) {
-				$oletusvarasto = $srow["varasto"];
-			}
-			else {
-				$oletusvarasto = 0;
-			}
+			$args = array(
+				'varasto' => $varasto,
+				'varastot' => $varastot,
+			);
+
+			$oletusvarasto = valitse_oletusvarasto($args);
 
 			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
 				$oletusvarasto = (int) $yhtiorow['takuuvarasto'];
@@ -2554,22 +2530,25 @@
 			$string = "<td>".t("Toimitustapa").":</td>";
 			$string .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
 
-			//Ekassa page reloadissa toimipaikkaa ei ole setattu. Asetetaan yhtiön oletustoimipaikka
-			if ($srow['yhtiotoimipaikka'] === null) {
-				$srow['yhtiotoimipaikka'] = 0;
-			}
+			$args = array('asiakasid' => $srow['liitostunnus']);
+
+			$toimipaikka = tilauksen_toimipaikka($args);
 
 			$params = array(
 				'asiakas_tunnus' => $srow['liitostunnus'],
-				'lasku_toimipaikka' => $srow['yhtiotoimipaikka'],
+				'lasku_toimipaikka' => $toimipaikka,
 				'varasto_toimipaikka' => $selectoitu_varasto_toimipaikka
 			);
+
 			$toimitustavat = hae_toimitustavat($params);
 			$toimitustapojen_selitteet = array_column($toimitustavat, 'selite');
+
 			if (!in_array($srow['toimitustapa'], $toimitustapojen_selitteet)) {
 				$asiakas = hae_asiakas($srow['liitostunnus']);
 			}
+
 			foreach ($toimitustavat as $toimitustapa) {
+
 				if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
 					continue;
 				}
@@ -3135,6 +3114,24 @@
 		if ($toim == 'PIKATILAUS') {
 			if (!isset($eilahe) and $srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilahe = 'o';
 			if (!isset($osatoimitus) and $srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0)) $osatoimitus = 'o';
+
+			$args = array('asiakasid' => $asiakasid);
+
+			$toimipaikka = tilauksen_toimipaikka($args);
+
+			$params = array(
+				'asiakas_tunnus' => $asiakasid,
+				'toimipaikka_tunnus' => $toimipaikka,
+			);
+
+			$varastot = sallitut_varastot($params);
+
+			$args = array(
+				'varasto' => $varasto,
+				'varastot' => $varastot,
+			);
+
+			$varasto = valitse_oletusvarasto($args);
 		}
 
 		//otetaan laskun Ytunnus talteen

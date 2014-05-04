@@ -162,52 +162,6 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
 			$erikoisale	= $asiakasrow["erikoisale"];
 
-			// Jos on varasto setattuna, pässätään eteenpäin
-			$varasto = 0;
-
-			// Katsotaan onko asiakkaaseen tai toimipaikkaan liitetty varastoja
-			if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A'){
-				$asiakkaan_oletusvarasto_query = "	SELECT avainsana
-													FROM asiakkaan_avainsanat
-													WHERE yhtio = '$kukarow[yhtio]'
-													AND laji = 'oletusmyyntivarasto'
-													AND liitostunnus = {$asiakasrow['tunnus']}";
-				$aov_result = pupe_query($asiakkaan_oletusvarasto_query);
-				if(mysql_num_rows($aov_result) == 1) {
-					$aov = mysql_result($aov_result,0);
-				}
-				elseif($asiakasrow['toimipaikka'] != 0 and mysql_num_rows($aov_result) == 0){
-					$toimipaikan_oletusvarasto_query = "	SELECT tunnus
-															FROM varastopaikat
-															WHERE yhtio = '$kukarow[yhtio]'
-															AND toimipaikka = {$asiakasrow['toimipaikka']}
-															ORDER BY tunnus DESC";
-					$tov_result = pupe_query($toimipaikan_oletusvarasto_query);
-					if(mysql_num_rows($tov_result) == 1) {
-						$tov = mysql_result($tov_result,0);
-					}
-				}
-			}
-
-			if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
-				$varasto = $yhtiorow['takuuvarasto'];
-			}
-			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and isset($aov)) {
-				$varasto = $aov;
-			}
-			elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and isset($tov)) {
-				$varasto = $tov;
-			}
-			elseif (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
-				// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
-				$varasto = $kukarow['varasto'];
-			}
-			// valitaan käyttäjän oletus varasto
-			elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
-				// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletusvarasto
-				$varasto = $kukarow['oletus_varasto'];
-			}
-
 			if ($yhtiorow["splittauskielto"] != '') {
 				$splittauskielto = "E";
 			}
@@ -280,30 +234,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 				$myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
 
 				if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
-
-					// Yhtiön toimipaikka yliajaa tämän parametrin
-					$query_x = "	SELECT ostotilauksen_kasittely
-									FROM yhtion_parametrit
-									WHERE yhtio = '{$kukarow['yhtio']}'";
-					$param_fetch_res = pupe_query($query_x);
-					$param_fetch_row = mysql_fetch_assoc($param_fetch_res);
-
-					$ostotilauksen_kasittely = $param_fetch_row['ostotilauksen_kasittely'];
-
-					if ($kukarow['toimipaikka'] != 0) {
-
-						$query_x = "	SELECT ostotilauksen_kasittely
-										FROM yhtion_toimipaikat
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$kukarow['toimipaikka']}'
-										AND ostotilauksen_kasittely != ''";
-						$toimpaikka_chk_res = pupe_query($query_x);
-
-						if (mysql_num_rows($toimpaikka_chk_res) > 0) {
-							$toimpaikka_chk_row = mysql_fetch_assoc($toimpaikka_chk_res);
-							$ostotilauksen_kasittely = $toimpaikka_chk_row['ostotilauksen_kasittely'];
-						}
-					}
+					$ostotilauksen_kasittely = $yhtiorow['ostotilauksen_kasittely'];
 				}
 			}
 		}

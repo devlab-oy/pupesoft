@@ -27595,13 +27595,13 @@ if (!function_exists('sallitut_varastot')) {
 			return explode(",", $kukarow["varasto"]);
 		}
 
+		# Ilman rajausta saa myydä kaikista normaalivarastoista
 		$query		 = "	SELECT varastopaikat.tunnus
 							FROM varastopaikat
 							WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
 							AND (varastopaikat.sallitut_maat LIKE '%$toimitus_maa%'
 								 OR varastopaikat.sallitut_maat = '')
-							AND varastopaikat.tyyppi != 'P'
-							$varastotyyppi_lisa";
+							AND varastopaikat.tyyppi = ''";
 		$result	 = pupe_query($query);
 
 		while ($tlv_row = mysql_fetch_assoc($result)) {

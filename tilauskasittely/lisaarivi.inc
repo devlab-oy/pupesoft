@@ -500,10 +500,13 @@
 		$kohde_ja_lahde_varasto = hae_mahdolliset_siirto_varastot(array($varasto_tunnukset[3]));
 		$kohde_ja_lahde_varasto = search_array_key_for_value_recursive($kohde_ja_lahde_varasto, 'tunnus', $varasto_tunnukset[1]);
 		$kohde_ja_lahde_varasto = $kohde_ja_lahde_varasto[0];
-		$kohde_varasto_update = "	tilausrivin_lisatiedot.kohde_hyllyalue = '{$kohde_ja_lahde_varasto['kohde_alkuhyllyalue']}',
-									tilausrivin_lisatiedot.kohde_hyllynro = '{$kohde_ja_lahde_varasto['kohde_alkuhyllynro']}',
-									tilausrivin_lisatiedot.kohde_hyllytaso = '0',
-									tilausrivin_lisatiedot.kohde_hyllyvali = '0',";
+
+		$tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($kohde_ja_lahde_varasto['kohde_tunnus']));
+		$tuotepaikka = $tuotepaikkojen_saldot[0];
+		$kohde_varasto_update = "	tilausrivin_lisatiedot.kohde_hyllyalue = '{$tuotepaikka['hyllyalue']}',
+									tilausrivin_lisatiedot.kohde_hyllynro = '{$tuotepaikka['hyllynro']}',
+									tilausrivin_lisatiedot.kohde_hyllytaso = '{$tuotepaikka['hyllytaso']}',
+									tilausrivin_lisatiedot.kohde_hyllyvali = '{$tuotepaikka['hyllyvali']}',";
 
 		$tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($kohde_ja_lahde_varasto['lahde_tunnus']));
 		$tuotepaikka = $tuotepaikkojen_saldot[0];
@@ -2204,7 +2207,23 @@
 						$autom_siirto_myytil = true;
 						$toimittajan_tunnus = $siirto_varasto['tunnus'];
 
-						$kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '{$siirto_varasto['kohde_alkuhyllyalue']}', tilausrivin_lisatiedot.kohde_hyllynro = '{$siirto_varasto['kohde_alkuhyllynro']}',";
+
+						$tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($siirto_varasto['kohde_tunnus']));
+						$tuotepaikka = $tuotepaikkojen_saldot[0];
+
+						$kohde_varasto_update = "	tilausrivin_lisatiedot.kohde_hyllyalue = '{$tuotepaikka['hyllyalue']}',
+													tilausrivin_lisatiedot.kohde_hyllynro = '{$tuotepaikka['hyllynro']}',
+													tilausrivin_lisatiedot.kohde_hyllytaso = '{$tuotepaikka['hyllytaso']}',
+													tilausrivin_lisatiedot.kohde_hyllyvali = '{$tuotepaikka['hyllyvali']}',";
+
+						$tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($siirto_varasto['lahde_tunnus']));
+						$tuotepaikka = $tuotepaikkojen_saldot[0];
+
+						$myy_hyllyalue_temp = $tuotepaikka['hyllyalue'];
+						$myy_hyllynro_temp = $tuotepaikka['hyllynro'];
+						$myy_hyllytaso_temp = $tuotepaikka['hyllytaso'];
+						$myy_hyllyvali_temp = $tuotepaikka['hyllyvali'];
+
 						$lahde_varasto_hyllyalue = $siirto_varasto['lahde_alkuhyllyalue'];
 						$lahde_varasto_hyllynro = $siirto_varasto['lahde_alkuhyllynro'];
 						$paivita_hyllyt_varastosiirto = true;

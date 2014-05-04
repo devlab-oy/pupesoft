@@ -1420,14 +1420,27 @@
 									}
 									else {
 										if ($kukarow["extranet"] == "") {
-											if ($asiakasmaa != '') {
-												$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
-											}
+
+											$args = array(
+												'asiakasid' => $asiakasid,
+												'maa' => $asiakasmaa,
+											);
+
+											$yhtiotoimipaikka = tilauksen_toimipaikka($args);
+
+											$params = array(
+												'asiakas_tunnus' => $asiakasid,
+												'toimipaikka_tunnus' => $yhtiotoimipaikka,
+												'toimitus_maa' => $asiakasmaa,
+												'varastotyyppi' => 'kaikki_varastot',
+											);
+
+											$varastot = sallitut_varastot($params);
 
 											$query = "	SELECT *
 														FROM varastopaikat
-														WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-														$asiakasmaalisa
+														WHERE yhtio = '$kukarow[yhtio]'
+														AND tunnus in (".implode(",", $varastot).")
 														ORDER BY tyyppi, nimitys";
 											$vtresult = pupe_query($query);
 

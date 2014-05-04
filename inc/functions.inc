@@ -27623,29 +27623,9 @@ if (!function_exists('valitse_oletusvarasto')) {
 			$varastot = array();
 		}
 
-
 		// Jos ollaan valittu varasto käyttöliittymästä
-		if ((isset($varasto) and $varasto != 0)) {
+		if ($varasto != 0 and in_array($varasto, $varastot)) {
 			return $varasto;
-		}
-
-		// Jos meillä ei ole tilausta kesken (= tullaan ekaa kertaa otsikolle)
-		if ($kukarow["kesken"] == 0) {
-
-			// jos "Esivalitaan myyntitilaukselle käyttäjän oletusvarasto"
-			if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O') {
-				return $kukarow['oletus_varasto'];
-			}
-
-			// Jos käyttäjätiedoissa on sallittu vain yksi varasto
-			if (count(implode(',', $kukarow['varasto'])) == 1) {
-				return $kukarow['varasto'];
-			}
-
-			// Jos varastolistassa on vain yksi
-			if (count($varastot) == 1) {
-				return $varastot[0];
-			}
 		}
 
 		// Jos käyttäjällä on tilaus kesken
@@ -27659,9 +27639,24 @@ if (!function_exists('valitse_oletusvarasto')) {
 			$laskurow = mysql_fetch_assoc($laskures);
 
 			// Meillä on varasto kannassa
-			if ($laskurow["varasto"] != 0) {
+			if ($laskurow["varasto"] != 0 and in_array($laskurow["varasto"], $varastot)) {
 				return $laskurow["varasto"];
 			}
+		}
+
+		// Jos varastolistassa on vain yksi
+		if (count($varastot) == 1) {
+			return $varastot[0];
+		}
+
+		// jos "Esivalitaan myyntitilaukselle käyttäjän oletusvarasto"
+		if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and in_array($kukarow['oletus_varasto'], $varastot)) {
+			return $kukarow['oletus_varasto'];
+		}
+
+		// Jos käyttäjätiedoissa on sallittu vain yksi varasto
+		if (count(implode(',', $kukarow['varasto'])) == 1 and in_array($kukarow['varasto'], $varastot)) {
+			return $kukarow['varasto'];
 		}
 
 		return 0;

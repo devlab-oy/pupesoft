@@ -2530,7 +2530,10 @@
 			$string = "<td>".t("Toimitustapa").":</td>";
 			$string .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
 
-			$args = array('asiakasid' => $srow['liitostunnus']);
+			$args = array(
+				'asiakasid' => $srow['liitostunnus'],
+				'maa' => $srow['maa'],
+			);
 
 			$toimipaikka = tilauksen_toimipaikka($args);
 
@@ -3114,30 +3117,33 @@
 		if ($toim == 'PIKATILAUS') {
 			if (!isset($eilahe) and $srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilahe = 'o';
 			if (!isset($osatoimitus) and $srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0)) $osatoimitus = 'o';
-
-			$args = array('asiakasid' => $asiakasid);
-
-			$toimipaikka = tilauksen_toimipaikka($args);
-
-			$params = array(
-				'asiakas_tunnus' => $asiakasid,
-				'toimipaikka_tunnus' => $toimipaikka,
-			);
-
-			$varastot = sallitut_varastot($params);
-
-			$args = array(
-				'varasto' => $varasto,
-				'varastot' => $varastot,
-			);
-
-			$varasto = valitse_oletusvarasto($args);
 		}
 
 		//otetaan laskun Ytunnus talteen
 		$apuqu = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
 		$meapu = pupe_query($apuqu);
 		$apuro = mysql_fetch_assoc($meapu);
+
+		$args = array(
+			'asiakasid' => $asiakasid,
+			'maa' => $maa
+		);
+
+		$yhtiotoimipaikka = tilauksen_toimipaikka($args);
+
+		$params = array(
+			'asiakas_tunnus' => $asiakasid,
+			'toimipaikka_tunnus' => $yhtiotoimipaikka,
+		);
+
+		$varastot = sallitut_varastot($params);
+
+		$args = array(
+			'varasto' => $varasto,
+			'varastot' => $varastot,
+		);
+
+		$varasto = valitse_oletusvarasto($args);
 
 		$otsikon_laskurow = $apuro;
 
@@ -3559,44 +3565,6 @@
 			$toimitusehto2 = trim($toimitusehto2." ".$kasitoimehto2);
 		}
 
-		if ($alv_velvollisuus != "") {
-			// haetaan sen yhteystiedot
-			$alhqur = "	SELECT tunnus, vat_numero, toim_alv
-						FROM yhtion_toimipaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND maa = '{$maa}'
-						AND vat_numero = '{$alv_velvollisuus}'";
-			$alhire = pupe_query($alhqur);
-			$alhiro = mysql_fetch_assoc($alhire);
-
-			$kukarow['toimipaikka'] = $alhiro['tunnus'];
-		}
-
-		if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($varasto) and $varasto != 0 and isset($yhtiotoimipaikka) and (trim($yhtiotoimipaikka) == '' or $yhtiotoimipaikka == 0)) {
-
-			$_query  = "SELECT toimipaikka
-						FROM varastopaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$varasto}'";
-			$vares = pupe_query($_query);
-			$varow = mysql_fetch_assoc($vares);
-
-			if ($varow['toimipaikka'] != 0) {
-				$yhtiotoimipaikka = $varow['toimipaikka'];
-			}
-		}
-
-		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
-		if (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != '') $kukarow['toimipaikka'] = $yhtiotoimipaikka;
-
-		// Tämä tehdään vain pikatilauksissa, ei jos edetään klikkaamalla
-		if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and !isset($klikkaus) and !empty($asiakasid)){
-			$queryx = "SELECT toimipaikka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$asiakasid}";
-			$resultx = pupe_query($queryx);
-			$asiakkaan_toimipaikkax = mysql_result($resultx, 0);
-			if ( (int) $asiakkaan_toimipaikkax !== 0 ) { $kukarow['toimipaikka'] = $asiakkaan_toimipaikkax; }
-		}
-
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		// yhtiön tiedot
@@ -3608,10 +3576,18 @@
 		$yhtioovttunnus 	= $yhtiorow["ovttunnus"];
 		$yhtiokotipaikka	= $yhtiorow["kotipaikka"];
 		$yhtioalv_tilino	= $yhtiorow["alv"];
-		$yhtiotoimipaikka	= $kukarow['toimipaikka'];
 
-		// Jos ollaan ALV-velvollisia ja ei olla vaihdettu otsikolla alasvetovalikosta toimipaikkaa, laitetaan ALV-tiedot toimipaikan mukaan
-		if ($alv_velvollisuus != "" and $kukarow['toimipaikka'] == $alhiro['tunnus']) {
+		// ALV-velvollisuus yliajaa aina kaikki toimipaikkatiedot
+		if ($alv_velvollisuus != "") {
+			// haetaan sen yhteystiedot
+			$alhqur = "	SELECT tunnus, vat_numero, toim_alv
+									FROM yhtion_toimipaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$yhtiotoimipaikka}'";
+			$alhire = pupe_query($alhqur);
+			$alhiro = mysql_fetch_assoc($alhire);
+
+			$yhtiotoimipaikka = $alhiro['tunnus'];
 			$yhtioovttunnus = $alhiro['vat_numero'];
 			$yhtioalv_tilino = $alhiro['toim_alv'];
 		}

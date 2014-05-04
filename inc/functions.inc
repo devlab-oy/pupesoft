@@ -27672,13 +27672,27 @@ if (!function_exists('tilauksen_toimipaikka')) {
 	function tilauksen_toimipaikka(Array $args) {
 		global $kukarow, $yhtiorow;
 
-		$asiakasid = isset($args['asiakasid']) ? (int) $asiakasid : 0;
+		$asiakasid = isset($args['asiakasid']) ? (int) $args['asiakasid'] : 0;
+		$maa = isset($args['maa']) ? $args['maa'] : '';
+
+		if ($yhtiorow['vat_numero'] != '') {
+
+			$query = "	SELECT tunnus
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND maa = '{$maa}'
+						AND vat_numero = '{$yhtiorow['vat_numero']}'";
+			$yhtion_toimipaikat_res = pupe_query($query);
+			$yhtion_toimipaikat_row = mysql_fetch_assoc($yhtion_toimipaikat_res);
+
+			return $yhtion_toimipaikat_row['tunnus'];
+		}
 
 		if ($kukarow['kesken'] != 0) {
 			$query = "	SELECT *
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$kukarow['kesken']}'";
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$kukarow['kesken']}'";
 			$laskures = pupe_query($query);
 			$laskurow = mysql_fetch_assoc($laskures);
 

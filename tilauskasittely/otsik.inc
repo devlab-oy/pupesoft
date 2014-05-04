@@ -857,6 +857,8 @@
 
 		$yhtiotoimipaikka = tilauksen_toimipaikka($args);
 
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
+
 		$params = array(
 			'asiakas_tunnus' => $srow['liitostunnus'],
 			'toimipaikka_tunnus' => $yhtiotoimipaikka,
@@ -892,8 +894,6 @@
 
 		// katsotaan miten vienti ja ALV käsitellään
 		$alv_velvollisuus = "";
-
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
 
 		// jos meillä on lasku menossa ulkomaille
 		if ($yhtiorow['maa'] == $srow['maa'] and $yhtiorow['vat_numero'] != '') {
@@ -3046,6 +3046,8 @@
 
 		$yhtiotoimipaikka = tilauksen_toimipaikka($args);
 
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
+
 		$params = array(
 			'asiakas_tunnus' => $asiakasid,
 			'toimipaikka_tunnus' => $yhtiotoimipaikka,
@@ -3479,8 +3481,6 @@
 		if ($kasitoimehto2 != '') {
 			$toimitusehto2 = trim($toimitusehto2." ".$kasitoimehto2);
 		}
-
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		// yhtiön tiedot
 		$yhtionimi 			= $yhtiorow["nimi"];

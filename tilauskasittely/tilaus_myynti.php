@@ -664,42 +664,6 @@ else {
 //tietyiss‰ keisseiss‰ tilaus lukitaan (ei syˆttˆrivi‰ eik‰ muota muokkaa/poista-nappuloita)
 $muokkauslukko = $state = "";
 
-if(isset($laskurow)){
-	$kukarow_varasto = array();
-	if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
-		$asiakkaan_oletusvarasto_query = " 	SELECT avainsana
-	                      					FROM asiakkaan_avainsanat
-	                      					WHERE yhtio = '$kukarow[yhtio]'
-	                      					AND laji = 'oletusmyyntivarasto'
-	                      					AND liitostunnus = {$laskurow['liitostunnus']}";
-	    $aov_result = pupe_query($asiakkaan_oletusvarasto_query);
-	    if(mysql_num_rows($aov_result) > 0){
-	      	while ($aov_row = mysql_fetch_assoc($aov_result)) {
-	        	$kukarow_varasto[] = $aov_row['avainsana'];
-	      	}
-	    }else{
-
-	    	$ytp = $laskurow['yhtio_toimipaikka'];
-
-	        if ($ytp != 0) {
-	        	$toimipaikkaan_liitetyt_varastot_query = "	SELECT tunnus
-	        												FROM varastopaikat
-	        												WHERE yhtio = '$kukarow[yhtio]'
-	        												AND toimipaikka = {$ytp}";
-	        	$tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
-	        	if(mysql_num_rows($tlv_result) > 0) {
-	        		while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
-	        			$kukarow_varasto[] = $tlv_row['tunnus'];
-	        		}
-	        	}
-	      	}
-	    }
-	    if(count($kukarow_varasto) < 1 and $kukarow_varasto[0] != ""){
-	    	$kukarow_varasto = explode(",", $kukarow["varasto"]);
-	    }
-	}
-}
-
 //	Projekti voidaan poistaa vain jos meill‰ ei ole sill‰ mit‰‰n toimituksia
 if (isset($laskurow["tunnusnippu"]) and $laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {
 	$query 	= "SELECT tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
@@ -2056,23 +2020,17 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 		if (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
 			$varasto = array((int) $laskurow["varasto"]);
 		}
-		elseif (isset($kukarow_varasto)) {
-			$varasto = $kukarow_varasto;
-		}
 		else {
-			$asiakasmaa = $laskurow["toim_nimi"] == "" ? $laskurow["maa"] : $laskurow["toim_maa"];
 
-			$varastolisa = $toim == 'EXTRANET' ? " and varastopaikat.tyyppi='' " : "";
+			$_varastotyyppi = $toim != 'EXTRANET' ? 'kaikki_varastot' : '';
 
-			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')
-						{$varastolisa}";
-			$vtresult = pupe_query($query);
-			$vtrow = mysql_fetch_assoc($vtresult);
-
-			$varasto = explode(",", $vtrow['tunnukset']);
+			$params = array(
+				'asiakas_tunnus' => $laskurow['liitostunnus'],
+				'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
+				'toimitus_maa' => $laskurow["toim_nimi"] == "" ? $laskurow["maa"] : $laskurow["toim_maa"],
+				'varastotyyppi' => $_varastotyyppi,
+			);
+			$varasto = sallitut_varastot($params);
 		}
 
 		//laitetaan myyntitilaukset jaksotettu talteen, ett‰ sit‰ voidaan k‰ytt‰‰ jtselaus.php:ss‰

@@ -27674,6 +27674,7 @@ if (!function_exists('tilauksen_toimipaikka')) {
 
 		$asiakasid = isset($args['asiakasid']) ? (int) $args['asiakasid'] : 0;
 		$maa = isset($args['maa']) ? $args['maa'] : '';
+		$toimipaikka = isset($args['toimipaikka']) ? $args['toimipaikka'] : null;
 
 		if ($yhtiorow['vat_numero'] != '') {
 
@@ -27688,7 +27689,12 @@ if (!function_exists('tilauksen_toimipaikka')) {
 			return $yhtion_toimipaikat_row['tunnus'];
 		}
 
+		if (!is_null($toimipaikka)) {
+			return $toimipaikka;
+		}
+
 		if ($kukarow['kesken'] != 0) {
+
 			$query = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -27700,6 +27706,7 @@ if (!function_exists('tilauksen_toimipaikka')) {
 		}
 
 		if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $asiakasid != 0) {
+
 			$asiakasrow = hae_asiakas($asiakasid);
 
 			if ($asiakasrow['toimipaikka'] != 0) {

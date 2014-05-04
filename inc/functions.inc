@@ -242,20 +242,20 @@ if (!function_exists("pupe_error")) {
 
 		if (ob_get_level() > 1) {
 			$fleur = ob_get_contents();
-
-			// Onko nagios monitor asennettu?
-			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-				file_put_contents("/home/nagios/nagios-pupesoft.log", "-----------------------------------------------\n$fleur\n$puperror\n-----------------------------------------------\n", FILE_APPEND);
-			}
-
 			ob_end_clean();
-
-			die("1, Tietokantayhteydessä virhe\r\n\r\n");
 		}
 		else {
-			// kuollaan pois
-			exit(nl2br($puperror));
+			$fleur = "";
 		}
+
+		// Onko nagios monitor asennettu?
+		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+			file_put_contents("/home/nagios/nagios-pupesoft.log", "-----------------------------------------------\n$fleur\n$puperror\n-----------------------------------------------\n", FILE_APPEND);
+		}
+
+		// kuollaan pois
+		echo nl2br($puperror);
+		exit(1);
 	}
 }
 

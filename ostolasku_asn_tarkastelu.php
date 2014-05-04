@@ -1710,7 +1710,7 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.paketintunniste = '{$kolli}'
-						AND asn_sanomat.tilausrivi is NULL
+						AND (asn_sanomat.tilausrivi is NULL or asn_sanomat.tilausrivi = '')
 						AND asn_sanomat.laji = 'asn'
 						AND asn_sanomat.asn_numero = '{$asn_numero}'
 						AND asn_sanomat.toimittajanumero = '{$toimittajanumero}'
@@ -1941,7 +1941,7 @@
 					$row['nimitys'] = $trow['nimitys'];
 				}
 
-				if (!empty($row['tilausrivi'])) {
+				if (!is_null($row['tilausrivi']) and !empty($row['tilausrivi'])) {
 					$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$row['tilausrivi']})";
 					$hinta_chk_res = pupe_query($query);
 					$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
@@ -1964,7 +1964,7 @@
 				if ($row['status'] == 'E') {
 					echo "<font class='message'>",t("Erolistalla"),"</font>";
 				}
-				elseif (!is_null($row['tilausrivi'])) {
+				elseif (!is_null($row['tilausrivi']) and !empty($row['tilausrivi'])) {
 					echo "<font class='ok'>Ok</font>";
 					$ok++;
 
@@ -1980,7 +1980,7 @@
 
 				echo "<td class='back'>";
 
-				if (is_null($row['tilausrivi']) and $row['status'] != 'E') {
+				if ((is_null($row['tilausrivi']) or empty($row['tilausrivi']) ) and $row['status'] != 'E') {
 					echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}##{$toimipaikka}' value='",t("Etsi"),"' />";
 
 					if ($row['hinta'] == 0) {
@@ -2078,14 +2078,14 @@
 						asn_sanomat.toimittajanumero,
 						asn_sanomat.status,
 						count(asn_sanomat.tunnus) AS rivit,
-						sum(if(asn_sanomat.tilausrivi is NULL, 0, 1)) AS ok
+						sum(if((asn_sanomat.tilausrivi is NULL or asn_sanomat.tilausrivi = ''), 0, 1)) AS ok
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.laji = 'asn'
 						AND asn_sanomat.status NOT IN ('X', 'E', 'D')
 						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
-						HAVING count(asn_sanomat.tunnus) != sum(if(asn_sanomat.tilausrivi is NULL, 0, 1))
+						HAVING count(asn_sanomat.tunnus) != sum(if((asn_sanomat.tilausrivi is NULL or asn_sanomat.tilausrivi = ''), 0, 1))
 						ORDER BY asn_sanomat.asn_numero, asn_sanomat.paketintunniste";
 			$result = pupe_query($query);
 
@@ -2209,7 +2209,7 @@
 						asn_sanomat.paketintunniste,
 						asn_sanomat.toimittajanumero,
 						count(asn_sanomat.tunnus) AS rivit,
-						sum(if(asn_sanomat.tilausrivi is NULL, 0, 1)) AS ok
+						sum(if((asn_sanomat.tilausrivi is NULL or asn_sanomat.tilausrivi = ''), 0, 1)) AS ok
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 						JOIN lasku ON (lasku.yhtio = asn_sanomat.yhtio AND lasku.laskunro = asn_sanomat.asn_numero AND vienti in ('B', 'C', 'E', 'F', 'H', 'I') AND lasku.liitostunnus = toimi.tunnus {$toimipaikkalisa})

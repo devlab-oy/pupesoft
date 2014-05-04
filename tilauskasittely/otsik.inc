@@ -923,11 +923,6 @@
 				exit;
 			}
 
-			if (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != $srow['yhtio_toimipaikka']) {
-				unset($srow['eilahetetta']);
-				unset($srow['osatoimitus']);
-			}
-
 			$apuro  = mysql_fetch_assoc($alhire);
 			// nämä tässä keisissä aina näin
 			$alv    = $apuro["selite"];

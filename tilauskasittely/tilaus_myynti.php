@@ -2021,11 +2021,14 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 			$varasto = array((int) $laskurow["varasto"]);
 		}
 		else {
+
+			$_varastotyyppi = $toim != 'EXTRANET' ? 'kaikki_varastot' : '';
+
 			$params = array(
 				'asiakas_tunnus' => $laskurow['liitostunnus'],
 				'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
 				'toimitus_maa' => $laskurow["toim_nimi"] == "" ? $laskurow["maa"] : $laskurow["toim_maa"],
-				'varastotyyppi' => 'normaali_varasto',
+				'varastotyyppi' => $_varastotyyppi,
 			);
 			$varasto = sallitut_varastot($params);
 		}

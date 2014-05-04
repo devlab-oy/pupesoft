@@ -27517,8 +27517,10 @@ if (!function_exists('sallitut_varastot')) {
 			return $yhtiorow['takuuvarasto'];
 		}
 
-		$varastotyyppi_lisa = "";
-		if ($varastotyyppi == 'normaali_varasto') {
+		if ($varastotyyppi == 'kaikki_varastot') {
+			$varastotyyppi_lisa = "";
+		}
+		else {
 			$varastotyyppi_lisa = "AND varastopaikat.tyyppi=''";
 		}
 
@@ -27550,8 +27552,7 @@ if (!function_exists('sallitut_varastot')) {
 								AND varastopaikat.tunnus = avainsana.selitetark
 								AND (varastopaikat.sallitut_maat LIKE '%$toimitus_maa%'
 									 OR varastopaikat.sallitut_maat = '')
-								AND varastopaikat.tyyppi != 'P'
-								{$varastotyyppi_lisa} )
+								AND varastopaikat.tyyppi != 'P')
 							WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
 							AND avainsana.laji = 'TOIMMYYNTI'
 							AND avainsana.selite = {$toimipaikka_tunnus}
@@ -27573,8 +27574,7 @@ if (!function_exists('sallitut_varastot')) {
 								AND varastopaikat.toimipaikka = {$toimipaikka_tunnus}
 								AND (varastopaikat.sallitut_maat LIKE '%$toimitus_maa%'
 									 OR varastopaikat.sallitut_maat = '')
-								AND varastopaikat.tyyppi != 'P'
-								$varastotyyppi_lisa";
+								AND varastopaikat.tyyppi != 'P'";
 			$tlv_result	 = pupe_query($query);
 
 			while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
@@ -27601,7 +27601,7 @@ if (!function_exists('sallitut_varastot')) {
 							WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
 							AND (varastopaikat.sallitut_maat LIKE '%$toimitus_maa%'
 								 OR varastopaikat.sallitut_maat = '')
-							AND varastopaikat.tyyppi = ''";
+							{$varastotyyppi_lisa}";
 		$result	 = pupe_query($query);
 
 		while ($tlv_row = mysql_fetch_assoc($result)) {

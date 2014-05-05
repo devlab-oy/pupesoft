@@ -207,7 +207,7 @@ elseif ($edi_tyyppi == "edifact911") {
 		if ($value != "") {
 			$edi_rivi .= $value."\n";
 
-			if (substr($value, 0, 6) == "NAD+SE" or substr($value, 0, 6) == "NAD+CZ") {
+			if (substr($value, 0, 6) == "NAD+SE") {
 				$nadse_segmentti = $value;
 			}
 		}
@@ -559,7 +559,7 @@ while ($tietue = fgets($fd)) {
 				$toimir = pupe_query($toimiq);
 				$toimiro = mysql_fetch_array($toimir);
 				
-				// Jos kyseess‰ on koontikuljetuskeissi niin setataan v‰lietappi
+				// Jos kyseess‰ on koontikuljetuskeissi niin setataan v‰lietappi (terminaali/varasto)
 				if ($toimiro['tulostustapa'] == "L" or $toimiro['tulostustapa'] == "K") {
 					$query = "	SELECT *
 								FROM asiakas
@@ -571,14 +571,14 @@ while ($tietue = fgets($fd)) {
 
 					if (mysql_num_rows($result) == 1) {
 						$abrow = mysql_fetch_array($result);
-						//laskun sisviesti1 kentt‰‰n menee tavaran ensimm‰inen vastaanottaja(terminaali)
+						//laskun sisviesti1 kentt‰‰n menee tavaran ensimm‰inen vastaanottaja(terminaali/varasto)
 						$lopnumero = $abrow['toim_ovttunnus'];
 						$lopnimi = $abrow['toim_nimi'];
 						$loppostitp = $abrow['toim_postitp'];
 						$loppostino = $abrow['toim_postino'];
 						$loposoite = $abrow['toim_osoite'];
 					}
-					// Koontikeississ‰ ei haluta en‰‰ jatkaa
+					// Koontikeississ‰ ei haluta en‰‰ jatkaa ettei vahingossa ylikirjoiteta tilaavaa asiakasta
 					break;
 				}
 			}
@@ -1040,7 +1040,7 @@ while ($tietue = fgets($fd)) {
 				}
 
 				// jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSƒ ON KOONTIKULJETUSKEISSI)
-				if (true or(($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L")) {
+				if ($tnimi != "" or ($tnimi == "" and $tnimitark != "") and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
 					if ($tnimi == "" and $tnimitark != "") {
 						$tnimi = $tnimitark;
 						$tnimitark = "";

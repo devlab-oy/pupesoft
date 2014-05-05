@@ -102,7 +102,7 @@ foreach ($arska as $key => &$value) {
 				$edi_rivi .= $kippari[0]."\n";
 				// Toimituspaivamaara
 				$edi_rivi .= $kippari[3]."\n";
-				// Tällä segmentillä kerrotaan että yksittäisen tilausrivin tiedot loppuu ja voidaan lisätä se tilaukselle
+				// Tällä segmentillä kerrotaan editilaus_in:lle että yksittäisen tilausrivin tiedot loppuu ja voidaan lisätä tuote tilaukselle
 				$edi_rivi .= "PCD+12\n";
 			}
 		}

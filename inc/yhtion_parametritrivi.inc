@@ -2660,6 +2660,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tilauksen_myyntieratiedot") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tilauksen myyntier‰ ja tuotetietoja ei n‰ytet‰")."</option>";
+		$ulos .= "<option value = 'o' $sel[o]>".t("Tilauksen myyntier‰ ja tuotetiedot n‰ytet‰‰n tarjouksella / myyntitilauksella")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tilausvahvistus_jttoimituksista") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

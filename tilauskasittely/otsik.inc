@@ -983,6 +983,34 @@
 				<td valign='top'>".t("Postitp").": </td>
 				<td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td></tr>";
 
+		echo "<tr><td valign='top'>".t("Toimipaikka").": </td>";
+		echo "<td>";
+
+		$tp = $kukarow['toimipaikka'];
+
+		$query = "  SELECT *
+		      FROM yhtion_toimipaikat
+		      WHERE yhtio = '{$kukarow['yhtio']}'
+		      AND vat_numero = ''
+		      ORDER BY nimi";
+		$vresult = pupe_query($query);
+
+		if (mysql_num_rows($vresult) > 0) {
+
+		  echo "<select name='toimipaikka_rajaus'><option value='0'>" . t("Ei toimipaikkaa") . "</option>";
+
+		  while ($vrow = mysql_fetch_array($vresult)) {
+		    $sel="";
+		    if ($tp == $vrow['tunnus']) {
+		      $sel = "selected";
+		    }
+		    echo "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
+		  }
+		  echo "</select>";
+		}
+
+		echo "</td></tr>";
+
 		if ($srow["liitostunnus"] > 0) {
 			$query = "	SELECT distinct koodi, nimi
 						FROM maat

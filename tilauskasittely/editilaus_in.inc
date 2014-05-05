@@ -1040,7 +1040,7 @@ while ($tietue = fgets($fd)) {
 				}
 
 				// jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSÄ ON KOONTIKULJETUSKEISSI)
-				if ($tnimi != "" or ($tnimi == "" and $tnimitark != "") and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
+				if (isset($kasitellaan_splitattuja_crossdock_edifact911) or ($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
 					if ($tnimi == "" and $tnimitark != "") {
 						$tnimi = $tnimitark;
 						$tnimitark = "";

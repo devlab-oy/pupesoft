@@ -586,7 +586,7 @@
 			}
 			echo "</td>";
 			$_kehahin = hinta_kuluineen($tuoterow['tuoteno'], $tuoterow['kehahin']);
-			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($kehahin, 6, TRUE);
+			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($_kehahin, 6, TRUE);
 
 			if ($tuoterow["myyntihinta_maara"] != 0) {
 				echo " $tuoterow[yksikko]<br>";
@@ -924,6 +924,10 @@
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_assoc ($sresult)) {
 
+						if (!isset($saldorow['era'])) {
+							$saldorow['era'] = '';
+						}
+
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
 
 						//summataan kokonaissaldoa ja vain oman firman saldoa
@@ -936,7 +940,7 @@
 						}
 
 						echo "<tr>";
-						echo "<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>";
+						echo "<td>" . $saldorow['nimitys'] . $saldorow['tyyppi'] . $saldorow['era'] . "</td>";
 
 						if ($saldorow["hyllyalue"] == "!!M") {
 							$asiakkaan_tunnus = (int) $saldorow["hyllynro"].$saldorow["hyllyvali"].$saldorow["hyllytaso"];
@@ -1391,6 +1395,8 @@
 					}
 
 					$query = "	SELECT tilausrivi.yhtio,
+								tilausrivi.tuoteno tuotenumero,
+								tilausrivi.rivihinta rivihinta,
 								IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.rivihinta,0) summa30,
 								IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kate,0) kate30,
 								IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kpl,0) kpl30,
@@ -1936,6 +1942,16 @@
 					echo 5;
 				}
 
+				if(!isset($sel1)) {$sel1 = '';}
+				if(!isset($sel2)) {$sel2 = '';}
+				if(!isset($sel3)) {$sel3 = '';}
+				if(!isset($sel4)) {$sel4 = '';}
+				if(!isset($sel5)) {$sel5 = '';}
+				if(!isset($sel6)) {$sel6 = '';}
+				if(!isset($sel7)) {$sel7 = '';}
+				if(!isset($sel8)) {$sel8 = '';}
+				if(!isset($sel9)) {$sel9 = '';}
+
 				echo "'>".t("Tapahtumalaji").": ";
 				echo "<select name='tapahtumalaji' onchange='submit();'>'";
 				echo "<option value=''>".t("Näytä kaikki")."</option>";
@@ -2185,8 +2201,15 @@
 						echo "<td nowrap align='right' valign='top'>".round($_hinta,2)."</td>";
 
 						if ($prow["laji"] == "laskutus") {
-							$kate = $kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta'] );
-							$katepros = 100*$kate/$prow['rivihinta'];
+							$kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta'] );
+
+							if ($prow['rivihinta'] == 0) {
+								$katepros = 0;
+							}
+							else{
+								$katepros = 100*$kate/$prow['rivihinta'];
+							}
+
 							echo "<td nowrap align='right' valign='top'>".round($katepros,2)."%</td>";
 						}
 						else {

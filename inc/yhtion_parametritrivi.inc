@@ -137,7 +137,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == == "kulujen_laskeminen_hintoihin") {
+	if (mysql_field_name($result, $i) == "kulujen_laskeminen_hintoihin") {
 
 	  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

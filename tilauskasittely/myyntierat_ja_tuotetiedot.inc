@@ -23,19 +23,20 @@ if (isset($_POST['piirtele_valikko'])) {
 	// piirrell‰‰n tuotteen_avainsanat-valikko
 	echo "<br><br>";
 
-	$query = "	SELECT distinct laji
-				FROM tuotteen_avainsanat
+	$query = "	SELECT selite, selitetark
+				FROM avainsana
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				ORDER BY laji";
+				AND laji    = 'PARAMETRI'
+				ORDER BY selite";
 	$result = pupe_query($query);
 
 	echo "<form>";
 	echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
 	echo "<tr><th>".t("Valitse avainsanat sek‰ lis‰kielet")."<br><br><input type='checkbox' class='check_all' value='lajiboksit'>".t("Valitse Kaikki")."</th><td>";
-	
-	$query = "	SELECT DISTINCT kieli 
-				FROM tuotteen_avainsanat 
-				WHERE yhtio='{$yhtiorow['yhtio']}' 
+
+	$query = "	SELECT DISTINCT kieli
+				FROM tuotteen_avainsanat
+				WHERE yhtio='{$yhtiorow['yhtio']}'
 				AND kieli != '{$yhtiorow['kieli']}'";
 	$ressu = pupe_query($query);
 
@@ -47,25 +48,31 @@ if (isset($_POST['piirtele_valikko'])) {
 
 	$secretcounter = 0;
 	$eka_ajo = true;
+
 	while ($row = mysql_fetch_assoc($result)) {
 		$nollaus = false;
 		if ($secretcounter == 0) echo "<tr>";
 		$tsekk = "";
+
 		foreach ($lajit as $osuma) {
-			if ($osuma == $row['laji']) {
+			if ($osuma == $row['selite']) {
 				$tsekk = "CHECKED";
 				break;
 			}
 		}
-		echo "<td align='left' valign='top' width='100'><input type='checkbox' class='lajiboksit' name='lajit[]' value='{$row['laji']}' $tsekk>{$row['laji']}</td>";
+
+		echo "<td align='left' valign='top' nowrap><input type='checkbox' class='lajiboksit' name='lajit[]' value='{$row['selite']}' $tsekk>{$row['selitetark']}</td>";
+
 		if ($secretcounter == 2) {
-			echo "</tr>"; 
+			echo "</tr>";
 			$secretcounter = 0;
 			$nollaus = true;
 		}
+
 		$eka_ajo = false;
-		if (!$nollaus) $secretcounter++;	
+		if (!$nollaus) $secretcounter++;
 	}
+
 	echo "<br><br>";
 	echo "	<tr>
 		  		<td align='left' class='back' valign='top'>
@@ -126,7 +133,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	array_unshift($kielet, $yhtiorow['kieli']);
 
 	mysql_data_seek($tilausrivit_talteen, 0);
-	
+
 	while ($row = mysql_fetch_array($tilausrivit_talteen)) {
 	    $rows[] = $row;
 	}
@@ -146,7 +153,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	//loopataan myyntier‰tiedot per tilausrivi
 	foreach ($rows as $tilausrivi) {
 		// Haetaan tuotteen tiedot
-		$query = "	SELECT * 
+		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tuoteno = '{$tilausrivi['tuoteno']}'";
@@ -160,9 +167,9 @@ elseif(isset($lajit) and count($lajit) > 0) {
 					AND tuoteno = '{$tilausrivi['tuoteno']}'";
 		$toimittajaressi = pupe_query($query);
 		$alkuperamaat = mysql_fetch_assoc($toimittajaressi);
-		
+
 		// Haetaan asiakkaan tuotenumero
-		$query = "	SELECT * 
+		$query = "	SELECT *
 					FROM asiakaskommentti
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tuoteno = '{$tilausrivi['tuoteno']}'";
@@ -213,20 +220,20 @@ elseif(isset($lajit) and count($lajit) > 0) {
 		$worksheet->write($excelrivi, $excelsarake++, $alkuperamaat['kaikkimaat']);
 
 		foreach ($lajit as $asanalaji) {
-			
+
 			foreach ($kielet as $kieli) {
 				// etsit‰‰n tuotteen avainsanat per valittu laji ja kieli
 				$query = "	SELECT *
 							FROM tuotteen_avainsanat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tuoteno = '{$tilausrivi['tuoteno']}'
-							AND laji = '{$asanalaji}'
-							AND kieli = '{$kieli}'";
+							AND laji    = '{$asanalaji}'
+							AND kieli   = '{$kieli}'";
 				$result = pupe_query($query);
-				
+
 				//laitetaan uusi headeri per valittu kieli vain ekalla rivill‰
 				if ($eka_tuote) $worksheet->write(0, $excelsarake, $asanalaji." ".strtoupper($kieli), $format_bold);
-				
+
 				$asanase = mysql_fetch_assoc($result);
 				if (is_numeric($asanase['selite'])) $asanase['selite'] = str_replace(".", ",", $asanase['selite']);
 				$worksheet->write($excelrivi, $excelsarake++, $asanase['selite']);
@@ -237,6 +244,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 
 		$excelrivi++;
 	}
+
 	$excelnimi = $worksheet->close();
 
 	if (isset($excelnimi)) {
@@ -248,7 +256,7 @@ elseif(isset($lajit) and count($lajit) > 0) {
 		echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
 		echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr></form>";
 		echo "</table><br>";
-	}	
+	}
 	else {
 		echo t("Tallennus ep‰onnistui")."!<br>";
 	}

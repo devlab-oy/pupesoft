@@ -6,16 +6,76 @@
 
 	require('inc/parametrit.inc');
 
+	if (!isset($mista)) $mista = $laji;
+
 	if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 		// tarkistetaan oikeuksia ja katsotaan etta muokataanko puuta vai puuliitoksia
 		$saamuokata = false;
 		$saamuokataliitosta = false;
 
-		if ($tee == 'valitsesegmentti' or $tee == 'addtotree' or $tee == 'removefromtree' and tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
+		if (($tee == 'valitsesegmentti' or $tee == 'addtotree' or $tee == 'removefromtree') and tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
 			$saamuokataliitosta = true;
 		}
 		elseif ($oikeurow['paivitys'] == '1') {
 			$saamuokata = true;
+		}
+
+		if ($tee == 'hae_laji') {
+
+			$val = '';
+
+			if (isset($avainsanan_tunnus)) {
+				$avainsanan_tunnus = (int) $avainsanan_tunnus;
+
+				$query = "	SELECT *
+							FROM dynaaminen_puu_avainsanat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$avainsanan_tunnus}'";
+				$res = pupe_query($query);
+				$row = mysql_fetch_assoc($res);
+				$val = $row['tarkenne'];
+
+				echo "<input type='hidden' id='avainsanan_tunnus' name='avainsanan_tunnus' value='{$avainsanan_tunnus}' />";
+			}
+
+			echo "<input type='text' id='keywords_value' name='keywords_value' value='{$val}' />";
+
+			exit;
+		}
+		elseif ($tee == 'hae_avainsana_lista') {
+			$query = "	SELECT *
+						FROM dynaaminen_puu_avainsanat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND liitostunnus = '{$nodeid}'
+						AND laji = '{$toim}'
+						ORDER BY laji, avainsana, tarkenne";
+			$dpavainsanat_res = pupe_query($query);
+
+			while ($dp_row = mysql_fetch_assoc($dpavainsanat_res)) {
+				$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
+
+				if ($saamuokata) {
+					echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;&nbsp;";
+					echo "<a style='float: right;' class='edit_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa'),"'/></a>";
+					echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
+				}
+
+				echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne]";
+
+
+				echo "<br />";
+			}
+
+			exit;
+		}
+		elseif ($tee == 'poista_avainsana' and !empty($avainsanan_tunnus)) {
+			$avainsanan_tunnus = (int) $avainsanan_tunnus;
+
+			$query = "	DELETE FROM dynaaminen_puu_avainsanat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$avainsanan_tunnus}'";
+			$delres = pupe_query($query);
+			exit;
 		}
 
 		// tarvii romplata tekstimuuttujia kun tehdaan jQuery.ajaxin kanssa
@@ -69,6 +129,48 @@
 						echo "<input type='hidden' id='newid' value='{$uusirivi['tunnus']}' />
 							  <input type='hidden' id='newcode' value='{$uusirivi['koodi']}' />";
 					}
+					elseif ($tee == 'lisaa_avainsana' and !empty($laji) and !empty($avainsana) and !empty($toim)) {
+
+						if (!empty($avainsanan_tunnus)) {
+							$avainsanan_tunnus = (int) $avainsanan_tunnus;
+
+							$query = "	UPDATE dynaaminen_puu_avainsanat SET
+										avainsana = '{$laji}',
+										tarkenne = '{$avainsana}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$avainsanan_tunnus}'";
+							$updres = pupe_query($query);
+						}
+						else {
+
+							# Tarkistetaan onko avainsana jo tallennettu kantaa. Duplikaatteja ei sallita.
+							$query = "	SELECT tunnus
+										FROM dynaaminen_puu_avainsanat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND liitostunnus = '{$nodeid}'
+										AND laji = '{$toim}'
+										AND avainsana = '{$laji}'
+										AND tarkenne = '{$avainsana}'";
+							$chk = pupe_query($query);
+
+							if (mysql_num_rows($chk) == 0) {
+								$query = "	INSERT INTO dynaaminen_puu_avainsanat SET
+											yhtio = '{$kukarow['yhtio']}',
+											liitostunnus = '{$nodeid}',
+											kieli = '{$kukarow['kieli']}',
+											laji = '{$toim}',
+											avainsana = '{$laji}',
+											tarkenne = '{$avainsana}',
+											muuttaja = '{$kukarow['kuka']}',
+											laatija = '{$kukarow['kuka']}',
+											luontiaika = now(),
+											muutospvm = now()";
+								$insquery = pupe_query($query);
+							}
+						}
+
+						exit;
+					}
 					elseif ($tee == 'poista') {
 						// poistaa ja upgradettaa alemmat lapset isommaksi.
 						PoistaLapset($toim, $noderow['lft']);
@@ -97,7 +199,7 @@
 				}
 				elseif ($saamuokataliitosta) {
 					if ($tee == 'addtotree') {
-						TuotteenAlkiot($toim, $liitos, $nodeid, $kieli);
+						TuotteenAlkiot($toim, $liitos, $nodeid, $kieli, $mista);
 					}
 					elseif ($tee == 'removefromtree') {
 						$qu = "	DELETE FROM puun_alkio
@@ -259,6 +361,12 @@
 				var nodeboxcode		= jQuery("#uusi_koodi");
 				var tee				= jQuery("#tee");
 
+				var nodebox_keywords		= jQuery("#nodebox_keywords");
+				var nodebox_keywords_title	= jQuery("#nodebox_keywords_title");
+				var addboxbutton_keywords	= jQuery("#showaddbox_keywords");
+				var keywords_category 		= jQuery("#keywords_category");
+				var keywords_value 			= jQuery("#keywords_value");
+
 				addboxbutton.click(function() {
 					tee.val("lisaa");
 					nodeboxtitle.html("Lis‰‰ taso");
@@ -267,6 +375,25 @@
 					nodebox.show();
 					nodeboxcode.val("");
 					return false;
+				});
+
+				addboxbutton_keywords.click(function() {
+					nodebox_keywords_title.html("Lis‰‰ avainsana");
+					addboxbutton_keywords.hide();
+					addboxbutton_keywords.after(nodebox_keywords);
+					jQuery('#keywords_value').hide();
+					nodebox_keywords.show();
+					return false;
+				});
+
+				keywords_category.on('change', function() {
+
+					if (jQuery('#avainsanan_tunnus').val() !== 'undefined') {
+						params["tee"] = 'hae_laji';
+						params["laji"] = jQuery("#keywords_category option:selected").html();
+
+						editNode_keywords(params);
+					}
 				});
 
 				moveboxbutton.click(function () {
@@ -300,6 +427,51 @@
 					return false;
 				});
 
+				jQuery("#keywordsform").live('submit', function() {
+					params["laji"] 			= jQuery("#keywords_category option:selected").html();
+					params["avainsana"] 	= jQuery("#keywords_value").val();
+					params["tee"]			= 'lisaa_avainsana';
+					params["toim"]			= jQuery("#toim").val();
+
+					if (jQuery("#keywords_category option:selected").val() == "" || params['avainsana'] == "") {
+						jQuery("#nodebox_keywords_err").show();
+						return false;
+					}
+
+					params['avainsanan_tunnus'] = jQuery("#avainsanan_tunnus") ? jQuery("#avainsanan_tunnus").val() : null;
+
+					editNode_keywords(params);
+
+					return false;
+				});
+
+				jQuery(".remove_keyword").live('click', function(e) {
+					e.preventDefault();
+
+					if (confirm("<?php echo t("Poista avainsana"); ?>")) {
+						params["tee"] = 'poista_avainsana';
+						params['avainsanan_tunnus'] = $(this).attr('id');
+						editNode_keywords(params);
+					}
+
+					return false;
+				});
+
+				jQuery(".edit_keyword").live('click', function(e) {
+					e.preventDefault();
+
+					var nodebox_keywords = jQuery("#nodebox_keywords");
+
+					jQuery("#nodebox_keywords_title").html("Muokkaa avainsanaa");
+					jQuery("#showaddbox_keywords").hide();
+					jQuery("#showaddbox_keywords").after(nodebox_keywords);
+					nodebox_keywords.show();
+
+					params["tee"] = 'hae_laji';
+					params["avainsanan_tunnus"] = $(this).attr('id');
+					editNode_keywords(params);
+				});
+
 				jQuery("#moveform").submit(function() {
 					params["kohdetaso"]	= jQuery("#kohdetaso").val();
 					params["tee"]		= "siirrataso";
@@ -322,6 +494,86 @@
 			<?php
 			// suljetaan nodelaatikko
 			echo "</div>";
+
+			# noden avainsanatlaatikko
+			echo "<br /><hr /><br />";
+			echo "<div id='infobox_keywords' class='spec' style='padding: 20px; border: 1px solid black;'>";
+			echo "<h2 style='font-size: 20px'>",t("Avainsanat"),"</h2><hr />";
+
+			$query = "	SELECT *
+						FROM dynaaminen_puu_avainsanat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND liitostunnus = '{$nodeid}'
+						AND laji = '{$toim}'
+						ORDER BY laji, avainsana, tarkenne";
+			$dpavainsanat_res = pupe_query($query);
+
+			echo "<div id='infobox_keywords_list' style='line-height: 16px;'>";
+
+			if (mysql_num_rows($dpavainsanat_res) > 0) {
+
+				while ($dp_row = mysql_fetch_assoc($dpavainsanat_res)) {
+					$_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
+
+					if ($saamuokata) {
+						echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;&nbsp;";
+						echo "<a style='float: right;' class='edit_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa'),"'/></a>";
+						echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
+					}
+
+					echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne]";
+
+					echo "<br />";
+				}
+			}
+
+			echo "</div>";
+
+			echo "<br />";
+			echo "<div id='editbuttons_keywords'>";
+
+			if ($saamuokata) {
+				echo "<a href='#' id='showaddbox_keywords'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰'),"'/>",t('Lis‰‰ uusi avainsana'),"</a><br /><br />";
+			}
+
+			echo "</div>";
+
+			# tason avainsana lis‰yslaatikko
+			echo "<div id='nodebox_keywords' style='display: none'>
+				<form id='keywordsform'>
+				<fieldset>
+					<legend style='font-weight: bold' id='nodebox_keywords_title'></legend>
+					<ul style='list-style:none; padding: 5px'>
+						<li style='padding: 3px'>
+							<label style='display: inline-block; width: 50px'>".t("Laji")." <font class='error'>*</font></label>";
+
+			$vresult = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark_2 = '{$toim}'");
+
+			echo "<select id='keywords_category' name='keywords_category' style='float: right;'>";
+			echo "<option value=''>",t("Valitse laji"),"</option>";
+
+			while($row = mysql_fetch_assoc($vresult)) {
+				echo "<option value='{$row['selite']}'>{$row['selitetark']}</option>";
+			}
+
+			echo "</select>";
+
+			echo "		</li>
+						<li style='padding: 3px' id='keywords_value_box'>
+							<label style='display: inline-block; width: 50px;'>".t("Avainsana")."</label>
+							<span style='float: right;' id='keywords_value_select'></span>";
+			echo "		</li>
+					</ul>
+					<input type='hidden' id='tee' value='' />
+					<input type='hidden' id='toim' value='{$toim}' />
+					<p style='display: none; color: red' id='nodebox_keywords_err'>".t("Laji ja avainsana ei saa olla tyhji‰").".</p>
+					<input type='submit' id='editsubmitbtn' value='".t("Tallenna")."' />
+				</fieldset>
+				</form>
+			</div>";
+
+			echo "</div>";
+
 		}
 		else {
 			echo "<p>".t("virhe: nodeid tai toim puuttuu")."</p>";
@@ -329,7 +581,6 @@
 
 		exit;
 	}
-
 
 	if (strtoupper($toim) == "TUOTE") {
 		$otsikko = t("Tuotepuu");
@@ -342,6 +593,7 @@
 	}
 
 	echo "<font class='head'>{$otsikko}</font><hr /><br />";
+	echo "<input type='hidden' id='mista' value='{$mista}' />";
 
 	$saamuokata = false;
 	$saamuokataliitoksia = false;
@@ -402,6 +654,7 @@
 					<legend>".t("Luo uusi puu")."</legend>
 					<label>".t("Nimi").": </label><input type='text' name='uusi_nimi' />
 					<input type='hidden' name='toim' value='".$toim."' />
+					<input type='hidden' name='mista' value='{$mista}' />
 					<input type='hidden' name='tee' value='paakat' />
 					<input type='submit' value='".t("Tallenna")."' />
 				</fieldset>
@@ -436,7 +689,7 @@
 		}
 
 		echo "</ul></div>
-				<div id='infobox' class='spec' style='padding: 20px; border: 1px solid black; position: fixed; left: 520px; top: 68px;'></div>";
+				<div id='infobox' class='spec' style='padding: 20px; border: 1px solid black; left: 520px; top: 52px; float: right; position: absolute;'></div>";
 
 		?>
 		<script language="javascript">
@@ -456,6 +709,8 @@
 		var loadimg = "<img src='pics/loading_orange.gif' id='loading' />";
 		var activenode;
 
+		var mista = jQuery('#mista').val();
+
 		jQuery.ajaxSetup({
 			url: "dynaaminen_puu.php?ajax=OK",
 			type: "POST",
@@ -468,6 +723,14 @@
 				activenode = this.id;
 				$(this).addClass("ok");
 				jQuery("#infobox").html(loadimg);
+				jQuery("#infobox").css('top', function() {
+
+					if (window.pageYOffset < 45) {
+						return 52;
+					}
+
+					return window.pageYOffset + 20;
+				});
 
 				dynpuuparams["nodeid"] = this.id;
 
@@ -486,6 +749,8 @@
 		function editNode(params) {
 			var editbox = jQuery("#editbuttons");
 			jQuery(editbox).hide().after(loadimg);
+
+			params.mista = mista;
 
 			jQuery.ajax({
 				data: params,
@@ -540,6 +805,82 @@
 				}
 			});
 		}
+
+		function editNode_keywords(params) {
+			var editbox = jQuery("#editbuttons_keywords");
+
+			if (params.tee != 'hae_laji' && params.tee != 'lisaa_avainsana' && params.tee != 'poista_avainsana') {
+				jQuery(editbox).hide().after(loadimg);
+			}
+
+			jQuery.ajax({
+				data: params,
+				async: false,
+				success: function(retval) {
+					if (params.tee == 'hae_laji') {
+						jQuery("#keywords_value_select").html(retval);
+
+						jQuery("#keywords_value_select > input").live('keyup', function() {
+							$('#keywordsform').closest('#tee').val('lisaa_avainsana');
+						});
+
+						if (params.avainsanan_tunnus) {
+
+							var laji_chk = jQuery('#'+params["avainsanan_tunnus"]+'_class').val();
+
+							if (params.laji) laji_chk = params.laji;
+
+							jQuery('#keywords_category > option').each(function() {
+								$(this).prop('selected', ($(this).html() == laji_chk));
+							});
+						}
+
+						return false;
+					}
+					else if (params.tee == 'lisaa_avainsana') {
+
+						if (params.avainsanan_tunnus) jQuery('#avainsanan_tunnus').remove();
+
+						var nodebox_keywords	= jQuery("#nodebox_keywords");
+						jQuery(nodebox_keywords).hide();
+
+						jQuery(editbox).show();
+
+						var showaddbox_keywords = jQuery('#showaddbox_keywords');
+						jQuery(showaddbox_keywords).show();
+
+						params.tee = 'hae_avainsana_lista';
+					}
+					else if (params.tee == 'poista_avainsana') {
+						params.tee = 'hae_avainsana_lista';
+					}
+					else {
+						jQuery("#infobox_keywords").html(retval);
+						return false;
+					}
+				}
+			});
+
+			if (params.tee == 'hae_avainsana_lista') {
+				jQuery.ajax({
+					data: params,
+					async: false,
+					success: function(retval) {
+						jQuery('#infobox_keywords_list').html(retval);
+
+						jQuery('#keywords_category > option').each(function() {
+							$(this).removeAttr('selected');
+						});
+
+						jQuery('#keywords_value > input').val('');
+						jQuery('#nodebox_keywords_err').hide();
+					}
+				});
+			}
+
+			return false;
+		}
+
 		<?php
 		// tarvittavat javascriptit kun muokataan liitoksia
 		if ($tee == 'valitsesegmentti') {

@@ -470,6 +470,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			if (isset($tilausrivi_alvillisuus)) {
 				setcookie('tilausrivi_alvillisuus', $tilausrivi_alvillisuus, time()+60*60*24*90, "/");
 			}
+			if (isset($lajit)) {
+				setcookie("avainsanalaji_keksi", urlencode(serialize($lajit)), strtotime('+90 days'), "/");
+				$_COOKIE["avainsanalaji_keksi"] = urlencode(serialize($lajit));
+			}
 		}
 
 		if ($phpnimi == 'generoi_siirtolista.php') {

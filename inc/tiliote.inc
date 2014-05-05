@@ -795,7 +795,7 @@
 			$maara 		 = sprintf('%.2f', $maara);
 			$kuittikoodi = substr($tietue,106,1);
 			$erialla 	 = "";
-			$maksaa 	 = trim(substr($tietue, 108, 35));
+			$maksaa 	 = pupesoft_cleanstring(trim(substr($tietue, 108, 35)));
 			$tilino 	 = substr($tietue, 144, 14);
 			$iban		 = "";
 			$omataso 	 = substr($tietue, 187, 1);

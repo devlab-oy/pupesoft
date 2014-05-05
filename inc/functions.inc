@@ -12548,13 +12548,16 @@ if (!function_exists("asiakashakuohje")) {
 
 // Funktio lis滗 tuotteenalkion dynaamiseen puuhun.
 if (!function_exists("TuotteenAlkiot")) {
-	function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli) {
+	function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli, $mista = '') {
 		global $kukarow;
+
+		$mista = empty($mista) ? $laji : $mista;
 
 		$qu = "	INSERT INTO puun_alkio
 				SET yhtio	= '$kukarow[yhtio]',
 				liitos 		= '$liitos',
 				laji 		= '$laji',
+				kutsuja 	= '{$mista}',
 				puun_tunnus = '$puun_tunnus',
 				kieli 		= '$kieli',
 				laatija 	= '$kukarow[kuka]',
@@ -17281,12 +17284,12 @@ if (!function_exists("tee_keraysera")) {
 
 			$ohjausmerkki = $jiivee = array();
 
-			$query = "	SELECT lasku.tunnus, 
+			$query = "	SELECT lasku.tunnus,
 						LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
 		 				IFNULL(maksuehto.jv, '') jv
 						FROM lasku
-						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto) 
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tunnus IN ({$tilaukset})";
 			$ohjausmerkki_res = pupe_query($query);
 
@@ -17563,7 +17566,7 @@ if (!function_exists("tee_keraysera")) {
 
 			$ed_ohjausmerkki = '种种种种种种种种';
 			$ed_jiivee = "种种种种种种种种";
-			
+
 			$ed_tuote = '';
 
 			foreach ($inner_main_array as $inner_key => &$tuoterow) {

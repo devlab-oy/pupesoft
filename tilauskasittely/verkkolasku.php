@@ -123,6 +123,10 @@
 		require("../inc/parametrit.inc");
 	}
 
+	// Timeout in 5h
+	ini_set("mysql.connect_timeout", 18000);
+	ini_set("max_execution_time", 18000);
+
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("$pupe_root_polku/dataout/".basename($filenimi));
 		exit;

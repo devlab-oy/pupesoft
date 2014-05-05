@@ -155,20 +155,32 @@
           and lasku.alatila   = 'X'
           $lisa
           and lasku.tapvm   >= '{$edellisvuosi}-01-01'
-          and lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'";
-
+          and lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'
+          limit 200";
     $eresult = pupe_query($query);
+
+    $group_by = array();
+
+    if (isset($mul_osasto)) {
+      $group_by[] = "osasto";
+    }
+
+    if (isset($mul_try)) {
+      $group_by[] = "tuoteryhma";
+    }
 
     $parametrit = array(
       "result" => $eresult,
       "sum" => array("myyntiVA", "kateVA", "myyntiEDVA", "kateEDVA", "myyntiED", "kateED", "myynti12", "kate12"),
-      "group_by" => array("osasto", "tuoteryhma"),
+      "group_by" => $group_by,
       "order_by" => array("osasto", "tuoteryhma"),
       "select" => array("osasto", "tuoteryhma"),
       "lisaa_kulut" => array("kateVA", "kateEDVA", "kateED", "kate12")
     );
 
     $rows = tilausrivin_tarkistus_riveittain($parametrit);
+
+
 
     foreach($rows as $row) {
 

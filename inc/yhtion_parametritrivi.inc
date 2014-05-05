@@ -3312,6 +3312,24 @@
 		$jatko = 0;
 	}
 
+	if ($fieldname == "reklamaatiovarasto") {
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value='0'>".t("Ei oletusvarastoa valittu")."</option>";
+
+		$varastot = hae_varastot();
+		foreach ($varastot as $varasto) {
+			$sel = '';
+			if ($trow[$i] == $varasto['tunnus']) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value='{$varasto['tunnus']}' {$sel}>{$varasto['nimitys']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if ($fieldname == "myynnin_alekentat") {
 
 		$apu = $trow[$i];

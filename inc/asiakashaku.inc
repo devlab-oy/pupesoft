@@ -28,6 +28,12 @@ else {
 	$konsyhtiot = "yhtio = '$kukarow[yhtio]' ";
 }
 
+$tp = $kukarow['toimipaikka'];
+if (trim($toimipaikka_rajaus) != '') {
+  $tp = $toimipaikka_rajaus;
+}
+$toimipaikkalisa = " and asiakas.toimipaikka = {$tp}";
+
 $ytunnus	 	= addslashes(trim($ytunnus));
 $limit  		= 1000; // montako riviä on maksimi
 $monta   		= 0;
@@ -224,6 +230,7 @@ elseif ($ytunnus != '') {
 					and asiakas.ytunnus!=''
 					$lajilisa
 					$asiakasrajaus
+					$toimipaikkalisa
 					ORDER BY asiakas.nimi";
 		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
@@ -272,6 +279,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.nimi like '%$ytunnus2%'
 						and asiakas.nimi!=''
+						$toimipaikkalisa
 						$osoitelisa
 						$postitplisa
 						$postinolisa
@@ -283,6 +291,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.nimitark like '%$ytunnus2%'
 						and asiakas.nimitark!=''
+						$toimipaikkalisa
 						$osoitelisa
 						$postitplisa
 						$postinolisa
@@ -294,6 +303,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.toim_nimi like '%$ytunnus2%'
 						and asiakas.toim_nimi!=''
+						$toimipaikkalisa
 						$osoite_toim_lisa
 						$postitp_toim_lisa
 						$postino_toim_lisa
@@ -305,6 +315,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.toim_nimitark like '%$ytunnus2%'
 						and asiakas.toim_nimitark!=''
+						$toimipaikkalisa
 						$osoite_toim_lisa
 						$postitp_toim_lisa
 						$postino_toim_lisa
@@ -316,6 +327,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.asiakasnro like '%$ytunnus2%'
 						and asiakas.asiakasnro not in ('0','')
+						$toimipaikkalisa
 						$osoitelisa
 						$postitplisa
 						$postinolisa
@@ -327,6 +339,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.ovttunnus like '%$ytunnus2%'
 						and asiakas.ovttunnus!=''
+						$toimipaikkalisa
 						$osoitelisa
 						$postitplisa
 						$postinolisa
@@ -340,6 +353,7 @@ elseif ($ytunnus != '') {
 							WHERE asiakas.$konsyhtiot
 							and asiakas.postitp like '%$postitp2%'
 							and asiakas.postitp!=''
+							$toimipaikkalisa
 							$osoitelisa
 							$postinolisa
 							$lajilisa $asiakasrajaus)
@@ -484,7 +498,40 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<th colspan='3'>",t("laskosoite/toimosoite"),"</th>";
 
 		if ($yhtiorow['toimipaikkakasittely'] == 'L') {
-			echo "<th>",t("Toimipaikka"),"</th>";
+
+		  echo "<th>";
+
+		  echo "<form method='post'>";
+		  echo "<input type='hidden' name='tee'         value='$tee'>";
+		  echo "<input type='hidden' name='toim'        value='$toim'>";
+		  echo "<input type='hidden' name='nimi'          value='$nimi'>";
+		  echo "<input type='hidden' name='postino'         value='$postino'>";
+		  echo "<input type='hidden' name='postitp'         value='$postitp'>";
+
+
+		    $query = "  SELECT *
+		          FROM yhtion_toimipaikat
+		          WHERE yhtio = '{$kukarow['yhtio']}'
+		          AND vat_numero = ''
+		          ORDER BY nimi";
+		    $vresult = pupe_query($query);
+
+		    if (mysql_num_rows($vresult) > 0) {
+
+		      echo "<select name='toimipaikka_rajaus' onchange='this.form.submit()'><option value='0'>" . t("Ei toimipaikkaa") . "</option>";
+
+		      while ($vrow = mysql_fetch_array($vresult)) {
+		        $sel="";
+		        if ($tp == $vrow['tunnus']) {
+		          $sel = "selected";
+		        }
+		        echo "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
+		      }
+		      echo "</select>";
+		    }
+
+		  echo "</form>";
+		  echo "</th>";
 		}
 
 		echo "<td class='back'></td></tr>";

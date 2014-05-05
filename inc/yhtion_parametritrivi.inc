@@ -137,6 +137,22 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == == "kulujen_laskeminen_hintoihin") {
+
+	  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+	  $sel = array();
+	  $apu = $trow[$i];
+	  $sel[$apu] = "SELECTED";
+
+	  $ulos .= "<option value = 'E' {$sel['E']}>".t("Hintoihin ei lis‰t‰ kuluja kuluprosentin mukaan")."</option>";
+	  $ulos .= "<option value = 'K' {$sel['K']}>".t("Hintoihin lis‰t‰‰n kulut kuluprosentin mukaan")."</option>";
+
+	  $ulos .= "</select></td>";
+
+	  $jatko = 0;
+	}
+
 	if ($fieldname == "myyntitilin_tulostustapa") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

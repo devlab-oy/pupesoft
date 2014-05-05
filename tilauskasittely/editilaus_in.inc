@@ -572,6 +572,7 @@ while ($tietue = fgets($fd)) {
 					if (mysql_num_rows($result) == 1) {
 						$abrow = mysql_fetch_array($result);
 						//laskun sisviesti1 kentt‰‰n menee tavaran ensimm‰inen vastaanottaja(terminaali)
+						$lopnumero = $abrow['toim_ovttunnus'];
 						$lopnimi = $abrow['toim_nimi'];
 						$loppostitp = $abrow['toim_postitp'];
 						$loppostino = $abrow['toim_postino'];
@@ -1244,6 +1245,7 @@ while ($tietue = fgets($fd)) {
 					$tilausyhteyshenkilo = $yhteysrow['nimi'];
 				}
 
+				$toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1311,7 +1313,7 @@ while ($tietue = fgets($fd)) {
 							toim_nimi		   					= '$arow[toim_nimi]',
 							toim_nimitark	   					= '$arow[toim_nimitark]',
 							toim_osoite		   					= '$arow[toim_osoite]',
-							toim_ovttunnus 	   					= '$arow[toim_ovttunnus]',
+							toim_ovttunnus 	   					= '$toimitetaan_tanne',
 							toim_postino	   					= '$arow[toim_postino]',
 							toim_postitp	   					= '$arow[toim_postitp]',
 							tunnusnippu							= '',

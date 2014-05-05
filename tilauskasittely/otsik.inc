@@ -997,7 +997,9 @@
 
 		if (mysql_num_rows($vresult) > 0) {
 
-		  echo "<select name='toimipaikka_rajaus'><option value='0'>" . t("Ei toimipaikkaa") . "</option>";
+		  echo "<select name='toimipaikka_rajaus'>";
+		  echo "<option value='X'>" . t("Kaikki") . "</option>";
+		  echo "<option value='0'>" . t("Ei toimipaikkaa") . "</option>";
 
 		  while ($vrow = mysql_fetch_array($vresult)) {
 		    $sel="";

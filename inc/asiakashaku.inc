@@ -29,10 +29,17 @@ else {
 }
 
 $tp = $kukarow['toimipaikka'];
+
 if (trim($toimipaikka_rajaus) != '') {
   $tp = $toimipaikka_rajaus;
 }
-$toimipaikkalisa = " and asiakas.toimipaikka = {$tp}";
+
+if ($toimipaikka_rajaus == 'X') {
+	$toimipaikkalisa = '';
+}
+else{
+	$toimipaikkalisa = " and asiakas.toimipaikka = {$tp}";
+}
 
 $ytunnus	 	= addslashes(trim($ytunnus));
 $limit  		= 1000; // montako riviä on maksimi
@@ -518,7 +525,9 @@ if ($monta > 1 and $monta <= $limit) {
 
 		    if (mysql_num_rows($vresult) > 0) {
 
-		      echo "<select name='toimipaikka_rajaus' onchange='this.form.submit()'><option value='0'>" . t("Ei toimipaikkaa") . "</option>";
+		      echo "<select name='toimipaikka_rajaus' onchange='this.form.submit()'>";
+		      echo "<option value='X'>" . t("Kaikki") . "</option>";
+		      echo "<option value='0'>" . t("Ei toimipaikkaa") . "</option>";
 
 		      while ($vrow = mysql_fetch_array($vresult)) {
 		        $sel="";

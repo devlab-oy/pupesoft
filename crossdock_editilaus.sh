@@ -5,7 +5,7 @@ command -v flock > /dev/null
 
 if [[ $? != 0 ]]; then
   echo "Flock komentoa ei löydy!"
- # exit 1
+  exit 1
 fi
 
 # Tehdään lukkofile
@@ -15,7 +15,7 @@ exec 9> ${lock_file}
 
 if ! flock -n 9 ; then
   echo "Siirto menossa!";
- # exit 1
+  exit 1
 else
   touch ${lock_file}
   chmod 666 ${lock_file}

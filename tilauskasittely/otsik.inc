@@ -784,6 +784,16 @@
 			}
 		}
 
+		// Tutkitaan onko tilauksella rivejä
+		if ($kukarow["kesken"] != 0) {
+			$query = "SELECT otunnus from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+			$tempr = pupe_query($query);
+			$templ = mysql_num_rows($tempr);
+		}
+		else {
+			$templ = 0;
+		}
+
 		// Varmistetaan, että tilaustyyppi on aina oikein
 		$tilaustyyppi = isset($tilaustyyppi) ? trim($tilaustyyppi) : $srow['tilaustyyppi'];
 
@@ -849,6 +859,11 @@
 								'T' => t("Tarjoustilaus"),
 								'U' => t("Takuutilaus"),
 							);
+
+			// Jos tilauksella on jo rivejä, ei saa enää vaihtaa tilaustyyppiä
+			if ($templ > 0) {
+				$tilaustyypit = array($tilaustyyppi => $tilaustyypit[$tilaustyyppi]);
+			}
 		}
 
 		echo "<font class='head'>{$tilaus_myynti_otsikko} ".t("otsikko")."</font><hr>";
@@ -910,16 +925,6 @@
 		);
 
 		$oletusvarasto = valitse_oletusvarasto($args);
-
-		//Tutkitaan onko tilauksella rivejä
-		if ($kukarow["kesken"] != 0) {
-			$query = "SELECT otunnus from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
-			$tempr = pupe_query($query);
-			$templ = mysql_num_rows($tempr);
-		}
-		else {
-			$templ = 0;
-		}
 
 		// jos meillä on jo alatila ja tila ei muokkailla niitä!
 		if ($alatila == '' and isset($srow['alatila']) and $srow['alatila'] != '' and $srow_from == "LASKU") {

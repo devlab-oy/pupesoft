@@ -4203,7 +4203,7 @@ if ($tee == '') {
 			}
 
 			$varasto = $laskurow["varasto"];
-echo "4206 "; var_dump($laskurow); echo "<br><br>";
+
 			// Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
 			if ($laskurow["tilaustyyppi"] == "E" or ($laskurow["tilaustyyppi"] == "T"  and $laskurow["tila"] == "T") or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";

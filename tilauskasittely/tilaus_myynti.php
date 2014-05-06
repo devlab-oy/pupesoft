@@ -2777,6 +2777,41 @@ if ($tee == '') {
 		$tilausok++;
 	}
 
+	if ($laskurow['varasto'] != 0) {
+		$varaston_toimipaikka = hae_varaston_toimipaikka($laskurow['varasto']);
+		$_kerayserat_mittatiedot = ($yhtiorow['kerayserat'] == 'K');
+		if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !$_kerayserat_mittatiedot and !empty($varaston_toimipaikka)) {
+			if ($varaston_toimipaikka['tunnus'] == 0) {
+				$kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
+				$kukarow['toimipaikka'] = 0;
+			}
+			$toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
+
+			$kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
+
+			$_toimipaikan_kerayserat_mittatiedot = ($toimipaikan_yhtiorow['kerayserat'] == 'K');
+			if ($_toimipaikan_kerayserat_mittatiedot) {
+				$toimitustavat = hae_kaikki_toimitustavat();
+				$toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $laskurow['toimitustapa']);
+				$toimitustapa = $toimitustapa[0];
+				$query = "	SELECT *
+							FROM lahdot
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND liitostunnus = {$toimitustapa['tunnus']}
+							AND varasto = {$laskurow['varasto']}
+							AND aktiivi = ''
+							AND pvm >= CURRENT_DATE
+							AND viimeinen_tilausaika > CURRENT_TIME";
+				$lahdot_result = pupe_query($query);
+
+				if (mysql_num_rows($lahdot_result) == 0) {
+					echo "<font class='error'>".t("VIRHE: Tilauksen toimitustavalla ei ole myyntivarastossa lähtöjä")."!</font><br><br>";
+					$tilausok++;
+				}
+			}
+		}
+	}
+
 	if ($kukarow['extranet'] == '' and ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS"))) {
 
 		echo "	<script type='text/javascript'>

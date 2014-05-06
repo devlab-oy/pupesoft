@@ -27478,6 +27478,24 @@ if (!function_exists('hae_toimitustavat')) {
 	}
 }
 
+if (!function_exists('hae_kaikki_toimitustavat')) {
+	function hae_kaikki_toimitustavat() {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
+
+		$toimitustavat = array();
+		while($toimitustapa = mysql_fetch_assoc($result)) {
+			$toimitustavat[] = $toimitustapa;
+		}
+
+		return $toimitustavat;
+	}
+}
+
 if (!function_exists('hae_varasto')) {
 
 	function hae_varasto($tunnus) {
@@ -27666,6 +27684,44 @@ if (!function_exists('valitse_oletusvarasto')) {
 		}
 
 		return 0;
+	}
+}
+
+if (!function_exists('hae_varaston_toimipaikka')) {
+	function hae_varaston_toimipaikka($varasto_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($varasto_tunnus)) {
+			return false;
+		}
+
+		$varasto_tunnus = (int)$varasto_tunnus;
+
+		$query = "	SELECT *
+					FROM varastopaikat AS v
+					WHERE v.yhtio = '{$kukarow['yhtio']}'
+					AND v.tunnus = {$varasto_tunnus}";
+		$result = pupe_query($query);
+
+		$varasto = mysql_fetch_assoc($result);
+
+		if (empty($varasto)) {
+			return false;
+		}
+
+		if ($varasto['toimipaikka'] == 0) {
+			//Pitäisi palauttaa pääkallopaikka eli oletustoimipaikka
+			return array('tunnus' => 0);
+		}
+
+		$query = "	SELECT yt.*
+					FROM yhtion_toimipaikat AS yt
+					WHERE yt.yhtio = '{$kukarow['yhtio']}'
+					yt.tunnus = {$varasto['toimipaikka']}";
+
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
 	}
 }
 

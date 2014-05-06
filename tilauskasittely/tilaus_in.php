@@ -76,14 +76,6 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "</pre>";
 	}
 
-	if ($tyyppi == 'edifact911_crossdock') {
-		// tarvitaan $filename
-		echo "<pre>";
-		// CrossDock-versiossa ostaja ja tuotetiedot tulevat eri järjestyksessä joten muutetaan malliin joka osataan lukea
-		require("splittaa_crossdock_editilaus.inc");
-		echo "</pre>";
-	}
-
 	if ($tyyppi == 'yct') {
 		// tarvitaan $filename
 		require ("inc/tilaus_in.inc");

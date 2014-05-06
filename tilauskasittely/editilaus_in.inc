@@ -6,7 +6,7 @@ $edi_ulos = "\n";
 // Kutsutaanko CLI:st‰
 $php_cli = FALSE;
 
-if (php_sapi_name() == 'cli' and !isset($kasitellaan_splitattuja_crossdock_edifact911)) {
+if (php_sapi_name() == 'cli') {
 	$php_cli = TRUE;
 }
 
@@ -188,15 +188,10 @@ elseif ($edi_tyyppi == "edifact911") {
 
 	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
+	
+	$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+	$order_tietosisalto = explode("'", $order_tietosisalto);
 
-	// Jos k‰sitell‰‰n splitattuja edifact911 niin rakenne on erilainen
-	if (isset($kasitellaan_splitattuja_crossdock_edifact911)) {
-		$order_tietosisalto = explode("\n", $order_tietosisalto);
-	}
-	else {
-		$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
-		$order_tietosisalto = explode("'", $order_tietosisalto);
-	}
 	// Tallennetaan NAD+SE -segmentti, koska se tulee muuten liian myˆh‰isess‰ vaiheessa...
 	$nadse_segmentti = "";
 
@@ -210,27 +205,23 @@ elseif ($edi_tyyppi == "edifact911") {
 			if (substr($value, 0, 6) == "NAD+SE") {
 				$nadse_segmentti = $value;
 			}
+			if (substr($value, 0, 23) == "EDIFACT_CROSSDOCK_SPLIT") {
+				$kasitellaan_splitattuja_crossdock_edifact911 = "JOO";
+			}
 		}
 	}
 
 	unset($order_tietosisalto);
 
-	// Jos k‰sitell‰‰n splitattuja edifact911 niin meill‰ on jo tiedosto valmiina
-	if (!isset($kasitellaan_splitattuja_crossdock_edifact911)) {
-		// Luodaan arraysta => tiedosto
-		$tiedosto = "/tmp/ediorders911".uniqid(time()."_").".txt";
-		file_put_contents($tiedosto, $edi_rivi);
+	// Luodaan arraysta => tiedosto
+	$tiedosto = "/tmp/ediorders911".uniqid(time()."_").".txt";
+	file_put_contents($tiedosto, $edi_rivi);
+	var_dump($edi_rivi);
+	// avataan tiedosto uudestaan
+	if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus ep‰onnistui")."!\n");
 
-		// avataan tiedosto uudestaan
-		if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus ep‰onnistui")."!\n");
-
-		//jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
-		$mailfile = $tiedosto;
-	}
-}
-elseif ($edi_tyyppi == "edifact911_crossdock") {
-	$edi_subj = t("Sis‰‰ntuleva Orders 91.1 CrossDock tilaus");
-	require_once("splittaa_crossdock_editilaus.inc");
+	//jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
+	$mailfile = $tiedosto;
 }
 else {
 	$edi_subj = t("Sis‰‰ntuleva EIH 1.4 EDI-tilaus");

@@ -552,14 +552,8 @@
 		$rakre_chkres = pupe_query($query);
 	}
 
+	// ** TÄSTÄ ALKAA KÄYTTÖLIITTYMÄ ** //
 	if ($tila == "" and !isset($jatka)) {
-
-		if (!isset($tilaustyyppi) and isset($laskurow['tilaustyyppi'])) {
-			$tilaustyyppi = $laskurow['tilaustyyppi'];
-		}
-		elseif (!isset($tilaustyyppi) and isset($srow['tilaustyyppi'])) {
-			$tilaustyyppi = $srow['tilaustyyppi'];
-		}
 
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
@@ -627,8 +621,8 @@
 		echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
 		echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
+		// Tässä haetaan $srow
 		if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
-
 			//Asiakas vaihtuu
 			if ($from == "vaihdaasiakas" and $asiakasid != "") {
 				// asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
@@ -854,7 +848,6 @@
 					echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisteristä.")."</font><br>";
 				}
 			}
-
 		}
 
 		$args = array(
@@ -1205,12 +1198,12 @@
 			echo "</table><br>";
 
 
-			if (((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["rinnakkaisostaja_myynnissa"] == "") or $srow["vienti"] =='K') {
+			if (((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $tilaustyyppi == "T") and $yhtiorow["rinnakkaisostaja_myynnissa"] == "") or $srow["vienti"] =='K') {
 				echo "<table>";
 				echo "<tr><td style='padding:0px;'>";
 				echo "<table>";
 
-				if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") {
+				if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $tilaustyyppi == "T") {
 					echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
 				}
 				else {
@@ -1232,7 +1225,7 @@
 				echo "</table>";
 				echo "</td>";
 
-				if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") {
+				if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $tilaustyyppi == "T") {
 					echo "<td style='padding:0px;'>";
 					echo "<table>";
 					echo "<tr>
@@ -1262,7 +1255,7 @@
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
 			}
-			elseif ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U')) {
+			elseif ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U') {
 				echo "<tr><th colspan='4'>".t("Takuun tiedot").":</th></tr>";
 			}
 			elseif ($toim == "REKLAMAATIO") {
@@ -1860,7 +1853,7 @@
 			elseif ($toim == "REKLAMAATIO") {
 				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
-				if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') {
+				if ($tilaustyyppi == 'U') {
 					echo "<input type='hidden' name='tilaustyyppi' value='U'>";
 					$vasen_sarake[$vasen] .= "<td>".t("Takuu")."</td>";
 				}
@@ -1961,7 +1954,7 @@
 				if (isset($srow) and $srow['tilaustyyppi'] != '') {
 					$sel = array($srow['tilaustyyppi'] => "selected");
 				}
-				elseif (isset($tilaustyyppi) and $tilaustyyppi != "") {
+				elseif ($tilaustyyppi != "") {
 					$sel = array($tilaustyyppi => "selected");
 				}
 				else {
@@ -2005,7 +1998,7 @@
 				$varastot_lisa_query = " AND tunnus IN (".implode(',', $varastot).")";
 			}
 
-			if ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') and $yhtiorow['takuuvarasto'] != 0) {
+			if ($toim == "REKLAMAATIO" and ($tilaustyyppi == 'U') and $yhtiorow['takuuvarasto'] != 0) {
 				$oletusvarasto = (int) $yhtiorow['takuuvarasto'];
 				$varastot_lisa_query = " and tunnus = {$oletusvarasto}";
 			}
@@ -3036,6 +3029,7 @@
 		$kentta = "nimi";
 	}
 
+	// ** TÄSTÄ ALKAA SUBMITIN JÄLKEISET CHECKIT ** //
 	if (isset($jatka)) {
 
 		if ($toim == 'PIKATILAUS') {

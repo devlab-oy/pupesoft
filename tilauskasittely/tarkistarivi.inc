@@ -854,7 +854,8 @@
 			$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
 			foreach ($siirto_varastot as $siirto_varasto) {
-				if ($siirto_varasto['tuote']['myytavissa'] <= 0) {
+				//Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat, tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto ja lisaarivi vaiheessa saldot on riittäneet.
+				if ($siirto_varasto['tuote']['myytavissa'] <= 0 and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']) {
 					continue;
 				}
 

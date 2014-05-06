@@ -27660,9 +27660,17 @@ if (!function_exists('valitse_oletusvarasto')) {
 			return $kukarow['oletus_varasto'];
 		}
 
-		// Jos käyttäjätiedoissa on sallittu vain yksi varasto
-		if (count(implode(',', $kukarow['varasto'])) == 1 and in_array($kukarow['varasto'], $varastot)) {
-			return $kukarow['varasto'];
+		// Jos käyttäjätiedoissa on sallittu varastoja
+		if ($kukarow['varasto'] != "" and strpos($kukarow['varsto'], ',') !== false) {
+			$kayttajan_varastot = implode(',', $kukarow['varasto']);
+		}
+		else {
+			$kayttajan_varastot = array($kukarow['varasto']);
+		}
+
+		// Jos on vain yksi, se on oletus
+		if (count($kayttajan_varastot) == 1 and in_array($kayttajan_varastot, $varastot)) {
+			return $kayttajan_varastot[0];
 		}
 
 		return 0;

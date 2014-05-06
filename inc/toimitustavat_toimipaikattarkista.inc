@@ -17,7 +17,7 @@ if (!function_exists("toimitustavat_toimipaikattarkista")) {
 				$virhe[$i] = t("Toimitustapa toimipaikka kombinaatio on jo tietokannassa");
 			}
 
-			$toimitustavat			 = hae_toimitustavat();
+			$toimitustavat			 = hae_kaikki_toimitustavat();
 			$toimitustapa_tunnukset	 = array_column($toimitustavat, 'tunnus');
 
 			if (!in_array($t[$i], $toimitustapa_tunnukset)) {

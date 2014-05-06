@@ -161,6 +161,9 @@
 					$varres = mysql_query($query) or pupe_error($query);
 					$varrow = mysql_fetch_array($varres);
 
+					//kutsutaan tilaus-valmis-siirtolista.inciä jotta saadaan tarvittaessa automaattisesti tulostettua siirtolistat kaikista luoduista siirtolistoista.
+					require ("tilaus-valmis-siirtolista.inc");
+
 					echo "<br><font class='message'>".t("Tehtiin uusi siirtolista! Siirtolistalle otsikko %s lähdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
 
 					$laskurow = mysql_fetch_array($aresult);

@@ -1479,7 +1479,8 @@ else {
 					$split_rahtivapaa	= $laskurow["rahtivapaa"];
 					$split_toimitustapa = $laskurow["toimitustapa"];
 
-					$query = "	SELECT ulkoinen_jarjestelma, erikoistoimitus_toimitustapa
+					$query = "	SELECT ulkoinen_jarjestelma, erikoistoimitus_toimitustapa,
+								toimipaikka
 								FROM varastopaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$varasto}'";
@@ -1504,8 +1505,10 @@ else {
 					$eilahe = $laskurow['eilahetetta'];
 					$osatoimitus = $laskurow['osatoimitus'];
 
+					# Katsotaan onko varasto sidottu johonkin toimipaikkaan
+					# Ja onko se eri kuin otsikolla oleva toimipaikka
 					# Katsotaan uudella yhtiörown parametreilla pitääkö täppiä laittaa
-					if ($yhtiorow['toimipaikkakasittely'] == "L") {
+					if ($yhtiorow['toimipaikkakasittely'] == "L" and $laskurow['yhtio_toimipaikka'] != $varaston_row['toimipaikka']) {
 
 						$_onko_myyntitilaus = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
 						$_kerataanko_valmistukset = ($yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");

@@ -25,9 +25,20 @@
 		$lisasalker = " ";
 	}
 
+	$ohjausmerkkilisa = '';
+
+	//jos tilaustyyppi on 2 ja ohjausmerkki on tyhj‰‰, niin pistet‰‰n ohjausmerkiksi tilaustyypin selkokielinen nimi
+	if ($laskurow['chn'] == "GEN" AND trim($laskurow['ohjausmerkki']) == "") {
+		$ohjausmerkkilisa = ", ohjausmerkki = 'Varastot‰ydennys'";
+		$laskurow["ohjausmerkki"] = "Varastot‰ydennys";
+	}
+
+	$laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
+
 	// p‰ivitet‰‰n vanhatunnus laskulle
 	$query  = "	UPDATE lasku SET
 	 			vanhatunnus = tunnus
+	 			$ohjausmerkkilisa
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$laskurow[tunnus]'
 				AND vanhatunnus = 0";
@@ -410,7 +421,7 @@
 				$lahtorow = mysql_fetch_assoc($result);
 
 				// Tilaustyyppi 2, eli varastot‰ydennys, siirret‰‰n aina yhden p‰iv‰n eteenp‰in
-				$eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
+				$eteenpain = ($lahtorow["chn"] == "GEN") ? 1 : 0;
 
 				$lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
 
@@ -445,7 +456,7 @@
 							AND tunnus = '{$laskurow['tunnus']}'";
 				$hresult = mysql_query($query) or pupe_error($query);
 			}
-				
+
 
 			while ($laskurow = mysql_fetch_array($hresult)) {
 				//Tulostetaan lista

@@ -1518,11 +1518,17 @@ else {
 						if ($_kerataanko_valmistukset or $_lahetteen_tulostustapa or $_nouto) {
 							$eilahe = 'o';
 						}
+						else {
+							$eilahe = '';
+						}
 
 						$_myyntitilaus_osatoimitus = ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $_onko_myyntitilaus);
 
 						if ($_myyntitilaus_osatoimitus) {
 							$osatoimitus = 'o';
+						}
+						else {
+							$osatoimitus = '';
 						}
 					}
 

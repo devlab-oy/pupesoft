@@ -8,55 +8,15 @@
 			$name	= strtoupper($path_parts['filename']);
 			$ext	= strtoupper($path_parts['extension']);
 
-			if ($ext != "TXT" and $ext != "CSV" and $ext != "XLS") {
-				die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
+			if ($ext != "TXT" and $ext != "CSV" and $ext != "XLS" and $ext != "XLSX") {
+				die ("<font class='error'><br>".t("Ainoastaan .txt, .csv, .xlsx tai .xls tiedostot sallittuja")."!</font>");
 			}
 
 			if ($_FILES['userfile']['size']==0) {
 				die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
 			}
 
-			if (strtoupper($ext)=="XLS") {
-				require_once ('excel_reader/reader.php');
-
-				// ExcelFile
-				$data = new Spreadsheet_Excel_Reader();
-
-				// Set output Encoding.
-				$data->setOutputEncoding('CP1251');
-				$data->setRowColOffset(0);
-				$data->read($_FILES['userfile']['tmp_name']);
-			}
-			else {
-				$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
-			}
-
-			// luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
-			$excelrivi = array();
-
-			if (strtoupper($ext) == "XLS") {
-				for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
-					for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-						$excelrivi[$excei][$excej] = $data->sheets[0]['cells'][$excei][$excej];
-					}
-				}
-			}
-			else {
-				$excei = 0;
-
-				while ($rivi = fgets($file)) {
-					// luetaan rivi tiedostosta..
-					$rivi = explode("\t", pupesoft_cleanstring($rivi));
-
-					$excej = 0;
-					foreach ($rivi as $riv) {
-						$excelrivi[$excei][$excej] = $riv;
-						$excej++;
-					}
-					$excei++;
-				}
-				fclose($file);
-			}
+			$excelrivi = pupeFileReader($_FILES['userfile']['tmp_name'], $ext, '');
 
 			foreach ($excelrivi as $rivi) {
 

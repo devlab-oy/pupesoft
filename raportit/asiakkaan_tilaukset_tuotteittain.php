@@ -23,6 +23,12 @@
 		echo "<font class='head'>".t("Tilatut tuotteet").":</font><hr>";
 	}
 
+	if (isset($vaihda)) {
+		unset($asiakasid);
+		unset($toimittajaid);
+		unset($ytunnus);
+	}
+
 	if (isset($muutparametrit) and $muutparametrit != '') {
 		$muut = explode('/',$muutparametrit);
 
@@ -101,13 +107,12 @@
 		$pvm_select2 = "";
 	}
 
-
-	if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
+	if ((int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 		if ($toim == 'MYYNTI') {
-			echo "<td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
+			echo "<td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td><td class='back'><input type='Submit' name='vaihda' value = '".t("Vaihda asiakasta")."'></td></tr>";
 		}
 		if ($toim == 'OSTO') {
-			echo "<td colspan='3'>$toimittajarow[nimi] $toimittajarow[nimitark]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
+			echo "<td colspan='3'>$toimittajarow[nimi] $toimittajarow[nimitark]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td><td class='back'><input type='Submit' name='vaihda' value = '".t("Vaihda toimittajaa")."'></td></tr>";
 		}
 	}
 	else {
@@ -627,6 +632,15 @@
 		else {
 			echo t("Ei ostettuja tuotteita")."...<br><br>";
 		}
+	}
+
+	if ((int) $asiakasid > 0 or (int) $toimittajaid > 0) {
+		echo "<br>";
+		echo "<form action = 'asiakkaan_tilaukset_tuotteittain.php' method = 'post'>
+			<input type='hidden' name='toim' value='$toim'>
+			<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
+		echo "</form>";
 	}
 
 	require ("inc/footer.inc");

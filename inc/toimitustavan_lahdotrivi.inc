@@ -49,6 +49,8 @@
 
 	if (mysql_field_name($result, $i) == "aktiivi") {
 
+		$sel1 = $sel2 = '';
+		
 		if ($trow[$i] == "E") {
 			$sel2 = "SELECTED";
 		}

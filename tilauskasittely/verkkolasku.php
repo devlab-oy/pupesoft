@@ -107,6 +107,14 @@
 				$laskutakaikki = "ON";
 			}
 
+			// jos kuukausilaskutus on p‰‰ll‰ (cron.monthly), niin ei v‰ltt‰m‰tt‰ haluta ajaa p‰iv‰laskutusta
+			// kukauden vikana p‰iv‰n‰, koska silloin asiakkaalle saattaa menn‰ kaksi laskua vikana p‰iv‰n‰ jos
+			// laskutusviikonp‰iv‰t osuu sillai kivasti
+			if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
+				echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
+				exit;
+			}
+
 			$tee = "TARKISTA";
 		}
 		else {
@@ -122,6 +130,10 @@
 
 		require("../inc/parametrit.inc");
 	}
+
+	// Timeout in 5h
+	ini_set("mysql.connect_timeout", 18000);
+	ini_set("max_execution_time", 18000);
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("$pupe_root_polku/dataout/".basename($filenimi));
@@ -1272,10 +1284,11 @@
 					// Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kuin alhaalla) rivi ~1243
 					$query = "  SELECT
 								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-								if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi in ('R', 'U')), 1, 0) reklamaatiot_lasku,
+								if ((((asiakas.koontilaskut_yhdistetaan = '' and ('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V')) or asiakas.koontilaskut_yhdistetaan = 'U') and lasku.tilaustyyppi in ('R','U')), 1, 0) reklamaatiot_lasku,
 								group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+								LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
 								where lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tunnus in ($tunnukset)
 								$laskutuslisa_tyyppi_ehto
@@ -1459,11 +1472,12 @@
 
 					// Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kuin alhaalla) rivi ~1243
 					$query = "  SELECT
-								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-								if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi in ('R', 'U')), 1, 0) reklamaatiot_lasku,
+								if (lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+								if ((((asiakas.koontilaskut_yhdistetaan = '' and ('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V'))  or asiakas.koontilaskut_yhdistetaan = 'U') and lasku.tilaustyyppi in ('R','U')), 1, 0) reklamaatiot_lasku,
 								group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+								LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
 								where lasku.yhtio = '{$kukarow['yhtio']}'
 								and lasku.tunnus in ({$tunnukset})
 								GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
@@ -1715,8 +1729,8 @@
 
 				//haetaan kaikki laskutusvalmiit tilaukset jotka saa ketjuttaa, viite pit‰‰ olla tyhj‰‰ muuten ei laskuteta
 				$query  = " SELECT
-							if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-							if((('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V') and lasku.tilaustyyppi in ('R', 'U')), 1, 0) reklamaatiot_lasku,
+							if (lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+							if ((((asiakas.koontilaskut_yhdistetaan = '' and ('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V')) or asiakas.koontilaskut_yhdistetaan = 'U') and lasku.tilaustyyppi in ('R','U')), 1, 0) reklamaatiot_lasku,
 							lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
@@ -1725,6 +1739,7 @@
 							group_concat(lasku.tunnus) tunnukset
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+							LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
 							WHERE lasku.yhtio   = '$kukarow[yhtio]'
 							and lasku.alatila   = 'V'
 							and lasku.tila      = 'L'

@@ -103,6 +103,7 @@
 	        $iLength = strlen($sRead);
 	        $iRetrieved += $iLength ;
 	        $iRemaining = $iSize - $iRetrieved;
+
 	        if ($iRemaining < $iBufferSize) {
 	            $iBufferSize = $iRemaining;
 	        }
@@ -205,6 +206,7 @@
 	                            $iLit = substr($read,$j+1,-3);
 	                            $fetch_data[] = $read;
 	                            $sLiteral = sqimap_fread($imap_stream,$iLit,$filter,$outputstream,$no_return);
+
 	                            if ($sLiteral === false) { /* error */
 	                                break 4; /* while while switch while */
 	                            }
@@ -221,6 +223,7 @@
 	                               we just got the exact literalsize and there
 	                               must follow data to complete the response */
 	                            $read = sqimap_fgets($imap_stream);
+
 	                            if ($read === false) { /* error */
 	                                break 4; /* while while switch while */
 	                            }
@@ -445,8 +448,8 @@
 				$query = "UID FETCH $uid (BODYSTRUCTURE)";
 				$fetch_message = sqimap_run_command_list($imapConnection, $query, true, $response, $message, '');
 
-				preg_match("/BODYSTRUCTURE \((.*)\)/", $fetch_message[0][0], $matches);
-				$bodyt = explode(")(", $matches[1]);
+				preg_match("/BODYSTRUCTURE \((.*)\)/", $fetch_message[0][0], $matches); //
+				$bodyt = explode(")(\"", $matches[1]);
 
 				for ($bodyind = 1; $bodyind <= count($bodyt); $bodyind++) {
 					// Haetaan viestin BODY, tai siis osa siitä
@@ -458,7 +461,7 @@
 					}
 
 					// Fetchataan filename
-					if (preg_match("/\(\"(FILE)?NAME\" \"(.*?)\"\)/", $bodyt[($bodyind-1)], $matches)) {
+					if (preg_match("/\(\"(FILE)?NAME\" \"(.*?)\"/", $bodyt[($bodyind-1)], $matches)) {
 						// Ok maili
 						$is_ok = TRUE;
 
@@ -479,6 +482,13 @@
 							$attachmentbody .= trim($fetch_body_part[0][$line]);
 						}
 
+						//siivotaan ylimääräset tekstit pois jos niitä on niin saadaan tiedoston sisältö oikein
+						$nokpos = strpos($attachmentbody, ">");
+						if ($nokpos !== FALSE) {
+							$attachmentbody = substr($attachmentbody, $nokpos + 1);
+							$sop = strrpos($attachmentbody, "--", -3);
+							$attachmentbody = substr($attachmentbody, 0, $sop);
+						}
 						$attachmentbody = base64_decode($attachmentbody);
 
 						// Katotaan, ettei samalla nimellä oo jo laskua jonossa

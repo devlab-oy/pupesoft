@@ -107,6 +107,14 @@
 				$laskutakaikki = "ON";
 			}
 
+			// jos kuukausilaskutus on p‰‰ll‰ (cron.monthly), niin ei v‰ltt‰m‰tt‰ haluta ajaa p‰iv‰laskutusta
+			// kukauden vikana p‰iv‰n‰, koska silloin asiakkaalle saattaa menn‰ kaksi laskua vikana p‰iv‰n‰ jos
+			// laskutusviikonp‰iv‰t osuu sillai kivasti
+			if ($argv[3] == "skippaa_kuukauden_vikapaiva" and date("d") == date("t")) {
+				echo "HUOM: P‰iv‰laskutusta ei ajeta kuukauden vikana p‰iv‰n‰!<br>\n";
+				exit;
+			}
+
 			$tee = "TARKISTA";
 		}
 		else {
@@ -122,6 +130,10 @@
 
 		require("../inc/parametrit.inc");
 	}
+
+	// Timeout in 5h
+	ini_set("mysql.connect_timeout", 18000);
+	ini_set("max_execution_time", 18000);
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("$pupe_root_polku/dataout/".basename($filenimi));

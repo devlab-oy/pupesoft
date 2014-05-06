@@ -19,6 +19,8 @@ echo " <!-- Enabloidaan shiftillä checkboxien chekkaus //-->
 			});
 		</script>";
 
+if(!isset($piilotetut_varastot)) $piilotetut_varastot = '';
+
 if ($piilotetut_varastot == 'on') {
 	$piilotetut_select = "checked='checked'";
 }
@@ -73,6 +75,8 @@ echo "</tr>";
 $epakur_chk1 = "";
 $epakur_chk2 = "";
 $epakur_chk3 = "";
+
+if(!isset($epakur)) $epakur = '';
 
 if ($epakur == 'kaikki') {
 	$epakur_chk1 = ' selected';

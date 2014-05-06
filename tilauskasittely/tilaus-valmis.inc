@@ -1501,6 +1501,28 @@ else {
 						$toimitustavan_lahto_arvo = 0;
 					}
 
+					$eilahe = $laskurow['eilahetetta'];
+					$osatoimitus = $laskurow['osatoimitus'];
+
+					# Katsotaan uudella yhtiörown parametreilla pitääkö täppiä laittaa
+					if ($yhtiorow['toimipaikkakasittely'] == "L") {
+
+						$_onko_myyntitilaus = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+						$_kerataanko_valmistukset = ($yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
+						$_lahetteen_tulostustapa = ($yhtiorow['lahetteen_tulostustapa'] == 'I');
+						$_nouto = ($totarowx['nouto'] != '' and $_onko_myyntitilaus and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
+
+						if ($_kerataanko_valmistukset or $_lahetteen_tulostustapa or $_nouto) {
+							$eilahe = 'o';
+						}
+
+						$_myyntitilaus_osatoimitus = ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $_onko_myyntitilaus);
+
+						if ($_myyntitilaus_osatoimitus) {
+							$osatoimitus = 'o';
+						}
+					}
+
 					// Ei monisteta tunnusta
 					for ($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
 
@@ -1520,6 +1542,12 @@ else {
 								break;
 							case 'varasto':
 								$values .= ", '$varasto'";
+								break;
+							case 'eilahetetta':
+								$values .= ", '{$eilahe}'";
+								break;
+							case 'osatoimitus':
+								$values .= ", '{$osatoimitus}'";
 								break;
 							case 'tulostusalue':
 								$values .= ", '$tulostusalue'";

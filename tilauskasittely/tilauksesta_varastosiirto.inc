@@ -114,6 +114,11 @@ if (!function_exists('normaali_varastosiirto')) {
 				return false;
 			}
 
+			//P‰ivitet‰‰n myyntitilausrivit var J ja tuotepaikka l‰hdevarastosta kohdevarastoon, jotta ne eiv‰t varaa saldoa kun varastosiirtorivi lis‰t‰‰n.
+			$tilausrivi_tunnukset = array_column($myyntitilausrivit, 'tunnus');
+			aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
+			paivita_myyntitilausrivien_tuotepaikat($myyntitilausrivit, false);
+
 			aseta_kukarow_kesken($varastosiirto['tunnus']);
 			foreach ($myyntitilausrivit as $tilausrivi) {
 				$lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], 'N');
@@ -124,12 +129,7 @@ if (!function_exists('normaali_varastosiirto')) {
 			}
 
 			tilaus_valmis_siirtolista($varastosiirto);
-
-			paivita_myyntitilausrivien_tuotepaikat($myyntitilausrivit, false);
 		}
-
-		$tilausrivi_tunnukset = array_column($myyntitilaus['tilausrivit'], 'tunnus');
-		aseta_tilausrivien_var($tilausrivi_tunnukset, 'J');
 
 		aseta_kukarow_kesken($myyntitilaus['tunnus']);
 

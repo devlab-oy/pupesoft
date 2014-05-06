@@ -608,6 +608,10 @@ if ($monta > 1 and $monta <= $limit) {
 						echo $toimipaikkarow['nimi'];
 					}
 				}
+				else {
+					echo t("Ei toimipaikkaa.");
+				}
+
 
 				echo "</td>";
 			}
@@ -776,7 +780,7 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 
 		//Annetaan mahdollisuus perustaa uusi asiakas
 		echo "<table border='0'>";
-		echo "<tr><td>".t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas")."</td>";
+		echo "<tr><td>" . t("Oikeaa asiakasta ei löytynyt.") . "<br />" . t("Perusta uusi asiakas, tai muuta hakuehtoja") . "</td>";
 
 		if (mysql_num_rows($oikeuresult1) > 0) {
 			echo "<td class='back'>";
@@ -798,6 +802,20 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 			echo "<input type='hidden' name='laji'		value='Y'>";
 			echo "<input type='hidden' name='uusi'		value='1'>";
 			echo "<input type='submit' value='".t("Uusi yritysasiakas")."'>";
+			echo "</form>";
+			echo "</td>";
+		}
+
+		if ($monta == 0) {
+			echo "<td class='back'>";
+			echo "<form method='post'>";
+			echo "<input type='hidden' name='tee'         value='$tee'>";
+			echo "<input type='hidden' name='toim'        value='$toim'>";
+			echo "<input type='hidden' name='nimi'        value='$nimi'>";
+			echo "<input type='hidden' name='postino'     value='$postino'>";
+			echo "<input type='hidden' name='postitp'     value='$postitp'>";
+			echo "<input type='hidden' name='toimipaikka_rajaus'     value='X'>";
+			echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";
 			echo "</form>";
 			echo "</td>";
 		}

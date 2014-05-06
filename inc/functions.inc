@@ -27620,7 +27620,7 @@ if (!function_exists('valitse_oletusvarasto')) {
 	function valitse_oletusvarasto($args) {
 		global $kukarow, $yhtiorow;
 
-		$varasto = isset($args['varasto']) ? (int) $args['varasto'] : 0;
+		$varasto = isset($args['varasto']) ? (int) $args['varasto'] : null;
 
 		if (isset($args['varastot']) and is_array($args['varastot'])) {
 			$varastot = $args['varastot'];
@@ -27630,7 +27630,7 @@ if (!function_exists('valitse_oletusvarasto')) {
 		}
 
 		// Jos ollaan valittu varasto käyttöliittymästä
-		if ($varasto != 0 and in_array($varasto, $varastot)) {
+		if (!is_null($varasto) and (in_array($varasto, $varastot) or $varasto == 0)) {
 			return $varasto;
 		}
 
@@ -27638,9 +27638,9 @@ if (!function_exists('valitse_oletusvarasto')) {
 		if ($kukarow['kesken'] != 0) {
 
 			$query = "	SELECT *
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$kukarow['kesken']}'";
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$kukarow['kesken']}'";
 			$laskures = pupe_query($query);
 			$laskurow = mysql_fetch_assoc($laskures);
 

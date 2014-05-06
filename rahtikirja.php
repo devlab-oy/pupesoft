@@ -3142,6 +3142,22 @@
 			echo "<input type='hidden' name='muutos' value='yes'>";
 		}
 
+		if ($yhtiorow['kerayserat'] == 'K') {		
+
+			$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+						FROM kerayserat
+						LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+						AND kerayserat.otunnus IN ($tunnukset)
+						GROUP BY 1,2,3
+						ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+			$pak_chk_res = pupe_query($query);
+										
+			$pak_num = mysql_num_rows($pak_chk_res);
+			
+			echo "<br>".t("HUOM: Pakkausten m‰‰r‰ on")." $pak_num <br>";
+		}
+
 		echo "<br><input type='hidden' name='id' value='$id'>";
 
 		echo "<input name='subnappi' type='submit' value='".t("Valmis")."'>";

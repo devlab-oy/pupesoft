@@ -97,6 +97,9 @@
 							if ($perusta == "TYOMAARAYS") {
 								$values .= ", 'A'";
 							}
+							elseif ($monistarow["tila"] == "T") {
+								$values .= ", 'T'";
+							}
 							else {
 								$values .= ", 'N'";
 							}

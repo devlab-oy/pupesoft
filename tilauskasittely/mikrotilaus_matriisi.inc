@@ -195,7 +195,7 @@
 								$jtkielto 		 	= $laskurow['jtkielto'];
 
 						        // Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
-								if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+								if ($laskurow["tilaustyyppi"] == "E" or ($laskurow["tilaustyyppi"] == "T" and $laskurow["tila"] == "T") or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 									$varataan_saldoa = "EI";
 								}
 								else {

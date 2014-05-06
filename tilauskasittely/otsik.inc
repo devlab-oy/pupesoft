@@ -555,73 +555,7 @@
 	// ** TÄSTÄ ALKAA KÄYTTÖLIITTYMÄ ** //
 	if ($tila == "" and !isset($jatka)) {
 
-		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
-			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
-		}
-		elseif ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U') {
-			echo "<font class='head'>".t("Takuu otsikko")."</font><hr>";
-		}
-		elseif ($toim == "REKLAMAATIO") {
-			echo "<font class='head'>".t("Reklamaatio otsikko")."</font><hr>";
-		}
-		elseif ($toim == "EXTRANET_REKLAMAATIO") {
-			echo "<font class='head'>".t("Extranet-Reklamaatio otsikko")."</font><hr>";
-		}
-		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-			echo "<font class='head'>".t("Valmistuksen otsikko")."</font><hr>";
-		}
-		elseif ($toim == "SIIRTOLISTA") {
-			echo "<font class='head'>".t("Siirtolistan otsikko")."</font><hr>";
-		}
-		elseif ($toim == "MYYNTITILI") {
-			echo "<font class='head'>".t("Myyntitilin otsikko")."</font><hr>";
-			// Myyntitili oikeellisuustarkistus
-			$query = "	SELECT tunnus
-						FROM varastopaikat
-						WHERE yhtio = '{$kukarow["yhtio"]}'
-						AND alkuhyllyalue = '!!M'
-						AND loppuhyllyalue = '!!M'
-						AND tyyppi = 'E'";
-			$myyntitili_result = pupe_query($query);
-
-			if (mysql_num_rows($myyntitili_result) != 1) {
-				echo t("VIRHE: Myyntitili-varastoa ei ole perustettu")."!";
-				require("inc/footer.inc");
-				exit;
-			}
-		}
-		elseif ($toim == "TARJOUS") {
-			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";
-		}
-		elseif ($toim == "EXTTARJOUS") {
-			echo "<font class='head'>".t("Ext-Tarjouksen otsikko")."</font><hr>";
-		}
-		elseif ($toim == "PROJEKTI") {
-			echo "<font class='head'>".t("Projektin otsikko")."</font><hr>";
-		}
-		elseif ($toim == "YLLAPITO") {
-			echo "<font class='head'>".t("Ylläpitosopimuksen otsikko")."</font><hr>";
-		}
-		elseif ($toim == "ENNAKKO" or $tilaustyyppi == 'E') {
-			echo "<font class='head'>".t("Ennakkotilauksen otsikko")."</font><hr>";
-		}
-		else {
-			echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
-		}
-
-		echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
-		echo "<input type='hidden' name='tee' value='OTSIK'>";
-		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-		echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
-		echo "<input type='hidden' name='toim' value='$toim'>";
-		echo "<input type='hidden' name='projektilla' value='$projektilla'>";
-		echo "<input type='hidden' name='from' value='$from'>";
-		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-		echo "<input type='hidden' name='mista' value='$mista'>";
-		echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
-		echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-
-		// Tässä haetaan $srow
+		// Ihan ensin haetaan $srow
 		if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 			//Asiakas vaihtuu
 			if ($from == "vaihdaasiakas" and $asiakasid != "") {
@@ -848,6 +782,107 @@
 					echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisteristä.")."</font><br>";
 				}
 			}
+		}
+
+		// Varmistetaan, että tilaustyyppi on aina oikein
+		$tilaustyyppi = isset($tilaustyyppi) ? trim($tilaustyyppi) : $srow['tilaustyyppi'];
+
+		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
+			$tilaus_myynti_otsikko = t("Työmääräys");
+			$tilaustyypit = array('A' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U') {
+			$tilaus_myynti_otsikko = t("Takuu");
+			$tilaustyypit = array('U' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "REKLAMAATIO") {
+			$tilaus_myynti_otsikko = t("Reklamaatio");
+			$tilaustyypit = array('R' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "EXTRANET_REKLAMAATIO") {
+			$tilaus_myynti_otsikko = t("Extranet-Reklamaatio");
+			$tilaustyypit = array('R' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
+			$tilaus_myynti_otsikko = t("Valmistus");
+			$tilaustyypit = array('V' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "SIIRTOLISTA") {
+			$tilaus_myynti_otsikko = t("Siirtolista");
+			$tilaustyypit = array('G' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "MYYNTITILI") {
+			$tilaus_myynti_otsikko = t("Myyntitili");
+			$tilaustyypit = array('M' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "TARJOUS") {
+			$tilaus_myynti_otsikko = t("Tarjous");
+			$tilaustyypit = array('T' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "EXTTARJOUS") {
+			$tilaus_myynti_otsikko = t("Ext-Tarjous");
+			$tilaustyypit = array('T' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "PROJEKTI") {
+			$tilaus_myynti_otsikko = t("Projekti");
+			$tilaustyypit = array('P' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "YLLAPITO") {
+			$tilaus_myynti_otsikko = t("Ylläpitosopimus");
+			$tilaustyypit = array('0' => $tilaus_myynti_otsikko);
+		}
+		elseif ($toim == "ENNAKKO" or $tilaustyyppi == 'E') {
+			$tilaus_myynti_otsikko = t("Ennakkotilaus");
+			$tilaustyypit = array('E' => $tilaus_myynti_otsikko);
+		}
+		else {
+			$tilaus_myynti_otsikko = t("Myyntitilaus");
+			$tilaustyypit = array(
+								'N' => t("Normaalitilaus"),
+								'E' => t("Ennakkotilaus"),
+								'2' => t("Varastotäydennys"),
+								'7' => t("Tehdastilaus"),
+								'8' => t("Muiden mukana"),
+								'9' => t("Tehdaspalautus"),
+								'A' => t("Työmääräys"),
+								'S' => t("Sarjatilaus"),
+								'T' => t("Tarjoustilaus"),
+								'U' => t("Takuutilaus"),
+							);
+		}
+
+		echo "<font class='head'>{$tilaus_myynti_otsikko} ".t("otsikko")."</font><hr>";
+
+		echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
+		echo "<input type='hidden' name='tee' value='OTSIK'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='projektilla' value='$projektilla'>";
+		echo "<input type='hidden' name='from' value='$from'>";
+		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+		echo "<input type='hidden' name='mista' value='$mista'>";
+		echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+		echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+
+		// Myyntitili oikeellisuustarkistus
+		if ($tilaustyyppi == 'M') {
+			$query = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND alkuhyllyalue = '!!M'
+						AND loppuhyllyalue = '!!M'
+						AND tyyppi = 'E'";
+			$myyntitili_result = pupe_query($query);
+
+			if (mysql_num_rows($myyntitili_result) != 1) {
+				echo t("VIRHE: Myyntitili-varastoa ei ole perustettu")."!";
+				require("inc/footer.inc");
+				exit;
+			}
+
+			$mrow = mysql_fetch_assoc($myyntitili_result);
+			echo "<input type='hidden' name='clearing' value='$mrow[tunnus]'>";
 		}
 
 		$args = array(
@@ -1841,152 +1876,33 @@
 				$vasen++;
 			}
 
-			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
+			$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
-				//Jos kyseessä on työmääräys
-				echo "<input type='hidden' name='tilaustyyppi' value='A'>";
-
-				$vasen_sarake[$vasen] .= "<td>".t("Työmääräys")."</td>";
-				$vasen++;
+			// Jos meillä on vain yksi tilaustyyppi, tehdään hidden
+			if (count($tilaustyypit) == 1) {
+				$key = key($tilaustyypit);
+				$value = $tilaustyypit[$key];
+				$vasen_sarake[$vasen] .= "<td>";
+				$vasen_sarake[$vasen] .= "{$value}";
+				$vasen_sarake[$vasen] .= "<input type='hidden' name='tilaustyyppi' value='{$key}'>";
+				$vasen_sarake[$vasen] .= "</td>";
 			}
-			elseif ($toim == "REKLAMAATIO") {
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
-
-				if ($tilaustyyppi == 'U') {
-					echo "<input type='hidden' name='tilaustyyppi' value='U'>";
-					$vasen_sarake[$vasen] .= "<td>".t("Takuu")."</td>";
+			// Muuten piirretään dropdown
+			else {
+				$vasen_sarake[$vasen] .= "<td>";
+				$vasen_sarake[$vasen] .= "<select name='tilaustyyppi'>";
+				foreach ($tilaustyypit as $key => $value) {
+					$sel = $key == $tilaustyyppi ? ' SELECTED' : '';
+					$vasen_sarake[$vasen] .= "<option value='$key'$sel>{$value}</option>";
 				}
-				else {
-					echo "<input type='hidden' name='tilaustyyppi' value='R'>";
-					$vasen_sarake[$vasen] .= "<td>".t("Reklamaatio")."</td>";
-				}
-
-				$vasen++;
+				$vasen_sarake[$vasen] .= "</select>";
+				$vasen_sarake[$vasen] .= "</td>";
 			}
 
-			elseif ($toim == "EXTRANET_REKLAMAATIO") {
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
+			$vasen++;
 
-				//Jos kyseessä on työmääräys
-				echo "<input type='hidden' name='tilaustyyppi' value='R'>";
-
-				$vasen_sarake[$vasen] .= "<td>".t("Extranet-Reklamaatio")."</td>";
-				$vasen++;
-			}
-			elseif (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS')) {
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
-
-				//Jos kyseessä on tarjous
-				echo "<input type='hidden' name='tilaustyyppi' value='T'>";
-
-				$vasen_sarake[$vasen] .= "<td>".t("Tarjous")."</td>";
-				$vasen++;
-			}
-			elseif ($toim == "PROJEKTI") {
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
-
-				//Jos kyseessä on tarjous
-				echo "<input type='hidden' name='tilaustyyppi' value='P'>";
-
-				$vasen_sarake[$vasen] .= "<td>".t("Projekti")."</td>";
-				$vasen++;
-			}
-			elseif ($toim == "YLLAPITO") {
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
-
-				//Jos kyseessä on ylläpitosopimus
-				echo "<input type='hidden' name='tilaustyyppi' value='0'>";
-
-				$vasen_sarake[$vasen] .= "<td>".t("Ylläpitosopimus")."</td>";
-				$vasen++;
-			}
-			elseif ($toim == "MYYNTITILI") {
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
-
-				//Jos kyseessä on myyntitili niin laitetaan tilaustyypiksi M
-				echo "<input type='hidden' name='tilaustyyppi' value='M'>";
-
-				$query = "	SELECT tunnus
-							FROM varastopaikat
-							WHERE yhtio = '$kukarow[yhtio]'
-							and alkuhyllyalue = '!!M'
-							and loppuhyllyalue = '!!M'";
-				$tresult = pupe_query($query);
-				$mrow = mysql_fetch_assoc($tresult);
-
-				//pupesoftissa on myytitili aina varastoalueella ##M
-				echo "<input type='hidden' name='clearing' value='$mrow[tunnus]'>";
-
-				$vasen_sarake[$vasen] .= "<td>".t("Myyntitili")."</td>";
-				$vasen++;
-			}
-			elseif ($toim == "VALMISTAASIAKKAALLE") {
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
-
-				//Jos kyseessä on valmistus asiakkaalle niin laitetaan tilaustyypiksi V
-				echo "<input type='hidden' name='tilaustyyppi' value='V'>";
-
-				$vasen_sarake[$vasen] .= "<td>".t("Valmistus-Tilaus")."</td>";
-				$vasen++;
-			}
-			elseif ($toim == "ENNAKKO" or $srow["tilaustyyppi"] == 'E') {
-				//Tarvitaan ainakin Ennakkotilauksilla
-				if ($srow["clearing"] != '') {
-					echo "<input type='hidden' name='clearing' value='$srow[clearing]'>";
-				}
-
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
-				echo "<input type='hidden' name='tilaustyyppi' value='E'>";
-				$vasen_sarake[$vasen] .= "<td>".t("Ennakkotilaus")."</td>";
-				$vasen++;
-			}
-			elseif ($srow["tilaustyyppi"] != 'E' or $templ == 0) {
-
-				//Tarvitaan ainakin tarjoustilauksilla
-				if ($srow["clearing"] != '') {
-					echo "<input type='hidden' name='clearing' value='$srow[clearing]'>";
-				}
-
-				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
-				$vasen_sarake[$vasen] .= "<td><select name='tilaustyyppi'>";
-
-				if (isset($srow) and $srow['tilaustyyppi'] != '') {
-					$sel = array($srow['tilaustyyppi'] => "selected");
-				}
-				elseif ($tilaustyyppi != "") {
-					$sel = array($tilaustyyppi => "selected");
-				}
-				else {
-					$sel = array();
-				}
-
-				$sel = $sel +
-				array(
-					'A' => '',
-					'E' => '',
-					'N' => '',
-					'S' => '',
-					'T' => '',
-					'U' => '',
-					2 => '',
-					7 => '',
-					8 => '',
-					9 => '',
-				);
-
-				$vasen_sarake[$vasen] .= "<option value='N' {$sel['N']}>".t("Normaalitilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='E' {$sel['E']}>".t("Ennakkotilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='8' {$sel[8]}>".t("Muiden mukana")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='S' {$sel['S']}>".t("Sarjatilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='U' {$sel['U']}>".t("Takuutilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='T' {$sel['T']}>".t("Tarjoustilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='9' {$sel[9]}>".t("Tehdaspalautus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='7' {$sel[7]}>".t("Tehdastilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='A' {$sel['A']}>".t("Työmääräys")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='2' {$sel[2]}>".t("Varastotäydennys")."</option>";
-				$vasen_sarake[$vasen] .= "</select></td>";
-				$vasen++;
+			if ($tilaustyyppi == 'E' and $srow["clearing"] != '') {
+				$vasen_sarake[$vasen] .= "<input type='hidden' name='clearing' value='$srow[clearing]'>";
 			}
 
 			$oikea_sarake[$oikea] = "<td>".t("Myy varastosta").":</td>";

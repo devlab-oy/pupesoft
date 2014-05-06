@@ -155,8 +155,7 @@
           and lasku.alatila   = 'X'
           $lisa
           and lasku.tapvm   >= '{$edellisvuosi}-01-01'
-          and lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'
-          limit 200";
+          and lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'";
     $eresult = pupe_query($query);
 
     $group_by = array();

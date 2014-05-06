@@ -112,7 +112,6 @@ else {
 		 		<option value='pos'>".t("Kassapääte")."</option>
 		 		<option value='yct'>Yamaha Center</option>
 				<option value='edifact911'>Orders 91.1</option>
-				<option value='edifact911_crossdock'>Orders 91.1 CrossDock</option>
 		 		<option value='multi'>".t("Useita asiakkaita")."</option>
 				<option value='asnui'>".t("ASN-sanoma")."</option>
 				</select>";

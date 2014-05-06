@@ -188,7 +188,7 @@ elseif ($edi_tyyppi == "edifact911") {
 
 	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meidän pitää heti tässä vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
-	
+
 	$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
 	$order_tietosisalto = explode("'", $order_tietosisalto);
 
@@ -216,7 +216,7 @@ elseif ($edi_tyyppi == "edifact911") {
 	// Luodaan arraysta => tiedosto
 	$tiedosto = "/tmp/ediorders911".uniqid(time()."_").".txt";
 	file_put_contents($tiedosto, $edi_rivi);
-	var_dump($edi_rivi);
+
 	// avataan tiedosto uudestaan
 	if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus epäonnistui")."!\n");
 

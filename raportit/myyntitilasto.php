@@ -210,8 +210,8 @@
        $kateprosVA = 0;
       }
 
-      $myyntiEDVA = round($row['myyntiVA']);
-      $kateEDVA = round($row['kateVA']);
+      $myyntiEDVA = round($row['myyntiEDVA']);
+      $kateEDVA = round($row['kateEDVA']);
       if( $myyntiEDVA != 0){
         $kateprosEDVA = round($kateEDVA / $myyntiEDVA * 100, 1);
       }

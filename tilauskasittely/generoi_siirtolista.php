@@ -124,7 +124,7 @@
 	if (!isset($lahdekeraysvyohyke)) $lahdekeraysvyohyke = array();
 	if (!isset($lapsituotteet)) $lapsituotteet = isset($_COOKIE["lapsituotteet"]) ? $_COOKIE["lapsituotteet"] : "";
 	if (!isset($myyntiera)) $myyntiera = isset($_COOKIE["myyntiera"]) ? $_COOKIE["myyntiera"] : "";
-	if (!isset($kesken)) $kesken = isset($_COOKIE["kesken"]) ? $_COOKIE["kesken"] : "";
+	if (!isset($kesken)) $kesken = isset($_COOKIE["kesken"]) ? $_COOKIE["kesken"] : "X";
 	if (!isset($tee)) $tee = "";
 	if (!isset($kohdevarasto)) $kohdevarasto = "";
 	if (!isset($toimittaja)) $toimittaja = "";

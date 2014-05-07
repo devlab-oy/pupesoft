@@ -60,10 +60,10 @@ if [ ! -d ${minne_siirretaan} ]; then
   exit
 fi
 
-# Loopataan läpi kaikki filet local hakemistosta ja lähetetään ne remote hakemistoon
+# Loopataan läpi kaikki filet local hakemistosta ja käsitellään ne splittaa_crossdock_editilaus.phpssä
 for file in `find ${mista_haetaan} -maxdepth 1 -type f`
 do
-  # Kopioidaan tiedosto remote dirikkaan, jos siirto onnistuu siirretään local file ok-hakemistoon
+  # Käsitellään crossdock tiedosto ja siirretään se käsittelyn jälkeen done-kansioon
   /usr/bin/php ${pupepolku}/tilauskasittely/splittaa_crossdock_editilaus.php ${file} ${minne_siirretaan}
   mv -f ${file} ${mista_haetaan}/done
 done

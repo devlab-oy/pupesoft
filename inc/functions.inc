@@ -27514,11 +27514,7 @@ if (!function_exists('sallitut_varastot')) {
 		$tilaustyyppi       = isset($params['tilaustyyppi']) ? $params['tilaustyyppi'] : '';
 
 		if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
-			return array($yhtiorow['takuuvarasto']);
-		}
-
-		if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'R' and $yhtiorow['reklamaatiovarasto'] != 0) {
-			return array($yhtiorow['reklamaatiovarasto']);
+			return $yhtiorow['takuuvarasto'];
 		}
 
 		if ($varastotyyppi == 'kaikki_varastot') {
@@ -27670,26 +27666,6 @@ if (!function_exists('valitse_oletusvarasto')) {
 		}
 
 		return 0;
-	}
-}
-
-if (!function_exists('hae_varastot')) {
-	function hae_varastot(array $tyypit = array('','V','E')) {
-		global $kukarow, $yhtiorow;
-
-		$query = "	SELECT *
-					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tyyppi IN ('".implode("','", $tyypit)."')
-					ORDER BY tyyppi, nimitys";
-		$result = pupe_query($query);
-
-		$varastot = array();
-		while ($varasto = mysql_fetch_assoc($result)) {
-			$varastot[] = $varasto;
-		}
-
-		return $varastot;
 	}
 }
 

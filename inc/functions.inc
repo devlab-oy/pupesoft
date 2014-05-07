@@ -27717,7 +27717,7 @@ if (!function_exists('hae_varaston_toimipaikka')) {
 		$query = "	SELECT yt.*
 					FROM yhtion_toimipaikat AS yt
 					WHERE yt.yhtio = '{$kukarow['yhtio']}'
-					yt.tunnus = {$varasto['toimipaikka']}";
+					AND yt.tunnus = {$varasto['toimipaikka']}";
 
 		$result = pupe_query($query);
 

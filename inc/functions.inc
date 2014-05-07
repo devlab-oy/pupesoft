@@ -27669,6 +27669,59 @@ if (!function_exists('valitse_oletusvarasto')) {
 	}
 }
 
+if (!function_exists('tuoteperhe')) {
+	/**
+	 * Funktio palauttaa tuotenumeron (isä tai lapsi) perusteella tuoteperheeseen kuuluvat lapsituotteet
+	 *
+	 * @global array $kukarow
+	 * @global array $yhtiorow
+	 * @param string $tuoteno
+	 * @return array
+	 */
+	function tuoteperhe($tuoteno) {
+		global $kukarow, $yhtiorow;
+
+		//Tarkistetaan onko annettu tuoteno isätuote
+		$query = "	SELECT *
+					FROM tuoteperhe
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND isatuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+
+		$tuotteet = array();
+		if (mysql_num_rows($result) > 0) {
+			//Kyseessä on isä tuote
+			while($tuote = mysql_fetch_assoc($result)) {
+				$tuotteet[] = $tuote;
+			}
+		}
+		else {
+			//Tarkistetaan onko tuoteno osa tuoteperhettä
+			$query = "	SELECT isatuoteno
+						FROM tuoteperhe
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$tuoteno}'";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) > 0) {
+				$tuoteperheenisa = mysql_fetch_assoc($result);
+
+				$query = "	SELECT *
+							FROM tuoteperhe
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND isatuoteno = '{$tuoteperheenisa['isatuoteno']}'";
+				$result = pupe_query($query);
+
+				while($tuote = mysql_fetch_assoc($result)) {
+					$tuotteet[] = $tuote;
+				}
+			}
+		}
+
+		return $tuotteet;
+	}
+}
+
 if (!function_exists('tilauksen_toimipaikka')) {
 	function tilauksen_toimipaikka(Array $args) {
 		global $kukarow, $yhtiorow;

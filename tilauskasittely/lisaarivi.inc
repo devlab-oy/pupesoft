@@ -2201,10 +2201,15 @@
 					$kohde_varastot = array();
 				}
 
+				$tuoteperhe = tuoteperhe($trow['tuoteno']);
 				$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $trow['tuoteno']);
 
 				foreach ($siirto_varastot as $siirto_varasto) {
-					if ($siirto_varasto['tuote']['myytavissa'] <= 0) {
+					if (!empty($tuoteperhe)) {
+						$tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
+					}
+
+					if ($siirto_varasto['tuote']['myytavissa'] <= 0 or (isset($tuoteperhe_saldomyytavissa) and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0)) {
 						continue;
 					}
 

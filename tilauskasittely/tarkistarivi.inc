@@ -851,10 +851,17 @@
 				$kohde_varastot = array();
 			}
 
+			$tuoteperhe = tuoteperhe($trow['tuoteno']);
 			$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
 			foreach ($siirto_varastot as $siirto_varasto) {
-				if ($siirto_varasto['tuote']['myytavissa'] <= 0) {
+				if (!empty($tuoteperhe)) {
+					$tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
+				}
+				//Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat, tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto ja lisaarivi vaiheessa saldot on riittäneet.
+				$_normirivi_onko_siirto = ($siirto_varasto['tuote']['myytavissa'] <= 0 and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']);
+				$_perherivi_onko_siirto = (isset($tuoteperhe_saldomyytavissa) and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0 and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']);
+				if ($_normirivi_onko_siirto or $_perherivi_onko_siirto) {
 					continue;
 				}
 

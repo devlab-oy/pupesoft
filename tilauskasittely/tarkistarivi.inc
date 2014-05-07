@@ -1,8 +1,11 @@
 <?php
 
-	if (!isset($kukarow_varasto)) {
-		$kukarow_varasto = explode(",", $kukarow["varasto"]);
-	}
+	$params = array(
+		'asiakas_tunnus' => $laskurow['liitostunnus'],
+		'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
+	);
+
+	$varastot_array = sallitut_varastot($params);
 
 	//sis‰‰n tulee $row jossa on tilausrivi kaikki tiedot
 
@@ -541,8 +544,6 @@
 		}
 
 		$omavarastores  = pupe_query($query);
-		$varastot_array = $kukarow_varasto;
-
 
 		// K‰yd‰‰n l‰pi oman varaston paikat
 		if (
@@ -901,7 +902,6 @@
 					and tuote.tuoteno = '$row[tuoteno]'
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 		$omavarastores  = pupe_query($query);
-		$varastot_array = $kukarow_varasto;
 
 		if (!isset($paikatlask)) $paikatlask = 0;
 
@@ -1155,7 +1155,7 @@
 
 						$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
 
-						$chk_varasto = $laskurow['varasto'] == 0 ? $kukarow_varasto : $laskurow['varasto'];
+						$chk_varasto = $laskurow['varasto'] == 0 ? $varastot_array : $laskurow['varasto'];
 
 						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $chk_varasto);
 

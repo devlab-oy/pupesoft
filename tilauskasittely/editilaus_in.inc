@@ -67,7 +67,7 @@ if (!function_exists('jt_toimita_editilaus')) {
 
 		$varastosta = array();
 
-		while ($vrow = mysql_fetch_array($vtresult)) {
+		while ($vrow = mysql_fetch_assoc($vtresult)) {
 			$varastosta[$vrow["tunnus"]] = $vrow["tunnus"];
 		}
 
@@ -84,6 +84,7 @@ unset($arow_ostaja);
 unset($arow_toimitus);
 unset($arow_terminaali);
 unset($yhtiorow);
+unset($crossdock911);
 
 $toimpvm 	 			= date("Y-m-d");
 $vastaustapa 			= "";
@@ -206,7 +207,7 @@ elseif ($edi_tyyppi == "edifact911") {
 				$nadse_segmentti = $value;
 			}
 			if (substr($value, 0, 23) == "EDIFACT_CROSSDOCK_SPLIT") {
-				$kasitellaan_splitattuja_crossdock_edifact911 = "JOO";
+				$crossdock911 = "JOO";
 			}
 		}
 	}
@@ -327,7 +328,7 @@ while ($tietue = fgets($fd)) {
 			$edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
 
 			$query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
-			$result = mysql_query($query) or die($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
 				// Kokeillaan tehd‰ ovttunnuksesta ytunnus
@@ -338,7 +339,7 @@ while ($tietue = fgets($fd)) {
 				if ((int) $tieto == 0) $tieto = "20428100";
 
 				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 			}
 
 			if (mysql_num_rows($result) != 1) {
@@ -346,7 +347,7 @@ while ($tietue = fgets($fd)) {
 				break;
 			}
 
-			$yhtiorow = mysql_fetch_array($result);
+			$yhtiorow = mysql_fetch_assoc($result);
 			$yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
 
 			$kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
@@ -542,14 +543,14 @@ while ($tietue = fgets($fd)) {
 			if ($tieto == "") {
 				break;
 			}
-			
-			if ($edi_tyyppi == "edifact911" and $tunnus == "NADCN") {
+
+			if (isset($crossdock911) and $tunnus == "NADCN") {
 				// Tarkistetaan onko kyseess‰ koontikuljetuskeissi
 				// haetaan toimitustavan tiedot tiedot
 				$toimiq = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
 				$toimir = pupe_query($toimiq);
-				$toimiro = mysql_fetch_array($toimir);
-				
+				$toimiro = mysql_fetch_assoc($toimir);
+
 				// Jos kyseess‰ on koontikuljetuskeissi niin setataan v‰lietappi (terminaali/varasto)
 				if ($toimiro['tulostustapa'] == "L" or $toimiro['tulostustapa'] == "K") {
 					$query = "	SELECT *
@@ -558,10 +559,10 @@ while ($tietue = fgets($fd)) {
 								and toim_ovttunnus = '$tieto'
 								and toim_ovttunnus not in ('','0')
 								and laji not in ('R','P')";
-					$result = mysql_query($query) or die($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 1) {
-						$abrow = mysql_fetch_array($result);
+						$abrow = mysql_fetch_assoc($result);
 						//laskun sisviesti1 kentt‰‰n menee tavaran ensimm‰inen vastaanottaja(terminaali/varasto)
 						$lopnumero = $abrow['toim_ovttunnus'];
 						$lopnimi = $abrow['toim_nimi'];
@@ -603,10 +604,10 @@ while ($tietue = fgets($fd)) {
 							and toim_ovttunnus = '$tieto'
 							and toim_ovttunnus not in ('','0')
 							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
+					$arow = mysql_fetch_assoc($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
 				}
@@ -619,10 +620,10 @@ while ($tietue = fgets($fd)) {
 							and ovttunnus = '$tieto'
 							and ovttunnus not in ('','0')
 							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
+					$arow = mysql_fetch_assoc($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
 				}
@@ -635,10 +636,10 @@ while ($tietue = fgets($fd)) {
 							and asiakasnro = '$tieto'
 							and asiakasnro not in ('','0')
 							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
+					$arow = mysql_fetch_assoc($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
 				}
@@ -703,10 +704,10 @@ while ($tietue = fgets($fd)) {
 							and toim_ovttunnus = '$tieto'
 							and toim_ovttunnus not in ('','0')
 							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
+					$arow = mysql_fetch_assoc($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[toim_nimi]\n";
 				}
@@ -746,8 +747,9 @@ while ($tietue = fgets($fd)) {
 				$tpostitp = $kentat[5];
 				$tpostino = $kentat[7];
 				$tosoite = $kentat[4];
+
 				// Jos kentt‰ ei sis‰lt‰nyt toimitusosoitetta niin koitetaan oliko siell‰ toim_ovttunnus
-				if (empty($tosoite) or empty($tpostino) or empty($tpostitp) or empty($tnimi)) {
+				if (isset($crossdock911) and (empty($tosoite) or empty($tpostino) or empty($tpostitp) or empty($tnimi))) {
 
 					list ($toimovttunnus) = explode(':', $kentat[1]);
 					if ($toimovttunnus != '') {
@@ -758,17 +760,17 @@ while ($tietue = fgets($fd)) {
 									and toim_ovttunnus = '$toimovttunnus'
 									and toim_ovttunnus not in ('','0')
 									and laji not in ('R','P')";
-						$result = mysql_query($query) or die($query);
+						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) == 1) {
-							$abrow = mysql_fetch_array($result);
+							$abrow = mysql_fetch_assoc($result);
 							$edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
 
-							$tnimi = $abrow['toim_nimi'];
+							$tnimi     = $abrow['toim_nimi'];
 							$tnimitark = $abrow['toim_nimitark'];
-							$tpostitp = $abrow['toim_postitp'];
-							$tpostino = $abrow['toim_postino'];
-							$tosoite = $abrow['toim_osoite'];
+							$tpostitp  = $abrow['toim_postitp'];
+							$tpostino  = $abrow['toim_postino'];
+							$tosoite   = $abrow['toim_osoite'];
 
 							$edi_ulos .= "$abrow[toim_nimi]\n";
 						}
@@ -814,7 +816,7 @@ while ($tietue = fgets($fd)) {
 			// toimitusosoitteen maakoodi
 			$ltoim_maa = substr(trim($tieto), 0, 2);
 			break;
-			
+
 		case 'OSTOTIL.OT_TOIMITUS_PUH' :
 			// toimitusosoitteen puh
 			$ltoim_puh = trim($tieto);
@@ -837,7 +839,7 @@ while ($tietue = fgets($fd)) {
 							AND kateinen = 'o'
 							LIMIT 1";
 				$editilaus_kateinen_res = pupe_query($query);
-				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
+				$editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
 				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
 					$editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
@@ -849,7 +851,7 @@ while ($tietue = fgets($fd)) {
 					$kassalipas_res = pupe_query($query);
 
 					if (mysql_num_rows($kassalipas_res) == 1) {
-						$kassalipas_row = mysql_fetch_array($kassalipas_res);
+						$kassalipas_row = mysql_fetch_assoc($kassalipas_res);
 						$kukarow["kassamyyja"] = $editilaus_kassalipas = $kassalipas_row["tunnus"];
 					}
 					else {
@@ -877,7 +879,7 @@ while ($tietue = fgets($fd)) {
 							ORDER BY jarjestys
 							LIMIT 1";
 				$editilaus_kateinen_res = pupe_query($query);
-				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
+				$editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
 				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
 					$editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
@@ -894,7 +896,7 @@ while ($tietue = fgets($fd)) {
 							ORDER BY jarjestys
 							LIMIT 1";
 				$editilaus_kateinen_res = pupe_query($query);
-				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
+				$editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
 				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
 					$editilaus_toimitustapa = $editilaus_kateinen_row["selite"];
@@ -966,7 +968,7 @@ while ($tietue = fgets($fd)) {
 				// haetaan tomitustavan oletusmaksajan tiedot
 				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
 				$meapu = pupe_query($apuqu);
-				$apuro = mysql_fetch_array($meapu);
+				$apuro = mysql_fetch_assoc($meapu);
 
 				$maksaja = $apuro['merahti'];
 
@@ -994,7 +996,7 @@ while ($tietue = fgets($fd)) {
 											FROM maat
 											WHERE koodi = '$arow[maa]'";
 						$maa_eu_res = pupe_query($maa_eu_query);
-						$maa_eu_row = mysql_fetch_array($maa_eu_res);
+						$maa_eu_row = mysql_fetch_assoc($maa_eu_res);
 
 						if ($maa_eu_row["eu"] == "") {
 							$arow["vienti"] = "K";
@@ -1031,7 +1033,7 @@ while ($tietue = fgets($fd)) {
 				}
 
 				// jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSƒ ON KOONTIKULJETUSKEISSI)
-				if (isset($kasitellaan_splitattuja_crossdock_edifact911) or ($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
+				if (isset($crossdock911) or ($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
 					if ($tnimi == "" and $tnimitark != "") {
 						$tnimi = $tnimitark;
 						$tnimitark = "";
@@ -1060,7 +1062,7 @@ while ($tietue = fgets($fd)) {
 									ORDER BY muutospvm DESC
 									LIMIT 1";
 						$ressu = pupe_query($query);
-					
+
 						// - jos lˆytyy niin k‰ytet‰‰n sit‰
 						if (mysql_num_rows($ressu) == 1) {
 							$ftc = mysql_fetch_assoc($ressu);
@@ -1142,7 +1144,7 @@ while ($tietue = fgets($fd)) {
 				$meapu = pupe_query($query);
 
 				if (mysql_num_rows($meapu) == 1) {
-					$apuro = mysql_fetch_array($meapu);
+					$apuro = mysql_fetch_assoc($meapu);
 					$edimyyja = $apuro['tunnus'];
 				}
 				elseif ($arow["myyjanro"] != "")  {
@@ -1153,7 +1155,7 @@ while ($tietue = fgets($fd)) {
 					$meapu = pupe_query($query);
 
 					if (mysql_num_rows($meapu) == 1) {
-						$apuro = mysql_fetch_array($meapu);
+						$apuro = mysql_fetch_assoc($meapu);
 						$edimyyja = $apuro['tunnus'];
 					}
 				}
@@ -1326,7 +1328,7 @@ while ($tietue = fgets($fd)) {
 							yhtio_toimipaikka					= '',
 							ytunnus			   					= '$arow[ytunnus]',
 							ohjelma_moduli						= '$ohjelmamoduli'";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 				$id = mysql_insert_id();
 
 				$query = "	INSERT INTO laskun_lisatiedot SET
@@ -1340,21 +1342,21 @@ while ($tietue = fgets($fd)) {
 							luontiaika			= now(),
 							yhtio				= '$kukarow[yhtio]',
 							otunnus				= '$id'";
-				$lisatiedot_result = mysql_query($query) or die($query);
+				$lisatiedot_result = pupe_query($query);
 
 				if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
 					$query = "	INSERT INTO tyomaarays SET
 								yhtio = '{$kukarow['yhtio']}',
 								otunnus = '{$id}'";
-					$tyomaarays_ins_res = mysql_query($query) or die($query);
+					$tyomaarays_ins_res = pupe_query($query);
 				}
 
 				$edi_ulos .= t("Tilausnumero")." $id\n\n";
 
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
-				$result   = mysql_query($query) or die($query);
-				$laskurow = mysql_fetch_array($result);
+				$result   = pupe_query($query);
+				$laskurow = mysql_fetch_assoc($result);
 
 				//vientikieltotarkistus
 				$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
@@ -1362,7 +1364,7 @@ while ($tietue = fgets($fd)) {
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus  = '$laskurow[liitostunnus]'";
 				$vieres = pupe_query($query);
-				$vierow = mysql_fetch_array($vieres);
+				$vierow = mysql_fetch_assoc($vieres);
 
 				if (isset($vierow) and $vierow["maa"] != "") {
 					$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
@@ -1478,7 +1480,7 @@ while ($tietue = fgets($fd)) {
 								and tuoteno = '{$tieto}'
 								and status != 'P'
 								{$kieltolisa}";
-					$result = mysql_query($query) or die($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 0) {
 						// Laitetaan kolmanneksi merkiksi space...
@@ -1491,7 +1493,7 @@ while ($tietue = fgets($fd)) {
 									and tuoteno = '{$tieto}'
 									and status != 'P'
 									{$kieltolisa}";
-						$result = mysql_query($query) or die($query);
+						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) == 0) {
 							// Poistetaan kolmannesta merkist‰ space...
@@ -1503,7 +1505,7 @@ while ($tietue = fgets($fd)) {
 										WHERE yhtio = '{$kukarow["yhtio"]}'
 										and tuoteno = '{$tieto}'
 										{$kieltolisa}";
-							$result = mysql_query($query) or die($query);
+							$result = pupe_query($query);
 
 							if (mysql_num_rows($result) == 0) {
 								// Laitetaan kolmanneksi merkiksi space...
@@ -1515,7 +1517,7 @@ while ($tietue = fgets($fd)) {
 											WHERE yhtio = '{$kukarow["yhtio"]}'
 											and tuoteno = '{$tieto}'
 											{$kieltolisa}";
-								$result = mysql_query($query) or die($query);
+								$result = pupe_query($query);
 
 								if (mysql_num_rows($result) == 0) {
 									// Jos ei mill‰‰n lˆydy niin laitetaan ilman spaceja eteenp‰in...
@@ -1524,7 +1526,7 @@ while ($tietue = fgets($fd)) {
 							}
 						}
 					}
-					
+
 					// spessukeissi, hinnastoon E tuotteita ei lˆydet‰
 					$kieltolisa .= " and hinnastoon != 'E'";
 				}
@@ -1534,7 +1536,7 @@ while ($tietue = fgets($fd)) {
 							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 							and tuote.tuoteno = '{$tieto}'
 							{$kieltolisa}";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 0) {
 					///* Lis‰t‰‰n tilaukselle dummytuote ja kommentti *///
@@ -1551,7 +1553,7 @@ while ($tietue = fgets($fd)) {
 									where tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
 									and tuoteperhe.tuoteno = '{$trow["tuoteno"]}'
 									and tuoteperhe.ohita_kerays != ''";
-						$result = mysql_query($query) or die($query);
+						$result = pupe_query($query);
 
                         // Runkotuotteita ei saa tilata suoraan!
 						if (mysql_num_rows($result) != 0) {
@@ -1603,7 +1605,7 @@ while ($tietue = fgets($fd)) {
 							and eankoodi = '$tieto'
 							$kieltolisa
 							ORDER BY tunnus";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 0) {
 					///* Lis‰t‰‰n tilaukselle dummytuote ja kommentti *///
@@ -1612,7 +1614,7 @@ while ($tietue = fgets($fd)) {
 					$tuoteerror = 1;
 				}
 				else {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 					$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $trow[tuoteno] / EAN: $tieto ";
 					$tuoteno = $trow['tuoteno'];
 					$tuoteerror = 0; // tuote ok
@@ -1954,7 +1956,7 @@ while ($tietue = fgets($fd)) {
 								otunnus 	= '$id',
 								tyyppi 		= '$editilaus_tyyppi',
 								kommentti 	= '$kommentti'";
-					$result = mysql_query($query) or die($query);
+					$result = pupe_query($query);
 
 				}
 			}
@@ -1987,15 +1989,15 @@ while ($tietue = fgets($fd)) {
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus = '$id'";
-				$result = mysql_query($query) or die($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					$query = "	SELECT vak_kielto
 								FROM toimitustapa
 								WHERE yhtio = '$kukarow[yhtio]'
 								and selite = '$laskurow[toimitustapa]'";
-					$result = mysql_query($query) or die($query);
-					$toimtapatmp = mysql_fetch_array($result);
+					$result = pupe_query($query);
+					$toimtapatmp = mysql_fetch_assoc($result);
 
 					if ($toimtapatmp['vak_kielto'] != '' and $toimtapatmp['vak_kielto'] != 'K') {
 						$query = "	SELECT selite
@@ -2007,15 +2009,15 @@ while ($tietue = fgets($fd)) {
 
 						if (mysql_num_rows($result) == 1) {
 							$query = "UPDATE lasku SET toimitustapa = '$toimtapatmp[vak_kielto]' where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
-							$result = mysql_query($query) or die($query);
+							$result = pupe_query($query);
 						}
 					}
 				}
 
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-				$result   = mysql_query($query) or die($query);
-				$laskurow = mysql_fetch_array($result);
+				$result   = pupe_query($query);
+				$laskurow = mysql_fetch_assoc($result);
 
 				// tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
 				$kukarow["kesken"] = $laskurow["tunnus"];
@@ -2048,7 +2050,7 @@ while ($tietue = fgets($fd)) {
 											order by alkuhyllyalue
 											limit 1";
 						$varasto_res = pupe_query($varasto_query);
-						$varasto_row = mysql_fetch_array($varasto_res);
+						$varasto_row = mysql_fetch_assoc($varasto_res);
 
 						$query = "	SELECT hyllyalue, hyllynro
 									FROM tilausrivi
@@ -2057,7 +2059,7 @@ while ($tietue = fgets($fd)) {
 									AND hyllynro != ''
 									AND otunnus = '$editilaus_lasku_tunnus'";
 						$edi_varastopaikka_res = pupe_query($query);
-						$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
+						$edi_varastopaikka_row = mysql_fetch_assoc($edi_varastopaikka_res);
 
 						$tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
 
@@ -2079,8 +2081,8 @@ while ($tietue = fgets($fd)) {
 
 						// haetaan tilauksen tiedot
 						$query    = "SELECT * FROM lasku WHERE tunnus = '$editilaus_lasku_tunnus' AND yhtio = '$kukarow[yhtio]'";
-						$result   = mysql_query($query) or die($query);
-						$laskurow = mysql_fetch_array($result);
+						$result   = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($result);
 
 						// pit‰‰ nollata toimitettuaika riveille
 						$query = "	UPDATE tilausrivi SET
@@ -2088,7 +2090,7 @@ while ($tietue = fgets($fd)) {
 									toimitettuaika = ''
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND otunnus = '$editilaus_lasku_tunnus'";
-						$result = mysql_query($query) or die($query);
+						$result = pupe_query($query);
 
 						// pit‰‰ nollata kerattyaika kaikille saldollisille tuotteille
 						$query = "	UPDATE tilausrivi SET
@@ -2097,7 +2099,7 @@ while ($tietue = fgets($fd)) {
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND otunnus = '$editilaus_lasku_tunnus'
 									AND keratty != 'saldoton'";
-						$result = mysql_query($query) or die($query);
+						$result = pupe_query($query);
 
 						// ei haluta k‰sitell‰ t‰t‰ toista kertaa kassamyyntin‰, koska se est‰‰ splittauksen
 						$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
@@ -2135,6 +2137,8 @@ while ($tietue = fgets($fd)) {
 			unset($arow_ostaja);
 			unset($arow_toimitus);
 			unset($arow_terminaali);
+			unset($crossdock911);
+
 			$toimpvm 	 			= date("Y-m-d");
 			$vastaustapa 			= "";
 			$editilaus_tila       	= "N"; // laskun tila

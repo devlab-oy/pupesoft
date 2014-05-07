@@ -244,7 +244,7 @@
 						if (mysql_num_rows($jtsre) == 0) {
 
 							$suoratoimitus = "";
-echo "247: $tunnus, $otunnus, $tyyppi <br><br>"; 
+ 
 							// Onko suoratoimitus
 							if ($tyyppi == "U" or ($tyyppi == 'KAIKKI' and $yhtiorow["tee_osto_myyntitilaukselta"] == 'Q')) {
 								$suoratoimitus = " , suoraveloitus = 'S' ";
@@ -326,7 +326,7 @@ echo "247: $tunnus, $otunnus, $tyyppi <br><br>";
 									and (tilausrivi.tunnus='$rivi[tunnus]' or tilausrivi.perheid2='$rivi[tunnus]')
 									order by tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
 						$tilrivires = pupe_query($query);
-echo "$query <br><br>";
+
 						$pid = 0;
 
 						while ($tilrivirow = mysql_fetch_assoc($tilrivires)) {
@@ -358,7 +358,7 @@ echo "$query <br><br>";
 										LIMIT 1";
 							$jtsre = pupe_query($query);
 							$jtstu = mysql_fetch_assoc($jtsre);
-echo "360: $tunnus, $otunnus, $tilrivirow[tilausrivilinkki] <br><br>"; 
+ 
 							// varattu m‰‰r‰‰ saa p‰ivitt‰‰ vaan jos kpl = 0 ja uusiotunnus = 0, tila = O, alatila =''
 							$query =  "	SELECT tilausrivi.*
 										FROM tilausrivi

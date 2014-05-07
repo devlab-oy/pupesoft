@@ -1232,19 +1232,15 @@ if ($tila == 'tee_kohdistus') {
 
 				//tarkistetaan viel‰ ett‰ jos ollaan tehty osasuorituksia laskulle jo aiemmin niin laitetaan viimeisen osasuorituksen maksup‰iv‰m‰‰r‰ laskun maksettup‰iv‰m‰‰r‰ksi
 				if ($lasku["summa"] != $lasku["alkup_summa"]) {
-					//haetaan eka myyntisaamistilit
-					$query = "	SELECT myyntisaamiset, factoringsaamiset, konsernimyyntisaamiset FROM yhtio
-								WHERE yhtio = '{$kukarow["yhtio"]}'";
-					$mstresult = pupe_query($query);
-					$myyntisaamistilit = mysql_fetch_assoc($mstresult);
-					$myyntisaamistilit = implode(", ", $myyntisaamistilit);
+					//haetaan eka myyntisaamistilit stringiin
+					$myyntisaamistilit = $yhtiorow["myyntisaamiset"].", ".$yhtiorow["factoringsaamiset"].", ".$yhtiorow["konsernimyyntisaamiset"];
 
 					//sitten katsotaan milloin n‰m‰ osasuoritukset on tehty
 					$query = "	SELECT tapvm
 								FROM tiliointi
 					 			WHERE yhtio = '{$kukarow["yhtio"]}'
 								AND tilino IN ($myyntisaamistilit)
-								AND summa < 0
+								AND ABS(summa) <= ABS({$lasku["alkup_summa"]} - {$lasku["summa"]})
 								AND ltunnus = {$lasku["tunnus"]}
 								ORDER BY tapvm DESC
 								LIMIT 1";

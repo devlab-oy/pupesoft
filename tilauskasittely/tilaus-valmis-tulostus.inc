@@ -3,7 +3,7 @@
 	//jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
 	// katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
-	$query  = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]'";
+	$query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
 	$prires = pupe_query($query);
 
 	if (mysql_num_rows($prires) != 0) {

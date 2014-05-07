@@ -27620,7 +27620,7 @@ if (!function_exists('valitse_oletusvarasto')) {
 	function valitse_oletusvarasto($args) {
 		global $kukarow, $yhtiorow;
 
-		$varasto = isset($args['varasto']) ? (int) $args['varasto'] : null;
+		$varasto = (isset($args['varasto']) and is_numeric($args['varasto'])) ? (int) $args['varasto'] : null;
 
 		if (isset($args['varastot']) and is_array($args['varastot'])) {
 			$varastot = $args['varastot'];

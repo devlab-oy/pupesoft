@@ -6,19 +6,20 @@
 
 	require('inc/parametrit.inc');
 
+	$saamuokata = false;
+	$saamuokataliitoksia = false;
+
+	if ($oikeurow['paivitys'] == '1') {
+		$saamuokata = true;
+	}
+
+	if (tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
+		$saamuokataliitoksia = true;
+	}
+
 	if (!isset($mista)) $mista = $laji;
 
 	if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
-		// tarkistetaan oikeuksia ja katsotaan etta muokataanko puuta vai puuliitoksia
-		$saamuokata = false;
-		$saamuokataliitosta = false;
-
-		if (($tee == 'valitsesegmentti' or $tee == 'addtotree' or $tee == 'removefromtree') and tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
-			$saamuokataliitosta = true;
-		}
-		elseif (tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
-			$saamuokata = true;
-		}
 
 		if ($tee == 'hae_laji') {
 
@@ -217,8 +218,6 @@
 				echo "<p>".t("Valitse uusi taso")."...</p>";
 				exit;
 			}
-
-			$saamuokata = tarkista_oikeus('yllapito.php', 'puun_alkio', 1);
 
 			echo "<h2 style='font-size: 20px'>".$noderow['nimi']."</h2><hr />
 					<p><font class='message'>".t("Koodi").":</font> ".$noderow['koodi']."<br />".
@@ -596,17 +595,6 @@
 
 	echo "<font class='head'>{$otsikko}</font><hr /><br />";
 	echo "<input type='hidden' id='mista' value='{$mista}' />";
-
-	$saamuokata = false;
-	$saamuokataliitoksia = false;
-
-	if ($oikeurow['paivitys'] == '1') {
-		$saamuokata = true;
-	}
-
-	if (tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
-		$saamuokataliitoksia = true;
-	}
 
 	// luodaan uusi root node
 	if (isset($tee) and isset($toim)) {

@@ -1737,6 +1737,13 @@ else {
 				$ohjausmerkkilisa = " , ohjausmerkki = '{$ohjausmerkki_nro}-{$laskurow['vanhatunnus']}' ";
 			}
 
+	  		$query = "	SELECT toimipaikka
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = {$varasto}";
+	  		$_tp_res = pupe_query($query);
+	  		$_tp_row = mysql_fetch_assoc($_tp_res);
+
 			# Katsotaan onko varasto sidottu johonkin toimipaikkaan
 			# Ja onko se eri kuin otsikolla oleva toimipaikka
 			# Katsotaan uudella yhtiörown parametreilla pitääkö täppiä laittaa

@@ -1435,6 +1435,9 @@ else {
 				$kukarow['toimipaikka'] = $_tp_row['yhtio_toimipaikka'];
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
+				$eilahe = $laskurow['eilahetetta'];
+				$osatoimitus = $laskurow['osatoimitus'];
+
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				// omalle_tilaukselle - tilauksia ei splitata muuten ku omiksi tilauksiksi (eli ei esim splitata varastoittain tai vyöhykkeittäin)
 				if ((	((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or
@@ -1501,9 +1504,6 @@ else {
 					else {
 						$toimitustavan_lahto_arvo = 0;
 					}
-
-					$eilahe = $laskurow['eilahetetta'];
-					$osatoimitus = $laskurow['osatoimitus'];
 
 					# Katsotaan onko varasto sidottu johonkin toimipaikkaan
 					# Ja onko se eri kuin otsikolla oleva toimipaikka
@@ -1737,10 +1737,39 @@ else {
 				$ohjausmerkkilisa = " , ohjausmerkki = '{$ohjausmerkki_nro}-{$laskurow['vanhatunnus']}' ";
 			}
 
+			# Katsotaan onko varasto sidottu johonkin toimipaikkaan
+			# Ja onko se eri kuin otsikolla oleva toimipaikka
+			# Katsotaan uudella yhtiörown parametreilla pitääkö täppiä laittaa
+			if ($yhtiorow['toimipaikkakasittely'] == "L" and $laskurow['yhtio_toimipaikka'] != $_tp_row['toimipaikka']) {
+
+				$_onko_myyntitilaus = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+				$_kerataanko_valmistukset = ($yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
+				$_lahetteen_tulostustapa = ($yhtiorow['lahetteen_tulostustapa'] == 'I');
+				$_nouto = ($totarowx['nouto'] != '' and $_onko_myyntitilaus and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
+
+				if ($_kerataanko_valmistukset or $_lahetteen_tulostustapa or $_nouto) {
+					$eilahe = 'o';
+				}
+				else {
+					$eilahe = '';
+				}
+
+				$_myyntitilaus_osatoimitus = ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $_onko_myyntitilaus);
+
+				if ($_myyntitilaus_osatoimitus) {
+					$osatoimitus = 'o';
+				}
+				else {
+					$osatoimitus = '';
+				}
+			}
+
 			//päivitetään laskulle tieto mihin varastoon se kuuluu
 			$query = "	UPDATE lasku set
 						varasto 							= '$varasto',
 						tulostusalue						= '$tulostusalue',
+						eilahetetta = '{$eilahe}',
+						osatoimitus = '{$osatoimitus}',
 						toimitustavan_lahto					= '$toimitustavan_lahto_arvo',
 						ultilno 							= '$laskurow[ultilno]',
 						aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',

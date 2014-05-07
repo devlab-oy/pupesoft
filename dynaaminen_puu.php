@@ -16,7 +16,7 @@
 		if (($tee == 'valitsesegmentti' or $tee == 'addtotree' or $tee == 'removefromtree') and tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
 			$saamuokataliitosta = true;
 		}
-		elseif ($oikeurow['paivitys'] == '1') {
+		elseif (tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
 			$saamuokata = true;
 		}
 
@@ -217,6 +217,8 @@
 				echo "<p>".t("Valitse uusi taso")."...</p>";
 				exit;
 			}
+
+			$saamuokata = tarkista_oikeus('yllapito.php', 'puun_alkio', 1);
 
 			echo "<h2 style='font-size: 20px'>".$noderow['nimi']."</h2><hr />
 					<p><font class='message'>".t("Koodi").":</font> ".$noderow['koodi']."<br />".

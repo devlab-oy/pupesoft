@@ -107,22 +107,23 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	$worksheet->write($excelrivi, $excelsarake++, t("Ean-koodi"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Nimitys"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Tuotemerkki"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Määrä"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Myyntihinta"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Alv"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Myyntierä"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Yksikkö"),	$format_bold);
+	// Asiakas
+	$worksheet->write($excelrivi, $excelsarake++, t("Asiakashinta"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Asiakkaan valuutta"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Asiakkaan kommentti"),	$format_bold);
+	// Tuote jatkuu
+	$worksheet->write($excelrivi, $excelsarake++, t("Tullinimike"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Lyhytkuvaus"),	$format_bold);
+	$worksheet->write($excelrivi, $excelsarake++, t("Kuvaus"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Tuotesyvyys"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Tuoteleveys"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Tuotekorkeus"),	$format_bold);
 	$worksheet->write($excelrivi, $excelsarake++, t("Tuotemassa"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Myyntihinta"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Myyntierä"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Alv"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Yksikkö"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Tullinimike"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Lyhytkuvaus"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Kuvaus"),	$format_bold);
-
-	// Asiakas
-	$worksheet->write($excelrivi, $excelsarake++, t("Asiakkaan kommentti"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Asiakashinta"),	$format_bold);
-	$worksheet->write($excelrivi, $excelsarake++, t("Asiakkaan valuutta"),	$format_bold);
 
 	// Tuotteen toimittajat
 	$worksheet->write($excelrivi, $excelsarake++, t("Alkuperämaa"),	$format_bold);
@@ -186,6 +187,44 @@ elseif(isset($lajit) and count($lajit) > 0) {
 		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['nimitys']);
 		// tuotemerkki
 		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tuotemerkki']);
+		// tilausrivin kpl
+		if (in_array($tilausrivi["var"], array('S','U','T','R', 'J'))) {
+			if ($yhtiorow["varaako_jt_saldoa"] == "") {
+				$kpl_ruudulle = $tilausrivi['jt'] * 1;
+			}
+			else {
+				$kpl_ruudulle = ($tilausrivi['jt']+$tilausrivi['varattu']) * 1;
+			}
+		}
+		elseif ($tilausrivi["var"] == 'P' or ($kukarow['extranet'] != '' and $tilausrivi['positio'] == 'Ei varaa saldoa')) {
+			$kpl_ruudulle = $tilausrivi['tilkpl'] * 1;
+		}
+		else {
+			$kpl_ruudulle = $tilausrivi['varattu'] * 1;
+		}
+		$worksheet->write($excelrivi, $excelsarake++, $kpl_ruudulle);
+		// myyntihinta
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tuoterowi['myyntihinta'])));
+		// alv
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['alv']));
+		// myyntierä
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['myynti_era']));
+		// yksikkö
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['yksikko']);
+		
+		// asiakashinta
+		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tilausrivi['hinta'])));
+		// asiakkaan valuutta
+		$worksheet->write($excelrivi, $excelsarake++, $laskurow['valkoodi']);
+		// asiakkaan tilausnro
+		$worksheet->write($excelrivi, $excelsarake++, $spessurowi['kommentti']);
+
+		// tullinimike1
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tullinimike1']);
+		// lyhytkuvaus
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['lyhytkuvaus']);
+		// kuvaus
+		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['kuvaus']);
 		// tuotesyvyys
 		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['tuotesyvyys']));
 		// tuoteleveys
@@ -194,27 +233,6 @@ elseif(isset($lajit) and count($lajit) > 0) {
 		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['tuotekorkeus']));
 		// tuotemassa
 		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['tuotemassa']));
-		// myyntihinta
-		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tuoterowi['myyntihinta']), $yhtiorow['hintapyoristys']));
-		// myyntierä
-		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['myynti_era']));
-		// alv
-		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tuoterowi['alv']));
-		// yksikkö
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['yksikko']);
-		// tullinimike1
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['tullinimike1']);
-		// lyhytkuvaus
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['lyhytkuvaus']);
-		// kuvaus
-		$worksheet->write($excelrivi, $excelsarake++, $tuoterowi['kuvaus']);
-
-		// asiakkaan tilausnro
-		$worksheet->write($excelrivi, $excelsarake++, $spessurowi['kommentti']);
-		// asiakashinta
-		$worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tilausrivi['hinta']), $yhtiorow['hintapyoristys']));
-		// asiakkaan valuutta
-		$worksheet->write($excelrivi, $excelsarake++, $laskurow['valkoodi']);
 
 		//alkuperämaa/t
 		$worksheet->write($excelrivi, $excelsarake++, $alkuperamaat['kaikkimaat']);

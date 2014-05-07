@@ -2777,23 +2777,31 @@ if ($tee == '') {
 		$tilausok++;
 	}
 
-	if ($laskurow['varasto'] != 0) {
+	// Tsekataa onko tilauksen varaston toimipaikalla lähdöt päällä, ja onko tilauksen varastolla lähtöjä
+	// pitäisi katsoa rivien varastot
+	if ($yhtiorow['toimipaikkakasittely'] == 'L' AND $laskurow['varasto'] != 0) {
+
+		# haetaan rivien varastot
+		# loopataan rivien varastot
+		
 		$varaston_toimipaikka = hae_varaston_toimipaikka($laskurow['varasto']);
-		$_kerayserat_mittatiedot = ($yhtiorow['kerayserat'] == 'K');
-		if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !$_kerayserat_mittatiedot and !empty($varaston_toimipaikka)) {
+
+		if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($varaston_toimipaikka)) {
 			if ($varaston_toimipaikka['tunnus'] == 0) {
 				$kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
 				$kukarow['toimipaikka'] = 0;
 			}
+
 			$toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
-
 			$kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
-
 			$_toimipaikan_kerayserat_mittatiedot = ($toimipaikan_yhtiorow['kerayserat'] == 'K');
+
 			if ($_toimipaikan_kerayserat_mittatiedot) {
+
 				$toimitustavat = hae_kaikki_toimitustavat();
 				$toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $laskurow['toimitustapa']);
 				$toimitustapa = $toimitustapa[0];
+
 				$query = "	SELECT *
 							FROM lahdot
 							WHERE yhtio = '{$kukarow['yhtio']}'

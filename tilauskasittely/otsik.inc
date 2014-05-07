@@ -968,55 +968,24 @@
 
 		echo "<table>";
 		echo "<tr>
-				<th colspan='2' align='left' valign='top'>".t("Ostaja").":</td></tr>";
+				<th colspan='2' align='left' valign='top'>".t("Ostaja").":</td>
+			</tr>";
 		echo "<tr>
 				<td valign='top'>".t("Nimi").": </td>
-				<td><input type='text' name='nimi' size='35' value='$nimi'></td></tr>";
+				<td><input type='text' name='nimi' size='35' value='$nimi'></td>
+			</tr>";
 		echo "<tr>
 				<td></td>
-				<td><input type='text' name='nimitark' size='35' value='$nimitark'></td></tr>";
+				<td><input type='text' name='nimitark' size='35' value='$nimitark'></td>
+			</tr>";
 		echo "<tr>
 				<td valign='top'>".t("Osoite").": </td>
-				<td><input type='text' name='osoite' size='35' value='$osoite'></td></tr>";
-
+				<td><input type='text' name='osoite' size='35' value='$osoite'></td>
+			</tr>";
 		echo "<tr>
 				<td valign='top'>".t("Postitp").": </td>
-				<td><input type='text' name='postino' size='10' value='$postino'> <input type='text' name='postitp' size='21' value='$postitp'></td></tr>";
-
-		echo "<tr><td valign='top'>".t("Toimipaikka").": </td>";
-		echo "<td>";
-
-		$tp = $kukarow['toimipaikka'];
-
-		$query = "  SELECT *
-		      FROM yhtion_toimipaikat
-		      WHERE yhtio = '{$kukarow['yhtio']}'
-		      AND vat_numero = ''
-		      ORDER BY nimi";
-		$vresult = pupe_query($query);
-
-		if (mysql_num_rows($vresult) > 0) {
-
-		  echo "<select name='toimipaikka_rajaus'>";
-		  echo "<option value='X'>" . t("Kaikki") . "</option>";
-		  echo "<option value='0'>" . t("Ei toimipaikkaa") . "</option>";
-
-		  $selected = false;
-		  while ($vrow = mysql_fetch_array($vresult)) {
-		    $sel="";
-		    if($toimipaikka_rajaus == $vrow['tunnus']) {
-		    	$sel = "selected";
-		    	$selected = true;
-		    }
-		    elseif (!$selected and $tp == $vrow['tunnus']) {
-		    	$sel = "selected";
-		    }
-		    echo "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
-		  }
-		  echo "</select>";
-		}
-
-		echo "</td></tr>";
+				<td><input type='text' name='postino' size='10' value='$postino'> <input type='text' name='postitp' size='21' value='$postitp'></td>
+			</tr>";
 
 		if ($srow["liitostunnus"] > 0) {
 			$query = "	SELECT distinct koodi, nimi
@@ -1089,6 +1058,8 @@
 				}
 			}
 
+			$tpr = $kukarow['toimipaikka'];
+			echo "<input type='hidden' name='toimipaikka_rajaus' value='$tpr'>";
 			echo "<input type='submit' value='".t("Hae")."'>";
 
 			echo "</form>";

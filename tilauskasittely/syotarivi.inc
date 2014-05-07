@@ -133,7 +133,9 @@
 			echo "</select></td>";
 		}
 
-		echo "	<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
+		echo "	<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'>
+				<input type='hidden' name='toimipaikka_rajaus' value = '{$kukarow['toimipaikka']}'>
+				</td>
 				<td valign='top' class='back'>
 				<input type='hidden' name='perheid' value = '$perheid'>
 				<input type='hidden' name='perheid2' value = '$perheid2'>
@@ -418,7 +420,7 @@
 			echo "</td>";
 			echo "<input type='hidden' name='alv' value='$alv'>";
 		}
-		else { 
+		else {
 		 	echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 

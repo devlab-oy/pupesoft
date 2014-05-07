@@ -1470,7 +1470,7 @@
 				if (isset($verkkokaupat) and $verkkokaupat != '') {
 					$lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
 				}
-
+				# Myyntied lukujen vuosi
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
 
@@ -2161,17 +2161,21 @@
 
 					if (!empty($kumulatiivinen_valittu) and strtotime($kumulatiivinen_alkupaiva) < strtotime("$vva-$kka-$ppa")) {
 						//Verrataan kumpi käyttöliittymästä tulevista ajoista on aikasempi ja käytetään sitä.
-						$vva = $kumulatiivinen_vv;
-						$kka = $kumulatiivinen_kk;
-						$ppa = $kumulatiivinen_pp;
+						$vvka = $kumulatiivinen_vv;
+						$kkka = $kumulatiivinen_kk;
+						$ppka = $kumulatiivinen_pp;
 
-						$lalku = $kumulatiivinen_alkupaiva;
+						$lkalku = $kumulatiivinen_alkupaiva;
 					}
 
 					if ($ajotapa == 'tilausjaauki') {
-						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-									and ((lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'  and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or (lasku.tapvm >= '{$vva}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
-
+						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')";
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= " and ((lasku.luontiaika >= '{$vvka}-{$kkka}-{$ppka} 00:00:00'  and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or (lasku.tapvm >= '{$vvka}-{$kkka}-{$ppka}' and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						}
+						else {
+							$query .= " and ((lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'  and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or (lasku.tapvm >= '{$vva}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						}
 						if ($piiloed == "") {
 							$query .= " or (lasku.tapvm >= '{$vvaa}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvll}-{$kkl}-{$ppl}') ";
 						}
@@ -2179,9 +2183,13 @@
 						$query .= " ) ";
 					}
 					elseif ($ajotapa == 'tilausjaaukiluonti') {
-						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-									and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
-
+						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')";
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= "	and ((lasku.luontiaika >= '{$lkalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
+						else {
+							$query .= "	and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
 						if ($piiloed == "") {
 							$query .= " or (lasku.luontiaika >= '{$lalku_ed} 00:00:00' and lasku.luontiaika <= '{$lloppu_ed} 23:59:59') ";
 						}
@@ -2189,9 +2197,13 @@
 						$query .= " ) ";
 					}
 					elseif ($ajotapa == 'tilausauki') {
-						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-									and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
-
+						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X') ";
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= "	and ((lasku.luontiaika >= '{$lkalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
+						else {
+							$query .= "	and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}						
 						if ($piiloed == "") {
 							$query .= " or (lasku.luontiaika >= '{$lalku_ed} 00:00:00' and lasku.luontiaika <= '{$lloppu_ed} 23:59:59') ";
 						}
@@ -2199,19 +2211,28 @@
 						$query .= " ) ";
 					}
 					elseif ($ajotapa == 'ennakot') {
-						$query .= "	and lasku.alatila = 'A'
-									and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
-
+						$query .= "	and lasku.alatila = 'A' ";
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= "	and ((lasku.luontiaika >= '{$lkalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
+						else {
+							$query .= "	and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
 						if ($piiloed == "") {
 							$query .= " or (lasku.luontiaika >= '{$lalku_ed} 00:00:00' and lasku.luontiaika <= '{$lloppu_ed} 23:59:59') ";
 						}
 
 						$query .= " ) ";
 					}
-					else {
-						$query .= "	and lasku.alatila='X'
-									and ((lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'  and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
-
+					else {	
+						$query .= "	and lasku.alatila='X' ";
+						
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= "and ((lasku.tapvm >= '{$vvka}-{$kkka}-{$ppka}'  and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						}
+						else {	
+							$query .= "	and ((lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'  and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						}
 						if ($piiloed == "") {
 							$query .= " or (lasku.tapvm >= '{$vvaa}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvll}-{$kkl}-{$ppl}') ";
 						}

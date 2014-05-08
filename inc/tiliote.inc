@@ -106,7 +106,7 @@
 
 						if (strlen(trim($maksuviite)) > 0 and (int) $maksuviite != 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti maksuviite & m‰‰r‰")."</font><br>\n";
-							
+
 							// etunollat pois
 							$maksuviite = ltrim($maksuviite, 0);
 
@@ -122,8 +122,6 @@
 										LIMIT 1";
 							$result = pupe_query($query);
 
-							echo "$query<br>";
-
 							if (mysql_num_rows($result) == 0) {
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 											FROM lasku
@@ -136,12 +134,10 @@
 											ORDER BY popvm
 											LIMIT 1";
 								$result = pupe_query($query);
-
-								echo "$query<br>";
 							}
 						}
 
-						if (strlen(trim($tilino)) > 0) {
+						if ((!isset($result) or mysql_num_rows($result) != 1) and strlen(trim($tilino)) > 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti tilino & m‰‰r‰")."</font><br>\n";
 
 							$tmpiban = luoiban($tilino);
@@ -180,7 +176,7 @@
 							}
 						}
 
-						if (strlen(trim($iban)) > 0) {
+						if ((!isset($result) or mysql_num_rows($result) != 1) and strlen(trim($iban)) > 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti IBAN & m‰‰r‰")."</font><br>\n";
 
 							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'

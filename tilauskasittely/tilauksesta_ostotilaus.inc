@@ -316,8 +316,9 @@
 						if (in_array($ostotilauksen_kasittely, array('1','3','5'))) $tunnukset[$tunnus] = $tunnus;
 
 						//Haetaan myös ns. lisävarusteperheet.
-						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
+						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl, tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
 									FROM tilausrivi
+									LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 									LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 									where tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus = '$otunnus'

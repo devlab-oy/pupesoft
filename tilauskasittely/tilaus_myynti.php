@@ -2994,7 +2994,7 @@ if ($tee == '') {
 			$_varasto = hae_varasto($laskurow['varasto']);
 			$params = array(
 				'asiakas_tunnus' => $laskurow['liitostunnus'],
-				'lasku_toimipaikka' => $laskurow['yhtiotoimipaikka'],
+				'lasku_toimipaikka' => $laskurow['yhtio_toimipaikka'],
 				'varasto_toimipaikka' => $_varasto['toimipaikka']
 			);
 			$toimitustavat = hae_toimitustavat($params);

@@ -310,34 +310,7 @@
 				# Jos laaja toimipaikkak‰sittely on p‰‰ll‰, niin p‰ivitet‰‰n siirtolistan toimipaikka
 				# kohdevaraston toimipaikaksi
 				if ($yhtiorow['toimipaikkakasittely'] == "L") {
-
-					$query = "SELECT tila, clearing
-										FROM lasku
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$row['tunnus']}'";
-					$laskres = pupe_query($query);
-					$laskrow = mysql_fetch_assoc($laskres);
-
-					# Siirtolistan clearing-kent‰ss‰ on kohdevarasto
-					if ($laskrow['tila'] == 'G' and $laskrow['clearing'] != '' and is_numeric($laskrow['clearing'])) {
-
-						$query = "SELECT toimipaikka
-											FROM varastopaikat
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$laskrow['clearing']}'";
-						$var_tp_res = pupe_query($query);
-
-						if (mysql_num_rows($var_tp_res) != 0) {
-
-							$var_tp_row = mysql_fetch_assoc($var_tp_res);
-
-							$query = "UPDATE lasku SET
-												yhtio_toimipaikka = '{$var_tp_row['toimipaikka']}'
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$row['tunnus']}'";
-							$updres = pupe_query($query);
-						}
-					}
+					paivita_siirtolistan_toimipaikka($row['tunnus']);
 				}
 			}
 		}
@@ -762,34 +735,8 @@
 					# kohdevaraston toimipaikaksi
 					if ($yhtiorow['toimipaikkakasittely'] == "L") {
 
-						$query = "SELECT tila, clearing, tunnus
-											FROM lasku
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus IN ({$otunnukset})";
-						$laskres = pupe_query($query);
-
-						while ($laskrow = mysql_fetch_assoc($laskres)) {
-
-							# Siirtolistan clearing-kent‰ss‰ on kohdevarasto
-							if ($laskrow['tila'] == 'G' and $laskrow['clearing'] != '' and is_numeric($laskrow['clearing'])) {
-
-								$query = "SELECT toimipaikka
-													FROM varastopaikat
-													WHERE yhtio = '{$kukarow['yhtio']}'
-													AND tunnus = '{$laskrow['clearing']}'";
-								$var_tp_res = pupe_query($query);
-
-								if (mysql_num_rows($var_tp_res) != 0) {
-
-									$var_tp_row = mysql_fetch_assoc($var_tp_res);
-
-									$query = "UPDATE lasku SET
-														yhtio_toimipaikka = '{$var_tp_row['toimipaikka']}'
-														WHERE yhtio = '{$kukarow['yhtio']}'
-														AND tunnus = '{$laskrow['tunnus']}'";
-									$updres = pupe_query($query);
-								}
-							}
+						foreach ($otunnukset as $siirtolistan_tunnus) {
+							paivita_siirtolistan_toimipaikka($siirtolistan_tunnus);
 						}
 					}
 				}

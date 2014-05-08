@@ -244,7 +244,7 @@
 						if (mysql_num_rows($jtsre) == 0) {
 
 							$suoratoimitus = "";
- 
+
 							// Onko suoratoimitus
 							if ($tyyppi == "U" or ($tyyppi == 'KAIKKI' and $yhtiorow["tee_osto_myyntitilaukselta"] == 'Q')) {
 								$suoratoimitus = " , suoraveloitus = 'S' ";
@@ -358,7 +358,7 @@
 										LIMIT 1";
 							$jtsre = pupe_query($query);
 							$jtstu = mysql_fetch_assoc($jtsre);
- 
+
 							// varattu m‰‰r‰‰ saa p‰ivitt‰‰ vaan jos kpl = 0 ja uusiotunnus = 0, tila = O, alatila =''
 							$query =  "	SELECT tilausrivi.*
 										FROM tilausrivi

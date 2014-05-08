@@ -366,7 +366,6 @@ elseif ($ytunnus != '') {
 							$lajilisa $asiakasrajaus)
 						ORDER BY nimi";
 		}
-		echo $query;
 		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 	}
@@ -785,7 +784,12 @@ if ($monta > 1 and $monta <= $limit) {
 }
 
 if ($monta > $limit) {
-	echo "<font class='error'>".t("Asiakashaulla löytyi")." $monta ".t("sopivaa asiakasta. Tarkenna hakuasi")."!</font><br><br>";
+	echo "<font class='error'>".t("Asiakashaulla löytyi")." $monta ".t("sopivaa asiakasta. Tarkenna hakuasi")."!</font>";
+	echo "<form method='post'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
+	echo "<input type='submit' value='".t("Tee uusi haku")."'>";
+	echo "</form>";
+	echo "<br><br>";
 	$ytunnus = "";
 }
 

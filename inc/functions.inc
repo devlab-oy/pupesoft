@@ -27478,24 +27478,22 @@ if (!function_exists('hae_toimitustavat')) {
 	}
 }
 
-if (!function_exists('hae_varasto')) {
-
-	function hae_varasto($tunnus) {
+if (!function_exists('hae_kaikki_toimitustavat')) {
+	function hae_kaikki_toimitustavat() {
 		global $kukarow, $yhtiorow;
 
-		if (empty($tunnus)) {
-			return false;
-		}
-
 		$query = "	SELECT *
- 					FROM varastopaikat
- 					WHERE yhtio = '{$kukarow['yhtio']}'
- 					AND tunnus = {$tunnus}";
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
 
-		return mysql_fetch_assoc($result);
-	}
+		$toimitustavat = array();
+		while($toimitustapa = mysql_fetch_assoc($result)) {
+			$toimitustavat[] = $toimitustapa;
+		}
 
+		return $toimitustavat;
+	}
 }
 
 if (!function_exists('sallitut_varastot')) {
@@ -27670,6 +27668,76 @@ if (!function_exists('valitse_oletusvarasto')) {
 		}
 
 		return 0;
+	}
+}
+
+if (!function_exists('hae_varaston_toimipaikka')) {
+	function hae_varaston_toimipaikka($varasto_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($varasto_tunnus)) {
+			return false;
+		}
+
+		$varasto_tunnus = (int)$varasto_tunnus;
+
+		$query = "	SELECT *
+					FROM varastopaikat AS v
+					WHERE v.yhtio = '{$kukarow['yhtio']}'
+					AND v.tunnus = {$varasto_tunnus}";
+		$result = pupe_query($query);
+
+		$varasto = mysql_fetch_assoc($result);
+
+		if (empty($varasto)) {
+			return false;
+		}
+
+		if ($varasto['toimipaikka'] == 0) {
+			//Pitäisi palauttaa pääkallopaikka eli oletustoimipaikka
+			return array('tunnus' => 0);
+		}
+
+		$query = "	SELECT yt.*
+					FROM yhtion_toimipaikat AS yt
+					WHERE yt.yhtio = '{$kukarow['yhtio']}'
+					AND yt.tunnus = {$varasto['toimipaikka']}";
+
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('tilausrivien_varastot')) {
+	function tilausrivien_varastot($lasku_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		if (empty($lasku_tunnus)) {
+			return array();
+		}
+
+		// Haetaan kaikkien tilausrivien varastopaikat
+		$query = "	SELECT DISTINCT tilausrivi.hyllyalue, tilausrivi.hyllynro
+					FROM tilausrivi
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$lasku_tunnus}'
+					AND tilausrivi.tyyppi != 'D'
+					AND tilausrivi.hyllyalue != ''
+					AND tilausrivi.varattu > 0
+					AND tilausrivi.var not in ('P','J','O','S')";
+		$chk_res = pupe_query($query);
+
+		$tilausrivit = array();
+
+		while ($tilausrivi = mysql_fetch_assoc($chk_res)) {
+			// Mihin varastoon
+			$varasto = kuuluukovarastoon($tilausrivi["hyllyalue"], $tilausrivi["hyllynro"]);
+
+			$tilausrivit[$varasto] = $varasto;
+		}
+
+		return $tilausrivit;
 	}
 }
 

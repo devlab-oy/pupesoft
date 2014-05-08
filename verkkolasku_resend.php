@@ -11,19 +11,16 @@ date_default_timezone_set('Europe/Helsinki');
 
 if ($php_cli) {
 	// otetaan includepath aina rootista
-	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+	$pupe_root_polku = dirname(__FILE__);
+
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
 	error_reporting(E_ALL);
-	ini_set("display_errors", 0);
+	ini_set("display_errors", 1);
 
 	// otetaan tietokanta connect
 	require("inc/connect.inc");
 	require("inc/functions.inc");
-
-	$pupe_root_polku = dirname(__FILE__);
 }
-
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();

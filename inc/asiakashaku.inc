@@ -390,6 +390,25 @@ if ($monta == 0) {
 		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";
 	}
 
+	if ($toimipaikka_rajaus != 'X') {
+
+		if ($toim == "PIKATILAUS") {
+			$nimi = $syotetty_ytunnus;
+		}
+
+		echo "<form method='post'>";
+		echo "<input type='hidden' name='tee'         			value='$tee'>";
+		echo "<input type='hidden' name='toim'        			value='$toim'>";
+		echo "<input type='hidden' name='nimi'        			value='$nimi'>";
+		echo "<input type='hidden' name='syotetty_ytunnus' 		value='$nimi'>";
+		echo "<input type='hidden' name='postino'     			value='$postino'>";
+		echo "<input type='hidden' name='postitp'     			value='$postitp'>";
+		echo "<input type='hidden' name='toimipaikka_rajaus'   	value='X'>";
+		echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";
+		echo "</form>";
+
+	}
+
 	if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE and $kutsuja != "yllapito.php") {
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
@@ -793,7 +812,7 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 
 		//Annetaan mahdollisuus perustaa uusi asiakas
 		echo "<table border='0'>";
-		echo "<tr><td>" . t("Oikeaa asiakasta ei löytynyt.") . "<br />" . t("Perusta uusi asiakas, tai muuta hakuehtoja") . "</td>";
+		echo "<tr><td>" . t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas") . "</td>";
 
 		if (mysql_num_rows($oikeuresult1) > 0) {
 			echo "<td class='back'>";
@@ -819,27 +838,9 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 			echo "</td>";
 		}
 
-		if ($monta == 0) {
-
-			if ($toim == "PIKATILAUS") {
-				$nimi = $syotetty_ytunnus;
-			}
-
-			echo "<td class='back'>";
-			echo "<form method='post'>";
-			echo "<input type='hidden' name='tee'         			value='$tee'>";
-			echo "<input type='hidden' name='toim'        			value='$toim'>";
-			echo "<input type='hidden' name='nimi'        			value='$nimi'>";
-			echo "<input type='hidden' name='syotetty_ytunnus' 		value='$nimi'>";
-			echo "<input type='hidden' name='postino'     			value='$postino'>";
-			echo "<input type='hidden' name='postitp'     			value='$postitp'>";
-			echo "<input type='hidden' name='toimipaikka_rajaus'   	value='X'>";
-			echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";
-			echo "</form>";
-			echo "</td>";
-		}
-
 		echo "</tr>";
 		echo "</table><br>";
+
 	}
 }
+

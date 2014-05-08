@@ -13,13 +13,13 @@
 		exit;
 	}
 
-	if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-		echo "<font class='error'>".t("HUOM: Ohjelma ei ole käytössä kun siirtolistoja (Siirtolistan_tulostustapa) tulostetaan keräyserien kautta")."!</font>";
-		exit;
-	}
-
 	if (!isset($tuvarasto)) $tuvarasto = '';
 	if (!isset($tutyyppi)) $tutyyppi = '';
+
+	if (!isset($jarj)) $jarj = '';
+	if (!isset($etsi)) $etsi = '';
+	if (!isset($tumaa)) $tumaa = '';
+	if (!isset($tee2)) $tee2 = '';
 
 	$valmistuslinjat = hae_valmistuslinjat();
 
@@ -45,7 +45,7 @@
 		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
-		if ($lasku_yhtio != '') {
+		if (isset($lasku_yhtio) and $lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
 		}
@@ -844,6 +844,8 @@
 			echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ($row[kpl])</option>";
 		}
 
+		if(!isset($tuoteno)) {$tuoteno = '';}
+
 		echo "</select>";
 		echo "</td>";
 		echo "<th>".t('Tuotenumero')."</th>";
@@ -877,7 +879,7 @@
 		}
 
 
-		$sel=array();
+		$sel=array('1' => '', '3' => '', '5' => '', '7' => '', '14' => '', 'KK' => '');
 		$sel[$karajaus] = "selected";
 
 		echo "<tr><th>".t("Keräysaikarajaus:")."</th>";
@@ -936,6 +938,7 @@
 		}
 
 		// Vain keräyslistat saa groupata
+		$grouppi = '';
 		if (($yhtiorow["lahetteen_tulostustapa"] == "K" or $yhtiorow["lahetteen_tulostustapa"] == "L") and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
 			//jos halutaan eritellä tulostusalueen mukaan , lasku.tulostusalue
 			$grouppi = "GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm, t_tyyppi2";
@@ -951,12 +954,19 @@
 			$grouppi .= ", lasku.varasto, lasku.tulostusalue";
 		}
 
-		if ($tuoteno != '') {
+		$tilausrivi_tuoteno_join = '';
+		if (isset($tuoteno) and $tuoteno != '') {
 			$tilausrivi_tuoteno_join = "	AND tilausrivi.tuoteno = '{$tuoteno}'";
 		}
 
-		if ($valmistuslinja != '') {
+		$valmistuslinja_where = '';
+		if (isset($valmistuslinja) and $valmistuslinja != '') {
 			$valmistuslinja_where = "	AND lasku.kohde = '{$valmistuslinja}'";
+		}
+
+		$siirtolista_where = '';
+		if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+			$siirtolista_where = " AND lasku.toimitustavan_lahto = 0 ";
 		}
 
 		$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
@@ -995,6 +1005,7 @@
 					lasku.$logistiikka_yhtiolisa
 					and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
 					$valmistuslinja_where
+					$siirtolista_where
 					$haku
 					$tilaustyyppi
 					$grouppi

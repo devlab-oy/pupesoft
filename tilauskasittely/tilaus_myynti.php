@@ -2779,44 +2779,48 @@ if ($tee == '') {
 
 	// Tsekataa onko tilauksen varaston toimipaikalla lähdöt päällä, ja onko tilauksen varastolla lähtöjä
 	// pitäisi katsoa rivien varastot
-	if ($yhtiorow['toimipaikkakasittely'] == 'L' AND $laskurow['varasto'] != 0) {
+	if ($yhtiorow['toimipaikkakasittely'] == 'L') {
 
-		# haetaan rivien varastot
-		# loopataan rivien varastot
-		
-		$varaston_toimipaikka = hae_varaston_toimipaikka($laskurow['varasto']);
+		$tilausrivien_varastot = tilausrivien_varastot($laskurow['otunnus']);
 
-		if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($varaston_toimipaikka)) {
-			if ($varaston_toimipaikka['tunnus'] == 0) {
-				$kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
-				$kukarow['toimipaikka'] = 0;
-			}
+		foreach ($tilausrivien_varastot as $tilausrivin_varasto) {
+			$varaston_toimipaikka = hae_varaston_toimipaikka($tilausrivin_varasto);
+			$varasto = hae_varasto($tilausrivin_varasto);
 
-			$toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
-			$kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
-			$_toimipaikan_kerayserat_mittatiedot = ($toimipaikan_yhtiorow['kerayserat'] == 'K');
+			if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($varaston_toimipaikka)) {
+				if ($varaston_toimipaikka['tunnus'] == 0) {
+					$kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
+					$kukarow['toimipaikka'] = 0;
+				}
 
-			if ($_toimipaikan_kerayserat_mittatiedot) {
+				$toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
+				$kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
+				$_toimipaikan_kerayserat_mittatiedot = ($toimipaikan_yhtiorow['kerayserat'] == 'K');
 
-				$toimitustavat = hae_kaikki_toimitustavat();
-				$toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $laskurow['toimitustapa']);
-				$toimitustapa = $toimitustapa[0];
+				if ($_toimipaikan_kerayserat_mittatiedot) {
 
-				$query = "	SELECT *
-							FROM lahdot
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND liitostunnus = {$toimitustapa['tunnus']}
-							AND varasto = {$laskurow['varasto']}
-							AND aktiivi = ''
-							AND pvm >= CURRENT_DATE
-							AND viimeinen_tilausaika > CURRENT_TIME";
-				$lahdot_result = pupe_query($query);
+					$toimitustavat = hae_kaikki_toimitustavat();
+					$toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $laskurow['toimitustapa']);
+					$toimitustapa = $toimitustapa[0];
 
-				if (mysql_num_rows($lahdot_result) == 0) {
-					echo "<font class='error'>".t("VIRHE: Tilauksen toimitustavalla ei ole myyntivarastossa lähtöjä")."!</font><br><br>";
-					$tilausok++;
+					$query = "	SELECT *
+								FROM lahdot
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND liitostunnus = {$toimitustapa['tunnus']}
+								AND varasto = {$laskurow['varasto']}
+								AND aktiivi = ''
+								AND pvm >= CURRENT_DATE
+								AND viimeinen_tilausaika > CURRENT_TIME";
+					$lahdot_result = pupe_query($query);
+
+					if (mysql_num_rows($lahdot_result) == 0) {
+						echo "<font class='error'>".t("VIRHE: Tilauksen toimitustavalla ei ole")." {$varasto['nimitys']} ".t("varastossa lähtöjä")."!</font><br><br>";
+						$tilausok++;
+					}
 				}
 			}
+
+			unset($kukarow_toimipaikka_temp);
 		}
 	}
 
@@ -7896,24 +7900,7 @@ if ($tee == '') {
 					else {
 
 						// Haetaan kaikkien tilausrivien varastopaikat
-						$query = "	SELECT DISTINCT tilausrivi.hyllyalue, tilausrivi.hyllynro
-									FROM tilausrivi
-									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									and tilausrivi.otunnus = '{$laskurow['tunnus']}'
-									AND tilausrivi.tyyppi != 'D'
-									and tilausrivi.hyllyalue != ''
-									and tilausrivi.varattu > 0
-									and tilausrivi.var not in ('P','J','O','S')";
-						$chk_res = pupe_query($query);
-
-						$chk_arr = array();
-
-						while ($chk_row = mysql_fetch_assoc($chk_res)) {
-							// Mihin varastoon
-							$varasto = kuuluukovarastoon($chk_row["hyllyalue"], $chk_row["hyllynro"]);
-
-							$chk_arr[$varasto] = $varasto;
-						}
+						$chk_arr = tilausrivien_varastot($laskurow['otunnus']);
 
 						$i_counter = 0;
 

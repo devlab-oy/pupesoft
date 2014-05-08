@@ -59,7 +59,9 @@
 				$kohdm_valkoodilisa = " and lasku.valkoodi = '$yhtiorow[valkoodi]' ";
 			}
 
-			if ($sisviite != 0) {
+			$maksutositetehty = FALSE;
+
+			if ($sisviite > 0) {
 				echo "<font class='message'> ".t("Maksukandidaatti sisäinen viite & määrä")."</font><br>\n";
 
 				$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
@@ -68,52 +70,69 @@
 							and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 							and yhtio	= '$yritirow[yhtio]'
 							and tila	= 'Q'
+							and alatila = 'K'
 							$kohdm_valkoodilisa";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 0) {
-					echo "<font class='error'>".t("Sopivaa maksua")." $sisviite $kohdm $tilinvaluutta ".t("ei löytynyt")."!</font><br>\n";
-					echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>\n";
-					require "inc/teeselvittely.inc";
+					$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
+								FROM lasku
+								WHERE tunnus = '$sisviite'
+								and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
+								and yhtio 	= '$yritirow[yhtio]'
+								and tila 	= 'Q'
+								and alatila = ''
+								$kohdm_valkoodilisa";
+					$result = pupe_query($query);
 				}
-				else {
+
+				if (mysql_num_rows($result) == 1) {
 					$trow = mysql_fetch_assoc($result);
 
 					echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>\n";
 					require "inc/teemaksutosite.inc";
+
+					$maksutositetehty = TRUE;
 				}
 			}
-			else if ($maksuviite != 0) {
-				echo "<font class='message'> ".t("Maksukandidaatti maksuviite & määrä")."</font><br>\n";
 
-				$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-							FROM lasku
-							WHERE viite = '$maksuviite'
-							and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
-							and yhtio	= '$yritirow[yhtio]'
-							and tila	= 'Q'
-							$kohdm_valkoodilisa";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) == 0) {
-					echo "<font class='error'>".t("Sopivaa maksua")." $maksuviite $kohdm $tilinvaluutta ".t("ei löytynyt")."!</font><br>\n";
-					echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>\n";
-					require "inc/teeselvittely.inc";
-				}
-				else {
-					$trow = mysql_fetch_assoc($result);
-
-					echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>\n";
-					require "inc/teemaksutosite.inc";
-				}
-			}
-			else {
+			if (!$maksutositetehty) {
 				switch ($koodi) {
 					case '702' : // Maksettu jotain tililtä, etsitään tilinolla ja summalla....
 					case '720' : // Maksumääräys maksettu jotain tililtä, etsitään nimellä ja summalla....
 
 						$tehdaanselvittelytosite = TRUE;
 						unset($result);
+
+						if (strlen(trim($maksuviite)) > 0) {
+							echo "<font class='message'> ".t("Maksukandidaatti maksuviite & määrä")."</font><br>\n";
+
+							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+										FROM lasku
+										WHERE viite = '$maksuviite'
+										and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
+										and yhtio 	= '$yritirow[yhtio]'
+										and tila 	= 'Q'
+										and alatila = 'K'
+										$kohdm_valkoodilisa
+										ORDER BY popvm
+										LIMIT 1";
+							$result = pupe_query($query);
+
+							if (mysql_num_rows($result) == 0) {
+								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
+											FROM lasku
+											WHERE viite = '$maksuviite'
+											and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
+											and yhtio 	= '$yritirow[yhtio]'
+											and tila 	= 'Q'
+											and alatila = ''
+											$kohdm_valkoodilisa
+											ORDER BY popvm
+											LIMIT 1";
+								$result = pupe_query($query);
+							}
+						}
 
 						if (strlen(trim($tilino)) > 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti tilino & määrä")."</font><br>\n";
@@ -824,7 +843,7 @@
 			$iban		 = "";
 			$omataso 	 = substr($tietue, 187, 1);
 			$koodiselite = trim(substr($tietue, 52, 35));
-			$maksuviite  = substr($tietue, 159, 20);
+			$maksuviite  = trim(substr($tietue, 159, 20));
 
 			// Tutkitaan seuraava maksu ja sen avulla laitetaan kuittikoodi ja erialla arvot kuntoon
 			$tdq = "	SELECT tiliotedata.*

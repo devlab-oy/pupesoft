@@ -138,8 +138,6 @@ elseif(isset($lajit) and count($lajit) > 0) {
 	while ($row = mysql_fetch_array($tilausrivit_talteen)) {
 	    $rows[] = $row;
 	}
-	// Reversataan että tilausrivit on excelissä samassa järjestyksessä kuin ruudulla
-	$rows = array_reverse($rows);
 
 	$eka_tuote = TRUE;
 

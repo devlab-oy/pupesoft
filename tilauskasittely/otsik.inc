@@ -952,14 +952,21 @@
 			}
 		}
 
+		if(!isset($nimi)) {$nimi = "";}
+		if(!isset($nimitark)) {$nimitark = "";}
+		if(!isset($osoite)) {$osoite = "";}
+		if(!isset($postino)) {$postino = "";}
+		if(!isset($postitp)) {$postitp = "";}
+		if(!isset($liitostunnus)) {$liitostunnus = "";}
+
 		if (!isset($srow)) {
 			$srow = array(
-				"nimi" => "",
-				"nimitark" => "",
-				"osoite" => "",
-				"postino" => "",
-				"postitp" => "",
-				"liitostunnus" => 0,
+				"nimi" => $nimi,
+				"nimitark" => $nimitark,
+				"osoite" => $osoite,
+				"postino" => $postino,
+				"postitp" => $postitp,
+				"liitostunnus" => $liitostunnus
 			);
 		}
 
@@ -972,19 +979,19 @@
 			</tr>";
 		echo "<tr>
 				<td valign='top'>".t("Nimi").": </td>
-				<td><input type='text' name='nimi' size='35' value='$nimi'></td>
+				<td><input type='text' name='nimi' size='35' value='$srow[nimi]'></td>
 			</tr>";
 		echo "<tr>
 				<td></td>
-				<td><input type='text' name='nimitark' size='35' value='$nimitark'></td>
+				<td><input type='text' name='nimitark' size='35' value='$srow[nimitark]'></td>
 			</tr>";
 		echo "<tr>
 				<td valign='top'>".t("Osoite").": </td>
-				<td><input type='text' name='osoite' size='35' value='$osoite'></td>
+				<td><input type='text' name='osoite' size='35' value='$srow[osoite]'></td>
 			</tr>";
 		echo "<tr>
 				<td valign='top'>".t("Postitp").": </td>
-				<td><input type='text' name='postino' size='10' value='$postino'> <input type='text' name='postitp' size='21' value='$postitp'></td>
+				<td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td>
 			</tr>";
 
 		if ($srow["liitostunnus"] > 0) {

@@ -925,7 +925,7 @@
 
 			echo "<input type='hidden' name='alv_velvollisuus' value='{$yhtiorow['vat_numero']}'>";
 		}
-		elseif ($srow['yhtio_toimipaikka'] != $yhtiotoimipaikka) {
+		elseif (isset($srow) and $srow['yhtio_toimipaikka'] != $yhtiotoimipaikka) {
 			$alhqur = "SELECT alv, vienti from asiakas where yhtio='$kukarow[yhtio]' and tunnus = '{$srow['liitostunnus']}'";
 			$alhire = pupe_query($alhqur);
 			$alhiro  = mysql_fetch_assoc($alhire);

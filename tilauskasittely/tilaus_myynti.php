@@ -2777,8 +2777,7 @@ if ($tee == '') {
 		$tilausok++;
 	}
 
-	// Tsekataa onko tilauksen varaston toimipaikalla lähdöt päällä, ja onko tilauksen varastolla lähtöjä
-	// pitäisi katsoa rivien varastot
+	// Tsekataa onko tilausrivien varastojen toimipaikoilla lähdöt päällä, ja onko kyseisen lähdevaraston toimitustavalla lähtöjä
 	if ($yhtiorow['toimipaikkakasittely'] == 'L') {
 
 		$tilausrivien_varastot = tilausrivien_varastot($laskurow['otunnus']);

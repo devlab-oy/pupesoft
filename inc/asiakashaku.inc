@@ -389,7 +389,7 @@ if ($monta == 0) {
 		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";
 	}
 
-	if ($toimipaikka_rajaus != 'X') {
+	if ($yhtiorow['toimipaikkakasittely'] == 'L' and $toimipaikka_rajaus != 'X') {
 
 		if ($toim == "PIKATILAUS") {
 			$nimi = $syotetty_ytunnus;

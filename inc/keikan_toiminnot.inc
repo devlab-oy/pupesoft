@@ -506,22 +506,10 @@
         
 		require ("../tilauskasittely/suuntalavat.inc");
 		
-		$kirjoitin = (int) $_POST['kirjoitin'];
+		$sscc_gen = uusi_sscc_nro();
 
-		if($kirjoitin != 0) {
-
-			$tee = "tulosta_sscc";
-			$sscc_kopio = "joo";
-			$kappalemaara = (int) $_POST['kappalemaara'];
-			// Tulostuksessa tehdään uusi sscc_koodi
-			// Tarvitaan otunnus, kirjoitin, tee=tulosta_sscc, kappalemaara, suuntalavan tunnus, sscc_kopio != '', $suuntalavat_ei_kayttoliittymaa
-			require("../tilauskasittely/tulosta_sscc.inc");
-		}
-		else {
-			$sscc = uusi_sscc_nro();
-		}
 		$params = array(
-			"sscc" => $sscc,
+			"sscc" => $sscc_gen,
 			"usea_keraysvyohyke" => "K",
 			"keraysvyohyke" => $_POST['keraysvyohyke'],
 			"kaytettavyys" => $_POST['kaytettavyys'],
@@ -538,7 +526,7 @@
 			"loppuhyllyalue" => "",
 			        "loppuhyllynro" => "",
 			        "loppuhyllyvali" => "",
-			        "loppuhyllytaso" => "",
+			        "loppuhyllytaso" => ""
 		);
 
 		$suuntalavan_tunnus = lisaa_suuntalava($otunnus, $params);
@@ -553,11 +541,25 @@
 					AND tilausrivi.tyyppi = 'O'";
 
 		$tilausrivi_res = pupe_query($query);
+		
+		$kirjoitin = (int) $_POST['kirjoitin'];
 
+		if($kirjoitin != 0) {
+
+			$tee = "tulosta_sscc";
+			$sscc_kopio = $sscc_gen;
+			$kappalemaara = (int) $_POST['kappalemaara'];
+
+			// Tarvitaan otunnus, kirjoitin, tee=tulosta_sscc, kappalemaara, suuntalavan tunnus, sscc_kopio != '', $suuntalavat_ei_kayttoliittymaa
+			require("../tilauskasittely/tulosta_sscc.inc");
+		}
+		
+		# Siirtovalmiiksi vasta tässä vaiheessa, että saadaan tulostettua oikealla sscc:llä tarra
 		# Suuntalava siirtovalmiiksi - tarvitaan $suuntalavat_ei_kayttoliittymaa != '', $tee = 'siirtovalmis', $suuntalavan_tunnus
+		
 		$tee = 'siirtovalmis';		 
 		require ("../tilauskasittely/suuntalavat.inc");
-
+		
 		echo json_encode(array('suuntalavan_tunnus' => $suuntalavan_tunnus));
 	}
 

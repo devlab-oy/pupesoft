@@ -1,26 +1,23 @@
 <?php
 
 // Kutsutaanko CLI:stä
-$php_cli = FALSE;
-
-if (php_sapi_name() == 'cli') {
-	$php_cli = TRUE;
+if (php_sapi_name() != 'cli') {
+	echo "CLI only!";
+	exit(1);
 }
 
 date_default_timezone_set('Europe/Helsinki');
 
-if ($php_cli) {
-	// otetaan includepath aina rootista
-	$pupe_root_polku = dirname(__FILE__);
+// otetaan includepath aina rootista
+$pupe_root_polku = dirname(__FILE__);
 
-	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
-	error_reporting(E_ALL);
-	ini_set("display_errors", 1);
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
 
-	// otetaan tietokanta connect
-	require("inc/connect.inc");
-	require("inc/functions.inc");
-}
+// otetaan tietokanta connect
+require("inc/connect.inc");
+require("inc/functions.inc");
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();

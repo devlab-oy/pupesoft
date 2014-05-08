@@ -131,6 +131,13 @@
 				$toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
 			}
 
+			if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
+				$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
+			}
+			else {
+				$toimitustavan_lahto_arvo = 0;
+			}
+
 			while ($row = mysql_fetch_array($result)) {
 				// Mihin varastoon
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
@@ -157,13 +164,6 @@
 
 					$fields = "yhtio";
 					$values = "'$kukarow[yhtio]'";
-
-					if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-						$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
-					}
-					else {
-						$toimitustavan_lahto_arvo = 0;
-					}
 
 					// Ei monisteta tunnusta
 					for ($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
@@ -233,13 +233,6 @@
 					}
 				}
 				else {
-					if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-						$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
-					}
-					else {
-						$toimitustavan_lahto_arvo = 0;
-					}
-
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 					$query  ="	UPDATE lasku SET
 								varasto 							= '$varasto',

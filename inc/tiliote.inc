@@ -61,7 +61,7 @@
 
 			$maksutositetehty = FALSE;
 
-			if ($sisviite > 0) {
+			if ($sisviite != 0) {
 				echo "<font class='message'> ".t("Maksukandidaatti sis‰inen viite & m‰‰r‰")."</font><br>\n";
 
 				$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
@@ -104,8 +104,11 @@
 						$tehdaanselvittelytosite = TRUE;
 						unset($result);
 
-						if (strlen(trim($maksuviite)) > 0) {
+						if (strlen(trim($maksuviite)) > 0 and (int) $maksuviite != 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti maksuviite & m‰‰r‰")."</font><br>\n";
+							
+							// etunollat pois
+							$maksuviite = ltrim($maksuviite, 0);
 
 							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 										FROM lasku
@@ -119,6 +122,8 @@
 										LIMIT 1";
 							$result = pupe_query($query);
 
+							echo "$query<br>";
+
 							if (mysql_num_rows($result) == 0) {
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 											FROM lasku
@@ -131,6 +136,8 @@
 											ORDER BY popvm
 											LIMIT 1";
 								$result = pupe_query($query);
+
+								echo "$query<br>";
 							}
 						}
 

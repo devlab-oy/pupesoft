@@ -27514,7 +27514,11 @@ if (!function_exists('sallitut_varastot')) {
 		$tilaustyyppi       = isset($params['tilaustyyppi']) ? $params['tilaustyyppi'] : '';
 
 		if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
-			return $yhtiorow['takuuvarasto'];
+			return array($yhtiorow['takuuvarasto']);
+		}
+
+		if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'R' and $yhtiorow['reklamaation_vastaanottovarasto'] != 0) {
+			return array($yhtiorow['reklamaation_vastaanottovarasto']);
 		}
 
 		if ($varastotyyppi == 'kaikki_varastot') {

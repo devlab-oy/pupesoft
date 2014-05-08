@@ -2220,7 +2220,7 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
 
-		$ulos .= "<option value = 'K' $sel[K]>".t("K‰ytet‰‰n ensisijaisesti k‰ytt‰j‰n toimipaikkaa")."</option>";
+		$ulos .= "<option value = ''>".t("K‰ytet‰‰n ensisijaisesti k‰ytt‰j‰n toimipaikkaa")."</option>";
 		$ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n ensisijaisesti asiakkaan toimipaikkaa")."</option>";
 		$ulos .= "</select></td>";
 
@@ -2771,6 +2771,21 @@
 
 		$ulos .= "<option value = ''>".t("JT-toimituksista ei l‰hetet‰ tilausvahvistusta")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("JT-toimituksista l‰hetet‰‰n tilausvahvistus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if ($fieldname == "tilauksen_myyntieratiedot") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tilauksen myyntier‰ ja tuotetietoja ei n‰ytet‰")."</option>";
+		$ulos .= "<option value = 'o' $sel[o]>".t("Tilauksen myyntier‰ ja tuotetiedot n‰ytet‰‰n tarjouksella / myyntitilauksella")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

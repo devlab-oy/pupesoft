@@ -746,7 +746,7 @@ while ($tietue = fgets($fd)) {
 			// toimitusosoitteen maakoodi
 			$ltoim_maa = substr(trim($tieto), 0, 2);
 			break;
-			
+
 		case 'OSTOTIL.OT_TOIMITUS_PUH' :
 			// toimitusosoitteen puh
 			$ltoim_puh = trim($tieto);
@@ -993,7 +993,7 @@ while ($tietue = fgets($fd)) {
 									ORDER BY muutospvm DESC
 									LIMIT 1";
 						$ressu = pupe_query($query);
-					
+
 						// - jos löytyy niin käytetään sitä
 						if (mysql_num_rows($ressu) == 1) {
 							$ftc = mysql_fetch_assoc($ressu);
@@ -1174,7 +1174,7 @@ while ($tietue = fgets($fd)) {
 					$kukarow['toimipaikka'] = $arow['toimipaikka'];
 					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-					if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'K') {
+					if ($yhtiorow['myyntitilauksen_toimipaikka'] == '') {
 						$kukarow['toimipaikka'] = $kukarow_toimipaikka_tmp;
 						$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 					}
@@ -1467,7 +1467,7 @@ while ($tietue = fgets($fd)) {
 							}
 						}
 					}
-					
+
 					// spessukeissi, hinnastoon E tuotteita ei löydetä
 					$kieltolisa .= " and hinnastoon != 'E'";
 				}

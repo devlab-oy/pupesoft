@@ -1599,11 +1599,14 @@
 
 					foreach($lisa_array as $tilriv) {
 
-						$query = "SELECT uusiotunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+						$query = "	SELECT uusiotunnus, tuoteno
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$tilriv}'";
 						$uusiotunnus_res = pupe_query($query);
 						$uusiotunnus_row = mysql_fetch_assoc($uusiotunnus_res);
 
-						list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilriv, $tilausrivirow, $rtuoteno[$i], $debug);
+						list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilriv, $uusiotunnus_row, $rtuoteno[$i], $debug);
 					}
 				}
 			}

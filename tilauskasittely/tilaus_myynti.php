@@ -81,6 +81,9 @@ for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix
 	if (!isset(${'ale_array'.$alepostfix})) ${'ale_array'.$alepostfix} = "";
 }
 
+print_r($_POST);
+echo '<hr>';
+
 if (!isset($alv)) 					$alv = "";
 if (!isset($alv_array)) 			$alv_array = "";
 if (!isset($asiakasid)) 			$asiakasid = "";

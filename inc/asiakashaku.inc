@@ -34,7 +34,7 @@ if (trim($toimipaikka_rajaus) != '') {
   $tp = $toimipaikka_rajaus;
 }
 
-if ($toimipaikka_rajaus == 'X') {
+if ($toimipaikka_rajaus == 'X' or $yhtiorow['toimipaikkakasittely'] != 'L') {
 	$toimipaikkalisa = '';
 }
 else{
@@ -366,7 +366,7 @@ elseif ($ytunnus != '') {
 							$lajilisa $asiakasrajaus)
 						ORDER BY nimi";
 		}
-
+		echo $query;
 		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 	}

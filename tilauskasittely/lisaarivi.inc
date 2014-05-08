@@ -2209,7 +2209,10 @@
 						$tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
 					}
 
-					if ($siirto_varasto['tuote']['myytavissa'] <= 0 or (isset($tuoteperhe_saldomyytavissa) and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0)) {
+					//Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat, tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto ja lisaarivi vaiheessa saldot on riittäneet.
+					$_normirivi_onko_siirto = (!isset($tuoteperhe_saldomyytavissa) and $siirto_varasto['tuote']['myytavissa'] <= 0);
+					$_perherivi_onko_siirto = (isset($tuoteperhe_saldomyytavissa) and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0);
+					if ($_normirivi_onko_siirto or $_perherivi_onko_siirto) {
 						continue;
 					}
 

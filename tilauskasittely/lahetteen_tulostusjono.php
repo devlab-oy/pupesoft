@@ -736,21 +736,35 @@
 
 		echo "<tr><th>".t("Valitse varasto:")."</th><td><select name='tuvarasto' onchange='submit()'>";
 
-		$query = "	SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
+		$query = "	SELECT lasku.yhtio_nimi,
+					varastopaikat.tunnus,
+					varastopaikat.nimitys,
+					lasku.tulostusalue,
+					count(*) kpl
 					FROM varastopaikat
-					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-					WHERE varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
-					GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
-					ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
+					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio
+						AND ((lasku.tila = '$tila'
+							AND lasku.alatila = '$lalatila') $tila_lalatila_lisa)
+						$tilaustyyppi
+						AND lasku.varasto = varastopaikat.tunnus)
+					WHERE varastopaikat.$logistiikka_yhtiolisa
+						AND varastopaikat.tyyppi != 'P'
+					GROUP BY
+					lasku.yhtio_nimi,
+					varastopaikat.tunnus,
+					varastopaikat.nimitys,
+					lasku.tulostusalue
+					ORDER BY varastopaikat.tyyppi,
+					varastopaikat.nimitys,
+					lasku.tulostusalue,
+					varastopaikat.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
 		$sel = array();
-		$sel[$tuvarasto] = "SELECTED";
-
 		while ($row = mysql_fetch_array($result)){
-
+			$sel[$row["tunnus"]] = ($row["tunnus"] == $tuvarasto) ? "selected" : "";
 			if ($row['tulostusalue'] != '') {
 				echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] $row[tulostusalue] ($row[kpl])";
 			}
@@ -837,10 +851,9 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
-
 		$sel=array();
-		$sel[$tutoimtapa] = "selected";
 		while ($row = mysql_fetch_array($result)){
+			$sel[$row["selite"]] = ($row["selite"] == $tutoimtapa) ? "selected" : "";
 			echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ($row[kpl])</option>";
 		}
 
@@ -1068,7 +1081,7 @@
 				$edennakko = $tilrow["t_tyyppi"];
 
 				$ero="td";
-				if ($tunnus==$tilrow['otunnus']) $ero="th";
+				if (isset($tunnus) and $tunnus==$tilrow['otunnus']) $ero="th";
 
 				echo "<tr class='aktiivi'>";
 
@@ -1149,6 +1162,13 @@
 					if ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') {
 						echo "<$ero valign='top'></$ero>";
 					}
+
+					if(!isset($vva)) $vva = '';
+					if(!isset($kka)) $kka = '';
+					if(!isset($ppa)) $ppa = '';
+					if(!isset($vvl)) $vvl = '';
+					if(!isset($kkl)) $kkl = '';
+					if(!isset($ppl)) $ppl = '';
 
 					echo "<form method='post'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
@@ -1345,7 +1365,7 @@
 					}
 
 					// Varaston oletus keräyslistatulostin (tai tarkalleen listan vikan keräyslistan varaston oletustulostin, mutta yleensä listaaan aina per varasto)
-					if ($kirjoitin != "" and $kukarow['kirjoitin'] == 0 and $kirrow['tunnus'] == $kirjoitin) {
+					if (isset($kirjoitin) and $kirjoitin != "" and $kukarow['kirjoitin'] == 0 and $kirrow['tunnus'] == $kirjoitin) {
 						$sel = "SELECTED";
 					}
 

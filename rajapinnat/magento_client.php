@@ -127,9 +127,8 @@ class MagentoClient {
 			try {
 				// Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
 				$category_tree = $this->getCategories();
-
+				var_dump($category_tree);
 				$kategoria['try_fi'] = utf8_encode($kategoria['try_fi']);
-
 				// Kasotaan löytyykö tuoteryhmä
 				if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
 
@@ -137,7 +136,7 @@ class MagentoClient {
 					$category_data = array(
 						'name'              		=> $kategoria['try_fi'],
 						'is_active'         		=> 1,
-						'position'         			=> 1,
+						#'position'         			=> 1,
 						'default_sort_by'   		=> 'position',
 						'available_sort_by' 		=> 'position',
 						'include_in_menu'   		=> 1
@@ -147,7 +146,8 @@ class MagentoClient {
 						// HUOM: Vain jos "Category access control"-moduli on asennettu
 						$category_data['accesscontrol_show_group'] = 0;
 					}
-
+					//KISSA
+					$parent_id = 53;
 					// Kutsutaan soap rajapintaa
 					$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
 						array($parent_id, $category_data)

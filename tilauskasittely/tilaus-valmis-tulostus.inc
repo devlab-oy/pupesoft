@@ -2,9 +2,16 @@
 	//sis‰‰n halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 	//jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
-	// katotaan ihan aluksi, ett‰ meill‰ on edellytykset tulostukselle...
-	$query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
-	$prires = pupe_query($query);
+	if (isset($laskurow['varasto']) AND $laskurow['varasto'] != 0) {
+		// katotaan ihan aluksi, ett‰ meill‰ on edellytykset tulostukselle...
+		$query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
+		$prires = pupe_query($query);
+	}
+	else {
+		// katotaan ihan aluksi, ett‰ meill‰ on edellytykset tulostukselle...
+		$query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}'";
+		$prires = pupe_query($query);
+	}
 
 	if (mysql_num_rows($prires) != 0) {
 		$prirow = mysql_fetch_assoc($prires);

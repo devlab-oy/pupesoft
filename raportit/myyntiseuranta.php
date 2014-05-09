@@ -880,6 +880,7 @@
 				$varasto_join 		= "";
 				$kantaasiakas_join 	= "";
 				$maksuehto_join 	= "";
+				$toimtuoteno_join	= "";
 
 				// näitä käytetään queryssä
 				$sel_osasto = "";
@@ -1378,12 +1379,12 @@
 
 				if ($naytatoimtuoteno != "") {
 					$group .= ",toim_tuoteno";
-					$select .= "(SELECT tuotteen_toimittajat.toim_tuoteno
-								FROM tuotteen_toimittajat use index (yhtio_tuoteno)
-								WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio
-								AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
-								ORDER BY IF(jarjestys = 0, 999, jarjestys)
-								LIMIT 1) toim_tuoteno, ";
+					$select .= "(	SELECT tuotteen_toimittajat.toim_tuoteno
+									FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+									WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio
+									AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+									ORDER BY IF(jarjestys = 0, 999, jarjestys)
+									LIMIT 1) toim_tuoteno, ";
 					$order  .= "toim_tuoteno,";
 					$gluku++;
 				}
@@ -1401,20 +1402,9 @@
 				}
 
 				if ($toimittaja != "") {
-					$query = "	SELECT group_concat(concat('\'',tuoteno,'\'')) tuotteet
-								FROM tuotteen_toimittajat
-								WHERE yhtio IN ({$yhtio})
-								AND liitostunnus = '{$toimittajaid}'";
-					$result = pupe_query($query);
-					$toimirow = mysql_fetch_assoc($result);
-
-					if ($toimirow["tuotteet"] != '') {
-						$lisa .= " and tilausrivi.tuoteno in ({$toimirow['tuotteet']})";
-					}
-					else {
-						echo "<font class='error'>",t("Toimittajan")," {$toimittaja} ",t("tuotteita ei löytynyt"),"!</font><br><br>";
-						$tee = "";
-					}
+					$toimtuoteno_join = " JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+										   AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+										   AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')";
 				}
 
 				if ($asiakas != "") {
@@ -2156,6 +2146,7 @@
 								{$varasto_join}
 								{$kantaasiakas_join}
 								{$maksuehto_join}
+								{$toimtuoteno_join}
 								{$lisa_parametri}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";
@@ -2867,6 +2858,7 @@
 													WHERE yhtio IN ({$yhtio})
 													AND tunnus IN ({$toimittajat})";
 										$osre = pupe_query($query);
+
 										if (mysql_num_rows($osre) == 1) {
 											$osrow = mysql_fetch_assoc($osre);
 											$row[$ken_nimi] = $osrow['nimi'];

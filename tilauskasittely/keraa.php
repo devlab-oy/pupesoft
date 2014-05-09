@@ -12,11 +12,6 @@
 		exit;
 	}
 
-	if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-		echo "<font class='error'>".t("HUOM: Ohjelma ei ole käytössä kun siirtolistoja (Siirtolistan_tulostustapa) tulostetaan keräyserien kautta")."!</font>";
-		exit;
-	}
-
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
@@ -2089,6 +2084,11 @@
 			echo "</td>";
 			echo "</tr>";
 
+			if(!isset($tuoteno)) $tuoteno = '';
+			if(!isset($pp)) $pp = '';
+			if(!isset($kk)) $kk = '';
+			if(!isset($vv)) $vv = '';
+
 			echo "<tr>";
 			echo "<th>".t('Tuotenumero')."</th>";
 			echo "<td>";
@@ -2233,7 +2233,7 @@
 				$tilausrivi_join_ehto = "	AND tilausrivi.tuoteno = '{$tuoteno}'";
 			}
 			$valmistuslinja_where = "";
-			if ($valmistuslinja != '') {
+			if (isset($valmistuslinja) and $valmistuslinja != '') {
 				$valmistuslinja_where = "	AND lasku.kohde = '{$valmistuslinja}'";
 			}
 
@@ -2245,6 +2245,11 @@
 				if ($valid) {
 					$kerayspaiva_where = "	AND lasku.kerayspvm = '{$paiva}'";
 				}
+			}
+
+			$siirtolista_where = '';
+			if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+				$siirtolista_where = " AND lasku.toimitustavan_lahto = 0 ";
 			}
 
 			if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
@@ -2312,6 +2317,7 @@
 							WHERE lasku.{$logistiikka_yhtiolisa}
 							{$valmistuslinja_where}
 							{$kerayspaiva_where}
+							{$siirtolista_where}
 							and lasku.tila					in ({$tila})
 							and lasku.alatila				= '{$alatilareklamaatio}'
 							and tilausrivi.tyyppi			in ({$tyyppi})

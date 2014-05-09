@@ -413,7 +413,7 @@ if ($tee == 'inventoidaan') {
 		$row = mysql_fetch_assoc($result);
 
 		$inven_laji = $row['selite'];
-		$lisaselite = t("K‰sip‰‰te").": " . $row['selitetark'];
+		$lisaselite = t("K‰sip‰‰te").": " . $row['selitetark_4'];
 		$mobiili = 'YES';
 
 		require('../inventoi.php');

@@ -1591,6 +1591,7 @@
 
 		echo "<table>";
 
+		$lisaselite = !isset($lisaselite) ? '' : $lisaselite;
 		$tresult = t_avainsana("INVEN_LAJI");
 
 		if (mysql_num_rows($tresult) > 0) {
@@ -1600,7 +1601,7 @@
 
 			while ($itrow = mysql_fetch_assoc($tresult)) {
 
-				if (is_null($inven_laji) AND is_null($sel)) {
+				if (!isset($inven_laji) AND !isset($sel)) {
 					$sel = 'selected';
 					$lisaselite = $itrow["selitetark_4"];
 				}

@@ -1422,11 +1422,6 @@
 			$jarjx = " ORDER BY laadittu";
 		}
 
-		$siirtolista_where = '';
-		if ($yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-			$siirtolista_where = " AND lasku.toimitustavan_lahto = 0 ";
-		}
-
 		// Haetaan sopivia tilauksia
 		$query = "	SELECT
 					lasku.yhtio yhtio,
@@ -1472,7 +1467,6 @@
 					$haku
 					$tilaustyyppi
 					$lisawhere
-					$siirtolista_where
 					and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa
 					$jarjx";

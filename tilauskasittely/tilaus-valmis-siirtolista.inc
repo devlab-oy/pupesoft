@@ -142,6 +142,9 @@
 				// Mihin varastoon
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
+				$varasto_row = hae_varasto($varasto);
+				$varasto_toimipaikka = $varasto_row['toimipaikka'];
+
 				// Mikä tulostusalue
 				$tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 
@@ -175,6 +178,9 @@
 						switch ($fieldname) {
 							case 'vanhatunnus':
 								$values .= ", '$alkuplaskutunnus'";
+								break;
+							case 'yhtio_toimipaikka':
+								$values .= ", '$varasto_toimipaikka'";
 								break;
 							case 'varasto':
 								$values .= ", '$varasto'";
@@ -238,6 +244,7 @@
 								varasto 							= '$varasto',
 								tulostusalue						= '$tulostusalue',
 								toimitustavan_lahto					= '$toimitustavan_lahto_arvo',
+								yhtio_toimipaikka					= '$varasto_toimipaikka',
 								ultilno 							= '$laskurow[ultilno]',
 								maa_maara							= '$laskurow[maa_maara]',
 								maa_lahetys							= '$laskurow[maa_lahetys]',

@@ -423,7 +423,9 @@
 
 		//$yhtio_toimipaikka muuttuja asetetaan ainoastaan tilauksesta_varastosiirto funkkarissa.
 		if (!isset($yhtio_toimipaikka)) {
-			$yhtio_toimipaikka = $kukarow['toimipaikka'];
+			//Defaultiksi lähdevaraston toimipaikka
+			$lahdevarasto = hae_varasto($varasto);
+			$yhtio_toimipaikka = $lahdevarasto['toimipaikka'];
 		}
 
 		$query .= "	lasku SET
@@ -434,7 +436,7 @@
 					yhtio_maa			= '$yhtiorow[maa]',
 					yhtio_ovttunnus		= '$yhtiorow[ovttunnus]',
 					yhtio_kotipaikka	= '$yhtiorow[kotipaikka]',
-					yhtio_toimipaikka	= '$yhtio_toimipaikka',
+					yhtio_toimipaikka	= '{$yhtio_toimipaikka}',
 					clearing			= '$clearing',
 					maa					= '$vtrow[maa]',
 					nimi 				= '$vtrow[nimitys]',

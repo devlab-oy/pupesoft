@@ -2220,7 +2220,7 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
 
-		$ulos .= "<option value = 'K' $sel[K]>".t("K‰ytet‰‰n ensisijaisesti k‰ytt‰j‰n toimipaikkaa")."</option>";
+		$ulos .= "<option value = ''>".t("K‰ytet‰‰n ensisijaisesti k‰ytt‰j‰n toimipaikkaa")."</option>";
 		$ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n ensisijaisesti asiakkaan toimipaikkaa")."</option>";
 		$ulos .= "</select></td>";
 

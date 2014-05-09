@@ -2994,7 +2994,7 @@ if ($tee == '') {
 			$_varasto = hae_varasto($laskurow['varasto']);
 			$params = array(
 				'asiakas_tunnus' => $laskurow['liitostunnus'],
-				'lasku_toimipaikka' => $laskurow['yhtiotoimipaikka'],
+				'lasku_toimipaikka' => $laskurow['yhtio_toimipaikka'],
 				'varasto_toimipaikka' => $_varasto['toimipaikka']
 			);
 			$toimitustavat = hae_toimitustavat($params);
@@ -4257,7 +4257,7 @@ if ($tee == '') {
 			$varasto = $laskurow["varasto"];
 
 			// Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
-			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";
 			}
 			else {

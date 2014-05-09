@@ -27517,6 +27517,10 @@ if (!function_exists('sallitut_varastot')) {
 			return array($yhtiorow['takuuvarasto']);
 		}
 
+		if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'R' and $yhtiorow['reklamaation_vastaanottovarasto'] != 0) {
+			return array($yhtiorow['reklamaation_vastaanottovarasto']);
+		}
+
 		if ($varastotyyppi == 'kaikki_varastot') {
 			$varastotyyppi_lisa = "";
 		}

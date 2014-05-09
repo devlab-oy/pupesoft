@@ -27225,7 +27225,6 @@ if (!function_exists('hae_tuotteen_tuotepaikat')) {
 }
 
 if (!function_exists('hae_varasto')) {
-
 	function hae_varasto($tunnus) {
 		global $kukarow, $yhtiorow;
 
@@ -27241,7 +27240,6 @@ if (!function_exists('hae_varasto')) {
 
 		return mysql_fetch_assoc($result);
 	}
-
 }
 
 if (!function_exists("onkotapahtumajariveja")) {

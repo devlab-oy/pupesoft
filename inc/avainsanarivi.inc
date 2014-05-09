@@ -25,6 +25,7 @@
 	if (mysql_field_name($result, $i) == "selitetark_4" and
 		($avain_sel['ASIAKASRYHMA'] == "SELECTED" or
 		$avain_sel['HENKILO_OSASTO'] == "SELECTED" or
+		$avain_sel['INVEN_LAJI'] == "SELECTED" or
 		$avain_sel['MYSQLALIAS'] == "SELECTED" or
 		$avain_sel['TRY'] == "SELECTED" or
 		$avain_sel["SAHKTILTUN"] == "SELECTED" or
@@ -705,6 +706,25 @@
 
 		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
 
+		$jatko = 0;
+	}
+	
+	if ($avain_sel['INVEN_LAJI'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
+
+		$sel1 = '';
+		$sel2 = '';
+
+		if ($trow[$i] == '') {
+			$sel1 = 'SELECTED';
+		}
+		elseif ($trow[$i] == 'X') {
+			$sel2 = 'SELECTED';
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' $sel1>".t("Ei")."</option>";
+		$ulos .= "<option value='X' $sel2>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 

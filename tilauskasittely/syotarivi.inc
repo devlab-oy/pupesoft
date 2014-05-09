@@ -89,8 +89,8 @@
 		}
 
 		if ($ulos == '') {
-			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
-				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
+			if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno)."</td>";
 			}
 			else {
 				echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
@@ -330,9 +330,9 @@
 		}
 
 		if ($ulos == '') {
-			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
+			if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 				// Laitetaan $tila "submit" parametriin, joten jos siellä on jotain ei submitata (valmistuksessa)
-				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, "", $tila)."</td>";
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno, $tila)."</td>";
 			}
 			else {
 				echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
@@ -418,7 +418,7 @@
 			echo "</td>";
 			echo "<input type='hidden' name='alv' value='$alv'>";
 		}
-		else { 
+		else {
 		 	echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 
@@ -648,9 +648,9 @@
 		}
 
 		if ($ulos == '') {
-			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
+			if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 				// Laitetaan $tila "submit" parametriin, joten jos siellä on jotain ei submitata (valmistuksessa)
-				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, "", $tila)."</td>";
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno, $tila)."</td>";
 			}
 			else {
 				echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";

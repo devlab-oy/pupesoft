@@ -736,8 +736,15 @@
 				$valid = FormValidator::validateContent($kumulatiivinen_alkupaiva, 'paiva');
 
 				if (strtotime($kumulatiivinen_loppupaiva) < strtotime($kumulatiivinen_alkupaiva)) {
+					echo '<font class="error">'.t('Kumulatiivinen alkup‰iv‰m‰‰r‰ on suurempi kuin loppup‰iv‰m‰‰r‰').'!<br></font>';
 					$valid = false;
 				}
+
+				if (strtotime($kumulatiivinen_alkupaiva) > strtotime("$vva-$kka-$ppa")) {
+					echo '<font class="error">'.t('Kumulatiivinen alkup‰iv‰m‰‰r‰ on suurempi kuin raportin alkup‰iv‰m‰‰r‰').'!<br></font>';
+					$valid = false;
+				}
+
 				if (!$valid) {
 					echo '<font class="error">'.t('Kumulatiivinenp‰iv‰ ei ole validi').'</font>';
 					$tee = "";
@@ -873,6 +880,7 @@
 				$varasto_join 		= "";
 				$kantaasiakas_join 	= "";
 				$maksuehto_join 	= "";
+				$toimtuoteno_join	= "";
 
 				// n‰it‰ k‰ytet‰‰n queryss‰
 				$sel_osasto = "";
@@ -1371,12 +1379,12 @@
 
 				if ($naytatoimtuoteno != "") {
 					$group .= ",toim_tuoteno";
-					$select .= "(SELECT tuotteen_toimittajat.toim_tuoteno
-								FROM tuotteen_toimittajat use index (yhtio_tuoteno)
-								WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio
-								AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
-								ORDER BY IF(jarjestys = 0, 999, jarjestys)
-								LIMIT 1) toim_tuoteno, ";
+					$select .= "(	SELECT tuotteen_toimittajat.toim_tuoteno
+									FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+									WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio
+									AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+									ORDER BY IF(jarjestys = 0, 999, jarjestys)
+									LIMIT 1) toim_tuoteno, ";
 					$order  .= "toim_tuoteno,";
 					$gluku++;
 				}
@@ -1394,20 +1402,9 @@
 				}
 
 				if ($toimittaja != "") {
-					$query = "	SELECT group_concat(concat('\'',tuoteno,'\'')) tuotteet
-								FROM tuotteen_toimittajat
-								WHERE yhtio IN ({$yhtio})
-								AND liitostunnus = '{$toimittajaid}'";
-					$result = pupe_query($query);
-					$toimirow = mysql_fetch_assoc($result);
-
-					if ($toimirow["tuotteet"] != '') {
-						$lisa .= " and tilausrivi.tuoteno in ({$toimirow['tuotteet']})";
-					}
-					else {
-						echo "<font class='error'>",t("Toimittajan")," {$toimittaja} ",t("tuotteita ei lˆytynyt"),"!</font><br><br>";
-						$tee = "";
-					}
+					$toimtuoteno_join = " JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+										   AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+										   AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')";
 				}
 
 				if ($asiakas != "") {
@@ -1470,7 +1467,7 @@
 				if (isset($verkkokaupat) and $verkkokaupat != '') {
 					$lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
 				}
-
+				# Myyntied lukujen vuosi
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
 
@@ -2149,6 +2146,7 @@
 								{$varasto_join}
 								{$kantaasiakas_join}
 								{$maksuehto_join}
+								{$toimtuoteno_join}
 								{$lisa_parametri}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";
@@ -2159,18 +2157,15 @@
 					$lalku_ed	= date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva-1));
 					$lloppu_ed	= date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl-1));
 
-					if (!empty($kumulatiivinen_valittu) and strtotime($kumulatiivinen_alkupaiva) < strtotime("$vva-$kka-$ppa")) {
-						//Verrataan kumpi k‰yttˆliittym‰st‰ tulevista ajoista on aikasempi ja k‰ytet‰‰n sit‰.
-						$vva = $kumulatiivinen_vv;
-						$kka = $kumulatiivinen_kk;
-						$ppa = $kumulatiivinen_pp;
-
-						$lalku = $kumulatiivinen_alkupaiva;
-					}
-
 					if ($ajotapa == 'tilausjaauki') {
-						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-									and ((lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'  and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or (lasku.tapvm >= '{$vva}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')";
+
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= " and ((lasku.luontiaika >= '{$kumulatiivinen_vv}-{$kumulatiivinen_kk}-{$kumulatiivinen_pp} 00:00:00'  and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or (lasku.tapvm >= '{$kumulatiivinen_vv}-{$kumulatiivinen_kk}-{$kumulatiivinen_pp}' and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						}
+						else {
+							$query .= " and ((lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'  and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or (lasku.tapvm >= '{$vva}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						}
 
 						if ($piiloed == "") {
 							$query .= " or (lasku.tapvm >= '{$vvaa}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvll}-{$kkl}-{$ppl}') ";
@@ -2179,8 +2174,14 @@
 						$query .= " ) ";
 					}
 					elseif ($ajotapa == 'tilausjaaukiluonti') {
-						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-									and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')";
+
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= "	and ((lasku.luontiaika >= '{$kumulatiivinen_alkupaiva} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
+						else {
+							$query .= "	and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
 
 						if ($piiloed == "") {
 							$query .= " or (lasku.luontiaika >= '{$lalku_ed} 00:00:00' and lasku.luontiaika <= '{$lloppu_ed} 23:59:59') ";
@@ -2189,8 +2190,14 @@
 						$query .= " ) ";
 					}
 					elseif ($ajotapa == 'tilausauki') {
-						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-									and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X') ";
+
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= "	and ((lasku.luontiaika >= '{$kumulatiivinen_alkupaiva} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
+						else {
+							$query .= "	and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
 
 						if ($piiloed == "") {
 							$query .= " or (lasku.luontiaika >= '{$lalku_ed} 00:00:00' and lasku.luontiaika <= '{$lloppu_ed} 23:59:59') ";
@@ -2199,8 +2206,14 @@
 						$query .= " ) ";
 					}
 					elseif ($ajotapa == 'ennakot') {
-						$query .= "	and lasku.alatila = 'A'
-									and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						$query .= "	and lasku.alatila = 'A' ";
+
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= "	and ((lasku.luontiaika >= '{$kumulatiivinen_alkupaiva} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
+						else {
+							$query .= "	and ((lasku.luontiaika >= '{$lalku} 00:00:00'  and lasku.luontiaika <= '{$lloppu} 23:59:59') ";
+						}
 
 						if ($piiloed == "") {
 							$query .= " or (lasku.luontiaika >= '{$lalku_ed} 00:00:00' and lasku.luontiaika <= '{$lloppu_ed} 23:59:59') ";
@@ -2209,8 +2222,14 @@
 						$query .= " ) ";
 					}
 					else {
-						$query .= "	and lasku.alatila='X'
-									and ((lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'  and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						$query .= "	and lasku.alatila='X' ";
+
+						if (!empty($kumulatiivinen_valittu)) {
+							$query .= "and ((lasku.tapvm >= '{$kumulatiivinen_vv}-{$kumulatiivinen_kk}-{$kumulatiivinen_pp}'  and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						}
+						else {
+							$query .= "	and ((lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'  and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+						}
 
 						if ($piiloed == "") {
 							$query .= " or (lasku.tapvm >= '{$vvaa}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvll}-{$kkl}-{$ppl}') ";
@@ -2839,6 +2858,7 @@
 													WHERE yhtio IN ({$yhtio})
 													AND tunnus IN ({$toimittajat})";
 										$osre = pupe_query($query);
+
 										if (mysql_num_rows($osre) == 1) {
 											$osrow = mysql_fetch_assoc($osre);
 											$row[$ken_nimi] = $osrow['nimi'];

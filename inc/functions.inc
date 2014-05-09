@@ -27514,7 +27514,7 @@ if (!function_exists('sallitut_varastot')) {
 		$tilaustyyppi       = isset($params['tilaustyyppi']) ? $params['tilaustyyppi'] : '';
 
 		if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
-			return $yhtiorow['takuuvarasto'];
+			return array($yhtiorow['takuuvarasto']);
 		}
 
 		if ($varastotyyppi == 'kaikki_varastot') {
@@ -27590,9 +27590,12 @@ if (!function_exists('sallitut_varastot')) {
 			return array($kukarow['oletus_varasto']);
 		}
 
-		// Ei löytynyt yhtään varastoa, otetaan varastot käyttäjän tiedoista
-		if (trim($kukarow['varasto']) != '') {
+		// Ei löytynyt vielä yhtään varastoa, otetaan varastot käyttäjän tiedoista
+		if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
 			return explode(",", $kukarow["varasto"]);
+		}
+		elseif (trim($kukarow['varasto']) != "") {
+			return array($kukarow['varasto']);
 		}
 
 		# Ilman rajausta saa myydä kaikista normaalivarastoista
@@ -27660,8 +27663,8 @@ if (!function_exists('valitse_oletusvarasto')) {
 		}
 
 		// Jos käyttäjätiedoissa on sallittu varastoja
-		if ($kukarow['varasto'] != "" and strpos($kukarow['varsto'], ',') !== false) {
-			$kayttajan_varastot = implode(',', $kukarow['varasto']);
+		if ($kukarow['varasto'] != "" and strpos($kukarow['varasto'], ',') !== false) {
+			$kayttajan_varastot = explode(',', $kukarow['varasto']);
 		}
 		else {
 			$kayttajan_varastot = array($kukarow['varasto']);

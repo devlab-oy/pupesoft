@@ -2,6 +2,14 @@
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
 		require ("inc/parametrit.inc");
+		
+		if (!empty($_POST['ajax_toiminto']) and $_POST['ajax_toiminto'] == 'hae_inventointiselite') {
+
+			$_selite = mysql_real_escape_string(utf8_decode($_POST['selite']));
+
+			echo t_avainsana("INVEN_LAJI", '', " and avainsana.selite = '{$_selite}'", '', '', "selitetark_4");
+			exit;
+		}
 	}
 
 	if (!isset($fileesta))			$fileesta = "";
@@ -9,6 +17,7 @@
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
 	if (!isset($laadittuaika))		$laadittuaika = "";
+	if (!isset($enarifocus))		$enarifocus = "";
 
 	$validi_kasinsyotetty_inventointipaivamaara = 0;
 
@@ -39,6 +48,40 @@
 
 	// Enaboidaan ajax kikkare
 	enable_ajax();
+
+	if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
+
+		echo "	<script type='text/javascript'>
+					$(function() {
+						$('#inven_laji').on('change', function() {
+							var select_value = $(this).val();
+							
+							$.ajax({
+								async: false,
+								type: 'POST',
+								data: {
+									selite: select_value,
+									ajax_toiminto: 'hae_inventointiselite',
+									no_head: 'yes',
+									ohje: 'off'
+								},
+								url: '{$_SERVER['SCRIPT_NAME']}'
+							}).done(function(data) {
+								$('#lisaselite').val(data);
+							});
+						});
+					});
+				</script>";
+
+		if ($enarifocus != '') {
+			echo "	<script type='text/javascript'>
+						$(function() {
+							$('#ean_koodi').focus();
+						});
+					</script>";
+		}
+
+	}
 
 	if ($mobiili != "YES") {
 		echo "<font class='head'>".t("Inventointi")."</font><hr>";
@@ -1597,7 +1640,7 @@
 		if (mysql_num_rows($tresult) > 0) {
 			echo "<tr><th>".t("Inventoinnin laji").":</th>";
 
-			echo "<td><select name='inven_laji'>";
+			echo "<td><select id='inven_laji' name='inven_laji'>";
 
 			while ($itrow = mysql_fetch_assoc($tresult)) {
 
@@ -1620,7 +1663,7 @@
 		}
 
 		echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
-		echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
+		echo "<td><input type='text' size='50' id='lisaselite' name='lisaselite' value='$lisaselite'></td></tr>";
 		if (isset($paivamaaran_kasisyotto)) {
 			echo "<tr><th>".t("Syötä inventointipäivämäärä (pp-kk-vvvv)").":</th>";
 			echo "<td><input type='text' size='2' maxlength='2' name='inventointipvm_pp' value='$inventointipvm_pp'>";
@@ -1628,8 +1671,10 @@
 			echo "<input type='text' size='4' maxlength='4' name='inventointipvm_vv' value='$inventointipvm_vv'></td></tr>";
 		}
 		echo "</table><br><br>";
-
-
+		if ($ean_koodi != '') {
+			echo "<input type='hidden' name='enarifocus' value='1'>";	
+		}
+		
 		if (mysql_num_rows($saldoresult) == $rivimaara) {
 			echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
 			//echo "<input type='submit' name='prev' value='".t("Inventoi/Edellinen sivu")."'> ";
@@ -1723,7 +1768,7 @@
 
 		echo "</td></tr>";
 
-		echo "<tr><th>".t("EAN-koodi:")."</th><td><input type='text' size='15' name='ean_koodi'></td></tr>";
+		echo "<tr><th>".t("EAN-koodi:")."</th><td><input type='text' size='15' id='ean_koodi' name='ean_koodi'></td></tr>";
 
 		echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='6' name='lista'></td><td class='back'><input type='Submit' value='".t("Inventoi")."'></td></tr>";
 

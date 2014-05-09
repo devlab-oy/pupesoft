@@ -218,7 +218,7 @@
 					}
 
 					if ($inven_laji != "") {
-						$query = "	SELECT selitetark_2
+						$query = "	SELECT selitetark_2, selitetark_4
 									FROM avainsana
 									WHERE yhtio = '$kukarow[yhtio]'
 									and laji    = 'INVEN_LAJI'
@@ -233,6 +233,7 @@
 						else {
 							$avain_row = mysql_fetch_assoc($avain_res);
 							$inven_laji_tilino = $avain_row["selitetark_2"];
+							if ($lisaselite == '') $lisaselite = $avain_row["selitetark_4"];
 						}
 					}
 
@@ -1597,9 +1598,21 @@
 
 			echo "<td><select name='inven_laji'>";
 
-			while($itrow = mysql_fetch_assoc($tresult)) {
-				$sel = "";
-				if ($itrow["selite"] == $inven_laji) $sel = 'selected';
+			while ($itrow = mysql_fetch_assoc($tresult)) {
+
+				if (is_null($inven_laji) AND is_null($sel)) {
+					$sel = 'selected';
+					$lisaselite = $itrow["selitetark_4"];
+				}
+				else {
+					$sel = "";
+				}
+
+				if ($itrow["selite"] == $inven_laji) {
+					$sel = 'selected';
+					$lisaselite = $itrow["selitetark_4"];
+				}
+
 				echo "<option value='$itrow[selite]' $sel>$itrow[selite]</option>";
 			}
 			echo "</select></td></tr>";

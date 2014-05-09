@@ -6,24 +6,19 @@
 		// katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
 		$query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
 		$prires = pupe_query($query);
-	}
-	else {
-		// katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
-		$query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}'";
-		$prires = pupe_query($query);
-	}
 
-	if (mysql_num_rows($prires) != 0) {
-		$prirow = mysql_fetch_assoc($prires);
+		if (mysql_num_rows($prires) != 0) {
+			$prirow = mysql_fetch_assoc($prires);
 
-		$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
-		$kirres = pupe_query($query);
+			$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
+			$kirres = pupe_query($query);
 
-		if (mysql_num_rows($kirres) == 0)
-			die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei löydy. Lähetteitä ei voida tulostaa...</font>");
-	}
-	else {
-		die ("<font class='error'>Yhtään varastoa ei ole määritelty. Lähetteitä ei voida tulostaa...</font>");
+			if (mysql_num_rows($kirres) == 0)
+				die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei löydy. Lähetteitä ei voida tulostaa...</font>");
+		}
+		else {
+			die ("<font class='error'>Yhtään varastoa ei ole määritelty. Lähetteitä ei voida tulostaa...</font>");
+		}
 	}
 
 	// tarkistetan tulostuksessa syntyviä virheitä

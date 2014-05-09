@@ -2,21 +2,23 @@
 	//sis‰‰n halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 	//jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
-	// katotaan ihan aluksi, ett‰ meill‰ on edellytykset tulostukselle...
-	$query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
-	$prires = pupe_query($query);
+	if (isset($laskurow['varasto']) AND $laskurow['varasto'] != 0) {
+		// katotaan ihan aluksi, ett‰ meill‰ on edellytykset tulostukselle...
+		$query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
+		$prires = pupe_query($query);
 
-	if (mysql_num_rows($prires) != 0) {
-		$prirow = mysql_fetch_assoc($prires);
+		if (mysql_num_rows($prires) != 0) {
+			$prirow = mysql_fetch_assoc($prires);
 
-		$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
-		$kirres = pupe_query($query);
+			$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
+			$kirres = pupe_query($query);
 
-		if (mysql_num_rows($kirres) == 0)
-			die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei lˆydy. L‰hetteit‰ ei voida tulostaa...</font>");
-	}
-	else {
-		die ("<font class='error'>Yht‰‰n varastoa ei ole m‰‰ritelty. L‰hetteit‰ ei voida tulostaa...</font>");
+			if (mysql_num_rows($kirres) == 0)
+				die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei lˆydy. L‰hetteit‰ ei voida tulostaa...</font>");
+		}
+		else {
+			die ("<font class='error'>Yht‰‰n varastoa ei ole m‰‰ritelty. L‰hetteit‰ ei voida tulostaa...</font>");
+		}
 	}
 
 	// tarkistetan tulostuksessa syntyvi‰ virheit‰

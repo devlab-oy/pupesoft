@@ -352,7 +352,7 @@ if (!function_exists('alku')) {
 		$pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli), 	$page_lasku[$sivu], $pieni);
 		$pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm), 		$page_lasku[$sivu], $norm);
 
-		$pdf_lasku->draw_text(310, 595, t("Mahdolliset muistutukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
+		$pdf_lasku->draw_text(310, 595, t("Mahdolliset huomautukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
 
 
 		// Kommentit

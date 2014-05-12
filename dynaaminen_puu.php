@@ -6,19 +6,20 @@
 
 	require('inc/parametrit.inc');
 
+	$saamuokata = false;
+	$saamuokataliitoksia = false;
+
+	if ($oikeurow['paivitys'] == '1') {
+		$saamuokata = true;
+	}
+
+	if (tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
+		$saamuokataliitoksia = true;
+	}
+
 	if (!isset($mista)) $mista = $laji;
 
 	if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
-		// tarkistetaan oikeuksia ja katsotaan etta muokataanko puuta vai puuliitoksia
-		$saamuokata = false;
-		$saamuokataliitosta = false;
-
-		if (($tee == 'valitsesegmentti' or $tee == 'addtotree' or $tee == 'removefromtree') and tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
-			$saamuokataliitosta = true;
-		}
-		elseif ($oikeurow['paivitys'] == '1') {
-			$saamuokata = true;
-		}
 
 		if ($tee == 'hae_laji') {
 
@@ -109,7 +110,9 @@
 
 			// muokkaustoiminnot
 			if (isset($tee) and $tee != '') {
-				if ($saamuokata) {
+
+				if ($saamuokata and !in_array($tee, array('addtotree','removefromtree'))) {
+
 					// Siirretään haaraa järjestyksessä ylös tai alas
 					if ($tee == 'ylos' or $tee == 'alas') {
 						$src['lft'] = $noderow['lft'];
@@ -193,11 +196,12 @@
 							paivitapuunsyvyys($toim);
 						}
 					}
+
 					// haetaan uudelleen paivittyneet
 					$noderow = getnoderow($toim, $nodeid);
-
 				}
-				elseif ($saamuokataliitosta) {
+				elseif ($saamuokataliitoksia) {
+
 					if ($tee == 'addtotree') {
 						TuotteenAlkiot($toim, $liitos, $nodeid, $kieli, $mista);
 					}
@@ -273,7 +277,8 @@
 					echo "<a href='#' class='editbtn' id='poista'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/> ".t('Poista taso')."</a>";
 				}
 			}
-			elseif ($saamuokataliitosta) {
+
+			if ($saamuokataliitoksia) {
 				// tarkistetaan onko jo liitetty
 				$qu = "SELECT *
 						FROM puun_alkio
@@ -283,12 +288,14 @@
 						AND puun_tunnus = {$noderow["tunnus"]}";
 				$re = pupe_query($qu);
 
+				echo "<br /><br />";
+
 				if (mysql_num_rows($re) > 0) {
 					$row = mysql_fetch_assoc($re);
-					echo "<a class='editnode' id='removefromtree'>".t("Poista liitos")." ({$liitos} - {$noderow["tunnus"]})</a>";
+					echo "<a class='editbtn' id='removefromtree'>".t("Poista liitos")." ({$liitos} - {$noderow["tunnus"]})</a>";
 				}
 				else {
-					echo "<a class='editnode' id='addtotree'>".t("Tee liitos")." ({$liitos} - {$noderow["tunnus"]})</a>";
+					echo "<a class='editbtn' id='addtotree'>".t("Tee liitos")." ({$liitos} - {$noderow["tunnus"]})</a>";
 				}
 			}
 			echo "</div>";
@@ -339,10 +346,18 @@
 				  params['kieli'] = '{$kieli}';
 				 ";
 
-			if ($saamuokata) {
-				echo "params['nodeid'] = {$nodeid};
-					var nimi = '{$noderow["nimi"]}';
-					var koodi = '{$noderow["koodi"]}';";
+			if ($saamuokata or $saamuokataliitoksia) {
+
+				if (!empty($nodeid)) {
+					echo "params['nodeid'] = {$nodeid};";
+				}
+				elseif (!empty($noderow['tunnus'])) {
+					echo "params['nodeid']	= '{$noderow["tunnus"]}';";
+				}
+
+				echo "var nimi = '{$noderow["nimi"]}';";
+				echo "var koodi = '{$noderow["koodi"]}';";
+				echo "params['liitos']	= '{$liitos}';";
 				?>
 
 				jQuery(".editbtn").click(function(){
@@ -481,15 +496,7 @@
 				});
 				<?php
 			}
-			elseif ($saamuokataliitosta) {
-				echo "params['liitos']	= '{$liitos}';
-					  params['nodeid']	= '{$noderow["tunnus"]}';";
-				?>
-				jQuery(".editnode").click(function() {
-					params["tee"] = this.id;
-					editNode(params);
-				});
-			<?php } ?>
+			?>
 			</script>
 			<?php
 			// suljetaan nodelaatikko
@@ -594,17 +601,6 @@
 
 	echo "<font class='head'>{$otsikko}</font><hr /><br />";
 	echo "<input type='hidden' id='mista' value='{$mista}' />";
-
-	$saamuokata = false;
-	$saamuokataliitoksia = false;
-
-	if ($oikeurow['paivitys'] == '1') {
-		$saamuokata = true;
-	}
-
-	if (tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
-		$saamuokataliitoksia = true;
-	}
 
 	// luodaan uusi root node
 	if (isset($tee) and isset($toim)) {

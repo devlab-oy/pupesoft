@@ -13,13 +13,13 @@
 		exit;
 	}
 
-	if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-		echo "<font class='error'>".t("HUOM: Ohjelma ei ole käytössä kun siirtolistoja (Siirtolistan_tulostustapa) tulostetaan keräyserien kautta")."!</font>";
-		exit;
-	}
-
 	if (!isset($tuvarasto)) $tuvarasto = '';
 	if (!isset($tutyyppi)) $tutyyppi = '';
+
+	if (!isset($jarj)) $jarj = '';
+	if (!isset($etsi)) $etsi = '';
+	if (!isset($tumaa)) $tumaa = '';
+	if (!isset($tee2)) $tee2 = '';
 
 	$valmistuslinjat = hae_valmistuslinjat();
 
@@ -45,7 +45,7 @@
 		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
-		if ($lasku_yhtio != '') {
+		if (isset($lasku_yhtio) and $lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
 		}
@@ -736,21 +736,35 @@
 
 		echo "<tr><th>".t("Valitse varasto:")."</th><td><select name='tuvarasto' onchange='submit()'>";
 
-		$query = "	SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
+		$query = "	SELECT lasku.yhtio_nimi,
+					varastopaikat.tunnus,
+					varastopaikat.nimitys,
+					lasku.tulostusalue,
+					count(*) kpl
 					FROM varastopaikat
-					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-					WHERE varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
-					GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
-					ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
+					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio
+						AND ((lasku.tila = '$tila'
+							AND lasku.alatila = '$lalatila') $tila_lalatila_lisa)
+						$tilaustyyppi
+						AND lasku.varasto = varastopaikat.tunnus)
+					WHERE varastopaikat.$logistiikka_yhtiolisa
+						AND varastopaikat.tyyppi != 'P'
+					GROUP BY
+					lasku.yhtio_nimi,
+					varastopaikat.tunnus,
+					varastopaikat.nimitys,
+					lasku.tulostusalue
+					ORDER BY varastopaikat.tyyppi,
+					varastopaikat.nimitys,
+					lasku.tulostusalue,
+					varastopaikat.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
 		$sel = array();
-		$sel[$tuvarasto] = "SELECTED";
-
 		while ($row = mysql_fetch_array($result)){
-
+			$sel[$row["tunnus"]] = ($row["tunnus"] == $tuvarasto) ? "selected" : "";
 			if ($row['tulostusalue'] != '') {
 				echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] $row[tulostusalue] ($row[kpl])";
 			}
@@ -837,12 +851,13 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
-
 		$sel=array();
-		$sel[$tutoimtapa] = "selected";
 		while ($row = mysql_fetch_array($result)){
+			$sel[$row["selite"]] = ($row["selite"] == $tutoimtapa) ? "selected" : "";
 			echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ($row[kpl])</option>";
 		}
+
+		if(!isset($tuoteno)) {$tuoteno = '';}
 
 		echo "</select>";
 		echo "</td>";
@@ -877,7 +892,7 @@
 		}
 
 
-		$sel=array();
+		$sel=array('1' => '', '3' => '', '5' => '', '7' => '', '14' => '', 'KK' => '');
 		$sel[$karajaus] = "selected";
 
 		echo "<tr><th>".t("Keräysaikarajaus:")."</th>";
@@ -936,6 +951,7 @@
 		}
 
 		// Vain keräyslistat saa groupata
+		$grouppi = '';
 		if (($yhtiorow["lahetteen_tulostustapa"] == "K" or $yhtiorow["lahetteen_tulostustapa"] == "L") and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
 			//jos halutaan eritellä tulostusalueen mukaan , lasku.tulostusalue
 			$grouppi = "GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm, t_tyyppi2";
@@ -951,12 +967,19 @@
 			$grouppi .= ", lasku.varasto, lasku.tulostusalue";
 		}
 
-		if ($tuoteno != '') {
+		$tilausrivi_tuoteno_join = '';
+		if (isset($tuoteno) and $tuoteno != '') {
 			$tilausrivi_tuoteno_join = "	AND tilausrivi.tuoteno = '{$tuoteno}'";
 		}
 
-		if ($valmistuslinja != '') {
+		$valmistuslinja_where = '';
+		if (isset($valmistuslinja) and $valmistuslinja != '') {
 			$valmistuslinja_where = "	AND lasku.kohde = '{$valmistuslinja}'";
+		}
+
+		$siirtolista_where = '';
+		if ($toim == "SIIRTOLISTA" and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+			$siirtolista_where = " AND lasku.toimitustavan_lahto = 0 ";
 		}
 
 		$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
@@ -995,6 +1018,7 @@
 					lasku.$logistiikka_yhtiolisa
 					and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
 					$valmistuslinja_where
+					$siirtolista_where
 					$haku
 					$tilaustyyppi
 					$grouppi
@@ -1057,7 +1081,7 @@
 				$edennakko = $tilrow["t_tyyppi"];
 
 				$ero="td";
-				if ($tunnus==$tilrow['otunnus']) $ero="th";
+				if (isset($tunnus) and $tunnus==$tilrow['otunnus']) $ero="th";
 
 				echo "<tr class='aktiivi'>";
 
@@ -1138,6 +1162,13 @@
 					if ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') {
 						echo "<$ero valign='top'></$ero>";
 					}
+
+					if(!isset($vva)) $vva = '';
+					if(!isset($kka)) $kka = '';
+					if(!isset($ppa)) $ppa = '';
+					if(!isset($vvl)) $vvl = '';
+					if(!isset($kkl)) $kkl = '';
+					if(!isset($ppl)) $ppl = '';
 
 					echo "<form method='post'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
@@ -1334,7 +1365,7 @@
 					}
 
 					// Varaston oletus keräyslistatulostin (tai tarkalleen listan vikan keräyslistan varaston oletustulostin, mutta yleensä listaaan aina per varasto)
-					if ($kirjoitin != "" and $kukarow['kirjoitin'] == 0 and $kirrow['tunnus'] == $kirjoitin) {
+					if (isset($kirjoitin) and $kirjoitin != "" and $kukarow['kirjoitin'] == 0 and $kirrow['tunnus'] == $kirjoitin) {
 						$sel = "SELECTED";
 					}
 

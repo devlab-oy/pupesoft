@@ -69,7 +69,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 
 		aseta_kukarow_kesken($myyntitilaus['tunnus']);
 
-		$varastosiirtorivit = hae_tilausrivit($varastosiirto['tunnus'], true);
+		$varastosiirtorivit = hae_tilausrivit($varastosiirto['tunnus'], 'K');
 
 		$varastosiirtorivit = aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit);
 
@@ -350,6 +350,10 @@ if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
 	function aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit) {
 		global $kukarow, $yhtiorow;
 
+		if (empty($varastosiirto) or empty($varastosiirtorivit)) {
+			return array();
+		}
+
 		$t1			 = $t2			 = $t3			 = $t4			 = $tunnus		 = array();
 		$tee		 = 'paikat';
 		$vainlistaus = '';
@@ -442,7 +446,7 @@ if (!function_exists('hae_tilausrivit')) {
 			$tilausrivi_where = " AND t.var not in ('P','J','O','S')";
 
 			if ($varastosiirtotyyppi == 'P') {
-				$lasku_join	 = "	JOIN lasku AS l
+				$lasku_join	 = "JOIN lasku AS l
 								ON ( l.yhtio = t.yhtio
 									AND l.tunnus = t.otunnus )";
 				$select		 = "l.varasto AS varasto, ";
@@ -450,7 +454,7 @@ if (!function_exists('hae_tilausrivit')) {
 			}
 		}
 
-		$query	 = "	SELECT t.*,
+		$query	 = "SELECT t.*,
 					{$select}
 					t.hyllyalue AS lahde_hyllyalue,
 					t.hyllynro AS lahde_hyllynro,
@@ -475,7 +479,7 @@ if (!function_exists('hae_tilausrivit')) {
 					WHERE t.yhtio = '{$kukarow['yhtio']}'
 					AND t.otunnus = {$otunnus}
 					{$tilausrivi_where}
-					AND t.tyyppi = 'L'";
+					AND t.tyyppi != 'D'";
 		$result	 = pupe_query($query);
 
 		$tilausrivit = array();

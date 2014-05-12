@@ -735,7 +735,9 @@
 					# kohdevaraston toimipaikaksi
 					if ($yhtiorow['toimipaikkakasittely'] == "L") {
 
-						foreach ($otunnukset as $siirtolistan_tunnus) {
+						foreach (explode(",", $otunnukset) as $siirtolistan_tunnus) {
+
+							$siirtolistan_tunnus = str_replace("'", "", $siirtolistan_tunnus);
 							paivita_siirtolistan_toimipaikka($siirtolistan_tunnus);
 						}
 					}

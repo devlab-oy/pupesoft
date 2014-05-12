@@ -38,7 +38,7 @@ if ($toimipaikka_rajaus == 'X' or $yhtiorow['toimipaikkakasittely'] != 'L') {
 	$toimipaikkalisa = '';
 }
 else{
-	$toimipaikkalisa = " and asiakas.toimipaikka = {$tp}";
+	$toimipaikkalisa = " and asiakas.toimipaikka = {$tp} ";
 }
 
 $ytunnus	 	= addslashes(trim($ytunnus));
@@ -400,8 +400,16 @@ if ($monta == 0) {
 		echo "<input type='hidden' name='toim'        			value='$toim'>";
 		echo "<input type='hidden' name='nimi'        			value='$nimi'>";
 		echo "<input type='hidden' name='syotetty_ytunnus' 		value='$nimi'>";
-		echo "<input type='hidden' name='postino'     			value='$postino'>";
 		echo "<input type='hidden' name='postitp'     			value='$postitp'>";
+		echo "<input type='hidden' name='tuoteno'     		value='$tuoteno'>";
+		echo "<input type='hidden' name='kpl'     			value='$kpl'>";
+		echo "<input type='hidden' name='var'     			value='$var'>";
+		echo "<input type='hidden' name='hinta'     		value='$hinta'>";
+		echo "<input type='hidden' name='ale1'     			value='$ale1'>";
+		echo "<input type='hidden' name='ale2'     			value='$ale2'>";
+		echo "<input type='hidden' name='ale3'     			value='$ale3'>";
+		echo "<input type='hidden' name='netto'     		value='$netto'>";
+
 		echo "<input type='hidden' name='toimipaikka_rajaus'   	value='X'>";
 		echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";
 		echo "</form>";

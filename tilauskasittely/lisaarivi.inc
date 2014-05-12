@@ -3192,3 +3192,23 @@
 			$tilrivinumero		= "";
 		}
 	}
+
+	if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !in_array($var, array('S','U','T','P'))) {
+		$myy_hyllyalue_temp = $myy_hyllyalue[0];
+		$myy_hyllynro_temp = $myy_hyllynro[0];
+		if (empty($myy_hyllyalue) and empty($myy_hyllynro) and !empty($p_hyllyalue) and !empty($p_hyllynro)) {
+			$myy_hyllyalue_temp = $p_hyllyalue;
+			$myy_hyllynro_temp = $p_hyllynro;
+		}
+		if ($laskurow['varasto'] == 0 and $myy_hyllynro_temp != '' and $myy_hyllyalue_temp != '') {
+			$varasto = kuuluukovarastoon($myy_hyllyalue_temp, $myy_hyllynro_temp);
+
+			if (!empty($varasto)) {
+				$query = "	UPDATE lasku
+							SET varasto = '{$varasto}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['tunnus']}'";
+				pupe_query($query);
+			}
+		}
+	}

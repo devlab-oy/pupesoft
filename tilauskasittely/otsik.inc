@@ -2010,6 +2010,24 @@
 				$varastot_lisa_query = " and tunnus = {$oletusvarasto}";
 			}
 
+			$disabled = '';
+			if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !empty($srow['tunnus'])) {
+				$query = "	SELECT COUNT(*) AS tilausrivi_kpl
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = {$srow['tunnus']}
+							AND var != 'P'";
+				$tilausrivi_result = pupe_query($query);
+				$tilausrivit = mysql_fetch_assoc($tilausrivi_result);
+			}
+			else {
+				$tilausrivit['tilausrivi_kpl'] = 0;
+			}
+
+			if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and $tilausrivit['tilausrivi_kpl'] > 0) {
+				$disabled = 'DISABLED';
+			}
+
 			$query  = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -2018,7 +2036,11 @@
 						order by tyyppi, nimitys";
 			$vares = pupe_query($query);
 
-			$oikea_sarake[$oikea] .= "<select name='varasto' onchange='this.form.submit()'><option value='0'>".t("Kaikista")."</option>";
+			if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !empty($disabled)) {
+				$oikea_sarake[$oikea] .= "<input type='hidden' name='varasto' value='{$oletusvarasto}' />";
+			}
+
+			$oikea_sarake[$oikea] .= "<select name='varasto' onchange='this.form.submit()' {$disabled}><option value='0'>".t("Kaikista")."</option>";
 
 			$selectoitu_varasto_toimipaikka = 0;
 

@@ -27167,7 +27167,6 @@ if (!function_exists('luo_tapahtuma')) {
 }
 
 if (!function_exists('hae_tuotepaikat')) {
-
 	function hae_tuotepaikat($tuoteno, $hyllyalue, $hyllynro, $hyllytaso = false, $hyllyvali = false) {
 		global $kukarow, $yhtiorow;
 
@@ -27200,7 +27199,6 @@ if (!function_exists('hae_tuotepaikat')) {
 }
 
 if (!function_exists('hae_tuotteen_tuotepaikat')) {
-
 	function hae_tuotteen_tuotepaikat($tuoteno) {
 		global $kukarow, $yhtiorow;
 

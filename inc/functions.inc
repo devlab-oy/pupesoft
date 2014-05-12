@@ -27806,3 +27806,43 @@ if (!function_exists('tilauksen_toimipaikka')) {
 		return 0;
 	}
 }
+
+if (!function_exists('paivita_siirtolistan_toimipaikka')) {
+	function paivita_siirtolistan_toimipaikka($tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$tunnus = (int) $tunnus;
+
+		if ($tunnus == 0) {
+			return false;
+		}
+
+		$query = "SELECT tila, clearing
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tunnus}'";
+		$laskres = pupe_query($query);
+		$laskrow = mysql_fetch_assoc($laskres);
+
+		# Siirtolistan clearing-kentässä on kohdevarasto
+		if ($laskrow['tila'] == 'G' and $laskrow['clearing'] != '' and is_numeric($laskrow['clearing'])) {
+
+			$query = "SELECT toimipaikka
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$laskrow['clearing']}'";
+			$var_tp_res = pupe_query($query);
+
+			if (mysql_num_rows($var_tp_res) != 0) {
+
+				$var_tp_row = mysql_fetch_assoc($var_tp_res);
+
+				$query = "UPDATE lasku SET
+									yhtio_toimipaikka = '{$var_tp_row['toimipaikka']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$tunnus}'";
+				$updres = pupe_query($query);
+			}
+		}
+	}
+}

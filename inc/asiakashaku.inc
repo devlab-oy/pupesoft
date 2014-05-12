@@ -407,8 +407,11 @@ if ($monta == 0) {
 		echo "<input type='hidden' name='tee'         		value = '$tee'>";
 		echo "<input type='hidden' name='toim'        		value = '$toim'>";
 		echo "<input type='hidden' name='nimi'        		value = '$nimi'>";
+		echo "<input type='hidden' name='nimitark'        	value = '$nimitark'>";
 		echo "<input type='hidden' name='syotetty_ytunnus' 	value = '$nimi'>";
+		echo "<input type='hidden' name='osoite'     		value = '$osoite'>";
 		echo "<input type='hidden' name='postino'     		value = '$postino'>";
+		echo "<input type='hidden' name='myyjanumero'     	value = '$myyjanumero'>";
 		echo "<input type='hidden' name='postitp'     		value = '$postitp'>";
 		echo "<input type='hidden' name='tuoteno'     		value = '$tuoteno'>";
 		echo "<input type='hidden' name='kpl'     			value = '$kpl'>";
@@ -549,7 +552,9 @@ if ($monta > 1 and $monta <= $limit) {
 		  echo "<input type='hidden' name='tee'         			value='$tee'>";
 		  echo "<input type='hidden' name='toim'        			value='$toim'>";
 		  echo "<input type='hidden' name='nimi'  	   				value='$nimi'>";
+		  echo "<input type='hidden' name='nimitark'  	   			value='$nimitark'>";
 		  echo "<input type='hidden' name='syotetty_ytunnus'    	value='$syotetty_ytunnus'>";
+		  echo "<input type='hidden' name='osoite'         			value='$osoite'>";
 		  echo "<input type='hidden' name='postino'         		value='$postino'>";
 		  echo "<input type='hidden' name='postitp'         		value='$postitp'>";
 		  echo "<input type='hidden' name='myyjanumero'				value='$myyjanumero'>";

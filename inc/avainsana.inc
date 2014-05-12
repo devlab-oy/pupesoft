@@ -37,6 +37,8 @@
 	$mysqlaliasarray['OSTOTIL_TILTYYP']['selitetark_2'] = "Automaattituloutuksen esto";
 
 	$mysqlaliasarray['INVEN_LAJI']['selitetark_2'] 		= "Varastonmuutos tili";
+	$mysqlaliasarray['INVEN_LAJI']['selitetark_3'] 		= "Mobiili-inventoinnin oletuslaji";
+	$mysqlaliasarray['INVEN_LAJI']['selitetark_4'] 		= "Oletusselite";
 
 	$mysqlaliasarray['KERAYSERA_TK']['selite']       	= "Ker‰‰j‰";
 	$mysqlaliasarray['KERAYSERA_TK']['selitetark']   	= "Varasto";

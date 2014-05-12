@@ -1,8 +1,11 @@
 <?php
 
-	if (!isset($kukarow_varasto)) {
-		$kukarow_varasto = explode(",", $kukarow["varasto"]);
-	}
+	$params = array(
+		'asiakas_tunnus' => $laskurow['liitostunnus'],
+		'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
+	);
+
+	$varastot_array = sallitut_varastot($params);
 
 	//sis‰‰n tulee $row jossa on tilausrivi kaikki tiedot
 
@@ -541,8 +544,6 @@
 		}
 
 		$omavarastores  = pupe_query($query);
-		$varastot_array = $kukarow_varasto;
-
 
 		// K‰yd‰‰n l‰pi oman varaston paikat
 		if (
@@ -562,7 +563,11 @@
 			}
 
 			while ($alkurow = mysql_fetch_assoc($omavarastores)) {
-
+				// or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and $row['var'] != 'S')
+				// Varastosiirto toiminnallisuudessa asetetaan var S riveille l‰hdevaraston tuotteen hyllynumerot tilausriville,
+				// jotta ne varaavat saldoa l‰hdevarastossa.
+				// T‰st‰ syyst‰ yll‰olevassa iffiss‰ pit‰‰ olla $row['var'] != 'S',
+				// koska muuten varastosiirron kautta k‰ytt‰j‰ saisi myyntioikeuden mahdolliseesti sellaiseen varastoon, johon k‰ytt‰j‰ll‰ ei ole myyntioikeutta.
 				if ($alkurow["hyllyalue"] != "!!M"
 					and (
 						(
@@ -575,7 +580,7 @@
 						or ($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0 and (in_array($alkurow["varasto"], $varastot_array) or count($varastot_array) == 0))
 						or $laskurow["varasto"] == $alkurow["varasto"]
 						or (in_array($alkurow["varasto"], $varastot_array) and $laskurow["varasto"] == 0)
-						or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])
+						or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and $row['var'] != 'S')
 					)
 				) {
 
@@ -854,7 +859,8 @@
 			$siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
 			foreach ($siirto_varastot as $siirto_varasto) {
-				if ($siirto_varasto['tuote']['myytavissa'] <= 0) {
+				//Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat, tarkoittaa se ett‰ tilausriville on valittu kyseinen siirtovarasto ja lisaarivi vaiheessa saldot on riitt‰neet.
+				if ($siirto_varasto['tuote']['myytavissa'] <= 0 and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']) {
 					continue;
 				}
 
@@ -901,7 +907,6 @@
 					and tuote.tuoteno = '$row[tuoteno]'
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 		$omavarastores  = pupe_query($query);
-		$varastot_array = $kukarow_varasto;
 
 		if (!isset($paikatlask)) $paikatlask = 0;
 
@@ -1155,7 +1160,7 @@
 
 						$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
 
-						$chk_varasto = $laskurow['varasto'] == 0 ? $kukarow_varasto : $laskurow['varasto'];
+						$chk_varasto = $laskurow['varasto'] == 0 ? $varastot_array : $laskurow['varasto'];
 
 						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $chk_varasto);
 

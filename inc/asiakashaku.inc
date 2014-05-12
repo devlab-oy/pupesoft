@@ -396,19 +396,28 @@ if ($monta == 0) {
 		}
 
 		echo "<form method='post'>";
-		echo "<input type='hidden' name='tee'         			value='$tee'>";
-		echo "<input type='hidden' name='toim'        			value='$toim'>";
-		echo "<input type='hidden' name='nimi'        			value='$nimi'>";
-		echo "<input type='hidden' name='syotetty_ytunnus' 		value='$nimi'>";
-		echo "<input type='hidden' name='postitp'     			value='$postitp'>";
-		echo "<input type='hidden' name='tuoteno'     		value='$tuoteno'>";
-		echo "<input type='hidden' name='kpl'     			value='$kpl'>";
-		echo "<input type='hidden' name='var'     			value='$var'>";
-		echo "<input type='hidden' name='hinta'     		value='$hinta'>";
-		echo "<input type='hidden' name='ale1'     			value='$ale1'>";
-		echo "<input type='hidden' name='ale2'     			value='$ale2'>";
-		echo "<input type='hidden' name='ale3'     			value='$ale3'>";
-		echo "<input type='hidden' name='netto'     		value='$netto'>";
+		echo "<input type='hidden' name='lopetus' 			value = '$lopetus'>";
+		echo "<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>";
+		echo "<input type='hidden' name='projektilla' 		value = '$projektilla'>";
+		echo "<input type='hidden' name='from' 				value = '$from'>";
+		echo "<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>";
+		echo "<input type='hidden' name='mista' 			value = '$mista'>";
+		echo "<input type='hidden' name='orig_tila' 		value = '$orig_tila'>";
+		echo "<input type='hidden' name='orig_alatila' 		value = '$orig_alatila'>";
+		echo "<input type='hidden' name='tee'         		value = '$tee'>";
+		echo "<input type='hidden' name='toim'        		value = '$toim'>";
+		echo "<input type='hidden' name='nimi'        		value = '$nimi'>";
+		echo "<input type='hidden' name='syotetty_ytunnus' 	value = '$nimi'>";
+		echo "<input type='hidden' name='postino'     		value = '$postino'>";
+		echo "<input type='hidden' name='postitp'     		value = '$postitp'>";
+		echo "<input type='hidden' name='tuoteno'     		value = '$tuoteno'>";
+		echo "<input type='hidden' name='kpl'     			value = '$kpl'>";
+		echo "<input type='hidden' name='var'     			value = '$var'>";
+		echo "<input type='hidden' name='hinta'     		value = '$hinta'>";
+		echo "<input type='hidden' name='ale1'     			value = '$ale1'>";
+		echo "<input type='hidden' name='ale2'     			value = '$ale2'>";
+		echo "<input type='hidden' name='ale3'     			value = '$ale3'>";
+		echo "<input type='hidden' name='netto'     		value = '$netto'>";
 
 		echo "<input type='hidden' name='toimipaikka_rajaus'   	value='X'>";
 		echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";

@@ -152,9 +152,15 @@
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
 				//varasto vaihtuu, splitataan tilaus, paitsi jos spliauskielto on trigattu
-				if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAASIAKKAALLE" and $toim != "VALMISTAVARASTOON") {
-					//Koska ollaan t‰‰ll‰‰ olaan juuri splittaamassa tilaus, eli halutaan tulostaa kaikkien splittauksessa syntyvien varastosiirojen siirtolistat
-					$splitattiin = TRUE;
+				if  ((
+				  ($varasto != $edvarasto and $edvarasto != 'x') or
+				  ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA") or
+				  ($yhtiorow['kerayserat'] != '' and $keraysvyohyke != $edkeraysvyohyke and $edkeraysvyohyke != 'x' and $edkeraysvyohyke != '' and $edomalle_tilaukselle == 0)
+				  ) and
+				  ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and
+				  ($laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAASIAKKAALLE" and $toim != "VALMISTAVARASTOON")) {
+				  //Koska ollaan t‰‰ll‰‰ olaan juuri splittaamassa tilaus, eli halutaan tulostaa kaikkien splittauksessa syntyvien varastosiirojen siirtolistat
+				  $splitattiin = TRUE;
 
 					if (!is_resource($laskusplitres)) {
 						// Jotta saadaan lasku kopsattua kivasti jos se splittaantuu
@@ -467,7 +473,7 @@
 							AND tunnus = '{$laskurow['tunnus']}'";
 				$hresult = mysql_query($query) or pupe_error($query);
 			}
-				
+
 
 			while ($laskurow = mysql_fetch_array($hresult)) {
 				//Tulostetaan lista

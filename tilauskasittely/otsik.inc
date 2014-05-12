@@ -795,7 +795,15 @@
 		}
 
 		// Varmistetaan, että tilaustyyppi on aina oikein
-		$tilaustyyppi = isset($tilaustyyppi) ? trim($tilaustyyppi) : $srow['tilaustyyppi'];
+		if (isset($tilaustyyppi) and trim($tilaustyyppi) != '') {
+			$tilaustyyppi = trim($tilaustyyppi);
+		}
+		elseif ($srow['tilaustyyppi'] != '') {
+			$tilaustyyppi = $srow['tilaustyyppi'];
+		}
+		else {
+			$tilaustyyppi = null;
+		}
 
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			$tilaus_myynti_otsikko = t("Työmääräys");
@@ -864,6 +872,11 @@
 			if ($templ > 0) {
 				$tilaustyypit = array($tilaustyyppi => $tilaustyypit[$tilaustyyppi]);
 			}
+		}
+
+		// Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto
+		if (is_null($tilaustyyppi) and count($tilaustyypit) == 1) {
+			$tilaustyyppi = key($tilaustyypit);
 		}
 
 		echo "<font class='head'>{$tilaus_myynti_otsikko} ".t("otsikko")."</font><hr>";

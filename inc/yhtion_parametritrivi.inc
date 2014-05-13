@@ -2701,7 +2701,7 @@
     $jatko = 0;
   }
 
-	if ($fieldname == "livetuotehaku_tilauksella") {
+  if ($fieldname == "livetuotehaku_tilauksella") {
 
     $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

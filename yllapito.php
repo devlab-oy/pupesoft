@@ -1163,7 +1163,7 @@
           $lisa .= " and {$array[$i]} = '{$haku[$i]}'";
         }
       }
-      elseif ($toim == 'puun_alkio' and $i == 5) {
+      elseif ($toim == 'puun_alkio' and $i == 6) {
         $lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi {$hakuehto}) {$hakuehto} ";
       }
       elseif ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {

@@ -2684,7 +2684,7 @@
     $jatko = 0;
   }
 
-	if ($fieldname == "myydaan_vain_yhteen_varastoon_kerrallaan") {
+  if ($fieldname == "myydaan_vain_yhteen_varastoon_kerrallaan") {
 
     $ulos = "<td>";
     $ulos .= "<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

@@ -3193,7 +3193,7 @@
     }
   }
 
-	if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !in_array($var, array('S', 'U', 'T', 'P'))) {
+  if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !in_array($var, array('S', 'U', 'T', 'P'))) {
     $myy_hyllyalue_temp = $myy_hyllyalue[0];
     $myy_hyllynro_temp = $myy_hyllynro[0];
     if (empty($myy_hyllyalue) and empty($myy_hyllynro) and !empty($p_hyllyalue) and !empty($p_hyllynro)) {

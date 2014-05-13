@@ -1,215 +1,281 @@
 <?php
 
-	// Kutsutaanko CLI:stä
-	$php_cli = FALSE;
+// Kutsutaanko CLI:stä
+if (php_sapi_name() != 'cli') {
+  echo "CLI only!";
+  exit(1);
+}
 
-	if (php_sapi_name() == 'cli') {
-		$php_cli = TRUE;
-	}
+date_default_timezone_set('Europe/Helsinki');
 
-	date_default_timezone_set('Europe/Helsinki');
+// otetaan includepath aina rootista
+$pupe_root_polku = dirname(__FILE__);
 
-	if ($php_cli) {
-		// otetaan includepath aina rootista
-		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
-		error_reporting(E_ALL);
-		ini_set("display_errors", 0);
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
 
-		// otetaan tietokanta connect
-		require("inc/connect.inc");
-		require("inc/functions.inc");
+// otetaan tietokanta connect
+require("inc/connect.inc");
+require("inc/functions.inc");
 
-		$pupe_root_polku = dirname(__FILE__);
-	}
+// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+pupesoft_flock();
 
-	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
-	pupesoft_flock();
+// jos verkkolaskun lähetys on feilannut niin koitetaan lähettää verkkolasku-tiedosto uudelleen
+// PUPEVOICE
+$kansio = "{$pupe_root_polku}/dataout/pupevoice_error/";
 
-	// jos verkkolaskun lähetys on feilannut niin koitetaan lähettää verkkolasku-tiedosto uudelleen
-	// PUPEVOICE
-	$kansio = "{$pupe_root_polku}/dataout/pupevoice_error/";
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
 
-	if ($handle = opendir($kansio)) {
-		while (($lasku = readdir($handle)) !== FALSE) {
-			if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+    // Ei käsitellä kun Pupevoice tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
 
-				$kukarow['yhtio'] = $yhtio[1];
-				$kukarow['kuka']  = 'admin';
-				$kukarow['kieli'] = 'fi';
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
 
-				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
+    if (onko_lasku_liian_vanha($lasku)) {
+      continue;
+    }
 
-				$ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
-				$ftpuser = $yhtiorow['verkkotunnus_lah'];
-				$ftppass = $yhtiorow['verkkosala_lah'];
-				$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
-				$ftpfile = $kansio.$lasku;
-				$ftpsucc = "{$pupe_root_polku}/dataout/";
+    $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
+    $ftpuser = $yhtiorow['verkkotunnus_lah'];
+    $ftppass = $yhtiorow['verkkosala_lah'];
+    $ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
+    $ftpfile = $kansio.$lasku;
+    $ftpsucc = "{$pupe_root_polku}/dataout/";
 
-				$tulos_ulos = "";
+    $tulos_ulos = "";
 
-				require("inc/ftp-send.inc");
-			}
-		}
+    require("inc/ftp-send.inc");
+  }
 
-		closedir($handle);
-	}
+  closedir($handle);
+}
 
-	// IPOST FINVOICE
-	$kansio = "{$pupe_root_polku}/dataout/ipost_error/";
+// IPOST FINVOICE
+$kansio = "{$pupe_root_polku}/dataout/ipost_error/";
 
-	if ($handle = opendir($kansio)) {
-		while (($lasku = readdir($handle)) !== FALSE) {
-			if (preg_match("/TRANSFER_IPOST\-(.*?)\-2/", $lasku, $yhtio)) {
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
 
-				$kukarow['yhtio'] = $yhtio[1];
-				$kukarow['kuka']  = 'admin';
-				$kukarow['kieli'] = 'fi';
+    // Ei käsitellä kun ipost tiedostoja
+    if (!preg_match("/TRANSFER_IPOST\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
 
-				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
 
-				$ftphost 		= "ftp.itella.net";
-				$ftpuser 		= $yhtiorow['verkkotunnus_lah'];
-				$ftppass 		= $yhtiorow['verkkosala_lah'];
-				$ftppath 		= "out/finvoice/data/";
-				$ftpfile 		= $kansio.$lasku;
-				$renameftpfile 	= str_replace("TRANSFER_IPOST", "DELIVERED_IPOST", $lasku);
-				$ftpsucc 		= "{$pupe_root_polku}/dataout/";
+    // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
+    if (onko_lasku_liian_vanha($lasku)) {
+      continue;
+    }
 
-				$tulos_ulos = "";
+    $ftphost     = "ftp.itella.net";
+    $ftpuser     = $yhtiorow['verkkotunnus_lah'];
+    $ftppass     = $yhtiorow['verkkosala_lah'];
+    $ftppath     = "out/finvoice/data/";
+    $ftpfile     = $kansio.$lasku;
+    $renameftpfile   = str_replace("TRANSFER_IPOST", "DELIVERED_IPOST", $lasku);
+    $ftpsucc     = "{$pupe_root_polku}/dataout/";
 
-				require("inc/ftp-send.inc");
-			}
-		}
+    $tulos_ulos = "";
 
-		closedir($handle);
-	}
+    require("inc/ftp-send.inc");
+  }
 
-	// ELMAEDI
-	$kansio = "{$pupe_root_polku}/dataout/elmaedi_error/";
+  closedir($handle);
+}
 
-	if ($handle = opendir($kansio)) {
-		while (($lasku = readdir($handle)) !== FALSE) {
-			if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+// ELMAEDI
+$kansio = "{$pupe_root_polku}/dataout/elmaedi_error/";
 
-				$kukarow['yhtio'] = $yhtio[1];
-				$kukarow['kuka']  = 'admin';
-				$kukarow['kieli'] = 'fi';
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
 
-				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    // Ei käsitellä kun EDI tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
 
-				$ftphost = $edi_ftphost;
-				$ftpuser = $edi_ftpuser;
-				$ftppass = $edi_ftppass;
-				$ftppath = $edi_ftppath;
-				$ftpfile = $kansio.$lasku;
-				$ftpsucc = "{$pupe_root_polku}/dataout/";
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
 
-				$tulos_ulos = "";
+    // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
+    if (onko_lasku_liian_vanha($lasku)) {
+      continue;
+    }
 
-				require("inc/ftp-send.inc");
-			}
-		}
+    $ftphost = $edi_ftphost;
+    $ftpuser = $edi_ftpuser;
+    $ftppass = $edi_ftppass;
+    $ftppath = $edi_ftppath;
+    $ftpfile = $kansio.$lasku;
+    $ftpsucc = "{$pupe_root_polku}/dataout/";
 
-		closedir($handle);
-	}
+    $tulos_ulos = "";
 
-	// PUPESOFT-FINVOICE
-	$kansio = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/";
+    require("inc/ftp-send.inc");
+  }
 
-	if ($handle = opendir($kansio)) {
-		while (($lasku = readdir($handle)) !== FALSE) {
-			if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+  closedir($handle);
+}
 
-				$kukarow['yhtio'] = $yhtio[1];
-				$kukarow['kuka']  = 'admin';
-				$kukarow['kieli'] = 'fi';
+// PUPESOFT-FINVOICE
+$kansio = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/";
 
-				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
 
-				$ftphost = $sisainenfoinvoice_ftphost;
-				$ftpuser = $sisainenfoinvoice_ftpuser;
-				$ftppass = $sisainenfoinvoice_ftppass;
-				$ftppath = $sisainenfoinvoice_ftppath;
-				$ftpfile = $kansio.$lasku;
-				$ftpsucc = "{$pupe_root_polku}/dataout/";
+    // Ei käsitellä kun Finvoice tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
 
-				$tulos_ulos = "";
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
 
-				require("inc/ftp-send.inc");
-			}
-		}
+    // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
+    if (onko_lasku_liian_vanha($lasku)) {
+      continue;
+    }
 
-		closedir($handle);
-	}
+    $ftphost = $sisainenfoinvoice_ftphost;
+    $ftpuser = $sisainenfoinvoice_ftpuser;
+    $ftppass = $sisainenfoinvoice_ftppass;
+    $ftppath = $sisainenfoinvoice_ftppath;
+    $ftpfile = $kansio.$lasku;
+    $ftpsucc = "{$pupe_root_polku}/dataout/";
 
-	// MAVENTA
-	$kansio = "{$pupe_root_polku}/dataout/maventa_error/";
+    $tulos_ulos = "";
 
-	if ($handle = opendir($kansio)) {
-		while (($lasku = readdir($handle)) !== FALSE) {
-			if (preg_match("/laskutus\-(.*?)\-2[0-9]{7,7}\-([0-9]*?)\-serialized.txt/", $lasku, $matsit)) {
+    require("inc/ftp-send.inc");
+  }
 
-				$kukarow['yhtio'] = $matsit[1];
-				$kukarow['kuka']  = 'admin';
-				$kukarow['kieli'] = 'fi';
+  closedir($handle);
+}
 
-				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+// MAVENTA
+$kansio = "{$pupe_root_polku}/dataout/maventa_error/";
 
-				// Täytetään api_keys, näillä kirjaudutaan Maventaan
-				$api_keys = array();
-				$api_keys["user_api_key"] 	= $yhtiorow['maventa_api_avain'];
-				$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
 
-				// Vaihtoehtoinen company_uuid
-				if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
-					$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
-				}
+    // Ei käsitellä kun Maventa tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2[0-9]{7,7}\-([0-9]*?)\-serialized.txt/", $lasku, $matsit)) {
+      continue;
+    }
 
-				try {
-					// Testaus
-					#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+    $yhtio = $matsit[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
 
-					// Tuotanto
-					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+    // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
+    if (onko_lasku_liian_vanha($lasku)) {
+      continue;
+    }
 
-					// Haetaan tarvittavat tiedot filestä
-					$files_out = unserialize(file_get_contents($kansio.$lasku));
+    // Täytetään api_keys, näillä kirjaudutaan Maventaan
+    $api_keys = array();
+    $api_keys["user_api_key"]   = $yhtiorow['maventa_api_avain'];
+    $api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
 
-					$status = maventa_invoice_put_file($client, $api_keys, $matsit[2], "", $kukarow['kieli'], $files_out);
+    // Vaihtoehtoinen company_uuid
+    if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+      $api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+    }
 
-					// Siirretään dataout kansioon jos kaikki meni ok
-					rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
+    try {
+      // Testaus
+      #$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
-					echo  "Maventa-lasku $matsit[2]: $status<br>\n";
-				}
-				catch (Exception $exVirhe) {
-					echo "VIRHE: Yhteys Maventaan epäonnistui: ".$exVirhe->getMessage()."\n";
-				}
-			}
-		}
+      // Tuotanto
+      $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-		closedir($handle);
-	}
+      // Haetaan tarvittavat tiedot filestä
+      $files_out = unserialize(file_get_contents($kansio.$lasku));
 
-	// APIX
-	$kansio = "{$pupe_root_polku}/dataout/apix_error/";
+      $status = maventa_invoice_put_file($client, $api_keys, $matsit[2], "", $kukarow['kieli'], $files_out);
 
-	if ($handle = opendir($kansio)) {
-		while (($lasku = readdir($handle)) !== FALSE) {
-			if (preg_match("/Apix_(.*?)_invoices_/", $lasku, $matsit)) {
+      // Siirretään dataout kansioon jos kaikki meni ok
+      rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
 
-				$kukarow['yhtio'] = $matsit[1];
-				$kukarow['kuka']  = 'admin';
-				$kukarow['kieli'] = 'fi';
+      echo  "Maventa-lasku $matsit[2]: $status<br>\n";
+    }
+    catch (Exception $exVirhe) {
+      echo "VIRHE: Yhteys Maventaan epäonnistui: ".$exVirhe->getMessage()."\n";
+    }
+  }
 
-				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+  closedir($handle);
+}
 
-				$status = apix_invoice_put_file("", $kukarow['kieli'], $lasku);
+// APIX
+$kansio = "{$pupe_root_polku}/dataout/apix_error/";
 
-				echo "APIX-lähetys $status<br>\n";
-			}
-		}
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
 
-		closedir($handle);
-	}
+    // Ei käsitellä kun Apix tiedostoja
+    if (!preg_match("/Apix_(.*?)_invoices_/", $lasku, $matsit)) {
+      continue;
+    }
+
+    $yhtio = $matsit[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
+
+    // Jos lasku on liian vanha, ei käsitellä, lähetetään maililla
+    if (onko_lasku_liian_vanha($lasku)) {
+      continue;
+    }
+
+    $status = apix_invoice_put_file("", $kukarow['kieli'], $lasku);
+    echo "APIX-lähetys $status<br>\n";
+  }
+
+  closedir($handle);
+}
+
+function onko_lasku_liian_vanha($filename) {
+  global $kukarow, $yhtiorow;
+
+  // Otetaan filen koko polku
+  $filename = realpath($filename);
+
+  // Jos file ollut alle vuorokauden error kansiossa, niin ei ole liian vanha
+  if (time() - filemtime($filename) < 86400) {
+    return false;
+  }
+
+  // Muuten on liian vanha ja lähetetään meili
+  $parametri = array(
+    "to"           => $yhtiorow["talhal_email"],
+    "subject"      => t("Laskujen uudelleenlähetys"),
+    "ctype"        => "text",
+    "body"         => t("Laskujen uudelleenlähetys epäonnistunut yli vuorokauden."),
+    "attachements" => array(0 =>
+      array(
+        "filename" => $filename,
+        "ctype" => mime_content_type($filename),
+      )),
+  );
+
+  $boob = pupesoft_sahkoposti($parametri);
+
+  // Poistetaan lasku hakemistosta jos sähköpostin lähetys onnistui
+  if ($boob) {
+    unlink($filename);
+  }
+
+  return true;
+}

@@ -1052,5 +1052,3 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 }
 
 require ("../inc/footer.inc");
-
-?>

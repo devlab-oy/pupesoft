@@ -1199,5 +1199,3 @@
 	echo "<br><input type='submit' name='ehdotusnappi' value = '".t("Aja ostoehdotus")."'></form>";
 
 	require ("inc/footer.inc");
-
-?>

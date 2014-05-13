@@ -22,4 +22,3 @@
 	}
 
 	$jarjestys = 'nimi';
-?>

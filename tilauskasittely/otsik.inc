@@ -1065,10 +1065,7 @@
 				}
 			}
 
-			$tpr = $kukarow['toimipaikka'];
-			echo "<input type='hidden' name='toimipaikka_rajaus' value='$tpr'>";
 			echo "<input type='submit' value='".t("Hae")."'>";
-
 			echo "</form>";
 
 			$formi  = "paaformi";

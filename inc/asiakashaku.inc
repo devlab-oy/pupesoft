@@ -483,7 +483,7 @@ if ($monta > 1 and $monta <= $limit) {
 
 		      echo "<select name='toimipaikka_rajaus' onchange='this.form.submit()'>";
 		      echo "<option value='X' "; if($toimipaikka_rajaus == 'X') {echo 'selected';} echo ">" . t("Kaikki") . "</option>";
-		      echo "<option value='0' "; if($toimipaikka_rajaus == '0') {echo 'selected';} echo ">" . t("Ei toimipaikkaa") . "</option>";
+		      echo "<option value='0' "; if(empty($toimipaikka_rajaus)) {echo 'selected';} echo ">" . t("Ei toimipaikkaa") . "</option>";
 
 		      while ($vrow = mysql_fetch_array($vresult)) {
 		        $sel="";

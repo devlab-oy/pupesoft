@@ -7,5 +7,3 @@ $type = isset($_REQUEST['type']) ? $_REQUEST['type'] : 'int25';
 $imgtype = isset($_REQUEST['imgtype']) ? $_REQUEST['imgtype'] : 'png';
 
 Image_Barcode::draw($num, $type, $imgtype);
-
-?>

@@ -479,7 +479,7 @@ if (!function_exists('hae_tilausrivit')) {
 					WHERE t.yhtio = '{$kukarow['yhtio']}'
 					AND t.otunnus = {$otunnus}
 					{$tilausrivi_where}
-					AND t.tyyppi != 'D'";
+					AND t.tyyppi IN ('L','G')";
 		$result	 = pupe_query($query);
 
 		$tilausrivit = array();

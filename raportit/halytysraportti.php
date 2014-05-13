@@ -2782,4 +2782,3 @@
 		}
 		require ("../inc/footer.inc");
 	}
-?>

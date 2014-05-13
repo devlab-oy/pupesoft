@@ -2,6 +2,14 @@
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
 		require ("inc/parametrit.inc");
+    
+    if (!empty($_POST['ajax_toiminto']) and $_POST['ajax_toiminto'] == 'hae_inventointiselite') {
+
+      $_selite = mysql_real_escape_string(utf8_decode($_POST['selite']));
+
+      echo t_avainsana("INVEN_LAJI", '', " and avainsana.selite = '{$_selite}'", '', '', "selitetark_4");
+      exit;
+    }
 	}
 
 	if (!isset($fileesta))			$fileesta = "";
@@ -9,6 +17,7 @@
 	if (!isset($livesearch_tee))	$livesearch_tee = "";
 	if (!isset($mobiili))			$mobiili = "";
 	if (!isset($laadittuaika))		$laadittuaika = "";
+  if (!isset($enarifocus))    $enarifocus = "";
 
 	$validi_kasinsyotetty_inventointipaivamaara = 0;
 
@@ -39,6 +48,40 @@
 
 	// Enaboidaan ajax kikkare
 	enable_ajax();
+
+  if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
+
+    echo "  <script type='text/javascript'>
+          $(function() {
+            $('#inven_laji').on('change', function() {
+              var select_value = $(this).val();
+              
+              $.ajax({
+                async: false,
+                type: 'POST',
+                data: {
+                  selite: select_value,
+                  ajax_toiminto: 'hae_inventointiselite',
+                  no_head: 'yes',
+                  ohje: 'off'
+                },
+                url: '{$_SERVER['SCRIPT_NAME']}'
+              }).done(function(data) {
+                $('#lisaselite').val(data);
+              });
+            });
+          });
+        </script>";
+
+    if ($enarifocus != '') {
+      echo "  <script type='text/javascript'>
+            $(function() {
+              $('#ean_koodi').focus();
+            });
+          </script>";
+    }
+
+  }
 
 	if ($mobiili != "YES") {
 		echo "<font class='head'>".t("Inventointi")."</font><hr>";
@@ -218,7 +261,7 @@
 					}
 
 					if ($inven_laji != "") {
-						$query = "	SELECT selitetark_2
+            $query = "  SELECT selitetark_2, selitetark_4
 									FROM avainsana
 									WHERE yhtio = '$kukarow[yhtio]'
 									and laji    = 'INVEN_LAJI'
@@ -233,6 +276,7 @@
 						else {
 							$avain_row = mysql_fetch_assoc($avain_res);
 							$inven_laji_tilino = $avain_row["selitetark_2"];
+              if ($lisaselite == '') $lisaselite = $avain_row["selitetark_4"];
 						}
 					}
 
@@ -350,13 +394,13 @@
 							foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
 								$ekpl = str_replace(",", ".", $ekpl);
 
-								if ($ekpl != '' and ($ekpl{0} == '+' or $ekpl{0} == '-' or !is_numeric($ekpl))) {
+                if ($ekpl != '' and (substr($ekpl, 0, 1) == '+' or substr($ekpl, 0, 1) == '-' or !is_numeric($ekpl))) {
 									echo "<font class='error'>".t("VIRHE: Erien määrät oltava absoluuttisia arvoja")."!</font><br>";
 									$virhe = 1;
 									break;
 								}
 
-								if (($kpl{0} == '+' or $kpl{0} == '-') and (float) $ekpl == 0 and $ekpl != '' and $onko_uusia == 0) {
+                if ((substr($kpl, 0, 1) == '+' or substr($kpl, 0, 1) == '-') and (float) $ekpl == 0 and $ekpl != '' and $onko_uusia == 0) {
 									echo "<font class='error'>".t("VIRHE: Et voi nollata erää, jos olet syöttänyt relatiivisen määrän")."!</font><br>";
 									$virhe = 1;
 									break;
@@ -1590,23 +1634,36 @@
 
 		echo "<table>";
 
+    $lisaselite = !isset($lisaselite) ? '' : $lisaselite;
 		$tresult = t_avainsana("INVEN_LAJI");
 
 		if (mysql_num_rows($tresult) > 0) {
 			echo "<tr><th>".t("Inventoinnin laji").":</th>";
 
-			echo "<td><select name='inven_laji'>";
+      echo "<td><select id='inven_laji' name='inven_laji'>";
 
 			while($itrow = mysql_fetch_assoc($tresult)) {
+
+        if (!isset($inven_laji) AND !isset($sel)) {
+          $sel = 'selected';
+          $lisaselite = $itrow["selitetark_4"];
+        }
+        else {
 				$sel = "";
-				if ($itrow["selite"] == $inven_laji) $sel = 'selected';
+        }
+
+        if ($itrow["selite"] == $inven_laji) {
+          $sel = 'selected';
+          $lisaselite = $itrow["selitetark_4"];
+        }
+
 				echo "<option value='$itrow[selite]' $sel>$itrow[selite]</option>";
 			}
 			echo "</select></td></tr>";
 		}
 
 		echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
-		echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
+    echo "<td><input type='text' size='50' id='lisaselite' name='lisaselite' value='$lisaselite'></td></tr>";
 		if (isset($paivamaaran_kasisyotto)) {
 			echo "<tr><th>".t("Syötä inventointipäivämäärä (pp-kk-vvvv)").":</th>";
 			echo "<td><input type='text' size='2' maxlength='2' name='inventointipvm_pp' value='$inventointipvm_pp'>";
@@ -1614,7 +1671,9 @@
 			echo "<input type='text' size='4' maxlength='4' name='inventointipvm_vv' value='$inventointipvm_vv'></td></tr>";
 		}
 		echo "</table><br><br>";
-
+    if ($ean_koodi != '') {
+      echo "<input type='hidden' name='enarifocus' value='1'>";  
+    }
 
 		if (mysql_num_rows($saldoresult) == $rivimaara) {
 			echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
@@ -1709,7 +1768,7 @@
 
 		echo "</td></tr>";
 
-		echo "<tr><th>".t("EAN-koodi:")."</th><td><input type='text' size='15' name='ean_koodi'></td></tr>";
+    echo "<tr><th>".t("EAN-koodi:")."</th><td><input type='text' size='15' id='ean_koodi' name='ean_koodi'></td></tr>";
 
 		echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='6' name='lista'></td><td class='back'><input type='Submit' value='".t("Inventoi")."'></td></tr>";
 

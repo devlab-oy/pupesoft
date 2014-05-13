@@ -2,8 +2,9 @@
 	//sis‰‰n halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 	//jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
+  if (isset($laskurow['varasto']) AND $laskurow['varasto'] != 0) {
 	// katotaan ihan aluksi, ett‰ meill‰ on edellytykset tulostukselle...
-	$query  = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]'";
+    $query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
 	$prires = pupe_query($query);
 
 	if (mysql_num_rows($prires) != 0) {
@@ -18,6 +19,7 @@
 	else {
 		die ("<font class='error'>Yht‰‰n varastoa ei ole m‰‰ritelty. L‰hetteit‰ ei voida tulostaa...</font>");
 	}
+  }
 
 	// tarkistetan tulostuksessa syntyvi‰ virheit‰
 	$virheellinen	= "";

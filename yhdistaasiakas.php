@@ -922,7 +922,3 @@ function hae_asiakastunnus($tunnukset) {
   }
   return false;
 }
-
-
-
-?>

@@ -1,280 +1,280 @@
 <?php
 
-	require ("inc/parametrit.inc");
+  require ("inc/parametrit.inc");
 
-	echo "<font class='head'>Tekstiviestien l‰hett‰minen</font><hr>";
+  echo "<font class='head'>Tekstiviestien l‰hett‰minen</font><hr>";
 
-	if ($tee == 'laheta') {
+  if ($tee == 'laheta') {
 
-		$kotinums2 = explode("\r", $kotinums);
-		$lahetetyt = array();
+    $kotinums2 = explode("\r", $kotinums);
+    $lahetetyt = array();
 
-		foreach ($kotinums2 as $kotinum) {
-			$kotinum = str_replace ("-", "", $kotinum);
-			$kotinum = str_replace ("+", "", $kotinum);
-			$kotinum = str_replace ("\n", "", $kotinum);
-			$kotinum = str_replace ("\r", "", $kotinum);
-			$ok = 1;
-	
-			if (is_numeric($kotinum) and strlen($teksti) > 0) {
-	
-				$host = $sms_header;
-				$teksti = str_replace($host, "", $teksti);
-				$teksti = str_replace(str_replace("'", "", $host), "", $teksti);
-				$teksti = $host.$teksti;
+    foreach ($kotinums2 as $kotinum) {
+      $kotinum = str_replace ("-", "", $kotinum);
+      $kotinum = str_replace ("+", "", $kotinum);
+      $kotinum = str_replace ("\n", "", $kotinum);
+      $kotinum = str_replace ("\r", "", $kotinum);
+      $ok = 1;
+  
+      if (is_numeric($kotinum) and strlen($teksti) > 0) {
+  
+        $host = $sms_header;
+        $teksti = str_replace($host, "", $teksti);
+        $teksti = str_replace(str_replace("'", "", $host), "", $teksti);
+        $teksti = $host.$teksti;
 
-				if (!in_array($kotinum, $lahetetyt)) {
-					array_push($lahetetyt, $kotinum);
+        if (!in_array($kotinum, $lahetetyt)) {
+          array_push($lahetetyt, $kotinum);
 
-					if (SendSms($sms_palvelintyyppi, $kukarow['yhtio'], $kukarow['kuka'], $kotinum, $teksti)) {
-						$ok = 0;
-					}
-					else {
-						$ok = 1;
-					}
-				}
-				else {
-					$ok = 2;
-				}
-			}
+          if (SendSms($sms_palvelintyyppi, $kukarow['yhtio'], $kukarow['kuka'], $kotinum, $teksti)) {
+            $ok = 0;
+          }
+          else {
+            $ok = 1;
+          }
+        }
+        else {
+          $ok = 2;
+        }
+      }
 
-			if ($ok == 1) {
-				echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font>";
-				echo " ".$kotinum;
-				echo "<br>";
-			}
-	
-			if ($ok == 0) {
-				echo "<font class='message'>Tekstiviesti l‰hetetty!</font>";
-				echo " ".$kotinum;
-				echo "<br>";
-			}
+      if ($ok == 1) {
+        echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font>";
+        echo " ".$kotinum;
+        echo "<br>";
+      }
+  
+      if ($ok == 0) {
+        echo "<font class='message'>Tekstiviesti l‰hetetty!</font>";
+        echo " ".$kotinum;
+        echo "<br>";
+      }
 
-			if ($ok == 2) {
-				echo "<font class='message'>Samaa tekstiviestia ei l‰hetetty uudestaan samaan numeroon!</font>";
-				echo " ".$kotinum;
-				echo "<br>";
-			}
-	
-			$tee = "";
-		}
-	}
-	echo "<br/>";
+      if ($ok == 2) {
+        echo "<font class='message'>Samaa tekstiviestia ei l‰hetetty uudestaan samaan numeroon!</font>";
+        echo " ".$kotinum;
+        echo "<br>";
+      }
+  
+      $tee = "";
+    }
+  }
+  echo "<br/>";
 
-	if ($tee == "") {
+  if ($tee == "") {
 
-		echo "<form name='form' method='post' name='tekstari'>";
-		echo "<input type='hidden' name='tee' value = 'laheta'>";
-		echo "<table>";
+    echo "<form name='form' method='post' name='tekstari'>";
+    echo "<input type='hidden' name='tee' value = 'laheta'>";
+    echo "<table>";
 
-		$query = "SELECT * FROM avainsana WHERE yhtio = '$kukarow[yhtio]' AND laji = 'sms_palvelin' ORDER BY jarjestys";
-		$vresult = mysql_query($query) or pupe_error($query);
+    $query = "SELECT * FROM avainsana WHERE yhtio = '$kukarow[yhtio]' AND laji = 'sms_palvelin' ORDER BY jarjestys";
+    $vresult = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($vresult) > 0) {
+    if (mysql_num_rows($vresult) > 0) {
 
-			echo "<tr><th>Tekstiviestipalvelin</th><td>";
-		 	echo "<select name='sms_palvelintyyppi'>";
+      echo "<tr><th>Tekstiviestipalvelin</th><td>";
+       echo "<select name='sms_palvelintyyppi'>";
 
-			while ($vrow = mysql_fetch_array($vresult)) {
-				if ($sms_palvelintyyppi == $vrow["selite"]) {
-					$selectedi = "selected";
-				}
-				else {
-					$selectedi = "";
-				}
-				echo "<option value='$vrow[selite]' ".$selectedi.">$vrow[selitetark]</option>";
-			}
-			
-			echo "</select>\n";
-			echo "</td></tr>";
-		}
-		else {
-			echo "<input type='hidden' name='sms_palvelintyyppi' value='pupe'>";
-		}
+      while ($vrow = mysql_fetch_array($vresult)) {
+        if ($sms_palvelintyyppi == $vrow["selite"]) {
+          $selectedi = "selected";
+        }
+        else {
+          $selectedi = "";
+        }
+        echo "<option value='$vrow[selite]' ".$selectedi.">$vrow[selitetark]</option>";
+      }
+      
+      echo "</select>\n";
+      echo "</td></tr>";
+    }
+    else {
+      echo "<input type='hidden' name='sms_palvelintyyppi' value='pupe'>";
+    }
 
-		echo "<tr><th>Puh. numerot<br/>Erottele rivinvaihdoilla</th>";
-		echo "<td><textarea name='kotinums' cols='45' rows='6' wrap='soft'>$kotinums</textarea></td>
-				</tr>
-				<tr>
-					<th>Viesti</th>
-					<td><textarea name='teksti' cols='45' rows='6' wrap='soft'>$teksti</textarea></td>
-				</tr>
-			</table>
+    echo "<tr><th>Puh. numerot<br/>Erottele rivinvaihdoilla</th>";
+    echo "<td><textarea name='kotinums' cols='45' rows='6' wrap='soft'>$kotinums</textarea></td>
+        </tr>
+        <tr>
+          <th>Viesti</th>
+          <td><textarea name='teksti' cols='45' rows='6' wrap='soft'>$teksti</textarea></td>
+        </tr>
+      </table>
 
-			<br><input type='submit' value = 'L‰het‰'>
+      <br><input type='submit' value = 'L‰het‰'>
 
-			</form>";
+      </form>";
 
-	}
+  }
 
-	require ("inc/footer.inc");
+  require ("inc/footer.inc");
 
-	function SendSms($sms_palvelintyyppi, $yhtio, $kuka, $vastaanottaja, $viesti) {
+  function SendSms($sms_palvelintyyppi, $yhtio, $kuka, $vastaanottaja, $viesti) {
 
-		$res = false;
+    $res = false;
 
-		if ($sms_palvelintyyppi == "pupe") {
-			$res = SendPupesoftSms($vastaanottaja, $viesti);
-		}
-		else if ($sms_palvelintyyppi == "kannel") {
-			$res = SendKannelSms($vastaanottaja, $viesti);
-		}
-		else if ($sms_palvelintyyppi == "clickatell") {
-			$res = SendClickatellSms($vastaanottaja, $viesti);
-		}
-		else {
-			echo "<font class='error'>VIRHE: Valitsemasi tekstiviestipalvelimen tyyppi $sms_palvelintyyppi ei ole tuettu!</font><br/><br/>";
-			return false;
-		}
+    if ($sms_palvelintyyppi == "pupe") {
+      $res = SendPupesoftSms($vastaanottaja, $viesti);
+    }
+    else if ($sms_palvelintyyppi == "kannel") {
+      $res = SendKannelSms($vastaanottaja, $viesti);
+    }
+    else if ($sms_palvelintyyppi == "clickatell") {
+      $res = SendClickatellSms($vastaanottaja, $viesti);
+    }
+    else {
+      echo "<font class='error'>VIRHE: Valitsemasi tekstiviestipalvelimen tyyppi $sms_palvelintyyppi ei ole tuettu!</font><br/><br/>";
+      return false;
+    }
 
-		if (!$res) {
-			return false;
-		}
+    if (!$res) {
+      return false;
+    }
 
-		if ($tee_lokimerkinta) {
-			$credits = floor(strlen($viesti) / 159) + 1;
-			// Lis‰t‰‰n viesti sms-tauluun
-			$query = "	INSERT INTO sms SET 
-						yhtio = '".$yhtio."', 
-						viesteja = '".$credits."',
-						vastaanottaja = '".addslashes($vastaanottaja)."',
-						viesti = '".addslashes($viesti)."',
-						luontiaika = now(),
-						laatija = '$kuka'";
-			$result = mysql_query($query) or pupe_error($query);
-		}
+    if ($tee_lokimerkinta) {
+      $credits = floor(strlen($viesti) / 159) + 1;
+      // Lis‰t‰‰n viesti sms-tauluun
+      $query = "  INSERT INTO sms SET 
+            yhtio = '".$yhtio."', 
+            viesteja = '".$credits."',
+            vastaanottaja = '".addslashes($vastaanottaja)."',
+            viesti = '".addslashes($viesti)."',
+            luontiaika = now(),
+            laatija = '$kuka'";
+      $result = mysql_query($query) or pupe_error($query);
+    }
 
-		return true;
-	}
+    return true;
+  }
 
 
-	function SendPupesoftSms($vastaanottaja, $viesti) {
+  function SendPupesoftSms($vastaanottaja, $viesti) {
 
-		if (strlen($viesti) > 160) {
-			echo "<font class='error'>VIRHE: Tekstiviestin maksimipituus on 160 merkki‰!</font><br><br>";
-			return false;
-		}
+    if (strlen($viesti) > 160) {
+      echo "<font class='error'>VIRHE: Tekstiviestin maksimipituus on 160 merkki‰!</font><br><br>";
+      return false;
+    }
 
-		global $sms_palvelin;
-		global $sms_user;
-		global $sms_pass;
+    global $sms_palvelin;
+    global $sms_user;
+    global $sms_pass;
 
-		if ($sms_palvelin == "" or $sms_user == "" or $sms_pass == "") {
-			echo "<font class='error'>VIRHE: Tarkista tekstiviestipalvelimen m‰‰ritykset asetustiedostossa!</font><br><br>";
-			return false;
-		}
+    if ($sms_palvelin == "" or $sms_user == "" or $sms_pass == "") {
+      echo "<font class='error'>VIRHE: Tarkista tekstiviestipalvelimen m‰‰ritykset asetustiedostossa!</font><br><br>";
+      return false;
+    }
 
-		if (is_numeric($vastaanottaja) and strlen($viesti) > 0 and strlen($viesti) <= 160) {
-			$viesti = urlencode($viesti);
-			$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$vastaanottaja&viesti=$viesti");
-			if (trim($retval) == "0") return true;
-		}
+    if (is_numeric($vastaanottaja) and strlen($viesti) > 0 and strlen($viesti) <= 160) {
+      $viesti = urlencode($viesti);
+      $retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$vastaanottaja&viesti=$viesti");
+      if (trim($retval) == "0") return true;
+    }
 
-		return false;
-	}
+    return false;
+  }
 
-	function SendClickatellSms($vastaanottaja, $viesti) {
-		global $clickatell_api_id;
-		global $clickatell_username;
-		global $clickatell_password;
-		global $clickatell_sender_name;
+  function SendClickatellSms($vastaanottaja, $viesti) {
+    global $clickatell_api_id;
+    global $clickatell_username;
+    global $clickatell_password;
+    global $clickatell_sender_name;
 
-		$continue = true;
-		if ($clickatell_api_id == "") {
-			echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_api_id ei ole m‰‰ritelty.</font><br/>";
-			$continue = false;
-		}
-		if ($clickatell_username == "") {
-			echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_username ei ole m‰‰ritelty.</font><br/>";
-			$continue = false;
-		}
-		if ($clickatell_password == "") {
-			echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_password ei ole m‰‰ritelty.</font><br/>";
-			$continue = false;
-		}
-		if (!$continue) {
-			echo "<br/><br/>";
-			return false;
-		}
+    $continue = true;
+    if ($clickatell_api_id == "") {
+      echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_api_id ei ole m‰‰ritelty.</font><br/>";
+      $continue = false;
+    }
+    if ($clickatell_username == "") {
+      echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_username ei ole m‰‰ritelty.</font><br/>";
+      $continue = false;
+    }
+    if ($clickatell_password == "") {
+      echo "<font class='error'>VIRHE: Tarkista asetukset! \$clickatell_password ei ole m‰‰ritelty.</font><br/>";
+      $continue = false;
+    }
+    if (!$continue) {
+      echo "<br/><br/>";
+      return false;
+    }
 
-		$mysms = new sms($clickatell_api_id, $clickatell_username, $clickatell_password);
-		//echo $mysms->session;
+    $mysms = new sms($clickatell_api_id, $clickatell_username, $clickatell_password);
+    //echo $mysms->session;
 
-		if ($mysms->send ($vastaanottaja, $clickatell_sender_name, $viesti)) {
-			echo "Tekstiviestitilin saldo: ".$mysms->getbalance()."<br/>";
+    if ($mysms->send ($vastaanottaja, $clickatell_sender_name, $viesti)) {
+      echo "Tekstiviestitilin saldo: ".$mysms->getbalance()."<br/>";
 
-			return true;
-		}
-		
-		$credits = floor(strlen($viesti) / 159) + 1;
-		// Lis‰t‰‰n viesti sms-tauluun
-		$query = "	INSERT INTO sms SET 
-					yhtio = '".$yhtio."', 
-					viesteja = '".$credits."',
-					vastaanottaja = '".addslashes($vastaanottaja)."',
-					viesti = '".addslashes($viesti)."',
-					luontiaika = now(),
-					laatija = '$kuka'";
-		$result = mysql_query($query) or pupe_error($query);
-		
-		return false;
-	}
+      return true;
+    }
+    
+    $credits = floor(strlen($viesti) / 159) + 1;
+    // Lis‰t‰‰n viesti sms-tauluun
+    $query = "  INSERT INTO sms SET 
+          yhtio = '".$yhtio."', 
+          viesteja = '".$credits."',
+          vastaanottaja = '".addslashes($vastaanottaja)."',
+          viesti = '".addslashes($viesti)."',
+          luontiaika = now(),
+          laatija = '$kuka'";
+    $result = mysql_query($query) or pupe_error($query);
+    
+    return false;
+  }
 
-	function SendKannelSms($receiver_number, $message) {
+  function SendKannelSms($receiver_number, $message) {
 
-		global $kannel_host_url;
-		global $kannel_username;
-		global $kannel_password;
+    global $kannel_host_url;
+    global $kannel_username;
+    global $kannel_password;
 
-		$continue = true;
-		if ($kannel_host_url == "") {
-			echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_host_url ei ole m‰‰ritelty.</font><br/>";
-			$continue = false;
-		}
-		if ($kannel_username == "") {
-			echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_username ei ole m‰‰ritelty.</font><br/>";
-			$continue = false;
-		}
-		if ($kannel_password == "") {
-			echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_password ei ole m‰‰ritelty.</font><br/>";
-			$continue = false;
-		}
-		if (!$continue) {
-			echo "<br/><br/>";
-			return false;
-		}
+    $continue = true;
+    if ($kannel_host_url == "") {
+      echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_host_url ei ole m‰‰ritelty.</font><br/>";
+      $continue = false;
+    }
+    if ($kannel_username == "") {
+      echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_username ei ole m‰‰ritelty.</font><br/>";
+      $continue = false;
+    }
+    if ($kannel_password == "") {
+      echo "<font class='error'>VIRHE: Tarkista asetukset! \$kannel_password ei ole m‰‰ritelty.</font><br/>";
+      $continue = false;
+    }
+    if (!$continue) {
+      echo "<br/><br/>";
+      return false;
+    }
 
-		$message = str_replace("\r", "", $message);
-		$message = urlencode($message);						
-	
-		$receiver_number = str_replace("+", "", $receiver_number);
-		$receiver_number = str_replace("\n", "", $receiver_number);				
-		$receiver_number = urlencode($receiver_number);
-			
-		$url = $kannel_host_url."?username=".$kannel_username."&password=".$kannel_password."&to=".$receiver_number."&text=".$message;
-		$ch = curl_init($url);				
-		curl_setopt($ch, CURLOPT_HEADER, 0);
-		curl_setopt($ch, CURLOPT_GET, 1);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$output = curl_exec($ch);
-		curl_close($ch);
-		if (strpos("a".$output, "0: Accepted for delivery") > 0) {			
-			return(true);
-		}
-		return(false);
-		
-		$credits = floor(strlen($viesti) / 159) + 1;
-		// Lis‰t‰‰n viesti sms-tauluun
-		$query = "	INSERT INTO sms SET 
-					yhtio = '".$yhtio."', 
-					viesteja = '".$credits."',
-					vastaanottaja = '".addslashes($vastaanottaja)."',
-					viesti = '".addslashes($viesti)."',
-					luontiaika = now(),
-					laatija = '$kuka'";
-		$result = mysql_query($query) or pupe_error($query);
-		
-	}
+    $message = str_replace("\r", "", $message);
+    $message = urlencode($message);            
+  
+    $receiver_number = str_replace("+", "", $receiver_number);
+    $receiver_number = str_replace("\n", "", $receiver_number);        
+    $receiver_number = urlencode($receiver_number);
+      
+    $url = $kannel_host_url."?username=".$kannel_username."&password=".$kannel_password."&to=".$receiver_number."&text=".$message;
+    $ch = curl_init($url);        
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_GET, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $output = curl_exec($ch);
+    curl_close($ch);
+    if (strpos("a".$output, "0: Accepted for delivery") > 0) {      
+      return(true);
+    }
+    return(false);
+    
+    $credits = floor(strlen($viesti) / 159) + 1;
+    // Lis‰t‰‰n viesti sms-tauluun
+    $query = "  INSERT INTO sms SET 
+          yhtio = '".$yhtio."', 
+          viesteja = '".$credits."',
+          vastaanottaja = '".addslashes($vastaanottaja)."',
+          viesti = '".addslashes($viesti)."',
+          luontiaika = now(),
+          laatija = '$kuka'";
+    $result = mysql_query($query) or pupe_error($query);
+    
+  }
 
 ?>
 
@@ -403,9 +403,9 @@ class sms {
     */
     function sms ($api_id, $username, $password) {
 
-	$this->api_id = $api_id;
-	$this->user = $username;
-	$this->password = $password;
+  $this->api_id = $api_id;
+  $this->user = $username;
+  $this->password = $password;
 
         if ($this->use_ssl) {
             $this->base   = "http://api.clickatell.com/http";
@@ -424,7 +424,7 @@ class sms {
     * @access private
     */
     function _auth() {
-    	$comm = sprintf ("%s/auth?api_id=%s&user=%s&password=%s", $this->base_s, $this->api_id, $this->user, $this->password);
+      $comm = sprintf ("%s/auth?api_id=%s&user=%s&password=%s", $this->base_s, $this->api_id, $this->user, $this->password);
         $this->session = $this->_parse_auth ($this->_execgw($comm));
     }
 
@@ -434,7 +434,7 @@ class sms {
     * @access public
     */
     function getbalance() {
-    	$comm = sprintf ("%s/getbalance?session_id=%s", $this->base, $this->session);
+      $comm = sprintf ("%s/getbalance?session_id=%s", $this->base, $this->session);
         return $this->_parse_getbalance ($this->_execgw($comm));
     }
 
@@ -448,49 +448,49 @@ class sms {
     */
     function send($to=null, $from=null, $text=null) {
 
-    	/* Check SMS credits balance */
-    	if ($this->getbalance() < $this->balace_limit) {
-    	    die ("You have reach the SMS credit limit!");
-    	};
+      /* Check SMS credits balance */
+      if ($this->getbalance() < $this->balace_limit) {
+          die ("You have reach the SMS credit limit!");
+      };
 
-    	/* Check SMS $text length */
+      /* Check SMS $text length */
         if ($this->unicode == true) {
             $this->_chk_mbstring();
             if (mb_strlen ($text) > 210) {
-        	    die ("Your unicode message is too long! (Current lenght=".mb_strlen ($text).")");
-        	}
-        	/* Does message need to be concatenate */
+              die ("Your unicode message is too long! (Current lenght=".mb_strlen ($text).")");
+          }
+          /* Does message need to be concatenate */
             if (mb_strlen ($text) > 70) {
                 $concat = "&concat=3";
-        	} else {
+          } else {
                 $concat = "";
             }
         } else {
             if (strlen ($text) > 459) {
-    	        die ("Your message is too long! (Current lenght=".strlen ($text).")");
-    	    }
-        	/* Does message need to be concatenate */
+              die ("Your message is too long! (Current lenght=".strlen ($text).")");
+          }
+          /* Does message need to be concatenate */
             if (strlen ($text) > 160) {
                 $concat = "&concat=3";
-        	} else {
+          } else {
                 $concat = "";
             }
         }
 
-    	/* Check $to and $from is not empty */
+      /* Check $to and $from is not empty */
         if (empty ($to)) {
-    	    die ("You not specify destination address (TO)!");
-    	}
+          die ("You not specify destination address (TO)!");
+      }
         if (empty ($from)) {
-    	    die ("You not specify source address (FROM)!");
-    	}
+          die ("You not specify source address (FROM)!");
+      }
 
-    	/* Reformat $to number */
+      /* Reformat $to number */
         $cleanup_chr = array ("+", " ", "(", ")", "\r", "\n", "\r\n");
         $to = str_replace($cleanup_chr, "", $to);
 
-    	/* Send SMS now */
-    	$comm = sprintf ("%s/sendmsg?session_id=%s&to=%s&from=%s&text=%s&callback=%s&unicode=%s%s",
+      /* Send SMS now */
+      $comm = sprintf ("%s/sendmsg?session_id=%s&to=%s&from=%s&text=%s&callback=%s&unicode=%s%s",
             $this->base,
             $this->session,
             rawurlencode($to),
@@ -535,19 +535,19 @@ class sms {
     */
     function uniord($c) {
         $ud = 0;
-        if (ord($c{0})>=0 && ord($c{0})<=127)
-            $ud = ord($c{0});
-        if (ord($c{0})>=192 && ord($c{0})<=223)
-            $ud = (ord($c{0})-192)*64 + (ord($c{1})-128);
-        if (ord($c{0})>=224 && ord($c{0})<=239)
-            $ud = (ord($c{0})-224)*4096 + (ord($c{1})-128)*64 + (ord($c{2})-128);
-        if (ord($c{0})>=240 && ord($c{0})<=247)
-            $ud = (ord($c{0})-240)*262144 + (ord($c{1})-128)*4096 + (ord($c{2})-128)*64 + (ord($c{3})-128);
-        if (ord($c{0})>=248 && ord($c{0})<=251)
-            $ud = (ord($c{0})-248)*16777216 + (ord($c{1})-128)*262144 + (ord($c{2})-128)*4096 + (ord($c{3})-128)*64 + (ord($c{4})-128);
-        if (ord($c{0})>=252 && ord($c{0})<=253)
-            $ud = (ord($c{0})-252)*1073741824 + (ord($c{1})-128)*16777216 + (ord($c{2})-128)*262144 + (ord($c{3})-128)*4096 + (ord($c{4})-128)*64 + (ord($c{5})-128);
-        if (ord($c{0})>=254 && ord($c{0})<=255) //error
+        if (ord(substr($c, 0, 1))>=0 && ord(substr($c, 0, 1))<=127)
+            $ud = ord(substr($c, 0, 1));
+        if (ord(substr($c, 0, 1))>=192 && ord(substr($c, 0, 1))<=223)
+            $ud = (ord(substr($c, 0, 1))-192)*64 + (ord(substr($c, 1, 1))-128);
+        if (ord(substr($c, 0, 1))>=224 && ord(substr($c, 0, 1))<=239)
+            $ud = (ord(substr($c, 0, 1))-224)*4096 + (ord(substr($c, 1, 1))-128)*64 + (ord(substr($c, 2, 1))-128);
+        if (ord(substr($c, 0, 1))>=240 && ord(substr($c, 0, 1))<=247)
+            $ud = (ord(substr($c, 0, 1))-240)*262144 + (ord(substr($c, 1, 1))-128)*4096 + (ord(substr($c, 2, 1))-128)*64 + (ord(substr($c, 3, 1))-128);
+        if (ord(substr($c, 0, 1))>=248 && ord(substr($c, 0, 1))<=251)
+            $ud = (ord(substr($c, 0, 1))-248)*16777216 + (ord(substr($c, 1, 1))-128)*262144 + (ord(substr($c, 2, 1))-128)*4096 + (ord(substr($c, 3, 1))-128)*64 + (ord(substr($c, 4, 1))-128);
+        if (ord(substr($c, 0, 1))>=252 && ord(substr($c, 0, 1))<=253)
+            $ud = (ord(substr($c, 0, 1))-252)*1073741824 + (ord(substr($c, 1, 1))-128)*16777216 + (ord(substr($c, 2, 1))-128)*262144 + (ord(substr($c, 3, 1))-128)*4096 + (ord(substr($c, 4, 1))-128)*64 + (ord(substr($c, 5, 1))-128);
+        if (ord(substr($c, 0, 1))>=254 && ord(substr($c, 0, 1))<=255) //error
             $ud = false;
         return sprintf("%04x", $ud);
     }
@@ -621,7 +621,7 @@ class sms {
     * @access private
     */
     function _parse_auth ($result) {
-    	$session = substr($result, 4);
+      $session = substr($result, 4);
         $code = substr($result, 0, 2);
         if ($code!="OK") {
             die ("Error in SMS authorization! ($result)");
@@ -634,12 +634,12 @@ class sms {
     * @access private
     */
     function _parse_send ($result) {
-    	$code = substr($result, 0, 2);
-    	if ($code!="ID") {
-    	    die ("Error sending SMS! ($result)");
-    	} else {
-    	    $code = "OK";
-    	}
+      $code = substr($result, 0, 2);
+      if ($code!="ID") {
+          die ("Error sending SMS! ($result)");
+      } else {
+          $code = "OK";
+      }
         return $code;
     }
 
@@ -648,7 +648,7 @@ class sms {
     * @access private
     */
     function _parse_getbalance ($result) {
-    	$result = substr($result, 8);
+      $result = substr($result, 8);
         return (int)$result;
     }
 
@@ -673,5 +673,3 @@ class sms {
     }
 
 }
-
-?>

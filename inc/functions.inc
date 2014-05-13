@@ -27508,7 +27508,7 @@ if (!function_exists('sallitut_varastot')) {
 
     // Parametrit
     $asiakas_tunnus     = isset($params['asiakas_tunnus']) ? (int)$params['asiakas_tunnus'] : 0;
-    $toimipaikka_tunnus = isset($params['toimipaikka']) ? (int)$params['toimipaikka'] : 0;
+    $toimipaikka_tunnus = isset($params['toimipaikka_tunnus']) ? (int)$params['toimipaikka_tunnus'] : 0;
     $toimitus_maa       = isset($params['toimitus_maa']) ? $params['toimitus_maa'] : '';
     $varastotyyppi      = isset($params['varastotyyppi']) ? $params['varastotyyppi'] : '';
     $toim               = isset($params['toim']) ? $params['toim'] : '';
@@ -27742,7 +27742,7 @@ if (!function_exists('palauta_varasto')) {
 
     $args = array(
       'asiakas_tunnus' => $asiakas_tunnus,
-      'toimipaikka' => $toimipaikka,
+      'toimipaikka_tunnus' => $toimipaikka,
       'toim' => $toim,
       'tilaustyyppi' => $tilaustyyppi,
       'toimitus_maa' => $toimitus_maa,
@@ -27760,7 +27760,7 @@ if (!function_exists('palauta_varasto')) {
 
     $varasto = valitse_oletusvarasto($args);
 
-    return $varasto;
+    return array($varasto, $varastot);
   }
 }
 

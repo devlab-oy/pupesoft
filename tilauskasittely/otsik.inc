@@ -937,6 +937,7 @@
       'toimitus_maa' => $srow['maa'],
     );
 
+<<<<<<< HEAD
     $oletusvarasto = palauta_varasto($args);
 =======
     );
@@ -950,6 +951,9 @@
 
     $oletusvarasto = valitse_oletusvarasto($args);
 >>>>>>> juppe/rupi
+=======
+    list($oletusvarasto, $varastot) = palauta_varasto($args);
+>>>>>>> 5ef7f6db83500c16d33d65ca2b9279e4021d1f6a
 
     // jos meillä on jo alatila ja tila ei muokkailla niitä!
     if ($alatila == '' and isset($srow['alatila']) and $srow['alatila'] != '' and $srow_from == "LASKU") {
@@ -3022,6 +3026,7 @@
       'toimitus_maa' => $maa,
     );
 
+<<<<<<< HEAD
     $varasto = palauta_varasto($args);
 =======
     );
@@ -3035,6 +3040,9 @@
 
     $varasto = valitse_oletusvarasto($args);
 >>>>>>> juppe/rupi
+=======
+    list($varasto, $varastot) = palauta_varasto($args);
+>>>>>>> 5ef7f6db83500c16d33d65ca2b9279e4021d1f6a
 
     $otsikon_laskurow = $apuro;
 

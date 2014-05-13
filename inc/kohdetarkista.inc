@@ -1,8 +1,8 @@
 <?php
 
-	if (!function_exists("kohdetarkista")) {
-		function kohdetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-			global $kukarow, $yhtiorow, $alias_set, $alasveto, $asiakasid;
+  if (!function_exists("kohdetarkista")) {
+    function kohdetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+      global $kukarow, $yhtiorow, $alias_set, $alasveto, $asiakasid;
 
             if (mysql_field_name($result, $i) == "asiakas") {
                 $chastunn = trim($t[$i]);
@@ -13,7 +13,7 @@
                     unset($chasresult);
 
                     if (is_numeric($chastunn) and $chastunn > 0) {
-                        $query	= "	SELECT *
+                        $query  = "  SELECT *
                                     FROM asiakas
                                     WHERE yhtio = '$kukarow[yhtio]'
                                     and laji != 'P'
@@ -23,9 +23,9 @@
 
                     if (!isset($chasresult) or (isset($chasresult) and mysql_num_rows($chasresult) != 1)) {
 
-                        $ytunnus 		= $chastunn;
-                        $kutsuja 		= "yllapito.php";
-                        $ulos2 			= "";
+                        $ytunnus     = $chastunn;
+                        $kutsuja     = "yllapito.php";
+                        $ulos2       = "";
 
                         if ($ytunnus != "" and $ytunnus != "0") {
                             require("asiakashaku.inc");
@@ -48,7 +48,5 @@
                     $virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
                 }
             }
-		}
-	}
-
-?>
+    }
+  }

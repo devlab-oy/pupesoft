@@ -80,7 +80,6 @@ for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix
   if (!isset(${'ale'.$alepostfix})) ${'ale'.$alepostfix} = "";
   if (!isset(${'ale_array'.$alepostfix})) ${'ale_array'.$alepostfix} = "";
 }
-
 if (!isset($alv))           $alv = "";
 if (!isset($alv_array))       $alv_array = "";
 if (!isset($asiakasid))       $asiakasid = "";
@@ -5414,7 +5413,7 @@ if ($tee == '') {
       // Tsekataa onko tilausrivien varastojen toimipaikoilla lähdöt päällä, ja onko kyseisen lähdevaraston toimitustavalla lähtöjä
       if ($yhtiorow['toimipaikkakasittely'] == 'L') {
 
-        $tilausrivien_varastot = tilausrivien_varastot($laskurow['otunnus']);
+        $tilausrivien_varastot = tilausrivien_varastot($laskurow['tunnus']);
 
         foreach ($tilausrivien_varastot as $tilausrivin_varasto) {
 
@@ -5447,7 +5446,7 @@ if ($tee == '') {
                     FROM lahdot
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND liitostunnus = {$toimitustapa['tunnus']}
-                    AND varasto = {$laskurow['varasto']}
+                    AND varasto = {$varasto['tunnus']}
                     AND aktiivi = ''
                     AND pvm >= CURRENT_DATE
                     AND viimeinen_tilausaika > CURRENT_TIME";
@@ -7907,7 +7906,7 @@ if ($tee == '') {
           else {
 
             // Haetaan kaikkien tilausrivien varastopaikat
-            $chk_arr = tilausrivien_varastot($laskurow['otunnus']);
+            $chk_arr = tilausrivien_varastot($laskurow['tunnus']);
 
             $i_counter = 0;
 

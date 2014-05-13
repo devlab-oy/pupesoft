@@ -795,7 +795,15 @@
     }
 
     // Varmistetaan, että tilaustyyppi on aina oikein
-    $tilaustyyppi = isset($tilaustyyppi) ? trim($tilaustyyppi) : $srow['tilaustyyppi'];
+    if (isset($tilaustyyppi) and trim($tilaustyyppi) != '') {
+      $tilaustyyppi = trim($tilaustyyppi);
+    }
+    elseif ($srow['tilaustyyppi'] != '') {
+      $tilaustyyppi = $srow['tilaustyyppi'];
+    }
+    else {
+      $tilaustyyppi = null;
+    }
 
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
       $tilaus_myynti_otsikko = t("Työmääräys");
@@ -864,6 +872,11 @@
       if ($templ > 0) {
         $tilaustyypit = array($tilaustyyppi => $tilaustyypit[$tilaustyyppi]);
       }
+    }
+
+    // Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto
+    if (is_null($tilaustyyppi) and count($tilaustyypit) == 1) {
+      $tilaustyyppi = key($tilaustyypit);
     }
 
     echo "<font class='head'>{$tilaus_myynti_otsikko} ".t("otsikko")."</font><hr>";
@@ -958,7 +971,7 @@
 
       echo "<input type='hidden' name='alv_velvollisuus' value='{$yhtiorow['vat_numero']}'>";
     }
-    elseif ($srow['yhtio_toimipaikka'] != $yhtiotoimipaikka) {
+    elseif (isset($srow) and $srow['yhtio_toimipaikka'] != $yhtiotoimipaikka) {
       $alhqur = "SELECT alv, vienti from asiakas where yhtio='$kukarow[yhtio]' and tunnus = '{$srow['liitostunnus']}'";
       $alhire = pupe_query($alhqur);
       $alhiro  = mysql_fetch_assoc($alhire);
@@ -985,14 +998,21 @@
       }
     }
 
+    if(!isset($nimi)) {$nimi = "";}
+    if(!isset($nimitark)) {$nimitark = "";}
+    if(!isset($osoite)) {$osoite = "";}
+    if(!isset($postino)) {$postino = "";}
+    if(!isset($postitp)) {$postitp = "";}
+    if(!isset($liitostunnus)) {$liitostunnus = "";}
+
     if (!isset($srow)) {
       $srow = array(
-        "nimi" => "",
-        "nimitark" => "",
-        "osoite" => "",
-        "postino" => "",
-        "postitp" => "",
-        "liitostunnus" => 0,
+        "nimi" => $nimi,
+        "nimitark" => $nimitark,
+        "osoite" => $osoite,
+        "postino" => $postino,
+        "postitp" => $postitp,
+        "liitostunnus" => $liitostunnus
       );
     }
 
@@ -1001,20 +1021,24 @@
 
     echo "<table>";
     echo "<tr>
-        <th colspan='2' align='left' valign='top'>".t("Ostaja").":</td></tr>";
+        <th colspan='2' align='left' valign='top'>".t("Ostaja").":</td>
+      </tr>";
     echo "<tr>
         <td valign='top'>".t("Nimi").": </td>
-        <td><input type='text' name='nimi' size='35' value='$srow[nimi]'></td></tr>";
+        <td><input type='text' name='nimi' size='35' value='$srow[nimi]'></td>
+      </tr>";
     echo "<tr>
         <td></td>
-        <td><input type='text' name='nimitark' size='35' value='$srow[nimitark]'></td></tr>";
+        <td><input type='text' name='nimitark' size='35' value='$srow[nimitark]'></td>
+      </tr>";
     echo "<tr>
         <td valign='top'>".t("Osoite").": </td>
-        <td><input type='text' name='osoite' size='35' value='$srow[osoite]'></td></tr>";
-
+        <td><input type='text' name='osoite' size='35' value='$srow[osoite]'></td>
+      </tr>";
     echo "<tr>
         <td valign='top'>".t("Postitp").": </td>
-        <td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td></tr>";
+        <td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td>
+      </tr>";
 
     if ($srow["liitostunnus"] > 0) {
       $query = "  SELECT distinct koodi, nimi
@@ -1088,7 +1112,6 @@
       }
 
       echo "<input type='submit' value='".t("Hae")."'>";
-
       echo "</form>";
 
       $formi  = "paaformi";

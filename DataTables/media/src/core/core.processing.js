@@ -1,5 +1,3 @@
-
-
 /**
  * Generate the node required for the processing node
  *  @param {object} oSettings dataTables settings object
@@ -8,17 +6,17 @@
  */
 function _fnFeatureHtmlProcessing ( oSettings )
 {
-	var nProcessing = document.createElement( 'div' );
-	
-	if ( !oSettings.aanFeatures.r )
-	{
-		nProcessing.id = oSettings.sTableId+'_processing';
-	}
-	nProcessing.innerHTML = oSettings.oLanguage.sProcessing;
-	nProcessing.className = oSettings.oClasses.sProcessing;
-	oSettings.nTable.parentNode.insertBefore( nProcessing, oSettings.nTable );
-	
-	return nProcessing;
+  var nProcessing = document.createElement( 'div' );
+  
+  if ( !oSettings.aanFeatures.r )
+  {
+    nProcessing.id = oSettings.sTableId+'_processing';
+  }
+  nProcessing.innerHTML = oSettings.oLanguage.sProcessing;
+  nProcessing.className = oSettings.oClasses.sProcessing;
+  oSettings.nTable.parentNode.insertBefore( nProcessing, oSettings.nTable );
+  
+  return nProcessing;
 }
 
 
@@ -30,15 +28,14 @@ function _fnFeatureHtmlProcessing ( oSettings )
  */
 function _fnProcessingDisplay ( oSettings, bShow )
 {
-	if ( oSettings.oFeatures.bProcessing )
-	{
-		var an = oSettings.aanFeatures.r;
-		for ( var i=0, iLen=an.length ; i<iLen ; i++ )
-		{
-			an[i].style.visibility = bShow ? "visible" : "hidden";
-		}
-	}
+  if ( oSettings.oFeatures.bProcessing )
+  {
+    var an = oSettings.aanFeatures.r;
+    for ( var i=0, iLen=an.length ; i<iLen ; i++ )
+    {
+      an[i].style.visibility = bShow ? "visible" : "hidden";
+    }
+  }
 
-	$(oSettings.oInstance).trigger('processing', [oSettings, bShow]);
+  $(oSettings.oInstance).trigger('processing', [oSettings, bShow]);
 }
-

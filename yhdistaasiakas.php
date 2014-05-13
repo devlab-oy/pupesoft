@@ -897,14 +897,14 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 function hae_asiakastunnus($tunnukset) {
   global $kukarow;
 
-  if($tunnukset['ASIAKASTUNNUS'] != ''){
+  if ($tunnukset['ASIAKASTUNNUS'] != '') {
     $query = "SELECT tunnus
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND laji != 'P'
               AND tunnus = '{$tunnukset['ASIAKASTUNNUS']}'";
   }
-  else{
+  else {
     $query = "SELECT tunnus
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -922,7 +922,3 @@ function hae_asiakastunnus($tunnukset) {
   }
   return false;
 }
-
-
-
-?>

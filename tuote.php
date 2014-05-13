@@ -577,7 +577,7 @@
 
 				foreach ($_ale as $key => $val) {
 
-					if ($key{3} > $yhtiorow['oston_alekentat']) continue;
+          if (substr($key, 3, 1) > $yhtiorow['oston_alekentat']) continue;
 
 					echo "{$val}% ";
 				}

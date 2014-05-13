@@ -28,14 +28,14 @@ $query = "  SELECT
             tilausrivi.uusiotunnus,
             lasku.liitostunnus,
             toimi.selaus,
-			IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi,
+      IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi,
             IFNULL(tilausrivin_lisatiedot.tilausrivitunnus, 0) as tilausrivitunnus
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
             JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-			LEFT JOIN tilausrivin_lisatiedot
-			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
+      LEFT JOIN tilausrivin_lisatiedot
+      ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'
             AND lasku.tunnus='{$ostotilaus}'
@@ -74,15 +74,18 @@ else {
         $saapuminen = uusi_saapuminen($toimittaja, $kukarow['toimipaikka']);
     }
 
-    // Päivitetään kuka.kesken
-    $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
-    $updated = pupe_query($update_kuka);
+    //jos ollaan ennaltakohdistetussa (mutta ei tuloutetussa) rivissä, niin se on poikkeustapaus, jolloin kukarow.kesken tietoa ei tule päivittää -> muuten seuraavien rivien päivitys menee sekaisin ja tuloutetaan rivejä väärälle saapumiselle
+  if (!isset($ennaltakohdistettu) OR !$ennaltakohdistettu) {
+      // Päivitetään kuka.kesken
+      $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+      $updated = pupe_query($update_kuka);
+  }
 }
 
 # Kontrolleri
 if (isset($submit)) {
 
-    $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
+    $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}".urlencode($tuotenumero);
 
     switch($submit) {
         case 'ok':
@@ -125,6 +128,7 @@ $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "ostotilaus={$ostotilaus}" :
 $url_lisa .= ($viivakoodi != "" and $tilausten_lukumaara > 1) ? "&viivakoodi={$viivakoodi}" : "";
 $url_lisa .= "&tuotenumero=".urlencode($tuotenumero);
 $url_lisa .= "&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+$url_lisa .= "&ennaltakohdistettu={$ennaltakohdistettu}";
 
 ######## UI ##########
 # Otsikko
@@ -204,11 +208,11 @@ $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&man
 
 # Napit
 echo "<div class='controls'>";
-echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}'\">",t("OK"),"</button>";
+echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}&ennaltakohdistettu={$ennaltakohdistettu}'\">",t("OK"),"</button>";
 echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>";
 
 if ($yhtiorow['suuntalavat'] != "") {
-    echo "<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>";
+    echo "<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}&ennaltakohdistettu={$ennaltakohdistettu}'\">",t("SUUNTALAVALLE"),"</button>";
 
 }
 

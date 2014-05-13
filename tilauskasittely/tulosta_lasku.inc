@@ -353,7 +353,7 @@ if (!function_exists('alku')) {
 		$pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli), 	$page_lasku[$sivu], $pieni);
 		$pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm), 		$page_lasku[$sivu], $norm);
 
-		$pdf_lasku->draw_text(310, 595, t("Mahdolliset muistutukset teht‰v‰ 8 p‰iv‰n kuluessa", $kieli), $page_lasku[$sivu], $pieni);
+    $pdf_lasku->draw_text(310, 595, t("Mahdolliset huomautukset teht‰v‰ 8 p‰iv‰n kuluessa", $kieli), $page_lasku[$sivu], $pieni);
 
 
 		// Kommentit
@@ -2798,8 +2798,13 @@ if (!function_exists("tulosta_lasku")) {
 				$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 				$liite = $pdf_laskufilenimi;
 
-				// l‰hetet‰‰n cc aina postittaja osoitteeseen
-				$sahkoposti_cc = $yhtiorow["postittaja_email"];
+        // l‰hetet‰‰n cc aina talhal/postittaja osoitteeseen
+        if ($yhtiorow["sahkopostilasku_cc_email"] != "") {
+          $sahkoposti_cc = $yhtiorow["sahkopostilasku_cc_email"];
+        }
+        else {
+          $sahkoposti_cc = "";
+        }
 
 				include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 			}

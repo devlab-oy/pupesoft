@@ -324,10 +324,10 @@ class pdffile
         $this->objects[$o]['number'] = $this->nextpage;
         $this->nextpage ++;
         foreach (array('margin-left', 'margin-right', 'margin-top', 'margin-bottom') as $margin) {
-	        $this->objects[$o][$margin] = $this->default[$margin];
+          $this->objects[$o][$margin] = $this->default[$margin];
         }
         $this->_debug_var(10, 'New page', $this->objects[$o]);
-		$this->currentPage = $this->objects[$o];
+    $this->currentPage = $this->objects[$o];
         return $o;
     }
 
@@ -564,8 +564,8 @@ class pdffile
          */
         $xol = array();
         if (isset($this->builddata['colorspaces'])) {
-        	foreach ($this->builddata['colorspaces'] as $name => $id) {
-            	$xol[$name] = $this->libtopdf[$id] . ' 0 R';
+          foreach ($this->builddata['colorspaces'] as $name => $id) {
+              $xol[$name] = $this->libtopdf[$id] . ' 0 R';
             }
         }
         if (isset($xol) && count($xol) > 0) {
@@ -665,8 +665,8 @@ class pdffile
                 break;
 
             case 'value' :
-            	$os .= $pdfoid . ' 0 obj ' . $this->objects[$liboid]['data'] .
-                	   ' endobj';
+              $os .= $pdfoid . ' 0 obj ' . $this->objects[$liboid]['data'] .
+                     ' endobj';
                 break;
             }
             $os .= "\x0a";
@@ -714,7 +714,7 @@ class pdffile
         }
         $data = substr($data, 12);
         if (substr($data, 0, 4) != 'IHDR') {
-        	$this->_push_error(6011, 'IHDR chunk missing');
+          $this->_push_error(6011, 'IHDR chunk missing');
             return false;
         }
         $data = substr($data, 4);
@@ -1009,7 +1009,7 @@ class pdffile
         }
         $tab = '';
         for ($i = 0; $i < $tabwidth; $i++) {
-        	$tab .= ' ';
+          $tab .= ' ';
         }
         $string = str_replace(chr(9), $tab, $string);
         if (substr($font, 0, 7) == "Courier") {
@@ -1153,15 +1153,15 @@ class pdffile
         $num = array_pop($this->erno);
         $msg = array_pop($this->ermsg);
         if (is_null($num)) {
-        	return false;
+          return false;
         } else {
-	        return $num;
+          return $num;
         }
     }
 
     function enable($name)
     {
-    	$name = strtolower($name);
+      $name = strtolower($name);
         include_once(dirname(__FILE__) . "/${name}.class.php");
         $this->x[$name] = new $name;
         $this->x[$name]->pdf = &$this;
@@ -1170,7 +1170,7 @@ class pdffile
         case 'template' :
         case 'packer' :
         case 'import' :
-	        $this->$name = &$this->x[$name];
+          $this->$name = &$this->x[$name];
             break;
         }
         $this->_debug(10, "enabled extension: $name");
@@ -1204,8 +1204,8 @@ class pdffile
             break;
 
         default :
-        	if (substr($desc, 0, 1) == '#') {
-            	// Parse out a hex triplet
+          if (substr($desc, 0, 1) == '#') {
+              // Parse out a hex triplet
                 $v = substr($desc, 1, 2);
                 $r['red'] = eval("return ord(\"\\x$v\");") / 255;
                 $v = substr($desc, 3, 2);
@@ -1213,7 +1213,7 @@ class pdffile
                 $v = substr($desc, 5, 2);
                 $r['blue'] = eval("return ord(\"\\x$v\");") / 255;
             } else {
-            	// Error condition?
+              // Error condition?
                 $this->_push_error(6012, "Unparsable color identifier: $desc");
                 $r = false;
             }
@@ -1739,4 +1739,3 @@ class pdffile
     }
 
 }
-?>

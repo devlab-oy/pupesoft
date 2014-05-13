@@ -2,147 +2,147 @@
 
 $lock_params = array(
     "locktime"    => 600,
-	"lockfile"    => "$kukarow[yhtio]-keikka.lock",
-	"filecontent" => "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s")
+  "lockfile"    => "$kukarow[yhtio]-keikka.lock",
+  "filecontent" => "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s")
 );
 
 pupesoft_flock($lock_params);
 
-$query  = "	SELECT *
-			FROM lasku
-			WHERE tunnus = '$otunnus'
-			AND yhtio    = '$kukarow[yhtio]'
-			AND tila     = 'K'
-			AND alatila  = ''";
+$query  = "  SELECT *
+      FROM lasku
+      WHERE tunnus = '$otunnus'
+      AND yhtio    = '$kukarow[yhtio]'
+      AND tila     = 'K'
+      AND alatila  = ''";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
-	$laskurow = mysql_fetch_array($result);
+  $laskurow = mysql_fetch_array($result);
 }
 else {
-	echo "<font style='error'>".t("Tilaus katosi!")."</font>";
-	exit;
+  echo "<font style='error'>".t("Tilaus katosi!")."</font>";
+  exit;
 }
 
 list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0, 0);
 
 if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 
-	if ($tee == "varma") {
-		require ("varastoon.inc");
+  if ($tee == "varma") {
+    require ("varastoon.inc");
 
-		// takaisin ihan alkuun
-		$toiminto 		= "dummy";
-		$ytunnus  		= "";
-		$toimittajaid 	= "";
-	}
-	else {
-		if ($tee == "eitullia") {
+    // takaisin ihan alkuun
+    $toiminto     = "dummy";
+    $ytunnus      = "";
+    $toimittajaid   = "";
+  }
+  else {
+    if ($tee == "eitullia") {
 
-			if (isset($poikkeavat_tulliprosentit) and is_array($poikkeavat_tulliprosentit)) {
-				// poikkeava_tulliprosentti
-				paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $rivi_oletus_tulliprosentti);
-			}
+      if (isset($poikkeavat_tulliprosentit) and is_array($poikkeavat_tulliprosentit)) {
+        // poikkeava_tulliprosentti
+        paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $rivi_oletus_tulliprosentti);
+      }
 
-			$tee = "";
-		}
+      $tee = "";
+    }
 
-		// katotaan onko liitettyj‰ laskuja, mutta ei vaihto-omaisuuslaskuja
-		$query  = "	SELECT *
-					from lasku
-					where yhtio = '$kukarow[yhtio]'
-					and tila = 'K'
-					and alatila = ''
-					and vanhatunnus <> 0
-					and laskunro = '$laskurow[laskunro]'
-					and vienti not in ('C','F','I','J','K','L')";
-		$result = pupe_query($query);
+    // katotaan onko liitettyj‰ laskuja, mutta ei vaihto-omaisuuslaskuja
+    $query  = "  SELECT *
+          from lasku
+          where yhtio = '$kukarow[yhtio]'
+          and tila = 'K'
+          and alatila = ''
+          and vanhatunnus <> 0
+          and laskunro = '$laskurow[laskunro]'
+          and vienti not in ('C','F','I','J','K','L')";
+    $result = pupe_query($query);
 
-		$summa = 0;
+    $summa = 0;
 
-		echo "<br>";
+    echo "<br>";
 
-		if (mysql_num_rows($result) != 0) {
-			echo "<table>";
-			echo "<tr>
-					<th>".t("Nimi")."</th>
-					<th>".t("Summa")."</th>
-					<th>".t("Veroton")."</th>
-					<th>".t("Valuutta")."</th>
-					<th>".t("Veroton")." $yhtiorow[valkoodi]</th>
-					<th>".t("Viite")."</th>
-					<th>".t("Vienti")."</th></tr>";
+    if (mysql_num_rows($result) != 0) {
+      echo "<table>";
+      echo "<tr>
+          <th>".t("Nimi")."</th>
+          <th>".t("Summa")."</th>
+          <th>".t("Veroton")."</th>
+          <th>".t("Valuutta")."</th>
+          <th>".t("Veroton")." $yhtiorow[valkoodi]</th>
+          <th>".t("Viite")."</th>
+          <th>".t("Vienti")."</th></tr>";
 
-			while ($llrow = mysql_fetch_array($result)) {
+      while ($llrow = mysql_fetch_array($result)) {
 
-				// tsekataan viel‰
-				if ($llrow["vienti_kurssi"] == 0) {
-					echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
-					exit;
-				}
+        // tsekataan viel‰
+        if ($llrow["vienti_kurssi"] == 0) {
+          echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
+          exit;
+        }
 
-				$apusumma = round($llrow["arvo"] * $llrow["vienti_kurssi"],2);
-				$summa += $llrow["arvo"] * $llrow["vienti_kurssi"];
+        $apusumma = round($llrow["arvo"] * $llrow["vienti_kurssi"],2);
+        $summa += $llrow["arvo"] * $llrow["vienti_kurssi"];
 
-				echo "<tr>
-						<td>$llrow[nimi]</td>
-						<td align='right'>$llrow[summa]</td>
-						<td align='right'>$llrow[arvo]</td>
-						<td>$llrow[valkoodi]</td>
-						<td align='right'>$apusumma</td>
-						<td>$llrow[viite]</td>
-						<td>$llrow[vienti]</td></tr>";
-			}
+        echo "<tr>
+            <td>$llrow[nimi]</td>
+            <td align='right'>$llrow[summa]</td>
+            <td align='right'>$llrow[arvo]</td>
+            <td>$llrow[valkoodi]</td>
+            <td align='right'>$apusumma</td>
+            <td>$llrow[viite]</td>
+            <td>$llrow[vienti]</td></tr>";
+      }
 
-			// pyˆristet‰‰n kahteen desimaaliin vasta lopuksi...
-			$summa = round($summa,2);
+      // pyˆristet‰‰n kahteen desimaaliin vasta lopuksi...
+      $summa = round($summa,2);
 
-			echo "</table><br>";
-		}
+      echo "</table><br>";
+    }
 
-		if ($yhtiorow["jalkilaskenta_kuluperuste"] == "") {
-			echo "<font class='message'>";
-			echo t("Kululaskuja yhteens‰").": ".$summa." $yhtiorow[valkoodi]";
-			echo "</font><br>";
+    if ($yhtiorow["jalkilaskenta_kuluperuste"] == "") {
+      echo "<font class='message'>";
+      echo t("Kululaskuja yhteens‰").": ".$summa." $yhtiorow[valkoodi]";
+      echo "</font><br>";
 
-			// yht‰‰n kululaskua ei ole liitetty
-			if ($summa == 0) {
-				echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty saapumiseen!")."<br>";
-			}
-		}
+      // yht‰‰n kululaskua ei ole liitetty
+      if ($summa == 0) {
+        echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty saapumiseen!")."<br>";
+      }
+    }
 
-		// p‰ivitet‰‰n kululaskujen summa kentt‰‰n saldo_maksettu keikan otsikolle
-		$query  = "	UPDATE lasku set saldo_maksettu='$summa', valkoodi='$yhtiorow[valkoodi]'
-					where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
-		$result = pupe_query($query);
+    // p‰ivitet‰‰n kululaskujen summa kentt‰‰n saldo_maksettu keikan otsikolle
+    $query  = "  UPDATE lasku set saldo_maksettu='$summa', valkoodi='$yhtiorow[valkoodi]'
+          where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
+    $result = pupe_query($query);
 
-		// haetaan keikan otsikko laskurowhun
-		$query  = "	SELECT *
-					from lasku
-					where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
-		$result = pupe_query($query);
-		$laskurow = mysql_fetch_array($result);
+    // haetaan keikan otsikko laskurowhun
+    $query  = "  SELECT *
+          from lasku
+          where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
+    $result = pupe_query($query);
+    $laskurow = mysql_fetch_array($result);
 
-		require ("varastoon.inc");
+    require ("varastoon.inc");
 
-		echo "<form method='post'>";
-		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-		echo "<input type='hidden' name='toiminto' value='kaikkiok'>";
-		echo "<input type='hidden' name='tee' value='varma'>";
-		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
-		echo "<input type='submit' value='".t("Laske virallinen varastonarvo!")."'>";
-		echo "</form>";
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+    echo "<input type='hidden' name='toiminto' value='kaikkiok'>";
+    echo "<input type='hidden' name='tee' value='varma'>";
+    echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+    echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
+    echo "<input type='submit' value='".t("Laske virallinen varastonarvo!")."'>";
+    echo "</form>";
 
-		echo "<form method='post'>";
-		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-		echo "<input type='hidden' name='toiminto' value=''>";
-		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-		echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
-		echo "<input type='submit' value='".t("Peruuta")."'>";
-		echo "</form>";
-	}
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+    echo "<input type='hidden' name='toiminto' value=''>";
+    echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+    echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
+    echo "<input type='submit' value='".t("Peruuta")."'>";
+    echo "</form>";
+  }
 }
 else {
-	echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
+  echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
 }

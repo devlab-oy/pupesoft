@@ -20,7 +20,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 		}
 
 		$myyntitilaus				 = hae_lasku($myyntitilaus_tunnus);
-		$myyntitilaus['tilausrivit'] = hae_tilausrivit($myyntitilaus_tunnus, $varastosiirto_tyyppi);
+		$myyntitilaus['tilausrivit'] = hae_tilausrivit($myyntitilaus_tunnus, $varastosiirto_tyyppi, true);
 
 		if ($varastosiirto_tyyppi == 'K') {
 			$ok = kirjanpidollinen_varastosiirto($myyntitilaus);
@@ -69,7 +69,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
 
 		aseta_kukarow_kesken($myyntitilaus['tunnus']);
 
-		$varastosiirtorivit = hae_tilausrivit($varastosiirto['tunnus'], 'K');
+		$varastosiirtorivit = hae_tilausrivit($varastosiirto['tunnus'], 'K', false);
 
 		$varastosiirtorivit = aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit);
 
@@ -410,7 +410,7 @@ if (!function_exists('linkkaa_myyntitilausrivi_varastosiirtoriviin')) {
 }
 
 if (!function_exists('hae_tilausrivit')) {
-	function hae_tilausrivit($otunnus, $varastosiirtotyyppi = 'N') {
+	function hae_tilausrivit($otunnus, $varastosiirtotyyppi = 'N', $onko_myyntitilaus = true) {
 		global $kukarow, $yhtiorow;
 
 		$tilausrivi_where		 = '';
@@ -454,6 +454,13 @@ if (!function_exists('hae_tilausrivit')) {
 			}
 		}
 
+		if ($onko_myyntitilaus) {
+			$tilausrivi_where .= " AND t.tyyppi = 'L'";
+		}
+		else {
+			$tilausrivi_where .= " AND t.tyyppi = 'G'";
+		}
+
 		$query	 = "SELECT t.*,
 					{$select}
 					t.hyllyalue AS lahde_hyllyalue,
@@ -478,8 +485,7 @@ if (!function_exists('hae_tilausrivit')) {
 					{$varasto_avainsana_join}
 					WHERE t.yhtio = '{$kukarow['yhtio']}'
 					AND t.otunnus = {$otunnus}
-					{$tilausrivi_where}
-					AND t.tyyppi IN ('L','G')";
+					{$tilausrivi_where}";
 		$result	 = pupe_query($query);
 
 		$tilausrivit = array();

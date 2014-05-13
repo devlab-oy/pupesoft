@@ -27,7 +27,6 @@ if ($laskurow['varasto'] != 0 and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A
   if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
     $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-    echo "TONTSAN JEKKU!";
   }
 }
 

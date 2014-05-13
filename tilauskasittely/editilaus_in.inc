@@ -1238,16 +1238,16 @@ while ($tietue = fgets($fd)) {
           $tilausyhteyshenkilo = $yhteysrow['nimi'];
         }
 
-				if ($arow['toimipaikka'] != 0) {
-					$kukarow_toimipaikka_tmp = $kukarow['toimipaikka'];
-					$kukarow['toimipaikka'] = $arow['toimipaikka'];
-					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+        if ($arow['toimipaikka'] != 0) {
+          $kukarow_toimipaikka_tmp = $kukarow['toimipaikka'];
+          $kukarow['toimipaikka'] = $arow['toimipaikka'];
+          $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-					if ($yhtiorow['myyntitilauksen_toimipaikka'] == '') {
-						$kukarow['toimipaikka'] = $kukarow_toimipaikka_tmp;
-						$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-					}
-				}
+          if ($yhtiorow['myyntitilauksen_toimipaikka'] == '') {
+            $kukarow['toimipaikka'] = $kukarow_toimipaikka_tmp;
+            $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+          }
+        }
 
         $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
 
@@ -1337,7 +1337,7 @@ while ($tietue = fgets($fd)) {
               yhtio_ovttunnus            = '$yhtiorow[ovttunnus]',
               yhtio_postino            = '$yhtiorow[postino]',
               yhtio_postitp            = '$yhtiorow[postitp]',
-							yhtio_toimipaikka					= '$kukarow[toimipaikka]',
+              yhtio_toimipaikka          = '$kukarow[toimipaikka]',
               ytunnus                   = '$arow[ytunnus]',
               ohjelma_moduli            = '$ohjelmamoduli'";
         $result = pupe_query($query);

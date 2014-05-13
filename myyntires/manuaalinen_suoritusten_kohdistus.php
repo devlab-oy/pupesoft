@@ -1230,36 +1230,36 @@ if ($tila == 'tee_kohdistus') {
           }
         }
 
-				//tarkistetaan viel‰ ett‰ jos ollaan tehty osasuorituksia laskulle jo aiemmin niin laitetaan viimeisen osasuorituksen maksup‰iv‰m‰‰r‰ laskun maksettup‰iv‰m‰‰r‰ksi
-				if ($lasku["summa"] != $lasku["alkup_summa"]) {
-					//haetaan eka myyntisaamistilit stringiin
-					$myyntisaamistilit = $yhtiorow["myyntisaamiset"].", ".$yhtiorow["factoringsaamiset"].", ".$yhtiorow["konsernimyyntisaamiset"];
+        //tarkistetaan viel‰ ett‰ jos ollaan tehty osasuorituksia laskulle jo aiemmin niin laitetaan viimeisen osasuorituksen maksup‰iv‰m‰‰r‰ laskun maksettup‰iv‰m‰‰r‰ksi
+        if ($lasku["summa"] != $lasku["alkup_summa"]) {
+          //haetaan eka myyntisaamistilit stringiin
+          $myyntisaamistilit = $yhtiorow["myyntisaamiset"].", ".$yhtiorow["factoringsaamiset"].", ".$yhtiorow["konsernimyyntisaamiset"];
 
-					//sitten katsotaan milloin n‰m‰ osasuoritukset on tehty
-					$query = "	SELECT tapvm
-								FROM tiliointi
-					 			WHERE yhtio = '{$kukarow["yhtio"]}'
-								AND tilino IN ($myyntisaamistilit)
-								AND ABS(summa) <= ABS({$lasku["alkup_summa"]} - {$lasku["summa"]})
-								AND ltunnus = {$lasku["tunnus"]}
-								ORDER BY tapvm DESC
-								LIMIT 1";
-					$uusinresult = pupe_query($query);
-					$uusin = mysql_fetch_assoc($uusinresult);
+          //sitten katsotaan milloin n‰m‰ osasuoritukset on tehty
+          $query = "  SELECT tapvm
+                FROM tiliointi
+                 WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tilino IN ($myyntisaamistilit)
+                AND ABS(summa) <= ABS({$lasku["alkup_summa"]} - {$lasku["summa"]})
+                AND ltunnus = {$lasku["tunnus"]}
+                ORDER BY tapvm DESC
+                LIMIT 1";
+          $uusinresult = pupe_query($query);
+          $uusin = mysql_fetch_assoc($uusinresult);
 
-					if ($uusin["tapvm"] > $laskun_maksupvm) {
-						$laskun_maksupvm_laskulle = $uusin["tapvm"];
-					}
-					else {
-						$laskun_maksupvm_laskulle = $laskun_maksupvm;
-					}
-				}
-				else {
-					$laskun_maksupvm_laskulle = $laskun_maksupvm;
-				}
+          if ($uusin["tapvm"] > $laskun_maksupvm) {
+            $laskun_maksupvm_laskulle = $uusin["tapvm"];
+          }
+          else {
+            $laskun_maksupvm_laskulle = $laskun_maksupvm;
+          }
+        }
+        else {
+          $laskun_maksupvm_laskulle = $laskun_maksupvm;
+        }
 
         $query = "  UPDATE lasku
-							SET mapvm 		= '$laskun_maksupvm_laskulle',
+              SET mapvm     = '$laskun_maksupvm_laskulle',
               viikorkoeur   = '$korkosumma',
               saldo_maksettu   = 0,
               saldo_maksettu_valuutassa = 0

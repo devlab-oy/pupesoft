@@ -184,10 +184,10 @@ class Image_Barcode_Code39 extends Image_Barcode
        $black = imagecolorallocate( $img, 0, 0, 0 );
        $white = imagecolorallocate( $img, 255, 255, 255 );
 
-	   // entinen parametri imagefontheightissä oli "gdFontSmall", nykysin ottaa int
+     // entinen parametri imagefontheightissä oli "gdFontSmall", nykysin ottaa int
        $font_height = ( $noText ? 0 : imagefontheight( 1 ) );
 
-	   // entinen parametri oli "gdFontSmall", nykysin ottaa int
+     // entinen parametri oli "gdFontSmall", nykysin ottaa int
        $font_width = imagefontwidth( 1 );
 
        // fill background with white color
@@ -219,7 +219,7 @@ class Image_Barcode_Code39 extends Image_Barcode
             }
 
             // draw text under barcode
-			// toinen parametri oli ennen 'gdFontSmall', nykysin ottaa int
+      // toinen parametri oli ennen 'gdFontSmall', nykysin ottaa int
             imagestring(
                 $img,
                 1,
@@ -246,7 +246,7 @@ class Image_Barcode_Code39 extends Image_Barcode
      *
      */
 
-	function &draw($text, $imgtype = 'png', $barwidth, $barcodeheight, $noText) {
+  function &draw($text, $imgtype = 'png', $barwidth, $barcodeheight, $noText) {
         // Check $text for invalid characters
         if ($this->checkInvalid($text)) {
             return PEAR::raiseError('Invalid text');
@@ -300,4 +300,3 @@ class Image_Barcode_Code39 extends Image_Barcode
         return preg_match( "/[^0-9A-Z\-*+\$%\/. ]/", $text );
     }
 }
-?>

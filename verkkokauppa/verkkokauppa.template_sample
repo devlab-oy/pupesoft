@@ -1,8 +1,8 @@
 <div class="wrapper" id="wrapper">
-	<div align="center" class="header" id="header">
-		<div class="head" id="head"><img src="walmiina_logo.jpg"></div>
-	</div>
-	<verkkokauppa>
-	<div class="right" id ="right"></div>
-	<div class="footer" id="footer">&copy; <a class="puhdas" href="http://www.devlab.fi">Devlab Oy</a></div>
+  <div align="center" class="header" id="header">
+    <div class="head" id="head"><img src="walmiina_logo.jpg"></div>
+  </div>
+  <verkkokauppa>
+  <div class="right" id ="right"></div>
+  <div class="footer" id="footer">&copy; <a class="puhdas" href="http://www.devlab.fi">Devlab Oy</a></div>
 </div>

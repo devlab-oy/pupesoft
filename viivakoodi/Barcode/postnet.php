@@ -159,4 +159,3 @@ class Image_Barcode_postnet extends Image_Barcode
     } // function create
 
 } // class
-?>

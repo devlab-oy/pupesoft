@@ -408,6 +408,7 @@ else {
 					AND selite = '$laskurow[toimitustapa]'";
 		$result = pupe_query($query);
 		$torow = mysql_fetch_assoc($result);
+
 		// jos toimitustavalle on setattu lisäkuluraja, lisäkulu sekä yhtiöllä on lisäkulun tuotenumero
 		if ($torow['lisakulu_summa'] != 0 and $torow['lisakulu'] != 0) {
 
@@ -446,8 +447,8 @@ else {
 				$trow = mysql_fetch_assoc($rhire);
 
 				$otunnus	 = $laskurow['tunnus'];
-				$hinta		 = $torow["lisakulu"]; // jvkulu
-				$nimitys	 = t("Toimitustavan lisäkulu");
+        $hinta   = $torow['lisakulu'];
+        $nimitys = $trow['nimitys'] != "" ? $trow['nimitys'] : t("Toimitustavan lisäkulu");
 
 				list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
@@ -538,7 +539,7 @@ else {
 			$result = pupe_query($query);
 		}
 
-		if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+    if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
 			require("inc/sahkoinen_lahete.class.inc");
 
@@ -985,7 +986,7 @@ else {
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
 
-				if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+        if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
 					require("inc/sahkoinen_lahete.class.inc");
 
@@ -1839,7 +1840,7 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
-					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+          if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
 						require("inc/sahkoinen_lahete.class.inc");
 
@@ -1881,7 +1882,7 @@ else {
 						laheta_tilausvahvistus($params_tilausvahvistus);
 					}
 
-					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+          if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
 						require("inc/sahkoinen_lahete.class.inc");
 

@@ -2041,14 +2041,14 @@
       $jtki = "";
       $rahtivapaa_chk = '';
 
-			$_eilahetetta_valmistus = (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
-			$_eilahetetta_tulostustapa = (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I');
-			$_eilahetetta_nouto = (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
-			if ($srow['eilahetetta'] != '' or $_eilahetetta_valmistus or $_eilahetetta_tulostustapa or $_eilahetetta_nouto) $eilah = 'CHECKED';
-			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
-			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
-			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
-			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
+      $_eilahetetta_valmistus = (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
+      $_eilahetetta_tulostustapa = (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I');
+      $_eilahetetta_nouto = (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
+      if ($srow['eilahetetta'] != '' or $_eilahetetta_valmistus or $_eilahetetta_tulostustapa or $_eilahetetta_nouto) $eilah = 'CHECKED';
+      if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
+      if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
+      if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
+      if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
       // Tarjouksia ei oletuksena osatoimiteta
       $_osatoimitus_oletus = ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0);

@@ -154,7 +154,7 @@
 				$toimitustavan_lahto_arvo = 0;
 			}
 
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 				// Mihin varastoon
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 

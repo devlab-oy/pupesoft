@@ -5412,8 +5412,7 @@ if ($tee == '') {
 
       // Tsekataa onko tilausrivien varastojen toimipaikoilla lähdöt päällä, ja onko kyseisen lähdevaraston toimitustavalla lähtöjä
       if ($yhtiorow['toimipaikkakasittely'] == 'L') {
-
-        $tilausrivien_varastot = tilausrivien_varastot($laskurow['otunnus']);
+        $tilausrivien_varastot = tilausrivien_varastot($laskurow['tunnus']);
 
         foreach ($tilausrivien_varastot as $tilausrivin_varasto) {
 
@@ -7906,7 +7905,7 @@ if ($tee == '') {
           else {
 
             // Haetaan kaikkien tilausrivien varastopaikat
-            $chk_arr = tilausrivien_varastot($laskurow['otunnus']);
+            $chk_arr = tilausrivien_varastot($laskurow['tunnus']);
 
             $i_counter = 0;
 

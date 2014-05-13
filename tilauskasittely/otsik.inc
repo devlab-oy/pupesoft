@@ -923,16 +923,33 @@
 
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
 
+<<<<<<< HEAD
     $args = array(
+=======
+    $params = array(
+>>>>>>> juppe/rupi
       'asiakas_tunnus' => $srow['liitostunnus'],
       'toimipaikka_tunnus' => $yhtiotoimipaikka,
       'toim' => $toim,
       'tilaustyyppi' => $tilaustyyppi,
+<<<<<<< HEAD
       'varasto' => $varasto,
       'toimitus_maa' => $srow['maa'],
     );
 
     $oletusvarasto = palauta_varasto($args);
+=======
+    );
+
+    $varastot = sallitut_varastot($params);
+
+    $args = array(
+      'varasto' => $varasto,
+      'varastot' => $varastot,
+    );
+
+    $oletusvarasto = valitse_oletusvarasto($args);
+>>>>>>> juppe/rupi
 
     // jos meillä on jo alatila ja tila ei muokkailla niitä!
     if ($alatila == '' and isset($srow['alatila']) and $srow['alatila'] != '' and $srow_from == "LASKU") {
@@ -2991,16 +3008,33 @@
 
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
 
+<<<<<<< HEAD
     $args = array(
+=======
+    $params = array(
+>>>>>>> juppe/rupi
       'asiakas_tunnus' => $asiakasid,
       'toimipaikka_tunnus' => $yhtiotoimipaikka,
       'toim' => $toim,
       'tilaustyyppi' => $tilaustyyppi,
+<<<<<<< HEAD
       'varasto' => $varasto,
       'toimitus_maa' => $maa,
     );
 
     $varasto = palauta_varasto($args);
+=======
+    );
+
+    $varastot = sallitut_varastot($params);
+
+    $args = array(
+      'varasto' => $varasto,
+      'varastot' => $varastot,
+    );
+
+    $varasto = valitse_oletusvarasto($args);
+>>>>>>> juppe/rupi
 
     $otsikon_laskurow = $apuro;
 

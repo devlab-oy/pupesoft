@@ -10,12 +10,23 @@ if (isset($_REQUEST['ajax_toiminto']) and trim($_REQUEST['ajax_toiminto']) == 't
 	$ohje = 'off';
 }
 
+if (isset($_POST["tappi"])) {
+  if($_POST["tappi"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+}
+
 if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
 
+if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($tappi) and $tappi == "lataa_tiedosto" and isset($tmpfilenimi)) {
+  readfile("/tmp/".$tmpfilenimi);
+  exit;
+}
+
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
+$sahkoinen_lahete_toim = array('RIVISYOTTO','PIKATILAUS');
 
 require('validation/Validation.php');
 
@@ -654,11 +665,11 @@ elseif ($toim == "PROJEKTI") {
 elseif ($toim == "YLLAPITO") {
 	$otsikko = t("Yll‰pitosopimus");
 }
+elseif ($toim == "EXTENNAKKO") {
+  $otsikko = t("Ext-Ennakkotilaus");
+}
 elseif ($toim == "ENNAKKO" or $laskurow["tilaustyyppi"] == "E") {
 	$otsikko = t("Ennakkotilaus");
-}
-elseif ($toim == "EXTENNAKKO" or $laskurow["tilaustyyppi"] == "E") {
-	$otsikko = t("Ext-Ennakkotilaus");
 }
 else {
 	$otsikko = t("Myyntitilaus");
@@ -858,6 +869,23 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 	$tyhjenna 	= "JOO";
 }
 
+if ($sahkoinen_lahete and $kukarow["extranet"] == "" and (int) $kukarow['kesken'] > 0 and !empty($laskurow)) {
+
+  # Tarkenne kentt‰ merkkaa sit‰ ett‰ voidaan k‰ytt‰‰ t‰t‰ ominaisuutta reklamaation puolella
+  $query = "  SELECT asiakkaan_avainsanat.*
+        FROM asiakkaan_avainsanat
+        WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+        and asiakkaan_avainsanat.laji = 'futur_sahkoinen_lahete'
+        and asiakkaan_avainsanat.avainsana != ''
+        and asiakkaan_avainsanat.tarkenne != ''
+        AND asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'";
+  $as_avain_chk_res = pupe_query($query);
+
+  if (mysql_num_rows($as_avain_chk_res) > 0) {
+    array_push($sahkoinen_lahete_toim, 'REKLAMAATIO');
+  }
+}
+
 // Poistetaan tilaus
 if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] == "" and (int) $kukarow['kesken'] > 0) {
 
@@ -913,7 +941,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 
 				$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
 
-				if ($kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $toimipaikat_row['liiketunnus'] != '') {
+        if ($kukarow["extranet"] == "" and in_array($toim, $sahkoinen_lahete_toim) and $toimipaikat_row['liiketunnus'] != '') {
 
 					require("inc/sahkoinen_lahete.class.inc");
 
@@ -1611,7 +1639,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 }
 
-if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and ($tee == "VAHINKO" or $tee == "LEPAA")) or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and $yhtiorow['reklamaation_kasittely'] != 'U'))) {
+if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == "LEPAA") or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and $yhtiorow['reklamaation_kasittely'] != 'U'))) {
 	require("tyomaarays/tyomaarays.inc");
 }
 
@@ -2030,6 +2058,26 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 	}
 }
 
+if ($tee == "MUUTA_EXT_ENNAKKO" and $kukarow['extranet'] == '') {
+
+  $query = "  UPDATE lasku
+        SET clearing = ''
+        WHERE yhtio='{$kukarow['yhtio']}'
+        AND tunnus = '{$tilausnumero}'
+        AND tilaustyyppi = '{$tilaustyyppi}'
+        AND tila = '{$orig_tila}'
+        AND alatila = '{$orig_alatila}'
+        AND clearing = 'EXTENNAKKO'";
+  $jauza = pupe_query($query);
+
+  if (mysql_affected_rows() != 1) {
+    echo "<font class='error'>".t("VIRHE: Tilausta %s ei muutettu normaaliksi ennakkotilaukseksi", "", $tilausnumero)."!</font><br><br>";
+  }
+  else {
+    echo "<font class='message'>".t("Tilaus %s muutettiin normaaliksi ennakkotilaukseksi", "", $tilausnumero)."!</font><br><br>";
+  }
+}
+
 // n‰ytet‰‰n tilaus-ruutu...
 if ($tee == '') {
 	$focus = "tuotenumero";
@@ -2354,22 +2402,6 @@ if ($tee == '') {
 					<input type='hidden' name='orig_tila' value='$orig_tila'>
 					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
 					<input type='submit' value='".t("Malliselain")."'>
-					</form>";
-		}
-
-		if ($kukarow["extranet"] == "" and $yhtiorow["vahinkotiedot_tyomaarayksella"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
-
-			echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='mista' value='$mista'>
-					<input type='hidden' name='tee' value='VAHINKO'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
-					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-					<input type='hidden' name='projektilla' value='$projektilla'>
-					<input type='hidden' name='orig_tila' value='$orig_tila'>
-					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
-					<input type='Submit' value='".t("Lis‰‰ vahinkotiedot")."'>
 					</form>";
 		}
 
@@ -3642,11 +3674,6 @@ if ($tee == '') {
 			<br>";
 	}
 
-	if ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
-		$tee_tyomaarays = "MAARAAIKAISHUOLLOT";
-		//require('tyomaarays/tyomaarays.inc');
-	}
-
 	//Kuitataan OK-var riville
 	if (($kukarow["extranet"] == "" or $yhtiorow["korvaavat_hyvaksynta"] != ""  or $yhtiorow["vientikiellon_ohitus"] == "K" or $vastaavienkasittely == "kylla") and ($tila == "OOKOOAA" or $tila == "OOKOOAAKAIKKI")) {
 
@@ -4219,7 +4246,7 @@ if ($tee == '') {
 			$varasto = $laskurow["varasto"];
 
 			// Ennakkotilaukset, Tarjoukset, Yll‰pitosopimukset ja Valmistukset eiv‰t tee saldotsekki‰
-			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+      if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";
 			}
 			else {
@@ -5069,6 +5096,7 @@ if ($tee == '') {
 					ORDER BY tilausrivi.otunnus, $sorttauslisa tuote.try, sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus
 					$limitlisa";
 		$result = pupe_query($query);
+    $tilausrivit_talteen = $result;
 
 		if ($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
 			if (isset($ruutulimit) and $ruutulimit > 0) {
@@ -8784,7 +8812,7 @@ if ($tee == '') {
 
 						$toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
 
-						if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $toimipaikat_row['liiketunnus'] != '') {
+            if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, $sahkoinen_lahete_toim) and $toimipaikat_row['liiketunnus'] != '') {
 
 							$query = "	SELECT asiakkaan_avainsanat.*
 										FROM asiakkaan_avainsanat
@@ -8944,10 +8972,65 @@ if ($tee == '') {
 						</td>
 					</tr>";
 		}
+    if ($toim == "EXTENNAKKO" and $kukarow['extranet'] == '') {
+      echo "<SCRIPT LANGUAGE=JAVASCRIPT>
+            function veri_fyi(){
+              msg = '".t("Haluatko todella muuttaa tilauksen normaaliksi ennakkotilaukseksi")."?';
+
+              if (confirm(msg)) {
+                return true;
+              }
+              else {
+                skippaa_tama_submitti = true;
+                return false;
+              }
+            }
+        </SCRIPT>";
+
+      echo "<tr><td align='left' class='back' valign='top'>
+          <form name='muuta_ennakoksi' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onSubmit = 'return veri_fyi();'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+          <input type='hidden' name='projektilla' value='$projektilla'>
+          <input type='hidden' name='tee' value='MUUTA_EXT_ENNAKKO'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='mista' value = '$mista'>
+          <input type='hidden' name='orig_tila' value = '$orig_tila'>
+          <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+          <input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>
+          <input type='submit' value='* ".t("Muuta %s normaaliksi ennakkotilaukseksi", "", $otsikko)."*'>
+          </form></td></tr>";
+    }
+
+    if ($kukarow['extranet'] == "" and $yhtiorow['tilauksen_myyntieratiedot'] != '' and $tilausok == 0 and $rivilaskuri > 0) {
+
+      if (!isset($piirtele_valikko)) {
+      echo "  <tr>
+            <td align='left' class='back' valign='top'>
+            <form name='excel_tuote_rapsa' method='post'>
+            <input type='hidden' name='lopetus' value='$lopetus'>
+            <input type='hidden' name='otunnus' value='$tilausnumero'>
+            <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+            <input type='hidden' name='mista' value = '$mista'>
+            <input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+            <input type='hidden' name='toim' value='$toim'>
+            <input type='hidden' name='tee' value='$tee'>
+            <input type='hidden' name='naantali' value='KIVAPAIKKA'>
+            <input type='submit' name='piirtele_valikko' value='".t("Tuotetiedot")."'>
+            </form>
+            </td>
+          </tr>";
+      }
+    }
 
 		echo "</table>";
 
 	}
+}
+
+if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($naantali) and $naantali == "KIVAPAIKKA") {
+  require("myyntierat_ja_tuotetiedot.inc");
 }
 
 if (@include("inc/footer.inc"));

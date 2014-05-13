@@ -69,7 +69,25 @@
 
 	if (mysql_field_name($result, $i) == "selite") {
 
-		if ($tem_laji == "tarratyyppi") {
+    if (strtolower($tem_laji) == "elinkaari") {
+
+      $vresult = t_avainsana("ELINKAARI");
+
+      if (mysql_num_rows($vresult) > 0) {
+        $ulos = "<td><select name='{$nimi}'>";
+        $ulos .= "<option value=''>".t("Ei elinkaarityyppiä")."</option>";
+
+        while ($vrow = mysql_fetch_assoc($vresult)) {
+          $sel = $trow[$i] == $vrow['selite'] ? "selected" : "";
+          $ulos .= "<option value='{$vrow['selite']}' {$sel}>{$vrow['selitetark']}</option>";
+        }
+
+        $ulos .= "</select></td>";
+      }
+
+      $jatko = 0;
+    }
+    elseif ($tem_laji == "tarratyyppi") {
 
 			$vresult = t_avainsana("TARRATYYPPI");
 
@@ -167,28 +185,21 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kieli") {
+    $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-		$ulos = "<td><select name='$nimi'>";
-		$sel  = "";
-
-		$query  = "SHOW columns from sanakirja";
-		$fields =  mysql_query($query);
-
-		while ($apurow = mysql_fetch_array($fields)) {
-			if (strlen($apurow[0]) == 2) {
+    foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
 				$sel = "";
-				if ($trow[$i] == $apurow[0]) {
-					$sel = "SELECTED";
+      if ($trow[$i] == $sanakirja_kieli) {
+        $sel = "selected";
 				}
-				elseif ($trow[$i] == "" and $apurow[0] == $yhtiorow["kieli"]) {
-					$sel = "SELECTED";
-				}
-				$ulos .= "<option value='$apurow[0]' $sel>$apurow[0] - ".maa($apurow[0])."</option>";
+      elseif ($trow[$i] == "" and $sanakirja_kieli == $yhtiorow["kieli"]) {
+        $sel = "selected";
 			}
+
+      $ulos .= "<option value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."</option>";
 		}
 
 		$ulos .= "</select></td>";
-
 		$jatko = 0;
 	}
 

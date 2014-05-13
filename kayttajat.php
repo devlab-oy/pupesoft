@@ -764,25 +764,15 @@
 				if ($toim == 'extranet') echo "<tr><th align='left'>",t("IP"),":&nbsp;</th><td><input type='text' size='16' value='{$krow['ip']}' maxlength='15' name='ip'></td></tr>";
 				echo "<tr><th align='left'>",t("Kieli"),":&nbsp;</th><td><select name='lang'>";
 
-				$query  = "show columns from sanakirja";
-				$fields =  mysql_query($query);
-
-				while ($apurow = mysql_fetch_row($fields)) {
-					if (strlen($apurow[0]) == 2) {
+        foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
 						$sel = "";
-						if ($krow["kieli"] == $apurow[0] or ($krow["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"])) {
+          if ($krow["kieli"] == $sanakirja_kieli or ($krow["kieli"] == "" and $sanakirja_kieli == $yhtiorow["kieli"])) {
 							$sel = "selected";
 						}
-						if ($apurow[0] != "tunnus") {
-							$query = "SELECT distinct nimi from maat where koodi = '{$apurow[0]}'";
-							$maare = pupe_query($query);
-							$maaro = mysql_fetch_assoc($maare);
-							$maa   = strtolower($maaro["nimi"]);
-							if ($maa=="") $maa = $apurow[0];
-							echo "<option value='{$apurow[0]}' {$sel}>",t($maa),"</option>";
-						}
-					}
+
+          echo "<option value='{$sanakirja_kieli}' {$sel}>".t($sanakirja_kieli_nimi)."</option>";
 				}
+
 				echo "</select></td></tr>";
 
 				if ($toim != 'extranet') {

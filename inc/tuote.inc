@@ -45,5 +45,3 @@
 
 	// Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa (tsekataan tuoterivi.inc)
 	$poistolukko = "ON";
-
-?>

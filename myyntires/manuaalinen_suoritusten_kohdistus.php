@@ -2092,5 +2092,3 @@ if ($tila == '') {
 }
 
 require("inc/footer.inc");
-
-?>

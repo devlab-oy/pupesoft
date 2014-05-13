@@ -291,8 +291,8 @@
 
 		$ulos .= "<option value = ''>".t("Asiakkaan laskutusosoitteella")."</option>";
 		$ulos .= "<option value = 'T' {$sel['T']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
-		$ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot erikseen")."</option>";
-		$ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot erikseen")."</option>";
+    $ulos .= "<option value = 'U' {$sel['U']}>".t("Asiakkaan laskutusosoitteella, reklamaatiot/takuut erikseen")."</option>";
+    $ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot/takuut erikseen")."</option>";
 
 		$ulos .= "</select></td>";
 
@@ -2659,6 +2659,21 @@
 
 		$jatko = 0;
 	}
+
+  if (mysql_field_name($result, $i) == "tilauksen_myyntieratiedot") {
+
+    $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+    $sel = array();
+    $apu = $trow[$i];
+    $sel[$apu] = "selected";
+
+    $ulos .= "<option value = ''>".t("Tilauksen myyntier‰ ja tuotetietoja ei n‰ytet‰")."</option>";
+    $ulos .= "<option value = 'o' $sel[o]>".t("Tilauksen myyntier‰ ja tuotetiedot n‰ytet‰‰n tarjouksella / myyntitilauksella")."</option>";
+    $ulos .= "</select></td>";
+
+    $jatko = 0;
+  }
 
 	if (mysql_field_name($result, $i) == "tilausvahvistus_jttoimituksista") {
 

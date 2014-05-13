@@ -37,7 +37,7 @@
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 
 	// debuggia varten, laita 1 jos haluut messuja
-	$lisaarivi_debug = 0;
+	$lisaarivi_debug = 1;
 
 	if (!isset($rivitunnus)) $rivitunnus = 0;
 	else $rivitunnus = (int) $rivitunnus;
@@ -1151,6 +1151,18 @@
 
 					// Jos tuotteella on tuotepaikkoja
 					foreach ($zzrow as $zrow) {
+
+if ($lisaarivi_debug == 1) {	echo "({$yhtiorow["puute_jt_oletus"]} == O <br>
+										or $varataan_saldoa == EI <br>
+										or ({$zrow["myytavissa"]} > 0 <br>
+											and (($rivityyppi == 'L' and {$kukarow['kassamyyja']} == '' and $myy_erikoistoim_ok and {$zrow['varastotyyppi']} == 'E' and {$zrow['erikoistoimitus_alarajasumma']} > 0 and (float) {$trow['myyntihinta']} >= (float) {$zrow['erikoistoimitus_alarajasumma']}) <br>
+												or {$zrow["varastotyyppi"]} == '' <br>
+												or {$zrow["varastotyyppi"]} == 'V' <br>
+												or (is_array($varasto) and in_array({$zrow["varasto"]}, $varasto) and {$laskurow["varasto"]} == 0)
+												or {$laskurow["varasto"]} == {$zrow["varasto"]}) <br>
+										) <br>
+									) <br><br>";
+	var_dump($varasto); echo "<br><br>";}
 
 						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 

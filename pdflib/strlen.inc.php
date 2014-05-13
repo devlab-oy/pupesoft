@@ -302,6 +302,4 @@ foreach ($tmpfnts as $fnt)
     $this->widths[$fnt][196] = $this->widths[$fnt][65];
     $this->widths[$fnt][197] = $this->widths[$fnt][65];
     $this->widths[$fnt][214] = $this->widths[$fnt][79];
-} 
-
-?>
+}

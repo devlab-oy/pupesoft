@@ -1,9 +1,10 @@
 <?php
+
 require ("inc/parametrit.inc");
 
-if (!isset($konserni))  $konserni = '';
+if (!isset($konserni))   $konserni = '';
 if (!isset($tee))     $tee = '';
-if (!isset($oper))    $oper = '';
+if (!isset($oper))     $oper = '';
 if (!isset($ojarj))    $ojarj = '';
 if (!isset($tapa))    $tapa = 'a';
 
@@ -79,7 +80,7 @@ if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_nam
 
 if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
   echo yhdista_asiakkaita( $jataminut, $yhdista );
-    echo "<br /><br /><form><input type='submit' value='" . t("Yhdistä lisää") . "' /></form>";
+  echo "<br /><br /><form><input type='submit' value='" . t("Yhdistä lisää") . "' /></form>";
 }
 
 if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']) or is_uploaded_file($_FILES['userfile']['tmp_name']) === false ) ) {
@@ -229,7 +230,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
   global $kukarow;
 
     // tässä on jätettävän asiakkaan tiedot
-    $jquery = " SELECT *
+    $jquery  = "  SELECT *
           FROM asiakas
           where yhtio = '$kukarow[yhtio]'
           and tunnus = '$jataminut' ";
@@ -256,7 +257,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         echo "<br>".t("Yhdistetään").": $asrow[ytunnus] $asrow[nimi] ".$asrow['osoite']." ".$asrow['postino']." ".$asrow['postitp']."<br><br>";
 
         // haetaan asiakashinta ensin Ytunnuksella.
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM asiakashinta
               WHERE ytunnus = '$asrow[ytunnus]'
               AND asiakas = 0
@@ -272,20 +273,20 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
             $tarksql = "SELECT *
                   FROM asiakashinta
-                  where yhtio           = '$kukarow[yhtio]'
-                  and tuoteno           = '$ahrow[tuoteno]'
-                  and ryhma             = '$ahrow[ryhma]'
-                  and asiakas           = 0
-                  and ytunnus           = '$jrow[ytunnus]'
-                  and asiakas_ryhma     = '$ahrow[asiakas_ryhma]'
-                  and asiakas_segmentti = '$ahrow[asiakas_segmentti]'
-                  and piiri             = '$ahrow[piiri]'
-                  and hinta             = '$ahrow[hinta]'
-                  and valkoodi          = '$ahrow[valkoodi]'
-                  and minkpl            = '$ahrow[minkpl]'
-                  and maxkpl            = '$ahrow[maxkpl]'
-                  and alkupvm           = '$ahrow[alkupvm]'
-                  and loppupvm          = '$ahrow[loppupvm]'
+                  where yhtio            = '$kukarow[yhtio]'
+                  and tuoteno            = '$ahrow[tuoteno]'
+                  and ryhma              = '$ahrow[ryhma]'
+                  and asiakas            = 0
+                  and ytunnus            = '$jrow[ytunnus]'
+                  and asiakas_ryhma      = '$ahrow[asiakas_ryhma]'
+                  and asiakas_segmentti  = '$ahrow[asiakas_segmentti]'
+                  and piiri              = '$ahrow[piiri]'
+                  and hinta              = '$ahrow[hinta]'
+                  and valkoodi           = '$ahrow[valkoodi]'
+                  and minkpl             = '$ahrow[minkpl]'
+                  and maxkpl             = '$ahrow[maxkpl]'
+                  and alkupvm            = '$ahrow[alkupvm]'
+                  and loppupvm           = '$ahrow[loppupvm]'
                   and laji        = '$ahrow[laji]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
@@ -293,22 +294,22 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             if ($ahy == 0) {
               $ahinsert = "INSERT INTO asiakashinta SET
                     yhtio             = '$kukarow[yhtio]',
-                    tuoteno           = '$ahrow[tuoteno]',
-                    ryhma             = '$ahrow[ryhma]',
-                    asiakas           = 0,
-                    ytunnus           = '$jrow[ytunnus]',
-                    asiakas_ryhma     = '$ahrow[asiakas_ryhma]',
-                    asiakas_segmentti = '$ahrow[asiakas_segmentti]',
-                    piiri             = '$ahrow[piiri]',
-                    hinta             = '$ahrow[hinta]',
-                    valkoodi          = '$ahrow[valkoodi]',
-                    minkpl            = '$ahrow[minkpl]',
-                    maxkpl            = '$ahrow[maxkpl]',
-                    alkupvm           = '$ahrow[alkupvm]',
-                    loppupvm          = '$ahrow[loppupvm]',
-                    laji              = '$ahrow[laji]',
-                    laatija           = '$kukarow[kuka]',
-                    luontiaika        = now()";
+                    tuoteno            = '$ahrow[tuoteno]',
+                    ryhma              = '$ahrow[ryhma]',
+                    asiakas            = 0,
+                    ytunnus            = '$jrow[ytunnus]',
+                    asiakas_ryhma      = '$ahrow[asiakas_ryhma]',
+                    asiakas_segmentti  = '$ahrow[asiakas_segmentti]',
+                    piiri              = '$ahrow[piiri]',
+                    hinta              = '$ahrow[hinta]',
+                    valkoodi           = '$ahrow[valkoodi]',
+                    minkpl             = '$ahrow[minkpl]',
+                    maxkpl             = '$ahrow[maxkpl]',
+                    alkupvm            = '$ahrow[alkupvm]',
+                    loppupvm           = '$ahrow[loppupvm]',
+                    laji               = '$ahrow[laji]',
+                    laatija            = '$kukarow[kuka]',
+                    luontiaika         = now()";
               $ahinsertresult = pupe_query($ahinsert);
 
               synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
@@ -317,7 +318,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // haetaan asiakashinta sitten asiakastunnuksella.
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM asiakashinta
               WHERE asiakas = '$asrow[tunnus]'
               AND yhtio ='$kukarow[yhtio]'";
@@ -333,20 +334,20 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             // Ytunnus voi olla myös setattu, mutta ei huomioida sitä tässä...
             $tarksql = "SELECT *
                   FROM asiakashinta
-                  where yhtio           = '$kukarow[yhtio]'
-                  and tuoteno           = '$ahrow[tuoteno]'
-                  and ryhma             = '$ahrow[ryhma]'
-                  and asiakas           = '$jrow[tunnus]'
+                  where yhtio            = '$kukarow[yhtio]'
+                  and tuoteno            = '$ahrow[tuoteno]'
+                  and ryhma              = '$ahrow[ryhma]'
+                  and asiakas            = '$jrow[tunnus]'
                   #and ytunnus            = ''
-                  and asiakas_ryhma     = '$ahrow[asiakas_ryhma]'
-                  and asiakas_segmentti = '$ahrow[asiakas_segmentti]'
-                  and piiri             = '$ahrow[piiri]'
-                  and hinta             = '$ahrow[hinta]'
-                  and valkoodi          = '$ahrow[valkoodi]'
-                  and minkpl            = '$ahrow[minkpl]'
-                  and maxkpl            = '$ahrow[maxkpl]'
-                  and alkupvm           = '$ahrow[alkupvm]'
-                  and loppupvm          = '$ahrow[loppupvm]'
+                  and asiakas_ryhma      = '$ahrow[asiakas_ryhma]'
+                  and asiakas_segmentti  = '$ahrow[asiakas_segmentti]'
+                  and piiri              = '$ahrow[piiri]'
+                  and hinta              = '$ahrow[hinta]'
+                  and valkoodi           = '$ahrow[valkoodi]'
+                  and minkpl             = '$ahrow[minkpl]'
+                  and maxkpl             = '$ahrow[maxkpl]'
+                  and alkupvm            = '$ahrow[alkupvm]'
+                  and loppupvm           = '$ahrow[loppupvm]'
                   and laji        = '$ahrow[laji]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
@@ -354,22 +355,22 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             if ($ahy == 0) {
               $ahinsert = "INSERT INTO asiakashinta SET
                     yhtio             = '$kukarow[yhtio]',
-                    tuoteno           = '$ahrow[tuoteno]',
-                    ryhma             = '$ahrow[ryhma]',
-                    asiakas           = '$jrow[tunnus]',
-                    ytunnus           = '',
-                    asiakas_ryhma     = '$ahrow[asiakas_ryhma]',
-                    asiakas_segmentti = '$ahrow[asiakas_segmentti]',
-                    piiri             = '$ahrow[piiri]',
-                    hinta             = '$ahrow[hinta]',
-                    valkoodi          = '$ahrow[valkoodi]',
-                    minkpl            = '$ahrow[minkpl]',
-                    maxkpl            = '$ahrow[maxkpl]',
-                    alkupvm           = '$ahrow[alkupvm]',
-                    loppupvm          = '$ahrow[loppupvm]',
-                    laji              = '$ahrow[laji]',
-                    laatija           = '$kukarow[kuka]',
-                    luontiaika        = now()";
+                    tuoteno            = '$ahrow[tuoteno]',
+                    ryhma              = '$ahrow[ryhma]',
+                    asiakas            = '$jrow[tunnus]',
+                    ytunnus            = '',
+                    asiakas_ryhma      = '$ahrow[asiakas_ryhma]',
+                    asiakas_segmentti  = '$ahrow[asiakas_segmentti]',
+                    piiri              = '$ahrow[piiri]',
+                    hinta              = '$ahrow[hinta]',
+                    valkoodi           = '$ahrow[valkoodi]',
+                    minkpl             = '$ahrow[minkpl]',
+                    maxkpl             = '$ahrow[maxkpl]',
+                    alkupvm            = '$ahrow[alkupvm]',
+                    loppupvm           = '$ahrow[loppupvm]',
+                    laji               = '$ahrow[laji]',
+                    laatija            = '$kukarow[kuka]',
+                    luontiaika         = now()";
               $ahinsertresult = pupe_query($ahinsert);
 
               synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
@@ -378,7 +379,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // haetaan asiakasalennus ensin Ytunnuksella.
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM asiakasalennus
               WHERE ytunnus = '$asrow[ytunnus]'
               AND asiakas = 0
@@ -393,39 +394,39 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           while ($alrow = mysql_fetch_assoc($hresult)) {
 
             $tarksql = "SELECT * FROM asiakasalennus
-                  where yhtio           = '$kukarow[yhtio]'
-                  and tuoteno           = '$alrow[tuoteno]'
-                  and ryhma             = '$alrow[ryhma]'
-                  and asiakas           = 0
-                  and ytunnus           = '$jrow[ytunnus]'
-                  and asiakas_ryhma     = '$alrow[asiakas_ryhma]'
-                  and asiakas_segmentti = '$alrow[asiakas_segmentti]'
-                  and piiri             = '$alrow[piiri]'
-                  and alennus             = '$alrow[alennus]'
-                  and alennuslaji     = '$alrow[alennuslaji]'
-                  and minkpl            = '$alrow[minkpl]'
-                  and alkupvm           = '$alrow[alkupvm]'
-                  and loppupvm          = '$alrow[loppupvm]'";
+                  where yhtio            = '$kukarow[yhtio]'
+                  and tuoteno            = '$alrow[tuoteno]'
+                  and ryhma              = '$alrow[ryhma]'
+                  and asiakas            = 0
+                  and ytunnus            = '$jrow[ytunnus]'
+                  and asiakas_ryhma      = '$alrow[asiakas_ryhma]'
+                  and asiakas_segmentti  = '$alrow[asiakas_segmentti]'
+                  and piiri              = '$alrow[piiri]'
+                  and alennus              = '$alrow[alennus]'
+                  and alennuslaji      = '$alrow[alennuslaji]'
+                  and minkpl             = '$alrow[minkpl]'
+                  and alkupvm            = '$alrow[alkupvm]'
+                  and loppupvm           = '$alrow[loppupvm]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
 
             if ($ahy == 0) {
               $alinsert = "INSERT INTO asiakasalennus SET
                   yhtio             = '$kukarow[yhtio]',
-                  tuoteno           = '$alrow[tuoteno]',
-                  ryhma             = '$alrow[ryhma]',
-                  asiakas           = 0,
-                  ytunnus           = '$jrow[ytunnus]',
-                  asiakas_ryhma     = '$alrow[asiakas_ryhma]',
-                  asiakas_segmentti = '$alrow[asiakas_segmentti]',
-                  piiri             = '$alrow[piiri]',
-                  alennus             = '$alrow[alennus]',
-                  alennuslaji     = '$alrow[alennuslaji]',
-                  minkpl            = '$alrow[minkpl]',
-                  alkupvm           = '$alrow[alkupvm]',
-                  loppupvm          = '$alrow[loppupvm]',
-                  laatija           = '$kukarow[kuka]',
-                  luontiaika        = now()";
+                  tuoteno            = '$alrow[tuoteno]',
+                  ryhma              = '$alrow[ryhma]',
+                  asiakas            = 0,
+                  ytunnus            = '$jrow[ytunnus]',
+                  asiakas_ryhma      = '$alrow[asiakas_ryhma]',
+                  asiakas_segmentti  = '$alrow[asiakas_segmentti]',
+                  piiri              = '$alrow[piiri]',
+                  alennus              = '$alrow[alennus]',
+                  alennuslaji      = '$alrow[alennuslaji]',
+                  minkpl             = '$alrow[minkpl]',
+                  alkupvm            = '$alrow[alkupvm]',
+                  loppupvm           = '$alrow[loppupvm]',
+                  laatija            = '$kukarow[kuka]',
+                  luontiaika         = now()";
               $alinsertresult = pupe_query($alinsert);
 
               synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
@@ -434,7 +435,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // haetaan asiakasalennus sitten asiakastunnuksella.
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM asiakasalennus
               WHERE asiakas = '$asrow[tunnus]'
               #AND ytunnus = ''
@@ -449,41 +450,41 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           while ($alrow = mysql_fetch_assoc($hresult)) {
             // Ytunnus voi olla myös setattu, mutta ei huomioida sitä tässä...
             $tarksql = "SELECT * FROM asiakasalennus
-                  where yhtio           = '$kukarow[yhtio]'
-                  and tuoteno           = '$alrow[tuoteno]'
-                  and ryhma             = '$alrow[ryhma]'
-                  and asiakas           = '$jrow[tunnus]'
+                  where yhtio            = '$kukarow[yhtio]'
+                  and tuoteno            = '$alrow[tuoteno]'
+                  and ryhma              = '$alrow[ryhma]'
+                  and asiakas            = '$jrow[tunnus]'
                   #and ytunnus            = ''
-                  and asiakas_ryhma     = '$alrow[asiakas_ryhma]'
-                  and asiakas_segmentti = '$alrow[asiakas_segmentti]'
-                  and piiri             = '$alrow[piiri]'
-                  and alennus             = '$alrow[alennus]'
-                  and alennuslaji     = '$alrow[alennuslaji]'
-                  and minkpl            = '$alrow[minkpl]'
-                  and monikerta           = '$alrow[monikerta]'
-                  and alkupvm           = '$alrow[alkupvm]'
-                  and loppupvm          = '$alrow[loppupvm]'";
+                  and asiakas_ryhma      = '$alrow[asiakas_ryhma]'
+                  and asiakas_segmentti  = '$alrow[asiakas_segmentti]'
+                  and piiri              = '$alrow[piiri]'
+                  and alennus              = '$alrow[alennus]'
+                  and alennuslaji      = '$alrow[alennuslaji]'
+                  and minkpl             = '$alrow[minkpl]'
+                  and monikerta            = '$alrow[monikerta]'
+                  and alkupvm            = '$alrow[alkupvm]'
+                  and loppupvm           = '$alrow[loppupvm]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
 
             if ($ahy == 0) {
               $alinsert = "INSERT INTO asiakasalennus SET
                     yhtio             = '$kukarow[yhtio]',
-                    tuoteno           = '$alrow[tuoteno]',
-                    ryhma             = '$alrow[ryhma]',
-                    asiakas           = '$jrow[tunnus]',
-                    ytunnus           = '',
-                    asiakas_ryhma     = '$alrow[asiakas_ryhma]',
-                    asiakas_segmentti = '$alrow[asiakas_segmentti]',
-                    piiri             = '$alrow[piiri]',
-                    alennus             = '$alrow[alennus]',
-                    alennuslaji     = '$alrow[alennuslaji]',
-                    minkpl            = '$alrow[minkpl]',
-                    monikerta           = '$alrow[monikerta]',
-                    alkupvm           = '$alrow[alkupvm]',
-                    loppupvm          = '$alrow[loppupvm]',
-                    laatija           = '$kukarow[kuka]',
-                    luontiaika        = now()";
+                    tuoteno            = '$alrow[tuoteno]',
+                    ryhma              = '$alrow[ryhma]',
+                    asiakas            = '$jrow[tunnus]',
+                    ytunnus            = '',
+                    asiakas_ryhma      = '$alrow[asiakas_ryhma]',
+                    asiakas_segmentti  = '$alrow[asiakas_segmentti]',
+                    piiri              = '$alrow[piiri]',
+                    alennus              = '$alrow[alennus]',
+                    alennuslaji      = '$alrow[alennuslaji]',
+                    minkpl             = '$alrow[minkpl]',
+                    monikerta            = '$alrow[monikerta]',
+                    alkupvm            = '$alrow[alkupvm]',
+                    loppupvm           = '$alrow[loppupvm]',
+                    laatija            = '$kukarow[kuka]',
+                    luontiaika         = now()";
               $alinsertresult = pupe_query($alinsert);
 
               synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
@@ -492,7 +493,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // !!!!!!!! ASIAKASKOMMENTTI OSIO !!!!!!!!!!!!
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM asiakaskommentti
               WHERE yhtio ='$kukarow[yhtio]'
               AND ytunnus = '$asrow[ytunnus]'";
@@ -508,19 +509,19 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             $tarksql = "SELECT *
                   FROM asiakaskommentti
                   where yhtio     = '$kukarow[yhtio]'
-                  and kommentti   = '$ahrow[kommentti]'
-                  and tuoteno     = '$ahrow[tuoteno]'
-                  and ytunnus     = '$jrow[ytunnus]'";
+                  and  kommentti   = '$ahrow[kommentti]'
+                  and  tuoteno     = '$ahrow[tuoteno]'
+                  and  ytunnus     = '$jrow[ytunnus]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
 
             if ($ahy == 0) {
               $ahinsert = "INSERT INTO asiakaskommentti SET
                     yhtio       = '$kukarow[yhtio]',
-                    kommentti   = '$ahrow[kommentti]',
-                    tuoteno     = '$ahrow[tuoteno]',
-                    ytunnus     = '$jrow[ytunnus]',
-                    laatija     = '$kukarow[kuka]',
+                     kommentti   = '$ahrow[kommentti]',
+                     tuoteno     = '$ahrow[tuoteno]',
+                     ytunnus     = '$jrow[ytunnus]',
+                     laatija     = '$kukarow[kuka]',
                     luontiaika  = now()";
               $ahinsertresult = pupe_query($ahinsert);
 
@@ -530,7 +531,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // !!!!!!!! RAHTISOPIMUS OSIO !!!!!!!!!!!!
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM rahtisopimukset
               WHERE yhtio = '$kukarow[yhtio]'
               AND asiakas = 0
@@ -548,8 +549,8 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                   FROM rahtisopimukset
                   where yhtio       = '$kukarow[yhtio]'
                   and toimitustapa  = '$ahrow[toimitustapa]'
-                  and asiakas     = 0
-                  and ytunnus     = '$jrow[ytunnus]'
+                  and asiakas      = 0
+                  and ytunnus      = '$jrow[ytunnus]'
                   and rahtisopimus  = '$ahrow[rahtisopimus]'
                   and selite      = '$ahrow[selite]'
                   and muumaksaja    = '$ahrow[muumaksaja]'";
@@ -560,12 +561,12 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
               $ahinsert = "INSERT INTO rahtisopimukset SET
                     yhtio         = '$kukarow[yhtio]',
                     toimitustapa  = '$ahrow[toimitustapa]',
-                    asiakas     = 0,
-                    ytunnus     = '$jrow[ytunnus]',
+                    asiakas      = 0,
+                    ytunnus      = '$jrow[ytunnus]',
                     rahtisopimus  = '$ahrow[rahtisopimus]',
                     selite      = '$ahrow[selite]',
                     muumaksaja    = '$ahrow[muumaksaja]',
-                    laatija       = '$kukarow[kuka]',
+                     laatija       = '$kukarow[kuka]',
                     luontiaika    = now()";
               $ahinsertresult = pupe_query($ahinsert);
 
@@ -574,7 +575,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
           }
         }
 
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM rahtisopimukset
               WHERE yhtio ='$kukarow[yhtio]'
               AND asiakas = '$asrow[tunnus]'";
@@ -591,7 +592,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                   FROM rahtisopimukset
                   where yhtio       = '$kukarow[yhtio]'
                   and toimitustapa  = '$ahrow[toimitustapa]'
-                  and asiakas     = '$jrow[tunnus]'
+                  and asiakas      = '$jrow[tunnus]'
                   and rahtisopimus  = '$ahrow[rahtisopimus]'
                   and selite      = '$ahrow[selite]'
                   and muumaksaja    = '$ahrow[muumaksaja]'";
@@ -602,12 +603,12 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
               $ahinsert = "INSERT INTO rahtisopimukset SET
                     yhtio         = '$kukarow[yhtio]',
                     toimitustapa  = '$ahrow[toimitustapa]',
-                    asiakas     = '$jrow[tunnus]',
-                    ytunnus     = '',
+                    asiakas      = '$jrow[tunnus]',
+                    ytunnus      = '',
                     rahtisopimus  = '$ahrow[rahtisopimus]',
                     selite      = '$ahrow[selite]',
                     muumaksaja    = '$ahrow[muumaksaja]',
-                    laatija       = '$kukarow[kuka]',
+                     laatija       = '$kukarow[kuka]',
                     luontiaika    = now()";
               $ahinsertresult = pupe_query($ahinsert);
 
@@ -617,11 +618,11 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // !!!!!!!! YHTEYSHENKILÖ OSIO !!!!!!!!!!!!
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM yhteyshenkilo
               WHERE yhtio    = '$kukarow[yhtio]'
               AND liitostunnus = '$asrow[tunnus]'
-              and tyyppi     = 'A'";
+              and tyyppi      = 'A'";
         $hresult = pupe_query($hquery);
 
         if (mysql_num_rows($hresult) == 0) {
@@ -634,40 +635,40 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             $tarksql = "SELECT *
                   FROM yhteyshenkilo
                   where yhtio         = '$kukarow[yhtio]'
-                  and tyyppi        = '$ahrow[tyyppi]'
+                  and tyyppi         = '$ahrow[tyyppi]'
                   and liitostunnus    = '$jrow[tunnus]'
                   and nimi        = '$ahrow[nimi]'
-                  and titteli       = '$ahrow[titteli]'
-                  and rooli       = '$ahrow[rooli]'
-                  and suoramarkkinointi = '$ahrow[suoramarkkinointi]'
-                  and email       = '$ahrow[email]'
-                  and puh         = '$ahrow[puh]'
-                  and gsm         = '$ahrow[gsm]'
-                  and fax         = '$ahrow[fax]'
-                  and www         = '$ahrow[www]'
-                  and fakta       = '$ahrow[fakta]'
-                  and tilausyhteyshenkilo = '$ahrow[tilausyhteyshenkilo]'
-                  and oletusyhteyshenkilo = '$ahrow[oletusyhteyshenkilo]'";
+                  and titteli        = '$ahrow[titteli]'
+                  and rooli        = '$ahrow[rooli]'
+                  and suoramarkkinointi  = '$ahrow[suoramarkkinointi]'
+                  and email        = '$ahrow[email]'
+                  and puh          = '$ahrow[puh]'
+                  and gsm          = '$ahrow[gsm]'
+                  and fax          = '$ahrow[fax]'
+                  and www          = '$ahrow[www]'
+                  and fakta        = '$ahrow[fakta]'
+                  and tilausyhteyshenkilo  = '$ahrow[tilausyhteyshenkilo]'
+                  and oletusyhteyshenkilo  = '$ahrow[oletusyhteyshenkilo]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
 
             if ($ahy == 0) {
               $ahinsert = "INSERT INTO yhteyshenkilo SET
                     yhtio           = '$kukarow[yhtio]',
-                    tyyppi        = '$ahrow[tyyppi]',
+                    tyyppi         = '$ahrow[tyyppi]',
                     liitostunnus    = '$jrow[tunnus]',
                     nimi        = '$ahrow[nimi]',
-                    titteli       = '$ahrow[titteli]',
-                    rooli       = '$ahrow[rooli]',
-                    suoramarkkinointi = '$ahrow[suoramarkkinointi]',
-                    email       = '$ahrow[email]',
-                    puh         = '$ahrow[puh]',
-                    gsm         = '$ahrow[gsm]',
-                    fax         = '$ahrow[fax]',
-                    www         = '$ahrow[www]',
-                    fakta       = '$ahrow[fakta]',
-                    tilausyhteyshenkilo = '$ahrow[tilausyhteyshenkilo]',
-                    oletusyhteyshenkilo = '$ahrow[oletusyhteyshenkilo]',
+                    titteli        = '$ahrow[titteli]',
+                    rooli        = '$ahrow[rooli]',
+                    suoramarkkinointi  = '$ahrow[suoramarkkinointi]',
+                    email        = '$ahrow[email]',
+                    puh          = '$ahrow[puh]',
+                    gsm          = '$ahrow[gsm]',
+                    fax          = '$ahrow[fax]',
+                    www          = '$ahrow[www]',
+                    fakta        = '$ahrow[fakta]',
+                    tilausyhteyshenkilo  = '$ahrow[tilausyhteyshenkilo]',
+                    oletusyhteyshenkilo  = '$ahrow[oletusyhteyshenkilo]',
                     laatija         = '$kukarow[kuka]',
                     luontiaika      = now()";
               $ahinsertresult = pupe_query($ahinsert);
@@ -678,7 +679,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // !!!!!!!! ASIAKKAAN_AVAINSANA OSIO !!!!!!!!!!!!
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM asiakkaan_avainsanat
               WHERE yhtio = '$kukarow[yhtio]'
               AND liitostunnus = '$asrow[tunnus]'";
@@ -694,20 +695,20 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             $tarksql = "SELECT *
                   FROM asiakkaan_avainsanat
                   where yhtio       = '$kukarow[yhtio]'
-                  and liitostunnus  = '$jrow[tunnus]'
-                  and kieli       = '$ahrow[kieli]'
+                  and liitostunnus   = '$jrow[tunnus]'
+                  and kieli        = '$ahrow[kieli]'
                   and laji        = '$ahrow[laji]'
-                  and avainsana   = '$ahrow[avainsana]'";
+                  and avainsana    = '$ahrow[avainsana]'";
             $tarkesult = pupe_query($tarksql);
             $ahy = mysql_num_rows($tarkesult);
 
             if ($ahy == 0) {
               $ahinsert = "INSERT INTO asiakkaan_avainsanat SET
-                    yhtio     = '$kukarow[yhtio]',
-                    liitostunnus  = '$jrow[tunnus]',
-                    kieli       = '$ahrow[kieli]',
+                    yhtio      = '$kukarow[yhtio]',
+                    liitostunnus   = '$jrow[tunnus]',
+                    kieli        = '$ahrow[kieli]',
                     laji        = '$ahrow[laji]',
-                    avainsana   = '$ahrow[avainsana]',
+                    avainsana    = '$ahrow[avainsana]',
                     laatija       = '$kukarow[kuka]',
                     luontiaika    = now()";
               $ahinsertresult = pupe_query($ahinsert);
@@ -718,7 +719,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // !!!!!!!! ASIAKASLIITE OSIO !!!!!!!!!!!!
-        $hquery = " SELECT *
+        $hquery = "  SELECT *
               FROM liitetiedostot
               WHERE yhtio = '$kukarow[yhtio]'
               AND liitos = 'asiakas'
@@ -735,17 +736,17 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             $tarksql = "SELECT *
                   FROM liitetiedostot
                   where yhtio       = '$kukarow[yhtio]'
-                  and liitos      = '$ahrow[liitos]'
-                  and liitostunnus  = '$jrow[tunnus]'
-                  and selite      = '$ahrow[selite]'
+                  and liitos       = '$ahrow[liitos]'
+                  and liitostunnus   = '$jrow[tunnus]'
+                  and selite       = '$ahrow[selite]'
                   and kieli       = '$ahrow[kieli]'
-                  and filename    = '$ahrow[filename]'
-                  and filesize    = '$ahrow[filesize]'
-                  and filetype    = '$ahrow[filetype]'
+                  and filename     = '$ahrow[filename]'
+                  and filesize     = '$ahrow[filesize]'
+                  and filetype     = '$ahrow[filetype]'
                   and image_width   = '$ahrow[image_width]'
-                  and image_height  = '$ahrow[image_height]'
-                  and image_bits    = '$ahrow[image_bits]'
-                  and image_channels  = '$ahrow[image_channels]'
+                  and image_height   = '$ahrow[image_height]'
+                  and image_bits     = '$ahrow[image_bits]'
+                  and image_channels   = '$ahrow[image_channels]'
                   and kayttotarkoitus = '$ahrow[kayttotarkoitus]'
                   and jarjestys     = '$ahrow[jarjestys]'";
             $tarkesult = pupe_query($tarksql);
@@ -753,19 +754,19 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
             if ($ahy == 0) {
               $ahinsert = "INSERT INTO liitetiedostot SET
-                    yhtio     = '$kukarow[yhtio]',
-                    liitos      = '$ahrow[liitos]',
-                    liitostunnus  = '$jrow[tunnus]',
-                    data      = '".mysql_real_escape_string($ahrow["data"])."',
-                    selite      = '$ahrow[selite]',
+                    yhtio      = '$kukarow[yhtio]',
+                    liitos       = '$ahrow[liitos]',
+                    liitostunnus   = '$jrow[tunnus]',
+                    data       = '".mysql_real_escape_string($ahrow["data"])."',
+                    selite       = '$ahrow[selite]',
                     kieli       = '$ahrow[kieli]',
-                    filename    = '$ahrow[filename]',
-                    filesize    = '$ahrow[filesize]',
-                    filetype    = '$ahrow[filetype]',
+                    filename     = '$ahrow[filename]',
+                    filesize     = '$ahrow[filesize]',
+                    filetype     = '$ahrow[filetype]',
                     image_width   = '$ahrow[image_width]',
-                    image_height  = '$ahrow[image_height]',
-                    image_bits    = '$ahrow[image_bits]',
-                    image_channels  = '$ahrow[image_channels]',
+                    image_height   = '$ahrow[image_height]',
+                    image_bits     = '$ahrow[image_bits]',
+                    image_channels   = '$ahrow[image_channels]',
                     kayttotarkoitus = '$ahrow[kayttotarkoitus]',
                     jarjestys     = '$ahrow[jarjestys]',
                     laatija       = '$kukarow[kuka]',
@@ -792,10 +793,10 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
             $tarksql = "SELECT *
                   FROM puun_alkio
-                  where yhtio   = '$kukarow[yhtio]'
-                  and liitos    = '$jrow[tunnus]'
+                  where yhtio    = '$kukarow[yhtio]'
+                  and liitos     = '$jrow[tunnus]'
                   and kieli     = '$ahrow[kieli]'
-                  and laji    = '$ahrow[laji]'
+                  and laji     = '$ahrow[laji]'
                   and kutsuja = '{$ahrow['kutsuja']}'
                   and puun_tunnus = '$ahrow[puun_tunnus]'";
             $tarkesult = pupe_query($tarksql);
@@ -804,10 +805,10 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
             if ($ahy == 0) {
 
               $ahinsert = "INSERT INTO puun_alkio SET
-                    yhtio   = '$kukarow[yhtio]',
-                    liitos    = '$jrow[tunnus]',
+                    yhtio    = '$kukarow[yhtio]',
+                    liitos     = '$jrow[tunnus]',
                     kieli     = '$ahrow[kieli]',
-                    laji    = '$ahrow[laji]',
+                    laji     = '$ahrow[laji]',
                     kutsuja    = '{$ahrow['kutsuja']}',
                     puun_tunnus = '$ahrow[puun_tunnus]',
                     jarjestys   = '$ahrow[jarjestys]',
@@ -819,7 +820,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // !!!!!! Asiakasmemot, kalenterit, siellä olevat liitetiedostot menee kalenterintunnuksen mukaan, joten niiitä ei tarvitse erikseen päivittää
-        $memohaku = " SELECT liitostunnus, asiakas
+        $memohaku = "  SELECT liitostunnus, asiakas
                 FROM kalenteri
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND liitostunnus = '$asrow[tunnus]'";
@@ -840,7 +841,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
         }
 
         // !!!!!!!! LASKUTUS OSIO !!!!!!!!!!!!
-        $lquery = " SELECT group_concat(tunnus) tunnukset FROM lasku WHERE yhtio ='$kukarow[yhtio]' AND liitostunnus = '$asrow[tunnus]' AND tila not IN ('G','O','K','H','Y','M','P','Q','X')";
+        $lquery = "  SELECT group_concat(tunnus) tunnukset FROM lasku WHERE yhtio ='$kukarow[yhtio]' AND liitostunnus = '$asrow[tunnus]' AND tila not IN ('G','O','K','H','Y','M','P','Q','X')";
         $lresult = pupe_query($lquery);
         $lrow = mysql_fetch_assoc($lresult);
 
@@ -878,16 +879,16 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
 
     $historia_tietokantaan = str_replace('<br />', '\\n', $historia);
 
-    $kysely = " INSERT INTO kalenteri
-          SET tapa    = '".t("Muu syy (muista selite!)")."',
-          asiakas     = '$jrow[ytunnus]',
-          liitostunnus  = '$jrow[tunnus]',
-          kuka        = '$kukarow[kuka]',
-          yhtio       = '$kukarow[yhtio]',
-          tyyppi      = 'Memo',
+    $kysely = "  INSERT INTO kalenteri
+          SET tapa     = '".t("Muu syy (muista selite!)")."',
+          asiakas      = '$jrow[ytunnus]',
+          liitostunnus   = '$jrow[tunnus]',
+          kuka         = '$kukarow[kuka]',
+          yhtio        = '$kukarow[yhtio]',
+          tyyppi       = 'Memo',
           kentta01    = '$historia_tietokantaan',
-          pvmalku     = now(),
-          laatija     = '$kukarow[kuka]',
+          pvmalku      = now(),
+          laatija      = '$kukarow[kuka]',
           luontiaika    = now()";
     $result = pupe_query($kysely);
 
@@ -906,7 +907,7 @@ function hae_asiakastunnus($tunnukset) {
   }
   else{
     $query = "SELECT tunnus
-              FROM asiakas
+        FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND laji != 'P'
               AND ytunnus = '{$tunnukset['YTUNNUS']}'
@@ -916,13 +917,9 @@ function hae_asiakastunnus($tunnukset) {
 
   $result = pupe_query($query);
 
-  if(mysql_num_rows($result) > 0){
+  if (mysql_num_rows($result) > 0) {
     $tunnus = mysql_result($result, 0);
     if ($tunnus != '') return $tunnus;
   }
   return false;
 }
-
-
-
-?>

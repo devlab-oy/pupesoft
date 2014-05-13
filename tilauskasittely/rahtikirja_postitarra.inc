@@ -1,60 +1,60 @@
 <?php
 
-	// nyt on kaikki tiedot rahtikirjaa varten haettu..
-	//
-	// arrayt:
-	// toitarow, otsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-	// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
-	//
-	// muuttujat:
-	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
-	// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
-	//
-	// tulostetaan rahtikirja
+  // nyt on kaikki tiedot rahtikirjaa varten haettu..
+  //
+  // arrayt:
+  // toitarow, otsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
+  // $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
+  //
+  // muuttujat:
+  // otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
+  // jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
+  //
+  // tulostetaan rahtikirja
 
-	// Setataan tarvittavat muuttujat
-	require_once("rahtikirja_postitarra_otsikkotiedot.inc");
+  // Setataan tarvittavat muuttujat
+  require_once("rahtikirja_postitarra_otsikkotiedot.inc");
 
-	if ($tulostuskpl == 0) {
-		$tulostakolli = 1;
-	}
-	else {
-		$tulostakolli = $tulostuskpl;
-	}
+  if ($tulostuskpl == 0) {
+    $tulostakolli = 1;
+  }
+  else {
+    $tulostakolli = $tulostuskpl;
+  }
 
-	// tulostetaan niin monta lappua kun on kollejakin
-	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
+  // tulostetaan niin monta lappua kun on kollejakin
+  for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-		$kuka    = sprintf("%02s",$tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
+    $kuka    = sprintf("%02s",$tulostuskpl);     // laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
 
-		if (substr($rivi["rahtikirjanro"], 0, 4) == "JJFI") {
-			$oma = sprintf("%09s", substr($rivi["rahtikirjanro"], -9));
-		}
-		else {
-			$oma = sprintf("%09s",$rtunnus); 			// 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää olaa uniikki
-		}
+    if (substr($rivi["rahtikirjanro"], 0, 4) == "JJFI") {
+      $oma = sprintf("%09s", substr($rivi["rahtikirjanro"], -9));
+    }
+    else {
+      $oma = sprintf("%09s",$rtunnus);       // 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää olaa uniikki
+    }
 
-		// tehdään viivakoodit
-		$viiva1  = ">6JJFI";
-		$viiva1 .= substr($toitarow['sopimusnro'], 0, 1);
-		$viiva1 .= ">5";
-		$viiva1 .= substr($toitarow['sopimusnro'], 1);
-		$viiva1 .= $kuka.$oma;
+    // tehdään viivakoodit
+    $viiva1  = ">6JJFI";
+    $viiva1 .= substr($toitarow['sopimusnro'], 0, 1);
+    $viiva1 .= ">5";
+    $viiva1 .= substr($toitarow['sopimusnro'], 1);
+    $viiva1 .= $kuka.$oma;
 
-		$viivaedi = "JJFI$toitarow[sopimusnro]$kuka$oma";
+    $viivaedi = "JJFI$toitarow[sopimusnro]$kuka$oma";
 
-		$viiva2   = "JJFI $toitarow[sopimusnro] $kuka$oma";
-		$v2_alku  = substr($viiva2, 0, -6);
-		$v2_loppu = substr($viiva2, -6);
+    $viiva2   = "JJFI $toitarow[sopimusnro] $kuka$oma";
+    $v2_alku  = substr($viiva2, 0, -6);
+    $v2_loppu = substr($viiva2, -6);
 
-		$keltainen_parts = explode(" ", $keltainen);
-		$keltainen1 = array_shift($keltainen_parts);
-		$keltainen2 = implode(" ", $keltainen_parts);
+    $keltainen_parts = explode(" ", $keltainen);
+    $keltainen1 = array_shift($keltainen_parts);
+    $keltainen2 = implode(" ", $keltainen_parts);
 
-		// erotellaan spacella jokainen rahtikirjanumero
-		$rahtikirjanro .= "$viiva2 ";
+    // erotellaan spacella jokainen rahtikirjanumero
+    $rahtikirjanro .= "$viiva2 ";
 
-		$sivu = "*** ETIKETIN KOKO ***
+    $sivu = "*** ETIKETIN KOKO ***
                  {D2280,1040,2250|}
                  {AX;+000,+000,+00|}
                  {AY;+10,0|}
@@ -62,7 +62,7 @@
 
                  *** LOGO ***
                  {PC085;0025,0068,1,1,H,00,B|}
-			     {RC085;Itella|}
+           {RC085;Itella|}
 
                  *** KIINTEÄÄ TEKSTIÄ JA VIIVOJA ***
                  {PC004;0060,0168,05,05,H,00,B|}
@@ -89,33 +89,33 @@
                  {RC016;|}
                  {PC017;0480,0709,05,10,G,00,B|}
                  {RC017;Tilinumero Kontonummer|}
- 				 {PC018;0057,0775,05,10,G,00,B|}
+          {PC018;0057,0775,05,10,G,00,B|}
                  {RC018;Pankkiviite Bank Referens|}
-				 {PC018;0740,0775,05,10,G,00,B|}
+         {PC018;0740,0775,05,10,G,00,B|}
                  {RC018;BIC|}
-				 {PC019;0062,1205,05,05,I,00,B|}
+         {PC019;0062,1205,05,05,I,00,B|}
                  {RC019;SAAPUMISILMOITUS  ANKOMSTAVI|}";
 
-		if (count($vakit) > 0 or $toitarow['kuljyksikko'] != '') {
-			$sivu .= "{PC020;0060,1235,05,10,G,00,B|}
-	                 {RC020;Lisätietoja 0200 77000, www.itella.com * Mera information 0200 75000, www.itella.com.|}
-	                 {PC021;0060,1261,05,10,G,00,B|}
-	                 {RC021;Säilytysaika on yksi (1) täysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.|}
-	                 {PC022;0060,1287,05,10,G,00,B|}
-	                 {RC022;|}";
-		}
-		else {
-			$sivu .= "{PC020;0060,1235,05,10,G,00,B|}
-	                 {RC020;Lähetys on noudettavissa Postistanne. Lisätietoja 0200 77000, www.itella.com.|}
-	                 {PC021;0060,1261,05,10,G,00,B|}
-	                 {RC021;Ni kan hämta försändelsen på Ert postkontor. Mera information 0200 75000, www.itella.com.|}
-	                 {PC022;0060,1287,05,10,G,00,B|}
-	                 {RC022;Säilytysaika on 2 täyttä kalenteriviikkoa. Kvarligger 2 hela kalenderveckor.|}";
-		}
+    if (count($vakit) > 0 or $toitarow['kuljyksikko'] != '') {
+      $sivu .= "{PC020;0060,1235,05,10,G,00,B|}
+                   {RC020;Lisätietoja 0200 77000, www.itella.com * Mera information 0200 75000, www.itella.com.|}
+                   {PC021;0060,1261,05,10,G,00,B|}
+                   {RC021;Säilytysaika on yksi (1) täysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.|}
+                   {PC022;0060,1287,05,10,G,00,B|}
+                   {RC022;|}";
+    }
+    else {
+      $sivu .= "{PC020;0060,1235,05,10,G,00,B|}
+                   {RC020;Lähetys on noudettavissa Postistanne. Lisätietoja 0200 77000, www.itella.com.|}
+                   {PC021;0060,1261,05,10,G,00,B|}
+                   {RC021;Ni kan hämta försändelsen på Ert postkontor. Mera information 0200 75000, www.itella.com.|}
+                   {PC022;0060,1287,05,10,G,00,B|}
+                   {RC022;Säilytysaika on 2 täyttä kalenteriviikkoa. Kvarligger 2 hela kalenderveckor.|}";
+    }
 
-		$sivu .= "
+    $sivu .= "
 
-				 {PC023;0060,1319,05,05,H,00,B|}
+         {PC023;0060,1319,05,05,H,00,B|}
                  {RC023;Lähettäjä Avsändare From|}
                  {PC123;0690,1319,05,05,H,00,B|}
                  {RC123;Lisätiedot Tilläggsuppgifter|}
@@ -137,7 +137,7 @@
                  {RC031;Tilinumero Kontonummer|}
                  {PC032;0055,1775,05,10,G,00,B|}
                  {RC032;Pankkiviite Bank Referens|}
-				 {PC032;0740,1775,05,10,G,00,B|}
+         {PC032;0740,1775,05,10,G,00,B|}
                  {RC032;BIC|}
                  {PC033;0055,1830,05,10,G,00,B|}
                  {RC033;Kuittaus ja nimen selvennys Kvittering och namnförtydligande|}
@@ -166,9 +166,9 @@
                  {LC;0810,1563,1000,1563,0,2|}
                  {LC;0810,1498,1000,1498,0,2|}
                  {LC;0460,1685,0460,1750,0,2|}
-				 {LC;0730,0750,0730,0805,0,2|}
-   			     {LC;0730,0750,0730,0805,0,2|}
-				 {LC;0730,1750,0730,1803,0,2|}
+         {LC;0730,0750,0730,0805,0,2|}
+              {LC;0730,0750,0730,0805,0,2|}
+         {LC;0730,1750,0730,1803,0,2|}
                  {XR;0050,0637,0101,0683,B|}
                  {XR;0053,0639,0099,0681,B|}
                  {XR;0115,0637,0166,0683,B|}
@@ -181,34 +181,34 @@
                  *** SEURANTA VIIVAKOODI ***
                  {XB00;0058,0845,A,3,04,0,0300,+0000000000,000,0,00|}
                  {RB00;$viiva1|}
-				 {PC037;0250,0837,07,07,Q,00,B|}
+         {PC037;0250,0837,07,07,Q,00,B|}
                  {RC037;$v2_alku|}
-				 {PC037;0660,0837,06,06,R,00,B|}
+         {PC037;0660,0837,06,06,R,00,B|}
                  {RC037;$v2_loppu|}
                  {PC038;0250,1172,07,07,Q,00,B|}
                  {RC038;$v2_alku|}
-				 {PC038;0660,1172,06,06,R,00,B|}
+         {PC038;0660,1172,06,06,R,00,B|}
                  {RC038;$v2_loppu|}
 
-				 *** PALVELUN NIMI JA NOPEUS ***
+         *** PALVELUN NIMI JA NOPEUS ***
                  {PC000;0180,0060,05,05,K,00,B|}
                  {RC000;$keltainen1|}
 
-				 {PC001;0180,0090,05,05,K,00,B|}
+         {PC001;0180,0090,05,05,K,00,B|}
                  {RC001;$keltainen2|}
 
                  {PC001;0180,0120,05,05,K,00,B|}
                  {RC001;$kuljetus|}";
 
-		if (strlen($keku) > 2) $kpos = "0355";
-		else $kpos = "0430";
+    if (strlen($keku) > 2) $kpos = "0355";
+    else $kpos = "0430";
 
-		// Laitetaan kuljetusohje
-		if ($kuljetusohjeet != "") $vakit[6] = $kuljetusohjeet;
+    // Laitetaan kuljetusohje
+    if ($kuljetusohjeet != "") $vakit[6] = $kuljetusohjeet;
 
-		$sivu .= "{PC003;$kpos,0090,15,15,H,00,B|}
+    $sivu .= "{PC003;$kpos,0090,15,15,H,00,B|}
                  {RC003;$keku|}
-				 {PC115;0600,1205,05,05,I,00,B|}
+         {PC115;0600,1205,05,05,I,00,B|}
                  {RC115;$keltainen $kuljetus $keku|}
 
                  {PC078;0055,1890,05,05,K,00,B|}
@@ -223,7 +223,7 @@
                  *** LISÄTIETO-OSA EDI/2W (Otsikko) ***
                  {PC034;0060,1930,05,05,H,00,B|}
                  {RC034;Lisätiedot Tilläggsuppgifter|}
-				 {PC033;0060,2250,08,08,H,00,B|}
+         {PC033;0060,2250,08,08,H,00,B|}
                  {RC033;Itella Green - ilmastoystävällinen kuljetus|}
 
                  *** MUUTTUVAA TIETOA ***
@@ -240,7 +240,7 @@
                  {PC045;0060,0403,05,05,I,00,B|}
                  {RC045;$rakir_row[toim_nimi]|}
 
-  				 {PC045;0440,0370,05,05,I,00,B|}
+           {PC045;0440,0370,05,05,I,00,B|}
                  {RC045;$rakir_row[puhelin]|}
 
                  {PC046;0060,0440,05,05,I,00,B|}
@@ -284,7 +284,7 @@
                  {PC064;0060,1428,05,05,I,00,B|}
                  {RC064;$rakir_row[toim_nimi]|}
 
-				 {PC045;0440,1390,05,05,I,00,B|}
+         {PC045;0440,1390,05,05,I,00,B|}
                  {RC045;$rakir_row[puhelin]|}
 
                  {PC065;0060,1465,05,05,I,00,B|}
@@ -332,29 +332,27 @@
                  {PC085;0060,2160,05,05,H,00,B|}
                  {RC085;$vakit[6]|}";
 
-		if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $postiedipath != "") {
-        	$sivu .= "***EDI ***
-                 	 {PC121;0800,0350,15,15,K,00,B|}
-                 	 {RC121;EDI|}";
-		}
+    if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $postiedipath != "") {
+          $sivu .= "***EDI ***
+                    {PC121;0800,0350,15,15,K,00,B|}
+                    {RC121;EDI|}";
+    }
 
         $sivu .= "*** TULOSTUS  ***
                  {XS;I,0001,0002C3210|}
                  ".chr(12);
 
-		$sivu = escapeshellarg($sivu);
+    $sivu = escapeshellarg($sivu);
 
-		if ($kirjoitin == "email") {
-			echo t("Rahtikirjaa ei voida tulostaa sähköpostiin")."<br>";
-		}
-		else {
-			$line = exec("echo \"$sivu\" | $kirjoitin");
-		}
+    if ($kirjoitin == "email") {
+      echo t("Rahtikirjaa ei voida tulostaa sähköpostiin")."<br>";
+    }
+    else {
+      $line = exec("echo \"$sivu\" | $kirjoitin");
+    }
 
-		//lähetetään postin edisanoma
-		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-			require("postiedi.inc");
-		}
-	}
-
-?>
+    //lähetetään postin edisanoma
+    if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+      require("postiedi.inc");
+    }
+  }

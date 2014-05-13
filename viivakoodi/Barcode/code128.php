@@ -151,7 +151,7 @@ class Image_Barcode_code128 extends Image_Barcode
 
         // First, print the image, centered across the bottom.
         /*
-		imagestring(
+    imagestring(
             $img,
             $this->_font,
             $barcodewidth / 2 - strlen($text) / 2 * (imagefontwidth($this->_font)),
@@ -159,8 +159,8 @@ class Image_Barcode_code128 extends Image_Barcode
             $text,
             $black
         );
-		*/
-		
+    */
+    
         // We set $xpos to 10 so we start bar printing after 
         // position 10 to simulate the 10 pixel "Quiet Zone"
         $xpos = 10;
@@ -339,4 +339,3 @@ class Image_Barcode_code128 extends Image_Barcode
     }
 
 } // class
-?>

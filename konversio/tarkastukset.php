@@ -13,14 +13,14 @@ ini_set("memory_limit", "5G");
 $kukarow = hae_kukarow('admin', $argv[1]);
 
 if ($argv[1] == '') {
-	echo "Anna tiedosto\n";
-	die;
+  echo "Anna tiedosto\n";
+  die;
 }
 
 $filepaths = TarkastuksetCSVDumper::split_file($argv[2]);
 var_dump($filepaths);
 foreach ($filepaths as $filepath) {
-//	echo "{$filepath}<br/><br/>";
-	$dumper = new TarkastuksetCSVDumper($kukarow, $filepath);
-	$dumper->aja();
+//  echo "{$filepath}<br/><br/>";
+  $dumper = new TarkastuksetCSVDumper($kukarow, $filepath);
+  $dumper->aja();
 }

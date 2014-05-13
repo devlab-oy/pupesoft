@@ -7,51 +7,51 @@ require("salasanat.php");
 // $temporarylink on linkki omaan kantaan johon pupe tekee temporary tablet. Jos $tempdbhost:ia ei oo määritelty, niin silloin $temporarylink pointaa master-kantaan.
 
 if (isset($useslave)) {
-	$useslave = (int) $useslave;
+  $useslave = (int) $useslave;
 }
 else {
-	$useslave = 0;
+  $useslave = 0;
 }
 
 // tarkistetaan onko annettu slave oikea
 if ($useslave > 0) {
-	// katsotaan onko haluttu useslave setattu, jos ei ole tai se on tyhjää laitetaan ykkönen
-	if (!isset($slavedb[$useslave])) {
-		$useslave = 1;
-	}
-	elseif ($slavedb[$useslave] == '') {
-		$useslave = 1;
-	}
+  // katsotaan onko haluttu useslave setattu, jos ei ole tai se on tyhjää laitetaan ykkönen
+  if (!isset($slavedb[$useslave])) {
+    $useslave = 1;
+  }
+  elseif ($slavedb[$useslave] == '') {
+    $useslave = 1;
+  }
 
-	// katsotaan onko haluttu useslave setattu, jos ei ole tai se on tyhjää laitetaan nolla eli masteri
-	if (!isset($slavedb[$useslave])) {
-		$useslave = 0;
-	}
-	elseif ($slavedb[$useslave] == '') {
-		$useslave = 0;
-	}
+  // katsotaan onko haluttu useslave setattu, jos ei ole tai se on tyhjää laitetaan nolla eli masteri
+  if (!isset($slavedb[$useslave])) {
+    $useslave = 0;
+  }
+  elseif ($slavedb[$useslave] == '') {
+    $useslave = 0;
+  }
 }
 
 // Jos Pupeen on konffattu oma database temporary tableja varten
 if (isset($tempdbhost) and $tempdbhost != "") {
-	$temporarylink = mysql_connect($tempdbhost, $tempdbuser, $tempdbpass) or die ("Ongelma tietokantapalvelimessa $tempdbhost");
-	mysql_select_db($tempdbkanta, $temporarylink) or die ("Tietokantaa $tempdbkanta ei löydy palvelimelta $tempdbhost! (connect.inc)");
-	mysql_set_charset("latin1", $temporarylink);
+  $temporarylink = mysql_connect($tempdbhost, $tempdbuser, $tempdbpass) or die ("Ongelma tietokantapalvelimessa $tempdbhost");
+  mysql_select_db($tempdbkanta, $temporarylink) or die ("Tietokantaa $tempdbkanta ei löydy palvelimelta $tempdbhost! (connect.inc)");
+  mysql_set_charset("latin1", $temporarylink);
 }
 
 // Käytetään slave kantaa
 if ($useslave > 0) {
-	// Otetaan yhteys myös master-kantaan koska tietyissä paikoissa tätä tarvitaan
-	$masterlink = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-	mysql_select_db($dbkanta, $masterlink) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
-	mysql_set_charset("latin1", $masterlink);
-	mysql_query("set group_concat_max_len=1000000", $masterlink);
+  // Otetaan yhteys myös master-kantaan koska tietyissä paikoissa tätä tarvitaan
+  $masterlink = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
+  mysql_select_db($dbkanta, $masterlink) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
+  mysql_set_charset("latin1", $masterlink);
+  mysql_query("set group_concat_max_len=1000000", $masterlink);
 
-	$link = mysql_connect($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
+  $link = mysql_connect($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 }
 else {
-	$link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-	$masterlink = $link;
+  $link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
+  $masterlink = $link;
 }
 
 mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
@@ -60,7 +60,7 @@ mysql_query("set group_concat_max_len=1000000", $link);
 
 // jos debugataan pienillä arvoilla, ni pakotetaan myös queryt kuntoon!
 if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0 and $GLOBALS["pupe_query_debug"] < 1) {
-//	mysql_query("set session sql_mode = 'STRICT_ALL_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE'", $link); // NO_ZERO_DATE ois myös kova!
+//  mysql_query("set session sql_mode = 'STRICT_ALL_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE'", $link); // NO_ZERO_DATE ois myös kova!
 }
 
 if (!isset($temporarylink)) $temporarylink = $masterlink;

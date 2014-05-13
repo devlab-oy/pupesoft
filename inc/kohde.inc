@@ -15,38 +15,38 @@
   $jarjestys = 'asiakas, nimi';
 
 if (!function_exists('kohde_poista_relaatiot')) {
-	function kohde_poista_relaatiot($toim, $tunnus) {
-		global $kukarow, $yhtiorow;
+  function kohde_poista_relaatiot($toim, $tunnus) {
+    global $kukarow, $yhtiorow;
 
-		$query = "SELECT group_concat(tunnus) as paikka_tunnukset
-					    FROM paikka
-					    WHERE yhtio = '{$kukarow['yhtio']}'
-					    AND kohde = '{$tunnus}'";
-		$result = pupe_query($query);
-		$paikka_tunnukset = mysql_fetch_assoc($result);
+    $query = "SELECT group_concat(tunnus) as paikka_tunnukset
+              FROM paikka
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kohde = '{$tunnus}'";
+    $result = pupe_query($query);
+    $paikka_tunnukset = mysql_fetch_assoc($result);
 
-		if (!empty($paikka_tunnukset['paikka_tunnukset'])) {
-			$query = "UPDATE laite
-						    SET tila = 'P'
-						    WHERE yhtio = '{$kukarow['yhtio']}'
-						    AND paikka IN ({$paikka_tunnukset['paikka_tunnukset']})";
-			pupe_query($query);
+    if (!empty($paikka_tunnukset['paikka_tunnukset'])) {
+      $query = "UPDATE laite
+                SET tila = 'P'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND paikka IN ({$paikka_tunnukset['paikka_tunnukset']})";
+      pupe_query($query);
 
-			$query = "UPDATE paikka
-						    SET poistettu = 1
-						    WHERE yhtio = '{$kukarow['yhtio']}'
-						    AND kohde = '{$tunnus}'";
-			pupe_query($query);
-		}
-	}
+      $query = "UPDATE paikka
+                SET poistettu = 1
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND kohde = '{$tunnus}'";
+      pupe_query($query);
+    }
+  }
 }
 
 if (!function_exists('echo_laite_redirect')) {
-	function echo_laite_redirect($params) {
-		global $palvelin2;
-		//jos syˆtet‰‰n asiakkaalle uusia kohteita asiakkaan_laite_hallinta.php:st‰ halutaan redirecti sinne takaisin
-		if (isset($params['redirect_to']) and $params['errori'] == 0) {
-			echo '<meta http-equiv="refresh" content="0;url='.$palvelin2.'asiakkaan_laite_hallinta.php?tee=hae_asiakas&asiakasid='.$params['valittu_asiakas'].'"/>';
-		}
-	}
+  function echo_laite_redirect($params) {
+    global $palvelin2;
+    //jos syˆtet‰‰n asiakkaalle uusia kohteita asiakkaan_laite_hallinta.php:st‰ halutaan redirecti sinne takaisin
+    if (isset($params['redirect_to']) and $params['errori'] == 0) {
+      echo '<meta http-equiv="refresh" content="0;url='.$palvelin2.'asiakkaan_laite_hallinta.php?tee=hae_asiakas&asiakasid='.$params['valittu_asiakas'].'"/>';
+    }
+  }
 }

@@ -3,66 +3,66 @@
 require_once('inc/laite_huolto_functions.inc');
 
 if ($action == 'hae_huoltovali_options') {
-	$huoltovali_options = huoltovali_options($huoltosykli_tunnus);
+  $huoltovali_options = huoltovali_options($huoltosykli_tunnus);
 
-	$oletus = reset($huoltovali_options);
+  $oletus = reset($huoltovali_options);
 
-	$options_string = "<option value='0'>Ei huoltoväliä</option>";
+  $options_string = "<option value='0'>Ei huoltoväliä</option>";
 
-	foreach( $huoltovali_options as $key => $val ){
+  foreach( $huoltovali_options as $key => $val ){
 
-		if ($key == $oletus['days']) {
-			$selected = 'selected';
-		}
+    if ($key == $oletus['days']) {
+      $selected = 'selected';
+    }
 
-		$options_string .= "<option value='{$key}' {$selected}>{$val['dropdown_text']}</option>";
+    $options_string .= "<option value='{$key}' {$selected}>{$val['dropdown_text']}</option>";
 
-		$selected = null;
-	}
+    $selected = null;
+  }
 
-	echo $options_string;
+  echo $options_string;
 }
 
 if ($action == 'hae_huoltosykli_options') {
 
-	if ($tuoteno == 'MUISTUTUS') {
-		$sammutin = array(
-			'tyyppi' => 'muistutus',
-			'koko' => '',
- 		);
-		error_log('lol');
-	}
-	else {
-		$query = "	SELECT sammutin_tyyppi.selite AS tyyppi,
-					sammutin_koko.selite AS koko
-					FROM tuote
-					JOIN tuotteen_avainsanat AS sammutin_tyyppi
-					ON ( sammutin_tyyppi.yhtio = tuote.yhtio
-						AND sammutin_tyyppi.tuoteno = tuote.tuoteno
-						AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
-					JOIN tuotteen_avainsanat AS sammutin_koko
-					ON ( sammutin_koko.yhtio = tuote.yhtio
-						AND sammutin_koko.tuoteno = tuote.tuoteno
-						AND sammutin_koko.laji = 'sammutin_koko' )
-					WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-					AND tuote.tuoteno = '{$tuoteno}'";
-		$result = pupe_query($query);
-		$sammutin = mysql_fetch_assoc($result);
-	}
+  if ($tuoteno == 'MUISTUTUS') {
+    $sammutin = array(
+      'tyyppi' => 'muistutus',
+      'koko' => '',
+     );
+    error_log('lol');
+  }
+  else {
+    $query = "  SELECT sammutin_tyyppi.selite AS tyyppi,
+          sammutin_koko.selite AS koko
+          FROM tuote
+          JOIN tuotteen_avainsanat AS sammutin_tyyppi
+          ON ( sammutin_tyyppi.yhtio = tuote.yhtio
+            AND sammutin_tyyppi.tuoteno = tuote.tuoteno
+            AND sammutin_tyyppi.laji = 'sammutin_tyyppi' )
+          JOIN tuotteen_avainsanat AS sammutin_koko
+          ON ( sammutin_koko.yhtio = tuote.yhtio
+            AND sammutin_koko.tuoteno = tuote.tuoteno
+            AND sammutin_koko.laji = 'sammutin_koko' )
+          WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+          AND tuote.tuoteno = '{$tuoteno}'";
+    $result = pupe_query($query);
+    $sammutin = mysql_fetch_assoc($result);
+  }
 
-	if (!empty($sammutin)) {
-		$huoltosykli_options = hae_huoltosyklit_tyyppi_koko($sammutin['tyyppi'], $sammutin['koko'], $tyyppi);
-		$options_string = "<option value='0'>Ei huoltosykliä</option>";
+  if (!empty($sammutin)) {
+    $huoltosykli_options = hae_huoltosyklit_tyyppi_koko($sammutin['tyyppi'], $sammutin['koko'], $tyyppi);
+    $options_string = "<option value='0'>Ei huoltosykliä</option>";
 
-		foreach( $huoltosykli_options as  $val ){
-			$options_string .= "<option value='{$val['tunnus']}'>{$val['dropdown_text']}</option>";
-		}
-	}
-	else {
-		$options_string = "<option value='0'>Ei huoltosykliä</option>";
-	}
+    foreach( $huoltosykli_options as  $val ){
+      $options_string .= "<option value='{$val['tunnus']}'>{$val['dropdown_text']}</option>";
+    }
+  }
+  else {
+    $options_string = "<option value='0'>Ei huoltosykliä</option>";
+  }
 
-	echo $options_string;
+  echo $options_string;
 }
 
 exit;

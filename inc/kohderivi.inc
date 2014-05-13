@@ -32,23 +32,23 @@
     $jatko = 0;
   }
   elseif (mysql_field_name($result, $i) == "asiakas") {
-	//jos tullaan asiakkaan_laite_hallinta.php:stä $valittu_asiakas muuttuja on setattu
-	if ((int)$trow[$i] > 0 or !empty($valittu_asiakas)) {
-		$asiakas_tunnus = (!empty($valittu_asiakas) ? $valittu_asiakas : $trow[$i]);
+  //jos tullaan asiakkaan_laite_hallinta.php:stä $valittu_asiakas muuttuja on setattu
+  if ((int)$trow[$i] > 0 or !empty($valittu_asiakas)) {
+    $asiakas_tunnus = (!empty($valittu_asiakas) ? $valittu_asiakas : $trow[$i]);
       $query  = " SELECT *
                   FROM asiakas
-						      WHERE yhtio='{$kukarow['yhtio']}'
-						      AND tunnus='{$asiakas_tunnus}'";
+                  WHERE yhtio='{$kukarow['yhtio']}'
+                  AND tunnus='{$asiakas_tunnus}'";
       $sresult = mysql_query($query) or pupe_error($query);
       $srow = mysql_fetch_array($sresult);
-		$ssize = strlen($asiakas_tunnus) + 2;
+    $ssize = strlen($asiakas_tunnus) + 2;
 
-		$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '{$asiakas_tunnus}' size='$ssize' maxlength='$maxsize'> <table><tr><td>$srow[nimi] $srow[nimitark]</td></tr><tr><td>$srow[toim_nimi] $srow[toim_nimitark]</td></tr></table></td>";
+    $ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '{$asiakas_tunnus}' size='$ssize' maxlength='$maxsize'> <table><tr><td>$srow[nimi] $srow[nimitark]</td></tr><tr><td>$srow[toim_nimi] $srow[toim_nimitark]</td></tr></table></td>";
       $jatko = 0;
   }
   else {
-		if ($trow[$i] == 0)
-			$trow[$i] = "";
+    if ($trow[$i] == 0)
+      $trow[$i] = "";
 
       // Ei maxlength:iä koska silloin hakutoiminto ei välttämättä toimi
       $ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
@@ -82,38 +82,38 @@
   }
 
   if (mysql_field_name($result, $i) == "poistettu") {
-	  $tyyppi = 0;
+    $tyyppi = 0;
   }
 
   if (mysql_field_name($result, $i) == "vastuuhenkilo") {
-  	$query = "	SELECT *
-  				FROM kuka
-  				WHERE yhtio = '{$kukarow['yhtio']}'";
-  	$result2 = pupe_query($query);
+    $query = "  SELECT *
+          FROM kuka
+          WHERE yhtio = '{$kukarow['yhtio']}'";
+    $result2 = pupe_query($query);
 
-  	$sel = "";
-  	$ulos = "<td>";
-  	$ulos .= "<select name='{$nimi}'>";
-  	while($kuka = mysql_fetch_assoc($result2)) {
-  		if ($trow[$i] == $kuka['kuka']) {
-  			$sel = "SELECTED";
-  		}
-  		$ulos .= "<option value='{$kuka['kuka']}' {$sel}>{$kuka['nimi']}</option>";
-  		$sel = "";
-  	}
-  	$ulos .= "</select>";
-  	$ulos .= "</td>";
-  	$jatko = 0;
+    $sel = "";
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    while($kuka = mysql_fetch_assoc($result2)) {
+      if ($trow[$i] == $kuka['kuka']) {
+        $sel = "SELECTED";
+      }
+      $ulos .= "<option value='{$kuka['kuka']}' {$sel}>{$kuka['nimi']}</option>";
+      $sel = "";
+    }
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
   }
 
   if (!isset($redirect_echoed)) {
-  	$redirect_echoed = 1;
+    $redirect_echoed = 1;
 
     if (!empty($valittu_asiakas)) {
-  		echo "<input type='hidden' name='redirect_to' value='asiakkaan_laite_hallinta.php' />";
-  		echo "<input type='hidden' name='valittu_asiakas' value='{$valittu_asiakas}' />";
-  	}
-  	else {
-  		echo "<input type='hidden' name='redirect_to_laite_hallinta' value='0' />";
-  	}
+      echo "<input type='hidden' name='redirect_to' value='asiakkaan_laite_hallinta.php' />";
+      echo "<input type='hidden' name='valittu_asiakas' value='{$valittu_asiakas}' />";
+    }
+    else {
+      echo "<input type='hidden' name='redirect_to_laite_hallinta' value='0' />";
+    }
   }

@@ -590,11 +590,11 @@
           // jos lähdevarasto on sama kuin kohdevarasto, niin silloin kohdepaikka on aina oletuspaikka, joten poistetaan sen myytävissämäärä lähdepuolelta
           if ($kohdevarasto == $lahdevarasto) {
             if ($saldo_myytavissa_kohde > 0) {
-            $saldo_myytavissa_lahde = (float) $saldo_myytavissa_lahde - $saldo_myytavissa_kohde;
-          }
-          else {
-            $saldo_myytavissa_lahde = (float) $saldo_myytavissa_lahde;
-          }
+              $saldo_myytavissa_lahde = (float) $saldo_myytavissa_lahde - $saldo_myytavissa_kohde;
+            }
+            else {
+              $saldo_myytavissa_lahde = (float) $saldo_myytavissa_lahde;
+            }
           }
           else {
             $saldo_myytavissa_lahde = (float) $saldo_myytavissa_lahde;

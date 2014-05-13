@@ -1642,14 +1642,14 @@
 
       echo "<td><select id='inven_laji' name='inven_laji'>";
 
-      while($itrow = mysql_fetch_assoc($tresult)) {
+      while ($itrow = mysql_fetch_assoc($tresult)) {
 
         if (!isset($inven_laji) AND !isset($sel)) {
           $sel = 'selected';
           $lisaselite = $itrow["selitetark_4"];
         }
         else {
-        $sel = "";
+          $sel = "";
         }
 
         if ($itrow["selite"] == $inven_laji) {
@@ -1674,7 +1674,7 @@
     if ($ean_koodi != '') {
       echo "<input type='hidden' name='enarifocus' value='1'>";  
     }
-
+    
     if (mysql_num_rows($saldoresult) == $rivimaara) {
       echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
       //echo "<input type='submit' name='prev' value='".t("Inventoi/Edellinen sivu")."'> ";

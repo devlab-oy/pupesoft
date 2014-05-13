@@ -24,12 +24,12 @@
 class template
 {
 
-	var $nexttid, $templ;
+  var $nexttid, $templ;
     var $pdf; // reference to the parent class
 
     function template()
     {
-    	$this->tid = 0;
+      $this->tid = 0;
     }
 
     function create()
@@ -61,7 +61,7 @@ class template
 
     function circle($tid, $cenx, $ceny, $radius, $attrib = array())
     {
-		$temp = $this->pdf->_resolve_param($attrib);
+    $temp = $this->pdf->_resolve_param($attrib);
         $temp["type"] = "circle";
         $temp["x"] = $cenx;
         $temp["y"] = $ceny;
@@ -71,7 +71,7 @@ class template
 
     function line($tid, $x, $y, $attrib = array())
     {
-		$temp = $this->pdf->_resolve_param($attrib);
+    $temp = $this->pdf->_resolve_param($attrib);
         $temp["type"] = "line";
         $temp["x"] = $x;
         $temp["y"] = $y;
@@ -80,12 +80,12 @@ class template
 
     function image($tid, $left, $bottom, $width, $height, $image, $attrib = array())
     {
-    	$this->ifield($tid, $left, $bottom, $width, $height, false, $image, $attrib);
+      $this->ifield($tid, $left, $bottom, $width, $height, false, $image, $attrib);
     }
 
     function ifield($tid, $left, $bottom, $width, $height, $name, $default = false, $attrib = array())
     {
-		$temp = $this->pdf->_resolve_param($attrib);
+    $temp = $this->pdf->_resolve_param($attrib);
         $temp['type'] = "ifield";
         $temp['left'] = $left;
         $temp['bottom'] = $bottom;
@@ -98,12 +98,12 @@ class template
 
     function text($tid, $left, $bottom, $text, $attrib = array())
     {
-    	return $this->field($tid, $left, $bottom, false, $text, $attrib);
+      return $this->field($tid, $left, $bottom, false, $text, $attrib);
     }
 
     function field($tid, $left, $bottom, $name, $default = '', $attrib = array())
     {
-    	$temp = $this->pdf->_resolve_param($attrib);
+      $temp = $this->pdf->_resolve_param($attrib);
         $temp["type"] = "field";
         $temp["left"] = $left;
         $temp["bottom"] = $bottom;
@@ -114,12 +114,12 @@ class template
 
     function paragraph($tid, $bottom, $left, $top, $right, $text, $attrib = array())
     {
-		return $this->pfield($tid, $bottom, $left, $top, $right, false, $text, $attrib);
+    return $this->pfield($tid, $bottom, $left, $top, $right, false, $text, $attrib);
     }
 
     function pfield($tid, $bottom, $left, $top, $right, $name, $default = '', $attrib = array())
     {
-    	$temp = $this->pdf->_resolve_param($attrib);
+      $temp = $this->pdf->_resolve_param($attrib);
         $temp['type'] = 'pfield';
         $temp['left'] = $left;
         $temp['bottom'] = $bottom;
@@ -132,7 +132,7 @@ class template
 
     function place($tid, $page, $left, $bottom, $data = array())
     {
-    	$ok = true;
+      $ok = true;
         foreach( $this->templ[$tid]["objects"] as $o ) {
             switch ($o['type']) {
             case 'rectangle' :
@@ -145,20 +145,20 @@ class template
                 break;
 
             case 'circle' :
-            	$ok = $ok && $this->pdf->draw_circle($left + $o['x'],
-                						             $bottom + $o['y'],
+              $ok = $ok && $this->pdf->draw_circle($left + $o['x'],
+                                         $bottom + $o['y'],
                                                      $o['radius'],
                                                      $page,
                                                      $o);
                 break;
 
             case 'line' :
-            	foreach ($o['x'] as $key => $value) {
-                	$o['x'][$key] += $left;
+              foreach ($o['x'] as $key => $value) {
+                  $o['x'][$key] += $left;
                     $o['y'][$key] += $bottom;
                 }
                 $ok = $ok && $this->pdf->draw_line($o['x'],
-                					               $o['y'],
+                                         $o['y'],
                                                    $page,
                                                    $o);
                 break;
@@ -182,22 +182,22 @@ class template
                                                 $page,
                                                 $o);
                 if (is_string($t)) {
-                	$ok = false;
+                  $ok = false;
                     $this->pdf->_push_error(6013, "Text overflowed available area: $t");
                 }
-            	break;
+              break;
 
             case 'ifield' :
-            	$temp = ($o['name'] === false) || empty($data[$o['name']]) ? $o['default'] : $data[$o['name']];
+              $temp = ($o['name'] === false) || empty($data[$o['name']]) ? $o['default'] : $data[$o['name']];
                 if ($temp === false) {
-                	break;
+                  break;
                 }
                 $id = $this->pdf->get_image_size($temp);
                 unset($o['scale']);
                 $o['scale']['x'] = $o['width'] / $id['width'];
                 $o['scale']['y'] = $o['height'] / $id['height'];
                 $ok = $ok && $this->pdf->image_place($temp,
-                						             $o['bottom'] + $bottom,
+                                         $o['bottom'] + $bottom,
                                                      $o['left'] + $left,
                                                      $page,
                                                      $o);
@@ -207,16 +207,15 @@ class template
         return $ok;
     }
 
-	/* Private methods
+  /* Private methods
      */
 
     function _add_object($objarray, $tid)
     {
-    	$oid = $this->templ[$tid]["next"];
+      $oid = $this->templ[$tid]["next"];
         $this->templ[$tid]["next"] ++;
         $this->templ[$tid]["objects"][$oid] = $objarray;
         return $oid;
     }
 
 }
-?>

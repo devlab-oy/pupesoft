@@ -394,13 +394,13 @@
 							foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
 								$ekpl = str_replace(",", ".", $ekpl);
 
-								if ($ekpl != '' and ($ekpl{0} == '+' or $ekpl{0} == '-' or !is_numeric($ekpl))) {
+                if ($ekpl != '' and (substr($ekpl, 0, 1) == '+' or substr($ekpl, 0, 1) == '-' or !is_numeric($ekpl))) {
 									echo "<font class='error'>".t("VIRHE: Erien määrät oltava absoluuttisia arvoja")."!</font><br>";
 									$virhe = 1;
 									break;
 								}
 
-								if (($kpl{0} == '+' or $kpl{0} == '-') and (float) $ekpl == 0 and $ekpl != '' and $onko_uusia == 0) {
+                if ((substr($kpl, 0, 1) == '+' or substr($kpl, 0, 1) == '-') and (float) $ekpl == 0 and $ekpl != '' and $onko_uusia == 0) {
 									echo "<font class='error'>".t("VIRHE: Et voi nollata erää, jos olet syöttänyt relatiivisen määrän")."!</font><br>";
 									$virhe = 1;
 									break;

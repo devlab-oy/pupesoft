@@ -1045,5 +1045,3 @@
 	if ($tulos_ulos == "" and $silent == "") {
 		echo $tulos_ulos_laskutus;
 	}
-
-?>

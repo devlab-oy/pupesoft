@@ -65,6 +65,11 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
           concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                 tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
           FROM tuotepaikat
+          JOIN varastopaikat
+          ON ( varastopaikat.yhtio = tuotepaikat.yhtio
+            AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+            AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+            AND varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}')
           JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
           WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
           AND $haku_ehto

@@ -1243,13 +1243,14 @@ while ($tietue = fgets($fd)) {
           $kukarow['toimipaikka'] = $arow['toimipaikka'];
           $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-          if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'K') {
+          if ($yhtiorow['myyntitilauksen_toimipaikka'] == '') {
             $kukarow['toimipaikka'] = $kukarow_toimipaikka_tmp;
             $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
           }
         }
 
         $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
+
         // Lis‰t‰‰n otsikko
         $query = "  INSERT into lasku SET
               aktiivinen_kuljetus          = '$suunnistus',

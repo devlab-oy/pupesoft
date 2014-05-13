@@ -80,7 +80,6 @@ for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix
   if (!isset(${'ale'.$alepostfix})) ${'ale'.$alepostfix} = "";
   if (!isset(${'ale_array'.$alepostfix})) ${'ale_array'.$alepostfix} = "";
 }
-
 if (!isset($alv))           $alv = "";
 if (!isset($alv_array))       $alv_array = "";
 if (!isset($asiakasid))       $asiakasid = "";
@@ -673,42 +672,6 @@ else {
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = $state = "";
-
-if(isset($laskurow)){
-  $kukarow_varasto = array();
-  if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
-    $asiakkaan_oletusvarasto_query = "   SELECT avainsana
-                                  FROM asiakkaan_avainsanat
-                                  WHERE yhtio = '$kukarow[yhtio]'
-                                  AND laji = 'oletusmyyntivarasto'
-                                  AND liitostunnus = {$laskurow['liitostunnus']}";
-      $aov_result = pupe_query($asiakkaan_oletusvarasto_query);
-      if(mysql_num_rows($aov_result) > 0){
-          while ($aov_row = mysql_fetch_assoc($aov_result)) {
-            $kukarow_varasto[] = $aov_row['avainsana'];
-          }
-      }else{
-
-        $ytp = $laskurow['yhtio_toimipaikka'];
-
-          if ($ytp != 0) {
-            $toimipaikkaan_liitetyt_varastot_query = "  SELECT tunnus
-                                  FROM varastopaikat
-                                  WHERE yhtio = '$kukarow[yhtio]'
-                                  AND toimipaikka = {$ytp}";
-            $tlv_result = pupe_query($toimipaikkaan_liitetyt_varastot_query);
-            if(mysql_num_rows($tlv_result) > 0) {
-              while ($tlv_row = mysql_fetch_assoc($tlv_result)) {
-                $kukarow_varasto[] = $tlv_row['tunnus'];
-              }
-            }
-          }
-      }
-      if(count($kukarow_varasto) < 1 and $kukarow_varasto[0] != ""){
-        $kukarow_varasto = explode(",", $kukarow["varasto"]);
-      }
-  }
-}
 
 //  Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
 if (isset($laskurow["tunnusnippu"]) and $laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {
@@ -2066,23 +2029,17 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
     if (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
       $varasto = array((int) $laskurow["varasto"]);
     }
-    elseif (isset($kukarow_varasto)) {
-      $varasto = $kukarow_varasto;
-    }
     else {
-      $asiakasmaa = $laskurow["toim_nimi"] == "" ? $laskurow["maa"] : $laskurow["toim_maa"];
 
-      $varastolisa = $toim == 'EXTRANET' ? " and varastopaikat.tyyppi='' " : "";
+      $_varastotyyppi = $toim != 'EXTRANET' ? 'kaikki_varastot' : '';
 
-      $query = "  SELECT GROUP_CONCAT(tunnus) tunnukset
-            FROM varastopaikat
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')
-            {$varastolisa}";
-      $vtresult = pupe_query($query);
-      $vtrow = mysql_fetch_assoc($vtresult);
-
-      $varasto = explode(",", $vtrow['tunnukset']);
+      $params = array(
+        'asiakas_tunnus' => $laskurow['liitostunnus'],
+        'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
+        'toimitus_maa' => $laskurow["toim_nimi"] == "" ? $laskurow["maa"] : $laskurow["toim_maa"],
+        'varastotyyppi' => $_varastotyyppi,
+      );
+      $varasto = sallitut_varastot($params);
     }
 
     //laitetaan myyntitilaukset jaksotettu talteen, että sitä voidaan käyttää jtselaus.php:ssä
@@ -3036,7 +2993,7 @@ if ($tee == '') {
       $_varasto = hae_varasto($laskurow['varasto']);
       $params = array(
         'asiakas_tunnus' => $laskurow['liitostunnus'],
-        'lasku_toimipaikka' => $laskurow['yhtiotoimipaikka'],
+        'lasku_toimipaikka' => $laskurow['yhtio_toimipaikka'],
         'varasto_toimipaikka' => $_varasto['toimipaikka']
       );
       $toimitustavat = hae_toimitustavat($params);
@@ -5453,6 +5410,60 @@ if ($tee == '') {
 
       echo "</td></tr>";
 
+      // Tsekataa onko tilausrivien varastojen toimipaikoilla lähdöt päällä, ja onko kyseisen lähdevaraston toimitustavalla lähtöjä
+      if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+
+        $tilausrivien_varastot = tilausrivien_varastot($laskurow['tunnus']);
+
+        foreach ($tilausrivien_varastot as $tilausrivin_varasto) {
+
+          $varaston_toimipaikka = hae_varaston_toimipaikka($tilausrivin_varasto);
+          $varasto = hae_varasto($tilausrivin_varasto);
+
+          if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($varaston_toimipaikka)) {
+
+            if ($varaston_toimipaikka['tunnus'] == 0) {
+              $kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
+              $kukarow['toimipaikka'] = 0;
+            }
+
+            $toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
+            $kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
+            $_toimipaikan_kerayserat_mittatiedot = ($toimipaikan_yhtiorow['kerayserat'] == 'K');
+            $toimipaikka_ja_varasto_ei_sama = ($varaston_toimipaikka['tunnus'] != $laskurow['yhtio_toimipaikka']);
+            $tarvii_lahdon = ($laskurow['eilahetetta'] == '' and $laskurow['sisainen'] == '');
+
+            // jos varaston toimipaikka ei ole tilauksen toimipaikka, niin aina true.
+            $tarvii_lahdon = ($toimipaikka_ja_varasto_ei_sama ? TRUE : $tarvii_lahdon);
+
+            if ($_toimipaikan_kerayserat_mittatiedot and $tarvii_lahdon) {
+
+              $toimitustavat = hae_kaikki_toimitustavat();
+              $toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $laskurow['toimitustapa']);
+              $toimitustapa = $toimitustapa[0];
+
+              $query = "  SELECT *
+                    FROM lahdot
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND liitostunnus = {$toimitustapa['tunnus']}
+                    AND varasto = {$varasto['tunnus']}
+                    AND aktiivi = ''
+                    AND pvm >= CURRENT_DATE
+                    AND viimeinen_tilausaika > CURRENT_TIME";
+              $lahdot_result = pupe_query($query);
+
+              if (mysql_num_rows($lahdot_result) == 0) {
+                echo "<font class='error'>".t("VIRHE: Tilauksen toimitustavalla ei ole")." {$varasto['nimitys']} ".t("varastossa lähtöjä")."!</font><br><br>";
+                $tilausok++;
+              }
+            }
+          }
+
+          unset($kukarow_toimipaikka_temp);
+        }
+      }
+
+
       $tuotetyyppi        = "";
       $positio_varattu      = "";
       $varaosatyyppi        = "";
@@ -6141,14 +6152,30 @@ if ($tee == '') {
                           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
                           <select name='palautus_varasto' onchange='submit();' $state $disalisa>";
 
+                $disalisa = "";
+
                 $paltoimiulos .= "<option value=''>".t("Ei palauteta")."</option>";
 
-                foreach ($lahde_kohde_varastot as $lahde_kohde_varasto) {
+                $_varastot = array();
+
+                foreach ($lahde_kohde_varastot as $_varasto) {
+                  $_varastot[$_varasto['lahde_tunnus']] = array(
+                    'lahde_nimi' => $_varasto['lahde_nimi'],
+                    'lahde_tunnus' => $_varasto['lahde_tunnus']
+                  );
+                }
+
+                foreach ($_varastot as $lahde_kohde_varasto) {
+
                   $sel = "";
+
                   if ($lahde_kohde_varasto["lahde_tunnus"] == abs($row["palautus_varasto"])) {
                     $sel = 'selected';
                   }
-                  $paltoimiulos .= "<option value='{$lahde_kohde_varasto['lahde_tunnus']}' {$sel}>".t('Varasto').": {$lahde_kohde_varasto['lahde_nimi']}</option>";
+
+                  $paltoimiulos .= "<option value='{$lahde_kohde_varasto['lahde_tunnus']}' {$sel}>";
+                  $paltoimiulos .= t('Varasto').": {$lahde_kohde_varasto['lahde_nimi']}";
+                  $paltoimiulos .= "</option>";
                 }
 
                 $paltoimiulos .= "</select>";
@@ -7882,24 +7909,7 @@ if ($tee == '') {
           else {
 
             // Haetaan kaikkien tilausrivien varastopaikat
-            $query = "  SELECT DISTINCT tilausrivi.hyllyalue, tilausrivi.hyllynro
-                  FROM tilausrivi
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  and tilausrivi.otunnus = '{$laskurow['tunnus']}'
-                  AND tilausrivi.tyyppi != 'D'
-                  and tilausrivi.hyllyalue != ''
-                  and tilausrivi.varattu > 0
-                  and tilausrivi.var not in ('P','J','O','S')";
-            $chk_res = pupe_query($query);
-
-            $chk_arr = array();
-
-            while ($chk_row = mysql_fetch_assoc($chk_res)) {
-              // Mihin varastoon
-              $varasto = kuuluukovarastoon($chk_row["hyllyalue"], $chk_row["hyllynro"]);
-
-              $chk_arr[$varasto] = $varasto;
-            }
+            $chk_arr = tilausrivien_varastot($laskurow['tunnus']);
 
             $i_counter = 0;
 

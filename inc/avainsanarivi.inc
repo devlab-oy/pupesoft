@@ -58,6 +58,7 @@
 	if (mysql_field_name($result, $i) == "selitetark_2" and
 		($avain_sel['ALV'] == "SELECTED" or
 		$avain_sel['ALVULK'] == "SELECTED" or
+		$avain_sel['TOIMMYYNTI'] == "SELECTED" or
 		$avain_sel['ASAVAINSANA'] == "SELECTED" or
 		$avain_sel['ASIAKASLUOKKA'] == "SELECTED" or
 		$avain_sel['ASIAKASOSASTO'] == "SELECTED" or
@@ -708,7 +709,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if ($avain_sel['INVEN_LAJI'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
 
 		$sel1 = '';

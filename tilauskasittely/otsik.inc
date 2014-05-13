@@ -910,21 +910,16 @@
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
 
-		$params = array(
+		$args = array(
 			'asiakas_tunnus' => $srow['liitostunnus'],
 			'toimipaikka_tunnus' => $yhtiotoimipaikka,
 			'toim' => $toim,
 			'tilaustyyppi' => $tilaustyyppi,
-		);
-
-		$varastot = sallitut_varastot($params);
-
-		$args = array(
 			'varasto' => $varasto,
-			'varastot' => $varastot,
+			'toimitus_maa' => $srow['maa'],
 		);
 
-		$oletusvarasto = valitse_oletusvarasto($args);
+		$oletusvarasto = palauta_varasto($args);
 
 		// jos meillä on jo alatila ja tila ei muokkailla niitä!
 		if ($alatila == '' and isset($srow['alatila']) and $srow['alatila'] != '' and $srow_from == "LASKU") {
@@ -2973,21 +2968,16 @@
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
 
-		$params = array(
+		$args = array(
 			'asiakas_tunnus' => $asiakasid,
 			'toimipaikka_tunnus' => $yhtiotoimipaikka,
 			'toim' => $toim,
 			'tilaustyyppi' => $tilaustyyppi,
-		);
-
-		$varastot = sallitut_varastot($params);
-
-		$args = array(
 			'varasto' => $varasto,
-			'varastot' => $varastot,
+			'toimitus_maa' => $maa,
 		);
 
-		$varasto = valitse_oletusvarasto($args);
+		$varasto = palauta_varasto($args);
 
 		$otsikon_laskurow = $apuro;
 

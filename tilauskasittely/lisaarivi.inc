@@ -3240,11 +3240,11 @@
             $osatoimitus = '';
           }
 
-          $update = "	, eilahetetta = '{$eilahe}'
+          $update = "  , eilahetetta = '{$eilahe}'
                   , osatoimitus = '{$osatoimitus}'";
         }
 
-        $query = "	UPDATE lasku
+        $query = "  UPDATE lasku
                 SET varasto = '{$varasto}'
                 {$update}
                 WHERE yhtio = '{$kukarow['yhtio']}'

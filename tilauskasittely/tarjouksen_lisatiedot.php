@@ -152,7 +152,7 @@
     //myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
     $where1 = " lasku.tila in ('L','N') ";
 
-    if ($ytunnus{0} == '£') {
+    if (substr($ytunnus, 0, 1) == '£') {
       $where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
             and lasku.nimitark  = '$asiakasrow[nimitark]'
             and lasku.osoite    = '$asiakasrow[osoite]'

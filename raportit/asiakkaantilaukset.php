@@ -476,7 +476,7 @@
             $yhtioekojoin
             WHERE lasku.$logistiikka_yhtiolisa ";
 
-      if ($ytunnus{0} == '£') {
+      if (substr($ytunnus, 0, 1) == '£') {
         $query .= "  and lasku.nimi    = '$asiakasrow[nimi]'
               and lasku.nimitark  = '$asiakasrow[nimitark]'
               and lasku.osoite  = '$asiakasrow[osoite]'

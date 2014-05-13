@@ -2016,7 +2016,10 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilah = 'CHECKED';
+			$_eilahetetta_valmistus = (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
+			$_eilahetetta_tulostustapa = (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I');
+			$_eilahetetta_nouto = (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
+			if ($srow['eilahetetta'] != '' or $_eilahetetta_valmistus or $_eilahetetta_tulostustapa or $_eilahetetta_nouto) $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
@@ -2025,7 +2028,7 @@
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
 
-			if (!isset($eilahe) and isset($varasto) and $varasto != '0') {
+			if (!isset($eilahe) and isset($varasto) and $varasto != '0' and is_numeric($varasto)) {
 				$varaston_toimipaikka = hae_varaston_toimipaikka($varasto);
 				if ($varaston_toimipaikka['tunnus'] == 0) {
 					$kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
@@ -2035,6 +2038,12 @@
 				$varaston_toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
 				$kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
 				unset($kukarow_toimipaikka_temp);
+
+				$_eilahetetta_valmistus = (!isset($srow['eilahetetta']) and $varaston_toimipaikan_yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
+				$_eilahetetta_tulostustapa = (!isset($srow['eilahetetta']) and $varaston_toimipaikan_yhtiorow['lahetteen_tulostustapa'] == 'I');
+				$_eilahetetta_nouto = (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $varaston_toimipaikan_yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
+				if ($srow['eilahetetta'] != '' or $_eilahetetta_valmistus or $_eilahetetta_tulostustapa or $_eilahetetta_nouto)
+					$eilah = 'CHECKED';
 			}
 
 			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus

@@ -24,21 +24,21 @@
 
         selectorStr = this;
 
-		function SortByClass(a, b){
-			var aClass = $(a).attr('class');
-			var bClass = $(b).attr('class');
+    function SortByClass(a, b){
+      var aClass = $(a).attr('class');
+      var bClass = $(b).attr('class');
 
-			return ((aClass < bClass) ? -1 : ((aClass > bClass) ? 1 : 0));
-		}
+      return ((aClass < bClass) ? -1 : ((aClass > bClass) ? 1 : 0));
+    }
 
-		selectorStr.sort(SortByClass);
-		$(selectorStr).bind("click", handleClick);
+    selectorStr.sort(SortByClass);
+    $(selectorStr).bind("click", handleClick);
     };
 
     function handleClick(event)
     {
         var val = this.value;
-		var nam = this.name;
+    var nam = this.name;
         var checkStatus = this.checked;
         //get the checkbox number which the user has checked
 
@@ -58,9 +58,9 @@
                         ind++;
                     });
                 }
-				else {
+        else {
                     $(selectorStr).each(function(i) {
-						if (ind >= prevChecked && ind <= currentChecked) {
+            if (ind >= prevChecked && ind <= currentChecked) {
                             this.checked = checkStatus;
                         }
                         ind++;
@@ -70,8 +70,8 @@
                 prevChecked = currentChecked;
             }
         }
-		else if (checkStatus) {
-        	prevChecked = getSelected(val, nam);
+    else if (checkStatus) {
+          prevChecked = getSelected(val, nam);
         }
     };
 
@@ -80,7 +80,7 @@
         var ind = 0, found = 0, checkedIndex;
 
         $(selectorStr).each(function(i) {
-			if (val == this.value && nam == this.name && found != 1) {
+      if (val == this.value && nam == this.name && found != 1) {
                 checkedIndex = ind;
                 found = 1;
             }

@@ -321,4 +321,3 @@ class Image_Barcode_upca extends Image_Barcode
     } // function create
 
 } // class
-?>

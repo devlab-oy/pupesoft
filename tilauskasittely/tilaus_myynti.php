@@ -5447,7 +5447,7 @@ if ($tee == '') {
 										FROM lahdot
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND liitostunnus = {$toimitustapa['tunnus']}
-										AND varasto = {$laskurow['varasto']}
+										AND varasto = {$varasto['tunnus']}
 										AND aktiivi = ''
 										AND pvm >= CURRENT_DATE
 										AND viimeinen_tilausaika > CURRENT_TIME";

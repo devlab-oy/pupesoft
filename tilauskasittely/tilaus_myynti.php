@@ -10,9 +10,19 @@ if (isset($_REQUEST['ajax_toiminto']) and trim($_REQUEST['ajax_toiminto']) == 't
 	$ohje = 'off';
 }
 
+if (isset($_POST["tappi"])) {
+  if($_POST["tappi"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+}
+
 if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
+
+if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($tappi) and $tappi == "lataa_tiedosto" and isset($tmpfilenimi)) {
+  readfile("/tmp/".$tmpfilenimi);
+  exit;
+}
 
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
@@ -4205,7 +4215,7 @@ if ($tee == '') {
 			$varasto = $laskurow["varasto"];
 
 			// Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
-			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+      if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";
 			}
 			else {
@@ -5081,6 +5091,7 @@ if ($tee == '') {
 					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus
 					$limitlisa";
 		$result = pupe_query($query);
+    $tilausrivit_talteen = $result;
 
 		if ($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
 			if (isset($ruutulimit) and $ruutulimit > 0) {
@@ -8847,9 +8858,34 @@ if ($tee == '') {
 					</form></td></tr>";
 		}
 
+    if ($kukarow['extranet'] == "" and $yhtiorow['tilauksen_myyntieratiedot'] != '' and $tilausok == 0 and $rivilaskuri > 0) {
+
+      if (!isset($piirtele_valikko)) {
+      echo "  <tr>
+            <td align='left' class='back' valign='top'>
+            <form name='excel_tuote_rapsa' method='post'>
+            <input type='hidden' name='lopetus' value='$lopetus'>
+            <input type='hidden' name='otunnus' value='$tilausnumero'>
+            <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+            <input type='hidden' name='mista' value = '$mista'>
+            <input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+            <input type='hidden' name='toim' value='$toim'>
+            <input type='hidden' name='tee' value='$tee'>
+            <input type='hidden' name='naantali' value='KIVAPAIKKA'>
+            <input type='submit' name='piirtele_valikko' value='".t("Tuotetiedot")."'>
+            </form>
+            </td>
+          </tr>";
+      }
+    }
+
 		echo "</table>";
 
 	}
+}
+
+if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($naantali) and $naantali == "KIVAPAIKKA") {
+  require("myyntierat_ja_tuotetiedot.inc");
 }
 
 if (@include("inc/footer.inc"));

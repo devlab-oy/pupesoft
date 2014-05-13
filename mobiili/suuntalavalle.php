@@ -143,7 +143,7 @@ $url = array (
             'tuotenumero' => $tuotenumero,
             'alusta_tunnus' => $alusta_tunnus,
             'liitostunnus' => $liitostunnus,
-			'ennaltakohdistettu' => $ennaltakohdistettu,
+      'ennaltakohdistettu' => $ennaltakohdistettu,
         );
 
 if (!is_numeric($hyllytetty)) {

@@ -1,4 +1,3 @@
-
 /**
  * Return the settings object for a particular table
  *  @param {node} nTable table we are using as a dataTable
@@ -7,15 +6,15 @@
  */
 function _fnSettingsFromNode ( nTable )
 {
-	for ( var i=0 ; i<DataTable.settings.length ; i++ )
-	{
-		if ( DataTable.settings[i].nTable === nTable )
-		{
-			return DataTable.settings[i];
-		}
-	}
-	
-	return null;
+  for ( var i=0 ; i<DataTable.settings.length ; i++ )
+  {
+    if ( DataTable.settings[i].nTable === nTable )
+    {
+      return DataTable.settings[i];
+    }
+  }
+  
+  return null;
 }
 
 
@@ -27,16 +26,16 @@ function _fnSettingsFromNode ( nTable )
  */
 function _fnGetTrNodes ( oSettings )
 {
-	var aNodes = [];
-	var aoData = oSettings.aoData;
-	for ( var i=0, iLen=aoData.length ; i<iLen ; i++ )
-	{
-		if ( aoData[i].nTr !== null )
-		{
-			aNodes.push( aoData[i].nTr );
-		}
-	}
-	return aNodes;
+  var aNodes = [];
+  var aoData = oSettings.aoData;
+  for ( var i=0, iLen=aoData.length ; i<iLen ; i++ )
+  {
+    if ( aoData[i].nTr !== null )
+    {
+      aNodes.push( aoData[i].nTr );
+    }
+  }
+  return aNodes;
 }
 
 
@@ -50,54 +49,54 @@ function _fnGetTrNodes ( oSettings )
  */
 function _fnGetTdNodes ( oSettings, iIndividualRow )
 {
-	var anReturn = [];
-	var iCorrector;
-	var anTds, nTd;
-	var iRow, iRows=oSettings.aoData.length,
-		iColumn, iColumns, oData, sNodeName, iStart=0, iEnd=iRows;
-	
-	/* Allow the collection to be limited to just one row */
-	if ( iIndividualRow !== undefined )
-	{
-		iStart = iIndividualRow;
-		iEnd = iIndividualRow+1;
-	}
+  var anReturn = [];
+  var iCorrector;
+  var anTds, nTd;
+  var iRow, iRows=oSettings.aoData.length,
+    iColumn, iColumns, oData, sNodeName, iStart=0, iEnd=iRows;
+  
+  /* Allow the collection to be limited to just one row */
+  if ( iIndividualRow !== undefined )
+  {
+    iStart = iIndividualRow;
+    iEnd = iIndividualRow+1;
+  }
 
-	for ( iRow=iStart ; iRow<iEnd ; iRow++ )
-	{
-		oData = oSettings.aoData[iRow];
-		if ( oData.nTr !== null )
-		{
-			/* get the TD child nodes - taking into account text etc nodes */
-			anTds = [];
-			nTd = oData.nTr.firstChild;
-			while ( nTd )
-			{
-				sNodeName = nTd.nodeName.toLowerCase();
-				if ( sNodeName == 'td' || sNodeName == 'th' )
-				{
-					anTds.push( nTd );
-				}
-				nTd = nTd.nextSibling;
-			}
+  for ( iRow=iStart ; iRow<iEnd ; iRow++ )
+  {
+    oData = oSettings.aoData[iRow];
+    if ( oData.nTr !== null )
+    {
+      /* get the TD child nodes - taking into account text etc nodes */
+      anTds = [];
+      nTd = oData.nTr.firstChild;
+      while ( nTd )
+      {
+        sNodeName = nTd.nodeName.toLowerCase();
+        if ( sNodeName == 'td' || sNodeName == 'th' )
+        {
+          anTds.push( nTd );
+        }
+        nTd = nTd.nextSibling;
+      }
 
-			iCorrector = 0;
-			for ( iColumn=0, iColumns=oSettings.aoColumns.length ; iColumn<iColumns ; iColumn++ )
-			{
-				if ( oSettings.aoColumns[iColumn].bVisible )
-				{
-					anReturn.push( anTds[iColumn-iCorrector] );
-				}
-				else
-				{
-					anReturn.push( oData._anHidden[iColumn] );
-					iCorrector++;
-				}
-			}
-		}
-	}
+      iCorrector = 0;
+      for ( iColumn=0, iColumns=oSettings.aoColumns.length ; iColumn<iColumns ; iColumn++ )
+      {
+        if ( oSettings.aoColumns[iColumn].bVisible )
+        {
+          anReturn.push( anTds[iColumn-iCorrector] );
+        }
+        else
+        {
+          anReturn.push( oData._anHidden[iColumn] );
+          iCorrector++;
+        }
+      }
+    }
+  }
 
-	return anReturn;
+  return anReturn;
 }
 
 
@@ -110,26 +109,26 @@ function _fnGetTdNodes ( oSettings, iIndividualRow )
  */
 function _fnLog( oSettings, iLevel, sMesg )
 {
-	var sAlert = (oSettings===null) ?
-		"DataTables warning: "+sMesg :
-		"DataTables warning (table id = '"+oSettings.sTableId+"'): "+sMesg;
-	
-	if ( iLevel === 0 )
-	{
-		if ( DataTable.ext.sErrMode == 'alert' )
-		{
-			alert( sAlert );
-		}
-		else
-		{
-			throw new Error(sAlert);
-		}
-		return;
-	}
-	else if ( window.console && console.log )
-	{
-		console.log( sAlert );
-	}
+  var sAlert = (oSettings===null) ?
+    "DataTables warning: "+sMesg :
+    "DataTables warning (table id = '"+oSettings.sTableId+"'): "+sMesg;
+  
+  if ( iLevel === 0 )
+  {
+    if ( DataTable.ext.sErrMode == 'alert' )
+    {
+      alert( sAlert );
+    }
+    else
+    {
+      throw new Error(sAlert);
+    }
+    return;
+  }
+  else if ( window.console && console.log )
+  {
+    console.log( sAlert );
+  }
 }
 
 
@@ -143,14 +142,14 @@ function _fnLog( oSettings, iLevel, sMesg )
  */
 function _fnMap( oRet, oSrc, sName, sMappedName )
 {
-	if ( sMappedName === undefined )
-	{
-		sMappedName = sName;
-	}
-	if ( oSrc[sName] !== undefined )
-	{
-		oRet[sMappedName] = oSrc[sName];
-	}
+  if ( sMappedName === undefined )
+  {
+    sMappedName = sName;
+  }
+  if ( oSrc[sName] !== undefined )
+  {
+    oRet[sMappedName] = oSrc[sName];
+  }
 }
 
 
@@ -167,26 +166,26 @@ function _fnMap( oRet, oSrc, sName, sMappedName )
  */
 function _fnExtend( oOut, oExtender )
 {
-	var val;
-	
-	for ( var prop in oExtender )
-	{
-		if ( oExtender.hasOwnProperty(prop) )
-		{
-			val = oExtender[prop];
+  var val;
+  
+  for ( var prop in oExtender )
+  {
+    if ( oExtender.hasOwnProperty(prop) )
+    {
+      val = oExtender[prop];
 
-			if ( typeof oInit[prop] === 'object' && val !== null && $.isArray(val) === false )
-			{
-				$.extend( true, oOut[prop], val );
-			}
-			else
-			{
-				oOut[prop] = val;
-			}
-		}
-	}
+      if ( typeof oInit[prop] === 'object' && val !== null && $.isArray(val) === false )
+      {
+        $.extend( true, oOut[prop], val );
+      }
+      else
+      {
+        oOut[prop] = val;
+      }
+    }
+  }
 
-	return oOut;
+  return oOut;
 }
 
 
@@ -201,19 +200,19 @@ function _fnExtend( oOut, oExtender )
  */
 function _fnBindAction( n, oData, fn )
 {
-	$(n)
-		.bind( 'click.DT', oData, function (e) {
-				n.blur(); // Remove focus outline for mouse users
-				fn(e);
-			} )
-		.bind( 'keypress.DT', oData, function (e){
-			if ( e.which === 13 ) {
-				fn(e);
-			} } )
-		.bind( 'selectstart.DT', function () {
-			/* Take the brutal approach to cancelling text selection */
-			return false;
-			} );
+  $(n)
+    .bind( 'click.DT', oData, function (e) {
+        n.blur(); // Remove focus outline for mouse users
+        fn(e);
+      } )
+    .bind( 'keypress.DT', oData, function (e){
+      if ( e.which === 13 ) {
+        fn(e);
+      } } )
+    .bind( 'selectstart.DT', function () {
+      /* Take the brutal approach to cancelling text selection */
+      return false;
+      } );
 }
 
 
@@ -228,13 +227,13 @@ function _fnBindAction( n, oData, fn )
  */
 function _fnCallbackReg( oSettings, sStore, fn, sName )
 {
-	if ( fn )
-	{
-		oSettings[sStore].push( {
-			"fn": fn,
-			"sName": sName
-		} );
-	}
+  if ( fn )
+  {
+    oSettings[sStore].push( {
+      "fn": fn,
+      "sName": sName
+    } );
+  }
 }
 
 
@@ -251,20 +250,20 @@ function _fnCallbackReg( oSettings, sStore, fn, sName )
  */
 function _fnCallbackFire( oSettings, sStore, sTrigger, aArgs )
 {
-	var aoStore = oSettings[sStore];
-	var aRet =[];
+  var aoStore = oSettings[sStore];
+  var aRet =[];
 
-	for ( var i=aoStore.length-1 ; i>=0 ; i-- )
-	{
-		aRet.push( aoStore[i].fn.apply( oSettings.oInstance, aArgs ) );
-	}
+  for ( var i=aoStore.length-1 ; i>=0 ; i-- )
+  {
+    aRet.push( aoStore[i].fn.apply( oSettings.oInstance, aArgs ) );
+  }
 
-	if ( sTrigger !== null )
-	{
-		$(oSettings.oInstance).trigger(sTrigger, aArgs);
-	}
+  if ( sTrigger !== null )
+  {
+    $(oSettings.oInstance).trigger(sTrigger, aArgs);
+  }
 
-	return aRet;
+  return aRet;
 }
 
 
@@ -281,42 +280,42 @@ function _fnCallbackFire( oSettings, sStore, sTrigger, aArgs )
  */
 var _fnJsonString = (window.JSON) ? JSON.stringify : function( o )
 {
-	/* Not an object or array */
-	var sType = typeof o;
-	if (sType !== "object" || o === null)
-	{
-		// simple data type
-		if (sType === "string")
-		{
-			o = '"'+o+'"';
-		}
-		return o+"";
-	}
+  /* Not an object or array */
+  var sType = typeof o;
+  if (sType !== "object" || o === null)
+  {
+    // simple data type
+    if (sType === "string")
+    {
+      o = '"'+o+'"';
+    }
+    return o+"";
+  }
 
-	/* If object or array, need to recurse over it */
-	var
-		sProp, mValue,
-		json = [],
-		bArr = $.isArray(o);
-	
-	for (sProp in o)
-	{
-		mValue = o[sProp];
-		sType = typeof mValue;
+  /* If object or array, need to recurse over it */
+  var
+    sProp, mValue,
+    json = [],
+    bArr = $.isArray(o);
+  
+  for (sProp in o)
+  {
+    mValue = o[sProp];
+    sType = typeof mValue;
 
-		if (sType === "string")
-		{
-			mValue = '"'+mValue+'"';
-		}
-		else if (sType === "object" && mValue !== null)
-		{
-			mValue = _fnJsonString(mValue);
-		}
+    if (sType === "string")
+    {
+      mValue = '"'+mValue+'"';
+    }
+    else if (sType === "object" && mValue !== null)
+    {
+      mValue = _fnJsonString(mValue);
+    }
 
-		json.push((bArr ? "" : '"'+sProp+'":') + mValue);
-	}
+    json.push((bArr ? "" : '"'+sProp+'":') + mValue);
+  }
 
-	return (bArr ? "[" : "{") + json + (bArr ? "]" : "}");
+  return (bArr ? "[" : "{") + json + (bArr ? "]" : "}");
 };
 
 
@@ -328,19 +327,18 @@ var _fnJsonString = (window.JSON) ? JSON.stringify : function( o )
  */
 function _fnBrowserDetect( oSettings )
 {
-	/* IE6/7 will oversize a width 100% element inside a scrolling element, to include the
-	 * width of the scrollbar, while other browsers ensure the inner element is contained
-	 * without forcing scrolling
-	 */
-	var n = $(
-		'<div style="position:absolute; top:0; left:0; height:1px; width:1px; overflow:hidden">'+
-			'<div style="position:absolute; top:1px; left:1px; width:100px; overflow:scroll;">'+
-				'<div id="DT_BrowserTest" style="width:100%; height:10px;"></div>'+
-			'</div>'+
-		'</div>')[0];
+  /* IE6/7 will oversize a width 100% element inside a scrolling element, to include the
+   * width of the scrollbar, while other browsers ensure the inner element is contained
+   * without forcing scrolling
+   */
+  var n = $(
+    '<div style="position:absolute; top:0; left:0; height:1px; width:1px; overflow:hidden">'+
+      '<div style="position:absolute; top:1px; left:1px; width:100px; overflow:scroll;">'+
+        '<div id="DT_BrowserTest" style="width:100%; height:10px;"></div>'+
+      '</div>'+
+    '</div>')[0];
 
-	document.body.appendChild( n );
-	oSettings.oBrowser.bScrollOversize = $('#DT_BrowserTest', n)[0].offsetWidth === 100 ? true : false;
-	document.body.removeChild( n );
+  document.body.appendChild( n );
+  oSettings.oBrowser.bScrollOversize = $('#DT_BrowserTest', n)[0].offsetWidth === 100 ? true : false;
+  document.body.removeChild( n );
 }
-

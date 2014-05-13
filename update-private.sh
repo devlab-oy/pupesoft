@@ -4,10 +4,10 @@ PUPEDIR=`dirname $0`
 PRIVATEDIR=$1
 
 if [ ! -d ${PUPEDIR} ] || [ ! -d ${PRIVATEDIR} ]; then
-	echo
-	echo "ERROR! Hakemistoja ei löydy!"
-	echo
-	exit
+  echo
+  echo "ERROR! Hakemistoja ei löydy!"
+  echo
+  exit
 fi
 
 echo

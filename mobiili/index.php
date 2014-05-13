@@ -18,23 +18,23 @@ echo "<div class='header'><h1>",t("PÄÄVALIKKO", $browkieli),"</h1></div>";
 
 echo "<div class='main valikko'>";
 if (tarkista_oikeus("mobiili/siirto.php")) {
-	echo "<button value=''>",t("Siirto", $browkieli),"</button>";
+  echo "<button value=''>",t("Siirto", $browkieli),"</button>";
 }
 
 if (tarkista_oikeus("mobiili/tulouta.php")) {
-	echo "<p><a href='tulouta.php' class='button'>",t("Tulouta", $browkieli),"</a></p>";
+  echo "<p><a href='tulouta.php' class='button'>",t("Tulouta", $browkieli),"</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/inventointi.php")) {
-	echo "<p><a href='inventointi.php' class='button'>",t("Inventointi", $browkieli),"</a></p>";
+  echo "<p><a href='inventointi.php' class='button'>",t("Inventointi", $browkieli),"</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/hyllysiirrot.php")) {
-	echo "<p><a href='hyllysiirrot.php' class='button'>",t("Hyllysiirrot", $browkieli),"</a></p>";
+  echo "<p><a href='hyllysiirrot.php' class='button'>",t("Hyllysiirrot", $browkieli),"</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/tuki.php")) {
-	echo "<button class='button' value=''>",t("Tuki", $browkieli),"</button>";
+  echo "<button class='button' value=''>",t("Tuki", $browkieli),"</button>";
 }
 
 echo "<p><a href='{$palvelin2}logout.php?location={$palvelin2}mobiili' class='button'>",t("Lopeta", $browkieli),"</a></p>";

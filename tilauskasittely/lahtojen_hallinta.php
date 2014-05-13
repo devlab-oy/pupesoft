@@ -786,7 +786,19 @@
                   WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                   AND lasku.tila     = 'L'
                   AND lasku.alatila IN ('A','C')
-                  AND lasku.toimitustavan_lahto = '{$lahto}')";
+                  AND lasku.toimitustavan_lahto = '{$lahto}')
+                  ";
+
+            if ($nayta_myos_siirrot) {
+              $query .= "  UNION
+                    (SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
+                    FROM lasku
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tila     = 'G'
+                    AND lasku.alatila IN ('J','A','C')
+                    AND lasku.toimitustavan_lahto = '{$lahto}')";
+            }
+
             $result = pupe_query($query);
 
             while ($row = mysql_fetch_assoc($result)) {

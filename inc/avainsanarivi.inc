@@ -708,7 +708,7 @@
 
     $jatko = 0;
   }
-
+  
   if ($avain_sel['INVEN_LAJI'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
 
     $sel1 = '';

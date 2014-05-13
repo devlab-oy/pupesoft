@@ -80,7 +80,6 @@ for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix
 	if (!isset(${'ale'.$alepostfix})) ${'ale'.$alepostfix} = "";
 	if (!isset(${'ale_array'.$alepostfix})) ${'ale_array'.$alepostfix} = "";
 }
-
 if (!isset($alv)) 					$alv = "";
 if (!isset($alv_array)) 			$alv_array = "";
 if (!isset($asiakasid)) 			$asiakasid = "";

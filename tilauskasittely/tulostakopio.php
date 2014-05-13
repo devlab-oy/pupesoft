@@ -621,7 +621,7 @@
 			//valmistuslista
 			$where1 .= " lasku.tila = 'V' ";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -643,7 +643,7 @@
 				$where1 .= " and lasku.vienti != '' ";
 			}
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -661,7 +661,7 @@
 			//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
 			$where1 .= " lasku.tila = 'U' and lasku.vienti = 'K' ";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -679,7 +679,7 @@
 			//myyntitilaus. Tulostetaan lähete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -698,7 +698,7 @@
 			//myyntitilaus. Tulostetaan lähete.
 			$where1 .= " lasku.tila in ('L','N','V') ";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -716,7 +716,7 @@
 			//myyntitilaus. Tulostetaan osoitelappuja.
 			$where1 .= " lasku.tila in ('L','G') ";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -734,7 +734,7 @@
 			//myyntitilaus. Tulostetaan vientieruttely.
 			$where1 .= " lasku.tila = 'U' and lasku.vienti != '' ";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -752,7 +752,7 @@
 			//myyntitilaus. Tulostetaan proforma.
 			$where1 .= " lasku.tila in ('L','N','V','E')";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -770,7 +770,7 @@
 			//myyntitilaus.
 			$where1 .= " lasku.tila in ('E','N','L','R','A','V')";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -788,7 +788,7 @@
 			//myyntitilaus.
 			$where1 .= " lasku.tila in ('0')";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -806,7 +806,7 @@
 			// Tulostellaan venemyyntiin liittyviä osia
 			$where1 .= " lasku.tila in ('L','T','N','A') ";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -824,7 +824,7 @@
 			/// Työmääräys
 			$where1 .= " lasku.tila in ('L','A','N','S','T')";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -844,7 +844,7 @@
 			//myyntitilaus. Tulostetaan vakadr-kopio.
 			$where1 .= " lasku.tila in ('L') ";
 
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {

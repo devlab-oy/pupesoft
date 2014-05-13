@@ -34,7 +34,7 @@
 		$sqlhaku = stripslashes(strtolower(trim($sqlhaku)));
 
 		// laitetaan aina kuudes merkki spaceks.. safetymeasure ni ei voi olla ku select
-		if ($sqlhaku{6} != " ") {
+		if (substr($sqlhaku, 6, 1) != " ") {
 			$sqlhaku = substr($sqlhaku,0,6)." ".substr($sqlhaku,6);
 		}
 

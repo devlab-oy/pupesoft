@@ -144,7 +144,7 @@ if ($tee == "SYOTTO") {
 		exit;
 	}
 
-	if ($ytunnus{0} == "£") {
+	if (substr($ytunnus, 0, 1) == "£") {
 		$query = "	SELECT nimi, liitostunnus
 					FROM lasku
 					WHERE ytunnus	= '".substr($ytunnus, 1)."'
@@ -162,7 +162,7 @@ if ($tee == "SYOTTO") {
 		$asiakas_nimi = pupesoft_cleanstring($row["nimi"]);
 		$asiakasstr = substr($row["nimi"], 0, 12);
 
-		if ($ytunnus{0} == "£") {
+		if (substr($ytunnus, 0, 1) == "£") {
 			$asiakasid = $row['liitostunnus'];
 		}
 	}
@@ -445,7 +445,7 @@ if ($ytunnus != '' and $tee == "") {
 	echo "<input type='hidden' name='tee' value='CHECK'/>\n";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
-	if ($ytunnus{0} == "£") {
+	if (substr($ytunnus, 0, 1) == "£") {
 		$query = "	SELECT concat('£',tunnus) tunnus, nimi, ytunnus
 					FROM lasku
 					WHERE ytunnus='".substr($ytunnus, 1)."'

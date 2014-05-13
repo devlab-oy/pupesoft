@@ -381,8 +381,8 @@
 
 		if ($vrow["tyojono"] != "" and $toim != 'TYOMAARAYS_ASENTAJA') {
 			list($ankkuri_pp, $ankkuri_kk, $ankkuri_vv) = explode(".", tv1dateconv($vrow["toimaika"]));
-			$ankkuri_pp = (strlen($ankkuri_pp) == 2 and $ankkuri_pp{0} == 0) ? $ankkuri_pp{1} : $ankkuri_pp;
-			$ankkuri_kk = (strlen($ankkuri_kk) == 2 and $ankkuri_kk{0} == 0) ? $ankkuri_kk{1} : $ankkuri_kk;
+			$ankkuri_pp = (strlen($ankkuri_pp) == 2 and substr($ankkuri_pp, 0, 1) == 0) ? substr($ankkuri_pp, 1, 1) : $ankkuri_pp;
+			$ankkuri_kk = (strlen($ankkuri_kk) == 2 and substr($ankkuri_kk, 0, 1) == 0) ? substr($ankkuri_kk, 1, 1) : $ankkuri_kk;
 
 			$ankkuri = "{$ankkuri_pp}_{$ankkuri_kk}_{$ankkuri_vv}";
 

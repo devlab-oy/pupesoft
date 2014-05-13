@@ -145,7 +145,7 @@
 	    $i = 0;
 
 	    while ($read) {
-	        $char = $read{0};
+	        $char = substr($read, 0, 1);
 	        switch ($char)
 	        {
 	          case '+':
@@ -153,7 +153,7 @@
 	            $read = sqimap_fgets($imap_stream);
 	            break;
 
-	          case $tag{0}:
+	          case substr($tag, 0, 1):
 	          {
 	            /* get the command */
 	            $arg = '';
@@ -186,7 +186,7 @@
 	                $read = sqimap_fgets($imap_stream);
 	                break;
 	            }
-	          } // end case $tag{0}
+	          } // end case substr($tag, 0, 1)
 
 	          case '*':
 	          {
@@ -235,11 +235,11 @@
 	                            break 4; /* while while switch while */
 	                        }
 	                        /* check for next untagged reponse and break */
-	                        if ($read{0} == '*') break 2;
+	                        if (substr($read, 0, 1) == '*') break 2;
 	                        $s = substr($read,-3);
 	                    } while ($s === "}\r\n");
 	                    $s = substr($read,-3);
-	                } while ($read{0} !== '*' &&
+	                } while (substr($read, 0, 1) !== '*' &&
 	                         substr($read,0,strlen($tag)) !== $tag);
 	                $resultlist[] = $fetch_data;
 	                /* release not neaded data */
@@ -264,7 +264,7 @@
 	                    $read = sqimap_fgets($imap_stream);
 	                    if ($read === false) {
 	                        break 3; /* while switch while */
-	                    } else if ($read{0} == '*') {
+	                    } else if (substr($read, 0, 1) == '*') {
 	                        break;
 	                    }
 	                    $s = substr($read,-3);

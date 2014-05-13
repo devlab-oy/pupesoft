@@ -1457,4 +1457,3 @@
 	if (!$php_cli) {
 		require ("inc/footer.inc");
 	}
-?>

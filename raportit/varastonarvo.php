@@ -349,5 +349,3 @@ if (isset($ajetaan)) {
 }
 
 require ("../inc/footer.inc");
-
-?>

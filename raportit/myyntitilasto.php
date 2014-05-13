@@ -266,4 +266,3 @@
   }
 
   require ("inc/footer.inc");
-?>

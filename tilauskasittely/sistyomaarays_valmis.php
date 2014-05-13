@@ -667,4 +667,3 @@
 		}
 	}
 	require ("inc/footer.inc");
-?>

@@ -177,6 +177,3 @@ if(!function_exists("yhtiotarkista")) {
 		}
 	}
 }
-
-
-?>

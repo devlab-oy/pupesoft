@@ -187,4 +187,3 @@
 	}
 
 	require ("inc/footer.inc");
-?>

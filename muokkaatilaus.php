@@ -2862,4 +2862,3 @@
 			require ("inc/footer.inc");
 		}
 	}
-?>

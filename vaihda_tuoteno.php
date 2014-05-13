@@ -795,5 +795,3 @@ if ($tee == "" and $php_cli === false) {
 }
 
 require ("inc/footer.inc");
-
-?>

@@ -339,5 +339,3 @@
 	}
 
 	require("inc/footer.inc");
-
-?>

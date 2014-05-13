@@ -694,4 +694,3 @@
 	}
 
 	require ("inc/footer.inc");
-?>

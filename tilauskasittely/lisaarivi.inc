@@ -3204,8 +3204,49 @@
 			$varasto = kuuluukovarastoon($myy_hyllyalue_temp, $myy_hyllynro_temp);
 
 			if (!empty($varasto)) {
+				$varaston_toimipaikka = hae_varaston_toimipaikka($varasto);
+				if ($varaston_toimipaikka['tunnus'] == 0) {
+					$kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
+					$kukarow['toimipaikka'] = 0;
+				}
+
+				$varaston_toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
+				$kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
+				unset($kukarow_toimipaikka_temp);
+				$update = "";
+
+				# Katsotaan onko varasto sidottu johonkin toimipaikkaan
+				# Ja onko se eri kuin otsikolla oleva toimipaikka
+				# Katsotaan uudella yhtiörown parametreilla pitääkö täppiä laittaa
+				if ($varaston_toimipaikan_yhtiorow['toimipaikkakasittely'] == "L" and $laskurow['yhtio_toimipaikka'] != $varaston_toimipaikka['tunnus']) {
+
+					$_onko_myyntitilaus = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+					$_kerataanko_valmistukset = ($varaston_toimipaikan_yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
+					$_lahetteen_tulostustapa = ($varaston_toimipaikan_yhtiorow['lahetteen_tulostustapa'] == 'I');
+
+					if ($_kerataanko_valmistukset or $_lahetteen_tulostustapa) {
+						$eilahe = 'o';
+					}
+					else {
+						$eilahe = '';
+					}
+
+					$_myyntitilaus_osatoimitus = ($varaston_toimipaikan_yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $_onko_myyntitilaus);
+
+					if ($_myyntitilaus_osatoimitus) {
+						$osatoimitus = 'o';
+					}
+					else {
+						$osatoimitus = '';
+					}
+
+					$update = "	, eilahetetta = '{$eilahe}'
+								, osatoimitus = '{$osatoimitus}'";
+				}
+
 				$query = "	UPDATE lasku
 							SET varasto = '{$varasto}'
+							{$update}
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);

@@ -84,7 +84,7 @@
   if (!isset($rajattu_nakyma))   $rajattu_nakyma = "";
   if (!isset($lukossa))       $lukossa = "";
   if (!isset($lukitse_laji))    $lukitse_laji = "";
-	if (!isset($toim_kuka))			$toim_kuka = "";
+  if (!isset($toim_kuka))      $toim_kuka = "";
 
   // Tutkitaan v‰h‰n alias_settej‰ ja rajattua n‰kym‰‰
   $al_lisa = " and selitetark_2 = '' and nakyvyys != '' ";
@@ -1272,24 +1272,24 @@
     // Ei n‰ytet‰ seuraavia avainsanoja avainsana-yll‰pitolistauksessa
     $avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
-		if (!isset($join)) {
-			$join = "";
-		}
+    if (!isset($join)) {
+      $join = "";
+    }
 
-		if (in_array($toim, array('asiakashinta')) and $yhtiorow['vauriopoytakirja'] == 'K') {
-			$query = "SELECT " . $kentat . " FROM $toim $join WHERE $toim.yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
-			$query .= "$ryhma ORDER BY $jarjestys $limiitti";
-		}
-		else {
+    if (in_array($toim, array('asiakashinta')) and $yhtiorow['vauriopoytakirja'] == 'K') {
+      $query = "SELECT " . $kentat . " FROM $toim $join WHERE $toim.yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
+      $query .= "$ryhma ORDER BY $jarjestys $limiitti";
+    }
+    else {
     $query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";
-		}
+    }
 
     $result = pupe_query($query);
 
-		if (isset($toim_kuka) and $toim_kuka != '') {
-			$lopetus = $lopetus . "//toim_kuka=$toim_kuka";
-		}
+    if (isset($toim_kuka) and $toim_kuka != '') {
+      $lopetus = $lopetus . "//toim_kuka=$toim_kuka";
+    }
 
     if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
       echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa";
@@ -1297,7 +1297,7 @@
       echo "' method = 'post'>
           <input type = 'hidden' name = 'uusi' value = '1'>
           <input type = 'hidden' name = 'toim' value = '$aputoim'>
-					<input type = 'hidden' name = 'toim_kuka' value = '$toim_kuka'>
+          <input type = 'hidden' name = 'toim_kuka' value = '$toim_kuka'>
           <input type = 'hidden' name = 'mista' value = '{$mista}' />
           <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
           <input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>

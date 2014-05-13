@@ -932,7 +932,7 @@
       'toimitus_maa' => $srow['maa'],
     );
 
-    $oletusvarasto = palauta_varasto($args);
+    list($oletusvarasto, $varastot) = palauta_varasto($args);
 
     // jos meillä on jo alatila ja tila ei muokkailla niitä!
     if ($alatila == '' and isset($srow['alatila']) and $srow['alatila'] != '' and $srow_from == "LASKU") {
@@ -3000,7 +3000,7 @@
       'toimitus_maa' => $maa,
     );
 
-    $varasto = palauta_varasto($args);
+    list($varasto, $varastot) = palauta_varasto($args);
 
     $otsikon_laskurow = $apuro;
 

@@ -27759,7 +27759,7 @@ if (!function_exists('palauta_varasto')) {
 
     $varasto = valitse_oletusvarasto($args);
 
-    return $varasto;
+    return array($varasto, $varastot);
   }
 }
 

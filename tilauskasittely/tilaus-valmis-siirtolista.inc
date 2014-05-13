@@ -118,20 +118,20 @@
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT 	otunnus,
-								tunnus,
-								hyllyalue,
-								hyllynro,
-								hyllyvali,
-								hyllytaso,
+			$query = "	SELECT 	tilausrivi.otunnus,
+								tilausrivi.tunnus,
+								tilausrivi.hyllyalue,
+								tilausrivi.hyllynro,
+								tilausrivi.hyllyvali,
+								tilausrivi.hyllytaso,
 								$kerayserat_select
-								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 								FROM tilausrivi
 								$kerayserat_join
-								WHERE otunnus 	= '$laskurow[tunnus]'
-								and yhtio		= '$kukarow[yhtio]'
-								and hyllyalue  != ''
-								and tyyppi	   != 'D'
+								WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+								and tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.hyllyalue != ''
+								and tilausrivi.tyyppi != 'D'
 								ORDER BY $sorttaus";
 			$result = mysql_query($query) or pupe_error($query);
 

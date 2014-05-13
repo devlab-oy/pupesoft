@@ -2049,9 +2049,12 @@
 			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
       // Tarjouksia ei oletuksena osatoimiteta
-      if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
+      $_osatoimitus_oletus = ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0);
+      $_osatoimitus_myyntitilaus = ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+      if ($srow['osatoimitus'] != '' or $_osatoimitus_oletus or $_osatoimitus_myyntitilaus) $osath = 'CHECKED';
 
-			if (!isset($eilahe) and isset($varasto) and $varasto != '0' and is_numeric($varasto)) {
+      $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
+			if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and $_onko_varasto_setattu) {
 				$varaston_toimipaikka = hae_varaston_toimipaikka($varasto);
 				if ($varaston_toimipaikka['tunnus'] == 0) {
 					$kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
@@ -2065,8 +2068,16 @@
 				$_eilahetetta_valmistus = (!isset($srow['eilahetetta']) and $varaston_toimipaikan_yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
 				$_eilahetetta_tulostustapa = (!isset($srow['eilahetetta']) and $varaston_toimipaikan_yhtiorow['lahetteen_tulostustapa'] == 'I');
 				$_eilahetetta_nouto = (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $varaston_toimipaikan_yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
-				if ($srow['eilahetetta'] != '' or $_eilahetetta_valmistus or $_eilahetetta_tulostustapa or $_eilahetetta_nouto)
-					$eilah = 'CHECKED';
+        if ($srow['eilahetetta'] != '' or $_eilahetetta_valmistus or $_eilahetetta_tulostustapa or $_eilahetetta_nouto) {
+          $eilah = 'CHECKED';
+        }
+
+        // Tarjouksia ei oletuksena osatoimiteta
+        $_osatoimitus_oletus = ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0);
+        $_osatoimitus_myyntitilaus = ($varaston_toimipaikan_yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+        if ($srow['osatoimitus'] != '' or $_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {
+          $osath = 'CHECKED';
+        }
 			}
 
 			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus

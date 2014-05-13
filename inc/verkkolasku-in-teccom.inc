@@ -319,7 +319,7 @@
         // täältä tulevat alennukset ja runko-, rahti- ja muutkulut
         if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)) {
 
-          if (isset($tuotetieto->UnitPrice->Amount) and $tuotetieto->UnitPrice->Amount != '') {
+          if (isset($tuotetieto->UnitPrice->Amount) and $tuotetieto->UnitPrice->Amount != '' and $laskuttajan_toimittajanumero != '123418') {
             $rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPrice->Amount);
           }
 

@@ -504,7 +504,7 @@ class import
         if (isset($ob['/DecodeParms'])) {
             $a = array();
             foreach($ob['/DecodeParms'] as $key => $value) {
-                if ($key{0} == '/') {
+                if (substr($key, 0, 1) == '/') {
                     $a[substr($key, 1)] = $value;
                 }
             }
@@ -647,7 +647,7 @@ class import
                 $l = $w;
             } else {
                 echo "Current character = '" . $d->cc() . "'<br>\n";
-                if ($w{0} == '/') {
+                if (substr($w, 0, 1) == '/') {
                     if (!isset($state[0])) {
                         echo "Assigning '$w' as value of [$l]<br>\n";
                         $r[$l] = $w;
@@ -657,7 +657,7 @@ class import
                         $r[$l] = $state[0];
                         $state = array();
                     }
-                } else if ($w{0} == '(' && $w{strlen($w) - 1} == ')') {
+                } else if (substr($w, 0, 1) == '(' && $w{strlen($w) - 1} == ')') {
                     // We've got a string
                     echo "Assigning string value '$w' to [$l]<br>\n";
                     $r[$l] = $w;

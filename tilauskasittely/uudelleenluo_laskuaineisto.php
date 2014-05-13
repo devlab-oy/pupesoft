@@ -21,12 +21,12 @@
   if (!isset($tee) or $tee != "NAYTATILAUS") echo "<font class='head'>".t("Luo laskutusaineisto")."</font><hr>\n";
 
   if (isset($tee) and $tee == "pupevoice_siirto") {
-
     $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
     $ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
-    $ftpfile = $pupe_root_polku."/dataout/".basename($filenimi);
+    $ftpfile = "{$pupe_root_polku}/dataout/".basename($filenimi);
+    $ftpfail = "{$pupe_root_polku}/dataout/pupevoice_error/";
 
     $tulos_ulos = "";
 
@@ -106,7 +106,7 @@
     $ftpuser     = $yhtiorow['verkkotunnus_lah'];
     $ftppass     = $yhtiorow['verkkosala_lah'];
     $ftppath     = "out/finvoice/data/";
-    $ftpfile     = $pupe_root_polku."/dataout/".basename($filenimi);
+    $ftpfile     = "{$pupe_root_polku}/dataout/".basename($filenimi);
     $renameftpfile   = str_replace("TRANSFER_IPOST", "DELIVERED_IPOST", basename($filenimi));
     $ftpfail     = "{$pupe_root_polku}/dataout/ipost_error/";
 

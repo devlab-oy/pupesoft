@@ -79,7 +79,7 @@ if(!function_exists("avainsanatarkista")) {
         if (trim($tem_selite) == '') {
           $virhe[$i] = t("Selite on pakollinen ja se pitää olla muodossa #123 tai #112233");
         }
-        elseif ($tem_selite{0} != '#') {
+        elseif (substr($tem_selite, 0, 1) != '#') {
           $virhe[$i] = t("Selitteen ensimmäinen kirjain pitää olla #");
         }
         elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {

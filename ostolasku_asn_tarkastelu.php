@@ -323,7 +323,7 @@
             ORDER BY asn_sanomat.tuoteno ASC";
       $kollires = pupe_query($query);
 
-      $i = $x = 0;
+      $i = $x = $y = 0;
       $keikoilla  = array();
       $ostoilla  = array();
       $tullaan_virhetarkistuksesta = $tee == 'vahvistavakisinkolli' ? false : true;
@@ -546,20 +546,23 @@
             $tilausrivires = pupe_query($query);
 
             while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
+
               if ($tilausrivirow['uusiotunnus'] == 0) {
                 // löytyi, ei ole keikalla
-                $ostoilla[$x]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
-                $ostoilla[$x]["hinta"] = $rtuoteno[$i]["hinta"];
-                $ostoilla[$x]["kpl"] = $rtuoteno[$i]["kpl"];
-                $ostoilla[$x]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
-                $ostoilla[$x]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-                $ostoilla[$x]["insert_id"] = $rtuoteno[$i]["insert_id"];
-                $ostoilla[$x]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
-                $ostoilla[$x]["kulu"] = $rtuoteno[$i]["kulu"];
-                $ostoilla[$x]["ale1"] = $rtuoteno[$i]["ale1"];
-                $ostoilla[$x]["ale2"] = $rtuoteno[$i]["ale2"];
-                $ostoilla[$x]["ale3"] = $rtuoteno[$i]["ale3"];
-                $ostoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
+                $ostoilla[$y]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
+                $ostoilla[$y]["hinta"] = $rtuoteno[$i]["hinta"];
+                $ostoilla[$y]["kpl"] = $rtuoteno[$i]["kpl"];
+                $ostoilla[$y]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+                $ostoilla[$y]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
+                $ostoilla[$y]["insert_id"] = $rtuoteno[$i]["insert_id"];
+                $ostoilla[$y]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
+                $ostoilla[$y]["kulu"] = $rtuoteno[$i]["kulu"];
+                $ostoilla[$y]["ale1"] = $rtuoteno[$i]["ale1"];
+                $ostoilla[$y]["ale2"] = $rtuoteno[$i]["ale2"];
+                $ostoilla[$y]["ale3"] = $rtuoteno[$i]["ale3"];
+                $ostoilla[$y]['tuoteno'] = $tilausrivirow['tuoteno'];
+
+                $y++;
               }
               else {
                 // löytyi, on jo keikalla
@@ -595,9 +598,9 @@
                         AND tunnus  = '{$kollirow['tunnus']}'";
                   $upd_res = pupe_query($query);
                 }
-              }
 
-              $x++;
+                $x++;
+              }
             }
           }
 

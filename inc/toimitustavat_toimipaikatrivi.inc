@@ -36,5 +36,7 @@ if (mysql_field_name($result, $i) == "toimipaikka_tunnus") {
 }
 
 if (mysql_field_name($result, $i) == "toimitustapa_tunnus") {
+  $trow['toimitustapa_tunnus'] = $lukitse_avaimeen;
+  $trow[$i] = $lukitse_avaimeen;
   $tyyppi = 4;
 }

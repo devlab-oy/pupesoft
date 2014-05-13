@@ -34,8 +34,17 @@
       $query  = "SHOW columns FROM yhtion_parametrit";
       $fields =  mysql_query($query);
 
+      // ihan kaikkia parametrejä ei voi sallia toimipaikan taakse
+      $poikkeukset = array(
+        "myyntitilauksen_toimipaikka",
+      );
+
       while ($apurow = mysql_fetch_array($fields)) {
+ 
         $sel = "";
+        
+        if (in_array($apurow[0], $poikkeukset)) continue;
+        
         if ($trow[$i] == $apurow[0]) {
           $sel     = "SELECTED";
           $parametri  = $trow[$i];

@@ -307,6 +307,11 @@
 							AND chn = '999'";
 				$ures  = pupe_query($query);
 
+				# Jos laaja toimipaikkak‰sittely on p‰‰ll‰, niin p‰ivitet‰‰n siirtolistan toimipaikka
+				# kohdevaraston toimipaikaksi
+				if ($yhtiorow['toimipaikkakasittely'] == "L") {
+					paivita_siirtolistan_toimipaikka($row['tunnus']);
+				}
 			}
 		}
 
@@ -725,6 +730,17 @@
 								AND yhtio 	   = '$kukarow[yhtio]'
 								AND tulostettu = '0000-00-00 00:00:00'";
 					$ures  = pupe_query($query);
+
+					# Jos laaja toimipaikkak‰sittely on p‰‰ll‰, niin p‰ivitet‰‰n siirtolistan toimipaikka
+					# kohdevaraston toimipaikaksi
+					if ($yhtiorow['toimipaikkakasittely'] == "L") {
+
+						foreach (explode(",", $otunnukset) as $siirtolistan_tunnus) {
+
+							$siirtolistan_tunnus = str_replace("'", "", $siirtolistan_tunnus);
+							paivita_siirtolistan_toimipaikka($siirtolistan_tunnus);
+						}
+					}
 				}
 
 				// n‰it‰ tarvitaan vain JV-keiseissa, mutta pit‰‰ nollata tietty joka luupilla

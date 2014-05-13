@@ -10890,8 +10890,16 @@ if (!function_exists("hae_kukarow")) {
 }
 
 if (!function_exists("hae_yhtion_parametrit")) {
-	function hae_yhtion_parametrit($yhtio, $toimipaikka = '') {
+	function hae_yhtion_parametrit($yhtio, $toimipaikka = null) {
 		global $kukarow, $konserni_yhtiot, $konsernivarasto_yhtiot;
+
+		// Katsotaan, että meillä on aina toimipaikka parametri setattu
+		if (is_null($toimipaikka)) {
+			$toimipaikka = isset($kukarow['toimipaikka']) ? (int) $kukarow['toimipaikka'] : 0;
+		}
+		else {
+			$toimipaikka = (int) $toimipaikka;
+		}
 
 		$query = "	SELECT *
 					FROM yhtio
@@ -10911,7 +10919,8 @@ if (!function_exists("hae_yhtion_parametrit")) {
 			$query = "	SELECT distinct yhtio.yhtio, konsernivarasto
 						FROM yhtio
 						JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
-						WHERE (yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '') or (yhtio.yhtio = '$yhtiorow[yhtio]')";
+						WHERE (yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '')
+						OR (yhtio.yhtio = '$yhtiorow[yhtio]')";
 			$result = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($result)) {
@@ -10929,7 +10938,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
 		$query = "	SELECT *
 					FROM yhtion_parametrit
-					WHERE yhtio='$yhtio'";
+					WHERE yhtio = '$yhtio'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
@@ -10945,14 +10954,12 @@ if (!function_exists("hae_yhtion_parametrit")) {
 			}
 		}
 
-		if ((isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0) or $toimipaikka != '') {
-			if ($toimipaikka == '') {
-				$toimipaikka = $kukarow['toimipaikka'];
-			}
+		// Jos meillä on toimipaikka, ylikirjataan yhtion parametrit toimipaikan parametreillä
+		if ($toimipaikka > 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
 						WHERE yhtio = '$yhtio'
-						and tunnus  = '$toimipaikka'";
+						and tunnus = '$toimipaikka'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -10970,8 +10977,8 @@ if (!function_exists("hae_yhtion_parametrit")) {
 				// Heataan vielä toimipaikan paramit
 				$query = "	SELECT *
 							FROM yhtion_toimipaikat_parametrit
-							WHERE yhtio 	= '$yhtio'
-							and toimipaikka = '$kukarow[toimipaikka]'";
+							WHERE yhtio = '$yhtio'
+							and toimipaikka = '$toimipaikka'";
 				$result = pupe_query($query);
 
 				while ($yhtion_toimipaikka_paramrow = mysql_fetch_assoc($result)) {
@@ -27167,7 +27174,6 @@ if (!function_exists('luo_tapahtuma')) {
 }
 
 if (!function_exists('hae_tuotepaikat')) {
-
 	function hae_tuotepaikat($tuoteno, $hyllyalue, $hyllynro, $hyllytaso = false, $hyllyvali = false) {
 		global $kukarow, $yhtiorow;
 
@@ -27200,7 +27206,6 @@ if (!function_exists('hae_tuotepaikat')) {
 }
 
 if (!function_exists('hae_tuotteen_tuotepaikat')) {
-
 	function hae_tuotteen_tuotepaikat($tuoteno) {
 		global $kukarow, $yhtiorow;
 
@@ -27885,5 +27890,45 @@ if (!function_exists('tilauksen_toimipaikka')) {
 		}
 
 		return 0;
+	}
+}
+
+if (!function_exists('paivita_siirtolistan_toimipaikka')) {
+	function paivita_siirtolistan_toimipaikka($tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$tunnus = (int) $tunnus;
+
+		if ($tunnus == 0) {
+			return false;
+		}
+
+		$query = "SELECT tila, clearing
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tunnus}'";
+		$laskres = pupe_query($query);
+		$laskrow = mysql_fetch_assoc($laskres);
+
+		# Siirtolistan clearing-kentässä on kohdevarasto
+		if ($laskrow['tila'] == 'G' and $laskrow['clearing'] != '' and is_numeric($laskrow['clearing'])) {
+
+			$query = "SELECT toimipaikka
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$laskrow['clearing']}'";
+			$var_tp_res = pupe_query($query);
+
+			if (mysql_num_rows($var_tp_res) != 0) {
+
+				$var_tp_row = mysql_fetch_assoc($var_tp_res);
+
+				$query = "UPDATE lasku SET
+									yhtio_toimipaikka = '{$var_tp_row['toimipaikka']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$tunnus}'";
+				$updres = pupe_query($query);
+			}
+		}
 	}
 }

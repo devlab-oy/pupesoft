@@ -685,5 +685,3 @@ if ($error==1) echo "<font class='error'>".t("Käsittelyssä tapahtui virhe")."</f
 
 fclose ($fd);
 echo "</pre>";
-
-?>

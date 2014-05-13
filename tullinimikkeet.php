@@ -47,148 +47,148 @@ update tullinimike set su_vientiilmo='CCT' where su='ct/l';
 
 if ($tee == "muuta") {
 
-	$ok = 0;
-	$uusitullinimike1 = trim($uusitullinimike1);
-	$uusitullinimike2 = trim($uusitullinimike2);
+  $ok = 0;
+  $uusitullinimike1 = trim($uusitullinimike1);
+  $uusitullinimike2 = trim($uusitullinimike2);
 
-	// katotaan, että tullinimike1 löytyy
-	$query = "SELECT cn FROM tullinimike WHERE cn = '$uusitullinimike1' and kieli = '$yhtiorow[kieli]'";
-	$result = mysql_query($query) or pupe_error($query);
+  // katotaan, että tullinimike1 löytyy
+  $query = "SELECT cn FROM tullinimike WHERE cn = '$uusitullinimike1' and kieli = '$yhtiorow[kieli]'";
+  $result = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($result) != 1 or $uusitullinimike1 == "") {
-		$ok = 1;
-		echo "<font class='error'>Tullinimike 1 on virheellinen!</font><br>";
-	}
+  if (mysql_num_rows($result) != 1 or $uusitullinimike1 == "") {
+    $ok = 1;
+    echo "<font class='error'>Tullinimike 1 on virheellinen!</font><br>";
+  }
 
-	// kaks pitkä tai ei mitään
-	if (strlen($uusitullinimike2) != 2) {
-		$ok = 1;
-		echo "<font class='error'>Tullinimike 2 tulee olla 2 merkkiä pitkä!</font><br>";
-	}
+  // kaks pitkä tai ei mitään
+  if (strlen($uusitullinimike2) != 2) {
+    $ok = 1;
+    echo "<font class='error'>Tullinimike 2 tulee olla 2 merkkiä pitkä!</font><br>";
+  }
 
-	// tää on aika fiinisliippausta
-	if ($ok == 1) echo "<br>";
+  // tää on aika fiinisliippausta
+  if ($ok == 1) echo "<br>";
 
-	// jos kaikki meni ok, nii päivitetään
-	if ($ok == 0) {
+  // jos kaikki meni ok, nii päivitetään
+  if ($ok == 0) {
 
-		if ($tullinimike2 != "") $lisa = " and tullinimike2='$tullinimike2'";
-		else $lisa = "";
+    if ($tullinimike2 != "") $lisa = " and tullinimike2='$tullinimike2'";
+    else $lisa = "";
 
-		$query = "update tuote set tullinimike1='$uusitullinimike1', tullinimike2='$uusitullinimike2' where yhtio='$kukarow[yhtio]' and tullinimike1='$tullinimike1' $lisa";
-		$result = mysql_query($query) or pupe_error($query);
+    $query = "update tuote set tullinimike1='$uusitullinimike1', tullinimike2='$uusitullinimike2' where yhtio='$kukarow[yhtio]' and tullinimike1='$tullinimike1' $lisa";
+    $result = mysql_query($query) or pupe_error($query);
 
-		echo sprintf("<font class='message'>Päivitettiin %s tuotetta.</font><br><br>", mysql_affected_rows());
+    echo sprintf("<font class='message'>Päivitettiin %s tuotetta.</font><br><br>", mysql_affected_rows());
 
-		$tullinimike1 = $uusitullinimike1;
-		$tullinimike2 = $uusitullinimike2;
-		$uusitullinimike1 = "";
-		$uusitullinimike2 = "";
-	}
+    $tullinimike1 = $uusitullinimike1;
+    $tullinimike2 = $uusitullinimike2;
+    $uusitullinimike1 = "";
+    $uusitullinimike2 = "";
+  }
 }
 
 if ($tee == "synkronoi") {
 
-	$ch  = curl_init();
-	curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssitullinimikkeet.sql");
-	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt ($ch, CURLOPT_HEADER, FALSE);
-	$nimikeet = curl_exec ($ch);
-	$nimikeet = explode("\n", trim($nimikeet));
+  $ch  = curl_init();
+  curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssitullinimikkeet.sql");
+  curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+  curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+  curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt ($ch, CURLOPT_HEADER, FALSE);
+  $nimikeet = curl_exec ($ch);
+  $nimikeet = explode("\n", trim($nimikeet));
 
-	if (count($nimikeet) == 0) {
-		echo t("Tiedoston avaus epäonnistui")."!";
-		require ("inc/footer.inc");
-		exit;
-	}
+  if (count($nimikeet) == 0) {
+    echo t("Tiedoston avaus epäonnistui")."!";
+    require ("inc/footer.inc");
+    exit;
+  }
 
-	echo "<br><br>";
-	echo t("Poistetaan vanhat tullinimikkeet")."...<br>";
+  echo "<br><br>";
+  echo t("Poistetaan vanhat tullinimikkeet")."...<br>";
 
-	// Poistetaan nykyiset nimikkeet....
-	$query  = "	DELETE FROM tullinimike";
-	$result = mysql_query($query) or pupe_error($query);
+  // Poistetaan nykyiset nimikkeet....
+  $query  = "  DELETE FROM tullinimike";
+  $result = mysql_query($query) or pupe_error($query);
 
-	// Päivitetään tuotteet 2012 - 2013
-	$muunnosavaimet = array(
-		"03074191"=>"03074192",
-		"03074951"=>"03079914",
-		"03074991"=>"03074992",
-		"03079100"=>"03079190",
-		"20081911"=>"20081912",
-		"20081991"=>"20081992",
-		"27040011"=>"27040010",
-		"27040019"=>"27040010",
-		"31025010"=>"31025000",
-		"31025090"=>"31025000",
-		"31059010"=>"31059020",
-		"31059091"=>"31059020",
-		"31059099"=>"31059080",
-		"44219098"=>"44219095",
-		"70193110"=>"70193100",
-		"70193190"=>"70193100",
-		"70193210"=>"70193200",
-		"70193290"=>"70193200",
-		"73251050"=>"73251000",
-		"73251092"=>"73251000",
-		"73251099"=>"73251000",
-		"76129090"=>"76129030",
-		"76151090"=>"76151030",
-		"84073300"=>"84073320",
-		"85285910"=>"85285920",
-		"85285940"=>"85285931",
-		"85285980"=>"85285939",
-		"87141000"=>"87141010",
-		"96190011"=>"96190071",
-		"96190013"=>"96190075",
-		"96190019"=>"96190079",
-		"96190021"=>"96190081",
-		"96190029"=>"96190089",
-		"96190031"=>"96190030",
-		"96190039"=>"96190030",
-		"96190041"=>"96190040",
-		"96190049"=>"96190040",
-		"96190051"=>"96190050",
-		"96190059"=>"96190050",
-		"96190090"=>"96190071");
+  // Päivitetään tuotteet 2012 - 2013
+  $muunnosavaimet = array(
+    "03074191"=>"03074192",
+    "03074951"=>"03079914",
+    "03074991"=>"03074992",
+    "03079100"=>"03079190",
+    "20081911"=>"20081912",
+    "20081991"=>"20081992",
+    "27040011"=>"27040010",
+    "27040019"=>"27040010",
+    "31025010"=>"31025000",
+    "31025090"=>"31025000",
+    "31059010"=>"31059020",
+    "31059091"=>"31059020",
+    "31059099"=>"31059080",
+    "44219098"=>"44219095",
+    "70193110"=>"70193100",
+    "70193190"=>"70193100",
+    "70193210"=>"70193200",
+    "70193290"=>"70193200",
+    "73251050"=>"73251000",
+    "73251092"=>"73251000",
+    "73251099"=>"73251000",
+    "76129090"=>"76129030",
+    "76151090"=>"76151030",
+    "84073300"=>"84073320",
+    "85285910"=>"85285920",
+    "85285940"=>"85285931",
+    "85285980"=>"85285939",
+    "87141000"=>"87141010",
+    "96190011"=>"96190071",
+    "96190013"=>"96190075",
+    "96190019"=>"96190079",
+    "96190021"=>"96190081",
+    "96190029"=>"96190089",
+    "96190031"=>"96190030",
+    "96190039"=>"96190030",
+    "96190041"=>"96190040",
+    "96190049"=>"96190040",
+    "96190051"=>"96190050",
+    "96190059"=>"96190050",
+    "96190090"=>"96190071");
 
-	echo t("Päivitetään muuttuneet tullinimikkeet tuotteille")."...<br>";
+  echo t("Päivitetään muuttuneet tullinimikkeet tuotteille")."...<br>";
 
-	foreach ($muunnosavaimet as $vanha => $uusi) {
-		$query  = "	UPDATE tuote set
-					tullinimike1 = '$uusi'
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tullinimike1 = '$vanha'";
-		$result = mysql_query($query) or pupe_error($query);
-	}
+  foreach ($muunnosavaimet as $vanha => $uusi) {
+    $query  = "  UPDATE tuote set
+          tullinimike1 = '$uusi'
+          WHERE yhtio = '$kukarow[yhtio]'
+          AND tullinimike1 = '$vanha'";
+    $result = mysql_query($query) or pupe_error($query);
+  }
 
-	// Eka rivi roskikseen
-	unset($nimikeet[0]);
+  // Eka rivi roskikseen
+  unset($nimikeet[0]);
 
-	echo t("Lisätään uudet tullinimikkeet tietokantaan")."...<br>";
+  echo t("Lisätään uudet tullinimikkeet tietokantaan")."...<br>";
 
-	foreach ($nimikeet as $rivi) {
-		list($cnkey, $cn, $dashes, $dm, $su, $su_vientiilmo, $kieli) = explode("\t", trim($rivi));
+  foreach ($nimikeet as $rivi) {
+    list($cnkey, $cn, $dashes, $dm, $su, $su_vientiilmo, $kieli) = explode("\t", trim($rivi));
 
-		$dm = preg_replace("/([^A-Z0-9öäåÅÄÖ \.,\-_\:\/\!\|\?\+\(\)%#]|é)/i", "", $dm);
+    $dm = preg_replace("/([^A-Z0-9öäåÅÄÖ \.,\-_\:\/\!\|\?\+\(\)%#]|é)/i", "", $dm);
 
-		$query  = "	INSERT INTO tullinimike SET
-					yhtio			= '$kukarow[yhtio]',
-					cnkey			= '$cnkey',
-					cn				= '$cn',
-					dashes			= '$dashes',
-					dm				= '$dm',
-					su				= '$su',
-					su_vientiilmo	= '$su_vientiilmo',
-					kieli			= '$kieli',
-					laatija			= '$kukarow[kuka]',
-					luontiaika		= now()";
-		$result = mysql_query($query) or pupe_error($query);
-	}
+    $query  = "  INSERT INTO tullinimike SET
+          yhtio      = '$kukarow[yhtio]',
+          cnkey      = '$cnkey',
+          cn        = '$cn',
+          dashes      = '$dashes',
+          dm        = '$dm',
+          su        = '$su',
+          su_vientiilmo  = '$su_vientiilmo',
+          kieli      = '$kieli',
+          laatija      = '$kukarow[kuka]',
+          luontiaika    = now()";
+    $result = mysql_query($query) or pupe_error($query);
+  }
 
-	echo t("Päivitys valmis")."...<br><br><hr>";
+  echo t("Päivitys valmis")."...<br><br><hr>";
 }
 
 
@@ -217,74 +217,72 @@ echo "</form>";
 
 if ($tullinimike1 != "") {
 
-	if ($tullinimike2 != "") $lisa = " and tullinimike2='$tullinimike2'";
-	else $lisa = "";
+  if ($tullinimike2 != "") $lisa = " and tullinimike2='$tullinimike2'";
+  else $lisa = "";
 
-	$query = "	SELECT *
-				from tuote use index (yhtio_tullinimike)
-				where yhtio = '$kukarow[yhtio]'
-				and tullinimike1 = '$tullinimike1' $lisa
-				order by tuoteno";
-	$resul = mysql_query($query) or pupe_error($query);
+  $query = "  SELECT *
+        from tuote use index (yhtio_tullinimike)
+        where yhtio = '$kukarow[yhtio]'
+        and tullinimike1 = '$tullinimike1' $lisa
+        order by tuoteno";
+  $resul = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($resul) == 0) {
-		echo "<font class='error'>Yhtään tuotetta ei löytynyt!</font><br>";
-	}
-	else {
+  if (mysql_num_rows($resul) == 0) {
+    echo "<font class='error'>Yhtään tuotetta ei löytynyt!</font><br>";
+  }
+  else {
 
-		echo sprintf("<font class='message'>Haulla löytyi %s tuotetta.</font><br><br>", mysql_num_rows($resul));
+    echo sprintf("<font class='message'>Haulla löytyi %s tuotetta.</font><br><br>", mysql_num_rows($resul));
 
-		echo "<form method='post' autocomplete='off'>";
-		echo "<input type='hidden' name='tullinimike1' value='$tullinimike1'>";
-		echo "<input type='hidden' name='tullinimike2' value='$tullinimike2'>";
-		echo "<input type='hidden' name='tee' value='muuta'>";
+    echo "<form method='post' autocomplete='off'>";
+    echo "<input type='hidden' name='tullinimike1' value='$tullinimike1'>";
+    echo "<input type='hidden' name='tullinimike2' value='$tullinimike2'>";
+    echo "<input type='hidden' name='tee' value='muuta'>";
 
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t("Syötä uusi tullinimike").":</th>";
-		echo "<td><input type='text' name='uusitullinimike1' value='$uusitullinimike1'></td>";
-		echo "</tr><tr>";
-		echo "<th>".t("Syötä tullinimikkeen lisäosa").":</th>";
-		echo "<td><input type='text' name='uusitullinimike2' value='$uusitullinimike2'></td>";
-		echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td>";
-		echo "</tr></table>";
-		echo "</form><br>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Syötä uusi tullinimike").":</th>";
+    echo "<td><input type='text' name='uusitullinimike1' value='$uusitullinimike1'></td>";
+    echo "</tr><tr>";
+    echo "<th>".t("Syötä tullinimikkeen lisäosa").":</th>";
+    echo "<td><input type='text' name='uusitullinimike2' value='$uusitullinimike2'></td>";
+    echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td>";
+    echo "</tr></table>";
+    echo "</form><br>";
 
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t("Tuoteno")."</th>";
-		echo "<th>".t("Osasto")."</th>";
-		echo "<th>".t("Try")."</th>";
-		echo "<th>".t("Merkki")."</th>";
-		echo "<th>".t("Nimitys")."</th>";
-		echo "<th>".t("Tullinimike")."</th>";
-		echo "<th>".t("Tullinimikkeen lisäosa")."</th>";
-		echo "</tr>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Tuoteno")."</th>";
+    echo "<th>".t("Osasto")."</th>";
+    echo "<th>".t("Try")."</th>";
+    echo "<th>".t("Merkki")."</th>";
+    echo "<th>".t("Nimitys")."</th>";
+    echo "<th>".t("Tullinimike")."</th>";
+    echo "<th>".t("Tullinimikkeen lisäosa")."</th>";
+    echo "</tr>";
 
-		while ($rivi = mysql_fetch_array($resul)) {
+    while ($rivi = mysql_fetch_array($resul)) {
 
-			// tehdään avainsana query
-			$oresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$rivi[osasto]'");
-			$os = mysql_fetch_array($oresult);
+      // tehdään avainsana query
+      $oresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$rivi[osasto]'");
+      $os = mysql_fetch_array($oresult);
 
-			// tehdään avainsana query
-			$tresult = t_avainsana("TRY", "", "and avainsana.selite ='$rivi[try]'");
-			$try = mysql_fetch_array($tresult);
+      // tehdään avainsana query
+      $tresult = t_avainsana("TRY", "", "and avainsana.selite ='$rivi[try]'");
+      $try = mysql_fetch_array($tresult);
 
-			echo "<tr>";
-			echo "<td><a href='yllapito.php?toim=tuote&tunnus=$rivi[tunnus]&lopetus=tullinimikkeet.php'>$rivi[tuoteno]</a></td>";
-			echo "<td>$rivi[osasto] $os[selitetark]</td>";
-			echo "<td>$rivi[try] $try[selitetark]</td>";
-			echo "<td>$rivi[tuotemerkki]</td>";
-			echo "<td>".t_tuotteen_avainsanat($rivi, 'nimitys')."</td>";
-			echo "<td>$rivi[tullinimike1]</td>";
-			echo "<td>$rivi[tullinimike2]</td>";
-			echo "</tr>";
-		}
-		echo "</table>";
-	}
+      echo "<tr>";
+      echo "<td><a href='yllapito.php?toim=tuote&tunnus=$rivi[tunnus]&lopetus=tullinimikkeet.php'>$rivi[tuoteno]</a></td>";
+      echo "<td>$rivi[osasto] $os[selitetark]</td>";
+      echo "<td>$rivi[try] $try[selitetark]</td>";
+      echo "<td>$rivi[tuotemerkki]</td>";
+      echo "<td>".t_tuotteen_avainsanat($rivi, 'nimitys')."</td>";
+      echo "<td>$rivi[tullinimike1]</td>";
+      echo "<td>$rivi[tullinimike2]</td>";
+      echo "</tr>";
+    }
+    echo "</table>";
+  }
 }
 
 require ("inc/footer.inc");
-
-?>

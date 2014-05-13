@@ -62,7 +62,7 @@ class Image_Barcode extends PEAR
      * @since  Image_Barcode 0.3
      */
 
-	function &draw($text, $type = 'int25', $imgtype = 'png', $bSendToBrowser = true, $barwidth = 1, $barcodeheight = 60, $noText = true) {
+  function &draw($text, $type = 'int25', $imgtype = 'png', $bSendToBrowser = true, $barwidth = 1, $barcodeheight = 60, $noText = true) {
         //Make sure no bad files are included
         if (!preg_match('/^[a-zA-Z0-9_-]+$/', $type)) {
             return PEAR::raiseError('Invalid barcode type ' . $type);
@@ -107,9 +107,8 @@ class Image_Barcode extends PEAR
                     break;
             }
         } 
-		else {
+    else {
             return $img;
         }
     }
 }
-?>

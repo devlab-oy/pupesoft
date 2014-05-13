@@ -57,7 +57,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$laskutyyppi	   = $asiakasrow["laskutyyppi"];
 			$lahetetyyppi 	   = pupesoft_lahetetyyppi(0, $asiakasrow['tunnus']);
 
-			if ($toim == "PIKATILAUS" and (int) $kukarow["kesken"] == 0 and $asiakasrow['toimipaikka'] != 0) {
+			if (in_array($toim, array('PIKATILAUS', 'EXTRANET')) and (int) $kukarow["kesken"] == 0 and $asiakasrow['toimipaikka'] != 0) {
 				if ($kukarow['toimipaikka'] != $asiakasrow['toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
 					$kukarow['toimipaikka'] = $asiakasrow['toimipaikka'];
 					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

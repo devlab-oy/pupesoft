@@ -157,9 +157,9 @@ class Image_Barcode_ean13 extends Image_Barcode
      */
     function &draw($text, $imgtype = 'png', $barwidth, $barcodeheight)
     {
-		$this->_barwidth = $barwidth;
-		$this->_barcodeheight = $barcodeheight;
-	
+    $this->_barwidth = $barwidth;
+    $this->_barcodeheight = $barcodeheight;
+  
         // Calculate the barcode width
         $barcodewidth = (strlen($text)) * (7 * $this->_barwidth)
             + 3 // left
@@ -257,4 +257,3 @@ class Image_Barcode_ean13 extends Image_Barcode
     } // function create
 
 } // class
-?>

@@ -21,7 +21,7 @@
 * @package    Spreadsheet_Excel_Reader
 * @author     Vadim Tkachenko <vt@apachephp.com>
 * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
-	* @link       http://pear.php.net/package/Spreadsheet_Excel_Reader
+  * @link       http://pear.php.net/package/Spreadsheet_Excel_Reader
 * @see        OLE, Spreadsheet_Excel_Writer
 */
 
@@ -1079,5 +1079,3 @@ class Spreadsheet_Excel_Reader
  * c-hanging-comment-ender-p: nil
  * End:
  */
-
-?>

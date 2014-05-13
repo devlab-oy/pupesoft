@@ -28,14 +28,14 @@ $query = "  SELECT
             tilausrivi.uusiotunnus,
             lasku.liitostunnus,
             toimi.selaus,
-			IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi,
+      IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi,
             IFNULL(tilausrivin_lisatiedot.tilausrivitunnus, 0) as tilausrivitunnus
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
             JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-			LEFT JOIN tilausrivin_lisatiedot
-			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
+      LEFT JOIN tilausrivin_lisatiedot
+      ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'
             AND lasku.tunnus='{$ostotilaus}'
@@ -75,11 +75,11 @@ else {
     }
 
     //jos ollaan ennaltakohdistetussa (mutta ei tuloutetussa) riviss‰, niin se on poikkeustapaus, jolloin kukarow.kesken tietoa ei tule p‰ivitt‰‰ -> muuten seuraavien rivien p‰ivitys menee sekaisin ja tuloutetaan rivej‰ v‰‰r‰lle saapumiselle
-	if (!isset($ennaltakohdistettu) OR !$ennaltakohdistettu) {
-    	// P‰ivitet‰‰n kuka.kesken
-    	$update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
-    	$updated = pupe_query($update_kuka);
-	}
+  if (!isset($ennaltakohdistettu) OR !$ennaltakohdistettu) {
+      // P‰ivitet‰‰n kuka.kesken
+      $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+      $updated = pupe_query($update_kuka);
+  }
 }
 
 # Kontrolleri

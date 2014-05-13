@@ -120,4 +120,3 @@ Whole license is located at <a href='pics/lullacons/lullacons-readme.txt'>pics/l
 
 </pre>
 "
-?>

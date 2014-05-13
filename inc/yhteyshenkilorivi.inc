@@ -84,5 +84,3 @@ $ulos .= "<option value='Magento'>Magento</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-
-?>

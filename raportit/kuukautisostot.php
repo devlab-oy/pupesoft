@@ -2915,7 +2915,7 @@
           sum(if(tyyppi IN ('W','M'), varattu, 0)) valmistuksessa,
           sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
           sum(if(tyyppi IN ('L','V') AND var NOT IN ('P','J','O','S'), varattu, 0)) ennpois,
-          sum(if(tyyppi IN ('L','G') AND var IN ('J','S'), jt $lisavarattu, 0)) jt
+          sum(if(tyyppi IN ('L','G') AND var = 'J', jt $lisavarattu, 0)) jt
           $varastolisa
           FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
           {$ei_vienteja_lisa}

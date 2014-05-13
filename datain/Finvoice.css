@@ -2,26 +2,26 @@
 
 body
 {
-	margin:5px;
-	padding:0;
-	background-color:#ffffff;
-	color:#000000;
-	width:99%;
+  margin:5px;
+  padding:0;
+  background-color:#ffffff;
+  color:#000000;
+  width:99%;
 }
 
 table
 {
-	margin:0px;
-	padding:0px;
-	border-collapse:collapse;
+  margin:0px;
+  padding:0px;
+  border-collapse:collapse;
 }
 
 td
 {
-	margin:0px;
-	padding:0px;
-	vertical-align:top;
-	text-align:left;
+  margin:0px;
+  padding:0px;
+  vertical-align:top;
+  text-align:left;
 }
 
 .title { font-weight:bold; }
@@ -32,12 +32,12 @@ td.title { padding-right: 0.4em; }
 
 div.InvoiceTypeText
 {
-	margin:0mm 0mm 6mm 0mm;
-	padding:0;
-	text-align:center;
-	letter-spacing:8px;
-	font-size:200%;
-	font-weight:bold;
+  margin:0mm 0mm 6mm 0mm;
+  padding:0;
+  text-align:center;
+  letter-spacing:8px;
+  font-size:200%;
+  font-weight:bold;
 }
 
 table.invoiceTop { width:99%; }
@@ -48,8 +48,8 @@ td.invoiceTopRight {}
 
 table.invoiceTopRight, table.invoiceTotal
 {
-	margin-left:auto;
-	margin-right:0px;
+  margin-left:auto;
+  margin-right:0px;
 }
 
 table.InvoiceDetails { width:100%; }
@@ -76,12 +76,12 @@ div.InvoiceRecipientContact { margin:7mm 0mm 0mm 0mm; }
 .EpiInstructedAmount, .EpiDateOptionDate, .EpiNameAddressDetails, .EpiAccountID,
 .EpiBfiIdentifier, .EpiRemittanceInfoIdentifier, .InvoiceTotalVatIncludedAmount
 {
-	font-weight:bold;
+  font-weight:bold;
 }
 
 div.colTitle, span.colTitle {
-	font-weight:bold;
-	white-space:nowrap;
+  font-weight:bold;
+  white-space:nowrap;
 }
 
 div.colData { margin:0ex 0ex 0.8ex 0ex; }
@@ -90,18 +90,18 @@ div.colData { margin:0ex 0ex 0.8ex 0ex; }
 
 table.invoiceRows
 {
-	width:100%;
-	border-top:2px solid black;
-	border-bottom:2px solid black;
-	margin:2ex 0em 2ex 0em;
-	border-collapse:collapse;
+  width:100%;
+  border-top:2px solid black;
+  border-bottom:2px solid black;
+  margin:2ex 0em 2ex 0em;
+  border-collapse:collapse;
 }
 
 table.invoiceRows td
 {
-	margin:0px;
-	padding:3px 3px 0px 3px;
-	vertical-align:top;
+  margin:0px;
+  padding:3px 3px 0px 3px;
+  vertical-align:top;
 }
 
 tr.InvoiceRow {}
@@ -114,7 +114,7 @@ tr.InvoiceRow.AnyPartyDetails {}
 
 tr.SubInvoiceRow
 {
-	background-color:rgb(243,243,243);
+  background-color:rgb(243,243,243);
 }
 
 tr.SubInvoiceRow.details {}
@@ -129,39 +129,39 @@ td.RowAmount { text-align:right; }
 
 tr.groupSeparator td
 {
-	height:1em;
+  height:1em;
 }
 
 tr.rowSeparator td
 {
-	height:0.5em;
-	border-top:1px dashed black;
+  height:0.5em;
+  border-top:1px dashed black;
 }
 
 tr.rowBottom td
 {
-	height:0.5em;
+  height:0.5em;
 }
 
 div.DefinitionDetails
 {
-	border:1px solid black;
-	margin:2ex 0ex 0ex 0ex;
-	padding:1ex 1ex 1ex 1ex;
+  border:1px solid black;
+  margin:2ex 0ex 0ex 0ex;
+  padding:1ex 1ex 1ex 1ex;
 }
 
 table.DefinitionDetails {}
 
 table.DefinitionDetails td.title
 {
-	font-weight:bold;
+  font-weight:bold;
 }
 
 table.DefinitionValue {}
 
 table.DefinitionDetails td.DefinitionValue
 {
-	padding:0px 2em 0px 0px;
+  padding:0px 2em 0px 0px;
 }
 
 table.accounting {}
@@ -176,7 +176,7 @@ td.VatFreeText {}
 
 div.VatCodeText {}
 
-div.InvoiceUrlText {	margin:2ex 0ex 0ex 0ex; }
+div.InvoiceUrlText {  margin:2ex 0ex 0ex 0ex; }
 
 table.deliveryDetails { margin:2ex 0ex 0ex 0ex; }
 
@@ -184,20 +184,20 @@ table.deliveryDetails td { padding:0px 2em 0px 0px; }
 
 div.virtualBankBarcodeBlock
 {
-	margin:2ex 0ex 0ex 0ex;
-	text-align:center;
+  margin:2ex 0ex 0ex 0ex;
+  text-align:center;
 }
 
 div.VirtualBankBarcode {}
 
 div.SpecificationDetails
 {
-	margin:2ex 0ex 0ex 0ex;
-	padding:3px 0px 3px 0px;
-	font-family:monospace;
-	white-space:pre-wrap;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+  margin:2ex 0ex 0ex 0ex;
+  padding:3px 0px 3px 0px;
+  font-family:monospace;
+  white-space:pre-wrap;
+  border-top:1px solid black;
+  border-bottom:1px solid black;
 }
 
 div.invoiceAnyPartyDetails { margin:2ex 0ex 0ex 0ex; }
@@ -214,14 +214,14 @@ table.PartialPaymentDetail td.titlePad { padding:0px 0.4em 0px 0px;}
 
 div.sellerDetails
 {
-	margin:2ex 0ex 0ex 0ex;
-	border-top:2px solid black;
+  margin:2ex 0ex 0ex 0ex;
+  border-top:2px solid black;
 }
 
 div.sellerDetails.afterSpecificationDetails
 {
-	margin:3ex 0ex 0ex 0ex;
-	/*border-top-style:none;*/
+  margin:3ex 0ex 0ex 0ex;
+  /*border-top-style:none;*/
 }
 
 table.sellerDetails { width:100%; } 
@@ -230,8 +230,8 @@ table.sellerDetails td { padding:0px 1em 0px 0px; }
 
 div.stamps
 {
-	margin:2ex 0ex 0ex 0ex;
-	border-top:2px solid black;
+  margin:2ex 0ex 0ex 0ex;
+  border-top:2px solid black;
 }
 
 /*.isNewVersion { background-color:blue; color:yellow; }*/

@@ -34,9 +34,9 @@ class packer
         $curpage = false,   // Current page ID
         $fields = array();  // Array of available fields
 
-	function packer()
+  function packer()
     {
-    	// Initialize the extension
+      // Initialize the extension
     }
     
     /* This is a wrapper around the pdffile class' ->new_page()
@@ -353,5 +353,3 @@ class field
         return $notch;
     }
 }
-
-?>

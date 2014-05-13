@@ -2025,6 +2025,18 @@
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
 
+			if (!isset($eilahe) and isset($varasto) and $varasto != '0') {
+				$varaston_toimipaikka = hae_varaston_toimipaikka($varasto);
+				if ($varaston_toimipaikka['tunnus'] == 0) {
+					$kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
+					$kukarow['toimipaikka'] = 0;
+				}
+
+				$varaston_toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
+				$kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
+				unset($kukarow_toimipaikka_temp);
+			}
+
 			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus
 			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim =="REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
 				tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VAINLASKUTA") or

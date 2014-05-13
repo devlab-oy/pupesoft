@@ -8785,7 +8785,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 			$haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
 		}
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -8991,7 +8991,7 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -9079,7 +9079,7 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -9160,7 +9160,7 @@ if (!function_exists("livesearch_kayttajahaku")) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -9257,7 +9257,7 @@ if (!function_exists("livesearch_asiakashaku")) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -9347,7 +9347,7 @@ if (!function_exists('livesearch_asiakasytunnushaku')) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -9433,7 +9433,7 @@ if (!function_exists('livesearch_asiakaskategoriahaku')) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -9521,7 +9521,7 @@ if (!function_exists("livesearch_varastohaku")) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -9602,7 +9602,7 @@ if (!function_exists("livesearch_toimittajahaku")) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -9681,7 +9681,7 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -11547,11 +11547,11 @@ if (!function_exists("tarkista_ean13")) {
 		$tarkistusmerkki = $eankoodi[12];
 
 		// 1. Add the values of the digits in the even-numbered positions: 2, 4, 6, etc.
-		$even_sum = $eankoodi{1} + $eankoodi{3} + $eankoodi{5} + $eankoodi{7} + $eankoodi{9} + $eankoodi{11};
+    $even_sum = substr($eankoodi, 1, 1) + substr($eankoodi, 3, 1) + substr($eankoodi, 5, 1) + substr($eankoodi, 7, 1) + substr($eankoodi, 9, 1) + substr($eankoodi, 11, 1);
 		// 2. Multiply this result by 3.
 		$even_sum_three = $even_sum * 3;
 		// 3. Add the values of the digits in the odd-numbered positions: 1, 3, 5, etc.
-		$odd_sum = $eankoodi{0} + $eankoodi{2} + $eankoodi{4} + $eankoodi{6} + $eankoodi{8} + $eankoodi{10};
+    $odd_sum = substr($eankoodi, 0, 1) + substr($eankoodi, 2, 1) + substr($eankoodi, 4, 1) + substr($eankoodi, 6, 1) + substr($eankoodi, 8, 1) + substr($eankoodi, 10, 1);
 		// 4. Sum the results of steps 2 and 3.
 		$total_sum = $even_sum_three + $odd_sum;
 		// 5. The check character is the smallest number which, when added to the result in step 4,  produces a multiple of 10.
@@ -12631,13 +12631,16 @@ if (!function_exists("asiakashakuohje")) {
 
 // Funktio lisää tuotteenalkion dynaamiseen puuhun.
 if (!function_exists("TuotteenAlkiot")) {
-	function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli) {
+  function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli, $mista = '') {
 		global $kukarow;
+
+    $mista = empty($mista) ? $laji : $mista;
 
 		$qu = "	INSERT INTO puun_alkio
 				SET yhtio	= '$kukarow[yhtio]',
 				liitos 		= '$liitos',
 				laji 		= '$laji',
+        kutsuja   = '{$mista}',
 				puun_tunnus = '$puun_tunnus',
 				kieli 		= '$kieli',
 				laatija 	= '$kukarow[kuka]',
@@ -14838,7 +14841,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 			$pakkaustieto_tunnukset_lisa .= " AND r1.pakkaustieto_tunnukset LIKE '%{$ot}%' ";
 		}
 
-		if ($otunnus{0} != "'") {
+    if (substr($otunnus, 0, 1) != "'") {
 			$otunnus = str_replace(",", "','", $otunnus);
 			$otunnus = "'{$otunnus}'";
 		}

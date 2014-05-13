@@ -179,5 +179,3 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 		}
 	}
 }
-
-?>

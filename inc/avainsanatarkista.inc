@@ -80,7 +80,7 @@ if(!function_exists("avainsanatarkista")) {
 				if (trim($tem_selite) == '') {
 					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa #123 tai #112233");
 				}
-				elseif ($tem_selite{0} != '#') {
+        elseif (substr($tem_selite, 0, 1) != '#') {
 					$virhe[$i] = t("Selitteen ensimm‰inen kirjain pit‰‰ olla #");
 				}
 				elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
@@ -136,7 +136,7 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($tem_selite != '' and ($tem_laji == 'TRY' or $tem_laji == 'OSASTO')) {
+      if ($tem_selite != '' and ($tem_laji == 'TRY' or $tem_laji == 'OSASTO' or $tem_laji == 'DPAVAINSANALAJI')) {
 				$query = "	SELECT tunnus
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'

@@ -1,5 +1,4 @@
 <?php
-	$otsikko = 'Koot';
-	$kentat = 'tunnus, koko, luokka, jarjestys';
-	$jarjestys = 'luokka, jarjestys';
-?>
+  $otsikko = 'Koot';
+  $kentat = 'tunnus, koko, luokka, jarjestys';
+  $jarjestys = 'luokka, jarjestys';

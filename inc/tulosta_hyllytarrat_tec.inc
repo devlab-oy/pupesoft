@@ -50,5 +50,3 @@ $sivu = "
 
 // Käytetään lpr funktiota
 lpr($sivu, 0, $komento);
-
-?>

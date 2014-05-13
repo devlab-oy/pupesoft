@@ -321,7 +321,7 @@ class import
     {
         $dict = $this->followIR($dict);
         foreach ($dict as $key => $entry) {
-        	echo "Resource Dictionary entry: $key<br>\n";
+          echo "Resource Dictionary entry: $key<br>\n";
             switch ($key) {
             case '/Font' :
                 $this->extract_fonts($entry);
@@ -363,32 +363,32 @@ class import
         /* If the thing was extracted as a value, just put it in
          */
         if (isset($ob['value'])) {
-	        $r = $this->pdf->_addnewoid();
+          $r = $this->pdf->_addnewoid();
             $this->pdf->objects[$r]['data'] = $ob['value'];
             $this->pdf->objects[$r]['type'] = 'value';
         } else {
-	        if (isset($this->pdf->builddata['colorspaces'][$name])) {
-    	    	echo "Colorspace $name already done<br>\n";
-        		return;
-	        }
-    	    $new = array();
-        	foreach ($ob as $key => $value) {
-        		if ($key !== 'itype') {
-            		if (is_array($value)) {
-                		if ($value['itype'] === 'dictionary') {
-                    		$temp = $value;
-	                        unset($temp['itype']);
-    	                    $value = $this->pdf->_makedictionary($temp);
-        	            } else { // Must be a PDF array
-            	        	$temp = $value;
-                	        unset($temp['itype']);
-                    	    $value = $this->pdf->_makearray($temp);
-	                    }
-    	            }
-        	    	$new[substr($key, 1)] = $value;
-            	}
-	        }
-    	    $r = $this->pdf->add_raw_object($new);
+          if (isset($this->pdf->builddata['colorspaces'][$name])) {
+            echo "Colorspace $name already done<br>\n";
+            return;
+          }
+          $new = array();
+          foreach ($ob as $key => $value) {
+            if ($key !== 'itype') {
+                if (is_array($value)) {
+                    if ($value['itype'] === 'dictionary') {
+                        $temp = $value;
+                          unset($temp['itype']);
+                          $value = $this->pdf->_makedictionary($temp);
+                      } else { // Must be a PDF array
+                        $temp = $value;
+                          unset($temp['itype']);
+                          $value = $this->pdf->_makearray($temp);
+                      }
+                  }
+                $new[substr($key, 1)] = $value;
+              }
+          }
+          $r = $this->pdf->add_raw_object($new);
         }
         echo "Object $r is now colorspace $name<br>\n";
         $this->pdf->builddata['colorspaces'][substr($name, 1)] = $r;
@@ -504,7 +504,7 @@ class import
         if (isset($ob['/DecodeParms'])) {
             $a = array();
             foreach($ob['/DecodeParms'] as $key => $value) {
-                if ($key{0} == '/') {
+                if (substr($key, 0, 1) == '/') {
                     $a[substr($key, 1)] = $value;
                 }
             }
@@ -582,10 +582,10 @@ class import
                     echo "Assuming a raw value in object<br>\n";
                     $this->ob[$id]['value'] = $w . ' ';
                     while (($w = $d->next_word()) !== 'endobj') {
-                    	echo "Adding '$w' to object value<br>\n";
-	                    $this->ob[$id]['value'] .= $w;
+                      echo "Adding '$w' to object value<br>\n";
+                      $this->ob[$id]['value'] .= $w;
                         if (($w !== '<') && ($w !== '>')) {
-                        	$this->ob[$id]['value'] .= ' ';
+                          $this->ob[$id]['value'] .= ' ';
                         }
                     }
                     break;
@@ -647,7 +647,7 @@ class import
                 $l = $w;
             } else {
                 echo "Current character = '" . $d->cc() . "'<br>\n";
-                if ($w{0} == '/') {
+                if (substr($w, 0, 1) == '/') {
                     if (!isset($state[0])) {
                         echo "Assigning '$w' as value of [$l]<br>\n";
                         $r[$l] = $w;
@@ -657,7 +657,7 @@ class import
                         $r[$l] = $state[0];
                         $state = array();
                     }
-                } else if ($w{0} == '(' && $w{strlen($w) - 1} == ')') {
+                } else if (substr($w, 0, 1) == '(' && $w{strlen($w) - 1} == ')') {
                     // We've got a string
                     echo "Assigning string value '$w' to [$l]<br>\n";
                     $r[$l] = $w;
@@ -946,4 +946,3 @@ class StreamHandler
         }
     }
 }
-?>

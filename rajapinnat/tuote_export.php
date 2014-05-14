@@ -80,7 +80,7 @@
   $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
   // alustetaan arrayt
-  $dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = $individual_tuotteet = array();
+  $dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = $individual_tuotteet = $dnstuotepuu = array();
 
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
@@ -327,6 +327,27 @@
                         'try_se'  => $row["try_se_nimi"],
                         'try_en'  => $row["try_en_nimi"],
                         );
+  }
+  
+  echo date("d.m.Y @ G:i:s")." - Haetaan dynaaminen tuotepuu.\n";
+  
+  $query = "  SELECT lapsi.nimi, lapsi.lft, lapsi.rgt, lapsi.tunnus, lapsi.syvyys
+              FROM dynaaminen_puu AS vanhempi, dynaaminen_puu AS lapsi
+              WHERE lapsi.lft BETWEEN vanhempi.lft AND vanhempi.rgt
+              AND vanhempi.lft = 1
+              AND vanhempi.nimi = 'magento'
+              AND vanhempi.laji = 'tuote' 
+              AND lapsi.laji = 'tuote'";
+
+  $dynpuu_result = pupe_query($query);
+
+  while ($row = mysql_fetch_assoc($dynpuu_result)) {
+    $dnstuotepuu[$row['tunnus']] = array(
+                                          'nimi'    => $row['nimi'],
+                                          'syvyys'  => $row['syvyys'],
+                                          'left'    => $row['lft'],
+                                          'right'   => $row['rgt'],
+                                        );
   }
 
   if ($ajetaanko_kaikki == "NO") {
@@ -612,6 +633,13 @@ $muutoslisa = '';
       echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
       $count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
       echo date("d.m.Y @ G:i:s")." - Päivitettiin $count kategoriaa\n";
+    }
+
+    // Dynaaminen tuotepuu
+    if (count($dnstuotepuu) > 0) {
+      echo date("d.m.Y @ G:i:s")." - Päivitetään dynaamisen tuotepuun kategoriat\n";
+      $count = $magento_client->lisaa_tuotepuu($dnstuotepuu);
+      echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotepuun kategoriaa\n";
     }
 
     // Tuotteet (Simple)

@@ -171,6 +171,82 @@ class MagentoClient {
   }
 
   /**
+   * Lis‰‰ kaikki tai puuttuvat kategoriat Magento-verkkokauppaan.
+   *
+   * @param  array  $dnsryhma Pupesoftin tuote_exportin palauttama array
+   * @return int             Lis‰ttyjen kategorioiden m‰‰r‰
+   */
+  public function lisaa_tuotepuu(array $dnstuotepuu) {
+
+    $this->log("Lis‰t‰‰n tuotepuun kategoriat");
+
+    $categoryaccesscontrol = $this->_categoryaccesscontrol;
+
+    //$parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhm‰t lis‰t‰‰n - muuttuu tietenkin jokaisella alakategorialla mutta defaulttaa t‰h‰n
+
+    $count = 0;
+
+    // Loopataan osastot ja tuoteryhmat
+    foreach ($dnstuotepuu as $alakategoria) {
+
+      try {
+        // Haetaan kategoriat joka kerta koska lis‰tt‰ess‰ puu muuttuu
+        $category_tree = $this->getCategories();
+        
+        $alakategoria['nimi'] = utf8_encode($alakategoria['nimi']);
+
+        // O-taso on vain tuotepuun nimi, 1-taso on "is‰kategoriat" jotka laitetaan aina magenton p‰‰kategoriatunnuksen alle
+        if ($alakategoria['syvyys'] == 1) {
+          // Otetaan
+          $parent_id = $this->_parent_id;
+          $
+        }
+        else {
+          $parent_id
+        }
+
+        // Katsotaan lˆytyykˆ tuoteryhm‰
+        if (!$this->findCategory($alakategoria['nimi'], $category_tree['children'])) {
+
+          // Lis‰t‰‰n kategoria, jos ei lˆytynyt
+          $sub_category_data = array(
+            'name'                  => $alakategoria['nimi'],
+            'is_active'             => 1,
+            'position'               => 1,
+            'default_sort_by'       => 'position',
+            'available_sort_by'     => 'position',
+            'include_in_menu'       => 1
+          );
+
+          if ($categoryaccesscontrol) {
+            // HUOM: Vain jos "Category access control"-moduli on asennettu
+            $category_data['accesscontrol_show_group'] = 0;
+          }
+          //KISSA Haetaan isikategorian id
+          //$parent_id = 53;
+          // Kutsutaan soap rajapintaa
+          $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
+            array($parent_id, $sub_category_data)
+          );
+
+          $count++;
+
+          $this->log("Lis‰ttiin kategoria {$alakategoria['nimi']}");
+        }
+      }
+      catch (Exception $e) {
+        $this->_error_count++;
+        $this->log("Virhe! Kategoriaa {$alakategoria['nimi']} ei voitu lis‰t‰", $e);
+      }
+    }
+
+    $this->_category_tree = $this->getCategories();
+    $this->log("$count alakategoriaa lis‰tty");
+
+    return $count;
+  }
+
+  /**
    * Lis‰‰ p‰ivitettyj‰ Simple tuotteita Magento-verkkokauppaan.
    *
    * @param  array  $dnstuote   Pupesoftin tuote_exportin palauttama tuote array

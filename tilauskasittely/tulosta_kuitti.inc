@@ -25,7 +25,7 @@ $lask = 1;
 $sivu = 1;
 
 if ($kieli == '') {
-  $kieli = $asiakasrow['kieli']; 
+  $kieli = $asiakasrow['kieli'];
 }
 
 // laskun alku ja loppu functiot...

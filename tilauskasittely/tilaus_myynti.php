@@ -7903,7 +7903,6 @@ if ($tee == '') {
             echo "</td>";
           }
           else {
-
             // Haetaan kaikkien tilausrivien varastopaikat
             $chk_arr = tilausrivien_varastot($laskurow['tunnus']);
 

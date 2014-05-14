@@ -105,7 +105,7 @@ if ($tee == '') {
   }
   $chk = trim($piilota_matkasarakkeet) != '' ? "CHECKED" : "";
   echo "<tr><th>",t("Piilota matkasarakkeet"),":</th><td colspan='3'><input type='checkbox' id='piilota_matkasarakkeet' name='piilota_matkasarakkeet' {$chk}></td></tr>";
-  
+
   $chk = trim($nayta_yhteenveto) != '' ? "CHECKED" : "";
   echo "<tr><th>".t("Näytä yhteenveto")."</th><td colspan='3'><input type='checkbox' name='nayta_yhteenveto' {$chk}></td></tr>";
 
@@ -140,7 +140,7 @@ if ($tee == '') {
       $vali_kale .= "$tama,";
     }
     $vali_kale     = substr($vali_kale,0,-1); // Viimeinen pilkku poistetaan
-    
+
   }
   else {
     if (!isset($vali_kale)) {
@@ -167,7 +167,7 @@ if ($tee == '') {
 
     echo "<tr><td nowrap><input type='checkbox' class='kaletapa' name='kaletapa[]' value='{$row['tunnus']}' {$checked}></td><td>{$row['selitetark']}</td></tr>";
   }
-  
+
   echo "</table>";
 
   if (isset($kalen)) {
@@ -264,7 +264,7 @@ if ($tee == '') {
     $asiakasjoini = " LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = kalenteri.yhtio) ";
   }
   foreach($yhtiot as $yhtio) {
-    $query = "  SELECT kuka.nimi kukanimi, 
+    $query = "  SELECT kuka.nimi kukanimi,
           kuka.yhtio yhtijo,
           avainsana.selitetark aselitetark,
           count(*) montakotapahtumaa,
@@ -309,7 +309,7 @@ if ($tee == '') {
         $worksheet->write($excelrivi, $excelsarake++, t("Tapa"),  $format_bold);
         $worksheet->write($excelrivi, $excelsarake++, t("Tapahtumia"),  $format_bold);
         $excelrivi++;
-      
+
 
         while ($rivi = mysql_fetch_assoc($result_group)) {
           $js_safe_muuttuja = str_replace("#", "hash_", $rivi['kuka']);
@@ -331,7 +331,7 @@ if ($tee == '') {
           echo "<tr class='{$js_safe_muuttuja}_{$rivi['tunnus']}' style='display:none;'>";
           echo "<td colspan='4' >";
           // haetaan tarkemmat tiedot kalelajilla ja kalekukalla
-          $query = "    SELECT kuka.nimi kukanimi, 
+          $query = "    SELECT kuka.nimi kukanimi,
                   avainsana.selitetark aselitetark,
                   IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
                   IF(asiakas.toim_postino!='' AND asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
@@ -355,7 +355,7 @@ if ($tee == '') {
                   $ressu = pupe_query($query);
 
           echo "<table style='width:100%;'>";
-    
+
           echo "<tr>";
 
           echo "<th>",t("Edustaja"),"</th>";
@@ -377,7 +377,7 @@ if ($tee == '') {
 
           echo "</tr>";
 
-          while ($divirivi = mysql_fetch_assoc($ressu)) {  
+          while ($divirivi = mysql_fetch_assoc($ressu)) {
             echo "<tr>";
             echo "<td>{$divirivi['kukanimi']}</td>";
             if ($nayta_sarake) echo "<td>{$divirivi['yhtio']}</td>";
@@ -427,7 +427,7 @@ if ($tee == '') {
       $worksheet->write($excelrivi, $excelsarake++, t("Kommentit"),  $format_bold);
 
       $excelrivi++;
-      
+
       if(!$piirra_yhteenveto) {
         echo "<table>";
         echo "<tr>";
@@ -450,7 +450,7 @@ if ($tee == '') {
         echo "</tr>";
       }
 
-      $query = "    SELECT kuka.nimi kukanimi, 
+      $query = "    SELECT kuka.nimi kukanimi,
               avainsana.selitetark aselitetark,
               IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
               IF(asiakas.toim_postino!='' AND asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
@@ -473,7 +473,7 @@ if ($tee == '') {
               ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
       $ressu = pupe_query($query);
 
-      while ($row = mysql_fetch_assoc($ressu)) {  
+      while ($row = mysql_fetch_assoc($ressu)) {
         $excelsarake = 0;
 
         $worksheet->write($excelrivi, $excelsarake++, $row["kukanimi"]);

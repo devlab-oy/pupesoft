@@ -117,7 +117,7 @@ foreach ($arska as $key => &$value) {
     $edi_rivi = $edi_rivi_alku."'$key'";
     $edi_rivi .= $otsikonloppu."'";
 
-    foreach ($value as $k => $v) { 
+    foreach ($value as $k => $v) {
       foreach ($v as $kii => $kippari) {
         // EAN-koodi
         $edi_rivi .= $kii."'";

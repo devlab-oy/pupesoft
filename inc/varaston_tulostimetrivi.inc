@@ -1,91 +1,91 @@
 <?php
 
-  $ulos = "";
-  $jatko = 1; // oletetaan normaali käsittely
-  $tyyppi = 1; // oletetaan rivin näkyvyys
+$ulos = "";
+$jatko = 1; // oletetaan normaali käsittely
+$tyyppi = 1; // oletetaan rivin näkyvyys
 
 
-  if (mysql_field_name($result, $i) == "tunnus" or
-      mysql_field_name($result, $i) == "yhtio") {
-    $tyyppi = 0;
+if (mysql_field_name($result, $i) == "tunnus" or
+    mysql_field_name($result, $i) == "yhtio") {
+  $tyyppi = 0;
+}
+
+if (substr(mysql_field_name($result,$i),0,9)=='varasto') {
+
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
+
+  $ulos = "<td><select name='$nimi'>";
+
+  $query = "  SELECT *
+        FROM varastopaikat
+        WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+        ORDER BY tyyppi, nimitys";
+  $kires = mysql_query($query) or pupe_error($query);
+
+  while ($kirow=mysql_fetch_array($kires))
+  {
+    if ($kirow["tunnus"]==$row[$i]) $select='SELECTED';
+    else $select = '';
+
+    $ulos .= "<option value='$kirow[tunnus]' ".$sel[$kirow["tunnus"]].">$kirow[nimitys]</option>";
   }
 
-  if (substr(mysql_field_name($result,$i),0,9)=='varasto') {
+  $ulos .= "</select></td>";
 
-    $sel = array();
-    $sel[$trow[$i]] = "selected";
+  $jatko=0;
+}
 
-    $ulos = "<td><select name='$nimi'>";
+if (mysql_field_name($result,$i)=='pakkaamo') {
 
-    $query = "  SELECT *
-          FROM varastopaikat
-          WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-          ORDER BY tyyppi, nimitys";
-    $kires = mysql_query($query) or pupe_error($query);
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
 
-    while ($kirow=mysql_fetch_array($kires))
-    {
-      if ($kirow["tunnus"]==$row[$i]) $select='SELECTED';
-      else $select = '';
+  $ulos = "<td><select name='$nimi'>";
 
-      $ulos .= "<option value='$kirow[tunnus]' ".$sel[$kirow["tunnus"]].">$kirow[nimitys]</option>";
-    }
+  $query = "select distinct nimi from pakkaamo where yhtio='$kukarow[yhtio]'";
+  $kires = mysql_query($query) or pupe_error($query);
 
-    $ulos .= "</select></td>";
+  $ulos .= "<option value=''>".t("Ei pakkaamoa")."</option>";
 
-    $jatko=0;
+  while ($kirow=mysql_fetch_array($kires))
+  {
+    if ($kirow["nimi"]==$row[$i]) $select='SELECTED';
+    else $select = '';
+
+    $ulos .= "<option value='$kirow[nimi]' ".$sel[$kirow["nimi"]].">$kirow[nimi]</option>";
   }
 
-  if (mysql_field_name($result,$i)=='pakkaamo') {
+  $ulos .= "</select></td>";
 
-    $sel = array();
-    $sel[$trow[$i]] = "selected";
+  $jatko=0;
+}
 
-    $ulos = "<td><select name='$nimi'>";
 
-    $query = "select distinct nimi from pakkaamo where yhtio='$kukarow[yhtio]'";
-    $kires = mysql_query($query) or pupe_error($query);
+if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 
-    $ulos .= "<option value=''>".t("Ei pakkaamoa")."</option>";
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
 
-    while ($kirow=mysql_fetch_array($kires))
-    {
-      if ($kirow["nimi"]==$row[$i]) $select='SELECTED';
-      else $select = '';
+  $ulos = "<td><select name='$nimi'>";
 
-      $ulos .= "<option value='$kirow[nimi]' ".$sel[$kirow["nimi"]].">$kirow[nimi]</option>";
-    }
+  $query = "  SELECT *
+        from kirjoittimet
+        where yhtio = '$kukarow[yhtio]'
+        AND komento != 'EDI'
+        ORDER BY kirjoitin";
+  $kires = mysql_query($query) or pupe_error($query);
 
-    $ulos .= "</select></td>";
+  $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-    $jatko=0;
+  while ($kirow=mysql_fetch_array($kires)) {
+    if ($kirow["tunnus"]==$row[$i]) $select='SELECTED';
+    else $select = '';
+
+    $ulos .= "<option value='$kirow[tunnus]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
   }
 
+  $ulos .= "</select></td>";
 
-  if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
-
-    $sel = array();
-    $sel[$trow[$i]] = "selected";
-
-    $ulos = "<td><select name='$nimi'>";
-
-    $query = "  SELECT *
-          from kirjoittimet
-          where yhtio = '$kukarow[yhtio]'
-          AND komento != 'EDI'
-          ORDER BY kirjoitin";
-    $kires = mysql_query($query) or pupe_error($query);
-
-    $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
-
-    while ($kirow=mysql_fetch_array($kires)) {
-      if ($kirow["tunnus"]==$row[$i]) $select='SELECTED';
-      else $select = '';
-
-      $ulos .= "<option value='$kirow[tunnus]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
-    }
-
-    $ulos .= "</select></td>";
-
-    $jatko=0;
-  }
+  $jatko=0;
+}

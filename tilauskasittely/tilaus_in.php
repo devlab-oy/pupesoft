@@ -80,11 +80,11 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     // tarvitaan $filename
     require ("inc/tilaus_in.inc");
   }
-  
+
   if ($tyyppi == 'asnui') {
 
     if (copy($filename, $teccomkansio.'/'.$path_parts["basename"])) {
-      require ("sisaanlue_teccom_asn.php");    
+      require ("sisaanlue_teccom_asn.php");
     }
     else {
       echo "Kopiointi epäonnistui!";
@@ -124,7 +124,7 @@ else {
 
   echo "<br><input type='submit' value='".t("Käsittele tiedosto")."'>";
   echo "</form>";
-  
+
 }
 
 require ("inc/footer.inc");

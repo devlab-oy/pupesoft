@@ -138,7 +138,7 @@ if ($tee == '') {
     echo "</table>";
     echo "<br>";
   }
-  
+
   $extennakoiden_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($kukarow['oletus_asiakas']);
 
   if ($extennakoiden_lukumaara > 0) {

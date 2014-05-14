@@ -37,10 +37,10 @@ function alku ($laji = '') {
     $vvv = date("Y") - 1;
     $now = date("Y-m-d");
   }
-  
+
   $alkukk  = sprintf("%02d", $alkukk);
   $alkupp  = sprintf("%02d", $alkupp);
-  $loppukk = sprintf("%02d", $loppukk); 
+  $loppukk = sprintf("%02d", $loppukk);
   $loppupp = sprintf("%02d", $loppupp);
 
   $firstpage = $pdf->new_page("a4");

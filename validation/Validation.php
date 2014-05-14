@@ -2,7 +2,7 @@
 
 /**
  * http://stackoverflow.com/questions/737385/easiest-form-validation-library-for-php
- * 
+ *
  * Pork Formvalidator. validates fields by regexes and can sanatize them. Uses PHP filter_var built-in functions and extra regexes
  * @package pork
  */
@@ -180,7 +180,7 @@ class FormValidator {
       if ($returnval) {
         $returnval = self::validateContent($var, $type);
       }
-      
+
       return($returnval);
     }
     $filter = false;

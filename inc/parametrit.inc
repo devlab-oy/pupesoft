@@ -354,7 +354,7 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
   if ($phpnimi != 'index.php') {
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
   }
-  else { 
+  else {
     if (isset($loginkieli)) {
        $browkieli = $loginkieli;
     }
@@ -371,7 +371,7 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       else {
         $browkieli = 'fi';
       }
-    }    
+    }
 
     if (isset($mobile) and $mobile and include_once("mobiili/login.php"));
     elseif (@include_once("login.php"));

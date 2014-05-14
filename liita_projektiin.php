@@ -5,11 +5,11 @@ require ("inc/parametrit.inc");
 
 /*
   Ty‰kalu laskujen/tilausten liitt‰miseksi osaksi projekti
-  
+
   N‰in esim erilliset rahtilaskut,hyvitykset voidaan liitt‰‰ osaksi projektia myˆs j‰lkik‰teen
-  
+
   T‰st‰ on apua kun laskemme koko projektin arvoa.
-  
+
 */
 
 echo "<font class='head'>".t("Liit‰ tilaus projektiin")."</font><hr><br><br>";
@@ -21,17 +21,17 @@ if($tee=="KORJAA" or $tee=="LIITA") {
   $result = mysql_query($query) or pupe_error($query);
   if(mysql_num_rows($result)>0) {
     $laskurow=mysql_fetch_array($result);
-    
+
     $query = "  SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('L','G','E','V','W','N','T','C') and tunnus='$tunnus'";
     $res = mysql_query($query) or pupe_error($query);
     if(mysql_num_rows($res)>0) {
       $row=mysql_fetch_array($res);
-      
+
       if($tee=="LIITA") {
         $query="update lasku set tunnusnippu='$tunnusnippu' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
         $updres=mysql_query($query) or pupe_error($query);
         echo "<font class='message'>".t("Liitettiin tilaus")." $tunnus ".t("tilaukseen")." $tunnusnippu</font><br><br>";
-      
+
         $tee="";
         $tunnus="";
       }
@@ -52,7 +52,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
             <tr>
               <td class='back'><br></td>
             </tr>";
-            
+
         $laskutyyppi=$row["tila"];
         $alatila=$row["alatila"];
 
@@ -65,7 +65,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
         else {
           $lisa = "";
         }
-        
+
         echo "<table>
             <tr>
               <th>".t("Tilaus joka liitet‰‰n")."</th>
@@ -77,7 +77,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
               <td class='back'><br></td>
             </tr>";
 
-            
+
         echo "  <tr>
               <form method='post' name='projekti' autocomplete='off'>
               <input type='hidden' name='tee' value='LIITA'>
@@ -86,8 +86,8 @@ if($tee=="KORJAA" or $tee=="LIITA") {
               <td class='back' align='right'><input type='Submit' value='".t("liit‰")."'></td>
               </form>
             </tr>
-          </table>";  
-      }      
+          </table>";
+      }
     }
     else {
       $tunnusvirhe = "<font class='error'>".("Tilausta ei voida liitt‰‰. Tilausnumero voi olla v‰‰r‰ tai tilaus on p‰‰tilaus")."</font><br>";
@@ -105,7 +105,7 @@ if($tee == "HAE") {
   $result = mysql_query($query) or pupe_error($query);
   if(mysql_num_rows($result)>0) {
     $laskurow=mysql_fetch_array($result);
-    if($laskurow["tunnusnippu"]>0) {      
+    if($laskurow["tunnusnippu"]>0) {
       $laskutyyppi=$laskurow["tila"];
       $alatila=$laskurow["alatila"];
 
@@ -121,7 +121,7 @@ if($tee == "HAE") {
           </tr>
           <tr>
             <td class='back'><br></td>
-          </tr>          
+          </tr>
           <tr>
             <th>".t("Anna tilausnumero jonka haluat liitt‰‰")."</th>
           </tr>
@@ -139,7 +139,7 @@ if($tee == "HAE") {
     else {
       //  pit‰isikˆ sallia sellainen tehd‰?
       $tunnusnippuvirhe =  "Tilauksella ei ole tunnusnippua";
-      $tee="";      
+      $tee="";
     }
   }
   else {

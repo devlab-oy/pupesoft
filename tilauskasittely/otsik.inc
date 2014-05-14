@@ -923,6 +923,10 @@
 
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
 
+    if ($varasto == "" and isset($srow['varasto'])) {
+      $varasto = $srow['varasto'];
+    }
+
     $args = array(
       'asiakas_tunnus' => $srow['liitostunnus'],
       'toimipaikka_tunnus' => $yhtiotoimipaikka,

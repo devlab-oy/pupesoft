@@ -45,7 +45,7 @@
       $qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
     }
 
-    if($kopioitava_otsikko > 0 or $kukarow["kesken"] > 0) {
+    if((isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) or $kukarow["kesken"] > 0) {
       if ($kopioitava_otsikko > 0) {
         $squery = "  SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
               FROM lasku
@@ -81,6 +81,15 @@
         $alatila=$srow['alatila'];
       }
       if ($srow['tila'] != '')    $ylatila=$srow['tila'];
+    }
+
+    if (!isset($srow)) {
+      $query = "SELECT *, hyvaksynnanmuutos as luokka FROM lasku LIMIT 1";
+      $result = pupe_query($query);
+      $srow = mysql_fetch_assoc($result);
+      foreach ($srow as $key => $value) {
+        $srow[$key] = '';
+      }
     }
 
     echo "<table>";
@@ -124,7 +133,7 @@
 
     while ($vrow = mysql_fetch_array($vtresult)) {
       $sel='';
-      if ($vrow['tunnus']==$srow["varasto"]) $sel = 'selected';
+      if ($vrow['tunnus'] == $srow["varasto"]) $sel = 'selected';
 
       $varastomaa = '';
       if (strtoupper($vrow['maa']) != strtoupper($yhtiorow['maa'])) {
@@ -401,24 +410,32 @@
       $toim_nimitark = $vtrow['nimitark'];
     }
 
-    if ($toim_nimi == '') {
+    if (!isset($toim_nimi) or $toim_nimi == '') {
       $toim_nimi = $vtrow['nimi'];
     }
 
-    if ($toim_osoite == '') {
+    if (!isset($toim_osoite) or $toim_osoite == '') {
       $toim_osoite = $vtrow['osoite'];
     }
 
-    if ($toim_postino == '') {
+    if (!isset($toim_postino) or $toim_postino == '') {
       $toim_postino = $vtrow['postino'];
     }
 
-    if ($toim_postitp == '') {
+    if (!isset($toim_postitp) or $toim_postitp == '') {
       $toim_postitp = $vtrow['postitp'];
     }
 
-    if ($toim_maa == '') {
+    if (!isset($toim_maa) or $toim_maa == '') {
       $toim_maa = $vtrow['maa'];
+    }
+
+    if (!isset($eilahe)) {
+      $eilahe = '';
+    }
+
+    if (!isset($valmistuslinja)) {
+      $valmistuslinja = '';
     }
 
     //$yhtio_toimipaikka muuttuja asetetaan ainoastaan tilauksesta_varastosiirto funkkarissa.

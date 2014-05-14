@@ -175,10 +175,10 @@ echo "<form name = 'valinta' method='post'>
   }
   echo "</select>";
   echo "</td></tr>";
-    
+
   $chk = "";
   if (isset($perustiedot) and $perustiedot != "") $chk = "CHECKED";
-  
+
   echo "<tr><th>".t("Perustiedot")."</th><td><input type = 'checkbox' name = 'perustiedot' $chk></td></tr></table>";
 
   echo "<br><br><input type = 'submit' value = '".t("Aja raportti")."'></td></tr>

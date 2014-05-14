@@ -2199,18 +2199,18 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $kohde_varastot = array();
       }
 
-        $tuoteperhe = tuoteperhe($trow['tuoteno']);
+      $tuoteperhe = tuoteperhe($trow['tuoteno']);
       $siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $trow['tuoteno']);
 
       foreach ($siirto_varastot as $siirto_varasto) {
-          if (!empty($tuoteperhe)) {
-            $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
-          }
+        if (!empty($tuoteperhe)) {
+          $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
+        }
 
-          //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat, tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto ja lisaarivi vaiheessa saldot on riittäneet.
-          $_normirivi_onko_siirto = (!isset($tuoteperhe_saldomyytavissa) and $siirto_varasto['tuote']['myytavissa'] <= 0);
-          $_perherivi_onko_siirto = (isset($tuoteperhe_saldomyytavissa) and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0);
-          if ($_normirivi_onko_siirto or $_perherivi_onko_siirto) {
+        //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat, tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto ja lisaarivi vaiheessa saldot on riittäneet.
+        $_normirivi_onko_siirto = (!isset($tuoteperhe_saldomyytavissa) and $siirto_varasto['tuote']['myytavissa'] <= 0);
+        $_perherivi_onko_siirto = (isset($tuoteperhe_saldomyytavissa) and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0);
+        if ($_normirivi_onko_siirto or $_perherivi_onko_siirto) {
           continue;
         }
 
@@ -2218,7 +2218,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $var = "S";
           $autom_siirto_myytil = true;
           $toimittajan_tunnus = $siirto_varasto['tunnus'];
-
 
           $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($siirto_varasto['kohde_tunnus']));
           $tuotepaikka = $tuotepaikkojen_saldot[0];

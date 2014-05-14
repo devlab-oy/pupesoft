@@ -154,7 +154,7 @@ else {
       $toimitustavan_lahto_arvo = 0;
     }
 
-      while ($row = mysql_fetch_assoc($result)) {
+    while ($row = mysql_fetch_assoc($result)) {
       // Mihin varastoon
       $varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
@@ -164,16 +164,16 @@ else {
       // Mikä tulostusalue
       $tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 
-        if ($yhtiorow['kerayserat'] == 'K') {
-          // Mikä keräysvyöhyke
-          $keraysvyohyke = $row['keraysvyohyke'];
-        }
+      if ($yhtiorow['kerayserat'] == 'K') {
+        // Mikä keräysvyöhyke
+        $keraysvyohyke = $row['keraysvyohyke'];
+      }
 
       // Intrastat-tiedot
       $laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
       //varasto vaihtuu, splitataan tilaus, paitsi jos spliauskielto on trigattu
-        if  ((
+      if  ((
           ($varasto != $edvarasto and $edvarasto != 'x' and $edvarasto != '') or
           ($toim == "SIIRTOLISTA" and $tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '') or
           ($keraysvyohyke != $edkeraysvyohyke and $edkeraysvyohyke != 'x' and $edkeraysvyohyke != '')

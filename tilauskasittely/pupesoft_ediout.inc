@@ -66,8 +66,8 @@ $query = "  SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausr
       FROM tilausrivi
       LEFT JOIN tuote USING (yhtio, tuoteno)
       LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
-      WHERE otunnus = '$laskurow[tunnus]' 
-      and varattu > 0 
+      WHERE otunnus = '$laskurow[tunnus]'
+      and varattu > 0
       and tilausrivi.yhtio='$kukarow[yhtio]'
       ORDER BY toim_tuoteno";
 $result = mysql_query($query) or pupe_error($query);

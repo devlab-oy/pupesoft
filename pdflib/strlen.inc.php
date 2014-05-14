@@ -293,7 +293,7 @@ $tmpfnts = array('Helvetica-Bold',
                  'Times',
                  'Times-Bold',
                  'Times-Italic',
-                 'Times-BoldItalic'); 
+                 'Times-BoldItalic');
 foreach ($tmpfnts as $fnt)
 {
     $this->widths[$fnt][229] = $this->widths[$fnt][97];

@@ -1,9 +1,9 @@
 <?php
 
-  // PGP enkoodaa viesti
-  //
-  // otetaan sisään $recipient ja $message
-  // palautetaan $encrypted_message
+// PGP enkoodaa viesti
+//
+// otetaan sisään $recipient ja $message
+// palautetaan $encrypted_message
 
 $gpg       = "/usr/bin/gpg";
 $recipient = escapeshellarg($recipient);

@@ -1,31 +1,31 @@
 <?php
 
-  $ulos = "";
-  $jatko = 1; // oletetaan normaali käsittely
-  $tyyppi = 1; // oletetaan rivin näkyvyys
+$ulos = "";
+$jatko = 1; // oletetaan normaali käsittely
+$tyyppi = 1; // oletetaan rivin näkyvyys
 
-  if (mysql_field_name($result, $i) == "tunnus" or
-      mysql_field_name($result, $i) == "yhtio") {
-    $tyyppi = 0;
-  }
+if (mysql_field_name($result, $i) == "tunnus" or
+    mysql_field_name($result, $i) == "yhtio") {
+  $tyyppi = 0;
+}
 
-  if (mysql_field_name($result, $i) == "toimitustapa") {
-    $query = "  SELECT *
-          from toimitustapa
-          WHERE yhtio='$kukarow[yhtio]'";
-    $sresult = mysql_query($query) or pupe_error($query);
+if (mysql_field_name($result, $i) == "toimitustapa") {
+  $query = "  SELECT *
+        from toimitustapa
+        WHERE yhtio='$kukarow[yhtio]'";
+  $sresult = mysql_query($query) or pupe_error($query);
 
-    $ulos = "<td><select name='$nimi'>";
-    
-    while ($srow = mysql_fetch_array($sresult)) {
-      $sel = '';
-      if ($trow[$i] == $srow['selite']) {
-        $sel = "selected";
-      }
-      
-      $ulos .= "<option value='$srow[selite]' $sel>".t_tunnus_avainsanat($srow, "selite", "TOIMTAPAKV")."</option>";
+  $ulos = "<td><select name='$nimi'>";
+
+  while ($srow = mysql_fetch_array($sresult)) {
+    $sel = '';
+    if ($trow[$i] == $srow['selite']) {
+      $sel = "selected";
     }
-    
-    $ulos .= "</select></td>";
-    $jatko = 0;
+
+    $ulos .= "<option value='$srow[selite]' $sel>".t_tunnus_avainsanat($srow, "selite", "TOIMTAPAKV")."</option>";
   }
+
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}

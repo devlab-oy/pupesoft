@@ -268,7 +268,7 @@ while ((!feof ($fd)) and ($error!=1)) {
                 tuoteno    = '$trow[tuoteno]',
                 yhtio    = '$trow[yhtio]'";
           $result = mysql_query($query) or pupe_error($query);
-          
+
           $query = "  INSERT into tapahtuma set
                 yhtio     = '$trow[yhtio]',
                 tuoteno   = '$trow[tuoteno]',

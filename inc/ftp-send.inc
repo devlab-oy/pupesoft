@@ -40,7 +40,7 @@ $filenimi     = basename($ftpfile);
 $ftptmpr     = !isset($ftptmpr) ? TRUE : $ftptmpr;
 
 if ($ftphost == 'localhost' and $ftppath != '' and is_dir($ftppath) and is_writable($ftppath) and $ftpfile != '' and is_file($ftpfile) and is_writable($ftpfile)) {
-  
+
   $ftppath = rtrim(realpath($ftppath), "/")."/";
   $file_from = realpath($ftpfile);
   $file_to = $ftppath.$filenimi;

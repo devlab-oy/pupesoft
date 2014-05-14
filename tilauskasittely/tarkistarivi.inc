@@ -856,30 +856,32 @@ if (
       $kohde_varastot = array();
     }
 
-      $tuoteperhe = tuoteperhe($trow['tuoteno']);
+    $tuoteperhe = tuoteperhe($trow['tuoteno']);
     $siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
     foreach ($siirto_varastot as $siirto_varasto) {
 
-        $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
-        if (!empty($tuoteperhe)) {
-          $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
-          $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
-        }
+      $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
+      if (!empty($tuoteperhe)) {
+        $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
+        $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
+      }
 
-      //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat, tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto ja lisaarivi vaiheessa saldot on riittäneet.
-        $_normirivi_onko_siirto = (
-                !isset($tuoteperhe_saldomyytavissa)
-                and $siirto_varasto['tuote']['myytavissa'] <= 0
-                and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
-                );
-        $_perherivi_onko_siirto = (
-                isset($tuoteperhe_saldomyytavissa)
-                and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0
-                and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
-                );
+      //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat,
+      //tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto
+      //ja lisaarivi vaiheessa saldot on riittäneet.
+      $_normirivi_onko_siirto = (
+              !isset($tuoteperhe_saldomyytavissa)
+              and $siirto_varasto['tuote']['myytavissa'] <= 0
+              and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
+              );
+      $_perherivi_onko_siirto = (
+              isset($tuoteperhe_saldomyytavissa)
+              and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0
+              and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
+              );
 
-        if ($_normirivi_onko_siirto or $_perherivi_onko_siirto) {
+      if ($_normirivi_onko_siirto or $_perherivi_onko_siirto) {
         continue;
       }
 
@@ -887,7 +889,7 @@ if (
         $sel4 = "SELECTED";
       }
 
-        $siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$saldo_myytavissa} ({$siirto_varasto['toimitustapa_selite']})";
+      $siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$saldo_myytavissa} ({$siirto_varasto['toimitustapa_selite']})";
       $paikat .= "<option value='¡¡S{$siirto_varasto['tunnus']}¡¡S{$siirto_varasto['lahde_tunnus']}¡¡S{$siirto_varasto['kohde_tunnus']}' {$sel4}>{$siirto_varastot_text}</option>";
       $paikatlask++;
       $sel4 = "";

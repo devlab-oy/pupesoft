@@ -1,7 +1,7 @@
 <?php
 
 function hinnastorivi($tuote, $laskurow) {
-    
+
   $myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
 
     // muutetaan yksiköt ISO-standardin mukaisiksi
@@ -12,7 +12,7 @@ function hinnastorivi($tuote, $laskurow) {
     $yksikko = "SET";
   if ($tuote['yksikko']=='PAR')
     $yksikko = "PAR";
-  
+
     // tehdään tietuetta
   $out  .= sprintf("%-35.35s", $tuote['tuoteno']);          // tuotenumero
   $out  .= sprintf("%-10.10s", sprintf("%02s", $tuote['try']));    // tuotteen tuoteryhmä kahteen merkkiin asti zeropaddattuna
@@ -41,6 +41,6 @@ function hinnastorivi($tuote, $laskurow) {
   $out  .= sprintf("%-19.19s", "");                     // määrän maksimi
   $out  .= sprintf("%-11.11s", "");                     // alennushinta
   $out .= "\n";
-  
+
     return $out;
 }

@@ -147,7 +147,7 @@ if (!function_exists("korjaalaskut")) {
       if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Uusikate = $tilausrivi[rivihinta] - $tilausrivi[kpl] * $kehahin (muutos = $muutos)</font><br>";
 
       // jos ei löydetä varastonmuutostiliöintiä ja meillä on varastonmuutosta
-      if ($tilikpl == 0 and $uusi_varastonmuutos <> 0) {        
+      if ($tilikpl == 0 and $uusi_varastonmuutos <> 0) {
         /*
         katsotaan onko $lasku[tapvm] suljetulla tilikaudella, jos on, laitetaan pvm ensimmäinen sallittu pvm (eli avoimen tilikauden ensimmäinen pvm)
         */
@@ -160,7 +160,7 @@ if (!function_exists("korjaalaskut")) {
 
         $uusi_varastonmuutos_kp = round($uusi_varastonmuutos, 2);
         $uusi_varasto_kp = round($uusi_varastonmuutos * -1, 2);
-                
+
         // Kirjataan 'varasto'-tilille
         $query = "  INSERT into tiliointi set
               yhtio     = '$kukarow[yhtio]',

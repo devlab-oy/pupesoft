@@ -176,7 +176,7 @@ while ($orow = mysql_fetch_array($result)) {
   $mrow = mysql_fetch_array($xresult);
 
   $nimitys_lukumaara = "";
-  
+
   if ($mrow['nimi'] == 'extranet_tarjoukset_ja_ennakot.php' and stristr($mrow['alanimi'], "EXTENNAKKO")) {
     $ennakoiden_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($kukarow['oletus_asiakas']);
     if ($ennakoiden_lukumaara > 0) {

@@ -40,7 +40,7 @@
   //Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
   $aputoim = $toim;
   $toimi_array = explode('!!!', $toim);
-    $a_lisa = "";
+  $a_lisa = "";
 
   $toim = $toimi_array[0];
   if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
@@ -56,34 +56,34 @@
   }
 
   // Setataan muuttujat
-  if (!isset($rajauslisa))     $rajauslisa = "";
-  if (!isset($del))         $del = "";
-  if (!isset($errori))       $errori = "";
-  if (!isset($from))         $from = "";
-  if (!isset($haku))         $haku = "";
-  if (!isset($js_open_yp))     $js_open_yp = "";
-  if (!isset($laji))         $laji = "";
-  if (!isset($limit))       $limit = "";
-  if (!isset($lisa))         $lisa = "";
-  if (!isset($lopetus))       $lopetus = "";
-  if (!isset($nayta_eraantyneet)) $nayta_eraantyneet = "";
-  if (!isset($nayta_poistetut))   $nayta_poistetut = "";
-  if (!isset($ojarj))       $ojarj = "";
-  if (!isset($oletus))       $oletus = "";
-  if (!isset($osuu))         $osuu = "";
-  if (!isset($otsikko_lisatiedot))$otsikko_lisatiedot = "";
-  if (!isset($otsikko_nappi))   $otsikko_nappi = "";
-  if (!isset($prospektlisa))     $prospektlisa = "";
-  if (!isset($ryhma))       $ryhma = "";
-  if (!isset($tunnus))       $tunnus = "";
-  if (!isset($ulisa))       $ulisa = "";
-  if (!isset($upd))         $upd = "";
-  if (!isset($uusi))         $uusi = "";
-  if (!isset($uusilukko))     $uusilukko = "";
-  if (!isset($alias_set))     $alias_set = "";
-  if (!isset($rajattu_nakyma))   $rajattu_nakyma = "";
-  if (!isset($lukossa))       $lukossa = "";
-  if (!isset($lukitse_laji))    $lukitse_laji = "";
+  if (!isset($rajauslisa))          $rajauslisa = "";
+  if (!isset($del))                 $del = "";
+  if (!isset($errori))              $errori = "";
+  if (!isset($from))                $from = "";
+  if (!isset($haku))                $haku = "";
+  if (!isset($js_open_yp))          $js_open_yp = "";
+  if (!isset($laji))                $laji = "";
+  if (!isset($limit))               $limit = "";
+  if (!isset($lisa))                $lisa = "";
+  if (!isset($lopetus))             $lopetus = "";
+  if (!isset($nayta_eraantyneet))   $nayta_eraantyneet = "";
+  if (!isset($nayta_poistetut))     $nayta_poistetut = "";
+  if (!isset($ojarj))               $ojarj = "";
+  if (!isset($oletus))              $oletus = "";
+  if (!isset($osuu))                $osuu = "";
+  if (!isset($otsikko_lisatiedot))  $otsikko_lisatiedot = "";
+  if (!isset($otsikko_nappi))       $otsikko_nappi = "";
+  if (!isset($prospektlisa))        $prospektlisa = "";
+  if (!isset($ryhma))               $ryhma = "";
+  if (!isset($tunnus))              $tunnus = "";
+  if (!isset($ulisa))               $ulisa = "";
+  if (!isset($upd))                 $upd = "";
+  if (!isset($uusi))                $uusi = "";
+  if (!isset($uusilukko))           $uusilukko = "";
+  if (!isset($alias_set))           $alias_set = "";
+  if (!isset($rajattu_nakyma))      $rajattu_nakyma = "";
+  if (!isset($lukossa))             $lukossa = "";
+  if (!isset($lukitse_laji))        $lukitse_laji = "";
 
   // Tutkitaan vähän alias_settejä ja rajattua näkymää
   $al_lisa = " and selitetark_2 = '' and nakyvyys != '' ";
@@ -1208,7 +1208,6 @@
 
   // Nyt selataan
   if ($tunnus == 0 and $uusi == 0 and $errori == '') {
-
     if (($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto" or $toim == "puun_alkio") and $oikeurow['paivitys'] == 1) {
       print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
         <!--
@@ -1271,13 +1270,24 @@
     // Ei näytetä seuraavia avainsanoja avainsana-ylläpitolistauksessa
     $avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
-    $query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
-        $query .= "$ryhma ORDER BY $jarjestys $limiitti";
+    $query = "SELECT {$kentat}
+              FROM $toim
+              WHERE yhtio = '$kukarow[yhtio]'
+              $lisa
+              $rajauslisa
+              $prospektlisa
+              $avainsana_query_lisa
+              $tuote_status_rajaus_lisa
+              $ryhma
+              ORDER BY $jarjestys
+              $limiitti";
     $result = pupe_query($query);
 
     if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
       echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa";
+
       if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
+
       echo "' method = 'post'>
           <input type = 'hidden' name = 'uusi' value = '1'>
           <input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -1335,11 +1345,11 @@
       $nykyinentuote = mysql_fetch_array($nykyinenresult);
 
       $query = "  SELECT tunnus
-            FROM tuote use index (tuoteno_index)
-            WHERE tuote.yhtio     = '$kukarow[yhtio]'
-            and tuote.tuoteno    < '$nykyinentuote[tuoteno]'
-            ORDER BY tuoteno desc
-            LIMIT 1";
+                  FROM tuote use index (tuoteno_index)
+                  WHERE tuote.yhtio     = '$kukarow[yhtio]'
+                  and tuote.tuoteno    < '$nykyinentuote[tuoteno]'
+                  ORDER BY tuoteno desc
+                  LIMIT 1";
       $noperes = pupe_query($query);
       $noperow = mysql_fetch_array($noperes);
 
@@ -1357,11 +1367,11 @@
       echo "</form>";
 
       $query = "  SELECT tunnus
-            FROM tuote use index (tuoteno_index)
-            WHERE tuote.yhtio     = '$kukarow[yhtio]'
-            and tuote.tuoteno    > '$nykyinentuote[tuoteno]'
-            ORDER BY tuoteno
-            LIMIT 1";
+                  FROM tuote use index (tuoteno_index)
+                  WHERE tuote.yhtio     = '$kukarow[yhtio]'
+                  and tuote.tuoteno    > '$nykyinentuote[tuoteno]'
+                  ORDER BY tuoteno
+                  LIMIT 1";
       $yesres = pupe_query($query);
       $yesrow = mysql_fetch_array($yesres);
 
@@ -1402,9 +1412,9 @@
 
         echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'{$tuote_status_lisa}>" . t(mysql_field_name($result,$i)) . "</a>";
 
-          if   (mysql_field_len($result,$i)>10) $size='15';
+          if      (mysql_field_len($result,$i)>10) $size='15';
           elseif  (mysql_field_len($result,$i)<5)  $size='5';
-          else  $size='10';
+          else     $size='10';
 
           if ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {
             if (!isset($haku[$i])) $haku[$i] = "";
@@ -2087,11 +2097,11 @@
     if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
 
       $query = "  SELECT kuka.kuka, kuka.nimi
-            FROM kuka
-            WHERE kuka.yhtio = '$kukarow[yhtio]'
-            AND kuka.aktiivinen = 1
-            AND kuka.oletus_asiakas = {$trow["tunnus"]}
-            ORDER BY kuka.nimi";
+                  FROM kuka
+                  WHERE kuka.yhtio = '$kukarow[yhtio]'
+                  AND kuka.aktiivinen = 1
+                  AND kuka.oletus_asiakas = {$trow["tunnus"]}
+                  ORDER BY kuka.nimi";
       $extkukares = pupe_query($query);
 
       if (mysql_num_rows($extkukares) > 0) {
@@ -2129,7 +2139,7 @@
       $toim == "perusalennus" or
       $toim == "yhteensopivuus_tuote" or
       $toim == "yhteensopivuus_tuote_lisatiedot" or
-       ($toim == "toimitustapa" and $poistolukko == "") or
+      ($toim == "toimitustapa" and $poistolukko == "") or
       $toim == "kirjoittimet" or
       $toim == "hinnasto" or
       $toim == "rahtimaksut" or

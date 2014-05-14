@@ -53,6 +53,7 @@
   if (!isset($perheid2))   $perheid2 = 0;
   else $perheid2 = (int)   $perheid2;
 
+  if (!isset($rivinumero)) $rivinumero = "";
   if (!isset($rivilaadittu))     $rivilaadittu = "";
   if (!isset($kommentti))     $kommentti = "";
   if (!isset($ale_peruste))    $ale_peruste = "";
@@ -1731,6 +1732,10 @@
                   $myy_lapsi_ein[$indeksi] = "";
                 }
 
+                if (!isset($myy_ohita_kerays[$indeksi])) {
+                  $myy_ohita_kerays[$indeksi] = "";
+                }
+
                 $tlisatied_lisa2 = "";
 
                 if ($toim == "YLLAPITO") {
@@ -1770,22 +1775,22 @@
 
                   $autoid = !empty($autoid) ? $autoid : 0;
 
-                  $query = "  INSERT INTO tilausrivin_lisatiedot
-                        SET yhtio        = '$kukarow[yhtio]',
-                        positio         = '{$positio}',
-                        toimittajan_tunnus    = '$toimittajan_tunnus',
-                        ei_nayteta         = '$myy_lapsi_ein[$indeksi]',
-                        tilausrivitunnus    = '$lisatty_tun',
-                        erikoistoimitus_myynti   = '$myy_erikoistoimitus[$indeksi]',
-                        ohita_kerays      = '{$myy_ohita_kerays[$indeksi]}',
-                        vanha_otunnus      = '$kukarow[kesken]',
-                        rekisterinumero      = '{$rekisterinumero}',
-                        autoid          = '{$autoid}',
-                        jarjestys        = '$jarjestys',
-                        luontiaika        = now(),
-                        laatija         = '$kukarow[kuka]'
-                        {$tlisatied_lisa}
-                        {$tlisatied_lisa2}";
+                  $query = "INSERT INTO tilausrivin_lisatiedot
+                            SET yhtio = '{$kukarow['yhtio']}',
+                            positio = '{$positio}',
+                            toimittajan_tunnus = '{$toimittajan_tunnus}',
+                            ei_nayteta = '{$myy_lapsi_ein[$indeksi]}',
+                            tilausrivitunnus = '{$lisatty_tun}',
+                            erikoistoimitus_myynti = '{$myy_erikoistoimitus[$indeksi]}',
+                            ohita_kerays = '{$myy_ohita_kerays[$indeksi]}',
+                            vanha_otunnus = '{$kukarow['kesken']}',
+                            rekisterinumero = '{$rekisterinumero}',
+                            autoid = '{$autoid}',
+                            jarjestys = '{$jarjestys}',
+                            luontiaika = now(),
+                            laatija = '{$kukarow['kuka']}'
+                            $tlisatied_lisa
+                            $tlisatied_lisa2";
 
                   if ($trow["sarjanumeroseuranta"] == "S" and $varattu < 0) {
                     $query .= " , osto_vai_hyvitys='O' ";

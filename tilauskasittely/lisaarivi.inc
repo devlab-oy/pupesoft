@@ -3234,7 +3234,10 @@
         if ($_laajat_toimipaikat and $_laskun_toimipaikka) {
 
           $_onko_myyntitilaus = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
-          $_kerataanko_valmistukset = ($vt_yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
+          $_kerataanko_valmistukset = (
+                  $vt_yhtiorow["kerataanko_valmistukset"] == "E"
+                  and $toim == "VALMISTAASIAKKAALLE"
+                  );
           $_lahetteen_tulostustapa = ($vt_yhtiorow['lahetteen_tulostustapa'] == 'I');
 
           if ($_kerataanko_valmistukset or $_lahetteen_tulostustapa) {
@@ -3244,7 +3247,10 @@
             $eilahe = '';
           }
 
-          $_myyntitilaus_osatoimitus = ($vt_yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $_onko_myyntitilaus);
+          $_myyntitilaus_osatoimitus = (
+                  $vt_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+                  and $_onko_myyntitilaus
+                  );
 
           if ($_myyntitilaus_osatoimitus) {
             $osatoimitus = 'o';

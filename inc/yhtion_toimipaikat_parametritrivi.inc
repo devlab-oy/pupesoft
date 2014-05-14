@@ -37,6 +37,7 @@ if (mysql_field_name($result, $i) == "parametri") {
     // ihan kaikkia parametrejä ei voi sallia toimipaikan taakse
     $poikkeukset = array(
       "myyntitilauksen_toimipaikka",
+      "toimipaikkakasittely",
     );
 
     while ($apurow = mysql_fetch_array($fields)) {

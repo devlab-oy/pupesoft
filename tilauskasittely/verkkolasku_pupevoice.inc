@@ -167,8 +167,8 @@ if (!function_exists('pupevoice_otsik')) {
       xml_add("InvoiceRecipientCountryCode",    $lasosrow['laskutus_maa'],              $tootxml);
     }
 
-    // Nämä solut lisätään vain jos yhtiön parametreissä on valittu lisäkentät
-    if ($yhtiorow['pupevoice_servinet'] != '') {
+    // Nämä solut lisätään vain jos pupevoice on lähdössä servinettiin
+    if ($yhtiorow['verkkolasku_lah'] == "servinet") {
 
       //haetaan toimitustavan tiedot
       $query = " SELECT *

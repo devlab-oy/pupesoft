@@ -54,6 +54,9 @@ if (mysql_field_name($result, $i) == "verkkolasku_lah") {
   elseif($trow[$i] == 'maventa') {
     $sel5 = "selected";
   }
+  elseif($trow[$i] == 'servinet') {
+    $sel6 = "selected";
+  }
   else {
     $sel1 = "selected";
   }
@@ -63,6 +66,7 @@ if (mysql_field_name($result, $i) == "verkkolasku_lah") {
   $ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost");
   $ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
   $ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
+  $ulos .= "<option value = 'servinet' $sel6>".t("Pupevoice Servinet");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3891,18 +3895,6 @@ if (mysql_field_name($result, $i) == 'suoratoimitusvarasto') {
     $ulos .= "<option value = '{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
   }
 
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
-if (mysql_field_name($result, $i) == 'pupevoice_servinet') {
-  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-  $sel = $trow[$i] == '1' ? 'selected' : '';
-
-  $ulos .= "<option value = ''>".t("Ei lis‰t‰ servinet lis‰kentti‰ Pupevoice-laskuun")."</option>";
-  $ulos .= "<option value = 'k' {$sel}>".t("Servinet lis‰kent‰t lis‰t‰‰n Pupevoice-laskuun")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

@@ -771,7 +771,7 @@ if ($silent == "") {
 
       echo "<br><table>";
       echo "<tr>";
-      
+
       if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikka == 'kaikki') {
         echo "<th>".t("Toimipaikka")."</th>";
       }

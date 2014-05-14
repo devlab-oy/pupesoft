@@ -1,8 +1,8 @@
 <?php
 
-  $otsikko = 'Yhtiön toimipaikan parametrit';
-  $otsikko_nappi   = 'yhtiön toimipaikan parametrit';
+$otsikko = 'Yhtiön toimipaikan parametrit';
+$otsikko_nappi   = 'yhtiön toimipaikan parametrit';
 
-  $kentat = 'tunnus, toimipaikka, parametri, arvo';
-  $hakukentat = 'tunnus, toimipaikka, parametri, arvo';
-  $jarjestys = 'toimipaikka, parametri';
+$kentat = 'tunnus, toimipaikka, parametri, arvo';
+$hakukentat = 'tunnus, toimipaikka, parametri, arvo';
+$jarjestys = 'toimipaikka, parametri';

@@ -1,4 +1,5 @@
 <?php
+
     ///* Tämä skripti käyttää slave-tietokantapalvelinta *///
   $useslave = 1;
 
@@ -58,6 +59,7 @@
     echo "<strong>".t("VIRHE: Tilausta ei löydy")."!</strong>$query<br>";
     exit;
   }
+
   $laskurow = mysql_fetch_assoc($aresult);
 
   $vientikurssi = 1;
@@ -577,7 +579,6 @@
           GROUP BY tunnusnippu";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
-
 
     $where = " tilausrivi.otunnus IN ($row[tunnukset]) ";
   }
@@ -1800,7 +1801,6 @@
         global $kukarow, $yhtiorow;
         // Haetaan tuotteen toimittajan liitostunnuksella toimitaulusta kaikki tiedot.
         // halutaan näyttää rivillä täydellinen toimittajanimi pelkän tunnuksen sijasta.
-
         $toimsql = "SELECT * from toimi where yhtio = '{$kukarow["yhtio"]}' and tunnus = '{$liitostunnus}'";
         $toimres = pupe_query($toimsql);
 

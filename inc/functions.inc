@@ -265,12 +265,13 @@ if (!function_exists("query_dump")) {
   function query_dump($query) {
 
     // trimmataan, tabit, rivinvaihdot ja tuplaspacet pois querystä..
-    $query = trim($query);
     $query = str_replace("\t", "",$query);
     $query = preg_replace("/ {2,}/", " ", $query);
+    $query = preg_replace("/(\n) */", "$1", $query);
+    $query = trim($query);
 
     echo "<pre>";
-    echo htmlentities($query);
+    echo htmlentities($query, ENT_IGNORE);
     echo "</pre>";
   }
 }

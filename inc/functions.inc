@@ -264,7 +264,7 @@ if (!function_exists("query_dump")) {
   // otetaan parametriksi query
   function query_dump($query) {
 
-    // trimmataan, tabit, rivinvaihdot ja tuplaspacet pois querystä..    
+    // trimmataan, tabit, rivinvaihdot ja tuplaspacet pois querystä..
     $query = str_replace("\t", "", $query);
     $query = preg_replace("/ {2,}/", " ", $query);
     $query = preg_replace("/(\n) */", "$1", $query);

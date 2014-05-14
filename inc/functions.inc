@@ -27679,7 +27679,10 @@ if (!function_exists('valitse_oletusvarasto')) {
 
       if (mysql_num_rows($aov_result) > 0) {
         $aov_row = mysql_fetch_assoc($aov_result);
-        return $aov_row['avainsana'];
+
+        if (in_array($aov_row['avainsana'], $varastot)) {
+          return $aov_row['avainsana'];
+        }
       }
     }
 
@@ -27703,7 +27706,10 @@ if (!function_exists('valitse_oletusvarasto')) {
 
       if (mysql_num_rows($result) > 0) {
         $varastorow = mysql_fetch_assoc($result);
-        return $varastorow['tunnus'];
+
+        if (in_array($varastorow['tunnus'], $varastot)) {
+          return $varastorow['tunnus'];
+        }
       }
     }
 

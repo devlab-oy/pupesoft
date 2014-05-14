@@ -1949,7 +1949,7 @@
 
       $disabled = '';
       if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !empty($srow['tunnus'])) {
-        $query = "	SELECT COUNT(*) AS tilausrivi_kpl
+        $query = "  SELECT COUNT(*) AS tilausrivi_kpl
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND otunnus = {$srow['tunnus']}
@@ -1965,7 +1965,7 @@
         $disabled = 'DISABLED';
       }
 
-      $query = "	SELECT *
+      $query = "  SELECT *
               FROM varastopaikat
               WHERE yhtio = '$kukarow[yhtio]'
               $varastot_lisa_query

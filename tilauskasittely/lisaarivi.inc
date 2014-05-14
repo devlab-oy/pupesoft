@@ -66,8 +66,6 @@
   if (!isset($rekisterinumero))  $rekisterinumero = "";
   if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
 
-  $reklamaatiohyvitys = false;
-
   if ($rekisterinumero == '') {
     //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.
     //Käyttöliittymässä on 2 valintaa. input rekisterinumero ja dropdown jo_syotetty_rekisterinumero. Jos rekisterinumero on syötetty, yliajaa se dropdownin
@@ -2522,8 +2520,6 @@
             elseif ($kpl < 0) {
               $var   = "";
               $varattu = $kpl;
-
-              $reklamaatiohyvitys = true;
             }
             // Normaalisti kaikki menee puutteeksi.
             else {
@@ -2613,12 +2609,20 @@
               }
             }
 
-            if (!$loydetytpaikat AND $reklamaatiohyvitys and $laskurow['varasto'] != 0) {
+            // Jos paikkaa ei vieläkään löytynyt, luodaan tilauksen varastoon tuotepaikka ja käytetään sitä (ostossa toisin)
+            if (!$loydetytpaikat AND $rivityyppi != 'O') {
+
+              if ($laskurow['varasto'] != 0) {
+                $_varasto = $laskurow['varasto'];
+              }
+              else {
+                $_varasto = $varasto[0];
+              }
 
               $query = "  SELECT alkuhyllyalue, alkuhyllynro
                     FROM varastopaikat
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$laskurow['varasto']}'";
+                    AND tunnus = '{$_varasto}'";
               $oletus_tuotepaikka_res = pupe_query($query);
               $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
 

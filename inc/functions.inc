@@ -27814,6 +27814,100 @@ if (!function_exists('tilauksen_toimipaikka')) {
   }
 }
 
+if (!function_exists('eilahetetta')) {
+  function eilahetetta($srow = array(), $toimtapa_apuro = array(), $poikkeava_yhtiorow = array()) {
+    global $kukarow, $yhtiorow, $toim;
+
+    $_yhtiorow = $yhtiorow;
+    if (!empty($poikkeava_yhtiorow)) {
+      $_yhtiorow = $poikkeava_yhtiorow;
+    }
+
+    if (!empty($srow)) {
+      $_eilahetetta_valmistus = (
+              !isset($srow['eilahetetta'])
+              and $_yhtiorow["kerataanko_valmistukset"] == "E"
+              and $toim == "VALMISTAASIAKKAALLE"
+              );
+      $_eilahetetta_tulostustapa = (
+              !isset($srow['eilahetetta'])
+              and $_yhtiorow['lahetteen_tulostustapa'] == 'I'
+              );
+      $_eilahetetta_nouto = (
+              !isset($srow['eilahetetta'])
+              and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              and $toimtapa_apuro['nouto'] != ''
+              and $_yhtiorow['nouto_suoraan_laskutukseen'] == 'K'
+              );
+
+      if ($srow['eilahetetta'] != ''
+              or $_eilahetetta_valmistus
+              or $_eilahetetta_tulostustapa
+              or $_eilahetetta_nouto) {
+        return true;
+      }
+    }
+    else {
+      $_eilahetetta_valmistus = (
+              $_yhtiorow["kerataanko_valmistukset"] == "E"
+              and $toim == "VALMISTAASIAKKAALLE"
+              );
+      $_eilahetetta_tulostustapa = (
+              $_yhtiorow['lahetteen_tulostustapa'] == 'I'
+              );
+      $_eilahetetta_nouto = (
+              in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              and $toimtapa_apuro['nouto'] != ''
+              and $_yhtiorow['nouto_suoraan_laskutukseen'] == 'K'
+              );
+
+      if ($srow['eilahetetta'] != ''
+              or $_eilahetetta_valmistus
+              or $_eilahetetta_tulostustapa
+              or $_eilahetetta_nouto) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
+if (!function_exists('osatoimitus')) {
+  function osatoimitus($srow = array(), $oletus = array(), $poikkeava_yhtiorow = array()) {
+    global $kukarow, $yhtiorow, $toim;
+
+    $_yhtiorow = $yhtiorow;
+    if (!empty($poikkeava_yhtiorow)) {
+      $_yhtiorow = $poikkeava_yhtiorow;
+    }
+
+    // Tarjouksia ei oletuksena osatoimiteta
+    $_osatoimitus_oletus = (
+            (in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "")
+            and $kukarow["kesken"] == 0
+            );
+    $_osatoimitus_myyntitilaus = (
+            $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+            and $kukarow['kesken'] == 0
+            and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+            );
+
+    if (!empty($srow)) {
+      if ($srow['osatoimitus'] != '' or $_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {
+        return true;
+      }
+    }
+    else {
+      if ($_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
 if (!function_exists('paivita_siirtolistan_toimipaikka')) {
   function paivita_siirtolistan_toimipaikka($tunnus) {
     global $kukarow, $yhtiorow;

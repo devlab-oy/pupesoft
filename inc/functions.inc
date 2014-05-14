@@ -27737,7 +27737,7 @@ if (!function_exists('palauta_varasto')) {
     $toimipaikka = isset($args['toimipaikka']) ? (int) $args['toimipaikka'] : 0;
     $toim = isset($args['toim']) ? $args['toim'] : '';
     $tilaustyyppi = isset($args['tilaustyyppi']) ? $args['tilaustyyppi'] : '';
-    $varasto = isset($args['varasto']) ? (int) $args['varasto'] : 0;
+    $varasto = isset($args['varasto']) ? $args['varasto'] : '';
     $toimitus_maa = isset($args['toimitus_maa']) ? $args['toimitus_maa'] : '';
 
     $args = array(

@@ -106,15 +106,42 @@ else {
     $result = mysql_query($query) or pupe_error($query);
     $maehrowx = mysql_fetch_array($result);
 
+    if ($yhtiorow['kerayserat'] == 'K') {
+      $kerayserat_select = " vh.keraysvyohyke, ";
+      $kerayserat_join = "LEFT JOIN varaston_hyllypaikat AS vh
+                          ON (vh.yhtio = tilausrivi.yhtio
+                          AND vh.hyllyalue = tilausrivi.hyllyalue
+                          AND vh.hyllynro = tilausrivi.hyllynro
+                          AND vh.hyllyvali = tilausrivi.hyllyvali
+                          AND vh.hyllytaso = tilausrivi.hyllytaso) ";
+      $sorttaus = " vh.keraysvyohyke, sorttauskentta ";
+    }
+    else{
+      $kerayserat_select = "";
+      $kerayserat_join = "";
+      $sorttaus = " sorttauskentta ";
+    }
+
     //haetaan kaikkien tilausrivien varastopaikat
-    $query = "  SELECT otunnus, tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso,
-          concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-          FROM tilausrivi
-          WHERE otunnus   = '$laskurow[tunnus]'
-          and yhtio    = '$kukarow[yhtio]'
-          and hyllyalue  != ''
-          and tyyppi     != 'D'
-          ORDER BY sorttauskentta";
+    $query = "  SELECT tilausrivi.otunnus,
+                tilausrivi.tunnus,
+                tilausrivi.hyllyalue,
+                tilausrivi.hyllynro,
+                tilausrivi.hyllyvali,
+                tilausrivi.hyllytaso,
+                $kerayserat_select
+                concat( rpad(upper(tilausrivi.hyllyalue), 5, '0'),
+                        lpad(upper(tilausrivi.hyllynro), 5, '0'),
+                        lpad(upper(tilausrivi.hyllyvali), 5, '0'),
+                        lpad(upper(tilausrivi.hyllytaso), 5, '0')
+                ) sorttauskentta
+                FROM tilausrivi
+                $kerayserat_join
+                WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+                and tilausrivi.yhtio = '$kukarow[yhtio]'
+                and tilausrivi.hyllyalue != ''
+                and tilausrivi.tyyppi != 'D'
+                ORDER BY $sorttaus";
     $result = mysql_query($query) or pupe_error($query);
 
     //tässä muuttujassa on sit kaikki tunnukset splitin jälkeen
@@ -122,9 +149,7 @@ else {
     $tvs_tilausnumerot[] = $laskurow["tunnus"];
 
     //mihin varastoon lähete kuuluu. aluksi x
-    $varasto   = 'x';
-    $edvarasto = 'x';
-    $tulostusalue = $edtulostusalue = "x";
+    $varasto  = $edvarasto = $tulostusalue = $edtulostusalue = $keraysvyohyke = $edkeraysvyohyke = "x";
     unset($laskusplitres);
 
     if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
@@ -138,7 +163,7 @@ else {
       $toimitustavan_lahto_arvo = 0;
     }
 
-    while ($row = mysql_fetch_array($result)) {
+    while ($row = mysql_fetch_assoc($result)) {
       // Mihin varastoon
       $varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
@@ -148,11 +173,44 @@ else {
       // Mikä tulostusalue
       $tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 
+      if ($yhtiorow['kerayserat'] == 'K') {
+        // Mikä keräysvyöhyke
+        $keraysvyohyke = $row['keraysvyohyke'];
+      }
+
       // Intrastat-tiedot
       $laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
       //varasto vaihtuu, splitataan tilaus, paitsi jos spliauskielto on trigattu
-      if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAASIAKKAALLE" and $toim != "VALMISTAVARASTOON") {
+      if  (
+            (
+              (
+                  $varasto != $edvarasto
+              and $edvarasto != 'x'
+              and $edvarasto != ''
+              )
+              OR (
+                      $toim == "SIIRTOLISTA"
+                  and $tulostusalue != $edtulostusalue
+                  and $edtulostusalue != 'x'
+                  and $edtulostusalue != ''
+              )
+              OR (
+                      $keraysvyohyke != $edkeraysvyohyke
+                  and $edkeraysvyohyke != 'x'
+                  and $edkeraysvyohyke != ''
+              )
+            )
+            AND (
+                   $maehrowx["jv"] == ''
+                or $totarowx["tulostustapa"] != 'H'
+            )
+            AND (   $laskurow["splittauskielto"] != "E"
+                and $toim != "SIIRTOTYOMAARAYS"
+                and $toim != "VALMISTAASIAKKAALLE"
+                and $toim != "VALMISTAVARASTOON"
+            )
+          ) {
         //Koska ollaan täällää olaan juuri splittaamassa tilaus, eli halutaan tulostaa kaikkien splittauksessa syntyvien varastosiirojen siirtolistat
         $splitattiin = TRUE;
 
@@ -273,6 +331,9 @@ else {
 
       // edellinen tulostusalue talteen
       $edtulostusalue = $tulostusalue;
+
+      // edellinen keraysvyohyke
+      $edkeraysvyohyke = $keraysvyohyke;
 
       //jos tilausrivin laskunumero on eri
       if ($row['otunnus'] != $laskurow['tunnus']) {

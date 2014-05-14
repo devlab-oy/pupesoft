@@ -277,10 +277,10 @@
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus = {$varasto}";
         $varasto_result = pupe_query($query);
-        $varaston_toimipaikka = mysql_fetch_assoc($varasto_result);
+        $v_toimipaikka = mysql_fetch_assoc($varasto_result);
         $params = array(
           'asiakas_tunnus' => $asiakasid,
-          'varasto_toimipaikka' => $varaston_toimipaikka['toimipaikka']
+          'varasto_toimipaikka' => $v_toimipaikka['toimipaikka']
         );
         $toimitustavat = hae_toimitustavat($params);
         $toimitustavat_selitteet = array_column($toimitustavat, 'selite');
@@ -2041,9 +2041,21 @@
       $jtki = "";
       $rahtivapaa_chk = '';
 
-      $_eilahetetta_valmistus = (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
-      $_eilahetetta_tulostustapa = (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I');
-      $_eilahetetta_nouto = (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
+      $_eilahetetta_valmistus = (
+              !isset($srow['eilahetetta'])
+              and $yhtiorow["kerataanko_valmistukset"] == "E"
+              and $toim == "VALMISTAASIAKKAALLE"
+              );
+      $_eilahetetta_tulostustapa = (
+              !isset($srow['eilahetetta'])
+              and $yhtiorow['lahetteen_tulostustapa'] == 'I'
+              );
+      $_eilahetetta_nouto = (
+              !isset($srow['eilahetetta'])
+              and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              and $toimtapa_apuro['nouto'] != ''
+              and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K'
+              );
       if ($srow['eilahetetta'] != '' or $_eilahetetta_valmistus or $_eilahetetta_tulostustapa or $_eilahetetta_nouto) $eilah = 'CHECKED';
       if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
       if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
@@ -2051,32 +2063,58 @@
       if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
       // Tarjouksia ei oletuksena osatoimiteta
-    $_osatoimitus_oletus = ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0);
-    $_osatoimitus_myyntitilaus = ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+    $_osatoimitus_oletus = (
+            (in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "")
+            and $kukarow["kesken"] == 0
+            );
+    $_osatoimitus_myyntitilaus = (
+            $yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+            and $kukarow['kesken'] == 0
+            and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+            );
     if ($srow['osatoimitus'] != '' or $_osatoimitus_oletus or $_osatoimitus_myyntitilaus) $osath = 'CHECKED';
 
     $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
     if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and $_onko_varasto_setattu) {
-      $varaston_toimipaikka = hae_varaston_toimipaikka($varasto);
-      if ($varaston_toimipaikka['tunnus'] == 0) {
-        $kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
+      $v_toimipaikka = hae_varaston_toimipaikka($varasto);
+      if ($v_toimipaikka['tunnus'] == 0) {
+        $_toimipaikka = $kukarow['toimipaikka'];
         $kukarow['toimipaikka'] = 0;
       }
 
-      $varaston_toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
-      $kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
-      unset($kukarow_toimipaikka_temp);
+      $vt_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
+      $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
+      unset($_toimipaikka);
 
-      $_eilahetetta_valmistus = (!isset($srow['eilahetetta']) and $varaston_toimipaikan_yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
-      $_eilahetetta_tulostustapa = (!isset($srow['eilahetetta']) and $varaston_toimipaikan_yhtiorow['lahetteen_tulostustapa'] == 'I');
-      $_eilahetetta_nouto = (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $varaston_toimipaikan_yhtiorow['nouto_suoraan_laskutukseen'] == 'K');
+      $_eilahetetta_valmistus = (
+              !isset($srow['eilahetetta'])
+              and $vt_yhtiorow["kerataanko_valmistukset"] == "E"
+              and $toim == "VALMISTAASIAKKAALLE"
+              );
+      $_eilahetetta_tulostustapa = (
+              !isset($srow['eilahetetta'])
+              and $vt_yhtiorow['lahetteen_tulostustapa'] == 'I'
+              );
+      $_eilahetetta_nouto = (
+              !isset($srow['eilahetetta'])
+              and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              and $toimtapa_apuro['nouto'] != ''
+              and $vt_yhtiorow['nouto_suoraan_laskutukseen'] == 'K'
+              );
       if ($srow['eilahetetta'] != '' or $_eilahetetta_valmistus or $_eilahetetta_tulostustapa or $_eilahetetta_nouto) {
         $eilah = 'CHECKED';
       }
 
       // Tarjouksia ei oletuksena osatoimiteta
-      $_osatoimitus_oletus = ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0);
-      $_osatoimitus_myyntitilaus = ($varaston_toimipaikan_yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+      $_osatoimitus_oletus = (
+              (in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "")
+              and $kukarow["kesken"] == 0
+              );
+      $_osatoimitus_myyntitilaus = (
+              $vt_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+              and $kukarow['kesken'] == 0
+              and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              );
       if ($srow['osatoimitus'] != '' or $_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {
         $osath = 'CHECKED';
       }

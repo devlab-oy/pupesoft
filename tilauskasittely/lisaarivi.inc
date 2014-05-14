@@ -3193,36 +3193,45 @@
     }
   }
 
-  if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !in_array($var, array('S', 'U', 'T', 'P'))) {
+  $_yhteen_varastoon = ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K');
+  if ($_yhteen_varastoon and !in_array($var, array('S', 'U', 'T', 'P'))) {
     $myy_hyllyalue_temp = $myy_hyllyalue[0];
     $myy_hyllynro_temp = $myy_hyllynro[0];
-    if (empty($myy_hyllyalue) and empty($myy_hyllynro) and !empty($p_hyllyalue) and !empty($p_hyllynro)) {
+
+    $_normi_tyhja = (empty($myy_hyllyalue) and empty($myy_hyllynro));
+    $_puute_ei_tyhja = (!empty($p_hyllyalue) and !empty($p_hyllynro));
+    $_puutteesta_hyllyt = ( $_normi_tyhja and $_puute_ei_tyhja);
+    if ($_puutteesta_hyllyt) {
       $myy_hyllyalue_temp = $p_hyllyalue;
       $myy_hyllynro_temp = $p_hyllynro;
     }
+
     if ($laskurow['varasto'] == 0 and $myy_hyllynro_temp != '' and $myy_hyllyalue_temp != '') {
       $varasto = kuuluukovarastoon($myy_hyllyalue_temp, $myy_hyllynro_temp);
 
       if (!empty($varasto)) {
-        $varaston_toimipaikka = hae_varaston_toimipaikka($varasto);
-        if ($varaston_toimipaikka['tunnus'] == 0) {
-          $kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
+        $v_toimipaikka = hae_varaston_toimipaikka($varasto);
+        if ($v_toimipaikka['tunnus'] == 0) {
+          $_toimipaikka = $kukarow['toimipaikka'];
           $kukarow['toimipaikka'] = 0;
         }
 
-        $varaston_toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
-        $kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
-        unset($kukarow_toimipaikka_temp);
+        //$vt_yhtiorow varaston toimipaikan yhtiorow
+        $vt_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
+        $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
+        unset($_toimipaikka);
         $update = "";
 
         # Katsotaan onko varasto sidottu johonkin toimipaikkaan
         # Ja onko se eri kuin otsikolla oleva toimipaikka
         # Katsotaan uudella yhtiörown parametreilla pitääkö täppiä laittaa
-        if ($varaston_toimipaikan_yhtiorow['toimipaikkakasittely'] == "L" and $laskurow['yhtio_toimipaikka'] != $varaston_toimipaikka['tunnus']) {
+        $_laajat_toimipaikat = ($vt_yhtiorow['toimipaikkakasittely'] == "L");
+        $_laskun_toimipaikka = ($laskurow['yhtio_toimipaikka'] != $v_toimipaikka['tunnus']);
+        if ($_laajat_toimipaikat and $_laskun_toimipaikka) {
 
           $_onko_myyntitilaus = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
-          $_kerataanko_valmistukset = ($varaston_toimipaikan_yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
-          $_lahetteen_tulostustapa = ($varaston_toimipaikan_yhtiorow['lahetteen_tulostustapa'] == 'I');
+          $_kerataanko_valmistukset = ($vt_yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE");
+          $_lahetteen_tulostustapa = ($vt_yhtiorow['lahetteen_tulostustapa'] == 'I');
 
           if ($_kerataanko_valmistukset or $_lahetteen_tulostustapa) {
             $eilahe = 'o';
@@ -3231,7 +3240,7 @@
             $eilahe = '';
           }
 
-          $_myyntitilaus_osatoimitus = ($varaston_toimipaikan_yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $_onko_myyntitilaus);
+          $_myyntitilaus_osatoimitus = ($vt_yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $_onko_myyntitilaus);
 
           if ($_myyntitilaus_osatoimitus) {
             $osatoimitus = 'o';
@@ -3241,14 +3250,14 @@
           }
 
           $update = "	, eilahetetta = '{$eilahe}'
-                  , osatoimitus = '{$osatoimitus}'";
+                      , osatoimitus = '{$osatoimitus}'";
         }
 
         $query = "	UPDATE lasku
-                SET varasto = '{$varasto}'
-                {$update}
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$laskurow['tunnus']}'";
+                    SET varasto = '{$varasto}'
+                    {$update}
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = '{$laskurow['tunnus']}'";
         pupe_query($query);
       }
     }

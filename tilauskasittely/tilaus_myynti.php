@@ -5417,20 +5417,20 @@ if ($tee == '') {
 
         foreach ($tilausrivien_varastot as $tilausrivin_varasto) {
 
-          $varaston_toimipaikka = hae_varaston_toimipaikka($tilausrivin_varasto);
+          $v_toimipaikka = hae_varaston_toimipaikka($tilausrivin_varasto);
           $varasto = hae_varasto($tilausrivin_varasto);
 
-          if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($varaston_toimipaikka)) {
+          if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and !empty($v_toimipaikka)) {
 
-            if ($varaston_toimipaikka['tunnus'] == 0) {
-              $kukarow_toimipaikka_temp = $kukarow['toimipaikka'];
+            if ($v_toimipaikka['tunnus'] == 0) {
+              $_toimipaikka = $kukarow['toimipaikka'];
               $kukarow['toimipaikka'] = 0;
             }
 
-            $toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $varaston_toimipaikka['tunnus']);
-            $kukarow['toimipaikka'] = (isset($kukarow_toimipaikka_temp) ? $kukarow_toimipaikka_temp : $kukarow['toimipaikka']);
+            $toimipaikan_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
+            $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
             $_toimipaikan_kerayserat_mittatiedot = ($toimipaikan_yhtiorow['kerayserat'] == 'K');
-            $toimipaikka_ja_varasto_ei_sama = ($varaston_toimipaikka['tunnus'] != $laskurow['yhtio_toimipaikka']);
+            $toimipaikka_ja_varasto_ei_sama = ($v_toimipaikka['tunnus'] != $laskurow['yhtio_toimipaikka']);
             $tarvii_lahdon = ($laskurow['eilahetetta'] == '' and $laskurow['sisainen'] == '');
 
             // jos varaston toimipaikka ei ole tilauksen toimipaikka, niin aina true.
@@ -5459,7 +5459,7 @@ if ($tee == '') {
             }
           }
 
-          unset($kukarow_toimipaikka_temp);
+          unset($_toimipaikka);
         }
       }
 

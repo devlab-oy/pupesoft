@@ -2235,8 +2235,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $myy_hyllytaso_temp = $tuotepaikka['hyllytaso'];
           $myy_hyllyvali_temp = $tuotepaikka['hyllyvali'];
 
-          $lahde_varasto_hyllyalue = $siirto_varasto['lahde_alkuhyllyalue'];
-          $lahde_varasto_hyllynro = $siirto_varasto['lahde_alkuhyllynro'];
           $paivita_hyllyt_varastosiirto = true;
           break;
         }

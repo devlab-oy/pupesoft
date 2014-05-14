@@ -3,9 +3,9 @@
 if(!function_exists("perusalennustarkista")) {
   function perusalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
-    
+
   }
-  
+
   if (mysql_field_name($result, $i) == "ryhma") {
     if (trim($t[$i]) == '') {
       $virhe[$i] = t("Tieto puuttuu");

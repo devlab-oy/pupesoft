@@ -1,34 +1,34 @@
 <?php
+global $urldata;
+
+function order_link($url, $parameters, $order) {
+  if (parameters != "") $temp = "&";
+  return "$url?$temp$parameters&order=$order";
+}
+
+function customer_link($url, $parameter, $value) {
+  return "$url?tila=valittu&$parameter=$value";
+}
+
+function urlput($url) {
   global $urldata;
 
-  function order_link($url, $parameters, $order) {
-    if (parameters != "") $temp = "&";
-    return "$url?$temp$parameters&order=$order";
-  }
+  return "$url&urlpdata=".base64_encode(serialize($urldata));
+}
 
-  function customer_link($url, $parameter, $value) {
-    return "$url?tila=valittu&$parameter=$value";
-  }
+function furlput() {
+  global $urldata;
 
-  function urlput($url) {
-    global $urldata;
+  return "<input type=\"hidden\" name=\"urlpdata\" value=\"".base64_encode(serialize($urldata)).
+       "\">\n";
+}
 
-    return "$url&urlpdata=".base64_encode(serialize($urldata));
-  }
+function urlget() {
+  global $urldata;
 
-  function furlput() {
-    global $urldata;
+  $urldata = unserialize(base64_decode($_GET['urlpdata']));
+  if (!is_array($urldata))
+    $urldata = array();
+}
 
-    return "<input type=\"hidden\" name=\"urlpdata\" value=\"".base64_encode(serialize($urldata)).
-         "\">\n";
-  }
-
-  function urlget() {
-    global $urldata;
-
-    $urldata = unserialize(base64_decode($_GET['urlpdata']));
-    if (!is_array($urldata))
-      $urldata = array();
-  }
-
-  urlget();
+urlget();

@@ -3,9 +3,9 @@
 if(!function_exists("varastopaikattarkista")) {
   function varastopaikattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
-    
+
     static $alkuhyllyalue, $alkuhyllynro, $loppuhyllyalue, $loppuhyllynro;
-    
+
     if (mysql_field_name($result, $i) == "alkuhyllyalue") {
       $t[$i] = trim(strtoupper($t[$i]));
       $alkuhyllyalue = $t[$i];

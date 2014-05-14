@@ -269,7 +269,7 @@ if (!function_exists('uusi_sivu_valm')) {
     $pdf->draw_text(35, $logoloppuy-20, $laskurow["osoite"],   $thispage, $norm);
     $pdf->draw_text(35, $logoloppuy-30, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
     $pdf->draw_text(35, $logoloppuy-40, $laskurow["maa"],     $thispage, $norm);
-    
+
     $logoloppuy -= 55;
 
     // haetaan maksuehdon tiedot

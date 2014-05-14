@@ -1,5 +1,5 @@
 <?php
 
-  $otsikko = 'Pankkiyhteystiedot';
-  $kentat = 'tunnus, nimitys';
-  $jarjestys = 'nimitys';
+$otsikko = 'Pankkiyhteystiedot';
+$kentat = 'tunnus, nimitys';
+$jarjestys = 'nimitys';

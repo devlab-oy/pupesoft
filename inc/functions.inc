@@ -27642,7 +27642,7 @@ if (!function_exists('valitse_oletusvarasto')) {
     }
 
     // Jos ollaan valittu varasto käyttöliittymästä
-    if (!is_null($varasto) and (in_array($varasto, $varastot) or $varasto == 0)) {
+    if (!is_null($varasto) and (in_array($varasto, $varastot) or $varasto === 0)) {
       return $varasto;
     }
 

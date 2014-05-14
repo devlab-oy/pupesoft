@@ -1,37 +1,37 @@
 <?php
 
-  ob_start();
+ob_start();
 
-  require ("parametrit.inc");
+require ("parametrit.inc");
 
-  $query = "  UPDATE kuka SET
-        session = ''
-        WHERE session = '$session'";
-  $result = pupe_query($query);
-  $bool = setcookie("pupesoft_session", "", time()-43200, "/");
+$query = "  UPDATE kuka SET
+      session = ''
+      WHERE session = '$session'";
+$result = pupe_query($query);
+$bool = setcookie("pupesoft_session", "", time()-43200, "/");
 
-  ob_end_flush();
+ob_end_flush();
 
-  if ($toim == 'change') {
-    echo "<form name='change' target='_top' action='$palvelin2' method='post'>";
-    echo "<input type='hidden' name='user' value='$kukarow[kuka]'>";
-    echo "<input type='hidden' name='salamd5' value='$kukarow[salasana]'>";
-    echo "</form>";
+if ($toim == 'change') {
+  echo "<form name='change' target='_top' action='$palvelin2' method='post'>";
+  echo "<input type='hidden' name='user' value='$kukarow[kuka]'>";
+  echo "<input type='hidden' name='salamd5' value='$kukarow[salasana]'>";
+  echo "</form>";
 
+  echo "<script>
+      change.submit();
+    </script>";
+}
+else {
+
+  if ($location != "") {
     echo "<script>
-        change.submit();
-      </script>";
+        setTimeout(\"parent.location.href='$location'\",0);
+        </script>";
   }
   else {
-
-    if ($location != "") {
-      echo "<script>
-          setTimeout(\"parent.location.href='$location'\",0);
-          </script>";
-    }
-    else {
-      echo "<script>
-          setTimeout(\"parent.location.href='$palvelin2'\",0);
-          </script>";
-    }
+    echo "<script>
+        setTimeout(\"parent.location.href='$palvelin2'\",0);
+        </script>";
   }
+}

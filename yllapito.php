@@ -1365,7 +1365,7 @@
           $lisa .= " and {$array[$i]} = '{$haku[$i]}'";
         }
       }
-      elseif ($toim == 'puun_alkio' and $i == 5) {
+    elseif ($toim == 'puun_alkio' and $i == 6) {
         $lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi {$hakuehto}) {$hakuehto} ";
       }
       elseif ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {
@@ -1410,7 +1410,6 @@
 
   // Nyt selataan
   if ($tunnus == 0 and $uusi == 0 and $errori == '') {
-
     if (($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto" or $toim == "puun_alkio") and $oikeurow['paivitys'] == 1) {
       print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
         <!--
@@ -1473,13 +1472,24 @@
     // Ei näytetä seuraavia avainsanoja avainsana-ylläpitolistauksessa
     $avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
-    $query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
-        $query .= "$ryhma ORDER BY $jarjestys $limiitti";
+  $query = "SELECT {$kentat}
+            FROM $toim
+            WHERE yhtio = '$kukarow[yhtio]'
+            $lisa
+            $rajauslisa
+            $prospektlisa
+            $avainsana_query_lisa
+            $tuote_status_rajaus_lisa
+            $ryhma
+            ORDER BY $jarjestys
+            $limiitti";
     $result = pupe_query($query);
 
     if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
       echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa";
+
       if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
+
       echo "' method = 'post'>
           <input type = 'hidden' name = 'uusi' value = '1'>
           <input type = 'hidden' name = 'toim' value = '$aputoim'>

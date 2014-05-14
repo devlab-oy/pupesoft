@@ -24,7 +24,7 @@ if (file_exists($filename)) {
     $xresult = mysql_query($query) or pupe_error($query);
   }
   fclose ($fp);
-} 
+}
 
 else {
     echo "$filename ".t("ei löydy")."<br>";

@@ -624,6 +624,10 @@
           $lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
         }
       }
+      elseif (strpos($_SERVER['SCRIPT_NAME'], "tulosseuranta") !== FALSE) {
+          $lisa_haku_kustp = " and tuote.kustp in ($kustpt) ";
+          $lisa .= " and tiliointi.kustp in ($kustpt) ";
+      }
       else {
         $lisa_haku_kustp = " and tiliointi.kustp in ($kustpt) ";
         $lisa .= " and tiliointi.kustp in ($kustpt) ";

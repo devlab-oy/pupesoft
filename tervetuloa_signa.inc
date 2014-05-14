@@ -17,7 +17,7 @@ function echo_myyntiseuranta_table() {
     );
     $myynti_ja_kate_nykyinen_tilikausi = hae_myyjan_myynti_ja_kate($tilikausi, $kukarow['tunnus']);
     $myynti_ja_kate_nykyinen_kvartaali = hae_myyjan_myynti_ja_kate($nykyinen_kvartaali, $kukarow['tunnus']);
-    
+
   }
 
   echo "<table>";
@@ -149,7 +149,7 @@ function hae_avoimet_tilaukset($kuka_tunnus) {
           JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio
             and tilausrivi.otunnus = lasku.tunnus
             and tilausrivi.tyyppi != 'D')
-          WHERE lasku.yhtio = '$kukarow[yhtio]' 
+          WHERE lasku.yhtio = '$kukarow[yhtio]'
           and lasku.tila in ('L', 'N')
           and lasku.alatila != 'X'";
   $sumresult = pupe_query($sumquery);

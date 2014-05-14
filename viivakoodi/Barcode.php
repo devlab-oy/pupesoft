@@ -106,7 +106,7 @@ class Image_Barcode extends PEAR
                     imagedestroy($img);
                     break;
             }
-        } 
+        }
     else {
             return $img;
         }

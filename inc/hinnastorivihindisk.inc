@@ -2,7 +2,7 @@
 
 function hinnastorivi($tuote) {
     global $kukarow;
-    
+
     //haetaan aleryhm‰n tunnus
   $query = "  SELECT b.tunnus, b.ryhma
         FROM tuote a
@@ -32,10 +32,10 @@ function hinnastorivi($tuote) {
   $korvaavat  = array();
 
   if ($tuote["id"] > 0) {
-    $query = "  SELECT * 
-          FROM korvaavat use index (yhtio_id) 
-          WHERE id='{$tuote['id']}' 
-          AND yhtio='{$kukarow['yhtio']}' 
+    $query = "  SELECT *
+          FROM korvaavat use index (yhtio_id)
+          WHERE id='{$tuote['id']}'
+          AND yhtio='{$kukarow['yhtio']}'
           ORDER BY jarjestys, tuoteno";
     $korvaresult = mysql_query($query) or pupe_error($query);
 
@@ -64,7 +64,7 @@ function hinnastorivi($tuote) {
       $seuraava  = $korvaavat[$koti+1];
     }
   }
-  
+
     // tehd‰‰n tietuetta
   $out  = sprintf('%-20.20s'  ,$tuote["tuoteno"]);
   $out .= sprintf('%-60.60s'  ,t_tuotteen_avainsanat($tuote, 'nimitys'));
@@ -76,6 +76,6 @@ function hinnastorivi($tuote) {
   $out .= sprintf('%-20.20s'  ,$edellinen);
   $out .= sprintf('%-3.3s'  ,'');
   $out .= "\r\n";
-  
+
     return $out;
 }

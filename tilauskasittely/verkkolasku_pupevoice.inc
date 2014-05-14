@@ -167,6 +167,27 @@ if (!function_exists('pupevoice_otsik')) {
       xml_add("InvoiceRecipientCountryCode",    $lasosrow['laskutus_maa'],              $tootxml);
     }
 
+    // Nämä solut lisätään vain jos yhtiön parametreissä on valittu lisäkentät
+    if ($yhtiorow['pupevoice_servinet'] != '') {
+
+      //haetaan toimitustavan tiedot
+      $query = " SELECT *
+                 FROM toimitustapa
+                 where yhtio ='$lasrow[yhtio]'
+                 and selite = '$lasrow[toimitustapa]'";
+      $terminaali_result = pupe_query($query);
+      $terminaali_row = mysql_fetch_assoc($terminaali_result);
+
+      if (!empty($terminaali_row['toim_ovttunnus'])) {
+        xml_add("CrossdockPartyName",         trim($terminaali_row['toim_nimi']." ".$terminaali_row['toim_nimitark']),       $tootxml);
+        xml_add("CrossdockPartyStreetName",   $terminaali_row['toim_osoite'],     $tootxml);
+        xml_add("CrossdockPartyPostCode",     $terminaali_row['toim_postino'],    $tootxml);
+        xml_add("CrossdockPartyTownName",     $terminaali_row['toim_postitp'],    $tootxml);
+        xml_add("CrossdockPartyCountryCode",  $terminaali_row['toim_maa'],        $tootxml);
+        xml_add("CrossdockPartyOVT",          $terminaali_row['toim_ovttunnus'],  $tootxml);
+      }
+    }
+
     xml_add("DueDate",                vlas_dateconv($lasrow['erpcm']),          $tootxml);
     xml_add("InvoiceTotalVatExcludedAmount",    $lasrow['arvo'],                  $tootxml);
     xml_add("InvoiceTotalVatAmount",        round($lasrow['summa']-$lasrow['arvo'], 2),      $tootxml);

@@ -3896,6 +3896,18 @@ if (mysql_field_name($result, $i) == 'suoratoimitusvarasto') {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == 'pupevoice_servinet') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == '1' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Ei lis‰t‰ servinet lis‰kentti‰ Pupevoice-laskuun")."</option>";
+  $ulos .= "<option value = 'k' {$sel}>".t("Servinet lis‰kent‰t lis‰t‰‰n Pupevoice-laskuun")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == 'lapsituotteen_poiston_esto') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

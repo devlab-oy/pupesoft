@@ -10,7 +10,7 @@ if (mysql_field_name($result, $i) == "yhtio") {
 
 if (mysql_field_name($result, $i) == "toimi_tunnus") {
   $ulos = "<input type='hidden' name='$nimi' value='{$lukitse_avaimeen}'>";
-  
+
   $tyyppi = 4;
   $jatko = 0;
 }

@@ -72,7 +72,7 @@ class import
         unset($this->ob);
         return true;
     }
-    
+
     function get_pages($pages = array())
     {
         foreach ($this->pages as $pageid) {
@@ -80,7 +80,7 @@ class import
         }
         return $pages;
     }
-    
+
     function capture_xref()
     {
         $data = &$this->d;
@@ -95,7 +95,7 @@ class import
         echo "found xref at $xref<br>\n";
         return $this->extract_xref($xref);
     }
-    
+
     function extract_xref($start)
     {
         $data = &$this->d;
@@ -117,7 +117,7 @@ class import
         }
         return true;
     }
-    
+
     function find_root()
     {
         // Find trailer
@@ -167,7 +167,7 @@ class import
         echo "Found /Root ... extracting location<br>\n";flush();
         return $d->next_word();
     }
-    
+
     function recursive_create($id)
     {
         echo "Converting Object # $id<br>\n";
@@ -177,19 +177,19 @@ class import
         case '/Info' :
             return false;
             break;
-            
+
         case '/XObject' :
             return $this->make_xobject($id);
             break;
-            
+
         case '/Catalog' :
             return $this->make_catalog($id);
             break;
-            
+
         case 'rawstream' :
             return $this->make_mstream($id);
             break;
-            
+
         }
     }
 
@@ -198,7 +198,7 @@ class import
         echo "Making catalog at $id<br>\n";
         $this->make_pages((int)$this->ob[$id]['/Pages']);
     }
-    
+
     function make_pages($id)
     {
         echo "Making pages at $id<br>\n";
@@ -312,7 +312,7 @@ class import
             }
         }
     }
-    
+
     /* Pass this a dictionary array
      * Some notes:
      * We ignore ProcSet because the PDF standard states it is obsolete
@@ -340,7 +340,7 @@ class import
             }
         }
     }
-    
+
     function extract_colorspaces($list)
     {
         echo "Extracting ColorSpace<br>\n";
@@ -353,7 +353,7 @@ class import
             }
         }
     }
-    
+
     function extract_colorspace($name, $ob)
     {
         /* Unlike other resources, we'll have total control over colorspaces
@@ -393,7 +393,7 @@ class import
         echo "Object $r is now colorspace $name<br>\n";
         $this->pdf->builddata['colorspaces'][substr($name, 1)] = $r;
     }
-    
+
     function extract_extgstates($list)
     {
         echo "Extracting ExtGState<br>\n";
@@ -406,7 +406,7 @@ class import
             }
         }
     }
-    
+
     function extract_extgstate($name, $ob)
     {
         /* Not currently implemented
@@ -418,7 +418,7 @@ class import
          * spent figuring out how to import embedded fonts ...
          */
     }
-    
+
     function extract_fonts($list)
     {
         echo "Extracting Fonts<br>\n";
@@ -431,7 +431,7 @@ class import
             }
         }
     }
-    
+
     function extract_font($oldname, $ob)
     {
         /* $r is the library id once the font is created.  This ID # is
@@ -451,7 +451,7 @@ class import
         $this->fonts[$oldname] = $name;
         return $name;
     }
-    
+
     function extract_xobjects($list)
     {
         echo "Extracting XObjects (hopefully images)<br>\n";
@@ -464,7 +464,7 @@ class import
             }
         }
     }
-    
+
     function followIR($ref)
     {
         /* Make sure the passed parameter is an array or dictionary ...
@@ -482,19 +482,19 @@ class import
         print_r($ref);
         return false;
     }
-    
+
     function make_xobject($name, $id)
     {
         switch ($id['/Subtype']) {
         case '/Image':
             return $this->make_image($name, $id);
             break;
-            
+
         default:
             return false;
         }
     }
-    
+
     function make_image($oldname, $ob)
     {
         $additional = array();
@@ -538,7 +538,7 @@ class import
         $this->images[$oldname] = $name;
         return $name;
     }
-    
+
     function extract($id)
     {
         if (!isset($this->ob[$id])) {
@@ -553,7 +553,7 @@ class import
         }
         return $this->ob[$id];
     }
-    
+
     function extract_obj($id)
     {
         $d = &$this->d;
@@ -600,7 +600,7 @@ class import
         print_r($temp);
         echo "</pre>\n";
     }
-    
+
     function extract_dictionary()
     {
         $d = &$this->d;
@@ -677,7 +677,7 @@ class import
         }
         return $r;
     }
-    
+
     function extract_stream($meta)
     {
         $d = &$this->d;
@@ -739,7 +739,7 @@ class StreamHandler
     var $l;     // Current location
     var $decompressed;
     var $length;    // Length of the stream
-    
+
     function StreamHandler($stream, $decompress)
     {
         $this->l = 0;
@@ -762,7 +762,7 @@ class StreamHandler
         $this->d .= "\n";
         $this->length = strlen($this->d);
     }
-    
+
     function get_array()
     {
         $s = new StreamHandler($this->read_array(), false);
@@ -784,7 +784,7 @@ class StreamHandler
         }
         return $r;
     }
-    
+
     function read_array()
     {
         $this->back_to_array();
@@ -811,24 +811,24 @@ class StreamHandler
         $this->next();
         return $r;
     }
-    
+
     function back_to_array()
     {
         if ($this->cc() != '[') {
             $this->l--;
         }
     }
-    
+
     function end()
     {
         $this->l = $this->length - 1;
     }
-    
+
     function start()
     {
         $this->l = 0;
     }
-    
+
     function next_word()
     {
         $this->skip_whitespace();
@@ -851,7 +851,7 @@ class StreamHandler
                  $this->l < strlen($this->d));
         return $r;
     }
-    
+
     function previous_word()
     {
         $this->rewind();
@@ -860,7 +860,7 @@ class StreamHandler
         echo "Looking backward ... current word: '$r'<br>\n";flush();
         return $r;
     }
-    
+
     // Backs up 1 word
     function rewind()
     {
@@ -869,7 +869,7 @@ class StreamHandler
             $this->l--;
         } while (!$this->is_whitespace() && !$this->boundry());
     }
-    
+
     // Skips past whitespace (strictly)
     function skip_whitespace($forward = true)
     {
@@ -883,7 +883,7 @@ class StreamHandler
         }
         return $this->l;
     }
-    
+
     // Skips past whitespace and boundtry characters
     function skip_nonwords($forward = true)
     {
@@ -897,7 +897,7 @@ class StreamHandler
         }
         return $this->l;
     }
-    
+
     function boundry($c = false)
     {
         if ($c === false) $c = $this->cc();
@@ -907,7 +907,7 @@ class StreamHandler
             return false;
         }
     }
-    
+
     function is_whitespace($c = '')
     {
         if ($c == '') $c = $this->cc();
@@ -920,14 +920,14 @@ class StreamHandler
              return false;
         }
     }
-    
+
     // Returns current byte (character)
     function cc($l = false)
     {
         if ($l === false) $l = $this->l;
         return $this->d{$l};
     }
-    
+
     function next()
     {
         $this->l++;
@@ -936,7 +936,7 @@ class StreamHandler
             $this->end();
         }
     }
-    
+
     function strpos($haystack, $needle)
     {
         if (strpos($haystack, $needle) === false) {

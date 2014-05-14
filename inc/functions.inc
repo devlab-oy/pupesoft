@@ -27734,7 +27734,7 @@ if (!function_exists('palauta_varasto')) {
     global $kukarow, $yhtiorow;
 
     $asiakas_tunnus = isset($args['asiakas_tunnus']) ? (int) $args['asiakas_tunnus'] : 0;
-    $toimipaikka = isset($args['toimipaikka']) ? (int) $args['toimipaikka'] : 0;
+    $toimipaikka = isset($args['toimipaikka_tunnus']) ? (int) $args['toimipaikka_tunnus'] : 0;
     $toim = isset($args['toim']) ? $args['toim'] : '';
     $tilaustyyppi = isset($args['tilaustyyppi']) ? $args['tilaustyyppi'] : '';
     $varasto = isset($args['varasto']) ? $args['varasto'] : '';

@@ -2,7 +2,7 @@
 
 if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
   require ("inc/parametrit.inc");
-  
+
   if (!empty($_POST['ajax_toiminto']) and $_POST['ajax_toiminto'] == 'hae_inventointiselite') {
 
     $_selite = mysql_real_escape_string(utf8_decode($_POST['selite']));
@@ -55,7 +55,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
         $(function() {
           $('#inven_laji').on('change', function() {
             var select_value = $(this).val();
-            
+
             $.ajax({
               async: false,
               type: 'POST',
@@ -1672,9 +1672,9 @@ if ($tee == 'INVENTOI') {
   }
   echo "</table><br><br>";
   if ($ean_koodi != '') {
-    echo "<input type='hidden' name='enarifocus' value='1'>";  
+    echo "<input type='hidden' name='enarifocus' value='1'>";
   }
-  
+
   if (mysql_num_rows($saldoresult) == $rivimaara) {
     echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
     //echo "<input type='submit' name='prev' value='".t("Inventoi/Edellinen sivu")."'> ";

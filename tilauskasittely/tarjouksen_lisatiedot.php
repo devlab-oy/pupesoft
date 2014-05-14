@@ -46,14 +46,14 @@ if ($tee == "TULOSTA") {
   if ($kappaleet > 0 and $komento["Rekisteröinti_ilmoitus"] != '' and $komento["Rekisteröinti_ilmoitus"] != 'email') {
     $komento["Rekisteröinti_ilmoitus"] .= " -# $kappaleet ";
   }
-  
+
   if (count($komento) == 0 and $tee == 'TULOSTA') {
     require("../inc/valitse_tulostin.inc");
   }
 }
 
 if ($tee == "TULOSTA") {
-  if ($komento["Tarjous"] != "") {      
+  if ($komento["Tarjous"] != "") {
     require_once ("tulosta_tarjous.inc");
     tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee);
   }
@@ -86,7 +86,7 @@ if ($tee == "TULOSTA") {
   $tee     = "";
 }
 
-  
+
 if ($tee == 'NAYTAHTML' or $tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
   require ("raportit/naytatilaus.inc");
@@ -148,7 +148,7 @@ if ($tee == "ETSILASKU") {
 
   $where1 = "";
   $where2 = "";
-    
+
   //myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
   $where1 = " lasku.tila in ('L','N') ";
 
@@ -167,9 +167,9 @@ if ($tee == "ETSILASKU") {
          and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
   if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-  
+
   $use = " use index (yhtio_tila_luontiaika) ";
-  
+
   if ($laskunro > 0) {
     $where2 = " and lasku.laskunro = '$laskunro' ";
     if (!isset($jarj)) $jarj = " lasku.tunnus desc";
@@ -200,11 +200,11 @@ if ($tee == "ETSILASKU") {
   $query_ale_lisa = generoi_alekentta('M');
 
   // Etsitään muutettavaa tilausta
-  $query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro, 
-        concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus, 
-        if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm, 
-        if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija, 
-        if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa, 
+  $query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro,
+        concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus,
+        if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm,
+        if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija,
+        if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa,
         lasku.tila, lasku.alatila
         FROM lasku $use
         LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
@@ -236,8 +236,8 @@ if ($tee == "ETSILASKU") {
       echo "<tr>";
 
       for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-        
-        
+
+
         echo "<$ero>$row[$i]</$ero>";
       }
 
@@ -293,7 +293,7 @@ if ($tee == '') {
   echo "<br><table>";
   echo "<form method = 'post' name='hakuformi'>";
 
-  
+
   echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
   echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
   echo "<tr><th>".t("Laskunumero")."</th><td><input type='text' size='10' name='laskunro'></td></tr>";
@@ -301,7 +301,7 @@ if ($tee == '') {
 
   echo "<br><input type='submit' value='".t("Jatka")."'>";
   echo "</form>";
-  
+
   $formi  = 'hakuformi';
   $kentta = 'ytunnus';
 }

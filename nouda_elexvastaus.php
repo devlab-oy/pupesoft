@@ -15,7 +15,7 @@ $responseFunction = array(  "TDE" => "Hylkäys",
               "TPV" => "Poistumisvahvistus ",
               "TTI" => "Tullin ilmoitus",
               "TVA" => "Vastaanotto");
-              
+
 $xmlstring = "        <FIExportResponse>
                 <Message>
                     <sender>003702454428-TESTI</sender>
@@ -34,14 +34,14 @@ $xmlstring = "        <FIExportResponse>
                                 <identification>FI002000</identification>
                             </Location>
                             <Party>
-                <name1>FI002000 Sähköinen tullauskeskus</name1> 
-                <name2>Tulli</name2> 
+                <name1>FI002000 Sähköinen tullauskeskus</name1>
+                <name2>Tulli</name2>
             <Contact>
-            <name>ELEX</name> 
+            <name>ELEX</name>
                 </Contact>
               <Communication>
-                  <telephone>020 090 00</telephone> 
-                 <telefax>020 391 115</telefax> 
+                  <telephone>020 090 00</telephone>
+                 <telefax>020 391 115</telefax>
               </Communication>
               </Party>
                         </CustomsOffice>
@@ -85,7 +85,7 @@ echo $xml->Response->ContactCustomsOffice->CustomsOffice->Location->qualifier."<
 echo $xml->Response->ContactCustomsOffice->CustomsOffice->Location->identification."<br>";
 echo $xml->Response->ContactCustomsOffice->CustomsOffice->Party->identity."<br>";
 echo $xml->Response->ContactCustomsOffice->CustomsOffice->Party->identityExtension."<br>";
-echo $xml->Response->ContactCustomsOffice->CustomsOffice->Party->codeListResponsibleAgency."<br>";  
+echo $xml->Response->ContactCustomsOffice->CustomsOffice->Party->codeListResponsibleAgency."<br>";
 echo $xml->Response->ContactCustomsOffice->CustomsOffice->Party->name1."<br>";
 echo $xml->Response->ContactCustomsOffice->CustomsOffice->Party->name2."<br>";
 echo $xml->Response->ContactCustomsOffice->CustomsOffice->Party->Adress->line."<br>";

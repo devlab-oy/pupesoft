@@ -75,14 +75,14 @@ if ($tee == "TULOSTA") {
     $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email ";
     $joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
   }
-  
+
   if ($asiakas_segmentin_yhteystiedot == 'on') {
     $mul_asiakas = array();
     for ($i = 1; $i <= $dynaaminenasiakasmaxsyvyys; $i++) {
       $muuttuja = "mul_asiakas{$i}";
       $mul_asiakas = array_merge($mul_asiakas, ${$muuttuja});
     }
-    
+
     $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email";
     $joinilisa = "  JOIN yhteyshenkilo yht
             ON ( yht.yhtio = asiakas.yhtio
@@ -384,7 +384,7 @@ if ($tee == '') {
       $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
     }
       }
-  
+
   if (strlen($ojarj) > 0) {
         $jarjestys = $ojarj;
       }

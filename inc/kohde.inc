@@ -9,7 +9,7 @@ $otsikko_nappi   = 'Kohde';
   else {
       $kentat = "tunnus, nimi, osoite, paikkakunta";
   }
-  
+
   $hakukentat = "tunnus, nimi, asiakas, osoite, paikkakunta";
-  
+
 $jarjestys = 'asiakas, nimi';

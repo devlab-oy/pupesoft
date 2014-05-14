@@ -462,8 +462,8 @@ if ($ok == 1) {
 
     $tilioterivilaskuri = 1;
     $tilioterivimaara  = mysql_num_rows($tiliotedataresult);
-    
-    
+
+
     // Haetaan kannan isoin lasku.tunnus, nin voidaan tehdän sanity-checki EndToEndId:lle.
     $query = "  SELECT max(tunnus) maxEndToEndId
           FROM lasku";

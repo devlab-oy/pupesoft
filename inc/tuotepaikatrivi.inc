@@ -22,7 +22,7 @@ if (mysql_field_name($result, $i) == "tunnus" or
     mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
-  
+
 if (mysql_field_name($result, $i) == "tuoteno" and $uusi != 0) {
   $tyyppi = 1;
 }
@@ -34,8 +34,8 @@ if (mysql_field_name($result, $i) == "tyyppi") {
   $sel[$trow[$i]] = " selected";
 
   $ulos .= "<option value = ''>".t("Normaali")."</option>";
-  $ulos .= "<option value = 'L'{$sel['L']}>".t("Lava")."</option>";  
-  $ulos .= "<option value = 'S'{$sel['S']}>".t("Suuntalava")."</option>";  
+  $ulos .= "<option value = 'L'{$sel['L']}>".t("Lava")."</option>";
+  $ulos .= "<option value = 'S'{$sel['S']}>".t("Suuntalava")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

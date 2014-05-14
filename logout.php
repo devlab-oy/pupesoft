@@ -4,9 +4,9 @@ $no_head = "yes";
 
 require ("inc/parametrit.inc");
 
-$query = "  UPDATE kuka SET 
-      session = '', 
-      kesken = '' 
+$query = "  UPDATE kuka SET
+      session = '',
+      kesken = ''
       WHERE session = '$session'";
 $result = pupe_query($query);
 

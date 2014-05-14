@@ -8,7 +8,7 @@ if ($i == 0) { //yhtiötä ei näytetä
   $tyyppi = 0;
 }
 
-if (mysql_field_name($result, $i) == "abs_pvm" or 
+if (mysql_field_name($result, $i) == "abs_pvm" or
   mysql_field_name($result, $i) == "kassa_abspvm") {
   $tyyppi = 1.5;
 }
@@ -20,7 +20,7 @@ if ((mysql_field_name($result, $i) == "jv")
   or (mysql_field_name($result, $i) == "jaksotettu")) {
 
   $ulos  = "<td><select name='$nimi'>";
-  
+
   $chk1 = '';
   $chk2 = '';
 
@@ -33,7 +33,7 @@ if ((mysql_field_name($result, $i) == "jv")
 
   $ulos .= "<option value=''  $chk1>".t("Ei")."</option>";
   $ulos .= "<option value='o' $chk2>".t("Kyllä")."</option>";
-  
+
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -64,7 +64,7 @@ if (mysql_field_name($result, $i) == "kaytossa") {
 
     $ulos .= "<option value=''  $chk1>".t("Käytössä")."</option>";
     $ulos .= "<option value='E' $chk2>".t("Poistettu / Ei käytössä")."</option>";
-  
+
     $ulos .= "</select></td>";
   }
 
@@ -131,7 +131,7 @@ if (mysql_field_name($result, $i) == "osamaksuehto1" or mysql_field_name($result
         WHERE yhtio = '$kukarow[yhtio]'
         ORDER BY jarjestys, teksti";
   $vresult = mysql_query($query) or pupe_error($query);
-  
+
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = ''>".t("Tämä ei ole moniehto-maksuehto");
 

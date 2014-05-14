@@ -131,7 +131,7 @@ if ($tee != '') {
       $tilausriveja  = 0;
       $maara        = 0;
       $myynti       = 0;
-      
+
       echo "<tr><th colspan='7'>",tv1dateconv($row['toimitettuaika']),"</th></tr>";
       echo $otsikot;
     }
@@ -146,7 +146,7 @@ if ($tee != '') {
       $kerayslistoja_kaikki += $row['kpl_kerayslista'];
       $tilausriveja       += $row['tilausriveja'];
       $tilausriveja_kaikki  += $row['tilausriveja'];
-      $maara           += $row['kpl_tilriv'];        
+      $maara           += $row['kpl_tilriv'];
       $maara_kaikki       += $row['kpl_tilriv'];
       $myynti         += $row['summa'];
       $myynti_kaikki      += $row['summa'];
@@ -182,7 +182,7 @@ if ($tee != '') {
         <td class='spec'>{$maara}</td>
         <td class='spec' align='right'>{$myynti}</td></tr>";
     echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
-    
+
     echo "<tr>
         <td class='spec' colspan='2'>",t("Kaikki yhteensä"),"</td>
         <td class='spec'>{$kerayslistoja_kaikki}</td>

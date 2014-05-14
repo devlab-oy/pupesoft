@@ -85,7 +85,7 @@ if (!function_exists('print_pdf_tariffi')) {
       $kutsu = "Tariffilista";
 
       require("../inc/sahkoposti.inc");
-      
+
       echo t("Tariffilista tulostuu")."...<br>";
     }
     elseif ($tee == 'NAYTATILAUS') {
@@ -94,7 +94,7 @@ if (!function_exists('print_pdf_tariffi')) {
       }
     elseif ($komento["Tariffilista"] != '' and $komento["Tariffilista"] != 'edi') {
       $line = exec("$komento[Tariffilista] $pdffilenimi");
-      
+
       echo t("Tariffilista tulostuu")."...<br>";
     }
 

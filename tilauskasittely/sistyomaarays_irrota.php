@@ -5,30 +5,30 @@ require ("../inc/parametrit.inc");
 echo "<font class='head'>".t("Irrota lis‰varuste laitteesta").":<hr></font>";
 
 if ($tee == "VALMIS") {
-  
-  //Haetaan jatkojalostettavan tuotteen ostorivitunnus 
-  $query = "  UPDATE sarjanumeroseuranta 
-        SET siirtorivitunnus = 0 
+
+  //Haetaan jatkojalostettavan tuotteen ostorivitunnus
+  $query = "  UPDATE sarjanumeroseuranta
+        SET siirtorivitunnus = 0
         WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and siirtorivitunnus='$siirtorivitunnus'";
   $sarjares = mysql_query($query) or pupe_error($query);
-  
-      
-  $query = "  UPDATE tilausrivi 
-        SET perheid2 = 0 
+
+
+  $query = "  UPDATE tilausrivi
+        SET perheid2 = 0
         WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tunnus='$rivitunnus'";
   $sarjares = mysql_query($query) or pupe_error($query);
-  
-  
+
+
   // P‰ivitet‰‰n saldo_varattu-kentt‰‰
   $query = "  SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, tilkpl
         FROM tilausrivi
         WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tunnus='$rivitunnus'";
   $sarjares = mysql_query($query) or pupe_error($query);
   $sarjarow = mysql_fetch_array($sarjares);
-  
-  $query = "  UPDATE tuotepaikat 
-        SET saldo_varattu = saldo_varattu - $sarjarow[tilkpl] 
-        WHERE yhtio    = '$kukarow[yhtio]' 
+
+  $query = "  UPDATE tuotepaikat
+        SET saldo_varattu = saldo_varattu - $sarjarow[tilkpl]
+        WHERE yhtio    = '$kukarow[yhtio]'
         and tuoteno    = '$tuoteno'
         and hyllyalue   = '$sarjarow[hyllyalue]'
         and hyllynro    = '$sarjarow[hyllynro]'
@@ -38,13 +38,13 @@ if ($tee == "VALMIS") {
   $sarjares = mysql_query($query) or pupe_error($query);
 
   echo t("Lis‰varuste irrotettu laitteesta")."!<br><br>";
-  
+
   $tee = "";
 }
 
 
 if ($tee == "") {
-  
+
   // N‰ytet‰‰n muuten vaan sopivia tilauksia
   echo "<br><form method='post'>
       <input type='hidden' name='toim' value='$toim'>
@@ -59,19 +59,19 @@ if ($tee == "") {
 
     //Tutkitaan lis‰varusteita
     $query = "  SELECT tilausrivi_osto.perheid2, sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero
-          FROM sarjanumeroseuranta 
+          FROM sarjanumeroseuranta
           JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus=tilausrivi_osto.perheid2
-          WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' 
+          WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
           and sarjanumeroseuranta.sarjanumero  = '$etsi'";
     $sarjares = mysql_query($query) or pupe_error($query);
 
     echo "<br><br><table>";
-    
-    while($sarjarow = mysql_fetch_array($sarjares)) {        
+
+    while($sarjarow = mysql_fetch_array($sarjares)) {
       // Haetaan muut lis‰varusteet
       $query = "  SELECT tuoteno, perheid2, tilkpl, tyyppi, tunnus
             FROM tilausrivi use index (yhtio_perheid2)
-            WHERE yhtio  = '$kukarow[yhtio]' 
+            WHERE yhtio  = '$kukarow[yhtio]'
             and perheid2 = '$sarjarow[perheid2]'
             and tyyppi  != 'D'
             and tunnus  != '$sarjarow[perheid2]'
@@ -80,13 +80,13 @@ if ($tee == "") {
 
       if (mysql_num_rows($sarjares1) > 0) {
         echo "<tr><th>$sarjarow[tuoteno]</th><th>$sarjarow[sarjanumero]</th></tr>";
-          
+
         while ($sarjarow1 = mysql_fetch_array($sarjares1)) {
           echo "<tr><td>$sarjarow1[tuoteno]</td><td>$sarjarow1[tilkpl]</td>";
-          
+
           if ($sarjarow1["tyyppi"] == "G") {
-            echo "<td class='back'>  
-                <form method='post'>  
+            echo "<td class='back'>
+                <form method='post'>
                 <input type='hidden' name='tee' value='VALMIS'>
                 <input type='hidden' name='etsi' value='$etsi'>
                 <input type='hidden' name='tuoteno' value='$sarjarow1[tuoteno]'>
@@ -99,10 +99,10 @@ if ($tee == "") {
           else {
             echo "<td class='back'>".t("Tehdaslis‰varustetta ei voida irrottaa")."</td>";
           }
-          
+
           echo "</tr>";
         }
-      }  
+      }
     }
     echo "</table>";
   }
@@ -124,9 +124,9 @@ $query  = "  SELECT sarjanumeroseuranta.*,
       (tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)  myyntihinta,
       varastopaikat.nimitys                varastonimi,
       sarjanumeroseuranta.lisatieto            lisatieto,
-      sarjanumeroseuranta.hyllyalue, 
-      sarjanumeroseuranta.hyllynro, 
-      sarjanumeroseuranta.hyllyvali, 
+      sarjanumeroseuranta.hyllyalue,
+      sarjanumeroseuranta.hyllynro,
+      sarjanumeroseuranta.hyllyvali,
       sarjanumeroseuranta.hyllytaso
       FROM sarjanumeroseuranta
       JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
@@ -146,11 +146,11 @@ $query  = "  SELECT sarjanumeroseuranta.*,
 $sarjares = mysql_query($query) or pupe_error($query);
 
 while ($sarjarow = mysql_fetch_array($sarjares)) {
-  
+
   // Haetaan muut lis‰varusteet
   $query = "  SELECT tuoteno, perheid2, tilkpl, tyyppi, tunnus
         FROM tilausrivi use index (yhtio_perheid2)
-        WHERE yhtio  = '$kukarow[yhtio]' 
+        WHERE yhtio  = '$kukarow[yhtio]'
         and perheid2 = '$sarjarow[osto_perheid2]'
         and tyyppi  != 'D'
         and tunnus  != '$sarjarow[osto_perheid2]'
@@ -160,20 +160,20 @@ while ($sarjarow = mysql_fetch_array($sarjares)) {
   if (mysql_num_rows($sarjares1) > 0) {
     echo "<br><br><table>";
     echo "<tr><th>$sarjarow[tuoteno]</th><th>$sarjarow[sarjanumero]</th><th>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</th></tr>";
-      
+
     while ($sarjarow1 = mysql_fetch_array($sarjares1)) {
       echo "<tr><td>$sarjarow1[tuoteno]</td><td>$sarjarow1[tilkpl]</td>";
-      
-      $query = "  UPDATE tuotepaikat 
-            set saldo_varattu   = saldo_varattu+1        
-            WHERE tuoteno     = '$sarjarow1[tuoteno]' 
-            and yhtio       = '$kukarow[yhtio]' 
+
+      $query = "  UPDATE tuotepaikat
+            set saldo_varattu   = saldo_varattu+1
+            WHERE tuoteno     = '$sarjarow1[tuoteno]'
+            and yhtio       = '$kukarow[yhtio]'
             and hyllyalue     = '$sarjarow[hyllyalue]'
             and hyllynro      = '$sarjarow[hyllynro]'
             and hyllyvali     = '$sarjarow[hyllyvali]'
             and hyllytaso     = '$sarjarow[hyllytaso]'";
       $rresult = mysql_query($query) or pupe_error($query);
-      
+
       echo "</tr>";
     }
     echo "</table>";

@@ -17,9 +17,9 @@ $viite .= $maara;
 for ($i=1; $i<=strlen($viite); $i++) {
   // oikealta vasemmalle
   $merkki = substr($viite, -1 * $i, 1);
-  
+
   $kala = $merkki*$kerroin;
-  
+
   //jos tulos suurempi kuin 9, esim 16 lasketaan 1+6 eli 7
   if (strlen($kala) > 1) {
     $kala2 = substr($kala,-1);
@@ -30,7 +30,7 @@ for ($i=1; $i<=strlen($viite); $i++) {
   else {
     $tulo += $kala;
   }
-  
+
   switch ($kerroin) {
     case 1:
       $kerroin = 2;

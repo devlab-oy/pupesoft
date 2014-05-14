@@ -55,7 +55,7 @@ if (isset($muutparametrit)) {
   $ed_iliitos     = unserialize(urldecode($ed_iliitos));
   $tiliointirivit   = unserialize(urldecode($tiliointirivit));
 }
-  
+
 if ($toimittajaid > 0) {
   for ($i = 1; $i <= count($iliitos); $i++) {
     if ($iliitos[$i] == 'T' and $iliitostunnus[$i] == $toimittajaid) {
@@ -379,7 +379,7 @@ if ($tee == 'I') {
 
   $kuittiok = 0; // Onko joku vienneistä kassa-tili, jotta kuitti voidaan tulostaa
   $isumma_valuutassa = array();
-  
+
   foreach ($ed_iliitostunnus as $liit_indx => $liit) {
     $iliitostunnus[$liit_indx] = $liit;
     $iliitos[$liit_indx] = $ed_iliitos[$liit_indx];

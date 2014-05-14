@@ -22,7 +22,7 @@ if (mysql_field_name($result, $i) == "liitostunnus") {
   }
   else {
     $toim_tuoteno_tunnus = $tunnus; // otetaan tää talteen
-    
+
     $liitostunnus = $trow["liitostunnus"] > 0 ? $trow["liitostunnus"] : (int) $t[$i];
 
     $query = "  SELECT *
@@ -34,9 +34,9 @@ if (mysql_field_name($result, $i) == "liitostunnus") {
 
     if (mysql_num_rows($sresult) == 1) {
       $srow = mysql_fetch_assoc($sresult);
-      
+
       $ssize = strlen($trow[$i])+2;
-      
+
       $ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$ssize' maxlength='$maxsize'><br><br>$srow[ytunnus] $srow[nimi] $srow[nimitark]</td>";
       $jatko = 0;
     }

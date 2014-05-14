@@ -160,11 +160,11 @@ if ($toiminto == 'MUOKKAA') {
           WHERE tunnus = '$sarjatunnus'";
     $sarres = pupe_query($query);
     $sarrow = mysql_fetch_assoc($sarres);
-    
+
     $era_kpl = (float) str_replace(",", ".", $era_kpl);
 
     if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
-      
+
       $query = "  UPDATE sarjanumeroseuranta
             SET lisatieto   = '$lisatieto',
             sarjanumero   = '$sarjanumero',

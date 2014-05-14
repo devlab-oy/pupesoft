@@ -1,12 +1,12 @@
 <?php
-  
-  
+
+
 $query = "  select *
       from kalenteri
       where tunnus='$tunnus'";
 $result = mysql_query($query) or pupe_error($query);
 $row = mysql_fetch_array($result);
-  
+
 echo "<br><table>";
 echo "<tr><th colspan='2'>Tilaisuuden tarkemmat tiedot:</th></tr>";
 

@@ -9,7 +9,7 @@ CREATE TABLE suuntalavat_saapuminen (
   luontiaika DATETIME,
   muutospvm DATETIME,
   muuttaja VARCHAR(10) NOT NULL DEFAULT '',
-  tunnus INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY  
+  tunnus INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY
 );
 
 # EKA PITÄÄ AJAA TÄMÄ SCRIPT

@@ -16,16 +16,16 @@ if (mysql_field_name($result, $i) == "toimitustapa") {
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
-  
+
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
     if ($trow[$i] == $srow['selite']) {
       $sel = "selected";
     }
-    
+
     $ulos .= "<option value='$srow[selite]' $sel>".t_tunnus_avainsanat($srow, "selite", "TOIMTAPAKV")."</option>";
   }
-  
+
   $ulos .= "</select></td>";
   $jatko = 0;
 }

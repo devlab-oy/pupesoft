@@ -419,7 +419,7 @@ else {
             AND tunnus = '{$laskurow['tunnus']}'";
       $hresult = mysql_query($query) or pupe_error($query);
     }
-      
+
 
     while ($laskurow = mysql_fetch_array($hresult)) {
       //Tulostetaan lista

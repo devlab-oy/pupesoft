@@ -20,7 +20,7 @@ if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
 
   $query = "  SELECT tuoteno, nimitys
         FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]' 
+        WHERE yhtio = '$kukarow[yhtio]'
         and status NOT IN ('P','X')
         and $lisa1
         ORDER BY tuoteno";
@@ -54,7 +54,7 @@ if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
 elseif (substr($tuoteno,-1) == '*') {
   $query = "  SELECT tuoteno, nimitys, ostohinta
         FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]' 
+        WHERE yhtio = '$kukarow[yhtio]'
         and status NOT IN ('P','X')
         and tuoteno like '" . substr($tuoteno,0,-1) . "%'
         ORDER BY tuoteno";
@@ -91,7 +91,7 @@ else  {
 
       $query = "  SELECT tuoteno
             FROM tuotteen_toimittajat
-            WHERE yhtio = '$kukarow[yhtio]' 
+            WHERE yhtio = '$kukarow[yhtio]'
             and toim_tuoteno='".substr($tuoteno,1)."'";
       $tresult = mysql_query($query) or pupe_error($query);
 
@@ -151,7 +151,7 @@ if ($tee == 'UV') {
         WHERE tuotepaikat.tuoteno = '$tuoteno'
         and tuotepaikat.yhtio = '$kukarow[yhtio]'";
   $qvresult = mysql_query($query) or pupe_error($query);
-  
+
   while ($zrow = mysql_fetch_array($qvresult)) { // Käydään kaikki varastopaikat läpi
 
     ///* Huomioidaan vain normaalivarastojen paikkoja, paitsi jos erikoisvarastokäsittely on triggeröity *///
@@ -166,14 +166,14 @@ if ($tee == 'UV') {
       if ($zrow['oletus'] != '') {
         $oletuspaikka = $i;
       }
-      
+
       if ($laskurow['varasto'] == $zrow["varasto"]) {
         $varasto = $i;
       }
       $i++;
     }
   }
-  
+
   //Ei löytynyt optimoitua paikkaa, otetaan silloin oletuspaikka
   if ($varasto == 0) {
     $varasto = $oletuspaikka;

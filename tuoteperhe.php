@@ -903,7 +903,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           $excelrivi++;
 
           echo "<td class='back'>";
-          
+
           if ($oikeurow['paivitys'] == '1') {
             echo "  <form method='post' action='tuoteperhe.php' autocomplete='off'>
                 <input type='hidden' name='toim' value='$toim'>
@@ -913,10 +913,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
                 <input type='submit' value='".t("Muuta")."'>
                 </form>";
           }
-          
+
           echo "</td>";
           echo "<td class='back'>";
-          
+
           if ($oikeurow['paivitys'] == '1') {
             echo "  <form method='post' action='tuoteperhe.php' autocomplete='off'>
                 <input type='hidden' name='toim' value='$toim'>
@@ -927,7 +927,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
                 <input type='submit' value='".t("Poista")."'>
                 </form>";
           }
-          
+
           echo "</td>";
           echo "</tr>";
         }
@@ -1034,7 +1034,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "</table><br>";
 
       echo "<br><br>";
-      
+
       if ($oikeurow['paivitys'] == '1') {
         echo "  <form method='post' action='tuoteperhe.php' autocomplete='off'>
             <input type='hidden' name='toim' value='$toim'>

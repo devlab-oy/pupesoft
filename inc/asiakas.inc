@@ -12,16 +12,16 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
   else {
     $apu_asiakasnumero = (int) $t[$pointer];
   }
-  
+
   //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
   $query = "  SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-        FROM yhtio 
+        FROM yhtio
         JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-        where konserni   = '$yhtiorow[konserni]' 
+        where konserni   = '$yhtiorow[konserni]'
         and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
-  $vresult2 = mysql_query($query) or pupe_error($query);      
+  $vresult2 = mysql_query($query) or pupe_error($query);
   $srowapu = mysql_fetch_array($vresult2);
-  
+
   if ($srowapu["yhtiot"] != "") {
     $tarkyhtio = $srowapu["yhtiot"];
   }
@@ -62,7 +62,7 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
             WHERE yhtio in ($tarkyhtio)
             AND asiakasnro+0 = $apu_asiakasnumero";
       $vresult = mysql_query($query) or pupe_error($query);
-    
+
       $counteri++;
 
       if ($counteri > 999) {

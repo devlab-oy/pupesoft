@@ -2742,7 +2742,7 @@ else {
     }
 
     echo "</select>";
-    
+
     echo "<input type='Submit' name='POISTA' value = '".t("Poista valittu raporttipohja")."'>";
 
     echo "</td></tr>";

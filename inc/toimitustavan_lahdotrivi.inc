@@ -50,7 +50,7 @@ if (mysql_field_name($result, $i) == "lahdon_viikonpvm") {
 if (mysql_field_name($result, $i) == "aktiivi") {
 
   $sel1 = $sel2 = '';
-  
+
   if ($trow[$i] == "E") {
     $sel2 = "SELECTED";
   }

@@ -1,5 +1,5 @@
 <?php
-if ($laskurow['alatila'] == 'K') { 
+if ($laskurow['alatila'] == 'K') {
   // maksetaan käteisalennuksella
   $laskusumma = $laskurow['summa'] - $laskurow['kasumma'];
 }
@@ -22,5 +22,5 @@ $ulos .= sprintf ('%02d', substr($pvmrow['olmapvm'],2,2)); //Tämä on eräpvm
   $ulos .= sprintf ('%02d', substr($pvmrow['olmapvm'],5,2)); //
   $ulos .= sprintf ('%02d', substr($pvmrow['olmapvm'],8,2)); //
 $ulos .= sprintf ('%-5s', ' ');
-$ulos .= sprintf ('%-20.20s', $laskurow['tunnus']);    
+$ulos .= sprintf ('%-20.20s', $laskurow['tunnus']);
 fputs($toot,$ulos . "\r\n");

@@ -1,7 +1,7 @@
 <?php
 
 $teksti .= "\n\n".sprintf('%67s', $id).sprintf('%8s', $sivu)."\n\n";
-$teksti .= 
+$teksti .=
 sprintf('%20s', 'Laskutusosoite:').sprintf('%-20s', '')  .sprintf('%21s', 'Toimitusosoite:').sprintf('%-15s', '')."\n".
 sprintf('%-8s', '').sprintf('%-31s', $row[0])  .sprintf('%-10s', '').sprintf('%-31s', $row[5])."\n".
 sprintf('%-8s', '').sprintf('%-31s', $row[1])  .sprintf('%-10s', '').sprintf('%-31s', $row[6])."\n".

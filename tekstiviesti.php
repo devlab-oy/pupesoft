@@ -84,7 +84,7 @@ if ($tee == "") {
       }
       echo "<option value='$vrow[selite]' ".$selectedi.">$vrow[selitetark]</option>";
     }
-    
+
     echo "</select>\n";
     echo "</td></tr>";
   }
@@ -134,8 +134,8 @@ function SendSms($sms_palvelintyyppi, $yhtio, $kuka, $vastaanottaja, $viesti) {
   if ($tee_lokimerkinta) {
     $credits = floor(strlen($viesti) / 159) + 1;
     // Lisätään viesti sms-tauluun
-    $query = "  INSERT INTO sms SET 
-          yhtio = '".$yhtio."', 
+    $query = "  INSERT INTO sms SET
+          yhtio = '".$yhtio."',
           viesteja = '".$credits."',
           vastaanottaja = '".addslashes($vastaanottaja)."',
           viesti = '".addslashes($viesti)."',
@@ -205,18 +205,18 @@ function SendClickatellSms($vastaanottaja, $viesti) {
 
     return true;
   }
-  
+
   $credits = floor(strlen($viesti) / 159) + 1;
   // Lisätään viesti sms-tauluun
-  $query = "  INSERT INTO sms SET 
-        yhtio = '".$yhtio."', 
+  $query = "  INSERT INTO sms SET
+        yhtio = '".$yhtio."',
         viesteja = '".$credits."',
         vastaanottaja = '".addslashes($vastaanottaja)."',
         viesti = '".addslashes($viesti)."',
         luontiaika = now(),
         laatija = '$kuka'";
   $result = mysql_query($query) or pupe_error($query);
-  
+
   return false;
 }
 
@@ -245,35 +245,35 @@ function SendKannelSms($receiver_number, $message) {
   }
 
   $message = str_replace("\r", "", $message);
-  $message = urlencode($message);            
+  $message = urlencode($message);
 
   $receiver_number = str_replace("+", "", $receiver_number);
-  $receiver_number = str_replace("\n", "", $receiver_number);        
+  $receiver_number = str_replace("\n", "", $receiver_number);
   $receiver_number = urlencode($receiver_number);
-    
+
   $url = $kannel_host_url."?username=".$kannel_username."&password=".$kannel_password."&to=".$receiver_number."&text=".$message;
-  $ch = curl_init($url);        
+  $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_HEADER, 0);
   curl_setopt($ch, CURLOPT_GET, 1);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   $output = curl_exec($ch);
   curl_close($ch);
-  if (strpos("a".$output, "0: Accepted for delivery") > 0) {      
+  if (strpos("a".$output, "0: Accepted for delivery") > 0) {
     return(true);
   }
   return(false);
-  
+
   $credits = floor(strlen($viesti) / 159) + 1;
   // Lisätään viesti sms-tauluun
-  $query = "  INSERT INTO sms SET 
-        yhtio = '".$yhtio."', 
+  $query = "  INSERT INTO sms SET
+        yhtio = '".$yhtio."',
         viesteja = '".$credits."',
         vastaanottaja = '".addslashes($vastaanottaja)."',
         viesti = '".addslashes($viesti)."',
         luontiaika = now(),
         laatija = '$kuka'";
   $result = mysql_query($query) or pupe_error($query);
-  
+
 }
 
 ?>
@@ -283,8 +283,8 @@ function SendKannelSms($receiver_number, $message) {
 /**
  * CLICKATELL SMS API
  *
- * This class is meant to send SMS messages (with unicode support) via 
- * the Clickatell gateway and provides support to authenticate to this service, 
+ * This class is meant to send SMS messages (with unicode support) via
+ * the Clickatell gateway and provides support to authenticate to this service,
  * spending an vouchers and also query for the current account balance. This class
  * use the fopen or CURL module to communicate with the gateway via HTTP/S.
  *

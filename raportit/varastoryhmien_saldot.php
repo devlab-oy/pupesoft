@@ -54,14 +54,14 @@ else {
       $myytavissa = 0;
 
       if ($row['isa'] != '') {
-        $saldot = tuoteperhe_myytavissa($row["tuoteno"], '', '', $varastot);      
+        $saldot = tuoteperhe_myytavissa($row["tuoteno"], '', '', $varastot);
 
         foreach ($saldot as $varasto => $myytavissa_apu) {
           $myytavissa += $myytavissa_apu;
         }
       }
       else {
-        list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $varastot);      
+        list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $varastot);
       }
 
       if ($myytavissa > 0) {

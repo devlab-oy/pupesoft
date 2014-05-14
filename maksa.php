@@ -205,7 +205,7 @@ if ($tee == 'H' or $tee == 'G') {
             and pankki4   = '$trow[pankki4]'
             and sisviesti1   = '$trow[sisviesti1]'";
     }
-    
+
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {

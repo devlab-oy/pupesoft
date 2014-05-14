@@ -36,8 +36,8 @@ if (!function_exists("cobolkikka")) {
     $numero = substr($numero,0,strlen($numero)-1) . $viimeinen;
     return ($numero);
   }
-}            
-  
+}
+
 if ($laskurow['alatila'] == 'K') {
   // maksetaan käteisalennuksella
   $laskusumma = $laskurow['summa'] - $laskurow['kasumma'];
@@ -47,7 +47,7 @@ else {
 }
 
 $ulklaskusumma=round($laskurow['kurssi']*$laskusumma,2);
-    
+
 $ulos  = "2";
 $ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 

@@ -483,7 +483,7 @@ elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_splittaus') {
   $otunnus      = $_POST['otunnus'];
   $uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
   $vanhan_rivin_kpl = $_POST['vanhan_rivin_kpl'];
-  
+
     $varastoonvaiei = (isset($_POST['varastoon'])) ? $_POST['varastoon'] : FALSE;
 
   $uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $varastoonvaiei, FALSE, FALSE, $vanhan_rivin_kpl);
@@ -503,9 +503,9 @@ elseif ($_POST['ajax_toiminto'] == 'lisaa_suuntalava') {
   $suuntalavan_tunnus = 0;
   $tee = "massakausi";
   $suuntalavat_ei_kayttoliittymaa = "KYLLA";
-      
+
   require ("../tilauskasittely/suuntalavat.inc");
-  
+
   $sscc_gen = uusi_sscc_nro();
 
   $params = array(
@@ -541,7 +541,7 @@ elseif ($_POST['ajax_toiminto'] == 'lisaa_suuntalava') {
         AND tilausrivi.tyyppi = 'O'";
 
   $tilausrivi_res = pupe_query($query);
-  
+
   $kirjoitin = (int) $_POST['kirjoitin'];
 
   if($kirjoitin != 0) {
@@ -553,13 +553,13 @@ elseif ($_POST['ajax_toiminto'] == 'lisaa_suuntalava') {
     // Tarvitaan otunnus, kirjoitin, tee=tulosta_sscc, kappalemaara, suuntalavan tunnus, sscc_kopio != '', $suuntalavat_ei_kayttoliittymaa
     require("../tilauskasittely/tulosta_sscc.inc");
   }
-  
+
   # Siirtovalmiiksi vasta tässä vaiheessa, että saadaan tulostettua oikealla sscc:llä tarra
   # Suuntalava siirtovalmiiksi - tarvitaan $suuntalavat_ei_kayttoliittymaa != '', $tee = 'siirtovalmis', $suuntalavan_tunnus
-  
-  $tee = 'siirtovalmis';     
+
+  $tee = 'siirtovalmis';
   require ("../tilauskasittely/suuntalavat.inc");
-  
+
   echo json_encode(array('suuntalavan_tunnus' => $suuntalavan_tunnus));
 }
 

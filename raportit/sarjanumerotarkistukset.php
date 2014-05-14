@@ -6,9 +6,9 @@ echo "<font class='head'>".t("Sarjanumeromyynnin tarkistusta").":</font><hr><br>
 
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-  
+
   require ("naytatilaus.inc");
-  
+
   echo "<br><br><br>";
 }
 
@@ -54,7 +54,7 @@ if ($tee == "") {
   if ($jarjestys_5 != "") $chk5 = "CHECKED";
   if ($jarjestys_6 != "") $chk6 = "CHECKED";
   if ($jarjestys_7 != "") $chk7 = "CHECKED";
-  
+
   if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -124,21 +124,21 @@ if ($tee == "") {
 }
 
 if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjestys_4 != '' or $jarjestys_5 != '' or $jarjestys_6 != '' or $jarjestys_7 != '') and $tee == "") {
-  
+
   function superlistaus ($tyyppi, $lisa1, $lisa2, $lisa3, $ostov) {
     global $PHP_SELF, $kukarow, $yhtiorow, $myyntitilaus_haku, $tuoteno_haku, $nimitys_haku, $ostotilaus_haku, $sarjanumero_haku, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $jarjestys_1, $jarjestys_2, $jarjestys_3, $jarjestys_4, $jarjestys_5, $jarjestys_6 , $jarjestys_7;
-    
+
     echo "<tr><th>Myyntitilaus<br>Ostotilaus</th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta<br>Ostohinta</th><th>Myyntikate<br>Ostokate</th><th>O/H</th><th>Sarjanumero</th></tr>";
 
     if ($tyyppi == "myynti") {
       $query = "  SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
-            round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta, 
-            round(tilausrivi.kate/tilausrivi.kpl,2) kate, 
+            round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta,
+            round(tilausrivi.kate/tilausrivi.kpl,2) kate,
             round(ostorivi.kate/abs(ostorivi.kpl),2) osto_kate,
-            ostorivi.tunnus ostotunnus, 
-            if(ostorivi.tyyppi IN ('O'), ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus, 
+            ostorivi.tunnus ostotunnus,
+            if(ostorivi.tyyppi IN ('O'), ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus,
             sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
-            tilausrivi.kpl, myyntilasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys, 
+            tilausrivi.kpl, myyntilasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys,
             if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
             tuote.kehahin,
             (select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
@@ -157,13 +157,13 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
     }
     else {
       $query = "  SELECT myyntirivi.otunnus, myyntirivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
-            round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta, 
-            round(myyntirivi.kate/myyntirivi.kpl,2) kate, 
-            round(tilausrivi.kate/abs(tilausrivi.kpl),2) osto_kate, 
-            tilausrivi.tunnus ostotunnus, 
-            if(tilausrivi.tyyppi IN ('O'), tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus, 
+            round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta,
+            round(myyntirivi.kate/myyntirivi.kpl,2) kate,
+            round(tilausrivi.kate/abs(tilausrivi.kpl),2) osto_kate,
+            tilausrivi.tunnus ostotunnus,
+            if(tilausrivi.tyyppi IN ('O'), tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus,
             sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
-            tilausrivi.kpl, ostolasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys, 
+            tilausrivi.kpl, ostolasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys,
             if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
             tuote.kehahin,
             (select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
@@ -177,13 +177,13 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
             $lisa1
             $lisa2
             $lisa3
-            order by tilausrivi.tunnus";      
+            order by tilausrivi.tunnus";
     }
 
     $vresult = mysql_query($query) or pupe_error($query);
-      
-    while ($vrow = mysql_fetch_array($vresult)) {  
-      
+
+    while ($vrow = mysql_fetch_array($vresult)) {
+
       // Sarjanumeron ostohinta
 
       if($tyyppi=="myynti") {
@@ -192,20 +192,20 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
       else {
         $ostohinta = sarjanumeron_ostohinta("ostorivitunnus", $vrow["ostotunnus"]);
       }
-            
+
       echo "<tr>
           <td valign='top'><a name='$vrow[ostotunnus]'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[otunnus]'>$vrow[otunnus]</a><br><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>
           <td valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($vrow["tuoteno"])."'>$vrow[tuoteno]</a></td>
           <td valign='top'>$vrow[nimitys]<br><font class='message'>$vrow[viesti]</font></td>
           <td valign='top' align='right'>$vrow[rivihinta]<br>".sprintf('%.2f', $ostohinta)."</td>";
-      
-                                                          
-      
+
+
+
       if ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$ostohinta,2) - $vrow["kate"]) > 0.01) {
         echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$ostohinta)."</font><br>";
       }
       /*
-      elseif ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$ostohinta,2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {      
+      elseif ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$ostohinta,2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
         if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
           echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font><br>";
         }
@@ -222,25 +222,25 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
       }
       else {
         echo "<td valign='top' align='right' nowrap><br>";
-      } 
-      
+      }
+
       if ($vrow["osto_kate"] != 0) {
         echo "<font style='color: red;'>$vrow[osto_kate]</font></td>";
       }
       else {
         echo "</td>";
       }
-      
+
       if ($ostov == "JOO") {
         $sel1 = $sel2 = "";
-      
+
         if ($vrow["osto_vai_hyvitys"] == "O") {
             $sel2 = "SELECTED";
         }
         else {
             $sel1 = "SELECTED";
         }
-      
+
         echo "<td><form action = '?tee=OSTOVAIHYVITYS&rivitunnus=$vrow[ostotunnus]&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&jarjestys_1=$jarjestys_1&jarjestys_2=$jarjestys_2&jarjestys_3=$jarjestys_3&jarjestys_4=$jarjestys_4&jarjestys_5=$jarjestys_5&jarjestys_6=$jarjestys_6&jarjestys_7=$jarjestys_7#$vrow[ostotunnus]' method='post'>
           <input type='hidden' name='myyntitilaus_haku'        value='$myyntitilaus_haku'>
           <input type='hidden' name='tuoteno_haku'             value='$tuoteno_haku'>
@@ -256,7 +256,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
       else {
         echo "<td></td>";
       }
-              
+
       if ($vrow["sarjatunnus"] != "" and $vrow["css"] == abs($vrow["kpl"])) {
         echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($vrow["tuoteno"])."&sarjanumero_haku=$vrow[sarjanumero]'>$vrow[sarjanumero]</a><br>$vrow[kaytetty]</td></tr>";
       }
@@ -273,8 +273,8 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
 
     echo "<tr><td class='back'><br><br></td></tr>";
   }
-  
-  
+
+
   $lisa2  = "";
 
   if ($ostotilaus_haku != "") {
@@ -284,7 +284,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
   if ($myyntitilaus_haku != "") {
     $lisa2 .= " and tilausrivi.otunnus='$myyntitilaus_haku' ";
   }
-  
+
   if ($tuoteno_haku != "") {
     $lisa2 .= " and tilausrivi.tuoteno like '%$tuoteno_haku%' ";
   }
@@ -295,15 +295,15 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
 
   if ($nimitys_haku != "") {
     $lisa2 .= " and tilausrivi.nimitys like '%$nimitys_haku%' ";
-  }  
-  
+  }
+
   if ($jarjestys_1 != "") {
     echo "<tr><th colspan='7'>Myyydyt sarjanumerot joita ei olla ollenkaan ostettu</th></tr>";
-                
+
     $lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl > 0";
     $lisa3 = "having ostotunnus is null";
-    
-    superlistaus ("myynti", $lisa1, $lisa2, $lisa3, "");  
+
+    superlistaus ("myynti", $lisa1, $lisa2, $lisa3, "");
   }
 
   if ($jarjestys_2 != "") {
@@ -311,54 +311,54 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
 
     $lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl > 0";
     $lisa3 = "having sarjanumero is not null and ostotunnus is not null and kpl=css";
-    
+
     superlistaus ("myynti", $lisa1, $lisa2, $lisa3, "");
   }
-  
+
   if ($jarjestys_3 != "") {
     echo "<tr><th colspan='7'>Myydyt sarjanumerot ilman sarjanumeroa</th></tr>";
-    
+
     $lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl > 0";
     $lisa3 = "having sarjanumero is null or kpl!=css";
-    
+
     superlistaus ("myynti", $lisa1, $lisa2, $lisa3, "");
   }
 
   if ($jarjestys_4 != "") {
     echo "<tr><th colspan='7'>Myyntipuolelta ostetut ja hyvitetyt sarjanumerot</th></tr>";
-    
+
     $lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0";
     $lisa3 = "having sarjanumero is not null";
-    
+
     superlistaus ("myynti", $lisa1, $lisa2, $lisa3, "JOO");
   }
 
   if ($jarjestys_5 != "") {
     echo "<tr><th colspan='7'>Myyntipuolelta ostetut ja hyvitetyt sarjanumerot ilman sarjanumeroa</th></tr>";
-    
+
     $lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0";
     $lisa3 = "having sarjanumero is null or abs(kpl)!=css";
-    
+
     superlistaus ("osto", $lisa1, $lisa2, $lisa3, "JOO");
   }
 
   if ($jarjestys_6 != "") {
     echo "<tr><th colspan='7'>Ostopuolelta ostetut sarjanumerot</th></tr>";
-    
+
     $lisa1 = "and tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0";
     $lisa3 = "";
-    
+
     superlistaus ("osto", $lisa1, $lisa2, $lisa3, "");
   }
 
   if ($jarjestys_7 != "") {
     echo "<tr><th colspan='7'>Valmistuksessa valmistetut sarjanumerot</th></tr>";
-    
+
     $lisa1 = "and tilausrivi.tyyppi IN ('D') and tilausrivi.kpl > 0 and ostolasku.tila='V'";
     $lisa3 = "";
-    
+
     superlistaus ("valmistus", $lisa1, $lisa2, $lisa3, "");
-  }    
+  }
 }
 
 echo "</table><br><br>";

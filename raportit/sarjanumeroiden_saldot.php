@@ -144,7 +144,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
               muutospvm  = now(),
               oletus    = '$oletus'";
         $paikres = pupe_query($query);
-        
+
         $tapahtumaquery = "  INSERT into tapahtuma set
                   yhtio     = '$kukarow[yhtio]',
                   tuoteno   = '$tuoteno',
@@ -256,7 +256,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
               muutospvm  = now(),
               oletus    = '$oletus'";
         $paikres = pupe_query($query);
-        
+
         $tapahtumaquery = "  INSERT into tapahtuma set
                   yhtio     = '$kukarow[yhtio]',
                   tuoteno   = '$tuoteno',
@@ -272,7 +272,7 @@ if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
                   laatija   = '$kukarow[kuka]',
                   laadittu   = now()";
         $result = pupe_query($tapahtumaquery);
-        
+
       }
       elseif (mysql_num_rows($alkuresult) == 1) {
         $query = "  UPDATE tuotepaikat SET

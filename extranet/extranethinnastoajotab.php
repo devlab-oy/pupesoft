@@ -10,7 +10,7 @@ echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
 //Haetaan asiakkaan tunnuksella
 $query  = "  SELECT *
       FROM asiakas
-      WHERE yhtio = '$kukarow[yhtio]' 
+      WHERE yhtio = '$kukarow[yhtio]'
       and tunnus  = '$kukarow[oletus_asiakas]'";
 $result = mysql_query($query) or pupe_error($query);
 
@@ -44,14 +44,14 @@ if ($tee != '') {
   }
 
   $rivi = '';
-  
+
   $query = "  SELECT a.tuoteno, a.nimitys, a.lyhytkuvaus, a.tuotemerkki, a.myyntihinta hinta_veroll, a.alv,
         if(b.alennus is null,'0,00', alennus) 'alepros', a.aleryhma
         FROM tuote a
         JOIN asiakas c on a.yhtio = c.yhtio and c.ytunnus = '$ytunnus'
         LEFT JOIN asiakasalennus b on a.yhtio = b.yhtio and a.aleryhma = b.ryhma and b.ytunnus = c.ytunnus
-        WHERE a.yhtio = '$kukarow[yhtio]' 
-        and a.status in ('','a') 
+        WHERE a.yhtio = '$kukarow[yhtio]'
+        and a.status in ('','a')
         and a.hinnastoon != 'E'
         and a.tuotetyyppi NOT IN ('A', 'B')
         $lisa

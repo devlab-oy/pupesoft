@@ -159,7 +159,7 @@ if (mysql_num_rows($pakkaamore) != 0) {
       else {
         echo "1'></td>";
       }
-      
+
     }
 
     $query = "  SELECT min(tilausrivi.kerattyaika) kerayspvm

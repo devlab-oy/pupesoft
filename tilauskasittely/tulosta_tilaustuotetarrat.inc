@@ -1,7 +1,7 @@
 <?php
-  
+
 if(!function_exists("tulosta_tilaustuotetarrat")) {
-  function tulosta_tilaustuotetarrat($otunnus, $tunnukset, $komento="", $tee="") {    
+  function tulosta_tilaustuotetarrat($otunnus, $tunnukset, $komento="", $tee="") {
     global $yhtiorow, $kukarow, $pdf, $fonts, $h;
 
     if($tunnukset>0) {
@@ -10,10 +10,10 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
     else {
       $lisa = "tilausrivi.otunnus in ($otunnus) and ";
     }
-    
+
     //  Haetaan tilausrivit
     $query = "  SELECT   tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
-              tuote.sarjanumeroseuranta, tuote.yksikko, if(tuote.tarrakpl>0, tarrakpl, 1) tarrakpl, tuote.yksikko, 
+              tuote.sarjanumeroseuranta, tuote.yksikko, if(tuote.tarrakpl>0, tarrakpl, 1) tarrakpl, tuote.yksikko,
               sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.myyntirivitunnus, sarjanumeroseuranta.lisatieto, sarjanumeroseuranta.tunnus sarjatunnus,
               tarratyyppi.selite tarratyyppi
           FROM tilausrivi
@@ -24,9 +24,9 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
     $result = mysql_query($query) or pupe_error($query);
 
     if(mysql_num_rows($result) > 0) {
-      
+
       require_once('pdflib/pupepdf.class.php');
-      
+
       if (!function_exists('alku')) {
         function alku ($pdf, $row) {
           global $yhtiorow, $laskurow, $kukarow, $fonts, $tid, $h, $pdf;
@@ -56,13 +56,13 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
           $pdf->addPage("10.1x3.8cm");
 
           $h=32;
-          
+
           return $pdf;
         }
       }
       $tarrat_tot=0;
       while($row = mysql_fetch_array($result)) {
-        
+
         $tarra_kpl = "";
 
         if(file_exists($row["tarratyyppi"])) {
@@ -100,7 +100,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
             $tarra_kpl = $row["tarrakpl"];
           }
 
-          for($i=0;$i<$tarra_kpl;$i++) {            
+          for($i=0;$i<$tarra_kpl;$i++) {
             require($row["tarratyyppi"]);
           }
 
@@ -115,12 +115,12 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
             $kirrow = mysql_fetch_array($kirres);
             $arvaakirjoitin[$kirrow["printteri2"]]++;
           }
-          
+
           $tarrat_tot+=$tarra_kpl;
         }
-        
+
       }
-      
+
       //  Tulostetaan tarra jos meillä on jotain tulostettavaa
       if($tarrat_tot>0) {
 
@@ -169,8 +169,8 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
         }
 
         system("rm -f $pdf_tilaustuotetarrafilenimi");
-        
-      }      
-    }    
-  }  
+
+      }
+    }
+  }
 }

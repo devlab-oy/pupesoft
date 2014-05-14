@@ -326,7 +326,7 @@ if ($tee != '') {
 
       foreach($_arr_values as $_key => $_val) {
         if ($_key == "yhteensa_kilot") echo "<td align='right'>{$_val}</td>";
-        else echo "<td>{$_val}</td>";          
+        else echo "<td>{$_val}</td>";
       }
 
       echo "</tr>";
@@ -351,7 +351,7 @@ if ($tee != '') {
 
         foreach($arr as $_key => $_val) {
           if ($_key == "yhteensa_kilot") echo "<td align='right'>{$_val}</td>";
-          else echo "<td>{$_val}</td>";          
+          else echo "<td>{$_val}</td>";
         }
 
         echo "</tr>";

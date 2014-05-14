@@ -37,7 +37,7 @@ if (!function_exists("pakkaamotarkista")) {
 
         if (isset($upd) and $upd == 1) {
           $pakkaamovarasto = $t[$i];
-          
+
           if ($t["varasto"] == $trow["varasto"] and $t["lokero"] != $trow["lokero"]) {
 
             $query = "  SELECT *
@@ -54,7 +54,7 @@ if (!function_exists("pakkaamotarkista")) {
         }
       }
     }
-    
+
     if (mysql_field_name($result, $i) == "printteri0") {
       if (trim($t[$i]) == '') {
         $virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhjä")."!";

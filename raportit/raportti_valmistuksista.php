@@ -313,7 +313,7 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
         $worksheet->write($excelrivi, $excelsarake, $linja);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, $rivit['valmistusnumero']);
-        $excelsarake++;          
+        $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, $rivit["valmistettu"]);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, $rivit["valmistetaan"]);

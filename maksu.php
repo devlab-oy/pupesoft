@@ -9,12 +9,12 @@ if ($tee == 'P') {
                    FROM maksu
                   WHERE tunnus = '$tunnus'";
   $result = mysql_query($query) or pupe_error($query);
-  
+
   if (mysql_num_rows($result) == 0) {
     echo t("Maksua ei löydy")."!";
     exit;
   }
-  
+
   $maksurow=mysql_fetch_array($result);
   $tapvm = $maksurow[0];
   $summa = $maksurow[1];

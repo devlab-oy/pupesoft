@@ -108,29 +108,29 @@ function alv_update_paivita_tuote_ja_asiakas($query_where_lisa = "") {
                 AND alv != 0";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
-    
+
     $query = "  UPDATE tuote
                 SET alv = 10
                 WHERE yhtio = '$yhtio'
                 AND alv = 9";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
-    
+
     $query = "  UPDATE tuote
                 SET alv = 14
                 WHERE yhtio = '$yhtio'
                 AND alv = 13";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
-    
+
     $query = "  UPDATE tuote
                 SET alv = 24
                 WHERE yhtio = '$yhtio'
                 AND alv = 23";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
-    
-    echo date("H:i:s d.m.Y"), ": Muutettiin $update_count tietuetta\n";      
+
+    echo date("H:i:s d.m.Y"), ": Muutettiin $update_count tietuetta\n";
   }
 }
 
@@ -147,9 +147,9 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
   while ($row = mysql_fetch_assoc($yhtio_result)) {
 
     $yhtio = $row['yhtio'];
-    $yhtiorow = hae_yhtion_parametrit($yhtio);      
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
     $update_count = 0;
-    
+
     echo date("H:i:s d.m.Y"), ": Avoimet tapahtumat yritykselle $yhtio\n";
 
     // Tarjous
@@ -219,8 +219,8 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
                   OR (lasku.tila IN ('A', 'C', 'L', 'N', 'E', 'F') AND lasku.alatila != 'X'))";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
-    
-    echo date("H:i:s d.m.Y"), ": Muutettiin $update_count tietuetta\n";      
+
+    echo date("H:i:s d.m.Y"), ": Muutettiin $update_count tietuetta\n";
   }
 }
 
@@ -358,11 +358,11 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
                 yhtion_parametrit.erikoisvarastomyynti_alarajasumma      = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma / 1.23 * 1.24, 2),
                 yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi / 1.23 * 1.24, 2),
                 yhtion_parametrit.rahtivapaa_alarajasumma                = round(yhtion_parametrit.rahtivapaa_alarajasumma / 1.23 * 1.24, 2),
-                yhtion_parametrit.laskutuslisa                           = if (yhtion_parametrit.laskutuslisa_tyyppi not in ('L', 'K', 'N'), 
-                                                                                round(yhtion_parametrit.laskutuslisa / 1.23 * 1.24, 2), 
+                yhtion_parametrit.laskutuslisa                           = if (yhtion_parametrit.laskutuslisa_tyyppi not in ('L', 'K', 'N'),
+                                                                                round(yhtion_parametrit.laskutuslisa / 1.23 * 1.24, 2),
                                                                                 yhtion_parametrit.laskutuslisa),
-                yhtion_parametrit.kuljetusvakuutus                       = if (yhtion_parametrit.kuljetusvakuutus_tyyppi not in ('B', 'G'), 
-                                                                                round(yhtion_parametrit.kuljetusvakuutus / 1.23 * 1.24, 2), 
+                yhtion_parametrit.kuljetusvakuutus                       = if (yhtion_parametrit.kuljetusvakuutus_tyyppi not in ('B', 'G'),
+                                                                                round(yhtion_parametrit.kuljetusvakuutus / 1.23 * 1.24, 2),
                                                                                 yhtion_parametrit.kuljetusvakuutus)
                 WHERE yhtion_parametrit.yhtio = '$yhtio'";
     $result = pupe_query($query);
@@ -374,8 +374,8 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
                 WHERE asiakas.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
-    
-    echo date("H:i:s d.m.Y"), ": Muutettiin $update_count tietuetta\n";      
+
+    echo date("H:i:s d.m.Y"), ": Muutettiin $update_count tietuetta\n";
   }
 }
 

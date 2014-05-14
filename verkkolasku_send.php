@@ -30,7 +30,7 @@ if ($php_cli) {
 
   // Haetaan käyttäjän tiedot
   $kukarow  = hae_kukarow('admin', $yhtio);
-  
+
   $PHP_SELF = "verkkolasku_send.php";
 }
 

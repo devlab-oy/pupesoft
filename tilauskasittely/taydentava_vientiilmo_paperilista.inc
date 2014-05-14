@@ -1,25 +1,25 @@
 <?php
-  
+
 function paperi_otsikko () {
   global $paperi, $yhtiorow, $ajopvm, $alku, $loppu, $paperisivu;
-  
+
   $paperi .= sprintf ('%-25.25s',   "VIENNIN ATK-TULLAUS");
   $paperi .= "\r\n";
-  
+
   $paperi .= sprintf ('%-30.30s',    "Viej‰: ".$yhtiorow["nimi"]);
   $paperi .= sprintf ('%-40.40s',   "Jaksolta $alku - $loppu");
   $paperi .= sprintf ('%-40.40s',   "TƒYDENTƒVƒ TULLI-ILMOITUS");
   $paperi .= sprintf ('%-22.22s',   "Ajopvm. $ajopvm");
   $paperi .= sprintf ('%-15.15s',   "Sivu nro ".$paperisivu);
   $paperi .= "\r\n";
-  
+
   $paperi .= sprintf ('%-30.30s',   "Asiakasnro ".$yhtiorow["tullin_asiaknro"]);
   $paperi .= sprintf ('%-40.40s',   "Y-tunnus ".$yhtiorow["ytunnus"]);
   $paperi .= "\r\n";
-  
+
   $paperi .= "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
   $paperi .= "\r\n";
-  
+
   $paperi .= sprintf ('%-11.11s',    "Viite");
   $paperi .= sprintf ('%-25.25s',   "Vastaanottaja");
   $paperi .= sprintf ('%-25.25s',   "Kuljetusv‰l. tunn.");
@@ -32,7 +32,7 @@ function paperi_otsikko () {
   $paperi .= sprintf ('%-13.13s',   "Toimitusehto");
   $paperi .= sprintf ('%-19.19s',   "Tullausnumero");
   $paperi .= "\r\n";
-  
+
   $paperi .= sprintf ('%-11.11s',    "Vientipvm");
   $paperi .= sprintf ('%-25.25s',   "");
   $paperi .= sprintf ('%-25.25s',   "Valuutta");
@@ -42,10 +42,10 @@ function paperi_otsikko () {
   $paperi .= sprintf ('%-14.14s',   "Vientiarvo");
   $paperi .= sprintf ('%-12.12s',    "EUR-ilmoitus");
   $paperi .= "\r\n";
-  
+
   $paperi .= "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
   $paperi .= "\r\n";
-  
+
   $paperi .= sprintf ('%-11.11s',    " ");
   $paperi .= sprintf ('%-25.25s',   "Tavaran kuvaus");
   $paperi .= sprintf ('%-25.25s',   "Tullinimike");
@@ -58,17 +58,17 @@ function paperi_otsikko () {
   $paperi .= sprintf ('%-13.13s',   "Vientiarvo");
   $paperi .= sprintf ('%-15.15s',   "Lisenssit/luvat");
   $paperi .= "\r\n";
-  
+
 }
 
 function paperi_otsikkorivi () {
   global $paperi, $yhtiorow, $laskurow, $vientiarvo, $laskunarvo;
-  
+
   $paperi .= "\r\n";
   $paperi .= "\r\n";
   $paperi .= "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
   $paperi .= "\r\n";
-  
+
   $paperi .= sprintf ('%-11.11s',    $laskurow["laskunro"]);
   $paperi .= sprintf ('%-25.25s',   substr($laskurow["nimi"],0,23));
   $paperi .= sprintf ('%-25.25s',   $laskurow["sisamaan_kuljetus"]." / ".$laskurow["aktiivinen_kuljetus"]);
@@ -80,22 +80,22 @@ function paperi_otsikkorivi () {
   $paperi .= sprintf ('%-11.11s',    $laskurow["laskunro"]);
   $paperi .= sprintf ('%-13.13s',   $laskurow["toimitusehto"]);
   $paperi .= sprintf ('%-19.19s',   $laskurow["tullausnumero"]);
-  
+
   $paperi .= "\r\n";
-  
+
   $paperi .= sprintf ('%-11.11s',    $laskurow["tapvm"]);
   $paperi .= sprintf ('%-25.25s',     "");
   $paperi .= sprintf ('%-25.25s',    $laskurow["valkoodi"]);
   $paperi .= sprintf ('%-10.10s',   $laskunarvo);
   $paperi .= sprintf ('%-13.13s',   "1");
-  
+
   if (abs($laskurow["lisattava_era"]) > 0)
     $lis = "+".abs($laskurow["lisattava_era"]);
-    
+
   if (abs($laskurow["vahennettava_era"]) > 0)
     $vah = "/-".abs($laskurow["vahennettava_era"]);
-  
-  $paperi .= sprintf ('%-16.16s',     $lis.$vah);    
+
+  $paperi .= sprintf ('%-16.16s',     $lis.$vah);
   $paperi .= sprintf ('%-14.14s',    $vientiarvo); //tilastoarvo
   $paperi .= sprintf ('%-12.12s',   "EUR");
 
@@ -105,14 +105,14 @@ function paperi_otsikkorivi () {
 
 function paperi_nimikerivi () {
   global $paperi, $rivirow, $laskurow, $tullarvo;
-  
+
   $paperi .= "\r\n";
   $paperi .= sprintf ('%-11.11s',   " ");
   $paperi .= sprintf ('%-25.25s',    substr($rivirow["nimitys"],0,23));
   $paperi .= sprintf ('%-25.25s',   $rivirow["tullinimike1"]);
   $paperi .= sprintf ('%-10.10s',   " ");
   $paperi .= sprintf ('%-13.13s',   $rivirow["nettop"]);
-  
+
   if ($rivirow["su"] != '') {
     $paperi .= sprintf ('%-16.16s', $rivirow["kpl"]);
     $paperi .= sprintf ('%-14.14s', $rivirow["su"]);
@@ -121,30 +121,30 @@ function paperi_nimikerivi () {
     $paperi .= sprintf ('%-16.16s', " ");
     $paperi .= sprintf ('%-14.14s', " ");
   }
-  
+
   $paperi .= sprintf ('%-12.12s',   $rivirow["tullikohtelu"]);
   $paperi .= sprintf ('%-11.11s',    $laskurow["maa_maara"]);
   $paperi .= sprintf ('%-13.13s',   $tullarvo);
   $paperi .= sprintf ('%-19.19s',   " ");
-  
+
   $paperi .= "\r\n";
 }
 
 function paperi_loppu () {
   global $paperi, $kukarow, $yhtiorow, $ajopvm, $tietuemaara, $laskutusarvo;
-  
-  
+
+
   $paperi .= chr(12);
-  
+
   paperi_otsikko();
-  
+
   $paperi .= "\r\n";
   $paperi .= "\r\n";
   $paperi .= "\r\n";
-  
+
   $paperi .= sprintf ('%-60.60s',"Koko aineiston tietuem‰‰r‰").$tietuemaara." kpl\r\n";
   $paperi .= sprintf ('%-60.60s',"Koko aineiston vientiarvo").$laskutusarvo." EUR\r\n";
-  
+
   $paperi .= "\r\n";
   $paperi .= "\r\n";
   $paperi .= "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------";

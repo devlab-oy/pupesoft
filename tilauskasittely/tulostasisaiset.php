@@ -48,9 +48,9 @@ if (isset($tee) and $tee == 'TULOSTA') {
   $laskurrrresult = mysql_query($query) or pupe_error($query);
 
   while ($sislaskrow = mysql_fetch_array($laskurrrresult)) {
-    
+
     echo t("Tulostetaan sisäinen lasku").": $sislaskrow[laskunro]<br>";
-    
+
     tulosta_lasku($sislaskrow["tunnus"], "", "", "", $valittu_tulostin, "", "");
   }
 

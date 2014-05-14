@@ -1838,7 +1838,7 @@ elseif ($tee != '') {
           else {
             $echolisa = "";
           }
-          
+
           if ($row["tyyppi"] == 'Luottokortti') {
 
             if ($row["tilino"] != '') {

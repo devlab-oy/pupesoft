@@ -126,7 +126,7 @@ if ($luokka != "") {
     }
     else {
       $jarjestys = $order." ".$sort;
-    }      
+    }
   }
   else {
     $jarjestys = "abc_aputaulu.luokka, $abcwhat desc";
@@ -147,7 +147,7 @@ if ($luokka != "") {
   // n‰m‰ m‰‰ritt‰‰ kumpaan tauluun Joinataan, asiakas vai tuote
   $asiakas_join_array = array('AK','AM','AP','AR');
   $tuote_join_array = array('TK','TM','TP','TR','TV');
-  
+
   if (in_array($abcchar,$asiakas_join_array)) {
     $analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus) ";
   }
@@ -157,9 +157,9 @@ if ($luokka != "") {
   else {
     $analyysin_join = "";
   }
-  
+
   list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcchar);
-      
+
   //kauden yhteismyynnit ja katteet
   $query = "  SELECT
         sum(abc_aputaulu.summa) yhtmyynti,
@@ -331,7 +331,7 @@ if ($luokka != "") {
       else echo "<td valign='top'><a href='../crm/asiakasmemo.php?asiakasid=$row[asiakastunnus]'>$row[tuoteno]</a></td>";
 
       echo "<td valign='top'>$row[nimitys]</td>";
-      
+
       if (!$asiakasanalyysi) {
         echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY".preg_replace("/&mul_osasto\[\]\=[^&]*/i", "", $ulisa)."&mul_osasto[]=$row[osasto]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[osasto]</a></td>";
         echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY".preg_replace("/&mul_(osasto|try)\[\]\=[^&]*/i", "", $ulisa)."&mul_osasto[]=$row[osasto]&mul_try[]=$row[try]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[try]</a></td>";

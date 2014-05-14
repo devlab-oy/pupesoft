@@ -18,29 +18,29 @@ if ($tunnus != '' and $upd != 1) {
 
     $toita = $toimitustapa_check_row['selite'];
 
-    $query = "  SELECT tunnus 
-          FROM asiakas 
-          WHERE toimitustapa = '{$toita}' 
-          AND yhtio = '{$kukarow['yhtio']}' 
+    $query = "  SELECT tunnus
+          FROM asiakas
+          WHERE toimitustapa = '{$toita}'
+          AND yhtio = '{$kukarow['yhtio']}'
           AND laji NOT IN ('P', 'R')";
     $chkres1 = pupe_query($query);
 
     $query = "  SELECT tunnus
-           FROM lasku 
-          WHERE toimitustapa = '{$toita}' 
-          AND yhtio = '{$kukarow['yhtio']}' 
+           FROM lasku
+          WHERE toimitustapa = '{$toita}'
+          AND yhtio = '{$kukarow['yhtio']}'
           AND ((tila = 'L' AND alatila IN ('A','B','C')) OR tila = 'N')";
     $chkres2 = pupe_query($query);
 
-    $query = "  SELECT tunnus 
+    $query = "  SELECT tunnus
           FROM rahtimaksut
-          WHERE toimitustapa = '{$toita}' 
+          WHERE toimitustapa = '{$toita}'
           AND yhtio = '{$kukarow['yhtio']}'";
     $chkres3 = pupe_query($query);
 
     $query = "  SELECT tunnus
-          FROM rahtisopimukset 
-          WHERE toimitustapa = '{$toita}' 
+          FROM rahtisopimukset
+          WHERE toimitustapa = '{$toita}'
           AND yhtio = '{$kukarow['yhtio']}'";
     $chkres4 = pupe_query($query);
 
@@ -68,7 +68,7 @@ if ($tunnus != '' and $upd != 1) {
       if (mysql_num_rows($chkres3) > 0) {
         $otsikko_lisatiedot .= "<li>".mysql_num_rows($chkres3)." ".t("rahtimaksulla")."</li>";
       }
-      
+
       if (mysql_num_rows($chkres4) > 0) {
         $otsikko_lisatiedot .= "<li>".mysql_num_rows($chkres4)." ".t("rahtisopimuksella")."</li>";
       }

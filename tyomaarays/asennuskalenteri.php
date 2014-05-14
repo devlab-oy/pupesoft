@@ -593,7 +593,7 @@ if ($tee == "") {
             if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
             if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
             if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,
-            tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus, 
+            tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus,
             lasku.nimi, lasku.toim_nimi,
             kalenteri.konserni, a2.selitetark_2 tyostatusvari
             FROM kalenteri
@@ -658,7 +658,7 @@ if ($tee == "") {
                   if (trim($vrow["viesti"]) != "") echo "<br><br>",t("Tilausviite"),": $vrow[viesti]";
                   if (trim($vrow["komm1"]) != "") echo "<br><br>",t("Työn kuvaus").": ".str_replace("\n", "<br>", $vrow["komm1"]);
                   if (trim($vrow["komm2"]) != "") echo "<br>".t("Toimenpiteet").": ".str_replace("\n", "<br>", $vrow["komm2"]);
-                  
+
                   echo "</div>";
                 }
 
@@ -666,7 +666,7 @@ if ($tee == "") {
                 $ed_tunnukset["$b"][] = $vrow['tunnus'];
               }
             }
-            
+
             if (is_array($varaukset[$b])) {
               natsort($varaukset[$b]);
             }

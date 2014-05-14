@@ -12,7 +12,7 @@ if (mysql_field_name($result, $i) == "tunnus" or
 if (mysql_field_name($result, $i) == "pakkaus") {
   if ($lukitse_avaimeen != "") {
     $tyyppi = 4;
-    
+
     $ulos = "<input type='hidden' name='{$nimi}' value='{$lukitse_avaimeen}'>";
     $jatko = 0;
   }

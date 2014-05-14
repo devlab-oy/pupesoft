@@ -134,7 +134,7 @@ if (mysql_num_rows($result) > 0) {
       if (abs($ero1) > 0.5 or abs($ero2) > 0.5 or abs($ero3) > 0.5) {
 
         if ($korjaa and (int) $laskurow['tapvm'] < $kpitokausi_auki) {
-          
+
           if ($tilirow['crossyearerror'] == 1) {
              // Uusin varastonmuutos
              $maxmuutos = explode(",", $tilirow["tanvuodentunnarit"]);

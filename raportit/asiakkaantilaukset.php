@@ -312,7 +312,7 @@ if ($ytunnus != '') {
     document.etsiform.etsinappi.click();
   }
   </script>";
-  
+
   echo "<form method='post' autocomplete='off' id='etsiform' name='etsiform'>
       <input type='hidden' name='ytunnus' value='$ytunnus'>
       <input type='hidden' name='asiakasid' value='$asiakasid'>

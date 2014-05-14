@@ -193,14 +193,14 @@ function loop_packet($xml_element, $parameters) {
       }
       elseif ($tavarantoimittajanumero == "123007") {
         $laatikko = $asn_numero;
-        
+
         foreach($element->PkgId as $pkg) {
           if (isset($pkg->PkgIdentSystem) and (int) $pkg->PkgIdentSystem == 17) {
             $laatikko = (string) $pkg->PkgIdentNumber;
             break;
           }
         }
-        
+
         $parameters["laatikkoind"]  = $laatikko;
         $parameters["sscc"]      = $laatikko;
       }

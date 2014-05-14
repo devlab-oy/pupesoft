@@ -97,7 +97,7 @@ function rest_tilaa($params) {
           WHERE yhtio = '{$kukarow["yhtio"]}'
           AND kuka   = '{$kukarow["kuka"]}'";
     $update = pupe_query($query);
-          
+
     // tässä kaattuuu
     $tilausnumero = luo_myyntitilausotsikko($toim, $tunnus, "", "", $kommentti, "", "");
   }
@@ -226,7 +226,7 @@ elseif ($tyyppi == "customer") {
   if ($api_status === FALSE) {
     rest_virhe_header($api_output);
   }
-  
+
   rest_ok_header($api_output);
 
 }

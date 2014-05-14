@@ -27,7 +27,7 @@ if (!function_exists("toimitustavan_lahdottarkista")) {
 
     if (mysql_field_name($result, $i) == "terminaalialue") {
       $sresult = t_avainsana('TERMINAALIALUE', '', " and selite != '' ");
-      
+
       if (trim($t[$i]) == '' and mysql_num_rows($sresult) >0) {
         $virhe[$i] .= t("Terminaalialue puuttuu")."!";
       }

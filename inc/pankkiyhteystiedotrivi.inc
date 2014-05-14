@@ -17,8 +17,8 @@ if (mysql_field_name($result, $i) == "viite") {
   else {
     $sela = "SELECTED";
   }
-  
-  
+
+
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value = '' $sela>".t("Suomi")."</option>";
   $ulos .= "<option value = 'SE' $selb>".t("Ruotsi")."</option>";

@@ -70,7 +70,7 @@ if (!function_exists("tuoteryhman_varastonarvo")) {
           AND tuote.try = '{$try}'";
     $result = pupe_query($query);
     $arvo = mysql_fetch_assoc($result);
-          
+
     $saldo_nyt = $arvo['saldo_nyt'];
 
     // varastonmuutos
@@ -85,10 +85,10 @@ if (!function_exists("tuoteryhman_varastonarvo")) {
           ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc";
     $muutosres = pupe_query($query);
     $row = mysql_fetch_assoc($muutosres);
-          
+
     $arvo1 = $saldo_nyt + $row['muutoskpl1'];
     $arvo2 = $saldo_nyt + $row['muutoskpl2'];
-          
+
     return array($arvo1, $arvo2);
   }
 }

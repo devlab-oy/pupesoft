@@ -3142,7 +3142,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     echo "<input type='hidden' name='muutos' value='yes'>";
   }
 
-  if ($yhtiorow['kerayserat'] == 'K') {    
+  if ($yhtiorow['kerayserat'] == 'K') {
 
     $query = "  SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
           FROM kerayserat
@@ -3152,9 +3152,9 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
           GROUP BY 1,2,3
           ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
     $pak_chk_res = pupe_query($query);
-                  
+
     $pak_num = mysql_num_rows($pak_chk_res);
-    
+
     echo "<br>".t("HUOM: Pakkausten m‰‰r‰ on")." $pak_num <br>";
   }
 

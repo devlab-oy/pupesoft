@@ -504,13 +504,13 @@ if ($tee != '') {
       echo "</select></td>";
 
       echo "<td class='back'><input type='submit' value='",t("Hae keräyserä"),"' />";
-      
+
       // Tsekataan onko käyttäjällä oikeus tulostaa kaikki tässä varastossa
       $ktkre = t_avainsana("KERAYSERA_TK", "", "and avainsana.selite  = '{$keraajarow['kuka']}' AND avainsana.selitetark = '{$select_varasto}' ");
       $ktkrow = mysql_fetch_assoc($ktkre);
 
       if ($ktkrow['selite'] != "") $naytetaan_tulosta_kaikki = 1;
- 
+
       if ($naytetaan_tulosta_kaikki) echo "<input type='button' id='tulosta_kaikki_namiska' value='",t("Tulosta kaikki"),"' />";
       echo "<input type='hidden' id='tulosta_kaikki' name='tulosta_kaikki' value='' />";
       echo "</td>";

@@ -21,20 +21,20 @@ foreach ($dnsryhma as $key => $osasto) {
   // Osasto on joka rivillä sama, otetaan ekalta riviltä tiedot
   $group = $information->addChild('group');
   $group->addAttribute('extSystemID',$key);
-  // setataan muuttuja joka seuraavassa luupissa Osaston vaihtuessa tehdään yhden kerran groupname-xml kirjoitus  
+  // setataan muuttuja joka seuraavassa luupissa Osaston vaihtuessa tehdään yhden kerran groupname-xml kirjoitus
   $vain_ekalla = 1;
 
   // Loopataan osaston tuoteryhmät
   foreach ($osasto as $try) {
-    
+
     if ($vain_ekalla == 1) {
       $group->addChild('groupname',utf8_encode(xmlentities($try["osasto_fi"])));
       $group->addChild('groupnameswe',utf8_encode(xmlentities($try["osasto_se"])));
       $group->addChild('groupnameeng',utf8_encode(xmlentities($try["osasto_en"])));
     }
-    
+
     $vain_ekalla = 2;
-    
+
     $subgroup = $group->addChild('subgroup');
     $subgroup->addAttribute('extSystemID',$try["try"]);
       $subgroup->addChild('subgroupcode',$try["try"]);

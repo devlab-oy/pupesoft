@@ -11,9 +11,9 @@ if (!function_exists("tuotepaikattarkista")) {
             WHERE yhtio = '$kukarow[yhtio]'
             and tuoteno = '$t[$i]'";
       $chktuote = mysql_query($query) or pupe_error($query);
-      
+
       $tmp_tuotenoind = $i;
-            
+
       if (mysql_num_rows($chktuote) != 1) {
         $virhe[$i] = t("Tuotenumero ei löydy!");
       }

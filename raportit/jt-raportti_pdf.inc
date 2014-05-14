@@ -82,7 +82,7 @@ if (!function_exists('rivi')) {
     if ($kalakorkeus < 70) {
       list($page,$kalakorkeus) = alku($pdf);
     }
-    
+
     //Käännetään nimitys
     $jtrow['nimitys'] = t_tuotteen_avainsanat($jtrow, 'nimitys', $kieli);
 

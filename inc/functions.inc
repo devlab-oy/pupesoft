@@ -240,7 +240,6 @@ if (!function_exists("pupe_error")) {
     // l‰hetet‰‰n se meilitse adminille
     mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SQL Error", "ISO-8859-1", "Q"), $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-
     if (ob_get_level() > 1) {
       $fleur = ob_get_contents();
 
@@ -265,13 +264,14 @@ if (!function_exists("query_dump")) {
   // otetaan parametriksi query
   function query_dump($query) {
 
-    // trimmataan, tabit, rivinvaihdot ja tuplaspacet pois queryst‰..
-    $query = trim($query);
-    $query = str_replace("\t", "",$query);
+    // trimmataan, tabit, rivinvaihdot ja tuplaspacet pois queryst‰..    
+    $query = str_replace("\t", "", $query);
     $query = preg_replace("/ {2,}/", " ", $query);
+    $query = preg_replace("/(\n) */", "$1", $query);
+    $query = trim($query);
 
     echo "<pre>";
-    echo htmlentities($query);
+    echo htmlentities($query, ENT_IGNORE);
     echo "</pre>";
   }
 }
@@ -17285,12 +17285,12 @@ if (!function_exists("tee_keraysera")) {
 
       $ohjausmerkki = $jiivee = array();
 
-      $query = "  SELECT lasku.tunnus, 
+      $query = "  SELECT lasku.tunnus,
             LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
              IFNULL(maksuehto.jv, '') jv
             FROM lasku
-            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto) 
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tunnus IN ({$tilaukset})";
       $ohjausmerkki_res = pupe_query($query);
 
@@ -17567,7 +17567,7 @@ if (!function_exists("tee_keraysera")) {
 
       $ed_ohjausmerkki = '÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷';
       $ed_jiivee = "÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷";
-      
+
       $ed_tuote = '';
 
       foreach ($inner_main_array as $inner_key => &$tuoterow) {

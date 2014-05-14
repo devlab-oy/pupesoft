@@ -38,7 +38,7 @@ class packer
     {
       // Initialize the extension
     }
-    
+
     /* This is a wrapper around the pdffile class' ->new_page()
      * that saves the relevent information for packer operation
      */
@@ -61,7 +61,7 @@ class packer
         }
         return $this->curpage;
     }
-    
+
     /* Fill text into the remaining space.
      * padding is in ems
      * minwidth is in ems, current defaults are used for all parameters
@@ -97,7 +97,7 @@ class packer
         else
             return true;
     }
-    
+
     /* Here we manually allocate a set region from the fields
      * This is likely to be the foundation of everything else that's
      * done in this class.  $space is a 'field' object.
@@ -131,7 +131,7 @@ class packer
         $this->fields[$target]->l = $hole->r;                   // right
         $this->fields_cleanup();
     }
-    
+
     /* Don't call this unless you've already established the operation to
      * be a notch, behaviour is undefined otherwise.
      */
@@ -188,22 +188,22 @@ class packer
             switch ($how) {
             case 11 : // bottom
                 $t->b = $hole->t; break;
-                
+
             case 7 : // left
                 $t->l = $hole->r; break;
-                
+
             case 14 : // top
                 $t->t = $hole->b; break;
-                
+
             case 13 : // right
                 $t->r = $hold->l; break;
-            
+
             default : // error
                 $this->pdf->push_error(666, 'notch encountered invalid chop');
             }
         }
     }
-    
+
     function find_upper_left($ignore = array())
     {
         if (!count($this->fields)) return false;
@@ -220,12 +220,12 @@ class packer
         }
         return $r;
     }
-    
+
     function dist($x, $y)
     {
         return pow(pow($x, 2) + pow($y, 2), 0.5);
     }
-    
+
     /* Scan the array of regions for regions that share an exactly equal border
      * and can thus be joined without altering the function of things.
      */
@@ -253,13 +253,13 @@ class packer
         }
         $this->fields_cleanup();
     }
-    
+
     function newfield($l, $r, $t, $b)
     {
         $temp = new field($l, $r, $t, $b);
         $this->fields[] = $temp;
     }
-    
+
     /* PHP seems to have a lot of trouble not messing up its arrays.  Some
      * operations leave gaps in the array that I wouldn't have expected to do
      * so. In lieu of having to contstantly check for gaps in the array prior
@@ -283,7 +283,7 @@ class packer
 class field
 {
     var $l, $r, $t, $b;     // left, right, top, bottom
-    
+
     function field($x1, $x2, $y1, $y2)
     {
         if ($x1 < $x2) {
@@ -301,7 +301,7 @@ class field
             $this->b = $y2;
         }
     }
-    
+
     // Return true if any part of me includes $target
     function intersects($target)
     {
@@ -311,7 +311,7 @@ class field
         if ($this->r <= $target->l) return false;
         return true;
     }
-    
+
     // Returns true if this field completely covers $target
     function obliterates($target)
     {
@@ -324,7 +324,7 @@ class field
             return false;
         }
     }
-    
+
     // Returns true if this field punches a hole in $target
     function punches($target) {
         if ($this->l > $target->l &&
@@ -336,7 +336,7 @@ class field
             return false;
         }
     }
-    
+
     /* Returns a bitmap of notches in $target
      * 0 = no notches
      * 1 = notches bottom

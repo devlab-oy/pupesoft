@@ -308,7 +308,7 @@ if ($error == 0 and $tee == "file") {
   }
   else {
     $tmpfname = tempnam("/tmp", "Vaihdatuoteno");
-    file_put_contents($tmpfname, "$vantuoteno  $uustuoteno");
+    file_put_contents($tmpfname, "$vantuoteno\t$uustuoteno");
     $file = fopen($tmpfname,"r") or die (t("Tiedoston avaus epäonnistui")."!");
   }
 

@@ -73,9 +73,9 @@ while($ketju = mysql_fetch_assoc($result)) {
       // Huomioidaan vain tuotteet joilla saldo on nolla
       if ($myytavissa[0] == 0) {
 
-        $muutos_query = "  UPDATE tuote SET 
-                  nimitys='$uusi_nimitys' 
-                  WHERE yhtio='{$kukarow['yhtio']}' 
+        $muutos_query = "  UPDATE tuote SET
+                  nimitys='$uusi_nimitys'
+                  WHERE yhtio='{$kukarow['yhtio']}'
                   AND tuoteno='{$tuote['tuoteno']}'";
 
         // Ajetaan päivitysquery ja poistetaan tuote vastaavuusketjuista

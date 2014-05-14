@@ -87,7 +87,7 @@ class vuosisopimus_asiakkaat_excel {
     $this->write_solu(t('Kausi Ed:', $this->kieli));
     $this->write_solu($this->rajaus_paivat['edalkupaiva'] . ' - ' . $this->rajaus_paivat['edloppupaiva']);
     $this->move_seuraavalle_riville();
-    
+
     $this->print_headers('osasto');
     $this->move_seuraavalle_riville();
 

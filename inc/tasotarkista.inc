@@ -45,7 +45,7 @@ if(!function_exists("tasotarkista")) {
 
     if (mysql_field_name($result, $i) == "summattava_taso" and trim($t[$i]) != '' and $tyyppitalteen != "B") {
       $t[$i] = trim($t[$i]);
-      
+
       foreach (explode(",", $t[$i]) as $sumtas) {
         $query = "  SELECT tunnus
               FROM taso

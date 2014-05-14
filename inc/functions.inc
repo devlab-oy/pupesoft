@@ -10938,7 +10938,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
     $query = "  SELECT *
           FROM yhtion_parametrit
-          WHERE yhtio='$yhtio'";
+          WHERE yhtio = '$yhtio'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -10959,7 +10959,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
       $query = "  SELECT *
             FROM yhtion_toimipaikat
             WHERE yhtio = '$yhtio'
-            and tunnus  = '$toimipaikka'";
+            and tunnus = '$toimipaikka'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -10977,7 +10977,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
         // Heataan viel‰ toimipaikan paramit
         $query = "  SELECT *
               FROM yhtion_toimipaikat_parametrit
-              WHERE yhtio   = '$yhtio'
+              WHERE yhtio = '$yhtio'
               and toimipaikka = '$toimipaikka'";
         $result = pupe_query($query);
 
@@ -27486,14 +27486,14 @@ if (!function_exists('hae_kaikki_toimitustavat')) {
     global $kukarow, $yhtiorow;
 
     $query = "  SELECT *
-          FROM toimitustapa
-          WHERE yhtio = '{$kukarow['yhtio']}'";
+                FROM toimitustapa
+                WHERE yhtio = '{$kukarow['yhtio']}'";
     $result = pupe_query($query);
 
     $toimitustavat = array();
-    while($toimitustapa = mysql_fetch_assoc($result)) {
+    while ($toimitustapa = mysql_fetch_assoc($result)) {
       $toimitustavat[] = $toimitustapa;
-  }
+    }
 
     return $toimitustavat;
   }
@@ -27531,7 +27531,7 @@ if (!function_exists('sallitut_varastot')) {
 
     // Katsotaan saako t‰lle asiakkaalle myyd‰ vain jostain varastoista
     if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $asiakas_tunnus != 0) {
-      $query     = "   SELECT asiakkaan_avainsanat.avainsana
+      $query = "SELECT asiakkaan_avainsanat.avainsana
                 FROM asiakkaan_avainsanat
                 WHERE asiakkaan_avainsanat.yhtio = '$kukarow[yhtio]'
                 AND asiakkaan_avainsanat.laji = 'oletusmyyntivarasto'
@@ -27550,18 +27550,18 @@ if (!function_exists('sallitut_varastot')) {
 
     if ($toimipaikka_tunnus != 0) {
       // Haetaan varastot joita toimipaikka saa k‰ytt‰‰
-      $query   = "  SELECT varastopaikat.tunnus
-              FROM avainsana
-              JOIN varastopaikat
-              ON (varastopaikat.yhtio = avainsana.yhtio
-                AND varastopaikat.tunnus = avainsana.selitetark
-                AND (varastopaikat.sallitut_maat LIKE '%$toimitus_maa%'
-                   OR varastopaikat.sallitut_maat = '')
-                AND varastopaikat.tyyppi != 'P')
-              WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-              AND avainsana.laji = 'TOIMMYYNTI'
-              AND avainsana.selite = {$toimipaikka_tunnus}
-              ORDER BY avainsana.jarjestys ASC";
+      $query = "SELECT varastopaikat.tunnus
+                FROM avainsana
+                JOIN varastopaikat
+                ON (varastopaikat.yhtio = avainsana.yhtio
+                  AND varastopaikat.tunnus = avainsana.selitetark
+                  AND (varastopaikat.sallitut_maat LIKE '%$toimitus_maa%'
+                     OR varastopaikat.sallitut_maat = '')
+                  AND varastopaikat.tyyppi != 'P')
+                WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+                AND avainsana.laji = 'TOIMMYYNTI'
+                AND avainsana.selite = {$toimipaikka_tunnus}
+                ORDER BY avainsana.jarjestys ASC";
       $result   = pupe_query($query);
 
       while ($varasto = mysql_fetch_assoc($result)) {
@@ -27573,7 +27573,7 @@ if (!function_exists('sallitut_varastot')) {
       }
 
       // Etsit‰‰n onko t‰ll‰ toimipaikalla jotain varastoja
-      $query     = "  SELECT varastopaikat.tunnus
+      $query = "SELECT varastopaikat.tunnus
                 FROM varastopaikat
                 WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
                 AND varastopaikat.toimipaikka = {$toimipaikka_tunnus}
@@ -27604,7 +27604,7 @@ if (!function_exists('sallitut_varastot')) {
     }
 
     # Ilman rajausta saa myyd‰ kaikista normaalivarastoista
-    $query     = "  SELECT varastopaikat.tunnus
+    $query = "SELECT varastopaikat.tunnus
               FROM varastopaikat
               WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
               AND (varastopaikat.sallitut_maat LIKE '%$toimitus_maa%'

@@ -2297,7 +2297,6 @@
 
     echo "<script LANGUAGE='JavaScript'>resizeIframe('{$toim}_iframe' $jcsmaxheigth);</script>";
   }
-
   elseif ($from != "yllapito") {
     require ("inc/footer.inc");
   }

@@ -1,36 +1,36 @@
 <?php
 /*
-Barcode Render Class for PHP using the GD graphics library 
+Barcode Render Class for PHP using the GD graphics library
 Copyright (C) 2001  Karim Mribti
-                
-   Version  0.0.7a  2001-04-01  
-                
+
+   Version  0.0.7a  2001-04-01
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either
 version 2.1 of the License, or (at your option) any later version.
-                                  
+
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
-                         
+
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-                                     
+
 Copy of GNU Lesser General Public License at: http://www.gnu.org/copyleft/lesser.txt
-                           
+
 Source code home page: http://www.mribti.com/barcode/
 Contact author at: barcode@mribti.com
 */
-  
-  /* 
-    Render for Code 128-B   
+
+  /*
+    Render for Code 128-B
     Code 128-B is a continuous, multilevel and full ASCII code .
   */
-    
-    
+
+
   class C128BObject extends BarcodeObject {
    var $mCharSet, $mChars;
    function C128BObject($Width, $Height, $Style, $Value)
@@ -145,7 +145,7 @@ Contact author at: barcode@mribti.com
         "411131"    /*  102 */
   );
    }
-   
+
    function GetCharIndex ($char) {
     for ($i=0;$i<95;$i++) {
     if ($this->mChars[$i] == $char)
@@ -153,8 +153,8 @@ Contact author at: barcode@mribti.com
    }
    return -1;
    }
-   
-   function GetBarSize ($xres, $char) { 
+
+   function GetBarSize ($xres, $char) {
      switch ($char)
    {
     case '1':
@@ -175,10 +175,10 @@ Contact author at: barcode@mribti.com
     return  $cVal * $xres;
    }
 
-    
+
    function GetSize($xres) {
      $len = strlen($this->mValue);
-   
+
    if ($len == 0)  {
      $this->mError = "Null value";
         __DEBUG__("GetRealSize: null barcode value");
@@ -198,19 +198,19 @@ Contact author at: barcode@mribti.com
          $ret += $this->GetBarSize($xres, $cset[4]);
          $ret += $this->GetBarSize($xres, $cset[5]);
          }
-   }   
+   }
    /* length of Check character */
    $cset = $this->GetCheckCharValue();
    for ($i=0;$i<6;$i++) {
      $CheckSize += $this->GetBarSize($cset[$i], $xres);
    }
-       
+
    $StartSize = 2*BCD_C128_BAR_2*$xres + 3*BCD_C128_BAR_1*$xres + BCD_C128_BAR_4*$xres;
     $StopSize  = 2*BCD_C128_BAR_2*$xres + 3*BCD_C128_BAR_1*$xres + 2*BCD_C128_BAR_3*$xres;
-    
+
     return $StartSize + $ret + $CheckSize + $StopSize;
    }
-   
+
    function GetCheckCharValue()
    {
      $len = strlen($this->mValue);
@@ -221,7 +221,7 @@ Contact author at: barcode@mribti.com
    $check  = $sum % 103;
     return $this->mCharSet[$check];
     }
-   
+
    function DrawStart($DrawPos, $yPos, $ySize, $xres)
    {  /* Start code is '211214' */
     $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize('2', $xres) , $ySize);
@@ -235,7 +235,7 @@ Contact author at: barcode@mribti.com
     $DrawPos += $this->GetBarSize('4', $xres);
     return $DrawPos;
    }
-   
+
    function DrawStop($DrawPos, $yPos, $ySize, $xres)
    {  /* Stop code is '2331112' */
     $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize('2', $xres) , $ySize);
@@ -251,7 +251,7 @@ Contact author at: barcode@mribti.com
     $DrawPos += $this->GetBarSize('2', $xres);
     return $DrawPos;
    }
-  
+
    function DrawCheckChar($DrawPos, $yPos, $ySize, $xres)
    {
      $cset = $this->GetCheckCharValue();
@@ -263,45 +263,45 @@ Contact author at: barcode@mribti.com
    $DrawPos += $this->GetBarSize($cset[3], $xres);
    $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize($cset[4], $xres) , $ySize);
    $DrawPos += $this->GetBarSize($cset[4], $xres);
-   $DrawPos += $this->GetBarSize($cset[5], $xres); 
+   $DrawPos += $this->GetBarSize($cset[5], $xres);
    return $DrawPos;
     }
-   
+
     function DrawObject ($xres)
     {
-     $len = strlen($this->mValue);        
+     $len = strlen($this->mValue);
    if (($size = $this->GetSize($xres))==0) {
        __DEBUG__("GetSize: failed");
       return false;
-   }    
-       
+   }
+
    if ($this->mStyle & BCS_ALIGN_CENTER) $sPos = (integer)(($this->mWidth - $size ) / 2);
    else if ($this->mStyle & BCS_ALIGN_RIGHT) $sPos = $this->mWidth - $size;
-       else $sPos = 0;    
-                  
-   /* Total height of bar code -Bars only- */          
+       else $sPos = 0;
+
+   /* Total height of bar code -Bars only- */
    if ($this->mStyle & BCS_DRAW_TEXT) $ysize = $this->mHeight - BCD_DEFAULT_MAR_Y1 - BCD_DEFAULT_MAR_Y2 - $this->GetFontHeight($this->mFont);
    else $ysize = $this->mHeight - BCD_DEFAULT_MAR_Y1 - BCD_DEFAULT_MAR_Y2;
-                     
-   /* Draw text */ 
+
+   /* Draw text */
    if ($this->mStyle & BCS_DRAW_TEXT) {
         if ($this->mStyle & BCS_STRETCH_TEXT) {
       for ($i=0;$i<$len;$i++) {
                $this->DrawChar($this->mFont, $sPos+(2*BCD_C128_BAR_2*$xres + 3*BCD_C128_BAR_1*$xres + BCD_C128_BAR_4*$xres)+($size/$len)*$i,
                $ysize + BCD_DEFAULT_MAR_Y1 + BCD_DEFAULT_TEXT_OFFSET, $this->mValue[$i]);
-        }                                                                                  
+        }
      } else {/* Center */
          $text_width = $this->GetFontWidth($this->mFont) * strlen($this->mValue);
        $this->DrawText($this->mFont, $sPos+(($size-$text_width)/2)+(2*BCD_C128_BAR_2*$xres + 3*BCD_C128_BAR_1*$xres + BCD_C128_BAR_4*$xres),
                  $ysize + BCD_DEFAULT_MAR_Y1 + BCD_DEFAULT_TEXT_OFFSET, $this->mValue);
-        }   
-    }                      
-                  
-   $cPos = 0;                         
-   $DrawPos = $this->DrawStart($sPos, BCD_DEFAULT_MAR_Y1 , $ysize, $xres); 
-   do {                 
+        }
+    }
+
+   $cPos = 0;
+   $DrawPos = $this->DrawStart($sPos, BCD_DEFAULT_MAR_Y1 , $ysize, $xres);
+   do {
     $c     = $this->GetCharIndex($this->mValue[$cPos]);
-    $cset  = $this->mCharSet[$c];           
+    $cset  = $this->mCharSet[$c];
       $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize($cset[0], $xres) , $ysize);
       $DrawPos += $this->GetBarSize($cset[0], $xres);
       $DrawPos += $this->GetBarSize($cset[1], $xres);
@@ -311,7 +311,7 @@ Contact author at: barcode@mribti.com
       $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize($cset[4], $xres) , $ysize);
       $DrawPos += $this->GetBarSize($cset[4], $xres);
       $DrawPos += $this->GetBarSize($cset[5], $xres);
-    $cPos++; 
+    $cPos++;
     } while ($cPos<$len);
      $DrawPos = $this->DrawCheckChar($DrawPos, BCD_DEFAULT_MAR_Y1 , $ysize, $xres);
     $DrawPos =  $this->DrawStop($DrawPos, BCD_DEFAULT_MAR_Y1 , $ysize, $xres);

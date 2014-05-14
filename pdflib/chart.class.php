@@ -27,7 +27,7 @@ class chart
     var $colors;        // global colors
     var $series;        // Array of series
     var $pdf;           // reference to the parent class
-    
+
     function chart()
     {
         $this->clearchart();

@@ -107,13 +107,13 @@ text-align: center;
 
 .sorting_asc {
 background: $varirgb[1] url('{$palvelin2}DataTables/media/images/sort_asc.png') no-repeat center right;
-}                
-                 
-.sorting_desc {  
+}
+
+.sorting_desc {
 background: $varirgb[1] url('{$palvelin2}DataTables/media/images/sort_desc.png') no-repeat center right;
-}                
-                 
-.sorting {       
+}
+
+.sorting {
 background: $varirgb[1] url('{$palvelin2}DataTables/media/images/sort_both.png') no-repeat center right;
 }
 

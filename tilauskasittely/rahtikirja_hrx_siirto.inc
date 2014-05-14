@@ -200,7 +200,7 @@ if ($kollityht > 0) {
          'montako_laatikkoa_yht' => $kollityht,
          'pakkauskoodi' => $pakkaus[0],
         'yh_nimi' => $yh_nimi,
-        'yh_puh' => $yh_puh, 
+        'yh_puh' => $yh_puh,
        );
 
       tulosta_hrx($params);

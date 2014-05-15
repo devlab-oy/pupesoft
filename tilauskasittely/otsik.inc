@@ -2015,7 +2015,12 @@ if ($tila == "" and !isset($jatka)) {
 
       $predefined_yhtiotoimipaikka = 0;
 
-      $oikea_sarake[$oikea] .= "<td><select name='yhtiotoimipaikka' onchange='this.form.submit()''>";
+      $oikea_sarake[$oikea] .= "<td>";
+      if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !empty($disabled)) {
+        $oikea_sarake[$oikea] .= "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
+      }
+
+      $oikea_sarake[$oikea] .= "<select name='yhtiotoimipaikka' onchange='this.form.submit()' {$disabled}>";
       $oikea_sarake[$oikea] .= "<option value='0'>".t("Yhtiön perustiedot")."</option>";
 
       while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {

@@ -45,6 +45,11 @@ if (mysql_field_name($result, $i) == "toimipaikka") {
   }
 }
 
+$toimipaikkoja = mysql_num_rows(hae_yhtion_toimipaikat($kukarow['yhtio']));
+if (mysql_field_name($result, $i) == "toimipaikka" and ($yhtiorow['myyntitilauksen_toimipaikka'] != 'A' and $toimipaikkoja < 1)) {
+  $tyyppi = 0;
+}
+
 if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
   $query = "  SELECT tunnus, nimi, koodi
         FROM kustannuspaikka

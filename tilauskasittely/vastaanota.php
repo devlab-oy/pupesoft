@@ -953,7 +953,7 @@ if ($id == '0' and $echotaanko) {
   if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {
     $varasto .= " AND lasku.yhtio_toimipaikka = {$toimipaikkarajaus}";
   }
-  else if (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] != 0) {
+  else if (!isset($toimipaikkarajaus)) {
     $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
   }
 

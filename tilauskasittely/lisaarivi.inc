@@ -2024,7 +2024,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
   //jos ei olla k‰yty tossa yll‰‰ll‰ niin katotaan onko $ei_nayteta settattu ja laitetaan $puu_ein = $ei_nayteta jos se on viel tyhj‰
   if ($puu_ein[$i] == "" AND isset($ei_nayteta)) {
     $puu_ein[$i] = $ei_nayteta;
-    echo "2030 I $i ei_nayteta $ei_nayteta <br><br>";
   }
 
   foreach ($puu_tuoteno as $i => $tuoteno) {

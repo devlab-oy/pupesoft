@@ -175,39 +175,39 @@ else {
         }
 
         if ($mukaan == "tuote") {
-                  if ($nimitykset == "" and $massat == "") {
-                    if ($group!="") $group .= ",tuote.tuoteno";
-                    else $group  .= "tuote.tuoteno";
-                    $select .= "tuote.tuoteno tuoteno, ";
-                    $order  .= "tuote.tuoteno,";
-                    $gluku++;
-                  }
-                  if ($nimitykset != "" and $massat == "") {
-                    if ($group!="") $group .= ",tuote.tuoteno, tuote.nimitys";
-                    else $group  .= "tuote.tuoteno, tuote.nimitys";
-                    $select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
-                    $order  .= "tuote.tuoteno,";
-                    $gluku++;
-                  }
-                  if ($nimitykset == "" and $massat != "") {
-                    if ($group!="") $group .= ",tuote.tuoteno, tuote.tuotemassa";
-                    else $group  .= "tuote.tuoteno, tuote.tuotemassa";
-                    $select .= "tuote.tuoteno tuoteno, tuote.tuotemassa tuotemassa, ";
-                    $order  .= "tuote.tuoteno,";
-                    $gluku++;
-                  }
-                  else {
-                    if ($group!="") $group .= ",tuote.tuoteno, tuote.tuotemassa";
-                    else $group  .= "tuote.tuoteno, tuote.tuotemassa";
-                    $select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, tuote.tuotemassa tuotemassa, ";
-                    $order  .= "tuote.tuoteno,";
-                    $gluku++;
-                  }
+          if ($nimitykset == "" and $massat == "") {
+            if ($group!="") $group .= ",tuote.tuoteno";
+            else $group  .= "tuote.tuoteno";
+            $select .= "tuote.tuoteno tuoteno, ";
+            $order  .= "tuote.tuoteno,";
+            $gluku++;
+            }
+          if ($nimitykset != "" and $massat == "") {
+            if ($group!="") $group .= ",tuote.tuoteno, tuote.nimitys";
+            else $group  .= "tuote.tuoteno, tuote.nimitys";
+            $select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
+            $order  .= "tuote.tuoteno,";
+            $gluku++;
+          }
+          if ($nimitykset == "" and $massat != "") {
+            if ($group!="") $group .= ",tuote.tuoteno, tuote.tuotemassa";
+            else $group  .= "tuote.tuoteno, tuote.tuotemassa";
+            $select .= "tuote.tuoteno tuoteno, tuote.tuotemassa tuotemassa, ";
+            $order  .= "tuote.tuoteno,";
+            $gluku++;
+          }
+          else {
+            if ($group!="") $group .= ",tuote.tuoteno, tuote.tuotemassa";
+            else $group  .= "tuote.tuoteno, tuote.tuotemassa";
+            $select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, tuote.tuotemassa tuotemassa, ";
+            $order  .= "tuote.tuoteno,";
+            $gluku++;
+          }
 
-                  if ($rajaus[$i] != "") {
-                    $lisa .= " and tuote.tuoteno='$rajaus[$i]' ";
-                  }
-                }
+          if ($rajaus[$i] != "") {
+                $lisa .= " and tuote.tuoteno='$rajaus[$i]' ";
+          }
+        }
 
         if ($mukaan == "tuoteostaja") {
           if ($group!="") $group .= ",tuote.ostajanro";

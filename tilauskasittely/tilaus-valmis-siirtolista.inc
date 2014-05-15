@@ -364,6 +364,34 @@ else {
     $varasto   = '';
     $edvarasto = '';
 
+    if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+      foreach ($splitatut as $tunnus) {
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus   = '{$tunnus}'
+                  AND toimitustavan_lahto = 0";
+        $result = pupe_query($query);
+        $lahtorow = mysql_fetch_assoc($result);
+
+        // Tilaustyyppi 2, eli varastotäydennys, siirretään aina yhden päivän eteenpäin
+        $eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
+
+        $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
+
+        if ($lahdot !== FALSE) {
+          // Otetaan eka lähtö
+          $valittu_lahto = array_shift($lahdot);
+
+          $query = "UPDATE lasku
+                    SET toimitustavan_lahto = '{$valittu_lahto['tunnus']}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$tunnus}'";
+          pupe_query($query);
+        }
+      }
+    }
+
     // loopataan kaikki yhdestä tilauksesta syntyneet lähetteet
     foreach ($tvs_tilausnumerot as $tvs_tilausnumero) {
 
@@ -434,11 +462,11 @@ else {
       }
       else {
         //Laitetaan lista tulostusjonoon
-        $query = "  UPDATE lasku
-              SET alatila = 'J'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus = '$laskurow[tunnus]'
-              and tila='$tvs_tila'";
+        $query = "UPDATE lasku
+                  SET alatila = 'J'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus = '$laskurow[tunnus]'
+                  AND tila='$tvs_tila'";
         $result = mysql_query($query) or pupe_error($query);
 
         if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
@@ -482,17 +510,23 @@ else {
 
           laheta_tilausvahvistus($params_tilausvahvistus);
 
-          echo "<font class='message'>".t("Siirtolista siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
+          echo "<font class='message'>";
+          echo t("Siirtolista siirretty tulostusjonoon") . " " . $laskurow['tunnus'];
+          echo "<br /><br />";
         }
       }
     }
 
     // tilaus ei enää kesken...
-    $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+    $query  = "UPDATE kuka SET kesken=0 WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
     $result = mysql_query($query) or pupe_error($query);
 
     // Lähetteet tulostetaan automaattisesti
-    if (($toim == "MYYNTITILI" and $yhtiorow["myyntitilin_tulostustapa"] == "A") or ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow["valmistuksen_tulostustapa"] == "A") or ($toim == "VALMISTAVARASTOON" and $yhtiorow["valmistuksen_tulostustapa"] == "A") or ($toim == "SIIRTOLISTA" and $yhtiorow["siirtolistan_tulostustapa"] == "A")) {
+    if (   ($toim == "MYYNTITILI" and $yhtiorow["myyntitilin_tulostustapa"] == "A")
+        or ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow["valmistuksen_tulostustapa"] == "A")
+        or ($toim == "VALMISTAVARASTOON" and $yhtiorow["valmistuksen_tulostustapa"] == "A")
+        or ($toim == "SIIRTOLISTA" and $yhtiorow["siirtolistan_tulostustapa"] == "A")
+    ) {
       #TODO: Otetaan tässä vain alkuperäinen tilaus ja tulostetaan se.. Jos tilaus splittaantui, muut jäävät keräyslistajonoon.
       $query = "SELECT * FROM lasku where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$alkuplaskutunnus'";
       $result = mysql_query($query) or pupe_error($query);
@@ -500,34 +534,6 @@ else {
 
       $tee = "valmis";
       $tulostetaan = "OK";
-    }
-
-    if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-      foreach ($splitatut as $tunnus) {
-        $query = "SELECT *
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus   = '{$tunnus}'
-                  AND toimitustavan_lahto = 0";
-        $result = pupe_query($query);
-        $lahtorow = mysql_fetch_assoc($result);
-
-        // Tilaustyyppi 2, eli varastot‰ydennys, siirret‰‰n aina yhden p‰iv‰n eteenp‰in
-        $eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
-
-        $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
-
-        if ($lahdot !== FALSE) {
-          // Otetaan eka lähtö
-          $valittu_lahto = array_shift($lahdot);
-
-          $query = "UPDATE lasku
-                    SET toimitustavan_lahto = '{$valittu_lahto['tunnus']}'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$tunnus}'";
-          pupe_query($query);
-        }
-      }
     }
   }
 

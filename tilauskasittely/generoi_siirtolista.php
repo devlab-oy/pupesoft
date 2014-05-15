@@ -133,6 +133,8 @@ if (!isset($ei_siirreta_jos_tarve_ylittyy)) $ei_siirreta_jos_tarve_ylittyy = "";
 
 list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
+$laaja_toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
+
 if (!$php_cli) {
 
   // Tällä ollaan, jos olemme syöttämässä tiedostoa ja muuta
@@ -143,7 +145,6 @@ if (!$php_cli) {
   $lahde_varastot = hae_varastot();
   echo "<tr><th>",t("Lähdevarasto, eli varasto josta kerätään"),":</th>";
   echo "<td>";
-  $laaja_toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
   if ($laaja_toim_kasittely) {
     array_unshift($lahde_varastot, array('tunnus' => '', 'nimitys' => t('Valitse')));
     echo "<select name='lahdevarastot[]'>";
@@ -394,6 +395,11 @@ if ($tee == 'M' and isset($generoi)) {
   if (!$php_cli) echo "<br /><br />";
 
   $kohdevarasto = (int) $kohdevarasto;
+
+  if ($laaja_toim_kasittely and count($lahdevarastot) == 1 and $lahdevarastot[0] == '') {
+    //Lähdevarasto dropdownista valittu "Valitse". Asetetaan $lahdevarastot tyhjäksi, jottei mene generointi haaraan
+    $lahdevarastot = array();
+  }
 
   if ($kohdevarasto > 0 and count($lahdevarastot) > 0) {
 

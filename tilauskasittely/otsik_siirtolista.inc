@@ -144,7 +144,6 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   }
   echo "</select></td></tr>";
 
-
   if ($toim != "SIIRTOTYOMAARAYS") {
     if ($toim == "SIIRTOLISTA") {
       echo "<tr><th>".t("Valitse kohdevarasto").":</th>";
@@ -314,7 +313,6 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
     }
     echo "</select>";
-
 
     echo "</td></tr>";
   }

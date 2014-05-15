@@ -556,7 +556,6 @@ else {
       $hresult = mysql_query($query) or pupe_error($query);
     }
 
-
     while ($laskurow = mysql_fetch_array($hresult)) {
       //Tulostetaan lista
       $query = "  SELECT tuote.tuoteno, tilausrivi.*
@@ -605,7 +604,6 @@ else {
                   and hyllytaso    = '$crow[hyllytaso]'";
             $varatutresult = mysql_query($query) or pupe_error($query);
             $varatutrow = mysql_fetch_array($varatutresult);
-
 
             $vapaana = $alkurow["saldo"] - $varatutrow["keratty"];
 

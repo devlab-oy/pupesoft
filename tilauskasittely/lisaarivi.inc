@@ -133,8 +133,6 @@ if (!function_exists("tuoteperhe_reku")) {
 
     return array($tuoteperhe, $kaikkituotteet);
   }
-
-
 }
 
 if (!function_exists("tuoteperhe_reku2")) {
@@ -193,8 +191,6 @@ if (!function_exists("tuoteperhe_reku2")) {
     }
     return array($perhearray, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array);
   }
-
-
 }
 
 if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ", var_dump($varasto), "<br>";
@@ -981,8 +977,6 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
             return 0;
           }
         }
-
-
       }
 
       // Sortataan varastopaikat oletus, prio, myyt‰viss‰ j‰rkk‰‰n
@@ -1010,8 +1004,6 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
             return 0;
           }
         }
-
-
       }
 
       if (!function_exists('chk_varaston_saldo')) {
@@ -1160,8 +1152,6 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
           return $arr;
         }
-
-
       }
 
       // Sortataan tuotepaikat
@@ -2227,7 +2217,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $autom_siirto_myytil = true;
           $toimittajan_tunnus = $siirto_varasto['tunnus'];
 
-
           $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($siirto_varasto['kohde_tunnus']));
           $tuotepaikka = $tuotepaikkojen_saldot[0];
 
@@ -2712,7 +2701,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
     }
 
-
     // Jos hinta ja alekertoimet on setattu
     if ($puu_hintake[$i] != "X") {
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -3145,7 +3133,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                   and $tunken      = 0";
             $sarjares = pupe_query($query);
           }
-
 
           if ($srow["kaytetty"] == 'K') {
             $query = "  UPDATE tilausrivi

@@ -1629,7 +1629,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "! ($aika) $kaikkiyhteensa {$laskurow['valkoodi']}</font><br /><br />";
       }
 
-
       if (($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kateinen != '' and $kukarow['extranet'] == '' and $kateisohitus == "") {
         echo "  <script type='text/javascript' language='JavaScript'>
             <!--
@@ -4932,7 +4931,6 @@ if ($tee == '') {
           }
         }
 
-
         echo "</table>";
         echo "</td>";
 
@@ -5509,7 +5507,6 @@ if ($tee == '') {
         }
       }
 
-
       $tuotetyyppi        = "";
       $positio_varattu      = "";
       $varaosatyyppi        = "";
@@ -5925,7 +5922,6 @@ if ($tee == '') {
               $tuoteperhe_kayty = $row['perheid'];
             }
             echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino";
-
 
             if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
               echo "<br/>";
@@ -6563,7 +6559,6 @@ if ($tee == '') {
             $kpl_ruudulle = $row['varattu'] * 1;
           }
 
-
           if ($muokkauslukko_rivi == "" and $kpl_ruudulle < 0 and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G")) {
 
             echo "<td $class align='right' valign='top' nowrap>";
@@ -6938,7 +6933,6 @@ if ($tee == '') {
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
                 <input type='Submit' value='".t("Lisää raaka-aine")."'>
                 </form>";
-
 
             echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='lisaaisakertareseptiin'>
                 <input type='hidden' name='toim'       value = '$toim'>
@@ -7677,7 +7671,6 @@ if ($tee == '') {
                 <th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
                 <td class='spec' align='right'>".sprintf("%.2f", $arvo_eieri)."</td>";
 
-
             if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and $kotiarvo_eieri-$ostot_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
               echo "<td class='spec' align='right' nowrap>".sprintf("%.2f", 100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."%</td>";
             }
@@ -8178,7 +8171,6 @@ if ($tee == '') {
             else {
               $jysum = $arvo;
             }
-
 
             if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
               echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f", 100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."' Style='text-align:right' $state></td>";
@@ -9027,7 +9019,7 @@ if ($tee == '') {
           </form></td></tr>";
     }
 
-    if (      $kukarow['extranet'] == ""
+    if ($kukarow['extranet'] == ""
       and isset($yhtiorow['tilauksen_myyntieratiedot'])
       and $yhtiorow['tilauksen_myyntieratiedot'] != ''
       and $tilausok == 0

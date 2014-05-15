@@ -1610,7 +1610,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     if ($kukarow["extranet"] == "") {
       $aika=date("d.m.y @ G:i:s", time());
 
-      if(isset($splitatut) and sizeof($splitatut) > 0){
+      if(isset($splitatut) and sizeof($splitatut) > 0) {
         foreach ($splitatut as $value) {
           echo "<font class='message'>";
           echo $otsikko,' ';
@@ -1622,7 +1622,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         }
         echo "<br />";
       }
-      else{
+      elseif(!isset($splitatut)) {
         echo "<font class='message'>";
         echo $otsikko, ' ', $kukarow['kesken'], ' ';
         echo t("valmis");

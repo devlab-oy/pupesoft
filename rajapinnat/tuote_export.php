@@ -350,6 +350,17 @@
                                         );
   }
 
+  // Etsitään isätuotteet valmiiksi alakategorioille joilla taso on > 1
+  foreach ($dnstuotepuu as $tun => &$val) {
+    if ($val['syvyys'] > 1) {
+      foreach($dnstuotepuu as $tunni => $valli) {
+        if ($valli['left'] < $val['left'] and $valli['right'] > $val['right'] and $valli['syvyys'] < $val['syvyys'] and $valli['syvyys'] > 0 and $tunni != $tun) {
+          $val['isan_nimi'] = $valli['nimi'];
+        } 
+      }
+    }
+  }
+
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
   }

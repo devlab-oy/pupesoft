@@ -182,8 +182,6 @@ class MagentoClient {
 
     $categoryaccesscontrol = $this->_categoryaccesscontrol;
 
-    //$parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhm‰t lis‰t‰‰n - muuttuu tietenkin jokaisella alakategorialla mutta defaulttaa t‰h‰n
-
     $count = 0;
 
     // Loopataan osastot ja tuoteryhmat
@@ -195,35 +193,41 @@ class MagentoClient {
         
         $alakategoria['nimi'] = utf8_encode($alakategoria['nimi']);
 
-        // O-taso on vain tuotepuun nimi, 1-taso on "is‰kategoriat" jotka laitetaan aina magenton p‰‰kategoriatunnuksen alle
+        // Selvitet‰‰n mik‰ on alakategorian parent_id
         if ($alakategoria['syvyys'] == 1) {
-          // Otetaan
+          // Syvyys 1-taso lis‰t‰‰n aina magenton p‰‰kategoriatunnuksen alle
+          // T‰m‰n tason tuoteryhm‰t pit‰isi normaalisti olla jo perustettuna
           $parent_id = $this->_parent_id;
-          $
+        }
+        elseif ($alakategoria['syvyys'] > 1 and isset($alakategoria['isan_nimi'])) {
+          // Kun syvyys on > 1 niin haetaan "is‰"-kategorian magentoid
+          $alakategoria['isan_nimi'] = utf8_encode($alakategoria['isan_nimi']);
+          $parent_id = $this->findCategory($alakategoria['isan_nimi'], $category_tree['children']);
+          if (empty($parent_id)) continue;
         }
         else {
-          $parent_id
+          continue;
         }
 
         // Katsotaan lˆytyykˆ tuoteryhm‰
         if (!$this->findCategory($alakategoria['nimi'], $category_tree['children'])) {
-
+          // Yli 3-tason alakategoriat pit‰isi piilottaa menusta(?)
+          $inclusion = $alakategoria['syvyys'] > 3  ? 0 : 1;
           // Lis‰t‰‰n kategoria, jos ei lˆytynyt
           $sub_category_data = array(
             'name'                  => $alakategoria['nimi'],
             'is_active'             => 1,
-            'position'               => 1,
+            'position'              => 1,
             'default_sort_by'       => 'position',
             'available_sort_by'     => 'position',
-            'include_in_menu'       => 1
+            'include_in_menu'       => $inclusion
           );
 
           if ($categoryaccesscontrol) {
             // HUOM: Vain jos "Category access control"-moduli on asennettu
-            $category_data['accesscontrol_show_group'] = 0;
+            $sub_category_data['accesscontrol_show_group'] = 0;
           }
-          //KISSA Haetaan isikategorian id
-          //$parent_id = 53;
+
           // Kutsutaan soap rajapintaa
           $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
             array($parent_id, $sub_category_data)
@@ -231,17 +235,17 @@ class MagentoClient {
 
           $count++;
 
-          $this->log("Lis‰ttiin kategoria {$alakategoria['nimi']}");
+          $this->log("Lis‰ttiin tuotepuun tason {$alakategoria['syvyys']} kategoria {$alakategoria['nimi']}");
         }
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log("Virhe! Kategoriaa {$alakategoria['nimi']} ei voitu lis‰t‰", $e);
+        $this->log("Virhe! Tuotepuun tason {$alakategoria['syvyys']} kategoriaa {$alakategoria['nimi']} ei voitu lis‰t‰", $e);
       }
     }
 
     $this->_category_tree = $this->getCategories();
-    $this->log("$count alakategoriaa lis‰tty");
+    $this->log("$count tuotepuun kategoriaa lis‰tty");
 
     return $count;
   }
@@ -291,8 +295,22 @@ class MagentoClient {
 
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
 
+      $category_ids = array();
       // Etsit‰‰n kategoria_id tuoteryhm‰ll‰
-      $category_id = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      
+      // Jos tuote kuuluu tuotepuuhun niin etsit‰‰n kategoria_idt myˆs kaikille tuotepuun kategorioille
+      $query = "SELECT group_concat(DISTINCT nimi) kaikki_tuotepuun_nimet FROM puun_alkio JOIN dynaaminen_puu ON (dynaaminen_puu.yhtio = puun_alkio.yhtio AND dynaaminen_puu.tunnus = puun_alkio.puun_tunnus) WHERE puun_alkio.yhtio ='srs' AND puun_alkio.liitos = '{$tuote_clean}'";
+      
+      $res = pupe_query($query);
+      var_dump($category_tree);
+      if (mysql_num_rows($res) == 1) {
+        $eow = mysql_fetch_assoc($res);
+        $kaikkinimet = explode(",",$eow['kaikki_tuotepuun_nimet']);
+        foreach($kaikkinimet as $etsinimi) {
+          $category_ids[] = $this->findCategory(utf8_encode($etsinimi), $category_tree['children']);
+        }
+      }
 
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
@@ -308,7 +326,7 @@ class MagentoClient {
       );
 
       $tuote_data = array(
-          'categories'            => array($category_id),
+          'categories'            => $category_ids,
           'websites'              => explode(" ", $tuote['nakyvyys']),
           'name'                  => utf8_encode($tuote['nimi']),
           'description'           => utf8_encode($tuote['kuvaus']),
@@ -325,7 +343,7 @@ class MagentoClient {
           'campaign_code'         => utf8_encode($tuote['campaign_code']),
           'onsale'                => utf8_encode($tuote['onsale']),
           'target'                => utf8_encode($tuote['target']),
-          'tier_price'      => $tuote_ryhmahinta_data,
+          #'tier_price'      => $tuote_ryhmahinta_data,
         );
 
       // Lis‰t‰‰n tai p‰ivitet‰‰n tuote

@@ -1618,14 +1618,15 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
           echo t("valmis");
           echo "! (" . $aika . ") ";
           echo $kaikkiyhteensa . $laskurow['valkoodi'];
-          echo "</font><br /><br />";
+          echo "</font><br />";
         }
+        echo "<br />";
       }
       else{
         echo "<font class='message'>";
         echo $otsikko, ' ', $kukarow['kesken'], ' ';
         echo t("valmis");
-        echo "! ($aika) $kaikkiyhteensa {$laskurow['valkoodi']}</font><br><br>";
+        echo "! ($aika) $kaikkiyhteensa {$laskurow['valkoodi']}</font><br /><br />";
       }
 
 

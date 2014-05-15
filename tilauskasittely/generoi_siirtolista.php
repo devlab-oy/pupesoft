@@ -243,9 +243,7 @@ if (!$php_cli) {
   echo "<tr><th>",t("Kohdevarasto, eli varasto jonne l‰hetet‰‰n"),":</th>";
   echo "<td><select name='kohdevarasto'><option value=''>",t("Valitse"),"</option>";
 
-  mysql_data_seek($vares, 0);
-
-  while ($varow = mysql_fetch_assoc($vares)) {
+  foreach ($lahde_varastot as $varow) {
     $sel = '';
     if ($varow['tunnus'] == $kohdevarasto) $sel = 'selected';
 

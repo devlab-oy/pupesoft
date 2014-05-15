@@ -2041,7 +2041,11 @@ if ($tila == "" and !isset($jatka)) {
     $jtki = "";
     $rahtivapaa_chk = '';
 
-    $ei_lahetettako = eilahetetta($srow, $toimtapa_apuro);
+    $args = array(
+        'srow'           => $srow,
+        'toimtapa_apuro' => $toimtapa_apuro,
+    );
+    $ei_lahetettako = eilahetetta($args);
     if ($ei_lahetettako) {
       $eilah = 'CHECKED';
     }
@@ -2050,7 +2054,12 @@ if ($tila == "" and !isset($jatka)) {
     if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
     if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
-    $osatoimitusko = osatoimitus($srow, $oletus);
+    $args = array(
+        'srow'   => $srow,
+        'oletus' => $oletus,
+        'huomioidaanko_kukarow_kesen' => true
+    );
+    $osatoimitusko = osatoimitus($args);
     if ($osatoimitusko) {
       $osath = 'CHECKED';
     }
@@ -2067,12 +2076,22 @@ if ($tila == "" and !isset($jatka)) {
       $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
       unset($_toimipaikka);
 
-      $ei_lahetettako = eilahetetta($srow, $toimtapa_apuro, $vt_yhtiorow);
+      $args = array(
+          'srow'               => $srow,
+          'toimtapa_apuro'     => $toimtapa_apuro,
+          'poikkeava_yhtiorow' => $vt_yhtiorow,
+      );
+      $ei_lahetettako = eilahetetta($args);
       if ($ei_lahetettako) {
         $eilah = 'CHECKED';
       }
 
-      $osatoimitusko = osatoimitus($srow, $oletus, $vt_yhtiorow);
+      $args = array(
+          'srow'               => $srow,
+          'oletus'     => $oletus,
+          'poikkeava_yhtiorow' => $vt_yhtiorow,
+      );
+      $osatoimitusko = osatoimitus($args);
       if ($osatoimitusko) {
         $osath = 'CHECKED';
       }
@@ -2095,7 +2114,11 @@ if ($tila == "" and !isset($jatka)) {
         $vt_yhtiorow = $yhtiorow;
       }
 
-      $ei_lahetettako = eilahetetta(array(), $toimtapa_apuro, $vt_yhtiorow);
+      $args = array(
+          'toimtapa_apuro'     => $toimtapa_apuro,
+          'poikkeava_yhtiorow' => $vt_yhtiorow,
+      );
+      $ei_lahetettako = eilahetetta($args);
       if ($ei_lahetettako) {
         $eilah = 'CHECKED';
       }
@@ -2103,7 +2126,11 @@ if ($tila == "" and !isset($jatka)) {
         $eilah = '';
       }
 
-      $osatoimitusko = osatoimitus(array(), $oletus, $vt_yhtiorow);
+      $args = array(
+          'toimtapa_apuro'     => $toimtapa_apuro,
+          'poikkeava_yhtiorow' => $vt_yhtiorow,
+      );
+      $osatoimitusko = osatoimitus($args);
       if ($osatoimitusko) {
         $osath = 'CHECKED';
       }

@@ -27816,8 +27816,12 @@ if (!function_exists('tilauksen_toimipaikka')) {
 }
 
 if (!function_exists('eilahetetta')) {
-  function eilahetetta($srow = array(), $toimtapa_apuro = array(), $poikkeava_yhtiorow = array()) {
+  function eilahetetta(array $args) {
     global $kukarow, $yhtiorow, $toim;
+
+    $srow = isset($args['srow']) ? $args['srow'] : array();
+    $toimtapa_apuro = isset($args['toimtapa_apuro']) ? $args['toimtapa_apuro'] : array();
+    $poikkeava_yhtiorow = isset($args['poikkeava_yhtiorow']) ? $args['poikkeava_yhtiorow'] : array();
 
     $_yhtiorow = $yhtiorow;
     if (!empty($poikkeava_yhtiorow)) {
@@ -27875,8 +27879,13 @@ if (!function_exists('eilahetetta')) {
 }
 
 if (!function_exists('osatoimitus')) {
-  function osatoimitus($srow = array(), $oletus = array(), $poikkeava_yhtiorow = array()) {
+  function osatoimitus(array $args) {
     global $kukarow, $yhtiorow, $toim;
+
+    $srow = isset($args['srow']) ? $args['srow'] : array();
+    $oletus = isset($args['oletus']) ? $args['oletus'] : array();
+    $poikkeava_yhtiorow = isset($args['poikkeava_yhtiorow']) ? $args['poikkeava_yhtiorow'] : array();
+    $huomioidaanko_kukarow_kesen = isset($args['huomioidaanko_kukarow_kesen']) ? $args['huomioidaanko_kukarow_kesen'] : false;
 
     $_yhtiorow = $yhtiorow;
     if (!empty($poikkeava_yhtiorow)) {
@@ -27888,11 +27897,20 @@ if (!function_exists('osatoimitus')) {
             (in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "")
             and $kukarow["kesken"] == 0
             );
-    $_osatoimitus_myyntitilaus = (
+
+    if ($huomioidaanko_kukarow_kesen) {
+      $_osatoimitus_myyntitilaus = (
             $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
-            and $kukarow['kesken'] == 0
+            and $kukarow["kesken"] == 0
             and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
             );
+    }
+    else {
+      $_osatoimitus_myyntitilaus = (
+            $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+            and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+            );
+    }
 
     if (!empty($srow)) {
       if ($srow['osatoimitus'] != '' or $_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {

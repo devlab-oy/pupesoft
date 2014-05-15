@@ -1109,7 +1109,7 @@ if ($id == '0' and $echotaanko) {
 
         if ($toim == "") {
           echo "<td>";
-          echo "<input type='checkbox' class='siirtolistan_vastaanotto' name='siirtolistan_vastaanotto[]' value='{$row['tunnus']}' /> {$_vastaanottonro} {$_lahto}";
+          echo "<input type='checkbox' class='siirtolistan_vastaanotto' name='siirtolistan_vastaanotto[]' value='{$row['tunnus']}' /> {$_vastaanottonro}";
           echo "</td>";
 
           if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {

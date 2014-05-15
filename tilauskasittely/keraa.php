@@ -1563,6 +1563,14 @@ if ($tee == 'P') {
           $alatilak = "C";
         }
 
+        $_siirtolista = ($laskurow['tila'] == 'G');
+        $_kerayserat_paalla = ($yhtiorow['kerayserat'] == 'K');
+        $_siirrolla_ei_lahtoa = ($laskurow['toimitustavan_lahto'] == 0);
+        $_laaja_toimipaikka = ($yhtiorow['toimipaikkakasittely'] == "L");
+        if ($_siirtolista and $_kerayserat_paalla and $_siirrolla_ei_lahtoa and $_laaja_toimipaikka) {
+          paivita_siirtolistan_toimipaikka($laskurow['tunnus']);
+        }
+
         // Lasku p‰ivitet‰‰n vasta kuin tilausrivit on p‰ivitetty...
         $query  = "  UPDATE lasku SET
               alatila = '$alatilak'

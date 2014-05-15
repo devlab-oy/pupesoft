@@ -28,8 +28,8 @@ if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $vara
   }
 }
 
-$toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
-if ($toim == 'SIIRTOLISTA' and isset($jatka) and $toim_kasittely and $varasto == '') {
+$laaja_toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
+if ($toim == 'SIIRTOLISTA' and isset($jatka) and $laaja_toim_kasittely and $varasto == '') {
   echo "<font class='error'>".t("L‰hdevarasto pit‰‰ valita")."!!!</font><br><br>";
   unset($jatka);
 }
@@ -119,7 +119,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   echo "<td><select name='varasto'>";
 
   if ($toim == "SIIRTOLISTA") {
-    if ($toim_kasittely and $tilauksesta_myyntitilaus) {
+    if ($laaja_toim_kasittely) {
       echo "<option value=''>".t("Valitse")."</option>";
     }
     else {

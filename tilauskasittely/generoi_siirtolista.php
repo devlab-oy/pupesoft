@@ -143,8 +143,8 @@ if (!$php_cli) {
   $lahde_varastot = hae_varastot();
   echo "<tr><th>",t("L‰hdevarasto, eli varasto josta ker‰t‰‰n"),":</th>";
   echo "<td>";
-  $toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
-  if ($toim_kasittely) {
+  $laaja_toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
+  if ($laaja_toim_kasittely) {
     array_unshift($lahde_varastot, array('tunnus' => '', 'nimitys' => t('Valitse')));
     echo "<select name='lahdevarastot[]'>";
     foreach ($lahde_varastot as $lahde_varasto) {

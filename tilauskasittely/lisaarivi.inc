@@ -768,6 +768,14 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       }
     }
   }
+  elseif ($perheid != 0) {
+    $query = "SELECT ei_nayteta
+              FROM tuoteperhe
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND isatuoteno = (SELECT tuoteno FROM tilausrivi WHERE tunnus = $perheid) LIMIT 1";
+    $einayres = mysql_fetch_assoc(pupe_query($query));
+    $ei_nayteta = $einayres["ei_nayteta"];
+  }
 
   //Kaikkien arrayden indeksien äiti
   $i = 0;
@@ -1674,8 +1682,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_erikoistoimitus[$indeksi] = "";
               }
 
-              if (!isset($myy_lapsi_ein[$indeksi])) {
+              if (!isset($myy_lapsi_ein[$indeksi]) AND !isset($ei_nayteta)) {
                 $myy_lapsi_ein[$indeksi] = "";
+              }
+              elseif (isset($ei_nayteta)) {
+                $myy_lapsi_ein[$indeksi] = $ei_nayteta;
               }
 
               $tlisatied_lisa2 = "";
@@ -2008,6 +2019,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $puu_ohiker[]   = $perherow["ohita_kerays"];
       $puu_var[]    = $var;
     }
+  }
+
+  //jos ei olla käyty tossa ylläällä niin katotaan onko $ei_nayteta settattu ja laitetaan $puu_ein = $ei_nayteta jos se on viel tyhjä
+  if ($puu_ein[$i] == "" AND isset($ei_nayteta)) {
+    $puu_ein[$i] = $ei_nayteta;
+    echo "2030 I $i ei_nayteta $ei_nayteta <br><br>";
   }
 
   foreach ($puu_tuoteno as $i => $tuoteno) {
@@ -2891,8 +2908,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
             toimittajan_tunnus  = '$toimittajan_tunnus',
             rekisterinumero    = '{$rekisterinumero}',
             muutospvm      = now(),
-            muuttaja      = '$kukarow[kuka]',
-            ei_nayteta      = '{$puu_ein[$i]}'
+            muuttaja      = '$kukarow[kuka]'
             {$tlisatied_lisa}
             {$tlisatied_lisa2}
             {$jt_manual_lisa}

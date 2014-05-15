@@ -2180,7 +2180,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $_extranetista = (isset($mista_tullaan) and $mista_tullaan == 'ORUMNET' and $toim == 'EXTRANET');
     $_osto_myyntitilaukselta = ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and $_myyntitilauksella);
 
-    if ($rivitunnus == 0 and
+    if (($rivitunnus == 0 or $tapa == "MYYVASTAAVA") and
       $rivityyppi == 'L' and
       $yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and
       $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and

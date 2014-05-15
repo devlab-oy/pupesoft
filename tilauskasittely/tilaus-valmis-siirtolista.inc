@@ -350,13 +350,12 @@ else {
       $montakotilausta = mysql_num_rows($result);
       $numerot = implode(', ',$tvs_tilausnumerot);
 
+      $splitatut = array();
       while ($row = mysql_fetch_array($result)) {
-
         $upviesti = $row["sisviesti2"]." ".t("Tilaus jakaantunut")." $montakotilausta ".t("tilaukseksi").": ".$numerot." ".t("Tilaus").": ".$tilauksia."/".$montakotilausta;
-
         $query = "UPDATE lasku set sisviesti2 = '$upviesti' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
         $upresult = mysql_query($query) or pupe_error($query);
-
+        $splitatut[] = $row['tunnus'];
         $tilauksia++;
       }
     }
@@ -399,20 +398,38 @@ else {
         //Tilauskella on pelkästään jt-rivejä
         if ($rivirow["riveja"] > 0 and $rivirow["jteet"] > 0) {
           //päivtetään tilaus tilaan 'odottaa jt-rivejä'
-          $query = "UPDATE lasku SET tila='$tvs_tila', alatila='T' where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]'";
+          $query = "  UPDATE lasku
+                      SET tila='$tvs_tila', alatila='T'
+                      WHERE yhtio='$kukarow[yhtio]'
+                      AND tunnus='$laskurow[tunnus]'";
           $yresult = mysql_query($query) or pupe_error($query);
-
-          echo "<font class='message'>".t("Siirtolista siirrettiin jälkitoimitukseksi odottamaan tuotteita")." $laskurow[tunnus].<br><br>";
+          echo "<font class='message'>";
+          echo t("Siirtolista siirrettiin jälkitoimitukseksi odottamaan tuotteita") . ' ';
+          echo $laskurow['tunnus'];
+          echo "<br /><br />";
         }
         else {
           // Mitään järkeviä riviä ei ollut, mitätöidään lista
-          $query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+          $query = "UPDATE tilausrivi
+                    SET tyyppi='D'
+                    WHERE yhtio='$kukarow[yhtio]'
+                    AND otunnus='$kukarow[kesken]'";
           $result = mysql_query($query) or pupe_error($query);
 
-          $query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi siirtolistan")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+          $kommentti = $kukarow['nimi'] . " " . "(" . $kukarow['kuka'] . ")" . " ";
+          $kommentti .= t("mitätöi siirtolistan") . " " . date("d.m.y @ G:i:s");
+          $query = "UPDATE lasku
+                    SET tila='D', alatila='$laskurow[tila]', comments='$kommentti'
+                    WHERE yhtio='$kukarow[yhtio]'
+                    AND tunnus='$kukarow[kesken]'";
           $result = mysql_query($query) or pupe_error($query);
-
-          echo "<font class='message'>".t("Siirtolista mitätöitiin, koska sillä ei ollut mitään kerättävää")." $laskurow[tunnus].<br><br>";
+          echo "<font class='message'>";
+          echo t("Siirtolista mitätöitiin, koska sillä ei ollut mitään kerättävää") . " ";
+          echo $laskurow['tunnus'];
+          echo "</font><br /><br />";
+        }
+        if(($laskutunnus = array_search($laskurow['tunnus'], $splitatut)) !== false) {
+          unset($splitatut[$laskutunnus]);
         }
       }
       else {
@@ -425,7 +442,9 @@ else {
         $result = mysql_query($query) or pupe_error($query);
 
         if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-          echo "<font class='message'>".t("Valmistus siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
+          echo "<font class='message'>";
+          echo t("Valmistus siirretty tulostusjonoon") . " " . $laskurow['tunnus'];
+          echo "</font><br><br>";
 
           if ($toim == "VALMISTAASIAKKAALLE" and trim($laskurow['tilausvahvistus']) != "") {
             //
@@ -484,28 +503,30 @@ else {
     }
 
     if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-      $query = "  SELECT *
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus   = '{$laskurow['tunnus']}'
-            AND toimitustavan_lahto = 0";
-      $result = pupe_query($query);
-      $lahtorow = mysql_fetch_assoc($result);
+      foreach ($splitatut as $tunnus) {
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus   = '{$tunnus}'
+                  AND toimitustavan_lahto = 0";
+        $result = pupe_query($query);
+        $lahtorow = mysql_fetch_assoc($result);
 
-      // Tilaustyyppi 2, eli varastotäydennys, siirretään aina yhden päivän eteenpäin
-      $eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
+        // Tilaustyyppi 2, eli varastot‰ydennys, siirret‰‰n aina yhden p‰iv‰n eteenp‰in
+        $eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
 
-      $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
+        $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
 
-      if ($lahdot !== FALSE) {
-        // Otetaan eka lähtö
-        $valittu_lahto = array_shift($lahdot);
+        if ($lahdot !== FALSE) {
+          // Otetaan eka lähtö
+          $valittu_lahto = array_shift($lahdot);
 
-        $query = "  UPDATE lasku
-              SET toimitustavan_lahto = '{$valittu_lahto['tunnus']}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$laskurow['tunnus']}'";
-        pupe_query($query);
+          $query = "UPDATE lasku
+                    SET toimitustavan_lahto = '{$valittu_lahto['tunnus']}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$tunnus}'";
+          pupe_query($query);
+        }
       }
     }
   }

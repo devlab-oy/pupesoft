@@ -149,6 +149,7 @@ if (!$php_cli) {
     echo "<select name='lahdevarastot[]'>";
     foreach ($lahde_varastot as $lahde_varasto) {
       $sel = "";
+      //Dropdownista voi tulla vain yksi lähdevarasto
       if (isset($lahdevarastot) and $lahdevarastot[0] == $lahde_varasto['tunnus']) {
         $sel = "SELECTED";
       }
@@ -162,18 +163,23 @@ if (!$php_cli) {
 
     foreach($lahde_varastot as $varow) {
       $sel = '';
-      if (isset($lahdevarastot) and is_array($lahdevarastot) and in_array($varow['tunnus'], $lahdevarastot))
+      if (isset($lahdevarastot) and in_array($varow['tunnus'], $lahdevarastot)) {
         $sel = 'checked';
+      }
 
       $varastomaa = '';
       if ($varow['maa'] != "" and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
         $varastomaa = '('.maa(strtoupper($varow['maa'])).')';
       }
 
-      if ($kala == 0)
+      if ($kala == 0) {
         echo "<tr>";
+      }
 
-      echo "<td><input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}</td>";
+      echo "<td>";
+      $nimi = "{$varow['nimitys']} {$varastomaa}";
+      echo "<input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel}/>{$nimi}";
+      echo "</td>";
 
       if ($kala == 3) {
         echo "</tr>";

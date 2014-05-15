@@ -5431,11 +5431,12 @@ if ($tee == '') {
             $_toimipaikan_kerayserat_mittatiedot = ($toimipaikan_yhtiorow['kerayserat'] == 'K');
             $toimipaikka_ja_varasto_ei_sama = ($v_toimipaikka['tunnus'] != $laskurow['yhtio_toimipaikka']);
             $tarvii_lahdon = ($laskurow['eilahetetta'] == '' and $laskurow['sisainen'] == '');
+            $_toimitustapa = ($laskurow['toimitustapa'] != '');
 
             // jos varaston toimipaikka ei ole tilauksen toimipaikka, niin aina true.
             $tarvii_lahdon = ($toimipaikka_ja_varasto_ei_sama ? TRUE : $tarvii_lahdon);
 
-            if ($_toimipaikan_kerayserat_mittatiedot and $tarvii_lahdon) {
+            if ($_toimipaikan_kerayserat_mittatiedot and $tarvii_lahdon and $_toimitustapa) {
 
               $toimitustavat = hae_kaikki_toimitustavat();
               $toimitustapa = search_array_key_for_value_recursive($toimitustavat, 'selite', $laskurow['toimitustapa']);

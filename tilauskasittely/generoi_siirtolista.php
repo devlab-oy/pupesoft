@@ -133,8 +133,6 @@ if (!isset($ei_siirreta_jos_tarve_ylittyy)) $ei_siirreta_jos_tarve_ylittyy = "";
 
 list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
-$laaja_toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
-
 if (!$php_cli) {
 
   // T‰ll‰ ollaan, jos olemme syˆtt‰m‰ss‰ tiedostoa ja muuta
@@ -142,62 +140,43 @@ if (!$php_cli) {
       <input type='hidden' name='tee' value='M'>
       <table>";
 
-  $lahde_varastot = hae_varastot();
   echo "<tr><th>",t("L‰hdevarasto, eli varasto josta ker‰t‰‰n"),":</th>";
-  echo "<td>";
-  if ($laaja_toim_kasittely) {
-    array_unshift($lahde_varastot, array('tunnus' => '', 'nimitys' => t('Valitse')));
-    echo "<select name='lahdevarastot[]'>";
-    foreach ($lahde_varastot as $lahde_varasto) {
-      $sel = "";
-      //Dropdownista voi tulla vain yksi l‰hdevarasto
-      if (isset($lahdevarastot) and $lahdevarastot[0] == $lahde_varasto['tunnus']) {
-        $sel = "SELECTED";
-      }
-      echo "<option value='{$lahde_varasto['tunnus']}' {$sel}>{$lahde_varasto['nimitys']}</option>";
-    }
-    echo "</select>";
-  }
-  else {
-    echo "<table>";
-    $kala = 0;
+  echo "<td><table>";
 
-    foreach($lahde_varastot as $varow) {
-      $sel = '';
-      if (isset($lahdevarastot) and in_array($varow['tunnus'], $lahdevarastot)) {
-        $sel = 'checked';
-      }
+  $query  = "  SELECT tunnus, nimitys, maa
+        FROM varastopaikat
+        WHERE yhtio = '{$kukarow['yhtio']}'
+        ORDER BY tyyppi, nimitys";
+  $vares = pupe_query($query);
 
-      $varastomaa = '';
-      if ($varow['maa'] != "" and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
-        $varastomaa = '('.maa(strtoupper($varow['maa'])).')';
-      }
+  $kala = 0;
 
-      if ($kala == 0) {
-        echo "<tr>";
-      }
+  while ($varow = mysql_fetch_assoc($vares)) {
+    $sel = '';
+    if (isset($lahdevarastot) and is_array($lahdevarastot) and in_array($varow['tunnus'], $lahdevarastot)) $sel = 'checked';
 
-      echo "<td>";
-      $nimi = "{$varow['nimitys']} {$varastomaa}";
-      echo "<input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel}/>{$nimi}";
-      echo "</td>";
-
-      if ($kala == 3) {
-        echo "</tr>";
-        $kala = -1;
-      }
-
-      $kala++;
+    $varastomaa = '';
+    if ($varow['maa'] != "" and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
+      $varastomaa = '(' . maa(strtoupper($varow['maa'])) . ')';
     }
 
-    if ($kala != 0) {
+    if ($kala == 0) echo "<tr>";
+
+    echo "<td><input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}</td>";
+
+    if ($kala == 3) {
       echo "</tr>";
+      $kala = -1;
     }
 
-    echo "</table>";
+    $kala++;
   }
 
-  echo "</td></tr>";
+  if ($kala != 0) {
+    echo "</tr>";
+  }
+
+  echo "</table></td></tr>";
 
   if ($yhtiorow['kerayserat'] == 'K') {
 
@@ -241,12 +220,12 @@ if (!$php_cli) {
 
   echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
-  echo "<tr>";
-  echo "<th>",t("Kohdevarasto, eli varasto jonne l‰hetet‰‰n"),":</th>";
-  echo "<td>";
-  echo "<select name='kohdevarasto'>";
+  echo "<tr><th>",t("Kohdevarasto, eli varasto jonne l‰hetet‰‰n"),":</th>";
+  echo "<td><select name='kohdevarasto'><option value=''>",t("Valitse"),"</option>";
 
-  foreach ($lahde_varastot as $varow) {
+  mysql_data_seek($vares, 0);
+
+  while ($varow = mysql_fetch_assoc($vares)) {
     $sel = '';
     if ($varow['tunnus'] == $kohdevarasto) $sel = 'selected';
 
@@ -397,11 +376,6 @@ if ($tee == 'M' and isset($generoi)) {
   if (!$php_cli) echo "<br /><br />";
 
   $kohdevarasto = (int) $kohdevarasto;
-
-  if ($laaja_toim_kasittely and count($lahdevarastot) == 1 and $lahdevarastot[0] == '') {
-    //L‰hdevarasto dropdownista valittu "Valitse". Asetetaan $lahdevarastot tyhj‰ksi, jottei mene generointi haaraan
-    $lahdevarastot = array();
-  }
 
   if ($kohdevarasto > 0 and count($lahdevarastot) > 0) {
 

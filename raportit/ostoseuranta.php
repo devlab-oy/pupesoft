@@ -181,7 +181,7 @@ else {
             $select .= "tuote.tuoteno tuoteno, ";
             $order  .= "tuote.tuoteno,";
             $gluku++;
-            }
+          }
           if ($nimitykset != "" and $massat == "") {
             if ($group!="") $group .= ",tuote.tuoteno, tuote.nimitys";
             else $group  .= "tuote.tuoteno, tuote.nimitys";
@@ -205,7 +205,7 @@ else {
           }
 
           if ($rajaus[$i] != "") {
-                $lisa .= " and tuote.tuoteno='$rajaus[$i]' ";
+            $lisa .= " and tuote.tuoteno='$rajaus[$i]' ";
           }
         }
 

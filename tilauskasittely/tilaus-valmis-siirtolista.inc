@@ -406,7 +406,7 @@ else {
           echo "<font class='message'>";
           echo t("Siirtolista siirrettiin jälkitoimitukseksi odottamaan tuotteita") . ' ';
           echo $laskurow['tunnus'];
-          echo "<br /><br />";
+          echo "</font><br /><br />";
         }
         else {
           // Mitään järkeviä riviä ei ollut, mitätöidään lista

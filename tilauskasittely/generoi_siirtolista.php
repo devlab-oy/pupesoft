@@ -140,43 +140,57 @@ if (!$php_cli) {
       <input type='hidden' name='tee' value='M'>
       <table>";
 
+  $lahde_varastot = hae_varastot();
   echo "<tr><th>",t("L‰hdevarasto, eli varasto josta ker‰t‰‰n"),":</th>";
-  echo "<td><table>";
+  echo "<td>";
+  $toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
+  if ($toim_kasittely) {
+    array_unshift($lahde_varastot, array('tunnus' => '', 'nimitys' => t('Valitse')));
+    echo "<select name='lahdevarastot[]'>";
+    foreach ($lahde_varastot as $lahde_varasto) {
+      $sel = "";
+      if (isset($lahdevarastot) and $lahdevarastot[0] == $lahde_varasto['tunnus']) {
+        $sel = "SELECTED";
+      }
+      echo "<option value='{$lahde_varasto['tunnus']}' {$sel}>{$lahde_varasto['nimitys']}</option>";
+    }
+    echo "</select>";
+  }
+  else {
+    echo "<table>";
+    $kala = 0;
 
-  $query  = "  SELECT tunnus, nimitys, maa
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        ORDER BY tyyppi, nimitys";
-  $vares = pupe_query($query);
+    foreach($lahde_varastot as $varow) {
+      $sel = '';
+      if (isset($lahdevarastot) and is_array($lahdevarastot) and in_array($varow['tunnus'], $lahdevarastot))
+        $sel = 'checked';
 
-  $kala = 0;
+      $varastomaa = '';
+      if ($varow['maa'] != "" and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
+        $varastomaa = '('.maa(strtoupper($varow['maa'])).')';
+      }
 
-  while ($varow = mysql_fetch_assoc($vares)) {
-    $sel = '';
-    if (isset($lahdevarastot) and is_array($lahdevarastot) and in_array($varow['tunnus'], $lahdevarastot)) $sel = 'checked';
+      if ($kala == 0)
+        echo "<tr>";
 
-    $varastomaa = '';
-    if ($varow['maa'] != "" and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
-      $varastomaa = '(' . maa(strtoupper($varow['maa'])) . ')';
+      echo "<td><input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}</td>";
+
+      if ($kala == 3) {
+        echo "</tr>";
+        $kala = -1;
+      }
+
+      $kala++;
     }
 
-    if ($kala == 0) echo "<tr>";
-
-    echo "<td><input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}</td>";
-
-    if ($kala == 3) {
+    if ($kala != 0) {
       echo "</tr>";
-      $kala = -1;
     }
 
-    $kala++;
+    echo "</table>";
   }
 
-  if ($kala != 0) {
-    echo "</tr>";
-  }
-
-  echo "</table></td></tr>";
+  echo "</td></tr>";
 
   if ($yhtiorow['kerayserat'] == 'K') {
 

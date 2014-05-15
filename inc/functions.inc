@@ -27815,6 +27815,25 @@ if (!function_exists('tilauksen_toimipaikka')) {
   }
 }
 
+if (!function_exists('hae_varastot')) {
+  function hae_varastot() {
+    global $kukarow, $yhtiorow;
+
+    $query = "  SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                ORDER BY tyyppi, nimitys";
+    $result = pupe_query($query);
+    $varastot = array();
+
+    while ($varasto = mysql_fetch_assoc($result)) {
+      $varastot[] = $varasto;
+    }
+
+    return $varastot;
+  }
+}
+
 if (!function_exists('paivita_siirtolistan_toimipaikka')) {
   function paivita_siirtolistan_toimipaikka($tunnus) {
     global $kukarow, $yhtiorow;

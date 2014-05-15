@@ -45,7 +45,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
   }
 
-  if((isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) or $kukarow["kesken"] > 0) {
+  if ((isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) or $kukarow["kesken"] > 0) {
     if ($kopioitava_otsikko > 0) {
       $squery = "  SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
             FROM lasku
@@ -77,7 +77,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $ylatila="";
 
     //  Jos meillä on kopioitu otsikko, ei kopioida alatilaa!
-    if($kopioitava_otsikko == 0 and $srow['alatila'] != '') {
+    if ($kopioitava_otsikko == 0 and $srow['alatila'] != '') {
       $alatila=$srow['alatila'];
     }
     if ($srow['tila'] != '')    $ylatila=$srow['tila'];
@@ -215,14 +215,14 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   else {
     list($toimvv, $toimkk, $toimpp) = explode('-', $srow["toimaika"]);
     list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
-    $kerpp = substr($kerpp,0,2);
-    $toimpp = substr($toimpp,0,2);
+    $kerpp = substr($kerpp, 0, 2);
+    $toimpp = substr($toimpp, 0, 2);
 
   }
 
   // Jos valmistuksessa käytetään tilakoodeja asetetaan keräysajankohta tulevaisuuteen.
   // Valmistus ei varaa saldoja ennenkuin työ on valmistuslinjalla.
-  if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K' AND $toim == 'VALMISTAVARASTOON') {
+  if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K' and $toim == 'VALMISTAVARASTOON') {
     $kerpp = '1';
     $kerkk = '1';
     $kervv = '2099';
@@ -236,7 +236,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       <input type='text' name='kerpp' value='$kerpp' size='3'>
       <input type='text' name='kerkk' value='$kerkk' size='3'>
       <input type='text' name='kervv' value='$kervv' size='6'>
-      <input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'></td></tr>";
+      <input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"], 0, 10)."'></td></tr>";
 
   if ($toim == "SIIRTOLISTA") {
     echo "<tr><th>".t("Toivottu toimitusajankohta").": </th>";
@@ -285,7 +285,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   echo "<select name='luokka'><option value=''>".t("Oletus")."</option>";
 
-  while($row = mysql_fetch_array($tresult)) {
+  while ($row = mysql_fetch_array($tresult)) {
     $sel = "";
     if ($row["selite"] == $srow["luokka"]) $sel = 'selected';
 
@@ -307,7 +307,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
     echo "<select name='toimitustapa'>";
 
-    while($row = mysql_fetch_array($tresult)) {
+    while ($row = mysql_fetch_array($tresult)) {
       $sel = "";
       if ($row["selite"] == $srow["toimitustapa"]) $sel = 'selected';
 
@@ -396,7 +396,7 @@ if (isset($jatka)) {
     $postquery2 = " WHERE otunnus = '$kukarow[kesken]'";
   }
 
-  $crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
+  $crlf = array("\r", "\n"); // poistetaan rivinvaihdot kommentista
   $comments = str_replace($crlf, " ", $comments);
 
   $aquery = "  SELECT *
@@ -501,7 +501,7 @@ if (isset($jatka)) {
 
   if ($toim == "SIIRTOTYOMAARAYS" and (int) $kukarow["kesken"] != 0) {
     //otetaan kantaa pyörän malliin
-    if($merkki2 != 'eimenu'){
+    if ($merkki2 != 'eimenu') {
       $merkki = $merkki2;
     }
 

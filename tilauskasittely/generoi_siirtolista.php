@@ -241,8 +241,10 @@ if (!$php_cli) {
 
   echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
-  echo "<tr><th>",t("Kohdevarasto, eli varasto jonne l‰hetet‰‰n"),":</th>";
-  echo "<td><select name='kohdevarasto'><option value=''>",t("Valitse"),"</option>";
+  echo "<tr>";
+  echo "<th>",t("Kohdevarasto, eli varasto jonne l‰hetet‰‰n"),":</th>";
+  echo "<td>";
+  echo "<select name='kohdevarasto'>";
 
   foreach ($lahde_varastot as $varow) {
     $sel = '';

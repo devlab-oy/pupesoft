@@ -283,7 +283,7 @@ elseif ($laskunro > 0) {
 elseif ($astilnro != '') {
   $query = "  SELECT laskunro, ytunnus, liitostunnus, tunnus
         FROM lasku use index (yhtio_asiakkaan_tilausnumero)
-        WHERE asiakkaan_tilausnumero LIKE ('%$astilnro%')
+        WHERE asiakkaan_tilausnumero = '$astilnro'
         and $logistiikka_yhtiolisa";
   $result = pupe_query($query);
   $row = mysql_fetch_array($result);

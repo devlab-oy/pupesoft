@@ -182,14 +182,14 @@ else {
             $order  .= "tuote.tuoteno,";
             $gluku++;
           }
-          if ($nimitykset != "" and $massat == "") {
+          elseif ($nimitykset != "" and $massat == "") {
             if ($group!="") $group .= ",tuote.tuoteno, tuote.nimitys";
             else $group  .= "tuote.tuoteno, tuote.nimitys";
             $select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
             $order  .= "tuote.tuoteno,";
             $gluku++;
           }
-          if ($nimitykset == "" and $massat != "") {
+          elseif ($nimitykset == "" and $massat != "") {
             if ($group!="") $group .= ",tuote.tuoteno, tuote.tuotemassa";
             else $group  .= "tuote.tuoteno, tuote.tuotemassa";
             $select .= "tuote.tuoteno tuoteno, tuote.tuotemassa tuotemassa, ";

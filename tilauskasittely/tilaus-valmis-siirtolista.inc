@@ -25,6 +25,23 @@ else {
   $lisasalker = " ";
 }
 
+// jos siirtolistan varasto on setattu ja on laaja toimipaikkak‰sittely,
+// tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
+if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+
+  $query = "  SELECT toimipaikka
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = {$laskurow['varasto']}";
+  $_tp_res = pupe_query($query);
+  $_tp_row = mysql_fetch_assoc($_tp_res);
+
+  if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
+    $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
+    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+  }
+}
+
 // p‰ivitet‰‰n vanhatunnus laskulle
 $query  = "  UPDATE lasku SET
        vanhatunnus = tunnus

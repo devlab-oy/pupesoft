@@ -13,9 +13,9 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
   exit;
 }
 
-// jos tilauksen varasto on setattu ja myyntitilauksen toimipaikka katsotaan oletuksena asiakkaan takaa,
+// jos tilauksen varasto on setattu ja on laaja toimipaikkakäsittely,
 // tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
-if ($laskurow['varasto'] != 0 and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
 
   $query = "  SELECT toimipaikka
               FROM varastopaikat

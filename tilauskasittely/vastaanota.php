@@ -984,25 +984,28 @@ if ($id == '0' and $echotaanko) {
     }
   }
 
-  $query = "  SELECT IF(lasku.siirtolistan_vastaanotto != 0, lasku.siirtolistan_vastaanotto,  IF(lasku.toimitustavan_lahto != 0, lasku.toimitustavan_lahto, lasku.clearing)) lahto_tai_vastaanotto,
-        lahdot.aktiivi AS lahdon_aktiivi,
-        GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
-        FROM tilausrivi
-        JOIN lasku on lasku.yhtio = tilausrivi.yhtio
-          and lasku.tunnus = tilausrivi.otunnus
-          and lasku.tila = 'G'
-          and lasku.alatila in ('C','B','D')
-          {$lahdotrajaus}
-          $myytili
-        LEFT JOIN varastopaikat ON lasku.clearing=varastopaikat.tunnus
-        LEFT JOIN lahdot
-          ON ( lahdot.yhtio = lasku.yhtio
-            AND lahdot.tunnus = lasku.toimitustavan_lahto )
-        where tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.toimitettu = ''
-        and tilausrivi.keratty != ''
-        $varasto
-        GROUP BY 1,2";
+  $query = "  SELECT IF(toimitustavan_lahto = 0, 'x', toimitustavan_lahto) lahto,
+              IF(siirtolistan_vastaanotto = 0, 'x', siirtolistan_vastaanotto) siirtolistan_vastaanotto,
+              lasku.clearing,
+              lahdot.aktiivi AS lahdon_aktiivi,
+              GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
+              FROM tilausrivi
+              JOIN lasku on lasku.yhtio = tilausrivi.yhtio
+                and lasku.tunnus = tilausrivi.otunnus
+                and lasku.tila = 'G'
+                and lasku.alatila in ('C','B','D')
+                {$lahdotrajaus}
+                $myytili
+              LEFT JOIN varastopaikat ON lasku.clearing=varastopaikat.tunnus
+              LEFT JOIN lahdot
+              ON ( lahdot.yhtio = lasku.yhtio
+                AND lahdot.tunnus = lasku.toimitustavan_lahto )
+              where tilausrivi.yhtio = '$kukarow[yhtio]'
+              and tilausrivi.toimitettu = ''
+              and tilausrivi.keratty != ''
+              $varasto
+              GROUP BY 1,2,3,4
+              ORDER BY siirtolistan_vastaanotto, lahto, lasku.clearing";
   $tilre = pupe_query($query);
 
   $selectlisa = $toim == "" ? ", viesti AS viite" : "";
@@ -1069,22 +1072,22 @@ if ($id == '0' and $echotaanko) {
 
     // etsit‰‰n sopivia tilauksia
     $query = "  SELECT varasto,
-          tunnus,
-          IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) lahto,
-          IF(siirtolistan_vastaanotto = 0, '', siirtolistan_vastaanotto) siirtolistan_vastaanotto,
-          nimi,
-          date_format(luontiaika, '%Y-%m-%d') laadittu,
-          laatija
-          {$selectlisa}
-          FROM lasku
-          WHERE tunnus IN ({$tilrow['otunnus']})
-          and tila = 'G'
-          {$haku}
-          {$myytili}
-          and yhtio = '{$kukarow['yhtio']}'
-          and alatila in ('C','B','D')
-          {$groupbylisa}
-          ORDER by siirtolistan_vastaanotto, lahto, laadittu DESC";
+                tunnus,
+                IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) lahto,
+                IF(siirtolistan_vastaanotto = 0, '', siirtolistan_vastaanotto) siirtolistan_vastaanotto,
+                nimi,
+                date_format(luontiaika, '%Y-%m-%d') laadittu,
+                laatija
+                {$selectlisa}
+                FROM lasku
+                WHERE tunnus IN ({$tilrow['otunnus']})
+                and tila = 'G'
+                {$haku}
+                {$myytili}
+                and yhtio = '{$kukarow['yhtio']}'
+                and alatila in ('C','B','D')
+                {$groupbylisa}
+                ORDER by siirtolistan_vastaanotto, lahto, laadittu DESC";
     $result = pupe_query($query);
 
     //piirret‰‰n taulukko...
@@ -1092,25 +1095,25 @@ if ($id == '0' and $echotaanko) {
 
       while ($row = mysql_fetch_assoc($result)) {
 
-        if (!is_null($ed_vastaanottonro) and $ed_vastaanottonro != $row['siirtolistan_vastaanotto']) {
-          echo "<tr><td class='back'>&nbsp;</td></tr>";
-        }
-        elseif (!is_null($ed_lahto) and $ed_lahto != $row['lahto'] and $row['siirtolistan_vastaanotto'] == '') {
-          echo "<tr><td class='back'>&nbsp;</td></tr>";
-        }
+        $_vastaanottonro = $row['siirtolistan_vastaanotto'];
+        $_lahto = $row['lahto'];
 
-        $ed_lahto = $row['lahto'];
-        $ed_vastaanottonro = $row['siirtolistan_vastaanotto'];
+        if (!is_null($ed_vastaanottonro) and $ed_vastaanottonro != $_vastaanottonro) {
+          echo "<tr><td class='back'>&nbsp;</td></tr>";
+        }
+        elseif (!is_null($ed_lahto) and $ed_lahto != $_lahto and $_vastaanottonro == '') {
+          echo "<tr><td class='back'>&nbsp;</td></tr>";
+        }
 
         echo "<tr class='aktiivi'>";
 
         if ($toim == "") {
           echo "<td>";
-          echo "<input type='checkbox' class='siirtolistan_vastaanotto' name='siirtolistan_vastaanotto[]' value='{$row['tunnus']}' /> {$row['siirtolistan_vastaanotto']}";
+          echo "<input type='checkbox' class='siirtolistan_vastaanotto' name='siirtolistan_vastaanotto[]' value='{$row['tunnus']}' /> {$_vastaanottonro} {$_lahto}";
           echo "</td>";
 
           if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-            echo "<td>{$row['lahto']}</td>";
+            echo "<td>{$_lahto}</td>";
           }
         }
 
@@ -1125,7 +1128,7 @@ if ($id == '0' and $echotaanko) {
         echo "<td>{$row['laatija']}</td>";
 
         if ($toim == "" and ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' or $row['siirtolistan_vastaanotto'] != '')) {
-          $_id =  ($row['lahto'] != '' or $row['siirtolistan_vastaanotto'] != '') ? $tilrow['otunnus'] : $row['tunnus'];
+          $_id =  ($_lahto != '' or $_vastaanottonro != '') ? $tilrow['otunnus'] : $row['tunnus'];
         }
         else {
           $_id = $row['tunnus'];
@@ -1139,13 +1142,32 @@ if ($id == '0' and $echotaanko) {
               <input type='hidden' name='toim' value='{$toim}'>";
 
         if ($toim == "MYYNTITILI") {
-          echo "<input type='submit' name='tila' value='".t("Toimita")."'>";
+          if (is_null($ed_vastaanottonro) or $ed_vastaanottonro != $_vastaanottonro) {
+            echo "<input type='submit' name='tila' value='".t("Toimita")."'>";
+          }
+          elseif (is_null($ed_lahto) or ($ed_lahto != $_lahto and $_vastaanottonro == '')) {
+            echo "<input type='submit' name='tila' value='".t("Toimita")."'>";
+          }
+          elseif (is_null($ed_lahto) or ($ed_lahto == '' and $_vastaanottonro == '')) {
+            echo "<input type='submit' name='tila' value='".t("Toimita")."'>";
+          }
         }
         else {
-          echo "<input type='submit' name='tila' value='".t("Vastaanota")."'>";
+          if (is_null($ed_vastaanottonro) or $ed_vastaanottonro != $_vastaanottonro) {
+            echo "<input type='submit' name='tila' value='".t("Vastaanota")."'>";
+          }
+          elseif (is_null($ed_lahto) or ($ed_lahto != $_lahto and $_vastaanottonro == '')) {
+            echo "<input type='submit' name='tila' value='".t("Vastaanota")."'>";
+          }
+          elseif (is_null($ed_lahto) or ($ed_lahto == '' and $_vastaanottonro == '')) {
+            echo "<input type='submit' name='tila' value='".t("Vastaanota")."'>";
+          }
         }
 
         echo "</form></td></tr>";
+        
+        $ed_lahto = $_lahto;
+        $ed_vastaanottonro = $_vastaanottonro;
       }
     }
   }

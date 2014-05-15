@@ -1863,6 +1863,11 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       $tyyppi = 2;
     }
 
+    $toimipaikkoja = mysql_num_rows(hae_yhtion_toimipaikat($kukarow['yhtio']));
+    if (mysql_field_name($result, $i) == "toimipaikka" and ($yhtiorow['myyntitilauksen_toimipaikka'] != 'A' and $toimipaikkoja < 1)) {
+      $tyyppi = 0;
+    }
+
     // $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
     // $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti
     // $tyyppi --> 1.5 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰

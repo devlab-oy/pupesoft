@@ -27669,14 +27669,14 @@ if (!function_exists('valitse_oletusvarasto')) {
 
     # asiakkaan_avainsanat.tarkenne = oletusruksi
     if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $asiakas_tunnus != 0) {
-      $query = "   SELECT asiakkaan_avainsanat.avainsana,
-            asiakkaan_avainsanat.tarkenne
-            FROM asiakkaan_avainsanat
-            WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
-            AND asiakkaan_avainsanat.laji = 'oletusmyyntivarasto'
-            AND asiakkaan_avainsanat.liitostunnus = {$asiakas_tunnus}
-            AND asiakkaan_avainsanat.tarkenne != ''";
-      $aov_result   = pupe_query($query);
+      $query = "SELECT asiakkaan_avainsanat.avainsana,
+                asiakkaan_avainsanat.tarkenne
+                FROM asiakkaan_avainsanat
+                WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
+                AND asiakkaan_avainsanat.laji = 'oletusmyyntivarasto'
+                AND asiakkaan_avainsanat.liitostunnus = {$asiakas_tunnus}
+                AND asiakkaan_avainsanat.tarkenne != ''";
+      $aov_result = pupe_query($query);
 
       if (mysql_num_rows($aov_result) > 0) {
         $aov_row = mysql_fetch_assoc($aov_result);
@@ -27690,20 +27690,20 @@ if (!function_exists('valitse_oletusvarasto')) {
     # avainsana.selitetark_2 = oletusruksi
     if ($toimipaikka_tunnus != 0) {
       // Haetaan varastot joita toimipaikka saa käyttää
-      $query = "  SELECT varastopaikat.tunnus
-            FROM avainsana
-            JOIN varastopaikat
-            ON (varastopaikat.yhtio = avainsana.yhtio
-              AND varastopaikat.tunnus = avainsana.selitetark
-              AND (varastopaikat.sallitut_maat LIKE '%{$toimitus_maa}%'
-                 OR varastopaikat.sallitut_maat = '')
-              AND varastopaikat.tyyppi != 'P')
-            WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-            AND avainsana.laji = 'TOIMMYYNTI'
-            AND avainsana.selite = {$toimipaikka_tunnus}
-            AND avainsana.selitetark_2 != ''
-            ORDER BY avainsana.jarjestys ASC";
-      $result   = pupe_query($query);
+      $query = "SELECT varastopaikat.tunnus
+                FROM avainsana
+                JOIN varastopaikat
+                ON (varastopaikat.yhtio = avainsana.yhtio
+                  AND varastopaikat.tunnus = avainsana.selitetark
+                  AND (varastopaikat.sallitut_maat LIKE '%{$toimitus_maa}%'
+                     OR varastopaikat.sallitut_maat = '')
+                  AND varastopaikat.tyyppi != 'P')
+                WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+                AND avainsana.laji = 'TOIMMYYNTI'
+                AND avainsana.selite = {$toimipaikka_tunnus}
+                AND avainsana.selitetark_2 != ''
+                ORDER BY avainsana.jarjestys ASC";
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
         $varastorow = mysql_fetch_assoc($result);

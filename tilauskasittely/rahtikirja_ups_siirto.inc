@@ -4,12 +4,12 @@ if ($kollityht > 0) {
 
   // katsotaan varaston tulostusalueista mihin pakkaamoon kyseinen tulostusalue kuuluu (pakkaamo ylä tai pakkaamo ala)
   // tämä tarkistus ohjaa ups-muuttujia
-  $query = "  SELECT pakkaamo
-        FROM varaston_tulostimet
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND varasto = '{$laskurow['varasto']}'
-        AND nimi = '{$laskurow['tulostusalue']}'
-        LIMIT 1";
+  $query = "SELECT pakkaamo
+            FROM varaston_tulostimet
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND varasto = '{$laskurow['varasto']}'
+            AND nimi    = '{$laskurow['tulostusalue']}'
+            LIMIT 1";
   $tulostusalue_check_res = mysql_query($query) or pupe_error($query);
   $tulostusalue_check_row = mysql_fetch_assoc($tulostusalue_check_res);
 
@@ -89,27 +89,27 @@ if ($kollityht > 0) {
     $xml = simplexml_load_string($xmlstring);
 
     //  Haetaan otsikkotiedot pohjalle
-    $query = "  SELECT lasku.*, laskun_lisatiedot.*,
-          lasku.tunnus laskutunnus,
-          LEFT(lasku.ytunnus, 35) ytunnus,
-          LEFT(lasku.nimi, 35) nimi,
-          LEFT(lasku.osoite, 35) osoite,
-          LEFT(lasku.maa, 30) maa,
-          LEFT(lasku.postino, 9) postino,
-          LEFT(lasku.postitp, 30) postitp,
-          LEFT(asiakas.puhelin, 15) puhelin,
-          LEFT(asiakas.gsm, 15) gsm,
-          LEFT(asiakas.tyopuhelin, 15) tyopuhelin,
-          LEFT(asiakas.fax, 15) fax,
-          LEFT(asiakas.email, 50) email,
-          LEFT(lasku.yhtio_nimi, 35) yhtio_nimi,
-          LEFT(lasku.toimitustapa, 25) toimitustapa
-          FROM lasku
-          JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-          LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          AND lasku.tunnus in ($otunnukset)
-          ORDER BY lasku.tunnus limit 1";
+    $query = "SELECT lasku.*, laskun_lisatiedot.*,
+              lasku.tunnus laskutunnus,
+              LEFT(lasku.ytunnus, 35) ytunnus,
+              LEFT(lasku.nimi, 35) nimi,
+              LEFT(lasku.osoite, 35) osoite,
+              LEFT(lasku.maa, 30) maa,
+              LEFT(lasku.postino, 9) postino,
+              LEFT(lasku.postitp, 30) postitp,
+              LEFT(asiakas.puhelin, 15) puhelin,
+              LEFT(asiakas.gsm, 15) gsm,
+              LEFT(asiakas.tyopuhelin, 15) tyopuhelin,
+              LEFT(asiakas.fax, 15) fax,
+              LEFT(asiakas.email, 50) email,
+              LEFT(lasku.yhtio_nimi, 35) yhtio_nimi,
+              LEFT(lasku.toimitustapa, 25) toimitustapa
+              FROM lasku
+              JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+              LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tunnus  in ($otunnukset)
+              ORDER BY lasku.tunnus limit 1";
     $ups_laskures = mysql_query($query) or pupe_error($query);
     $ups_laskurow = mysql_fetch_array($ups_laskures);
 
@@ -119,12 +119,12 @@ if ($kollityht > 0) {
     C = Conditional
     */
 
-    $query = "  SELECT *
-          FROM yhteyshenkilo
-          WHERE yhtio    = '$kukarow[yhtio]'
-          AND liitostunnus = '$laskurow[liitostunnus]'
-          AND nimi      = '$laskurow[tilausyhteyshenkilo]'
-          and tyyppi     = 'A'";
+    $query = "SELECT *
+              FROM yhteyshenkilo
+              WHERE yhtio      = '$kukarow[yhtio]'
+              AND liitostunnus = '$laskurow[liitostunnus]'
+              AND nimi         = '$laskurow[tilausyhteyshenkilo]'
+              and tyyppi       = 'A'";
     $yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
     $yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
 
@@ -140,11 +140,11 @@ if ($kollityht > 0) {
       $attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkiloasiakas['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
     }
     elseif ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
-      $query = "  SELECT *
-            FROM yhteyshenkilo
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'
-            and tyyppi  = 'A'";
+      $query = "SELECT *
+                FROM yhteyshenkilo
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'
+                and tyyppi  = 'A'";
       $yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
       $yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
       if ($yhteyshenkilo_kaupallinen_row['nimi'] == '') {
@@ -153,11 +153,11 @@ if ($kollityht > 0) {
       $attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_kaupallinen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
     }
     elseif ($ups_laskurow['yhteyshenkilo_tekninen'] != '') {
-      $query = "  SELECT *
-            FROM yhteyshenkilo
-            WHERE yhtio  = '{$kukarow['yhtio']}'
-            AND tunnus  = '{$ups_laskurow['yhteyshenkilo_tekninen']}'
-            and tyyppi  = 'A'";
+      $query = "SELECT *
+                FROM yhteyshenkilo
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$ups_laskurow['yhteyshenkilo_tekninen']}'
+                and tyyppi  = 'A'";
       $yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
       $yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
       if ($yhteyshenkilo_tekninen_row['nimi'] == '') {
@@ -289,20 +289,20 @@ if ($kollityht > 0) {
     $upsaccountnumber      = $thirdpartyreceiver->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
     */
 
-    $query ="  SELECT merahti,
-          sum(kollit) kollit,
-          sum(kilot) kilot,
-          sum(kuutiot) kuutiot,
-          sum(lavametri) lavametri,
-          min(pakkauskuvaus) pakkauskuvaus,
-          min(pakkauskuvaustark) pakkauskuvaustark
-          from rahtikirjat use index (otsikko_index)
-          where yhtio = '$kukarow[yhtio]'
-          and otsikkonro = '$ups_laskurow[laskutunnus]'
-          and rahtikirjanro = '$rahtikirjanro'
-          and pakkaus = '$pakkaus[0]'
-          GROUP BY 1
-          ORDER BY 1";
+    $query ="SELECT merahti,
+             sum(kollit) kollit,
+             sum(kilot) kilot,
+             sum(kuutiot) kuutiot,
+             sum(lavametri) lavametri,
+             min(pakkauskuvaus) pakkauskuvaus,
+             min(pakkauskuvaustark) pakkauskuvaustark
+             from rahtikirjat use index (otsikko_index)
+             where yhtio       = '$kukarow[yhtio]'
+             and otsikkonro    = '$ups_laskurow[laskutunnus]'
+             and rahtikirjanro = '$rahtikirjanro'
+             and pakkaus       = '$pakkaus[0]'
+             GROUP BY 1
+             ORDER BY 1";
     //and pakkauskuvaus = '$row[selitetark]'";
     $ups_rakires = mysql_query($query) or pupe_error($query);
     $ups_rakirow = mysql_fetch_array($ups_rakires);

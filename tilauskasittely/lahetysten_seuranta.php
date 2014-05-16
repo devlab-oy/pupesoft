@@ -68,10 +68,10 @@ echo "<th>",t("Varasto"),"</th>";
 echo "<td><select name='varasto'>";
 echo "<option value=''>",t("Valitse"),"</option>";
 
-$query = "  SELECT *
-      FROM varastopaikat
-      WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-      ORDER BY nimitys";
+$query = "SELECT *
+          FROM varastopaikat
+          WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+          ORDER BY nimitys";
 $varasto_res = pupe_query($query);
 
 while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
@@ -119,20 +119,20 @@ if ($tee == 'hae') {
     $pvmlisa = "";
   }
 
-  $query = "  SELECT lahdot.pvm,
-        TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi,
-        toimitustapa.selite AS toimitustapa,
-        group_concat(DISTINCT kerayserat.sscc) AS sscc
-        FROM kerayserat
-        JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus {$nimilisa} {$postitplisa})
-        JOIN lahdot ON (lahdot.yhtio = kerayserat.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = 'S' $pvmlisa)
-        JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
-        WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-        AND kerayserat.tila = 'R'
-        {$tilauslisa}
-        {$sscclisa}
-        GROUP BY 1,2,3
-        ORDER BY 1,2,3 ";
+  $query = "SELECT lahdot.pvm,
+            TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi,
+            toimitustapa.selite AS toimitustapa,
+            group_concat(DISTINCT kerayserat.sscc) AS sscc
+            FROM kerayserat
+            JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus {$nimilisa} {$postitplisa})
+            JOIN lahdot ON (lahdot.yhtio = kerayserat.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = 'S' $pvmlisa)
+            JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
+            WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+            AND kerayserat.tila    = 'R'
+            {$tilauslisa}
+            {$sscclisa}
+            GROUP BY 1,2,3
+            ORDER BY 1,2,3 ";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
@@ -144,30 +144,30 @@ if ($tee == 'hae') {
 
       if ($row['sscc'] == "") continue;
 
-      $query = "  SELECT
-            kerayserat.nro,
-            kerayserat.sscc,
-            kerayserat.sscc_ulkoinen,
-            kerayserat.otunnus,
-            IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus,
-            lasku.ohjausmerkki,
-            CONCAT(TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark)), ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp) AS osoite,
-            ROUND((SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + IFNULL(pakkaus.oma_paino, 0)), 1) AS kg
-            FROM kerayserat
-            JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
-            LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-            JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-            JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio
-              {$varastolisa}
-              AND vh.hyllyalue = tilausrivi.hyllyalue
-              AND vh.hyllynro = tilausrivi.hyllynro
-              AND vh.hyllyvali = tilausrivi.hyllyvali
-              AND vh.hyllytaso = tilausrivi.hyllytaso)
-            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuotelisa})
-            WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-            AND kerayserat.sscc IN ({$row['sscc']})
-            GROUP BY 1,2,3,4,5,6,7
-            ORDER BY 1,2";
+      $query = "SELECT
+                kerayserat.nro,
+                kerayserat.sscc,
+                kerayserat.sscc_ulkoinen,
+                kerayserat.otunnus,
+                IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus,
+                lasku.ohjausmerkki,
+                CONCAT(TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark)), ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp) AS osoite,
+                ROUND((SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + IFNULL(pakkaus.oma_paino, 0)), 1) AS kg
+                FROM kerayserat
+                JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
+                LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+                JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+                JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio
+                  {$varastolisa}
+                  AND vh.hyllyalue     = tilausrivi.hyllyalue
+                  AND vh.hyllynro      = tilausrivi.hyllynro
+                  AND vh.hyllyvali     = tilausrivi.hyllyvali
+                  AND vh.hyllytaso     = tilausrivi.hyllytaso)
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuotelisa})
+                WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                AND kerayserat.sscc    IN ({$row['sscc']})
+                GROUP BY 1,2,3,4,5,6,7
+                ORDER BY 1,2";
       $era_res = pupe_query($query);
 
       if (mysql_num_rows($era_res) > 0) {
@@ -221,12 +221,12 @@ if ($tee == 'hae') {
           echo "<td>{$era_row['osoite']}</td>";
           echo "</tr>";
 
-          $query = "  SELECT kerayserat.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, kuka.nimi AS keraaja, ROUND(kerayserat.kpl_keratty, 0) kpl_keratty
-                FROM kerayserat
-                JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-                JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
-                WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-                AND (kerayserat.sscc = '{$era_row['sscc']}' OR kerayserat.sscc_ulkoinen = '{$era_row['sscc']}')";
+          $query = "SELECT kerayserat.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, kuka.nimi AS keraaja, ROUND(kerayserat.kpl_keratty, 0) kpl_keratty
+                    FROM kerayserat
+                    JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+                    JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
+                    WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                    AND (kerayserat.sscc = '{$era_row['sscc']}' OR kerayserat.sscc_ulkoinen = '{$era_row['sscc']}')";
           $sscc_res = pupe_query($query);
 
           echo "<tr class='{$era_row['sscc']}' style='display:none'>";

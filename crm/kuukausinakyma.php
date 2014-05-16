@@ -116,14 +116,14 @@ echo "<td class='back' width='20'></td>";
 echo "<th>".t("Valitse osasto").":</th><td><select name='osasto' Onchange='submit();'>";
 
 //Haetaan kaikki käyttäjät
-$query = "  SELECT distinct kuka.osasto
-      FROM kuka, oikeu
-      WHERE oikeu.yhtio  = kuka.yhtio
-      and oikeu.kuka    = kuka.kuka
-      and oikeu.nimi like '%kalenteri.php'
-      and kuka.osasto     != ''
-      $konsernit3
-      ORDER BY kuka.osasto";
+$query = "SELECT distinct kuka.osasto
+          FROM kuka, oikeu
+          WHERE oikeu.yhtio  = kuka.yhtio
+          and oikeu.kuka     = kuka.kuka
+          and oikeu.nimi     like '%kalenteri.php'
+          and kuka.osasto   != ''
+          $konsernit3
+          ORDER BY kuka.osasto";
 $result = mysql_query($query) or pupe_error($query);
 
 // jos ei olla valittu osastoa ja käyttäjällä on oma osasto valitaan se
@@ -169,15 +169,15 @@ else {
 }
 
 // Haetaan kaikki käyttäjät
-$query = "  SELECT distinct if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, kuka.kuka, kuka.osasto
-      FROM kuka, oikeu
-      WHERE oikeu.yhtio  = kuka.yhtio
-      and oikeu.kuka    = kuka.kuka
-      and oikeu.nimi like '%kalenteri.php'
-      and kuka.osasto     != ''
-      $konsernit3
-      $osastolisa
-      ORDER BY kuka.osasto, kuka.nimi";
+$query = "SELECT distinct if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, kuka.kuka, kuka.osasto
+          FROM kuka, oikeu
+          WHERE oikeu.yhtio  = kuka.yhtio
+          and oikeu.kuka     = kuka.kuka
+          and oikeu.nimi     like '%kalenteri.php'
+          and kuka.osasto   != ''
+          $konsernit3
+          $osastolisa
+          ORDER BY kuka.osasto, kuka.nimi";
 $result = mysql_query($query) or pupe_error($query);
 
 while($row = mysql_fetch_array($result)) {
@@ -225,20 +225,20 @@ while($row = mysql_fetch_array($result)) {
   for ($i = 1; $i <= days_in_month($month, $year); $i++) {
     $pva = $i;
 
-    $query = "  SELECT avainsana.selite tapa, avainsana.selitetark, kalenteri.tunnus, pvmalku, pvmloppu, kalenteri.yhtio,
-          date_format(pvmalku,'%H:%i') kello, date_format(pvmalku,'%d') paiva, date_format(pvmalku,'%m') kuu, date_format(pvmalku,'%Y') vuosi,
-          kalenteri.kuka, date_format(pvmloppu,'%H:%i') lkello,
-          kalenteri.kuittaus,
-          kalenteri.laatija,
-          replace(kentta01,'\r\n',' ') kentta01
-          FROM kalenteri
-          LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
-          WHERE kalenteri.kuka = '$row[kuka]'
-          and kalenteri.tyyppi in ('asennuskalenteri','kalenteri')
-          and ((pvmalku >= '$year-$mymonth-$pva 00:00:00' and pvmalku <= '$year-$mymonth-$pva 23:59:00') or
-          (pvmalku < '$year-$mymonth-$pva 00:00:00' and pvmloppu > '$year-$mymonth-$pva 00:00:00'))
-          $konsernit2
-          order by pvmalku";
+    $query = "SELECT avainsana.selite tapa, avainsana.selitetark, kalenteri.tunnus, pvmalku, pvmloppu, kalenteri.yhtio,
+              date_format(pvmalku,'%H:%i') kello, date_format(pvmalku,'%d') paiva, date_format(pvmalku,'%m') kuu, date_format(pvmalku,'%Y') vuosi,
+              kalenteri.kuka, date_format(pvmloppu,'%H:%i') lkello,
+              kalenteri.kuittaus,
+              kalenteri.laatija,
+              replace(kentta01,'\r\n',' ') kentta01
+              FROM kalenteri
+              LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
+              WHERE kalenteri.kuka = '$row[kuka]'
+              and kalenteri.tyyppi in ('asennuskalenteri','kalenteri')
+              and ((pvmalku >= '$year-$mymonth-$pva 00:00:00' and pvmalku <= '$year-$mymonth-$pva 23:59:00') or
+              (pvmalku < '$year-$mymonth-$pva 00:00:00' and pvmloppu > '$year-$mymonth-$pva 00:00:00'))
+              $konsernit2
+              order by pvmalku";
     $kresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($kresult) > 0) {
@@ -329,13 +329,13 @@ if ($osasto == "" or $osasto == "varauskalenterit") {
     echo "</tr>";
   }
 
-  $query = "  SELECT distinct alanimi
-        FROM oikeu
-        WHERE
-        oikeu.nimi  = 'varauskalenteri/varauskalenteri.php'
-        and oikeu.kuka  = ''
-        and yhtio = '$kukarow[yhtio]'
-        ORDER BY alanimi";
+  $query = "SELECT distinct alanimi
+            FROM oikeu
+            WHERE
+            oikeu.nimi     = 'varauskalenteri/varauskalenteri.php'
+            and oikeu.kuka = ''
+            and yhtio      = '$kukarow[yhtio]'
+            ORDER BY alanimi";
   $result = mysql_query($query) or pupe_error($query);
 
   while($row = mysql_fetch_array($result)) {
@@ -345,17 +345,17 @@ if ($osasto == "" or $osasto == "varauskalenterit") {
     for($i = 1; $i <= days_in_month($month, $year); $i++) {
       $pva = $i;
 
-      $query = "  SELECT kalenteri.tunnus tunnus, pvmalku, pvmloppu, kalenteri.yhtio, if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, replace(kentta01,'\r\n',' ') kentta01,
-            date_format(pvmalku,'%H:%i') kello, date_format(pvmloppu,'%H:%i') lkello
-            FROM kalenteri, kuka
-            WHERE kalenteri.tyyppi = 'varauskalenteri'
-            and pvmalku  <= '$year-$mymonth-$pva 23:59:00'
-            and pvmloppu >= '$year-$mymonth-$pva 00:00:00'
-            and kalenteri.tapa  = '$row[alanimi]'
-            and kalenteri.yhtio  = kuka.yhtio
-            and kalenteri.kuka  = kuka.kuka
-            $konsernit2
-            order by pvmalku";
+      $query = "SELECT kalenteri.tunnus tunnus, pvmalku, pvmloppu, kalenteri.yhtio, if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, replace(kentta01,'\r\n',' ') kentta01,
+                date_format(pvmalku,'%H:%i') kello, date_format(pvmloppu,'%H:%i') lkello
+                FROM kalenteri, kuka
+                WHERE kalenteri.tyyppi = 'varauskalenteri'
+                and pvmalku            <= '$year-$mymonth-$pva 23:59:00'
+                and pvmloppu           >= '$year-$mymonth-$pva 00:00:00'
+                and kalenteri.tapa     = '$row[alanimi]'
+                and kalenteri.yhtio    = kuka.yhtio
+                and kalenteri.kuka     = kuka.kuka
+                $konsernit2
+                order by pvmalku";
       $kresult = mysql_query($query) or pupe_error($query);
       $krow = mysql_fetch_array($kresult);
 

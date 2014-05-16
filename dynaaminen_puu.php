@@ -28,10 +28,10 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     if (isset($avainsanan_tunnus)) {
       $avainsanan_tunnus = (int) $avainsanan_tunnus;
 
-      $query = "  SELECT *
-            FROM dynaaminen_puu_avainsanat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$avainsanan_tunnus}'";
+      $query = "SELECT *
+                FROM dynaaminen_puu_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$avainsanan_tunnus}'";
       $res = pupe_query($query);
       $row = mysql_fetch_assoc($res);
       $val = $row['tarkenne'];
@@ -44,12 +44,12 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     exit;
   }
   elseif ($tee == 'hae_avainsana_lista') {
-    $query = "  SELECT *
-          FROM dynaaminen_puu_avainsanat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND liitostunnus = '{$nodeid}'
-          AND laji = '{$toim}'
-          ORDER BY laji, avainsana, tarkenne";
+    $query = "SELECT *
+              FROM dynaaminen_puu_avainsanat
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND liitostunnus = '{$nodeid}'
+              AND laji         = '{$toim}'
+              ORDER BY laji, avainsana, tarkenne";
     $dpavainsanat_res = pupe_query($query);
 
     while ($dp_row = mysql_fetch_assoc($dpavainsanat_res)) {
@@ -72,9 +72,9 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
   elseif ($tee == 'poista_avainsana' and !empty($avainsanan_tunnus)) {
     $avainsanan_tunnus = (int) $avainsanan_tunnus;
 
-    $query = "  DELETE FROM dynaaminen_puu_avainsanat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$avainsanan_tunnus}'";
+    $query = "DELETE FROM dynaaminen_puu_avainsanat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$avainsanan_tunnus}'";
     $delres = pupe_query($query);
     exit;
   }
@@ -137,37 +137,37 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
           if (!empty($avainsanan_tunnus)) {
             $avainsanan_tunnus = (int) $avainsanan_tunnus;
 
-            $query = "  UPDATE dynaaminen_puu_avainsanat SET
-                  avainsana = '{$laji}',
-                  tarkenne = '{$avainsana}'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$avainsanan_tunnus}'";
+            $query = "UPDATE dynaaminen_puu_avainsanat SET
+                      avainsana   = '{$laji}',
+                      tarkenne    = '{$avainsana}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$avainsanan_tunnus}'";
             $updres = pupe_query($query);
           }
           else {
 
             # Tarkistetaan onko avainsana jo tallennettu kantaa. Duplikaatteja ei sallita.
-            $query = "  SELECT tunnus
-                  FROM dynaaminen_puu_avainsanat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND liitostunnus = '{$nodeid}'
-                  AND laji = '{$toim}'
-                  AND avainsana = '{$laji}'
-                  AND tarkenne = '{$avainsana}'";
+            $query = "SELECT tunnus
+                      FROM dynaaminen_puu_avainsanat
+                      WHERE yhtio      = '{$kukarow['yhtio']}'
+                      AND liitostunnus = '{$nodeid}'
+                      AND laji         = '{$toim}'
+                      AND avainsana    = '{$laji}'
+                      AND tarkenne     = '{$avainsana}'";
             $chk = pupe_query($query);
 
             if (mysql_num_rows($chk) == 0) {
-              $query = "  INSERT INTO dynaaminen_puu_avainsanat SET
-                    yhtio = '{$kukarow['yhtio']}',
-                    liitostunnus = '{$nodeid}',
-                    kieli = '{$kukarow['kieli']}',
-                    laji = '{$toim}',
-                    avainsana = '{$laji}',
-                    tarkenne = '{$avainsana}',
-                    muuttaja = '{$kukarow['kuka']}',
-                    laatija = '{$kukarow['kuka']}',
-                    luontiaika = now(),
-                    muutospvm = now()";
+              $query = "INSERT INTO dynaaminen_puu_avainsanat SET
+                        yhtio        = '{$kukarow['yhtio']}',
+                        liitostunnus = '{$nodeid}',
+                        kieli        = '{$kukarow['kieli']}',
+                        laji         = '{$toim}',
+                        avainsana    = '{$laji}',
+                        tarkenne     = '{$avainsana}',
+                        muuttaja     = '{$kukarow['kuka']}',
+                        laatija      = '{$kukarow['kuka']}',
+                        luontiaika   = now(),
+                        muutospvm    = now()";
               $insquery = pupe_query($query);
             }
           }
@@ -507,12 +507,12 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     echo "<div id='infobox_keywords' class='spec' style='padding: 20px; border: 1px solid black;'>";
     echo "<h2 style='font-size: 20px'>",t("Avainsanat"),"</h2><hr />";
 
-    $query = "  SELECT *
-          FROM dynaaminen_puu_avainsanat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND liitostunnus = '{$nodeid}'
-          AND laji = '{$toim}'
-          ORDER BY laji, avainsana, tarkenne";
+    $query = "SELECT *
+              FROM dynaaminen_puu_avainsanat
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND liitostunnus = '{$nodeid}'
+              AND laji         = '{$toim}'
+              ORDER BY laji, avainsana, tarkenne";
     $dpavainsanat_res = pupe_query($query);
 
     echo "<div id='infobox_keywords_list' style='line-height: 16px;'>";

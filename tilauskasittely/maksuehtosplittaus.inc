@@ -5,10 +5,10 @@
 $tulos_ulos_ehtosplit = "";
 
 // otetaan maksuehto t‰ss‰ heti alussa selville
-$query = "  SELECT *
-      from maksuehto
-      where yhtio  = '$kukarow[yhtio]'
-      and tunnus  = '$laskurow[maksuehto]'";
+$query = "SELECT *
+          from maksuehto
+          where yhtio = '$kukarow[yhtio]'
+          and tunnus  = '$laskurow[maksuehto]'";
 $yresult = pupe_query($query);
 $mrow = mysql_fetch_assoc($yresult);
 
@@ -20,18 +20,18 @@ if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["
   $query_ale_lisa = generoi_alekentta('M');
 
   if ($yhtiorow["alv_kasittely"] == '') {
-    $query = "  SELECT round((varattu*hinta*{$query_ale_lisa})/(1+alv/100),2) rivihinta, netto
-          FROM tilausrivi
-          WHERE otunnus   = '$laskurow[tunnus]'
-          and yhtio      = '$kukarow[yhtio]'
-          and tyyppi    = 'L'";
+    $query = "SELECT round((varattu*hinta*{$query_ale_lisa})/(1+alv/100),2) rivihinta, netto
+              FROM tilausrivi
+              WHERE otunnus = '$laskurow[tunnus]'
+              and yhtio     = '$kukarow[yhtio]'
+              and tyyppi    = 'L'";
   }
   else {
-    $query = "  SELECT round((varattu*hinta*{$query_ale_lisa}),2) rivihinta, netto
-          FROM tilausrivi
-          WHERE otunnus   = '$laskurow[tunnus]'
-          and yhtio      = '$kukarow[yhtio]'
-          and tyyppi    = 'L'";
+    $query = "SELECT round((varattu*hinta*{$query_ale_lisa}),2) rivihinta, netto
+              FROM tilausrivi
+              WHERE otunnus = '$laskurow[tunnus]'
+              and yhtio     = '$kukarow[yhtio]'
+              and tyyppi    = 'L'";
   }
 
   $presult = pupe_query($query);
@@ -86,22 +86,22 @@ if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["
 
     list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-    $query  = "  INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika)
-          values ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
+    $query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika)
+               values ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
     $addtil = pupe_query($query);
 
     //p‰ivitet‰‰n alkuper‰isen otsikon maksuehto
-    $query = "  UPDATE lasku set
-          maksuehto   = '$mrow[osamaksuehto1]'
-          where yhtio  = '$kukarow[yhtio]'
-          and tunnus   = '$laskurow[tunnus]'";
+    $query = "UPDATE lasku set
+              maksuehto   = '$mrow[osamaksuehto1]'
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$laskurow[tunnus]'";
     $varresult = pupe_query($query);
 
     // vaikka meill‰ onkin laskurow, haetaan silti laskun tiedot fetch_arraylla, jotta saadaan kiva looppi
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus = '$laskurow[tunnus]'";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$laskurow[tunnus]'";
     $laskufetch_res = pupe_query($query);
     $laskufetch_row = mysql_fetch_assoc($laskufetch_res);
 
@@ -132,10 +132,10 @@ if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["
     $laskuinsert_result = pupe_query($query);
     $uusitunnus = (string) mysql_insert_id();
 
-    $query = "  SELECT *
-          FROM laskun_lisatiedot
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND otunnus = '$laskurow[tunnus]'";
+    $query = "SELECT *
+              FROM laskun_lisatiedot
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND otunnus = '$laskurow[tunnus]'";
     $lisatiedot_res = pupe_query($query);
     $lisatiedot_row = mysql_fetch_assoc($lisatiedot_res);
 
@@ -176,8 +176,8 @@ if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["
 
     list($hinta, $alv) = alv($laskurow, $trow, $hyvitetaan, '', '');
 
-    $query  = "  INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika)
-          values ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
+    $query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika)
+               values ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
     $addtil = pupe_query($query);
   }
 }

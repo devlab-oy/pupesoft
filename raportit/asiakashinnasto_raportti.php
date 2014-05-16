@@ -167,10 +167,10 @@ function echo_kayttoliittyma($request = array()) {
 function hae_asiakasryhmat() {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM avainsana
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND laji = 'ASIAKASRYHMA'";
+  $query = "SELECT *
+            FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji    = 'ASIAKASRYHMA'";
   $result = pupe_query($query);
 
   $asiakasryhmat = array();
@@ -189,9 +189,9 @@ function hae_asiakasryhmat() {
 function hae_aleryhmat() {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM perusalennus
-        WHERE yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT *
+            FROM perusalennus
+            WHERE yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   $aleryhmat = array();
@@ -222,11 +222,11 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
   }
 
   if ($request['mitka_tuotteet'] == 'kaikki') {
-    $query = "  SELECT aleryhma, tuoteno
-          FROM tuote
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          {$tuote_where}
-          AND aleryhma != ''";
+    $query = "SELECT aleryhma, tuoteno
+              FROM tuote
+              WHERE yhtio   = '{$kukarow['yhtio']}'
+              {$tuote_where}
+              AND aleryhma != ''";
     $result = pupe_query($query);
 
     while ($tuote = mysql_fetch_assoc($result)) {
@@ -234,13 +234,13 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
     }
   }
   else {
-    $query = "  SELECT group_concat(parent.tunnus) tunnukset
-          FROM puun_alkio
-          JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-          JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
-          WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
-          AND puun_alkio.laji    = 'ASIAKAS'
-          AND puun_alkio.liitos  = '{$request['valittu_asiakas']}'";
+    $query = "SELECT group_concat(parent.tunnus) tunnukset
+              FROM puun_alkio
+              JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+              JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
+              WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
+              AND puun_alkio.laji    = 'ASIAKAS'
+              AND puun_alkio.liitos  = '{$request['valittu_asiakas']}'";
     $result = pupe_query($query);
     $puun_tunnukset = mysql_fetch_assoc($result);
 
@@ -265,13 +265,13 @@ function hae_asiakasalet($request) {
     $tuote_where = "";
   }
 
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tuoteno IN ('".implode("','", $tuotenumerot)."')
-        {$tuote_where}
-        AND aleryhma != ''
-        ORDER BY tuote.aleryhma ASC, tuote.nimitys ASC";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND tuoteno   IN ('".implode("','", $tuotenumerot)."')
+            {$tuote_where}
+            AND aleryhma != ''
+            ORDER BY tuote.aleryhma ASC, tuote.nimitys ASC";
   $result = pupe_query($query);
 
   $tuotteet = array();
@@ -296,12 +296,12 @@ function hae_asiakasalet($request) {
       $alehinnat = alehinta(array(), $tuote, 1, '', '', '', $palautettavat_kentat, '', '', $request['valittu_asiakasryhma']);
     }
 
-    $query = "  SELECT *
-          FROM tuotteen_toimittajat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tuoteno = '{$tuote['tuoteno']}'
-          ORDER BY jarjestys ASC
-          LIMIT 1";
+    $query = "SELECT *
+              FROM tuotteen_toimittajat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$tuote['tuoteno']}'
+              ORDER BY jarjestys ASC
+              LIMIT 1";
     $tuotteen_toimittaja_result = pupe_query($query);
     $tuotteen_toimittaja_row = mysql_fetch_assoc($tuotteen_toimittaja_result);
 

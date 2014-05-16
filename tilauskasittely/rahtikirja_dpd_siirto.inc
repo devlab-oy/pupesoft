@@ -86,10 +86,10 @@ if ($kollityht > 0) {
     $parcelOrder["tilausnumero2"] = trim($tilausnumerot2);
 
     //  Haetaan otsikkotiedot pohjalle
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset)
-          ORDER BY tunnus limit 1";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset)
+              ORDER BY tunnus limit 1";
     $laskures = mysql_query($query) or pupe_error($query);
     $laskurow = mysql_fetch_array($laskures);
 
@@ -107,9 +107,9 @@ if ($kollityht > 0) {
     }
 
     //  Haetaan asiakastiedot
-    $query = "  SELECT *
-          FROM asiakas
-          WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
     $asres = mysql_query($query) or pupe_error($query);
     $asrow = mysql_fetch_array($asres);
 
@@ -122,11 +122,11 @@ if ($kollityht > 0) {
       $parcelOrder["asiakas_".$r] = $v;
     }
 
-    $query = "  SELECT *
-          FROM asiakkaan_avainsanat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND liitostunnus = '{$asrow['tunnus']}'
-          AND LOWER(laji) = 'dpd'";
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND liitostunnus = '{$asrow['tunnus']}'
+              AND LOWER(laji) = 'dpd'";
     $as_avainsana_res = pupe_query($query);
     $as_avainsana_row = mysql_fetch_assoc($as_avainsana_res);
 
@@ -181,27 +181,27 @@ if ($kollityht > 0) {
     /*
     Jos meillä oli joku yhteyshenkilö haetaan sen tiedot myös! (Falceback asiakas)
     */
-    $query = "  SELECT nimi, titteli, email, puh, gsm, fax
-          FROM laskun_lisatiedot
-          JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and yhteyshenkilo.tyyppi = 'A'
-          WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
-          and otunnus IN ($otunnukset)
-          and yhteyshenkilo_tekninen > 0";
+    $query = "SELECT nimi, titteli, email, puh, gsm, fax
+              FROM laskun_lisatiedot
+              JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and yhteyshenkilo.tyyppi = 'A'
+              WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
+              and otunnus                   IN ($otunnukset)
+              and yhteyshenkilo_tekninen    > 0";
     $yhres = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($yhres) == 0) {
-      $query = "  SELECT nimi, titteli, email, puh, gsm, fax
-            FROM laskun_lisatiedot
-            JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_kaupallinen and yhteyshenkilo.tyyppi = 'A'
-            WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
-            and otunnus IN ($otunnukset)
-            and yhteyshenkilo_tekninen > 0";
+      $query = "SELECT nimi, titteli, email, puh, gsm, fax
+                FROM laskun_lisatiedot
+                JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_kaupallinen and yhteyshenkilo.tyyppi = 'A'
+                WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
+                and otunnus                   IN ($otunnukset)
+                and yhteyshenkilo_tekninen    > 0";
       $yhres = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($yhres) == 0) {
-        $query = "  SELECT '2' O, '' nimi, '' titteli, email, puhelin puh, gsm, fax
-              FROM asiakas
-              WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+        $query = "SELECT '2' O, '' nimi, '' titteli, email, puhelin puh, gsm, fax
+                  FROM asiakas
+                  WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
         $yhres = mysql_query($query) or pupe_error($query);
       }
     }

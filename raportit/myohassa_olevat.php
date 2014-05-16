@@ -80,12 +80,12 @@ echo "</td></tr>";
 
 echo "<tr><th>".t("Valitse kustannuspaikka")."</th>";
 
-$query = "  SELECT tunnus, nimi
-      FROM kustannuspaikka
-      WHERE yhtio = '$kukarow[yhtio]'
-      and kaytossa != 'E'
-      and tyyppi = 'K'
-      ORDER BY koodi+0, koodi, nimi";
+$query = "SELECT tunnus, nimi
+          FROM kustannuspaikka
+          WHERE yhtio   = '$kukarow[yhtio]'
+          and kaytossa != 'E'
+          and tyyppi    = 'K'
+          ORDER BY koodi+0, koodi, nimi";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='mul_kustannuspaikka[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -279,22 +279,22 @@ if ($tee == "HAE") {
     $selectlisa = ", group_concat(tilausrivi.tunnus) tunnukset, sum(tilausrivi.varattu+tilausrivi.jt) myydyt";
   }
 
-  $query = "  SELECT lasku.toimaika,
-        tilausrivi.tuoteno
-        $selectlisa
-        FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-        JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tila IN ('L','N') and lasku.toimaika <= '$myovv-$myokk-$myopp')
-        JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-        JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-        $toimjoin
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.tyyppi != 'D'
-        and tilausrivi.laskutettuaika = '0000-00-00'
-        and tilausrivi.toimitettuaika = '0000-00-00'
-        and tilausrivi.var != 'P'
-        $lisa
-        group by lasku.toimaika, tilausrivi.tuoteno
-        ORDER BY lasku.toimaika $suunta";
+  $query = "SELECT lasku.toimaika,
+            tilausrivi.tuoteno
+            $selectlisa
+            FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+            JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tila IN ('L','N') and lasku.toimaika <= '$myovv-$myokk-$myopp')
+            JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+            JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+            $toimjoin
+            WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
+            and tilausrivi.tyyppi         != 'D'
+            and tilausrivi.laskutettuaika  = '0000-00-00'
+            and tilausrivi.toimitettuaika  = '0000-00-00'
+            and tilausrivi.var            != 'P'
+            $lisa
+            group by lasku.toimaika, tilausrivi.tuoteno
+            ORDER BY lasku.toimaika $suunta";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -317,15 +317,15 @@ if ($tee == "HAE") {
 
       $ostotilaus_varattu_kpl = 0;
 
-      $query = "  SELECT *
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$tulrow['tuoteno']}'
-            AND kpl = 0
-            AND varattu != 0
-            AND tyyppi = 'O'
-            AND toimaika <= '{$tulrow['toimaika']}'
-            ORDER BY toimaika $suunta";
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio   = '{$kukarow['yhtio']}'
+                AND tuoteno   = '{$tulrow['tuoteno']}'
+                AND kpl       = 0
+                AND varattu  != 0
+                AND tyyppi    = 'O'
+                AND toimaika  <= '{$tulrow['toimaika']}'
+                ORDER BY toimaika $suunta";
       $ostotilausres = mysql_query($query) or pupe_error($query);
 
       while ($ostotilausrow = mysql_fetch_assoc($ostotilausres)) {
@@ -339,15 +339,15 @@ if ($tee == "HAE") {
       $kpl_pvm = array();
 
       if ($ostotilaus_varattu_kpl == 0 or $tulrow['myydyt'] > $ostotilaus_varattu_kpl) {
-        $query = "  SELECT *
-              FROM tilausrivi
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$tulrow['tuoteno']}'
-              AND kpl = 0
-              AND varattu != 0
-              AND tyyppi = 'O'
-              AND toimaika >= '{$tulrow['toimaika']}'
-              ORDER BY toimaika $suunta";
+        $query = "SELECT *
+                  FROM tilausrivi
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  AND tuoteno   = '{$tulrow['tuoteno']}'
+                  AND kpl       = 0
+                  AND varattu  != 0
+                  AND tyyppi    = 'O'
+                  AND toimaika  >= '{$tulrow['toimaika']}'
+                  ORDER BY toimaika $suunta";
         $ostotilausres = mysql_query($query) or pupe_error($query);
 
         while ($ostotilausrow = mysql_fetch_assoc($ostotilausres)) {
@@ -360,12 +360,12 @@ if ($tee == "HAE") {
         continue;
       }
 
-      $query = "  SELECT *, varattu+jt varattu
-            FROM tilausrivi
-            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.tunnus in ($tulrow[tunnukset])
-            ORDER BY tilausrivi.toimaika $suunta";
+      $query = "SELECT *, varattu+jt varattu
+                FROM tilausrivi
+                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.tunnus  in ($tulrow[tunnukset])
+                ORDER BY tilausrivi.toimaika $suunta";
       $myohastyneet_res = mysql_query($query) or pupe_error($query);
 
       while ($myohastyneet_row = mysql_fetch_assoc($myohastyneet_res)) {

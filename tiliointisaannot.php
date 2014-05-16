@@ -27,12 +27,12 @@ if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
     $lisat = "and ytunnus = '$nimi'";
   }
 
-  $query = "  SELECT tunnus, ytunnus, nimi, postitp
-        FROM toimi
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi != 'P'
-        $lisat
-        ORDER BY nimi";
+  $query = "SELECT tunnus, ytunnus, nimi, postitp
+            FROM toimi
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tyyppi  != 'P'
+            $lisat
+            ORDER BY nimi";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -73,9 +73,9 @@ if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
 
 if ($tee == 'P') {
   // Olemassaolevaa sääntöä muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
-  $query = "  SELECT *
-        FROM tiliointisaanto
-        WHERE tunnus = '$rtunnus' and yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT *
+            FROM tiliointisaanto
+            WHERE tunnus = '$rtunnus' and yhtio = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -105,12 +105,12 @@ if ($tee == 'P') {
 
 if ($tee == 'U') {
 
-  $query = "  SELECT tunnus
-        FROM toimi
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi != 'P'
-        $lisat
-        ORDER BY selaus";
+  $query = "SELECT tunnus
+            FROM toimi
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tyyppi  != 'P'
+            $lisat
+            ORDER BY selaus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -120,12 +120,12 @@ if ($tee == 'U') {
   }
 
   if ($kustp != 0 and $kustp != 999999999) {
-    $query = "  SELECT tunnus
-          FROM kustannuspaikka
-          WHERE tunnus = '$kustp'
-          and yhtio = '$kukarow[yhtio]'
-          and tyyppi = 'K'
-          and kaytossa != 'E'";
+    $query = "SELECT tunnus
+              FROM kustannuspaikka
+              WHERE tunnus  = '$kustp'
+              and yhtio     = '$kukarow[yhtio]'
+              and tyyppi    = 'K'
+              and kaytossa != 'E'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -149,9 +149,9 @@ if ($tee == 'U') {
       }
     }
 
-    $query = "  SELECT tilino
-          FROM tili
-          WHERE tilino = '$tilino' and yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT tilino
+              FROM tili
+              WHERE tilino = '$tilino' and yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -162,23 +162,23 @@ if ($tee == 'U') {
 
     //Onko tälle välille jo sääntö?
     if ($mintuote != '') {
-      $query = "  SELECT mintuote, maxtuote
-            FROM tiliointisaanto
-            WHERE ttunnus = '$tunnus'
-            and yhtio = '$kukarow[yhtio]'
-            and mintuote <= '$mintuote'
-            and maxtuote >= '$mintuote'
-            and tilino != 0";
+      $query = "SELECT mintuote, maxtuote
+                FROM tiliointisaanto
+                WHERE ttunnus  = '$tunnus'
+                and yhtio      = '$kukarow[yhtio]'
+                and mintuote   <= '$mintuote'
+                and maxtuote   >= '$mintuote'
+                and tilino    != 0";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
-        $query = "  SELECT mintuote, maxtuote
-              FROM tiliointisaanto
-              WHERE ttunnus = '$tunnus'
-              and yhtio = '$kukarow[yhtio]'
-              and mintuote <= '$maxtuote'
-              and maxtuote >= '$maxtuote'
-              and tilino != 0";
+        $query = "SELECT mintuote, maxtuote
+                  FROM tiliointisaanto
+                  WHERE ttunnus  = '$tunnus'
+                  and yhtio      = '$kukarow[yhtio]'
+                  and mintuote   <= '$maxtuote'
+                  and maxtuote   >= '$maxtuote'
+                  and tilino    != 0";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 0) {
@@ -246,27 +246,27 @@ if ($tee == 'U') {
 
   // Lisätään sääntö
   $query = "INSERT into tiliointisaanto VALUES (
-      '$kukarow[yhtio]',
-      '$tyyppi',
-      '$tunnus',
-      '$mintuote',
-      '$maxtuote',
-      '$kuvaus',
-      '$kuvaus2',
-      '$tilino',
-      '$kustp',
-      '{$toimipaikka}',
-      '$hyvak1',
-      '$hyvak2',
-      '$hyvak3',
-      '$hyvak4',
-      '$hyvak5',
-      '$vienti',
-      '$kukarow[kuka]',
-      now(),
-      '',
-      '',
-      '')";
+            '$kukarow[yhtio]',
+            '$tyyppi',
+            '$tunnus',
+            '$mintuote',
+            '$maxtuote',
+            '$kuvaus',
+            '$kuvaus2',
+            '$tilino',
+            '$kustp',
+            '{$toimipaikka}',
+            '$hyvak1',
+            '$hyvak2',
+            '$hyvak3',
+            '$hyvak4',
+            '$hyvak5',
+            '$vienti',
+            '$kukarow[kuka]',
+            now(),
+            '',
+            '',
+            '')";
   $result = pupe_query($query);
 }
 
@@ -274,12 +274,12 @@ if (isset($tunnus) and $tunnus > 0) {
   // Toimittaja on valittu ja sille annetaan sääntöjä
   if ($tila == "XML") {
 
-    $query = "   SELECT data, filename, kayttotarkoitus, tunnus
-          FROM liitetiedostot
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND liitos = 'lasku'
-          AND tunnus = '$liitetiedosto'
-          AND kayttotarkoitus = '$kayttotyyppi'";
+    $query = "SELECT data, filename, kayttotarkoitus, tunnus
+              FROM liitetiedostot
+              WHERE yhtio         = '$kukarow[yhtio]'
+              AND liitos          = 'lasku'
+              AND tunnus          = '$liitetiedosto'
+              AND kayttotarkoitus = '$kayttotyyppi'";
 
     $tulokset = pupe_query($query);
     $tulosrivi = mysql_fetch_assoc($tulokset);
@@ -304,11 +304,11 @@ if (isset($tunnus) and $tunnus > 0) {
     }
   }
 
-  $query = "  SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, concat_ws(' ', postino, postitp) osoite
-        FROM toimi
-        WHERE tunnus = '$tunnus'
-        and yhtio = '$kukarow[yhtio]'
-        and tyyppi != 'P'";
+  $query = "SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, concat_ws(' ', postino, postitp) osoite
+            FROM toimi
+            WHERE tunnus  = '$tunnus'
+            and yhtio     = '$kukarow[yhtio]'
+            and tyyppi   != 'P'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -381,50 +381,50 @@ if (isset($tunnus) and $tunnus > 0) {
 
   // Näytetään vanhat säännöt muutosta varten
   if ($tyyppi == 't') {
-    $query = "  SELECT tiliointisaanto.tunnus, tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero,
-          if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
-          FROM tiliointisaanto
-          LEFT JOIN tili ON tili.yhtio = tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
-          LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
-          WHERE tiliointisaanto.ttunnus  = '$tunnus'
-          and tiliointisaanto.tyyppi     = '$tyyppi'
-          and tiliointisaanto.yhtio     = '$kukarow[yhtio]'
-          order by tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus";
+    $query = "SELECT tiliointisaanto.tunnus, tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero,
+              if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+              FROM tiliointisaanto
+              LEFT JOIN tili ON tili.yhtio = tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
+              LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
+              WHERE tiliointisaanto.ttunnus = '$tunnus'
+              and tiliointisaanto.tyyppi    = '$tyyppi'
+              and tiliointisaanto.yhtio     = '$kukarow[yhtio]'
+              order by tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus";
   }
   elseif ($tyyppi == 'o' or $tyyppi == 'b') {
-    $query = "  SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite,
-          tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp,
-          concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-          if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
-          FROM tiliointisaanto
-          LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
-          WHERE tiliointisaanto.ttunnus   = '$tunnus'
-          and tiliointisaanto.tyyppi     = '$tyyppi'
-          and tiliointisaanto.yhtio     = '$kukarow[yhtio]'
-          order by tiliointisaanto.kuvaus, tiliointisaanto.kuvaus2, tiliointisaanto.mintuote, tiliointisaanto.maxtuote";
+    $query = "SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite,
+              tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp,
+              concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
+              if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+              FROM tiliointisaanto
+              LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
+              WHERE tiliointisaanto.ttunnus = '$tunnus'
+              and tiliointisaanto.tyyppi    = '$tyyppi'
+              and tiliointisaanto.yhtio     = '$kukarow[yhtio]'
+              order by tiliointisaanto.kuvaus, tiliointisaanto.kuvaus2, tiliointisaanto.mintuote, tiliointisaanto.maxtuote";
   }
   elseif ($tyyppi == 'a') {
-    $query = "  SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus,
-          concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-          if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
-          FROM tiliointisaanto
-          LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
-          WHERE tiliointisaanto.ttunnus   = '$tunnus'
-          and tiliointisaanto.tyyppi     = '$tyyppi'
-          and tiliointisaanto.yhtio     = '$kukarow[yhtio]'
-          and tiliointisaanto.tilino     = 0
-          ORDER BY tiliointisaanto.kuvaus";
+    $query = "SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus,
+              concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
+              if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+              FROM tiliointisaanto
+              LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
+              WHERE tiliointisaanto.ttunnus = '$tunnus'
+              and tiliointisaanto.tyyppi    = '$tyyppi'
+              and tiliointisaanto.yhtio     = '$kukarow[yhtio]'
+              and tiliointisaanto.tilino    = 0
+              ORDER BY tiliointisaanto.kuvaus";
   }
   elseif ($tyyppi == 'k') {
-    $query = "  SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus,
-          concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
-          if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
-          FROM tiliointisaanto
-          LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
-          WHERE tiliointisaanto.ttunnus   = '$tunnus'
-          and tiliointisaanto.tyyppi     = '$tyyppi'
-          and tiliointisaanto.yhtio     = '$kukarow[yhtio]'
-          ORDER BY tiliointisaanto.kuvaus";
+    $query = "SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus,
+              concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak,
+              if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+              FROM tiliointisaanto
+              LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
+              WHERE tiliointisaanto.ttunnus = '$tunnus'
+              and tiliointisaanto.tyyppi    = '$tyyppi'
+              and tiliointisaanto.yhtio     = '$kukarow[yhtio]'
+              ORDER BY tiliointisaanto.kuvaus";
   }
 
   $result = pupe_query($query);
@@ -451,11 +451,11 @@ if (isset($tunnus) and $tunnus > 0) {
         foreach (explode('#', $tiliointirow[$kennimi]) as $hyvaksyja) {
 
           if (trim($hyvaksyja) != '') {
-            $query = "  SELECT nimi
-                  FROM kuka
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND kuka = '".mysql_real_escape_string($hyvaksyja)."'
-                  and hyvaksyja = 'o'";
+            $query = "SELECT nimi
+                      FROM kuka
+                      WHERE yhtio   = '$kukarow[yhtio]'
+                      AND kuka      = '".mysql_real_escape_string($hyvaksyja)."'
+                      and hyvaksyja = 'o'";
             $kuka_chk_res = pupe_query($query);
 
             if (mysql_num_rows($kuka_chk_res) == 1) {
@@ -477,10 +477,10 @@ if (isset($tunnus) and $tunnus > 0) {
       elseif ($kennimi == 'toimipaikka') {
 
         if ($tiliointirow[$kennimi] != 0) {
-          $query = "  SELECT nimi
-                FROM yhtion_toimipaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$tiliointirow[$kennimi]}'";
+          $query = "SELECT nimi
+                    FROM yhtion_toimipaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$tiliointirow[$kennimi]}'";
           $nimi_fetch_res = pupe_query($query);
           $nimi_fetch_row = mysql_fetch_assoc($nimi_fetch_res);
 
@@ -576,12 +576,12 @@ if (isset($tunnus) and $tunnus > 0) {
     $vienti    = '';
   }
 
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'K'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = 'K'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $result = pupe_query($query);
 
   $ulos = "<select name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa")."</option>";
@@ -646,10 +646,10 @@ if (isset($tunnus) and $tunnus > 0) {
   }
 
   if ($tyyppi != 't') {
-    $query = "  SELECT kuka, nimi
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
-          ORDER BY nimi";
+    $query = "SELECT kuka, nimi
+              FROM kuka
+              WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
+              ORDER BY nimi";
     $hyvak_result = pupe_query($query);
 
     echo "<td nowrap>",t("Hyväksyjä")," 1: <select name='hyvak1'>";

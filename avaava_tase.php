@@ -4,10 +4,10 @@ require ("inc/parametrit.inc");
 
 if (isset($tee) and $tee == 'I') {
 
-  $query = "  SELECT tunnus, tilino
-        FROM tili
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
+  $query = "SELECT tunnus, tilino
+            FROM tili
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
   $tilires = pupe_query($query);
 
   if (mysql_num_rows($tilires) != 1) {
@@ -18,10 +18,10 @@ if (isset($tee) and $tee == 'I') {
     $tilirow = mysql_fetch_assoc($tilires);
   }
 
-  $query = "  SELECT tunnus
-        FROM tili
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tilino  = '{$edellisten_tilikausien_voitto_tappio}'";
+  $query = "SELECT tunnus
+            FROM tili
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tilino  = '{$edellisten_tilikausien_voitto_tappio}'";
   $tilires = pupe_query($query);
 
   if (mysql_num_rows($tilires) != 1) {
@@ -29,10 +29,10 @@ if (isset($tee) and $tee == 'I') {
     $tee = "go";
   }
 
-  $query = "  SELECT tunnus
-        FROM tili
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tilino  = '{$tilikauden_tulos_siirto}'";
+  $query = "SELECT tunnus
+            FROM tili
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tilino  = '{$tilikauden_tulos_siirto}'";
   $tilires = pupe_query($query);
 
   if (mysql_num_rows($tilires) != 1) {
@@ -40,10 +40,10 @@ if (isset($tee) and $tee == 'I') {
     $tee = "go";
   }
 
-  $query = "  SELECT tilikausi_alku, tilikausi_loppu, avaava_tase
-        FROM tilikaudet
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tunnus  = '{$tilikausi}'";
+  $query = "SELECT tilikausi_alku, tilikausi_loppu, avaava_tase
+            FROM tilikaudet
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tunnus  = '{$tilikausi}'";
   $tilikausi_alku_loppu_res = pupe_query($query);
 
   if (mysql_num_rows($tilikausi_alku_loppu_res) == 1) {
@@ -96,25 +96,25 @@ if (isset($tee) and $tee == 'I') {
   $avaavatase = 'joo';
 
   // Onko tulos jo kirjattu
-  $query = "  SELECT tunnus
-        FROM lasku
-        WHERE yhtio   = '{$kukarow['yhtio']}'
-        and tapvm     = '{$vv3}-{$kk3}-{$pp3}'
-        and tila     = 'X'
-        and alatila   = 'T'";
+  $query = "SELECT tunnus
+            FROM lasku
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tapvm   = '{$vv3}-{$kk3}-{$pp3}'
+            and tila    = 'X'
+            and alatila = 'T'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    $query = "  INSERT into lasku set
-          yhtio     = '{$kukarow['yhtio']}',
-          tapvm     = '{$vv3}-{$kk3}-{$pp3}',
-          tila     = 'X',
-          alatila    = 'T',
-          nimi    = '{$yhtiorow['nimi']}',
-          alv_tili   = '',
-          comments  = '{$iselite[$maara]}',
-          laatija   = '{$kukarow['kuka']}',
-          luontiaika   = now()";
+    $query = "INSERT into lasku set
+              yhtio      = '{$kukarow['yhtio']}',
+              tapvm      = '{$vv3}-{$kk3}-{$pp3}',
+              tila       = 'X',
+              alatila    = 'T',
+              nimi       = '{$yhtiorow['nimi']}',
+              alv_tili   = '',
+              comments   = '{$iselite[$maara]}',
+              laatija    = '{$kukarow['kuka']}',
+              luontiaika = now()";
     $result = pupe_query($query);
     $tunnus = mysql_insert_id($link);
   }
@@ -123,12 +123,12 @@ if (isset($tee) and $tee == 'I') {
     $tunnus = $tulos_row['tunnus'];
 
     // Yliviivataan vanhat tulossiirrot
-    $query = "  UPDATE tiliointi SET
-          korjattu   = '{$kukarow['kuka']}',
-              korjausaika = now()
-              WHERE ltunnus   = '{$tunnus}'
-              AND yhtio     = '{$kukarow['yhtio']}'
-              AND korjattu   = ''";
+    $query = "UPDATE tiliointi SET
+              korjattu          = '{$kukarow['kuka']}',
+                  korjausaika   = now()
+                  WHERE ltunnus = '{$tunnus}'
+                  AND yhtio     = '{$kukarow['yhtio']}'
+                  AND korjattu  = ''";
     $ylikirjaus_result = pupe_query($query);
   }
 
@@ -165,13 +165,13 @@ if (isset($tee) and $tee == 'I') {
   if (isset($tilikausi_alku_loppu_row["avaava_tase"]) and $tilikausi_alku_loppu_row["avaava_tase"] > 0) {
 
     // Onko tämä varmasti oikea tosite?
-    $query = "  SELECT tunnus
-          FROM lasku
-          WHERE yhtio  = '{$kukarow['yhtio']}'
-          AND tapvm   = '{$tpv}-{$tpk}-{$tpp}'
-          AND tila   = 'X'
-          AND alatila = 'A'
-          AND tunnus  = '{$tilikausi_alku_loppu_row["avaava_tase"]}'";
+    $query = "SELECT tunnus
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tapvm   = '{$tpv}-{$tpk}-{$tpp}'
+              AND tila    = 'X'
+              AND alatila = 'A'
+              AND tunnus  = '{$tilikausi_alku_loppu_row["avaava_tase"]}'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -237,10 +237,10 @@ echo "<table>";
 
 echo "<tr><th>",t("Valitse suljettava tilikausi"),"</th>";
 
-$query = "  SELECT tilikausi_alku, tilikausi_loppu, tunnus
-      FROM tilikaudet
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      ORDER BY tilikausi_alku DESC";
+$query = "SELECT tilikausi_alku, tilikausi_loppu, tunnus
+          FROM tilikaudet
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          ORDER BY tilikausi_alku DESC";
 $tilikausi_result = pupe_query($query);
 
 echo "<td><select name='tilikausi'><option value=''>",t("Valitse"),"</option>";
@@ -257,10 +257,10 @@ echo "</form><br />";
 
 if (trim($tee) == 'go') {
 
-  $query = "  SELECT tilino
-        FROM tili
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
+  $query = "SELECT tilino
+            FROM tili
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
   $tilires = pupe_query($query);
   $tilirow = mysql_fetch_assoc($tilires);
 
@@ -309,54 +309,54 @@ if (trim($tee) == 'go') {
 if (trim($tee) == 'go') {
 
   // Haetaan tilikausi
-  $query = "  SELECT tilikausi_alku, tilikausi_loppu, avaava_tase
-        FROM tilikaudet
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tunnus  = '{$tilikausi}'";
+  $query = "SELECT tilikausi_alku, tilikausi_loppu, avaava_tase
+            FROM tilikaudet
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tunnus  = '{$tilikausi}'";
   $tilikausi_alku_loppu_res = pupe_query($query);
   $tilikausi_alku_loppu_row = mysql_fetch_assoc($tilikausi_alku_loppu_res);
 
   // Onko tulos jo kirjattu
-  $query = "  SELECT tunnus
-        FROM lasku
-        WHERE yhtio   = '{$kukarow['yhtio']}'
-        and tapvm     = '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
-        and tila     = 'X'
-        and alatila   = 'T'";
+  $query = "SELECT tunnus
+            FROM lasku
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tapvm   = '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
+            and tila    = 'X'
+            and alatila = 'T'";
   $result = pupe_query($query);
   $tulostositerow = mysql_fetch_assoc($result);
 
   // Hetaan tilit
-  $query = "  SELECT
-        ifnull(group_concat(if(LEFT(ulkoinen_taso, 1) = BINARY '3', concat(\"'\",tilino,\"'\"), NULL)), '') tulostilit,
-        ifnull(group_concat(if(LEFT(ulkoinen_taso, 1) < BINARY '3', concat(\"'\",tilino,\"'\"), NULL)), '') tasetilit
-        FROM tili
-        WHERE yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT
+            ifnull(group_concat(if(LEFT(ulkoinen_taso, 1) = BINARY '3', concat(\"'\",tilino,\"'\"), NULL)), '') tulostilit,
+            ifnull(group_concat(if(LEFT(ulkoinen_taso, 1) < BINARY '3', concat(\"'\",tilino,\"'\"), NULL)), '') tasetilit
+            FROM tili
+            WHERE yhtio = '$kukarow[yhtio]'";
   $tilires = pupe_query($query);
   $tilitrow = mysql_fetch_assoc($tilires);
 
   // Haetaan firman tulos
-  $query = "  SELECT sum(tiliointi.summa) summa
-               FROM tiliointi use index (yhtio_tilino_tapvm)
-              WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
-              and tiliointi.korjattu = ''
-        and tiliointi.tilino in ({$tilitrow['tulostilit']})
-        and tiliointi.tapvm >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
-              and tiliointi.tapvm <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
-        and tiliointi.ltunnus != '{$tulostositerow['tunnus']}'";
+  $query = "SELECT sum(tiliointi.summa) summa
+            FROM tiliointi use index (yhtio_tilino_tapvm)
+            WHERE tiliointi.yhtio   = '{$kukarow['yhtio']}'
+            and tiliointi.korjattu  = ''
+            and tiliointi.tilino    in ({$tilitrow['tulostilit']})
+            and tiliointi.tapvm     >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
+            and tiliointi.tapvm     <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
+            and tiliointi.ltunnus  != '{$tulostositerow['tunnus']}'";
   $tulosres = pupe_query($query);
   $tulosrow = mysql_fetch_assoc($tulosres);
 
-  $query = "  SELECT tiliointi.tilino, count(*) vientejä, sum(tiliointi.summa) saldo
-        FROM tiliointi use index (yhtio_tilino_tapvm)
-        WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
-        and tiliointi.korjattu = ''
-        and tiliointi.tilino in ({$tilitrow['tasetilit']})
-        and tiliointi.tapvm >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
-        and tiliointi.tapvm <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
-        and tiliointi.ltunnus != '{$tulostositerow['tunnus']}'
-        GROUP BY 1
-        ORDER BY 1";
+  $query = "SELECT tiliointi.tilino, count(*) vientejä, sum(tiliointi.summa) saldo
+            FROM tiliointi use index (yhtio_tilino_tapvm)
+            WHERE tiliointi.yhtio   = '{$kukarow['yhtio']}'
+            and tiliointi.korjattu  = ''
+            and tiliointi.tilino    in ({$tilitrow['tasetilit']})
+            and tiliointi.tapvm     >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
+            and tiliointi.tapvm     <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
+            and tiliointi.ltunnus  != '{$tulostositerow['tunnus']}'
+            GROUP BY 1
+            ORDER BY 1";
   $result = pupe_query($query);
 
   list($tpv, $tpk, $tpp) = explode("-", $tilikausi_alku_loppu_row['tilikausi_loppu']);
@@ -399,10 +399,10 @@ if (trim($tee) == 'go') {
     $iselite[$maara]   = t("Avaavat saldot")." ".tv1dateconv($tpv);
     $ivero[$maara]     = 0;
 
-    $query = "  SELECT nimi
-          FROM tili
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tilino = '{$trow['tilino']}'";
+    $query = "SELECT nimi
+              FROM tili
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tilino  = '{$trow['tilino']}'";
     $tilires = pupe_query($query);
     $tilinimirow = mysql_fetch_assoc($tilires);
 

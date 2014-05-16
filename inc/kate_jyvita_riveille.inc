@@ -21,13 +21,13 @@ function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausnumero = 0, $tilau
     $tilausrivi_where = "  AND tilausrivi.tunnus IN ('".implode("','", $tilausrivi_tunnukset)."')";
   }
 
-  $query = "  SELECT tilausrivi.*,
-        tuote.kehahin
-        FROM tilausrivi
-        JOIN tuote
-        USING (yhtio, tuoteno)
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        {$tilausrivi_where}";
+  $query = "SELECT tilausrivi.*,
+            tuote.kehahin
+            FROM tilausrivi
+            JOIN tuote
+            USING (yhtio, tuoteno)
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            {$tilausrivi_where}";
   $result = pupe_query($query);
 
   $tilausrivit = array();
@@ -62,16 +62,16 @@ function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausnumero = 0, $tilau
 
     $summa += $uusi_hinta;
 
-    $query = "  UPDATE tilausrivi
-          SET hinta = '{$uusi_hinta}'
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$tilausrivi['tunnus']}'";
+    $query = "UPDATE tilausrivi
+              SET hinta = '{$uusi_hinta}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$tilausrivi['tunnus']}'";
     pupe_query($query);
   }
 
-  $query = "  UPDATE lasku
-        SET hinta = '{$summa}'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$otunnus}'";
+  $query = "UPDATE lasku
+            SET hinta = '{$summa}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$otunnus}'";
   pupe_query($query);
 }

@@ -30,10 +30,10 @@ if (isset($method) and $method == 'move') {
 
   // Haetaan valitun valmistuksen tiedot
   $query = "SELECT *, lasku.tunnus
-        FROM kalenteri
-        JOIN lasku on (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
-        WHERE kalenteri.yhtio = '{$kukarow['yhtio']}'
-        AND kalenteri.otunnus = '{$tunnus}'";
+            FROM kalenteri
+            JOIN lasku on (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
+            WHERE kalenteri.yhtio = '{$kukarow['yhtio']}'
+            AND kalenteri.otunnus = '{$tunnus}'";
   $result = pupe_query($query);
   $valittu_valmistus = mysql_fetch_assoc($result);
 
@@ -120,7 +120,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
     echo "</form>";
   }
   // KESKEYTÄ FORMI
-  else if (!isset($varmistus) and ($tila == 'TK') and $valmistus->getTila() == 'VA') {
+  elseif (!isset($varmistus) and ($tila == 'TK') and $valmistus->getTila() == 'VA') {
     echo "<font class='head'>" . t("Keskeytä työ") . "</font>";
 
     echo "<form method='POST'>";
@@ -207,31 +207,31 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
       if (empty($errors)) {
         // Tarkistetaan ja päivitetään käytetyt tunnit, ylityötunnit ja kommentti
         $query = "UPDATE kalenteri SET
-              pvmalku  = '$pvmalku',
-              pvmloppu = '$pvmloppu',
-              kentta01 = '{$ylityotunnit}',
-              kentta02 = '{$kommentti}',
-              kentta03 = '{$kaytetyttunnit}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$tunnus}'";
+                  pvmalku     = '$pvmalku',
+                  pvmloppu    = '$pvmloppu',
+                  kentta01    = '{$ylityotunnit}',
+                  kentta02    = '{$kommentti}',
+                  kentta03    = '{$kaytetyttunnit}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$tunnus}'";
         pupe_query($query);
 
         if ($tila=='VT' and $valmistus->getTila() == 'VA') {
-          $tilausrivi_query = "  UPDATE tilausrivi SET
-                      kerayspvm   = '{$pvmalku}',
-                      toimaika    = '{$pvmalku}'
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND otunnus = {$tunnus}
-                      AND tyyppi = 'V'";
+          $tilausrivi_query = "UPDATE tilausrivi SET
+                               kerayspvm   = '{$pvmalku}',
+                               toimaika    = '{$pvmalku}'
+                               WHERE yhtio = '{$kukarow['yhtio']}'
+                               AND otunnus = {$tunnus}
+                               AND tyyppi  = 'V'";
           pupe_query($tilausrivi_query);
 
           //päivitetään valmisteen keräyspvm ja toimaika nykyhetkeen, jotta ne tulevat myytäviksi
-          $tilausrivi_query = "  UPDATE tilausrivi SET
-                      kerayspvm   = '{$pvmloppu}',
-                      toimaika    = '{$pvmloppu}'
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND otunnus = {$tunnus}
-                      AND tyyppi = 'W'";
+          $tilausrivi_query = "UPDATE tilausrivi SET
+                               kerayspvm   = '{$pvmloppu}',
+                               toimaika    = '{$pvmloppu}'
+                               WHERE yhtio = '{$kukarow['yhtio']}'
+                               AND otunnus = {$tunnus}
+                               AND tyyppi  = 'W'";
           pupe_query($tilausrivi_query);
         }
       }

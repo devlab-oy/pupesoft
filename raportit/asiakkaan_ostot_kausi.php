@@ -61,38 +61,38 @@ if ($tee == 'go') {
     echo "<br><br><font class='error'>".t("VIRHE: Valitse asiakas tai asiakasosasto")."!</font><br><br><br>";
   }
   elseif ($asiakasid != '') {
-    $query = "  SELECT t.tuoteno, t.nimitys,
-          sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.rivihinta,0)) summa,
-          sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.rivihinta,0)) edsumma,
-          sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.kate,0)) kate,
-          sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.kate,0)) edkate,
-          sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.kpl,0)) kpl,
-          sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.kpl,0)) edkpl
-          FROM lasku l use index (yhtio_tila_liitostunnus_tapvm)
-          JOIN tilausrivi t ON ( l.yhtio = t.yhtio and l.tunnus = t.uusiotunnus)
-          WHERE l.yhtio = '$kukarow[yhtio]'
-          AND l.tila = 'u'
-          AND l.alatila = 'x'
-          AND l.liitostunnus = '$asiakasid'
-          AND ((l.tapvm >= '$apvm' and l.tapvm <= '$lpvm') or (l.tapvm >= '$eapvm' and l.tapvm <= '$elpvm'))
-          GROUP BY 1,2
-          ORDER BY 1";
+    $query = "SELECT t.tuoteno, t.nimitys,
+              sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.rivihinta,0)) summa,
+              sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.rivihinta,0)) edsumma,
+              sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.kate,0)) kate,
+              sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.kate,0)) edkate,
+              sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.kpl,0)) kpl,
+              sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.kpl,0)) edkpl
+              FROM lasku l use index (yhtio_tila_liitostunnus_tapvm)
+              JOIN tilausrivi t ON ( l.yhtio = t.yhtio and l.tunnus = t.uusiotunnus)
+              WHERE l.yhtio      = '$kukarow[yhtio]'
+              AND l.tila         = 'u'
+              AND l.alatila      = 'x'
+              AND l.liitostunnus = '$asiakasid'
+              AND ((l.tapvm >= '$apvm' and l.tapvm <= '$lpvm') or (l.tapvm >= '$eapvm' and l.tapvm <= '$elpvm'))
+              GROUP BY 1,2
+              ORDER BY 1";
   }
   elseif ($asosasto != '') {
-    $query = "  SELECT t.tuoteno, t.nimitys,
-          sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.rivihinta,0)) summa,
-          sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.rivihinta,0)) edsumma,
-          sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.kate,0)) kate,
-          sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.kate,0)) edkate,
-          sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.kpl,0)) kpl,
-          sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.kpl,0)) edkpl
-          FROM asiakas a use index (yhtio_osasto_ryhma)
-          JOIN lasku l use index (yhtio_tila_liitostunnus_tapvm) ON (a.yhtio = l.yhtio AND l.liitostunnus = a.tunnus and l.tila = 'u' and l.alatila = 'x' and ((l.tapvm >= '$apvm' and l.tapvm <= '$lpvm') or (l.tapvm >= '$eapvm' and l.tapvm <= '$elpvm')))
-          JOIN tilausrivi t ON (l.yhtio = t.yhtio and l.tunnus = t.uusiotunnus)
-          WHERE a.yhtio = '$kukarow[yhtio]'
-          and a.osasto = '$asosasto'
-          group by 1,2
-          order by 1";
+    $query = "SELECT t.tuoteno, t.nimitys,
+              sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.rivihinta,0)) summa,
+              sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.rivihinta,0)) edsumma,
+              sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.kate,0)) kate,
+              sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.kate,0)) edkate,
+              sum(if(t.laskutettuaika >= '$apvm'  and t.laskutettuaika <= '$lpvm',  t.kpl,0)) kpl,
+              sum(if(t.laskutettuaika >= '$eapvm' and t.laskutettuaika <= '$elpvm', t.kpl,0)) edkpl
+              FROM asiakas a use index (yhtio_osasto_ryhma)
+              JOIN lasku l use index (yhtio_tila_liitostunnus_tapvm) ON (a.yhtio = l.yhtio AND l.liitostunnus = a.tunnus and l.tila = 'u' and l.alatila = 'x' and ((l.tapvm >= '$apvm' and l.tapvm <= '$lpvm') or (l.tapvm >= '$eapvm' and l.tapvm <= '$elpvm')))
+              JOIN tilausrivi t ON (l.yhtio = t.yhtio and l.tunnus = t.uusiotunnus)
+              WHERE a.yhtio = '$kukarow[yhtio]'
+              and a.osasto  = '$asosasto'
+              group by 1,2
+              order by 1";
   }
 
   if ($ok == 1 and ($asiakasid != '' or $asosasto != '')) {
@@ -194,10 +194,10 @@ echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
   <td><input type='text' name='kkl' value='$kkl' size='3'></td>
   <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 
-$query = "  SELECT distinct if(osasto = '','TYHJÄ', osasto) osasto
-      FROM asiakas
-      WHERE yhtio = '$kukarow[yhtio]'
-      ORDER BY 1";
+$query = "SELECT distinct if(osasto = '','TYHJÄ', osasto) osasto
+          FROM asiakas
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY 1";
 $sresult = pupe_query($query);
 
 $ulos2 = "<select name='asosasto'>";

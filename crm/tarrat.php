@@ -91,11 +91,11 @@ if ($tee == "TULOSTA") {
               AND yht.rooli IN ('".implode("','", $mul_asiakas)."') )";
   }
 
-  $query = "  SELECT asiakas.* $selectilisa
-        FROM asiakas
-        $joinilisa
-        WHERE asiakas.yhtio = '$kukarow[yhtio]'
-        and asiakas.tunnus in ($otunnus)";
+  $query = "SELECT asiakas.* $selectilisa
+            FROM asiakas
+            $joinilisa
+            WHERE asiakas.yhtio = '$kukarow[yhtio]'
+            and asiakas.tunnus  in ($otunnus)";
   $res = mysql_query($query) or pupe_error($query);
 
   $laskuri = 1;
@@ -418,15 +418,15 @@ if ($tee == '') {
   }
 
   //haetaan omat asiakkaat
-  $query = "  SELECT asiakas.nimi, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.osasto, asiakas.ryhma, asiakas.piiri, asiakas.flag_1, asiakas.flag_2, asiakas.flag_3, asiakas.flag_4, asiakas.tunnus
-        FROM asiakas
-        {$asiakas_yhteeyshenkilo_join}
-        WHERE asiakas.yhtio = '$kukarow[yhtio]'
-        and asiakas.laji != 'P'
-        and asiakas.nimi != ''
-        $lisa
-        ORDER BY $jarjestys
-        $limit";
+  $query = "SELECT asiakas.nimi, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.osasto, asiakas.ryhma, asiakas.piiri, asiakas.flag_1, asiakas.flag_2, asiakas.flag_3, asiakas.flag_4, asiakas.tunnus
+            FROM asiakas
+            {$asiakas_yhteeyshenkilo_join}
+            WHERE asiakas.yhtio  = '$kukarow[yhtio]'
+            and asiakas.laji    != 'P'
+            and asiakas.nimi    != ''
+            $lisa
+            ORDER BY $jarjestys
+            $limit";
   $result = mysql_query($query) or pupe_error($query);
   $lim = "";
   $lim[$limitti] = "SELECTED";

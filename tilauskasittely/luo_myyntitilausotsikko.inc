@@ -4,22 +4,22 @@ if (!function_exists("luo_myyntitilausotsikko")) {
   function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '', $ei_ketjutus = '') {
     global $kukarow, $yhtiorow, $session;
 
-    $query  = "  SELECT *
-          FROM asiakas
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus  = '$asiakasid'";
+    $query  = "SELECT *
+               FROM asiakas
+               WHERE yhtio = '$kukarow[yhtio]'
+               and tunnus  = '$asiakasid'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $asiakasrow  = mysql_fetch_assoc($result);
 
       if (empty($asiakasrow['maksuehto'])) {
-        $query = "  SELECT *
-              FROM maksuehto
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND kaytossa = ''
-              ORDER BY jarjestys ASC
-              LIMIT 1";
+        $query = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio  = '{$kukarow['yhtio']}'
+                  AND kaytossa = ''
+                  ORDER BY jarjestys ASC
+                  LIMIT 1";
         $result = pupe_query($query);
 
         $maksuehto_row = mysql_fetch_assoc($result);
@@ -144,13 +144,13 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
       //annetaan extranet-tilaukselle aina paras prioriteetti, tämä on hyvä porkkana.
       if ($kukarow["extranet"] != '') {
-        $query  = "  SELECT distinct selite
-              FROM avainsana
-              WHERE yhtio = '$kukarow[yhtio]'
-              and laji  = 'asiakasluokka'
-              and selite != ''
-              ORDER BY 1
-              LIMIT 1";
+        $query  = "SELECT distinct selite
+                   FROM avainsana
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   and laji     = 'asiakasluokka'
+                   and selite  != ''
+                   ORDER BY 1
+                   LIMIT 1";
         $prioresult = pupe_query($query);
         $priorow = mysql_fetch_assoc($prioresult);
 
@@ -212,14 +212,14 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       }
 
       $yhteysquery = "SELECT nimi
-              FROM yhteyshenkilo
-              where yhtio = '$kukarow[yhtio]'
-              and liitostunnus = '$asiakasrow[tunnus]'
-              and tyyppi = 'A'
-              and tilausyhteyshenkilo != ''
-              and oletusyhteyshenkilo != ''
-              ORDER BY nimi
-              LIMIT 1";
+                      FROM yhteyshenkilo
+                      where yhtio              = '$kukarow[yhtio]'
+                      and liitostunnus         = '$asiakasrow[tunnus]'
+                      and tyyppi               = 'A'
+                      and tilausyhteyshenkilo != ''
+                      and oletusyhteyshenkilo != ''
+                      ORDER BY nimi
+                      LIMIT 1";
       $yhteysresult = pupe_query($yhteysquery);
 
       if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
@@ -268,10 +268,10 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $valkoodi = $yhtiorow["valkoodi"]."##";
     }
     else {
-      $query = "  SELECT nimi, kurssi
-            FROM valuu
-            WHERE yhtio = '$kukarow[yhtio]'
-            and nimi= '$valkoodi'";
+      $query = "SELECT nimi, kurssi
+                FROM valuu
+                WHERE yhtio = '$kukarow[yhtio]'
+                and nimi= '$valkoodi'";
       $vresult = pupe_query($query);
 
       if (mysql_num_rows($vresult) == 1) {
@@ -382,35 +382,35 @@ if (!function_exists("luo_tarjouspohja")) {
     $viesti = $params['viesti'];
 
     //Jos asiakasid < 0 niin kyseessä on special case. Tässä tapauksessa luodaan Extranet Dummytarjousta.
-    $query = "  SELECT *
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus  = '$asiakasid'";
+    $query = "SELECT *
+              FROM kuka
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$asiakasid'";
     $result = pupe_query($query);
     $asiakasrow  = mysql_fetch_assoc($result);
 
-    $query = "  SELECT *
-          FROM maksuehto
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND kaytossa = ''
-          AND jv = ''
-          AND kateinen = ''
-          AND jaksotettu = ''
-          AND erapvmkasin = ''
-          AND (sallitut_maat = '' OR sallitut_maat LIKE '%$yhtiorow[maa]%')
-          ORDER BY jarjestys ASC
-          LIMIT 1";
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE yhtio     = '{$kukarow['yhtio']}'
+              AND kaytossa    = ''
+              AND jv          = ''
+              AND kateinen    = ''
+              AND jaksotettu  = ''
+              AND erapvmkasin = ''
+              AND (sallitut_maat = '' OR sallitut_maat LIKE '%$yhtiorow[maa]%')
+              ORDER BY jarjestys ASC
+              LIMIT 1";
     $result = pupe_query($query);
     $maksuehto_row = mysql_fetch_assoc($result);
 
-    $query = "  SELECT *
-          FROM toimitustapa
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND nouto = ''
-          AND vak_kielto = ''
-          AND (sallitut_maat = '' OR sallitut_maat LIKE '%$yhtiorow[maa]%')
-          ORDER BY jarjestys ASC
-          LIMIT 1";
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND nouto      = ''
+              AND vak_kielto = ''
+              AND (sallitut_maat = '' OR sallitut_maat LIKE '%$yhtiorow[maa]%')
+              ORDER BY jarjestys ASC
+              LIMIT 1";
     $result = pupe_query($query);
     $default_toimitustapa_row  = mysql_fetch_assoc($result);
 
@@ -438,11 +438,11 @@ if (!function_exists("luo_tarjouspohja")) {
     }
 
     if (!empty($tilausnumero)) {
-      $query = "  SELECT lasku.*, laskun_lisatiedot.sopimus_lisatietoja
-            FROM lasku
-            JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
-            WHERE lasku.yhtio='{$kukarow['yhtio']}'
-            AND lasku.tunnus = $tilausnumero";
+      $query = "SELECT lasku.*, laskun_lisatiedot.sopimus_lisatietoja
+                FROM lasku
+                JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+                WHERE lasku.yhtio='{$kukarow['yhtio']}'
+                AND lasku.tunnus = $tilausnumero";
       $result = pupe_query($query);
 
       $dummy_tarjous_row = mysql_fetch_assoc($result);
@@ -460,10 +460,10 @@ if (!function_exists("luo_tarjouspohja")) {
       else {
         $asiakas_tunnukset = implode(',', $valitut_asiakastunnukset);
       }
-      $query = "  UPDATE laskun_lisatiedot
-            SET sopimus_lisatietoja = '{$asiakas_tunnukset}'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus = '{$tilausnumero}'";
+      $query = "UPDATE laskun_lisatiedot
+                SET sopimus_lisatietoja = '{$asiakas_tunnukset}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$tilausnumero}'";
       pupe_query($query);
     }
 

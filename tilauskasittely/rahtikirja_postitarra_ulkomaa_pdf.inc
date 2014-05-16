@@ -61,14 +61,14 @@ $query_ale_lisa = generoi_alekentta('M');
 
 if ($otunnukset != "") {
   // Tilausken arvo
-  $query = "  SELECT lasku.valkoodi, sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]')) rivihinta
-        FROM tilausrivi
-        JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-        where tilausrivi.otunnus in ($otunnukset)
-        and tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.var in ('','H')
-        and tilausrivi.tyyppi in ('L','G')
-        GROUP BY 1";
+  $query = "SELECT lasku.valkoodi, sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]')) rivihinta
+            FROM tilausrivi
+            JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+            where tilausrivi.otunnus in ($otunnukset)
+            and tilausrivi.yhtio     = '$kukarow[yhtio]'
+            and tilausrivi.var       in ('','H')
+            and tilausrivi.tyyppi    in ('L','G')
+            GROUP BY 1";
   $riresult = pupe_query($query);
   $rirow = mysql_fetch_assoc($riresult);
 }
@@ -95,12 +95,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   }
   else {
     // Haetaan seuraava vapaa numero
-    $query = "  SELECT rahtikirjanro
-          FROM rahtikirjat
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND rahtikirjanro LIKE 'CE%FI%'
-          ORDER BY tunnus desc
-          LIMIT 1";
+    $query = "SELECT rahtikirjanro
+              FROM rahtikirjat
+              WHERE yhtio       = '$kukarow[yhtio]'
+              AND rahtikirjanro LIKE 'CE%FI%'
+              ORDER BY tunnus desc
+              LIMIT 1";
     $ranres = pupe_query($query);
     $ranrow = mysql_fetch_assoc($ranres);
 

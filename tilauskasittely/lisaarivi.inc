@@ -44,27 +44,90 @@ if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myy
 // debuggia varten, laita 1 jos haluut messuja
 $lisaarivi_debug = 0;
 
-if (!isset($rivitunnus)) $rivitunnus = 0;
-else $rivitunnus = (int) $rivitunnus;
+if (!isset($indeksi)) {
+  $indeksi = 0;
+}
 
-if (!isset($perheid))   $perheid = 0;
-else $perheid = (int)   $perheid;
+if (!isset($osto_sarjatunnus)) {
+  $osto_sarjatunnus = 0;
+}
 
-if (!isset($perheid2))   $perheid2 = 0;
-else $perheid2 = (int)   $perheid2;
+if (!isset($myy_sarjatunnus)) {
+  $myy_sarjatunnus = 0;
+}
 
-if (!isset($rivilaadittu))     $rivilaadittu = "";
-if (!isset($kommentti))     $kommentti = "";
-if (!isset($ale_peruste))    $ale_peruste = "";
-if (!isset($jaksotettu))     $jaksotettu = "";
-if (!isset($korvaavakielto))  $korvaavakielto = "";
-if (!isset($orvoteikiinnosta))   $orvoteikiinnosta = "";
-if (!isset($jtspec))       $jtspec = "";
-if (!isset($paikka))       $paikka = "";
-if (!isset($perhekielto))     $perhekielto = "";
-if (!isset($valmistuslinja))  $valmistuslinja = "";
-if (!isset($rekisterinumero))  $rekisterinumero = "";
-if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
+if (!isset($rivitunnus)) {
+  $rivitunnus = 0;
+}
+else {
+  $rivitunnus = (int) $rivitunnus;
+}
+
+if (!isset($perheid)) {
+  $perheid = 0;
+}
+else {
+  $perheid = (int)   $perheid;
+}
+
+if (!isset($perheid2)) {
+  $perheid2 = 0;
+}
+else {
+  $perheid2 = (int)   $perheid2;
+}
+
+if (!isset($rivinumero)) {
+  $rivinumero = "";
+}
+
+if (!isset($rivilaadittu)) {
+  $rivilaadittu = "";
+}
+
+if (!isset($kommentti)) {
+  $kommentti = "";
+}
+
+if (!isset($ale_peruste)) {
+  $ale_peruste = "";
+}
+
+if (!isset($jaksotettu)) {
+  $jaksotettu = "";
+}
+
+if (!isset($korvaavakielto)) {
+  $korvaavakielto = "";
+}
+
+if (!isset($orvoteikiinnosta)) {
+  $orvoteikiinnosta = "";
+}
+
+if (!isset($jtspec)) {
+  $jtspec = "";
+}
+
+if (!isset($paikka)) {
+  $paikka = "";
+}
+
+if (!isset($perhekielto)) {
+  $perhekielto = "";
+}
+
+if (!isset($valmistuslinja)) {
+ $valmistuslinja = "";
+}
+
+if (!isset($rekisterinumero)) {
+  $rekisterinumero = "";
+}
+
+if (!isset($jo_syotetty_rekisterinumero)) {
+  $jo_syotetty_rekisterinumero = "";
+}
 
 if ($rekisterinumero == '') {
   //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.
@@ -839,7 +902,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       }
 
       // Käydään läpi tuotepaikat
-      if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $paikka != "EIERAAVIELA#!¡!#EIEI" AND $rivityyppi != 'W' AND ($laskurow["tila"] != 'V' or $paikka != "")) {
+      if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $paikka != "EIERAAVIELA#!¡!#EIEI" and $rivityyppi != 'W' and ($laskurow["tila"] != 'V' or $paikka != "")) {
         $query = "  SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
               tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
               sarjanumeroseuranta.sarjanumero era,
@@ -1703,7 +1766,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               $trivtyrow = array("selite" => "");
 
-              @include("trivityyppivalinta.inc");
+              @include "trivityyppivalinta.inc";
 
               //special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
               //excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
@@ -1715,6 +1778,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $positio = $trivtyrow['selite'];
               }
 
+              if (!isset($myy_ohita_kerays[$indeksi])) {
+                $myy_ohita_kerays[$indeksi] = "";
+              }
+
+              $tlisatied_lisa2 = "";
               $query = "  SELECT *
                     FROM tilausrivin_lisatiedot
                     WHERE yhtio       = '$kukarow[yhtio]'
@@ -1769,21 +1837,21 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $autoid = !empty($autoid) ? $autoid : 0;
 
                 $query = "  INSERT INTO tilausrivin_lisatiedot
-                      SET yhtio        = '$kukarow[yhtio]',
+                          SET yhtio = '{$kukarow['yhtio']}',
                       positio         = '{$positio}',
-                      toimittajan_tunnus    = '$toimittajan_tunnus',
-                      ei_nayteta         = '$myy_lapsi_ein[$indeksi]',
-                      tilausrivitunnus    = '$lisatty_tun',
-                      erikoistoimitus_myynti   = '$myy_erikoistoimitus[$indeksi]',
+                          toimittajan_tunnus     = '{$toimittajan_tunnus}',
+                          ei_nayteta             = '{$myy_lapsi_ein[$indeksi]}',
+                          tilausrivitunnus       = '{$lisatty_tun}',
+                          erikoistoimitus_myynti = '{$myy_erikoistoimitus[$indeksi]}',
                       ohita_kerays      = '{$myy_ohita_kerays[$indeksi]}',
-                      vanha_otunnus      = '$kukarow[kesken]',
+                          vanha_otunnus          = '{$kukarow['kesken']}',
                       rekisterinumero      = '{$rekisterinumero}',
                       autoid          = '{$autoid}',
-                      jarjestys        = '$jarjestys',
+                          jarjestys              = '{$jarjestys}',
                       luontiaika        = now(),
-                      laatija         = '$kukarow[kuka]'
-                      {$tlisatied_lisa}
-                      {$tlisatied_lisa2}";
+                          laatija                = '{$kukarow['kuka']}'
+                          $tlisatied_lisa
+                          $tlisatied_lisa2";
 
                 if ($trow["sarjanumeroseuranta"] == "S" and $varattu < 0) {
                   $query .= " , osto_vai_hyvitys='O' ";
@@ -2180,7 +2248,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $_extranetista = (isset($mista_tullaan) and $mista_tullaan == 'ORUMNET' and $toim == 'EXTRANET');
     $_osto_myyntitilaukselta = ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and $_myyntitilauksella);
 
-    if ($rivitunnus == 0 and
+    if (($rivitunnus == 0 or $tapa == "MYYVASTAAVA") and
       $rivityyppi == 'L' and
       $yhtiorow['tee_automaattinen_siirto_myyntitilaukselta'] == 'K' and
       $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and
@@ -2210,7 +2278,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $var = "S";
           $autom_siirto_myytil = true;
           $toimittajan_tunnus = $siirto_varasto['tunnus'];
-
 
           $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($siirto_varasto['kohde_tunnus']));
           $tuotepaikka = $tuotepaikkojen_saldot[0];
@@ -2602,7 +2669,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           }
 
           // Jos paikkaa ei vieläkään löytynyt, luodaan tilauksen varastoon tuotepaikka ja käytetään sitä (ostossa toisin)
-          if (!$loydetytpaikat AND $rivityyppi != 'O') {
+          if (!$loydetytpaikat and $rivityyppi != 'O') {
 
             if ($laskurow['varasto'] != 0) {
               $_varasto = $laskurow['varasto'];
@@ -2695,7 +2762,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
     }
-
 
     // Jos hinta ja alekertoimet on setattu
     if ($puu_hintake[$i] != "X") {
@@ -2982,7 +3048,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     $trivtyrow = array("selite" => "");
-    @include("trivityyppivalinta.inc");
+    @include "trivityyppivalinta.inc";
 
     //special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
     //excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
@@ -3129,7 +3195,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                   and $tunken      = 0";
             $sarjares = pupe_query($query);
           }
-
 
           if ($srow["kaytetty"] == 'K') {
             $query = "  UPDATE tilausrivi

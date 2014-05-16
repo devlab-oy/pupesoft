@@ -3900,6 +3900,18 @@ if (mysql_field_name($result, $i) == 'suoratoimitusvarasto') {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == 'yhdistetaan_identtiset_laskulla') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == '1' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Identtisi‰ tilausrivej‰ ei yhdistet‰ laskulla")."</option>";
+  $ulos .= "<option value = 'k' {$sel}>".t("Identtiset tilausrivit yhdistet‰‰n laskulla")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == 'lapsituotteen_poiston_esto') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

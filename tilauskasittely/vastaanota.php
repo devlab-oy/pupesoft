@@ -701,7 +701,13 @@ if ($tee == 'valmis') {
             and alanimi = ''";
   $jtoikeudetres = pupe_query($query);
 
-  if ((mysql_num_rows($jtoikeudetres) <> 0 and $yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "") or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
+  $_jtoikeus              = (mysql_num_rows($jtoikeudetres) <> 0);
+  $_jt_toimita            = ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "");
+  $_jt_toimita_j          = ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J");
+  $_jt_toimitus_sallittu  = (($_jtoikeus and $_jt_toimita) or $_jt_toimita_j);
+  $_normisiirto           = (!isset($_kirjanpidollinen_varastosiirto) or $_kirjanpidollinen_varastosiirto == false);
+
+  if ($_jt_toimitus_sallittu and $_normisiirto) {
     $jtoikeudetrow  = mysql_fetch_assoc($jtoikeudetres);
     $jtrivit = array();
     $jtrivit_paikat   = array();

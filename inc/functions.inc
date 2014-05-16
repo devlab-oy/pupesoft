@@ -26969,10 +26969,14 @@ if (!function_exists('hae_yhtion_toimipaikan_varastot')) {
   function hae_yhtion_toimipaikan_varastot($yhtio_toimipaikka) {
     global $kukarow, $yhtiorow;
 
+    // haetaan kaikki paitsi poistetut varastot annetulta toimipaikalta
+    // sortataan tyypin ja nimityksen mukaan varastot
     $query = "SELECT *
               FROM varastopaikat
-              WHERE yhtio     = '{$kukarow['yhtio']}'
-              AND toimipaikka = '{$yhtio_toimipaikka}'";
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND toimipaikka  = '{$yhtio_toimipaikka}'
+              AND tyyppi      != 'P'
+              ORDER BY if(tyyppi = '', 0, if(tyyppi = 'V', 1, 2)), nimitys";
     $varastopaikat_result = pupe_query($query);
     $varastopaikat = array();
 
@@ -27098,57 +27102,16 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
       return false;
     }
 
-    $myyntitilaus = hae_lasku($myyntitilaus_tunnus);
-    $varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtion_toimipaikka']);
+    $myyntitilaus   = hae_lasku($myyntitilaus_tunnus);
+    $varastot       = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
+    $varastot       = array_column($varastot, 'tunnus');
 
-    //Yhtiön toimipaikalla voi olla monta varastoa. Alkuksi verrataan vain ensimmäistä.
-    //@TODO muutetaan ehkä jossain vaiheessa niin, että verrataan kaikkiin yhtiön toimipaikan varastoihin
-    if ($myyntitilaus['varasto'] != $varastot[0]['tunnus']) {
+    // Yhtiön toimipaikalla voi olla monta varastoa.
+    if (!in_array($myyntitilaus['varasto'], $varastot)) {
       require('tilauskasittely/tilauksesta_varastosiirto.inc');
 
-      //Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
+      // Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
       tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K');
-    }
-  }
-}
-
-if (!function_exists('hae_tuotepaikka')) {
-  function hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali) {
-    global $kukarow, $yhtiorow;
-
-    $query = "SELECT *
-              FROM tuotepaikat
-              WHERE yhtio   = '{$kukarow['yhtio']}'
-              AND tuoteno   = '{$tuoteno}'
-              AND hyllyalue = '{$hyllyalue}'
-              AND hyllynro  = '{$hyllynro}'
-              AND hyllytaso = '{$hyllytaso}'
-              AND hyllyvali = '{$hyllyvali}'";
-    $result = pupe_query($query);
-
-    return mysql_fetch_assoc($result);
-  }
-}
-
-if (!function_exists('luo_tuotepaikka')) {
-  function luo_tuotepaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $tuoteno) {
-    global $kukarow, $yhtiorow;
-
-    $tuotepaikka = hae_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali);
-    if (empty($tuotepaikka)) {
-      luo_tapahtuma($tuoteno, 'uusipaikka', $hyllyalue, $hyllynro, $hyllytaso, $hyllyvali);
-      $query = "INSERT INTO tuotepaikat
-                SET yhtio = '{$kukarow['yhtio']}',
-                tuoteno    = '{$tuoteno}',
-                hyllyalue  = '{$hyllyalue}',
-                hyllynro   = '{$hyllynro}',
-                hyllytaso  = '{$hyllytaso}',
-                hyllyvali  = '{$hyllyvali}',
-                laatija    = '{$kukarow['kuka']}',
-                luontiaika = NOW(),
-                muutospvm  = NOW(),
-                muuttaja   = '{$kukarow['yhtio']}'";
-      pupe_query($query);
     }
   }
 }
@@ -27209,27 +27172,41 @@ if (!function_exists('hae_tuotepaikat')) {
 }
 
 if (!function_exists('hae_tuotteen_tuotepaikat')) {
-  function hae_tuotteen_tuotepaikat($tuoteno) {
+  function hae_tuotteen_tuotepaikat($tuoteno, $varasto = 0) {
     global $kukarow, $yhtiorow;
 
     if (empty($tuoteno)) {
       return array();
     }
 
-    $query = "SELECT *
+    $varastojoin = '';
+
+    if (!empty($varasto)) {
+
+      $varastojoin = "JOIN varastopaikat on (
+                      varastopaikat.yhtio=tuotepaikat.yhtio and
+                      concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+                      concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                      AND varastopaikat.tunnus = {$varasto}
+                      )";
+    }
+
+    $query = "SELECT tuotepaikat.*
               FROM tuotepaikat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$tuoteno}'";
+              $varastojoin
+              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+              AND tuotepaikat.tuoteno = '{$tuoteno}'
+              ORDER BY tuotepaikat.oletus desc";
     $result = pupe_query($query);
 
     $tuotepaikat = array();
+
     while ($tuotepaikka = mysql_fetch_assoc($result)) {
       $tuotepaikat[] = $tuotepaikka;
     }
 
     return $tuotepaikat;
   }
-
 }
 
 if (!function_exists('hae_varasto')) {

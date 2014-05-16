@@ -64,45 +64,45 @@ if ($tee != '') {
   $query_ale_lisa = generoi_alekentta('M');
 
   if ($try != '') {
-    $query = "  SELECT tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus, asiakas.asiakasnro,
-          round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)),2) puutekpl,
-          round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
-          round(sum(if ((tilausrivi.var='' or tilausrivi.var='H'), tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur
-          FROM tilausrivi
-          LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
-          LEFT JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
-          LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-          WHERE tilausrivi.yhtio   = '$kukarow[yhtio]'
-          and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'
-          and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59'
-          and tilausrivi.var in ('P','H','')
-          and tilausrivi.osasto   = '$osasto'
-          and tilausrivi.try    = '$try'
-          and tilausrivi.tyyppi  ='L'
-          $lisaasiakas
-          and tuote.status NOT IN ('P','X')
-          GROUP BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus
-          HAVING puutekpl <> 0
-          ORDER BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus";
+    $query = "SELECT tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus, asiakas.asiakasnro,
+              round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)),2) puutekpl,
+              round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
+              round(sum(if ((tilausrivi.var='' or tilausrivi.var='H'), tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur
+              FROM tilausrivi
+              LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+              LEFT JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
+              LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+              WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+              and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'
+              and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59'
+              and tilausrivi.var      in ('P','H','')
+              and tilausrivi.osasto   = '$osasto'
+              and tilausrivi.try      = '$try'
+              and tilausrivi.tyyppi  ='L'
+              $lisaasiakas
+              and tuote.status        NOT IN ('P','X')
+              GROUP BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus
+              HAVING puutekpl <> 0
+              ORDER BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus";
   }
   else {
-    $query = "  SELECT tilausrivi.osasto, tilausrivi.try $sellisa,
-          round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)),2) puutekpl,
-          round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
-          round(sum(if (tilausrivi.var='' or tilausrivi.var='H', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur
-          FROM tilausrivi
-          LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
-          LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-          WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-          and tilausrivi.tyyppi = 'L'
-          and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
-          and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
-          and tilausrivi.var in ('P','H','')
-          $lisaasiakas
-          and tuote.status NOT IN ('P','X')
-          GROUP BY tilausrivi.osasto, tilausrivi.try $sellisa
-          $rivilisa
-          ORDER BY tilausrivi.osasto, tilausrivi.try $sellisa";
+    $query = "SELECT tilausrivi.osasto, tilausrivi.try $sellisa,
+              round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)),2) puutekpl,
+              round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
+              round(sum(if (tilausrivi.var='' or tilausrivi.var='H', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur
+              FROM tilausrivi
+              LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+              LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              and tilausrivi.tyyppi  = 'L'
+              and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
+              and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
+              and tilausrivi.var     in ('P','H','')
+              $lisaasiakas
+              and tuote.status       NOT IN ('P','X')
+              GROUP BY tilausrivi.osasto, tilausrivi.try $sellisa
+              $rivilisa
+              ORDER BY tilausrivi.osasto, tilausrivi.try $sellisa";
   }
 
   $result = mysql_query($query) or pupe_error($query);
@@ -359,10 +359,10 @@ if ($tee != '') {
 
     if ($try != '') {
       // Tuotteen kokonaissaldo
-      $query = "  SELECT sum(saldo) kokonaissaldo
-            FROM tuotepaikat
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tuoteno = '$row[tuoteno]'";
+      $query = "SELECT sum(saldo) kokonaissaldo
+                FROM tuotepaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tuoteno = '$row[tuoteno]'";
       $saldores = pupe_query($query);
       $saldorow = mysql_fetch_assoc($saldores);
 
@@ -372,9 +372,9 @@ if ($tee != '') {
       $excelsarake++;
 
       //tilauksessa olevat
-      $query = "  SELECT sum(varattu) tilattu
-            FROM tilausrivi
-            WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
+      $query = "SELECT sum(varattu) tilattu
+                FROM tilausrivi
+                WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
       $tulresult = mysql_query($query) or pupe_error($query);
       $tulrow = mysql_fetch_array($tulresult);
 
@@ -383,26 +383,26 @@ if ($tee != '') {
       $worksheet->writeNumber($excelrivi, $excelsarake, (float) $tulrow['tilattu']);
       $excelsarake++;
 
-      $query = "  SELECT tahtituote, hinnastoon, status, ostoehdotus,
-            group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
-            group_concat(distinct toimi.ytunnus order by toimi.ytunnus separator '<br>') toimittaja
-            FROM tuote
-            LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
-            LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-            WHERE tuote.yhtio='$kukarow[yhtio]'
-            and tuote.tuoteno='$row[tuoteno]'
-            GROUP BY 1,2,3";
+      $query = "SELECT tahtituote, hinnastoon, status, ostoehdotus,
+                group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
+                group_concat(distinct toimi.ytunnus order by toimi.ytunnus separator '<br>') toimittaja
+                FROM tuote
+                LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
+                LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+                WHERE tuote.yhtio='$kukarow[yhtio]'
+                and tuote.tuoteno='$row[tuoteno]'
+                GROUP BY 1,2,3";
       $tuoteresult = mysql_query($query) or pupe_error($query);
       $tuoterow = mysql_fetch_array($tuoteresult);
 
       //Rekisteröidyt kpl
       if (table_exists("yhteensopivuus_tuote")) {
         $query = "SELECT count(yhteensopivuus_rekisteri.tunnus)
-        FROM yhteensopivuus_tuote, yhteensopivuus_rekisteri
-        WHERE yhteensopivuus_tuote.yhtio = yhteensopivuus_rekisteri.yhtio
-        AND yhteensopivuus_tuote.atunnus = yhteensopivuus_rekisteri.autoid
-        AND yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
-        AND yhteensopivuus_tuote.tuoteno = '$row[tuoteno]'";
+                  FROM yhteensopivuus_tuote, yhteensopivuus_rekisteri
+                  WHERE yhteensopivuus_tuote.yhtio = yhteensopivuus_rekisteri.yhtio
+                  AND yhteensopivuus_tuote.atunnus = yhteensopivuus_rekisteri.autoid
+                  AND yhteensopivuus_tuote.yhtio   = '$kukarow[yhtio]'
+                  AND yhteensopivuus_tuote.tuoteno = '$row[tuoteno]'";
 
         $rekresult = mysql_query($query) or pupe_error($query);
         $rekrow = mysql_fetch_array($rekresult);
@@ -437,9 +437,9 @@ if ($tee != '') {
             $alkurow = mysql_fetch_array($alkuresult);
 
             //ennakkopoistot
-            $query = "  SELECT sum(varattu) varattu
-                  FROM tilausrivi
-                  WHERE tyyppi = 'L' and yhtio = '$kukarow[yhtio]' and tuoteno = '$krow2row[tuoteno]' and varattu>0";
+            $query = "SELECT sum(varattu) varattu
+                      FROM tilausrivi
+                      WHERE tyyppi = 'L' and yhtio = '$kukarow[yhtio]' and tuoteno = '$krow2row[tuoteno]' and varattu>0";
             $varatutresult = mysql_query($query) or pupe_error($query);
             $varatutrow = mysql_fetch_array($varatutresult);
 

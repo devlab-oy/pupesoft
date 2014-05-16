@@ -11,9 +11,9 @@ function hinnastorivi($tuote, $laskurow) {
 
     // Tarkistetaan saldo
     $query = "SELECT sum(saldo) as saldo
-        FROM tuotepaikat
-        WHERE yhtio='{$kukarow['yhtio']}'
-        AND tuoteno='{$tuote['tuoteno']}'";
+              FROM tuotepaikat
+              WHERE yhtio='{$kukarow['yhtio']}'
+              AND tuoteno='{$tuote['tuoteno']}'";
     $result = pupe_query($query);
 
     // jos saldo on nolla laitetaan myyntihinnaksi 0

@@ -14,10 +14,10 @@ if (mysql_field_name($result, $i) == "sallitut_alustat") {
 
   $sel = explode(",", $trow[$i]);
 
-  $query = "  SELECT *
-        FROM pakkaus
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        ORDER BY pakkaus";
+  $query = "SELECT *
+            FROM pakkaus
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            ORDER BY pakkaus";
   $pakkaus_result = mysql_query($query) or pupe_error($query);
 
   $ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
@@ -100,10 +100,10 @@ if (mysql_field_name($result, $i) == "yhdistelysaanto") {
 if (mysql_field_name($result, $i) == "varasto") {
   $ulos = "<td><select name='{$nimi}'>";
 
-  $query = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+            ORDER BY tyyppi, nimitys";
   $varasto_res = mysql_query($query) or pupe_error($query);
 
   while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
@@ -124,12 +124,12 @@ if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 
   $printterilisa = mysql_field_name($result,$i) == 'printteri8' ? " and komento != 'email' " : '';
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        {$printterilisa}
-        AND komento != 'EDI'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            {$printterilisa}
+            AND komento != 'EDI'
+            ORDER BY kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";

@@ -51,22 +51,22 @@ if ($tee != '') {
     $orderbylisa = "toimitettuaika, ";
   }
 
-  $query = "  SELECT lasku.toimitustapa
-        {$lisa},
-        left(SEC_TO_TIME(AVG(TIME_TO_SEC(DATE_FORMAT(toimitettuaika,'%H:%i:%s')))),5) aika,
-        COUNT(DISTINCT lasku.tunnus) kpl,
-        SUM(tilausrivi.rivihinta) summa,
-        COUNT(DISTINCT IF(lasku.kerayslista = 0, lasku.tunnus, lasku.kerayslista)) kpl_kerayslista,
-        COUNT(DISTINCT tilausrivi.tunnus) tilausriveja,
-        ROUND(SUM(tilausrivi.kpl)) kpl_tilriv
-        FROM tilausrivi
-        JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.tyyppi = 'L'
-        AND tilausrivi.toimitettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-        AND tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-        GROUP BY 1 {$groupbylisa}
-        ORDER BY {$orderbylisa} aika, kpl desc, toimitustapa";
+  $query = "SELECT lasku.toimitustapa
+            {$lisa},
+            left(SEC_TO_TIME(AVG(TIME_TO_SEC(DATE_FORMAT(toimitettuaika,'%H:%i:%s')))),5) aika,
+            COUNT(DISTINCT lasku.tunnus) kpl,
+            SUM(tilausrivi.rivihinta) summa,
+            COUNT(DISTINCT IF(lasku.kerayslista = 0, lasku.tunnus, lasku.kerayslista)) kpl_kerayslista,
+            COUNT(DISTINCT tilausrivi.tunnus) tilausriveja,
+            ROUND(SUM(tilausrivi.kpl)) kpl_tilriv
+            FROM tilausrivi
+            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+            WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+            AND tilausrivi.tyyppi         = 'L'
+            AND tilausrivi.toimitettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+            AND tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+            GROUP BY 1 {$groupbylisa}
+            ORDER BY {$orderbylisa} aika, kpl desc, toimitustapa";
   $result = pupe_query($query);
 
   $otsikot =  "  <tr>

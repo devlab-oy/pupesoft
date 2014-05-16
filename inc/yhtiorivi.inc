@@ -34,10 +34,10 @@ if (mysql_field_name($result, $i) == "kieli") {
 }
 
 if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "laskutus_maa") {
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = mysql_query($query) or pupe_error($query);
   $ulos = "<td><select name='$nimi'>";
 
@@ -54,10 +54,10 @@ if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "
 }
 
 if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
-  $query = "  SELECT nimi, tunnus
-                FROM valuu
-                WHERE yhtio = '$kukarow[yhtio]'
-                ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY jarjestys";
      $vresult = mysql_query($query) or pupe_error($query);
     $ulos = "<td><select name='$nimi'>";
 
@@ -141,9 +141,9 @@ if ((mysql_field_name($result, $i) == "kassa") or
       $ulos .= "<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
     }
 
-    $query = "  SELECT nimi
-          FROM tili
-          WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
+    $query = "SELECT nimi
+              FROM tili
+              WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
     $vresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($vresult) == 1) {
@@ -151,9 +151,9 @@ if ((mysql_field_name($result, $i) == "kassa") or
       $ulos .= " $vrow[nimi]";
     }
     else {
-      $query = "  SELECT tilino, nimi
-            FROM tili
-            WHERE yhtio='$kukarow[yhtio]'";
+      $query = "SELECT tilino, nimi
+                FROM tili
+                WHERE yhtio='$kukarow[yhtio]'";
 
       if (mysql_field_name($result, $i) == "kassa")                 $query .= " and nimi regexp '(kassa|k.teis)' ";
       elseif (mysql_field_name($result, $i) == "pankkikortti")           $query .= " and nimi regexp 'pankki.*kortti' ";

@@ -53,12 +53,12 @@ if ($tee == "TULOSTA") {
     $jarj = "ORDER BY 3";
   }
 
-  $tuotepaikka_query = "  SELECT tuote.tuoteno, tuote.nimitys, CONCAT_WS('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllyosoite
-              FROM tuotepaikat
-              JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio=tuotepaikat.yhtio AND tuote.tuoteno=tuotepaikat.tuoteno)
-              WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
-              $wherelisa
-              $jarj";
+  $tuotepaikka_query = "SELECT tuote.tuoteno, tuote.nimitys, CONCAT_WS('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllyosoite
+                        FROM tuotepaikat
+                        JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio=tuotepaikat.yhtio AND tuote.tuoteno=tuotepaikat.tuoteno)
+                        WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
+                        $wherelisa
+                        $jarj";
   $tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
 
   if (mysql_num_rows($tuotepaikka_result) == 0) {

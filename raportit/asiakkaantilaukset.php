@@ -111,11 +111,11 @@ enable_ajax();
 
 if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
 
-  $query = "  SELECT ytunnus, liitostunnus
-        FROM lasku
-        WHERE $logistiikka_yhtiolisa
-        and tunnus = '$kukarow[kesken]'
-        and $til";
+  $query = "SELECT ytunnus, liitostunnus
+            FROM lasku
+            WHERE $logistiikka_yhtiolisa
+            and tunnus = '$kukarow[kesken]'
+            and $til";
   $keskenresult = pupe_query($query);
 
   if (mysql_num_rows($keskenresult) == 1) {
@@ -138,10 +138,10 @@ if ($tee == 'NAYTATILAUS') {
   require ("naytatilaus.inc");
 
   if ($cleantoim == "MYYNTI" or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI' or $cleantoim == "TAKUU") {
-    $query = "  SELECT *
-          FROM rahtikirjat
-          WHERE otsikkonro='$tunnus'
-          and $logistiikka_yhtiolisa ";
+    $query = "SELECT *
+              FROM rahtikirjat
+              WHERE otsikkonro='$tunnus'
+              and $logistiikka_yhtiolisa ";
     $rahtiresult = pupe_query($query);
 
     if (mysql_num_rows($rahtiresult)> 0) {
@@ -159,11 +159,11 @@ if ($tee == 'NAYTATILAUS') {
               <th>".t("Tulostustapa")."</th></tr>";
 
       while ($rahtirow = mysql_fetch_array($rahtiresult)){
-        $query = "  SELECT nimitys
-              FROM varastopaikat
-              WHERE tunnus='$rahtirow[tulostuspaikka]'
-              and $logistiikka_yhtiolisa
-              limit 1";
+        $query = "SELECT nimitys
+                  FROM varastopaikat
+                  WHERE tunnus='$rahtirow[tulostuspaikka]'
+                  and $logistiikka_yhtiolisa
+                  limit 1";
         $varnimresult = pupe_query($query);
         $varnimrow = mysql_fetch_array($varnimresult);
 
@@ -203,20 +203,20 @@ if ($ytunnus != '' and ($otunnus == '' and $laskunro == '' and $sopimus == '')) 
   }
 }
 elseif ($otunnus > 0) {
-  $query = "  (SELECT laskunro, ytunnus, liitostunnus
-        FROM lasku use index (PRIMARY)
-        WHERE tunnus='$otunnus'
-        and $logistiikka_yhtiolisa)
-        UNION
-        (SELECT laskunro, ytunnus, liitostunnus
-        FROM lasku use index (yhtio_vanhatunnus)
-        WHERE vanhatunnus='$otunnus'
-        and $logistiikka_yhtiolisa)
-        UNION
-        (SELECT laskunro, ytunnus, liitostunnus
-        FROM lasku use index (yhtio_tunnusnippu)
-        WHERE tunnusnippu = '$otunnus'
-        and $logistiikka_yhtiolisa)";
+  $query = "(SELECT laskunro, ytunnus, liitostunnus
+             FROM lasku use index (PRIMARY)
+             WHERE tunnus='$otunnus'
+             and $logistiikka_yhtiolisa)
+             UNION
+             (SELECT laskunro, ytunnus, liitostunnus
+             FROM lasku use index (yhtio_vanhatunnus)
+             WHERE vanhatunnus='$otunnus'
+             and $logistiikka_yhtiolisa)
+             UNION
+             (SELECT laskunro, ytunnus, liitostunnus
+             FROM lasku use index (yhtio_tunnusnippu)
+             WHERE tunnusnippu = '$otunnus'
+             and $logistiikka_yhtiolisa)";
   $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 
@@ -233,10 +233,10 @@ elseif ($otunnus > 0) {
   }
 }
 elseif ($sopimus > 0) {
-  $query = "  SELECT laskunro, ytunnus, liitostunnus
-        FROM lasku
-        WHERE tunnus = '$sopimus'
-        and $logistiikka_yhtiolisa";
+  $query = "SELECT laskunro, ytunnus, liitostunnus
+            FROM lasku
+            WHERE tunnus = '$sopimus'
+            and $logistiikka_yhtiolisa";
   $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 
@@ -252,12 +252,12 @@ elseif ($sopimus > 0) {
 }
 elseif ($laskunro > 0) {
   if ($cleantoim == 'OSTO') {
-    $query = "  SELECT laskunro, ytunnus, liitostunnus
-          FROM lasku
-          WHERE laskunro  = '$laskunro'
-          and tila    = 'K'
-          and vanhatunnus = 0
-          and $logistiikka_yhtiolisa";
+    $query = "SELECT laskunro, ytunnus, liitostunnus
+              FROM lasku
+              WHERE laskunro  = '$laskunro'
+              and tila        = 'K'
+              and vanhatunnus = 0
+              and $logistiikka_yhtiolisa";
     $result = pupe_query($query);
     $row = mysql_fetch_array($result);
 
@@ -266,12 +266,12 @@ elseif ($laskunro > 0) {
     $toimittajaid   = $row["liitostunnus"];
   }
   else {
-    $query = "  SELECT laskunro, ytunnus, liitostunnus
-          FROM lasku
-          WHERE laskunro  = '$laskunro'
-          and tila     = 'U'
-          and alatila    = 'X'
-          and $logistiikka_yhtiolisa";
+    $query = "SELECT laskunro, ytunnus, liitostunnus
+              FROM lasku
+              WHERE laskunro = '$laskunro'
+              and tila       = 'U'
+              and alatila    = 'X'
+              and $logistiikka_yhtiolisa";
     $result = pupe_query($query);
     $row = mysql_fetch_array($result);
 
@@ -281,10 +281,10 @@ elseif ($laskunro > 0) {
   }
 }
 elseif ($astilnro != '') {
-  $query = "  SELECT laskunro, ytunnus, liitostunnus, tunnus
-        FROM lasku use index (yhtio_asiakkaan_tilausnumero)
-        WHERE asiakkaan_tilausnumero LIKE ('%$astilnro%')
-        and $logistiikka_yhtiolisa";
+  $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus
+            FROM lasku use index (yhtio_asiakkaan_tilausnumero)
+            WHERE asiakkaan_tilausnumero LIKE ('%$astilnro%')
+            and $logistiikka_yhtiolisa";
   $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 
@@ -322,20 +322,20 @@ if ($ytunnus != '') {
       <input type='hidden' name='tee' value='TULOSTA'>";
 
   if ($asiakasid > 0) {
-    $query  = "  SELECT concat_ws(' ', nimi, nimitark) nimi
-          FROM asiakas
-          WHERE $logistiikka_yhtiolisa
-          and tunnus='$asiakasid'";
+    $query  = "SELECT concat_ws(' ', nimi, nimitark) nimi
+               FROM asiakas
+               WHERE $logistiikka_yhtiolisa
+               and tunnus='$asiakasid'";
     $result = pupe_query($query);
     $asiakasrow   = mysql_fetch_array($result);
 
     echo "<table><tr><th>".t("Valittu asiakas").":</th><td>$asiakasrow[nimi]</td></td><td class='back'><input type='button' onclick='vaihdaClick();' value = '".t("Vaihda asiakasta")."'></td></tr></table><br>";
   }
   elseif ($toimittajaid > 0) {
-    $query  = "  SELECT concat_ws(' ', nimi, nimitark) nimi
-          FROM toimi
-          WHERE $logistiikka_yhtiolisa
-          and tunnus='$toimittajaid'";
+    $query  = "SELECT concat_ws(' ', nimi, nimitark) nimi
+               FROM toimi
+               WHERE $logistiikka_yhtiolisa
+               and tunnus='$toimittajaid'";
     $result = pupe_query($query);
     $asiakasrow   = mysql_fetch_array($result);
 
@@ -408,73 +408,73 @@ if ($ytunnus != '') {
 
   if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
     if ($laskunro > 0) {
-      $query = "  SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-            FROM lasku
-            $yhtioekojoin
-            WHERE lasku.$logistiikka_yhtiolisa
-            and lasku.liitostunnus = '$litunn'
-            and $til
-            and lasku.laskunro='$laskunro'";
+      $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                FROM lasku
+                $yhtioekojoin
+                WHERE lasku.$logistiikka_yhtiolisa
+                and lasku.liitostunnus = '$litunn'
+                and $til
+                and lasku.laskunro='$laskunro'";
     }
     elseif ($sopimus > 0) {
-      $query = "  (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-            FROM lasku
-            $yhtioekojoin
-            WHERE lasku.$logistiikka_yhtiolisa
-            and lasku.liitostunnus = '$litunn'
-            and $til
-            and lasku.tunnus='$sopimus')
-            UNION
-            (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-            FROM lasku
-            $yhtioekojoin
-            WHERE lasku.$logistiikka_yhtiolisa
-            and lasku.liitostunnus = '$litunn'
-            and $til
-            and lasku.vanhatunnus='$sopimus')
-            UNION
-            (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-            FROM lasku
-            $yhtioekojoin
-            WHERE lasku.$logistiikka_yhtiolisa
-            and lasku.liitostunnus = '$litunn'
-            and $til
-            and lasku.clearing='sopimus'
-            and lasku.swift='$sopimus')";
+      $query = "(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 FROM lasku
+                 $yhtioekojoin
+                 WHERE lasku.$logistiikka_yhtiolisa
+                 and lasku.liitostunnus = '$litunn'
+                 and $til
+                 and lasku.tunnus='$sopimus')
+                 UNION
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 FROM lasku
+                 $yhtioekojoin
+                 WHERE lasku.$logistiikka_yhtiolisa
+                 and lasku.liitostunnus = '$litunn'
+                 and $til
+                 and lasku.vanhatunnus='$sopimus')
+                 UNION
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 FROM lasku
+                 $yhtioekojoin
+                 WHERE lasku.$logistiikka_yhtiolisa
+                 and lasku.liitostunnus = '$litunn'
+                 and $til
+                 and lasku.clearing='sopimus'
+                 and lasku.swift='$sopimus')";
     }
     else {
-      $query = "  (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-            FROM lasku
-            $yhtioekojoin
-            WHERE lasku.$logistiikka_yhtiolisa
-            and lasku.liitostunnus = '$litunn'
-            and $til
-            and lasku.tunnus='$otunnus')
-            UNION
-            (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-            FROM lasku
-            $yhtioekojoin
-            WHERE lasku.$logistiikka_yhtiolisa
-            and lasku.liitostunnus = '$litunn'
-            and $til
-            and lasku.vanhatunnus='$otunnus')
-            UNION
-            (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-            FROM lasku
-            $yhtioekojoin
-            WHERE lasku.$logistiikka_yhtiolisa
-            and lasku.liitostunnus = '$litunn'
-            and $til
-            and lasku.tunnusnippu='$otunnus')";
+      $query = "(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 FROM lasku
+                 $yhtioekojoin
+                 WHERE lasku.$logistiikka_yhtiolisa
+                 and lasku.liitostunnus = '$litunn'
+                 and $til
+                 and lasku.tunnus='$otunnus')
+                 UNION
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 FROM lasku
+                 $yhtioekojoin
+                 WHERE lasku.$logistiikka_yhtiolisa
+                 and lasku.liitostunnus = '$litunn'
+                 and $til
+                 and lasku.vanhatunnus='$otunnus')
+                 UNION
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 FROM lasku
+                 $yhtioekojoin
+                 WHERE lasku.$logistiikka_yhtiolisa
+                 and lasku.liitostunnus = '$litunn'
+                 and $til
+                 and lasku.tunnusnippu='$otunnus')";
     }
 
     $query .=  "$jarj";
   }
   else {
-    $query = "  SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-          FROM lasku use index (yhtio_tila_luontiaika)
-          $yhtioekojoin
-          WHERE lasku.$logistiikka_yhtiolisa ";
+    $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+              FROM lasku use index (yhtio_tila_luontiaika)
+              $yhtioekojoin
+              WHERE lasku.$logistiikka_yhtiolisa ";
 
     if (substr($ytunnus, 0, 1) == '£') {
       $query .= "  and lasku.nimi    = '$asiakasrow[nimi]'
@@ -576,11 +576,11 @@ if ($ytunnus != '') {
 
       // Laatikot laskujen ympärille
       if ($row["laskunro"] > 0 and $row["laskunro"] != $edlaskunro) {
-        $query = "  SELECT count(*)
-              FROM lasku
-              WHERE $logistiikka_yhtiolisa
-              and laskunro = '$row[laskunro]'
-              and tila in ('U','L')";
+        $query = "SELECT count(*)
+                  FROM lasku
+                  WHERE $logistiikka_yhtiolisa
+                  and laskunro = '$row[laskunro]'
+                  and tila     in ('U','L')";
         $pkres = pupe_query($query);
         $pkrow = mysql_fetch_array($pkres);
 

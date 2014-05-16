@@ -51,10 +51,10 @@ echo "</select>&nbsp;<input type='text' size='5' name='year' value='$YearToShow'
 
 echo"<table bgcolor='$tablecolor' border='0' cellspacing='1' cellpadding='2'>";
 
-$query = "  SELECT id, maksuaika, maksutapa, maksutapa
-      FROM asiakastiedot
-      WHERE month(maksuaika)='$MonthToShow' and year(maksuaika)='$YearToShow' and (asnum='303' or asnum='660494')
-      ORDER by id";
+$query = "SELECT id, maksuaika, maksutapa, maksutapa
+          FROM asiakastiedot
+          WHERE month(maksuaika)='$MonthToShow' and year(maksuaika)='$YearToShow' and (asnum='303' or asnum='660494')
+          ORDER by id";
 $result = mysql_query ($query)
   or die ("Kysely ei onnistu $query");
 
@@ -63,15 +63,15 @@ echo "  <tr><td>$thfont Työmääräys: </td>
 $yhteensa = 0;
 
 while ($row = mysql_fetch_array($result)){
-  $query = "  SELECT sum(rivihinta)
-        FROM huoltotiedot
-        WHERE kpl > 0 and id='$row[0]'";
+  $query = "SELECT sum(rivihinta)
+            FROM huoltotiedot
+            WHERE kpl > 0 and id='$row[0]'";
   $presult = mysql_query ($query)
     or die ("Kysely ei onnistu $query");
 
-  $query = "  SELECT sum(if (osanro='HT295',rivihinta,0))
-        FROM varaosat
-        WHERE kpl > 0 and id='$row[0]'";
+  $query = "SELECT sum(if (osanro='HT295',rivihinta,0))
+            FROM varaosat
+            WHERE kpl > 0 and id='$row[0]'";
   $rresult = mysql_query ($query)
     or die ("Kysely ei onnistu $query");
 

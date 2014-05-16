@@ -46,31 +46,31 @@ if ($tee == '') {
 
   echo "<input type='hidden' name='ed_valkoodi' value='$valkoodi'>";
 
-  $query = "  SELECT *
-                FROM factoring
-               WHERE yhtio     = '$kukarow[yhtio]'
-        and factoringyhtio   = '$factoringyhtio'
-        and valkoodi     = '$valkoodi'";
+  $query = "SELECT *
+            FROM factoring
+            WHERE yhtio        = '$kukarow[yhtio]'
+            and factoringyhtio = '$factoringyhtio'
+            and valkoodi       = '$valkoodi'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
-  $query = "  SELECT min(laskunro) eka, max(laskunro) vika
-        FROM lasku use index (yhtio_tila_tapvm)
-        JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring = '$factoringyhtio'
-        WHERE lasku.yhtio  = '$kukarow[yhtio]'
-        and lasku.tila      = 'U'
-        and lasku.tapvm     > date_sub(CURDATE(), interval 6 month)
-        and lasku.alatila  = 'X'
-        and lasku.summa    != 0
-        and lasku.factoringsiirtonumero = 0
-        and lasku.valkoodi  = '$valkoodi'";
+  $query = "SELECT min(laskunro) eka, max(laskunro) vika
+            FROM lasku use index (yhtio_tila_tapvm)
+            JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring = '$factoringyhtio'
+            WHERE lasku.yhtio                = '$kukarow[yhtio]'
+            and lasku.tila                   = 'U'
+            and lasku.tapvm                  > date_sub(CURDATE(), interval 6 month)
+            and lasku.alatila                = 'X'
+            and lasku.summa                 != 0
+            and lasku.factoringsiirtonumero  = 0
+            and lasku.valkoodi               = '$valkoodi'";
   $aresult = pupe_query($query);
   $arow = mysql_fetch_assoc($aresult);
 
-  $query = "  SELECT nimi, tunnus
-                FROM valuu
-               WHERE yhtio = '$kukarow[yhtio]'
-                 ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+             ORDER BY jarjestys";
   $vresult = pupe_query($query);
 
   echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
@@ -95,14 +95,14 @@ if ($tee == '') {
       <td><input type='text' name='ppl' value='$arow[vika]' size='10'></td>
       </tr>";
 
-  $query = "  SELECT max(factoringsiirtonumero)+1 seuraava
-        FROM lasku use index (yhtio_tila_tapvm)
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tila    = 'U'
-        and lasku.tapvm   > date_sub(CURDATE(), interval 6 month)
-        and lasku.alatila = 'X'
-        and lasku.summa   != 0
-        and lasku.factoringsiirtonumero > 0";
+  $query = "SELECT max(factoringsiirtonumero)+1 seuraava
+            FROM lasku use index (yhtio_tila_tapvm)
+            WHERE lasku.yhtio                = '$kukarow[yhtio]'
+            and lasku.tila                   = 'U'
+            and lasku.tapvm                  > date_sub(CURDATE(), interval 6 month)
+            and lasku.alatila                = 'X'
+            and lasku.summa                 != 0
+            and lasku.factoringsiirtonumero  > 0";
   $aresult = pupe_query($query);
   $arow = mysql_fetch_assoc($aresult);
 
@@ -127,21 +127,21 @@ if ($tee == '') {
 
   echo "<input type='hidden' name='ed_valkoodi' value='$valkoodi'>";
 
-  $query = "  SELECT *
-                FROM factoring
-               WHERE yhtio     = '$kukarow[yhtio]'
-        and factoringyhtio   = '$factoringyhtio'
-        and valkoodi     = '$valkoodi'";
+  $query = "SELECT *
+            FROM factoring
+            WHERE yhtio        = '$kukarow[yhtio]'
+            and factoringyhtio = '$factoringyhtio'
+            and valkoodi       = '$valkoodi'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
   echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
   echo "<tr><th>Valitse valuutta:</th><td><select name='valkoodi' onchange='submit();'>";
 
-  $query = "  SELECT nimi, tunnus
-                FROM valuu
-               WHERE yhtio = '$kukarow[yhtio]'
-                 ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+             ORDER BY jarjestys";
   $vresult = pupe_query($query);
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -165,11 +165,11 @@ if ($tee == 'TULOSTA') {
   $luontipvm  = date("ymd");
   $luontiaika  = date("Hi");
 
-  $query = "  SELECT *
-        FROM factoring
-        WHERE yhtio = '$kukarow[yhtio]'
-        and factoringyhtio = '$factoringyhtio'
-        and valkoodi = '$valkoodi'";
+  $query = "SELECT *
+            FROM factoring
+            WHERE yhtio        = '$kukarow[yhtio]'
+            and factoringyhtio = '$factoringyhtio'
+            and valkoodi       = '$valkoodi'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
@@ -241,15 +241,15 @@ if ($tee == 'TULOSTA') {
           and lasku.factoringsiirtonumero = 0 ";
   }
 
-  $dquery = "  SELECT lasku.yhtio
-        FROM lasku
-        JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
-        WHERE lasku.yhtio    = '$kukarow[yhtio]'
-        and lasku.tila        = 'U'
-        and lasku.alatila    = 'X'
-        and lasku.summa    != 0
-        and lasku.valkoodi  = '$valkoodi'
-        $where";
+  $dquery = "SELECT lasku.yhtio
+             FROM lasku
+             JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
+             WHERE lasku.yhtio   = '$kukarow[yhtio]'
+             and lasku.tila      = 'U'
+             and lasku.alatila   = 'X'
+             and lasku.summa    != 0
+             and lasku.valkoodi  = '$valkoodi'
+             $where";
   $dresult = pupe_query($dquery);
 
   if (mysql_num_rows($dresult) == 0) {
@@ -257,43 +257,43 @@ if ($tee == 'TULOSTA') {
     exit;
   }
 
-  $query = "  SELECT if (lasku.summa >= 0, '01', '02') tyyppi,
-        lasku.ytunnus,
-        lasku.nimi,
-        lasku.nimitark,
-        lasku.osoite,
-        lasku.postino,
-        lasku.postitp,
-        lasku.maa,
-        lasku.laskunro,
-        round(lasku.viikorkopros*100,0) viikorkopros,
-        round(abs(lasku.summa*100),0) summa,
-        round(abs(lasku.kasumma*100),0) kasumma,
-        round(abs(lasku.summa_valuutassa*100),0) summa_valuutassa,
-        round(abs(lasku.kasumma_valuutassa*100),0) kasumma_valuutassa,
-        lasku.toim_nimi,
-        lasku.toim_nimitark,
-        lasku.toim_osoite,
-        lasku.toim_postino,
-        lasku.toim_postitp,
-        lasku.toim_maa,
-        lasku.maa,
-        lasku.viite,
-        DATE_FORMAT(lasku.tapvm, '%y%m%d') tapvm,
-        DATE_FORMAT(lasku.erpcm, '%y%m%d') erpcm,
-        DATE_FORMAT(lasku.kapvm, '%y%m%d') kapvm,
-        lasku.tunnus,
-        lasku.valkoodi,
-        lasku.liitostunnus
-        FROM lasku
-        JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
-        WHERE lasku.yhtio    = '$kukarow[yhtio]'
-        and lasku.tila        = 'U'
-        and lasku.alatila    = 'X'
-        and lasku.summa    != 0
-        and lasku.valkoodi  = '$valkoodi'
-        $where
-        ORDER BY laskunro";
+  $query = "SELECT if (lasku.summa >= 0, '01', '02') tyyppi,
+            lasku.ytunnus,
+            lasku.nimi,
+            lasku.nimitark,
+            lasku.osoite,
+            lasku.postino,
+            lasku.postitp,
+            lasku.maa,
+            lasku.laskunro,
+            round(lasku.viikorkopros*100,0) viikorkopros,
+            round(abs(lasku.summa*100),0) summa,
+            round(abs(lasku.kasumma*100),0) kasumma,
+            round(abs(lasku.summa_valuutassa*100),0) summa_valuutassa,
+            round(abs(lasku.kasumma_valuutassa*100),0) kasumma_valuutassa,
+            lasku.toim_nimi,
+            lasku.toim_nimitark,
+            lasku.toim_osoite,
+            lasku.toim_postino,
+            lasku.toim_postitp,
+            lasku.toim_maa,
+            lasku.maa,
+            lasku.viite,
+            DATE_FORMAT(lasku.tapvm, '%y%m%d') tapvm,
+            DATE_FORMAT(lasku.erpcm, '%y%m%d') erpcm,
+            DATE_FORMAT(lasku.kapvm, '%y%m%d') kapvm,
+            lasku.tunnus,
+            lasku.valkoodi,
+            lasku.liitostunnus
+            FROM lasku
+            JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
+            WHERE lasku.yhtio   = '$kukarow[yhtio]'
+            and lasku.tila      = 'U'
+            and lasku.alatila   = 'X'
+            and lasku.summa    != 0
+            and lasku.valkoodi  = '$valkoodi'
+            $where
+            ORDER BY laskunro";
   $laskures = pupe_query($query);
 
   if (mysql_num_rows($laskures) > 0) {
@@ -316,10 +316,10 @@ if ($tee == 'TULOSTA') {
     while ($laskurow = mysql_fetch_assoc($laskures)) {
 
       // Haetaan asiakkaan tiedot
-      $query  = "  SELECT *
-            FROM asiakas
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus  = '$laskurow[liitostunnus]'";
+      $query  = "SELECT *
+                 FROM asiakas
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 and tunnus  = '$laskurow[liitostunnus]'";
       $asires = pupe_query($query);
       $asirow = mysql_fetch_assoc($asires);
 
@@ -590,19 +590,19 @@ if ($tee == 'TULOSTA') {
     }
     else {
       if ($tee_u != 'UUDELLEENLUO') {
-        $dquery = "  UPDATE lasku, maksuehto
-              SET lasku.factoringsiirtonumero = '$factoringsiirtonumero'
-              WHERE lasku.yhtio  = '$kukarow[yhtio]'
-              and lasku.tila      = 'U'
-              and lasku.alatila  = 'X'
-              and lasku.summa    != 0
-              and lasku.laskunro >= '$ppa'
-              and lasku.laskunro <= '$ppl'
-              and lasku.factoringsiirtonumero = 0
-              and lasku.valkoodi  = '$valkoodi'
-              and lasku.yhtio = maksuehto.yhtio
-              and lasku.maksuehto = maksuehto.tunnus
-              and maksuehto.factoring = '$factoringyhtio'";
+        $dquery = "UPDATE lasku, maksuehto
+                   SET lasku.factoringsiirtonumero = '$factoringsiirtonumero'
+                   WHERE lasku.yhtio                = '$kukarow[yhtio]'
+                   and lasku.tila                   = 'U'
+                   and lasku.alatila                = 'X'
+                   and lasku.summa                 != 0
+                   and lasku.laskunro               >= '$ppa'
+                   and lasku.laskunro               <= '$ppl'
+                   and lasku.factoringsiirtonumero  = 0
+                   and lasku.valkoodi               = '$valkoodi'
+                   and lasku.yhtio                  = maksuehto.yhtio
+                   and lasku.maksuehto              = maksuehto.tunnus
+                   and maksuehto.factoring          = '$factoringyhtio'";
         $dresult = pupe_query($dquery);
       }
       //luodaan summatietue

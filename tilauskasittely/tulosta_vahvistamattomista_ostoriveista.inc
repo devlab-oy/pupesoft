@@ -125,11 +125,11 @@ if (!function_exists('alku')) {
     $pdf->draw_text(50, 687, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
     $pdf->draw_text(50, 677, $laskurow["maa"],         $thispage, $norm);
 
-    $query = "  SELECT *
-          FROM toimi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus   = '$laskurow[liitostunnus]'
-          LIMIT 1";
+    $query = "SELECT *
+              FROM toimi
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$laskurow[liitostunnus]'
+              LIMIT 1";
     $rarres = mysql_query($query) or pupe_error($query);
     $toimirow = mysql_fetch_array($rarres);
 

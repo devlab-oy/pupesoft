@@ -551,15 +551,15 @@ else {
 
       echo "$tunnus ($filetype  $kayttotarkoitus)<br />";
 
-      $query = "  DELETE
-            FROM liitetiedostot
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus = '$ltiedtunnus'
-            AND liitostunnus = '$ltunnus'
-            AND kayttotarkoitus = '$kayttotarkoitus'
-            AND liitos = 'tuote'
-            AND filename != ''
-            AND filetype = '$filetype'";
+      $query = "DELETE
+                FROM liitetiedostot
+                WHERE yhtio          = '$kukarow[yhtio]'
+                AND tunnus           = '$ltiedtunnus'
+                AND liitostunnus     = '$ltunnus'
+                AND kayttotarkoitus  = '$kayttotarkoitus'
+                AND liitos           = 'tuote'
+                AND filename        != ''
+                AND filetype         = '$filetype'";
       $result = pupe_query($query);
     }
   }
@@ -670,30 +670,30 @@ else {
     $orderlisa = "tuote.osasto, tuote.try, tuote.tuoteno";
 
     // haetaan halutut tuotteet
-    $query  = "  SELECT
-          if(tuote.try is not null, tuote.try, 0) try,
-          if(tuote.osasto is not null, tuote.osasto, 0) osasto,
-          tuote.tuoteno,
-          tuote.tuotemerkki,
-          tuote.nimitys,
-          tuote.tunnus,
-          tuote.status,
-          liitetiedostot.tunnus ltiedtunnus,
-          liitetiedostot.liitostunnus ltunnus,
-          liitetiedostot.filename,
-          liitetiedostot.filetype,
-          liitetiedostot.kayttotarkoitus,
-          liitetiedostot.data,
-          liitetiedostot.tunnus id,
-          liitetiedostot.image_height korkeus,
-          liitetiedostot.image_width leveys,
-          liitetiedostot.selite,
-          liitetiedostot.liitos
-          FROM tuote
-          JOIN liitetiedostot USE INDEX (yhtio_liitos_liitostunnus) ON (liitetiedostot.yhtio = tuote.yhtio and liitetiedostot.liitos = 'tuote' and liitetiedostot.liitostunnus = tuote.tunnus and liitetiedostot.filename != '')
-          WHERE tuote.yhtio   = '$kukarow[yhtio]'
-          $lisa
-          ORDER BY $orderlisa";
+    $query  = "SELECT
+               if(tuote.try is not null, tuote.try, 0) try,
+               if(tuote.osasto is not null, tuote.osasto, 0) osasto,
+               tuote.tuoteno,
+               tuote.tuotemerkki,
+               tuote.nimitys,
+               tuote.tunnus,
+               tuote.status,
+               liitetiedostot.tunnus ltiedtunnus,
+               liitetiedostot.liitostunnus ltunnus,
+               liitetiedostot.filename,
+               liitetiedostot.filetype,
+               liitetiedostot.kayttotarkoitus,
+               liitetiedostot.data,
+               liitetiedostot.tunnus id,
+               liitetiedostot.image_height korkeus,
+               liitetiedostot.image_width leveys,
+               liitetiedostot.selite,
+               liitetiedostot.liitos
+               FROM tuote
+               JOIN liitetiedostot USE INDEX (yhtio_liitos_liitostunnus) ON (liitetiedostot.yhtio = tuote.yhtio and liitetiedostot.liitos = 'tuote' and liitetiedostot.liitostunnus = tuote.tunnus and liitetiedostot.filename != '')
+               WHERE tuote.yhtio = '$kukarow[yhtio]'
+               $lisa
+               ORDER BY $orderlisa";
     $result = pupe_query($query);
 
     // scripti balloonien tekemiseen

@@ -57,10 +57,10 @@ if (mysql_field_name($result, $i) == "asiakas_segmentti") {
 
 if (mysql_field_name($result, $i) == "ryhma") {
 
-  $query = "  SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
-        FROM perusalennus
-        WHERE yhtio='$kukarow[yhtio]'
-        ORDER BY ryhma";
+  $query = "SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
+            FROM perusalennus
+            WHERE yhtio='$kukarow[yhtio]'
+            ORDER BY ryhma";
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select id='aleryhma' name='$nimi'>";
@@ -102,10 +102,10 @@ elseif (mysql_field_name($result, $i) == "asiakas_ryhma") {
 }
 
 if (mysql_field_name($result, $i) == "valkoodi") {
-  $query = "  SELECT nimi, tunnus
-                FROM valuu
-               WHERE yhtio = '$kukarow[yhtio]'
-                 ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+             ORDER BY jarjestys";
   $vresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -174,9 +174,9 @@ elseif (mysql_field_name($result, $i) == "asiakas" and isset($alasveto[$i])) {
 }
 elseif (mysql_field_name($result, $i) == "asiakas") {
   if ((int) $trow[$i] > 0) {
-    $query  = "  SELECT *
-          FROM asiakas
-          WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
+    $query  = "SELECT *
+               FROM asiakas
+               WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
     $sresult = mysql_query($query) or pupe_error($query);
     $srow = mysql_fetch_array($sresult);
     $ssize = strlen($trow[$i])+2;

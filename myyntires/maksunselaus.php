@@ -8,11 +8,11 @@ require("inc/parametrit.inc");
 echo "<br><font class='head'>".t("Maksujen selaus")."</font><hr>";
 
 $query = "SELECT tapvm, summa, selite, tunnus
-                       FROM maksu
-                       WHERE yhtio ='$kukarow[yhtio]'
-           and tyyppi = 'MU'
-           and maksettu <> '1'
-     ORDER BY tapvm";
+          FROM maksu
+          WHERE yhtio ='$kukarow[yhtio]'
+          and tyyppi   = 'MU'
+          and maksettu <> '1'
+          ORDER BY tapvm";
 
 $result = mysql_query($query) or pupe_error($query);
 

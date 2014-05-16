@@ -45,20 +45,20 @@ echo "</form>";
 
 if ($lisa != "") {
 
-  $query = "  SELECT
-        tuoteno,
-        nimitys,
-        myyntihinta
-        FROM tuote
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        {$lisa}
-        AND (status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-        and tuotetyyppi NOT IN ('A', 'B')
-        and ei_saldoa = ''
-        and hinnastoon != 'E'
-        {$ei_try}
-        ORDER BY tuoteno, nimitys
-        Limit 500";
+  $query = "SELECT
+            tuoteno,
+            nimitys,
+            myyntihinta
+            FROM tuote
+            WHERE yhtio      = '{$kukarow["yhtio"]}'
+            {$lisa}
+            AND (status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+            and tuotetyyppi  NOT IN ('A', 'B')
+            and ei_saldoa    = ''
+            and hinnastoon  != 'E'
+            {$ei_try}
+            ORDER BY tuoteno, nimitys
+            Limit 500";
   $tuoteres = pupe_query($query);
 
   if (mysql_num_rows($tuoteres) > 0) {

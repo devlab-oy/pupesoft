@@ -30,12 +30,12 @@ if (!function_exists("check_ostoskori")) {
     $koriresult = mysql_query($query) or pupe_error($query);
 
     // kaikki ok, etsitään kori
-    $query = "  SELECT *
-          FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-          WHERE yhtio = '$kukarow[yhtio]' and
-          tila = 'B' and
-          liitostunnus = '$liitostunnus' and
-          alatila = '$ostoskori'";
+    $query = "SELECT *
+              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+              WHERE yhtio  = '$kukarow[yhtio]' and
+              tila         = 'B' and
+              liitostunnus = '$liitostunnus' and
+              alatila      = '$ostoskori'";
     $koriresult = mysql_query($query) or pupe_error($query);
 
     // koria ei löydy, tehdään sellanen
@@ -46,13 +46,13 @@ if (!function_exists("check_ostoskori")) {
       $wtres  = mysql_query($wquery) or pupe_error($wquery);
       $wtrow  = mysql_fetch_array($wtres);
 
-      $query = "  INSERT INTO lasku set
-            yhtio       = '$kukarow[yhtio]',
-            alv        = '$wtrow[selite]',
-            ytunnus      = '$asiakasrow[ytunnus]',
-            liitostunnus   = '$liitostunnus',
-            tila      = 'B',
-            alatila     = '$ostoskori'";
+      $query = "INSERT INTO lasku set
+                yhtio        = '$kukarow[yhtio]',
+                alv          = '$wtrow[selite]',
+                ytunnus      = '$asiakasrow[ytunnus]',
+                liitostunnus = '$liitostunnus',
+                tila         = 'B',
+                alatila      = '$ostoskori'";
       $koriin = mysql_query($query) or pupe_error($query);
       $tunnus = mysql_insert_id();
 

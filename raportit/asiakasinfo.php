@@ -29,9 +29,9 @@ if ($kukarow["extranet"] != "") {
   $rajaus = "ALENNUKSET";
 
   //Haetaan asiakkaan tunnuksella
-  $query  = "  SELECT *
-        FROM asiakas
-        WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+  $query  = "SELECT *
+             FROM asiakas
+             WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -89,10 +89,10 @@ if ($tee == 'eposti') {
       $pieni["height"] = 8;
       $pieni["font"] = "Courier";
 
-      $query =  "  SELECT *
-            FROM asiakas
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus  = '$asiakasid'";
+      $query =  "SELECT *
+                 FROM asiakas
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 and tunnus  = '$asiakasid'";
       $assresult = pupe_query($query);
       $assrow = mysql_fetch_assoc($assresult);
 
@@ -205,12 +205,12 @@ if ($asiakasid > 0) {
     $asiakas_yhtio = $GLOBALS['eta_yhtio'];
 
     // Toisen firman asiakastiedot
-    $query = "  SELECT *
-          FROM asiakas
-          WHERE yhtio = '{$asiakas_yhtio}'
-          AND laji != 'P'
-          AND ytunnus = '{$asiakasrow['ytunnus']}'
-          AND toim_ovttunnus = '{$asiakasrow['toim_ovttunnus']}'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio         = '{$asiakas_yhtio}'
+              AND laji           != 'P'
+              AND ytunnus         = '{$asiakasrow['ytunnus']}'
+              AND toim_ovttunnus  = '{$asiakasrow['toim_ovttunnus']}'";
     $asiakas_tunnus_res = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($asiakas_tunnus_res);
   }
@@ -219,13 +219,13 @@ if ($asiakasid > 0) {
   }
 
   // haetaan asiakkaan segmentit
-  $query = "  SELECT group_concat(parent.tunnus) tunnukset
-           FROM puun_alkio
-        JOIN dynaaminen_puu AS node ON (node.yhtio = puun_alkio.yhtio AND node.tunnus = puun_alkio.puun_tunnus AND node.laji = puun_alkio.laji)
-           JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 1)
-           WHERE puun_alkio.yhtio   = '$kukarow[yhtio]'
-        AND puun_alkio.laji   = 'asiakas'
-        AND puun_alkio.liitos   = '$asiakasrow[tunnus]'";
+  $query = "SELECT group_concat(parent.tunnus) tunnukset
+            FROM puun_alkio
+            JOIN dynaaminen_puu AS node ON (node.yhtio = puun_alkio.yhtio AND node.tunnus = puun_alkio.puun_tunnus AND node.laji = puun_alkio.laji)
+            JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 1)
+            WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
+            AND puun_alkio.laji    = 'asiakas'
+            AND puun_alkio.liitos  = '$asiakasrow[tunnus]'";
   $almight = pupe_query($query);
 
   $alehi_assegmenttirow = mysql_fetch_assoc($almight);
@@ -302,16 +302,16 @@ if ($asiakasid > 0) {
     // 24 kk sitten
     $ayy = date("Y-m-01",mktime(0, 0, 0, date("m")-24, date("d"), date("Y")));
 
-    $query  = "  SELECT date_format(tapvm,'%Y/%m') kausi,
-          round(sum(arvo),0) myynti,
-          round(sum(kate),0) kate,
-          round(sum(kate)/sum(arvo)*100,1) katepro
-          FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND liitostunnus = '$asiakasid'
-          AND tila = 'U'
-          AND tapvm >= '$ayy'
-          GROUP BY 1";
+    $query  = "SELECT date_format(tapvm,'%Y/%m') kausi,
+               round(sum(arvo),0) myynti,
+               round(sum(kate),0) kate,
+               round(sum(kate)/sum(arvo)*100,1) katepro
+               FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+               WHERE yhtio      = '$kukarow[yhtio]'
+               AND liitostunnus = '$asiakasid'
+               AND tila         = 'U'
+               AND tapvm        >= '$ayy'
+               GROUP BY 1";
     $result = pupe_query($query);
 
     // otetaan suurin myynti talteen
@@ -336,13 +336,13 @@ if ($asiakasid > 0) {
       $kuukausi = str_pad((int) $kuukausi, 2, 0, STR_PAD_LEFT);
 
       // Ketaan asiakaskäynnit
-      $query = "  SELECT count(*) kaynnit
-            FROM kalenteri
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND liitostunnus = '{$asiakasid}'
-            and tapa       = 'Asiakaskäynti'
-            and tyyppi      in ('kalenteri','memo')
-            and ((left(pvmalku,7) = '$vuosi-$kuukausi') or (left(pvmalku,7) < '$vuosi-$kuukausi' and left(pvmloppu,7) >= '$vuosi-$kuukausi'))";
+      $query = "SELECT count(*) kaynnit
+                FROM kalenteri
+                WHERE yhtio      = '$kukarow[yhtio]'
+                AND liitostunnus = '{$asiakasid}'
+                and tapa         = 'Asiakaskäynti'
+                and tyyppi       in ('kalenteri','memo')
+                and ((left(pvmalku,7) = '$vuosi-$kuukausi') or (left(pvmalku,7) < '$vuosi-$kuukausi' and left(pvmloppu,7) >= '$vuosi-$kuukausi'))";
       $result = pupe_query($query);
       $askarow = mysql_fetch_assoc($result);
 
@@ -492,22 +492,22 @@ if ($asiakasid > 0) {
     // alkukuukauden tiedot 12 kk sitten
     $ayy = date("Y-m-01",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 
-    $query = "  SELECT osasto, try,
-          round(sum(rivihinta),0) myynti,
-          round(sum(tilausrivi.kate),0) kate,
-          round(sum(kpl),0) kpl,
-          round(sum(tilausrivi.kate)/sum(rivihinta)*100,1) katepro
-          FROM lasku use index (yhtio_tila_liitostunnus_tapvm), tilausrivi use index (uusiotunnus_index)
-          WHERE lasku.yhtio     = '$kukarow[yhtio]'
-          AND lasku.liitostunnus   = '$asiakasid'
-          AND lasku.tila       = 'U'
-          AND lasku.alatila     = 'X'
-          AND lasku.tapvm      >= '$ayy'
-          AND tilausrivi.yhtio   = lasku.yhtio
-          AND tilausrivi.uusiotunnus = lasku.tunnus
-          GROUP BY 1,2
-          HAVING myynti <> 0 OR kate <> 0
-          ORDER BY osasto+0, try+0";
+    $query = "SELECT osasto, try,
+              round(sum(rivihinta),0) myynti,
+              round(sum(tilausrivi.kate),0) kate,
+              round(sum(kpl),0) kpl,
+              round(sum(tilausrivi.kate)/sum(rivihinta)*100,1) katepro
+              FROM lasku use index (yhtio_tila_liitostunnus_tapvm), tilausrivi use index (uusiotunnus_index)
+              WHERE lasku.yhtio          = '$kukarow[yhtio]'
+              AND lasku.liitostunnus     = '$asiakasid'
+              AND lasku.tila             = 'U'
+              AND lasku.alatila          = 'X'
+              AND lasku.tapvm            >= '$ayy'
+              AND tilausrivi.yhtio       = lasku.yhtio
+              AND tilausrivi.uusiotunnus = lasku.tunnus
+              GROUP BY 1,2
+              HAVING myynti <> 0 OR kate <> 0
+              ORDER BY osasto+0, try+0";
     $result = pupe_query($query);
 
     $col=1;
@@ -567,12 +567,12 @@ if ($asiakasid > 0) {
 
     echo "</table><br>";
 
-    $query = "  SELECT yhtio
-          FROM oikeu
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and kuka  = '$kukarow[kuka]'
-          and nimi  = 'raportit/myyntiseuranta.php'
-          and alanimi = ''";
+    $query = "SELECT yhtio
+              FROM oikeu
+              WHERE yhtio = '$kukarow[yhtio]'
+              and kuka    = '$kukarow[kuka]'
+              and nimi    = 'raportit/myyntiseuranta.php'
+              and alanimi = ''";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -747,14 +747,14 @@ if ($asiakasid > 0) {
         $tyhja = 0;
         //  Onko perusalessa tyhjä ryhmä?
         if ($asrow["prio"] == 5) {
-          $query = "  SELECT tuote.tunnus
-                FROM tuote
-                WHERE tuote.yhtio = '$asiakas_yhtio'
-                and tuote.aleryhma = '$asrow[alennusryhmä]'
-                and tuote.hinnastoon != 'E'
-                AND tuote.tuotetyyppi NOT IN ('A', 'B')
-                and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-                LIMIT 1";
+          $query = "SELECT tuote.tunnus
+                    FROM tuote
+                    WHERE tuote.yhtio      = '$asiakas_yhtio'
+                    and tuote.aleryhma     = '$asrow[alennusryhmä]'
+                    and tuote.hinnastoon  != 'E'
+                    AND tuote.tuotetyyppi  NOT IN ('A', 'B')
+                    and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+                    LIMIT 1";
           $testres = pupe_query($query);
 
           if (mysql_num_rows($testres) == 0) {

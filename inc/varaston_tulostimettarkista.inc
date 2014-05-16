@@ -46,35 +46,35 @@ if(!function_exists("varaston_tulostimettarkista")) {
       }
 
       //Katotaan osuuko alkuhyllyalue johonkin tulostusalueeseen
-      $query = "  SELECT tunnus
-            FROM varaston_tulostimet
-            WHERE
-            tunnus != '$tunnus'
-            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
-            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
-            and yhtio = '$kukarow[yhtio]'";
+      $query = "SELECT tunnus
+                FROM varaston_tulostimet
+                WHERE
+                tunnus    != '$tunnus'
+                and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
+                and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
+                and yhtio  = '$kukarow[yhtio]'";
       $vares = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($vares) == 0) {
           //Katotaan osuuko loppuhyllyalue johonkin tulostusalueeseen
-          $query = "  SELECT tunnus
-                FROM varaston_tulostimet
-                WHERE
-                tunnus != '$tunnus'
-                and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
-                and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
-                and yhtio = '$kukarow[yhtio]'";
+          $query = "SELECT tunnus
+                    FROM varaston_tulostimet
+                    WHERE
+                    tunnus    != '$tunnus'
+                    and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
+                    and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
+                    and yhtio  = '$kukarow[yhtio]'";
           $vares = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($vares) == 0) {
             //Katotaan onko jo jonkun tulostusalueen sisällä
-            $query = "  SELECT tunnus
-                  FROM varaston_tulostimet
-                  WHERE
-                  tunnus != '$tunnus'
-                  and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
-                  and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
-                  and yhtio = '$kukarow[yhtio]'";
+            $query = "SELECT tunnus
+                      FROM varaston_tulostimet
+                      WHERE
+                      tunnus    != '$tunnus'
+                      and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
+                      and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
+                      and yhtio  = '$kukarow[yhtio]'";
             $vares = mysql_query($query) or pupe_error($query);
           }
       }

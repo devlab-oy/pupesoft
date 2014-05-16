@@ -10,19 +10,19 @@ if ($tee == '') {
    // Summaus hyväksynnässä olevista laskuista
   echo "<font class='head'>".t("Laskuja hyväksymättä")."</font><hr>";
 
-  $query = "  SELECT hyvaksyja_nyt,
-        if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
-        concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
-        min(erpcm) erpcm,
-        max(erpcm) maxerpcm,
-        round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
-        FROM lasku
-        LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and tila = 'H'
-        and hyvaksyja_nyt != ''
-        GROUP BY 1,2
-        ORDER BY nimi";
+  $query = "SELECT hyvaksyja_nyt,
+            if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
+            concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
+            min(erpcm) erpcm,
+            max(erpcm) maxerpcm,
+            round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+            FROM lasku
+            LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
+            WHERE lasku.yhtio  = '$kukarow[yhtio]'
+            and tila           = 'H'
+            and hyvaksyja_nyt != ''
+            GROUP BY 1,2
+            ORDER BY nimi";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
@@ -50,9 +50,9 @@ if ($tee == '') {
 if ($tee == 'T') {
   // Muutetaan hyväksyntää
   if ((strlen($mika) > 0) and (strlen($nimi) > 0)) {
-    $query = "  SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time, h5time
-            FROM lasku
-            WHERE tunnus = '$mika' and yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time, h5time
+              FROM lasku
+              WHERE tunnus = '$mika' and yhtio = '$kukarow[yhtio]'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -75,11 +75,11 @@ if ($tee == 'T') {
         exit;
       }
 
-      $query = "  UPDATE lasku set
-            $mita = '$nimi',
-            hyvaksyja_nyt = '$nimi',
-            alatila = ''
-              WHERE tunnus = '$mika'";
+      $query = "UPDATE lasku set
+                $mita = '$nimi',
+                hyvaksyja_nyt  = '$nimi',
+                alatila        = ''
+                  WHERE tunnus = '$mika'";
       $result = mysql_query($query) or pupe_error($query);
       echo "<font class='message'>".t("Lasku siirrettiin").".. '$kuka' --> '$nimi'</font><br>";
     }
@@ -88,10 +88,10 @@ if ($tee == 'T') {
     }
   }
 
-  $query = "  SELECT nimi, kuka, tuuraaja
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]'
-        and kuka = '$kuka'";
+  $query = "SELECT nimi, kuka, tuuraaja
+            FROM kuka
+            WHERE yhtio = '$kukarow[yhtio]'
+            and kuka    = '$kuka'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -105,14 +105,14 @@ if ($tee == 'T') {
   echo "<font class='head'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
 
   // Tehdään popup, jolla voidaan hyväksyjä myöhemmin vaihtaa
-  $query = "  SELECT DISTINCT kuka.kuka, kuka.nimi
-        FROM kuka
-        JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
-        WHERE kuka.yhtio = '$kukarow[yhtio]'
-        AND kuka.aktiivinen = 1
-        AND kuka.extranet   = ''
-        AND kuka.hyvaksyja  = 'o'
-        ORDER BY kuka.nimi";
+  $query = "SELECT DISTINCT kuka.kuka, kuka.nimi
+            FROM kuka
+            JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
+            WHERE kuka.yhtio    = '$kukarow[yhtio]'
+            AND kuka.aktiivinen = 1
+            AND kuka.extranet   = ''
+            AND kuka.hyvaksyja  = 'o'
+            ORDER BY kuka.nimi";
   $result = mysql_query($query) or pupe_error($query);
 
   $ulos = "<select name='nimi'>";
@@ -126,13 +126,13 @@ if ($tee == 'T') {
   }
   $ulos .= "</select>";
 
-  $query = "  SELECT tapvm, kapvm, erpcm, if(alatila='',nimi,concat_ws('<br>', nimi, comments)) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma',
-        summa, valkoodi, ebid, tunnus, alatila, if(laskunro = 0, '', laskunro) laskunro
-        FROM lasku
-        WHERE hyvaksyja_nyt='$kuka'
-        and yhtio = '$kukarow[yhtio]'
-        and tila in ('H','Y','M','P','Q')
-        ORDER BY erpcm";
+  $query = "SELECT tapvm, kapvm, erpcm, if(alatila='',nimi,concat_ws('<br>', nimi, comments)) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma',
+            summa, valkoodi, ebid, tunnus, alatila, if(laskunro = 0, '', laskunro) laskunro
+            FROM lasku
+            WHERE hyvaksyja_nyt='$kuka'
+            and yhtio = '$kukarow[yhtio]'
+            and tila  in ('H','Y','M','P','Q')
+            ORDER BY erpcm";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table><tr>";

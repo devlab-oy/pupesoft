@@ -48,10 +48,10 @@ if ($tee != '' and isset($karhuttavatfile)) {
 if ($tee == 'LAHETA') {
 
   if (!empty($aseta_myyntikielto)) {
-    $query = "  UPDATE asiakas
-          SET myyntikielto = 'K'
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND ytunnus = '$aseta_myyntikielto'";
+    $query = "UPDATE asiakas
+              SET myyntikielto = 'K'
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND ytunnus = '$aseta_myyntikielto'";
     $result = pupe_query($query);
   }
 
@@ -97,17 +97,17 @@ if ($tee == "ALOITAKARHUAMINEN") {
   $ktunnus = (int) $ktunnus;
 
   if ($ktunnus != 0) {
-    $query = "  SELECT *
-          FROM factoring
-          WHERE yhtio = '$kukarow[yhtio]' and tunnus=$ktunnus";
+    $query = "SELECT *
+              FROM factoring
+              WHERE yhtio = '$kukarow[yhtio]' and tunnus=$ktunnus";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $factoringrow = mysql_fetch_assoc($result);
-      $query = "  SELECT GROUP_CONCAT(tunnus) karhuttavat
-            FROM maksuehto
-            WHERE yhtio   = '$kukarow[yhtio]'
-            AND factoring = '$factoringrow[factoringyhtio]'";
+      $query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
+                FROM maksuehto
+                WHERE yhtio   = '$kukarow[yhtio]'
+                AND factoring = '$factoringrow[factoringyhtio]'";
       $result = pupe_query($query);
 
       $maksuehdotrow = mysql_fetch_assoc($result);
@@ -126,9 +126,9 @@ if ($tee == "ALOITAKARHUAMINEN") {
     }
   }
   else {
-    $query = "  SELECT GROUP_CONCAT(tunnus) karhuttavat
-          FROM maksuehto
-          WHERE yhtio = '$kukarow[yhtio]' and factoring = ''";
+    $query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
+              FROM maksuehto
+              WHERE yhtio = '$kukarow[yhtio]' and factoring = ''";
     $result = pupe_query($query);
 
     $maksuehdotrow = mysql_fetch_assoc($result);
@@ -142,9 +142,9 @@ if ($tee == "ALOITAKARHUAMINEN") {
     }
   }
 
-  $query = "  SELECT GROUP_CONCAT(distinct concat('\'',ovttunnus,'\'')) konsrernyhtiot
-        FROM yhtio
-        WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+  $query = "SELECT GROUP_CONCAT(distinct concat('\'',ovttunnus,'\'')) konsrernyhtiot
+            FROM yhtio
+            WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
   $result = pupe_query($query);
 
   $konslisa = "";
@@ -168,37 +168,37 @@ if ($tee == "ALOITAKARHUAMINEN") {
     $maa_lisa = "and lasku.maa = '$lasku_maa'";
   }
 
-  $query = "  SELECT asiakas.ytunnus,
-        IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
-            concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
-            concat(asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp)) asiakastiedot,
-        group_concat(distinct lasku.tunnus) karhuttavat,
-        sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
-        FROM lasku
-        JOIN (  SELECT lasku.tunnus,
-            maksuehto.jv,
-            max(karhukierros.pvm) kpvm,
-            count(distinct karhu_lasku.ktunnus) karhuttu
-            FROM lasku use index (yhtio_tila_mapvm)
-            LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
-            LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
-            LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and lasku.tila = 'U'
-            and lasku.mapvm  = '0000-00-00'
-            and (lasku.erpcm < date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
-            and lasku.summa  != 0
-            $maksuehtolista
-            $maa_lisa
-            GROUP BY lasku.tunnus
-            HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
-        JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
-        WHERE lasku.tunnus = laskut.tunnus
-        $konslisa
-        $asiakaslisa
-        GROUP BY asiakas.ytunnus, asiakastiedot
-        HAVING karhuttava_summa > 0
-        ORDER BY asiakas.ytunnus";
+  $query = "SELECT asiakas.ytunnus,
+            IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
+                concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
+                concat(asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp)) asiakastiedot,
+            group_concat(distinct lasku.tunnus) karhuttavat,
+            sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
+            FROM lasku
+            JOIN (  SELECT lasku.tunnus,
+                maksuehto.jv,
+                max(karhukierros.pvm) kpvm,
+                count(distinct karhu_lasku.ktunnus) karhuttu
+                FROM lasku use index (yhtio_tila_mapvm)
+                LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
+                LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
+                LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)
+                WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                and lasku.tila     = 'U'
+                and lasku.mapvm    = '0000-00-00'
+                and (lasku.erpcm < date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
+                and lasku.summa   != 0
+                $maksuehtolista
+                $maa_lisa
+                GROUP BY lasku.tunnus
+                HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
+            JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
+            WHERE lasku.tunnus     = laskut.tunnus
+            $konslisa
+            $asiakaslisa
+            GROUP BY asiakas.ytunnus, asiakastiedot
+            HAVING karhuttava_summa > 0
+            ORDER BY asiakas.ytunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -250,40 +250,40 @@ if ($tee == 'KARHUA' and $karhuttavat[0] == "") {
 }
 
 if ($tee == 'KARHUA')  {
-  $query = "  SELECT lasku.liitostunnus,
-        lasku.summa-lasku.saldo_maksettu as summa,
-        lasku.erpcm, lasku.laskunro, lasku.tapvm, lasku.tunnus,
-        TO_DAYS(now())-TO_DAYS(lasku.erpcm) as ika,
-        max(karhukierros.pvm) as kpvm,
-        count(distinct karhu_lasku.ktunnus) as karhuttu,
-        sum(if(karhukierros.tyyppi='T', 1, 0)) tratattu,
-        if(maksuehto.jv!='', '".t("Jälkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi,
-        concat_ws(' ', lasku.viesti, lasku.comments) comments,
-        asiakas.myyntikielto
-        FROM lasku
-        JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-        LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
-        LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
-        LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tunnus in ($karhuttavat[0])
-        GROUP BY lasku.tunnus
-        ORDER BY lasku.erpcm";
+  $query = "SELECT lasku.liitostunnus,
+            lasku.summa-lasku.saldo_maksettu as summa,
+            lasku.erpcm, lasku.laskunro, lasku.tapvm, lasku.tunnus,
+            TO_DAYS(now())-TO_DAYS(lasku.erpcm) as ika,
+            max(karhukierros.pvm) as kpvm,
+            count(distinct karhu_lasku.ktunnus) as karhuttu,
+            sum(if(karhukierros.tyyppi='T', 1, 0)) tratattu,
+            if(maksuehto.jv!='', '".t("Jälkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi,
+            concat_ws(' ', lasku.viesti, lasku.comments) comments,
+            asiakas.myyntikielto
+            FROM lasku
+            JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+            LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
+            LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
+            LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tunnus  in ($karhuttavat[0])
+            GROUP BY lasku.tunnus
+            ORDER BY lasku.erpcm";
   $result = pupe_query($query);
 
   //otetaan asiakastiedot ekalta laskulta
   $asiakastiedot = mysql_fetch_assoc($result);
 
-  $query = "  SELECT *,
-        IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimi, nimi) nimi,
-        IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimitark, nimitark) nimitark,
-        IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_osoite, osoite) osoite,
-        IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postino, postino) postino,
-        IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postitp, postitp) postitp,
-        IF(lasku_email != '', lasku_email, email) karhu_email
-        FROM asiakas
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus  = '$asiakastiedot[liitostunnus]'";
+  $query = "SELECT *,
+            IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimi, nimi) nimi,
+            IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimitark, nimitark) nimitark,
+            IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_osoite, osoite) osoite,
+            IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postino, postino) postino,
+            IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postitp, postitp) postitp,
+            IF(lasku_email != '', lasku_email, email) karhu_email
+            FROM asiakas
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$asiakastiedot[liitostunnus]'";
   $asiakasresult = pupe_query($query);
   $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
@@ -301,13 +301,13 @@ if ($tee == 'KARHUA')  {
   <tr><th>".t("Fakta")."</th><td>$asiakastiedot[fakta]</td></tr>";
 
   //Reskontraviestit
-  $query  = "  SELECT kalenteri.kentta01, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, left(kalenteri.pvmalku,10) paivamaara
-            FROM asiakas
-        JOIN kalenteri ON (kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus AND kalenteri.tyyppi = 'Myyntireskontraviesti')
-        LEFT JOIN kuka ON (kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka)
-            WHERE asiakas.yhtio = '$kukarow[yhtio]'
-            AND asiakas.ytunnus = '$asiakastiedot[ytunnus]'
-        ORDER BY kalenteri.tunnus desc";
+  $query  = "SELECT kalenteri.kentta01, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, left(kalenteri.pvmalku,10) paivamaara
+             FROM asiakas
+             JOIN kalenteri ON (kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus AND kalenteri.tyyppi = 'Myyntireskontraviesti')
+             LEFT JOIN kuka ON (kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka)
+             WHERE asiakas.yhtio = '$kukarow[yhtio]'
+             AND asiakas.ytunnus = '$asiakastiedot[ytunnus]'
+             ORDER BY kalenteri.tunnus desc";
   $amres = pupe_query($query);
 
   while ($amrow = mysql_fetch_assoc($amres)) {
@@ -332,11 +332,11 @@ if ($tee == 'KARHUA')  {
     $sorttaus = $yhtiorow["maa"];
   }
 
-  $query = "  SELECT *, if(kieli='$sorttaus', concat(1, kieli), kieli) sorttaus
-        from avainsana
-        where laji   = 'KARHUVIESTI'
-        and yhtio   = '$yhtiorow[yhtio]'
-        order by sorttaus, jarjestys";
+  $query = "SELECT *, if(kieli='$sorttaus', concat(1, kieli), kieli) sorttaus
+            from avainsana
+            where laji = 'KARHUVIESTI'
+            and yhtio  = '$yhtiorow[yhtio]'
+            order by sorttaus, jarjestys";
   $res = mysql_query($query) or pupe_error();
 
   echo "<form name='lahetaformi' method='post'>";
@@ -382,19 +382,19 @@ if ($tee == 'KARHUA')  {
   echo "<tr><th>".t("Sähköposti")."</th><td>$asiakastiedot[karhu_email]</td></tr>";
   echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
 
-  $query = "  SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
-        FROM lasku
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tunnus in ($karhuttavat[0])";
+  $query = "SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
+            FROM lasku
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tunnus  in ($karhuttavat[0])";
   $lires = pupe_query($query);
   $lirow = mysql_fetch_assoc($lires);
 
-  $query = "  SELECT sum(summa) summa
-        FROM suoritus
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kohdpvm  = '0000-00-00'
-        and ltunnus > 0
-        and asiakas_tunnus in ($lirow[liitokset])";
+  $query = "SELECT sum(summa) summa
+            FROM suoritus
+            WHERE yhtio        = '$kukarow[yhtio]'
+            and kohdpvm        = '0000-00-00'
+            and ltunnus        > 0
+            and asiakas_tunnus in ($lirow[liitokset])";
   $summaresult = pupe_query($query);
   $kaato = mysql_fetch_assoc($summaresult);
 
@@ -502,11 +502,11 @@ if ($tee == 'KARHUA')  {
 
     if ($lasku["karhuttu"] >= 1 and $asiakastiedot['myyjanro'] != 0) {
       $ehdota_karhuemail_myyjalle = 1;
-      $query = "  SELECT eposti
-            FROM kuka
-            WHERE yhtio = '{$asiakastiedot['yhtio']}'
-            AND myyja = '{$asiakastiedot['myyjanro']}'
-            AND trim(eposti) != ''";
+      $query = "SELECT eposti
+                FROM kuka
+                WHERE yhtio = '{$asiakastiedot['yhtio']}'
+                AND myyja   = '{$asiakastiedot['myyjanro']}'
+                AND trim(eposti) != ''";
       $res = pupe_query($query);
       if (mysql_num_rows($res) > 0) {
         $myyjalla_on_eposti = 1;
@@ -613,10 +613,10 @@ if ($tee == "") {
   echo "<td><select name='lasku_maa'>";
   echo "<option value=''>".t("Ei maavalintaa")."</option>";
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        where nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            where nimi != ''
+            ORDER BY koodi";
   $meapu = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($meapu)) {
@@ -657,11 +657,11 @@ if ($tee == "") {
 
   echo "<tr><th>",t("Valitse tulostin"),"</th><td><select name='kirjoitin'>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio  = '{$kukarow['yhtio']}'
-        AND komento != 'edi'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND komento != 'edi'
+            ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
   while ($kirow = mysql_fetch_assoc($kires)) {

@@ -187,10 +187,10 @@ echo "<select name='llvp'>
 
 echo "<tr><th>".t("tai koko tilikausi")."</th>";
 
-$query = "  SELECT *
-      FROM tilikaudet
-      WHERE yhtio = '$kukarow[yhtio]'
-      ORDER BY tilikausi_alku DESC";
+$query = "SELECT *
+          FROM tilikaudet
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY tilikausi_alku DESC";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td colspan='3'><select name='tkausi'><option value='0'>".t("Ei valintaa")."</option>";
@@ -240,12 +240,12 @@ if ($kasin != "") {
 
 echo "<tr><th>".t("Vain käsin viedyt")."</th><td colspan='3'><input type='checkbox' name='kasin' $sel>";
 
-$query = "  SELECT kuka.kuka, kuka.nimi
-      FROM kuka
-      WHERE kuka.yhtio = '{$kukarow["yhtio"]}'
-      AND kuka.aktiivinen = 1
-      and kuka.extranet = ''
-      ORDER BY kuka.nimi";
+$query = "SELECT kuka.kuka, kuka.nimi
+          FROM kuka
+          WHERE kuka.yhtio    = '{$kukarow["yhtio"]}'
+          AND kuka.aktiivinen = 1
+          and kuka.extranet   = ''
+          ORDER BY kuka.nimi";
 $vresult = pupe_query($query);
 
 echo " <select name='laatija'><option value = '' >".t("Valitse laatija")."</option>";
@@ -286,10 +286,10 @@ echo "<tr><th valign='top'>".t("Maarajaus")."</th>";
 
 if (!isset($maarajaus)) $maarajaus = '';
 
-$query = "  SELECT distinct koodi, nimi
-    FROM maat
-    WHERE nimi != ''
-    ORDER BY koodi";
+$query = "SELECT distinct koodi, nimi
+          FROM maat
+          WHERE nimi != ''
+          ORDER BY koodi";
 $vresult = pupe_query($query);
 
 echo "<td colspan='3'><select name='maarajaus'><option value = '' >".t("Ei valintaa")."</option>";
@@ -349,11 +349,11 @@ if ($tee != "") {
       if ($blvk == 0) $blvk = 1;
       if ($blvp == 0) $blvp = 1;
 
-      $query = "  SELECT *
-            FROM tilikaudet
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tilikausi_alku <= '$alvv-$blvk-$blvp'
-            and tilikausi_loppu >= '$alvv-$blvk-$blvp'";
+      $query = "SELECT *
+                FROM tilikaudet
+                WHERE yhtio         = '$kukarow[yhtio]'
+                and tilikausi_alku  <= '$alvv-$blvk-$blvp'
+                and tilikausi_loppu >= '$alvv-$blvk-$blvp'";
       $result = mysql_query($query) or pupe_error($query);
     }
     else {
@@ -365,10 +365,10 @@ if ($tee != "") {
       $llvk = 0;
       $llvp = 0;
 
-      $query = "  SELECT *
-            FROM tilikaudet
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$tkausi'";
+      $query = "SELECT *
+                FROM tilikaudet
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tkausi'";
       $result = mysql_query($query) or pupe_error($query);
     }
 
@@ -386,12 +386,12 @@ if ($tee != "") {
   $lisa2 = ''; // alkusaldon laskemiseen
 
   // Tehdäänkö linkit päiväkirjaan
-  $query = "  SELECT yhtio
-        FROM oikeu
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and kuka  = '$kukarow[kuka]'
-        and nimi  = 'muutosite.php'
-        and alanimi = ''";
+  $query = "SELECT yhtio
+            FROM oikeu
+            WHERE yhtio = '$kukarow[yhtio]'
+            and kuka    = '$kukarow[kuka]'
+            and nimi    = 'muutosite.php'
+            and alanimi = ''";
   $oikresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($oikresult) > 0) {
@@ -502,27 +502,27 @@ if ($tee != "") {
     }
   }
 
-  $query = "  SELECT CONCAT_WS(' ', tiliointi.tilino, tili.nimi) tili, tiliointi.tapvm, kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite,
-        tiliointi.summa, tiliointi.vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi, tiliointi.tunnus rivitunnus,
-        kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi, tili.alv_taso,
-        lasku.tapvm laskutapvm,
-        lasku.mapvm laskumapvm,
-        lasku.summa laskusumma,
-        lasku.tila
-        FROM tiliointi
-        LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
-        LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
-        LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio = kustp.yhtio and tiliointi.kustp = kustp.tunnus
-        LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio = kohde.yhtio and tiliointi.kohde = kohde.tunnus
-        LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio = projekti.yhtio and tiliointi.projekti = projekti.tunnus
-        $asiakasjoini
-        $konsernijoini
-        WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
-        and tiliointi.korjattu = ''
-        $lisa1
-        $lisa
-        $konsernilisa
-        ORDER BY $jarj";
+  $query = "SELECT CONCAT_WS(' ', tiliointi.tilino, tili.nimi) tili, tiliointi.tapvm, kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite,
+            tiliointi.summa, tiliointi.vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi, tiliointi.tunnus rivitunnus,
+            kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi, tili.alv_taso,
+            lasku.tapvm laskutapvm,
+            lasku.mapvm laskumapvm,
+            lasku.summa laskusumma,
+            lasku.tila
+            FROM tiliointi
+            LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
+            LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
+            LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio = kustp.yhtio and tiliointi.kustp = kustp.tunnus
+            LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio = kohde.yhtio and tiliointi.kohde = kohde.tunnus
+            LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio = projekti.yhtio and tiliointi.projekti = projekti.tunnus
+            $asiakasjoini
+            $konsernijoini
+            WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+            and tiliointi.korjattu = ''
+            $lisa1
+            $lisa
+            $konsernilisa
+            ORDER BY $jarj";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -622,13 +622,13 @@ if ($tee != "") {
 
       //jos tili on valittu lasketaan sen alkusaldo
       if (strlen(trim($tili)) > 0 and $edtili != $trow["xtilino"] and isset($tilikaudetrow)) {
-        $query = "  SELECT sum(summa) saldo
-              FROM tiliointi
-              WHERE tiliointi.yhtio   = '$kukarow[yhtio]'
-              and tiliointi.korjattu  = ''
-              and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
-              and tiliointi.tilino   = '$trow[xtilino]'
-              $lisa2";
+        $query = "SELECT sum(summa) saldo
+                  FROM tiliointi
+                  WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+                  and tiliointi.korjattu = ''
+                  and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
+                  and tiliointi.tilino   = '$trow[xtilino]'
+                  $lisa2";
         $alkres    = mysql_query($query) or pupe_error($query);
         $alkurow  = mysql_fetch_array ($alkres);
         $kumsumma = $alkurow["saldo"];

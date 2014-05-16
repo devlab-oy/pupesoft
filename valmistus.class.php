@@ -43,10 +43,10 @@ class Valmistus {
 
     if (empty($this->tuotteet)) {
       $query = "SELECT *
-            FROM tilausrivi
-            WHERE yhtio='$this->yhtio'
-            AND otunnus=$this->tunnus
-            AND tyyppi IN ('W', 'M')";
+                FROM tilausrivi
+                WHERE yhtio='$this->yhtio'
+                AND otunnus=$this->tunnus
+                AND tyyppi IN ('W', 'M')";
       $result = pupe_query($query);
 
       while($tuote = mysql_fetch_assoc($result)) {
@@ -86,11 +86,11 @@ class Valmistus {
 
     // Haetaan raaka-aineet
     $query = "SELECT *
-                FROM tilausrivi
-                WHERE yhtio='{$kukarow['yhtio']}'
-                AND otunnus='{$this->tunnus}'
-                AND tuoteno!='TYÖ'
-                AND tyyppi='V'";
+              FROM tilausrivi
+              WHERE yhtio='{$kukarow['yhtio']}'
+              AND otunnus='{$this->tunnus}'
+              AND tuoteno!='TYÖ'
+              AND tyyppi='V'";
     $result = pupe_query($query);
 
     $puutteet = array();
@@ -104,14 +104,14 @@ class Valmistus {
       // Valmistuslinjalla olevat valmistukset varaavat saldoa ja uuden valmistuksen on
       // tarkistettava paljon ne vähentävät raaka-aineiden saldoa.
       $muut_query = "SELECT tilausrivi.otunnus, COALESCE(sum(tilausrivi.varattu), 0) AS varattu
-                  FROM kalenteri
-                      JOIN lasku ON (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
-                      JOIN tilausrivi ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus)
-                  WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
-                      AND kalenteri.tyyppi='valmistus'
-                      AND tilausrivi.tyyppi='V'
-                      AND tilausrivi.tuoteno='{$raaka_aine['tuoteno']}'
-                      AND kalenteri.pvmalku < '$aloitus_pvm'";
+                     FROM kalenteri
+                         JOIN lasku ON (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
+                         JOIN tilausrivi ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus)
+                     WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
+                         AND kalenteri.tyyppi='valmistus'
+                         AND tilausrivi.tyyppi='V'
+                         AND tilausrivi.tuoteno='{$raaka_aine['tuoteno']}'
+                         AND kalenteri.pvmalku < '$aloitus_pvm'";
       $muut_valmistukset_result = pupe_query($muut_query);
       $muut_valmistukset = mysql_fetch_assoc($muut_valmistukset_result);
 
@@ -120,12 +120,12 @@ class Valmistus {
 
       // Haetaan raaka-aineen ostotilauksia, jotka vaikuttavat valmistuksen aloitukseen
       $query = "SELECT COALESCE(sum(varattu), 0) AS varattu
-                  FROM tilausrivi
-                  WHERE yhtio='{$kukarow['yhtio']}'
-                  AND tuoteno='{$raaka_aine['tuoteno']}'
-                  AND tyyppi='O'
-                  #AND kerattyaika != '0000-00-00 00:00:00'
-                  AND kerattyaika < '$aloitus_pvm'";
+                FROM tilausrivi
+                WHERE yhtio='{$kukarow['yhtio']}'
+                AND tuoteno='{$raaka_aine['tuoteno']}'
+                AND tyyppi='O'
+                #AND kerattyaika != '0000-00-00 00:00:00'
+                AND kerattyaika < '$aloitus_pvm'";
       $ostotilaukset_result = pupe_query($query);
       $ostotilaukset = mysql_fetch_assoc($ostotilaukset_result);
 
@@ -162,10 +162,10 @@ class Valmistus {
   function kesto() {
     if (empty($this->kesto)) {
       $query = "SELECT sum(varattu) as kesto
-            FROM tilausrivi
-            WHERE yhtio='$this->yhtio'
-            AND otunnus=$this->tunnus
-            AND yksikko='H'";
+                FROM tilausrivi
+                WHERE yhtio='$this->yhtio'
+                AND otunnus=$this->tunnus
+                AND yksikko='H'";
       $result = pupe_query($query);
       $valmistus = mysql_fetch_assoc($result);
 
@@ -177,10 +177,10 @@ class Valmistus {
 
   function viesti() {
     if (empty($this->viesti)) {
-      $query = "  SELECT viesti
-            FROM lasku
-            WHERE yhtio = '{$this->yhtio}'
-            AND tunnus = '{$this->tunnus}'";
+      $query = "SELECT viesti
+                FROM lasku
+                WHERE yhtio = '{$this->yhtio}'
+                AND tunnus  = '{$this->tunnus}'";
       $result = pupe_query($query);
       $valmistus = mysql_fetch_assoc($result);
 
@@ -195,9 +195,9 @@ class Valmistus {
    */
   function kaytetty() {
     $query = "SELECT kentta03 as kaytetyttunnit
-           FROM kalenteri
-          WHERE yhtio='$this->yhtio'
-          AND otunnus=$this->tunnus";
+              FROM kalenteri
+              WHERE yhtio='$this->yhtio'
+              AND otunnus=$this->tunnus";
     $result = pupe_query($query);
     $valmistus = mysql_fetch_assoc($result);
     return $valmistus['kaytetyttunnit'];
@@ -230,11 +230,11 @@ class Valmistus {
     // Keskeytetään työ
     // Merkataan kalenteriin ylityotunnit, kommentit ja kaytetyttunnit
     $query = "UPDATE kalenteri SET
-          kentta01='{$this->ylityotunnit}',
-          kentta02='{$this->kommentti}',
-          kentta03='{$this->kaytetyttunnit}'
-          WHERE yhtio='{$kukarow['yhtio']}'
-          AND otunnus='{$this->tunnus}'";
+              kentta01='{$this->ylityotunnit}',
+              kentta02='{$this->kommentti}',
+              kentta03='{$this->kaytetyttunnit}'
+              WHERE yhtio='{$kukarow['yhtio']}'
+              AND otunnus='{$this->tunnus}'";
     $result = pupe_query($query);
 
     $this->setTila(Valmistus::KESKEYTETTY);
@@ -277,10 +277,10 @@ class Valmistus {
           // Jos työ on keskeytetty ja siirretään takaisin parkkiin
           // nollataan kalenterista valmistuslinja (kalenteri.henkilo)
           elseif($this->getTila() == 'TK') {
-            $query = "  UPDATE kalenteri SET
-                  henkilo = 0
-                  WHERE yhtio='{$kukarow['yhtio']}'
-                  AND otunnus='{$this->tunnus}'";
+            $query = "UPDATE kalenteri SET
+                      henkilo = 0
+                      WHERE yhtio='{$kukarow['yhtio']}'
+                      AND otunnus='{$this->tunnus}'";
             if (!pupe_query($query)) {
               throw new Exception("Tilan vaihtamisessa tapahtui virhe. (kalenteri)");
             }
@@ -288,20 +288,20 @@ class Valmistus {
             // Valmistuksen keskeytys nollaa myös laskun ja tilausrivin keräyspäivät,
             // jolloin saldojen laskenta menee oikein.
             $update_lasku_query = "UPDATE lasku
-                    SET kerayspvm ='2099-01-01',
-                    toimaika      ='2099-01-01'
-                    WHERE yhtio   ='{$kukarow['yhtio']}'
-                    AND tunnus    ='{$this->tunnus}'
-                    AND tila      = 'V'";
+             SET kerayspvm ='2099-01-01',
+             toimaika      ='2099-01-01'
+             WHERE yhtio   ='{$kukarow['yhtio']}'
+             AND tunnus    ='{$this->tunnus}'
+             AND tila = 'V'";
             if (!pupe_query($update_lasku_query)) {
               throw new Exception("Tilan vaihtamisessa tapahtui virhe. (valmistus)");
             }
 
             $update_tilausrivi_query = "UPDATE tilausrivi
-                    SET kerayspvm ='2099-01-01',
-                    toimaika      ='2099-01-01'
-                    WHERE yhtio   ='{$kukarow['yhtio']}'
-                    AND otunnus   ='{$this->tunnus}'";
+             SET kerayspvm ='2099-01-01',
+             toimaika      ='2099-01-01'
+             WHERE yhtio   ='{$kukarow['yhtio']}'
+             AND otunnus   ='{$this->tunnus}'";
             if (!pupe_query($update_tilausrivi_query)) {
               throw new Exception("Tilan vaihtamisessa tapahtui virhe. (valmisteet)");
             }
@@ -313,11 +313,11 @@ class Valmistus {
         case Valmistus::VALMISTUKSESSA:
           // Valmistuslinjalla voi olla vain yksi valmistus VALMISTUKSESSA tilassa kerrallaan
           $query = "SELECT kalenteri.kuka, otunnus, valmistuksen_tila
-                FROM kalenteri
-                JOIN lasku on (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
-                WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
-                AND kalenteri.henkilo='{$this->valmistuslinja}'
-                AND valmistuksen_tila = 'VA'";
+                    FROM kalenteri
+                    JOIN lasku on (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
+                    WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
+                    AND kalenteri.henkilo='{$this->valmistuslinja}'
+                    AND valmistuksen_tila = 'VA'";
           $result = pupe_query($query);
 
           // Jos keskeneräinen valmistus löytyy
@@ -336,9 +336,9 @@ class Valmistus {
 
           // Päivitetään valmistuksen uudet ajat
           $query = "UPDATE kalenteri
-                SET pvmalku='{$pvmalku}', pvmloppu='{$pvmloppu}'
-                WHERE yhtio='{$kukarow['yhtio']}'
-                AND otunnus='{$this->tunnus}'";
+                    SET pvmalku='{$pvmalku}', pvmloppu='{$pvmloppu}'
+                    WHERE yhtio='{$kukarow['yhtio']}'
+                    AND otunnus='{$this->tunnus}'";
 
           // Päivitetään laskun ja tilausrivin keräyspäivät?
 
@@ -362,9 +362,9 @@ class Valmistus {
           #echo "valmistus merkattu tarkastetuksi!";
           // poistetaan valmistus kalenterista
           $delete_query = "DELETE FROM kalenteri
-                   WHERE yhtio='{$kukarow['yhtio']}'
-                   AND tyyppi='valmistus'
-                   AND otunnus='{$this->tunnus}'";
+           WHERE yhtio='{$kukarow['yhtio']}'
+           AND tyyppi='valmistus'
+           AND otunnus='{$this->tunnus}'";
           $result = pupe_query($delete_query);
 
           break;
@@ -377,9 +377,9 @@ class Valmistus {
 
       // Jos kaikki on ok, päivitetään valmistuksen tila
       $query = "UPDATE lasku
-            SET valmistuksen_tila='$tila'
-            WHERE yhtio='{$kukarow['yhtio']}'
-            AND tunnus=$this->tunnus";
+                SET valmistuksen_tila='$tila'
+                WHERE yhtio='{$kukarow['yhtio']}'
+                AND tunnus=$this->tunnus";
       $result = pupe_query($query);
     }
     else {
@@ -397,19 +397,19 @@ class Valmistus {
     // Hakee kaikki keskeneräiset valmistukset (lasku/kalenteri)
     // Vain valmistukset joiden tila on kerätty
     $query = "SELECT
-            lasku.yhtio,
-            lasku.tunnus,
-            lasku.valmistuksen_tila as tila,
-            lasku.viesti,
-            kalenteri.henkilo as valmistuslinja
-          FROM lasku
-          LEFT JOIN kalenteri ON (lasku.yhtio=kalenteri.yhtio AND lasku.tunnus=kalenteri.otunnus)
-          WHERE lasku.yhtio='{$kukarow['yhtio']}'
-          AND lasku.valmistuksen_tila in ('OV', 'TK')
-          AND lasku.tila='V'
-          AND lasku.alatila in ('J', 'C')
-          ORDER BY lasku.tunnus ASC,
-          pvmalku ASC";
+              lasku.yhtio,
+              lasku.tunnus,
+              lasku.valmistuksen_tila as tila,
+              lasku.viesti,
+              kalenteri.henkilo as valmistuslinja
+              FROM lasku
+              LEFT JOIN kalenteri ON (lasku.yhtio=kalenteri.yhtio AND lasku.tunnus=kalenteri.otunnus)
+              WHERE lasku.yhtio='{$kukarow['yhtio']}'
+              AND lasku.valmistuksen_tila in ('OV', 'TK')
+              AND lasku.tila='V'
+              AND lasku.alatila           in ('J', 'C')
+              ORDER BY lasku.tunnus ASC,
+              pvmalku ASC";
     $result = pupe_query($query);
 
     $valmistukset = array();
@@ -425,21 +425,21 @@ class Valmistus {
     global $kukarow;
 
     $query = "SELECT
-            lasku.yhtio,
-            lasku.nimi,
-            lasku.ytunnus,
-            lasku.tunnus,
-            lasku.valmistuksen_tila as tila,
-            kalenteri.pvmalku,
-            kalenteri.pvmloppu,
-            kalenteri.henkilo as valmistuslinja,
-            kalenteri.kentta01 as ylityotunnit,
-            kalenteri.kentta02 as kommentti,
-            kalenteri.kentta03 as kaytetyttunnit
-          FROM lasku
-          LEFT JOIN kalenteri on (lasku.yhtio=kalenteri.yhtio AND lasku.tunnus=kalenteri.otunnus)
-          WHERE lasku.yhtio='{$kukarow['yhtio']}'
-          AND lasku.tunnus=$tunnus LIMIT 1";
+              lasku.yhtio,
+              lasku.nimi,
+              lasku.ytunnus,
+              lasku.tunnus,
+              lasku.valmistuksen_tila as tila,
+              kalenteri.pvmalku,
+              kalenteri.pvmloppu,
+              kalenteri.henkilo as valmistuslinja,
+              kalenteri.kentta01 as ylityotunnit,
+              kalenteri.kentta02 as kommentti,
+              kalenteri.kentta03 as kaytetyttunnit
+              FROM lasku
+              LEFT JOIN kalenteri on (lasku.yhtio=kalenteri.yhtio AND lasku.tunnus=kalenteri.otunnus)
+              WHERE lasku.yhtio='{$kukarow['yhtio']}'
+              AND lasku.tunnus=$tunnus LIMIT 1";
     $result = pupe_query($query);
 
     if ($valmistus = mysql_fetch_object($result, 'valmistus')) {
@@ -455,16 +455,16 @@ class Valmistus {
     global $kukarow;
 
     $query = "SELECT
-            lasku.valmistuksen_tila as tila,
-            lasku.yhtio,
-            lasku.tunnus,
-            kalenteri.kentta01 as ylityotunnit,
-            kalenteri.kentta02 as kommentti
-          FROM lasku
-          LEFT JOIN kalenteri ON (lasku.yhtio=kalenteri.yhtio AND lasku.tunnus=kalenteri.otunnus)
-          WHERE lasku.yhtio='{$kukarow['yhtio']}'
-          AND lasku.tila='V'
-          AND lasku.valmistuksen_tila='VT'";
+              lasku.valmistuksen_tila as tila,
+              lasku.yhtio,
+              lasku.tunnus,
+              kalenteri.kentta01 as ylityotunnit,
+              kalenteri.kentta02 as kommentti
+              FROM lasku
+              LEFT JOIN kalenteri ON (lasku.yhtio=kalenteri.yhtio AND lasku.tunnus=kalenteri.otunnus)
+              WHERE lasku.yhtio='{$kukarow['yhtio']}'
+              AND lasku.tila='V'
+              AND lasku.valmistuksen_tila='VT'";
 
     $result = pupe_query($query);
 

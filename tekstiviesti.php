@@ -134,13 +134,13 @@ function SendSms($sms_palvelintyyppi, $yhtio, $kuka, $vastaanottaja, $viesti) {
   if ($tee_lokimerkinta) {
     $credits = floor(strlen($viesti) / 159) + 1;
     // Lis‰t‰‰n viesti sms-tauluun
-    $query = "  INSERT INTO sms SET
-          yhtio = '".$yhtio."',
-          viesteja = '".$credits."',
-          vastaanottaja = '".addslashes($vastaanottaja)."',
-          viesti = '".addslashes($viesti)."',
-          luontiaika = now(),
-          laatija = '$kuka'";
+    $query = "INSERT INTO sms SET
+              yhtio         = '".$yhtio."',
+              viesteja      = '".$credits."',
+              vastaanottaja = '".addslashes($vastaanottaja)."',
+              viesti        = '".addslashes($viesti)."',
+              luontiaika    = now(),
+              laatija       = '$kuka'";
     $result = mysql_query($query) or pupe_error($query);
   }
 
@@ -208,13 +208,13 @@ function SendClickatellSms($vastaanottaja, $viesti) {
 
   $credits = floor(strlen($viesti) / 159) + 1;
   // Lis‰t‰‰n viesti sms-tauluun
-  $query = "  INSERT INTO sms SET
-        yhtio = '".$yhtio."',
-        viesteja = '".$credits."',
-        vastaanottaja = '".addslashes($vastaanottaja)."',
-        viesti = '".addslashes($viesti)."',
-        luontiaika = now(),
-        laatija = '$kuka'";
+  $query = "INSERT INTO sms SET
+            yhtio         = '".$yhtio."',
+            viesteja      = '".$credits."',
+            vastaanottaja = '".addslashes($vastaanottaja)."',
+            viesti        = '".addslashes($viesti)."',
+            luontiaika    = now(),
+            laatija       = '$kuka'";
   $result = mysql_query($query) or pupe_error($query);
 
   return false;
@@ -265,13 +265,13 @@ function SendKannelSms($receiver_number, $message) {
 
   $credits = floor(strlen($viesti) / 159) + 1;
   // Lis‰t‰‰n viesti sms-tauluun
-  $query = "  INSERT INTO sms SET
-        yhtio = '".$yhtio."',
-        viesteja = '".$credits."',
-        vastaanottaja = '".addslashes($vastaanottaja)."',
-        viesti = '".addslashes($viesti)."',
-        luontiaika = now(),
-        laatija = '$kuka'";
+  $query = "INSERT INTO sms SET
+            yhtio         = '".$yhtio."',
+            viesteja      = '".$credits."',
+            vastaanottaja = '".addslashes($vastaanottaja)."',
+            viesti        = '".addslashes($viesti)."',
+            luontiaika    = now(),
+            laatija       = '$kuka'";
   $result = mysql_query($query) or pupe_error($query);
 
 }

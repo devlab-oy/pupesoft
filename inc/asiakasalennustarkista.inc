@@ -21,11 +21,11 @@ if(!function_exists("asiakasalennustarkista")) {
 
       // Ei tsekata turhaan kun rivi dellataan luedatasta
       if ($chytunnus != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
-        $query = "  SELECT ytunnus
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              and laji != 'P'
-              and ytunnus = '$t[$i]'";
+        $query = "SELECT ytunnus
+                  FROM asiakas
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and laji    != 'P'
+                  and ytunnus  = '$t[$i]'";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {
@@ -43,11 +43,11 @@ if(!function_exists("asiakasalennustarkista")) {
         unset($chasresult);
 
         if (is_numeric($chastunn) and $chastunn > 0) {
-          $query  = "  SELECT *
-                FROM asiakas
-                WHERE yhtio = '$kukarow[yhtio]'
-                and laji != 'P'
-                and tunnus = '$chastunn'";
+          $query  = "SELECT *
+                     FROM asiakas
+                     WHERE yhtio  = '$kukarow[yhtio]'
+                     and laji    != 'P'
+                     and tunnus   = '$chastunn'";
           $chasresult = pupe_query($query);
         }
 
@@ -95,9 +95,9 @@ if(!function_exists("asiakasalennustarkista")) {
 
       // Ei tsekata turhaan kun rivi dellataan luedatasta
       if ($chtuoteno != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
-        $query = "  SELECT tuoteno
-              FROM tuote
-              WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
+        $query = "SELECT tuoteno
+                  FROM tuote
+                  WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 1) {
@@ -124,9 +124,9 @@ if(!function_exists("asiakasalennustarkista")) {
 
       // Ei tsekata turhaan kun rivi dellataan luedatasta
       if ($chryhma != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
-        $query = "  SELECT tunnus
-              FROM perusalennus
-              WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
+        $query = "SELECT tunnus
+                  FROM perusalennus
+                  WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 1) {
@@ -260,16 +260,16 @@ if(!function_exists("asiakasalennustarkista")) {
 
       $chminkpl = (int) $chminkpl;
 
-      $aquery = "  SELECT ytunnus
-            FROM asiakasalennus
-            WHERE yhtio    = '$kukarow[yhtio]'
-            $and
-            and alkupvm   = '$chalkupvm'
-            and loppupvm   = '$chloppupvm'
-            and minkpl     = $chminkpl
-            and monikerta  = '$chmonikerta'
-            and alennuslaji = $chalennuslaji
-            and tunnus     != '$trow[$i]'";
+      $aquery = "SELECT ytunnus
+                 FROM asiakasalennus
+                 WHERE yhtio      = '$kukarow[yhtio]'
+                 $and
+                 and alkupvm      = '$chalkupvm'
+                 and loppupvm     = '$chloppupvm'
+                 and minkpl       = $chminkpl
+                 and monikerta    = '$chmonikerta'
+                 and alennuslaji  = $chalennuslaji
+                 and tunnus      != '$trow[$i]'";
       $dsresult = pupe_query($aquery);
 
       if (mysql_num_rows($dsresult) > 0) {

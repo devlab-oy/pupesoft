@@ -19,11 +19,11 @@ $errors = array();
 /* ostotilausten_kohdistus.inc rivit 1541-1567
 * Haetaan "sopivat" suuntalavat
 */
-$query = "  SELECT tuote.keraysvyohyke, tilausrivi.*
-            FROM tilausrivi
-            JOIN tuote ON tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
-            WHERE tilausrivi.tunnus = '{$tilausrivi}'
-            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+$query = "SELECT tuote.keraysvyohyke, tilausrivi.*
+          FROM tilausrivi
+          JOIN tuote ON tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
+          WHERE tilausrivi.tunnus = '{$tilausrivi}'
+          AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
 $result = pupe_query($query);
 $tilausrivi = mysql_fetch_assoc($result);
 
@@ -37,33 +37,33 @@ if (!empty($tilausrivi['uusiotunnus'])) {
 if (empty($tullaan)) $tullaan = '';
 
 # Etsit‰‰n sopivat suuntalavat
-$query = "  (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
-            FROM suuntalavat
-            JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$saapuminen}')
-            WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-            AND (suuntalavat.keraysvyohyke = '{$tilausrivi['keraysvyohyke']}' OR suuntalavat.usea_keraysvyohyke = 'K')
-            AND suuntalavat.tila IN ('', 'S', 'P'))
-            UNION
-            (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
-            FROM suuntalavat
-            WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-            AND suuntalavat.tila IN ('', 'S', 'P')
-            AND suuntalavat.tunnus = '{$tilausrivi['suuntalava']}')
-            UNION
-            (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
-            FROM suuntalavat
-            WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-            AND suuntalavat.keraysvyohyke = '{$tilausrivi['keraysvyohyke']}'
-            AND suuntalavat.tila = ''
-            AND suuntalavat.kaytettavyys = 'L')
-            UNION
-            (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
-            FROM suuntalavat
-            WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-            AND suuntalavat.usea_keraysvyohyke = 'K'
-            AND suuntalavat.tila IN ('', 'S', 'P')
-            AND suuntalavat.kaytettavyys = 'L')
-            ORDER BY sscc, tunnus";
+$query = "(SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
+           FROM suuntalavat
+           JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$saapuminen}')
+           WHERE suuntalavat.yhtio            = '{$kukarow['yhtio']}'
+           AND (suuntalavat.keraysvyohyke = '{$tilausrivi['keraysvyohyke']}' OR suuntalavat.usea_keraysvyohyke = 'K')
+           AND suuntalavat.tila               IN ('', 'S', 'P'))
+           UNION
+           (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
+           FROM suuntalavat
+           WHERE suuntalavat.yhtio            = '{$kukarow['yhtio']}'
+           AND suuntalavat.tila               IN ('', 'S', 'P')
+           AND suuntalavat.tunnus             = '{$tilausrivi['suuntalava']}')
+           UNION
+           (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
+           FROM suuntalavat
+           WHERE suuntalavat.yhtio            = '{$kukarow['yhtio']}'
+           AND suuntalavat.keraysvyohyke      = '{$tilausrivi['keraysvyohyke']}'
+           AND suuntalavat.tila               = ''
+           AND suuntalavat.kaytettavyys       = 'L')
+           UNION
+           (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
+           FROM suuntalavat
+           WHERE suuntalavat.yhtio            = '{$kukarow['yhtio']}'
+           AND suuntalavat.usea_keraysvyohyke = 'K'
+           AND suuntalavat.tila               IN ('', 'S', 'P')
+           AND suuntalavat.kaytettavyys       = 'L')
+           ORDER BY sscc, tunnus";
 
 $suuntalavat_res = pupe_query($query);
 

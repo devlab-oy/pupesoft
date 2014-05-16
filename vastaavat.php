@@ -210,7 +210,7 @@ if ($tee == 'vaihtoehtoinen') {
         $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$_tuoteno}'";
         $result = pupe_query($query);
     }
-    else if ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
+    elseif ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
         $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$_tuoteno}'";
         $result = pupe_query($query);
     }
@@ -254,7 +254,7 @@ if ($tee == 'add') {
         echo "<font class='error'>".t("Lisäys ei onnistu! Tuotetta")." $vastaava ".t("ei löydy")."!</font><br><br>";
     }
     // Lisätään haluttuun ketjuun
-    else if (!empty($ketju_id)) {
+    elseif (!empty($ketju_id)) {
         lisaa_tuote($tuoteno, $vastaava, $ketju_id);
     }
     else {

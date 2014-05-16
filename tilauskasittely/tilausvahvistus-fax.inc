@@ -235,7 +235,7 @@ else {
       if ($naytatvale==3) {
         // menn‰‰n ohi koska ei haluta n‰ytt‰‰ hintoja
       }
-      else if ($naytatvale==2) {
+      elseif ($naytatvale==2) {
         $ulos .= sprintf("%8.s"  ,$tvtilausrivirow['myyntihinta'])." ";
       }
       else {
@@ -250,7 +250,7 @@ else {
       if ($naytatvale == 3 or $naytatvale == 4) {
         // menn‰‰n ohi koska ei haluta n‰ytt‰‰ alea
       }
-      else if ($naytatvale==2) {
+      elseif ($naytatvale==2) {
         $ulos .= sprintf("%6.s"  ,$tvtilausrivirow['aleryhma']);
       }
       else {

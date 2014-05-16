@@ -83,7 +83,7 @@ function loop_packet($xml_element, $parameters) {
           $chk_row = mysql_fetch_assoc($chk_res);
           $tuote = $chk_row['toim_tuoteno'];
         }
-        else if (mysql_num_rows($chk_res) == 0) {
+        elseif (mysql_num_rows($chk_res) == 0) {
           // haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että
           $chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuote, $tavarantoimittajanumero);
 

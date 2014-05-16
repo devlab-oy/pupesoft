@@ -1611,7 +1611,7 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
         }
       }
     }
-    else if ($rtuoteno[$i]['tuoteno'] == "A-100" or $rtuoteno[$i]['tuoteno'] == "A-200") {
+    elseif ($rtuoteno[$i]['tuoteno'] == "A-100" or $rtuoteno[$i]['tuoteno'] == "A-200") {
       continue;
     }
     else {

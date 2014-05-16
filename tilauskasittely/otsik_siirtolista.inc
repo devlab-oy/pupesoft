@@ -51,7 +51,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
   }
 
-  if($kopioitava_otsikko > 0 or $kukarow["kesken"] > 0) {
+  if ((isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) or $kukarow["kesken"] > 0) {
     if ($kopioitava_otsikko > 0) {
       $squery = "  SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
             FROM lasku
@@ -83,10 +83,19 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $ylatila="";
 
     //  Jos meillä on kopioitu otsikko, ei kopioida alatilaa!
-    if($kopioitava_otsikko == 0 and $srow['alatila'] != '') {
+    if ($kopioitava_otsikko == 0 and $srow['alatila'] != '') {
       $alatila=$srow['alatila'];
     }
     if ($srow['tila'] != '')    $ylatila=$srow['tila'];
+  }
+
+  if (!isset($srow)) {
+    $query = "SELECT *, hyvaksynnanmuutos as luokka FROM lasku LIMIT 1";
+    $result = pupe_query($query);
+    $srow = mysql_fetch_assoc($result);
+    foreach ($srow as $key => $value) {
+      $srow[$key] = '';
+    }
   }
 
   echo "<table>";
@@ -135,7 +144,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   while ($vrow = mysql_fetch_array($vtresult)) {
     $sel='';
-    if ($vrow['tunnus']==$srow["varasto"]) $sel = 'selected';
+    if ($vrow['tunnus'] == $srow["varasto"]) $sel = 'selected';
 
     $varastomaa = '';
     if (strtoupper($vrow['maa']) != strtoupper($yhtiorow['maa'])) {
@@ -145,7 +154,6 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     echo "<option value='$vrow[tunnus]' $sel>$vrow[maa] $vrow[nimitys]</option>";
   }
   echo "</select></td></tr>";
-
 
   if ($toim != "SIIRTOTYOMAARAYS") {
     if ($toim == "SIIRTOLISTA") {
@@ -217,14 +225,14 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   else {
     list($toimvv, $toimkk, $toimpp) = explode('-', $srow["toimaika"]);
     list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
-    $kerpp = substr($kerpp,0,2);
-    $toimpp = substr($toimpp,0,2);
+    $kerpp = substr($kerpp, 0, 2);
+    $toimpp = substr($toimpp, 0, 2);
 
   }
 
   // Jos valmistuksessa käytetään tilakoodeja asetetaan keräysajankohta tulevaisuuteen.
   // Valmistus ei varaa saldoja ennenkuin työ on valmistuslinjalla.
-  if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K' AND $toim == 'VALMISTAVARASTOON') {
+  if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K' and $toim == 'VALMISTAVARASTOON') {
     $kerpp = '1';
     $kerkk = '1';
     $kervv = '2099';
@@ -238,7 +246,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       <input type='text' name='kerpp' value='$kerpp' size='3'>
       <input type='text' name='kerkk' value='$kerkk' size='3'>
       <input type='text' name='kervv' value='$kervv' size='6'>
-      <input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'></td></tr>";
+      <input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"], 0, 10)."'></td></tr>";
 
   if ($toim == "SIIRTOLISTA") {
     echo "<tr><th>".t("Toivottu toimitusajankohta").": </th>";
@@ -287,7 +295,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   echo "<select name='luokka'><option value=''>".t("Oletus")."</option>";
 
-  while($row = mysql_fetch_array($tresult)) {
+  while ($row = mysql_fetch_array($tresult)) {
     $sel = "";
     if ($row["selite"] == $srow["luokka"]) $sel = 'selected';
 
@@ -309,14 +317,13 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
     echo "<select name='toimitustapa'>";
 
-    while($row = mysql_fetch_array($tresult)) {
+    while ($row = mysql_fetch_array($tresult)) {
       $sel = "";
       if ($row["selite"] == $srow["toimitustapa"]) $sel = 'selected';
 
       echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
     }
     echo "</select>";
-
 
     echo "</td></tr>";
   }
@@ -398,7 +405,7 @@ if (isset($jatka)) {
     $postquery2 = " WHERE otunnus = '$kukarow[kesken]'";
   }
 
-  $crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
+  $crlf = array("\r", "\n"); // poistetaan rivinvaihdot kommentista
   $comments = str_replace($crlf, " ", $comments);
 
   $aquery = "  SELECT *
@@ -412,24 +419,32 @@ if (isset($jatka)) {
     $toim_nimitark = $vtrow['nimitark'];
   }
 
-  if ($toim_nimi == '') {
+  if (!isset($toim_nimi) or $toim_nimi == '') {
     $toim_nimi = $vtrow['nimi'];
   }
 
-  if ($toim_osoite == '') {
+  if (!isset($toim_osoite) or $toim_osoite == '') {
     $toim_osoite = $vtrow['osoite'];
   }
 
-  if ($toim_postino == '') {
+  if (!isset($toim_postino) or $toim_postino == '') {
     $toim_postino = $vtrow['postino'];
   }
 
-  if ($toim_postitp == '') {
+  if (!isset($toim_postitp) or $toim_postitp == '') {
     $toim_postitp = $vtrow['postitp'];
   }
 
-  if ($toim_maa == '') {
+  if (!isset($toim_maa) or $toim_maa == '') {
     $toim_maa = $vtrow['maa'];
+  }
+
+  if (!isset($eilahe)) {
+    $eilahe = '';
+  }
+
+  if (!isset($valmistuslinja)) {
+    $valmistuslinja = '';
   }
 
   //$yhtio_toimipaikka muuttuja asetetaan ainoastaan tilauksesta_varastosiirto funkkarissa.
@@ -518,7 +533,7 @@ if (isset($jatka)) {
 
   if ($toim == "SIIRTOTYOMAARAYS" and (int) $kukarow["kesken"] != 0) {
     //otetaan kantaa pyörän malliin
-    if($merkki2 != 'eimenu'){
+    if ($merkki2 != 'eimenu') {
       $merkki = $merkki2;
     }
 

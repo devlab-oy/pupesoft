@@ -122,7 +122,7 @@ function sqimap_fread($imap_stream,$iSize,$filter=false, $outputstream=false, $n
         if ($outputstream && $sRead != '') {
            if (is_resource($outputstream)) {
                fwrite($outputstream,$sRead);
-           } else if ($outputstream == 'php://stdout') {
+           } elseif ($outputstream == 'php://stdout') {
                echo $sRead;
            }
         }
@@ -264,7 +264,7 @@ function sqimap_read_data_list ($imap_stream, $tag_uid, $handle_errors, &$respon
                     $read = sqimap_fgets($imap_stream);
                     if ($read === false) {
                         break 3; /* while switch while */
-                    } else if (substr($read, 0, 1) == '*') {
+                    } elseif (substr($read, 0, 1) == '*') {
                         break;
                     }
                     $s = substr($read,-3);
@@ -378,13 +378,13 @@ function sqimap_mailbox_select ($imap_stream, $mailbox) {
     for ($i = 0, $cnt = count($read); $i < $cnt; $i++) {
         if (preg_match('/^\*\s+OK\s\[(\w+)\s(\w+)\]/',$read[$i], $regs)) {
             $result[strtoupper($regs[1])] = $regs[2];
-        } else if (preg_match('/^\*\s([0-9]+)\s(\w+)/',$read[$i], $regs)) {
+        } elseif (preg_match('/^\*\s([0-9]+)\s(\w+)/',$read[$i], $regs)) {
             $result[strtoupper($regs[2])] = $regs[1];
         } else {
             if (preg_match("/PERMANENTFLAGS(.*)/i",$read[$i], $regs)) {
                 $regs[1]=trim(preg_replace (  array ("/\(/","/\)/","/\]/") ,'', $regs[1])) ;
                 $result['PERMANENTFLAGS'] = $regs[1];
-            } else if (preg_match("/FLAGS(.*)/i",$read[$i], $regs)) {
+            } elseif (preg_match("/FLAGS(.*)/i",$read[$i], $regs)) {
                 $regs[1]=trim(preg_replace (  array ("/\(/","/\)/") ,'', $regs[1])) ;
                 $result['FLAGS'] = $regs[1];
             }

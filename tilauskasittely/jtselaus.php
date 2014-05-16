@@ -1622,7 +1622,7 @@ if ($tee == "JATKA") {
                   $toimvko = date("W", strtotime($jtrow['ltoimaika']));
                   $toimpva = date("N", strtotime($jtrow['ltoimaika']));
                 }
-                else if ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] == 7) {
+                elseif ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] == 7) {
                   $toimvko = date("W", strtotime($jtrow['ltoimaika']));
                 }
 

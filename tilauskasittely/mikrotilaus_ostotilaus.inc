@@ -64,7 +64,7 @@ if ($tee == "file") {
                 ORDER BY IF(tuotteen_toimittajat.jarjestys=0, 99999999999, tuotteen_toimittajat.jarjestys), tuote.tuoteno
                 LIMIT 1";
         }
-        else if (substr($tuoteno,0,1) != '?' and $tiedoston_tuoteno == 'toimittajan_tuoteno') {
+        elseif (substr($tuoteno,0,1) != '?' and $tiedoston_tuoteno == 'toimittajan_tuoteno') {
           $query = "  SELECT *
                 FROM tuotteen_toimittajat
                 JOIN tuote USING (yhtio, tuoteno)

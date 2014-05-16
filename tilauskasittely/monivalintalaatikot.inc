@@ -2124,7 +2124,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         echo "<input type='radio' name='kustapvalinta' value='asiakas' {$kustapvalinta_asiakas}>",t("Asiakkailta");
         echo "</th></tr>";
       }
-      else if (strpos($_SERVER['SCRIPT_NAME'], "matkalaskuraportti") !== FALSE) {
+      elseif (strpos($_SERVER['SCRIPT_NAME'], "matkalaskuraportti") !== FALSE) {
         $ruksitchk_kustp = "";
         $ruksitchk_toimittajalta = "";
         $ruksitchk_tuotteilta = "";

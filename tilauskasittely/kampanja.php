@@ -790,30 +790,30 @@ function hae_liveseach_kentta($kohde, $tyyppi, $ehto_index, $aliehto_index = 0, 
     if ($kohde == 'asiakas') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'asiakas_ytunnus') {
+    elseif ($kohde == 'asiakas_ytunnus') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASYTUNNUSHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'asiakaskategoria') {
+    elseif ($kohde == 'asiakaskategoria') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'tuote') {
+    elseif ($kohde == 'tuote') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'tuotekategoria') {
+    elseif ($kohde == 'tuotekategoria') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
     else {
       $return = "<input type='text' class='ehto_arvo' name='kampanja_ehdot[{$ehto_index}][arvo]' value='{$value}' />";
     }
   }
-  else if ($tyyppi == 'aliehto') {
+  elseif ($tyyppi == 'aliehto') {
     if ($kohde == 'asiakas') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'tuote') {
+    elseif ($kohde == 'tuote') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
     }
-    else if ($kohde == 'tuotekategoria') {
+    elseif ($kohde == 'tuotekategoria') {
       $return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
     }
     else {

@@ -686,7 +686,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
         // verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
       }
     }
-    else if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check != 0) {
+    elseif ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check != 0) {
       echo "<font class='message'>",t("Laskun rivejä oli liitetty saapumiseen jossa oli jo vaihto-omaisuus lasku"),". ",t("Poistetaan tämmöisten rivien liitos"),". ",t("Käsittele lasku"), " $lasku ",t("uudestaan"),".</font><br /><br />";
     }
 

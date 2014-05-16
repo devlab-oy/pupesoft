@@ -8740,7 +8740,7 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
         $haku_query .= "and asiakkaan_tilausnumero like ('%$haku%') ";
       }
 
-      $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
+      $query = "SELECT tunnus, asiakkaan_tilausnumero, nimi
                 FROM lasku use index (yhtio_asiakkaan_tilausnumero)
                 WHERE lasku.tila != 'U'
                 $haku_query

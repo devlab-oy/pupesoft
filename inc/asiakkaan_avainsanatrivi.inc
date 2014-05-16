@@ -52,10 +52,10 @@ if (mysql_field_name($result, $i) == "avainsana") {
 
     $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-    $query = "  SELECT selite
-          FROM toimitustapa
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          ORDER BY 1";
+    $query = "SELECT selite
+              FROM toimitustapa
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              ORDER BY 1";
     $toimitustapares = pupe_query($query);
 
     $ulos .= "<option value='OLETUS'>".t("Oletus")."</option>";
@@ -70,10 +70,10 @@ if (mysql_field_name($result, $i) == "avainsana") {
     $jatko = 0;
   }
   elseif (stripos($asavainsanatyyppi, "TOIMITUSTAPA") !== FALSE) {
-    $query = "  SELECT *
-          FROM toimitustapa
-          WHERE yhtio = '$kukarow[yhtio]'
-          ORDER BY jarjestys, selite";
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              ORDER BY jarjestys, selite";
     $vresult = pupe_query($query);
     $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -121,11 +121,11 @@ if (mysql_field_name($result, $i) == "avainsana") {
     $jatko = 0;
   }
   elseif (stripos($asavainsanatyyppi, "PAIKALLISVARAST") !== FALSE){
-    $query = "  SELECT *
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND laji = 'PAIKALLISVARAST'
-          ORDER BY jarjestys, selite";
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND laji    = 'PAIKALLISVARAST'
+              ORDER BY jarjestys, selite";
     $varresult = pupe_query($query);
     $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 

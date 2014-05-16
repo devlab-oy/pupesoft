@@ -15,31 +15,31 @@ if (empty($ostotilaus) or empty($tilausrivi)) {
 }
 # Haetaan tilausrivin ja laskun tiedot
 /* Ostotilausten_kohdistus rivi 847 - 895 */
-$query = "  SELECT
-            tilausrivi.varattu+tilausrivi.kpl siskpl,
-            tilausrivi.tuoteno,
-            round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),2) ulkkpl,
-            tuotteen_toimittajat.toim_tuoteno,
-            tuotteen_toimittajat.tuotekerroin,
-            concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as kerayspaikka,
-            tilausrivi.varattu,
-            tilausrivi.yksikko,
-            tilausrivi.suuntalava,
-            tilausrivi.uusiotunnus,
-            lasku.liitostunnus,
-            toimi.selaus,
-      IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi,
-            IFNULL(tilausrivin_lisatiedot.tilausrivitunnus, 0) as tilausrivitunnus
-            FROM lasku
-            JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
-            JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
-            JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-      LEFT JOIN tilausrivin_lisatiedot
-      ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-            WHERE tilausrivi.tunnus='{$tilausrivi}'
-            AND tilausrivi.yhtio='{$kukarow['yhtio']}'
-            AND lasku.tunnus='{$ostotilaus}'
-            AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'";
+$query = "SELECT
+          tilausrivi.varattu+tilausrivi.kpl siskpl,
+          tilausrivi.tuoteno,
+          round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),2) ulkkpl,
+          tuotteen_toimittajat.toim_tuoteno,
+          tuotteen_toimittajat.tuotekerroin,
+          concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as kerayspaikka,
+          tilausrivi.varattu,
+          tilausrivi.yksikko,
+          tilausrivi.suuntalava,
+          tilausrivi.uusiotunnus,
+          lasku.liitostunnus,
+          toimi.selaus,
+          IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi,
+          IFNULL(tilausrivin_lisatiedot.tilausrivitunnus, 0) as tilausrivitunnus
+          FROM lasku
+          JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
+          JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+          JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+          LEFT JOIN tilausrivin_lisatiedot
+          ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
+          WHERE tilausrivi.tunnus='{$tilausrivi}'
+          AND tilausrivi.yhtio='{$kukarow['yhtio']}'
+          AND lasku.tunnus='{$ostotilaus}'
+          AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'";
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 
@@ -61,8 +61,8 @@ if (empty($saapuminen)) {
 else {
     // Haetaan saapumisen toimittaja tunnus
     $saapuminen_query = "SELECT liitostunnus
-                        FROM lasku
-                        WHERE tunnus='{$saapuminen}'";
+                         FROM lasku
+                         WHERE tunnus='{$saapuminen}'";
     $saapumisen_toimittaja = mysql_fetch_assoc(pupe_query($saapuminen_query));
 
     // jos toimittaja ei ole sama kuin tilausrivin niin tehdään uusi saapuminen
@@ -179,11 +179,11 @@ echo "<tr>
 
 if ($row['tilausrivitunnus'] != 0) {
 
-    $query = "  SELECT tilausrivi.otunnus, lasku.nimi
-                FROM tilausrivi
-                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.tunnus = '{$row['tilausrivitunnus']}'";
+    $query = "SELECT tilausrivi.otunnus, lasku.nimi
+              FROM tilausrivi
+              JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.tunnus  = '{$row['tilausrivitunnus']}'";
     $tilausrivitunnus_res = pupe_query($query);
     $tilausrivitunnus_row = mysql_fetch_assoc($tilausrivitunnus_res);
 

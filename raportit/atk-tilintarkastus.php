@@ -94,10 +94,10 @@ if ($tee == "raportti") {
   $fh = fopen("/tmp/".$file2, "w");
 
   // haetaan kaikki tilit
-  $query  = "  SELECT *
-        FROM tili
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY tilino";
+  $query  = "SELECT *
+             FROM tili
+             WHERE yhtio = '$kukarow[yhtio]'
+             ORDER BY tilino";
   $result = pupe_query($query);
 
   echo "<br>Haetaan tilikartta....<br>";
@@ -128,15 +128,15 @@ if ($tee == "raportti") {
   $fh = fopen("/tmp/".$file1, "w");
 
   // haetaan kaikki vuoden tapahtumat.. uh
-  $query  = "  SELECT tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti,
-        tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija,
-        tiliointi.laadittu, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.osoitetark, lasku.postino, lasku.postitp, lasku.alatila, lasku.tila
-        FROM tiliointi
-        JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
-        where tiliointi.yhtio  = '$kukarow[yhtio]'
-        and tiliointi.tapvm    >= '$alku'
-        and tiliointi.tapvm    <= '$loppu'
-        and tiliointi.korjattu  = ''";
+  $query  = "SELECT tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti,
+             tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija,
+             tiliointi.laadittu, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.osoitetark, lasku.postino, lasku.postitp, lasku.alatila, lasku.tila
+             FROM tiliointi
+             JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
+             where tiliointi.yhtio  = '$kukarow[yhtio]'
+             and tiliointi.tapvm    >= '$alku'
+             and tiliointi.tapvm    <= '$loppu'
+             and tiliointi.korjattu = ''";
   $result = pupe_query($query);
 
 
@@ -224,11 +224,11 @@ if ($tee == "raportti") {
   $fh = fopen("/tmp/".$file3, "w");
 
   // haetaan kaikki kustannuspaikat
-  $query  = "  SELECT *
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND kaytossa != 'E'
-        ORDER BY tyyppi, koodi+0, koodi, nimi";
+  $query  = "SELECT *
+             FROM kustannuspaikka
+             WHERE yhtio   = '$kukarow[yhtio]'
+             AND kaytossa != 'E'
+             ORDER BY tyyppi, koodi+0, koodi, nimi";
   $result = pupe_query($query);
 
   echo "<br>Haetaan tarkenteet....<br>";
@@ -276,19 +276,19 @@ if ($tee == "raportti") {
   fwrite($fh, "toimitus_tunnus|laskunro|luontiaika|pvm|verollinen_summa|veroton_summa|verollinen_summa_valuutassa|veroton_summa_valuutassa|valuutta|toimitusehto|asiakasnumero|hyvitysviesti\n");
   fwrite($fhr, "lasku_tunnus|toimitus_tunnus|tuoteno|nimitys|kpl|verollinen_rivihinta|veroton_rivihinta|vero|toimitettu\n");
 
-  $query = "  SELECT lasku.tunnus, lasku.laskunro, lasku.luontiaika, lasku.tapvm, lasku.summa, asiakas.asiakasnro,
-        concat_ws(' ', lasku.nimi, lasku.nimitark) nimi, if(lasku.clearing = 'HYVITYS', lasku.viesti,'') viesti,
-        lasku.summa_valuutassa, lasku.valkoodi, lasku.toimitusehto, lasku.arvo, lasku.arvo_valuutassa,
-        avg(date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s')) toimitettuaika
-        FROM tilausrivi
-        JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
-        LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.tyyppi  = 'L'
-        AND tilausrivi.toimitettuaika  >= '$alku 00:00:00'
-        AND tilausrivi.toimitettuaika  <= '$loppu 23:59:59'
-        GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
-        ORDER BY toimitettuaika";
+  $query = "SELECT lasku.tunnus, lasku.laskunro, lasku.luontiaika, lasku.tapvm, lasku.summa, asiakas.asiakasnro,
+            concat_ws(' ', lasku.nimi, lasku.nimitark) nimi, if(lasku.clearing = 'HYVITYS', lasku.viesti,'') viesti,
+            lasku.summa_valuutassa, lasku.valkoodi, lasku.toimitusehto, lasku.arvo, lasku.arvo_valuutassa,
+            avg(date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s')) toimitettuaika
+            FROM tilausrivi
+            JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+            LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+            WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+            AND tilausrivi.tyyppi         = 'L'
+            AND tilausrivi.toimitettuaika >= '$alku 00:00:00'
+            AND tilausrivi.toimitettuaika <= '$loppu 23:59:59'
+            GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+            ORDER BY toimitettuaika";
   $result = pupe_query($query);
 
   echo "<br>Haetaan toimitukset....<br>";
@@ -302,11 +302,11 @@ if ($tee == "raportti") {
 
     fwrite($fh, "{$row['tunnus']}|{$row['laskunro']}|{$row['luontiaika']}|{$row['tapvm']}|{$row['summa']}|{$row['arvo']}|{$row['summa_valuutassa']}|{$row['arvo_valuutassa']}|{$row['valkoodi']}|{$row['toimitusehto']}|{$row['asiakasnro']}|{$row['viesti']}\n");
 
-    $query = "  SELECT tilausrivi.uusiotunnus, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.alv, tilausrivi.toimitettuaika
-          FROM tilausrivi
-          WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-          AND tilausrivi.otunnus = '{$row['tunnus']}'
-          AND tilausrivi.tyyppi  = 'L'";
+    $query = "SELECT tilausrivi.uusiotunnus, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.alv, tilausrivi.toimitettuaika
+              FROM tilausrivi
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus = '{$row['tunnus']}'
+              AND tilausrivi.tyyppi  = 'L'";
     $rivires = pupe_query($query);
 
     while ($rivirow = mysql_fetch_assoc($rivires)) {
@@ -332,17 +332,17 @@ if ($tee == "raportti") {
   fwrite($fh, "lasku_tunnus|laskunro|luontiaika|pvm|verollinen_summa|veroton_summa|verollinen_summa_valuutassa|veroton_summa_valuutassa|valuutta|toimitusehto|asiakasnumero|hyvitysviesti\n");
   fwrite($fhr, "lasku_tunnus|toimitus_tunnus|tuoteno|nimitys|kpl|verollinen_rivihinta|veroton_rivihinta|vero|toimitettu\n");
 
-  $query = "  SELECT lasku.tunnus, lasku.laskunro, lasku.luontiaika, lasku.tapvm, lasku.summa, asiakas.asiakasnro,
-        concat_ws(' ', lasku.nimi, lasku.nimitark) nimi, if(lasku.clearing = 'HYVITYS', lasku.viesti,'') viesti,
-        lasku.summa_valuutassa, lasku.valkoodi, lasku.toimitusehto, lasku.arvo, lasku.arvo_valuutassa
-        FROM lasku
-        LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tila    = 'U'
-        AND lasku.alatila = 'X'
-        AND lasku.tapvm  >= '$alku'
-        AND lasku.tapvm  <= current_date
-        ORDER BY lasku.laskunro";
+  $query = "SELECT lasku.tunnus, lasku.laskunro, lasku.luontiaika, lasku.tapvm, lasku.summa, asiakas.asiakasnro,
+            concat_ws(' ', lasku.nimi, lasku.nimitark) nimi, if(lasku.clearing = 'HYVITYS', lasku.viesti,'') viesti,
+            lasku.summa_valuutassa, lasku.valkoodi, lasku.toimitusehto, lasku.arvo, lasku.arvo_valuutassa
+            FROM lasku
+            LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila    = 'U'
+            AND lasku.alatila = 'X'
+            AND lasku.tapvm   >= '$alku'
+            AND lasku.tapvm   <= current_date
+            ORDER BY lasku.laskunro";
   $result = pupe_query($query);
 
   echo "<br>Haetaan laskut....<br>";
@@ -356,11 +356,11 @@ if ($tee == "raportti") {
 
     fwrite($fh, "{$row['tunnus']}|{$row['laskunro']}|{$row['luontiaika']}|{$row['tapvm']}|{$row['summa']}|{$row['arvo']}|{$row['summa_valuutassa']}|{$row['arvo_valuutassa']}|{$row['valkoodi']}|{$row['toimitusehto']}|{$row['asiakasnro']}|{$row['viesti']}\n");
 
-    $query = "  SELECT tilausrivi.uusiotunnus, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.alv, tilausrivi.toimitettuaika
-          FROM tilausrivi
-          WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
-          AND tilausrivi.uusiotunnus = '{$row['tunnus']}'
-          AND tilausrivi.tyyppi      = 'L'";
+    $query = "SELECT tilausrivi.uusiotunnus, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.alv, tilausrivi.toimitettuaika
+              FROM tilausrivi
+              WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+              AND tilausrivi.uusiotunnus = '{$row['tunnus']}'
+              AND tilausrivi.tyyppi      = 'L'";
     $rivires = pupe_query($query);
 
     while ($rivirow = mysql_fetch_assoc($rivires)) {

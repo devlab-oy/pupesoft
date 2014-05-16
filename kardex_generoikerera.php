@@ -34,10 +34,10 @@ else {
 
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-  $query = "  SELECT *
-        FROM keraysvyohyke
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND ulkoinen_jarjestelma = 'K'";
+  $query = "SELECT *
+            FROM keraysvyohyke
+            WHERE yhtio              = '{$kukarow['yhtio']}'
+            AND ulkoinen_jarjestelma = 'K'";
   $gen_ker_res_result = pupe_query($query);
 
   while ($gen_ker_row = mysql_fetch_assoc($gen_ker_res_result)) {
@@ -59,12 +59,12 @@ else {
         $kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
 
         // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
-        $query = "  UPDATE lasku SET
-              tila = 'L',
-              lahetepvm = now(),
-              kerayslista = '{$kerayslistatunnus}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus in ({$otunnukset})";
+        $query = "UPDATE lasku SET
+                  tila        = 'L',
+                  lahetepvm   = now(),
+                  kerayslista = '{$kerayslistatunnus}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  in ({$otunnukset})";
         $upd_res = pupe_query($query);
       }
     }

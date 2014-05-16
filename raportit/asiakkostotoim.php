@@ -81,25 +81,25 @@ if ($debug == 1) {
 
 if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' and $toimi != '') {
 
-    $query = "  SELECT b.tuoteno, b.nimitys, sum(a.kpl) kpl, round(sum(a.rivihinta*((a.alv/100)+1)),2) summa, round(sum(a.rivihinta),2) summa2
-          FROM tilausrivi a,
-          tuote b,
-          tuotteen_toimittajat d,
-          lasku c
-          WHERE a.yhtio = '$kukarow[yhtio]' and c.tapvm >= '$vva-$kka-$ppa'
-          and c.tapvm <= '$vvl-$kkl-$ppl'
-          and c.tila = 'U'
-          and c.alatila = 'X'
-          and a.yhtio = b.yhtio
-          and a.yhtio = c.yhtio
-          and a.yhtio = d.yhtio
-          and c.tunnus = a.uusiotunnus
-          and a.tuoteno = b.tuoteno
-          and a.tuoteno = d.tuoteno
-          and c.liitostunnus = '$asiakasid'
-          and d.liitostunnus = '$toimittajaid'
-          GROUP BY 1
-          ORDER BY 1";
+    $query = "SELECT b.tuoteno, b.nimitys, sum(a.kpl) kpl, round(sum(a.rivihinta*((a.alv/100)+1)),2) summa, round(sum(a.rivihinta),2) summa2
+              FROM tilausrivi a,
+              tuote b,
+              tuotteen_toimittajat d,
+              lasku c
+              WHERE a.yhtio      = '$kukarow[yhtio]' and c.tapvm >= '$vva-$kka-$ppa'
+              and c.tapvm        <= '$vvl-$kkl-$ppl'
+              and c.tila         = 'U'
+              and c.alatila      = 'X'
+              and a.yhtio        = b.yhtio
+              and a.yhtio        = c.yhtio
+              and a.yhtio        = d.yhtio
+              and c.tunnus       = a.uusiotunnus
+              and a.tuoteno      = b.tuoteno
+              and a.tuoteno      = d.tuoteno
+              and c.liitostunnus = '$asiakasid'
+              and d.liitostunnus = '$toimittajaid'
+              GROUP BY 1
+              ORDER BY 1";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) > 0 ) {

@@ -84,33 +84,33 @@ else {
 
 if ($yhtiorow['viikkosuunnitelma'] == '') {
   if ($tee == "lahetalista") {
-    $query = "  SELECT asiakas.tunnus, asiakas.nimi, asiakas.postitp, asiakas.ytunnus, asiakas.yhtio, asiakas.asiakasnro, asiakas.nimitark,
-          asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite,
-          asiakas.toim_postino, asiakas.toim_postitp, asiakas.toim_maa, asiakas.puhelin, asiakas.fax, asiakas.myyjanro, asiakas.email,
-          asiakas.osasto, asiakas.piiri, asiakas.ryhma, asiakas.fakta, asiakas.toimitustapa, asiakas.yhtio
-          FROM asiakas
-          WHERE $konsernit
-          $lisa";
+    $query = "SELECT asiakas.tunnus, asiakas.nimi, asiakas.postitp, asiakas.ytunnus, asiakas.yhtio, asiakas.asiakasnro, asiakas.nimitark,
+              asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite,
+              asiakas.toim_postino, asiakas.toim_postitp, asiakas.toim_maa, asiakas.puhelin, asiakas.fax, asiakas.myyjanro, asiakas.email,
+              asiakas.osasto, asiakas.piiri, asiakas.ryhma, asiakas.fakta, asiakas.toimitustapa, asiakas.yhtio
+              FROM asiakas
+              WHERE $konsernit
+              $lisa";
     $tiednimi = "asiakaslista.xls";
   }
   else {
-    $query = "  SELECT asiakas.tunnus, if (asiakas.nimi != asiakas.toim_nimi, CONCAT(asiakas.nimi, '<br />', asiakas.toim_nimi), asiakas.nimi) nimi,
-          asiakas.asiakasnro, asiakas.ytunnus,  if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
-          if (asiakas.toim_postino != 00000, asiakas.toim_postino, asiakas.postino) postino,
-          asiakas.yhtio, asiakas.myyjanro, asiakas.email, asiakas.puhelin $selectlisa
-          FROM asiakas
-          WHERE $konsernit
-          $lisa";
+    $query = "SELECT asiakas.tunnus, if (asiakas.nimi != asiakas.toim_nimi, CONCAT(asiakas.nimi, '<br />', asiakas.toim_nimi), asiakas.nimi) nimi,
+              asiakas.asiakasnro, asiakas.ytunnus,  if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
+              if (asiakas.toim_postino != 00000, asiakas.toim_postino, asiakas.postino) postino,
+              asiakas.yhtio, asiakas.myyjanro, asiakas.email, asiakas.puhelin $selectlisa
+              FROM asiakas
+              WHERE $konsernit
+              $lisa";
     $tiednimi = "viikkosuunnitelma.xls";
   }
 }
 else {
-  $query = "  SELECT asiakas.tunnus, asiakas.nimi, (SELECT concat_ws(' ', kuka.myyja, kuka.nimi) FROM kuka WHERE kuka.yhtio = '$kukarow[yhtio]' AND kuka.myyja = asiakas.myyjanro AND kuka.myyja > 0 LIMIT 1) myyja,
-        asiakas.ytunnus, asiakas.asiakasnro, if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
-        asiakas.puhelin, asiakas.yhtio
-        FROM asiakas
-        WHERE $konsernit
-        $lisa";
+  $query = "SELECT asiakas.tunnus, asiakas.nimi, (SELECT concat_ws(' ', kuka.myyja, kuka.nimi) FROM kuka WHERE kuka.yhtio = '$kukarow[yhtio]' AND kuka.myyja = asiakas.myyjanro AND kuka.myyja > 0 LIMIT 1) myyja,
+            asiakas.ytunnus, asiakas.asiakasnro, if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
+            asiakas.puhelin, asiakas.yhtio
+            FROM asiakas
+            WHERE $konsernit
+            $lisa";
 }
 if ($lisa == "" and ($tee != 'laheta' or $tee != 'lahetalista')) {
   $limit = " LIMIT 200 ";
@@ -125,10 +125,10 @@ $result = pupe_query($query);
 if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
   // K‰yd‰‰n lista l‰pi kertaalleen
   while ($trow = mysql_fetch_array ($result)) {
-    $query_update = "  UPDATE asiakas
-              SET tila = '$astila_vaihto'
-              WHERE tunnus = '$trow[tunnus]'
-              AND yhtio = '$yhtiorow[yhtio]'";
+    $query_update = "UPDATE asiakas
+           SET tila = '$astila_vaihto'
+           WHERE tunnus = '$trow[tunnus]'
+           AND yhtio    = '$yhtiorow[yhtio]'";
     $result_update = pupe_query($query_update);
   }
   $result = pupe_query($query);

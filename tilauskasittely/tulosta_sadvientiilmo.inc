@@ -93,10 +93,10 @@ $pdf2->draw_text(61,  759, $yhtiorow["postino"]." ".$yhtiorow["postitp"],   $pag
 $sivu = 1;
 
 //hetaan kaikki otunnukset jotka löytyvät tän uusiotunnuksen alta
-$query = "  SELECT distinct otunnus
-      FROM tilausrivi
-      WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
-      and tilausrivi.yhtio='$kukarow[yhtio]'";
+$query = "SELECT distinct otunnus
+          FROM tilausrivi
+          WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
+          and tilausrivi.yhtio='$kukarow[yhtio]'";
 $uresult = mysql_query($query) or pupe_error($query);
 
 $tunnukset = '';
@@ -111,10 +111,10 @@ $tunnukset = substr($tunnukset,0,-1);
 if ($tunnukset != "") {
 
   //haetaan kollimäärä ja bruttopaino
-  $query = "  SELECT *
-        FROM rahtikirjat
-        WHERE otsikkonro in ($tunnukset)
-        and yhtio='$kukarow[yhtio]'";
+  $query = "SELECT *
+            FROM rahtikirjat
+            WHERE otsikkonro in ($tunnukset)
+            and yhtio='$kukarow[yhtio]'";
   $rahtiresult = mysql_query($query) or pupe_error($query);
 
   $kilot  = 0;
@@ -135,26 +135,26 @@ if ($tunnukset != "") {
     $kilot = $laskurow["bruttopaino"];
   }
 
-  $query = "  SELECT
-        tuote.tullinimike1,
-        tuote.tullinimike2,
-        tuote.tullikohtelu,
-        (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
-        tullinimike.su,
-        tullinimike.su_vientiilmo,
-        tullinimike.dm,
-        min(tilausrivi.nimitys) nimitys,
-        GROUP_CONCAT(distinct trim(tuote.nimitys) ORDER BY tuote.nimitys SEPARATOR '##') nimitys_hieno,
-        sum(tilausrivi.rivihinta) rivihinta,
-        sum(tilausrivi.kpl) kpl,
-        round(sum(if(tuote.tuotemassa!=0, tilausrivi.kpl*tuote.tuotemassa, (tilausrivi.rivihinta/$laskurow[summa])*$kilot)),2) nettop
-        FROM tilausrivi
-        JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = ''
-        JOIN tullinimike ON tuote.tullinimike1 = tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tuote.tullinimike1!=''
-        WHERE tilausrivi.uusiotunnus  = '$uusiotunnus'
-        and tilausrivi.yhtio      = '$kukarow[yhtio]'
-        and tilausrivi.kpl        > 0
-        GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa, tullinimike.su, tullinimike.su_vientiilmo, tullinimike.dm";
+  $query = "SELECT
+            tuote.tullinimike1,
+            tuote.tullinimike2,
+            tuote.tullikohtelu,
+            (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
+            tullinimike.su,
+            tullinimike.su_vientiilmo,
+            tullinimike.dm,
+            min(tilausrivi.nimitys) nimitys,
+            GROUP_CONCAT(distinct trim(tuote.nimitys) ORDER BY tuote.nimitys SEPARATOR '##') nimitys_hieno,
+            sum(tilausrivi.rivihinta) rivihinta,
+            sum(tilausrivi.kpl) kpl,
+            round(sum(if(tuote.tuotemassa!=0, tilausrivi.kpl*tuote.tuotemassa, (tilausrivi.rivihinta/$laskurow[summa])*$kilot)),2) nettop
+            FROM tilausrivi
+            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = ''
+            JOIN tullinimike ON tuote.tullinimike1 = tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tuote.tullinimike1!=''
+            WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
+            and tilausrivi.yhtio         = '$kukarow[yhtio]'
+            and tilausrivi.kpl           > 0
+            GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa, tullinimike.su, tullinimike.su_vientiilmo, tullinimike.dm";
   $riviresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($riviresult) < 1) {
@@ -559,11 +559,11 @@ if ($tunnukset != "") {
   $pdf2->draw_text(61, 520, $laskurow["poistumistoimipaikka_koodi"],       $pages[0], $kymppi);
 
   //Kenttä 30 Tavaran sijaintipaikka
-  $query = "  SELECT osoite
-        FROM varastopaikat
-        WHERE tunnus = '$laskurow[varasto]'
-        and yhtio = '$kukarow[yhtio]'
-        and osoite != ''";
+  $query = "SELECT osoite
+            FROM varastopaikat
+            WHERE tunnus  = '$laskurow[varasto]'
+            and yhtio     = '$kukarow[yhtio]'
+            and osoite   != ''";
   $varresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($varresult) > 0) {

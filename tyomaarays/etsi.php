@@ -40,15 +40,15 @@ if ($tee == 'etsi') {
     $muu2 = "%".$valmno."%";
   }
 
-  $squery = "  SELECT lasku.*, tyomaarays.*, lasku.tunnus laskutunnus
-        FROM lasku
-        JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
-        JOIN asiakas ON asiakas.yhtio = tyomaarays.yhtio and asiakas.tunnus = lasku.liitostunnus
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tila in ('A','L','N')
-        and lasku.tilaustyyppi = 'A'
-        and $muu1 '$muu2'
-        ORDER BY lasku.tunnus desc";
+  $squery = "SELECT lasku.*, tyomaarays.*, lasku.tunnus laskutunnus
+             FROM lasku
+             JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+             JOIN asiakas ON asiakas.yhtio = tyomaarays.yhtio and asiakas.tunnus = lasku.liitostunnus
+             WHERE lasku.yhtio      = '$kukarow[yhtio]'
+             and lasku.tila         in ('A','L','N')
+             and lasku.tilaustyyppi = 'A'
+             and $muu1 '$muu2'
+             ORDER BY lasku.tunnus desc";
   $sresult = mysql_query($squery) or pupe_error($query);
 
   if (mysql_num_rows($sresult) > 0) {

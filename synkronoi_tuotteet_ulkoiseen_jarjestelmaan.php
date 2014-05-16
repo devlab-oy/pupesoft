@@ -14,14 +14,14 @@ if ($ftp_posten_logistik_host == '' or $ftp_posten_logistik_user == '' or $ftp_p
   exit;
 }
 
-$query = "  SELECT tuote.*, ta.selite AS synkronointi
-      FROM tuote
-      LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
-      WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-      AND tuote.status != 'P'
-      AND tuote.ei_saldoa = ''
-      AND tuote.eankoodi != ''
-      AND ta.selite IS NULL";
+$query = "SELECT tuote.*, ta.selite AS synkronointi
+          FROM tuote
+          LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
+          WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
+          AND tuote.status    != 'P'
+          AND tuote.ei_saldoa  = ''
+          AND tuote.eankoodi  != ''
+          AND ta.selite IS NULL";
 $res = pupe_query($query);
 
 if (mysql_num_rows($res) > 0) {
@@ -124,26 +124,26 @@ if (mysql_num_rows($res) > 0) {
 
       if (is_null($row['synkronointi'])) {
 
-        $query = "  INSERT INTO tuotteen_avainsanat SET
-              yhtio = '{$kukarow['yhtio']}',
-              tuoteno = '{$row['tuoteno']}',
-              kieli = '{$yhtiorow['kieli']}',
-              laji = 'synkronointi',
-              selite = 'x',
-              laatija = '{$kukarow['kuka']}',
-              luontiaika = now(),
-              muutospvm = now(),
-              muuttaja = '{$kukarow['kuka']}'";
+        $query = "INSERT INTO tuotteen_avainsanat SET
+                  yhtio      = '{$kukarow['yhtio']}',
+                  tuoteno    = '{$row['tuoteno']}',
+                  kieli      = '{$yhtiorow['kieli']}',
+                  laji       = 'synkronointi',
+                  selite     = 'x',
+                  laatija    = '{$kukarow['kuka']}',
+                  luontiaika = now(),
+                  muutospvm  = now(),
+                  muuttaja   = '{$kukarow['kuka']}'";
         pupe_query($query);
 
       }
       else {
 
-        $query = "  UPDATE tuotteen_avainsanat SET
-              selite = 'x'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$row['tuoteno']}'
-              AND laji = 'synkronointi'";
+        $query = "UPDATE tuotteen_avainsanat SET
+                  selite      = 'x'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$row['tuoteno']}'
+                  AND laji    = 'synkronointi'";
         pupe_query($query_dump());
       }
 

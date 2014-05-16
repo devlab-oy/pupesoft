@@ -14,11 +14,11 @@ echo "</table>";
 
 if (trim($laskunro) != '' and is_numeric($laskunro)) {
 
-  $query = "  SELECT lasku.tunnus, liitetiedostot.kayttotarkoitus, lasku.asiakkaan_tilausnumero
-        FROM lasku
-        JOIN liitetiedostot ON (liitetiedostot.yhtio = lasku.yhtio and liitetiedostot.liitos = 'lasku' AND liitetiedostot.liitostunnus = lasku.tunnus AND liitetiedostot.kayttotarkoitus IN ('FINVOICE', 'EDI'))
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND lasku.laskunro = '$laskunro'";
+  $query = "SELECT lasku.tunnus, liitetiedostot.kayttotarkoitus, lasku.asiakkaan_tilausnumero
+            FROM lasku
+            JOIN liitetiedostot ON (liitetiedostot.yhtio = lasku.yhtio and liitetiedostot.liitos = 'lasku' AND liitetiedostot.liitostunnus = lasku.tunnus AND liitetiedostot.kayttotarkoitus IN ('FINVOICE', 'EDI'))
+            WHERE lasku.yhtio  = '$kukarow[yhtio]'
+            AND lasku.laskunro = '$laskunro'";
   $lasku_res = pupe_query($query);
   $lasku_row = mysql_fetch_assoc($lasku_res);
 

@@ -58,23 +58,23 @@ laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit);
 function hae_ostotilauksien_tilausrivit_joiden_toimitusaika_on_muuttunut_tai_vahvistettu() {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT lasku.tunnus AS lasku_tunnus,
-        tilausrivi.toimaika,
-        tilausrivi.tuoteno,
-        tilausrivi.tilkpl as tilkpl,
-        tilausrivi.tilkpl as tilkpl_jaljella
-        FROM lasku
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus )
-        JOIN tilausrivin_lisatiedot
-        ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-          AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-          AND tilausrivin_lisatiedot.toimitusaika_paivitetty >= DATE_SUB(NOW(), INTERVAL 1 DAY))
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tila = 'O'
-        AND lasku.alatila IN ('','A','B')
-        ORDER BY lasku.toimaika ASC";
+  $query = "SELECT lasku.tunnus AS lasku_tunnus,
+            tilausrivi.toimaika,
+            tilausrivi.tuoteno,
+            tilausrivi.tilkpl as tilkpl,
+            tilausrivi.tilkpl as tilkpl_jaljella
+            FROM lasku
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus                             = lasku.tunnus )
+            JOIN tilausrivin_lisatiedot
+            ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus        = tilausrivi.tunnus
+              AND tilausrivin_lisatiedot.toimitusaika_paivitetty >= DATE_SUB(NOW(), INTERVAL 1 DAY))
+            WHERE lasku.yhtio                                    = '{$kukarow['yhtio']}'
+            AND lasku.tila                                       = 'O'
+            AND lasku.alatila                                    IN ('','A','B')
+            ORDER BY lasku.toimaika ASC";
   $result = pupe_query($query);
   $ostolaskut = array();
   while ($ostolasku = mysql_fetch_assoc($result)) {
@@ -134,22 +134,22 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
     $asiakas_join = "AND asiakas.jt_toimitusaika_email_vahvistus = 'K'";
   }
   //Haetaan kaikki myyntilaskut joiden asiakkaan jt_toimitusaika_email_vahvistus on Käytetään yhtiön oletus parametriä tai saa lähettää sähköposteja
-  $query = "  SELECT lasku.tunnus,
-        lasku.nimi,
-        lasku.liitostunnus
-        FROM lasku
-        JOIN asiakas
-        ON ( asiakas.yhtio = lasku.yhtio
-          AND asiakas.tunnus = lasku.liitostunnus
-          {$asiakas_join} )
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus
-          AND tilausrivi.var = 'J'
-          AND tilausrivi.tyyppi != 'D')
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        GROUP BY lasku.tunnus
-        ORDER BY lasku.luontiaika ASC";
+  $query = "SELECT lasku.tunnus,
+            lasku.nimi,
+            lasku.liitostunnus
+            FROM lasku
+            JOIN asiakas
+            ON ( asiakas.yhtio = lasku.yhtio
+              AND asiakas.tunnus      = lasku.liitostunnus
+              {$asiakas_join} )
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus  = lasku.tunnus
+              AND tilausrivi.var      = 'J'
+              AND tilausrivi.tyyppi  != 'D')
+            WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
+            GROUP BY lasku.tunnus
+            ORDER BY lasku.luontiaika ASC";
   $result = pupe_query($query);
 
   $myyntitilaukset = array();
@@ -173,15 +173,15 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
 function hae_myyntitilausrivit($tilaus_tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT tuoteno,
-        varattu+jt AS tilkpl,
-        varattu+jt AS tilkpl_jaljella,
-        nimitys,
-        toimaika
-        FROM tilausrivi
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus = '{$tilaus_tunnus}'
-        AND var = 'J'";
+  $query = "SELECT tuoteno,
+            varattu+jt AS tilkpl,
+            varattu+jt AS tilkpl_jaljella,
+            nimitys,
+            toimaika
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$tilaus_tunnus}'
+            AND var     = 'J'";
   $result = pupe_query($query);
 
   $tilausrivit = array();
@@ -203,10 +203,10 @@ function hae_myyntitilausrivit($tilaus_tunnus) {
 function hae_myyntitilauksen_asiakas($liitostunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$liitostunnus}'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$liitostunnus}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);

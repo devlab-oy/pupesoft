@@ -18,11 +18,11 @@ if (isset($uusi) AND !isset($virhe)) {
 }
 // Katsotaan onko käyttäjälle keskeneräistä saapumista
 elseif (!isset($virhe) AND (!isset($backsaapuminen) OR $backsaapuminen != "")) {
-  $query = "  SELECT kesken
-        FROM kuka
-        JOIN lasku ON (kuka.yhtio=lasku.yhtio AND kuka.kesken=lasku.tunnus AND lasku.tila='K' AND lasku.alatila NOT IN ('X','I'))
-        WHERE kuka.kuka = '{$kukarow['kuka']}'
-        AND kuka.yhtio  = '{$kukarow['yhtio']}'";
+  $query = "SELECT kesken
+            FROM kuka
+            JOIN lasku ON (kuka.yhtio=lasku.yhtio AND kuka.kesken=lasku.tunnus AND lasku.tila='K' AND lasku.alatila NOT IN ('X','I'))
+            WHERE kuka.kuka = '{$kukarow['kuka']}'
+            AND kuka.yhtio  = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
   $kesken_row = mysql_fetch_assoc($result);
 
@@ -30,21 +30,21 @@ elseif (!isset($virhe) AND (!isset($backsaapuminen) OR $backsaapuminen != "")) {
   if ($kesken_row['kesken'] == 0) {
 
     // Haetaan käyttäjän uusin saapumisen tunnus ja setataan se kesken kolumniin
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laatija = '{$kukarow['kuka']}'
-          AND tila = 'K'
-          AND alatila NOT IN ('X','I')
-          ORDER BY luontiaika DESC
-          LIMIT 1";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laatija = '{$kukarow['kuka']}'
+              AND tila    = 'K'
+              AND alatila NOT IN ('X','I')
+              ORDER BY luontiaika DESC
+              LIMIT 1";
     $result = pupe_query($query);
     $saapuminen_row = mysql_fetch_assoc($result);
 
-    $kesken_query = "  UPDATE kuka
-              SET kesken = '{$saapuminen_row['tunnus']}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND kuka    = '{$kukarow['kuka']}'";
+    $kesken_query = "UPDATE kuka
+                     SET kesken = '{$saapuminen_row['tunnus']}'
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND kuka    = '{$kukarow['kuka']}'";
     pupe_query($kesken_query);
   }
 }

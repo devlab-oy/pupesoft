@@ -13,25 +13,25 @@ if ($tee == "PAIVITA" and (checkdate(substr($paivamaara,5,2), substr($paivamaara
     $lisa = " and tilausrivi.laskutettuaika >= '$paivamaara' ";
   }
 
-  $query  = "  SELECT DISTINCT
-        lasku.tunnus keikka,
-        tilausrivi.tunnus rivitun,
-        tilausrivi.tuoteno,
-        tilausrivi.laskutettuaika,
-        sarjanumeroseuranta.sarjanumero,
-        sarjanumeroseuranta.ostorivitunnus,
-        round(tilausrivi.rivihinta/tilausrivi.kpl,2) r2
-        FROM tilausrivi
-        JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
-        JOIN lasku on tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and lasku.alatila='X'
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.kpl != 0
-        and tilausrivi.tyyppi in ('L','O')
-        $lisa
-        and tilausrivi.laskutettuaika >= '$yhtiorow[tilikausi_alku]'
-        and tilausrivi.laskutettuaika <= '$yhtiorow[tilikausi_loppu]'
-        and tilausrivi.var2 != 'EIOST'
-        ORDER BY tilausrivi.laskutettuaika";
+  $query  = "SELECT DISTINCT
+             lasku.tunnus keikka,
+             tilausrivi.tunnus rivitun,
+             tilausrivi.tuoteno,
+             tilausrivi.laskutettuaika,
+             sarjanumeroseuranta.sarjanumero,
+             sarjanumeroseuranta.ostorivitunnus,
+             round(tilausrivi.rivihinta/tilausrivi.kpl,2) r2
+             FROM tilausrivi
+             JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+             JOIN lasku on tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and lasku.alatila='X'
+             WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
+             and tilausrivi.kpl            != 0
+             and tilausrivi.tyyppi          in ('L','O')
+             $lisa
+             and tilausrivi.laskutettuaika  >= '$yhtiorow[tilikausi_alku]'
+             and tilausrivi.laskutettuaika  <= '$yhtiorow[tilikausi_loppu]'
+             and tilausrivi.var2           != 'EIOST'
+             ORDER BY tilausrivi.laskutettuaika";
   $korjaaresult = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
@@ -60,29 +60,29 @@ if ($tee == "PAIVITA" and (checkdate(substr($paivamaara,5,2), substr($paivamaara
     }
   }
 
-  $query  = "  SELECT DISTINCT
-        ostorivi.uusiotunnus keikka,
-        ostorivi.tunnus rivitun,
-        ostorivi.laskutettuaika,
-        tilausrivi.tunnus myyrivitun,
-        tilausrivi.tuoteno,
-        tilausrivi.kate,
-        tilausrivi.rivihinta,
-        tilausrivi.kpl,
-        sarjanumeroseuranta.sarjanumero,
-        sarjanumeroseuranta.ostorivitunnus,
-        round(ostorivi.rivihinta/ostorivi.kpl,2) r2
-        FROM tilausrivi
-        JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus)
-        JOIN tilausrivi ostorivi ON (sarjanumeroseuranta.yhtio=ostorivi.yhtio and sarjanumeroseuranta.ostorivitunnus=ostorivi.tunnus and ostorivi.laskutettuaika != '0000-00-00' and ostorivi.var2 != 'EIOST')
-        JOIN lasku on tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and lasku.alatila='X'
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.kpl != 0
-        and tilausrivi.tyyppi = 'L'
-        $lisa
-        and tilausrivi.laskutettuaika >= '$yhtiorow[tilikausi_alku]'
-        and tilausrivi.laskutettuaika <= '$yhtiorow[tilikausi_loppu]'
-        ORDER BY tilausrivi.laskutettuaika";
+  $query  = "SELECT DISTINCT
+             ostorivi.uusiotunnus keikka,
+             ostorivi.tunnus rivitun,
+             ostorivi.laskutettuaika,
+             tilausrivi.tunnus myyrivitun,
+             tilausrivi.tuoteno,
+             tilausrivi.kate,
+             tilausrivi.rivihinta,
+             tilausrivi.kpl,
+             sarjanumeroseuranta.sarjanumero,
+             sarjanumeroseuranta.ostorivitunnus,
+             round(ostorivi.rivihinta/ostorivi.kpl,2) r2
+             FROM tilausrivi
+             JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus)
+             JOIN tilausrivi ostorivi ON (sarjanumeroseuranta.yhtio=ostorivi.yhtio and sarjanumeroseuranta.ostorivitunnus=ostorivi.tunnus and ostorivi.laskutettuaika != '0000-00-00' and ostorivi.var2 != 'EIOST')
+             JOIN lasku on tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and lasku.alatila='X'
+             WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
+             and tilausrivi.kpl            != 0
+             and tilausrivi.tyyppi          = 'L'
+             $lisa
+             and tilausrivi.laskutettuaika  >= '$yhtiorow[tilikausi_alku]'
+             and tilausrivi.laskutettuaika  <= '$yhtiorow[tilikausi_loppu]'
+             ORDER BY tilausrivi.laskutettuaika";
   $korjaaresult = mysql_query($query) or pupe_error($query);
 
   while ($korjaarow = mysql_fetch_array($korjaaresult)) {

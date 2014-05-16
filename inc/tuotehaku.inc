@@ -10,11 +10,11 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== FALSE and $kukarow["extrane
 // Etsitän enarilla jos kappaleita ei ole syötetty eikä hakuja käytetty
 if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and substr($tuoteno,0,1) != '@') {
 
-  $query = "  SELECT *
-        FROM tuote
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        and tuote.eankoodi = '$tuoteno'
-        and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
+  $query = "SELECT *
+            FROM tuote
+            WHERE tuote.yhtio  = '$kukarow[yhtio]'
+            and tuote.eankoodi = '$tuoteno'
+            and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
   $tresult = pupe_query($query);
 
   if (mysql_num_rows($tresult) == 1) {
@@ -29,19 +29,19 @@ if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno,0
 if (!$enarimatch) {
   if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and substr($tuoteno,0,1) != '@' and $yhtiorow["automaattinen_tuotehaku"] != '') {
 
-    $query = "  SELECT *
-          FROM tuote
-          WHERE tuote.yhtio = '$kukarow[yhtio]'
-          and tuote.tuoteno = '$tuoteno'
-          {$poistetulisa}";
+    $query = "SELECT *
+              FROM tuote
+              WHERE tuote.yhtio = '$kukarow[yhtio]'
+              and tuote.tuoteno = '$tuoteno'
+              {$poistetulisa}";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-      $query = "  SELECT *
-            FROM tuote
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.tuoteno LIKE '$tuoteno%'
-            and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
+      $query = "SELECT *
+                FROM tuote
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                and tuote.tuoteno LIKE '$tuoteno%'
+                and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) != 1) {
@@ -64,10 +64,10 @@ if (!$enarimatch) {
     if (substr($tuoteno,0,1) == '?') {
       // Toimittajan tuotenumero
 
-      $query = "  SELECT *
-            from tuotteen_toimittajat
-            where yhtio = '$kukarow[yhtio]'
-            and toim_tuoteno = '".substr($tuoteno,1)."'";
+      $query = "SELECT *
+                from tuotteen_toimittajat
+                where yhtio      = '$kukarow[yhtio]'
+                and toim_tuoteno = '".substr($tuoteno,1)."'";
       $tresult = pupe_query($query);
 
       while ($toimirivi = mysql_fetch_assoc($tresult)) {
@@ -122,10 +122,10 @@ if (!$enarimatch) {
     }
     else {
       //Yhtiövalinnat
-      $query  = "  SELECT distinct yhtio, nimi
-            from yhtio
-            where konserni = '$yhtiorow[konserni]'
-            and konserni != ''";
+      $query  = "SELECT distinct yhtio, nimi
+                 from yhtio
+                 where konserni  = '$yhtiorow[konserni]'
+                 and konserni   != ''";
       $presult = pupe_query($query);
 
       if (mysql_num_rows($presult) > 0) {
@@ -151,10 +151,10 @@ if (!$enarimatch) {
     if ($kaikkituhaku != "KYLLA") {
 
       if ($kukarow["kesken"] > 0) {
-        $query  = "  SELECT if (toim_maa != '', toim_maa, maa) maa
-              FROM lasku
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tunnus  = '$kukarow[kesken]'";
+        $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+                   FROM lasku
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and tunnus  = '$kukarow[kesken]'";
         $vieres = pupe_query($query);
         $vierow = mysql_fetch_assoc($vieres);
       }
@@ -169,10 +169,10 @@ if (!$enarimatch) {
         }
       }
       elseif ($kukarow["extranet"] != "") {
-        $query  = "  SELECT if (toim_maa != '', toim_maa, maa) maa
-              FROM asiakas
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tunnus  = '$kukarow[oletus_asiakas]'";
+        $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+                   FROM asiakas
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and tunnus  = '$kukarow[oletus_asiakas]'";
         $vieres = pupe_query($query);
         $vierow = mysql_fetch_assoc($vieres);
       }
@@ -184,34 +184,34 @@ if (!$enarimatch) {
 
     // Poistettuja tuotteita ei näytetä paitsi jos niillä on saldoa
     // Joinataan korvaavat mukaan
-    $query = "  SELECT
-          tuote.yhtio,
-          ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
-          ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
-          tuote.tuoteno,
-          tuote.nimitys,
-           tuote.osasto,
-            tuote.try,
-           tuote.myyntihinta,
-          tuote.nettohinta,
-           tuote.aleryhma,
-           tuote.status,
-           tuote.ei_saldoa,
-           tuote.yksikko,
-           tuote.tunnus,
-           (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
-          tuote.sarjanumeroseuranta,
-            tuote.status,
-           IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
-           (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
-          FROM tuote use index (tuoteno, nimitys)
-          {$tuotteen_toimittajat_join}
-          WHERE tuote.$yhtiot
-          $kieltolisa
-          $th_lisa1
-          HAVING (tuote.status not in ('P','X') or saldo > 0)
-          ORDER BY tuote.tuoteno
-          LIMIT 201";
+    $query = "SELECT
+              tuote.yhtio,
+              ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
+              ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
+              tuote.tuoteno,
+              tuote.nimitys,
+               tuote.osasto,
+                tuote.try,
+               tuote.myyntihinta,
+              tuote.nettohinta,
+               tuote.aleryhma,
+               tuote.status,
+               tuote.ei_saldoa,
+               tuote.yksikko,
+               tuote.tunnus,
+               (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
+              tuote.sarjanumeroseuranta,
+                tuote.status,
+               IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
+               (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
+              FROM tuote use index (tuoteno, nimitys)
+              {$tuotteen_toimittajat_join}
+              WHERE tuote.$yhtiot
+              $kieltolisa
+              $th_lisa1
+              HAVING (tuote.status not in ('P','X') or saldo > 0)
+              ORDER BY tuote.tuoteno
+              LIMIT 201";
     $thresult = pupe_query($query);
 
     $rows = array();
@@ -222,34 +222,34 @@ if (!$enarimatch) {
       while ($mrow = mysql_fetch_assoc($thresult)) {
         if ($mrow["korvaavat"] != $mrow["tuoteno"]) {
 
-          $query = "  SELECT
-                tuote.yhtio,
-                ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
-                korvaavat.id korvaavat,
-                tuote.tuoteno,
-                tuote.nimitys,
-                tuote.osasto,
-                tuote.try,
-                tuote.myyntihinta,
-                tuote.nettohinta,
-                tuote.aleryhma,
-                tuote.status,
-                tuote.ei_saldoa,
-                tuote.yksikko,
-                tuote.tunnus,
-                (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
-                tuote.sarjanumeroseuranta,
-                tuote.status,
-                IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
-                (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
-                FROM korvaavat
-                JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
-                WHERE korvaavat.yhtio = '$mrow[yhtio]'
-                and korvaavat.id = '$mrow[korvaavat]'
-                and korvaavat.tuoteno != '$mrow[tuoteno]'
-                $kieltolisa
-                HAVING (tuote.status not in ('P','X') or saldo > 0)
-                ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
+          $query = "SELECT
+                    tuote.yhtio,
+                    ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
+                    korvaavat.id korvaavat,
+                    tuote.tuoteno,
+                    tuote.nimitys,
+                    tuote.osasto,
+                    tuote.try,
+                    tuote.myyntihinta,
+                    tuote.nettohinta,
+                    tuote.aleryhma,
+                    tuote.status,
+                    tuote.ei_saldoa,
+                    tuote.yksikko,
+                    tuote.tunnus,
+                    (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
+                    tuote.sarjanumeroseuranta,
+                    tuote.status,
+                    IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
+                    (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
+                    FROM korvaavat
+                    JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
+                    WHERE korvaavat.yhtio  = '$mrow[yhtio]'
+                    and korvaavat.id       = '$mrow[korvaavat]'
+                    and korvaavat.tuoteno != '$mrow[tuoteno]'
+                    $kieltolisa
+                    HAVING (tuote.status not in ('P','X') or saldo > 0)
+                    ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
           $kores = pupe_query($query);
 
           if (mysql_num_rows($kores) > 0) {
@@ -367,13 +367,13 @@ if (!$enarimatch) {
         }
 
         // katotaan onko tällä tuotteella joku variaatiorypäs
-        $query = "  SELECT *
-              FROM tuotteen_avainsanat
-              WHERE yhtio = '$trow[yhtio]'
-              AND laji = 'parametri_variaatio'
-              AND kieli = '$yhtiorow[kieli]'
-              AND tuoteno = '$trow[tuoteno]'
-              LIMIT 1";
+        $query = "SELECT *
+                  FROM tuotteen_avainsanat
+                  WHERE yhtio = '$trow[yhtio]'
+                  AND laji    = 'parametri_variaatio'
+                  AND kieli   = '$yhtiorow[kieli]'
+                  AND tuoteno = '$trow[tuoteno]'
+                  LIMIT 1";
         $parametrit_res = pupe_query($query);
         $parametritrivi = mysql_fetch_assoc($parametrit_res);
 
@@ -410,11 +410,11 @@ if (!$enarimatch) {
 
       $th_lisa1 = "and tuote.eankoodi='".substr($tuoteno,1)."'";
 
-      $query = "  SELECT tuote.tuoteno
-            FROM tuote
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-            $th_lisa1";
+      $query = "SELECT tuote.tuoteno
+                FROM tuote
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+                $th_lisa1";
       $tresult = pupe_query($query);
 
       if (mysql_num_rows($tresult) > 1) {
@@ -444,11 +444,11 @@ if (!$enarimatch) {
       $hakyhtio   = $kukarow["yhtio"];
     }
 
-    $query = "  SELECT *
-          FROM tuote
-          WHERE tuote.yhtio = '$hakyhtio'
-          and tuote.tuoteno = '$tuoteno'
-          {$poistetulisa}";
+    $query = "SELECT *
+              FROM tuote
+              WHERE tuote.yhtio = '$hakyhtio'
+              and tuote.tuoteno = '$tuoteno'
+              {$poistetulisa}";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {

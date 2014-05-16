@@ -288,7 +288,7 @@ elseif ($laskunro > 0) {
     $asiakasid     = $row["liitostunnus"];
   }
 }
-elseif ($astilnro != 0) {
+elseif ($astilnro != '') {
   $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
             FROM lasku use index (yhtio_asiakkaan_tilausnumero)
             WHERE asiakkaan_tilausnumero = '$astilnro'
@@ -767,7 +767,7 @@ if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
   }
   echo "<tr><th>".t("Laskunumero")."</th><td><input type='text' size='10' name='laskunro'></td></tr>";
   if ($cleantoim == "MYYNTI") {
-    echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td>"; //<input type='text' size='10' name='astilnro'></td></tr>";
+    echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td>";
      // Tehaan kentta tai naytetaan popup
     echo livesearch_kentta("asiaktilaus", "ASIAKKAANTILAUSNUMERO", "astilnro", 170, $astilnro);
     echo "</td>";

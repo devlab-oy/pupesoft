@@ -44,28 +44,90 @@ if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myy
 // debuggia varten, laita 1 jos haluut messuja
 $lisaarivi_debug = 0;
 
-if (!isset($rivitunnus)) $rivitunnus = 0;
-else $rivitunnus = (int) $rivitunnus;
+if (!isset($indeksi)) {
+  $indeksi = 0;
+}
 
-if (!isset($perheid))   $perheid = 0;
-else $perheid = (int)   $perheid;
+if (!isset($osto_sarjatunnus)) {
+  $osto_sarjatunnus = 0;
+}
 
-if (!isset($perheid2))   $perheid2 = 0;
-else $perheid2 = (int)   $perheid2;
+if (!isset($myy_sarjatunnus)) {
+  $myy_sarjatunnus = 0;
+}
 
-if (!isset($rivinumero)) $rivinumero = "";
-if (!isset($rivilaadittu))     $rivilaadittu = "";
-if (!isset($kommentti))     $kommentti = "";
-if (!isset($ale_peruste))    $ale_peruste = "";
-if (!isset($jaksotettu))     $jaksotettu = "";
-if (!isset($korvaavakielto))  $korvaavakielto = "";
-if (!isset($orvoteikiinnosta))   $orvoteikiinnosta = "";
-if (!isset($jtspec))       $jtspec = "";
-if (!isset($paikka))       $paikka = "";
-if (!isset($perhekielto))     $perhekielto = "";
-if (!isset($valmistuslinja))  $valmistuslinja = "";
-if (!isset($rekisterinumero))  $rekisterinumero = "";
-if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
+if (!isset($rivitunnus)) {
+  $rivitunnus = 0;
+}
+else {
+  $rivitunnus = (int) $rivitunnus;
+}
+
+if (!isset($perheid)) {
+  $perheid = 0;
+}
+else {
+  $perheid = (int)   $perheid;
+}
+
+if (!isset($perheid2)) {
+  $perheid2 = 0;
+}
+else {
+  $perheid2 = (int)   $perheid2;
+}
+
+if (!isset($rivinumero)) {
+  $rivinumero = "";
+}
+
+if (!isset($rivilaadittu)) {
+  $rivilaadittu = "";
+}
+
+if (!isset($kommentti)) {
+  $kommentti = "";
+}
+
+if (!isset($ale_peruste)) {
+  $ale_peruste = "";
+}
+
+if (!isset($jaksotettu)) {
+  $jaksotettu = "";
+}
+
+if (!isset($korvaavakielto)) {
+  $korvaavakielto = "";
+}
+
+if (!isset($orvoteikiinnosta)) {
+  $orvoteikiinnosta = "";
+}
+
+if (!isset($jtspec)) {
+  $jtspec = "";
+}
+
+if (!isset($paikka)) {
+  $paikka = "";
+}
+
+if (!isset($perhekielto)) {
+  $perhekielto = "";
+}
+
+if (!isset($valmistuslinja)) {
+ $valmistuslinja = "";
+}
+
+if (!isset($rekisterinumero)) {
+  $rekisterinumero = "";
+}
+
+if (!isset($jo_syotetty_rekisterinumero)) {
+  $jo_syotetty_rekisterinumero = "";
+}
 
 if ($rekisterinumero == '') {
   //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.

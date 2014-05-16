@@ -65,10 +65,10 @@ $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 $query = "  SELECT *
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus = '{$laskurow['maksuehto']}'
-            AND tilkpl < 0 ";
-$hyvitys_result = pupe_query($query);
-$hyvitysrow = mysql_fetch_assoc($hyvitys_result);
+            AND otunnus = '{$laskurow['tunnus']}'
+            AND varattu + jt > 0 ";
+$veloitus_result = pupe_query($query);
+$veloitusrow = mysql_fetch_assoc($veloitus_result);
 
 // Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, 
 //    E -  kaikki muu ku myyjien tekemä estetään)
@@ -79,7 +79,9 @@ $luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J","L",
   and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) 
   and $tilausvalmis_asiakas_row['luottoraja'] != 0 and $maksuehtorow['kateinen'] == '' 
   and $korkolasku != 'kylla'
-  and mysql_num_rows($hyvitysrow) > 0) ? 1 : 0;
+  and mysql_num_rows($veloitus_result) > 0) ? 1 : 0;
+  
+
 $erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K","J","L","M")) 
   or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F")) 
   and ($kukarow["extranet"] != "" 

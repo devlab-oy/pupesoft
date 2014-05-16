@@ -185,18 +185,18 @@ $query_ale_lisa = generoi_alekentta('M');
 $alku = date("Y-m-d")." 00:00:00";
 $lopu = date("Y-m-d")." 23:59:59";
 
-$query = "  SELECT
-      round(sum(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1))), 0) AS 'tilatut_eurot',
-      round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))), 0) AS 'tilatut_kate',
-      sum(if(tilausrivi.toimitettu!='', 1, 0)) AS 'toimitetut_rivit'
-      FROM tilausrivi
-      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
-      JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
-      JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
-      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-      AND tilausrivi.tyyppi = 'L'
-      AND tilausrivi.laadittu >= '$alku'
-      AND tilausrivi.laadittu <= '$lopu'";
+$query = "SELECT
+          round(sum(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1))), 0) AS 'tilatut_eurot',
+          round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))), 0) AS 'tilatut_kate',
+          sum(if(tilausrivi.toimitettu!='', 1, 0)) AS 'toimitetut_rivit'
+          FROM tilausrivi
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
+          JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+          JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
+          WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+          AND tilausrivi.tyyppi   = 'L'
+          AND tilausrivi.laadittu >= '$alku'
+          AND tilausrivi.laadittu <= '$lopu'";
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 
@@ -229,17 +229,17 @@ echo "<input type='text' name='vvl' id='vvl' value='{$vvl}' size='5'></td>";
 echo "</tr>";
 
 if ($yhtiorow['konserni'] != "") {
-  $query = "  SELECT group_concat(yhtio) AS yhtiot
-        FROM yhtio
-        WHERE konserni = '$yhtiorow[konserni]'
-        and konserni != ''";
+  $query = "SELECT group_concat(yhtio) AS yhtiot
+            FROM yhtio
+            WHERE konserni  = '$yhtiorow[konserni]'
+            and konserni   != ''";
   $yhtio_res = pupe_query($query);
   $yhtio_array = mysql_fetch_assoc($yhtio_res);
 
-  $query = "  SELECT nimi, yhtio
-        FROM yhtio
-        WHERE konserni = '$yhtiorow[konserni]'
-        and konserni != ''";
+  $query = "SELECT nimi, yhtio
+            FROM yhtio
+            WHERE konserni  = '$yhtiorow[konserni]'
+            and konserni   != ''";
   $yhtio_res = pupe_query($query);
   $numrows = mysql_num_rows($yhtio_res);
 
@@ -335,21 +335,21 @@ if ($tee == 'laske') {
     $pvmlisa = "SUBSTRING(tilausrivi.laadittu, 1, 10)";
   }
 
-  $query = "  SELECT {$pvmlisa} AS 'pvm',
-        if(tilausrivi.laskutettu != '', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) AS 'tilatut_kate',
-        if(tilausrivi.laskutettu != '', tilausrivi.rivihinta, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)) AS tilatut_eurot,
-        kustannuspaikka.nimi AS kustannuspaikka,
-        tuote.osasto, tuote.try
-        FROM tilausrivi
-        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
-        JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
-        JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
-        LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tilausrivi.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
-        WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
-        AND tilausrivi.tyyppi = 'L'
-        AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-        AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-        ORDER BY tilausrivi.laadittu";
+  $query = "SELECT {$pvmlisa} AS 'pvm',
+            if(tilausrivi.laskutettu != '', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) AS 'tilatut_kate',
+            if(tilausrivi.laskutettu != '', tilausrivi.rivihinta, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)) AS tilatut_eurot,
+            kustannuspaikka.nimi AS kustannuspaikka,
+            tuote.osasto, tuote.try
+            FROM tilausrivi
+            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
+            JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+            JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
+            LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tilausrivi.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
+            WHERE tilausrivi.yhtio  IN ('{$query_yhtiot}')
+            AND tilausrivi.tyyppi   = 'L'
+            AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+            AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+            ORDER BY tilausrivi.laadittu";
   $result = pupe_query($query);
 
   $_k = "";
@@ -448,22 +448,22 @@ if ($tee == 'laske') {
     $pvmlisa = "SUBSTRING(tilausrivi.laskutettuaika, 1, 10)";
   }
 
-  $query = "  SELECT {$pvmlisa} AS 'pvm',
-        tilausrivi.kate AS 'laskutetut_kate',
-        tilausrivi.rivihinta AS 'laskutetut_eurot',
-        kustannuspaikka.nimi AS kustannuspaikka,
-        tuote.osasto, tuote.try
-        FROM tilausrivi
-        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
-        JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
-        JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
-        LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tilausrivi.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
-        WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
-        AND tilausrivi.tyyppi = 'L'
-        AND tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
-        AND tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}'
-        AND tilausrivi.laskutettu != ''
-        ORDER BY tilausrivi.laadittu";
+  $query = "SELECT {$pvmlisa} AS 'pvm',
+            tilausrivi.kate AS 'laskutetut_kate',
+            tilausrivi.rivihinta AS 'laskutetut_eurot',
+            kustannuspaikka.nimi AS kustannuspaikka,
+            tuote.osasto, tuote.try
+            FROM tilausrivi
+            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
+            JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+            JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
+            LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tilausrivi.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
+            WHERE tilausrivi.yhtio         IN ('{$query_yhtiot}')
+            AND tilausrivi.tyyppi          = 'L'
+            AND tilausrivi.laskutettuaika  >= '{$vva}-{$kka}-{$ppa}'
+            AND tilausrivi.laskutettuaika  <= '{$vvl}-{$kkl}-{$ppl}'
+            AND tilausrivi.laskutettu     != ''
+            ORDER BY tilausrivi.laadittu";
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {

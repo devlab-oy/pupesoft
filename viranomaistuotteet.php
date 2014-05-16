@@ -42,36 +42,36 @@ if ($tee == 'PERUSTA') {
       $tuoteno = "PR-$maa_nimi-$vuosi";
     }
 
-    $query  = "  INSERT INTO tuote SET
-          tuoteno      = '$tuoteno',
-          nimitys         = '$tuotenimitys',
-          malli      = '$tuotenimitys_osa',
-          alv             = '0',
-          kommentoitava   = '',
-          kuvaus          = '50',
-          myyntihinta     = '$paivaraha',
-          myymalahinta    = $paivaraha / 2,
-          tuotetyyppi     = 'A',
-          status      = 'A',
-          tilino       = '$tilino',
-          vienti          = '$maa[$riviindex]',
-          yhtio      = '$kukarow[yhtio]',
-          laatija      = '$kukarow[kuka]',
-          luontiaika    = now()
-          ON DUPLICATE KEY UPDATE
-          nimitys         = '$tuotenimitys',
-          malli      = '$tuotenimitys_osa',
-          alv             = '0',
-          kommentoitava   = '',
-          kuvaus          = '50',
-          myyntihinta     = '$paivaraha',
-          myymalahinta    = $paivaraha / 2,
-          tuotetyyppi     = 'A',
-          status      = 'A',
-          tilino       = '$tilino',
-          vienti          = '$maa[$riviindex]',
-          muuttaja    = '$kukarow[kuka]',
-          muutospvm    = now()";
+    $query  = "INSERT INTO tuote SET
+               tuoteno       = '$tuoteno',
+               nimitys       = '$tuotenimitys',
+               malli         = '$tuotenimitys_osa',
+               alv           = '0',
+               kommentoitava = '',
+               kuvaus        = '50',
+               myyntihinta   = '$paivaraha',
+               myymalahinta  = $paivaraha / 2,
+               tuotetyyppi   = 'A',
+               status        = 'A',
+               tilino        = '$tilino',
+               vienti        = '$maa[$riviindex]',
+               yhtio         = '$kukarow[yhtio]',
+               laatija       = '$kukarow[kuka]',
+               luontiaika    = now()
+               ON DUPLICATE KEY UPDATE
+               nimitys       = '$tuotenimitys',
+               malli         = '$tuotenimitys_osa',
+               alv           = '0',
+               kommentoitava = '',
+               kuvaus        = '50',
+               myyntihinta   = '$paivaraha',
+               myymalahinta  = $paivaraha / 2,
+               tuotetyyppi   = 'A',
+               status        = 'A',
+               tilino        = '$tilino',
+               vienti        = '$maa[$riviindex]',
+               muuttaja      = '$kukarow[kuka]',
+               muutospvm     = now()";
     $result = mysql_query($query) or pupe_error($query);
   }
 
@@ -82,13 +82,13 @@ if ($tee == 'PERUSTA') {
 if ($tee == 'POISTA') {
   $annettuvuosipoista = date("y");
 
-  $query = "  UPDATE tuote
-        SET status = 'P'
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND ((tuotetyyppi = 'A' and tuoteno like 'PR-%')
-          OR (tuotetyyppi = 'B' and tuoteno like 'KM-%'))
-        AND right(tuoteno, 2) > 0
-        AND right(tuoteno, 2) < $annettuvuosipoista";
+  $query = "UPDATE tuote
+            SET status = 'P'
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND ((tuotetyyppi = 'A' and tuoteno like 'PR-%')
+              OR (tuotetyyppi = 'B' and tuoteno like 'KM-%'))
+            AND right(tuoteno, 2) > 0
+            AND right(tuoteno, 2) < $annettuvuosipoista";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<br>".t("Vanhat päivärahat poistettu käytöstä")."<br><br><br>";
@@ -215,11 +215,11 @@ if ($tee == 'LUO' and (trim($tilinumero) == '' or trim($annettuvuosi) == '')) {
 
 if ($tee == "synkronoi") {
 
-  $query = "  SELECT tunnus, tilino
-        FROM tili
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tilino = '{$ulkomaantilinumero}'
-        and tilino != ''";
+  $query = "SELECT tunnus, tilino
+            FROM tili
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            and tilino   = '{$ulkomaantilinumero}'
+            and tilino  != ''";
   $tilires = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tilires) == 0) {
@@ -227,11 +227,11 @@ if ($tee == "synkronoi") {
     $tee = '';
   }
 
-  $query = "  SELECT tunnus, tilino
-        FROM tili
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tilino = '{$kotimaantilinumero}'
-        and tilino != ''";
+  $query = "SELECT tunnus, tilino
+            FROM tili
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            and tilino   = '{$kotimaantilinumero}'
+            and tilino  != ''";
   $tilires = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tilires) == 0) {
@@ -272,36 +272,36 @@ if ($tee == "synkronoi") {
       $tilino = $kotimaantilinumero;
     }
 
-    $query  = "  INSERT INTO tuote SET
-          tuoteno      = '$tuoteno',
-          nimitys         = '$nimitys',
-          alv             = '$alv',
-          kommentoitava   = '$kommentoitava',
-          kuvaus          = '$kuvaus',
-          myyntihinta     = '$myyntihinta',
-          tuotetyyppi     = '$tuotetyyppi',
-          status      = 'A',
-          tilino       = '$tilino',
-          vienti          = '$vienti',
-          malli            = '$malli',
-          myymalahinta    = '$myymalahinta',
-          yhtio      = '$kukarow[yhtio]',
-          laatija      = '$kukarow[kuka]',
-          luontiaika    = now()
-          ON DUPLICATE KEY UPDATE
-          nimitys         = '$nimitys',
-          alv             = '$alv',
-          kommentoitava   = '$kommentoitava',
-          kuvaus          = '$kuvaus',
-          myyntihinta     = '$myyntihinta',
-          tuotetyyppi     = '$tuotetyyppi',
-          status      = 'A',
-          tilino       = '$tilino',
-          vienti          = '$vienti',
-          malli            = '$malli',
-          myymalahinta    = '$myymalahinta',
-          muuttaja    = '$kukarow[kuka]',
-          muutospvm    = now()";
+    $query  = "INSERT INTO tuote SET
+               tuoteno       = '$tuoteno',
+               nimitys       = '$nimitys',
+               alv           = '$alv',
+               kommentoitava = '$kommentoitava',
+               kuvaus        = '$kuvaus',
+               myyntihinta   = '$myyntihinta',
+               tuotetyyppi   = '$tuotetyyppi',
+               status        = 'A',
+               tilino        = '$tilino',
+               vienti        = '$vienti',
+               malli         = '$malli',
+               myymalahinta  = '$myymalahinta',
+               yhtio         = '$kukarow[yhtio]',
+               laatija       = '$kukarow[kuka]',
+               luontiaika    = now()
+               ON DUPLICATE KEY UPDATE
+               nimitys       = '$nimitys',
+               alv           = '$alv',
+               kommentoitava = '$kommentoitava',
+               kuvaus        = '$kuvaus',
+               myyntihinta   = '$myyntihinta',
+               tuotetyyppi   = '$tuotetyyppi',
+               status        = 'A',
+               tilino        = '$tilino',
+               vienti        = '$vienti',
+               malli         = '$malli',
+               myymalahinta  = '$myymalahinta',
+               muuttaja      = '$kukarow[kuka]',
+               muutospvm     = now()";
     $result = mysql_query($query) or pupe_error($query);
   }
 
@@ -333,20 +333,20 @@ if ($tee == "synkronoi" or $tee == "synkronoimaat") {
   while ($rivi = fgets($file)) {
     list($koodi, $nimi, $eu, $ryhma_tunnus, $iso3, $iso_name) = explode("\t", trim($rivi));
 
-    $query  = "  INSERT INTO maat SET
-          koodi      = '$koodi',
-          iso3      = '$iso3',
-          nimi            = '$nimi',
-          name      = '$iso_name',
-          eu              = '$eu',
-          ryhma_tunnus    = '$ryhma_tunnus'
-          ON DUPLICATE KEY UPDATE
-          koodi      = '$koodi',
-          iso3      = '$iso3',
-          nimi            = '$nimi',
-          name      = '$iso_name',
-          eu              = '$eu',
-          ryhma_tunnus    = '$ryhma_tunnus'";
+    $query  = "INSERT INTO maat SET
+               koodi        = '$koodi',
+               iso3         = '$iso3',
+               nimi         = '$nimi',
+               name         = '$iso_name',
+               eu           = '$eu',
+               ryhma_tunnus = '$ryhma_tunnus'
+               ON DUPLICATE KEY UPDATE
+               koodi        = '$koodi',
+               iso3         = '$iso3',
+               nimi         = '$nimi',
+               name         = '$iso_name',
+               eu           = '$eu',
+               ryhma_tunnus = '$ryhma_tunnus'";
     $result = mysql_query($query) or pupe_error($query);
   }
 

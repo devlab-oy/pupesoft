@@ -12,11 +12,11 @@ if(!function_exists("kirjoittimettarkista")) {
         $virhe[$i] = t("Tieto puuttuu");
       }
       else {
-        $query  = "  SELECT tunnus
-              FROM kirjoittimet
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND komento = '{$komento}'
-              AND tunnus != '{$tunnus}'";
+        $query  = "SELECT tunnus
+                   FROM kirjoittimet
+                   WHERE yhtio  = '{$kukarow["yhtio"]}'
+                   AND komento  = '{$komento}'
+                   AND tunnus  != '{$tunnus}'";
         $chkressiresult = pupe_query($query);
 
         if (mysql_num_rows($chkressiresult) > 0) {

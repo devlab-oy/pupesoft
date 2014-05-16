@@ -54,18 +54,18 @@ else {
   $kasittely_periaate = "asiakas.tunnus";
 }
 
-$query  = "  SELECT $kasittely_periaate ytunnus,
-      group_concat(distinct tunnus) liitostunnukset,
-      group_concat(distinct nimi ORDER BY nimi SEPARATOR '<br>') nimi,
-      group_concat(distinct toim_nimi ORDER BY nimi SEPARATOR '<br>') toim_nimi,
-      min(luottoraja) luottoraja,
-      min(myyntikielto) myyntikielto,
-      min(ytunnus) tunniste
-      FROM asiakas
-      WHERE yhtio = '$yhtiorow[yhtio]'
-      AND laji != 'P'
-      GROUP BY 1
-      HAVING luottoraja > 0";
+$query  = "SELECT $kasittely_periaate ytunnus,
+           group_concat(distinct tunnus) liitostunnukset,
+           group_concat(distinct nimi ORDER BY nimi SEPARATOR '<br>') nimi,
+           group_concat(distinct toim_nimi ORDER BY nimi SEPARATOR '<br>') toim_nimi,
+           min(luottoraja) luottoraja,
+           min(myyntikielto) myyntikielto,
+           min(ytunnus) tunniste
+           FROM asiakas
+           WHERE yhtio  = '$yhtiorow[yhtio]'
+           AND laji    != 'P'
+           GROUP BY 1
+           HAVING luottoraja > 0";
 $asiakasres = mysql_query($query) or pupe_error($query);
 
 $content_body .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
@@ -96,38 +96,38 @@ $query_alennuksia = generoi_alekentta('M');
 while ($asiakasrow = mysql_fetch_array($asiakasres)) {
 
   // Avoimet laskut
-  $query = "   SELECT sum(lasku.summa - lasku.saldo_maksettu) laskuavoinsaldo
-        FROM lasku use index (yhtio_tila_mapvm)
-        WHERE lasku.yhtio = '$yhtiorow[yhtio]'
-        AND lasku.tila = 'U'
-        AND lasku.alatila = 'X'
-        AND lasku.mapvm = '0000-00-00'
-        AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])";
+  $query = "SELECT sum(lasku.summa - lasku.saldo_maksettu) laskuavoinsaldo
+            FROM lasku use index (yhtio_tila_mapvm)
+            WHERE lasku.yhtio      = '$yhtiorow[yhtio]'
+            AND lasku.tila         = 'U'
+            AND lasku.alatila      = 'X'
+            AND lasku.mapvm        = '0000-00-00'
+            AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])";
   $avoimetlaskutres = pupe_query($query);
   $avoimetlaskutrow = mysql_fetch_assoc($avoimetlaskutres);
 
   // Avoimet tilaukset
-  $query = "  SELECT
-        round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
-        FROM lasku
-        JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-        WHERE lasku.yhtio = '$yhtiorow[yhtio]'
-        AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))  # Kaikki myyntitilaukset, paitsi laskutetut
-          OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))          # Myyntitilaus kesken, tulostusjonossa tai odottaa hyväksyntää
-          OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))      # Valmistukset
-        )
-        AND lasku.liitostunnus in ($asiakasrow[liitostunnukset])";
+  $query = "SELECT
+            round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+            FROM lasku
+            JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+            WHERE lasku.yhtio      = '$yhtiorow[yhtio]'
+            AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))  # Kaikki myyntitilaukset, paitsi laskutetut
+              OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))          # Myyntitilaus kesken, tulostusjonossa tai odottaa hyväksyntää
+              OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))      # Valmistukset
+            )
+            AND lasku.liitostunnus in ($asiakasrow[liitostunnukset])";
   $avoimettilauksetres = pupe_query($query);
   $avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
 
   // Kaatotili
-  $query = "  SELECT
-        sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa
-        FROM suoritus
-        WHERE yhtio = '$yhtiorow[yhtio]'
-        and ltunnus > 0
-        and kohdpvm = '0000-00-00'
-        and asiakas_tunnus in ($asiakasrow[liitostunnukset])";
+  $query = "SELECT
+            sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa
+            FROM suoritus
+            WHERE yhtio        = '$yhtiorow[yhtio]'
+            and ltunnus        > 0
+            and kohdpvm        = '0000-00-00'
+            and asiakas_tunnus in ($asiakasrow[liitostunnukset])";
   $kaatotilires = pupe_query($query);
   $kaatotilirow = mysql_fetch_assoc($kaatotilires);
 

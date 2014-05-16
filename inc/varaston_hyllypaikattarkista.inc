@@ -25,14 +25,14 @@ if (!function_exists("varaston_hyllypaikattarkista")) {
 
         if (mysql_field_name($result, $i) == "hyllytaso" and $chk_hyllyalue != '' and $chk_hyllynro != '' and $chk_hyllyvali != '' and $chk_hyllytaso != '') {
 
-          $query = "  SELECT tunnus
-                FROM varaston_hyllypaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND hyllyalue = '{$chk_hyllyalue}'
-                AND hyllynro = '{$chk_hyllynro}'
-                AND hyllyvali = '{$chk_hyllyvali}'
-                AND hyllytaso = '{$chk_hyllytaso}'
-                and tunnus != '{$tunnus}'";
+          $query = "SELECT tunnus
+                    FROM varaston_hyllypaikat
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND hyllyalue  = '{$chk_hyllyalue}'
+                    AND hyllynro   = '{$chk_hyllynro}'
+                    AND hyllyvali  = '{$chk_hyllyvali}'
+                    AND hyllytaso  = '{$chk_hyllytaso}'
+                    and tunnus    != '{$tunnus}'";
           $chk_res = pupe_query($query);
 
           if (mysql_num_rows($chk_res) != 0) {

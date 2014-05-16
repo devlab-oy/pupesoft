@@ -34,9 +34,9 @@ $yhtiores = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
 $yhtiorow = mysql_fetch_array($yhtiores);
 
-$query = "  SELECT *
-      FROM yhtion_parametrit
-      WHERE yhtio='$kukarow[yhtio]'";
+$query = "SELECT *
+          FROM yhtion_parametrit
+          WHERE yhtio='$kukarow[yhtio]'";
 $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 if (mysql_num_rows($result) == 1) {
@@ -48,23 +48,23 @@ if (mysql_num_rows($result) == 1) {
   }
 }
 
-$query = "  SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti, lasku.hyvaksyja_nyt,
-        UNIX_TIMESTAMP(lasku.luontiaika) luontiaika,
-        UNIX_TIMESTAMP(h1time) h1time,
-        UNIX_TIMESTAMP(h2time) h2time,
-        UNIX_TIMESTAMP(h3time) h3time,
-        UNIX_TIMESTAMP(h4time) h4time,
-        UNIX_TIMESTAMP(h5time) httime,
-        lasku.hyvak1 hyvak1,
-        lasku.hyvak2 hyvak2,
-        lasku.hyvak3 hyvak3,
-        lasku.hyvak4 hyvak4,
-        lasku.hyvak5 hyvak5
-      FROM lasku
-      LEFT JOIN valuu ON valuu.yhtio=lasku.yhtio and lasku.valkoodi=valuu.nimi
-      JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> ''
-      WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila = 'H' and (tilaustyyppi != 'M' or h1time != '0000-00-00 00:00:00')
-      ORDER BY kuka.eposti, tapvm";
+$query = "SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti, lasku.hyvaksyja_nyt,
+          UNIX_TIMESTAMP(lasku.luontiaika) luontiaika,
+          UNIX_TIMESTAMP(h1time) h1time,
+          UNIX_TIMESTAMP(h2time) h2time,
+          UNIX_TIMESTAMP(h3time) h3time,
+          UNIX_TIMESTAMP(h4time) h4time,
+          UNIX_TIMESTAMP(h5time) httime,
+          lasku.hyvak1 hyvak1,
+          lasku.hyvak2 hyvak2,
+          lasku.hyvak3 hyvak3,
+          lasku.hyvak4 hyvak4,
+          lasku.hyvak5 hyvak5
+          FROM lasku
+          LEFT JOIN valuu ON valuu.yhtio=lasku.yhtio and lasku.valkoodi=valuu.nimi
+          JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> ''
+          WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila = 'H' and (tilaustyyppi != 'M' or h1time != '0000-00-00 00:00:00')
+          ORDER BY kuka.eposti, tapvm";
 $result = mysql_query($query) or pupe_error($query);
 
 while ($trow=mysql_fetch_array($result)) {

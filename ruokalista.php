@@ -13,19 +13,19 @@ if ($tee == 'LISAA') {
   $kentta04 = nl2br(strip_tags($kentta04));
   $kentta05 = nl2br(strip_tags($kentta05));
 
-  $query = "  INSERT INTO kalenteri
-        SET
-        kuka = '$kukarow[kuka]',
-        tapa = 'ruokalista',
-        tyyppi = 'ruokalista',
-        pvmalku = '$vva-$kka-$ppa 00:00:00',
-        pvmloppu = '$vvl-$kkl-$ppl 23:59:59',
-        kentta01 = '$kentta01',
-        kentta02 = '$kentta02',
-        kentta03 = '$kentta03',
-        kentta04 = '$kentta04',
-        kentta05 = '$kentta05',
-        yhtio = '$kukarow[yhtio]'";
+  $query = "INSERT INTO kalenteri
+            SET
+            kuka     = '$kukarow[kuka]',
+            tapa     = 'ruokalista',
+            tyyppi   = 'ruokalista',
+            pvmalku  = '$vva-$kka-$ppa 00:00:00',
+            pvmloppu = '$vvl-$kkl-$ppl 23:59:59',
+            kentta01 = '$kentta01',
+            kentta02 = '$kentta02',
+            kentta03 = '$kentta03',
+            kentta04 = '$kentta04',
+            kentta05 = '$kentta05',
+            yhtio    = '$kukarow[yhtio]'";
   mysql_query($query) or pupe_error($query);
 
   $tee = "";

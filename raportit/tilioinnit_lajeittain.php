@@ -106,16 +106,16 @@ if ($tee == "raportti") {
     $tehdaspalautuksetrajaus = "and lasku.tilaustyyppi = '9'";
   }
 
-  $query = "  SELECT tiliointi.tilino, tili.nimi, sum(tiliointi.summa) summa, sum(tiliointi.summa*(tiliointi.vero/100)) veronmaara
-        FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
-        JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus $laskurajaus $tehdaspalautuksetrajaus)
-        LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tili.tilino = tiliointi.tilino)
-        WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-        AND tiliointi.tapvm >= '$vv-$kk-$pp'
-        AND tiliointi.tapvm <= '$lvv-$lkk-$lpp'
-        AND tiliointi.korjattu = ''
-        GROUP BY tilino, nimi
-        ORDER BY tilino, nimi";
+  $query = "SELECT tiliointi.tilino, tili.nimi, sum(tiliointi.summa) summa, sum(tiliointi.summa*(tiliointi.vero/100)) veronmaara
+            FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
+            JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus $laskurajaus $tehdaspalautuksetrajaus)
+            LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tili.tilino = tiliointi.tilino)
+            WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+            AND tiliointi.tapvm    >= '$vv-$kk-$pp'
+            AND tiliointi.tapvm    <= '$lvv-$lkk-$lpp'
+            AND tiliointi.korjattu = ''
+            GROUP BY tilino, nimi
+            ORDER BY tilino, nimi";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -152,37 +152,37 @@ if ($tee == "raportti") {
   }
 
   if ($laji == "myynti") {
-    $query = "  SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, lasku.vienti,
-          if (lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa
-          FROM lasku
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tapvm >= '$vv-$kk-$pp'
-          AND lasku.tapvm <= '$lvv-$lkk-$lpp'
-          AND lasku.tila = 'U'
-          $tehdaspalautuksetrajaus
-          ORDER BY lasku.tapvm, lasku.tunnus";
+    $query = "SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, lasku.vienti,
+              if (lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa
+              FROM lasku
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tapvm   >= '$vv-$kk-$pp'
+              AND lasku.tapvm   <= '$lvv-$lkk-$lpp'
+              AND lasku.tila    = 'U'
+              $tehdaspalautuksetrajaus
+              ORDER BY lasku.tapvm, lasku.tunnus";
   }
 
   if ($laji == "osto") {
-    $query = "  SELECT lasku.tunnus, concat_ws('<br>', lasku.viesti, lasku.viite) laskunro, lasku.nimi, lasku.tapvm, lasku.summa, lasku.valkoodi, lasku.vienti
-          FROM lasku
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tapvm >= '$vv-$kk-$pp'
-          AND lasku.tapvm <= '$lvv-$lkk-$lpp'
-          AND lasku.tila in ('H','Y','M','P','Q')
-          ORDER BY lasku.tapvm, lasku.tunnus";
+    $query = "SELECT lasku.tunnus, concat_ws('<br>', lasku.viesti, lasku.viite) laskunro, lasku.nimi, lasku.tapvm, lasku.summa, lasku.valkoodi, lasku.vienti
+              FROM lasku
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tapvm   >= '$vv-$kk-$pp'
+              AND lasku.tapvm   <= '$lvv-$lkk-$lpp'
+              AND lasku.tila    in ('H','Y','M','P','Q')
+              ORDER BY lasku.tapvm, lasku.tunnus";
   }
 
   if ($laji == "tosite") {
-    $query = "  SELECT lasku.tunnus, group_concat(tiliointi.tilino SEPARATOR '<br>') laskunro, group_concat(tiliointi.selite SEPARATOR '<br>') nimi, group_concat(tiliointi.tapvm SEPARATOR '<br>') tapvm, sum(tiliointi.summa) summa, group_concat(tiliointi.summa SEPARATOR '<br>') valkoodi, lasku.vienti
-          FROM lasku
-          JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = '')
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tapvm >= '$vv-$kk-$pp'
-          AND lasku.tapvm <= '$lvv-$lkk-$lpp'
-          AND lasku.tila = 'X'
-          GROUP BY lasku.tunnus
-          ORDER BY lasku.tapvm, lasku.tunnus";
+    $query = "SELECT lasku.tunnus, group_concat(tiliointi.tilino SEPARATOR '<br>') laskunro, group_concat(tiliointi.selite SEPARATOR '<br>') nimi, group_concat(tiliointi.tapvm SEPARATOR '<br>') tapvm, sum(tiliointi.summa) summa, group_concat(tiliointi.summa SEPARATOR '<br>') valkoodi, lasku.vienti
+              FROM lasku
+              JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = '')
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tapvm   >= '$vv-$kk-$pp'
+              AND lasku.tapvm   <= '$lvv-$lkk-$lpp'
+              AND lasku.tila    = 'X'
+              GROUP BY lasku.tunnus
+              ORDER BY lasku.tapvm, lasku.tunnus";
     $result = mysql_query($query) or pupe_error($query);
   }
 
@@ -200,11 +200,11 @@ if ($tee == "raportti") {
       echo "<th>".t("Valuutta")."</th>";
       echo "<th>".t("Vienti")."</th>";
 
-      $query = "  SELECT selite
-            FROM avainsana
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND laji = 'ALV'
-            ORDER by jarjestys, selite";
+      $query = "SELECT selite
+                FROM avainsana
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND laji    = 'ALV'
+                ORDER by jarjestys, selite";
       $alv_result = mysql_query($query) or pupe_error($query);
 
       while ($alv_row = mysql_fetch_assoc($alv_result)) {

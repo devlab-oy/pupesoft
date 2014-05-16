@@ -22,21 +22,21 @@ if($tee=='YHDISTA') {
 
   if (count($valmistettavat) > 1 or ($tilaukseen > 0 and count($valmistettavat) > 0)) {
 
-    $query = "  SELECT *
-          FROM  lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          and  tunnus = (SELECT otunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus=$valmistettavat[0])";
+    $query = "SELECT *
+              FROM  lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              and  tunnus = (SELECT otunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus=$valmistettavat[0])";
     $result = mysql_query($query) or pupe_error($query);
     $laskurow    = mysql_fetch_array($result);
 
     if($tilaukseen > 0) {
 
       //  Tarkastetaan ett‰ tunnus on oikein
-      $query = "  SELECT tunnus
-            FROM  lasku
-            WHERE yhtio = '$kukarow[yhtio]'
-            and  tunnus = '$tilaukseen'
-            and tila = 'V'";
+      $query = "SELECT tunnus
+                FROM  lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                and  tunnus = '$tilaukseen'
+                and tila    = 'V'";
       $result = mysql_query($query) or pupe_error($query);
       if(mysql_num_rows($result) == 0) {
         die("<font class='error'>VIRHE!!! Tilaus ei ole valmistus!</font>");
@@ -47,32 +47,32 @@ if($tee=='YHDISTA') {
 
       echo "<font class='message'>".t("Liitet‰‰n rivit valmistukseen")." $otunnus</font><br>";
 
-      $query = "  UPDATE lasku SET
-              comments = '$comments',
-              viesti = '$viesti'
-            WHERE yhtio = '$kukarow[yhtio]'
-            and  tunnus = '$otunnus'";
+      $query = "UPDATE lasku SET
+                comments    = '$comments',
+                viesti      = '$viesti'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and  tunnus = '$otunnus'";
       $result = mysql_query($query) or pupe_error($query);
     }
     else {
-      $query = "  INSERT into
-            lasku SET
-            clearing      = '',
-            nimi         = 'Valmistusajo',
-            toimaika       = now(),
-            kerayspvm       = now(),
-            comments       = '$comments',
-            viesti         = '$viesti',
-            yhtio         = '$kukarow[yhtio]',
-            varasto       = '$laskurow[varasto]',
-            hyvaksynnanmuutos   = '',
-            liitostunnus     = '9999999999',
-            tilaustyyppi     = 'W',
-            tila        = 'V',
-            alatila        = 'J',
-            ytunnus        = 'Valmistusajo',
-            laatija       = '$kukarow[kuka]',
-            luontiaika      = NOW()";
+      $query = "INSERT into
+                lasku SET
+                clearing          = '',
+                nimi              = 'Valmistusajo',
+                toimaika          = now(),
+                kerayspvm         = now(),
+                comments          = '$comments',
+                viesti            = '$viesti',
+                yhtio             = '$kukarow[yhtio]',
+                varasto           = '$laskurow[varasto]',
+                hyvaksynnanmuutos = '',
+                liitostunnus      = '9999999999',
+                tilaustyyppi      = 'W',
+                tila              = 'V',
+                alatila           = 'J',
+                ytunnus           = 'Valmistusajo',
+                laatija           = '$kukarow[kuka]',
+                luontiaika        = NOW()";
       $result = mysql_query($query) or pupe_error($query);
       $otunnus = mysql_insert_id();
 
@@ -83,43 +83,43 @@ if($tee=='YHDISTA') {
 
     foreach($valmistettavat as $rivitunnus) {
       //Otetaan alkuper‰isen otsikon numero talteen
-      $query = "  SELECT otunnus
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$rivitunnus'";
+      $query = "SELECT otunnus
+                FROM tilausrivi
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$rivitunnus'";
       $result = mysql_query($query) or pupe_error($query);
       $otsikrow = mysql_fetch_array($result);
 
       //  Tallennetaan vanha otunnus
-      $query = "  UPDATE tilausrivin_lisatiedot
-            SET vanha_otunnus = (SELECT otunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus=$rivitunnus)
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tilausrivitunnus = '$rivitunnus'";
+      $query = "UPDATE tilausrivin_lisatiedot
+                SET vanha_otunnus = (SELECT otunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus=$rivitunnus)
+                WHERE yhtio          = '$kukarow[yhtio]'
+                and tilausrivitunnus = '$rivitunnus'";
       $result = mysql_query($query) or pupe_error($query);
 
       //Siirret‰‰n rivi uudelle otsikolle
-      $query = "  UPDATE tilausrivi
-            SET otunnus = '$otunnus'
-            WHERE yhtio = '$kukarow[yhtio]'
-            and perheid = '$rivitunnus'
-            and tyyppi in ('V','W','M')
-            and uusiotunnus = 0";
+      $query = "UPDATE tilausrivi
+                SET otunnus = '$otunnus'
+                WHERE yhtio     = '$kukarow[yhtio]'
+                and perheid     = '$rivitunnus'
+                and tyyppi      in ('V','W','M')
+                and uusiotunnus = 0";
       $result = mysql_query($query) or pupe_error($query);
 
       //Tsekataan onko alkuper‰isotsikolla viel‰ rivej‰
-      $query = "  SELECT count(*) jaljella
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and otunnus = '$otsikrow[otunnus]'";
+      $query = "SELECT count(*) jaljella
+                FROM tilausrivi
+                WHERE yhtio = '$kukarow[yhtio]'
+                and otunnus = '$otsikrow[otunnus]'";
       $result = mysql_query($query) or pupe_error($query);
       $rivirow = mysql_fetch_array($result);
 
       if ($rivirow["jaljella"] == 0) {
         //p‰ivitet‰‰n alkuper‰isen otsikon alatila
-        $query = "  UPDATE lasku
-              SET alatila = 'Y'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus = '$otsikrow[otunnus]'";
+        $query = "UPDATE lasku
+                  SET alatila = 'Y'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$otsikrow[otunnus]'";
         $result = mysql_query($query) or pupe_error($query);
       }
     }
@@ -127,27 +127,27 @@ if($tee=='YHDISTA') {
 
     if($yhtiorow["valmistusten_yhdistaminen"] == "P") {
       //  Testataan saataisiinko jotain perheit‰ yhdistetty‰
-      $query = "  SELECT group_concat(tunnus) tunnukset, count(*) rivei
-             FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and tyyppi IN ('W','M') and perheid = tunnus
-            GROUP BY tuoteno
-            HAVING rivei > 1";
+      $query = "SELECT group_concat(tunnus) tunnukset, count(*) rivei
+                FROM tilausrivi
+                WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and tyyppi IN ('W','M') and perheid = tunnus
+                GROUP BY tuoteno
+                HAVING rivei > 1";
       $result = mysql_query($query) or pupe_error($query);
       if(mysql_num_rows($result)>0) {
         while($row = mysql_fetch_array($result)) {
 
           //  suoritetan vertailu by tuoteperhe
-          $query = "  SELECT tuoteno, perheid,
-                  group_concat(
-                    concat(
-                      tuoteno, 'x',
-                      (SELECT round((isa.kpl+isa.jt+isa.varattu)/((tilausrivi.kpl+tilausrivi.jt+tilausrivi.varattu)/10), 1) FROM tilausrivi isa WHERE isa.yhtio = tilausrivi.yhtio and isa.tunnus=tilausrivi.perheid)
-                    ) ORDER BY tuoteno SEPARATOR '|'
-                  ) stringi
-          FROM tilausrivi
-          WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and perheid IN ($row[tunnukset])
-          GROUP BY perheid
-          ORDER BY stringi";
+          $query = "SELECT tuoteno, perheid,
+                    group_concat(
+                      concat(
+                        tuoteno, 'x',
+                        (SELECT round((isa.kpl+isa.jt+isa.varattu)/((tilausrivi.kpl+tilausrivi.jt+tilausrivi.varattu)/10), 1) FROM tilausrivi isa WHERE isa.yhtio = tilausrivi.yhtio and isa.tunnus=tilausrivi.perheid)
+                      ) ORDER BY tuoteno SEPARATOR '|'
+                    ) stringi
+                    FROM tilausrivi
+                    WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and perheid IN ($row[tunnukset])
+                    GROUP BY perheid
+                    ORDER BY stringi";
           $sresult = mysql_query($query) or pupe_error($query);
 
           $edstringi = $edperheid = "";
@@ -191,28 +191,28 @@ if($tee=='YHDISTA') {
               if($ekaperhe > 0 and $loput != "") {
 
                 //  P‰ivitet‰‰n summa ekaan tietueeseen toinen tuhotaan! HUOM: t‰m‰ ei tajua mit‰‰n varastopaikoista, jos meill‰ on sama tuote 2 kertaa on myˆs suuri ongelma!
-                $query = "  SELECT tuoteno, sum(kpl) kpl, sum(varattu) varattu, sum(jt) jt, sum(tilkpl) tilkpl, group_concat(if(kommentti='', NULL, kommentti)) kommentti
-                      FROM tilausrivi
-                      WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($tunnukset)
-                      GROUP BY tuoteno";
+                $query = "SELECT tuoteno, sum(kpl) kpl, sum(varattu) varattu, sum(jt) jt, sum(tilkpl) tilkpl, group_concat(if(kommentti='', NULL, kommentti)) kommentti
+                          FROM tilausrivi
+                          WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($tunnukset)
+                          GROUP BY tuoteno";
                 $sresult = mysql_query($query) or pupe_error($query);
                 while($srow = mysql_fetch_array($sresult)) {
 
                   //  P‰ivitet‰‰n ekan perheen tiedot
-                  $query = "  UPDATE tilausrivi SET
-                          kpl     = '".round($srow['kpl'], 2)."',
-                          tilkpl    = '".round($srow['tilkpl'], 2 )."',
-                          varattu   = '".round($srow['varattu'], 2 )."',
-                          jt       = '".round($srow['jt'], 2 )."',
-                          kommentti   = '$srow[kommentti]'
-                        WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid = '$ekaperhe' and tuoteno = '$srow[tuoteno]'";
+                  $query = "UPDATE tilausrivi SET
+                            kpl         = '".round($srow['kpl'], 2)."',
+                            tilkpl      = '".round($srow['tilkpl'], 2 )."',
+                            varattu     = '".round($srow['varattu'], 2 )."',
+                            jt          = '".round($srow['jt'], 2 )."',
+                            kommentti   = '$srow[kommentti]'
+                            WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid = '$ekaperhe' and tuoteno = '$srow[tuoteno]'";
                   $updres = mysql_query($query) or pupe_error($query);
 
                   //  Merkataan loput poistetuiksi
-                  $query = "  UPDATE tilausrivi SET
-                          tyyppi = 'D',
-                          kommentti = 'Tuote yhdistettiin perheeseen $ekaperhe'
-                        WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($loput) and tuoteno = '$srow[tuoteno]'";
+                  $query = "UPDATE tilausrivi SET
+                            tyyppi      = 'D',
+                            kommentti   = 'Tuote yhdistettiin perheeseen $ekaperhe'
+                            WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($loput) and tuoteno = '$srow[tuoteno]'";
                   $updres = mysql_query($query) or pupe_error($query);
 
                   //echo "<font class='info'>".t("Yhdistettiin")." $srow[tuoteno] !</font><br>";
@@ -241,19 +241,19 @@ if ($tee == "VALITSE") {
 
   echo "<table>";
 
-  $query = "  SELECT
-        GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') 'Tilaus',
-        GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR ', ') 'Asiakas/Nimi',
-        GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus',
-        GROUP_CONCAT(DISTINCT lasku.viesti SEPARATOR ', ') 'viestit',
-        GROUP_CONCAT(DISTINCT lasku.comments SEPARATOR ', ') 'comments'
-        FROM tilausrivi, lasku
-        LEFT JOIN kuka ON lasku.myyja = kuka.tunnus and lasku.yhtio=kuka.yhtio
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        and  tilausrivi.tunnus in ($valmistettavat)
-        and lasku.tunnus=tilausrivi.otunnus
-        and lasku.yhtio=tilausrivi.yhtio
-        and tilausrivi.uusiotunnus = 0";
+  $query = "SELECT
+            GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') 'Tilaus',
+            GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR ', ') 'Asiakas/Nimi',
+            GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus',
+            GROUP_CONCAT(DISTINCT lasku.viesti SEPARATOR ', ') 'viestit',
+            GROUP_CONCAT(DISTINCT lasku.comments SEPARATOR ', ') 'comments'
+            FROM tilausrivi, lasku
+            LEFT JOIN kuka ON lasku.myyja = kuka.tunnus and lasku.yhtio=kuka.yhtio
+            WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
+            and  tilausrivi.tunnus     in ($valmistettavat)
+            and lasku.tunnus=tilausrivi.otunnus
+            and lasku.yhtio=tilausrivi.yhtio
+            and tilausrivi.uusiotunnus = 0";
   $result = mysql_query($query) or pupe_error($query);
   $row    = mysql_fetch_array($result);
 
@@ -262,18 +262,18 @@ if ($tee == "VALITSE") {
   }
   echo "</table><br>";
 
-  $query = "  SELECT tilausrivi.otunnus, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tuoteno, tilkpl tilattu, if(tyyppi!='L', varattu, 0) valmistetaan, if(tyyppi='L' or tyyppi='D', varattu, 0) valmistettu,
-        toimaika, kerayspvm, tilausrivi.tunnus tunnus, tilausrivi.perheid, tilausrivi.tyyppi, tilausrivi.toimitettuaika
-        FROM tilausrivi, tuote
-        WHERE
-        tilausrivi.otunnus in ($row[Tilaus])
-        and tilausrivi.perheid in ($valmistettavat)
-        and tilausrivi.yhtio='$kukarow[yhtio]'
-        and tuote.yhtio=tilausrivi.yhtio
-        and tuote.tuoteno=tilausrivi.tuoteno
-        and tyyppi IN ('W','M')
-        and tilausrivi.uusiotunnus = 0
-        ORDER BY perheid";
+  $query = "SELECT tilausrivi.otunnus, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tuoteno, tilkpl tilattu, if(tyyppi!='L', varattu, 0) valmistetaan, if(tyyppi='L' or tyyppi='D', varattu, 0) valmistettu,
+            toimaika, kerayspvm, tilausrivi.tunnus tunnus, tilausrivi.perheid, tilausrivi.tyyppi, tilausrivi.toimitettuaika
+            FROM tilausrivi, tuote
+            WHERE
+            tilausrivi.otunnus         in ($row[Tilaus])
+            and tilausrivi.perheid     in ($valmistettavat)
+            and tilausrivi.yhtio='$kukarow[yhtio]'
+            and tuote.yhtio=tilausrivi.yhtio
+            and tuote.tuoteno=tilausrivi.tuoteno
+            and tyyppi                 IN ('W','M')
+            and tilausrivi.uusiotunnus = 0
+            ORDER BY perheid";
   $presult = mysql_query($query) or pupe_error($query);
   $riveja = mysql_num_rows($presult);
 
@@ -297,14 +297,14 @@ if ($tee == "VALITSE") {
 
   while ($prow = mysql_fetch_array ($presult)) {
     $linkki = "";
-    $query = "  SELECT fakta2
-          FROM tuoteperhe
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tyyppi = 'R'
-          and isatuoteno = '$prow[tuoteno]'
-          and trim(fakta2) != ''
-          ORDER BY LENGTH(fakta2) desc
-          LIMIT 1";
+    $query = "SELECT fakta2
+              FROM tuoteperhe
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and tyyppi     = 'R'
+              and isatuoteno = '$prow[tuoteno]'
+              and trim(fakta2) != ''
+              ORDER BY LENGTH(fakta2) desc
+              LIMIT 1";
     $faktares = mysql_query($query) or pupe_error($query);
 
     if(mysql_num_rows($faktares) > 0) {
@@ -334,11 +334,11 @@ if ($tee == "VALITSE") {
 
   echo "</table><br><br>";
 
-  $query = "  SELECT *
-        FROM  lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tila = 'V'
-        and  tunnus = '$tilaukseen'";
+  $query = "SELECT *
+            FROM  lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tila    = 'V'
+            and  tunnus = '$tilaukseen'";
   $result = mysql_query($query) or pupe_error($query);
   $laskurow = mysql_fetch_array($result);
 
@@ -359,9 +359,9 @@ if ($tee == "VALITSE") {
     </table>
     <br>";
 
-  $query = "  SELECT tunnus, viesti
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]' and tila = 'V' and alatila IN ('', 'J') and ytunnus = 'Valmistusajo'";
+  $query = "SELECT tunnus, viesti
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]' and tila = 'V' and alatila IN ('', 'J') and ytunnus = 'Valmistusajo'";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table><tr><th>".t("Yhdist‰ valitut valmistukseen").":</th>
@@ -427,16 +427,16 @@ if ($tee == "") {
   $haku='';
 
   // Haetaan jotain tuotetta
-  $query = "  SELECT group_concat(distinct perheid separator ',') haku
-        FROM tilausrivi
-        JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tila = 'V' and lasku.alatila = 'J'
-        JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.vanha_otunnus = 0
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.toimitettu = ''
-        and tilausrivi.varattu != 0
-        and tilausrivi.uusiotunnus = 0
-        and tilausrivi.tuoteno='$etsi'
-        and tilausrivi.tyyppi in ('W','V','M')";
+  $query = "SELECT group_concat(distinct perheid separator ',') haku
+            FROM tilausrivi
+            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tila = 'V' and lasku.alatila = 'J'
+            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.vanha_otunnus = 0
+            WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
+            and tilausrivi.toimitettu   = ''
+            and tilausrivi.varattu     != 0
+            and tilausrivi.uusiotunnus  = 0
+            and tilausrivi.tuoteno='$etsi'
+            and tilausrivi.tyyppi       in ('W','V','M')";
   $tilre = mysql_query($query) or pupe_error($query);
   $tilro = mysql_fetch_array($tilre);
 
@@ -461,42 +461,42 @@ if ($tee == "") {
   }
 
   if ($haku == "" and $pervalmiste == "OK") {
-    $query     = "  SELECT
-            GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR '<br>') tunnus,
-            GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR '<br>') nimi,
-            GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR '<br>') ytunnus,
-            tilausrivi.tuoteno,
-            sum(tilausrivi.varattu) varattu,
-            GROUP_CONCAT(DISTINCT tilausrivi.kerayspvm ORDER BY tilausrivi.kerayspvm SEPARATOR '<br>') kerayspvm,
-            GROUP_CONCAT(DISTINCT tilausrivi.toimaika ORDER BY tilausrivi.toimaika SEPARATOR '<br>') toimaika,
-            GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat,
-            lasku.varasto";
+    $query     = "SELECT
+                  GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR '<br>') tunnus,
+                  GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR '<br>') nimi,
+                  GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR '<br>') ytunnus,
+                  tilausrivi.tuoteno,
+                  sum(tilausrivi.varattu) varattu,
+                  GROUP_CONCAT(DISTINCT tilausrivi.kerayspvm ORDER BY tilausrivi.kerayspvm SEPARATOR '<br>') kerayspvm,
+                  GROUP_CONCAT(DISTINCT tilausrivi.toimaika ORDER BY tilausrivi.toimaika SEPARATOR '<br>') toimaika,
+                  GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat,
+                  lasku.varasto";
     $grouppi  = " GROUP BY lasku.varasto, tilausrivi.tuoteno";
   }
   elseif ($haku != "") {
-    $query     = "  SELECT
-            GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR '<br>') tunnus,
-            GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR '<br>') nimi,
-            GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR '<br>') ytunnus,
-            GROUP_CONCAT(DISTINCT tilausrivi.tuoteno ORDER BY tilausrivi.tuoteno SEPARATOR '<br>') tuoteno,
-            sum(tilausrivi.varattu) varattu,
-            GROUP_CONCAT(DISTINCT tilausrivi.kerayspvm ORDER BY tilausrivi.kerayspvm SEPARATOR '<br>') kerayspvm,
-            GROUP_CONCAT(DISTINCT tilausrivi.toimaika ORDER BY tilausrivi.toimaika SEPARATOR '<br>') toimaika,
-            GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat,
-            lasku.varasto";
+    $query     = "SELECT
+                  GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR '<br>') tunnus,
+                  GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR '<br>') nimi,
+                  GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR '<br>') ytunnus,
+                  GROUP_CONCAT(DISTINCT tilausrivi.tuoteno ORDER BY tilausrivi.tuoteno SEPARATOR '<br>') tuoteno,
+                  sum(tilausrivi.varattu) varattu,
+                  GROUP_CONCAT(DISTINCT tilausrivi.kerayspvm ORDER BY tilausrivi.kerayspvm SEPARATOR '<br>') kerayspvm,
+                  GROUP_CONCAT(DISTINCT tilausrivi.toimaika ORDER BY tilausrivi.toimaika SEPARATOR '<br>') toimaika,
+                  GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat,
+                  lasku.varasto";
     $grouppi  = " GROUP BY lasku.varasto";
   }
   else {
-    $query     = "  SELECT
-            lasku.tunnus,
-            lasku.nimi,
-            lasku.ytunnus,
-            tilausrivi.tuoteno,
-            tilausrivi.varattu,
-            tilausrivi.kerayspvm,
-            tilausrivi.toimaika,
-            lasku.varasto,
-            tilausrivi.tunnus valmistettavat";
+    $query     = "SELECT
+                  lasku.tunnus,
+                  lasku.nimi,
+                  lasku.ytunnus,
+                  tilausrivi.tuoteno,
+                  tilausrivi.varattu,
+                  tilausrivi.kerayspvm,
+                  tilausrivi.toimaika,
+                  lasku.varasto,
+                  tilausrivi.tunnus valmistettavat";
     $grouppi  = " ";
   }
 

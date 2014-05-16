@@ -4,10 +4,10 @@ function hinnastorivi($tuote) {
     global $kukarow;
 
     //haetaan aleryhmän tunnus
-  $query = "  SELECT b.tunnus, b.ryhma
-        FROM tuote a
-        LEFT JOIN perusalennus b use index (yhtio_ryhma) ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
-        WHERE a.tuoteno = '{$tuote['tuoteno']}' and a.yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT b.tunnus, b.ryhma
+            FROM tuote a
+            LEFT JOIN perusalennus b use index (yhtio_ryhma) ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
+            WHERE a.tuoteno = '{$tuote['tuoteno']}' and a.yhtio = '{$kukarow['yhtio']}'";
   $aleresult = mysql_query($query) or pupe_error($query);
   $alerow = mysql_fetch_array($aleresult);
 
@@ -17,10 +17,10 @@ function hinnastorivi($tuote) {
   if ($aletun == '') {
     $aletun = '000';
   }
-  else if ($tunpit == '2'){
+  elseif ($tunpit == '2'){
     $aletun = '0'.$aletun;
   }
-  else if ($tunpit == '1'){
+  elseif ($tunpit == '1'){
     $aletun = '00'.$aletun;
   }
   //echo "$aletun <br>";
@@ -32,11 +32,11 @@ function hinnastorivi($tuote) {
   $korvaavat  = array();
 
   if ($tuote["id"] > 0) {
-    $query = "  SELECT *
-          FROM korvaavat use index (yhtio_id)
-          WHERE id='{$tuote['id']}'
-          AND yhtio='{$kukarow['yhtio']}'
-          ORDER BY jarjestys, tuoteno";
+    $query = "SELECT *
+              FROM korvaavat use index (yhtio_id)
+              WHERE id='{$tuote['id']}'
+              AND yhtio='{$kukarow['yhtio']}'
+              ORDER BY jarjestys, tuoteno";
     $korvaresult = mysql_query($query) or pupe_error($query);
 
     $lask = 0;

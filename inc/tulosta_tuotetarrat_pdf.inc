@@ -1,9 +1,9 @@
 <?php
 
-$query = "  SELECT *
-      FROM tuote
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND tuoteno = '$tuoteno'";
+$query = "SELECT *
+          FROM tuote
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND tuoteno = '$tuoteno'";
 $eankoodires = mysql_query($query) or pupe_error($query);
 $eankoodirow = mysql_fetch_assoc($eankoodires);
 

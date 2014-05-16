@@ -93,10 +93,10 @@ if (isset($submit) and trim($submit) != '') {
             $_maara = (float) $_maara;
             $_tun = (int) $_tun;
 
-            $query = "  SELECT varattu
-                  FROM tilausrivi
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$_tun}'";
+            $query = "SELECT varattu
+                      FROM tilausrivi
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$_tun}'";
             $chk_varattu_res = mysql_query($query);
             $chk_varattu_row = mysql_fetch_assoc($chk_varattu_res);
 
@@ -126,10 +126,10 @@ if (isset($submit) and trim($submit) != '') {
             if (trim($_syotetty_maara) != '') {
               $_syotetty_maara = (float) $_syotetty_maara;
 
-              $query = "  SELECT varattu
-                    FROM tilausrivi
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$_tunnus}'";
+              $query = "SELECT varattu
+                        FROM tilausrivi
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = '{$_tunnus}'";
               $chk_varattu_res = mysql_query($query);
               $chk_varattu_row = mysql_fetch_assoc($chk_varattu_res);
 
@@ -230,11 +230,11 @@ echo "<div class='main'>
       <th>",t("Tulosta tavaraetiketit"),"</th>
       <td colspan='2'><select name='komento[Tavaraetiketti]'>";
 
-      $query = "  SELECT *
-            FROM kirjoittimet
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND komento NOT IN ('edi','email')
-            ORDER BY kirjoitin";
+      $query = "SELECT *
+                FROM kirjoittimet
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND komento NOT IN ('edi','email')
+                ORDER BY kirjoitin";
       $kires = pupe_query($query);
 
       echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
@@ -258,12 +258,12 @@ echo "<div class='main'>
   <input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
   <input type='hidden' name='tilausrivi' value='{$tilausrivi}' />";
 
-$query = "  SELECT *
-      FROM tilausrivi
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND tyyppi = 'O'
-      AND suuntalava = '{$alusta_tunnus}'
-      AND uusiotunnus = '{$sscc['saapuminen']}'";
+$query = "SELECT *
+          FROM tilausrivi
+          WHERE yhtio     = '{$kukarow['yhtio']}'
+          AND tyyppi      = 'O'
+          AND suuntalava  = '{$alusta_tunnus}'
+          AND uusiotunnus = '{$sscc['saapuminen']}'";
 $tuotteet_res = mysql_query($query);
 
 if (mysql_num_rows($tuotteet_res) > 0) {

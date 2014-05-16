@@ -33,10 +33,10 @@ $yhtio = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 
 // Haetaan kukarow
-$query = "  SELECT *
-      FROM kuka
-      WHERE yhtio = '{$yhtio}'
-      AND kuka = 'admin'";
+$query = "SELECT *
+          FROM kuka
+          WHERE yhtio = '{$yhtio}'
+          AND kuka    = 'admin'";
 $kukares = pupe_query($query);
 
 if (mysql_num_rows($kukares) != 1) {
@@ -71,11 +71,11 @@ if ($handle = opendir($path)) {
         if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and trim($xml->MessageHeader->MessageType) == 'StockReport') {
 
           // tuki vain yhdelle Posten-varastolle
-          $query = "  SELECT *
-                FROM varastopaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND ulkoinen_jarjestelma = 'P'
-                LIMIT 1";
+          $query = "SELECT *
+                    FROM varastopaikat
+                    WHERE yhtio              = '{$kukarow['yhtio']}'
+                    AND ulkoinen_jarjestelma = 'P'
+                    LIMIT 1";
           $varastores = pupe_query($query);
           $varastorow = mysql_fetch_assoc($varastores);
 
@@ -90,10 +90,10 @@ if ($handle = opendir($path)) {
             $eankoodi = $line->ItemNumber;
             $kpl = (float) $line->Quantity;
 
-            $query = "  SELECT tuoteno, nimitys
-                  FROM tuote
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND eankoodi = '{$eankoodi}'";
+            $query = "SELECT tuoteno, nimitys
+                      FROM tuote
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      AND eankoodi = '{$eankoodi}'";
             $tuoteres = pupe_query($query);
             $tuoterow = mysql_fetch_assoc($tuoteres);
 

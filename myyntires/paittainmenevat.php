@@ -17,12 +17,12 @@ if ($tee == 'N') {
   $result = pupe_query($query);
 
   //Etsitään nolla suoritukset
-  $query = "  SELECT nimi_maksaja, kirjpvm, summa, ltunnus, tunnus
-        FROM suoritus
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kohdpvm = '0000-00-00'
-        and ltunnus > 0
-        and summa   = 0";
+  $query = "SELECT nimi_maksaja, kirjpvm, summa, ltunnus, tunnus
+            FROM suoritus
+            WHERE yhtio = '$kukarow[yhtio]'
+            and kohdpvm = '0000-00-00'
+            and ltunnus > 0
+            and summa   = 0";
   $paaresult = pupe_query($query);
 
   if (mysql_num_rows($paaresult) > 0) {
@@ -32,9 +32,9 @@ if ($tee == 'N') {
       $tapvm = $suoritusrow['kirjpvm'];
 
       //Kirjataan suoritukset käytetyksi
-      $query = "  UPDATE suoritus
-            SET kohdpvm = '$tapvm'
-            WHERE tunnus = '$suoritusrow[tunnus]'";
+      $query = "UPDATE suoritus
+                SET kohdpvm = '$tapvm'
+                WHERE tunnus = '$suoritusrow[tunnus]'";
       if ($debug == 1) echo "$query<br>";
       else $result = pupe_query($query);
 
@@ -53,13 +53,13 @@ if ($tee == 'T') {
   $query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ, tili READ";
   $result = pupe_query($query);
 
-  $query  = "  SELECT a.tunnus atunnus, b.tunnus btunnus, a.ltunnus altunnus, b.ltunnus bltunnus, a.kirjpvm akirjpvm, a.summa asumma, b.kirjpvm bkirjpvm, b.summa bsumma, a.nimi_maksaja
-        FROM suoritus a
-        JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.ltunnus > 0 and b.summa * -1 = a.summa $tilitselisa)
-        WHERE a.yhtio = '$kukarow[yhtio]'
-        and a.ltunnus > 0
-        and a.kohdpvm = '0000-00-00'
-        and a.summa < 0";
+  $query  = "SELECT a.tunnus atunnus, b.tunnus btunnus, a.ltunnus altunnus, b.ltunnus bltunnus, a.kirjpvm akirjpvm, a.summa asumma, b.kirjpvm bkirjpvm, b.summa bsumma, a.nimi_maksaja
+             FROM suoritus a
+             JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.ltunnus > 0 and b.summa * -1 = a.summa $tilitselisa)
+             WHERE a.yhtio = '$kukarow[yhtio]'
+             and a.ltunnus > 0
+             and a.kohdpvm = '0000-00-00'
+             and a.summa   < 0";
   $paaresult = pupe_query($query);
 
   if (mysql_num_rows($paaresult) > 0) {
@@ -67,12 +67,12 @@ if ($tee == 'T') {
     while ($suoritusrow = mysql_fetch_assoc ($paaresult)) {
 
       // Onko tilioinnit veilä olemassa ja suoritus oikeassa tilassa
-      $query  = "  SELECT tunnus, kirjpvm
-            FROM suoritus
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND kohdpvm = '0000-00-00'
-            and ltunnus > 0
-            and tunnus in ('$suoritusrow[atunnus]', '$suoritusrow[btunnus]')";
+      $query  = "SELECT tunnus, kirjpvm
+                 FROM suoritus
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND kohdpvm = '0000-00-00'
+                 and ltunnus > 0
+                 and tunnus  in ('$suoritusrow[atunnus]', '$suoritusrow[btunnus]')";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 2) {
@@ -80,20 +80,20 @@ if ($tee == 'T') {
         $suoritus1row = mysql_fetch_assoc($result);
         $suoritus2row = mysql_fetch_assoc($result);
 
-        $query  = "  SELECT tunnus, ltunnus, summa, tilino, kustp, kohde, projekti
-              FROM tiliointi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$suoritusrow[altunnus]'";
+        $query  = "SELECT tunnus, ltunnus, summa, tilino, kustp, kohde, projekti
+                   FROM tiliointi
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and tunnus  = '$suoritusrow[altunnus]'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 1) {
 
           $tiliointi1row = mysql_fetch_assoc ($result);
 
-          $query  = "  SELECT tunnus, ltunnus, summa, tilino, kustp, kohde, projekti
-                FROM tiliointi
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$suoritusrow[bltunnus]'";
+          $query  = "SELECT tunnus, ltunnus, summa, tilino, kustp, kohde, projekti
+                     FROM tiliointi
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     and tunnus  = '$suoritusrow[bltunnus]'";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 1) {
@@ -123,10 +123,10 @@ if ($tee == 'T') {
             }
 
             // Alkuperäisen rahatiliöinnin kustannuspaikka
-            $query  = "  SELECT kustp, kohde, projekti
-                  FROM tiliointi
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and aputunnus  = '$tiliointi1row[tunnus]'";
+            $query  = "SELECT kustp, kohde, projekti
+                       FROM tiliointi
+                       WHERE yhtio   = '$kukarow[yhtio]'
+                       and aputunnus = '$tiliointi1row[tunnus]'";
             $result = pupe_query($query);
             $raha1row = mysql_fetch_assoc($result);
 
@@ -136,97 +136,97 @@ if ($tee == 'T') {
             // Nyt kaikki on hyvin ja voimme tehdä päivitykset
             // Kirjataan päittäinmeno selvittelytilin kautta
             // Tiliöinniltä otetaan selvittelytilin vastatili
-            $query = "  INSERT INTO tiliointi SET
-                  yhtio    = '$kukarow[yhtio]',
-                  ltunnus    = '$tiliointi1row[ltunnus]',
-                  tapvm    = '$tapvm',
-                  summa    = $tiliointi1row[summa],
-                  tilino    = '$yhtiorow[selvittelytili]',
-                  selite    = '".t('Suoritettu päittäin')."',
-                  lukko    = 1,
-                  laatija    = '$kukarow[kuka]',
-                  laadittu  = now(),
-                  kustp      = '{$kustp_ins}',
-                  kohde     = '{$kohde_ins}',
-                  projekti   = '{$projekti_ins}'";
+            $query = "INSERT INTO tiliointi SET
+                      yhtio    = '$kukarow[yhtio]',
+                      ltunnus  = '$tiliointi1row[ltunnus]',
+                      tapvm    = '$tapvm',
+                      summa    = $tiliointi1row[summa],
+                      tilino   = '$yhtiorow[selvittelytili]',
+                      selite   = '".t('Suoritettu päittäin')."',
+                      lukko    = 1,
+                      laatija  = '$kukarow[kuka]',
+                      laadittu = now(),
+                      kustp    = '{$kustp_ins}',
+                      kohde    = '{$kohde_ins}',
+                      projekti = '{$projekti_ins}'";
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
             // Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointi1row["tilino"], $tiliointi1row["kustp"], $tiliointi1row["kohde"], $tiliointi1row["projekti"]);
 
-            $query = "  INSERT INTO tiliointi SET
-                  yhtio    = '$kukarow[yhtio]',
-                  ltunnus    = '$tiliointi1row[ltunnus]',
-                  tapvm    = '$tapvm',
-                  summa    = $tiliointi1row[summa] * -1,
-                  tilino    = '$tiliointi1row[tilino]',
-                  selite    = '".t('Suoritettu päittäin')."',
-                  lukko    = 1,
-                  laatija    = '$kukarow[kuka]',
-                  laadittu  = now(),
-                  kustp      = '{$kustp_ins}',
-                  kohde     = '{$kohde_ins}',
-                  projekti   = '{$projekti_ins}'";
+            $query = "INSERT INTO tiliointi SET
+                      yhtio    = '$kukarow[yhtio]',
+                      ltunnus  = '$tiliointi1row[ltunnus]',
+                      tapvm    = '$tapvm',
+                      summa    = $tiliointi1row[summa] * -1,
+                      tilino   = '$tiliointi1row[tilino]',
+                      selite   = '".t('Suoritettu päittäin')."',
+                      lukko    = 1,
+                      laatija  = '$kukarow[kuka]',
+                      laadittu = now(),
+                      kustp    = '{$kustp_ins}',
+                      kohde    = '{$kohde_ins}',
+                      projekti = '{$projekti_ins}'";
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
             // Alkuperäisen rahatiliöinnin kustannuspaikka
-            $query  = "  SELECT kustp, kohde, projekti
-                  FROM tiliointi
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and aputunnus  = '$tiliointi2row[tunnus]'";
+            $query  = "SELECT kustp, kohde, projekti
+                       FROM tiliointi
+                       WHERE yhtio   = '$kukarow[yhtio]'
+                       and aputunnus = '$tiliointi2row[tunnus]'";
             $result = pupe_query($query);
             $raha2row = mysql_fetch_assoc($result);
 
             // Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"], $raha2row["kustp"], $raha2row["kohde"], $raha2row["projekti"]);
 
-            $query = "  INSERT INTO tiliointi SET
-                  yhtio    = '$kukarow[yhtio]',
-                  ltunnus    = '$tiliointi2row[ltunnus]',
-                  tapvm    = '$tapvm',
-                  summa    = $tiliointi2row[summa],
-                  tilino    = '$yhtiorow[selvittelytili]',
-                  selite    = '".t('Suoritettu päittäin')."',
-                  lukko    = 1,
-                  laatija    = '$kukarow[kuka]',
-                  laadittu  = now(),
-                  kustp      = '{$kustp_ins}',
-                  kohde     = '{$kohde_ins}',
-                  projekti   = '{$projekti_ins}'";
+            $query = "INSERT INTO tiliointi SET
+                      yhtio    = '$kukarow[yhtio]',
+                      ltunnus  = '$tiliointi2row[ltunnus]',
+                      tapvm    = '$tapvm',
+                      summa    = $tiliointi2row[summa],
+                      tilino   = '$yhtiorow[selvittelytili]',
+                      selite   = '".t('Suoritettu päittäin')."',
+                      lukko    = 1,
+                      laatija  = '$kukarow[kuka]',
+                      laadittu = now(),
+                      kustp    = '{$kustp_ins}',
+                      kohde    = '{$kohde_ins}',
+                      projekti = '{$projekti_ins}'";
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
             // Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
             list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointi1row["tilino"], $tiliointi2row["kustp"], $tiliointi2row["kohde"], $tiliointi2row["projekti"]);
 
-            $query = "  INSERT INTO tiliointi SET
-                  yhtio    = '$kukarow[yhtio]',
-                  ltunnus    = '$tiliointi2row[ltunnus]',
-                  tapvm    = '$tapvm',
-                  summa    = $tiliointi2row[summa] * -1,
-                  tilino    = '$tiliointi1row[tilino]',
-                  selite    = '".t('Suoritettu päittäin')."',
-                  lukko    = 1,
-                  laatija    = '$kukarow[kuka]',
-                  laadittu  = now(),
-                  kustp      = '{$kustp_ins}',
-                  kohde     = '{$kohde_ins}',
-                  projekti   = '{$projekti_ins}'";
+            $query = "INSERT INTO tiliointi SET
+                      yhtio    = '$kukarow[yhtio]',
+                      ltunnus  = '$tiliointi2row[ltunnus]',
+                      tapvm    = '$tapvm',
+                      summa    = $tiliointi2row[summa] * -1,
+                      tilino   = '$tiliointi1row[tilino]',
+                      selite   = '".t('Suoritettu päittäin')."',
+                      lukko    = 1,
+                      laatija  = '$kukarow[kuka]',
+                      laadittu = now(),
+                      kustp    = '{$kustp_ins}',
+                      kohde    = '{$kohde_ins}',
+                      projekti = '{$projekti_ins}'";
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
             //Kirjataan suoritukset käytetyksi
-            $query = "  UPDATE suoritus
-                  SET kohdpvm = '$tapvm'
-                  WHERE tunnus = '$suoritus1row[tunnus]'";
+            $query = "UPDATE suoritus
+                      SET kohdpvm = '$tapvm'
+                      WHERE tunnus = '$suoritus1row[tunnus]'";
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
-            $query = "  UPDATE suoritus
-                  SET kohdpvm = '$tapvm'
-                  WHERE tunnus = '$suoritus2row[tunnus]'";
+            $query = "UPDATE suoritus
+                      SET kohdpvm = '$tapvm'
+                      WHERE tunnus = '$suoritus2row[tunnus]'";
             if ($debug == 1) echo "$query<br>";
             else $result = pupe_query($query);
 
@@ -253,13 +253,13 @@ if ($tee == 'T') {
 if ($tee == '') {
 
   //Etsitään päittäin menevät suoritukset
-  $query = "  SELECT a.nimi_maksaja nimi1, a.kirjpvm pvm1, a.summa summa1, b.nimi_maksaja nimi2, b.kirjpvm pvm2, b.summa summa2
-        FROM suoritus a
-        JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.ltunnus > 0 and b.summa * -1 = a.summa $tilitselisa)
-        WHERE a.yhtio = '$kukarow[yhtio]'
-        and a.kohdpvm = '0000-00-00'
-        and a.ltunnus > 0
-        and a.summa < 0";
+  $query = "SELECT a.nimi_maksaja nimi1, a.kirjpvm pvm1, a.summa summa1, b.nimi_maksaja nimi2, b.kirjpvm pvm2, b.summa summa2
+            FROM suoritus a
+            JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.ltunnus > 0 and b.summa * -1 = a.summa $tilitselisa)
+            WHERE a.yhtio = '$kukarow[yhtio]'
+            and a.kohdpvm = '0000-00-00'
+            and a.ltunnus > 0
+            and a.summa   < 0";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -298,12 +298,12 @@ if ($tee == '') {
   }
 
   //Etsitään nolla suoritukset
-  $query = "  SELECT nimi_maksaja, kirjpvm, summa
-        FROM suoritus
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kohdpvm = '0000-00-00'
-        and ltunnus > 0
-        and summa   = 0";
+  $query = "SELECT nimi_maksaja, kirjpvm, summa
+            FROM suoritus
+            WHERE yhtio = '$kukarow[yhtio]'
+            and kohdpvm = '0000-00-00'
+            and ltunnus > 0
+            and summa   = 0";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

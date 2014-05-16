@@ -8,10 +8,10 @@ if(!function_exists("yhtion_toimipaikat_parametrittarkista")) {
     if (mysql_field_name($result, $i) == "toimipaikka") {
       $chtoimipaikka = (int) $t[$i];
 
-      $query = "  SELECT *
-            FROM yhtion_toimipaikat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = $chtoimipaikka";
+      $query = "SELECT *
+                FROM yhtion_toimipaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = $chtoimipaikka";
       $vares = pupe_query($query);
 
       if (mysql_num_rows($vares) != 1) {
@@ -30,12 +30,12 @@ if(!function_exists("yhtion_toimipaikat_parametrittarkista")) {
       }
 
 
-      $query = "  SELECT *
-            FROM yhtion_toimipaikat_parametrit
-            WHERE yhtio   = '{$kukarow['yhtio']}'
-            AND toimipaikka = '$chtoimipaikka'
-            AND parametri = '$chparametri'
-            AND tunnus   != '$trow[$i]'";
+      $query = "SELECT *
+                FROM yhtion_toimipaikat_parametrit
+                WHERE yhtio      = '{$kukarow['yhtio']}'
+                AND toimipaikka  = '$chtoimipaikka'
+                AND parametri    = '$chparametri'
+                AND tunnus      != '$trow[$i]'";
       $vares = pupe_query($query);
 
       if (mysql_num_rows($vares) > 0) {

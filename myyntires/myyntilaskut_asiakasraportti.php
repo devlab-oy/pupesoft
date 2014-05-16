@@ -20,10 +20,10 @@
 
       $asiakasid = (int) $asiakasid;
 
-      $query = "  SELECT nimi, IF(talhal_email != '', talhal_email, email) AS email
-            FROM asiakas
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$asiakasid}'";
+      $query = "SELECT nimi, IF(talhal_email != '', talhal_email, email) AS email
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$asiakasid}'";
       $asiakasresult = pupe_query($query);
       $asiakasrow = mysql_fetch_assoc($asiakasresult);
 
@@ -94,15 +94,15 @@
       global $palvelin2;
 
       // myohassa maksetut
-      $query = "  SELECT sum(if(erpcm < mapvm, summa, 0)) myohassa, sum(summa) yhteensa
-            FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
-            WHERE yhtio = '$yhtio'
-            AND tila = 'U'
-            AND liitostunnus in ($tunnukset)
-            AND tapvm  > '0000-00-00'
-            AND mapvm  > '0000-00-00'
-            AND alatila = 'X'
-            AND summa > 0";
+      $query = "SELECT sum(if(erpcm < mapvm, summa, 0)) myohassa, sum(summa) yhteensa
+                FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
+                WHERE yhtio      = '$yhtio'
+                AND tila         = 'U'
+                AND liitostunnus in ($tunnukset)
+                AND tapvm        > '0000-00-00'
+                AND mapvm        > '0000-00-00'
+                AND alatila      = 'X'
+                AND summa        > 0";
       $result = pupe_query($query);
       $laskut = mysql_fetch_array($result);
 
@@ -218,11 +218,11 @@
         $haku_sql = "ytunnus = '$ytunnus'";
       }
 
-      $query = "  SELECT tunnus, ytunnus, nimi, osoite, postino, postitp, maa, IF(talhal_email != '', talhal_email, email) AS email
-            FROM asiakas
-            WHERE yhtio = '$kukarow[yhtio]'
-            and $haku_sql
-            ORDER BY email DESC";
+      $query = "SELECT tunnus, ytunnus, nimi, osoite, postino, postitp, maa, IF(talhal_email != '', talhal_email, email) AS email
+                FROM asiakas
+                WHERE yhtio = '$kukarow[yhtio]'
+                and $haku_sql
+                ORDER BY email DESC";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
@@ -240,10 +240,10 @@
           $nimet    = 1;
         }
         else {
-          $query = "  SELECT group_concat(tunnus) tunnukset, count(*) kpl
-                FROM asiakas
-                WHERE yhtio = '$kukarow[yhtio]'
-                and ytunnus = '$asiakasrow[ytunnus]'";
+          $query = "SELECT group_concat(tunnus) tunnukset, count(*) kpl
+                    FROM asiakas
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and ytunnus = '$asiakasrow[ytunnus]'";
           $result = pupe_query($query);
           $asiakasrow2 = mysql_fetch_array($result);
 
@@ -260,40 +260,40 @@
           $salisa = "";
         }
 
-        $query = "  SELECT valkoodi, sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa, sum(summa) summa_valuutassa
-              FROM suoritus
-              WHERE yhtio = '$kukarow[yhtio]'
-              and kohdpvm = '0000-00-00'
-              and ltunnus > 0
-              and asiakas_tunnus in ($tunnukset)
-              and summa  != 0
-              $salisa
-              group by 1";
+        $query = "SELECT valkoodi, sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa, sum(summa) summa_valuutassa
+                  FROM suoritus
+                  WHERE yhtio         = '$kukarow[yhtio]'
+                  and kohdpvm         = '0000-00-00'
+                  and ltunnus         > 0
+                  and asiakas_tunnus  in ($tunnukset)
+                  and summa          != 0
+                  $salisa
+                  group by 1";
         $kaatoresult = pupe_query($query);
 
-        $query = "  SELECT valkoodi, count(tunnus) as maara,
-              sum(if(mapvm = '0000-00-00',1,0)) avoinmaara,
-              sum(if(erpcm < now() and mapvm = '0000-00-00',1,0)) eraantynytmaara,
-              sum(summa-saldo_maksettu) as summa,
-              sum(if(mapvm='0000-00-00',summa-saldo_maksettu,0)) avoinsumma,
-              sum(if(erpcm < now() and mapvm = '0000-00-00',summa-saldo_maksettu,0)) eraantynytsumma,
-              sum(summa_valuutassa-saldo_maksettu_valuutassa) as summa_valuutassa,
-              sum(if(mapvm='0000-00-00',summa_valuutassa-saldo_maksettu_valuutassa,0)) avoinsumma_valuutassa,
-              sum(if(erpcm < now() and mapvm = '0000-00-00',summa_valuutassa-saldo_maksettu_valuutassa,0)) eraantynytsumma_valuutassa,
-              sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) <= -3,1,0)) maara1,
-              sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > -3 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= -1,1,0)) maara2,
-              sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > -1 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 15,1,0)) maara3,
-              sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > 15 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 30,1,0)) maara4,
-              sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > 30 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 60,1,0)) maara5,
-              sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > 60,1,0)) maara6
-              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tila   = 'U'
-              and liitostunnus in ($tunnukset)
-              $salisa
-              and tapvm > '0000-00-00'
-              and mapvm = '0000-00-00'
-              group by 1";
+        $query = "SELECT valkoodi, count(tunnus) as maara,
+                  sum(if(mapvm = '0000-00-00',1,0)) avoinmaara,
+                  sum(if(erpcm < now() and mapvm = '0000-00-00',1,0)) eraantynytmaara,
+                  sum(summa-saldo_maksettu) as summa,
+                  sum(if(mapvm='0000-00-00',summa-saldo_maksettu,0)) avoinsumma,
+                  sum(if(erpcm < now() and mapvm = '0000-00-00',summa-saldo_maksettu,0)) eraantynytsumma,
+                  sum(summa_valuutassa-saldo_maksettu_valuutassa) as summa_valuutassa,
+                  sum(if(mapvm='0000-00-00',summa_valuutassa-saldo_maksettu_valuutassa,0)) avoinsumma_valuutassa,
+                  sum(if(erpcm < now() and mapvm = '0000-00-00',summa_valuutassa-saldo_maksettu_valuutassa,0)) eraantynytsumma_valuutassa,
+                  sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) <= -3,1,0)) maara1,
+                  sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > -3 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= -1,1,0)) maara2,
+                  sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > -1 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 15,1,0)) maara3,
+                  sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > 15 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 30,1,0)) maara4,
+                  sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > 30 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 60,1,0)) maara5,
+                  sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) > 60,1,0)) maara6
+                  FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and tila         = 'U'
+                  and liitostunnus in ($tunnukset)
+                  $salisa
+                  and tapvm        > '0000-00-00'
+                  and mapvm        = '0000-00-00'
+                  group by 1";
         $result = pupe_query($query);
 
         if (mysql_num_rows($kaatoresult) > 1) {
@@ -417,12 +417,12 @@
           echo "</tr>";
         }
 
-        $query  = "  SELECT group_concat(distinct kentta01 SEPARATOR '<br>') viestit
-                FROM kalenteri
-                 WHERE yhtio = '$kukarow[yhtio]'
-                 AND tyyppi  = 'Myyntireskontraviesti'
-                   AND liitostunnus in ($tunnukset)
-              ORDER BY tunnus desc";
+        $query  = "SELECT group_concat(distinct kentta01 SEPARATOR '<br>') viestit
+                   FROM kalenteri
+                    WHERE yhtio        = '$kukarow[yhtio]'
+                    AND tyyppi         = 'Myyntireskontraviesti'
+                      AND liitostunnus in ($tunnukset)
+                   ORDER BY tunnus desc";
         $amres = pupe_query($query);
         $amrow = mysql_fetch_assoc($amres);
 
@@ -552,29 +552,29 @@
           $laskupvm_where = "  AND tapvm >= '{$alkupvm}' AND tapvm <= '{$loppupvm}'";
         }
 
-        $query = "  SELECT laskunro, tapvm, erpcm,
-              summa loppusumma,
-              summa_valuutassa loppusumma_valuutassa,
-              if(mapvm!='0000-00-00', 0, summa-saldo_maksettu) avoinsumma,
-              if(mapvm!='0000-00-00', 0, summa_valuutassa-saldo_maksettu_valuutassa) avoinsumma_valuutassa,
-              kapvm, kasumma, kasumma_valuutassa, mapvm,
-              TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm) ika,
-              round((viikorkopros * (TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm)) * summa / 36500),2) as korko,
-              olmapvm korkolaspvm,
-              tunnus,
-              saldo_maksettu,
-              saldo_maksettu_valuutassa,
-              valkoodi
-              FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
-              WHERE yhtio ='$kukarow[yhtio]'
-              and tila = 'U'
-              and alatila = 'X'
-              and liitostunnus in ($tunnukset)
-              AND tapvm > '0000-00-00'
-              {$laskupvm_where}
-              $mapvmlisa
-              $salisa
-              ORDER BY erpcm";
+        $query = "SELECT laskunro, tapvm, erpcm,
+                  summa loppusumma,
+                  summa_valuutassa loppusumma_valuutassa,
+                  if(mapvm!='0000-00-00', 0, summa-saldo_maksettu) avoinsumma,
+                  if(mapvm!='0000-00-00', 0, summa_valuutassa-saldo_maksettu_valuutassa) avoinsumma_valuutassa,
+                  kapvm, kasumma, kasumma_valuutassa, mapvm,
+                  TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm) ika,
+                  round((viikorkopros * (TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm)) * summa / 36500),2) as korko,
+                  olmapvm korkolaspvm,
+                  tunnus,
+                  saldo_maksettu,
+                  saldo_maksettu_valuutassa,
+                  valkoodi
+                  FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
+                  WHERE yhtio ='$kukarow[yhtio]'
+                  and tila         = 'U'
+                  and alatila      = 'X'
+                  and liitostunnus in ($tunnukset)
+                  AND tapvm        > '0000-00-00'
+                  {$laskupvm_where}
+                  $mapvmlisa
+                  $salisa
+                  ORDER BY erpcm";
         $result = pupe_query($query);
 
         echo "<form action = 'myyntilaskut_asiakasraportti.php' method = 'post' id='riviformi'>
@@ -596,14 +596,14 @@
             </select>
             </td></tr>";
 
-        $query = "  SELECT
-              distinct upper(if(valkoodi='', '$yhtiorow[valkoodi]' , valkoodi)) valuutat
-              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tila   = 'U'
-              and liitostunnus in ($tunnukset)
-              and tapvm > '0000-00-00'
-              $mapvmlisa";
+        $query = "SELECT
+                  distinct upper(if(valkoodi='', '$yhtiorow[valkoodi]' , valkoodi)) valuutat
+                  FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and tila         = 'U'
+                  and liitostunnus in ($tunnukset)
+                  and tapvm        > '0000-00-00'
+                  $mapvmlisa";
         $aasres = pupe_query($query);
 
         if (mysql_num_rows($aasres) > 1) {
@@ -694,11 +694,11 @@
            $korkoja = 0;
 
           // haetaan kaikki yrityksen rahatilit mysql muodossa
-          $query  = "  SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
-                FROM yriti
-                WHERE yhtio = '$kukarow[yhtio]'
-                and kaytossa = ''
-                and oletus_rahatili != ''";
+          $query  = "SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
+                     FROM yriti
+                     WHERE yhtio          = '$kukarow[yhtio]'
+                     and kaytossa         = ''
+                     and oletus_rahatili != ''";
           $ratire = pupe_query($query);
           $ratiro = mysql_fetch_array($ratire);
 
@@ -771,22 +771,22 @@
               $tilinolisa = '';
               $kassa_arska = $pankkikortti_arska = $luottokortti_arska = array();
               // Katsotaan onko laskun tunnuksella olevilla tiliöinneillä kustannuspaikkaa
-              $query = "  SELECT group_concat(DISTINCT kustp) kustannuspaikat 
-                    FROM tiliointi USE INDEX (tositerivit_index) 
-                    WHERE yhtio='$kukarow[yhtio]' 
-                    AND ltunnus = $maksurow[tunnus]
-                    AND korjattu = ''
-                    AND kustp != 0";
+              $query = "SELECT group_concat(DISTINCT kustp) kustannuspaikat 
+                        FROM tiliointi USE INDEX (tositerivit_index) 
+                        WHERE yhtio='$kukarow[yhtio]' 
+                        AND ltunnus   = $maksurow[tunnus]
+                        AND korjattu  = ''
+                        AND kustp    != 0";
               $kustpre = pupe_query($query);
 
               if (mysql_num_rows($kustpre) == 1)  {
 
                 $kustpro = mysql_fetch_assoc($kustpre);
                 // Jos laskun tiliöinneiltä löytyy kustannuspaikka voidaan etsiä sen perusteella kassalipastilinumeroita
-                $query = "  SELECT DISTINCT kustp,kassa,pankkikortti,luottokortti 
-                      FROM kassalipas 
-                      WHERE yhtio='$kukarow[yhtio]' 
-                      AND kustp IN ({$kustpro['kustannuspaikat']})";
+                $query = "SELECT DISTINCT kustp,kassa,pankkikortti,luottokortti 
+                          FROM kassalipas 
+                          WHERE yhtio='$kukarow[yhtio]' 
+                          AND kustp IN ({$kustpro['kustannuspaikat']})";
                 $keijo = pupe_query($query);
 
                 while ($ressukka = mysql_fetch_assoc($keijo)) {
@@ -808,12 +808,12 @@
                 if (count($dipoli) > 0) $tilinolisa = ",".implode(",", $dipoli);
               }
 
-              $query = "  SELECT *
-                    FROM tiliointi USE INDEX (tositerivit_index)
-                    WHERE yhtio = '$kukarow[yhtio]' and
-                    ltunnus = '$maksurow[tunnus]' and
-                    tilino in ({$ratiro['rahatilit']}{$tilinolisa}) and
-                    korjattu = ''";
+              $query = "SELECT *
+                        FROM tiliointi USE INDEX (tositerivit_index)
+                        WHERE yhtio = '$kukarow[yhtio]' and
+                        ltunnus     = '$maksurow[tunnus]' and
+                        tilino      in ({$ratiro['rahatilit']}{$tilinolisa}) and
+                        korjattu    = ''";
               $lasktilitre = pupe_query($query);
 
               // listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks

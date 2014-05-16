@@ -364,6 +364,11 @@ else {
     $varasto   = '';
     $edvarasto = '';
 
+    //jos ei splitattu, laitetaan $splitattuihin luodun laskun tunnus päivitystä varten
+    if (!isset($splitatut)) {
+      $splitatut = array($laskurow['tunnus']);
+    }
+
     if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
       foreach ($splitatut as $tunnus) {
         $query = "SELECT *

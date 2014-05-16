@@ -26605,9 +26605,11 @@ if (!function_exists('hae_mahdolliset_siirto_varastot')) {
   function hae_mahdolliset_siirto_varastot($kohde_varastot = array(), $tuoteno = '') {
     global $kukarow, $yhtiorow;
 
-    $avainsana_where = "";
     if (!empty($kohde_varastot)) {
       $avainsana_where = "  AND a.selitetark IN (".implode(', ', $kohde_varastot).")";
+    }
+    else {
+      return array();
     }
 
     $query = "  SELECT a.*,

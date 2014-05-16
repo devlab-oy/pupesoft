@@ -404,14 +404,30 @@ if (isset($jatka)) {
   $vtresult = mysql_query($aquery) or pupe_error($aquery);
   $vtrow = mysql_fetch_array($vtresult);
 
-  if ($toim_nimitark == '' and $toim_nimi == '') $toim_nimitark = $vtrow['nimitark'];
-  if (!isset($toim_nimi) or $toim_nimi == '') $toim_nimi = $vtrow['nimi'];
-  if (!isset($toim_osoite) or $toim_osoite == '') $toim_osoite = $vtrow['osoite'];
-  if (!isset($toim_postino) or $toim_postino == '') $toim_postino = $vtrow['postino'];
-  if (!isset($toim_postitp) or $toim_postitp == '') $toim_postitp = $vtrow['postitp'];
-  if (!isset($toim_maa) or $toim_maa == '') $toim_maa = $vtrow['maa'];
-  if (!isset($eilahe)) $eilahe = '';
-  if (!isset($valmistuslinja)) $valmistuslinja = '';
+  if ($toim_nimitark == '' and $toim_nimi == '') {
+    $toim_nimitark = $vtrow['nimitark'];
+  }
+  if (!isset($toim_nimi) or $toim_nimi == '') {
+    $toim_nimi = $vtrow['nimi'];
+  }
+  if (!isset($toim_osoite) or $toim_osoite == '') {
+    $toim_osoite = $vtrow['osoite'];
+  }
+  if (!isset($toim_postino) or $toim_postino == '') {
+    $toim_postino = $vtrow['postino'];
+  }
+  if (!isset($toim_postitp) or $toim_postitp == '') {
+    $toim_postitp = $vtrow['postitp'];
+  }
+  if (!isset($toim_maa) or $toim_maa == '') {
+    $toim_maa = $vtrow['maa'];
+  }
+  if (!isset($eilahe)) {
+    $eilahe = '';
+  }
+  if (!isset($valmistuslinja)) {
+    $valmistuslinja = '';
+  }
 
   //$yhtio_toimipaikka muuttuja asetetaan ainoastaan tilauksesta_varastosiirto funkkarissa.
   if (!isset($yhtio_toimipaikka)) {

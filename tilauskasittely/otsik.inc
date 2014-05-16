@@ -2539,7 +2539,7 @@ if ($tila == "" and !isset($jatka)) {
         if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
           $sel = 'selected';
         }
-        else if (!empty($asiakas) and $toimitustapa["selite"] == $asiakas["toimitustapa"]) {
+        elseif (!empty($asiakas) and $toimitustapa["selite"] == $asiakas["toimitustapa"]) {
           $sel = 'selected';
         }
 

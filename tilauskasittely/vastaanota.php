@@ -984,7 +984,9 @@ if ($id == '0' and $echotaanko) {
     }
   }
 
-  $query = "  SELECT IF(toimitustavan_lahto = 0, 'x', toimitustavan_lahto) lahto,
+  $group_per_lahto = $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'];
+
+  $query = "  SELECT IF((toimitustavan_lahto = 0 OR '{$group_per_lahto}' = ''), 'x', toimitustavan_lahto) lahto,
               IF(siirtolistan_vastaanotto = 0, 'x', siirtolistan_vastaanotto) siirtolistan_vastaanotto,
               lasku.clearing,
               lahdot.aktiivi AS lahdon_aktiivi,
@@ -1073,7 +1075,7 @@ if ($id == '0' and $echotaanko) {
     // etsit‰‰n sopivia tilauksia
     $query = "  SELECT varasto,
                 tunnus,
-                IF(toimitustavan_lahto = 0, '', toimitustavan_lahto) lahto,
+                IF((toimitustavan_lahto = 0 OR '{$group_per_lahto}' = ''), '', toimitustavan_lahto) lahto,
                 IF(siirtolistan_vastaanotto = 0, '', siirtolistan_vastaanotto) siirtolistan_vastaanotto,
                 nimi,
                 date_format(luontiaika, '%Y-%m-%d') laadittu,
@@ -1165,7 +1167,7 @@ if ($id == '0' and $echotaanko) {
         }
 
         echo "</form></td></tr>";
-        
+
         $ed_lahto = $_lahto;
         $ed_vastaanottonro = $_vastaanottonro;
       }

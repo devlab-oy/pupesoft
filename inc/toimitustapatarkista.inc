@@ -88,12 +88,12 @@ if(!function_exists("toimitustapatarkista")) {
 
       if ($tuote != "") {
         // katotaan löytyykö tällänen saldoton tuote
-        $query = "  SELECT tunnus
-              FROM tuote
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND tuoteno = '$tuote'
-              AND tuoteno != ''
-              AND ei_saldoa != ''";
+        $query = "SELECT tunnus
+                  FROM tuote
+                  WHERE yhtio    = '$kukarow[yhtio]'
+                  AND tuoteno    = '$tuote'
+                  AND tuoteno   != ''
+                  AND ei_saldoa != ''";
         $xyresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($xyresult) == 0) {

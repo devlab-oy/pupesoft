@@ -93,18 +93,18 @@ foreach ($ups_path as $ups_key => $ups_val) {
             }
 
             if ($reference_number != '' and $ups_tracking_number != '' and $xml_yhtio != '') {
-              $query = "  SELECT yhtio
-                    FROM yhtio
-                    WHERE ytunnus = '$xml_yhtio'";
+              $query = "SELECT yhtio
+                        FROM yhtio
+                        WHERE ytunnus = '$xml_yhtio'";
               $result = mysql_query($query) or die("Ei saatu yhtiota ytunnuksella $xml_yhtio\n".mysql_error()."\n\n");
 
               if (mysql_num_rows($result) == 1) {
                 $row = mysql_fetch_assoc($result);
 
-                $query = "  UPDATE rahtikirjat SET
-                      rahtikirjanro = concat(rahtikirjanro, '$ups_tracking_number')
-                      WHERE yhtio = '$row[yhtio]'
-                      AND otsikkonro = $reference_number";
+                $query = "UPDATE rahtikirjat SET
+                          rahtikirjanro  = concat(rahtikirjanro, '$ups_tracking_number')
+                          WHERE yhtio    = '$row[yhtio]'
+                          AND otsikkonro = $reference_number";
                 $result = mysql_query($query) or die("Ei voitu paivittaa $reference_number $ups_tracking_number\n".mysql_error()."\n\n");
 
                 $ups_lisattuja++;

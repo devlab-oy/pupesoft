@@ -19,10 +19,10 @@ if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan
 
 if (mysql_field_name($result, $i) == "oletus_suoravel_pankki") { //suoraveloitus suoritetaan automaattisesti
 
-  $query = "  SELECT nimi, tilino, tunnus
-        FROM yriti
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and kaytossa = ''";
+  $query = "SELECT nimi, tilino, tunnus
+            FROM yriti
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and kaytossa = ''";
   $vresult = pupe_query($query);
 
   $sel="";
@@ -68,10 +68,10 @@ if  ((mysql_field_name($result, $i) == "oletus_suoraveloitus") or
 }
 
 if (mysql_field_name($result, $i) == "oletus_valkoodi") { //valuutta
-  $query = "  SELECT nimi, tunnus
-        FROM valuu
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY jarjestys";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
@@ -99,11 +99,11 @@ if (mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set == "KAYTTAJA
     (mysql_field_name($result, $i) == "oletus_hyvak4") or
     (mysql_field_name($result, $i) == "oletus_hyvak5")) { //hyväksyjät
 
-  $query = "  SELECT kuka, nimi
-        FROM kuka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and hyvaksyja = 'o'
-        ORDER BY nimi";
+  $query = "SELECT kuka, nimi
+            FROM kuka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and hyvaksyja = 'o'
+            ORDER BY nimi";
   $vresult = pupe_query($query);
 
   $sel="";
@@ -125,12 +125,12 @@ if (mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set == "KAYTTAJA
 
 if (mysql_field_name($result, $i) == "nimi" and $alias_set == "KAYTTAJA") {
 
-  $query = "  SELECT kuka, nimi
-        FROM kuka
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND extranet = ''
-        AND nimi != ''
-        ORDER BY nimi";
+  $query = "SELECT kuka, nimi
+            FROM kuka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            AND extranet  = ''
+            AND nimi     != ''
+            ORDER BY nimi";
   $vresult = pupe_query($query);
 
   $sel="";
@@ -151,12 +151,12 @@ if (mysql_field_name($result, $i) == "nimi" and $alias_set == "KAYTTAJA") {
 }
 
   if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
-  $query = "  SELECT tunnus, nimi, koodi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa != 'E'
-        and tyyppi = 'K'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi, koodi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   $sel="";
@@ -179,12 +179,12 @@ if (mysql_field_name($result, $i) == "nimi" and $alias_set == "KAYTTAJA") {
 }
 
 if (mysql_field_name($result, $i) == "kohde") { //kohteet
-  $query = "  SELECT tunnus, nimi, koodi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'O'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi, koodi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = 'O'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   $sel="";
@@ -207,12 +207,12 @@ if (mysql_field_name($result, $i) == "kohde") { //kohteet
 
 if (mysql_field_name($result, $i) == "projekti") { //projektit
 
-  $query = "  SELECT tunnus, nimi, koodi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'P'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi, koodi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = 'P'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $vresult = pupe_query($query);
 
   $sel="";
@@ -332,10 +332,10 @@ if (mysql_field_name($result, $i) == "kuljetusmuoto") {
 }
 
 if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "maa_lahetys" or mysql_field_name($result, $i) == "ultilno_maa") {
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
@@ -430,12 +430,12 @@ if (mysql_field_name($result, $i) == "tyyppi") {
 if (mysql_field_name($result, $i) == "tilino_alv") {
 
   // tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity
-  $query = "  SELECT *
-        FROM yhtion_toimipaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        and maa != ''
-        and vat_numero != ''
-        and toim_alv != ''";
+  $query = "SELECT *
+            FROM yhtion_toimipaikat
+            WHERE yhtio     = '$kukarow[yhtio]'
+            and maa        != ''
+            and vat_numero != ''
+            and toim_alv   != ''";
   $alhire = pupe_query($query);
 
   // ollaan alv-rekisteröity

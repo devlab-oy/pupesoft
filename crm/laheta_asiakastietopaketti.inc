@@ -2,21 +2,21 @@
 //Haetaan viikon päivät
 viikonpaivat($kausi);
 
-$query = "  SELECT asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, left(kalenteri.pvmalku,10) pvmalku,
-      asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.maa, asiakas.postitp,
-      asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite, asiakas.toim_postino, asiakas.toim_maa, asiakas.toim_postitp,
-      asiakas.puhelin, asiakas.fax, asiakas.email,
-      kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
-      FROM kalenteri
-      LEFT JOIN kuka ON kalenteri.kuka=kuka.kuka and kalenteri.yhtio=kuka.yhtio
-      LEFT JOIN asiakas ON kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus
-      WHERE kalenteri.yhtio = '$kukarow[yhtio]'
-      and kalenteri.kuka = '$kukarow[kuka]'
-      and pvmalku >= '$viikkoalku'
-      and pvmalku <= '$viikkoloppu'
-      and tapa = 'Viikkosuunnitelma'
-      and tyyppi in ('kalenteri','memo')
-      order by pvmalku";
+$query = "SELECT asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, left(kalenteri.pvmalku,10) pvmalku,
+          asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.maa, asiakas.postitp,
+          asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite, asiakas.toim_postino, asiakas.toim_maa, asiakas.toim_postitp,
+          asiakas.puhelin, asiakas.fax, asiakas.email,
+          kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
+          FROM kalenteri
+          LEFT JOIN kuka ON kalenteri.kuka=kuka.kuka and kalenteri.yhtio=kuka.yhtio
+          LEFT JOIN asiakas ON kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus
+          WHERE kalenteri.yhtio = '$kukarow[yhtio]'
+          and kalenteri.kuka    = '$kukarow[kuka]'
+          and pvmalku           >= '$viikkoalku'
+          and pvmalku           <= '$viikkoloppu'
+          and tapa              = 'Viikkosuunnitelma'
+          and tyyppi            in ('kalenteri','memo')
+          order by pvmalku";
 $aresult = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($aresult)) {
@@ -40,11 +40,11 @@ while ($row = mysql_fetch_assoc($aresult)) {
   $viesti .= "Fax:         $row[fax]\r\n";
   $viesti .= "Sähköposti:  $row[email]\r\n\r\n";
 
-  $query = "  SELECT *
-        FROM yhteyshenkilo
-        WHERE yhtio    = '$kukarow[yhtio]'
-        and liitostunnus = '$row[ytunnus]'
-        and tyyppi      = 'A'";
+  $query = "SELECT *
+            FROM yhteyshenkilo
+            WHERE yhtio      = '$kukarow[yhtio]'
+            and liitostunnus = '$row[ytunnus]'
+            and tyyppi       = 'A'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -63,19 +63,19 @@ while ($row = mysql_fetch_assoc($aresult)) {
 
   $vuosi = date("Y")-1;
 
-  $query = "  SELECT asiakas.ytunnus, kalenteri.yhtio, left(kalenteri.pvmalku,10) pvmalku, kuka.nimi kukanimi,
-        asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.maa, asiakas.postitp,
-        asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite, asiakas.toim_postino, asiakas.toim_maa, asiakas.toim_postitp,
-        kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
-        FROM kalenteri
-        LEFT JOIN kuka ON kalenteri.kuka=kuka.kuka and kalenteri.yhtio=kuka.yhtio
-        LEFT JOIN asiakas ON kalenteri.yhtio=asiakas.yhtio and kalenteri.asiakas=asiakas.ytunnus
-        WHERE kalenteri.yhtio='$kukarow[yhtio]'
-        and pvmalku >= '$vuosi-01-01'
-        and pvmalku <= '$viikkoloppu'
-        and kalenteri.asiakas  = '$row[ytunnus]'
-        and tyyppi in ('kalenteri','memo')
-        order by pvmalku desc";
+  $query = "SELECT asiakas.ytunnus, kalenteri.yhtio, left(kalenteri.pvmalku,10) pvmalku, kuka.nimi kukanimi,
+            asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.maa, asiakas.postitp,
+            asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite, asiakas.toim_postino, asiakas.toim_maa, asiakas.toim_postitp,
+            kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
+            FROM kalenteri
+            LEFT JOIN kuka ON kalenteri.kuka=kuka.kuka and kalenteri.yhtio=kuka.yhtio
+            LEFT JOIN asiakas ON kalenteri.yhtio=asiakas.yhtio and kalenteri.asiakas=asiakas.ytunnus
+            WHERE kalenteri.yhtio='$kukarow[yhtio]'
+            and pvmalku           >= '$vuosi-01-01'
+            and pvmalku           <= '$viikkoloppu'
+            and kalenteri.asiakas = '$row[ytunnus]'
+            and tyyppi            in ('kalenteri','memo')
+            order by pvmalku desc";
   $bresult = pupe_query($query);
 
   if (mysql_num_rows($bresult) > 0) {

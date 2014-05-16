@@ -489,13 +489,13 @@ if (!function_exists('rivi_valm')) {
         $tunken = "ostorivitunnus";
       }
 
-      $query = "  SELECT DISTINCT sarjanumero, parasta_ennen
-            FROM sarjanumeroseuranta
-            WHERE yhtio    = '$kukarow[yhtio]'
-            and tuoteno    = '$row[tuoteno]'
-            and $tunken    = '$row[tunnus]'
-            and sarjanumero != ''
-            ORDER BY sarjanumero";
+      $query = "SELECT DISTINCT sarjanumero, parasta_ennen
+                FROM sarjanumeroseuranta
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and tuoteno      = '$row[tuoteno]'
+                and $tunken    = '$row[tunnus]'
+                and sarjanumero != ''
+                ORDER BY sarjanumero";
       $sarjares = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($sarjares) > 0) {
@@ -616,14 +616,14 @@ if (!function_exists('rivi_valmistus')) {
     }
 
     if ($row["tunnus"] == $row["perheid"]) {
-      $query = "  SELECT fakta
-            FROM tuoteperhe
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and tyyppi     = 'R'
-            and isatuoteno   = '$row[tuoteno]'
-            and trim(fakta) != ''
-            ORDER BY LENGTH(fakta) desc
-            LIMIT 1";
+      $query = "SELECT fakta
+                FROM tuoteperhe
+                WHERE yhtio    = '$kukarow[yhtio]'
+                and tyyppi     = 'R'
+                and isatuoteno = '$row[tuoteno]'
+                and trim(fakta) != ''
+                ORDER BY LENGTH(fakta) desc
+                LIMIT 1";
       $ressu = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($ressu) == 1) {

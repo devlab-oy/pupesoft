@@ -71,13 +71,13 @@ else {
   echo "<td><select name='myyja'>";
   echo "<option value='0'>",t("Valitse"),"</option>";
 
-  $query = "  SELECT tunnus, kuka, nimi, myyja
-        FROM kuka
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND extranet = ''
-        AND nimi != ''
-        AND myyja != ''
-        ORDER BY nimi";
+  $query = "SELECT tunnus, kuka, nimi, myyja
+            FROM kuka
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND extranet  = ''
+            AND nimi     != ''
+            AND myyja    != ''
+            ORDER BY nimi";
   $myyjares = pupe_query($query);
 
   while ($myyjarow = mysql_fetch_assoc($myyjares)) {
@@ -111,16 +111,16 @@ else {
     $myyjalisa = $myyja != 0 ? "AND lasku.myyja = '{$myyja}'" : "";
 
     // Haetaan laskutetut tilaukset
-    $query = "  SELECT lasku.*, IFNULL(kuka.nimi, '".t("Ei myyjää")."') AS myyja, TRIM(CONCAT(lasku.ytunnus, ' ', lasku.nimi, ' ', lasku.nimitark)) AS nimi
-          FROM lasku
-          LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          AND lasku.tila = 'L'
-          AND lasku.alatila = 'X'
-          AND lasku.tapvm >= '{$avv}-{$akk}-{$app}'
-          AND lasku.tapvm <= '{$lvv}-{$lkk}-{$lpp}'
-          {$myyjalisa}
-          ORDER BY lasku.myyja, lasku.tapvm, lasku.tunnus";
+    $query = "SELECT lasku.*, IFNULL(kuka.nimi, '".t("Ei myyjää")."') AS myyja, TRIM(CONCAT(lasku.ytunnus, ' ', lasku.nimi, ' ', lasku.nimitark)) AS nimi
+              FROM lasku
+              LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tila    = 'L'
+              AND lasku.alatila = 'X'
+              AND lasku.tapvm   >= '{$avv}-{$akk}-{$app}'
+              AND lasku.tapvm   <= '{$lvv}-{$lkk}-{$lpp}'
+              {$myyjalisa}
+              ORDER BY lasku.myyja, lasku.tapvm, lasku.tunnus";
     $laskures = pupe_query($query);
 
     if (mysql_num_rows($laskures) == 0) {
@@ -158,23 +158,23 @@ else {
 
       $x = 1;
 
-      $query = "  SELECT *
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus = '{$laskurow['tunnus']}'
-            AND tyyppi = 'L'
-            AND kpl+varattu > 0
-            AND tuoteno NOT IN (
-              '{$yhtiorow['rahti_tuotenumero']}',
-              '{$yhtiorow['jalkivaatimus_tuotenumero']}',
-              '{$yhtiorow['erilliskasiteltava_tuotenumero']}',
-              '{$yhtiorow['kasittelykulu_tuotenumero']}',
-              '{$yhtiorow['maksuehto_tuotenumero']}',
-              '{$yhtiorow['ennakkomaksu_tuotenumero']}',
-              '{$yhtiorow['alennus_tuotenumero']}',
-              '{$yhtiorow['laskutuslisa_tuotenumero']}',
-              '{$yhtiorow['kuljetusvakuutus_tuotenumero']}'
-            )";
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$laskurow['tunnus']}'
+                AND tyyppi  = 'L'
+                AND kpl+varattu > 0
+                AND tuoteno NOT IN (
+                  '{$yhtiorow['rahti_tuotenumero']}',
+                  '{$yhtiorow['jalkivaatimus_tuotenumero']}',
+                  '{$yhtiorow['erilliskasiteltava_tuotenumero']}',
+                  '{$yhtiorow['kasittelykulu_tuotenumero']}',
+                  '{$yhtiorow['maksuehto_tuotenumero']}',
+                  '{$yhtiorow['ennakkomaksu_tuotenumero']}',
+                  '{$yhtiorow['alennus_tuotenumero']}',
+                  '{$yhtiorow['laskutuslisa_tuotenumero']}',
+                  '{$yhtiorow['kuljetusvakuutus_tuotenumero']}'
+                )";
       $tilausrivires = pupe_query($query);
 
       $num_rows = mysql_num_rows($tilausrivires);
@@ -188,10 +188,10 @@ else {
         $_chk = $laskurow['liitostunnus'].'####'.$tilausrivirow['tuoteno'].'####'.$tilausrivirow['kpl'];
 
         if (!isset($tuotteiden_alehinnat[$_chk])) {
-          $query = "  SELECT *
-                FROM tuote
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$tilausrivirow['tuoteno']}'";
+          $query = "SELECT *
+                    FROM tuote
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$tilausrivirow['tuoteno']}'";
           $tres = pupe_query($query);
           $trow = mysql_fetch_assoc($tres);
 

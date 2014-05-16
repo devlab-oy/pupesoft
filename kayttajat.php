@@ -141,20 +141,20 @@ if ($tee == 'delkesken') {
 }
 
 if ($tee == 'deloikeu') {
-  $query = "  UPDATE kuka
-        SET profiilit   = '',
-        aktiivinen     = 0,
-        muuttaja    = '{$kukarow['kuka']}',
-        muutospvm    = now()
-        WHERE kuka = '{$selkuka}'
-        AND yhtio = '{$kukarow['yhtio']}'";
+  $query = "UPDATE kuka
+            SET profiilit   = '',
+            aktiivinen = 0,
+            muuttaja   = '{$kukarow['kuka']}',
+            muutospvm  = now()
+            WHERE kuka = '{$selkuka}'
+            AND yhtio  = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
-  $query = "  DELETE from oikeu
-        WHERE kuka = '{$selkuka}'
-        and kuka != ''
-        and profiili = ''
-        and yhtio = '{$kukarow['yhtio']}'";
+  $query = "DELETE from oikeu
+            WHERE kuka    = '{$selkuka}'
+            and kuka     != ''
+            and profiili  = ''
+            and yhtio     = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   echo "<b>",t("Käyttäjän")," {$selkuka} ",t("käyttöoikeudet")," ",t("poistettu"),"!</b><br>";
@@ -165,11 +165,11 @@ if ($tee == 'deloikeu') {
 
 // Poistetaan käyttäjän salasana
 if ($tee == 'delpsw') {
-  $query = "  UPDATE kuka
-        SET salasana = '',
-        muuttaja   = '{$kukarow['kuka']}',
-        muutospvm   = now()
-        WHERE kuka = '{$selkuka}'";
+  $query = "UPDATE kuka
+            SET salasana = '',
+            muuttaja   = '{$kukarow['kuka']}',
+            muutospvm  = now()
+            WHERE kuka = '{$selkuka}'";
   $result = pupe_query($query);
 
   echo "<b>",t("Käyttäjän")," {$selkuka} ",t("salasana poistettu"),"!</b><br>";
@@ -204,11 +204,11 @@ if ($tee == "UUSI" or $tee == "MUUTA") {
       unset($submit_button);
     }
     else {
-      $query = "  SELECT tunnus
-            FROM kuka
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND myyja = $myyja
-            AND kuka != '{$kuka}'";
+      $query = "SELECT tunnus
+                FROM kuka
+                WHERE yhtio  = '{$kukarow["yhtio"]}'
+                AND myyja    = $myyja
+                AND kuka    != '{$kuka}'";
       $resmyyja = pupe_query($query);
 
       if (mysql_num_rows($resmyyja) > 0) {
@@ -222,11 +222,11 @@ if ($tee == "UUSI" or $tee == "MUUTA") {
   $hyvaksyja_maksimisumma = (int) $hyvaksyja_maksimisumma;
 
   if ($hyvaksyja_maksimisumma != 0) {
-    $query = "  SELECT tunnus
-          FROM dynaaminen_puu
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laji = 'kuka'
-          LIMIT 1";
+    $query = "SELECT tunnus
+              FROM dynaaminen_puu
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = 'kuka'
+              LIMIT 1";
     $respuu = pupe_query($query);
 
     if (mysql_num_rows($respuu) == 0) {
@@ -330,57 +330,57 @@ if ($tee == 'UUSI') {
 
     $oletus_profiili = mysql_real_escape_string(trim($oletus_profiili));
 
-    $query = "  INSERT into kuka
-          SET nimi             = '{$firname}',
-          kuka               = '{$ktunnus}',
-          puhno               = '{$phonenum}',
-          eposti               = '{$email}',
-          kieli               = '{$lang}',
-          ip                = '{$ip}',
-          taso               = '{$taso}',
-          tilaus_valmis          = '{$tilaus_valmis}',
-          hinnat              = '{$hinta}',
-          saatavat            = '{$saatavat}',
-          osasto              = '{$osasto}',
-          salasana            = '{$salasana}',
-          keraajanro             = '{$keraajanro}',
-          myyja               = '{$myyja}',
-          tuuraaja            = '{$tuuraaja}',
-          varasto             = '{$varasto}',
-          oletus_varasto          = '{$oletus_varasto}',
-          oletus_ostovarasto        = '{$oletus_ostovarasto}',
-          oletus_pakkaamo          = '{$oletus_pakkaamo}',
-          kirjoitin             = '{$kirjoitin}',
-          kassalipas_otto          = '{$kassalipas_otto}',
-          kassamyyja             = '{$kassamyyja}',
-          dynaaminen_kassamyynti       = '{$dynaaminen_kassamyynti}',
-          jyvitys              = '{$jyvitys}',
-          oletus_asiakas           = '{$oletus_asiakas}',
-          oletus_asiakastiedot       = '{$oletus_asiakastiedot}',
-          oletus_profiili          = '{$oletus_profiili}',
-          oletus_ohjelma           = '{$oletus_ohjelma}',
-          resoluutio            = '{$resoluutio}',
-          extranet            = '{$extranet}',
-          hyvaksyja            = '{$hyvaksyja}',
-          hyvaksyja_maksimisumma      = '{$hyvaksyja_maksimisumma}',
-          hierarkia            = '{$hierarkia}',
-          lomaoikeus            = '{$lomaoikeus}',
-          asema              = '{$asema}',
-          toimipaikka            = '{$toimipaikka}',
-          mitatoi_tilauksia        = '{$mitatoi_tilauksia}',
-          naytetaan_katteet_tilauksella   = '{$naytetaan_katteet_tilauksella}',
-          naytetaan_asiakashinta       = '{$naytetaan_asiakashinta}',
-          naytetaan_tuotteet        = '{$naytetaan_tuotteet}',
-          naytetaan_tilaukset        = '{$naytetaan_tilaukset}',
-          profiilit             = '{$profile}',
-          piirit              = '{$piirit}',
-          fyysinen_sijainti        = '{$fyysinen_sijainti}',
-          keraysvyohyke          = '{$keraysvyohyke}',
-          max_keraysera_alustat      = '{$max_keraysera_alustat}',
-          laatija              = '{$kukarow['kuka']}',
-          luontiaika            = now(),
-          budjetti            = '{$budjetti}',
-          yhtio               = '{$yhtio}'";
+    $query = "INSERT into kuka
+              SET nimi             = '{$firname}',
+              kuka                          = '{$ktunnus}',
+              puhno                         = '{$phonenum}',
+              eposti                        = '{$email}',
+              kieli                         = '{$lang}',
+              ip                            = '{$ip}',
+              taso                          = '{$taso}',
+              tilaus_valmis                 = '{$tilaus_valmis}',
+              hinnat                        = '{$hinta}',
+              saatavat                      = '{$saatavat}',
+              osasto                        = '{$osasto}',
+              salasana                      = '{$salasana}',
+              keraajanro                    = '{$keraajanro}',
+              myyja                         = '{$myyja}',
+              tuuraaja                      = '{$tuuraaja}',
+              varasto                       = '{$varasto}',
+              oletus_varasto                = '{$oletus_varasto}',
+              oletus_ostovarasto            = '{$oletus_ostovarasto}',
+              oletus_pakkaamo               = '{$oletus_pakkaamo}',
+              kirjoitin                     = '{$kirjoitin}',
+              kassalipas_otto               = '{$kassalipas_otto}',
+              kassamyyja                    = '{$kassamyyja}',
+              dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
+              jyvitys                       = '{$jyvitys}',
+              oletus_asiakas                = '{$oletus_asiakas}',
+              oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
+              oletus_profiili               = '{$oletus_profiili}',
+              oletus_ohjelma                = '{$oletus_ohjelma}',
+              resoluutio                    = '{$resoluutio}',
+              extranet                      = '{$extranet}',
+              hyvaksyja                     = '{$hyvaksyja}',
+              hyvaksyja_maksimisumma        = '{$hyvaksyja_maksimisumma}',
+              hierarkia                     = '{$hierarkia}',
+              lomaoikeus                    = '{$lomaoikeus}',
+              asema                         = '{$asema}',
+              toimipaikka                   = '{$toimipaikka}',
+              mitatoi_tilauksia             = '{$mitatoi_tilauksia}',
+              naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
+              naytetaan_asiakashinta        = '{$naytetaan_asiakashinta}',
+              naytetaan_tuotteet            = '{$naytetaan_tuotteet}',
+              naytetaan_tilaukset           = '{$naytetaan_tilaukset}',
+              profiilit                     = '{$profile}',
+              piirit                        = '{$piirit}',
+              fyysinen_sijainti             = '{$fyysinen_sijainti}',
+              keraysvyohyke                 = '{$keraysvyohyke}',
+              max_keraysera_alustat         = '{$max_keraysera_alustat}',
+              laatija                       = '{$kukarow['kuka']}',
+              luontiaika                    = now(),
+              budjetti                      = '{$budjetti}',
+              yhtio                         = '{$yhtio}'";
     $result = pupe_query($query);
     $selkuka = mysql_insert_id();
 
@@ -395,69 +395,69 @@ if ($tee == 'UUSI') {
     $profiilit = explode(',', trim($profile));
 
     //poistetaan käyttäjän vanhat profiilioikeudet
-    $query = "  DELETE FROM oikeu
-          WHERE yhtio = '{$yhtio}'
-          AND kuka = '{$ktunnus}'
-          AND kuka != ''
-          AND profiili = ''
-          AND lukittu = ''";
+    $query = "DELETE FROM oikeu
+              WHERE yhtio   = '{$yhtio}'
+              AND kuka      = '{$ktunnus}'
+              AND kuka     != ''
+              AND profiili  = ''
+              AND lukittu   = ''";
     $pres = pupe_query($query);
 
     if (count($profiilit) > 0 and $profiilit[0] !='') {
       //käydään uudestaan profiili läpi
       foreach ($profiilit as $prof) {
-        $query = "  SELECT *
-              FROM oikeu
-              WHERE yhtio = '{$yhtio}'
-              AND kuka = '{$prof}'
-              AND profiili = '{$prof}'";
+        $query = "SELECT *
+                  FROM oikeu
+                  WHERE yhtio  = '{$yhtio}'
+                  AND kuka     = '{$prof}'
+                  AND profiili = '{$prof}'";
         $pres = pupe_query($query);
 
         while ($trow = mysql_fetch_assoc($pres)) {
           //joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
           //voi olla esim jos se on lukittuna annettu
-          $query = "  SELECT yhtio, paivitys
-                FROM oikeu
-                WHERE yhtio    = '{$yhtio}'
-                AND kuka    = '{$ktunnus}'
-                AND sovellus  = '{$trow['sovellus']}'
-                AND nimi    = '{$trow['nimi']}'
-                AND alanimi   = '{$trow['alanimi']}'";
+          $query = "SELECT yhtio, paivitys
+                    FROM oikeu
+                    WHERE yhtio  = '{$yhtio}'
+                    AND kuka     = '{$ktunnus}'
+                    AND sovellus = '{$trow['sovellus']}'
+                    AND nimi     = '{$trow['nimi']}'
+                    AND alanimi  = '{$trow['alanimi']}'";
           $tarkesult = pupe_query($query);
           $tarkesultrow = mysql_fetch_assoc($tarkesult);
 
           if (mysql_num_rows($tarkesult) == 0) {
-            $query = "  INSERT into oikeu SET
-                  kuka    = '{$ktunnus}',
-                  sovellus  = '{$trow['sovellus']}',
-                  nimi    = '{$trow['nimi']}',
-                  alanimi   = '{$trow['alanimi']}',
-                  paivitys  = '{$trow['paivitys']}',
-                  nimitys    = '{$trow['nimitys']}',
-                  jarjestys   = '{$trow['jarjestys']}',
-                  jarjestys2  = '{$trow['jarjestys2']}',
-                  hidden    = '{$trow['hidden']}',
-                  yhtio    = '{$yhtio}',
-                  laatija   = '{$kukarow['kuka']}',
-                  luontiaika   = now(),
-                  muutospvm   = now(),
-                  muuttaja   = '{$kukarow['kuka']}'";
+            $query = "INSERT into oikeu SET
+                      kuka       = '{$ktunnus}',
+                      sovellus   = '{$trow['sovellus']}',
+                      nimi       = '{$trow['nimi']}',
+                      alanimi    = '{$trow['alanimi']}',
+                      paivitys   = '{$trow['paivitys']}',
+                      nimitys    = '{$trow['nimitys']}',
+                      jarjestys  = '{$trow['jarjestys']}',
+                      jarjestys2 = '{$trow['jarjestys2']}',
+                      hidden     = '{$trow['hidden']}',
+                      yhtio      = '{$yhtio}',
+                      laatija    = '{$kukarow['kuka']}',
+                      luontiaika = now(),
+                      muutospvm  = now(),
+                      muuttaja   = '{$kukarow['kuka']}'";
             $rresult = pupe_query($query);
           }
           elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
-            $query = "  UPDATE oikeu
-                  SET paivitys = '1',
-                  muutospvm    = now(),
-                  muuttaja    = '{$kukarow['kuka']}'
-                  WHERE kuka    = '{$ktunnus}'
-                  AND sovellus  = '{$trow['sovellus']}'
-                  AND nimi    = '{$trow['nimi']}'
-                  AND alanimi   = '{$trow['alanimi']}'
-                  AND nimitys    = '{$trow['nimitys']}'
-                  AND jarjestys   = '{$trow['jarjestys']}'
-                  AND jarjestys2  = '{$trow['jarjestys2']}'
-                  AND hidden    = '{$trow['hidden']}'
-                  AND yhtio    = '{$yhtio}'";
+            $query = "UPDATE oikeu
+                      SET paivitys = '1',
+                      muutospvm      = now(),
+                      muuttaja       = '{$kukarow['kuka']}'
+                      WHERE kuka     = '{$ktunnus}'
+                      AND sovellus   = '{$trow['sovellus']}'
+                      AND nimi       = '{$trow['nimi']}'
+                      AND alanimi    = '{$trow['alanimi']}'
+                      AND nimitys    = '{$trow['nimitys']}'
+                      AND jarjestys  = '{$trow['jarjestys']}'
+                      AND jarjestys2 = '{$trow['jarjestys2']}'
+                      AND hidden     = '{$trow['hidden']}'
+                      AND yhtio      = '{$yhtio}'";
             $rresult = pupe_query($query);
           }
         }
@@ -526,12 +526,12 @@ if ($tee == 'MUUTA') {
     if (trim($password) != '') {
       $password = md5(trim($password));
 
-      $query = "  UPDATE kuka
-            SET salasana = '{$password}',
-            api_key     = md5(concat(yhtio, kuka, '{$password}')),
-            muuttaja   = '{$kukarow['kuka']}',
-            muutospvm   = now()
-            WHERE kuka = '{$kuka}'";
+      $query = "UPDATE kuka
+                SET salasana = '{$password}',
+                api_key    = md5(concat(yhtio, kuka, '{$password}')),
+                muuttaja   = '{$kukarow['kuka']}',
+                muutospvm  = now()
+                WHERE kuka = '{$kuka}'";
       $result = pupe_query($query);
     }
 
@@ -557,61 +557,61 @@ if ($tee == 'MUUTA') {
 
     $max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
-    $query = "  UPDATE kuka
-          SET nimi             = '{$firname}',
-          puhno               = '{$phonenum}',
-          eposti               = '{$email}',
-          kieli               = '{$lang}',
-          ip                = '{$ip}',
-          taso               = '{$taso}',
-          tilaus_valmis          = '{$tilaus_valmis}',
-          hinnat              = '{$hinnat}',
-          saatavat            = '{$saatavat}',
-          keraajanro             = '{$keraajanro}',
-          myyja               = '{$myyja}',
-          tuuraaja            = '{$tuuraaja}',
-          osasto              = '{$osasto}',
-          varasto             = '{$varasto}',
-          oletus_varasto           = '{$oletus_varasto}',
-          oletus_ostovarasto        = '{$oletus_ostovarasto}',
-          oletus_pakkaamo          = '{$oletus_pakkaamo}',
-          kirjoitin             = '{$kirjoitin}',
-          oletus_asiakas           = '{$oletus_asiakas}',
-          oletus_asiakastiedot       = '{$oletus_asiakastiedot}',
-          oletus_profiili          = '{$oletus_profiili}',
-          resoluutio             = '{$resoluutio}',
-          extranet            = '{$extranet}',
-          hyvaksyja            = '{$hyvaksyja}',
-          hyvaksyja_maksimisumma      = '{$hyvaksyja_maksimisumma}',
-          hierarkia            = '{$hierarkia}',
-          lomaoikeus            = '{$lomaoikeus}',
-          asema              = '{$asema}',
-          toimipaikka            = '{$toimipaikka}',
-          mitatoi_tilauksia        = '{$mitatoi_tilauksia}',
-          kassalipas_otto          = '{$kassalipas_otto}',
-          kassamyyja             = '{$kassamyyja}',
-          dynaaminen_kassamyynti      = '{$dynaaminen_kassamyynti}',
-          jyvitys              = '{$jyvitys}',
-          oletus_ohjelma           = '{$oletus_ohjelma}',
-          naytetaan_katteet_tilauksella   = '{$naytetaan_katteet_tilauksella}',
-          naytetaan_asiakashinta       = '{$naytetaan_asiakashinta}',
-          naytetaan_tuotteet        = '{$naytetaan_tuotteet}',
-          naytetaan_tilaukset        = '{$naytetaan_tilaukset}',
-          profiilit             = '{$profile}',
-          piirit              = '{$piirit}',
-          fyysinen_sijainti        = '{$fyysinen_sijainti}',
-          keraysvyohyke          = '{$keraysvyohyke}',
-          max_keraysera_alustat      = '{$max_keraysera_alustat}',
-          muuttaja            = '{$kukarow['kuka']}',
-          muutospvm            = now(),
-          budjetti            = '{$budjetti}'
-          WHERE kuka  = '{$kuka}'
-          AND yhtio  = '{$yhtio}'";
+    $query = "UPDATE kuka
+              SET nimi             = '{$firname}',
+              puhno                         = '{$phonenum}',
+              eposti                        = '{$email}',
+              kieli                         = '{$lang}',
+              ip                            = '{$ip}',
+              taso                          = '{$taso}',
+              tilaus_valmis                 = '{$tilaus_valmis}',
+              hinnat                        = '{$hinnat}',
+              saatavat                      = '{$saatavat}',
+              keraajanro                    = '{$keraajanro}',
+              myyja                         = '{$myyja}',
+              tuuraaja                      = '{$tuuraaja}',
+              osasto                        = '{$osasto}',
+              varasto                       = '{$varasto}',
+              oletus_varasto                = '{$oletus_varasto}',
+              oletus_ostovarasto            = '{$oletus_ostovarasto}',
+              oletus_pakkaamo               = '{$oletus_pakkaamo}',
+              kirjoitin                     = '{$kirjoitin}',
+              oletus_asiakas                = '{$oletus_asiakas}',
+              oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
+              oletus_profiili               = '{$oletus_profiili}',
+              resoluutio                    = '{$resoluutio}',
+              extranet                      = '{$extranet}',
+              hyvaksyja                     = '{$hyvaksyja}',
+              hyvaksyja_maksimisumma        = '{$hyvaksyja_maksimisumma}',
+              hierarkia                     = '{$hierarkia}',
+              lomaoikeus                    = '{$lomaoikeus}',
+              asema                         = '{$asema}',
+              toimipaikka                   = '{$toimipaikka}',
+              mitatoi_tilauksia             = '{$mitatoi_tilauksia}',
+              kassalipas_otto               = '{$kassalipas_otto}',
+              kassamyyja                    = '{$kassamyyja}',
+              dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
+              jyvitys                       = '{$jyvitys}',
+              oletus_ohjelma                = '{$oletus_ohjelma}',
+              naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
+              naytetaan_asiakashinta        = '{$naytetaan_asiakashinta}',
+              naytetaan_tuotteet            = '{$naytetaan_tuotteet}',
+              naytetaan_tilaukset           = '{$naytetaan_tilaukset}',
+              profiilit                     = '{$profile}',
+              piirit                        = '{$piirit}',
+              fyysinen_sijainti             = '{$fyysinen_sijainti}',
+              keraysvyohyke                 = '{$keraysvyohyke}',
+              max_keraysera_alustat         = '{$max_keraysera_alustat}',
+              muuttaja                      = '{$kukarow['kuka']}',
+              muutospvm                     = now(),
+              budjetti                      = '{$budjetti}'
+              WHERE kuka                    = '{$kuka}'
+              AND yhtio                     = '{$yhtio}'";
     $result = pupe_query($query);
 
-    $query = "  SELECT nimi, kuka, tunnus
-          FROM kuka
-          WHERE tunnus = '{$selkuka}'";
+    $query = "SELECT nimi, kuka, tunnus
+              FROM kuka
+              WHERE tunnus = '{$selkuka}'";
     $result = pupe_query($query);
     $selkukarow = mysql_fetch_assoc($result);
 
@@ -619,69 +619,69 @@ if ($tee == 'MUUTA') {
     $profiilit = explode(',', trim($profile));
 
     //poistetaan käyttäjän vanhat profiilioikeudet
-    $query = "  DELETE FROM oikeu
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND kuka = '{$kuka}'
-          AND kuka != ''
-          AND profiili = ''
-          AND lukittu = ''";
+    $query = "DELETE FROM oikeu
+              WHERE yhtio   = '{$kukarow['yhtio']}'
+              AND kuka      = '{$kuka}'
+              AND kuka     != ''
+              AND profiili  = ''
+              AND lukittu   = ''";
     $pres = pupe_query($query);
 
     if (count($profiilit) > 0 and $profiilit[0] != '') {
       //käydään uudestaan profiili läpi
       foreach ($profiilit as $prof) {
-        $query = "  SELECT *
-              FROM oikeu
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND kuka = '{$prof}'
-              AND profiili = '{$prof}'";
+        $query = "SELECT *
+                  FROM oikeu
+                  WHERE yhtio  = '{$kukarow['yhtio']}'
+                  AND kuka     = '{$prof}'
+                  AND profiili = '{$prof}'";
         $pres = pupe_query($query);
 
         while ($trow = mysql_fetch_assoc($pres)) {
           //joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
           //voi olla esim jos se on lukittuna annettu
-          $query = "  SELECT yhtio, paivitys
-                FROM oikeu
-                WHERE yhtio    = '{$kukarow['yhtio']}'
-                AND kuka    = '{$kuka}'
-                AND sovellus  = '{$trow['sovellus']}'
-                AND nimi    = '{$trow['nimi']}'
-                AND alanimi   = '{$trow['alanimi']}'";
+          $query = "SELECT yhtio, paivitys
+                    FROM oikeu
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
+                    AND kuka     = '{$kuka}'
+                    AND sovellus = '{$trow['sovellus']}'
+                    AND nimi     = '{$trow['nimi']}'
+                    AND alanimi  = '{$trow['alanimi']}'";
           $tarkesult = pupe_query($query);
           $tarkesultrow = mysql_fetch_assoc($tarkesult);
 
           if (mysql_num_rows($tarkesult) == 0) {
-            $query = "  INSERT into oikeu SET
-                  kuka    = '{$kuka}',
-                  sovellus  = '{$trow['sovellus']}',
-                  nimi    = '{$trow['nimi']}',
-                  alanimi   = '{$trow['alanimi']}',
-                  paivitys  = '{$trow['paivitys']}',
-                  nimitys    = '{$trow['nimitys']}',
-                  jarjestys   = '{$trow['jarjestys']}',
-                  jarjestys2  = '{$trow['jarjestys2']}',
-                  hidden    = '{$trow['hidden']}',
-                  yhtio    = '{$kukarow['yhtio']}',
-                  laatija   = '{$kukarow['kuka']}',
-                  luontiaika   = now(),
-                  muutospvm   = now(),
-                  muuttaja   = '{$kukarow['kuka']}'";
+            $query = "INSERT into oikeu SET
+                      kuka       = '{$kuka}',
+                      sovellus   = '{$trow['sovellus']}',
+                      nimi       = '{$trow['nimi']}',
+                      alanimi    = '{$trow['alanimi']}',
+                      paivitys   = '{$trow['paivitys']}',
+                      nimitys    = '{$trow['nimitys']}',
+                      jarjestys  = '{$trow['jarjestys']}',
+                      jarjestys2 = '{$trow['jarjestys2']}',
+                      hidden     = '{$trow['hidden']}',
+                      yhtio      = '{$kukarow['yhtio']}',
+                      laatija    = '{$kukarow['kuka']}',
+                      luontiaika = now(),
+                      muutospvm  = now(),
+                      muuttaja   = '{$kukarow['kuka']}'";
             $rresult = pupe_query($query);
           }
           elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
-            $query = "  UPDATE oikeu
-                  SET paivitys = '1',
-                  muutospvm    = now(),
-                  muuttaja    = '{$kukarow['kuka']}'
-                  WHERE kuka    = '{$kuka}'
-                  AND sovellus  = '{$trow['sovellus']}'
-                  AND nimi    = '{$trow['nimi']}'
-                  AND alanimi   = '{$trow['alanimi']}'
-                  AND nimitys    = '{$trow['nimitys']}'
-                  AND jarjestys   = '{$trow['jarjestys']}'
-                  AND jarjestys2  = '{$trow['jarjestys2']}'
-                  AND hidden    = '{$trow['hidden']}'
-                  AND yhtio    = '{$kukarow['yhtio']}'";
+            $query = "UPDATE oikeu
+                      SET paivitys = '1',
+                      muutospvm      = now(),
+                      muuttaja       = '{$kukarow['kuka']}'
+                      WHERE kuka     = '{$kuka}'
+                      AND sovellus   = '{$trow['sovellus']}'
+                      AND nimi       = '{$trow['nimi']}'
+                      AND alanimi    = '{$trow['alanimi']}'
+                      AND nimitys    = '{$trow['nimitys']}'
+                      AND jarjestys  = '{$trow['jarjestys']}'
+                      AND jarjestys2 = '{$trow['jarjestys2']}'
+                      AND hidden     = '{$trow['hidden']}'
+                      AND yhtio      = '{$kukarow['yhtio']}'";
             $rresult = pupe_query($query);
           }
         }
@@ -805,12 +805,12 @@ if ($tee == 'MUUTA') {
         echo "<tr><th align='left'>",t("Sijainen laskujen hyväksynnässä"),":</th><td>";
 
         // Haetaan mahdolliset tuuraajat
-        $query = "  SELECT kuka, nimi
-              FROM kuka
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND hyvaksyja != ''
-              AND extranet = ''
-              ORDER BY nimi";
+        $query = "SELECT kuka, nimi
+                  FROM kuka
+                  WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND hyvaksyja != ''
+                  AND extranet   = ''
+                  ORDER BY nimi";
         $hyvaksyja_result = pupe_query($query);
 
         echo "<select name = 'tuuraaja'>";
@@ -970,10 +970,10 @@ if ($tee == 'MUUTA') {
       echo "<tr><th align='left'>",t("Valitse käyttäjän oletusvarasto"),":</td>";
       echo "<td>";
 
-      $query  = "  SELECT *
-            FROM varastopaikat
-            WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-            ORDER BY tyyppi, nimitys";
+      $query  = "SELECT *
+                 FROM varastopaikat
+                 WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+                 ORDER BY tyyppi, nimitys";
       $vares = pupe_query($query);
 
       echo "<select name='oletus_varasto'>";
@@ -1007,10 +1007,10 @@ if ($tee == 'MUUTA') {
       echo "<tr><th align='left'>",t("Valitse varastot, joista käyttäjä saa myydä"),":</td>";
       echo "<td>";
 
-      $query  = "  SELECT *
-            FROM varastopaikat
-            WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-            ORDER BY tyyppi, nimitys";
+      $query  = "SELECT *
+                 FROM varastopaikat
+                 WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+                 ORDER BY tyyppi, nimitys";
       $vares = pupe_query($query);
 
       $varastot_array = explode(",", $krow["varasto"]);
@@ -1045,11 +1045,11 @@ if ($tee == 'MUUTA') {
         echo "<tr><th align='left'>",t("Henkilökohtainen tulostin:"),"</td>";
         echo "<td><select name='kirjoitin'><option value=''>",t("Ei oletuskirjoitinta"),"</option>";
 
-        $query  = "  SELECT tunnus, kirjoitin
-              FROM kirjoittimet
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND komento != 'EDI'
-              ORDER BY kirjoitin";
+        $query  = "SELECT tunnus, kirjoitin
+                   FROM kirjoittimet
+                   WHERE yhtio  = '{$kukarow['yhtio']}'
+                   AND komento != 'EDI'
+                   ORDER BY kirjoitin";
         $vares = pupe_query($query);
 
         while ($varow = mysql_fetch_assoc($vares)) {
@@ -1061,11 +1061,11 @@ if ($tee == 'MUUTA') {
         echo "</select></td></tr>";
 
         $kassalipaslisa = $krow['toimipaikka'] != 0 ? "and (toimipaikka = 0 or toimipaikka = {$krow['toimipaikka']})" : "";
-        $query = "  SELECT *
-              FROM kassalipas
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              {$kassalipaslisa}
-              ORDER BY nimi";
+        $query = "SELECT *
+                  FROM kassalipas
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  {$kassalipaslisa}
+                  ORDER BY nimi";
         $kassalipasres = pupe_query($query);
         $kassalippaat = array();
         while($kassalipas = mysql_fetch_assoc($kassalipasres)) {
@@ -1202,12 +1202,12 @@ if ($tee == 'MUUTA') {
           echo "<tr><th align='left'>",t("Oletusprofiili"),":</th><td>";
           echo "<table><tr><td><select name='oletus_profiili'>";
 
-          $query = "  SELECT DISTINCT profiili
-                FROM oikeu
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND profiili != ''
-                AND profiili LIKE 'extranet%'
-                ORDER BY profiili";
+          $query = "SELECT DISTINCT profiili
+                    FROM oikeu
+                    WHERE yhtio   = '{$kukarow['yhtio']}'
+                    AND profiili != ''
+                    AND profiili  LIKE 'extranet%'
+                    ORDER BY profiili";
           $pres = pupe_query($query);
 
           echo "<option value=''></option>";
@@ -1262,11 +1262,11 @@ if ($tee == 'MUUTA') {
         echo "<tr><th align='left'>",t("Oletusohjelma"),":</th><td><select name='oletus_ohjelma'>";
         echo "<option value=''>",t("Ei oletusta"),"</option>";
 
-        $query  = "  SELECT DISTINCT concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus
-              FROM oikeu
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND kuka = '{$krow['kuka']}'
-              ORDER BY sovellus, nimitys";
+        $query  = "SELECT DISTINCT concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus
+                   FROM oikeu
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND kuka    = '{$krow['kuka']}'
+                   ORDER BY sovellus, nimitys";
         $vares = pupe_query($query);
 
         while ($varow = mysql_fetch_assoc($vares)) {
@@ -1349,11 +1349,11 @@ if ($tee == 'MUUTA') {
         echo "<tr><th align='left'>",t("Toimipaikka"),":</td>";
         echo "<td><select name='toimipaikka'><option value=''>",t("Oletustoimipaikka"),"</option>";
 
-        $query = "  SELECT *
-              FROM yhtion_toimipaikat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND vat_numero = ''
-              ORDER BY nimi";
+        $query = "SELECT *
+                  FROM yhtion_toimipaikat
+                  WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND vat_numero = ''
+                  ORDER BY nimi";
         $vares = pupe_query($query);
 
         while ($varow = mysql_fetch_assoc($vares)) {
@@ -1372,7 +1372,7 @@ if ($tee == 'MUUTA') {
             $sel2 = "";
             $sel3 = "";
           }
-          else if ($krow['jyvitys'] == "S") {
+          elseif ($krow['jyvitys'] == "S") {
             $sel1 = "";
             $sel2 = "";
             $sel3 = "SELECTED";
@@ -1424,12 +1424,12 @@ if ($tee == 'MUUTA') {
       }
 
 
-      $query = "  SELECT DISTINCT profiili
-            FROM oikeu
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND profiili != ''
-            {$andextra}
-            ORDER BY profiili";
+      $query = "SELECT DISTINCT profiili
+                FROM oikeu
+                WHERE yhtio   = '{$kukarow['yhtio']}'
+                AND profiili != ''
+                {$andextra}
+                ORDER BY profiili";
       $pres = pupe_query($query);
 
       $profiilit = explode(',', $krow["profiilit"]);
@@ -1480,12 +1480,12 @@ if ($tee == 'MUUTA') {
     echo "</td>";
 
     if ($toim == 'extranet') {
-      $queryoik = "  SELECT tunnus
-              FROM oikeu
-              WHERE nimi LIKE '%yllapito.php'
-              AND alanimi = 'extranet_kayttajan_lisatiedot'
-              AND kuka = '{$kukarow['kuka']}'
-              AND yhtio = '{$yhtiorow['yhtio']}'";
+      $queryoik = "SELECT tunnus
+                   FROM oikeu
+                   WHERE nimi  LIKE '%yllapito.php'
+                   AND alanimi = 'extranet_kayttajan_lisatiedot'
+                   AND kuka    = '{$kukarow['kuka']}'
+                   AND yhtio   = '{$yhtiorow['yhtio']}'";
       $res = pupe_query($queryoik);
 
       if (mysql_num_rows($res) > 0) {
@@ -1558,13 +1558,13 @@ if ($tee == "") {
   if ($toim == "extranet") $extrsel = "X";
   else $extrsel = "";
 
-  $query = "  SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if (count(oikeu.tunnus) > 0, 0, 1) aktiivinen
-        FROM kuka
-        LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
-        WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-        AND kuka.extranet = '{$extrsel}'
-        GROUP BY 1,2,3
-        ORDER BY aktiivinen, kuka.nimi";
+  $query = "SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if (count(oikeu.tunnus) > 0, 0, 1) aktiivinen
+            FROM kuka
+            LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+            WHERE kuka.yhtio  = '{$kukarow['yhtio']}'
+            AND kuka.extranet = '{$extrsel}'
+            GROUP BY 1,2,3
+            ORDER BY aktiivinen, kuka.nimi";
   $kukares = pupe_query($query);
 
   echo "<optgroup label='",t("Aktiiviset käyttäjät"),"'>";

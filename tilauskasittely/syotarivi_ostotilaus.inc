@@ -29,12 +29,12 @@ $suoratoimitusekko = "";
 
 if ($rivitunnus > 0) {
   //Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
-     $query = "  SELECT tilausrivi.tunnus, tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
-           FROM tilausrivin_lisatiedot
-           JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.laskutettuaika = '0000-00-00')
-        JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-           WHERE tilausrivin_lisatiedot.yhtio = '$kukarow[yhtio]'
-           and tilausrivin_lisatiedot.tilausrivilinkki  = '$rivitunnus'";
+     $query = "SELECT tilausrivi.tunnus, tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
+               FROM tilausrivin_lisatiedot
+               JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.laskutettuaika = '0000-00-00')
+               JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+               WHERE tilausrivin_lisatiedot.yhtio          = '$kukarow[yhtio]'
+               and tilausrivin_lisatiedot.tilausrivilinkki = '$rivitunnus'";
   $varastoon_result = pupe_query($query);
 
   if ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {

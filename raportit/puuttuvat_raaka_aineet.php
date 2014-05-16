@@ -120,85 +120,85 @@ function hae_valmistukset_joissa_raaka_aine_ei_riita($request) {
   }
 
   //Haetaan valmisteet
-  $query = "  SELECT lasku.tunnus AS lasku_tunnus,
-        tilausrivi.tunnus AS tilausrivi_tunnus,
-        tilausrivi.tuoteno,
-        tilausrivi.nimitys,
-        tilausrivi.tyyppi,
-        lasku.kohde as valmistuslinja,
-        lasku.tila,
-        lasku.alatila,
-        lasku.kerayspvm,
-        lasku.toimaika,
-        (  SELECT toimi.nimi
-          FROM tuotteen_toimittajat
-          JOIN toimi
-          ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-            AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
-          WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-          AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-          ORDER BY tuotteen_toimittajat.jarjestys ASC
-          LIMIT 1
-        ) AS toimittaja,
-        sum(tilausrivi.varattu) AS valmistettava_kpl
-        FROM lasku
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus
-          AND tilausrivi.tyyppi IN ('W')
-          AND tilausrivi.varattu > 0)
-        JOIN tuote
-        ON ( tuote.yhtio = tilausrivi.yhtio
-          AND tuote.tuoteno = tilausrivi.tuoteno
-          AND tuote.tuotetyyppi not in ('A', 'B')
-          AND tuote.ei_saldoa = ''
-          {$tuote_join} )
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.toimaika BETWEEN '{$request['alku_pvm']}' AND '{$request['loppu_pvm']}'
-        {$lasku_where}
-        GROUP BY 1,2,3,4,5,6,7,8,9,10,11
-        ORDER BY lasku.tunnus ASC, tilausrivi.perheid ASC, tilausrivi.tyyppi DESC";
+  $query = "SELECT lasku.tunnus AS lasku_tunnus,
+            tilausrivi.tunnus AS tilausrivi_tunnus,
+            tilausrivi.tuoteno,
+            tilausrivi.nimitys,
+            tilausrivi.tyyppi,
+            lasku.kohde as valmistuslinja,
+            lasku.tila,
+            lasku.alatila,
+            lasku.kerayspvm,
+            lasku.toimaika,
+            (  SELECT toimi.nimi
+              FROM tuotteen_toimittajat
+              JOIN toimi
+              ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+                AND toimi.tunnus               = tuotteen_toimittajat.liitostunnus )
+              WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+              AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+              ORDER BY tuotteen_toimittajat.jarjestys ASC
+              LIMIT 1
+            ) AS toimittaja,
+            sum(tilausrivi.varattu) AS valmistettava_kpl
+            FROM lasku
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus           = lasku.tunnus
+              AND tilausrivi.tyyppi            IN ('W')
+              AND tilausrivi.varattu           > 0)
+            JOIN tuote
+            ON ( tuote.yhtio = tilausrivi.yhtio
+              AND tuote.tuoteno                = tilausrivi.tuoteno
+              AND tuote.tuotetyyppi            not in ('A', 'B')
+              AND tuote.ei_saldoa              = ''
+              {$tuote_join} )
+            WHERE lasku.yhtio                  = '{$kukarow['yhtio']}'
+            AND lasku.toimaika BETWEEN '{$request['alku_pvm']}' AND '{$request['loppu_pvm']}'
+            {$lasku_where}
+            GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+            ORDER BY lasku.tunnus ASC, tilausrivi.perheid ASC, tilausrivi.tyyppi DESC";
   $result = pupe_query($query);
 
   $valmistukset_joissa_raaka_aine_ei_riita = array();
   while ($valmiste_rivi = mysql_fetch_assoc($result)) {
     //Haetaan valmisteen raaka-aineet
-    $query = "  SELECT lasku.tunnus AS lasku_tunnus,
-          tilausrivi.tunnus AS tilausrivi_tunnus,
-          tilausrivi.tuoteno,
-          tilausrivi.nimitys,
-          tilausrivi.tyyppi,
-          lasku.kohde as valmistuslinja,
-          lasku.tila,
-          lasku.alatila,
-          lasku.kerayspvm,
-          lasku.toimaika,
-          (  SELECT toimi.nimi
-            FROM tuotteen_toimittajat
-            JOIN toimi
-            ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
-            WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-            AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-            ORDER BY tuotteen_toimittajat.jarjestys ASC
-            LIMIT 1
-          ) AS toimittaja,
-          sum(tilausrivi.varattu) AS valmistettava_kpl
-          FROM lasku
-          JOIN tilausrivi
-          ON ( tilausrivi.yhtio = lasku.yhtio
-            AND tilausrivi.otunnus = lasku.tunnus
-            AND tilausrivi.tyyppi IN ('V')
-            AND tilausrivi.varattu > 0
-            AND tilausrivi.otunnus = '{$valmiste_rivi['lasku_tunnus']}'
-            AND tilausrivi.perheid = '{$valmiste_rivi['tilausrivi_tunnus']}' )
-          JOIN tuote
-          ON ( tuote.yhtio = tilausrivi.yhtio
-            AND tuote.tuoteno = tilausrivi.tuoteno
-            AND tuote.tuotetyyppi not in ('A', 'B')
-            AND tuote.ei_saldoa = '' )
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11";
+    $query = "SELECT lasku.tunnus AS lasku_tunnus,
+              tilausrivi.tunnus AS tilausrivi_tunnus,
+              tilausrivi.tuoteno,
+              tilausrivi.nimitys,
+              tilausrivi.tyyppi,
+              lasku.kohde as valmistuslinja,
+              lasku.tila,
+              lasku.alatila,
+              lasku.kerayspvm,
+              lasku.toimaika,
+              (  SELECT toimi.nimi
+                FROM tuotteen_toimittajat
+                JOIN toimi
+                ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+                  AND toimi.tunnus               = tuotteen_toimittajat.liitostunnus )
+                WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+                AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+                ORDER BY tuotteen_toimittajat.jarjestys ASC
+                LIMIT 1
+              ) AS toimittaja,
+              sum(tilausrivi.varattu) AS valmistettava_kpl
+              FROM lasku
+              JOIN tilausrivi
+              ON ( tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus           = lasku.tunnus
+                AND tilausrivi.tyyppi            IN ('V')
+                AND tilausrivi.varattu           > 0
+                AND tilausrivi.otunnus           = '{$valmiste_rivi['lasku_tunnus']}'
+                AND tilausrivi.perheid           = '{$valmiste_rivi['tilausrivi_tunnus']}' )
+              JOIN tuote
+              ON ( tuote.yhtio = tilausrivi.yhtio
+                AND tuote.tuoteno                = tilausrivi.tuoteno
+                AND tuote.tuotetyyppi            not in ('A', 'B')
+                AND tuote.ei_saldoa              = '' )
+              WHERE lasku.yhtio                  = '{$kukarow['yhtio']}'
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11";
     $valmistus_result = pupe_query($query);
 
     while ($valmistus_rivi = mysql_fetch_assoc($valmistus_result)) {
@@ -227,12 +227,12 @@ function hae_valmistukset_joissa_raaka_aine_ei_riita($request) {
 function hae_tilattu_kpl($tuoteno) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT ifnull(sum(varattu), 0) as tilattu
-        FROM tilausrivi
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tyyppi = 'O'
-        AND varattu > 0
-        AND tuoteno = '{$tuoteno}'";
+  $query = "SELECT ifnull(sum(varattu), 0) as tilattu
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tyyppi  = 'O'
+            AND varattu > 0
+            AND tuoteno = '{$tuoteno}'";
   $result = pupe_query($query);
 
   $tilattu_row = mysql_fetch_assoc($result);

@@ -125,11 +125,11 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $tulostin     = $kopiotulostin;
 
     if ($varasto == 0) {
-      $query = "  SELECT tunnus
-            FROM varastopaikat
-            WHERE yhtio = '$kukarow[yhtio]'
-            ORDER BY alkuhyllyalue, alkuhyllynro
-            LIMIT 1";
+      $query = "SELECT tunnus
+                FROM varastopaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                ORDER BY alkuhyllyalue, alkuhyllynro
+                LIMIT 1";
       $tempr = pupe_query($query);
       $tmp_varasto = mysql_fetch_assoc($tempr);
 
@@ -138,10 +138,10 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   }
   else {
     if (!$rahtikirja_ilman_asiakasta) {
-      $query = "  SELECT *
-            FROM asiakas
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND ytunnus = '$ytunnus'";
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND ytunnus = '$ytunnus'";
       $asres = pupe_query($query);
       $asiakasrow = mysql_fetch_assoc($asres);
 
@@ -231,10 +231,10 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   }
 
   // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
-  $query = "  SELECT nimi, nimitark, osoite, postino, postitp, maa
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus  = '$varasto'";
+  $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$varasto'";
   $tempr = pupe_query($query);
   $postirow_varasto = mysql_fetch_assoc($tempr);
 
@@ -250,19 +250,19 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
   $rahtikirjanrostring = mysql_real_escape_string(serialize($osoitelappurow));
 
-  $query  = "  SELECT *
-        FROM toimitustapa
-        WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
-        AND selite  = '$toimitustapa'
-        ORDER BY jarjestys, selite";
+  $query  = "SELECT *
+             FROM toimitustapa
+             WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
+             AND selite  = '$toimitustapa'
+             ORDER BY jarjestys, selite";
   $result = pupe_query($query);
   $toitarow = mysql_fetch_assoc($result);
 
   if ((int) $tulostin > 0 and $kollityht > 0) {
-    $query = "  SELECT komento
-          from kirjoittimet
-          where tunnus = '$tulostin'
-          AND yhtio   = '$kukarow[yhtio]'";
+    $query = "SELECT komento
+              from kirjoittimet
+              where tunnus = '$tulostin'
+              AND yhtio    = '$kukarow[yhtio]'";
     $res = pupe_query($query);
     $k = mysql_fetch_assoc($res);
 
@@ -276,23 +276,23 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
   // Tallennetaan customrahtikirjan tiedot järjestelmään
   if (!isset($tulostakopio) and (int) $otsikkonro != 0) {
-    $query  = "  UPDATE rahtikirjat
-          SET rahtikirjanro = '$rahtikirjanro',
-          tyhjanrahtikirjan_otsikkotiedot = '$rahtikirjanrostring',
-          tulostettu = now()
-          where yhtio       = '$kukarow[yhtio]'
-          and otsikkonro    = ($otsikkonro*-1)
-          and rahtikirjanro = ($otsikkonro*-1)";
+    $query  = "UPDATE rahtikirjat
+               SET rahtikirjanro = '$rahtikirjanro',
+               tyhjanrahtikirjan_otsikkotiedot = '$rahtikirjanrostring',
+               tulostettu                      = now()
+               where yhtio                     = '$kukarow[yhtio]'
+               and otsikkonro                  = ($otsikkonro*-1)
+               and rahtikirjanro               = ($otsikkonro*-1)";
     $kirres = pupe_query($query);
   }
 
   if ((int) $valittu_oslapp_tulostin > 0 and $oslappkpl > 0) {
 
     //haetaan osoitelapun tulostuskomento
-    $query  = "  SELECT *
-          from kirjoittimet
-          where yhtio  = '$kukarow[yhtio]'
-          and tunnus  = '$valittu_oslapp_tulostin'";
+    $query  = "SELECT *
+               from kirjoittimet
+               where yhtio = '$kukarow[yhtio]'
+               and tunnus  = '$valittu_oslapp_tulostin'";
     $kirres = pupe_query($query);
     $kirrow = mysql_fetch_assoc($kirres);
     $oslapp = $kirrow['komento'];
@@ -336,22 +336,22 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
   $formi  = "haku";
   $kentta = "ytunnus";
 
-  $query  = "  SELECT rahtikirjanro, otsikkonro*-1 otsikkonro, max(tulostettu) tulostettu, max(tyhjanrahtikirjan_otsikkotiedot) tyhjanrahtikirjan_otsikkotiedot, sum(kilot) paino
-        FROM rahtikirjat
-        where yhtio = '$kukarow[yhtio]'
-        and otsikkonro < 0
-        and tulostettu >= date_sub(now(), INTERVAL 180 DAY)
-        GROUP BY rahtikirjanro, otsikkonro
-        ORDER BY tulostettu desc";
+  $query  = "SELECT rahtikirjanro, otsikkonro*-1 otsikkonro, max(tulostettu) tulostettu, max(tyhjanrahtikirjan_otsikkotiedot) tyhjanrahtikirjan_otsikkotiedot, sum(kilot) paino
+             FROM rahtikirjat
+             where yhtio    = '$kukarow[yhtio]'
+             and otsikkonro < 0
+             and tulostettu >= date_sub(now(), INTERVAL 180 DAY)
+             GROUP BY rahtikirjanro, otsikkonro
+             ORDER BY tulostettu desc";
   $kirres = pupe_query($query);
 
   if (mysql_num_rows($kirres) > 0) {
 
-    $query = "  SELECT *
-          FROM kirjoittimet
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND komento != 'EDI'
-          ORDER BY kirjoitin";
+    $query = "SELECT *
+              FROM kirjoittimet
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND komento != 'EDI'
+              ORDER BY kirjoitin";
     $kirre = pupe_query($query);
 
     echo "<br><br>".t("Uusimmat tyhjät rahtikirjat").":<br>";
@@ -447,10 +447,10 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       <td><input type='text' name='tpostino' size='10' value='$asiakasrow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$asiakasrow[toim_postitp]'></td></tr>";
 
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   echo "<tr>
@@ -570,11 +570,11 @@ else {
 
   // Hetaan varaston tulostimet
   if ($varasto > 0) {
-    $query = "  SELECT *
-          from varastopaikat
-          where yhtio  = '$kukarow[yhtio]'
-          and tunnus  = '$varasto'
-          order by alkuhyllyalue, alkuhyllynro";
+    $query = "SELECT *
+              from varastopaikat
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$varasto'
+              order by alkuhyllyalue, alkuhyllynro";
   }
   $kirre = pupe_query($query);
 
@@ -587,11 +587,11 @@ else {
     $sel_lahete[$tulostin] = "SELECTED";
   }
 
-    $query = "  SELECT *
-        from kirjoittimet
-        where yhtio = '$kukarow[yhtio]'
-        AND komento != 'EDI'
-        ORDER BY kirjoitin";
+    $query = "SELECT *
+              from kirjoittimet
+              where yhtio  = '$kukarow[yhtio]'
+              AND komento != 'EDI'
+              ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
   while ($kirow = mysql_fetch_assoc($kires)) {
@@ -623,10 +623,10 @@ else {
 
   echo "<table>";
 
-  $query  = "  SELECT *
-        FROM pakkaus
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY jarjestys";
+  $query  = "SELECT *
+             FROM pakkaus
+             WHERE yhtio = '$kukarow[yhtio]'
+             ORDER BY jarjestys";
   $result = pupe_query($query);
 
   echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
@@ -800,11 +800,11 @@ function pupe_varasto_fetch_all() {
  */
 function pupe_toimitustapa_fetch_all() {
   // haetaan kaikki toimitustavat
-  $query  = "  SELECT *
-        FROM toimitustapa
-        WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
-        and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc','rahtikirja_hrx_siirto.inc', 'rahtikirja_tyhja.inc')
-        order by jarjestys,selite";
+  $query  = "SELECT *
+             FROM toimitustapa
+             WHERE yhtio    = '{$GLOBALS['kukarow']['yhtio']}'
+             and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc','rahtikirja_hrx_siirto.inc', 'rahtikirja_tyhja.inc')
+             order by jarjestys,selite";
   $result = pupe_query($query);
 
   $data = array();

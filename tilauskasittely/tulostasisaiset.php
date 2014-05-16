@@ -37,14 +37,14 @@ if (isset($tee) and $tee == 'TULOSTA') {
   require_once("tilauskasittely/tulosta_lasku.inc");
 
   //hateaan laskun kaikki tiedot
-  $query = "  SELECT *
-        FROM lasku
-        WHERE tila    = 'U'
-        and alatila   = 'X'
-        and sisainen != ''
-        $where
-        and yhtio ='$kukarow[yhtio]'
-        ORDER BY laskunro";
+  $query = "SELECT *
+            FROM lasku
+            WHERE tila    = 'U'
+            and alatila   = 'X'
+            and sisainen != ''
+            $where
+            and yhtio ='$kukarow[yhtio]'
+            ORDER BY laskunro";
   $laskurrrresult = mysql_query($query) or pupe_error($query);
 
   while ($sislaskrow = mysql_fetch_array($laskurrrresult)) {
@@ -70,11 +70,11 @@ if (!isset($tee) or $tee == '') {
   echo "<tr><th>".t("Tulosta lasku").":</th><td colspan='3'><select name='valittu_tulostin'>";
   echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE
-        yhtio = '$kukarow[yhtio]'
-        ORDER by kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE
+            yhtio = '$kukarow[yhtio]'
+            ORDER by kirjoitin";
   $kirre = mysql_query($query) or pupe_error($query);
 
   while ($kirrow = mysql_fetch_array($kirre)) {
@@ -126,11 +126,11 @@ if (!isset($tee) or $tee == '') {
   echo "<tr><th>".t("Tulosta lasku").":</th><td colspan='3'><select name='valittu_tulostin'>";
   echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE
-        yhtio = '$kukarow[yhtio]'
-        ORDER by kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE
+            yhtio = '$kukarow[yhtio]'
+            ORDER by kirjoitin";
   $kirre = mysql_query($query) or pupe_error($query);
 
   while ($kirrow = mysql_fetch_array($kirre)) {

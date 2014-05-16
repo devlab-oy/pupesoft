@@ -42,10 +42,10 @@ if ($tee == 'tulosta') {
   $varasto     = (int) $varasto;
 
   // haetaan toimitustavan tiedot
-  $query = "  SELECT *
-        FROM toimitustapa
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND selite = '$toimitustapa'";
+  $query = "SELECT *
+            FROM toimitustapa
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND selite  = '$toimitustapa'";
   $toitares = pupe_query($query);
   $toitarow = mysql_fetch_assoc($toitares);
 
@@ -74,43 +74,43 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
   }
 
   // haetaan rahtikirjan tyyppi
-  $query = "  SELECT *
-        from avainsana
-        where yhtio = '$kukarow[yhtio]'
-        and laji   = 'RAHTIKIRJA'
-        and selite   = '$toitarow[rahtikirja]'";
+  $query = "SELECT *
+            from avainsana
+            where yhtio = '$kukarow[yhtio]'
+            and laji    = 'RAHTIKIRJA'
+            and selite  = '$toitarow[rahtikirja]'";
   $avainres = pupe_query($query);
   $avainrow = mysql_fetch_assoc($avainres);
 
   // haetaan printterin tiedot
   if (isset($laskurow)) {
     if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
-      $query = "  SELECT pakkaamo.printteri2, pakkaamo.printteri4, pakkaamo.printteri6
-            from pakkaamo
-            where pakkaamo.yhtio='$kukarow[yhtio]'
-            and pakkaamo.tunnus='$laskurow[pakkaamo]'
-            order by pakkaamo.tunnus";
+      $query = "SELECT pakkaamo.printteri2, pakkaamo.printteri4, pakkaamo.printteri6
+                from pakkaamo
+                where pakkaamo.yhtio='$kukarow[yhtio]'
+                and pakkaamo.tunnus='$laskurow[pakkaamo]'
+                order by pakkaamo.tunnus";
     }
     elseif ($laskurow['tulostusalue'] != '' and $laskurow['varasto'] != '') {
-      $query = "  SELECT varaston_tulostimet.printteri2, varaston_tulostimet.printteri4, varaston_tulostimet.printteri6
-            FROM varaston_tulostimet
-            WHERE varaston_tulostimet.yhtio = '$kukarow[yhtio]'
-            AND varaston_tulostimet.nimi = '$laskurow[tulostusalue]'
-            AND varaston_tulostimet.varasto = '$laskurow[varasto]'
-            ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
+      $query = "SELECT varaston_tulostimet.printteri2, varaston_tulostimet.printteri4, varaston_tulostimet.printteri6
+                FROM varaston_tulostimet
+                WHERE varaston_tulostimet.yhtio = '$kukarow[yhtio]'
+                AND varaston_tulostimet.nimi    = '$laskurow[tulostusalue]'
+                AND varaston_tulostimet.varasto = '$laskurow[varasto]'
+                ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
     }
     else {
-      $query = "  SELECT *
-            FROM varastopaikat
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus   = '$varasto'";
+      $query = "SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$varasto'";
     }
   }
   else {
-    $query = "  SELECT *
-          FROM varastopaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus = '$varasto'";
+    $query = "SELECT *
+              FROM varastopaikat
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$varasto'";
   }
 
   $pres  = pupe_query($query);
@@ -148,9 +148,9 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
   if ($komento != "PDF_RUUDULLE") {
     // haetaan printterille tulostuskomento
-    $query = "  SELECT *
-          from kirjoittimet
-          where tunnus = '$kirjoitin_tunnus'";
+    $query = "SELECT *
+              from kirjoittimet
+              where tunnus = '$kirjoitin_tunnus'";
     $pres  = pupe_query($query);
     $print = mysql_fetch_assoc($pres);
 
@@ -164,9 +164,9 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
   if ($valittu_rakiroslapp_tulostin != '') {
     //haetaan osoitelapun tulostuskomento
     if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
-      $query  = "  SELECT *
-            from kirjoittimet
-            where tunnus = '$valittu_rakiroslapp_tulostin'";
+      $query  = "SELECT *
+                 from kirjoittimet
+                 where tunnus = '$valittu_rakiroslapp_tulostin'";
       $kirres = pupe_query($query);
       $kirrow = mysql_fetch_assoc($kirres);
 
@@ -230,20 +230,20 @@ if ($tee == 'close_with_printer') {
     $res = pupe_query($query);
   }
 
-  $query = "  SELECT lasku.tunnus, lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.toimitusvahvistus, group_concat(DISTINCT rahtikirjat.tunnus) ratunnarit, sum(rahtikirjat.kilot) kilot
-        FROM rahtikirjat
-        JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') $ltun_querylisa)
-        $vainvakilliset
-        LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-        LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
-        LEFT JOIN rahtisopimukset ON (lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
-        WHERE rahtikirjat.yhtio      = '$kukarow[yhtio]'
-        AND rahtikirjat.tulostettu    = '0000-00-00 00:00:00'
-        AND rahtikirjat.toimitustapa  = '$toimitustapa'
-        AND rahtikirjat.tulostuspaikka  = '$varasto'
-        $jvehto
-        GROUP BY 1,2,3,4,5,6,7,8
-        ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
+  $query = "SELECT lasku.tunnus, lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.toimitusvahvistus, group_concat(DISTINCT rahtikirjat.tunnus) ratunnarit, sum(rahtikirjat.kilot) kilot
+            FROM rahtikirjat
+            JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') $ltun_querylisa)
+            $vainvakilliset
+            LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+            LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
+            LEFT JOIN rahtisopimukset ON (lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
+            WHERE rahtikirjat.yhtio        = '$kukarow[yhtio]'
+            AND rahtikirjat.tulostettu     = '0000-00-00 00:00:00'
+            AND rahtikirjat.toimitustapa   = '$toimitustapa'
+            AND rahtikirjat.tulostuspaikka = '$varasto'
+            $jvehto
+            GROUP BY 1,2,3,4,5,6,7,8
+            ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
   $rakir_res = pupe_query($query);
 
   $mergeid_arr = array();
@@ -256,21 +256,21 @@ if ($tee == 'close_with_printer') {
 
     // merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun erätulostuksen kollitarra
     if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-      $query = "  UPDATE tilausrivi
-            SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
-            WHERE otunnus  = '$row[tunnus]'
-            AND yhtio      = '$kukarow[yhtio]'
-            AND var not in ('P','J','O')
-            AND keratty    != ''
-            AND toimitettu  = ''
-            AND tyyppi      = 'L'";
+      $query = "UPDATE tilausrivi
+                SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+                WHERE otunnus   = '$row[tunnus]'
+                AND yhtio       = '$kukarow[yhtio]'
+                AND var         not in ('P','J','O')
+                AND keratty    != ''
+                AND toimitettu  = ''
+                AND tyyppi      = 'L'";
       $ures  = pupe_query($query);
 
-      $query = "  UPDATE rahtikirjat
-            SET tulostettu = now()
-            WHERE tunnus  IN ($row[ratunnarit])
-            AND yhtio      = '$kukarow[yhtio]'
-            AND tulostettu = '0000-00-00 00:00:00'";
+      $query = "UPDATE rahtikirjat
+                SET tulostettu = now()
+                WHERE tunnus   IN ($row[ratunnarit])
+                AND yhtio      = '$kukarow[yhtio]'
+                AND tulostettu = '0000-00-00 00:00:00'";
       $ures  = pupe_query($query);
 
       // kotimaan myynti menee alatilaan D
@@ -286,25 +286,25 @@ if ($tee == 'close_with_printer') {
       $ures  = pupe_query($query);
 
       // verkkolaskutettavat EU-viennit menee alatilaan D, jos niillä on tarpeeksi lisätietoja
-      $query = "  UPDATE lasku set
-            alatila = 'D',
-            bruttopaino = '{$row['kilot']}'
-            where yhtio = '$kukarow[yhtio]'
-            and tunnus  = '{$row['tunnus']}'
-            and vienti  = 'E'
-            and chn in ('020', '030')
-            and maa_maara != ''
-            and kauppatapahtuman_luonne > 0
-            and kuljetusmuoto != ''";
+      $query = "UPDATE lasku set
+                alatila                      = 'D',
+                bruttopaino                  = '{$row['kilot']}'
+                where yhtio                  = '$kukarow[yhtio]'
+                and tunnus                   = '{$row['tunnus']}'
+                and vienti                   = 'E'
+                and chn                      in ('020', '030')
+                and maa_maara               != ''
+                and kauppatapahtuman_luonne  > 0
+                and kuljetusmuoto           != ''";
       $ures  = pupe_query($query);
 
       // Etukäteen maksetut tilaukset pitää muuttaa takaisin "maksettu"-tilaan
-      $query = "  UPDATE lasku SET
-            alatila = 'X'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus = '{$row['tunnus']}'
-            AND mapvm != '0000-00-00'
-            AND chn = '999'";
+      $query = "UPDATE lasku SET
+                alatila      = 'X'
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND tunnus   = '{$row['tunnus']}'
+                AND mapvm   != '0000-00-00'
+                AND chn      = '999'";
       $ures  = pupe_query($query);
 
     }
@@ -318,10 +318,10 @@ if ($tee == 'close_with_printer') {
 
   require_once("inc/unifaun_send.inc");
 
-  $query = "  SELECT unifaun_nimi
-        FROM kirjoittimet
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus  = '{$kirjoitin_tunnus}'";
+  $query = "SELECT unifaun_nimi
+            FROM kirjoittimet
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$kirjoitin_tunnus}'";
   $kires = pupe_query($query);
   $kirow = mysql_fetch_assoc($kires);
 
@@ -358,12 +358,12 @@ if ($tee == 'tulosta') {
   }
 
   // haetaan kaikki distinct rahtikirjat..
-  $query = "  SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
-        lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-        rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
-        asiakas.toimitusvahvistus, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) as asiakas_email, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
-        FROM rahtikirjat
-        JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
+  $query = "SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+            lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
+            rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
+            asiakas.toimitusvahvistus, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) as asiakas_email, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+            FROM rahtikirjat
+            JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
     $query .= " and lasku.alatila = 'B' ";
@@ -432,9 +432,9 @@ if ($tee == 'tulosta') {
       }
 
       // haetaan tälle rahtikirjalle kuuluvat tunnukset
-      $query = "  SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
-            FROM rahtikirjat
-            JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
+      $query = "SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
+                FROM rahtikirjat
+                JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
 
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
         $query .= " and lasku.alatila = 'B' ";
@@ -479,10 +479,10 @@ if ($tee == 'tulosta') {
 
           if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !$unifaun_era_vainkollitarra) {
             // Päivitetään tilausket "tulostetaan alatilaan".
-            $query = "  UPDATE lasku
-                  SET alatila  = 'BD'
-                  WHERE tunnus = $rivi[otunnus]
-                  AND yhtio = '$kukarow[yhtio]'";
+            $query = "UPDATE lasku
+                      SET alatila  = 'BD'
+                      WHERE tunnus = $rivi[otunnus]
+                      AND yhtio    = '$kukarow[yhtio]'";
             $result = pupe_query($query);
           }
         }
@@ -583,11 +583,11 @@ if ($tee == 'tulosta') {
       $pakkaustieto_tunnukset = '';
 
       if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin == 'koonti_eratulostus_pakkaustiedot' and trim($pakkaustieto_rahtikirjanro) != '') {
-        $query = "  SELECT group_concat(tunnus) pakkaustieto_tunnukset
-              FROM rahtikirjat
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND rahtikirjanro = '$pakkaustieto_rahtikirjanro'
-              AND pakkaustieto_tunnukset != ''";
+        $query = "SELECT group_concat(tunnus) pakkaustieto_tunnukset
+                  FROM rahtikirjat
+                  WHERE yhtio                 = '$kukarow[yhtio]'
+                  AND rahtikirjanro           = '$pakkaustieto_rahtikirjanro'
+                  AND pakkaustieto_tunnukset != ''";
         $koonti_era_pakkaustieto_tunnus_res = pupe_query($query);
         $koonti_era_pakkaustieto_tunnus_row = mysql_fetch_assoc($koonti_era_pakkaustieto_tunnus_res);
 
@@ -597,14 +597,14 @@ if ($tee == 'tulosta') {
       }
 
       // Summataan kaikki painot yhteen
-      $query = "  SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark,
-            sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri,
-            group_concat(tunnus SEPARATOR '_') shipment_id
-            FROM rahtikirjat
-            WHERE tunnus in ($tunnukset)
-            AND yhtio = '$kukarow[yhtio]'
-            GROUP BY pakkaus, pakkauskuvaus, pakkauskuvaustark $groupby_lisa
-            ORDER BY pakkaus, pakkauskuvaus, pakkauskuvaustark";
+      $query = "SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark,
+                sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri,
+                group_concat(tunnus SEPARATOR '_') shipment_id
+                FROM rahtikirjat
+                WHERE tunnus in ($tunnukset)
+                AND yhtio    = '$kukarow[yhtio]'
+                GROUP BY pakkaus, pakkauskuvaus, pakkauskuvaustark $groupby_lisa
+                ORDER BY pakkaus, pakkauskuvaus, pakkauskuvaustark";
       $pakka = pupe_query($query);
 
       while ($pak = mysql_fetch_assoc($pakka)) {
@@ -627,10 +627,10 @@ if ($tee == 'tulosta') {
       }
 
       // Kuljetusohjeet
-      $query = "  SELECT trim(group_concat(DISTINCT viesti SEPARATOR ' ')) viesti
-            FROM rahtikirjat
-            WHERE tunnus in ($tunnukset)
-            AND yhtio = '$kukarow[yhtio]'";
+      $query = "SELECT trim(group_concat(DISTINCT viesti SEPARATOR ' ')) viesti
+                FROM rahtikirjat
+                WHERE tunnus in ($tunnukset)
+                AND yhtio    = '$kukarow[yhtio]'";
       $pakka = pupe_query($query);
       $pak = mysql_fetch_assoc($pakka);
 
@@ -641,11 +641,11 @@ if ($tee == 'tulosta') {
       if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin == 'koonti_eratulostus_pakkaustiedot' and trim($pakkaustieto_rahtikirjanro) != '') {
         // merkataan rahtikirjat tulostetuksi..
         if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-          $query = "  UPDATE rahtikirjat
-                SET tulostettu = now()
-                WHERE tunnus  IN ($tunnukset)
-                AND yhtio      = '$kukarow[yhtio]'
-                AND tulostettu = '0000-00-00 00:00:00'";
+          $query = "UPDATE rahtikirjat
+                    SET tulostettu = now()
+                    WHERE tunnus   IN ($tunnukset)
+                    AND yhtio      = '$kukarow[yhtio]'
+                    AND tulostettu = '0000-00-00 00:00:00'";
           $ures  = pupe_query($query);
         }
 
@@ -655,14 +655,14 @@ if ($tee == 'tulosta') {
 
       // merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun erätulostuksen kollitarra
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !$unifaun_era_vainkollitarra) {
-        $query = "  UPDATE tilausrivi
-              SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
-              WHERE otunnus in ($otunnukset)
-              AND yhtio      = '$kukarow[yhtio]'
-              AND var not in ('P','J','O')
-              AND keratty    != ''
-              AND toimitettu  = ''
-              AND tyyppi      = 'L'";
+        $query = "UPDATE tilausrivi
+                  SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+                  WHERE otunnus   in ($otunnukset)
+                  AND yhtio       = '$kukarow[yhtio]'
+                  AND var         not in ('P','J','O')
+                  AND keratty    != ''
+                  AND toimitettu  = ''
+                  AND tyyppi      = 'L'";
         $ures  = pupe_query($query);
       }
 
@@ -677,18 +677,18 @@ if ($tee == 'tulosta') {
       }
 
       // Haetaan kaikki vakkoodit arrayseen
-      $query = "  SELECT $vakselect vakkoodi,
-            round(sum(tuote.tuotemassa*(tilausrivi.kpl+tilausrivi.varattu)), 1) tuote_kilot,
-            sum(if(tuote.tuotemassa=0, 1, 0)) tuotemassattomat
-            FROM tilausrivi
-            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
-            $vakjoin
-            where tilausrivi.otunnus in ($otunnukset)
-            and tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tilausrivi.var in ('','H')
-            and tilausrivi.tyyppi in ('L','G')
-            GROUP BY 1
-            ORDER BY 1";
+      $query = "SELECT $vakselect vakkoodi,
+                round(sum(tuote.tuotemassa*(tilausrivi.kpl+tilausrivi.varattu)), 1) tuote_kilot,
+                sum(if(tuote.tuotemassa=0, 1, 0)) tuotemassattomat
+                FROM tilausrivi
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
+                $vakjoin
+                where tilausrivi.otunnus in ($otunnukset)
+                and tilausrivi.yhtio     = '$kukarow[yhtio]'
+                and tilausrivi.var       in ('','H')
+                and tilausrivi.tyyppi    in ('L','G')
+                GROUP BY 1
+                ORDER BY 1";
       $vres = pupe_query($query);
 
       if (mysql_num_rows($vres) > 0) {
@@ -719,11 +719,11 @@ if ($tee == 'tulosta') {
 
       // merkataan rahtikirjat tulostetuksi..
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !$unifaun_era_vainkollitarra) {
-        $query = "  UPDATE rahtikirjat
-              SET tulostettu = now()
-              WHERE tunnus  IN ($tunnukset)
-              AND yhtio      = '$kukarow[yhtio]'
-              AND tulostettu = '0000-00-00 00:00:00'";
+        $query = "UPDATE rahtikirjat
+                  SET tulostettu = now()
+                  WHERE tunnus   IN ($tunnukset)
+                  AND yhtio      = '$kukarow[yhtio]'
+                  AND tulostettu = '0000-00-00 00:00:00'";
         $ures  = pupe_query($query);
       }
 
@@ -753,11 +753,11 @@ if ($tee == 'tulosta') {
           $chnlisa = "";
         }
 
-        $query = "  UPDATE lasku
-              set alatila='D'
-              $chnlisa
-              where tunnus in ($laskutettavat)
-              and yhtio = '$kukarow[yhtio]'";
+        $query = "UPDATE lasku
+                  set alatila='D'
+                  $chnlisa
+                  where tunnus in ($laskutettavat)
+                  and yhtio    = '$kukarow[yhtio]'";
         $result = pupe_query($query);
 
         $rivitunnukset = $tunnukset;
@@ -789,10 +789,10 @@ if ($tee == 'tulosta') {
         // $rahinta jossa on rahtikulut
         // $laskurow jossa on laskutetun laskun tiedot
 
-        $query = "  SELECT *
-              FROM lasku
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$rivi[otunnus]'";
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '$rivi[otunnus]'";
         $lasres = pupe_query($query);
         $laskurow = mysql_fetch_array($lasres);
 
@@ -850,17 +850,17 @@ if ($tee == 'tulosta') {
 
         // Kopsuille ei päivitetä eikä kun muokataan rahtikirjan tietoja!
         if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
-          $query = "  UPDATE rahtikirjat
-                set rahtikirjanro = '$rahtikirjanro'
-                where tunnus in ($tunnukset)
-                and yhtio = '$kukarow[yhtio]'";
+          $query = "UPDATE rahtikirjat
+                    set rahtikirjanro = '$rahtikirjanro'
+                    where tunnus in ($tunnukset)
+                    and yhtio    = '$kukarow[yhtio]'";
           $ures  = pupe_query($query);
 
           if (trim($pakkaustieto_tunnukset) != '') {
-            $query = "  UPDATE rahtikirjat
-                  set rahtikirjanro = '$rahtikirjanro'
-                  where tunnus in ($pakkaustieto_tunnukset)
-                  and yhtio = '$kukarow[yhtio]'";
+            $query = "UPDATE rahtikirjat
+                      set rahtikirjanro = '$rahtikirjanro'
+                      where tunnus in ($pakkaustieto_tunnukset)
+                      and yhtio    = '$kukarow[yhtio]'";
             $ures  = pupe_query($query);
           }
         }
@@ -909,12 +909,12 @@ if ($tee == 'tulosta') {
 
       // Katsotaan onko magento-API konffattu, eli verkkokauppa käytössä, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
       if (isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
-        $query = "  SELECT asiakkaan_tilausnumero
-              FROM lasku
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus  IN ($otunnukset)
-              AND laatija = 'Magento'
-              AND asiakkaan_tilausnumero != ''";
+        $query = "SELECT asiakkaan_tilausnumero
+                  FROM lasku
+                  WHERE yhtio                 = '$kukarow[yhtio]'
+                  AND tunnus                  IN ($otunnukset)
+                  AND laatija                 = 'Magento'
+                  AND asiakkaan_tilausnumero != ''";
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {
@@ -929,10 +929,10 @@ if ($tee == 'tulosta') {
       // Tulostetaan DGD
       if ((strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or $tultiin == 'koonti_eratulostus_pakkaustiedot') and $rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
 
-        $query = "  SELECT *
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$rivi['otunnus']}'";
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$rivi['otunnus']}'";
         $laskures = pupe_query($query);
         $laskurow = mysql_fetch_assoc($laskures);
 
@@ -972,10 +972,10 @@ if ($tee == 'tulosta') {
           $rahtikirja_tulostus = "yep";
           $tunnus = $lotsikot[0];
 
-          $query = "  SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
-                from lasku
-                where yhtio = '$kukarow[yhtio]'
-                and tunnus  in ($otunnukset)";
+          $query = "SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
+                    from lasku
+                    where yhtio = '$kukarow[yhtio]'
+                    and tunnus  in ($otunnukset)";
           $viestirar = pupe_query($query);
           $viestirarrow = mysql_fetch_assoc($viestirar);
 
@@ -991,21 +991,21 @@ if ($tee == 'tulosta') {
           }
           elseif ($toimitustaparow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 
-            $query = "  SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
-                  FROM kerayserat
-                  LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-                  WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-                  AND kerayserat.otunnus IN ({$otunnukset})
-                  GROUP BY 1,2,3
-                  ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+            $query = "SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+                      FROM kerayserat
+                      LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+                      WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                      AND kerayserat.otunnus IN ({$otunnukset})
+                      GROUP BY 1,2,3
+                      ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
             $pak_chk_res = pupe_query($query);
 
             $pak_num = mysql_num_rows($pak_chk_res);
 
-            $query = "  SELECT *
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$rivi['otunnus']}'";
+            $query = "SELECT *
+                      FROM lasku
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$rivi['otunnus']}'";
             $laskures = pupe_query($query);
             $laskurow = mysql_fetch_assoc($laskures);
 
@@ -1186,20 +1186,20 @@ if ($tee == '') {
   }
 
   // haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
-  $query = "  SELECT lasku.yhtio yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7, group_concat(distinct lasku.tunnus ORDER BY lasku.tunnus ASC) ltunnus
-        FROM rahtikirjat
-        JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B')
-        JOIN toimitustapa on lasku.yhtio = toimitustapa.yhtio
-        AND lasku.toimitustapa = toimitustapa.selite
-        AND toimitustapa.tulostustapa in ('E','L')
-        AND toimitustapa.nouto = ''
-        LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
-        LEFT JOIN varastopaikat on varastopaikat.yhtio=rahtikirjat.yhtio and varastopaikat.tunnus=rahtikirjat.tulostuspaikka
-        WHERE rahtikirjat.tulostettu = '0000-00-00 00:00:00'
-        AND rahtikirjat.$logistiikka_yhtiolisa
-        $wherelisa
-        GROUP BY lasku.yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7
-        ORDER BY varastopaikat.tunnus, lasku.toimitustapa";
+  $query = "SELECT lasku.yhtio yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7, group_concat(distinct lasku.tunnus ORDER BY lasku.tunnus ASC) ltunnus
+            FROM rahtikirjat
+            JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B')
+            JOIN toimitustapa on lasku.yhtio = toimitustapa.yhtio
+            AND lasku.toimitustapa        = toimitustapa.selite
+            AND toimitustapa.tulostustapa in ('E','L')
+            AND toimitustapa.nouto        = ''
+            LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+            LEFT JOIN varastopaikat on varastopaikat.yhtio=rahtikirjat.yhtio and varastopaikat.tunnus=rahtikirjat.tulostuspaikka
+            WHERE rahtikirjat.tulostettu  = '0000-00-00 00:00:00'
+            AND rahtikirjat.$logistiikka_yhtiolisa
+            $wherelisa
+            GROUP BY lasku.yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7
+            ORDER BY varastopaikat.tunnus, lasku.toimitustapa";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -1266,12 +1266,12 @@ if ($tee == '') {
     $sel = array();
     $sel[$e] = "SELECTED";
 
-    $query = "  SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
-          FROM kirjoittimet
-          WHERE $logistiikka_yhtiolisa
-          AND komento != 'EDI'
-          GROUP BY komento
-          ORDER BY kirjoitin";
+    $query = "SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+              FROM kirjoittimet
+              WHERE $logistiikka_yhtiolisa
+              AND komento != 'EDI'
+              GROUP BY komento
+              ORDER BY kirjoitin";
     $kires = pupe_query($query);
 
     while ($kirow = mysql_fetch_assoc($kires)) {

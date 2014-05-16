@@ -1,10 +1,10 @@
 <?php
 
-$query = "  SELECT otunnus, tilausrivi, sscc, sscc_ulkoinen, kpl, tunnus
-      FROM kerayserat
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND nro   = '{$kerayseran_numero}'
-      AND tila    = 'X'";
+$query = "SELECT otunnus, tilausrivi, sscc, sscc_ulkoinen, kpl, tunnus
+          FROM kerayserat
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND nro     = '{$kerayseran_numero}'
+          AND tila    = 'X'";
 $kardex_res = pupe_query($query);
 
 if (mysql_num_rows($kardex_res) > 0) {
@@ -14,18 +14,18 @@ if (mysql_num_rows($kardex_res) > 0) {
 
   while ($kardex_row = mysql_fetch_assoc($kardex_res)) {
 
-    $query = "  SELECT toimitustapa
-          FROM lasku
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$kardex_row['otunnus']}'";
+    $query = "SELECT toimitustapa
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$kardex_row['otunnus']}'";
     $lahto_chk_res = pupe_query($query);
     $lahto_chk_row = mysql_fetch_assoc($lahto_chk_res);
 
     // haetaan toimitustavan tiedot
-    $query = "  SELECT rahtikirja
-          FROM toimitustapa
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND selite  = '{$lahto_chk_row['toimitustapa']}'";
+    $query = "SELECT rahtikirja
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND selite  = '{$lahto_chk_row['toimitustapa']}'";
     $toitares = pupe_query($query);
     $toitarow = mysql_fetch_assoc($toitares);
 
@@ -43,10 +43,10 @@ if (mysql_num_rows($kardex_res) > 0) {
       $kardex_sscc_sisalto = $kardex_row['sscc_ulkoinen'];
     }
 
-    $query = "  SELECT tunnus, tuoteno, nimitys, hyllyalue, CONCAT(hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka
-          FROM tilausrivi
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$kardex_row['tilausrivi']}'";
+    $query = "SELECT tunnus, tuoteno, nimitys, hyllyalue, CONCAT(hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$kardex_row['tilausrivi']}'";
     $tilriv_tiedot_res = pupe_query($query);
     $tilriv_tiedot_row = mysql_fetch_assoc($tilriv_tiedot_res);
 

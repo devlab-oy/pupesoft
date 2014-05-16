@@ -8,10 +8,10 @@ echo "<font class='head'>".t("Korkolaskut")."</font><hr>";
 //laskut huomioidaan näkymässsä
 $min_myoh = 3;
 
-$query = "  SELECT tuoteno
-      FROM tuote
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND tuoteno = 'Korko'";
+$query = "SELECT tuoteno
+          FROM tuote
+          WHERE yhtio = '$kukarow[yhtio]'
+          AND tuoteno = 'Korko'";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) != 1) {
@@ -35,10 +35,10 @@ if ($tee == 'LAHETA') {
   require('tee_korkolasku.inc');
 
   //päivitetään laskut lähetetyiksi
-  $query = "  UPDATE lasku
-        SET olmapvm = now()
-        WHERE tunnus in ($xquery)
-        and yhtio = '$kukarow[yhtio]'";
+  $query = "UPDATE lasku
+            SET olmapvm = now()
+            WHERE tunnus in ($xquery)
+            and yhtio    = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   $tee = "KOROTA";
@@ -54,9 +54,9 @@ if ($tee == "ALOITAKOROTUS") {
 
   $minimisumma = (float) $minimisumma;
 
-  $query = "  SELECT GROUP_CONCAT(distinct concat('\'',ovttunnus,'\'')) konsrernyhtiot
-        FROM yhtio
-        WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+  $query = "SELECT GROUP_CONCAT(distinct concat('\'',ovttunnus,'\'')) konsrernyhtiot
+            FROM yhtio
+            WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
   $result = pupe_query($query);
 
   $konslisa = "";
@@ -75,34 +75,34 @@ if ($tee == "ALOITAKOROTUS") {
     $asiakaslisa .= " and asiakas.vienti in ('".implode("','", $vienti)."') ";
   }
 
-  $query = "  SELECT
-        GROUP_CONCAT(distinct lasku.tunnus) korotettavat,
-        round(sum(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500),2) korkosumma
-        FROM lasku
-        JOIN (  SELECT lasku.tunnus,
-            to_days(tiliointi.tapvm) - to_days(lasku.erpcm) ika,
-            round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2) korkosumma2,
-            maksuehto.jv
-            FROM lasku use index (yhtio_tila_mapvm)
+  $query = "SELECT
+            GROUP_CONCAT(distinct lasku.tunnus) korotettavat,
+            round(sum(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500),2) korkosumma
+            FROM lasku
+            JOIN (  SELECT lasku.tunnus,
+                to_days(tiliointi.tapvm) - to_days(lasku.erpcm) ika,
+                round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2) korkosumma2,
+                maksuehto.jv
+                FROM lasku use index (yhtio_tila_mapvm)
+                JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
+                JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
+                LEFT JOIN maksuehto on (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
+                WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                and lasku.tila     = 'U'
+                and lasku.mapvm   >='$vva-$kka-$ppa'
+                and lasku.mapvm   <='$vvl-$kkl-$ppl'
+                and lasku.summa   != 0
+                and lasku.olmapvm  = '0000-00-00'
+                $konslisa
+                HAVING ika > $min_myoh and abs(korkosumma2) > abs($minimisumma) and (maksuehto.jv is null or maksuehto.jv = '')
+                ORDER BY asiakas.ytunnus) as laskut
             JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
             JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
-            LEFT JOIN maksuehto on (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
-            WHERE lasku.yhtio   = '$kukarow[yhtio]'
-            and lasku.tila     = 'U'
-            and lasku.mapvm   >='$vva-$kka-$ppa'
-            and lasku.mapvm   <='$vvl-$kkl-$ppl'
-            and lasku.summa    != 0
-            and lasku.olmapvm  = '0000-00-00'
+            WHERE lasku.tunnus     = laskut.tunnus
             $konslisa
-            HAVING ika > $min_myoh and abs(korkosumma2) > abs($minimisumma) and (maksuehto.jv is null or maksuehto.jv = '')
-            ORDER BY asiakas.ytunnus) as laskut
-        JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
-        JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
-        WHERE lasku.tunnus = laskut.tunnus
-        $konslisa
-        GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
-        HAVING korkosumma > 0 $korkolisa
-        ORDER BY asiakas.ytunnus";
+            GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
+            HAVING korkosumma > 0 $korkolisa
+            ORDER BY asiakas.ytunnus";
   $result = pupe_query($query);
 
   $korotettavat = array();
@@ -126,17 +126,17 @@ if ($tee == 'KOROTA' and $korotettavat[0] == "") {
 
 if ($tee == "KOROTA")  {
 
-  $query = "  SELECT lasku.liitostunnus, tiliointi.summa*-1 summa, lasku.tunnus,
-        lasku.erpcm, lasku.laskunro, tiliointi.tapvm, lasku.tapvm latapvm, if(count(*) > 1, 'useita', lasku.mapvm) mapvm, lasku.viikorkopros,
-        if (count(*) > 1, 'useita', to_days(tiliointi.tapvm) - to_days(lasku.erpcm)) as ika,
-        sum(round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2)) as korkosumma
-        FROM lasku
-        JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
-        LEFT JOIN maksuehto on (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tunnus in ($korotettavat[0])
-        GROUP BY lasku.tunnus
-        ORDER BY lasku.erpcm";
+  $query = "SELECT lasku.liitostunnus, tiliointi.summa*-1 summa, lasku.tunnus,
+            lasku.erpcm, lasku.laskunro, tiliointi.tapvm, lasku.tapvm latapvm, if(count(*) > 1, 'useita', lasku.mapvm) mapvm, lasku.viikorkopros,
+            if (count(*) > 1, 'useita', to_days(tiliointi.tapvm) - to_days(lasku.erpcm)) as ika,
+            sum(round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2)) as korkosumma
+            FROM lasku
+            JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
+            LEFT JOIN maksuehto on (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tunnus  in ($korotettavat[0])
+            GROUP BY lasku.tunnus
+            ORDER BY lasku.erpcm";
   $result = pupe_query($query);
 
   //Poistetaan arraysta käytetyt tunnukset
@@ -145,10 +145,10 @@ if ($tee == "KOROTA")  {
   //otetaan asiakastiedot ekalta laskulta
   $asiakastiedot = mysql_fetch_assoc($result);
 
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus = '$asiakastiedot[liitostunnus]'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$asiakastiedot[liitostunnus]'";
   $asiakasresult = pupe_query($query);
   $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
@@ -306,12 +306,12 @@ if ($tee == "") {
   if (!isset($ppl))
     $ppl = date("d");
 
-  $query = "  SELECT *
-        FROM maksuehto
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa = ''
-        and jaksotettu = ''
-        ORDER BY jarjestys, teksti";
+  $query = "SELECT *
+            FROM maksuehto
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and kaytossa   = ''
+            and jaksotettu = ''
+            ORDER BY jarjestys, teksti";
   $vresult = pupe_query($query);
 
   $ulos = "<select name='vmehto'>";
@@ -372,11 +372,11 @@ if ($tee == "") {
 
   echo "<tr><th>",t("Valitse tulostin"),"</th><td colspan='3'><select name='kirjoitin'>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio  = '{$kukarow['yhtio']}'
-        AND komento != 'edi'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND komento != 'edi'
+            ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
   while ($kirow = mysql_fetch_assoc($kires)) {

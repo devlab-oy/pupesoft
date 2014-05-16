@@ -11,9 +11,9 @@ function hinnastorivi($tuote, $laskurow) {
 
     // Tarkistetaan saldo
     $query = "SELECT sum(saldo) as saldo
-        FROM tuotepaikat
-        WHERE yhtio='{$kukarow['yhtio']}'
-        AND tuoteno='{$tuote['tuoteno']}'";
+              FROM tuotepaikat
+              WHERE yhtio='{$kukarow['yhtio']}'
+              AND tuoteno='{$tuote['tuoteno']}'";
     $result = pupe_query($query);
 
     // jos saldo on nolla laitetaan myyntihinnaksi 0
@@ -24,7 +24,7 @@ function hinnastorivi($tuote, $laskurow) {
   }
   // Jos tuote on poistettu ja hinnastoon on kyllä, mutta tuote ei ole korvaavuusketjussa.
   // Ei laiteta hinnastoon.
-  else if ($tuote['status'] == 'P' and $tuote['hinnastoon'] != 'E' and $tuote['id'] == '') {
+  elseif ($tuote['status'] == 'P' and $tuote['hinnastoon'] != 'E' and $tuote['id'] == '') {
     return;
   }
 

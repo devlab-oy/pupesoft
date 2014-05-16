@@ -8,16 +8,16 @@ if (!function_exists("kopioi_tilaus")) {
     // tarvitaan yhtiörowta ja kukarowta
     global $yhtiorow, $kukarow;
 
-    $query = "  SELECT *
-          FROM lasku
-          WHERE tunnus = '$tunnus'
-          AND yhtio = '{$kukarow["yhtio"]}'";
+    $query = "SELECT *
+              FROM lasku
+              WHERE tunnus = '$tunnus'
+              AND yhtio    = '{$kukarow["yhtio"]}'";
     $monistares = pupe_query($query);
 
-    $query = "  SELECT *
-          FROM laskun_lisatiedot
-          WHERE otunnus = '$tunnus'
-          AND yhtio = '{$kukarow["yhtio"]}'";
+    $query = "SELECT *
+              FROM laskun_lisatiedot
+              WHERE otunnus = '$tunnus'
+              AND yhtio     = '{$kukarow["yhtio"]}'";
     $lisatiedotres = pupe_query($query);
 
     // Katsotaan, että tilausrivi on voimassa $tapahtumapvm == sopimuksen tämä laskutuspäivä
@@ -31,11 +31,11 @@ if (!function_exists("kopioi_tilaus")) {
       $lisaehto = "";
     }
 
-    $query = "  SELECT *
-          FROM tilausrivi
-          WHERE otunnus = '$tunnus'
-          AND yhtio = '{$kukarow["yhtio"]}'
-          $lisaehto";
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE otunnus = '$tunnus'
+              AND yhtio     = '{$kukarow["yhtio"]}'
+              $lisaehto";
     $rivires = pupe_query($query);
 
     if (mysql_num_rows($monistares) == 0) {
@@ -137,9 +137,9 @@ if (!function_exists("kopioi_tilaus")) {
       $insid  = mysql_insert_id();
 
       // Kopioidaan tilausrivin lisatiedot
-      $query = "  SELECT *
-            FROM tilausrivin_lisatiedot
-            WHERE tilausrivitunnus = '$rivirow[tunnus]' and yhtio = '$kukarow[yhtio]'";
+      $query = "SELECT *
+                FROM tilausrivin_lisatiedot
+                WHERE tilausrivitunnus = '$rivirow[tunnus]' and yhtio = '$kukarow[yhtio]'";
       $monistares2 = pupe_query($query);
 
       if (mysql_num_rows($monistares2) > 0) {
@@ -167,38 +167,38 @@ if (!function_exists("kopioi_tilaus")) {
     }
 
     //Korjataan perheid:t uusilla riveillä
-    $query = "  SELECT perheid, min(tunnus) uusiperheid
-          FROM tilausrivi
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND otunnus = '$utunnus'
-          AND perheid != 0
-          GROUP by perheid";
+    $query = "SELECT perheid, min(tunnus) uusiperheid
+              FROM tilausrivi
+              WHERE yhtio  = '{$kukarow["yhtio"]}'
+              AND otunnus  = '$utunnus'
+              AND perheid != 0
+              GROUP by perheid";
     $copresult = pupe_query($query);
 
     while ($coprivirow = mysql_fetch_array($copresult)) {
-      $query = "  UPDATE tilausrivi
-            SET perheid = '{$coprivirow["uusiperheid"]}'
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND otunnus = '$utunnus'
-            AND perheid = '{$coprivirow["perheid"]}'";
+      $query = "UPDATE tilausrivi
+                SET perheid = '{$coprivirow["uusiperheid"]}'
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND otunnus = '$utunnus'
+                AND perheid = '{$coprivirow["perheid"]}'";
       $cores = pupe_query($query);
     }
 
     //Korjataan perheid2:t uusilla riveillä
-    $query = "  SELECT perheid2, min(tunnus) uusiperheid2
-          FROM tilausrivi
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND otunnus = '$utunnus'
-          AND perheid2 != 0
-          GROUP by perheid2";
+    $query = "SELECT perheid2, min(tunnus) uusiperheid2
+              FROM tilausrivi
+              WHERE yhtio   = '{$kukarow["yhtio"]}'
+              AND otunnus   = '$utunnus'
+              AND perheid2 != 0
+              GROUP by perheid2";
     $copresult = pupe_query($query);
 
     while ($coprivirow = mysql_fetch_array($copresult)) {
-      $query = "  UPDATE tilausrivi
-            SET perheid2 = '{$coprivirow["uusiperheid2"]}'
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND otunnus = '$utunnus'
-            AND perheid2 = '{$coprivirow["perheid2"]}'";
+      $query = "UPDATE tilausrivi
+                SET perheid2 = '{$coprivirow["uusiperheid2"]}'
+                WHERE yhtio  = '{$kukarow["yhtio"]}'
+                AND otunnus  = '$utunnus'
+                AND perheid2 = '{$coprivirow["perheid2"]}'";
       $cores = pupe_query($query);
     }
 

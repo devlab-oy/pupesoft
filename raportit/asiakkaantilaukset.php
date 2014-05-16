@@ -5,6 +5,14 @@ $pupe_DataTables = "asiakkaantilaukset";
 
 require ("../inc/parametrit.inc");
 
+if ($livesearch_tee == 'ASIAKKAANTILAUSNUMERO') {
+  livesearch_asiakkaantilausnumero($toim);
+  exit;
+}
+
+// Enaboidaan ajax kikkare
+enable_ajax();
+
 if (substr($toim, 0, 8) == "KONSERNI") {
   $logistiikka_yhtio = '';
   $logistiikka_yhtiolisa = '';
@@ -280,13 +288,13 @@ elseif ($laskunro > 0) {
     $asiakasid     = $row["liitostunnus"];
   }
 }
-elseif ($astilnro != '') {
-  $query = "  SELECT laskunro, ytunnus, liitostunnus, tunnus
-        FROM lasku use index (yhtio_asiakkaan_tilausnumero)
-        WHERE asiakkaan_tilausnumero = '$astilnro'
-        and $logistiikka_yhtiolisa";
+elseif ($astilnro != 0) {
+  $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
+            FROM lasku use index (yhtio_asiakkaan_tilausnumero)
+            WHERE asiakkaan_tilausnumero = '$astilnro'
+            and $logistiikka_yhtiolisa";
   $result = pupe_query($query);
-  $row = mysql_fetch_array($result);
+  $row = mysql_fetch_assoc($result);
 
   if ($row["laskunro"] > 0) {
     $laskunro = $row["laskunro"];
@@ -739,7 +747,7 @@ if ($ytunnus != '') {
 if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
   // N‰ytet‰‰n muuten vaan sopivia tilauksia
 
-  echo "<form action = 'asiakkaantilaukset.php' method = 'post'>
+  echo "<form name = 'asiaktilaus' action = 'asiakkaantilaukset.php' method = 'post'>
     <input type='hidden' name='lopetus' value='$lopetus'>
     <input type='hidden' name='toim' value='$toim'>";
 
@@ -759,7 +767,10 @@ if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
   }
   echo "<tr><th>".t("Laskunumero")."</th><td><input type='text' size='10' name='laskunro'></td></tr>";
   if ($cleantoim == "MYYNTI") {
-    echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td><input type='text' size='10' name='astilnro'></td></tr>";
+    echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td>"; //<input type='text' size='10' name='astilnro'></td></tr>";
+     // Tehaan kentta tai naytetaan popup
+    echo livesearch_kentta("asiaktilaus", "ASIAKKAANTILAUSNUMERO", "astilnro", 170, $astilnro);
+    echo "</td>";
   }
   echo "</table>";
 

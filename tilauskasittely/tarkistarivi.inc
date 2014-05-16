@@ -568,13 +568,17 @@ if (
       // jotta ne varaavat saldoa lähdevarastossa.
       // Tästä syystä ylläolevassa iffissä pitää olla $row['var'] != 'S',
       // koska muuten varastosiirron kautta käyttäjä saisi myyntioikeuden mahdolliseesti sellaiseen varastoon, johon käyttäjällä ei ole myyntioikeutta.
+
+      if (!isset($maksuehtorow)) {
+        $maksuehtorow = array("jv" => "");
+      }
+
       if ($alkurow["hyllyalue"] != "!!M"
         and (
           (
             $alkurow['varastotyyppi'] == 'E'
             and $kukarow['kassamyyja'] == ''
-            and isset($maksuehtorow["jv"])
-            and $maksuehtorow["jv"] == ""
+            and ($maksuehtorow["jv"] == "")
             and $alkurow['erikoistoimitus_alarajasumma'] > 0
             and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']
           )

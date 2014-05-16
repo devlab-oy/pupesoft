@@ -17,10 +17,10 @@ function hinnastorivi($tuote) {
   if ($aletun == '') {
     $aletun = '000';
   }
-  else if ($tunpit == '2'){
+  elseif ($tunpit == '2'){
     $aletun = '0'.$aletun;
   }
-  else if ($tunpit == '1'){
+  elseif ($tunpit == '1'){
     $aletun = '00'.$aletun;
   }
   //echo "$aletun <br>";

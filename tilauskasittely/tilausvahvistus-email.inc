@@ -302,7 +302,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       if ($naytatvale==3) {
         // menn‰‰n ohi koska ei haluta n‰hd‰ hintoja
       }
-      else if ($naytatvale==2) {
+      elseif ($naytatvale==2) {
         $ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
       }
       else {
@@ -317,7 +317,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       if ($naytatvale == 3 or $naytatvale == 4) {
         // kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
       }
-      else if ($naytatvale==2) {
+      elseif ($naytatvale==2) {
         $ulos .= sprintf("%6.s"  ,$tvtilausrivirow['aleryhma']);
       }
       else {
@@ -342,7 +342,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       if ($naytatvale==3) {
         // ei hintoja kolmosella
       }
-      else if ($naytatvale==2) {
+      elseif ($naytatvale==2) {
         $liite .= round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys'])."\t";
       }
       else {
@@ -352,7 +352,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       if ($naytatvale == 3 or $naytatvale == 4) {
         // kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
       }
-      else if ($naytatvale == 2) {
+      elseif ($naytatvale == 2) {
         $liite .= $tvtilausrivirow['aleryhma'];
       }
       else {

@@ -836,14 +836,14 @@ else {
       if ($asiakasnro != "") {
         $ytunnus = "";
       }
-      else if ($ytunnus != "") {
+      elseif ($ytunnus != "") {
         $asiakasnro = "";
       }
 
       if ($ytunnus != '') {
         $asiakas = $ytunnus;
       }
-      else if ($asiakasnro != "") {
+      elseif ($asiakasnro != "") {
         // mennään ohi
       }
       else {

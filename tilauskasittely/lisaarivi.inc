@@ -2227,10 +2227,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           if (in_array($yhtiorow['puute_jt_oletus'], array('','A'))) {
             $var = "P";
           }
-          else if (in_array($yhtiorow['puute_jt_oletus'], array('J','B'))) {
+          elseif (in_array($yhtiorow['puute_jt_oletus'], array('J','B'))) {
             $var = "J";
           }
-          else if (in_array($yhtiorow['puute_jt_oletus'], array('H'))) {
+          elseif (in_array($yhtiorow['puute_jt_oletus'], array('H'))) {
             $var = "";
           }
           else {
@@ -2323,10 +2323,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           if (isset($jt_manual) and $jt_manual != '' and !empty($yhtiorow['jt_manual'])) {
             $kerayspvm = date('Y-m-d', strtotime('now'));
           }
-          else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+          elseif ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
             $kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
           }
-          else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+          elseif ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
             $kerayspvm = date('Y-m-d', strtotime('now'));
           }
         case 'R' : // Valmistetaan asiakkaalle

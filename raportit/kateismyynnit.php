@@ -670,7 +670,7 @@ if ($tee == "tiliointi") {
         $comments .= "$arvo<br>";
       }
     }
-    else if (stristr($kentta,"yht_lopkas")) {
+    elseif (stristr($kentta,"yht_lopkas")) {
       $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
       $loppukassa_array[$kassalipasrow['tunnus']] = $arvo;
       $comments .= "$tyyppi loppukassa: $arvo<br><br>";
@@ -682,22 +682,22 @@ if ($tee == "tiliointi") {
         $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
         $comments_yht .= "$arvo<br>";
       }
-      else if ($kentta == "yht_katot_ohjelm") {
+      elseif ($kentta == "yht_katot_ohjelm") {
         $comments_yht .= "Käteisotto-ohjelmasta yhteensä: ";
         $arvo = str_replace(".",",",sprintf('%.2f',$arvo));
         $comments_yht .= "$arvo<br>";
       }
-      else if ($kentta == "yht_katot") {
+      elseif ($kentta == "yht_katot") {
         $comments_yht .= "Käteisotto yhteensä: ";
         $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
         $comments_yht .= "$arvo<br>";
       }
-      else if ($kentta == "yht_kattil") {
+      elseif ($kentta == "yht_kattil") {
         $comments_yht .= "Käteistilitys yhteensä: ";
         $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
         $comments_yht .= "$arvo<br>";
       }
-      else if ($kentta == "yht_kasero") {
+      elseif ($kentta == "yht_kasero") {
         $comments_yht .= "Kassaerotus yhteensä: ";
         $arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
         $comments_yht .= "$arvo<br>";
@@ -2550,7 +2550,7 @@ function populoi_kassalipas_muuttujat_kassakohtaisesti($_post) {
         }
       }
     }
-    else if (stristr($kentan_nimi ,'maksutapa')) {
+    elseif (stristr($kentan_nimi ,'maksutapa')) {
       //tämä hoitaa pankki ja luottokortit, jotka eivät ole kassa kohtaisia
       if (stristr($kentan_arvo, 'pankkikortti') or stristr($kentan_arvo, 'luottokortti')) {
         $kortin_nimi = explode('#', $kentan_arvo);

@@ -22,7 +22,7 @@ if (php_sapi_name() == 'cli') {
   // Haetaan käyttäjän tiedot
   $kukarow = hae_kukarow('admin', $yhtio);
 }
-else if (php_sapi_name() != 'cli') {
+elseif (php_sapi_name() != 'cli') {
   //for debug reasons
   require('inc/parametrit.inc');
 

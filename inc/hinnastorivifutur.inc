@@ -24,7 +24,7 @@ function hinnastorivi($tuote, $laskurow) {
   }
   // Jos tuote on poistettu ja hinnastoon on kyllä, mutta tuote ei ole korvaavuusketjussa.
   // Ei laiteta hinnastoon.
-  else if ($tuote['status'] == 'P' and $tuote['hinnastoon'] != 'E' and $tuote['id'] == '') {
+  elseif ($tuote['status'] == 'P' and $tuote['hinnastoon'] != 'E' and $tuote['id'] == '') {
     return;
   }
 

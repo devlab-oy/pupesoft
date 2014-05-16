@@ -653,7 +653,7 @@ function laheta_email($email_address, array $liitetiedostot_path = array()) {
     if(stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
       $ctype = 'pdf';
     }
-    else if(stristr(mime_content_type($liitetiedosto_path), 'xls')) {
+    elseif(stristr(mime_content_type($liitetiedosto_path), 'xls')) {
       $ctype = 'excel';
     }
     else {

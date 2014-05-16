@@ -88,7 +88,7 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
 
             kohdista_rivi($laskurow, $uusi_tilausrivi, $tilausrivi['otunnus'], $saapuminen, $suuntalava);
         }
-        else if ($hyllytetty > $tilausrivi['varattu']) {
+        elseif ($hyllytetty > $tilausrivi['varattu']) {
             $poikkeukset = array("tilausrivi.varattu" => ($hyllytetty-$tilausrivi['varattu']));
             $uusi_tilausrivi = kopioi_tilausrivi($tilausrivi['tunnus'], $poikkeukset);
 

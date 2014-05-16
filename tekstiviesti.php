@@ -116,10 +116,10 @@ function SendSms($sms_palvelintyyppi, $yhtio, $kuka, $vastaanottaja, $viesti) {
   if ($sms_palvelintyyppi == "pupe") {
     $res = SendPupesoftSms($vastaanottaja, $viesti);
   }
-  else if ($sms_palvelintyyppi == "kannel") {
+  elseif ($sms_palvelintyyppi == "kannel") {
     $res = SendKannelSms($vastaanottaja, $viesti);
   }
-  else if ($sms_palvelintyyppi == "clickatell") {
+  elseif ($sms_palvelintyyppi == "clickatell") {
     $res = SendClickatellSms($vastaanottaja, $viesti);
   }
   else {

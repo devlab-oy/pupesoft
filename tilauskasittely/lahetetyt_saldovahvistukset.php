@@ -87,7 +87,7 @@ if ($request['tee'] == 'hae_lahetetyt_saldovahvistukset') {
 
   echo_lahetetyt_saldovahvistukset($request);
 }
-else if ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovahvistus_pdf') {
+elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovahvistus_pdf') {
   //requestissa tulee saldovahvistus_tunnus. Tällöin $saldovahvistus arrayssa on vain yksi solu
   $saldovahvistus = hae_lahetetyt_saldovahvistukset($request);
 
@@ -99,7 +99,7 @@ else if ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldova
   if ($request['tee'] == 'NAYTATILAUS') {
     echo file_get_contents($pdf_filepath);
   }
-  else if ($request['tee'] == 'tulosta_saldovahvistus_pdf') {
+  elseif ($request['tee'] == 'tulosta_saldovahvistus_pdf') {
     $kirjoitin_komento = hae_kayttajan_kirjoitin();
 
     exec($kirjoitin_komento['komento'].' '.$pdf_filepath);
@@ -111,7 +111,7 @@ else if ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldova
   $request['saldovahvistukset'] = hae_lahetetyt_saldovahvistukset($request);
   echo_lahetetyt_saldovahvistukset($request);
 }
-else if ($request['tee'] == 'laheta_sahkoposti') {
+elseif ($request['tee'] == 'laheta_sahkoposti') {
   list($lahetetyt_count, $ei_lahetetty_count) = generoi_saldovahvistus_sahkopostit($request, true);
 }
 

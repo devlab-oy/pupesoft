@@ -648,7 +648,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
       if (isset($row['ostoehdotus']) and array_key_exists($row['ostoehdotus'], $ostoehdotukset)) {
         $row['ostoehdotus'] = $ostoehdotukset[$row['ostoehdotus']];
       }
-      else if (isset($row['ostoehdotus']) and !array_key_exists($row['ostoehdotus'], $ostoehdotukset)) {
+      elseif (isset($row['ostoehdotus']) and !array_key_exists($row['ostoehdotus'], $ostoehdotukset)) {
         $row['ostoehdotus'] = t("Tuntematon");
       }
     }
@@ -660,7 +660,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
       if ($row['poistettu'] == 1) {
         $row['poistettu'] = $poistettu;
       }
-      else if ($row['poistettu'] == 0) {
+      elseif ($row['poistettu'] == 0) {
         $saldolliset[] = $row["paikkatun"];
         $row['poistettu'] = '';
       }

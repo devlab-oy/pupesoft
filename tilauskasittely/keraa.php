@@ -2355,7 +2355,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           $('#hakutable').hide();
         </script> ";
     }
-    else if (mysql_num_rows($result) > 0) {
+    elseif (mysql_num_rows($result) > 0) {
       //piirret‰‰n taulukko...
       echo "<br><table>";
       echo "<tr>";

@@ -527,7 +527,7 @@ function hae_extranet_tarjous($tunnus, $toim) {
   if ($toim == 'EXTTARJOUS') {
     $where = "  AND tila = 'T' AND alatila = ''";
   }
-  else if ($toim == 'EXTENNAKKO') {
+  elseif ($toim == 'EXTENNAKKO') {
     $where = "  AND tila = 'N' AND alatila = ''";
   }
   else {

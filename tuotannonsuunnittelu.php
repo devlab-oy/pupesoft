@@ -120,7 +120,7 @@ if ($tee == 'paivita' and isset($method) and $method == 'update') {
     echo "</form>";
   }
   // KESKEYTÄ FORMI
-  else if (!isset($varmistus) and ($tila == 'TK') and $valmistus->getTila() == 'VA') {
+  elseif (!isset($varmistus) and ($tila == 'TK') and $valmistus->getTila() == 'VA') {
     echo "<font class='head'>" . t("Keskeytä työ") . "</font>";
 
     echo "<form method='POST'>";

@@ -8,22 +8,22 @@
 
 $query_ale_lisa = generoi_alekentta("O");
 
-$query = "  SELECT tilausrivi.tunnus,
-      tilausrivi.otunnus,
-      ROUND(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu,
-      tilausrivi.yksikko,
-      tilausrivi.tuoteno,
-      IFNULL(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno,
-      ROUND(tilausrivi.hinta * IF(tuotteen_toimittajat.tuotekerroin = 0 OR tuotteen_toimittajat.tuotekerroin IS NULL, 1, tuotteen_toimittajat.tuotekerroin) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') nettohinta
-      FROM tilausrivi
-      JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
-      LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
-      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-      AND tilausrivi.tyyppi  = 'O'
-      AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-      AND tilausrivi.varattu > 0
-      AND ta.tunnus IS NULL
-      ORDER BY tilausrivi.tunnus";
+$query = "SELECT tilausrivi.tunnus,
+          tilausrivi.otunnus,
+          ROUND(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu,
+          tilausrivi.yksikko,
+          tilausrivi.tuoteno,
+          IFNULL(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno,
+          ROUND(tilausrivi.hinta * IF(tuotteen_toimittajat.tuotekerroin = 0 OR tuotteen_toimittajat.tuotekerroin IS NULL, 1, tuotteen_toimittajat.tuotekerroin) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') nettohinta
+          FROM tilausrivi
+          JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
+          LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
+          WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+          AND tilausrivi.tyyppi  = 'O'
+          AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+          AND tilausrivi.varattu > 0
+          AND ta.tunnus IS NULL
+          ORDER BY tilausrivi.tunnus";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {

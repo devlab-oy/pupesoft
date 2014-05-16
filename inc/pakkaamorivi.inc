@@ -16,11 +16,11 @@ if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 
   $ulos = "<td><select name='$nimi'>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND komento != 'EDI'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND komento != 'EDI'
+            ORDER BY kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
@@ -47,10 +47,10 @@ if (mysql_field_name($result, $i) == "varasto") {
 
   $ulos = "<td><select name='$nimi'>";
 
-  $query = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+            ORDER BY tyyppi, nimitys";
   $varasto_res = mysql_query($query) or pupe_error($query);
 
   while ($varasto_row = mysql_fetch_array($varasto_res)) {

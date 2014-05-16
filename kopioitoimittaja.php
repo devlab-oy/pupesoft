@@ -4,9 +4,9 @@ echo "<font class='head'>".t("Kopioi toimittaja").":</font><hr>";
 if ($tee == "write") {
 
   // Luodaan puskuri, jotta saadaan taulukot kuntoon
-  $query = "  SELECT *
-        FROM toimi
-        WHERE tunnus = '$id'";
+  $query = "SELECT *
+            FROM toimi
+            WHERE tunnus = '$id'";
   $result = mysql_query($query) or pupe_error($query);
   $trow = mysql_fetch_array($result);
 
@@ -54,9 +54,9 @@ if ($tee == "edit") {
   echo "<input type = 'hidden' name = 'id' value ='$id'>";
 
   // Kokeillaan geneeristä
-  $query = "  SELECT *
-        FROM toimi
-        WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
+  $query = "SELECT *
+            FROM toimi
+            WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
   $result = mysql_query($query) or die ("Kysely ei onnistu $query");
   $trow = mysql_fetch_array($result);
   echo "<table>";

@@ -66,12 +66,12 @@ class pupeExcel {
     // Hardcoodataan style
     $style = array("date" => TRUE);
 
-    $query = "  INSERT INTO temporary_excel_data SET
-          excelrivi   = $excelrivi,
-          excelsarake = $excelsarake,
-          type     = 'D',
-          value     = '$date',
-          style     = '".mysql_real_escape_string(serialize($style))."'";
+    $query = "INSERT INTO temporary_excel_data SET
+              excelrivi   = $excelrivi,
+              excelsarake = $excelsarake,
+              type        = 'D',
+              value       = '$date',
+              style       = '".mysql_real_escape_string(serialize($style))."'";
     $result = pupe_query($query, $this->_exceldblink);
   }
 
@@ -85,12 +85,12 @@ class pupeExcel {
     $excelrivi++;
     $excelsarake++;
 
-    $query = "  INSERT INTO temporary_excel_data SET
-          excelrivi   = $excelrivi,
-          excelsarake = $excelsarake,
-          type     = 'N',
-          value     = '$number',
-          style     = '".mysql_real_escape_string(serialize($style))."'";
+    $query = "INSERT INTO temporary_excel_data SET
+              excelrivi   = $excelrivi,
+              excelsarake = $excelsarake,
+              type        = 'N',
+              value       = '$number',
+              style       = '".mysql_real_escape_string(serialize($style))."'";
     $result = pupe_query($query, $this->_exceldblink);
   }
 
@@ -104,12 +104,12 @@ class pupeExcel {
     $excelrivi++;
     $excelsarake++;
 
-    $query = "  INSERT INTO temporary_excel_data SET
-          excelrivi   = $excelrivi,
-          excelsarake = $excelsarake,
-          type     = 'F',
-          value     = '$number',
-          style     = '".mysql_real_escape_string(serialize($style))."'";
+    $query = "INSERT INTO temporary_excel_data SET
+              excelrivi   = $excelrivi,
+              excelsarake = $excelsarake,
+              type        = 'F',
+              value       = '$number',
+              style       = '".mysql_real_escape_string(serialize($style))."'";
     $result = pupe_query($query, $this->_exceldblink);
   }
 
@@ -124,19 +124,19 @@ class pupeExcel {
 
     $string_key = md5($string);
 
-    $query = "  INSERT INTO temporary_excel_data SET
-          excelrivi   = $excelrivi,
-          excelsarake = $excelsarake,
-          type     = 'S',
-          value     = '$string_key',
-          style     = '".mysql_real_escape_string(serialize($style))."'";
+    $query = "INSERT INTO temporary_excel_data SET
+              excelrivi   = $excelrivi,
+              excelsarake = $excelsarake,
+              type        = 'S',
+              value       = '$string_key',
+              style       = '".mysql_real_escape_string(serialize($style))."'";
     $result = pupe_query($query, $this->_exceldblink);
 
-    $query = "  INSERT INTO temporary_excel_sharedstrings SET
-          string_key  = '$string_key',
-          string     = '$string',
-          times_used   = 1
-          ON DUPLICATE KEY UPDATE times_used = times_used + 1";
+    $query = "INSERT INTO temporary_excel_sharedstrings SET
+              string_key = '$string_key',
+              string     = '$string',
+              times_used = 1
+              ON DUPLICATE KEY UPDATE times_used = times_used + 1";
     $result = pupe_query($query, $this->_exceldblink);
   }
 
@@ -159,15 +159,15 @@ class pupeExcel {
     $sharedStrings = simplexml_load_file($sharedStringsFile);
 
     // Päivitetään excel dataan string_id:t
-    $query = "  UPDATE temporary_excel_data
-          JOIN temporary_excel_sharedstrings ON (temporary_excel_sharedstrings.string_key = temporary_excel_data.value)
-          SET temporary_excel_data.string_id = (temporary_excel_sharedstrings.id-1)
-          WHERE temporary_excel_data.type = 'S'";
+    $query = "UPDATE temporary_excel_data
+              JOIN temporary_excel_sharedstrings ON (temporary_excel_sharedstrings.string_key = temporary_excel_data.value)
+              SET temporary_excel_data.string_id = (temporary_excel_sharedstrings.id-1)
+              WHERE temporary_excel_data.type = 'S'";
     $result = pupe_query($query, $this->_exceldblink);
 
     // Tehdään Shared Strings XML
-    $query = "  SELECT *
-          FROM temporary_excel_sharedstrings";
+    $query = "SELECT *
+              FROM temporary_excel_sharedstrings";
     $result = pupe_query($query, $this->_exceldblink);
 
     $stringCount = 0;
@@ -181,9 +181,9 @@ class pupeExcel {
     }
 
     // Tehdään Excel taulukko XML
-    $query = "  SELECT *
-          FROM temporary_excel_data
-          ORDER BY excelrivi, excelsarake";
+    $query = "SELECT *
+              FROM temporary_excel_data
+              ORDER BY excelrivi, excelsarake";
     $result = pupe_query($query, $this->_exceldblink);
 
     $rowCount = mysql_num_rows($result);

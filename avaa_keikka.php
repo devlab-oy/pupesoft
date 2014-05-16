@@ -7,15 +7,15 @@ print "<font class='head'>".t("Avaa saapuminen")."</font><hr>";
 if ($tee == "avaa") {
 
   // Nollataan mapvm, koska se ylikirjataan joka tapauksessa kun keikka loppulasketaan uudestaan
-  $query = "  UPDATE lasku
-        SET alatila = '',
-        kohdistettu = 'K',
-        mapvm = '0000-00-00'
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tila = 'K'
-        and laskunro = '$keikka'
-        and tunnus = '$tunnus'
-        and vanhatunnus = 0";
+  $query = "UPDATE lasku
+            SET alatila = '',
+            kohdistettu     = 'K',
+            mapvm           = '0000-00-00'
+            WHERE yhtio     = '$kukarow[yhtio]'
+            and tila        = 'K'
+            and laskunro    = '$keikka'
+            and tunnus      = '$tunnus'
+            and vanhatunnus = 0";
   $res = mysql_query($query) or pupe_error($query);
 
   if (mysql_affected_rows() != 1) {
@@ -32,14 +32,14 @@ if ($tee == "avaa") {
 
 if ($tee == "etsi") {
 
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio   = '$kukarow[yhtio]'
-        and tila     = 'K'
-        and laskunro   = '$keikka'
-        and vanhatunnus = 0
-        and alatila   = 'X'
-        and kohdistettu = 'X'";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio     = '$kukarow[yhtio]'
+            and tila        = 'K'
+            and laskunro    = '$keikka'
+            and vanhatunnus = 0
+            and alatila     = 'X'
+            and kohdistettu = 'X'";
   $res = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($res) == 1) {

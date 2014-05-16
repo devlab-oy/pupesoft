@@ -11,20 +11,20 @@ if ($rakir_row["tunnusnippu"]>0) {
 
 // onko t‰m‰ tyhj‰ rahtikirja (rahtikirja_custom.php), jos EI niin haetaan infot tilaukselta
 if (!isset($GLOBALS['tyhja'])) {
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus in ($otunnukset)
-        ORDER BY tunnus
-        LIMIT 1";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  in ($otunnukset)
+            ORDER BY tunnus
+            LIMIT 1";
   $tempr = mysql_query($query) or pupe_error($query);
   $postirow = mysql_fetch_array($tempr);
 
   // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
-  $query = "  SELECT nimi, nimitark, osoite, postino, postitp, maa
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus = '$postirow[varasto]'";
+  $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$postirow[varasto]'";
   $tempr = mysql_query($query) or pupe_error($query);
   $postirow_varasto = mysql_fetch_array($tempr);
 
@@ -55,12 +55,12 @@ elseif ($osoitelappurow["toim_nimi"] != '') {
   $rakir_row = $osoitelappurow;
 }
 else {
-  $query = "  SELECT asiakas.*, rahtikirjat.merahti, rahtikirjat.rahtisopimus
-        FROM asiakas
-        JOIN rahtikirjat on rahtikirjat.yhtio = asiakas.yhtio and rahtikirjat.otsikkonro = '".($otsikkonro * -1)."'
-        WHERE asiakas.yhtio  = '$kukarow[yhtio]'
-        and asiakas.tunnus  = '$GLOBALS[asiakasid]'
-        LIMIT 1";
+  $query = "SELECT asiakas.*, rahtikirjat.merahti, rahtikirjat.rahtisopimus
+            FROM asiakas
+            JOIN rahtikirjat on rahtikirjat.yhtio = asiakas.yhtio and rahtikirjat.otsikkonro = '".($otsikkonro * -1)."'
+            WHERE asiakas.yhtio = '$kukarow[yhtio]'
+            and asiakas.tunnus  = '$GLOBALS[asiakasid]'
+            LIMIT 1";
   $tempr = mysql_query($query) or pupe_error($query);
   $rakir_row = mysql_fetch_array($tempr);
 
@@ -241,11 +241,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   // varmistetaan, ett‰ kopiossakin tulee oikean toimipaikan logo
   if ((int) $postirow["yhtio_toimipaikka"] != 0) {
-    $query = "  SELECT *
-          FROM yhtion_toimipaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$postirow[yhtio_toimipaikka]'
-          and lasku_logo != ''";
+    $query = "SELECT *
+              FROM yhtion_toimipaikat
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and tunnus      = '$postirow[yhtio_toimipaikka]'
+              and lasku_logo != ''";
     $result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
 
     if (mysql_num_rows($result) == 1) {
@@ -254,9 +254,9 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
      }
   }
   else {
-    $query = "  SELECT *
-          FROM yhtion_parametrit
-          WHERE yhtio = '$postirow[yhtio]'";
+    $query = "SELECT *
+              FROM yhtion_parametrit
+              WHERE yhtio = '$postirow[yhtio]'";
     $result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
 
     if (mysql_num_rows($result) == 1) {
@@ -372,11 +372,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(302,  761,  t("Vastaanottajan viite Mottagarens referens"),    $firstpage, $norm);
 
   if (!isset($GLOBALS['tyhja'])) {
-    $query = "  SELECT group_concat(trim(viesti) SEPARATOR ', ') viesti
-          from lasku
-          where yhtio = '$kukarow[yhtio]'
-          and tunnus in ($otunnukset)
-          order by tunnus ";
+    $query = "SELECT group_concat(trim(viesti) SEPARATOR ', ') viesti
+              from lasku
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  in ($otunnukset)
+              order by tunnus ";
     $viestires = mysql_query($query) or pupe_error($query);
     $viestirow = mysql_fetch_array($viestires);
   }

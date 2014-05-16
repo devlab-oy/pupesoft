@@ -31,11 +31,11 @@ if (!function_exists("puun_alkiotarkista")) {
     if (mysql_field_name($result, $i) == "tunnus") {
 
       if ((!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA") and ((strtoupper($tem_laji) == "TUOTE" and strtoupper($tem_kutsuja) == "ASIAKAS") or strtoupper($tem_laji) == 'ASIAKAS' or strtoupper($table_tarkenne) == 'ASIAKAS')) {
-        $query = "  SELECT tunnus
-              FROM asiakas
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND laji != 'P'
-              AND tunnus = '$tem_liitos'";
+        $query = "SELECT tunnus
+                  FROM asiakas
+                  WHERE yhtio  = '{$kukarow['yhtio']}'
+                  AND laji    != 'P'
+                  AND tunnus   = '$tem_liitos'";
         $asiakkaan_haku_res = pupe_query($query);
 
         if (mysql_num_rows($asiakkaan_haku_res) == 0) {
@@ -43,11 +43,11 @@ if (!function_exists("puun_alkiotarkista")) {
         }
       }
       elseif ((!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA") and ((strtoupper($tem_laji) == "ASIAKAS" and strtoupper($tem_kutsuja) == "TUOTE") or strtoupper($tem_laji) == 'TUOTE' or strtoupper($table_tarkenne) == 'TUOTE')) {
-        $query = "  SELECT tunnus
-              FROM tuote
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND status != 'P'
-              AND tuoteno = '$tem_liitos'";
+        $query = "SELECT tunnus
+                  FROM tuote
+                  WHERE yhtio  = '{$kukarow['yhtio']}'
+                  AND status  != 'P'
+                  AND tuoteno  = '$tem_liitos'";
         $asiakkaan_haku_res = pupe_query($query);
 
         if (mysql_num_rows($asiakkaan_haku_res) == 0) {

@@ -213,10 +213,10 @@ if (!function_exists('hae_toimitustapa')) {
       return false;
     }
 
-    $query = "  SELECT *
-          FROM toimitustapa
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = {$toimitustapa_tunnus}";
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = {$toimitustapa_tunnus}";
     $result = pupe_query($query);
 
     return mysql_fetch_assoc($result);
@@ -325,10 +325,10 @@ if (!function_exists('aseta_kukarow_kesken')) {
       return false;
     }
 
-    $query = "  UPDATE kuka
-          SET kesken = {$kesken}
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND kuka = '{$kukarow['kuka']}'";
+    $query = "UPDATE kuka
+              SET kesken = {$kesken}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kuka    = '{$kukarow['kuka']}'";
     pupe_query($query);
 
     $kukarow["kesken"] = $kesken;
@@ -395,10 +395,10 @@ if (!function_exists('linkkaa_myyntitilausrivi_varastosiirtoriviin')) {
       return false;
     }
 
-    $query = "  UPDATE tilausrivin_lisatiedot
-          SET tilausrivilinkki = {$myyntitilausirivi_tunnus}
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tilausrivitunnus = {$varastosiirtorivi_tunnus}";
+    $query = "UPDATE tilausrivin_lisatiedot
+              SET tilausrivilinkki = {$myyntitilausirivi_tunnus}
+              WHERE yhtio          = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus = {$varastosiirtorivi_tunnus}";
     pupe_query($query);
 
     return true;
@@ -458,30 +458,30 @@ if (!function_exists('hae_tilausrivit')) {
     }
 
     $query   = "SELECT t.*,
-          {$select}
-          t.hyllyalue AS lahde_hyllyalue,
-          t.hyllynro AS lahde_hyllynro,
-          tl.palautus_varasto AS palautus_varasto,
-          tl.toimittajan_tunnus,
-          tl.tilausrivitunnus AS tilausrivitunnus,
-          tl.tilausrivilinkki AS tilausrivilinkki,
-          tl.kohde_hyllyalue AS kohde_hyllyalue,
-          tl.kohde_hyllynro AS kohde_hyllynro,
-          tl.kohde_hyllytaso AS kohde_hyllytaso,
-          tl.kohde_hyllyvali AS kohde_hyllyvali
-          FROM tilausrivi AS t
-          {$lasku_join}
-          JOIN tuote
-          ON ( tuote.yhtio = t.yhtio
-            AND tuote.tuoteno = t.tuoteno
-            AND tuote.ei_saldoa = '')
-          JOIN tilausrivin_lisatiedot AS tl
-          ON (tl.yhtio = t.yhtio
-            AND tl.tilausrivitunnus = t.tunnus )
-          {$varasto_avainsana_join}
-          WHERE t.yhtio = '{$kukarow['yhtio']}'
-          AND t.otunnus = {$otunnus}
-          {$tilausrivi_where}";
+                {$select}
+                t.hyllyalue AS lahde_hyllyalue,
+                t.hyllynro AS lahde_hyllynro,
+                tl.palautus_varasto AS palautus_varasto,
+                tl.toimittajan_tunnus,
+                tl.tilausrivitunnus AS tilausrivitunnus,
+                tl.tilausrivilinkki AS tilausrivilinkki,
+                tl.kohde_hyllyalue AS kohde_hyllyalue,
+                tl.kohde_hyllynro AS kohde_hyllynro,
+                tl.kohde_hyllytaso AS kohde_hyllytaso,
+                tl.kohde_hyllyvali AS kohde_hyllyvali
+                FROM tilausrivi AS t
+                {$lasku_join}
+                JOIN tuote
+                ON ( tuote.yhtio = t.yhtio
+                  AND tuote.tuoteno       = t.tuoteno
+                  AND tuote.ei_saldoa     = '')
+                JOIN tilausrivin_lisatiedot AS tl
+                ON (tl.yhtio = t.yhtio
+                  AND tl.tilausrivitunnus = t.tunnus )
+                {$varasto_avainsana_join}
+                WHERE t.yhtio             = '{$kukarow['yhtio']}'
+                AND t.otunnus             = {$otunnus}
+                {$tilausrivi_where}";
     $result   = pupe_query($query);
 
     $tilausrivit = array();
@@ -509,13 +509,13 @@ if (!function_exists('paivita_myyntitilausrivien_tuotepaikat')) {
         $update = "AND tunnus = {$tilausrivi['tilausrivilinkki']}";
       }
 
-      $query = "  UPDATE tilausrivi SET
-                  hyllyalue   = '{$tilausrivi['kohde_hyllyalue']}',
-                  hyllynro    = '{$tilausrivi['kohde_hyllynro']}',
-                  hyllytaso   = '{$tilausrivi['kohde_hyllytaso']}',
-                  hyllyvali   = '{$tilausrivi['kohde_hyllyvali']}'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  {$update}";
+      $query = "UPDATE tilausrivi SET
+                hyllyalue   = '{$tilausrivi['kohde_hyllyalue']}',
+                hyllynro    = '{$tilausrivi['kohde_hyllynro']}',
+                hyllytaso   = '{$tilausrivi['kohde_hyllytaso']}',
+                hyllyvali   = '{$tilausrivi['kohde_hyllyvali']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                {$update}";
       pupe_query($query);
     }
 
@@ -531,10 +531,10 @@ if (!function_exists('linkkaa_varastosiirto_myyntitilaukseen')) {
       return false;
     }
 
-    $query = "  UPDATE lasku SET
-          vanhatunnus = {$varastosiirto['tunnus']}
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = {$myyntitilaus['tunnus']}";
+    $query = "UPDATE lasku SET
+              vanhatunnus = {$varastosiirto['tunnus']}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = {$myyntitilaus['tunnus']}";
     pupe_query($query);
 
     return true;
@@ -549,13 +549,13 @@ if (!function_exists('hae_avoin_varastosiirto')) {
       return false;
     }
 
-    $query   = "  SELECT *
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tila = 'G'
-            AND alatila = ''
-            AND varasto = '{$lahdevarasto_tunnus}'
-            AND clearing = '{$kohdevarasto_tunnus}'";
+    $query   = "SELECT *
+                FROM lasku
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND tila     = 'G'
+                AND alatila  = ''
+                AND varasto  = '{$lahdevarasto_tunnus}'
+                AND clearing = '{$kohdevarasto_tunnus}'";
     $result   = pupe_query($query);
 
     return mysql_fetch_assoc($result);

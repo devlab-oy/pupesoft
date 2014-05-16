@@ -358,8 +358,7 @@ if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
 
     foreach ($varastosiirtorivit as &$varastosiirtorivi) {
 
-      $kohde_varasto                = hae_varasto($varastosiirto['clearing']);
-      $kohde_varasto_tuotepaikat    = hae_tuotteen_tuotepaikat($varastosiirtorivi['tuoteno'], $kohde_varasto);
+      $kohde_varasto_tuotepaikat    = hae_tuotteen_tuotepaikat($varastosiirtorivi['tuoteno'], $varastosiirto['clearing']);
 
       if (empty($kohde_varasto_tuotepaikat)) {
         //Jos kohde varastossa ei ole tälle tuotteelle hyllypaikkaa niin luodaan ns. default-paikka

@@ -946,16 +946,21 @@ if ($id == '0' and $echotaanko) {
   if (isset($varastorajaus) and !empty($varastorajaus)) {
     $varasto .= ' AND lasku.clearing = '.(int) $varastorajaus;
   }
-  else if ($varastorajaus === 0 and !empty($kukarow['oletus_varasto'])) {
-      $varasto .= ' AND lasku.clearing = '.(int) $kukarow['oletus_varasto'];
-    }
+  elseif ($varastorajaus === 0 and !empty($kukarow['oletus_varasto'])) {
+    $varasto .= ' AND lasku.clearing = '.(int) $kukarow['oletus_varasto'];
+  }
 
   if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {
     $varasto .= " AND lasku.yhtio_toimipaikka = {$toimipaikkarajaus}";
   }
-  else if (!isset($toimipaikkarajaus)) {
-      $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
-    }
+  elseif (!isset($toimipaikkarajaus) and $yhtiorow['toimipaikkakasittely'] == "L") {
+    // rajataan vaikka käyttäjällä ei ole toimipaikkaa
+    $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
+  }
+  elseif (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] != 0) {
+    // rajataan vain kun käyttäjällä on toimipaikka
+    $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
+  }
 
   if (isset($maa) and !empty($maa)) {
     $varasto .= " AND varastopaikat.maa = '".mysql_real_escape_string($maa)."'";

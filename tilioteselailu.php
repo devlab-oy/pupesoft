@@ -21,19 +21,19 @@ enable_ajax();
 
 if ($tee == 'T' and (int) $kuitattava_tiliotedata_tunnus > 0) {
 
-  $query = "  SELECT kuitattu
-        FROM tiliotedata
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND perheid = '$kuitattava_tiliotedata_tunnus'";
+  $query = "SELECT kuitattu
+            FROM tiliotedata
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND perheid = '$kuitattava_tiliotedata_tunnus'";
   $kuitetaan_result = pupe_query($query);
   $kuitetaan_row = mysql_fetch_assoc($kuitetaan_result);
 
   $kuitataan_lisa = $kuitetaan_row['kuitattu'] == '' ? " kuitattu = '$kukarow[kuka]', kuitattuaika = now() " : " kuitattu = '', kuitattuaika = '0000-00-00 00:00:00' ";
 
-  $query = "  UPDATE tiliotedata SET
-        $kuitataan_lisa
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND perheid = '$kuitattava_tiliotedata_tunnus'";
+  $query = "UPDATE tiliotedata SET
+            $kuitataan_lisa
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND perheid = '$kuitattava_tiliotedata_tunnus'";
   $kuitetaan_result = pupe_query($query);
 
   die("TRUE");
@@ -43,11 +43,11 @@ echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 //Olemme tulossa takasin suorituksista
 if ($tee == 'Z' or $tiliote == 'Z') {
-  $query = "  SELECT tilino
-        FROM yriti
-        WHERE tunnus = $mtili
-        and yhtio = '$kukarow[yhtio]'
-        and kaytossa = ''";
+  $query = "SELECT tilino
+            FROM yriti
+            WHERE tunnus = $mtili
+            and yhtio    = '$kukarow[yhtio]'
+            and kaytossa = ''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -68,50 +68,50 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
 
   if ($tee == 'X') {
     // Pyyntö seuraavasta tiliotteesta
-    $query = "  SELECT *
-          FROM tiliotedata use index (yhtio_tilino_alku)
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND alku    > '$pvm'
-          AND tilino  = '$tilino'
-          AND tyyppi  = '1'
-          ORDER BY tunnus
-          LIMIT 1";
+    $query = "SELECT *
+              FROM tiliotedata use index (yhtio_tilino_alku)
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND alku    > '$pvm'
+              AND tilino  = '$tilino'
+              AND tyyppi  = '1'
+              ORDER BY tunnus
+              LIMIT 1";
     $tyyppi = 1;
   }
   elseif ($tee == 'XX') {
     // Pyyntö edellisestä tiliotteesta
-    $query = "  SELECT *
-          FROM tiliotedata use index (yhtio_tilino_alku)
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND alku    < '$pvm'
-          AND tilino  = '$tilino'
-          AND tyyppi  = '1'
-          ORDER BY tunnus desc
-          LIMIT 1";
+    $query = "SELECT *
+              FROM tiliotedata use index (yhtio_tilino_alku)
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND alku    < '$pvm'
+              AND tilino  = '$tilino'
+              AND tyyppi  = '1'
+              ORDER BY tunnus desc
+              LIMIT 1";
     $tyyppi = 1;
   }
   elseif ($tee == 'XS') {
     // Pyyntö seuraavasta viiteaineistosta
-    $query = "  SELECT *
-          FROM tiliotedata use index (yhtio_tilino_alku)
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND alku    > '$pvm'
-          AND tilino  = '$tilino'
-          AND tyyppi  = '3'
-          ORDER BY tunnus
-          LIMIT 1";
+    $query = "SELECT *
+              FROM tiliotedata use index (yhtio_tilino_alku)
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND alku    > '$pvm'
+              AND tilino  = '$tilino'
+              AND tyyppi  = '3'
+              ORDER BY tunnus
+              LIMIT 1";
     $tyyppi = 3;
   }
   elseif ($tee == 'XXS') {
     // Pyyntö seuraavasta viiteaineistosta
-    $query = "  SELECT *
-          FROM tiliotedata use index (yhtio_tilino_alku)
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND alku    < '$pvm'
-          AND tilino  = '$tilino'
-          AND tyyppi  = '3'
-          ORDER BY tunnus desc
-          LIMIT 1";
+    $query = "SELECT *
+              FROM tiliotedata use index (yhtio_tilino_alku)
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND alku    < '$pvm'
+              AND tilino  = '$tilino'
+              AND tyyppi  = '3'
+              ORDER BY tunnus desc
+              LIMIT 1";
     $tyyppi = 3;
   }
 
@@ -196,15 +196,15 @@ if ($tee == 'S') {
 
 
   if ($tyyppi == '3') {
-    $query = "  SELECT tiliotedata.*,
-          ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi
-          FROM tiliotedata
-          LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
-          WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
-          and tiliotedata.alku    = '$pvm'
-          and tiliotedata.tilino  = '$tilino'
-          and tiliotedata.tyyppi  = '$tyyppi'
-          ORDER BY tunnus";
+    $query = "SELECT tiliotedata.*,
+              ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi
+              FROM tiliotedata
+              LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
+              WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
+              and tiliotedata.alku    = '$pvm'
+              and tiliotedata.tilino  = '$tilino'
+              and tiliotedata.tyyppi  = '$tyyppi'
+              ORDER BY tunnus";
   }
   else {
 
@@ -214,16 +214,16 @@ if ($tee == 'S') {
       $tjarjlista = "sorttauskentta,";
     }
 
-    $query = "  SELECT tiliotedata.*,
-          ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi,
-          if(left(tieto, 3) in ('T40','T50','T60','T70') or kuitattu != '', 2, 1) sorttauskentta
-          FROM tiliotedata
-          LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
-          WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
-          and tiliotedata.alku    = '$pvm'
-          and tiliotedata.tilino  = '$tilino'
-          and tiliotedata.tyyppi  = '$tyyppi'
-          ORDER BY $tjarjlista perheid, tunnus";
+    $query = "SELECT tiliotedata.*,
+              ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi,
+              if(left(tieto, 3) in ('T40','T50','T60','T70') or kuitattu != '', 2, 1) sorttauskentta
+              FROM tiliotedata
+              LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
+              WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
+              and tiliotedata.alku    = '$pvm'
+              and tiliotedata.tilino  = '$tilino'
+              and tiliotedata.tyyppi  = '$tyyppi'
+              ORDER BY $tjarjlista perheid, tunnus";
   }
   $tiliotedataresult = pupe_query($query);
 
@@ -276,10 +276,10 @@ if ($tee == 'S') {
 
 if ($tee == '') {
 
-  $query = "  SELECT *
-        FROM yriti
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and kaytossa = '' ";
+  $query = "SELECT *
+            FROM yriti
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and kaytossa = '' ";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -334,14 +334,14 @@ if ($tee == '') {
       </table><br>
       </form>";
 
-  $query = "  SELECT alku, loppu, concat_ws(' ', yriti.nimi, yriti.tilino) tili, if(tyyppi='1', 'tiliote', if(tyyppi='2','lmp','viitesiirrot')) laji, tyyppi, yriti.tilino
-        FROM tiliotedata
-        JOIN yriti ON (yriti.yhtio = tiliotedata.yhtio and yriti.tilino = tiliotedata.tilino)
-                WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
-        and tiliotedata.alku   >= '$vv-$kk-$pp'
-        $querylisa
-        GROUP BY alku, tili, laji
-        ORDER BY alku DESC, tiliotedata.tilino, laji";
+  $query = "SELECT alku, loppu, concat_ws(' ', yriti.nimi, yriti.tilino) tili, if(tyyppi='1', 'tiliote', if(tyyppi='2','lmp','viitesiirrot')) laji, tyyppi, yriti.tilino
+            FROM tiliotedata
+            JOIN yriti ON (yriti.yhtio = tiliotedata.yhtio and yriti.tilino = tiliotedata.tilino)
+                    WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
+            and tiliotedata.alku            >= '$vv-$kk-$pp'
+            $querylisa
+            GROUP BY alku, tili, laji
+            ORDER BY alku DESC, tiliotedata.tilino, laji";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

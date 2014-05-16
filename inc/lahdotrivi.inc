@@ -14,10 +14,10 @@ if (mysql_field_name($result, $i) == "yhtio") {
 }
 
 if (mysql_field_name($result, $i) == "liitostunnus") {
-  $query = "  SELECT *
-        FROM toimitustapa
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY jarjestys, selite";
+  $query = "SELECT *
+            FROM toimitustapa
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY jarjestys, selite";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -121,10 +121,10 @@ if (mysql_field_name($result, $i) == "alkupvm") {
 
 if (mysql_field_name($result, $i) == "varasto") {
 
-  $query = "  SELECT tunnus, nimitys
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT tunnus, nimitys
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+            ORDER BY tyyppi, nimitys";
   $varastores = pupe_query($query);
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)."><option value=''>".t("Valitse")."</option>";

@@ -30,12 +30,12 @@ if ($tee == 'Z') {
   }
 
   if ($lisa == '') {
-    $query = "  SELECT distinct concat_ws('-',hyllyalue,if(hyllynro!='',hyllynro,0),if(hyllyvali!='',hyllyvali,0),if(hyllytaso!='',hyllytaso,0)) as paikka
-          FROM tuotepaikat
-          WHERE yhtio = '$kukarow[yhtio]' and
-          concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
-          concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
-          ORDER BY hyllyalue,hyllynro+0,hyllyvali+0,hyllytaso+0";
+    $query = "SELECT distinct concat_ws('-',hyllyalue,if(hyllynro!='',hyllynro,0),if(hyllyvali!='',hyllyvali,0),if(hyllytaso!='',hyllytaso,0)) as paikka
+              FROM tuotepaikat
+              WHERE yhtio = '$kukarow[yhtio]' and
+              concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
+              concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
+              ORDER BY hyllyalue,hyllynro+0,hyllyvali+0,hyllytaso+0";
     $paikatres = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($paikatres) > 0) {

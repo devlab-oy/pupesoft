@@ -102,27 +102,27 @@ if ($tee != "" and isset($painoinnappia)) {
     $toimittaja_join = "";
   }
 
-  $query = "  SELECT tuote.tuoteno,
-        tuote.nimitys,
-        tuote.osasto,
-        tuote.try,
-        tuote.myyntihinta,
-        tuote.varmuus_varasto,
-        tuote.kehahin,
-        tuote.epakurantti25pvm,
-        tuote.epakurantti50pvm,
-        tuote.epakurantti75pvm,
-        tuote.epakurantti100pvm
-        FROM tuote
-        {$toimittaja_join}
-        WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-        {$lisa}
-        AND (tuote.status != 'P' OR (  SELECT sum(tuotepaikat.saldo)
-                        FROM tuotepaikat
-                        WHERE tuotepaikat.yhtio = tuote.yhtio
-                        AND tuotepaikat.tuoteno = tuote.tuoteno
-                        AND tuotepaikat.saldo > 0) > 0)
-        ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
+  $query = "SELECT tuote.tuoteno,
+            tuote.nimitys,
+            tuote.osasto,
+            tuote.try,
+            tuote.myyntihinta,
+            tuote.varmuus_varasto,
+            tuote.kehahin,
+            tuote.epakurantti25pvm,
+            tuote.epakurantti50pvm,
+            tuote.epakurantti75pvm,
+            tuote.epakurantti100pvm
+            FROM tuote
+            {$toimittaja_join}
+            WHERE tuote.yhtio                       = '{$kukarow["yhtio"]}'
+            {$lisa}
+            AND (tuote.status != 'P' OR (  SELECT sum(tuotepaikat.saldo)
+                            FROM tuotepaikat
+                            WHERE tuotepaikat.yhtio = tuote.yhtio
+                            AND tuotepaikat.tuoteno = tuote.tuoteno
+                            AND tuotepaikat.saldo   > 0) > 0)
+            ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
   $eresult = pupe_query($query);
   $total_rows = mysql_num_rows($eresult);
 
@@ -229,13 +229,13 @@ if ($tee != "" and isset($painoinnappia)) {
       $bar->increase();
 
       // ostopuoli
-      $query = "  SELECT min(toimaika) toimaika,
-            round(sum(varattu)) tulossa
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tuoteno = '{$row["tuoteno"]}'
-            AND tyyppi   = 'O'
-            AND varattu > 0";
+      $query = "SELECT min(toimaika) toimaika,
+                round(sum(varattu)) tulossa
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tuoteno = '{$row["tuoteno"]}'
+                AND tyyppi  = 'O'
+                AND varattu > 0";
       $ostoresult = pupe_query($query);
       $ostorivi = mysql_fetch_assoc($ostoresult);
 
@@ -243,13 +243,13 @@ if ($tee != "" and isset($painoinnappia)) {
 
       // Jos jälkitoimitukset eivät varaa saldoa, pitää ne ottaa mukaan
       if ($yhtiorow["varaako_jt_saldoa"] == "") {
-        $query = "  SELECT ifnull(round(sum(jt)), 0) jt
-              FROM tilausrivi
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tuoteno = '{$row["tuoteno"]}'
-              AND tyyppi  = 'L'
-              AND var     = 'J'
-              AND jt      > 0";
+        $query = "SELECT ifnull(round(sum(jt)), 0) jt
+                  FROM tilausrivi
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tuoteno = '{$row["tuoteno"]}'
+                  AND tyyppi  = 'L'
+                  AND var     = 'J'
+                  AND jt      > 0";
         $jt_result = pupe_query($query);
         $jt_rivi = mysql_fetch_assoc($jt_result);
         $jalkitoimituksessa = $jt_rivi["jt"];
@@ -258,33 +258,33 @@ if ($tee != "" and isset($painoinnappia)) {
       $tyyppi_lisa = ($listaustyyppi == "kappaleet" or $listaustyyppi == "kappaleet2") ? "kpl" : "rivihinta";
 
       // myyntipuoli
-      $query = "  SELECT
-            round(sum(if(laskutettuaika >= '{$vvl}-01-01', $tyyppi_lisa, 0))) myyntiVA,
-            round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0))) myynti12kk,
-            round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0))) myynti6kk,
-            round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) myynti3kk
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tuoteno = '{$row["tuoteno"]}'
-            AND tyyppi = 'L'
-            and laskutettuaika >= date_sub(CURDATE(), interval 12 month)
-            AND kpl != 0";
+      $query = "SELECT
+                round(sum(if(laskutettuaika >= '{$vvl}-01-01', $tyyppi_lisa, 0))) myyntiVA,
+                round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0))) myynti12kk,
+                round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0))) myynti6kk,
+                round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) myynti3kk
+                FROM tilausrivi
+                WHERE yhtio         = '{$kukarow["yhtio"]}'
+                AND tuoteno         = '{$row["tuoteno"]}'
+                AND tyyppi          = 'L'
+                and laskutettuaika  >= date_sub(CURDATE(), interval 12 month)
+                AND kpl            != 0";
       $myyntiresult = pupe_query($query);
       $myyntirivi = mysql_fetch_assoc($myyntiresult);
 
       if ($listaustyyppi == "kappaleet2") {
         // kulutukset
-        $query = "  SELECT
-              round(sum(if(toimitettuaika >= '{$vvl}-01-01', $tyyppi_lisa, 0))) kulutusVA,
-              round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0))) kulutus12kk,
-              round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0))) kulutus6kk,
-              round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) kulutus3kk
-              FROM tilausrivi
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tuoteno = '{$row["tuoteno"]}'
-              AND tyyppi = 'V'
-              and toimitettuaika >= date_sub(CURDATE(), interval 12 month)
-              AND kpl != 0";
+        $query = "SELECT
+                  round(sum(if(toimitettuaika >= '{$vvl}-01-01', $tyyppi_lisa, 0))) kulutusVA,
+                  round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0))) kulutus12kk,
+                  round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0))) kulutus6kk,
+                  round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) kulutus3kk
+                  FROM tilausrivi
+                  WHERE yhtio         = '{$kukarow["yhtio"]}'
+                  AND tuoteno         = '{$row["tuoteno"]}'
+                  AND tyyppi          = 'V'
+                  and toimitettuaika  >= date_sub(CURDATE(), interval 12 month)
+                  AND kpl            != 0";
         $kulutusresult = pupe_query($query);
         $kulutusrivi = mysql_fetch_assoc($kulutusresult);
       }

@@ -8,9 +8,9 @@ if ($tee == '1' and !isset($ajarappari)) {
 
 if ($tee == '1') {
   if ($tilino != '') {
-    $query = "  SELECT nimi
-          FROM tili
-          WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tilino'";
+    $query = "SELECT nimi
+              FROM tili
+              WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tilino'";
     $sresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($sresult) != 1) {
@@ -25,9 +25,9 @@ if ($tee == '1') {
 
   $tkausi = (int) $tkausi;
 
-  $query = "  SELECT tilikausi_alku, tilikausi_loppu
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]' and tunnus = $tkausi";
+  $query = "SELECT tilikausi_alku, tilikausi_loppu
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]' and tunnus = $tkausi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($vresult) == 1) {
@@ -79,18 +79,18 @@ if ($tee == '1') {
     $kustannuspaikoittain_join = "";
   }
 
-  $query = "  SELECT $tilinolisa1 tiliointi.tilino, tili.nimi, $lisa, sum(tiliointi.summa) Kumulatiivinen $kustannuspaikoittain_select
-        FROM tiliointi
-        LEFT JOIN tili ON tili.yhtio = '$kukarow[yhtio]' and tiliointi.tilino = tili.tilino
-        $kustannuspaikoittain_join
-        WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-        and tiliointi.korjattu=''
-        and tapvm >= '$tilikausirow[tilikausi_alku]'
-        and tapvm <= '$tilikausirow[tilikausi_loppu]'
-        $wher
-        $tilinolisa2
-        GROUP BY $tilinolisa1 tiliointi.tilino $kustannuspaikoittain_group
-        ORDER BY $tilinolisa1 tiliointi.tilino";
+  $query = "SELECT $tilinolisa1 tiliointi.tilino, tili.nimi, $lisa, sum(tiliointi.summa) Kumulatiivinen $kustannuspaikoittain_select
+            FROM tiliointi
+            LEFT JOIN tili ON tili.yhtio = '$kukarow[yhtio]' and tiliointi.tilino = tili.tilino
+            $kustannuspaikoittain_join
+            WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+            and tiliointi.korjattu=''
+            and tapvm             >= '$tilikausirow[tilikausi_alku]'
+            and tapvm             <= '$tilikausirow[tilikausi_loppu]'
+            $wher
+            $tilinolisa2
+            GROUP BY $tilinolisa1 tiliointi.tilino $kustannuspaikoittain_group
+            ORDER BY $tilinolisa1 tiliointi.tilino";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table><tr>";
@@ -196,16 +196,16 @@ if ($tee == '1') {
         $lisa = " AND tiliointi.tapvm = '$trow[tapvm]' ";
       }
 
-      $query = "  SELECT sum(summa_valuutassa) summa_val, valkoodi
-            FROM tiliointi
-            WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-            AND tiliointi.korjattu = ''
-            AND tiliointi.tilino = '$trow[tilino]'
-            AND tiliointi.valkoodi != '$yhtiorow[valkoodi]'
-            AND tiliointi.valkoodi != ''
-            $lisa
-            GROUP BY tiliointi.valkoodi
-            HAVING summa_val != 0";
+      $query = "SELECT sum(summa_valuutassa) summa_val, valkoodi
+                FROM tiliointi
+                WHERE tiliointi.yhtio   = '$kukarow[yhtio]'
+                AND tiliointi.korjattu  = ''
+                AND tiliointi.tilino    = '$trow[tilino]'
+                AND tiliointi.valkoodi != '$yhtiorow[valkoodi]'
+                AND tiliointi.valkoodi != ''
+                $lisa
+                GROUP BY tiliointi.valkoodi
+                HAVING summa_val != 0";
       $summa_val_result = mysql_query($query) or pupe_error($query);
 
       echo "<td align='right'>";
@@ -278,10 +278,10 @@ echo "<form name='valinta' action = 'raportit.php' method='post'>
 
 echo "<tr><th>".t("Valitse tilikausi")."</th>";
 
- $query = "  SELECT *
-      FROM tilikaudet
-      WHERE yhtio = '$kukarow[yhtio]'
-      ORDER BY tilikausi_alku desc";
+ $query = "SELECT *
+           FROM tilikaudet
+           WHERE yhtio = '$kukarow[yhtio]'
+           ORDER BY tilikausi_alku desc";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='tkausi' onchange='submit();'>";

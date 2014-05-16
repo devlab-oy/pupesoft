@@ -12,10 +12,10 @@ if(!function_exists("perusalennustarkista")) {
     }
     else {
       if ($tunnus == "") {
-        $query  = "  SELECT yhtio
-              FROM perusalennus
-              WHERE yhtio = '$kukarow[yhtio]'
-              and ryhma = '".trim($t[$i])."'";
+        $query  = "SELECT yhtio
+                   FROM perusalennus
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and ryhma   = '".trim($t[$i])."'";
         $chkressiresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($chkressiresult) > 0) {

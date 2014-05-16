@@ -7,11 +7,11 @@
 
 
 //hateaan varaston tulostusalueet
-$query = "  SELECT *
-      FROM varaston_tulostimet
-      WHERE varasto = '$varasto'
-      and yhtio    = '$kukarow[yhtio]'
-      ORDER BY prioriteetti, alkuhyllyalue";
+$query = "SELECT *
+          FROM varaston_tulostimet
+          WHERE varasto = '$varasto'
+          and yhtio     = '$kukarow[yhtio]'
+          ORDER BY prioriteetti, alkuhyllyalue";
 $turesult = pupe_query($query);
 
 if (mysql_num_rows($turesult) > 0) {
@@ -34,11 +34,11 @@ if (mysql_num_rows($turesult) > 0) {
   }
 
   if ($lis != '') {
-    $query = "  SELECT $lis
-          FROM tilausrivi
-          WHERE otunnus in ($tilaus)
-          and yhtio = '$kukarow[yhtio]'
-          $kirjoitintilrivilisa";
+    $query = "SELECT $lis
+              FROM tilausrivi
+              WHERE otunnus in ($tilaus)
+              and yhtio     = '$kukarow[yhtio]'
+              $kirjoitintilrivilisa";
     $tiresult = pupe_query($query);
     $tirow = mysql_fetch_array($tiresult);
 

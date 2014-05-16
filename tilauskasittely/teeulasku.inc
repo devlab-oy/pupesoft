@@ -20,28 +20,28 @@ $asiakkaan_tilausnumero  = "";
 $kohde           = "";
 $useita_toimtapoja    = "EI";
 
-$query  = "  SELECT
-      sum(arvo) arvo,
-      sum(arvo_valuutassa) arvo_valuutassa,
-      sum(arvo/if(vienti_kurssi=0, 1, vienti_kurssi)) arvo_valuutassa_matikka,
-      sum(summa) summa,
-      sum(summa_valuutassa) summa_valuutassa,
-      sum(pyoristys) pyoristys,
-      sum(pyoristys_valuutassa) pyoristys_valuutassa,
-      sum(kate) kate,
-      sum(bruttopaino) bruttopaino,
-      group_concat(distinct if(trim(comments)='', NULL, trim(comments))                 SEPARATOR ' / ') comments,
-      group_concat(distinct if(trim(sisviesti1)='', NULL, trim(sisviesti1))               SEPARATOR ' / ') sisviestit1,
-      group_concat(distinct if(trim(sisviesti2)='', NULL, trim(sisviesti2))               SEPARATOR ' / ') sisviestit2,
-      group_concat(distinct if(trim(viesti)='', NULL, trim(viesti))                   SEPARATOR ' / ') viestit,
-      group_concat(distinct if(trim(tilausyhteyshenkilo)='', NULL, trim(tilausyhteyshenkilo))     SEPARATOR ' / ') tilausyhteyshenkilo,
-      group_concat(distinct if(trim(asiakkaan_tilausnumero)='', NULL, trim(asiakkaan_tilausnumero))   SEPARATOR ' / ') asiakkaan_tilausnumero,
-      group_concat(distinct if(trim(kohde)='', NULL, trim(kohde))                   SEPARATOR ' / ') kohde,
-      count(distinct toimitustapa) toimitustavat,
-      count(tunnus) tilausmaara
-      FROM lasku
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tunnus in ($tunnukset)";
+$query  = "SELECT
+           sum(arvo) arvo,
+           sum(arvo_valuutassa) arvo_valuutassa,
+           sum(arvo/if(vienti_kurssi=0, 1, vienti_kurssi)) arvo_valuutassa_matikka,
+           sum(summa) summa,
+           sum(summa_valuutassa) summa_valuutassa,
+           sum(pyoristys) pyoristys,
+           sum(pyoristys_valuutassa) pyoristys_valuutassa,
+           sum(kate) kate,
+           sum(bruttopaino) bruttopaino,
+           group_concat(distinct if(trim(comments)='', NULL, trim(comments))                 SEPARATOR ' / ') comments,
+           group_concat(distinct if(trim(sisviesti1)='', NULL, trim(sisviesti1))               SEPARATOR ' / ') sisviestit1,
+           group_concat(distinct if(trim(sisviesti2)='', NULL, trim(sisviesti2))               SEPARATOR ' / ') sisviestit2,
+           group_concat(distinct if(trim(viesti)='', NULL, trim(viesti))                   SEPARATOR ' / ') viestit,
+           group_concat(distinct if(trim(tilausyhteyshenkilo)='', NULL, trim(tilausyhteyshenkilo))     SEPARATOR ' / ') tilausyhteyshenkilo,
+           group_concat(distinct if(trim(asiakkaan_tilausnumero)='', NULL, trim(asiakkaan_tilausnumero))   SEPARATOR ' / ') asiakkaan_tilausnumero,
+           group_concat(distinct if(trim(kohde)='', NULL, trim(kohde))                   SEPARATOR ' / ') kohde,
+           count(distinct toimitustapa) toimitustavat,
+           count(tunnus) tilausmaara
+           FROM lasku
+           WHERE yhtio = '$kukarow[yhtio]'
+           and tunnus  in ($tunnukset)";
 $uusiuresult = pupe_query($query);
 
 if (mysql_num_rows($uusiuresult) > 0) {
@@ -65,24 +65,24 @@ if (mysql_num_rows($uusiuresult) > 0) {
     $alvinmaara = 0;
 
     //Haetaan kaikki alvikannat riveiltä
-    $alvquery = "  SELECT DISTINCT alv
-            FROM tilausrivi
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and otunnus in ($tunnukset)
-            and tyyppi = 'L'
-            and alv < 500";
+    $alvquery = "SELECT DISTINCT alv
+                 FROM tilausrivi
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 and otunnus in ($tunnukset)
+                 and tyyppi  = 'L'
+                 and alv     < 500";
     $alvresult = pupe_query($alvquery);
 
     while ($alvrow = mysql_fetch_assoc($alvresult)) {
 
-      $aquery = "  SELECT
-            round(sum(tilausrivi.rivihinta * (tilausrivi.alv / 100)),2) alvrivihinta
-            FROM tilausrivi
-            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-            WHERE tilausrivi.otunnus in ($tunnukset)
-            and tilausrivi.yhtio  = '$kukarow[yhtio]'
-            and tilausrivi.alv    = '$alvrow[alv]'
-            and tilausrivi.tyyppi  = 'L'";
+      $aquery = "SELECT
+                 round(sum(tilausrivi.rivihinta * (tilausrivi.alv / 100)),2) alvrivihinta
+                 FROM tilausrivi
+                 JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+                 WHERE tilausrivi.otunnus in ($tunnukset)
+                 and tilausrivi.yhtio     = '$kukarow[yhtio]'
+                 and tilausrivi.alv       = '$alvrow[alv]'
+                 and tilausrivi.tyyppi    = 'L'";
       $aresult = pupe_query($aquery);
       $arow = mysql_fetch_assoc($aresult);
 
@@ -118,27 +118,27 @@ if (mysql_num_rows($uusiuresult) > 0) {
 }
 
 // haetaan laskulle otsikkotiedot ketjun ekalta laskulta
-$query  = "  SELECT *
-      FROM lasku
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tunnus in ($tunnukset)
-      ORDER BY tunnus
-      LIMIT 1";
+$query  = "SELECT *
+           FROM lasku
+           WHERE yhtio = '$kukarow[yhtio]'
+           and tunnus  in ($tunnukset)
+           ORDER BY tunnus
+           LIMIT 1";
 $laskusplitres = pupe_query($query);
 $lasrow = mysql_fetch_assoc($laskusplitres);
 
 //haetaan laskun oletettu tulostuskieli ja t-funktioidaan sen kielen mukaisesti kantaa tallennettavat fraasit
-$querykieli = "  SELECT kieli
-        FROM asiakas
-        WHERE tunnus = '$lasrow[liitostunnus]'
-        AND yhtio = '$kukarow[yhtio]'";
+$querykieli = "SELECT kieli
+               FROM asiakas
+               WHERE tunnus = '$lasrow[liitostunnus]'
+               AND yhtio    = '$kukarow[yhtio]'";
 $resultkieli = pupe_query($querykieli);
 $kielirow = mysql_fetch_assoc($resultkieli);
 
-$query  = "  SELECT distinct toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa
-      from lasku
-      where yhtio = '$kukarow[yhtio]'
-      and tunnus in ($tunnukset)";
+$query  = "SELECT distinct toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa
+           from lasku
+           where yhtio = '$kukarow[yhtio]'
+           and tunnus  in ($tunnukset)";
 $uusiuresult = pupe_query($query);
 
 // jos meillä on useita toimitusosoitteita, niin ei kirjoiteta vain ekaa siihen otsikolle. se on sekavaa.. kijotetaan vain "useita"
@@ -158,10 +158,10 @@ if ($sumrow["toimitustavat"] > 1) {
 }
 
 // haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan
-$query = "  SELECT *
-      FROM maksuehto
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tunnus  = '$lasrow[maksuehto]'";
+$query = "SELECT *
+          FROM maksuehto
+          WHERE yhtio = '$kukarow[yhtio]'
+          and tunnus  = '$lasrow[maksuehto]'";
 $xresult = pupe_query($query);
 
 if (mysql_num_rows($xresult) == 0) {
@@ -193,11 +193,11 @@ $lisa_viestit  = "";
 
 // Jos kyseessä on factoring niin laitetaan laskun kommenttiin talteen factoring siirtoteksti
 if (strtoupper($mehtorow["factoring"]) != "") {
-  $query = "  SELECT *
-        FROM factoring
-        WHERE yhtio     = '$kukarow[yhtio]'
-        and factoringyhtio   = '$mehtorow[factoring]'
-        and valkoodi     = '$lasrow[valkoodi]'";
+  $query = "SELECT *
+            FROM factoring
+            WHERE yhtio        = '$kukarow[yhtio]'
+            and factoringyhtio = '$mehtorow[factoring]'
+            and valkoodi       = '$lasrow[valkoodi]'";
   $fres = pupe_query($query);
 
   if (mysql_num_rows($fres) > 0) {
@@ -216,11 +216,11 @@ if ($lasrow["vienti"] == 'E') {
   }
   else {
     //  Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..
-    $query = "  SELECT tilausrivi.tunnus
-          FROM tilausrivi
-          JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='')
-          WHERE tilausrivi.yhtio='$kukarow[yhtio]'
-          and tilausrivi.otunnus in ($tunnukset)";
+    $query = "SELECT tilausrivi.tunnus
+              FROM tilausrivi
+              JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='')
+              WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+              and tilausrivi.otunnus in ($tunnukset)";
     $abulisares = pupe_query($query);
 
     if (mysql_num_rows($abulisares) == 0) {
@@ -238,22 +238,22 @@ if ($lasrow["vienti"] == 'K') {
 
 if ($lasrow["vienti"] != '') {
   // Laitetaan kollimäärät ja kilot mukaan kommenttiin vientilaskuille
-  $query = "  SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit
-        FROM rahtikirjat
-        WHERE otsikkonro in ($tunnukset)
-        and yhtio = '$kukarow[yhtio]'
-        GROUP BY pakkaus, pakkauskuvaus, pakkauskuvaustark
-        HAVING kollit > 0";
+  $query = "SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit
+            FROM rahtikirjat
+            WHERE otsikkonro in ($tunnukset)
+            and yhtio        = '$kukarow[yhtio]'
+            GROUP BY pakkaus, pakkauskuvaus, pakkauskuvaustark
+            HAVING kollit > 0";
   $rahtiresult = pupe_query($query);
 
   while ($rahtirow = mysql_fetch_assoc($rahtiresult)) {
 
     // Haetaan pakkauksen tiedot
-    $query = "  SELECT *
-          from pakkaus
-          WHERE yhtio = '$kukarow[yhtio]'
-          and pakkaus = '$rahtirow[pakkaus]'
-           and pakkauskuvaus = '$rahtirow[pakkauskuvaus]'";
+    $query = "SELECT *
+              from pakkaus
+              WHERE yhtio        = '$kukarow[yhtio]'
+              and pakkaus        = '$rahtirow[pakkaus]'
+               and pakkauskuvaus = '$rahtirow[pakkauskuvaus]'";
     $spakkausresult = pupe_query($query);
     $spakkausrow = mysql_fetch_assoc($spakkausresult);
 
@@ -284,13 +284,13 @@ if ($mehtorow["jv"] != '') {
 }
 
 // Haetaan avainsanoista vakioviesti
-$query = "  SELECT *
-      FROM avainsana
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND kieli = '$kielirow[kieli]'
-      AND laji = 'VAKIOVIESTI'
-      ORDER BY jarjestys
-      LIMIT 1";
+$query = "SELECT *
+          FROM avainsana
+          WHERE yhtio = '$kukarow[yhtio]'
+          AND kieli   = '$kielirow[kieli]'
+          AND laji    = 'VAKIOVIESTI'
+          ORDER BY jarjestys
+          LIMIT 1";
 $vakioviesti_result = pupe_query($query);
 
 if (mysql_num_rows($vakioviesti_result) == 1) {
@@ -416,10 +416,10 @@ $uusiotsikko = pupe_query($kysely);
 $uusiotunnus = (string) mysql_insert_id();
 
 // haetaan laskun lisätiedot ketjun ekalta laskulta
-$query = "  SELECT *
-      FROM laskun_lisatiedot
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND otunnus = '$lasrow[tunnus]'";
+$query = "SELECT *
+          FROM laskun_lisatiedot
+          WHERE yhtio = '$kukarow[yhtio]'
+          AND otunnus = '$lasrow[tunnus]'";
 $lisatiedot_result = pupe_query($query);
 $lisatiedot_row = mysql_fetch_assoc($lisatiedot_result);
 
@@ -447,30 +447,30 @@ $query = substr($query, 0, -1);
 $lisatiedot_result = pupe_query($query);
 
 // haetaan nyt varmuuden vuoksi vielä insertoidut tiedot takaisin..
-$query = "  SELECT *
-      FROM lasku
-      WHERE yhtio = '$kukarow[yhtio]'
-      and tunnus  = '$uusiotunnus'";
+$query = "SELECT *
+          FROM lasku
+          WHERE yhtio = '$kukarow[yhtio]'
+          and tunnus  = '$uusiotunnus'";
 $uusiuresult = pupe_query($query);
 
 if (mysql_num_rows($uusiuresult)==0) die (t("Lasku")." $uusiotunnus ".t("katosi")."!");
 $laskurow = mysql_fetch_assoc($uusiuresult);
 
 // päivitetään tilausriveille uuden otsikon tiedot (ei päivitetä Puute ja Jt rivejä laskutetuiksi)
-$query = "  UPDATE tilausrivi
-      SET uusiotunnus = '$laskurow[tunnus]'
-      WHERE otunnus in ($tunnukset)
-      and yhtio = '$kukarow[yhtio]'
-      and var not in ('P','J','O')";
+$query = "UPDATE tilausrivi
+          SET uusiotunnus = '$laskurow[tunnus]'
+          WHERE otunnus in ($tunnukset)
+          and yhtio     = '$kukarow[yhtio]'
+          and var       not in ('P','J','O')";
 $ulasr = pupe_query($query);
 
 // katotaan montako tilausta ollaan käsittelemässä
 $montakotilausta = explode(",", $tunnukset);
 
-$asiakas_apu_query = "  SELECT *
-            FROM asiakas
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$laskurow[liitostunnus]'";
+$asiakas_apu_query = "SELECT *
+                      FROM asiakas
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$laskurow[liitostunnus]'";
 $asiakas_apu_res = pupe_query($asiakas_apu_query);
 $asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
 
@@ -508,16 +508,16 @@ if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
   else $pjat_sortlisa = "";
 
   //laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
-  $query = "  SELECT tilausrivi.otunnus, tilausrivi.tunnus,
-        $sorttauskentta,
-        if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
-        FROM tilausrivi
-        JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.otunnus in ($tunnukset)
-        and tilausrivi.tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
-        and tilausrivi.kpl != 0
-        ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+  $query = "SELECT tilausrivi.otunnus, tilausrivi.tunnus,
+            $sorttauskentta,
+            if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+            FROM tilausrivi
+            JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+            WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+            and tilausrivi.otunnus  in ($tunnukset)
+            and tilausrivi.tuoteno  not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
+            and tilausrivi.kpl     != 0
+            ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
   $valsures = pupe_query($query);
 
   $edotunnus = '';
@@ -526,10 +526,10 @@ if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
   while ($valsurow = mysql_fetch_assoc($valsures)) {
     if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
 
-      $query = "  SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
-            FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$edotunnus'";
+      $query = "SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$edotunnus'";
       $sumsresult = pupe_query($query);
       $sumsrow  = mysql_fetch_assoc($sumsresult);
 
@@ -540,12 +540,12 @@ if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
         $sumvieku = 1;
       }
 
-      $query = "  SELECT sum(round((rivihinta/$sumvieku)*(1+alv/100), 2)) summa
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
-            and tyyppi != 'D'
-            and otunnus = '$edotunnus'";
+      $query = "SELECT sum(round((rivihinta/$sumvieku)*(1+alv/100), 2)) summa
+                FROM tilausrivi
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and tuoteno  not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
+                and tyyppi  != 'D'
+                and otunnus  = '$edotunnus'";
       $sumsresult = pupe_query($query);
       $sumsrow2  = mysql_fetch_assoc($sumsresult);
 
@@ -563,10 +563,10 @@ if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
         $sumskommentti .= "\n".t("Toimitustapa", $kielirow["kieli"])." : $sumsrow[toimitustapa]";
       }
 
-      $query = "  UPDATE tilausrivi
-            SET kommentti = concat(kommentti, '\n', '$sumskommentti')
-            WHERE tunnus = '$edtunnus'
-            and yhtio = '$kukarow[yhtio]'";
+      $query = "UPDATE tilausrivi
+                SET kommentti = concat(kommentti, '\n', '$sumskommentti')
+                WHERE tunnus = '$edtunnus'
+                and yhtio    = '$kukarow[yhtio]'";
       $paivres = pupe_query($query);
     }
 
@@ -577,10 +577,10 @@ if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
   //laitetaan välisumma vikallekin tilaukselle
   if ($edtunnus != "") {
 
-    $query = "  SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$edotunnus'";
+    $query = "SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$edotunnus'";
     $sumsresult = pupe_query($query);
     $sumsrow  = mysql_fetch_assoc($sumsresult);
 
@@ -591,12 +591,12 @@ if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
       $sumvieku = 1;
     }
 
-    $query = "  SELECT sum(round((rivihinta/$sumvieku)*(1+alv/100), 2)) summa
-          FROM tilausrivi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
-          and tyyppi != 'D'
-          and otunnus = '$edotunnus'";
+    $query = "SELECT sum(round((rivihinta/$sumvieku)*(1+alv/100), 2)) summa
+              FROM tilausrivi
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tuoteno  not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
+              and tyyppi  != 'D'
+              and otunnus  = '$edotunnus'";
     $sumsresult = pupe_query($query);
     $sumsrow2  = mysql_fetch_assoc($sumsresult);
 

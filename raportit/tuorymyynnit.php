@@ -67,24 +67,24 @@ if ($ytunnus!='' and $try!='') {
   // alkukuukauden tiedot 24 kk sitten
   $ayy = date("Y-m-01",mktime(0, 0, 0, date("m")-24, date("d"), date("Y")));
 
-  $query  = "  SELECT
-        date_format(lasku.tapvm,'%Y/%m') kausi,
-        round(sum(rivihinta),0) myynti,
-        round(sum(tilausrivi.kate),0) kate,
-        round(sum(tilausrivi.kpl),0) kpl,
-        round(sum(tilausrivi.kate)/sum(rivihinta)*100,1) katepro
-        from lasku use index (yhtio_tila_liitostunnus_tapvm), tilausrivi use index (uusiotunnus_index)
-        where lasku.yhtio  = '$kukarow[yhtio]'
-        and lasku.tila      = 'U'
-        and lasku.alatila    = 'X'
-        and lasku.tapvm      >= '$ayy'
-        and lasku.liitostunnus  = '$asiakasid'
-        and tilausrivi.try    = '$try'
-        and tilausrivi.osasto  = '$osasto'
-        and tilausrivi.uusiotunnus = lasku.tunnus
-        and tilausrivi.yhtio = lasku.yhtio
-        group by 1
-        having myynti <> 0 or kate <> 0";
+  $query  = "SELECT
+             date_format(lasku.tapvm,'%Y/%m') kausi,
+             round(sum(rivihinta),0) myynti,
+             round(sum(tilausrivi.kate),0) kate,
+             round(sum(tilausrivi.kpl),0) kpl,
+             round(sum(tilausrivi.kate)/sum(rivihinta)*100,1) katepro
+             from lasku use index (yhtio_tila_liitostunnus_tapvm), tilausrivi use index (uusiotunnus_index)
+             where lasku.yhtio          = '$kukarow[yhtio]'
+             and lasku.tila             = 'U'
+             and lasku.alatila          = 'X'
+             and lasku.tapvm            >= '$ayy'
+             and lasku.liitostunnus     = '$asiakasid'
+             and tilausrivi.try         = '$try'
+             and tilausrivi.osasto      = '$osasto'
+             and tilausrivi.uusiotunnus = lasku.tunnus
+             and tilausrivi.yhtio       = lasku.yhtio
+             group by 1
+             having myynti <> 0 or kate <> 0";
   $result = mysql_query($query) or pupe_error($query);
 
   // otetaan suurin myynti talteen

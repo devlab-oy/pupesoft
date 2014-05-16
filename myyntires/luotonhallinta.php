@@ -205,11 +205,11 @@ if ($tee == "3") {
       $ytunnuslisa = $ytunnus != "" ? "AND ytunnus = '{$ytunnus}'" : "";
       $asiakasnrolisa = $asiakasnro != "" ? "AND asiakasnro = '{$asiakasnro}'" : "";
 
-      $query = "  UPDATE asiakas SET
-            luottoraja = '{$luottoraja}'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            {$ytunnuslisa}
-            {$asiakasnrolisa}";
+      $query = "UPDATE asiakas SET
+                luottoraja  = '{$luottoraja}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                {$ytunnuslisa}
+                {$asiakasnrolisa}";
       pupe_query($query);
 
       $cnt++;
@@ -247,11 +247,11 @@ if ($tee == "2") {
     $summa = (float) $summa;
     $ytunnus = mysql_real_escape_string($ytunnus);
 
-    $query = "  UPDATE asiakas SET
-          myyntikielto = '$myyntikielto[$ytunnus]',
-          luottoraja = '$summa'
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND $kasittely_periaate = '$ytunnus'";
+    $query = "UPDATE asiakas SET
+              myyntikielto = '$myyntikielto[$ytunnus]',
+              luottoraja   = '$summa'
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND $kasittely_periaate = '$ytunnus'";
     $asiakasres = mysql_query($query) or pupe_error($query);
 
     if (mysql_affected_rows() != 0) {
@@ -267,20 +267,20 @@ if ($tee == "2") {
 if ($tee == "1") {
 
   // haetaan kaikki yrityksen asiakkaat
-  $query  = "  SELECT $kasittely_periaate ytunnus,
-        group_concat(distinct tunnus) liitostunnukset,
-        group_concat(distinct nimi ORDER BY nimi SEPARATOR '<br>') nimi,
-        group_concat(distinct toim_nimi ORDER BY nimi SEPARATOR '<br>') toim_nimi,
-        min(luottoraja) luottoraja,
-        min(myyntikielto) myyntikielto,
-        min(ytunnus) tunniste
-        FROM asiakas
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND laji != 'P'
-        AND luottovakuutettu = '$luottolisa'
-        $asiakasrajaus
-        $lisa
-        GROUP BY 1";
+  $query  = "SELECT $kasittely_periaate ytunnus,
+             group_concat(distinct tunnus) liitostunnukset,
+             group_concat(distinct nimi ORDER BY nimi SEPARATOR '<br>') nimi,
+             group_concat(distinct toim_nimi ORDER BY nimi SEPARATOR '<br>') toim_nimi,
+             min(luottoraja) luottoraja,
+             min(myyntikielto) myyntikielto,
+             min(ytunnus) tunniste
+             FROM asiakas
+             WHERE yhtio           = '$kukarow[yhtio]'
+             AND laji             != 'P'
+             AND luottovakuutettu  = '$luottolisa'
+             $asiakasrajaus
+             $lisa
+             GROUP BY 1";
   $asiakasres = mysql_query($query) or pupe_error($query);
 
   echo "<form name='paivitys' action='luotonhallinta.php' method='post' autocomplete='off'>";
@@ -318,13 +318,13 @@ if ($tee == "1") {
   while ($asiakasrow = mysql_fetch_array($asiakasres)) {
 
     // haetaan asiakkaan myynnit halutulta ajalta
-    $query = "  SELECT ifnull(sum(summa), 0) summa, ifnull(sum(arvo), 0) arvo
-          FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tila = 'U'
-          AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])
-          AND lasku.tapvm >= '$pvm_alku'
-          AND lasku.tapvm <= '$pvm_loppu'";
+    $query = "SELECT ifnull(sum(summa), 0) summa, ifnull(sum(arvo), 0) arvo
+              FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
+              WHERE lasku.yhtio      = '$kukarow[yhtio]'
+              AND lasku.tila         = 'U'
+              AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])
+              AND lasku.tapvm        >= '$pvm_alku'
+              AND lasku.tapvm        <= '$pvm_loppu'";
     $myyntires = mysql_query($query) or pupe_error($query);
     $myyntirow = mysql_fetch_array($myyntires);
 
@@ -385,18 +385,18 @@ if ($tee == "1") {
       }
 
       // haetaan uusin karhukierros/karhukerta
-      $query = "  SELECT count(karhu_lasku.ltunnus) as karhukerrat
-            FROM lasku
-            JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
-            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '')
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tila = 'U'
-            AND lasku.alatila = 'X'
-            AND lasku.mapvm = '0000-00-00'
-            $extraehto
-            GROUP BY karhu_lasku.ltunnus
-            $having_ehto
-            ORDER BY karhukerrat DESC";
+      $query = "SELECT count(karhu_lasku.ltunnus) as karhukerrat
+                FROM lasku
+                JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '')
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                AND lasku.tila    = 'U'
+                AND lasku.alatila = 'X'
+                AND lasku.mapvm   = '0000-00-00'
+                $extraehto
+                GROUP BY karhu_lasku.ltunnus
+                $having_ehto
+                ORDER BY karhukerrat DESC";
       $laskures = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($laskures) > 0) {
@@ -417,37 +417,37 @@ if ($tee == "1") {
     }
 
     // Avoimet laskut
-    $query = "   SELECT sum(lasku.summa - lasku.saldo_maksettu) laskuavoinsaldo
-          FROM lasku use index (yhtio_tila_mapvm)
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tila = 'U'
-          AND lasku.alatila = 'X'
-          AND lasku.mapvm = '0000-00-00'
-          AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])";
+    $query = "SELECT sum(lasku.summa - lasku.saldo_maksettu) laskuavoinsaldo
+              FROM lasku use index (yhtio_tila_mapvm)
+              WHERE lasku.yhtio      = '$kukarow[yhtio]'
+              AND lasku.tila         = 'U'
+              AND lasku.alatila      = 'X'
+              AND lasku.mapvm        = '0000-00-00'
+              AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])";
     $avoimetlaskutres = pupe_query($query);
     $avoimetlaskutrow = mysql_fetch_assoc($avoimetlaskutres);
 
     // Kaatotili
-    $query = "  SELECT
-          sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa
-          FROM suoritus
-          WHERE yhtio = '$kukarow[yhtio]'
-          and ltunnus > 0
-          and kohdpvm = '0000-00-00'
-          and asiakas_tunnus in ($asiakasrow[liitostunnukset])";
+    $query = "SELECT
+              sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa
+              FROM suoritus
+              WHERE yhtio        = '$kukarow[yhtio]'
+              and ltunnus        > 0
+              and kohdpvm        = '0000-00-00'
+              and asiakas_tunnus in ($asiakasrow[liitostunnukset])";
     $kaatotilires = pupe_query($query);
     $kaatotilirow = mysql_fetch_assoc($kaatotilires);
 
     // Avoimet tilaukset
-    $query = "  SELECT
-          round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
-          FROM lasku
-          JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND ((lasku.tila in ('L', 'N') and lasku.alatila != 'X')      # Kaikki myyntitilaukset, paitsi laskutetut
-            OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))  # Valmistukset
-          )
-          AND lasku.liitostunnus in ($asiakasrow[liitostunnukset])";
+    $query = "SELECT
+              round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+              FROM lasku
+              JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+              WHERE lasku.yhtio      = '$kukarow[yhtio]'
+              AND ((lasku.tila in ('L', 'N') and lasku.alatila != 'X')      # Kaikki myyntitilaukset, paitsi laskutetut
+                OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))  # Valmistukset
+              )
+              AND lasku.liitostunnus in ($asiakasrow[liitostunnukset])";
     $avoimettilauksetres = pupe_query($query);
     $avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
 

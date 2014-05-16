@@ -31,8 +31,8 @@ else{
 // Alatila on A kun lasku on laskuttamatta.
 $maxrows = 500;
 $query = "SELECT COALESCE(l.laskunro,'-') laskunro, l.nimi nimi, l.nimitark nimitark, l.erpcm erpcm, l.summa summa, l.viite viite, l.tunnus tunnus, ytunnus
-    FROM lasku l WHERE l.yhtio ='$kukarow[yhtio]' and l.tila = 'U' and l.mapvm='0000-00-00' $lisa
-     ORDER BY $jarjestys LIMIT $maxrows";
+          FROM lasku l WHERE l.yhtio ='$kukarow[yhtio]' and l.tila = 'U' and l.mapvm='0000-00-00' $lisa
+           ORDER BY $jarjestys LIMIT $maxrows";
 // Mikä on maksaja?
 
 

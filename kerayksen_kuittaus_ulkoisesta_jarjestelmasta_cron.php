@@ -33,10 +33,10 @@ $yhtio = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 
 // Haetaan kukarow
-$query = "  SELECT *
-      FROM kuka
-      WHERE yhtio = '{$yhtio}'
-      AND kuka = 'admin'";
+$query = "SELECT *
+          FROM kuka
+          WHERE yhtio = '{$yhtio}'
+          AND kuka    = 'admin'";
 $kukares = pupe_query($query);
 
 if (mysql_num_rows($kukares) != 1) {
@@ -79,10 +79,10 @@ if ($handle = opendir($path)) {
           $toimaika = "{$vv}-{$kk}-{$pp}";
           $toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
 
-          $query = "  SELECT *
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$otunnus}'";
+          $query = "SELECT *
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$otunnus}'";
           $laskures = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laskures);
 
@@ -96,10 +96,10 @@ if ($handle = opendir($path)) {
             $eankoodi = mysql_real_escape_string($line->ItemNumber);
             $keratty = (float) $line->DeliveredQuantity;
 
-            $query = "  SELECT *
-                  FROM tilausrivi
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$tilausrivin_tunnus}'";
+            $query = "SELECT *
+                      FROM tilausrivi
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$tilausrivin_tunnus}'";
             $tilausrivi_res = pupe_query($query);
             $tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
@@ -120,45 +120,45 @@ if ($handle = opendir($path)) {
               $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
             }
 
-            $query = "  UPDATE tilausrivi
-                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
-                  SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                  tilausrivi.kerattyaika = '{$toimaika} 00:00:00',
-                  tilausrivi.toimitettu = '{$kukarow['kuka']}',
-                  tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'
-                  {$varattuupdate}
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
+            $query = "UPDATE tilausrivi
+                      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
+                      SET tilausrivi.keratty = '{$kukarow['kuka']}',
+                      tilausrivi.kerattyaika    = '{$toimaika} 00:00:00',
+                      tilausrivi.toimitettu     = '{$kukarow['kuka']}',
+                      tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'
+                      {$varattuupdate}
+                      WHERE tilausrivi.yhtio    = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tunnus     = '{$tilausrivin_tunnus}'";
             pupe_query($query);
 
-            $query = "  SELECT SUM(tuote.tuotemassa) paino
-                  FROM tilausrivi
-                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tunnus = '{$tilausrivin_tunnus}'";
+            $query = "SELECT SUM(tuote.tuotemassa) paino
+                      FROM tilausrivi
+                      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
             $painores = pupe_query($query);
             $painorow = mysql_fetch_assoc($painores);
 
             $tuotteiden_paino += $painorow['paino'];
           }
 
-          $query  = "  INSERT INTO rahtikirjat SET
-                kollit       = 1,
-                kilot      = {$tuotteiden_paino},
-                pakkaus     = '',
-                pakkauskuvaus   = '',
-                rahtikirjanro   = '',
-                otsikkonro     = '{$otunnus}',
-                tulostuspaikka   = '{$laskurow['varasto']}',
-                yhtio       = '{$kukarow['yhtio']}',
-                viesti      = ''";
+          $query  = "INSERT INTO rahtikirjat SET
+                     kollit         = 1,
+                     kilot          = {$tuotteiden_paino},
+                     pakkaus        = '',
+                     pakkauskuvaus  = '',
+                     rahtikirjanro  = '',
+                     otsikkonro     = '{$otunnus}',
+                     tulostuspaikka = '{$laskurow['varasto']}',
+                     yhtio          = '{$kukarow['yhtio']}',
+                     viesti         = ''";
           $result_rk = pupe_query($query);
 
-          $query = "  UPDATE lasku SET
-                tila = 'L',
-                alatila = 'D'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$laskurow['tunnus']}'";
+          $query = "UPDATE lasku SET
+                    tila        = 'L',
+                    alatila     = 'D'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$laskurow['tunnus']}'";
           $upd_res = pupe_query($query);
 
           if (count($kerayspoikkeama) != 0) {

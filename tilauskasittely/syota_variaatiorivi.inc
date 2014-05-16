@@ -21,18 +21,18 @@ if (is_array($variaatio_valinta)) {
 
 if ($variaatio_tuoteno != "") {
   // haetaan kaikki tuotteet, jotka kuuluu tähän ryppääseen
-  $query = "  SELECT tuote.tuoteno,
-        if(t2.jarjestys = 0 or t2.jarjestys is null, t2.selite, t2.jarjestys) t2j2,
-        if(t3.jarjestys = 0 or t3.jarjestys is null, t3.selite, t3.jarjestys) t3j3
-        FROM tuotteen_avainsanat
-        JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno and tuote.status not in ('P','X'))
-        LEFT JOIN tuotteen_avainsanat t2 on tuote.yhtio = t2.yhtio and tuote.tuoteno = t2.tuoteno and t2.laji = 'parametri_vari' and t2.kieli = '$yhtiorow[kieli]'
-        LEFT JOIN tuotteen_avainsanat t3 on tuote.yhtio = t3.yhtio and tuote.tuoteno = t3.tuoteno and t3.laji = 'parametri_koko' and t3.kieli = '$yhtiorow[kieli]'
-        WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
-        AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-        AND tuotteen_avainsanat.kieli = '$yhtiorow[kieli]'
-        AND tuotteen_avainsanat.selite = '$variaatio_tuoteno'
-        ORDER BY t3j3, tuotteen_avainsanat.tuoteno";
+  $query = "SELECT tuote.tuoteno,
+            if(t2.jarjestys = 0 or t2.jarjestys is null, t2.selite, t2.jarjestys) t2j2,
+            if(t3.jarjestys = 0 or t3.jarjestys is null, t3.selite, t3.jarjestys) t3j3
+            FROM tuotteen_avainsanat
+            JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno and tuote.status not in ('P','X'))
+            LEFT JOIN tuotteen_avainsanat t2 on tuote.yhtio = t2.yhtio and tuote.tuoteno = t2.tuoteno and t2.laji = 'parametri_vari' and t2.kieli = '$yhtiorow[kieli]'
+            LEFT JOIN tuotteen_avainsanat t3 on tuote.yhtio = t3.yhtio and tuote.tuoteno = t3.tuoteno and t3.laji = 'parametri_koko' and t3.kieli = '$yhtiorow[kieli]'
+            WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
+            AND tuotteen_avainsanat.laji    = 'parametri_variaatio'
+            AND tuotteen_avainsanat.kieli   = '$yhtiorow[kieli]'
+            AND tuotteen_avainsanat.selite  = '$variaatio_tuoteno'
+            ORDER BY t3j3, tuotteen_avainsanat.tuoteno";
   $variaatiores = mysql_query($query) or pupe_error($query);
 }
 
@@ -41,12 +41,12 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
   $variaatiorow = mysql_fetch_assoc($variaatiores);
 
   // haetaan tuotteen parametrit
-  $query = "  SELECT *
-        from tuotteen_avainsanat
-        where yhtio = '$kukarow[yhtio]'
-        and laji like 'parametri_%'
-        and kieli = '$yhtiorow[kieli]'
-        and tuoteno = '$variaatiorow[tuoteno]'";
+  $query = "SELECT *
+            from tuotteen_avainsanat
+            where yhtio = '$kukarow[yhtio]'
+            and laji    like 'parametri_%'
+            and kieli   = '$yhtiorow[kieli]'
+            and tuoteno = '$variaatiorow[tuoteno]'";
   $parametrit_res = mysql_query($query) or pupe_error($query);
   $variaatio_check = array();
 
@@ -80,12 +80,12 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
     while ($variaatiorow = mysql_fetch_assoc($variaatiores)) {
 
       // haetaan tuotteen parametrit
-      $query = "  SELECT *
-            from tuotteen_avainsanat
-            where yhtio = '$kukarow[yhtio]'
-            and laji like 'parametri_%'
-            and kieli = '$yhtiorow[kieli]'
-            and tuoteno = '$variaatiorow[tuoteno]'";
+      $query = "SELECT *
+                from tuotteen_avainsanat
+                where yhtio = '$kukarow[yhtio]'
+                and laji    like 'parametri_%'
+                and kieli   = '$yhtiorow[kieli]'
+                and tuoteno = '$variaatiorow[tuoteno]'";
       $parametrit_res = mysql_query($query) or pupe_error($query);
       $this_parametrit = array();
 
@@ -176,19 +176,19 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
   $varilask = 0;
 
   // haetaan kaikki tuotteet, jotka halutaan nähä
-  $query = "  SELECT distinct tuote.tuoteno, tuote.nimitys,
-        if(t2.jarjestys = 0 or t2.jarjestys is null, t2.selite, t2.jarjestys) t2j2,
-        if(t3.jarjestys = 0 or t3.jarjestys is null, t3.selite, t3.jarjestys) t3j3
-        FROM tuotteen_avainsanat
-        JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno and tuote.status not in ('P','X'))
-        LEFT JOIN tuotteen_avainsanat t2 on tuote.yhtio = t2.yhtio and tuote.tuoteno = t2.tuoteno and t2.laji = 'parametri_vari' and t2.kieli = '$yhtiorow[kieli]'
-        LEFT JOIN tuotteen_avainsanat t3 on tuote.yhtio = t3.yhtio and tuote.tuoteno = t3.tuoteno and t3.laji = 'parametri_koko' and t3.kieli = '$yhtiorow[kieli]'
-        $variaatio_hakulisa
-        WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
-        AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-        AND tuotteen_avainsanat.kieli = '$yhtiorow[kieli]'
-        AND tuotteen_avainsanat.selite = '$variaatio_tuoteno'
-        ORDER BY t3j3, tuotteen_avainsanat.tuoteno";
+  $query = "SELECT distinct tuote.tuoteno, tuote.nimitys,
+            if(t2.jarjestys = 0 or t2.jarjestys is null, t2.selite, t2.jarjestys) t2j2,
+            if(t3.jarjestys = 0 or t3.jarjestys is null, t3.selite, t3.jarjestys) t3j3
+            FROM tuotteen_avainsanat
+            JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno and tuote.status not in ('P','X'))
+            LEFT JOIN tuotteen_avainsanat t2 on tuote.yhtio = t2.yhtio and tuote.tuoteno = t2.tuoteno and t2.laji = 'parametri_vari' and t2.kieli = '$yhtiorow[kieli]'
+            LEFT JOIN tuotteen_avainsanat t3 on tuote.yhtio = t3.yhtio and tuote.tuoteno = t3.tuoteno and t3.laji = 'parametri_koko' and t3.kieli = '$yhtiorow[kieli]'
+            $variaatio_hakulisa
+            WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
+            AND tuotteen_avainsanat.laji    = 'parametri_variaatio'
+            AND tuotteen_avainsanat.kieli   = '$yhtiorow[kieli]'
+            AND tuotteen_avainsanat.selite  = '$variaatio_tuoteno'
+            ORDER BY t3j3, tuotteen_avainsanat.tuoteno";
   $variaatiores = mysql_query($query) or pupe_error($query);
 
   while ($varirow = mysql_fetch_assoc($variaatiores)) {

@@ -175,17 +175,31 @@ else {
         }
 
         if ($mukaan == "tuote") {
-          if ($nimitykset == "") {
+          if ($nimitykset == "" and $massat == "") {
             if ($group!="") $group .= ",tuote.tuoteno";
             else $group  .= "tuote.tuoteno";
             $select .= "tuote.tuoteno tuoteno, ";
             $order  .= "tuote.tuoteno,";
             $gluku++;
           }
-          else {
+          elseif ($nimitykset != "" and $massat == "") {
             if ($group!="") $group .= ",tuote.tuoteno, tuote.nimitys";
             else $group  .= "tuote.tuoteno, tuote.nimitys";
             $select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
+            $order  .= "tuote.tuoteno,";
+            $gluku++;
+          }
+          elseif ($nimitykset == "" and $massat != "") {
+            if ($group!="") $group .= ",tuote.tuoteno, tuote.tuotemassa";
+            else $group  .= "tuote.tuoteno, tuote.tuotemassa";
+            $select .= "tuote.tuoteno tuoteno, tuote.tuotemassa tuotemassa, ";
+            $order  .= "tuote.tuoteno,";
+            $gluku++;
+          }
+          else {
+            if ($group!="") $group .= ",tuote.tuoteno, tuote.tuotemassa";
+            else $group  .= "tuote.tuoteno, tuote.tuotemassa";
+            $select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, tuote.tuotemassa tuotemassa, ";
             $order  .= "tuote.tuoteno,";
             $gluku++;
           }
@@ -812,16 +826,17 @@ else {
     if ($ruksit[70]  != '')       $ruk70chk          = "CHECKED";
     if ($ruksit[80]  != '')       $ruk80chk          = "CHECKED";
     if ($ruksit[90]  != '')       $ruk90chk          = "CHECKED";
-    if ($ruksit[100]  != '')       $ruk100chk         = "CHECKED";
-    if ($ruksit[110]  != '')       $ruk110chk         = "CHECKED";
-    if ($ruksit[120]  != '')       $ruk120chk         = "CHECKED";
-    if ($ruksit[130]  != '')       $ruk130chk         = "CHECKED";
-    if ($ruksit[140]  != '')       $ruk140chk         = "CHECKED";
+    if ($ruksit[100]  != '')      $ruk100chk         = "CHECKED";
+    if ($ruksit[110]  != '')      $ruk110chk         = "CHECKED";
+    if ($ruksit[120]  != '')      $ruk120chk         = "CHECKED";
+    if ($ruksit[130]  != '')      $ruk130chk         = "CHECKED";
+    if ($ruksit[140]  != '')      $ruk140chk         = "CHECKED";
     if ($ruksit[150] != '')       $ruk150chk         = "CHECKED";
-    if ($ruksit[160] != '')        $ruk160chk         = "CHECKED";
-    if ($ruksit[170] != '')        $ruk170chk         = "CHECKED";
-    if ($nimitykset != '')         $nimchk           = "CHECKED";
-    if ($piiyhteensa != '')        $piychk           = "CHECKED";
+    if ($ruksit[160] != '')       $ruk160chk         = "CHECKED";
+    if ($ruksit[170] != '')       $ruk170chk         = "CHECKED";
+    if ($nimitykset != '')        $nimchk            = "CHECKED";
+    if ($massat != '')            $maschk            = "CHECKED";
+    if ($piiyhteensa != '')       $piychk            = "CHECKED";
     if ($kuukausittain == 'SARAKE')    $kuuchk1          = "CHECKED";
     if ($kuukausittain == 'ALLEKKAIN')  $kuuchk2          = "CHECKED";
     if ($piiloed != '')          $piiloedchk       = "CHECKED";
@@ -904,6 +919,12 @@ else {
       <tr>
       <th>".t("Näytä tuotteiden nimitykset")."</th>
       <td><input type='checkbox' name='nimitykset' $nimchk></td>
+      <td></td>
+      <td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
+      </tr>
+      <tr>
+      <th>".t("Näytä tuotteiden massat")."</th>
+      <td><input type='checkbox' name='massat' $maschk></td>
       <td></td>
       <td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
       </tr>

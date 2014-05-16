@@ -61,6 +61,9 @@ if ($fieldname == "verkkolasku_lah") {
   elseif($trow[$i] == 'maventa') {
     $sel5 = "selected";
   }
+  elseif($trow[$i] == 'servinet') {
+    $sel6 = "selected";
+  }
   else {
     $sel1 = "selected";
   }
@@ -70,6 +73,7 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost");
   $ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
   $ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
+  $ulos .= "<option value = 'servinet' $sel6>".t("Pupevoice Servinet");
   $ulos .= "</select></td>";
 
   $jatko = 0;

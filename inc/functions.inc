@@ -615,7 +615,7 @@ if (!function_exists("lopetus")) {
 
         if ($meta == "") {
           if ($palautavainurli) return $lopetus;
-          else if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": ".t("$row[nimitys]")."$nlisa</a><br>";
+          elseif ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": ".t("$row[nimitys]")."$nlisa</a><br>";
           else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
         }
 
@@ -21892,7 +21892,7 @@ if (!function_exists('_xls_jarjestetty_rivit')) {
         if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name]) and !in_array($column_name, $sulje_pois)) {
           _kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
         }
-        else if (!isset($rivi[$column_name])) {
+        elseif (!isset($rivi[$column_name])) {
           //jos aineisto on viallinen,
           //lis‰t‰‰n tyhj‰ solu jotta solujen j‰rjestys pysyy oikeana
           _kirjoita_solu($xls, $column_name, '', $rivi_numero, $sarake_numero, $force_to_string);
@@ -21917,7 +21917,7 @@ if (!function_exists('_kirjoita_solu')) {
     if (is_numeric($string) and !in_array($key, $force_to_string)) {
       $xls->writeNumber($rivi, $sarake, $string);
     }
-    else if (valid_date($string) != 0 and valid_date($string) !== false and !in_array($key, $force_to_string)) {
+    elseif (valid_date($string) != 0 and valid_date($string) !== false and !in_array($key, $force_to_string)) {
       $xls->writeDate($rivi, $sarake, $string);
     }
     else {
@@ -25345,7 +25345,7 @@ if (!function_exists('hae_asiakashinnat')) {
     if ($tyyppi == 'poistuvat') {
       $poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
     }
-    else if ($tyyppi == 'kaikki') {
+    elseif ($tyyppi == 'kaikki') {
       $poislisa = "";
     }
     else {
@@ -26019,10 +26019,10 @@ if (!function_exists('hae_lahetetyt_saldovahvistukset')) {
     if ($request['ryhmittely_tyyppi'] == 'ytunnus' and $request['ryhmittely_arvo'] != '') {
       $asiakas_join = "  AND asiakas.ytunnus = '{$request['ryhmittely_arvo']}'";
     }
-    else if ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
+    elseif ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
       $asiakas_join = "  AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
     }
-    else if ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
+    elseif ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
       $asiakas_join = "  AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
     }
 
@@ -26156,10 +26156,10 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
       if ($request['ryhmittely_tyyppi'] == 'ytunnus' and $request['ryhmittely_arvo'] != '') {
         $asiakas_join = "  AND asiakas.ytunnus = '{$request['ryhmittely_arvo']}'";
       }
-      else if ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
+      elseif ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
         $asiakas_join = "  AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
       }
-      else if ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
+      elseif ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
         $asiakas_join = "  AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
       }
     }
@@ -26442,7 +26442,7 @@ if (!function_exists('sum_array')) {
 
         return $sum;
       }
-      else if ($params['direction'] == 'y') {
+      elseif ($params['direction'] == 'y') {
 
         $keys = array_keys($array);
 

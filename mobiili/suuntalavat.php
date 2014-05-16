@@ -120,7 +120,7 @@ if (isset($uusi)) {
 }
 # P‰ivitet‰‰n suuntalava
 # form.php / update
-else if (isset($muokkaa) and is_numeric($muokkaa)) {
+elseif (isset($muokkaa) and is_numeric($muokkaa)) {
   $title = t("Suuntalavan muokkaus");
 
   # Tyyppi
@@ -220,7 +220,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 }
 
 # Suuntalava siirtovalmiiksi (normaali)
-else if ($tee == 'siirtovalmis' or $tee == 'suoraan_hyllyyn' and isset($suuntalava)) {
+elseif ($tee == 'siirtovalmis' or $tee == 'suoraan_hyllyyn' and isset($suuntalava)) {
   $title = t("Suuntalava siirtovalmiiksi");
 
   echo "Suuntalava $suuntalava siirtovalmiiksi<br>";
@@ -242,7 +242,7 @@ else if ($tee == 'siirtovalmis' or $tee == 'suoraan_hyllyyn' and isset($suuntala
   echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
   exit();
 }
-else if ($tee == 'poista') {
+elseif ($tee == 'poista') {
 
   # Varmistetaan ett‰ suuntalava on tyhj‰
   $query = "SELECT * FROM tilausrivi WHERE yhtio='{$kukarow['yhtio']}' AND suuntalava='{$suuntalava}'";

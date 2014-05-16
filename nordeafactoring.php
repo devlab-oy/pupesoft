@@ -13,7 +13,7 @@ if ($toim == "OKO") {
   echo "<font class='head'>".t("OKO Saatavarahoitus siirtotiedosto").":</font><hr><br>";
   $factoringyhtio = "OKO";
 }
-else if ($toim == 'SAMPO') {
+elseif ($toim == 'SAMPO') {
   echo "<font class='head'>".t("Sampo Factoring siirtotiedosto").":</font><hr><br>";
   $factoringyhtio = "SAMPO";
 }

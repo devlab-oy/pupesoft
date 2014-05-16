@@ -24,7 +24,7 @@ if (isset($tee) and $tee == 'verify') {
     include '_valmistus_edit.php';
   }
   // N‰ytet‰‰n formi (keskeytys)
-  else if ($tila == Valmistus::KESKEYTETTY) {
+  elseif ($tila == Valmistus::KESKEYTETTY) {
     include '_keskeyta_valmistus.php';
   }
   else {
@@ -80,7 +80,7 @@ if (isset($tee) and $tee == 'update') {
             throw new Exception("Virhe valmistuksen keskeytyksess‰ (ei jaettu)");
           }
           // M‰‰r‰ on sama (valmistus on valmistettu kokonaan)
-          else if ($maara == $valmiste['varattu']) {
+          elseif ($maara == $valmiste['varattu']) {
             #echo "m‰‰r‰ sama! p‰ivitet‰‰n vaan tila ja lis‰t‰‰n kommentit";
           }
           // Virhe
@@ -201,11 +201,11 @@ if ($tee == '') {
 
         }
         // Aloitettu valmistus voidaan merkata valmistetuksi tai keskeytt‰‰
-        else if ($tyojono['valmistuksen_tila'] == Valmistus::VALMISTUKSESSA) {
+        elseif ($tyojono['valmistuksen_tila'] == Valmistus::VALMISTUKSESSA) {
           echo "<option value='TK'>Keskeyt‰ valmistus</option>";
           echo "<option value='VT'>Valmis tarkistukseen</option>";
         }
-        else if ($tyojono['valmistuksen_tila'] == Valmistus::KESKEYTETTY) {
+        elseif ($tyojono['valmistuksen_tila'] == Valmistus::KESKEYTETTY) {
           echo "<option value='VA'>Aloita valmistus</option>";
         }
 

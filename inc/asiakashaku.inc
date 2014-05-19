@@ -711,6 +711,11 @@ if ($monta != 1) {
     }
 
     echo "<form method='post'>";
+
+    if (!empty($ytunnus_talteen)) {
+      echo "<input type='hidden' name='ytunnus' value='{$ytunnus_talteen}'>";
+    }
+
     echo "<input type='hidden' name='toimipaikka_rajaus' value='X'>";
     echo "<input type='hidden' name='ale1' value='$ale1'>";
     echo "<input type='hidden' name='ale2' value='$ale2'>";

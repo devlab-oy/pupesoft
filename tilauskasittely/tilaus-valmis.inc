@@ -13,6 +13,23 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
   exit;
 }
 
+// jos tilauksen varasto on setattu ja on laaja toimipaikkakäsittely,
+// tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
+if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+
+  $query = "SELECT toimipaikka
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = {$laskurow['varasto']}";
+  $_tp_res = pupe_query($query);
+  $_tp_row = mysql_fetch_assoc($_tp_res);
+
+  if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
+    $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
+    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+  }
+}
+
 if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
   //Kampanjoiden tarkistus ja tuotteiden lisäys jos osuu johonkin.
   tarkista_osuuko_myyntitilaus_kampanjaan($laskurow['tunnus']);
@@ -1445,17 +1462,6 @@ else {
         // Intrastat-tiedot
         $laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
-        // Haetaan aina oikean toimipaikan yhtiön parametrit
-            $query = "SELECT toimipaikka
-                      FROM varastopaikat
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      AND tunnus  = {$varasto}";
-            $_tp_res = pupe_query($query);
-            $_tp_row = mysql_fetch_assoc($_tp_res);
-
-        $kukarow['toimipaikka'] = $_tp_row['yhtio_toimipaikka'];
-        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-
         // varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
         // omalle_tilaukselle - tilauksia ei splitata muuten ku omiksi tilauksiksi (eli ei esim splitata varastoittain tai vyöhykkeittäin)
         if ((  ((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or
@@ -1671,9 +1677,6 @@ else {
         }
       }
 
-      $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
-      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-
       // Valitaan paras varasto ja tulostusalue alkuperäiselle osalla
       asort($varasto_kpl_array);
       asort($tulalue_kpl_array);
@@ -1805,10 +1808,8 @@ else {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {
-          $lahtorow = mysql_fetch_assoc($result);
 
-          $kukarow['toimipaikka'] = $lahtorow['yhtio_toimipaikka'];
-          $yhtiorow_chk = hae_yhtion_parametrit($lahtorow['yhtio']);
+          $lahtorow = mysql_fetch_assoc($result);
 
           if ($yhtiorow_chk['kerayserat'] != 'K') continue;
 
@@ -1829,8 +1830,6 @@ else {
           }
         }
       }
-
-      $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
 
       foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
         if ($laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and $_ulkoinen_jarjestelma == 'P') {
@@ -1892,13 +1891,11 @@ else {
       }
       else {
         foreach ($tilausnumerot as $tilausnumero) {
+
           //luetaan laskun tiedot uudestaan tässä, per splitti
           $query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
           $result = pupe_query($query);
           $laskurow = mysql_fetch_assoc($result);
-
-          $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
-          $yhtiorow = hae_yhtion_parametrit($laskurow['yhtio']);
 
           // Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
           if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
@@ -1979,9 +1976,6 @@ else {
 
           $jt_chk_row = mysql_fetch_assoc($jt_chk_res);
 
-          $kukarow['toimipaikka'] = $jt_chk_row['yhtio_toimipaikka'];
-          $yhtiorow = hae_yhtion_parametrit($jt_chk_row['yhtio']);
-
           if ($yhtiorow['jt_email'] == '') continue;
 
           $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
@@ -2007,9 +2001,6 @@ else {
           echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
         }
       }
-
-      $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
-      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
     }
   } // end jos yksikin rivi kerätty else haara
 }

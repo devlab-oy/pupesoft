@@ -4496,6 +4496,7 @@ if ($tee == '') {
             //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
             lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $kohdevarasto_tunnus);
           }
+        }
         require 'lisaarivi.inc';
       }
 

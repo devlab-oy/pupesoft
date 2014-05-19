@@ -23,10 +23,10 @@ echo "<form method='post'>
   <table>
   <tr><th>".t("Simuloitu tuotteiden lähetysmaa").":</th>";
 
-$query = "  SELECT distinct koodi, nimi
-      FROM maat
-      WHERE nimi != ''
-      ORDER BY koodi";
+$query = "SELECT distinct koodi, nimi
+          FROM maat
+          WHERE nimi != ''
+          ORDER BY koodi";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='maa'>";
@@ -44,11 +44,11 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 echo "</select>";
 echo "</td></tr><tr><th>".t("Toimittaja").":</th>";
 
-$query = "  SELECT distinct toimi.tunnus, toimi.nimi, toimi.nimitark
-      FROM tuotteen_toimittajat
-      JOIN toimi ON (toimi.yhtio=tuotteen_toimittajat.yhtio and toimi.tunnus=tuotteen_toimittajat.liitostunnus and toimi.tyyppi != 'P')
-      WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-      ORDER BY toimi.nimi, toimi.nimitark";
+$query = "SELECT distinct toimi.tunnus, toimi.nimi, toimi.nimitark
+          FROM tuotteen_toimittajat
+          JOIN toimi ON (toimi.yhtio=tuotteen_toimittajat.yhtio and toimi.tunnus=tuotteen_toimittajat.liitostunnus and toimi.tyyppi != 'P')
+          WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+          ORDER BY toimi.nimi, toimi.nimitark";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='toimittaja'>";
@@ -73,11 +73,11 @@ echo "</td>
 
 if ($tuoteno != '') {
 
-  $query = "  SELECT tuote.tuoteno, tuote.tullinimike1, tuote.tullinimike2, tuotteen_toimittajat.alkuperamaa
-        FROM tuote
-        JOIN tuotteen_toimittajat using (yhtio,tuoteno)
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        and tuote.tuoteno = '$tuoteno'";
+  $query = "SELECT tuote.tuoteno, tuote.tullinimike1, tuote.tullinimike2, tuotteen_toimittajat.alkuperamaa
+            FROM tuote
+            JOIN tuotteen_toimittajat using (yhtio,tuoteno)
+            WHERE tuote.yhtio = '$kukarow[yhtio]'
+            and tuote.tuoteno = '$tuoteno'";
   $result = mysql_query($query) or pupe_error($query);
   $tuorow = mysql_fetch_array($result);
 
@@ -116,15 +116,15 @@ if (isset($KAIKKI)) {
     $lisa = " and tuotteen_toimittajat.liitostunnus = '$toimittaja' ";
   }
 
-  $query = "  SELECT tuote.tuoteno, tuote.tullinimike1, tuote.tullinimike2, tuotteen_toimittajat.alkuperamaa
-        FROM tuote
-        JOIN tuotteen_toimittajat using (yhtio,tuoteno)
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        and tuote.status not in ('P','X')
-        and tuotteen_toimittajat.alkuperamaa not in ('FI', '')
-        and tuote.tullinimike1 not in ('', 0)
-        $lisa
-        ORDER BY tuotteen_toimittajat.alkuperamaa, tuote.tuoteno";
+  $query = "SELECT tuote.tuoteno, tuote.tullinimike1, tuote.tullinimike2, tuotteen_toimittajat.alkuperamaa
+            FROM tuote
+            JOIN tuotteen_toimittajat using (yhtio,tuoteno)
+            WHERE tuote.yhtio                    = '$kukarow[yhtio]'
+            and tuote.status                     not in ('P','X')
+            and tuotteen_toimittajat.alkuperamaa not in ('FI', '')
+            and tuote.tullinimike1               not in ('', 0)
+            $lisa
+            ORDER BY tuotteen_toimittajat.alkuperamaa, tuote.tuoteno";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<pre>";

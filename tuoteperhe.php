@@ -106,13 +106,13 @@ if ($tee == "KOPIOI") {
   }
   else {
 
-    $query  = "  SELECT tuote.*, tuoteperhe.isatuoteno isa
-          from tuote
-          LEFT JOIN tuoteperhe ON tuote.yhtio=tuoteperhe.yhtio and tuote.tuoteno=tuoteperhe.isatuoteno and tuoteperhe.tyyppi='$hakutyyppi'
-          where tuote.tuoteno   = '$kop_isatuo'
-          and tuote.yhtio     = '$kukarow[yhtio]'
-          and tuote.status      NOT IN ('P','X')
-          HAVING isa is null";
+    $query  = "SELECT tuote.*, tuoteperhe.isatuoteno isa
+               from tuote
+               LEFT JOIN tuoteperhe ON tuote.yhtio=tuoteperhe.yhtio and tuote.tuoteno=tuoteperhe.isatuoteno and tuoteperhe.tyyppi='$hakutyyppi'
+               where tuote.tuoteno = '$kop_isatuo'
+               and tuote.yhtio     = '$kukarow[yhtio]'
+               and tuote.status    NOT IN ('P','X')
+               HAVING isa is null";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -125,19 +125,19 @@ if ($tee == "KOPIOI") {
             $insert_lisa = "ohita_kerays = '{$kop_ohita_kerays[$kop_index]}',";
           }
 
-          $query = "  INSERT into  tuoteperhe set
-                isatuoteno    = '$kop_isatuo',
-                tuoteno     = '$kop_tuoteno[$kop_index]',
-                kerroin     = '$kop_kerroin[$kop_index]',
-                hintakerroin  = '$kop_hinkerr[$kop_index]',
-                alekerroin     = '$kop_alekerr[$kop_index]',
-                #rivikommentti  = '$kop_rivikom[$kop_index]',
-                fakta       = '$kop_fakta[$kop_index]',
-                {$insert_lisa}
-                yhtio       = '$kukarow[yhtio]',
-                laatija      = '$kukarow[kuka]',
-                luontiaika    = now(),
-                tyyppi       = '$hakutyyppi'";
+          $query = "INSERT into  tuoteperhe set
+                    isatuoteno   = '$kop_isatuo',
+                    tuoteno      = '$kop_tuoteno[$kop_index]',
+                    kerroin      = '$kop_kerroin[$kop_index]',
+                    hintakerroin = '$kop_hinkerr[$kop_index]',
+                    alekerroin   = '$kop_alekerr[$kop_index]',
+                    #rivikommentti  = '$kop_rivikom[$kop_index]',
+                    fakta        = '$kop_fakta[$kop_index]',
+                    {$insert_lisa}
+                    yhtio        = '$kukarow[yhtio]',
+                    laatija      = '$kukarow[kuka]',
+                    luontiaika   = now(),
+                    tyyppi       = '$hakutyyppi'";
           $result = pupe_query($query);
         }
       }
@@ -268,21 +268,21 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
     $isatuoteno = trim($isatuoteno);
     $tuoteno = trim($tuoteno);
 
-    $query  = "  SELECT *
-          from tuoteperhe
-          where isatuoteno   = '$isatuoteno'
-          and yhtio       = '$kukarow[yhtio]'
-          and tyyppi       = '$hakutyyppi'";
+    $query  = "SELECT *
+               from tuoteperhe
+               where isatuoteno = '$isatuoteno'
+               and yhtio        = '$kukarow[yhtio]'
+               and tyyppi       = '$hakutyyppi'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
       //katsotaan ettei tämä isa/lapsi kombinaatio ole jo olemassa
-      $query  = "  SELECT *
-            from tuoteperhe
-            where isatuoteno   = '$isatuoteno'
-            and tuoteno     = '$tuoteno'
-            and yhtio       = '$kukarow[yhtio]'
-            and tyyppi       = '$hakutyyppi'";
+      $query  = "SELECT *
+                 from tuoteperhe
+                 where isatuoteno = '$isatuoteno'
+                 and tuoteno      = '$tuoteno'
+                 and yhtio        = '$kukarow[yhtio]'
+                 and tyyppi       = '$hakutyyppi'";
       $result = pupe_query($query);
 
       //Jos tunnus on erisuuri kuin tyhjä niin ollan päivittämässä olemassa olevaaa kombinaatiota
@@ -379,14 +379,14 @@ if ($tee == 'POISTA' and $oikeurow['paivitys'] == '1') {
   $isatuoteno = trim($isatuoteno);
 
   // Varmistetaan, että faktat ei mene rikki
-  $query = "  SELECT
-        group_concat(distinct if(fakta = '', null, fakta)) fakta,
-        group_concat(distinct if(fakta2 = '', null, fakta2)) fakta2,
-        group_concat(distinct if(omasivu = '', null, omasivu)) omasivu
-        FROM tuoteperhe
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = '$hakutyyppi'
-        and isatuoteno = '$isatuoteno'";
+  $query = "SELECT
+            group_concat(distinct if(fakta = '', null, fakta)) fakta,
+            group_concat(distinct if(fakta2 = '', null, fakta2)) fakta2,
+            group_concat(distinct if(omasivu = '', null, omasivu)) omasivu
+            FROM tuoteperhe
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and tyyppi     = '$hakutyyppi'
+            and isatuoteno = '$isatuoteno'";
   $result = pupe_query($query);
   $fakrow = mysql_fetch_array($result);
 
@@ -396,10 +396,10 @@ if ($tee == 'POISTA' and $oikeurow['paivitys'] == '1') {
   $tee     = "TALLENNAFAKTA";
 
   //poistetaan rivi..
-  $query  = "  DELETE from tuoteperhe
-        where tunnus = '$tunnus'
-        and yhtio = '$kukarow[yhtio]'
-        and tyyppi = '$hakutyyppi'";
+  $query  = "DELETE from tuoteperhe
+             where tunnus = '$tunnus'
+             and yhtio    = '$kukarow[yhtio]'
+             and tyyppi   = '$hakutyyppi'";
   $result = pupe_query($query);
   $tunnus = '';
 }
@@ -407,29 +407,29 @@ if ($tee == 'POISTA' and $oikeurow['paivitys'] == '1') {
 if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
   $isatuoteno = trim($isatuoteno);
 
-  $query = "  UPDATE tuoteperhe
-        SET fakta = '', fakta2 = '', omasivu = ''
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = '$hakutyyppi'
-        and isatuoteno = '$isatuoteno'";
+  $query = "UPDATE tuoteperhe
+            SET fakta = '', fakta2 = '', omasivu = ''
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and tyyppi     = '$hakutyyppi'
+            and isatuoteno = '$isatuoteno'";
   $result = pupe_query($query);
 
-  $query = "  UPDATE tuoteperhe
-        SET fakta = '$fakta', fakta2 = '$fakta2', omasivu = '$omasivu'
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = '$hakutyyppi'
-        and isatuoteno = '$isatuoteno'
-        ORDER BY isatuoteno, tuoteno
-        LIMIT 1";
+  $query = "UPDATE tuoteperhe
+            SET fakta = '$fakta', fakta2 = '$fakta2', omasivu = '$omasivu'
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and tyyppi     = '$hakutyyppi'
+            and isatuoteno = '$isatuoteno'
+            ORDER BY isatuoteno, tuoteno
+            LIMIT 1";
   $result = pupe_query($query);
 
   echo "<br><br><font class='message'>".t("Reseptin tiedot tallennettu")."!</font><br>";
 
-  $query = "  UPDATE tuoteperhe
-        SET ei_nayteta = '$ei_nayteta'
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = '$hakutyyppi'
-        and isatuoteno = '$isatuoteno'";
+  $query = "UPDATE tuoteperhe
+            SET ei_nayteta = '$ei_nayteta'
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and tyyppi     = '$hakutyyppi'
+            and isatuoteno = '$isatuoteno'";
   $result = pupe_query($query);
 
   echo "<font class='message'>".t("Esitysmuoto tallennettu")."!</font><br>";
@@ -453,19 +453,19 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
     $tchk = $hakutuoteno;
   }
 
-  $query  = "  SELECT tuoteno
-        from tuote
-        where yhtio = '$kukarow[yhtio]'
-        and tuoteno = '$tchk'";
+  $query  = "SELECT tuoteno
+             from tuote
+             where yhtio = '$kukarow[yhtio]'
+             and tuoteno = '$tchk'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
-    $query  = "  SELECT distinct isatuoteno
-          from tuoteperhe
-          where yhtio = '$kukarow[yhtio]'
-          $lisa
-          and tyyppi = '$hakutyyppi'
-          order by isatuoteno, tuoteno";
+    $query  = "SELECT distinct isatuoteno
+               from tuoteperhe
+               where yhtio = '$kukarow[yhtio]'
+               $lisa
+               and tyyppi  = '$hakutyyppi'
+               order by isatuoteno, tuoteno";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0 and ($hakutuoteno != '' or $isatuoteno != '')) {
@@ -652,14 +652,14 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Reseptin faktat").": </th></tr>";
       }
 
-      $query = "  SELECT fakta
-            FROM tuoteperhe
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tyyppi = '$hakutyyppi'
-            and isatuoteno = '$isatuoteno'
-            and trim(fakta) != ''
-            ORDER BY LENGTH(fakta) desc
-            LIMIT 1";
+      $query = "SELECT fakta
+                FROM tuoteperhe
+                WHERE yhtio    = '$kukarow[yhtio]'
+                and tyyppi     = '$hakutyyppi'
+                and isatuoteno = '$isatuoteno'
+                and trim(fakta) != ''
+                ORDER BY LENGTH(fakta) desc
+                LIMIT 1";
       $ressu = pupe_query($query);
       $faktarow = mysql_fetch_array($ressu);
 
@@ -667,14 +667,14 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
       if ($toim == "RESEPTI") {
 
-        $query = "  SELECT fakta2
-              FROM tuoteperhe
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tyyppi = '$hakutyyppi'
-              and isatuoteno = '$isatuoteno'
-              and trim(fakta2) != ''
-              ORDER BY LENGTH(fakta2) desc
-              LIMIT 1";
+        $query = "SELECT fakta2
+                  FROM tuoteperhe
+                  WHERE yhtio    = '$kukarow[yhtio]'
+                  and tyyppi     = '$hakutyyppi'
+                  and isatuoteno = '$isatuoteno'
+                  and trim(fakta2) != ''
+                  ORDER BY LENGTH(fakta2) desc
+                  LIMIT 1";
         $ressu = pupe_query($query);
         $faktarow = mysql_fetch_array($ressu);
 
@@ -760,12 +760,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
       $excelrivi++;
 
-      $query = "  SELECT *
-            FROM tuoteperhe
-            WHERE isatuoteno = '$row[isatuoteno]'
-            AND yhtio     = '$kukarow[yhtio]'
-            AND tyyppi      = '$hakutyyppi'
-            ORDER BY isatuoteno, tuoteno";
+      $query = "SELECT *
+                FROM tuoteperhe
+                WHERE isatuoteno = '$row[isatuoteno]'
+                AND yhtio        = '$kukarow[yhtio]'
+                AND tyyppi       = '$hakutyyppi'
+                ORDER BY isatuoteno, tuoteno";
       $res   = pupe_query($query);
 
       $resyht = 0;
@@ -932,11 +932,11 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "</tr>";
         }
         elseif ($tunnus == $prow["tunnus"]) {
-          $query  = "  SELECT *
-                FROM tuoteperhe
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus = '$tunnus'
-                and tyyppi = '$hakutyyppi'";
+          $query  = "SELECT *
+                     FROM tuoteperhe
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     and tunnus  = '$tunnus'
+                     and tyyppi  = '$hakutyyppi'";
           $zresult = pupe_query($query);
           $zrow = mysql_fetch_array($zresult);
 
@@ -1063,12 +1063,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "<table>";
 
       while($row = mysql_fetch_array($result)) {
-        $query = "  SELECT *
-              from tuoteperhe
-              where isatuoteno = '$row[isatuoteno]'
-              and yhtio = '$kukarow[yhtio]'
-              and tyyppi = '$hakutyyppi'
-              order by isatuoteno, tuoteno";
+        $query = "SELECT *
+                  from tuoteperhe
+                  where isatuoteno = '$row[isatuoteno]'
+                  and yhtio        = '$kukarow[yhtio]'
+                  and tyyppi       = '$hakutyyppi'
+                  order by isatuoteno, tuoteno";
         $res   = pupe_query($query);
 
         echo "<tr><td><a href='$PHP_SELF?toim=$toim&isatuoteno=".urlencode($row["isatuoteno"])."&hakutuoteno=".urlencode($row["isatuoteno"])."'>$row[isatuoteno]</a></td>";
@@ -1109,17 +1109,17 @@ elseif ($tee == "") {
     $lisa1 .= " and tuoteperhe.tuoteno like '%$tuoteno_haku%' ";
   }
 
-  $query  = "  SELECT tuoteperhe.isatuoteno, ti.nimitys,
-        group_concat(concat(tuoteperhe.tuoteno, ' ' , tl.nimitys) order by tuoteperhe.tuoteno, tuoteperhe.tunnus separator '<br>') tuotteet
-        from tuoteperhe
-        join tuote ti on ti.yhtio=tuoteperhe.yhtio and ti.tuoteno=tuoteperhe.isatuoteno
-        join tuote tl on tl.yhtio=tuoteperhe.yhtio and tl.tuoteno=tuoteperhe.tuoteno
-        where tuoteperhe.yhtio = '$kukarow[yhtio]'
-        and tuoteperhe.tyyppi = '$hakutyyppi'
-        $lisa1
-        group by tuoteperhe.isatuoteno
-        order by $lisalimit tuoteperhe.isatuoteno, tuoteperhe.tuoteno
-        $limitteri";
+  $query  = "SELECT tuoteperhe.isatuoteno, ti.nimitys,
+             group_concat(concat(tuoteperhe.tuoteno, ' ' , tl.nimitys) order by tuoteperhe.tuoteno, tuoteperhe.tunnus separator '<br>') tuotteet
+             from tuoteperhe
+             join tuote ti on ti.yhtio=tuoteperhe.yhtio and ti.tuoteno=tuoteperhe.isatuoteno
+             join tuote tl on tl.yhtio=tuoteperhe.yhtio and tl.tuoteno=tuoteperhe.tuoteno
+             where tuoteperhe.yhtio = '$kukarow[yhtio]'
+             and tuoteperhe.tyyppi  = '$hakutyyppi'
+             $lisa1
+             group by tuoteperhe.isatuoteno
+             order by $lisalimit tuoteperhe.isatuoteno, tuoteperhe.tuoteno
+             $limitteri";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

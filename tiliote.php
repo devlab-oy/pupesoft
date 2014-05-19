@@ -173,11 +173,11 @@ if ($ok == 1) {
           fseek($fd, $pointterin_paikka);
 
                       if ($onko_vipn) {
-                          $query = " SELECT tilino
-                                     FROM yriti
-                                     WHERE bic       =  'DABAFIHH'
-                                     AND   factoring != ''
-                                     LIMIT 1;";
+                          $query = "SELECT tilino
+                                    FROM yriti
+                                    WHERE bic        =  'DABAFIHH'
+                                    AND   factoring != ''
+                                    LIMIT 1;";
                           $f_result = pupe_query($query);
 
                           if (mysql_num_rows($f_result) === 1) {
@@ -187,18 +187,18 @@ if ($ok == 1) {
                       }
         }
 
-        $query = "  SELECT *
-              FROM yriti
-              WHERE tilino = '$tilino'
-              and kaytossa = ''";
+        $query = "SELECT *
+                  FROM yriti
+                  WHERE tilino = '$tilino'
+                  and kaytossa = ''";
         $yritiresult = pupe_query($query);
 
         if (mysql_num_rows($yritiresult) != 1) {
           // Kokeillaan 14 vikalla merkill‰ (Virossa esim on 18 merkkisi‰ tilinumeroita)
-          $query = "  SELECT *
-                FROM yriti
-                WHERE right(tilino,14) = '$tilino'
-                and kaytossa = ''";
+          $query = "SELECT *
+                    FROM yriti
+                    WHERE right(tilino,14) = '$tilino'
+                    and kaytossa = ''";
           $yritiresult = pupe_query($query);
         }
 
@@ -217,9 +217,9 @@ if ($ok == 1) {
           $kukarow["yhtio"] = $yritirow["yhtio"];
         }
 
-        $query = "  SELECT myyntireskontrakausi_alku, myyntireskontrakausi_loppu, ostoreskontrakausi_alku, ostoreskontrakausi_loppu, tilikausi_alku, tilikausi_loppu
-              FROM yhtio
-              WHERE yhtio = '{$yritirow['yhtio']}'";
+        $query = "SELECT myyntireskontrakausi_alku, myyntireskontrakausi_loppu, ostoreskontrakausi_alku, ostoreskontrakausi_loppu, tilikausi_alku, tilikausi_loppu
+                  FROM yhtio
+                  WHERE yhtio = '{$yritirow['yhtio']}'";
         $yhtio_tsekres = pupe_query($query);
         $yhtio_tsekrow = mysql_fetch_assoc($yhtio_tsekres);
 
@@ -243,12 +243,12 @@ if ($ok == 1) {
         $tikaloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
 
         // Onko t‰m‰ aineisto jo ajettu?
-        $query = "  SELECT *
-              FROM tiliotedata
-              WHERE tilino = '$tilino'
-              and alku    = '$alkupvm'
-              and loppu    = '$loppupvm'
-              and tyyppi    = '$xtyyppi'";
+        $query = "SELECT *
+                  FROM tiliotedata
+                  WHERE tilino = '$tilino'
+                  and alku     = '$alkupvm'
+                  and loppu    = '$loppupvm'
+                  and tyyppi   = '$xtyyppi'";
         $tiliotedatares = pupe_query($query);
 
         if (mysql_num_rows($tiliotedatares) > 0) {
@@ -258,12 +258,12 @@ if ($ok == 1) {
           // Koodataan t‰ss‰ vaiheessa vain LMP:lle, mutta mik‰‰n ei est‰ etteikˆ saman tsekin vois tehd‰ myˆs vaikka tiliotteille jos joku pankki toimittaisi yhden p‰iv‰n otteet useassa osassa.
           if ($xtyyppi == 2) {
             // Group concatissa tulee kaikki t‰n p‰iv‰n LMP:t
-            $query = "  SELECT group_concat(tieto SEPARATOR '') kantaaineisto
-                  FROM tiliotedata
-                  WHERE tilino = '$tilino'
-                  and alku    = '$alkupvm'
-                  and loppu    = '$loppupvm'
-                  and tyyppi    = '$xtyyppi'";
+            $query = "SELECT group_concat(tieto SEPARATOR '') kantaaineisto
+                      FROM tiliotedata
+                      WHERE tilino = '$tilino'
+                      and alku     = '$alkupvm'
+                      and loppu    = '$loppupvm'
+                      and tyyppi   = '$xtyyppi'";
             $tiliotedatares = pupe_query($query);
             $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
@@ -337,13 +337,13 @@ if ($ok == 1) {
 
         if (($taso == ' ') and ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0))) {
           // Katsotaan lˆytyykˆ t‰ll‰ tunnuksella suoritus
-          $query = "  SELECT alku
-                FROM tiliotedata
-                WHERE yhtio  = '$yritirow[yhtio]'
-                and tilino   = '$tilino'
-                and tyyppi   = '$xtyyppi'
-                and tieto  = '$tietue'
-                and substring(tieto, 13, 18) = '$arkistotunnari'";
+          $query = "SELECT alku
+                    FROM tiliotedata
+                    WHERE yhtio = '$yritirow[yhtio]'
+                    and tilino  = '$tilino'
+                    and tyyppi  = '$xtyyppi'
+                    and tieto   = '$tietue'
+                    and substring(tieto, 13, 18) = '$arkistotunnari'";
           $vchkres = pupe_query($query);
 
           if (mysql_num_rows($vchkres) > 0) {
@@ -391,13 +391,13 @@ if ($ok == 1) {
 
         if ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0)) {
           // Katsotaan lˆytyykˆ t‰ll‰ tunnuksella suoritus
-          $query = "  SELECT alku
-                FROM tiliotedata
-                WHERE yhtio  = '$yritirow[yhtio]'
-                and tilino   = '$tilino'
-                and tyyppi   = '$xtyyppi'
-                and tieto  = '$tietue'
-                and substring(tieto, 28, 16) = '$arkistotunnari'";
+          $query = "SELECT alku
+                    FROM tiliotedata
+                    WHERE yhtio = '$yritirow[yhtio]'
+                    and tilino  = '$tilino'
+                    and tyyppi  = '$xtyyppi'
+                    and tieto   = '$tietue'
+                    and substring(tieto, 28, 16) = '$arkistotunnari'";
           $vchkres = pupe_query($query);
 
           if (mysql_num_rows($vchkres) > 0) {
@@ -423,9 +423,9 @@ if ($ok == 1) {
         }
 
         if ($td_perheid > 0) {
-          $query = "  UPDATE tiliotedata
-                SET perheid = $td_perheid
-                WHERE tunnus = $tiliote_id";
+          $query = "UPDATE tiliotedata
+                    SET perheid = $td_perheid
+                    WHERE tunnus = $tiliote_id";
           $updateperheid = pupe_query($query);
         }
       }
@@ -454,10 +454,10 @@ if ($ok == 1) {
     $tiliotedataresult = pupe_query($query);
 
     // K‰sitell‰‰n uudet tietueet
-    $query = "  SELECT *
-          FROM tiliotedata
-          WHERE aineisto = '$aineistorow[aineisto]'
-          ORDER BY tunnus";
+    $query = "SELECT *
+              FROM tiliotedata
+              WHERE aineisto = '$aineistorow[aineisto]'
+              ORDER BY tunnus";
     $tiliotedataresult = pupe_query($query);
 
     $tilioterivilaskuri = 1;
@@ -465,8 +465,8 @@ if ($ok == 1) {
 
 
     // Haetaan kannan isoin lasku.tunnus, nin voidaan tehd‰n sanity-checki EndToEndId:lle.
-    $query = "  SELECT max(tunnus) maxEndToEndId
-          FROM lasku";
+    $query = "SELECT max(tunnus) maxEndToEndId
+              FROM lasku";
     $meteidres = pupe_query($query);
     $meteidrow = mysql_fetch_assoc($meteidres);
 
@@ -484,9 +484,9 @@ if ($ok == 1) {
       }
 
       // merkataan t‰m‰ tiliotedatarivi k‰sitellyksi
-      $query = "  UPDATE tiliotedata
-            SET kasitelty = now()
-            WHERE tunnus = '$tiliotedatarow[tunnus]'";
+      $query = "UPDATE tiliotedata
+                SET kasitelty = now()
+                WHERE tunnus = '$tiliotedatarow[tunnus]'";
       $updatekasitelty = pupe_query($query);
 
       $tilioterivilaskuri++;

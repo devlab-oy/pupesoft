@@ -36,7 +36,7 @@ if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
 }
 
 //jos tilaustyyppi on 2 ja ohjausmerkki on tyhj‰‰, niin pistet‰‰n ohjausmerkiksi tilaustyypin selkokielinen nimi
-if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") {
+if ($laskurow['tilaustyyppi'] == "2" and trim($laskurow['ohjausmerkki']) == "") {
   $ohjausmerkkilisa = ", ohjausmerkki = 'Varastot‰ydennys'";
   $laskurow["ohjausmerkki"] = "Varastot‰ydennys";
 }
@@ -75,11 +75,32 @@ $query = "  SELECT *
 $maksuehto_result = pupe_query($query);
 $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
+// Tarkistetaan, onko kaikki rivit hyvitysrivej‰ -> ei luottorajatarkistusta
+$query = "SELECT tunnus
+          FROM tilausrivi
+          WHERE yhtio  = '{$kukarow['yhtio']}'
+          AND otunnus  = '{$laskurow['tunnus']}'
+          AND tyyppi  != 'D'
+          AND (varattu + jt) > 0 ";
+$veloitus_result = pupe_query($query);
+$veloitusrow = mysql_fetch_assoc($veloitus_result);
+
 // Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
 // Jos maksuehto on k‰teinen, sallitaan luottorajan ylitys
 // samma pÂ erapaivan_ylityksen_raja
-$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J","L","M"))             or (in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0 and $maksuehtorow['kateinen'] == '') ? 1 : 0;
-$erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K","J","L","M")) or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F")) and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
+$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K", "J", "L", "M"))
+    or (in_array($yhtiorow["luottorajan_ylitys"], array("E", "F"))
+      and ($kukarow["extranet"] != ""
+        or $tilausvalmiskutsuja != "TILAUSMYYNTI")))
+  and $tilausvalmis_asiakas_row['luottoraja'] != 0
+  and $maksuehtorow['kateinen'] == ''
+  and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE
+  and mysql_num_rows($veloitus_result) > 0) ? 1 : 0;
+
+$erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K", "J", "L", "M"))
+  or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E", "F"))
+    and ($kukarow["extranet"] != ""
+      or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
 
 if ($luottoraja_chk or $erapaiva_chk) {
 
@@ -97,10 +118,10 @@ if ($luottoraja_chk or $erapaiva_chk) {
   ob_start();
 
   if ($toim != "EXTRANET") {
-    require ("raportit/saatanat.php");
+    require "raportit/saatanat.php";
   }
   else {
-    require ("saatanat.php");
+    require "saatanat.php";
   }
 
   ob_end_clean();
@@ -555,7 +576,7 @@ else {
 
     if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-      require("inc/sahkoinen_lahete.class.inc");
+      require "inc/sahkoinen_lahete.class.inc";
 
       sahkoinen_lahete($laskurow);
     }
@@ -643,7 +664,7 @@ else {
           $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
         }
 
-        require ("tilauskasittely/verkkolasku.php");
+        require "tilauskasittely/verkkolasku.php";
 
         unset($valittu_tulostin);
       }
@@ -963,7 +984,7 @@ else {
         $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
       }
 
-      require ("tilauskasittely/verkkolasku.php");
+      require "tilauskasittely/verkkolasku.php";
 
       unset($valittu_tulostin);
     }
@@ -1002,7 +1023,7 @@ else {
 
         if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-          require("inc/sahkoinen_lahete.class.inc");
+          require "inc/sahkoinen_lahete.class.inc";
 
           sahkoinen_lahete($laskurow);
         }
@@ -1010,7 +1031,7 @@ else {
         if ($toim != "REKLAMAATIO") {
           // Tulostetaan ker‰yslista
           $tilausnumeroita = $laskurow["tunnus"];
-          require("tilaus-valmis-tulostus.inc");
+          require "tilaus-valmis-tulostus.inc";
         }
 
         // Tulostetaan l‰hete
@@ -1036,7 +1057,7 @@ else {
 
           $myynti_vai_osto = 'M';
 
-          require("editilaus_out_futur.inc");
+          require "editilaus_out_futur.inc";
 
           $laskurow = $tmp_laskurow;
         }
@@ -1112,7 +1133,7 @@ else {
 
         // Jos meill‰ on osatoimituskielto, ni menn‰‰n katsomaan pit‰‰kˆ tilaus j‰tt‰‰ odottamaan tuotteita
         if ($laskurow['osatoimitus'] != '') {
-          require ("tilauskasittely/tilaus-valmis-valitsetila.inc");
+          require "tilauskasittely/tilaus-valmis-valitsetila.inc";
         }
       }
 
@@ -1130,7 +1151,7 @@ else {
           $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
         }
 
-        require ("tilauskasittely/verkkolasku.php");
+        require "tilauskasittely/verkkolasku.php";
 
         unset($valittu_tulostin);
       }
@@ -1699,7 +1720,7 @@ else {
       $ohjausmerkkilisa = "";
 
       // Jos sarjatilaus ja ohjausmerkki puuttuu
-      if ($omalle_tilaukselle > 0 AND trim($laskurow['ohjausmerkki']) == "") {
+      if ($omalle_tilaukselle > 0 and trim($laskurow['ohjausmerkki']) == "") {
         $ohjausmerkkilisa = " , ohjausmerkki = '{$ohjausmerkki_nro}-{$laskurow['vanhatunnus']}' ";
       }
 
@@ -1858,14 +1879,14 @@ else {
 
           if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-            require("inc/sahkoinen_lahete.class.inc");
+            require "inc/sahkoinen_lahete.class.inc";
 
             sahkoinen_lahete($laskurow);
           }
 
           $kutsuja = "tilaus-valmis.inc";
 
-          require("tilaus-valmis-valitsetila.inc");
+          require "tilaus-valmis-valitsetila.inc";
         }
       }
       else {
@@ -1901,7 +1922,7 @@ else {
 
           if (!empty($sahkoinen_lahete) and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and !empty($sahkoinen_lahete_toim) and in_array($toim, $sahkoinen_lahete_toim)) {
 
-            require("inc/sahkoinen_lahete.class.inc");
+            require "inc/sahkoinen_lahete.class.inc";
 
             sahkoinen_lahete($laskurow);
           }
@@ -1909,7 +1930,7 @@ else {
           ///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
           $kutsuja = "tilaus-valmis.inc";
 
-          require("tilaus-valmis-valitsetila.inc");
+          require "tilaus-valmis-valitsetila.inc";
         }
       }
 

@@ -25,10 +25,10 @@ if (mysql_field_name($result, $i) == "rahdinkuljettaja") {
 
   $ulos = "<td><select name='$nimi'>";
 
-  $query = "  SELECT *
-        FROM rahdinkuljettajat
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        ORDER BY nimi";
+  $query = "SELECT *
+            FROM rahdinkuljettajat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            ORDER BY nimi";
   $rahdinkuljettajat_res = pupe_query($query);
 
   while ($rahdinkuljettajat_row = mysql_fetch_assoc($rahdinkuljettajat_res)) {

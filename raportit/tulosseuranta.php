@@ -35,11 +35,11 @@ if ($tee != "" and $alku_pvm > $loppu_pvm) {
 }
 else {
   // Haetaan ko. ajan tilikausi
-  $query = "  SELECT tilikausi_alku
-              FROM tilikaudet
-              WHERE tilikaudet.yhtio = '{$kukarow['yhtio']}'
-              AND tilikausi_alku <= '$alku_pvm'
-              AND tilikausi_loppu >= '$loppu_pvm'";
+  $query = "SELECT tilikausi_alku
+            FROM tilikaudet
+            WHERE tilikaudet.yhtio = '{$kukarow['yhtio']}'
+            AND tilikausi_alku     <= '$alku_pvm'
+            AND tilikausi_loppu    >= '$loppu_pvm'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -109,8 +109,8 @@ if ($tee == "raportoi") {
   // Katostaan halutaanko hakea myynti/varastonmuutos myynnin puolelta
   $query = "SELECT *
             FROM taso
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tyyppi = 'B'
+            WHERE yhtio         = '{$kukarow["yhtio"]}'
+            AND tyyppi          = 'B'
             AND summattava_taso LIKE '%nettokate%'";
   $result = pupe_query($query);
 
@@ -118,8 +118,8 @@ if ($tee == "raportoi") {
 
     // Haetaan myynti/kate tilausriveiltä
     $query = "SELECT tuote.yhtio, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
-              AND tilausrivi.laskutettuaika <= '$loppu_pvm', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
-              AND tilausrivi.laskutettuaika <= '$loppu_pvm', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokatenyt
+              AND tilausrivi.laskutettuaika  <= '$loppu_pvm', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
+              AND tilausrivi.laskutettuaika  <= '$loppu_pvm', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokatenyt
               FROM lasku use index (yhtio_tila_tapvm)
               JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
               JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio
@@ -128,17 +128,17 @@ if ($tee == "raportoi") {
               JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio
               and tuote.tuoteno=tilausrivi.tuoteno)
               JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
-              AND asiakas.tunnus = lasku.liitostunnus
-              AND asiakas.myynninseuranta = '' )
+              AND asiakas.tunnus             = lasku.liitostunnus
+              AND asiakas.myynninseuranta    = '' )
               LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio
               and lasku.toimitustapa=toimitustapa.selite)
-              WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-              AND lasku.tila = 'U'
-              AND lasku.alatila = 'X'
-              AND lasku.tapvm >= '$alku_pvm'
-              AND lasku.tapvm <= '$loppu_pvm'
-              AND tuote.myynninseuranta = ''
-              AND tilausrivi.tuoteno != 'MAKSUERÄ'
+              WHERE lasku.yhtio              = '{$kukarow["yhtio"]}'
+              AND lasku.tila                 = 'U'
+              AND lasku.alatila              = 'X'
+              AND lasku.tapvm                >= '$alku_pvm'
+              AND lasku.tapvm                <= '$loppu_pvm'
+              AND tuote.myynninseuranta      = ''
+              AND tilausrivi.tuoteno        != 'MAKSUERÄ'
               $lisa_haku_kustp";
 
     $result = pupe_query($query);
@@ -163,13 +163,13 @@ if ($tee == "raportoi") {
             LEFT JOIN tili ON (tili.yhtio = taso.yhtio
               AND tili.tulosseuranta_taso = taso.taso)
             LEFT JOIN tiliointi ON (tiliointi.yhtio = tili.yhtio
-              AND tiliointi.tilino = tili.tilino
-              AND tiliointi.tapvm >= '$alku_pvm'
-              AND tiliointi.tapvm <= '$loppu_pvm'
-              AND tiliointi.korjattu = ''
+              AND tiliointi.tilino        = tili.tilino
+              AND tiliointi.tapvm         >= '$alku_pvm'
+              AND tiliointi.tapvm         <= '$loppu_pvm'
+              AND tiliointi.korjattu      = ''
               $lisa)
-            WHERE taso.yhtio = '{$kukarow['yhtio']}'
-            AND taso.tyyppi = 'B'
+            WHERE taso.yhtio              = '{$kukarow['yhtio']}'
+            AND taso.tyyppi               = 'B'
             GROUP BY taso.taso, taso.nimi, taso.summattava_taso, taso.kerroin, taso.jakaja, taso.kumulatiivinen
             ORDER BY taso.taso+1";
   $result = pupe_query($query);
@@ -178,14 +178,14 @@ if ($tee == "raportoi") {
 
     // Jos taso tulee olla kumulatiivinen, haetaan tason kumulatiivinen summa kirjanpidosta
     if ($row["kumulatiivinen"] == "X" and $row["tilit"] != "") {
-      $query = "  SELECT round(ifnull(sum(tiliointi.summa) * -1, 0)) summa
-                  FROM tiliointi
-                  WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
-                  AND tiliointi.tilino in ({$row["tilit"]})
-                  AND tiliointi.tapvm >= '$tilikausi_alku'
-                  AND tiliointi.tapvm < '$alku_pvm'
-                  AND tiliointi.korjattu = ''
-                  $lisa";
+      $query = "SELECT round(ifnull(sum(tiliointi.summa) * -1, 0)) summa
+                FROM tiliointi
+                WHERE tiliointi.yhtio  = '{$kukarow["yhtio"]}'
+                AND tiliointi.tilino   in ({$row["tilit"]})
+                AND tiliointi.tapvm    >= '$tilikausi_alku'
+                AND tiliointi.tapvm    < '$alku_pvm'
+                AND tiliointi.korjattu = ''
+                $lisa";
       $kumulatiivinen_result = pupe_query($query);
       $kumulatiivinen_row = mysql_fetch_assoc($kumulatiivinen_result);
       $row["summa"] += $kumulatiivinen_row["summa"];

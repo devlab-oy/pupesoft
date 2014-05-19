@@ -18,12 +18,12 @@ if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
 
   $lisa1 = substr($lisa1, 4);
 
-  $query = "  SELECT tuoteno, nimitys
-        FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]'
-        and status NOT IN ('P','X')
-        and $lisa1
-        ORDER BY tuoteno";
+  $query = "SELECT tuoteno, nimitys
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]'
+            and status  NOT IN ('P','X')
+            and $lisa1
+            ORDER BY tuoteno";
   $tresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tresult) >  100) {
@@ -52,12 +52,12 @@ if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
   }
 }
 elseif (substr($tuoteno,-1) == '*') {
-  $query = "  SELECT tuoteno, nimitys, ostohinta
-        FROM tuote
-        WHERE yhtio = '$kukarow[yhtio]'
-        and status NOT IN ('P','X')
-        and tuoteno like '" . substr($tuoteno,0,-1) . "%'
-        ORDER BY tuoteno";
+  $query = "SELECT tuoteno, nimitys, ostohinta
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]'
+            and status  NOT IN ('P','X')
+            and tuoteno like '" . substr($tuoteno,0,-1) . "%'
+            ORDER BY tuoteno";
   $tresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($tresult) >  100) {
@@ -89,10 +89,10 @@ else  {
     ///* Toimittajan tuotenumerospecial*///
     if (substr($tuoteno,0,1) == '?') {
 
-      $query = "  SELECT tuoteno
-            FROM tuotteen_toimittajat
-            WHERE yhtio = '$kukarow[yhtio]'
-            and toim_tuoteno='".substr($tuoteno,1)."'";
+      $query = "SELECT tuoteno
+                FROM tuotteen_toimittajat
+                WHERE yhtio = '$kukarow[yhtio]'
+                and toim_tuoteno='".substr($tuoteno,1)."'";
       $tresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($tresult) > 1) {
@@ -116,9 +116,9 @@ else  {
       }
     }
 
-    $query = "  SELECT *
-          FROM tuote
-          WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+    $query = "SELECT *
+              FROM tuote
+              WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -142,14 +142,14 @@ else  {
 
 if ($tee == 'UV') {
   //etsit‰‰n tuotteelle varastopaikka
-  $query = "  SELECT *, varastopaikat.tunnus varasto, tuotepaikat.tunnus tuotepaikka
-        FROM tuotepaikat
-        LEFT JOIN varastopaikat
-        ON varastopaikat.yhtio = tuotepaikat.yhtio
-        and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-        and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-        WHERE tuotepaikat.tuoteno = '$tuoteno'
-        and tuotepaikat.yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT *, varastopaikat.tunnus varasto, tuotepaikat.tunnus tuotepaikka
+            FROM tuotepaikat
+            LEFT JOIN varastopaikat
+            ON varastopaikat.yhtio = tuotepaikat.yhtio
+            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            WHERE tuotepaikat.tuoteno = '$tuoteno'
+            and tuotepaikat.yhtio     = '$kukarow[yhtio]'";
   $qvresult = mysql_query($query) or pupe_error($query);
 
   while ($zrow = mysql_fetch_array($qvresult)) { // K‰yd‰‰n kaikki varastopaikat l‰pi

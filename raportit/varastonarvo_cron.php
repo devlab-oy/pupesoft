@@ -26,9 +26,9 @@ if ($argv[0] == 'varastonarvo_cron.php' and $argv[1] != '' and $argv[2] != '') {
   $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
   $email = escapeshellarg(trim($argv[2]));
 
-  $query = "  SELECT group_concat(distinct tunnus order by tunnus) varastot
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]'";
+  $query = "SELECT group_concat(distinct tunnus order by tunnus) varastot
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]'";
   $varastores = mysql_query($query) or die ("Varastonhaussa tapahtui virhe!\n".mysql_error()."\n");
   $varastorow = mysql_fetch_array($varastores);
 

@@ -22,9 +22,9 @@ if ($tila == 'parametrit') {
     $error = 1;
   }
 
-  $query = "  SELECT nimi
-        from yhtio
-        where yhtio = '$yhtio'";
+  $query = "SELECT nimi
+            from yhtio
+            where yhtio = '$yhtio'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -36,28 +36,28 @@ if ($tila == 'parametrit') {
 
   if ($error == 0) {
     // Tehdään yhtiö
-    $query = "  INSERT into yhtio
-          SET yhtio  = '$yhtio',
-          nimi    = '$nimi',
-          laatija   = '$kukarow[kuka]',
-          luontiaika   = now()";
+    $query = "INSERT into yhtio
+              SET yhtio  = '$yhtio',
+              nimi       = '$nimi',
+              laatija    = '$kukarow[kuka]',
+              luontiaika = now()";
     $result = pupe_query($query);
 
     // Tehdään parametrit
-    $query = "  INSERT into yhtion_parametrit
-          SET yhtio  = '$yhtio',
-          laatija   = '$kukarow[kuka]',
-          luontiaika   = now()";
+    $query = "INSERT into yhtion_parametrit
+              SET yhtio  = '$yhtio',
+              laatija    = '$kukarow[kuka]',
+              luontiaika = now()";
     $result = pupe_query($query);
 
     // Tehdään haluttu valuutta
-    $query = "  INSERT into valuu
-          SET yhtio  = '$yhtio',
-          nimi    = '$valuutta',
-          kurssi    = 1,
-          jarjestys  = 1,
-          laatija   = '$kukarow[kuka]',
-          luontiaika   = now()";
+    $query = "INSERT into valuu
+              SET yhtio  = '$yhtio',
+              nimi       = '$valuutta',
+              kurssi     = 1,
+              jarjestys  = 1,
+              laatija    = '$kukarow[kuka]',
+              luontiaika = now()";
     $result = pupe_query($query);
   }
   else {
@@ -75,9 +75,9 @@ if ($tila == 'ulkonako') {
       $error = 1;
     }
 
-    $query = "  SELECT tunnus
-          FROM yhtio
-          WHERE yhtio = '$yhtio'";
+    $query = "SELECT tunnus
+              FROM yhtio
+              WHERE yhtio = '$yhtio'";
     $yht_res = pupe_query($query);
     $yht_row = mysql_fetch_assoc($yht_res);
 
@@ -117,9 +117,9 @@ if ($tila == 'ulkonako') {
       $error = 1;
     }
 
-    $query = "  SELECT tunnus
-          FROM yhtion_parametrit
-          WHERE yhtio = '$yhtio'";
+    $query = "SELECT tunnus
+              FROM yhtion_parametrit
+              WHERE yhtio = '$yhtio'";
     $yht_res = pupe_query($query);
     $yht_row = mysql_fetch_assoc($yht_res);
 
@@ -166,9 +166,9 @@ if ($tila == 'ulkonako') {
 
 if ($tila == 'perusta') {
   if ($fromyhtio != '') {
-    $query = "  SELECT css, css_extranet, css_verkkokauppa, css_pieni
-          from yhtion_parametrit
-          where yhtio = '$fromyhtio'";
+    $query = "SELECT css, css_extranet, css_verkkokauppa, css_pieni
+              from yhtion_parametrit
+              where yhtio = '$fromyhtio'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -179,19 +179,19 @@ if ($tila == 'perusta') {
     if ($error == 0) {
       $uusiyhtiorow = mysql_fetch_array($result);
 
-      $query = "  SELECT tunnus
-            FROM yhtion_parametrit
-            WHERE yhtio = '$yhtio'";
+      $query = "SELECT tunnus
+                FROM yhtion_parametrit
+                WHERE yhtio = '$yhtio'";
       $yht_res = pupe_query($query);
       $yht_row = mysql_fetch_assoc($yht_res);
 
-      $query = "  UPDATE yhtion_parametrit SET
-             css         = '$uusiyhtiorow[css]',
-            css_extranet     = '$uusiyhtiorow[css_extranet]',
-            css_verkkokauppa   = '$uusiyhtiorow[css_verkkokauppa]',
-            css_pieni       = '$uusiyhtiorow[css_pieni]'
-            WHERE tunnus = '$yht_row[tunnus]'
-            AND yhtio   = '$yhtio'";
+      $query = "UPDATE yhtion_parametrit SET
+                css              = '$uusiyhtiorow[css]',
+                css_extranet     = '$uusiyhtiorow[css_extranet]',
+                css_verkkokauppa = '$uusiyhtiorow[css_verkkokauppa]',
+                css_pieni        = '$uusiyhtiorow[css_pieni]'
+                WHERE tunnus     = '$yht_row[tunnus]'
+                AND yhtio        = '$yhtio'";
       $result = pupe_query($query);
     }
   }
@@ -199,12 +199,12 @@ if ($tila == 'perusta') {
 
 if ($tila == 'menut') {
   if ($fromyhtio != '') {
-    $query = "  INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,laatija,luontiaika,muutospvm,muuttaja)
-          SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio','{$kukarow['kuka']}',now(),now(),'{$kukarow['kuka']}'
-          FROM oikeu
-          WHERE yhtio  = '$fromyhtio'
-          and profiili = ''
-          and kuka     = ''";
+    $query = "INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,laatija,luontiaika,muutospvm,muuttaja)
+              SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio','{$kukarow['kuka']}',now(),now(),'{$kukarow['kuka']}'
+              FROM oikeu
+              WHERE yhtio  = '$fromyhtio'
+              and profiili = ''
+              and kuka     = ''";
     $result = pupe_query($query);
   }
 }
@@ -212,31 +212,31 @@ if ($tila == 'menut') {
 if ($tila == 'profiilit') {
   if (is_array($profiilit)) {
     foreach ($profiilit as $prof) {
-      $query = "  SELECT *
-            FROM oikeu
-            WHERE yhtio  = '$fromyhtio'
-            and kuka   = '$prof'
-            and profiili = '$prof'";
+      $query = "SELECT *
+                FROM oikeu
+                WHERE yhtio  = '$fromyhtio'
+                and kuka     = '$prof'
+                and profiili = '$prof'";
       $pres = pupe_query($query);
 
       while ($trow = mysql_fetch_array($pres)) {
-        $query = "  INSERT into oikeu
-              SET
-              kuka    = '$trow[kuka]',
-              sovellus  = '$trow[sovellus]',
-              nimi    = '$trow[nimi]',
-              alanimi   = '$trow[alanimi]',
-              paivitys  = '$trow[paivitys]',
-              nimitys    = '$trow[nimitys]',
-              jarjestys   = '$trow[jarjestys]',
-              jarjestys2  = '$trow[jarjestys2]',
-              profiili  = '$trow[profiili]',
-              yhtio    = '$yhtio',
-              hidden    = '$trow[hidden]',
-              laatija   = '{$kukarow['kuka']}',
-              luontiaika   = now(),
-              muutospvm   = now(),
-              muuttaja   = '{$kukarow['kuka']}'";
+        $query = "INSERT into oikeu
+                  SET
+                  kuka       = '$trow[kuka]',
+                  sovellus   = '$trow[sovellus]',
+                  nimi       = '$trow[nimi]',
+                  alanimi    = '$trow[alanimi]',
+                  paivitys   = '$trow[paivitys]',
+                  nimitys    = '$trow[nimitys]',
+                  jarjestys  = '$trow[jarjestys]',
+                  jarjestys2 = '$trow[jarjestys2]',
+                  profiili   = '$trow[profiili]',
+                  yhtio      = '$yhtio',
+                  hidden     = '$trow[hidden]',
+                  laatija    = '{$kukarow['kuka']}',
+                  luontiaika = now(),
+                  muutospvm  = now(),
+                  muuttaja   = '{$kukarow['kuka']}'";
         $rresult = pupe_query($query);
       }
     }
@@ -267,87 +267,87 @@ if ($tila == 'kayttaja') {
   }
   else $salasana = md5($salasana);
 
-  $query = "  INSERT into kuka SET
-        yhtio     = '$yhtio',
-        nimi     = '$nimi',
-        salasana   = '$salasana',
-        kuka      = '$kuka',
-        profiilit   = '$profile'";
+  $query = "INSERT into kuka SET
+            yhtio     = '$yhtio',
+            nimi      = '$nimi',
+            salasana  = '$salasana',
+            kuka      = '$kuka',
+            profiilit = '$profile'";
   $result = pupe_query($query);
 
   //Insertoidaan ainakin oikeudet käyttäjähallintaan
-  $query = "  INSERT into oikeu
-        SET
-        kuka    = '$kuka',
-        sovellus  = 'Käyttäjät ja valikot',
-        nimi    = 'suoja.php',
-        alanimi   = '',
-        paivitys  = '1',
-        nimitys    = 'Käyttöoikeudet',
-        jarjestys   = '30',
-        jarjestys2  = '',
-        lukittu    = '1',
-        yhtio    = '$yhtio',
-        hidden    = ''";
+  $query = "INSERT into oikeu
+            SET
+            kuka       = '$kuka',
+            sovellus   = 'Käyttäjät ja valikot',
+            nimi       = 'suoja.php',
+            alanimi    = '',
+            paivitys   = '1',
+            nimitys    = 'Käyttöoikeudet',
+            jarjestys  = '30',
+            jarjestys2 = '',
+            lukittu    = '1',
+            yhtio      = '$yhtio',
+            hidden     = ''";
   $rresult = pupe_query($query);
 
   // Oikeudet
   if (is_array($profiilit)) {
     foreach($profiilit as $prof) {
 
-      $query = "  SELECT *
-            FROM oikeu
-            WHERE yhtio='$yhtio' and kuka='$prof' and profiili='$prof'";
+      $query = "SELECT *
+                FROM oikeu
+                WHERE yhtio='$yhtio' and kuka='$prof' and profiili='$prof'";
       $pres = pupe_query($query);
 
       while ($trow = mysql_fetch_array($pres)) {
         //joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
         //voi olla jossain toisessa profiilissa
         //jos oikeus on jo jostaan toisesta profiilista katotaan oisko eroja päivitysoikeus kohassa
-        $query = "  SELECT yhtio
-              FROM oikeu
-              WHERE kuka    = '$kuka'
-              AND sovellus  = '{$trow['sovellus']}'
-              AND nimi    = '{$trow['nimi']}'
-              AND alanimi   = '{$trow['alanimi']}'
-              AND yhtio    = '$yhtio'";
+        $query = "SELECT yhtio
+                  FROM oikeu
+                  WHERE kuka   = '$kuka'
+                  AND sovellus = '{$trow['sovellus']}'
+                  AND nimi     = '{$trow['nimi']}'
+                  AND alanimi  = '{$trow['alanimi']}'
+                  AND yhtio    = '$yhtio'";
         $tarkesult = pupe_query($query);
         $tarkesultrow = mysql_fetch_assoc($tarkesult);
 
         if (mysql_num_rows($tarkesult) == 0) {
-          $query = "  INSERT into oikeu
-                SET
-                kuka    = '$kuka',
-                sovellus  = '{$trow['sovellus']}',
-                nimi    = '{$trow['nimi']}',
-                alanimi   = '{$trow['alanimi']}',
-                paivitys  = '{$trow['paivitys']}',
-                nimitys    = '{$trow['nimitys']}',
-                jarjestys   = '{$trow['jarjestys']}',
-                jarjestys2  = '{$trow['jarjestys2']}',
-                yhtio    = '$yhtio',
-                hidden    = '{$trow['hidden']}',
-                laatija   = '{$kukarow['kuka']}',
-                luontiaika   = now(),
-                muutospvm   = now(),
-                muuttaja   = '{$kukarow['kuka']}'";
+          $query = "INSERT into oikeu
+                    SET
+                    kuka       = '$kuka',
+                    sovellus   = '{$trow['sovellus']}',
+                    nimi       = '{$trow['nimi']}',
+                    alanimi    = '{$trow['alanimi']}',
+                    paivitys   = '{$trow['paivitys']}',
+                    nimitys    = '{$trow['nimitys']}',
+                    jarjestys  = '{$trow['jarjestys']}',
+                    jarjestys2 = '{$trow['jarjestys2']}',
+                    yhtio      = '$yhtio',
+                    hidden     = '{$trow['hidden']}',
+                    laatija    = '{$kukarow['kuka']}',
+                    luontiaika = now(),
+                    muutospvm  = now(),
+                    muuttaja   = '{$kukarow['kuka']}'";
           $rresult = pupe_query($query);
         }
         elseif ($trow["paivitys"] == '1' AND $tarkesultrow["paivitys"] != '1') {
-          $query = "  UPDATE oikeu
-                SET
-                paivitys     = '1',
-                muutospvm      = now(),
-                muuttaja      = '{$kukarow['kuka']}'
-                WHERE kuka    = '$kuka'
-                AND sovellus  = '{$trow['sovellus']}'
-                AND nimi    = '{$trow['nimi']}'
-                AND alanimi   = '{$trow['alanimi']}'
-                AND nimitys    = '{$trow['nimitys']}'
-                AND jarjestys   = '{$trow['jarjestys']}'
-                AND jarjestys2  = '{$trow['jarjestys2']}'
-                AND hidden    = '{$trow['hidden']}'
-                AND yhtio    = '$yhtio'";
+          $query = "UPDATE oikeu
+                    SET
+                    paivitys       = '1',
+                    muutospvm      = now(),
+                    muuttaja       = '{$kukarow['kuka']}'
+                    WHERE kuka     = '$kuka'
+                    AND sovellus   = '{$trow['sovellus']}'
+                    AND nimi       = '{$trow['nimi']}'
+                    AND alanimi    = '{$trow['alanimi']}'
+                    AND nimitys    = '{$trow['nimitys']}'
+                    AND jarjestys  = '{$trow['jarjestys']}'
+                    AND jarjestys2 = '{$trow['jarjestys2']}'
+                    AND hidden     = '{$trow['hidden']}'
+                    AND yhtio      = '$yhtio'";
           $rresult = pupe_query($query);
         }
       }
@@ -361,8 +361,8 @@ if ($tila == 'tili') {
     $kukar = pupe_query($query);
 
     while ($row = mysql_fetch_array($kukar)) {
-      $query = "  INSERT into tili (nimi, sisainen_taso, tilino, ulkoinen_taso, alv_taso, kustp, kohde, projekti, toimijaliitos, yhtio)
-            values ('$row[nimi]','$row[sisainen_taso]','$row[tilino]','$row[ulkoinen_taso]', '$row[alv_taso]', '$row[kustp]','$row[kohde]','$row[projekti]','$row[toimijaliitos]','$yhtio')";
+      $query = "INSERT into tili (nimi, sisainen_taso, tilino, ulkoinen_taso, alv_taso, kustp, kohde, projekti, toimijaliitos, yhtio)
+                values ('$row[nimi]','$row[sisainen_taso]','$row[tilino]','$row[ulkoinen_taso]', '$row[alv_taso]', '$row[kustp]','$row[kohde]','$row[projekti]','$row[toimijaliitos]','$yhtio')";
       $upres = pupe_query($query);
     }
 
@@ -370,8 +370,8 @@ if ($tila == 'tili') {
     $kukar = pupe_query($query);
 
     while ($row = mysql_fetch_array($kukar)) {
-      $query = "  INSERT into taso (tyyppi, summattava_taso, taso, nimi, yhtio)
-            values ('$row[tyyppi]','$row[summattava_taso]','$row[taso]','$row[nimi]','$yhtio')";
+      $query = "INSERT into taso (tyyppi, summattava_taso, taso, nimi, yhtio)
+                values ('$row[tyyppi]','$row[summattava_taso]','$row[taso]','$row[nimi]','$yhtio')";
       $upres = pupe_query($query);
     }
   }
@@ -380,23 +380,23 @@ if ($tila == 'tili') {
 if ($tila == 'avainsana') {
   if (is_array($avainsanat) and $eimitaan=='') {
     foreach($avainsanat as $avain) {
-      $query = "  SELECT *
-            FROM avainsana
-            WHERE yhtio = '$fromyhtio' and laji = '$avain'";
+      $query = "SELECT *
+                FROM avainsana
+                WHERE yhtio = '$fromyhtio' and laji = '$avain'";
       $pres = pupe_query($query);
       while ($trow = mysql_fetch_array($pres)) {
-        $query = "  INSERT into avainsana
-              SET
-              jarjestys    = '$trow[jarjestys]',
-              laji      = '$trow[laji]',
-              laatija     = '$kukarow[kuka]',
-              luontiaika     =  now(),
-              selite      = '$trow[selite]',
-              selitetark    = '$trow[selitetark]',
-              selitetark_2  = '$trow[selitetark_2]',
-              selitetark_3  = '$trow[selitetark_3]',
-              kieli      = '$trow[kieli]',
-              yhtio      = '$yhtio'";
+        $query = "INSERT into avainsana
+                  SET
+                  jarjestys    = '$trow[jarjestys]',
+                  laji         = '$trow[laji]',
+                  laatija      = '$kukarow[kuka]',
+                  luontiaika   =  now(),
+                  selite       = '$trow[selite]',
+                  selitetark   = '$trow[selitetark]',
+                  selitetark_2 = '$trow[selitetark_2]',
+                  selitetark_3 = '$trow[selitetark_3]',
+                  kieli        = '$trow[kieli]',
+                  yhtio        = '$yhtio'";
         $rresult = pupe_query($query);
       }
     }
@@ -409,21 +409,21 @@ if ($tila == 'kirjoitin') {
     $kukar = pupe_query($query);
 
     while ($row = mysql_fetch_array($kukar)) {
-      $query = "  INSERT INTO kirjoittimet SET
-            yhtio     = '$yhtio',
-            fax     = '$row[fax]',
-            kirjoitin   = '$row[kirjoitin]',
-            komento   = '$row[komento]',
-            merkisto   = '$row[merkisto]',
-            nimi     = '$row[nimi]',
-            osoite     = '$row[osoite]',
-            postino   = '$row[postino]',
-            postitp   = '$row[postitp]',
-            puhelin   = '$row[puhelin]',
-            yhteyshenkilo = '$row[yhteyshenkilo]',
-            ip       = '$row[ip]',
-            laatija   = '$kukarow[kuka]',
-            luontiaika  = now()";
+      $query = "INSERT INTO kirjoittimet SET
+                yhtio         = '$yhtio',
+                fax           = '$row[fax]',
+                kirjoitin     = '$row[kirjoitin]',
+                komento       = '$row[komento]',
+                merkisto      = '$row[merkisto]',
+                nimi          = '$row[nimi]',
+                osoite        = '$row[osoite]',
+                postino       = '$row[postino]',
+                postitp       = '$row[postitp]',
+                puhelin       = '$row[puhelin]',
+                yhteyshenkilo = '$row[yhteyshenkilo]',
+                ip            = '$row[ip]',
+                laatija       = '$kukarow[kuka]',
+                luontiaika    = now()";
       $upres = pupe_query($query);
     }
   }
@@ -435,30 +435,30 @@ if ($tila == 'maksuehto') {
     $kukar = pupe_query($query);
 
     while ($row = mysql_fetch_array($kukar)) {
-      $query = "  INSERT INTO maksuehto SET
-            yhtio         = '$yhtio',
-            teksti         = '$row[teksti]',
-            rel_pvm       = '$row[rel_pvm]',
-            abs_pvm       = '$row[abs_pvm]',
-            kassa_relpvm     = '$row[kassa_relpvm]',
-            kassa_abspvm     = '$row[kassa_abspvm]',
-            kassa_alepros     = '$row[kassa_alepros]',
-            osamaksuehto1     = '$row[osamaksuehto1]',
-            osamaksuehto2     = '$row[osamaksuehto2]',
-            summanjakoprososa2   = '$row[summanjakoprososa2]',
-            jv           = '$row[jv]',
-            kateinen       = '$row[kateinen]',
-            suoraveloitus     = '$row[suoraveloitus]',
-            factoring       = '$row[factoring]',
-            pankkiyhteystiedot   = '$row[pankkiyhteystiedot]',
-            itsetulostus     = '$row[itsetulostus]',
-            jaksotettu       = '$row[jaksotettu]',
-            erapvmkasin     = '$row[erapvmkasin]',
-            sallitut_maat     = '$row[sallitut_maat]',
-            kaytossa       = '$row[kaytossa]',
-            jarjestys       = '$row[jarjestys]',
-            laatija       = '$kukarow[kuka]',
-            luontiaika       = now()";
+      $query = "INSERT INTO maksuehto SET
+                yhtio              = '$yhtio',
+                teksti             = '$row[teksti]',
+                rel_pvm            = '$row[rel_pvm]',
+                abs_pvm            = '$row[abs_pvm]',
+                kassa_relpvm       = '$row[kassa_relpvm]',
+                kassa_abspvm       = '$row[kassa_abspvm]',
+                kassa_alepros      = '$row[kassa_alepros]',
+                osamaksuehto1      = '$row[osamaksuehto1]',
+                osamaksuehto2      = '$row[osamaksuehto2]',
+                summanjakoprososa2 = '$row[summanjakoprososa2]',
+                jv                 = '$row[jv]',
+                kateinen           = '$row[kateinen]',
+                suoraveloitus      = '$row[suoraveloitus]',
+                factoring          = '$row[factoring]',
+                pankkiyhteystiedot = '$row[pankkiyhteystiedot]',
+                itsetulostus       = '$row[itsetulostus]',
+                jaksotettu         = '$row[jaksotettu]',
+                erapvmkasin        = '$row[erapvmkasin]',
+                sallitut_maat      = '$row[sallitut_maat]',
+                kaytossa           = '$row[kaytossa]',
+                jarjestys          = '$row[jarjestys]',
+                laatija            = '$kukarow[kuka]',
+                luontiaika         = now()";
       $upres = pupe_query($query);
     }
   }
@@ -470,47 +470,47 @@ if ($tila == 'toimitustapa') {
     $kukar = pupe_query($query);
 
     while ($row = mysql_fetch_array($kukar)) {
-      $query = "  INSERT INTO toimitustapa SET
-            yhtio           = '$yhtio',
-            selite           = '$row[selite]',
-            tulostustapa       = '$row[tulostustapa]',
-            rahtikirja         = '$row[rahtikirja]',
-            osoitelappu       = '$row[osoitelappu]',
-            rahdinkuljettaja     = '$row[rahdinkuljettaja]',
-            sopimusnro         = '$row[sopimusnro]',
-            jvkulu           = '$row[jvkulu]',
-            jvkielto         = '$row[jvkielto]',
-            vak_kielto         = '$row[vak_kielto]',
-            nouto           = '$row[nouto]',
-            lauantai         = '$row[lauantai]',
-            kuljyksikko       = '$row[kuljyksikko]',
-            merahti         = '$row[merahti]',
-            extranet         = '$row[extranet]',
-            ei_pakkaamoa       = '$row[ei_pakkaamoa]',
-            kuluprosentti       = '$row[kuluprosentti]',
-            toim_nimi         = '$row[toim_nimi]',
-            toim_nimitark       = '$row[toim_nimitark]',
-            toim_osoite       = '$row[toim_osoite]',
-            toim_postino       = '$row[toim_postino]',
-            toim_postitp       = '$row[toim_postitp]',
-            toim_maa         = '$row[toim_maa]',
-            maa_maara         = '$row[maa_maara]',
-            sisamaan_kuljetus     = '$row[sisamaan_kuljetus]',
-            sisamaan_kuljetus_kansallisuus = '$row[sisamaan_kuljetus_kansallisuus]',
-            sisamaan_kuljetusmuoto   = '$row[sisamaan_kuljetusmuoto]',
-            kontti           = '$row[kontti]',
-            aktiivinen_kuljetus   = '$row[aktiivinen_kuljetus]',
-            aktiivinen_kuljetus_kansallisuus = '$row[aktiivinen_kuljetus_kansallisuus]',
-            kauppatapahtuman_luonne = '$row[kauppatapahtuman_luonne]',
-            kuljetusmuoto      = '$row[kuljetusmuoto]',
-            poistumistoimipaikka_koodi = '$row[poistumistoimipaikka_koodi]',
-            ulkomaanlisa       = '$row[ulkomaanlisa]',
-            sallitut_maat       = '$row[sallitut_maat]',
-            sallitut_alustat    = '$row[sallitut_alustat]',
-            virallinen_selite    = '$row[virallinen_selite]',
-            jarjestys         = '$row[jarjestys]',
-            laatija         = '$kukarow[kuka]',
-            luontiaika        = now()";
+      $query = "INSERT INTO toimitustapa SET
+                yhtio                            = '$yhtio',
+                selite                           = '$row[selite]',
+                tulostustapa                     = '$row[tulostustapa]',
+                rahtikirja                       = '$row[rahtikirja]',
+                osoitelappu                      = '$row[osoitelappu]',
+                rahdinkuljettaja                 = '$row[rahdinkuljettaja]',
+                sopimusnro                       = '$row[sopimusnro]',
+                jvkulu                           = '$row[jvkulu]',
+                jvkielto                         = '$row[jvkielto]',
+                vak_kielto                       = '$row[vak_kielto]',
+                nouto                            = '$row[nouto]',
+                lauantai                         = '$row[lauantai]',
+                kuljyksikko                      = '$row[kuljyksikko]',
+                merahti                          = '$row[merahti]',
+                extranet                         = '$row[extranet]',
+                ei_pakkaamoa                     = '$row[ei_pakkaamoa]',
+                kuluprosentti                    = '$row[kuluprosentti]',
+                toim_nimi                        = '$row[toim_nimi]',
+                toim_nimitark                    = '$row[toim_nimitark]',
+                toim_osoite                      = '$row[toim_osoite]',
+                toim_postino                     = '$row[toim_postino]',
+                toim_postitp                     = '$row[toim_postitp]',
+                toim_maa                         = '$row[toim_maa]',
+                maa_maara                        = '$row[maa_maara]',
+                sisamaan_kuljetus                = '$row[sisamaan_kuljetus]',
+                sisamaan_kuljetus_kansallisuus   = '$row[sisamaan_kuljetus_kansallisuus]',
+                sisamaan_kuljetusmuoto           = '$row[sisamaan_kuljetusmuoto]',
+                kontti                           = '$row[kontti]',
+                aktiivinen_kuljetus              = '$row[aktiivinen_kuljetus]',
+                aktiivinen_kuljetus_kansallisuus = '$row[aktiivinen_kuljetus_kansallisuus]',
+                kauppatapahtuman_luonne          = '$row[kauppatapahtuman_luonne]',
+                kuljetusmuoto                    = '$row[kuljetusmuoto]',
+                poistumistoimipaikka_koodi       = '$row[poistumistoimipaikka_koodi]',
+                ulkomaanlisa                     = '$row[ulkomaanlisa]',
+                sallitut_maat                    = '$row[sallitut_maat]',
+                sallitut_alustat                 = '$row[sallitut_alustat]',
+                virallinen_selite                = '$row[virallinen_selite]',
+                jarjestys                        = '$row[jarjestys]',
+                laatija                          = '$kukarow[kuka]',
+                luontiaika                       = now()";
       $upres = pupe_query($query);
     }
   }
@@ -524,41 +524,41 @@ if ($tila == 'varasto') {
     $kirjoitin_res = pupe_query($query);
     $kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
-    $query = "  INSERT INTO varastopaikat SET
-          yhtio       = '$yhtio',
-          alkuhyllyalue   = 'A00',
-          alkuhyllynro   = '00',
-          loppuhyllyalue   = 'A99',
-          loppuhyllynro   = '99',
-          printteri0     = '$kirjoitin_row[tunnus]',
-          printteri1     = '$kirjoitin_row[tunnus]',
-          printteri2     = '$kirjoitin_row[tunnus]',
-          printteri3     = '$kirjoitin_row[tunnus]',
-          printteri4     = '$kirjoitin_row[tunnus]',
-          printteri5     = '$kirjoitin_row[tunnus]',
-          printteri6     = '$kirjoitin_row[tunnus]',
-          printteri7     = '$kirjoitin_row[tunnus]',
-          nimitys     = '$varasto',
-          tyyppi       = '',
-          nimi       = '$varasto',
-          nimitark     = '',
-          osoite       = '',
-          postino     = '',
-          postitp     = '',
-          maa       = 'FI',
-          maa_maara     = '',
-          sisamaan_kuljetus = '',
-          sisamaan_kuljetus_kansallisuus = '',
-          sisamaan_kuljetusmuoto = 0,
-          kontti       = 0,
-          aktiivinen_kuljetus = '',
-          aktiivinen_kuljetus_kansallisuus = '',
-          kauppatapahtuman_luonne = 0,
-          kuljetusmuoto  = 0,
-          poistumistoimipaikka_koodi = '',
-          sallitut_maat   = '',
-          laatija     = '$kukarow[kuka]',
-          luontiaika    = now()";
+    $query = "INSERT INTO varastopaikat SET
+              yhtio                            = '$yhtio',
+              alkuhyllyalue                    = 'A00',
+              alkuhyllynro                     = '00',
+              loppuhyllyalue                   = 'A99',
+              loppuhyllynro                    = '99',
+              printteri0                       = '$kirjoitin_row[tunnus]',
+              printteri1                       = '$kirjoitin_row[tunnus]',
+              printteri2                       = '$kirjoitin_row[tunnus]',
+              printteri3                       = '$kirjoitin_row[tunnus]',
+              printteri4                       = '$kirjoitin_row[tunnus]',
+              printteri5                       = '$kirjoitin_row[tunnus]',
+              printteri6                       = '$kirjoitin_row[tunnus]',
+              printteri7                       = '$kirjoitin_row[tunnus]',
+              nimitys                          = '$varasto',
+              tyyppi                           = '',
+              nimi                             = '$varasto',
+              nimitark                         = '',
+              osoite                           = '',
+              postino                          = '',
+              postitp                          = '',
+              maa                              = 'FI',
+              maa_maara                        = '',
+              sisamaan_kuljetus                = '',
+              sisamaan_kuljetus_kansallisuus   = '',
+              sisamaan_kuljetusmuoto           = 0,
+              kontti                           = 0,
+              aktiivinen_kuljetus              = '',
+              aktiivinen_kuljetus_kansallisuus = '',
+              kauppatapahtuman_luonne          = 0,
+              kuljetusmuoto                    = 0,
+              poistumistoimipaikka_koodi       = '',
+              sallitut_maat                    = '',
+              laatija                          = '$kukarow[kuka]',
+              luontiaika                       = now()";
     $upres = pupe_query($query);
   }
   unset($tila);
@@ -569,9 +569,9 @@ if ($tila == 'varasto') {
 
 // Käyttöliittymä
 if (isset($tila)) {
-  $query = "  SELECT nimi
-        from yhtio
-        where yhtio = '$yhtio'";
+  $query = "SELECT nimi
+            from yhtio
+            where yhtio = '$yhtio'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -589,9 +589,9 @@ if (isset($tila)) {
 
 if ($tila == 'parametrit') {
   // yritysvalinta
-  $query = "  SELECT yhtio, nimi
-        FROM yhtio
-        WHERE yhtio != '$yhtio'";
+  $query = "SELECT yhtio, nimi
+            FROM yhtio
+            WHERE yhtio != '$yhtio'";
   $result = pupe_query($query);
 
   echo "<form method='post'>

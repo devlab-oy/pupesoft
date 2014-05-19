@@ -2,11 +2,11 @@
 
 if (!function_exists("uusi_karhukierros")) {
   function uusi_karhukierros($yhtio) {
-    $query = "  SELECT tunnus
-          FROM karhukierros
-          where pvm  = current_date
-          and yhtio  = '$yhtio'
-          and tyyppi = ''";
+    $query = "SELECT tunnus
+              FROM karhukierros
+              where pvm  = current_date
+              and yhtio  = '$yhtio'
+              and tyyppi = ''";
     $result = pupe_query($query);
 
     if (!mysql_num_rows($result)) {
@@ -117,10 +117,10 @@ if (!function_exists("alku")) {
     $pdf->draw_text(330, 752, t("Päivämäärä", $kieli),     $firstpage, $pieni);
 
     if ($karhukierros_tunnus != "") {
-      $query = "  SELECT pvm
-            FROM karhukierros
-            WHERE tunnus = '$karhukierros_tunnus'
-            LIMIT 1";
+      $query = "SELECT pvm
+                FROM karhukierros
+                WHERE tunnus = '$karhukierros_tunnus'
+                LIMIT 1";
       $pvm_result = pupe_query($query);
       $pvm_row = mysql_fetch_assoc($pvm_result);
       $paiva = substr($pvm_row["pvm"], 8, 2);
@@ -401,10 +401,10 @@ if(!function_exists("loppu")) {
 
     //Laitetaan pankkiyhteystiedot kuntoon
     if ($maksuehtotiedot["factoring"] != "") {
-      $query = "  SELECT *
-            FROM factoring
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND factoringyhtio = '$maksuehtotiedot[factoring]'";
+      $query = "SELECT *
+                FROM factoring
+                WHERE yhtio        = '$kukarow[yhtio]'
+                AND factoringyhtio = '$maksuehtotiedot[factoring]'";
       $fac_result = pupe_query($query);
       $factoringrow = mysql_fetch_assoc($fac_result);
 
@@ -545,11 +545,11 @@ if ($nayta_pdf == 1 and $karhutunnus != '') {
   $karhutunnus = mysql_real_escape_string($karhutunnus);
   $kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
 
-  $query = "  SELECT count(distinct ktunnus) ktun
-        FROM karhu_lasku
-        JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
-        WHERE ltunnus in ($ltunnukset)
-        AND ktunnus <= $karhutunnus";
+  $query = "SELECT count(distinct ktunnus) ktun
+            FROM karhu_lasku
+            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
+            WHERE ltunnus in ($ltunnukset)
+            AND ktunnus   <= $karhutunnus";
   $karhukertares = pupe_query($query);
   $karhukertarow = mysql_fetch_assoc($karhukertares);
 
@@ -562,44 +562,44 @@ else {
   $ikalaskenta = " TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, ";
 }
 
-$query = "  SELECT l.tunnus,
-      l.tapvm,
-      l.liitostunnus,
-      l.summa-l.saldo_maksettu summa,
-      l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa,
-      l.erpcm, l.laskunro, l.viite,
-      l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa,
-      round((l.viikorkopros * (TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm)) * summa / 36500),2) as korko,
-      $ikalaskenta
-      max(kk.pvm) as kpvm,
-      count(distinct kl.ktunnus) as karhuttu,
-      l.laskunro laskunro,
-      l.myyja myyja
-      FROM lasku l
-      LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
-      LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus AND kk.tyyppi = '')
-      WHERE l.tunnus in ($ltunnukset)
-      and l.yhtio = '$kukarow[yhtio]'
-      and l.tila = 'U'
-      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
-      ORDER BY l.erpcm";
+$query = "SELECT l.tunnus,
+          l.tapvm,
+          l.liitostunnus,
+          l.summa-l.saldo_maksettu summa,
+          l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa,
+          l.erpcm, l.laskunro, l.viite,
+          l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa,
+          round((l.viikorkopros * (TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm)) * summa / 36500),2) as korko,
+          $ikalaskenta
+          max(kk.pvm) as kpvm,
+          count(distinct kl.ktunnus) as karhuttu,
+          l.laskunro laskunro,
+          l.myyja myyja
+          FROM lasku l
+          LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
+          LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus AND kk.tyyppi = '')
+          WHERE l.tunnus in ($ltunnukset)
+          and l.yhtio    = '$kukarow[yhtio]'
+          and l.tila     = 'U'
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+          ORDER BY l.erpcm";
 $result = pupe_query($query);
 
 //otetaan maksuehto- ja asiakastiedot ekalta laskulta
 $laskutiedot = mysql_fetch_assoc($result);
 
-$query = "  SELECT *
-      FROM maksuehto
-      LEFT JOIN pankkiyhteystiedot ON (pankkiyhteystiedot.yhtio = maksuehto.yhtio AND pankkiyhteystiedot.tunnus = maksuehto.pankkiyhteystiedot)
-      WHERE maksuehto.yhtio = '$kukarow[yhtio]'
-      AND maksuehto.tunnus  = '$laskutiedot[maksuehto]'";
+$query = "SELECT *
+          FROM maksuehto
+          LEFT JOIN pankkiyhteystiedot ON (pankkiyhteystiedot.yhtio = maksuehto.yhtio AND pankkiyhteystiedot.tunnus = maksuehto.pankkiyhteystiedot)
+          WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+          AND maksuehto.tunnus  = '$laskutiedot[maksuehto]'";
 $maksuehtoresult = pupe_query($query);
 $maksuehtotiedot = mysql_fetch_assoc($maksuehtoresult);
 
-$query = "  SELECT *
-      FROM asiakas
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND tunnus  = '$laskutiedot[liitostunnus]'";
+$query = "SELECT *
+          FROM asiakas
+          WHERE yhtio = '$kukarow[yhtio]'
+          AND tunnus  = '$laskutiedot[liitostunnus]'";
 $asiakasresult = pupe_query($query);
 $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
@@ -609,10 +609,10 @@ $kieli = $asiakastiedot["kieli"];
 //ja kelataan akuun
 mysql_data_seek($result, 0);
 
-$query = "  SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
-      FROM lasku
-      WHERE lasku.yhtio = '$kukarow[yhtio]'
-      and lasku.tunnus in ($ltunnukset)";
+$query = "SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
+          FROM lasku
+          WHERE lasku.yhtio = '$kukarow[yhtio]'
+          and lasku.tunnus  in ($ltunnukset)";
 $lires = pupe_query($query);
 $lirow = mysql_fetch_assoc($lires);
 
@@ -622,13 +622,13 @@ if ($laskutiedot["kpvm"] == "") {
 }
 
 if ($lirow["liitokset"] != "") {
-  $query = "  SELECT sum(summa) summa
-        FROM suoritus
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and (kohdpvm = '0000-00-00' or kohdpvm > '$laskutiedot[kpvm]')
-        and ltunnus  > 0
-        and kirjpvm <= '$laskutiedot[kpvm]'
-        and asiakas_tunnus in ($lirow[liitokset])";
+  $query = "SELECT sum(summa) summa
+            FROM suoritus
+            WHERE yhtio        = '$kukarow[yhtio]'
+            and (kohdpvm = '0000-00-00' or kohdpvm > '$laskutiedot[kpvm]')
+            and ltunnus        > 0
+            and kirjpvm        <= '$laskutiedot[kpvm]'
+            and asiakas_tunnus in ($lirow[liitokset])";
   $summaresult = pupe_query($query);
   $kaato = mysql_fetch_assoc($summaresult);
 }
@@ -639,10 +639,10 @@ else {
 
 // haetaan yhtiön toimipaikkojen yhteystiedot
 if ($laskutiedot["yhtio_toimipaikka"] != '' and $laskutiedot["yhtio_toimipaikka"] != 0) {
-  $toimipaikkaquery = "  SELECT *
-              FROM yhtion_toimipaikat
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND tunnus  = '$laskutiedot[yhtio_toimipaikka]'";
+  $toimipaikkaquery = "SELECT *
+                       FROM yhtion_toimipaikat
+                       WHERE yhtio = '$kukarow[yhtio]'
+                       AND tunnus  = '$laskutiedot[yhtio_toimipaikka]'";
   $toimipaikkares = pupe_query($toimipaikkaquery);
   $toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
 }
@@ -666,10 +666,10 @@ if (!$kaatosumma) $kaatosumma = '0.00';
 if (!isset($karhuviesti)) {
 
   //  Lasketaan kuinka vanhoja laskuja tässä karhutaan
-  $query = "  SELECT count(*) kpl
-        FROM karhu_lasku
-        WHERE ltunnus IN ($ltunnukset)
-        GROUP BY ltunnus;";
+  $query = "SELECT count(*) kpl
+            FROM karhu_lasku
+            WHERE ltunnus IN ($ltunnukset)
+            GROUP BY ltunnus;";
   $res = mysql_query($query) or pupe_error();
   $r = 0;
 
@@ -685,54 +685,54 @@ if (!isset($karhuviesti)) {
   }
 
   // Etsitään asiakkaan kielellä:
-  $query = "  SELECT tunnus
-        FROM avainsana
-        WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
+  $query = "SELECT tunnus
+            FROM avainsana
+            WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
   $res = mysql_query($query) or pupe_error();
 
   if (mysql_num_rows($res) == 0) {
 
-    $query = "  SELECT tunnus
-          FROM avainsana
-          WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$kieli'
-          ORDER BY jarjestys DESC
-          LIMIT 1";
+    $query = "SELECT tunnus
+              FROM avainsana
+              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$kieli'
+              ORDER BY jarjestys DESC
+              LIMIT 1";
     $res = mysql_query($query) or pupe_error();
 
     if (mysql_num_rows($res) == 0) {
 
-      $query = "  SELECT tunnus
-            FROM avainsana
-            WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$kieli'
-            ORDER BY jarjestys ASC
-            LIMIT 1";
+      $query = "SELECT tunnus
+                FROM avainsana
+                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$kieli'
+                ORDER BY jarjestys ASC
+                LIMIT 1";
       $res = mysql_query($query) or pupe_error();
     }
   }
 
   // Etsitään yhtiön kielellä:
   if (mysql_num_rows($res) == 0) {
-    $query = "  SELECT tunnus
-          FROM avainsana
-          WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$yhtiorow[kieli]'";
+    $query = "SELECT tunnus
+              FROM avainsana
+              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$yhtiorow[kieli]'";
     $res = mysql_query($query) or pupe_error();
 
     if (mysql_num_rows($res) == 0) {
 
-      $query = "  SELECT tunnus
-            FROM avainsana
-            WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$yhtiorow[kieli]'
-            ORDER BY jarjestys DESC
-            LIMIT 1";
+      $query = "SELECT tunnus
+                FROM avainsana
+                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$yhtiorow[kieli]'
+                ORDER BY jarjestys DESC
+                LIMIT 1";
       $res = mysql_query($query) or pupe_error();
 
       if (mysql_num_rows($res) == 0) {
 
-        $query = "  SELECT tunnus
-              FROM avainsana
-              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$yhtiorow[kieli]'
-              ORDER BY jarjestys ASC
-              LIMIT 1";
+        $query = "SELECT tunnus
+                  FROM avainsana
+                  WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$yhtiorow[kieli]'
+                  ORDER BY jarjestys ASC
+                  LIMIT 1";
         $res = mysql_query($query) or pupe_error();
       }
     }
@@ -742,11 +742,11 @@ if (!isset($karhuviesti)) {
   $karhuviesti = $kv["tunnus"];
 }
 
-$query = "  SELECT selitetark
-      FROM avainsana
-      WHERE tunnus = '$karhuviesti'
-      AND laji   = 'KARHUVIESTI'
-      AND yhtio    = '{$yhtiorow['yhtio']}'";
+$query = "SELECT selitetark
+          FROM avainsana
+          WHERE tunnus = '$karhuviesti'
+          AND laji     = 'KARHUVIESTI'
+          AND yhtio    = '{$yhtiorow['yhtio']}'";
 $res = mysql_query($query) or pupe_error();
 $viestit = mysql_fetch_assoc($res);
 
@@ -762,13 +762,13 @@ while ($row = mysql_fetch_assoc($result)) {
 
   if ($tee_pdf == 'tulosta_karhu') {
     // huomioidaan osasuoritukset jos tulostetaan kopsu jälkikäteen
-    $query = "  SELECT sum(summa) osasuor_summa
-          FROM tiliointi USE INDEX (tositerivit_index)
-          WHERE yhtio = '$kukarow[yhtio]'
-          and ltunnus = '$row[tunnus]'
-          and tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
-          and tapvm >= '$laskutiedot[kpvm]'
-          and korjattu = ''";
+    $query = "SELECT sum(summa) osasuor_summa
+              FROM tiliointi USE INDEX (tositerivit_index)
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and ltunnus  = '$row[tunnus]'
+              and tilino   in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
+              and tapvm    >= '$laskutiedot[kpvm]'
+              and korjattu = ''";
     $lasktilitre = pupe_query($query);
     $lasktilitro = mysql_fetch_assoc($lasktilitre);
 
@@ -860,12 +860,12 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
   $toimaikarow['maxt'] = date("Y-m-d");
 
   // Otetaan ekan laskun tiedot
-  $query = "  SELECT *
-        FROM lasku
-        WHERE tunnus in ($ltunnukset)
-        and yhtio = '$kukarow[yhtio]'
-        and tila = 'U'
-        LIMIT 1";
+  $query = "SELECT *
+            FROM lasku
+            WHERE tunnus in ($ltunnukset)
+            and yhtio    = '$kukarow[yhtio]'
+            and tila     = 'U'
+            LIMIT 1";
   $result_temp = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result_temp);
 
@@ -1057,10 +1057,10 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
     $kirjoitin = $kirjoitin == 0 ? $kukarow['kirjoitin'] : $kirjoitin;
 
     // itse print komento...
-    $query = "  SELECT komento
-          from kirjoittimet
-          where yhtio = '{$kukarow['yhtio']}'
-          and tunnus = '{$kirjoitin}'";
+    $query = "SELECT komento
+              from kirjoittimet
+              where yhtio = '{$kukarow['yhtio']}'
+              and tunnus  = '{$kirjoitin}'";
     $kires = pupe_query($query);
 
     error_log($kirjoitin);

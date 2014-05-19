@@ -8,12 +8,12 @@ $lock_params = array(
 
 pupesoft_flock($lock_params);
 
-$query  = "  SELECT *
-      FROM lasku
-      WHERE tunnus = '$otunnus'
-      AND yhtio    = '$kukarow[yhtio]'
-      AND tila     = 'K'
-      AND alatila  = ''";
+$query  = "SELECT *
+           FROM lasku
+           WHERE tunnus = '$otunnus'
+           AND yhtio    = '$kukarow[yhtio]'
+           AND tila     = 'K'
+           AND alatila  = ''";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -48,14 +48,14 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
     }
 
     // katotaan onko liitettyj‰ laskuja, mutta ei vaihto-omaisuuslaskuja
-    $query  = "  SELECT *
-          from lasku
-          where yhtio = '$kukarow[yhtio]'
-          and tila = 'K'
-          and alatila = ''
-          and vanhatunnus <> 0
-          and laskunro = '$laskurow[laskunro]'
-          and vienti not in ('C','F','I','J','K','L')";
+    $query  = "SELECT *
+               from lasku
+               where yhtio     = '$kukarow[yhtio]'
+               and tila        = 'K'
+               and alatila     = ''
+               and vanhatunnus <> 0
+               and laskunro    = '$laskurow[laskunro]'
+               and vienti      not in ('C','F','I','J','K','L')";
     $result = pupe_query($query);
 
     $summa = 0;
@@ -112,14 +112,14 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
     }
 
     // p‰ivitet‰‰n kululaskujen summa kentt‰‰n saldo_maksettu keikan otsikolle
-    $query  = "  UPDATE lasku set saldo_maksettu='$summa', valkoodi='$yhtiorow[valkoodi]'
-          where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
+    $query  = "UPDATE lasku set saldo_maksettu='$summa', valkoodi='$yhtiorow[valkoodi]'
+               where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
     $result = pupe_query($query);
 
     // haetaan keikan otsikko laskurowhun
-    $query  = "  SELECT *
-          from lasku
-          where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
+    $query  = "SELECT *
+               from lasku
+               where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
     $result = pupe_query($query);
     $laskurow = mysql_fetch_array($result);
 

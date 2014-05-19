@@ -69,18 +69,18 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
       $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv‰ksynt‰‰n koska laskun liitteit‰ muutettiin.")."<br>";
 
       // nollataan hyv‰ksyj‰t jos jokin n‰ist‰ tiloista
-      $query = "  UPDATE lasku
-            SET h1time     = '',
-            h2time       = '',
-            h3time       = '',
-            h4time       = '',
-            h5time       = '',
-            hyvaksyja_nyt   = hyvak1,
-            tila       = if(tila='M', 'H', tila),
-            comments    = trim(concat('$komm', comments))
-            WHERE tunnus   = $lasrow[tunnus]
-            and yhtio    = '$kukarow[yhtio]'
-            and tila in ('H','M')";
+      $query = "UPDATE lasku
+                SET h1time     = '',
+                h2time        = '',
+                h3time        = '',
+                h4time        = '',
+                h5time        = '',
+                hyvaksyja_nyt = hyvak1,
+                tila          = if(tila='M', 'H', tila),
+                comments      = trim(concat('$komm', comments))
+                WHERE tunnus  = $lasrow[tunnus]
+                and yhtio     = '$kukarow[yhtio]'
+                and tila      in ('H','M')";
       $ares = mysql_query($query) or pupe_error($query);
     }
   }

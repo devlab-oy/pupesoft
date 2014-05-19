@@ -4,21 +4,21 @@ $teccom_editilaus = $pupe_root_polku."/dataout/tc-".$laskurow['tunnus'].".txt";
 
 if (!$toot = fopen($teccom_editilaus, "w")) die("Filen $teccom_editilaus luonti epaonnistui!");
 
-$query = "  SELECT tilausrivi.tunnus,
-      tilausrivi.yksikko,
-      round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu,
-      ifnull(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno
-      FROM tilausrivi
-      JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
-      AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-      AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]')
-      LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
-      WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-      AND tilausrivi.tyyppi  = 'O'
-      AND tilausrivi.otunnus = '$laskurow[tunnus]'
-      AND tilausrivi.varattu > 0
-      AND ta.tunnus IS NULL
-      ORDER BY tilausrivi.tunnus";
+$query = "SELECT tilausrivi.tunnus,
+          tilausrivi.yksikko,
+          round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu,
+          ifnull(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno
+          FROM tilausrivi
+          JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+          AND tuotteen_toimittajat.tuoteno      = tilausrivi.tuoteno
+          AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]')
+          LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
+          WHERE tilausrivi.yhtio                = '$kukarow[yhtio]'
+          AND tilausrivi.tyyppi                 = 'O'
+          AND tilausrivi.otunnus                = '$laskurow[tunnus]'
+          AND tilausrivi.varattu                > 0
+          AND ta.tunnus IS NULL
+          ORDER BY tilausrivi.tunnus";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) == 0) {
@@ -81,19 +81,19 @@ else {
     $lask = 1;
 
     while ($tilausrivirow = mysql_fetch_assoc($result)) {
-      $sqlquery = "  UPDATE tilausrivi SET
-              tilaajanrivinro = $lask
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus  = '$tilausrivirow[tunnus]'";
+      $sqlquery = "UPDATE tilausrivi SET
+                   tilaajanrivinro = $lask
+                   WHERE yhtio     = '$kukarow[yhtio]'
+                   AND tunnus      = '$tilausrivirow[tunnus]'";
       $tresult = pupe_query($sqlquery, $masterlink);
 
       $lask++;
     }
 
-    $sqlquery = "  UPDATE lasku
-            SET kirjoitin = 'edi'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus  = '$laskurow[tunnus]'";
+    $sqlquery = "UPDATE lasku
+                 SET kirjoitin = 'edi'
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND tunnus  = '$laskurow[tunnus]'";
     $result = pupe_query($sqlquery, $masterlink);
   }
   else {

@@ -110,43 +110,43 @@ if ($tee == '') {
   }
 
   if ($yhtiorow["pankkitiedostot"] == "E") {
-    $query = "  SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
-          lasku.popvm aika,
-          ifnull(kuka.nimi, lasku.maksaja) kukanimi,
-          lasku.olmapvm,
-          CONCAT(yriti.nimi, ' ', yriti.tilino) maksu_tili,
-          COUNT(*) kpl,
-          GROUP_CONCAT(lasku.tunnus) tunnukset,
-          round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
-          FROM lasku
-          LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
-          LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tila in ('P', 'Q', 'Y')
-          AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00'
-          and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
-          $lisa
-          GROUP BY tyyppi, aika, kukanimi, olmapvm, maksu_tili
-          ORDER BY tyyppi ASC, aika DESC";
+    $query = "SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
+              lasku.popvm aika,
+              ifnull(kuka.nimi, lasku.maksaja) kukanimi,
+              lasku.olmapvm,
+              CONCAT(yriti.nimi, ' ', yriti.tilino) maksu_tili,
+              COUNT(*) kpl,
+              GROUP_CONCAT(lasku.tunnus) tunnukset,
+              round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+              FROM lasku
+              LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
+              LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tila    in ('P', 'Q', 'Y')
+              AND lasku.popvm   >= '$alkuvv-$alkukk-$alkupp 00:00:00'
+              and lasku.popvm   <= '$loppuvv-$loppukk-$loppupp 23:59:59'
+              $lisa
+              GROUP BY tyyppi, aika, kukanimi, olmapvm, maksu_tili
+              ORDER BY tyyppi ASC, aika DESC";
   }
   else {
-    $query = "  SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
-          lasku.popvm aika,
-          ifnull(kuka.nimi, lasku.maksaja) kukanimi,
-          group_CONCAT(distinct yriti.nimi, ' ', yriti.tilino separator '<br>') maksu_tili,
-          COUNT(*) kpl,
-          GROUP_CONCAT(lasku.tunnus) tunnukset,
-          round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
-          FROM lasku
-          LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
-          LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tila in ('P', 'Q', 'Y')
-          AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00'
-          and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
-          $lisa
-          GROUP BY tyyppi, aika, kukanimi
-          ORDER BY tyyppi ASC, aika DESC";
+    $query = "SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
+              lasku.popvm aika,
+              ifnull(kuka.nimi, lasku.maksaja) kukanimi,
+              group_CONCAT(distinct yriti.nimi, ' ', yriti.tilino separator '<br>') maksu_tili,
+              COUNT(*) kpl,
+              GROUP_CONCAT(lasku.tunnus) tunnukset,
+              round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+              FROM lasku
+              LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
+              LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tila    in ('P', 'Q', 'Y')
+              AND lasku.popvm   >= '$alkuvv-$alkukk-$alkupp 00:00:00'
+              and lasku.popvm   <= '$loppuvv-$loppukk-$loppupp 23:59:59'
+              $lisa
+              GROUP BY tyyppi, aika, kukanimi
+              ORDER BY tyyppi ASC, aika DESC";
 
   }
   $result = mysql_query($query) or pupe_error($query);
@@ -217,34 +217,34 @@ if ($tee == 'selaa') {
 
   if ($tunnukset) $lisa .= " and lasku.tunnus in ($tunnukset) ";
 
-  $query = "  SELECT lasku.tunnus,
-        lasku.nimi,
-        lasku.nimitark,
-        lasku.maksaja,
-        lasku.maksuaika,
-        if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
-        lasku.summa,
-        if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) poimittusumma,
-        lasku.valkoodi,
-        ifnull(kuka.nimi, lasku.maksaja) kukanimi,
-        lasku.popvm,
-        lasku.tapvm,
-        lasku.olmapvm,
-        lasku.mapvm,
-        lasku.erpcm,
-        yriti.nimi maksu_tili,
-        yriti.iban yriti_iban,
-        date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy,
-        round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
-        round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
-        FROM lasku
-        LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
-        LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND lasku.tila in ('P', 'Q', 'Y')
-        AND lasku.maksuaika > '0000-00-00 00:00:00'
-        $lisa
-        ORDER BY lasku.liitostunnus, lasku.tapvm, lasku.summa ASC";
+  $query = "SELECT lasku.tunnus,
+            lasku.nimi,
+            lasku.nimitark,
+            lasku.maksaja,
+            lasku.maksuaika,
+            if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
+            lasku.summa,
+            if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) poimittusumma,
+            lasku.valkoodi,
+            ifnull(kuka.nimi, lasku.maksaja) kukanimi,
+            lasku.popvm,
+            lasku.tapvm,
+            lasku.olmapvm,
+            lasku.mapvm,
+            lasku.erpcm,
+            yriti.nimi maksu_tili,
+            yriti.iban yriti_iban,
+            date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy,
+            round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
+            round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
+            FROM lasku
+            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
+            LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
+            WHERE lasku.yhtio   = '$kukarow[yhtio]'
+            AND lasku.tila      in ('P', 'Q', 'Y')
+            AND lasku.maksuaika > '0000-00-00 00:00:00'
+            $lisa
+            ORDER BY lasku.liitostunnus, lasku.tapvm, lasku.summa ASC";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {

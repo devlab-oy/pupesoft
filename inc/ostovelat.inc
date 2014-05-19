@@ -6,9 +6,9 @@ echo "<form method='post'><input type='hidden' name='toim' value='ostovelat'>";
 echo "<table><tr><th></th><th></th>";
 
 if (isset($tkausi)) {
-  $query = "  SELECT *
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+  $query = "SELECT *
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
   $vresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($vresult) == 1) {
@@ -45,11 +45,11 @@ $sarakkeita = $j;
 
 for ($i=1; $i<8; $i++) {
 
-  $query = "  SELECT distinct nimi, taso
-        FROM taso
-        WHERE yhtio = '$kukarow[yhtio]'
-        and taso < '3'
-        ORDER BY taso";
+  $query = "SELECT distinct nimi, taso
+            FROM taso
+            WHERE yhtio = '$kukarow[yhtio]'
+            and taso    < '3'
+            ORDER BY taso";
   $sresult = mysql_query($query) or pupe_error($query);
 
   echo "<tr><td><select name='taso[$i]'>";
@@ -96,19 +96,19 @@ for ($i=1; $i<8; $i++) {
       $j++;
     }
 
-    $query = "  SELECT taso.nimi $lisa
-          FROM tili, tiliointi USE INDEX (yhtio_tilino_tapvm), taso
-          WHERE tili.yhtio = '$kukarow[yhtio]'
-          and tapvm >= '$yhtiorow[tilikausi_alku]'
-          and tapvm <= '$yhtiorow[tilikausi_loppu]'
-          and korjattu=''
-          and tiliointi.yhtio=tili.yhtio
-          and tiliointi.tilino=tili.tilino
-          and tili.ulkoinen_taso like '$taso[$i]%'
-          and tiliointi.yhtio=taso.yhtio
-          and taso.taso = '$taso[$i]'
-          and taso.tyyppi ='U'
-          GROUP BY 1";
+    $query = "SELECT taso.nimi $lisa
+              FROM tili, tiliointi USE INDEX (yhtio_tilino_tapvm), taso
+              WHERE tili.yhtio       = '$kukarow[yhtio]'
+              and tapvm              >= '$yhtiorow[tilikausi_alku]'
+              and tapvm              <= '$yhtiorow[tilikausi_loppu]'
+              and korjattu=''
+              and tiliointi.yhtio=tili.yhtio
+              and tiliointi.tilino=tili.tilino
+              and tili.ulkoinen_taso like '$taso[$i]%'
+              and tiliointi.yhtio=taso.yhtio
+              and taso.taso          = '$taso[$i]'
+              and taso.tyyppi ='U'
+              GROUP BY 1";
     $result = mysql_query($query) or pupe_error($query);
 
     while ($trow = mysql_fetch_array ($result)) {
@@ -139,10 +139,10 @@ echo "</table>";
 echo "<table><tr>";
 echo "<td>".t("Tilikausi");
 
-$query = "  SELECT *
-      FROM tilikaudet
-      WHERE yhtio = '$kukarow[yhtio]'
-      ORDER BY tilikausi_alku";
+$query = "SELECT *
+          FROM tilikaudet
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY tilikausi_alku";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo " <select name='tkausi'>";

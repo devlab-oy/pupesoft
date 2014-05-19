@@ -7,10 +7,10 @@ require ("inc/functions.inc");
 
 $laskuri = 0;
 
-$query = "  SELECT ultilno, swift, tilinumero, tunnus
-      FROM toimi
-      WHERE ultilno = ''
-      AND tilinumero not in ('', 0)";
+$query = "SELECT ultilno, swift, tilinumero, tunnus
+          FROM toimi
+          WHERE ultilno  = ''
+          AND tilinumero not in ('', 0)";
 $result = mysql_query($query) or pupe_error($query);
 
 while ($toimirow = mysql_fetch_array($result)) {
@@ -20,18 +20,18 @@ while ($toimirow = mysql_fetch_array($result)) {
   $bic = trim($vastaus["swift"]);
 
   if (tarkista_iban($iban) != "" and $bic != '') {
-    $query = "  UPDATE toimi SET
-          ultilno = '$iban',
-          swift = '$bic'
-          WHERE tunnus = '$toimirow[tunnus]'";
+    $query = "UPDATE toimi SET
+              ultilno      = '$iban',
+              swift        = '$bic'
+              WHERE tunnus = '$toimirow[tunnus]'";
     $update = mysql_query($query) or pupe_error($query);
     $laskuri++;
   }
 }
 
-$query = "  SELECT tilino, iban, bic, tunnus
-      FROM yriti
-      WHERE iban = ''";
+$query = "SELECT tilino, iban, bic, tunnus
+          FROM yriti
+          WHERE iban = ''";
 $result = mysql_query($query) or pupe_error($query);
 
 while ($toimirow = mysql_fetch_array($result)) {
@@ -41,20 +41,20 @@ while ($toimirow = mysql_fetch_array($result)) {
   $bic = trim($vastaus["swift"]);
 
   if (tarkista_iban($iban) != "" and $bic != '') {
-    $query = "  UPDATE yriti SET
-          iban = '$iban',
-          bic = '$bic'
-          WHERE tunnus = '$toimirow[tunnus]'";
+    $query = "UPDATE yriti SET
+              iban         = '$iban',
+              bic          = '$bic'
+              WHERE tunnus = '$toimirow[tunnus]'";
     $update = mysql_query($query) or pupe_error($query);
     $laskuri++;
   }
 }
 
-$query = "  SELECT ultilno, swift, tilinumero, tunnus
-      FROM lasku
-      WHERE ultilno = ''
-      AND tilinumero not in ('', 0)
-      AND tila in ('H','M','P')";
+$query = "SELECT ultilno, swift, tilinumero, tunnus
+          FROM lasku
+          WHERE ultilno  = ''
+          AND tilinumero not in ('', 0)
+          AND tila       in ('H','M','P')";
 $result = mysql_query($query) or pupe_error($query);
 
 while ($toimirow = mysql_fetch_array($result)) {
@@ -64,10 +64,10 @@ while ($toimirow = mysql_fetch_array($result)) {
   $bic = trim($vastaus["swift"]);
 
   if (tarkista_iban($iban) != "" and $bic != '') {
-    $query = "  UPDATE lasku SET
-          ultilno = '$iban',
-          swift = '$bic'
-          WHERE tunnus = '$toimirow[tunnus]'";
+    $query = "UPDATE lasku SET
+              ultilno      = '$iban',
+              swift        = '$bic'
+              WHERE tunnus = '$toimirow[tunnus]'";
     $update = mysql_query($query) or pupe_error($query);
     $laskuri++;
   }

@@ -14,19 +14,19 @@ elseif ($tee == 'vanhat' and count($vanhatunnukset) > 0) {
   $lisa = "and lasku.tunnus in (".implode(",", $vanhatunnukset).") ";
 }
 
-$query = "  SELECT ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 astunnus,
-      DATE_FORMAT(laadittu, '%d-%m-%y') laadittu, tuote.eankoodi eankoodi, kommentti tuoteno,
-      aktiivinen_kuljetus suunnistus, lasku.tunnus xtunnus,
-      lasku.sisviesti3 as merkkitieto,
-      concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-      FROM lasku
-      JOIN tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (tilausrivi.tunnus = tilausrivi.perheid or tilausrivi.perheid = 0) and tilausrivi.tyyppi = 'Z'
-      LEFT JOIN tuote on lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-      WHERE lasku.yhtio = '$kukarow[yhtio]'
-      and lasku.tila = 'Z'
-      and lasku.alatila = '$alatila'
-      $lisa
-      ORDER BY sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
+$query = "SELECT ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 astunnus,
+          DATE_FORMAT(laadittu, '%d-%m-%y') laadittu, tuote.eankoodi eankoodi, kommentti tuoteno,
+          aktiivinen_kuljetus suunnistus, lasku.tunnus xtunnus,
+          lasku.sisviesti3 as merkkitieto,
+          concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+          FROM lasku
+          JOIN tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (tilausrivi.tunnus = tilausrivi.perheid or tilausrivi.perheid = 0) and tilausrivi.tyyppi = 'Z'
+          LEFT JOIN tuote on lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+          WHERE lasku.yhtio = '$kukarow[yhtio]'
+          and lasku.tila    = 'Z'
+          and lasku.alatila = '$alatila'
+          $lisa
+          ORDER BY sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
 $tarrares = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($tarrares) > 0) {
@@ -94,10 +94,10 @@ if (mysql_num_rows($tarrares) > 0) {
       $lasktarrat ++;
 
       if ($xtunnus != $vanhatunnus) {
-        $query = "  UPDATE lasku
-              set alatila = 'X'
-              where yhtio = '$kukarow[yhtio]'
-              and tunnus = '$xtunnus'";
+        $query = "UPDATE lasku
+                  set alatila = 'X'
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$xtunnus'";
         $res = mysql_query($query) or pupe_error($query);
         $vanhatunnus = $xtunnus;
       }

@@ -454,10 +454,10 @@ if (mysql_field_name($result, $i) == "rahdinkuljettaja") {
 
   $ulos = "<td><select name='{$nimi}'>";
 
-  $query = "  SELECT *
-        FROM rahdinkuljettajat
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        ORDER BY nimi";
+  $query = "SELECT *
+            FROM rahdinkuljettajat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            ORDER BY nimi";
   $rahdinkuljettajat_res = pupe_query($query);
 
   $ulos .= "<option value=''>".t("Ei valintaa")."</option>";
@@ -695,11 +695,11 @@ if (mysql_field_name($result, $i) == "vak_kielto") {
   $ulos .= "<option value=''>".t("Toimitustavalla saa toimittaa VAK-tuotteita")."</option>";
   $ulos .= "<option value='K' $sel[K]>".t("Toimitustavalla ei saa toimittaa VAK-tuotteita")."</option>";
 
-  $query = "  SELECT DISTINCT selite
-        FROM toimitustapa
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND vak_kielto = ''
-        AND nouto = ''";
+  $query = "SELECT DISTINCT selite
+            FROM toimitustapa
+            WHERE yhtio    = '{$kukarow['yhtio']}'
+            AND vak_kielto = ''
+            AND nouto      = ''";
   $alt_toimitustapa_res = mysql_query($query) or pupe_error($query);
 
   while ($alt_toimitustapa_row = mysql_fetch_assoc($alt_toimitustapa_res)) {
@@ -791,9 +791,9 @@ if (mysql_field_name($result, $i) == "sallitut_alustat") {
 
   $sel = explode(",", $trow[$i]);
 
-  $query = "  SELECT *
-        FROM pakkaus
-        WHERE yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT *
+            FROM pakkaus
+            WHERE yhtio = '{$kukarow['yhtio']}'";
   $pakkaus_result = mysql_query($query) or pupe_error($query);
 
   $ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";

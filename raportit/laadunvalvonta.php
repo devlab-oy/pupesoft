@@ -44,20 +44,20 @@ if ($submit) {
 
   $vva = (int) $vva;
 
-  $query = "  SELECT $tuoteryhma LEFT(toimitettuaika, 7) as toimitettuaika,
-        SUM(IF(toimaika = LEFT(toimitettuaika, 10), 1, 0)) as ajallaan,
-        SUM(IF(toimaika > LEFT(toimitettuaika, 10), 1, 0)) as etuajassa,
-        SUM(IF(toimaika < LEFT(toimitettuaika, 10), 1, 0)) as myohassa
-        FROM tilausrivi USE INDEX (yhtio_laadittu)
-        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' $tuotelisa)
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        AND tilausrivi.laadittu >= '$vva-01-01 00:00:00'
-        AND tilausrivi.laadittu <= '$vva-12-31 23:59:59'
-        AND tilausrivi.tyyppi = 'L'
-        AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00'
-        AND tilausrivi.var != 'P'
-        GROUP BY $group_by
-        ORDER BY $order_by";
+  $query = "SELECT $tuoteryhma LEFT(toimitettuaika, 7) as toimitettuaika,
+            SUM(IF(toimaika = LEFT(toimitettuaika, 10), 1, 0)) as ajallaan,
+            SUM(IF(toimaika > LEFT(toimitettuaika, 10), 1, 0)) as etuajassa,
+            SUM(IF(toimaika < LEFT(toimitettuaika, 10), 1, 0)) as myohassa
+            FROM tilausrivi USE INDEX (yhtio_laadittu)
+            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' $tuotelisa)
+            WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
+            AND tilausrivi.laadittu        >= '$vva-01-01 00:00:00'
+            AND tilausrivi.laadittu        <= '$vva-12-31 23:59:59'
+            AND tilausrivi.tyyppi          = 'L'
+            AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00'
+            AND tilausrivi.var            != 'P'
+            GROUP BY $group_by
+            ORDER BY $order_by";
   $toimaikares = mysql_query($query) or pupe_error($query);
 
   if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {

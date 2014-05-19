@@ -18,13 +18,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  === FALSE or $tee ==
 
   echo "<br>".t("L‰hetet‰‰n k‰ytt‰jille muistutukset hyv‰ksynn‰st‰")."...<br>";
 
-  $query = "  SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti
-        FROM lasku, valuu, kuka
-        WHERE lasku.yhtio='$kukarow[yhtio]' and valuu.yhtio=lasku.yhtio and
-        kuka.yhtio=lasku.yhtio and lasku.valkoodi=valuu.nimi and
-        lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> '' and
-        lasku.tila = 'H'
-        ORDER BY kuka.eposti, tapvm";
+  $query = "SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti
+            FROM lasku, valuu, kuka
+            WHERE lasku.yhtio='$kukarow[yhtio]' and valuu.yhtio=lasku.yhtio and
+            kuka.yhtio=lasku.yhtio and lasku.valkoodi=valuu.nimi and
+            lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> '' and
+            lasku.tila = 'H'
+            ORDER BY kuka.eposti, tapvm";
   $result = mysql_query($query) or pupe_error($query);
 
   while ($trow = mysql_fetch_array($result)) {

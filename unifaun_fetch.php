@@ -107,14 +107,14 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         list($eranumero, $sscc) = explode("_", $eranumero_sscc);
 
         // Jos paketilla on jo ulkoinen sscc, lähetetään discardParcel-sanoma
-        $query = "  SELECT *
-              FROM kerayserat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND sscc = '{$sscc}'
-              AND nro = '{$eranumero}'
-              AND sscc_ulkoinen != ''
-              AND sscc_ulkoinen != 0
-              LIMIT 1";
+        $query = "SELECT *
+                  FROM kerayserat
+                  WHERE yhtio        = '{$kukarow['yhtio']}'
+                  AND sscc           = '{$sscc}'
+                  AND nro            = '{$eranumero}'
+                  AND sscc_ulkoinen != ''
+                  AND sscc_ulkoinen != 0
+                  LIMIT 1";
         $sscc_ulkoinen_chk_res = pupe_query($query);
 
         if (mysql_num_rows($sscc_ulkoinen_chk_res) == 1) {
@@ -123,10 +123,10 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
           require_once("inc/unifaun_send.inc");
 
-          $query = "  SELECT lasku.toimitustavan_lahto, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp
-                FROM lasku
-                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                AND lasku.tunnus = '{$sscc_ulkoinen_chk_row['otunnus']}'";
+          $query = "SELECT lasku.toimitustavan_lahto, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp
+                    FROM lasku
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus  = '{$sscc_ulkoinen_chk_row['otunnus']}'";
           $toitares = pupe_query($query);
           $toitarow = mysql_fetch_assoc($toitares);
 
@@ -143,21 +143,21 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           $unifaun->ftpSend();
         }
 
-        $query = "  UPDATE kerayserat SET
-              sscc_ulkoinen = '{$sscc_ulkoinen}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND sscc   = '{$sscc}'
-              AND nro   = '{$eranumero}'";
+        $query = "UPDATE kerayserat SET
+                  sscc_ulkoinen = '{$sscc_ulkoinen}'
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  AND sscc      = '{$sscc}'
+                  AND nro       = '{$eranumero}'";
         $upd_res = pupe_query($query);
       }
       else {
 
         $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
 
-        $query = "  UPDATE rahtikirjat SET
-              sscc_ulkoinen = '{$sscc_ulkoinen}'
-              WHERE yhtio   = '{$kukarow['yhtio']}'
-              AND tunnus in ($eranumero_sscc)";
+        $query = "UPDATE rahtikirjat SET
+                  sscc_ulkoinen = '{$sscc_ulkoinen}'
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  AND tunnus    in ($eranumero_sscc)";
         $upd_res  = pupe_query($query);
       }
 

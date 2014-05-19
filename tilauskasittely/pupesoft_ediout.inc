@@ -61,15 +61,15 @@ $nimi = $plkulsa."dataout/pupesoft-order-$kukarow[yhtio]-".date("Ymd")."-".md5(u
 
 if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti epäonnistui!");
 
-$query = "  SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika,
-      tilausrivi.hyllyalue, kommentti, hinta
-      FROM tilausrivi
-      LEFT JOIN tuote USING (yhtio, tuoteno)
-      LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
-      WHERE otunnus = '$laskurow[tunnus]'
-      and varattu > 0
-      and tilausrivi.yhtio='$kukarow[yhtio]'
-      ORDER BY toim_tuoteno";
+$query = "SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika,
+          tilausrivi.hyllyalue, kommentti, hinta
+          FROM tilausrivi
+          LEFT JOIN tuote USING (yhtio, tuoteno)
+          LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
+          WHERE otunnus = '$laskurow[tunnus]'
+          and varattu   > 0
+          and tilausrivi.yhtio='$kukarow[yhtio]'
+          ORDER BY toim_tuoteno";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) == 0) {

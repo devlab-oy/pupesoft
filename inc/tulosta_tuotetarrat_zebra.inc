@@ -4,17 +4,17 @@
 //ja tarvitaan myös $tuoteno
 
 if ($malli == 'Zebra_hylly') {
-  $query = "  SELECT tuote.*, concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
-        FROM tuote
-        JOIN tuotepaikat on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuotepaikat.oletus = 'X')
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        AND tuote.tuoteno = '$tuoteno'";
+  $query = "SELECT tuote.*, concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
+            FROM tuote
+            JOIN tuotepaikat on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuotepaikat.oletus = 'X')
+            WHERE tuote.yhtio = '$kukarow[yhtio]'
+            AND tuote.tuoteno = '$tuoteno'";
 }
 else {
-  $query = "  SELECT tuote.*
-        FROM tuote
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        AND tuote.tuoteno = '$tuoteno'";
+  $query = "SELECT tuote.*
+            FROM tuote
+            WHERE tuote.yhtio = '$kukarow[yhtio]'
+            AND tuote.tuoteno = '$tuoteno'";
 }
 
 $tarrares = pupe_query($query);

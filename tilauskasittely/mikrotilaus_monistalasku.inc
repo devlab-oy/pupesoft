@@ -42,12 +42,12 @@ if ($tee == "file") {
       $krahd = trim($rivi[5]);
       $rekla_hinnat = trim($rivi[6]);
 
-      $query = "  SELECT tunnus
-            FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'
-            and laskunro= '$lasku'
-            and tila  = 'U'
-            and alatila  = 'X'";
+      $query = "SELECT tunnus
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                and laskunro= '$lasku'
+                and tila    = 'U'
+                and alatila = 'X'";
       $result = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($result) == 1) {

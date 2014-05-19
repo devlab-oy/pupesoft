@@ -170,22 +170,22 @@ function hae_palautuneet_tuotteet($request) {
     $query_limit = "LIMIT {$request['osumien_maara_rajaus']}";
   }
 
-  $query = "  SELECT tilausrivi.tuoteno,
-        tilausrivi.nimitys,
-        sum(tilausrivi.tilkpl) as palautettu_kpl,
-        sum((tilausrivi.rivihinta)) as palautettu_hinta
-        FROM   lasku
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus )
-        WHERE  lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tila = 'L'
-        AND lasku.alatila = 'X'
-        AND lasku.tilaustyyppi = 'R'
-        AND lasku.tapvm BETWEEN '{$request['alku_pvm']}' AND '{$request['loppu_pvm']}'
-        GROUP BY tilausrivi.tuoteno, tilausrivi.nimitys
-        ORDER BY palautettu_kpl ASC
-        {$query_limit}";
+  $query = "SELECT tilausrivi.tuoteno,
+            tilausrivi.nimitys,
+            sum(tilausrivi.tilkpl) as palautettu_kpl,
+            sum((tilausrivi.rivihinta)) as palautettu_hinta
+            FROM   lasku
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus )
+            WHERE  lasku.yhtio       = '{$kukarow['yhtio']}'
+            AND lasku.tila           = 'L'
+            AND lasku.alatila        = 'X'
+            AND lasku.tilaustyyppi   = 'R'
+            AND lasku.tapvm BETWEEN '{$request['alku_pvm']}' AND '{$request['loppu_pvm']}'
+            GROUP BY tilausrivi.tuoteno, tilausrivi.nimitys
+            ORDER BY palautettu_kpl ASC
+            {$query_limit}";
   $result = pupe_query($query);
 
   $palautuneet_tuotteet = array();
@@ -203,10 +203,10 @@ function hae_palautuneet_tuotteet($request) {
 function hae_ajoneuvosoveltuvuus_kpl($tuoteno) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT count(*) as kpl
-        FROM yhteensopivuus_tuote
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tuoteno = '{$tuoteno}'";
+  $query = "SELECT count(*) as kpl
+            FROM yhteensopivuus_tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuoteno}'";
   $result = pupe_query($query);
 
   $yhteensopivuuksien_lkm = mysql_fetch_assoc($result);

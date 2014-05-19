@@ -104,9 +104,9 @@ if (mysql_field_name($result, $i) == "perhe") {
     $trow[$i] = $perhe = $lukitse_avaimeen;
   }
   elseif ($trow[$i] == 0) {
-    $query = "  SELECT max(perhe) perhe
-           FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT max(perhe) perhe
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'";
     $pres = pupe_query($query);
     $perse = mysql_fetch_array($pres);
 
@@ -114,10 +114,10 @@ if (mysql_field_name($result, $i) == "perhe") {
 
     //Päivitetään tämä jo tässä vaiheessa
     if ($tunnus > 0) {
-      $query = "  UPDATE avainsana
-            SET perhe = '$perhe'
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$tunnus'";
+      $query = "UPDATE avainsana
+                SET perhe = '$perhe'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tunnus'";
       $pres = pupe_query($query);
     }
   }
@@ -317,11 +317,11 @@ if ($avain_sel['OLETUSPAIKKA'] == 'SELECTED') {
     $sel = array();
     $sel[$trow[$i]] = "SELECTED";
 
-    $query = "  SELECT selite,
-          selitetark
-          FROM avainsana
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laji = 'S'";
+    $query = "SELECT selite,
+              selitetark
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = 'S'";
     $tuote_status_result = pupe_query($query);
 
     $ulos = "<td><select name = '$nimi'>";
@@ -359,11 +359,11 @@ if (mysql_field_name($result, $i) == "kieli") {
       $laji = $al_laji;
     }
 
-    $query = "  SELECT group_concat(kieli) kielet
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          and perhe   = '$perhe'
-          and laji    = '$laji'";
+    $query = "SELECT group_concat(kieli) kielet
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'
+              and perhe   = '$perhe'
+              and laji    = '$laji'";
     $res = pupe_query($query);
     $kilerow = mysql_fetch_array($res);
     $kielet = $kilerow["kielet"];
@@ -550,10 +550,10 @@ if ($avain_sel["ALV"] == "SELECTED" and mysql_field_name($result, $i) == "selite
 
 if ($avain_sel["SAHKTILTUN"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
 
-  $query = "  SELECT nimi, tunnus
-        FROM toimi
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tyyppi not in ('P','K')";
+  $query = "SELECT nimi, tunnus
+            FROM toimi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tyyppi  not in ('P','K')";
   $toimi_chk_res = pupe_query($query);
 
   if (mysql_num_rows($toimi_chk_res) > 0) {
@@ -582,10 +582,10 @@ if ($avain_sel["SAHKTILTUN"] == "SELECTED" and mysql_field_name($result, $i) == 
 
 if ($avain_sel["ALVULK"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
 
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
@@ -726,10 +726,10 @@ if (($avain_sel["TYOM_PRIORIT"] == "SELECTED" or $avain_sel["TYOM_TYOJONO"] == "
 
 if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
-  $query = "  SELECT selite, selitetark
-        FROM avainsana
-        WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOJONO'
-        ORDER BY jarjestys, selitetark_2";
+  $query = "SELECT selite, selitetark
+            FROM avainsana
+            WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOJONO'
+            ORDER BY jarjestys, selitetark_2";
   $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -750,12 +750,12 @@ if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) 
 
 if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
 
-  $query = "  SELECT kuka, nimi
-        FROM kuka
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND aktiivinen = 1
-        AND extranet = ''
-        ORDER BY nimi";
+  $query = "SELECT kuka, nimi
+            FROM kuka
+            WHERE yhtio    = '$kukarow[yhtio]'
+            AND aktiivinen = 1
+            AND extranet   = ''
+            ORDER BY nimi";
   $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -789,9 +789,9 @@ if ($avain_sel["RAHTIKIRJA"] == "SELECTED" and mysql_field_name($result, $i) == 
 }
 
 if ($avain_sel['VARASTORYHMA'] == 'SELECTED' and mysql_field_name($result, $i) == "selitetark") {
-  $query = "  SELECT tunnus, nimitys
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'";
+  $query = "SELECT tunnus, nimitys
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'";
   $varasto_res = pupe_query($query);
 
   $ulos .= "<td>";
@@ -829,10 +829,10 @@ if ($avain_sel['KATEISOTTO'] == "SELECTED" and mysql_field_name($result, $i) == 
   $sel = array();
   $sel[$trow[$i]] = "SELECTED";
 
-  $query = "  SELECT tunnus,
-        concat(tilino,' - ',nimi) as dropdown_text
-        FROM tili
-        WHERE yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT tunnus,
+            concat(tilino,' - ',nimi) as dropdown_text
+            FROM tili
+            WHERE yhtio = '{$kukarow['yhtio']}'";
   $tilires = pupe_query($query);
   $tilit = array();
   while($tili = mysql_fetch_assoc($tilires)) {
@@ -855,14 +855,14 @@ if ($avain_sel['KATEISOTTO'] == "SELECTED" and mysql_field_name($result, $i) == 
 
 if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
-  $query = "  SELECT *
-        FROM kuka
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND nimi != ''
-        AND extranet = ''
-        AND (keraajanro > 0 or kuka = '$kukarow[kuka]')
-        AND aktiivinen = 1
-        ORDER BY nimi";
+  $query = "SELECT *
+            FROM kuka
+            WHERE yhtio     = '$kukarow[yhtio]'
+            AND nimi       != ''
+            AND extranet    = ''
+            AND (keraajanro > 0 or kuka = '$kukarow[kuka]')
+            AND aktiivinen  = 1
+            ORDER BY nimi";
   $varresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -880,12 +880,12 @@ if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) =
 
 if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
 
-  $query = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND nimitys != ''
-        AND tyyppi != 'P'
-        ORDER BY tyyppi,nimitys";
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND nimitys != ''
+            AND tyyppi  != 'P'
+            ORDER BY tyyppi,nimitys";
   $varresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

@@ -7,12 +7,12 @@
 
 if ($phpnimi != "rahtikirja_custom.php") {
   //Tulostetaan standardi kolliosoitelappu
-  $query = "  SELECT lasku.*, if(yhteyshenkilo.nimi!='',concat_ws(' / ', yhteyshenkilo.nimi,if(yhteyshenkilo.gsm!='',yhteyshenkilo.gsm,if(yhteyshenkilo.puh!='',yhteyshenkilo.puh,NULL))),'') yhteyshenkilo
-        FROM lasku
-        LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
-        LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and yhteyshenkilo.tyyppi = 'A'
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tunnus = '$tunnus'";
+  $query = "SELECT lasku.*, if(yhteyshenkilo.nimi!='',concat_ws(' / ', yhteyshenkilo.nimi,if(yhteyshenkilo.gsm!='',yhteyshenkilo.gsm,if(yhteyshenkilo.puh!='',yhteyshenkilo.puh,NULL))),'') yhteyshenkilo
+            FROM lasku
+            LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+            LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and yhteyshenkilo.tyyppi = 'A'
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tunnus  = '$tunnus'";
   $tempr = mysql_query($query) or pupe_error($query);
   $laskurow = mysql_fetch_assoc($tempr);
 
@@ -27,15 +27,15 @@ if ($phpnimi != "rahtikirja_custom.php") {
   }
 
   // Haetaan kaikki vakkoodit arrayseen
-  $query = "  SELECT group_concat(distinct $vakselect SEPARATOR ', ') vakkoodi
-        FROM tilausrivi
-        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
-        $vakjoin
-        where tilausrivi.otunnus = '$laskurow[tunnus]'
-        and tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.var in ('','H')
-        and tilausrivi.tyyppi in ('L','G')
-        ORDER BY tuote.vakkoodi";
+  $query = "SELECT group_concat(distinct $vakselect SEPARATOR ', ') vakkoodi
+            FROM tilausrivi
+            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
+            $vakjoin
+            where tilausrivi.otunnus = '$laskurow[tunnus]'
+            and tilausrivi.yhtio     = '$kukarow[yhtio]'
+            and tilausrivi.var       in ('','H')
+            and tilausrivi.tyyppi    in ('L','G')
+            ORDER BY tuote.vakkoodi";
   $vres = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($vres) > 0) {
@@ -48,11 +48,11 @@ else {
 }
 
 // haetaan printterin osoitetiedot
-$query = "  SELECT *
-      FROM kirjoittimet
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND TRIM(komento) LIKE CONCAT(TRIM('{$oslapp}'),'%')
-      AND nimi != ''";
+$query = "SELECT *
+          FROM kirjoittimet
+          WHERE yhtio  = '{$kukarow['yhtio']}'
+          AND TRIM(komento) LIKE CONCAT(TRIM('{$oslapp}'),'%')
+          AND nimi    != ''";
 $pres  = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($pres) > 0) {
@@ -116,11 +116,11 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
   $kaikki_ok = true;
 
   if ($yhtiorow['kerayserat'] == 'A') {
-    $query = "  SELECT kerayserat
-          FROM asiakas
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$laskurow['liitostunnus']}'
-          AND kerayserat = 'A'";
+    $query = "SELECT kerayserat
+              FROM asiakas
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND tunnus     = '{$laskurow['liitostunnus']}'
+              AND kerayserat = 'A'";
     $asiakas_chk_res = pupe_query($query);
 
     if (mysql_num_rows($asiakas_chk_res) == 0) {
@@ -129,11 +129,11 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
   }
 
   if ($kaikki_ok) {
-    $query = "  SELECT DISTINCT pakkausnro, sscc, sscc_ulkoinen, pakkaus
-          FROM kerayserat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND otunnus = '{$laskurow['tunnus']}'
-          ORDER BY pakkausnro";
+    $query = "SELECT DISTINCT pakkausnro, sscc, sscc_ulkoinen, pakkaus
+              FROM kerayserat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$laskurow['tunnus']}'
+              ORDER BY pakkausnro";
     $pakkaus_chk_res = pupe_query($query);
 
     $pi = 1;
@@ -317,9 +317,9 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $pdf->draw_text(mm_pt(105), mm_pt(92), round($kollityht), $firstpage, $norm);
   }
   else {
-    $query = "  SELECT sum(kollit) kollit
-          FROM rahtikirjat
-          WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
+    $query = "SELECT sum(kollit) kollit
+              FROM rahtikirjat
+              WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
     $pakka = mysql_query($query) or pupe_error($query);
     $pak = mysql_fetch_assoc($pakka);
 

@@ -16,9 +16,9 @@ if(!function_exists("rahtisopimuksettarkista")) {
       $chytunnus = $t[$i];
 
       if ($chytunnus != '') {
-        $query = "  SELECT ytunnus
-              FROM asiakas
-              WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
+        $query = "SELECT ytunnus
+                  FROM asiakas
+                  WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
         $sresult = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($sresult) == 0) {
@@ -47,9 +47,9 @@ if(!function_exists("rahtisopimuksettarkista")) {
       $chastunn = $t[$i];
 
       if ($chastunn != '') {
-        $query  = "  SELECT *
-              FROM asiakas
-              WHERE yhtio='$kukarow[yhtio]' and tunnus='$chastunn'";
+        $query  = "SELECT *
+                   FROM asiakas
+                   WHERE yhtio='$kukarow[yhtio]' and tunnus='$chastunn'";
         $result = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($result) != 1) {

@@ -40,11 +40,11 @@ if (!function_exists("pakkaamotarkista")) {
 
           if ($t["varasto"] == $trow["varasto"] and $t["lokero"] != $trow["lokero"]) {
 
-            $query = "  SELECT *
-                  FROM pakkaamo
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND lokero = '$pakkaamolokero'
-                  AND varasto = '$pakkaamovarasto'";
+            $query = "SELECT *
+                      FROM pakkaamo
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND lokero  = '$pakkaamolokero'
+                      AND varasto = '$pakkaamovarasto'";
             $pakkaamo_chk_res = mysql_query($query) or pupe_error($query);
 
             if (mysql_num_rows($pakkaamo_chk_res) != 0) {

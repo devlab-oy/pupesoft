@@ -136,13 +136,13 @@ if(!function_exists("avainsanatarkista")) {
       }
 
       if ($tem_selite != '' and ($tem_laji == 'TRY' or $tem_laji == 'OSASTO' or $tem_laji == 'DPAVAINSANALAJI')) {
-        $query = "  SELECT tunnus
-              FROM avainsana
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND kieli   = '$tem_kieli'
-              AND laji    = '$tem_laji'
-              AND selite  = '$tem_selite'
-              and tunnus != '$tunnus'";
+        $query = "SELECT tunnus
+                  FROM avainsana
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  AND kieli    = '$tem_kieli'
+                  AND laji     = '$tem_laji'
+                  AND selite   = '$tem_selite'
+                  and tunnus  != '$tunnus'";
         $results = pupe_query($query);
 
         if (mysql_num_rows($results) > 0) {
@@ -151,12 +151,12 @@ if(!function_exists("avainsanatarkista")) {
       }
 
       if ($tem_laji == "SALDOVAHVISTUS") {
-        $query = "  SELECT *
-              FROM avainsana
-              WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-              AND selite = '{$tem_selite}'
-              AND laji = '{$tem_laji}'
-              AND tunnus != '{$tunnus}'";
+        $query = "SELECT *
+                  FROM avainsana
+                  WHERE avainsana.yhtio  = '{$kukarow['yhtio']}'
+                  AND selite             = '{$tem_selite}'
+                  AND laji               = '{$tem_laji}'
+                  AND tunnus            != '{$tunnus}'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {
@@ -170,12 +170,12 @@ if(!function_exists("avainsanatarkista")) {
 
       // Yritetään asettaa oletusverokanta
       if (strtoupper($tem_laji) == "ALV" and trim($t[$i]) != "") {
-        $query = "  SELECT tunnus
-              FROM avainsana
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND laji = 'ALV'
-              AND selitetark != ''
-              AND tunnus != '$tunnus'";
+        $query = "SELECT tunnus
+                  FROM avainsana
+                  WHERE yhtio     = '{$kukarow["yhtio"]}'
+                  AND laji        = 'ALV'
+                  AND selitetark != ''
+                  AND tunnus     != '$tunnus'";
         $results = pupe_query($query);
 
         if (mysql_num_rows($results) > 0) {
@@ -207,10 +207,10 @@ if(!function_exists("avainsanatarkista")) {
 
       if (strtoupper($tem_laji) == "INVEN_LAJI" and $tem_selitetark_2 != "") {
 
-        $query = "  SELECT tunnus
-              FROM tili
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tilino = '{$tem_selitetark_2}'";
+        $query = "SELECT tunnus
+                  FROM tili
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tilino  = '{$tem_selitetark_2}'";
         $tili_chk_res = pupe_query($query);
 
         if (mysql_num_rows($tili_chk_res) == 0) $virhe[$i] = t("Tilinumero ei ole sallittu")."!";
@@ -242,17 +242,17 @@ if(!function_exists("avainsanatarkista")) {
 
     if (mysql_field_name($result, $i) == 'tunnus') {
 
-      $query = "  SELECT kieli, selite, laji
-            FROM avainsana
-            WHERE yhtio     = '$kukarow[yhtio]'
-            AND kieli       = '$tem_kieli'
-            AND laji        = '$tem_laji'
-            AND nakyvyys      = '$tem_nakyvyys'
-            AND selite      = '$tem_selite'
-            AND selitetark    = '$tem_selitetark'
-            AND selitetark_2  = '$tem_selitetark_2'
-            AND selitetark_3  = '$tem_selitetark_3'
-            and tunnus        != '$tunnus'";
+      $query = "SELECT kieli, selite, laji
+                FROM avainsana
+                WHERE yhtio       = '$kukarow[yhtio]'
+                AND kieli         = '$tem_kieli'
+                AND laji          = '$tem_laji'
+                AND nakyvyys      = '$tem_nakyvyys'
+                AND selite        = '$tem_selite'
+                AND selitetark    = '$tem_selitetark'
+                AND selitetark_2  = '$tem_selitetark_2'
+                AND selitetark_3  = '$tem_selitetark_3'
+                and tunnus       != '$tunnus'";
       $results = pupe_query($query);
 
       if (mysql_num_rows($results) > 0) {

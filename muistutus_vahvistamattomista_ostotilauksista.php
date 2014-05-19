@@ -23,9 +23,9 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
     $yhtiorow = mysql_fetch_array($yhtiores);
 
     // haetaan yhtiön parametrit
-    $query = "  SELECT *
-          FROM yhtion_parametrit
-          WHERE yhtio='$yhtiorow[yhtio]'";
+    $query = "SELECT *
+              FROM yhtion_parametrit
+              WHERE yhtio='$yhtiorow[yhtio]'";
     $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
     if (mysql_num_rows($result) == 1) {
@@ -40,32 +40,32 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
 
-  $query = "  (SELECT tilausrivi.otunnus, lasku.laatija, concat('vastuuostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
-        FROM tilausrivi
-        JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '' AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY))
-        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ostajanro > 0)
-        JOIN kuka  ON (kuka.yhtio = tuote.yhtio AND kuka.myyja = tuote.ostajanro AND kuka.eposti != '')
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND tilausrivi.toimitettu = ''
-        AND tilausrivi.tyyppi = 'O'
-        AND tilausrivi.kpl = 0
-        and tilausrivi.varattu != 0
-        AND tilausrivi.jaksotettu = 0
-        GROUP BY 1,2,3,4,5)
-        UNION
-        (SELECT tilausrivi.otunnus, lasku.laatija, concat('ostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
-        FROM tilausrivi
-        JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '' AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY))
-        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-        JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija AND kuka.eposti != '')
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND tilausrivi.toimitettu = ''
-        AND tilausrivi.tyyppi = 'O'
-        AND tilausrivi.kpl = 0
-        and tilausrivi.varattu != 0
-        AND tilausrivi.jaksotettu = 0
-        GROUP BY 1,2,3,4,5)
-        ORDER BY eposti, otunnus";
+  $query = "(SELECT tilausrivi.otunnus, lasku.laatija, concat('vastuuostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
+             FROM tilausrivi
+             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '' AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY))
+             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ostajanro > 0)
+             JOIN kuka  ON (kuka.yhtio = tuote.yhtio AND kuka.myyja = tuote.ostajanro AND kuka.eposti != '')
+             WHERE lasku.yhtio          = '$kukarow[yhtio]'
+             AND tilausrivi.toimitettu  = ''
+             AND tilausrivi.tyyppi      = 'O'
+             AND tilausrivi.kpl         = 0
+             and tilausrivi.varattu    != 0
+             AND tilausrivi.jaksotettu  = 0
+             GROUP BY 1,2,3,4,5)
+             UNION
+             (SELECT tilausrivi.otunnus, lasku.laatija, concat('ostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
+             FROM tilausrivi
+             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '' AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY))
+             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+             JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija AND kuka.eposti != '')
+             WHERE lasku.yhtio          = '$kukarow[yhtio]'
+             AND tilausrivi.toimitettu  = ''
+             AND tilausrivi.tyyppi      = 'O'
+             AND tilausrivi.kpl         = 0
+             and tilausrivi.varattu    != 0
+             AND tilausrivi.jaksotettu  = 0
+             GROUP BY 1,2,3,4,5)
+             ORDER BY eposti, otunnus";
   $result = pupe_query($query);
 
   $veposti = "";

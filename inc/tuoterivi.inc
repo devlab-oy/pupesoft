@@ -15,24 +15,24 @@ if (mysql_field_name($result, $i) == "tuoteno") {
     $tyyppi = 3;
 
     // Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa
-    $query = "  SELECT yhtio
-          FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
-          WHERE yhtio = '$kukarow[yhtio]'
-          and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
-          and tuoteno = '$tuoteno'
-          LIMIT 1";
+    $query = "SELECT yhtio
+              FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
+              WHERE yhtio = '$kukarow[yhtio]'
+              and laji    in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
+              and tuoteno = '$tuoteno'
+              LIMIT 1";
     $sdtres = pupe_query($query);
 
     if (mysql_num_rows($sdtres) == 0) {
       // Ei saa olla myöskään yhtään tilausriviä (Puuterivit sallitaan)
-      $query = "  SELECT yhtio
-            FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tyyppi in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
-            and tuoteno = '$tuoteno'
-            and laadittu > '0000-00-00 00:00:00'
-            and var != 'P'
-            LIMIT 1";
+      $query = "SELECT yhtio
+                FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tyyppi    in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
+                and tuoteno   = '$tuoteno'
+                and laadittu  > '0000-00-00 00:00:00'
+                and var      != 'P'
+                LIMIT 1";
       $sdtres = pupe_query($query);
 
       if (mysql_num_rows($sdtres) == 0) {
@@ -57,11 +57,11 @@ if (mysql_field_name($result, $i) == "tuoteno") {
 
       $etsitaan = true;
 
-      $query = "  SELECT {$autom_selectlisa} AS seuraava_tuoteno
-            FROM tuote
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            AND tuote.tuoteno REGEXP '[^0-9]' = 0
-            {$autom_wherelisa}";
+      $query = "SELECT {$autom_selectlisa} AS seuraava_tuoteno
+                FROM tuote
+                WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                AND tuote.tuoteno REGEXP '[^0-9]' = 0
+                {$autom_wherelisa}";
       $autom_tuoteno_res = pupe_query($query);
       $autom_tuoteno_row = mysql_fetch_assoc($autom_tuoteno_res);
 
@@ -93,11 +93,11 @@ if (mysql_field_name($result, $i) == "tilino" or
 if (mysql_field_name($result, $i) == "nimitys") {
 
   //  Jos meillä on jokin viranomaistuote huomautetaan että nimitystä ei venkslailla
-  $query  = "  SELECT tunnus
-          FROM tuote
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tuoteno = '$tuoteno'
-        and tuotetyyppi in ('A','B')";
+  $query  = "SELECT tunnus
+             FROM tuote
+             WHERE yhtio     = '$kukarow[yhtio]'
+             and tuoteno     = '$tuoteno'
+             and tuotetyyppi in ('A','B')";
     $sresult = pupe_query($query);
 
   if(mysql_num_rows($sresult) != 0) {
@@ -191,10 +191,10 @@ if (mysql_field_name($result, $i) == "try"
 }
 
 if (mysql_field_name($result, $i) == "valuutta") {
-  $query = "  SELECT nimi, tunnus
-        FROM valuu
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY jarjestys";
+  $query = "SELECT nimi, tunnus
+            FROM valuu
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY jarjestys";
         $vresult = pupe_query($query);
         $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
         while ($vrow=mysql_fetch_array($vresult)) {
@@ -258,11 +258,11 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
    $sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
 
-  $query = "  SELECT count(*) saldo
-        FROM tuotepaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tuoteno = '$tuoteno'
-        and saldo  != 0";
+  $query = "SELECT count(*) saldo
+            FROM tuotepaikat
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tuoteno  = '$tuoteno'
+            and saldo   != 0";
   $vresult = pupe_query($query);
   $vrow = mysql_fetch_array($vresult);
 
@@ -300,10 +300,10 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
 if (mysql_field_name($result, $i) == "aleryhma") {
 
-  $query = "  SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
-        FROM perusalennus
-        WHERE yhtio = '$kukarow[yhtio]'
-        ORDER BY ryhma";
+  $query = "SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
+            FROM perusalennus
+            WHERE yhtio = '$kukarow[yhtio]'
+            ORDER BY ryhma";
   $vresult = pupe_query($query);
 
   $ulos = "<td><select id='aleryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -344,10 +344,10 @@ if (mysql_field_name($result, $i) == "yksikko") {
 }
 
 if (mysql_field_name($result, $i) == "alkuperamaa") {
-  $query = "  SELECT distinct koodi, nimi
-        FROM maat
-        WHERE nimi != ''
-        ORDER BY koodi";
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -694,9 +694,9 @@ if ((mysql_field_name($result, $i) == "vakkoodi" or mysql_field_name($result, $i
 
   $query_taulu = mysql_field_name($result, $i) == "vak_imdg_koodi" ? "vak_imdg" : "vak";
 
-  $query = "  SELECT tunnus, concat_ws(' / ', yk_nro, substring(nimi_ja_kuvaus,1,70), luokka, luokituskoodi, pakkausryhma, lipukkeet, erityismaaraykset, rajoitetut_maarat_ja_poikkeusmaarat_1) nimi
-        FROM {$query_taulu}
-        WHERE yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT tunnus, concat_ws(' / ', yk_nro, substring(nimi_ja_kuvaus,1,70), luokka, luokituskoodi, pakkausryhma, lipukkeet, erityismaaraykset, rajoitetut_maarat_ja_poikkeusmaarat_1) nimi
+            FROM {$query_taulu}
+            WHERE yhtio = '{$kukarow['yhtio']}'";
   $vak_res = pupe_query($query);
 
   $ulos .= "<option value=''>".t("Valitse")."</option>";
@@ -743,12 +743,12 @@ if (mysql_field_name($result, $i) == "panttitili") {
   if (trim($trow[$i]) == 'K') {
     $query_ale_lisa = generoi_alekentta('M', 'panttitili');
 
-    $query = "  SELECT
-          round(sum(hinta*kpl* {$query_ale_lisa}), 2) as rivihinta
-          FROM panttitili
-          WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
-          AND panttitili.tuoteno = '{$trow['tuoteno']}'
-          AND panttitili.status  = ''";
+    $query = "SELECT
+              round(sum(hinta*kpl* {$query_ale_lisa}), 2) as rivihinta
+              FROM panttitili
+              WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
+              AND panttitili.tuoteno = '{$trow['tuoteno']}'
+              AND panttitili.status  = ''";
     $panttitili_result = pupe_query($query);
     $panttitili_row = mysql_fetch_assoc($panttitili_result);
 

@@ -113,18 +113,18 @@ if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus
 
 if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] == '' and $otunnus != '') {
 
-  $query2 = "  SELECT tilausvahvistus, liitostunnus
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus  = '$otunnus'";
+  $query2 = "SELECT tilausvahvistus, liitostunnus
+             FROM lasku
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$otunnus'";
   $vresult2 = pupe_query($query2);
   $row2 = mysql_fetch_assoc($vresult2);
 
   if (trim($row2['tilausvahvistus']) == "") {
-    $query2 = "  SELECT tilausvahvistus
-          FROM asiakas
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus  = '{$row2['liitostunnus']}'";
+    $query2 = "SELECT tilausvahvistus
+               FROM asiakas
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus  = '{$row2['liitostunnus']}'";
     $vresult2 = pupe_query($query2);
     $row2 = mysql_fetch_assoc($vresult2);
   }
@@ -253,9 +253,9 @@ echo "<tr><th>".t("Valitse kieli")."</th>";
 ///* Haetaan asiakkaan kieli *///
 if ($otunnus != '' or $laskunro != '') {
 
-  $querykieli = "  SELECT liitostunnus
-          FROM lasku
-          WHERE";
+  $querykieli = "SELECT liitostunnus
+                 FROM lasku
+                 WHERE";
 
   if ($otunnus > 0) {
     $querykieli .= " tunnus='$otunnus' ";
@@ -279,10 +279,10 @@ if ($otunnus != '' or $laskunro != '') {
   $lasku_email = "";
   if ($mista == 'asiakas') $lasku_email = ", lasku_email";
 
-  $querykieli = "  SELECT kieli, email $lasku_email
-          FROM $mista
-          WHERE tunnus = '$asrow[liitostunnus]'
-          AND yhtio    = '$kukarow[yhtio]'";
+  $querykieli = "SELECT kieli, email $lasku_email
+                 FROM $mista
+                 WHERE tunnus = '$asrow[liitostunnus]'
+                 AND yhtio    = '$kukarow[yhtio]'";
   $resultkieli = pupe_query($querykieli);
   $asrow = mysql_fetch_array($resultkieli);
 
@@ -317,13 +317,13 @@ foreach ($tulostimet as $tulostin) {
       $valitut_suuntalisa = " AND suuntalavat.tunnus in (".mysql_real_escape_string($valitut_lavat).")";
     }
 
-    $query = "  SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc
-          FROM suuntalavat
-          JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
-          WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-          AND suuntalavat.tila   = 'S'
-          AND (suuntalavat.kaytettavyys = 'L' OR (suuntalavat.kaytettavyys = 'Y' AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'))
-          {$valitut_suuntalisa}";
+    $query = "SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc
+              FROM suuntalavat
+              JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+              WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+              AND suuntalavat.tila    = 'S'
+              AND (suuntalavat.kaytettavyys = 'L' OR (suuntalavat.kaytettavyys = 'Y' AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'))
+              {$valitut_suuntalisa}";
     $suuntalavat_res = pupe_query($query);
 
     if (mysql_num_rows($suuntalavat_res) == 0) continue;
@@ -357,11 +357,11 @@ foreach ($tulostimet as $tulostin) {
     $rajaus = " and komento != 'edi' ";
   }
 
-  $querykieli = "  SELECT *
-          from kirjoittimet
-          where yhtio='$kukarow[yhtio]'
-          $rajaus
-          ORDER BY kirjoitin";
+  $querykieli = "SELECT *
+                 from kirjoittimet
+                 where yhtio='$kukarow[yhtio]'
+                 $rajaus
+                 ORDER BY kirjoitin";
   $kires = pupe_query($querykieli);
 
   $seepra = false;

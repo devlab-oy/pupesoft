@@ -2878,7 +2878,8 @@ if ($tee == '') {
       <input type='hidden' name='projektilla' value='$projektilla'>
       <input type='hidden' name='orig_tila' value='$orig_tila'>
       <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-      <input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>";
+      <input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>
+      <input type='hidden' name='kohdevarasto_tunnus' value='$clearing'>";
 
   // kirjoitellaan otsikko
   echo "<table>";
@@ -4480,6 +4481,21 @@ if ($tee == '') {
       }
 
       if ($tuoteno != '' and $kpl != 0) {
+        if($toim = 'SIIRTOLISTA') {
+          //Laitetaan tuote oletusvaraston tuotepaikalle
+          $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $kohdevarasto_tunnus);
+
+          if (!empty($tuotteen_oletuspaikka)) {
+            // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
+            $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
+            $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
+            $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
+            $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
+          }
+          else {
+            //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
+            lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $kohdevarasto_tunnus);
+          }
         require 'lisaarivi.inc';
       }
 

@@ -908,8 +908,9 @@ if ($tee == 'Z') {
         $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, varastopaikat.toimipaikka AS varasto_toimipaikka,
                   tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
                   concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-                  varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
-                   FROM tuote
+                  varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+                  '' as era
+                  FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
                   and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
@@ -1391,6 +1392,8 @@ if ($tee == 'Z') {
         }
 
         $query = "SELECT tilausrivi.yhtio,
+                  tilausrivi.tuoteno,
+                  tilausrivi.rivihinta,
                   IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.rivihinta,0) summa30,
                   IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kate,0) kate30,
                   IF(tilausrivi.laskutettuaika >= DATE_SUB(now(), INTERVAL 30 DAY), tilausrivi.kpl,0) kpl30,
@@ -1416,7 +1419,7 @@ if ($tee == 'Z') {
           "sum" => array("summa30", "kate30", "kpl30", "summa90", "kate90", "kpl90", "summaVA", "kateVA", "kplVA", "summaEDV", "kateEDV", "kplEDV"),
           "group_by" => array("yhtio"),
           "order_by" => array(),
-          "select" => array(),
+          "select" => array("rivihinta"),
           "lisaa_kulut" => array("kate30", "kate90", "kateVA", "kateEDV")
         );
 
@@ -2033,7 +2036,8 @@ if ($tee == 'Z') {
                 tapahtuma.hyllyalue tapahtuma_hyllyalue,
                 concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
                 tilausrivi.hyllyalue tilausrivi_hyllyalue,
-                round(100*tilausrivi.kate/tilausrivi.rivihinta, 2) katepros,
+                tilausrivi.kate,
+                tilausrivi.rivihinta,
                 tilausrivi.tunnus trivitunn,
                 tilausrivi.perheid,
                 tilausrivin_lisatiedot.osto_vai_hyvitys,
@@ -2184,7 +2188,7 @@ if ($tee == 'Z') {
           echo "<td nowrap align='right' valign='top'>".$_hinta."</td>";
 
           if ($prow["laji"] == "laskutus") {
-            $kate = $kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta'] );
+            $kate = kate_kuluineen($prow['tuoteno'], $prow['rivihinta'], $prow['hinta'] );
             $katepros = 100*$kate/$prow['rivihinta'];
             echo "<td nowrap align='right' valign='top'>".round($katepros,2)."%</td>";
           }

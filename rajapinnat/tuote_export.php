@@ -230,9 +230,9 @@ $query =  "(SELECT tapahtuma.tuoteno,
               AND tuote.nakyvyys    != '')
             WHERE tapahtuma.yhtio    = '{$kukarow["yhtio"]}'
             $muutoslisa1)
-            
+
             UNION
-            
+
             (SELECT tilausrivi.tuoteno,
             tuote.eankoodi
             FROM tilausrivi
@@ -244,9 +244,9 @@ $query =  "(SELECT tapahtuma.tuoteno,
               AND tuote.nakyvyys    != '')
             WHERE tilausrivi.yhtio   = '{$kukarow["yhtio"]}'
             $muutoslisa2)
-            
+
             UNION
-            
+
             (SELECT tuote.tuoteno,
             tuote.eankoodi
             FROM tuote
@@ -256,7 +256,7 @@ $query =  "(SELECT tapahtuma.tuoteno,
             AND tuote.tuoteno       != ''
             AND tuote.nakyvyys      != ''
             $muutoslisa3)
-            
+
             ORDER BY 1";
 $result = pupe_query($query);
 

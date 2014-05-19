@@ -109,7 +109,7 @@ if($tee == "aja") {
             LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio=kustp.yhtio and tiliointi.kustp=kustp.tunnus
             LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio=projekti.yhtio and tiliointi.projekti=projekti.tunnus
             LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus
-            
+
             WHERE tiliointi.yhtio='$kukarow[yhtio]' and
             tapvm>='$alku' and
             tapvm<='$loppu'

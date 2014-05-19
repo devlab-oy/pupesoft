@@ -9,12 +9,12 @@ require('../inc/parametrit.inc');
 echo "<font class='head'>".t("Myyjien rivimyynnit").":</font><hr>";
 
 // Otetaan kuluva tilikausi
-$query = "  SELECT year(tilikausi_alku) y, month(tilikausi_alku) m
-      FROM tilikaudet
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND tilikausi_alku < now()
-      ORDER BY tilikausi_alku DESC
-      LIMIT 1";
+$query = "SELECT year(tilikausi_alku) y, month(tilikausi_alku) m
+          FROM tilikaudet
+          WHERE yhtio        = '{$kukarow['yhtio']}'
+          AND tilikausi_alku < now()
+          ORDER BY tilikausi_alku DESC
+          LIMIT 1";
 $result = pupe_query($query);
 $tilikausi = mysql_fetch_assoc($result);
 
@@ -75,40 +75,40 @@ echo "<br>";
 if ($tee != '') {
 
   // myynnit
-  $query = "  SELECT tilausrivin_lisatiedot.positio myyja,
-        ifnull(kuka.nimi, 'Ö-muu') nimi,
-        date_format(tilausrivi.laskutettuaika,'%Y/%m') kausi,
-        round(sum(tilausrivi.rivihinta),0) summa
-        FROM lasku use index (yhtio_tila_tapvm)
-        JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'L')
-        JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-        LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = tilausrivin_lisatiedot.positio)
-        WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-        and lasku.tila    = 'L'
-        and lasku.alatila = 'X'
-        and lasku.tapvm >= '$pvmalku'
-        and lasku.tapvm <= '$pvmloppu'
-        GROUP BY myyja, nimi, kausi
-        HAVING summa <> 0";
+  $query = "SELECT tilausrivin_lisatiedot.positio myyja,
+            ifnull(kuka.nimi, 'Ö-muu') nimi,
+            date_format(tilausrivi.laskutettuaika,'%Y/%m') kausi,
+            round(sum(tilausrivi.rivihinta),0) summa
+            FROM lasku use index (yhtio_tila_tapvm)
+            JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'L')
+            JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = tilausrivin_lisatiedot.positio)
+            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+            and lasku.tila    = 'L'
+            and lasku.alatila = 'X'
+            and lasku.tapvm   >= '$pvmalku'
+            and lasku.tapvm   <= '$pvmloppu'
+            GROUP BY myyja, nimi, kausi
+            HAVING summa <> 0";
 
 
   if ($toimitetut  != '') {
 
     $query_ale_lisa = generoi_alekentta('M');
 
-    $query2 = "  SELECT tilausrivin_lisatiedot.positio myyja,
-          ifnull(kuka.nimi, 'Ö-muu') nimi,
-          date_format(now(),'%Y/%m') kausi,
-          round(sum(round((tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)) * tilausrivi.varattu * {$query_ale_lisa}, $yhtiorow[hintapyoristys])),0) summa
-          FROM lasku
-          JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'L')
-          JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-          LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = tilausrivin_lisatiedot.positio)
-          WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-          and lasku.tila    = 'L'
-          and lasku.alatila = 'D'
-          GROUP BY myyja, nimi, kausi
-          HAVING summa <> 0";
+    $query2 = "SELECT tilausrivin_lisatiedot.positio myyja,
+               ifnull(kuka.nimi, 'Ö-muu') nimi,
+               date_format(now(),'%Y/%m') kausi,
+               round(sum(round((tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)) * tilausrivi.varattu * {$query_ale_lisa}, $yhtiorow[hintapyoristys])),0) summa
+               FROM lasku
+               JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'L')
+               JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+               LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = tilausrivin_lisatiedot.positio)
+               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+               and lasku.tila    = 'L'
+               and lasku.alatila = 'D'
+               GROUP BY myyja, nimi, kausi
+               HAVING summa <> 0";
 
     $query = "($query) UNION ($query2)";
 

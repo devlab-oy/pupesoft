@@ -18,12 +18,12 @@ if (!isset($tee))      $tee = "";
 
 if ($tee == 'PAIVITAMYYJA' and (int) $tunnus > 0 and (int) $myyja > 0) {
 
-  $query = "  UPDATE lasku
-        SET myyja = '$myyja'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tunnus  = '$tunnus'
-        and tila   = 'L'
-        and alatila = 'X'";
+  $query = "UPDATE lasku
+            SET myyja = '$myyja'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tunnus  = '$tunnus'
+            and tila    = 'L'
+            and alatila = 'X'";
   pupe_query($query);
 
   die("Myyjä päivitetty!");
@@ -31,10 +31,10 @@ if ($tee == 'PAIVITAMYYJA' and (int) $tunnus > 0 and (int) $myyja > 0) {
 
 if ($tee == 'PAIVITARIVIMYYJA' and (int) $rivitunnus > 0 and $myyja != "") {
 
-  $query = "  UPDATE tilausrivin_lisatiedot
-        SET positio = '$myyja'
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tilausrivitunnus = '$rivitunnus'";
+  $query = "UPDATE tilausrivin_lisatiedot
+            SET positio = '$myyja'
+            WHERE yhtio          = '{$kukarow['yhtio']}'
+            and tilausrivitunnus = '$rivitunnus'";
   pupe_query($query);
 
   die("Myyjä päivitetty!");
@@ -85,10 +85,10 @@ echo "<tr><th>".t("Näytä vain ne josta myyjä puuttuu")."</th>
 echo "</tr>";
 
 
-$query = "  SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
-      FROM kuka
-      WHERE kuka.yhtio = '$kukarow[yhtio]'
-      ORDER BY kuka.nimi";
+$query = "SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+          FROM kuka
+          WHERE kuka.yhtio = '$kukarow[yhtio]'
+          ORDER BY kuka.nimi";
 $myyjares = pupe_query($query);
 
 echo "<tr><th>".t("Näytä vain myyjän tilaukset")."</th><td colspan='3'><select name='laskumyyja'>";
@@ -136,27 +136,27 @@ if ($laskumyyja != "") {
   $lasmylis = " AND lasku.myyja = $laskumyyja ";
 }
 
-$query = "  SELECT
-      lasku.tunnus,
-      lasku.laskunro,
-      concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas,
-      lasku.summa,
-      lasku.viesti tilausviite,
-      $rivilisa
-      lasku.myyja,
-      kuka.nimi
-      FROM lasku
-      $rivijoin
-      LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
-      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-      and lasku.tila     = 'L'
-      and lasku.alatila = 'X'
-      and lasku.tapvm  >= '$vva-$kka-$ppa'
-      and lasku.tapvm  <= '$vvl-$kkl-$ppl'
-      {$soplisa}
-      {$puuttuvatlisa}
-      {$lasmylis}
-      ORDER BY 1";
+$query = "SELECT
+          lasku.tunnus,
+          lasku.laskunro,
+          concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas,
+          lasku.summa,
+          lasku.viesti tilausviite,
+          $rivilisa
+          lasku.myyja,
+          kuka.nimi
+          FROM lasku
+          $rivijoin
+          LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
+          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+          and lasku.tila    = 'L'
+          and lasku.alatila = 'X'
+          and lasku.tapvm   >= '$vva-$kka-$ppa'
+          and lasku.tapvm   <= '$vvl-$kkl-$ppl'
+          {$soplisa}
+          {$puuttuvatlisa}
+          {$lasmylis}
+          ORDER BY 1";
 $result = pupe_query($query);
 
 echo "<input type='submit' value='".t("Näytä tilaukset")."'>";
@@ -165,18 +165,18 @@ echo "</form><br><br>";
 if (mysql_num_rows($result) > 0) {
 
   if ($riveittain != "") {
-    $query = "  SELECT selite, selitetark
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND laji    = 'TRIVITYYPPI'
-           ORDER BY selitetark";
+    $query = "SELECT selite, selitetark
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND laji    = 'TRIVITYYPPI'
+               ORDER BY selitetark";
     $myyjares = pupe_query($query);
   }
   else {
-    $query = "  SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
-          FROM kuka
-          WHERE kuka.yhtio = '$kukarow[yhtio]'
-          ORDER BY kuka.nimi";
+    $query = "SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+              FROM kuka
+              WHERE kuka.yhtio = '$kukarow[yhtio]'
+              ORDER BY kuka.nimi";
     $myyjares = pupe_query($query);
   }
 
@@ -226,12 +226,12 @@ if (mysql_num_rows($result) > 0) {
       echo "{$row['rivikommetti']}";
     }
     else {
-      $query = "  SELECT DISTINCT kommentti
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND otunnus = '$row[tunnus]'
-            and tyyppi  = 'L'
-            AND kommentti != ''";
+      $query = "SELECT DISTINCT kommentti
+                FROM tilausrivi
+                WHERE yhtio    = '$kukarow[yhtio]'
+                AND otunnus    = '$row[tunnus]'
+                and tyyppi     = 'L'
+                AND kommentti != ''";
       $kommres = pupe_query($query);
 
       while ($kommrow = mysql_fetch_assoc($kommres)) {

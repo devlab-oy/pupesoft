@@ -40,12 +40,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
         $ikustp[$maara] = (int) substr($rivi,228,5);
 
         // Etsit‰‰‰n vastaava kustannuspaikka
-        $query = "  SELECT tunnus
-              FROM kustannuspaikka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tyyppi = 'P'
-              and kaytossa != 'E'
-              and nimi = '$ikustp[$maara]'";
+        $query = "SELECT tunnus
+                  FROM kustannuspaikka
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and tyyppi    = 'P'
+                  and kaytossa != 'E'
+                  and nimi      = '$ikustp[$maara]'";
         $result = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($result) == 1) {
@@ -73,12 +73,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
       $ikustp[$maara]  = 0;
 
       if ($ikustp_tsk != "") {
-        $query = "  SELECT tunnus
-              FROM kustannuspaikka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tyyppi = 'K'
-              and kaytossa != 'E'
-              and nimi = '$ikustp_tsk'";
+        $query = "SELECT tunnus
+                  FROM kustannuspaikka
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and tyyppi    = 'K'
+                  and kaytossa != 'E'
+                  and nimi      = '$ikustp_tsk'";
         $ikustpres = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($ikustpres) == 1) {
@@ -88,12 +88,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
       }
 
       if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
-        $query = "  SELECT tunnus
-              FROM kustannuspaikka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tyyppi = 'K'
-              and kaytossa != 'E'
-              and koodi = '$ikustp_tsk'";
+        $query = "SELECT tunnus
+                  FROM kustannuspaikka
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and tyyppi    = 'K'
+                  and kaytossa != 'E'
+                  and koodi     = '$ikustp_tsk'";
         $ikustpres = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($ikustpres) == 1) {
@@ -106,12 +106,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
         $ikustp_tsk = (int) $ikustp_tsk;
 
-        $query = "  SELECT tunnus
-              FROM kustannuspaikka
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tyyppi = 'K'
-              and kaytossa != 'E'
-              and tunnus = '$ikustp_tsk'";
+        $query = "SELECT tunnus
+                  FROM kustannuspaikka
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and tyyppi    = 'K'
+                  and kaytossa != 'E'
+                  and tunnus    = '$ikustp_tsk'";
         $ikustpres = mysql_query($query) or pupe_error($query);
 
         if (mysql_num_rows($ikustpres) == 1) {
@@ -167,12 +167,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
           $tsk = "";
 
           if ($tsk_nimi != "") {
-            $query = "  SELECT tunnus
-                  FROM kustannuspaikka
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tyyppi = '$tsk_tyyppi'
-                  and kaytossa != 'E'
-                  and nimi = '$tsk_nimi'";
+            $query = "SELECT tunnus
+                      FROM kustannuspaikka
+                      WHERE yhtio   = '$kukarow[yhtio]'
+                      and tyyppi    = '$tsk_tyyppi'
+                      and kaytossa != 'E'
+                      and nimi      = '$tsk_nimi'";
             $tskres = mysql_query($query) or pupe_error($query);
 
             if (mysql_num_rows($tskres) == 1) {
@@ -182,12 +182,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
           }
 
           if ($tsk_nimi != "" and $tsk == 0) {
-            $query = "  SELECT tunnus
-                  FROM kustannuspaikka
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tyyppi = '$tsk_tyyppi'
-                  and kaytossa != 'E'
-                  and koodi = '$tsk_nimi'";
+            $query = "SELECT tunnus
+                      FROM kustannuspaikka
+                      WHERE yhtio   = '$kukarow[yhtio]'
+                      and tyyppi    = '$tsk_tyyppi'
+                      and kaytossa != 'E'
+                      and koodi     = '$tsk_nimi'";
             $tskres = mysql_query($query) or pupe_error($query);
 
             if (mysql_num_rows($tskres) == 1) {
@@ -200,12 +200,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
             $tsk_nimi = (int) $tsk_nimi;
 
-            $query = "  SELECT tunnus
-                  FROM kustannuspaikka
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tyyppi = '$tsk_tyyppi'
-                  and kaytossa != 'E'
-                  and tunnus = '$tsk_nimi'";
+            $query = "SELECT tunnus
+                      FROM kustannuspaikka
+                      WHERE yhtio   = '$kukarow[yhtio]'
+                      and tyyppi    = '$tsk_tyyppi'
+                      and kaytossa != 'E'
+                      and tunnus    = '$tsk_nimi'";
             $tskres = mysql_query($query) or pupe_error($query);
 
             if (mysql_num_rows($tskres) == 1) {

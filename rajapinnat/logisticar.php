@@ -141,28 +141,28 @@ function nimike($limit = '') {
 
   echo "Tuotteet ...";
 
-  $query = "  SELECT
-        tuote.tuoteno      nimiketunnus,
-        tuote.nimitys      nimitys,
-        tuote.yksikko      yksikko,
-        tuote.try        tuoteryhma,
-        avainsana.selitetark  tuoteryhma_nimi,
-        tuote.kustp        kustannuspaikka,
-        ''            toimittajatunnus,
-        '0'            varastotunnus,
-        '0'            toimittajannimiketunnus,
-        '1'            hintayksikko,
-        if(tuote.status = 'T', '0', '1') varastoimiskoodi,
-        tuote.tuotetyyppi    nimikelaji,
-        kuka.kuka        ostaja,
-        tuote.tuotemassa    paino,
-        tuote.status      status
-        FROM tuote
-        LEFT JOIN avainsana ON (avainsana.selite = tuote.try AND avainsana.yhtio = tuote.yhtio)
-        LEFT JOIN kuka ON (kuka.myyja = tuote.ostajanro AND kuka.yhtio = tuote.yhtio AND kuka.myyja > 0)
-        WHERE tuote.yhtio = '$yhtio'
-        AND tuote.tuotetyyppi NOT IN ('A','B')
-        $limit";
+  $query = "SELECT
+            tuote.tuoteno      nimiketunnus,
+            tuote.nimitys      nimitys,
+            tuote.yksikko      yksikko,
+            tuote.try        tuoteryhma,
+            avainsana.selitetark  tuoteryhma_nimi,
+            tuote.kustp        kustannuspaikka,
+            ''            toimittajatunnus,
+            '0'            varastotunnus,
+            '0'            toimittajannimiketunnus,
+            '1'            hintayksikko,
+            if(tuote.status = 'T', '0', '1') varastoimiskoodi,
+            tuote.tuotetyyppi    nimikelaji,
+            kuka.kuka        ostaja,
+            tuote.tuotemassa    paino,
+            tuote.status      status
+            FROM tuote
+            LEFT JOIN avainsana ON (avainsana.selite = tuote.try AND avainsana.yhtio = tuote.yhtio)
+            LEFT JOIN kuka ON (kuka.myyja = tuote.ostajanro AND kuka.yhtio = tuote.yhtio AND kuka.myyja > 0)
+            WHERE tuote.yhtio     = '$yhtio'
+            AND tuote.tuotetyyppi NOT IN ('A','B')
+            $limit";
   $rest = pupe_query($query);
   $rows = mysql_num_rows($rest);
 
@@ -199,22 +199,22 @@ function nimike($limit = '') {
     // mones tämä on
     $row++;
 
-    $query = "  SELECT
-          liitostunnus toimittajatunnus,
-          toim_tuoteno toimittajannimiketunnus
-          FROM tuotteen_toimittajat
-          WHERE tuoteno = '{$tuote['nimiketunnus']}'
-          AND yhtio = '$yhtio'
-          LIMIT 1";
+    $query = "SELECT
+              liitostunnus toimittajatunnus,
+              toim_tuoteno toimittajannimiketunnus
+              FROM tuotteen_toimittajat
+              WHERE tuoteno = '{$tuote['nimiketunnus']}'
+              AND yhtio     = '$yhtio'
+              LIMIT 1";
     $tuot_toim_res = pupe_query($query);
     $tuot_toim_row = mysql_fetch_assoc($tuot_toim_res);
 
-    $query = "  SELECT hyllyalue, hyllynro
-          FROM tuotepaikat
-          WHERE tuoteno = '{$tuote['nimiketunnus']}'
-          AND oletus != ''
-          AND yhtio = '$yhtio'
-          LIMIT 1";
+    $query = "SELECT hyllyalue, hyllynro
+              FROM tuotepaikat
+              WHERE tuoteno  = '{$tuote['nimiketunnus']}'
+              AND oletus    != ''
+              AND yhtio      = '$yhtio'
+              LIMIT 1";
     $res = pupe_query($query);
     $paikka = mysql_fetch_assoc($res);
 
@@ -243,15 +243,15 @@ function asiakas($limit = '') {
 
   echo "Asiakkaat...";
 
-  $query = "  SELECT
-        asiakas.tunnus    asiakastunnus,
-        concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
-        asiakas.ryhma    asiakasryhma,
-        kuka.kuka       myyjatunnus
-        FROM asiakas
-        LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
-        where asiakas.yhtio='$yhtio'
-        $limit";
+  $query = "SELECT
+            asiakas.tunnus    asiakastunnus,
+            concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
+            asiakas.ryhma    asiakasryhma,
+            kuka.kuka       myyjatunnus
+            FROM asiakas
+            LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
+            where asiakas.yhtio='$yhtio'
+            $limit";
   $rest = pupe_query($query);
 
   $rows = mysql_num_rows($rest);
@@ -296,12 +296,12 @@ function toimittaja($limit = '') {
 
   echo "Toimittajat...";
 
-  $query = "  SELECT
-        tunnus              toimittajatunnus,
-        concat_ws(' ', nimi, nimitark)  toimittajannimi
-        from toimi
-        where yhtio='$yhtio'
-        $limit";
+  $query = "SELECT
+            tunnus              toimittajatunnus,
+            concat_ws(' ', nimi, nimitark)  toimittajannimi
+            from toimi
+            where yhtio='$yhtio'
+            $limit";
   $rest = pupe_query($query);
 
   $rows = mysql_num_rows($rest);
@@ -345,26 +345,26 @@ function varasto($limit = '') {
 
   $fp = fopen($path_varasto, 'w+');
 
-  $query = "  SELECT
-        tuotepaikat.tuoteno nimiketunnus,
-        sum(tuotepaikat.saldo) saldo,
-        tuote.kehahin keskihinta,
-        '0' tilattu,
-        '0' varattu,
-        varastopaikat.tunnus varastotunnus,
-        (SELECT tuotteen_toimittajat.toimitusaika FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = '$yhtio' AND tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno AND tuotteen_toimittajat.toimitusaika != '' LIMIT 1) toimitusaika
-        FROM tuotepaikat
-        LEFT JOIN varastopaikat ON
-        concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-        concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-        and varastopaikat.yhtio=tuotepaikat.yhtio
-        JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio
-        WHERE tuote.ei_saldoa = ''
-        AND tuotepaikat.yhtio = '$yhtio'
-        $where_logisticar[varasto_1]
-        GROUP BY 1,3,4,5,6,7
-        ORDER BY 1
-        $limit";
+  $query = "SELECT
+            tuotepaikat.tuoteno nimiketunnus,
+            sum(tuotepaikat.saldo) saldo,
+            tuote.kehahin keskihinta,
+            '0' tilattu,
+            '0' varattu,
+            varastopaikat.tunnus varastotunnus,
+            (SELECT tuotteen_toimittajat.toimitusaika FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = '$yhtio' AND tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno AND tuotteen_toimittajat.toimitusaika != '' LIMIT 1) toimitusaika
+            FROM tuotepaikat
+            LEFT JOIN varastopaikat ON
+            concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+            concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+            and varastopaikat.yhtio=tuotepaikat.yhtio
+            JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio
+            WHERE tuote.ei_saldoa = ''
+            AND tuotepaikat.yhtio = '$yhtio'
+            $where_logisticar[varasto_1]
+            GROUP BY 1,3,4,5,6,7
+            ORDER BY 1
+            $limit";
   $res = pupe_query($query);
 
   $rows = mysql_num_rows($res);
@@ -390,14 +390,14 @@ function varasto($limit = '') {
   while ($trow = mysql_fetch_assoc($res)) {
     $row++;
 
-    $query = "  SELECT
-          sum(if(tilausrivi.tyyppi='O', tilausrivi.varattu, 0)) tilattu,
-          sum(if((tilausrivi.tyyppi='L' or tilausrivi.tyyppi='V') and tilausrivi.var $lisavarattu, tilausrivi.varattu, 0)) varattu
-          FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-          WHERE yhtio = '$yhtio'
-           and tyyppi in ('L','V','O','G')
-          and tuoteno = '{$trow['nimiketunnus']}'
-          and laskutettuaika = '0000-00-00'";
+    $query = "SELECT
+              sum(if(tilausrivi.tyyppi='O', tilausrivi.varattu, 0)) tilattu,
+              sum(if((tilausrivi.tyyppi='L' or tilausrivi.tyyppi='V') and tilausrivi.var $lisavarattu, tilausrivi.varattu, 0)) varattu
+              FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+              WHERE yhtio        = '$yhtio'
+               and tyyppi        in ('L','V','O','G')
+              and tuoteno        = '{$trow['nimiketunnus']}'
+              and laskutettuaika = '0000-00-00'";
     $result = pupe_query($query);
     $ennp = mysql_fetch_assoc($result);
 
@@ -438,40 +438,40 @@ function varastotapahtumat($limit = '') {
     $pvmlisa = " and date_format(tapahtuma.laadittu, '%Y-%m-%d') > '0000-00-00 00:00:00' ";
   }
 
-  $query = "  SELECT
-        tapahtuma.tuoteno       nimiketunnus,
-        if(tapahtuma.laji = 'siirto', lasku.clearing, lasku.liitostunnus) asiakastunnus,
-        if(tapahtuma.laji = 'siirto', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
-        date_format(tapahtuma.laadittu, '%Y-%m-%d') tapahtumapaiva,
-        tapahtuma.laji             tapahtumalaji,
-        (tapahtuma.kplhinta * tapahtuma.kpl * -1) myyntiarvo,
-        (tapahtuma.kplhinta * tapahtuma.kpl * -1) ostoarvo,
-        (tapahtuma.kpl * (tapahtuma.kplhinta - tapahtuma.hinta) * -1) kate,
-        tapahtuma.kpl         tapahtumamaara,
-        lasku.laskunro              laskunumero,
-        kuka.kuka                  myyjatunnus,
-        lasku.yhtio_toimipaikka    toimipaikka,
-        varastopaikat.tunnus        varastotunnus,
-        tapahtuma.laji        tapahtumatyyppi
-        FROM tapahtuma
-        LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
-        LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-        LEFT JOIN tuotepaikat USE INDEX (yhtio_tuoteno_paikka) ON (  tuotepaikat.yhtio    = tapahtuma.yhtio and
-                                      tuotepaikat.tuoteno   = tapahtuma.tuoteno and
-                                      tuotepaikat.hyllyvali   = tapahtuma.hyllyvali and
-                                      tuotepaikat.hyllytaso   = tapahtuma.hyllytaso and
-                                      tuotepaikat.hyllyalue   = tapahtuma.hyllyalue and
-                                      tuotepaikat.hyllynro   = tapahtuma.hyllynro)
-        LEFT JOIN varastopaikat ON
-        concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-        concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-        and varastopaikat.yhtio = tuotepaikat.yhtio
-        LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
-        WHERE tapahtuma.laji in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus')
-        and tapahtuma.yhtio = '$yhtio'
-        $pvmlisa
-        ORDER BY tapahtumapaiva, nimiketunnus ASC
-        $limit";
+  $query = "SELECT
+            tapahtuma.tuoteno       nimiketunnus,
+            if(tapahtuma.laji = 'siirto', lasku.clearing, lasku.liitostunnus) asiakastunnus,
+            if(tapahtuma.laji = 'siirto', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
+            date_format(tapahtuma.laadittu, '%Y-%m-%d') tapahtumapaiva,
+            tapahtuma.laji             tapahtumalaji,
+            (tapahtuma.kplhinta * tapahtuma.kpl * -1) myyntiarvo,
+            (tapahtuma.kplhinta * tapahtuma.kpl * -1) ostoarvo,
+            (tapahtuma.kpl * (tapahtuma.kplhinta - tapahtuma.hinta) * -1) kate,
+            tapahtuma.kpl         tapahtumamaara,
+            lasku.laskunro              laskunumero,
+            kuka.kuka                  myyjatunnus,
+            lasku.yhtio_toimipaikka    toimipaikka,
+            varastopaikat.tunnus        varastotunnus,
+            tapahtuma.laji        tapahtumatyyppi
+            FROM tapahtuma
+            LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
+            LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+            LEFT JOIN tuotepaikat USE INDEX (yhtio_tuoteno_paikka) ON (  tuotepaikat.yhtio    = tapahtuma.yhtio and
+                                          tuotepaikat.tuoteno   = tapahtuma.tuoteno and
+                                          tuotepaikat.hyllyvali = tapahtuma.hyllyvali and
+                                          tuotepaikat.hyllytaso = tapahtuma.hyllytaso and
+                                          tuotepaikat.hyllyalue = tapahtuma.hyllyalue and
+                                          tuotepaikat.hyllynro  = tapahtuma.hyllynro)
+            LEFT JOIN varastopaikat ON
+            concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+            concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+            and varastopaikat.yhtio                             = tuotepaikat.yhtio
+            LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
+            WHERE tapahtuma.laji                                in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus')
+            and tapahtuma.yhtio                                 = '$yhtio'
+            $pvmlisa
+            ORDER BY tapahtumapaiva, nimiketunnus ASC
+            $limit";
     $res = pupe_query($query);
 
   $rows = mysql_num_rows($res);
@@ -589,37 +589,37 @@ function myynti($limit = '') {
 
   $query_ale_lisa = generoi_alekentta('M');
 
-    $query = "  SELECT
-        tilausrivi.tuoteno nimiketunnus,
-        lasku.liitostunnus asiakastunnus,
-        lasku.liitostunnus toimitusasiakas,
-        if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) asiakastunnus,
-        if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
-        tilausrivi.toimaika toimituspaiva,
-        tilausrivi.tyyppi tapahtumalaji,
-        round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) myyntiarvo,
-        (tilausrivi.varattu+tilausrivi.jt) * tuote.kehahin ostoarvo,
-        tilausrivi.varattu tapahtumamaara,
-        lasku.tunnus tilausnro,
-        kuka.kuka myyjatunnus,
-        lasku.yhtio_toimipaikka  toimipaikka,
-        varastopaikat.tunnus varastotunnus,
-        tilausrivi.toimitettu
-        FROM tilausrivi
-        JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
-        JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
-        JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
-        JOIN varastopaikat ON
-        concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-        concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-        and varastopaikat.yhtio=tuotepaikat.yhtio
-        LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
-        WHERE tilausrivi.varattu != 0
-        AND tilausrivi.tyyppi IN ('L','O','G')
-        AND tilausrivi.laskutettuaika = '0000-00-00'
-        AND tilausrivi.yhtio = '$yhtio'
-        ORDER BY tilausrivi.laadittu
-        $limit";
+    $query = "SELECT
+              tilausrivi.tuoteno nimiketunnus,
+              lasku.liitostunnus asiakastunnus,
+              lasku.liitostunnus toimitusasiakas,
+              if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) asiakastunnus,
+              if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
+              tilausrivi.toimaika toimituspaiva,
+              tilausrivi.tyyppi tapahtumalaji,
+              round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) myyntiarvo,
+              (tilausrivi.varattu+tilausrivi.jt) * tuote.kehahin ostoarvo,
+              tilausrivi.varattu tapahtumamaara,
+              lasku.tunnus tilausnro,
+              kuka.kuka myyjatunnus,
+              lasku.yhtio_toimipaikka  toimipaikka,
+              varastopaikat.tunnus varastotunnus,
+              tilausrivi.toimitettu
+              FROM tilausrivi
+              JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
+              JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
+              JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
+              JOIN varastopaikat ON
+              concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+              concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+              and varastopaikat.yhtio=tuotepaikat.yhtio
+              LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
+              WHERE tilausrivi.varattu      != 0
+              AND tilausrivi.tyyppi          IN ('L','O','G')
+              AND tilausrivi.laskutettuaika  = '0000-00-00'
+              AND tilausrivi.yhtio           = '$yhtio'
+              ORDER BY tilausrivi.laadittu
+              $limit";
   $res = pupe_query($query);
 
   $rows = mysql_num_rows($res);

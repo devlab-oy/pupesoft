@@ -11,10 +11,10 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
       $tem_tuoteno_i = $i;
 
       if ($tem_tuoteno != '') {
-        $query = "  SELECT tuoteno
-              FROM tuote
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tuoteno = '$t[$i]'";
+        $query = "SELECT tuoteno
+                  FROM tuote
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tuoteno = '$t[$i]'";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 1) {
@@ -81,11 +81,11 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 
       if ($tem_laji == "SISTOIMITTAJA") {
         // salitaan vaan konserniyhtiö joka ei ole me itse
-        $query = "  SELECT *
-              FROM yhtio
-              WHERE yhtio  = '$t[$i]'
-              and konserni = '$yhtiorow[konserni]'
-              and yhtio   != '$kukarow[yhtio]'";
+        $query = "SELECT *
+                  FROM yhtio
+                  WHERE yhtio   = '$t[$i]'
+                  and konserni  = '$yhtiorow[konserni]'
+                  and yhtio    != '$kukarow[yhtio]'";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {
@@ -100,13 +100,13 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 
       // jos kyseessä on tuotteen parametri
       if (substr(strtoupper($tem_laji), 0, 10) == "PARAMETRI_") {
-        $query = "  SELECT tunnus
-              from tuotteen_avainsanat
-              where yhtio = '$kukarow[yhtio]'
-              and laji   = '$tem_laji'
-              and kieli   = '$tem_kieli'
-              and tuoteno = '$tem_tuoteno'
-              and tunnus != '$tunnus'";
+        $query = "SELECT tunnus
+                  from tuotteen_avainsanat
+                  where yhtio  = '$kukarow[yhtio]'
+                  and laji     = '$tem_laji'
+                  and kieli    = '$tem_kieli'
+                  and tuoteno  = '$tem_tuoteno'
+                  and tunnus  != '$tunnus'";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) > 0) {
@@ -119,12 +119,12 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
         $variaatiot = explode(",", $t[$i]);
 
         foreach ($variaatiot as $variaatio) {
-          $query = "  SELECT tunnus
-                from tuotteen_avainsanat
-                where yhtio = '$kukarow[yhtio]'
-                and kieli   = '$yhtiorow[kieli]'
-                and laji   = 'parametri_$variaatio'
-                and tuoteno = '$tem_tuoteno'";
+          $query = "SELECT tunnus
+                    from tuotteen_avainsanat
+                    where yhtio = '$kukarow[yhtio]'
+                    and kieli   = '$yhtiorow[kieli]'
+                    and laji    = 'parametri_$variaatio'
+                    and tuoteno = '$tem_tuoteno'";
           $sresult = pupe_query($query);
 
           if (mysql_num_rows($sresult) != 1) {
@@ -139,17 +139,17 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 
     if (mysql_field_name($result, $i) == 'tunnus') {
 
-      $query = "  SELECT tunnus
-            FROM tuotteen_avainsanat
-            WHERE yhtio   = '$kukarow[yhtio]'
-            AND tuoteno     = '$tem_tuoteno'
-            AND kieli     = '$tem_kieli'
-            AND laji      = '$tem_laji'
-            AND selite      = '$tem_selite'
-            AND selitetark   = '$tem_selitetark'
-            AND status      = '$tem_status'
-            AND nakyvyys   = '$tem_nakyvyys'
-            and tunnus     != '$tunnus'";
+      $query = "SELECT tunnus
+                FROM tuotteen_avainsanat
+                WHERE yhtio     = '$kukarow[yhtio]'
+                AND tuoteno     = '$tem_tuoteno'
+                AND kieli       = '$tem_kieli'
+                AND laji        = '$tem_laji'
+                AND selite      = '$tem_selite'
+                AND selitetark  = '$tem_selitetark'
+                AND status      = '$tem_status'
+                AND nakyvyys    = '$tem_nakyvyys'
+                and tunnus     != '$tunnus'";
       $results = pupe_query($query);
 
       if (mysql_num_rows($results) > 0) {

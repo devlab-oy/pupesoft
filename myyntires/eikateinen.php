@@ -130,10 +130,10 @@ $kentta = "laskuno";
 function hae_maksuehto($maksuehto) {
   global $kukarow;
 
-  $query = "  SELECT *
-        FROM maksuehto
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus = '$maksuehto'";
+  $query = "SELECT *
+            FROM maksuehto
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$maksuehto'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -148,10 +148,10 @@ function hae_maksuehto($maksuehto) {
 function hae_lasku($tunnus) {
   global $kukarow;
 
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus = '$tunnus'";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$tunnus'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -166,10 +166,10 @@ function hae_lasku($tunnus) {
 function hae_asiakas($laskurow) {
   global $kukarow;
 
-  $query = "  SELECT konserniyhtio
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        and tunnus = '{$laskurow['liitostunnus']}'";
+  $query = "SELECT konserniyhtio
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and tunnus  = '{$laskurow['liitostunnus']}'";
   $konsres = pupe_query($query);
 
   return mysql_fetch_assoc($konsres);
@@ -179,14 +179,14 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
   global $kukarow, $yhtiorow;
 
   if ($params['toim'] == 'KATEINEN') {
-    $query   = "  UPDATE lasku set
-            erpcm      = '{$params['tapahtumapaiva']}',
-            mapvm      = '{$params['tapahtumapaiva']}',
-            maksuehto  = '{$params['maksuehto']}',
-            kassalipas = '{$params['kassalipas']}',
-            kasumma    = 0
-            where yhtio = '{$kukarow['yhtio']}'
-            and tunnus  = '{$params['tunnus']}'";
+    $query   = "UPDATE lasku set
+                erpcm       = '{$params['tapahtumapaiva']}',
+                mapvm       = '{$params['tapahtumapaiva']}',
+                maksuehto   = '{$params['maksuehto']}',
+                kassalipas  = '{$params['kassalipas']}',
+                kasumma     = 0
+                where yhtio = '{$kukarow['yhtio']}'
+                and tunnus  = '{$params['tunnus']}'";
     $result = pupe_query($query);
 
     echo "<font class='message'>".t("Muutettin laskun")." {$params['laskurow']['laskunro']} ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")."!</font><br>";
@@ -216,15 +216,15 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
     }
 
     // päivitetään lasku
-    $query = "  UPDATE lasku set
-          mapvm      = '',
-          maksuehto  = '{$params['maksuehto']}',
-          erpcm      = $erapvm,
-          kapvm      = $kassa_erapvm,
-          kasumma    = '$kassa_loppusumma',
-          kassalipas = 0
-          where yhtio = '$kukarow[yhtio]'
-          and tunnus  = '{$params['tunnus']}'";
+    $query = "UPDATE lasku set
+              mapvm       = '',
+              maksuehto   = '{$params['maksuehto']}',
+              erpcm       = $erapvm,
+              kapvm       = $kassa_erapvm,
+              kasumma     = '$kassa_loppusumma',
+              kassalipas  = 0
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  = '{$params['tunnus']}'";
     $result = pupe_query($query);
 
     if (mysql_affected_rows() > 0) {
@@ -250,10 +250,10 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 
 function hae_kassalipas($kassalipas_tunnus) {
   global $kukarow;
-  $query = "  SELECT *
-        FROM kassalipas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$kassalipas_tunnus}'";
+  $query = "SELECT *
+            FROM kassalipas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$kassalipas_tunnus}'";
 
   $result = pupe_query($query);
 
@@ -274,14 +274,14 @@ function tee_kirjanpito_muutokset($params) {
     $tapvmlisa = "";
   }
 
-  $query = "  SELECT tunnus, summa
-        FROM tiliointi
-        WHERE yhtio   = '$kukarow[yhtio]'
-        AND ltunnus   = '{$params['tunnus']}'
-        AND tilino   IN {$vanhatili}
-        AND korjattu = ''
-        ORDER BY tapvm DESC, tunnus DESC
-        LIMIT 1";
+  $query = "SELECT tunnus, summa
+            FROM tiliointi
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND ltunnus  = '{$params['tunnus']}'
+            AND tilino   IN {$vanhatili}
+            AND korjattu = ''
+            ORDER BY tapvm DESC, tunnus DESC
+            LIMIT 1";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -297,13 +297,13 @@ function tee_kirjanpito_muutokset($params) {
       $summalisa = "summa";
     }
 
-    $query = "  UPDATE tiliointi
-          SET summa   = {$summalisa} * -1,
-          laatija   = '{$kukarow['kuka']}',
-          laadittu   = now()
-          {$tapvmlisa}
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and tunnus  = '{$tilid}'";
+    $query = "UPDATE tiliointi
+              SET summa   = {$summalisa} * -1,
+              laatija     = '{$kukarow['kuka']}',
+              laadittu    = now()
+              {$tapvmlisa}
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '{$tilid}'";
     $result = pupe_query($query);
 
     // Kopsataan alkuperäinen ja päivitetään siille uudet tiedot
@@ -318,15 +318,15 @@ function tee_kirjanpito_muutokset($params) {
       $summalisa = $vanharow['summa'];
     }
 
-    $query = "  UPDATE tiliointi
-          SET tilino   = '{$uusitili}',
-          summa     = '{$summalisa}',
-          laatija   = '{$kukarow['kuka']}',
-          laadittu   = now()
-          {$tapvmlisa}
-          {$kustplisa}
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and tunnus  = '{$tilid}'";
+    $query = "UPDATE tiliointi
+              SET tilino   = '{$uusitili}',
+              summa       = '{$summalisa}',
+              laatija     = '{$kukarow['kuka']}',
+              laadittu    = now()
+              {$tapvmlisa}
+              {$kustplisa}
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '{$tilid}'";
     $result = pupe_query($query);
 
     if (mysql_affected_rows() > 0) {
@@ -347,10 +347,10 @@ function tee_kirjanpito_muutokset($params) {
       }
     }
 
-    $query = "  UPDATE lasku SET
-          saldo_maksettu = {$summalisa}
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$params['laskurow']['tunnus']}'";
+    $query = "UPDATE lasku SET
+              saldo_maksettu = {$summalisa}
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND tunnus     = '{$params['laskurow']['tunnus']}'";
     $updres = pupe_query($query);
   }
 }
@@ -358,13 +358,13 @@ function tee_kirjanpito_muutokset($params) {
 function yliviivaa_alet_ja_pyoristykset($tunnus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE tiliointi
-        SET korjattu = '$kukarow[kuka]',
-        korjausaika  = now()
-        where yhtio = '$kukarow[yhtio]'
-        and ltunnus = '$tunnus'
-        and tilino  IN ('$yhtiorow[myynninkassaale]', '$yhtiorow[pyoristys]')
-        and korjattu = ''";
+  $query = "UPDATE tiliointi
+            SET korjattu = '$kukarow[kuka]',
+            korjausaika  = now()
+            where yhtio  = '$kukarow[yhtio]'
+            and ltunnus  = '$tunnus'
+            and tilino   IN ('$yhtiorow[myynninkassaale]', '$yhtiorow[pyoristys]')
+            and korjattu = ''";
   $result = pupe_query($query);
 
   if (mysql_affected_rows() > 0) {
@@ -375,31 +375,31 @@ function yliviivaa_alet_ja_pyoristykset($tunnus) {
 function tarkista_pyoristys_erotukset($laskurow, $tunnus) {
   global $kukarow , $yhtiorow;
 
-  $query = "  SELECT sum(summa) summa, sum(summa_valuutassa) summa_valuutassa
-        FROM tiliointi
-        WHERE yhtio  = '$kukarow[yhtio]'
-        AND ltunnus  = '$tunnus'
-        AND korjattu = ''";
+  $query = "SELECT sum(summa) summa, sum(summa_valuutassa) summa_valuutassa
+            FROM tiliointi
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND ltunnus  = '$tunnus'
+            AND korjattu = ''";
   $result = pupe_query($query);
   $check1 = mysql_fetch_assoc($result);
 
   if ($check1['summa'] != 0) {
-    $query = "  INSERT into tiliointi set
-          yhtio         = '$kukarow[yhtio]',
-          ltunnus       = '$tunnus',
-          tilino         = '$yhtiorow[pyoristys]',
-          kustp         = 0,
-          kohde         = 0,
-          projekti       = 0,
-          tapvm         = '$laskurow[tapvm]',
-          summa         = -1 * $check1[summa],
-          summa_valuutassa   = -1 * $check1[summa_valuutassa],
-          valkoodi      = '$laskurow[valkoodi]',
-          vero         = 0,
-          selite         = '".t("Pyöristysero")."',
-          lukko         = '',
-          laatija       = '$kukarow[kuka]',
-          laadittu       = now()";
+    $query = "INSERT into tiliointi set
+              yhtio            = '$kukarow[yhtio]',
+              ltunnus          = '$tunnus',
+              tilino           = '$yhtiorow[pyoristys]',
+              kustp            = 0,
+              kohde            = 0,
+              projekti         = 0,
+              tapvm            = '$laskurow[tapvm]',
+              summa            = -1 * $check1[summa],
+              summa_valuutassa = -1 * $check1[summa_valuutassa],
+              valkoodi         = '$laskurow[valkoodi]',
+              vero             = 0,
+              selite           = '".t("Pyöristysero")."',
+              lukko            = '',
+              laatija          = '$kukarow[kuka]',
+              laadittu         = now()";
     $laskutusres = pupe_query($query);
   }
 }
@@ -408,60 +408,60 @@ function hae_lasku2($laskuno, $toim) {
   global $kukarow;
 
   if ($toim == 'KATEINEN') {
-    $query = "  SELECT lasku.ytunnus,
-          lasku.liitostunnus,
-          lasku.*,
-          lasku.tunnus ltunnus,
-          maksuehto.tunnus,
-          maksuehto.teksti,
-          maksuehto.kateinen,
-          asiakas.ytunnus asiakas_ytunnus,
-          asiakas.nimi asiakas_nimi,
-          asiakas.nimitark asiakas_nimitark,
-          asiakas.osoite asiakas_osoite,
-          asiakas.postino asiakas_postino,
-          asiakas.postitp asiakas_postitp,
-          asiakas.toim_nimi asiakas_toim_nimi,
-          asiakas.toim_nimitark asiakas_toim_nimitark,
-          asiakas.toim_osoite asiakas_toim_osoite,
-          asiakas.toim_postino asiakas_toim_postino,
-          asiakas.toim_postitp asiakas_toim_postitp,
-          lasku.tapvm
-          FROM lasku
-          JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus)
-          JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-          WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-          AND  lasku.laskunro = '{$laskuno}'
-          AND lasku.tila     = 'U'
-          AND lasku.alatila  = 'X'";
+    $query = "SELECT lasku.ytunnus,
+              lasku.liitostunnus,
+              lasku.*,
+              lasku.tunnus ltunnus,
+              maksuehto.tunnus,
+              maksuehto.teksti,
+              maksuehto.kateinen,
+              asiakas.ytunnus asiakas_ytunnus,
+              asiakas.nimi asiakas_nimi,
+              asiakas.nimitark asiakas_nimitark,
+              asiakas.osoite asiakas_osoite,
+              asiakas.postino asiakas_postino,
+              asiakas.postitp asiakas_postitp,
+              asiakas.toim_nimi asiakas_toim_nimi,
+              asiakas.toim_nimitark asiakas_toim_nimitark,
+              asiakas.toim_osoite asiakas_toim_osoite,
+              asiakas.toim_postino asiakas_toim_postino,
+              asiakas.toim_postitp asiakas_toim_postitp,
+              lasku.tapvm
+              FROM lasku
+              JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus)
+              JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
+              WHERE lasku.yhtio   = '{$kukarow['yhtio']}'
+              AND  lasku.laskunro = '{$laskuno}'
+              AND lasku.tila      = 'U'
+              AND lasku.alatila   = 'X'";
   }
   else {
-    $query = "  SELECT lasku.ytunnus,
-          lasku.liitostunnus,
-          lasku.*,
-          lasku.tunnus ltunnus,
-          maksuehto.tunnus,
-          maksuehto.teksti,
-          maksuehto.kateinen,
-          asiakas.ytunnus asiakas_ytunnus,
-          asiakas.nimi asiakas_nimi,
-          asiakas.nimitark asiakas_nimitark,
-          asiakas.osoite asiakas_osoite,
-          asiakas.postino asiakas_postino,
-          asiakas.postitp asiakas_postitp,
-          asiakas.toim_nimi asiakas_toim_nimi,
-          asiakas.toim_nimitark asiakas_toim_nimitark,
-          asiakas.toim_osoite asiakas_toim_osoite,
-          asiakas.toim_postino asiakas_toim_postino,
-          asiakas.toim_postitp asiakas_toim_postitp,
-          lasku.tapvm
-          FROM lasku
-          JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != ''
-          JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-          WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-          AND lasku.laskunro = '{$laskuno}'
-          AND lasku.tila     = 'U'
-          AND lasku.alatila  = 'X'";
+    $query = "SELECT lasku.ytunnus,
+              lasku.liitostunnus,
+              lasku.*,
+              lasku.tunnus ltunnus,
+              maksuehto.tunnus,
+              maksuehto.teksti,
+              maksuehto.kateinen,
+              asiakas.ytunnus asiakas_ytunnus,
+              asiakas.nimi asiakas_nimi,
+              asiakas.nimitark asiakas_nimitark,
+              asiakas.osoite asiakas_osoite,
+              asiakas.postino asiakas_postino,
+              asiakas.postitp asiakas_postitp,
+              asiakas.toim_nimi asiakas_toim_nimi,
+              asiakas.toim_nimitark asiakas_toim_nimitark,
+              asiakas.toim_osoite asiakas_toim_osoite,
+              asiakas.toim_postino asiakas_toim_postino,
+              asiakas.toim_postitp asiakas_toim_postitp,
+              lasku.tapvm
+              FROM lasku
+              JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != ''
+              JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
+              WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
+              AND lasku.laskunro = '{$laskuno}'
+              AND lasku.tila     = 'U'
+              AND lasku.alatila  = 'X'";
   }
 
   $result = pupe_query($query);
@@ -525,9 +525,9 @@ function echo_lasku_table($laskurow, $toim) {
     $now = date('Y-m-d');
     $now = explode('-' , $now);
     // haetaan kaikki käteisen maksuehdot
-    $query = "  SELECT *
-          FROM kassalipas
-          WHERE yhtio = '{$kukarow['yhtio']}'";
+    $query = "SELECT *
+              FROM kassalipas
+              WHERE yhtio = '{$kukarow['yhtio']}'";
     $result = pupe_query($query);
 
     echo '<tr>';
@@ -548,23 +548,23 @@ function echo_lasku_table($laskurow, $toim) {
 
     echo "<tr><th>".t("Tapahtumapäivä (pp-kk-vvvv)")."</th><td><input name='tapahtumapaiva_pp' type='text' size='3' value='".$now[2]."'/>-<input name='tapahtumapaiva_kk' type='text' size='3' value='".$now[1]."'/>-<input name='tapahtumapaiva_vv' type='text' size='5' value='".$now[0]."'/></td></tr>";
 
-    $query = "  SELECT *
-          FROM maksuehto
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kateinen != ''
-          and kaytossa = ''
-          ORDER BY jarjestys, teksti";
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and kateinen != ''
+              and kaytossa  = ''
+              ORDER BY jarjestys, teksti";
   }
   else {
     echo "<tr><th>".t("Tapahtumapäivä")."</th><td>$laskurow[tapvm]</td></tr>";
 
     // haetaan kaikki maksuehdot (paitsi käteinen)
-    $query = "  SELECT *
-          FROM maksuehto
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kateinen = ''
-          and kaytossa = ''
-          ORDER BY jarjestys, teksti";
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and kateinen = ''
+              and kaytossa = ''
+              ORDER BY jarjestys, teksti";
   }
   $vresult = pupe_query($query);
 
@@ -599,10 +599,10 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 
   if ($mehtorow['kateinen'] != '') {
 
-    $query = "  SELECT *
-          FROM kassalipas
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          and tunnus  = '{$kassalipas}'";
+    $query = "SELECT *
+              FROM kassalipas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              and tunnus  = '{$kassalipas}'";
     $kateisresult = pupe_query($query);
     $kateisrow = mysql_fetch_assoc($kateisresult);
 
@@ -649,12 +649,12 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
   else {
     if ($laskurow['kassalipas'] != '') {
       //haetaan kassalippaan tilit kassalippaan takaa
-      $kassalipas_query = "  SELECT kassa,
-                  pankkikortti,
-                  luottokortti
-                  FROM kassalipas
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$laskurow['kassalipas']}'";
+      $kassalipas_query = "SELECT kassa,
+                           pankkikortti,
+                           luottokortti
+                           FROM kassalipas
+                           WHERE yhtio = '{$kukarow['yhtio']}'
+                           AND tunnus  = '{$laskurow['kassalipas']}'";
       $kassalipas_result = pupe_query($kassalipas_query);
 
       $kassalippaat = mysql_fetch_assoc($kassalipas_result);

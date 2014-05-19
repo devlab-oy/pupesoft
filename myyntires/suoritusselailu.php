@@ -58,44 +58,44 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
   }
 
   // Haetaan itse suoritus
-  $query = "  SELECT *
-        FROM suoritus
-        WHERE yhtio  = '$kukarow[yhtio]'
-        AND kohdpvm  = '0000-00-00'
-        AND tunnus in ($suoritustunnukset)
-        $suorilisa";
+  $query = "SELECT *
+            FROM suoritus
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND kohdpvm = '0000-00-00'
+            AND tunnus  in ($suoritustunnukset)
+            $suorilisa";
   $suoritus_res = pupe_query($query);
 
   while ($suoritus_row = mysql_fetch_assoc($suoritus_res)) {
 
     // Haetaan suorituksen pankkitili
-    $query = "  SELECT oletus_rahatili
-          FROM yriti
-          WHERE yhtio   = '$kukarow[yhtio]'
-          AND kaytossa   != 'E'
-          and tilino    = '$suoritus_row[tilino]'";
+    $query = "SELECT oletus_rahatili
+              FROM yriti
+              WHERE yhtio   = '$kukarow[yhtio]'
+              AND kaytossa != 'E'
+              and tilino    = '$suoritus_row[tilino]'";
     $yriti_res = pupe_query($query);
     $yriti_row = mysql_fetch_assoc($yriti_res);
 
     // Haetaan suorituksen saamiset-tiliöinti
-    $query = "  SELECT *
-          FROM tiliointi
-          WHERE yhtio   = '$kukarow[yhtio]'
-          AND tunnus     = '$suoritus_row[ltunnus]'
-          AND korjattu   = ''";
+    $query = "SELECT *
+              FROM tiliointi
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tunnus   = '$suoritus_row[ltunnus]'
+              AND korjattu = ''";
     $tiliointi1_res = pupe_query($query);
     $tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);
 
     if (mysql_num_rows($tiliointi1_res) == 1) {
       // Haetaan suorituksen pankkitili-tiliöinti
-      $query = "  SELECT tilino
-            FROM tiliointi
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and ltunnus   = '$tiliointi1_row[ltunnus]'
-            and tilino     = '$yriti_row[oletus_rahatili]'
-            and summa     =  $tiliointi1_row[summa] * -1
-            and korjattu   = ''
-            LIMIT 1";
+      $query = "SELECT tilino
+                FROM tiliointi
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and ltunnus  = '$tiliointi1_row[ltunnus]'
+                and tilino   = '$yriti_row[oletus_rahatili]'
+                and summa    =  $tiliointi1_row[summa] * -1
+                and korjattu = ''
+                LIMIT 1";
       $tiliointi2_res = pupe_query($query);
       $tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
     }
@@ -134,43 +134,43 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
         $tapvm  = date("Y-m-d");
       }
 
-      $query = "  INSERT INTO tiliointi SET
-            yhtio    = '$kukarow[yhtio]',
-            ltunnus    = '$tiliointi1_row[ltunnus]',
-            tapvm    = '$tapvm',
-            summa    =  $tiliointi1_row[summa],
-            tilino    = '$stili',
-            kustp     = '$tiliointi1_row[kustp]',
-            kohde     = '$tiliointi1_row[kohde]',
-            projekti   = '$tiliointi1_row[projekti]',
-            selite    = '$selite',
-            lukko    = 0,
-            laatija    = '$kukarow[kuka]',
-            laadittu  = now(),
-            summa_valuutassa = $tiliointi1_row[summa_valuutassa],
-            valkoodi  = '$tiliointi1_row[valkoodi]'";
+      $query = "INSERT INTO tiliointi SET
+                yhtio            = '$kukarow[yhtio]',
+                ltunnus          = '$tiliointi1_row[ltunnus]',
+                tapvm            = '$tapvm',
+                summa            =  $tiliointi1_row[summa],
+                tilino           = '$stili',
+                kustp            = '$tiliointi1_row[kustp]',
+                kohde            = '$tiliointi1_row[kohde]',
+                projekti         = '$tiliointi1_row[projekti]',
+                selite           = '$selite',
+                lukko            = 0,
+                laatija          = '$kukarow[kuka]',
+                laadittu         = now(),
+                summa_valuutassa = $tiliointi1_row[summa_valuutassa],
+                valkoodi         = '$tiliointi1_row[valkoodi]'";
       $result = pupe_query($query);
 
-      $query = "  INSERT INTO tiliointi SET
-            yhtio    = '$kukarow[yhtio]',
-            ltunnus    = '$tiliointi1_row[ltunnus]',
-            tapvm    = '$tapvm',
-            summa    =  $tiliointi1_row[summa] * -1,
-            tilino    = '$tiliointi1_row[tilino]',
-            kustp     = '$tiliointi1_row[kustp]',
-            kohde     = '$tiliointi1_row[kohde]',
-            projekti   = '$tiliointi1_row[projekti]',
-            selite    = '$selite',
-            lukko    = 1,
-            laatija    = '$kukarow[kuka]',
-            laadittu  = now(),
-            summa_valuutassa = $tiliointi1_row[summa_valuutassa] * -1,
-            valkoodi  = '$tiliointi1_row[valkoodi]'";
+      $query = "INSERT INTO tiliointi SET
+                yhtio            = '$kukarow[yhtio]',
+                ltunnus          = '$tiliointi1_row[ltunnus]',
+                tapvm            = '$tapvm',
+                summa            =  $tiliointi1_row[summa] * -1,
+                tilino           = '$tiliointi1_row[tilino]',
+                kustp            = '$tiliointi1_row[kustp]',
+                kohde            = '$tiliointi1_row[kohde]',
+                projekti         = '$tiliointi1_row[projekti]',
+                selite           = '$selite',
+                lukko            = 1,
+                laatija          = '$kukarow[kuka]',
+                laadittu         = now(),
+                summa_valuutassa = $tiliointi1_row[summa_valuutassa] * -1,
+                valkoodi         = '$tiliointi1_row[valkoodi]'";
       $result = pupe_query($query);
 
-      $query = "  UPDATE suoritus
-            SET kohdpvm = '$tapvm'
-            WHERE tunnus = '$suoritus_row[tunnus]'";
+      $query = "UPDATE suoritus
+                SET kohdpvm = '$tapvm'
+                WHERE tunnus = '$suoritus_row[tunnus]'";
       $result = pupe_query($query);
     }
   }
@@ -185,10 +185,10 @@ if ($tila == 'suoritus_asiakaskohdistus_kaikki') {
 }
 
 if ($tila == 'komm') {
-  $query = "  UPDATE suoritus
-        SET viesti = '$komm'
-        WHERE tunnus = '$tunnus'
-        and yhtio = '$kukarow[yhtio]'";
+  $query = "UPDATE suoritus
+            SET viesti = '$komm'
+            WHERE tunnus = '$tunnus'
+            and yhtio    = '$kukarow[yhtio]'";
   $result = pupe_query($query);
   $tila = 'tarkenna';
 }
@@ -196,10 +196,10 @@ if ($tila == 'komm') {
 if ($tila == 'tulostakuitti') {
 
   //Haetaan kirjoitin
-  $query  = "  SELECT komento
-        FROM kirjoittimet
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus = '$kukarow[kirjoitin]'";
+  $query  = "SELECT komento
+             FROM kirjoittimet
+             WHERE yhtio = '$kukarow[yhtio]'
+             AND tunnus  = '$kukarow[kirjoitin]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -209,10 +209,10 @@ if ($tila == 'tulostakuitti') {
     $kirjoitinrow = mysql_fetch_assoc($result);
     $tulostakuitti = $kirjoitinrow["komento"];
 
-    $query = "  SELECT *
-          FROM asiakas
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus = '$asiakas_tunnus'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$asiakas_tunnus'";
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
@@ -258,10 +258,10 @@ if ($tila == "kohdista") {
     $myyntisaamiset = 0;
 
     // katotaan löytyykö tili
-    $query = "  SELECT tilino
-          from tili
-          where yhtio = '$kukarow[yhtio]'
-          and tilino  = '$vastatili'";
+    $query = "SELECT tilino
+              from tili
+              where yhtio = '$kukarow[yhtio]'
+              and tilino  = '$vastatili'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -269,11 +269,11 @@ if ($tila == "kohdista") {
       exit;
     }
 
-    $query = "  SELECT *
-          FROM suoritus
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kohdpvm  = '0000-00-00'
-          and tunnus  = '$tunnus'";
+    $query = "SELECT *
+              FROM suoritus
+              WHERE yhtio = '$kukarow[yhtio]'
+              and kohdpvm = '0000-00-00'
+              and tunnus  = '$tunnus'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -281,18 +281,18 @@ if ($tila == "kohdista") {
       $suoritus = mysql_fetch_assoc($result);
 
       // Suoritus kuntoon
-      $query = "  UPDATE suoritus
-            SET asiakas_tunnus = '$atunnus'
-            WHERE tunnus = '$tunnus'
-            AND yhtio = '$kukarow[yhtio]'";
+      $query = "UPDATE suoritus
+                SET asiakas_tunnus = '$atunnus'
+                WHERE tunnus = '$tunnus'
+                AND yhtio    = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
       // Tiliöinti on voinut muuttua
-      $query = "  UPDATE tiliointi
-            SET tilino = '$vastatili'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus = '$suoritus[ltunnus]'
-            AND korjattu = ''";
+      $query = "UPDATE tiliointi
+                SET tilino = '$vastatili'
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND tunnus   = '$suoritus[ltunnus]'
+                AND korjattu = ''";
       $result = pupe_query($query);
 
       echo "<font class='message'>".t("Suoritus kohdistettu")."!</font><br><br>";
@@ -308,28 +308,28 @@ if ($tila == 'tarkenna') {
 
   echo "<font class='head'>".t("Suorituksen kohdistaminen asiakkaaseen")."<hr></font>";
 
-  $query = "  SELECT suoritus.yhtio,
-        concat_ws(' ',yriti.oletus_rahatili, yriti.nimi) tilino,
-        tilino_maksaja,
-        nimi_maksaja,
-        viite,
-        viesti,
-        suoritus.summa,
-        maksupvm,
-        kirjpvm,
-        concat_ws(' ',tili.tilino, tili.nimi) vastatili,
-        asiakas_tunnus,
-        tili.tilino ttilino,
-        yriti.oletus_selvittelytili,
-        tiliointi.summa * -1 kotisumma,
-        suoritus.valkoodi
-        FROM suoritus
-        LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio AND tiliointi.tunnus = suoritus.ltunnus AND tiliointi.korjattu = '')
-        LEFT JOIN tili ON (tili.yhtio = suoritus.yhtio and tili.tilino = tiliointi.tilino)
-        LEFT JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
-        WHERE suoritus.yhtio = '$kukarow[yhtio]'
-        AND suoritus.kohdpvm = '0000-00-00'
-        AND suoritus.tunnus  = $tunnus";
+  $query = "SELECT suoritus.yhtio,
+            concat_ws(' ',yriti.oletus_rahatili, yriti.nimi) tilino,
+            tilino_maksaja,
+            nimi_maksaja,
+            viite,
+            viesti,
+            suoritus.summa,
+            maksupvm,
+            kirjpvm,
+            concat_ws(' ',tili.tilino, tili.nimi) vastatili,
+            asiakas_tunnus,
+            tili.tilino ttilino,
+            yriti.oletus_selvittelytili,
+            tiliointi.summa * -1 kotisumma,
+            suoritus.valkoodi
+            FROM suoritus
+            LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio AND tiliointi.tunnus = suoritus.ltunnus AND tiliointi.korjattu = '')
+            LEFT JOIN tili ON (tili.yhtio = suoritus.yhtio and tili.tilino = tiliointi.tilino)
+            LEFT JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
+            WHERE suoritus.yhtio = '$kukarow[yhtio]'
+            AND suoritus.kohdpvm = '0000-00-00'
+            AND suoritus.tunnus  = $tunnus";
   $result = pupe_query($query);
 
   echo "  <form method='post'>
@@ -408,13 +408,13 @@ if ($tila == 'tarkenna') {
   }
 
   //haetaan omat asiakkaat
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '$kukarow[yhtio]'
-        and laji != 'R'
-        $asiakasrajaus
-        $lisa
-        ORDER BY nimi";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and laji    != 'R'
+            $asiakasrajaus
+            $lisa
+            ORDER BY nimi";
   $result = pupe_query($query);
 
   echo "<form action = '?tunnus=$tunnus&tila=$tila' method = 'post'>";
@@ -451,12 +451,12 @@ if ($tila == 'tarkenna') {
       echo "<td valign='top'>$trow[postitp]<br>$trow[toim_postitp]</td>";
 
       // Onko asiakkaalla avoimia laskuja
-      $query = "  SELECT count(*) maara
-            FROM lasku USE INDEX (yhtio_tila_mapvm)
-            WHERE yhtio = '$kukarow[yhtio]'
-            and mapvm = '0000-00-00'
-            and tila = 'U'
-            and (ytunnus = '$trow[ytunnus]' or nimi = '$trow[nimi]' or liitostunnus = '$trow[tunnus]')";
+      $query = "SELECT count(*) maara
+                FROM lasku USE INDEX (yhtio_tila_mapvm)
+                WHERE yhtio = '$kukarow[yhtio]'
+                and mapvm   = '0000-00-00'
+                and tila    = 'U'
+                and (ytunnus = '$trow[ytunnus]' or nimi = '$trow[nimi]' or liitostunnus = '$trow[tunnus]')";
       $lresult = pupe_query($query);
       $lasku = mysql_fetch_assoc ($lresult);
 
@@ -514,13 +514,13 @@ if ($tila == '') {
 
   echo "<form action = '?tila=$tila' method = 'post'>";
 
-  $query = "  SELECT distinct suoritus.tilino, yriti.nimi, yriti.valkoodi
-        FROM suoritus
-        JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
-        WHERE suoritus.yhtio = '$kukarow[yhtio]'
-        AND suoritus.kohdpvm = '0000-00-00'
-        $lisa
-        ORDER BY yriti.nimi";
+  $query = "SELECT distinct suoritus.tilino, yriti.nimi, yriti.valkoodi
+            FROM suoritus
+            JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
+            WHERE suoritus.yhtio = '$kukarow[yhtio]'
+            AND suoritus.kohdpvm = '0000-00-00'
+            $lisa
+            ORDER BY yriti.nimi";
   $result = pupe_query($query);
 
   echo "<table>";
@@ -535,12 +535,12 @@ if ($tila == '') {
   }
   echo "</select></td></tr>";
 
-  $query = "  SELECT distinct valkoodi
-        FROM suoritus
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND kohdpvm = '0000-00-00'
-        $lisa
-        ORDER BY valkoodi";
+  $query = "SELECT distinct valkoodi
+            FROM suoritus
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND kohdpvm = '0000-00-00'
+            $lisa
+            ORDER BY valkoodi";
   $vresult = pupe_query($query);
 
   echo "<tr><th>".t("Näytä vain tapahtumat valuutassa")."</th>";
@@ -584,26 +584,26 @@ if ($tila == '') {
     $lisa .= " and suoritus.valkoodi = '$valuutta' ";
   }
 
-  $query = "  SELECT suoritus.nimi_maksaja, suoritus.kirjpvm, suoritus.summa, suoritus.valkoodi,
-        suoritus.tilino, suoritus.viite, suoritus.viesti, suoritus.tunnus, suoritus.asiakas_tunnus,
-        asiakas.ytunnus,
-        asiakas.nimi,
-        asiakas.nimitark,
-        asiakas.osoite,
-        asiakas.postitp,
-        asiakas.toim_nimi,
-        asiakas.toim_nimitark,
-        asiakas.toim_osoite,
-        asiakas.toim_postitp,
-        tiliointi.tilino ttilino,
-        tiliointi.ltunnus tltunnus
-        FROM suoritus
-        LEFT JOIN asiakas ON (asiakas.yhtio = suoritus.yhtio AND asiakas.tunnus = suoritus.asiakas_tunnus)
-        LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio and tiliointi.tunnus = suoritus.ltunnus)
-        WHERE suoritus.yhtio = '$kukarow[yhtio]'
-        AND suoritus.kohdpvm = '0000-00-00'
-        $lisa
-         ORDER BY $jarjestys";
+  $query = "SELECT suoritus.nimi_maksaja, suoritus.kirjpvm, suoritus.summa, suoritus.valkoodi,
+            suoritus.tilino, suoritus.viite, suoritus.viesti, suoritus.tunnus, suoritus.asiakas_tunnus,
+            asiakas.ytunnus,
+            asiakas.nimi,
+            asiakas.nimitark,
+            asiakas.osoite,
+            asiakas.postitp,
+            asiakas.toim_nimi,
+            asiakas.toim_nimitark,
+            asiakas.toim_osoite,
+            asiakas.toim_postitp,
+            tiliointi.tilino ttilino,
+            tiliointi.ltunnus tltunnus
+            FROM suoritus
+            LEFT JOIN asiakas ON (asiakas.yhtio = suoritus.yhtio AND asiakas.tunnus = suoritus.asiakas_tunnus)
+            LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio and tiliointi.tunnus = suoritus.ltunnus)
+            WHERE suoritus.yhtio = '$kukarow[yhtio]'
+            AND suoritus.kohdpvm = '0000-00-00'
+            $lisa
+             ORDER BY $jarjestys";
   $result = pupe_query($query);
 
       echo "<table><tr><th>x</th>";

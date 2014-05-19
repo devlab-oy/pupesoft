@@ -63,11 +63,11 @@ else {
   echo "<tr><td>",t("Kieli"),"</td>";
   echo "<td><select name='kieli'><option value=''>",t("Ei valintaa"),"</option>";
 
-  $query = "  SELECT DISTINCT kieli
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND laji = 'R'
-        AND kieli != ''";
+  $query = "SELECT DISTINCT kieli
+            FROM asiakas
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND laji     = 'R'
+            AND kieli   != ''";
   $kieli_res = pupe_query($query);
 
   while ($kieli_row = mysql_fetch_assoc($kieli_res)) {
@@ -119,13 +119,13 @@ else {
   echo "<table>";
   echo "<tr><th colspan='4'>",t("Asiakkaan avainsanat"),"</th></tr>";
 
-  $query = "  SELECT count(selite) laskuri, selitetark, selite, jarjestys, min(tunnus) mintunnus
-        FROM avainsana
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND kieli = 'fi'
-        AND laji = 'ASAVAINSANA'
-        GROUP BY selite
-        ORDER BY jarjestys, selite";
+  $query = "SELECT count(selite) laskuri, selitetark, selite, jarjestys, min(tunnus) mintunnus
+            FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND kieli   = 'fi'
+            AND laji    = 'ASAVAINSANA'
+            GROUP BY selite
+            ORDER BY jarjestys, selite";
   $dynamic_res = pupe_query($query);
 
   $riv = 0;
@@ -141,13 +141,13 @@ else {
     echo "<td>{$dynamic_row['selitetark']}</td>";
 
     if ($dynamic_row['laskuri'] > 1) {
-      $query = "  SELECT selitetark_2
-            FROM avainsana
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND kieli = 'fi'
-            AND laji = 'ASAVAINSANA'
-            AND selite = '{$dynamic_row["selite"]}'
-            ORDER BY selitetark_2";
+      $query = "SELECT selitetark_2
+                FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND kieli   = 'fi'
+                AND laji    = 'ASAVAINSANA'
+                AND selite  = '{$dynamic_row["selite"]}'
+                ORDER BY selitetark_2";
       $filler_res = pupe_query($query);
 
       echo "<td><select name='{$dynamic_row['selite']}' ".js_alasvetoMaxWidth($dynamic_row['mintunnus'], 300)."><option value=''>",t("Ei valintaa"),"</option>";
@@ -169,12 +169,12 @@ else {
       echo "</select></td>";
     }
     else {
-      $query = "  SELECT DISTINCT avainsana
-            FROM asiakkaan_avainsanat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji = '{$dynamic_row['selite']}'
-            AND avainsana != ''
-            ORDER BY avainsana";
+      $query = "SELECT DISTINCT avainsana
+                FROM asiakkaan_avainsanat
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                AND laji       = '{$dynamic_row['selite']}'
+                AND avainsana != ''
+                ORDER BY avainsana";
       $avain_res = pupe_query($query);
 
       if (strtolower($dynamic_row['selite']) == 'syntymavuosi') {
@@ -238,11 +238,11 @@ else {
       }
     }
 
-    $query = "  SELECT asiakas.*
-          FROM asiakas
-          $asiakkaan_avainsana_join
-          WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
-          $asiakkaan_avainsana_where";
+    $query = "SELECT asiakas.*
+              FROM asiakas
+              $asiakkaan_avainsana_join
+              WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
+              $asiakkaan_avainsana_where";
 
     if (checkdate($kk1, $pvm1, $vuosi1)) {
       $alkaa = $vuosi1."-".$kk1."-".$pvm1;
@@ -381,12 +381,12 @@ else {
       $excelsarake++;
 
 
-      $query = "  SELECT DISTINCT selitetark, jarjestys
-            FROM avainsana
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND kieli = 'fi'
-            AND laji = 'ASAVAINSANA'
-            ORDER BY jarjestys";
+      $query = "SELECT DISTINCT selitetark, jarjestys
+                FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND kieli   = 'fi'
+                AND laji    = 'ASAVAINSANA'
+                ORDER BY jarjestys";
       $otsikot_res = pupe_query($query);
 
       while ($otsikot_row = mysql_fetch_assoc($otsikot_res)) {
@@ -399,12 +399,12 @@ else {
     }
 
     // Haetaan asikasavainsanat
-    $query = "  SELECT DISTINCT selitetark, jarjestys, selite
-          FROM avainsana
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND kieli = 'fi'
-          AND laji = 'ASAVAINSANA'
-          ORDER BY jarjestys";
+    $query = "SELECT DISTINCT selitetark, jarjestys, selite
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kieli   = 'fi'
+              AND laji    = 'ASAVAINSANA'
+              ORDER BY jarjestys";
     $otsikot_res = pupe_query($query);
 
     $rows = 0;
@@ -419,18 +419,18 @@ else {
       }
 
       // Subquery. Haetaan riveiltä yhteissummia
-      $query = "  SELECT sum(tilausrivi.rivihinta) rivin_summa
-            FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
-            JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi != 'D')
-            JOIN tuote on (lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
-            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-            AND lasku.tila = 'L'
-            AND lasku.alatila = 'X'
-            and lasku.liitostunnus = '{$row["tunnus"]}'
-            AND lasku.tapvm >= '{$alkaa}'
-            AND lasku.tapvm <= '{$loppuu}'
-            {$lisa}
-            {$mlisa}";
+      $query = "SELECT sum(tilausrivi.rivihinta) rivin_summa
+                FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
+                JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi != 'D')
+                JOIN tuote on (lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
+                WHERE lasku.yhtio      = '{$kukarow["yhtio"]}'
+                AND lasku.tila         = 'L'
+                AND lasku.alatila      = 'X'
+                and lasku.liitostunnus = '{$row["tunnus"]}'
+                AND lasku.tapvm        >= '{$alkaa}'
+                AND lasku.tapvm        <= '{$loppuu}'
+                {$lisa}
+                {$mlisa}";
       $summress = pupe_query($query);
       $rivit = mysql_fetch_assoc($summress);
 
@@ -478,11 +478,11 @@ else {
 
           while ($otsikot_row = mysql_fetch_assoc($otsikot_res)) {
 
-            $query = "  SELECT *
-                  FROM asiakkaan_avainsanat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND liitostunnus = '{$row['tunnus']}'
-                  AND laji = '{$otsikot_row['selite']}'";
+            $query = "SELECT *
+                      FROM asiakkaan_avainsanat
+                      WHERE yhtio      = '{$kukarow['yhtio']}'
+                      AND liitostunnus = '{$row['tunnus']}'
+                      AND laji         = '{$otsikot_row['selite']}'";
             $attr_res = pupe_query($query);
             $attr_row = mysql_fetch_assoc($attr_res);
 

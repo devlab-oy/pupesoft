@@ -32,11 +32,11 @@ else {
   if (!$toot = fopen($tilvahvfilenimi, "w")) die(t("TILAUSVAHVISTUS: Tiedoston luonti epäonnistui")."!");
 
   if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
-    $query = "   SELECT group_concat(tunnus) tunnukset
-          FROM lasku use index (yhtio_vanhatunnus)
-          WHERE yhtio    = '$kukarow[yhtio]'
-          and vanhatunnus = '$laskurow[vanhatunnus]'
-          and tila IN ('N','L','A')";
+    $query = "SELECT group_concat(tunnus) tunnukset
+              FROM lasku use index (yhtio_vanhatunnus)
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and vanhatunnus = '$laskurow[vanhatunnus]'
+              and tila        IN ('N','L','A')";
     $abures = pupe_query($query);
     $aburow = mysql_fetch_assoc($abures);
 
@@ -50,11 +50,11 @@ else {
     }
   }
   elseif ($laskurow["tunnusnippu"] > 0 and $laskurow["clearing"] != "JT-TILAUS") {
-    $query = "  SELECT group_concat(tunnus) tunnukset
-          FROM lasku
-          WHERE yhtio   = '$kukarow[yhtio]'
-          and tunnusnippu = '$laskurow[tunnusnippu]'
-          and tila IN ('N','L','A')";
+    $query = "SELECT group_concat(tunnus) tunnukset
+              FROM lasku
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and tunnusnippu = '$laskurow[tunnusnippu]'
+              and tila        IN ('N','L','A')";
     $abures = pupe_query($query);
     $aburow = mysql_fetch_assoc($abures);
 
@@ -92,24 +92,24 @@ else {
     $tulostettava_tunnus = $laskurow['tunnus'];
   }
 
-  $query = "  SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
-        if(tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0) varattu,
-        if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
-        tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
-        tilausrivi.nimitys, tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
-        FROM tilausrivi
-        LEFT JOIN tuote USING (yhtio, tuoteno)
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        $tyyppilisa
-        and $wherelisa
-        and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
-        ORDER BY tilausrivi.tunnus";
+  $query = "SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
+            if(tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0) varattu,
+            if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
+            tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
+            tilausrivi.nimitys, tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
+            FROM tilausrivi
+            LEFT JOIN tuote USING (yhtio, tuoteno)
+            WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+            $tyyppilisa
+            and $wherelisa
+            and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+            ORDER BY tilausrivi.tunnus";
   $tilvahresult = pupe_query($query);
 
-  $query = "  SELECT nimi, eposti
-        FROM kuka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus  = '$laskurow[myyja]'";
+  $query = "SELECT nimi, eposti
+            FROM kuka
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$laskurow[myyja]'";
   $kresult = pupe_query($query);
   $krow = mysql_fetch_array($kresult);
 
@@ -136,12 +136,12 @@ else {
     $useita = "EI";
 
     if ($laskurow["nippu"] > 0) {
-      $query = "  SELECT distinct(toimaika)
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]'
-            $tyyppilisa
-            and otunnus IN ($laskurow[nippu])
-            and toimaika != '0000-00-00'";
+      $query = "SELECT distinct(toimaika)
+                FROM tilausrivi
+                WHERE yhtio   = '$kukarow[yhtio]'
+                $tyyppilisa
+                and otunnus   IN ($laskurow[nippu])
+                and toimaika != '0000-00-00'";
       $toimaikares = pupe_query($query);
 
       if (mysql_num_rows($toimaikares) > 1) {

@@ -303,18 +303,18 @@ if (!function_exists('finvoice_otsik')) {
 
       if (strpos($_SERVER['SCRIPT_NAME'], "karhu.php") === FALSE)  {
         //  Oisko toista laskutusosoitetta?
-        $query = "  SELECT laskutus_nimi,
-              laskutus_nimitark,
-              laskutus_osoite,
-              laskutus_postino,
-              laskutus_postitp,
-              laskutus_maa
-              FROM laskun_lisatiedot
-              WHERE yhtio = '{$lasrow['yhtio']}'
-              AND laskutus_nimi != ''
-              AND CONCAT(laskutus_nimi, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa) != '$lasrow[nimi]$lasrow[osoite]$lasrow[postino]$lasrow[postitp]$lasrow[maa]'
-              AND otunnus = '{$lasrow['tunnus']}'
-              LIMIT 1";
+        $query = "SELECT laskutus_nimi,
+                  laskutus_nimitark,
+                  laskutus_osoite,
+                  laskutus_postino,
+                  laskutus_postitp,
+                  laskutus_maa
+                  FROM laskun_lisatiedot
+                  WHERE yhtio        = '{$lasrow['yhtio']}'
+                  AND laskutus_nimi != ''
+                  AND CONCAT(laskutus_nimi, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa) != '$lasrow[nimi]$lasrow[osoite]$lasrow[postino]$lasrow[postitp]$lasrow[maa]'
+                  AND otunnus        = '{$lasrow['tunnus']}'
+                  LIMIT 1";
         $tarkres = pupe_query($query);
 
         if (mysql_num_rows($tarkres) == 1) {
@@ -395,14 +395,14 @@ if (!function_exists('finvoice_otsik')) {
 
       if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
         //  Onko meillä kaupallista käsittelijää, falseback on tekninen yhteyshenkilö
-        $query = "  SELECT kk.nimi kaupallinen_kasittelija, kt.nimi tekninen_yhteyshenkilo
-              FROM lasku
-              JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
-              LEFT JOIN yhteyshenkilo kk ON kk.yhtio=laskun_lisatiedot.yhtio and kk.tunnus=laskun_lisatiedot.yhteyshenkilo_kaupallinen and kk.tyyppi = 'A'
-              LEFT JOIN yhteyshenkilo kt ON kt.yhtio=laskun_lisatiedot.yhtio and kt.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and kt.tyyppi = 'A'
-              WHERE lasku.yhtio = '$lasrow[yhtio]'
-              and lasku.laskunro = '$lasrow[laskunro]'
-              and lasku.tila = 'L'";
+        $query = "SELECT kk.nimi kaupallinen_kasittelija, kt.nimi tekninen_yhteyshenkilo
+                  FROM lasku
+                  JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+                  LEFT JOIN yhteyshenkilo kk ON kk.yhtio=laskun_lisatiedot.yhtio and kk.tunnus=laskun_lisatiedot.yhteyshenkilo_kaupallinen and kk.tyyppi = 'A'
+                  LEFT JOIN yhteyshenkilo kt ON kt.yhtio=laskun_lisatiedot.yhtio and kt.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and kt.tyyppi = 'A'
+                  WHERE lasku.yhtio  = '$lasrow[yhtio]'
+                  and lasku.laskunro = '$lasrow[laskunro]'
+                  and lasku.tila     = 'L'";
         $tarkres = pupe_query($query);
 
         while ($tarkrow = mysql_fetch_assoc($tarkres)) {
@@ -688,12 +688,12 @@ if (!function_exists('finvoice_rivi')) {
         }
 
         // Tämä on tilauksen vika rivi, laitetaan työmäärystiedot tähän
-        $query = "  SELECT tyomaarays.*
-              FROM lasku
-              JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              and lasku.tilaustyyppi = 'A'
-              and lasku.tunnus = '$tilrow[otunnus]'";
+        $query = "SELECT tyomaarays.*
+                  FROM lasku
+                  JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+                  WHERE lasku.yhtio      = '$kukarow[yhtio]'
+                  and lasku.tilaustyyppi = 'A'
+                  and lasku.tunnus       = '$tilrow[otunnus]'";
         $tyomres = pupe_query($query);
 
         if (mysql_num_rows($tyomres) > 0) {
@@ -716,10 +716,10 @@ if (!function_exists('finvoice_rivi')) {
                     $tyomrow[$kentta] = tv1dateconv($tyomrow[$kentta]);
                   }
                   elseif ($kentta == "suorittaja") {
-                    $query = "  SELECT nimi
-                          FROM kuka
-                          WHERE yhtio = '$kukarow[yhtio]'
-                          and kuka    = '".$tyomrow[$kentta]."'";
+                    $query = "SELECT nimi
+                              FROM kuka
+                              WHERE yhtio = '$kukarow[yhtio]'
+                              and kuka    = '".$tyomrow[$kentta]."'";
                     $yresult = pupe_query($query);
                     $row = mysql_fetch_assoc($yresult);
 

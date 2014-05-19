@@ -11,10 +11,10 @@ echo "<font class='head'>".t("Yhdist‰ asiakkaita")."</font><hr>";
 if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
   // t‰ss‰ on j‰tett‰v‰n asiakkaan tiedot
-  $jquery  = "  SELECT *
-        FROM asiakas
-        where yhtio = '$kukarow[yhtio]'
-        and tunnus = '$jataminut' ";
+  $jquery  = "SELECT *
+              FROM asiakas
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$jataminut' ";
   $jresult = pupe_query($jquery);
   $jrow = mysql_fetch_assoc($jresult);
 
@@ -38,11 +38,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       echo "<br>".t("Yhdistet‰‰n").": $asrow[ytunnus] $asrow[nimi] ".$asrow['osoite']." ".$asrow['postino']." ".$asrow['postitp']."<br>";
 
       // haetaan asiakashinta ensin Ytunnuksella.
-      $hquery = "  SELECT *
-            FROM asiakashinta
-            WHERE ytunnus = '$asrow[ytunnus]'
-            AND asiakas = 0
-            AND yhtio ='$kukarow[yhtio]'";
+      $hquery = "SELECT *
+                 FROM asiakashinta
+                 WHERE ytunnus = '$asrow[ytunnus]'
+                 AND asiakas   = 0
+                 AND yhtio ='$kukarow[yhtio]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -99,11 +99,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // haetaan asiakashinta sitten asiakastunnuksella.
-      $hquery = "  SELECT *
-            FROM asiakashinta
-            WHERE asiakas = '$asrow[tunnus]'
-            #AND ytunnus = ''
-            AND yhtio ='$kukarow[yhtio]'";
+      $hquery = "SELECT *
+                 FROM asiakashinta
+                 WHERE asiakas = '$asrow[tunnus]'
+                 #AND ytunnus = ''
+                 AND yhtio ='$kukarow[yhtio]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -161,11 +161,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // haetaan asiakasalennus ensin Ytunnuksella.
-      $hquery = "  SELECT *
-            FROM asiakasalennus
-            WHERE ytunnus = '$asrow[ytunnus]'
-            AND asiakas = 0
-            AND yhtio ='$kukarow[yhtio]'";
+      $hquery = "SELECT *
+                 FROM asiakasalennus
+                 WHERE ytunnus = '$asrow[ytunnus]'
+                 AND asiakas   = 0
+                 AND yhtio ='$kukarow[yhtio]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -217,11 +217,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // haetaan asiakasalennus sitten asiakastunnuksella.
-      $hquery = "  SELECT *
-            FROM asiakasalennus
-            WHERE asiakas = '$asrow[tunnus]'
-            #AND ytunnus = ''
-            AND yhtio ='$kukarow[yhtio]'";
+      $hquery = "SELECT *
+                 FROM asiakasalennus
+                 WHERE asiakas = '$asrow[tunnus]'
+                 #AND ytunnus = ''
+                 AND yhtio ='$kukarow[yhtio]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -275,10 +275,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // !!!!!!!! ASIAKASKOMMENTTI OSIO !!!!!!!!!!!!
-      $hquery = "  SELECT *
-            FROM asiakaskommentti
-            WHERE yhtio ='$kukarow[yhtio]'
-            AND ytunnus = '$asrow[ytunnus]'";
+      $hquery = "SELECT *
+                 FROM asiakaskommentti
+                 WHERE yhtio ='$kukarow[yhtio]'
+                 AND ytunnus = '$asrow[ytunnus]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -313,11 +313,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // !!!!!!!! RAHTISOPIMUS OSIO !!!!!!!!!!!!
-      $hquery = "  SELECT *
-            FROM rahtisopimukset
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND asiakas = 0
-            AND ytunnus = '$asrow[ytunnus]'";
+      $hquery = "SELECT *
+                 FROM rahtisopimukset
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND asiakas = 0
+                 AND ytunnus = '$asrow[ytunnus]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -357,11 +357,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
         }
       }
 
-      $hquery = "  SELECT *
-            FROM rahtisopimukset
-            WHERE yhtio ='$kukarow[yhtio]'
-            #AND ytunnus = ''
-            AND asiakas = '$asrow[tunnus]'";
+      $hquery = "SELECT *
+                 FROM rahtisopimukset
+                 WHERE yhtio ='$kukarow[yhtio]'
+                 #AND ytunnus = ''
+                 AND asiakas = '$asrow[tunnus]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -402,11 +402,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // !!!!!!!! YHTEYSHENKIL÷ OSIO !!!!!!!!!!!!
-      $hquery = "  SELECT *
-            FROM yhteyshenkilo
-            WHERE yhtio    = '$kukarow[yhtio]'
-            AND liitostunnus = '$asrow[tunnus]'
-            and tyyppi      = 'A'";
+      $hquery = "SELECT *
+                 FROM yhteyshenkilo
+                 WHERE yhtio      = '$kukarow[yhtio]'
+                 AND liitostunnus = '$asrow[tunnus]'
+                 and tyyppi       = 'A'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -463,10 +463,10 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // !!!!!!!! ASIAKKAAN_AVAINSANA OSIO !!!!!!!!!!!!
-      $hquery = "  SELECT *
-            FROM asiakkaan_avainsanat
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND liitostunnus = '$asrow[tunnus]'";
+      $hquery = "SELECT *
+                 FROM asiakkaan_avainsanat
+                 WHERE yhtio      = '$kukarow[yhtio]'
+                 AND liitostunnus = '$asrow[tunnus]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -503,11 +503,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // !!!!!!!! ASIAKASLIITE OSIO !!!!!!!!!!!!
-      $hquery = "  SELECT *
-            FROM liitetiedostot
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND liitos = 'asiakas'
-            AND liitostunnus = '$asrow[tunnus]'";
+      $hquery = "SELECT *
+                 FROM liitetiedostot
+                 WHERE yhtio      = '$kukarow[yhtio]'
+                 AND liitos       = 'asiakas'
+                 AND liitostunnus = '$asrow[tunnus]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -562,11 +562,11 @@ if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
       }
 
       // !!!!!!!! PUUN_ALKIO OSIO !!!!!!!!!!!!
-      $hquery = "  SELECT *
-            FROM puun_alkio
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND laji = 'Asiakas'
-            AND liitos = '$asrow[tunnus]'";
+      $hquery = "SELECT *
+                 FROM puun_alkio
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND laji    = 'Asiakas'
+                 AND liitos  = '$asrow[tunnus]'";
       $hresult = pupe_query($hquery);
 
       if (mysql_num_rows($hresult) == 0) {
@@ -695,20 +695,20 @@ if (strlen($ojarj) > 0) {
 
 $lisa .= " and asiakas.laji != 'P' ";
 
-$query = "  SELECT
-      asiakas.tunnus,
-      asiakas.ytunnus,
-      concat(asiakas.nimi ,'<br>', asiakas.toim_nimi,'<br>',  asiakas.laskutus_nimi) 'nimi'  ,
-      concat(asiakas.osoite ,'<br>', asiakas.toim_osoite,'<br>',  asiakas.laskutus_osoite) 'osoite',
-      concat(asiakas.postino, '<br>', asiakas.toim_postino, asiakas.laskutus_postino) 'postino',
-      concat(asiakas.postitp, '<br>', asiakas.toim_postitp, asiakas.laskutus_postitp) 'postitp',
-      asiakas.asiakasnro,
-      asiakas.yhtio
-      FROM asiakas
-      WHERE asiakas.yhtio = '$kukarow[yhtio]'
-      $lisa
-      ORDER BY $jarjestys
-      LIMIT 500";
+$query = "SELECT
+          asiakas.tunnus,
+          asiakas.ytunnus,
+          concat(asiakas.nimi ,'<br>', asiakas.toim_nimi,'<br>',  asiakas.laskutus_nimi) 'nimi'  ,
+          concat(asiakas.osoite ,'<br>', asiakas.toim_osoite,'<br>',  asiakas.laskutus_osoite) 'osoite',
+          concat(asiakas.postino, '<br>', asiakas.toim_postino, asiakas.laskutus_postino) 'postino',
+          concat(asiakas.postitp, '<br>', asiakas.toim_postitp, asiakas.laskutus_postitp) 'postitp',
+          asiakas.asiakasnro,
+          asiakas.yhtio
+          FROM asiakas
+          WHERE asiakas.yhtio = '$kukarow[yhtio]'
+          $lisa
+          ORDER BY $jarjestys
+          LIMIT 500";
 $result = pupe_query($query);
 
 echo "<br><table>";

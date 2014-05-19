@@ -109,10 +109,10 @@ echo "<table>";
 
 echo "<tr><th>".t("Valitse tilikausi")."</th>";
 
- $query = "  SELECT *
-      FROM tilikaudet
-      WHERE yhtio = '$kukarow[yhtio]'
-      ORDER BY tilikausi_alku desc";
+ $query = "SELECT *
+           FROM tilikaudet
+           WHERE yhtio = '$kukarow[yhtio]'
+           ORDER BY tilikausi_alku desc";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='tkausi' onchange='submit();'>";
@@ -155,10 +155,10 @@ echo "</td></tr>";
 
 echo "<tr><th>",t("Valuutta"),"</th><td>";
 
-$query = "  SELECT nimi, tunnus
-      FROM valuu
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      ORDER BY jarjestys";
+$query = "SELECT nimi, tunnus
+          FROM valuu
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          ORDER BY jarjestys";
 $vresult = pupe_query($query);
 
 echo " <select name='valkoodi'>\n";
@@ -192,10 +192,10 @@ if ($tee == "TARKISTA") {
 
   $tkausi = (int) $tkausi;
 
-  $query = "  SELECT tilikausi_alku, tilikausi_loppu
-        FROM tilikaudet
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tunnus = $tkausi";
+  $query = "SELECT tilikausi_alku, tilikausi_loppu
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = $tkausi";
   $vresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($vresult) == 1) {
@@ -262,15 +262,15 @@ if ($tee == "TARKISTA") {
       $tilinloppu = $swap;
     }
 
-    $query = "  SELECT tiliointi.tilino, group_concat(distinct tiliointi.kustp) kustp, {$lisa1}, sum(tiliointi.summa) tilisaldo
-          FROM tiliointi
-          WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
-          AND tiliointi.korjattu = ''
-          AND tiliointi.tapvm   >= '{$tilikausirow['tilikausi_alku']}'
-          AND tiliointi.tapvm   <= '{$tilikausirow['tilikausi_loppu']}'
-          AND tiliointi.tilino between '{$tilinalku}' AND '{$tilinloppu}'
-          {$where}
-          GROUP BY tilino {$groupby}";
+    $query = "SELECT tiliointi.tilino, group_concat(distinct tiliointi.kustp) kustp, {$lisa1}, sum(tiliointi.summa) tilisaldo
+              FROM tiliointi
+              WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
+              AND tiliointi.korjattu = ''
+              AND tiliointi.tapvm    >= '{$tilikausirow['tilikausi_alku']}'
+              AND tiliointi.tapvm    <= '{$tilikausirow['tilikausi_loppu']}'
+              AND tiliointi.tilino between '{$tilinalku}' AND '{$tilinloppu}'
+              {$where}
+              GROUP BY tilino {$groupby}";
     $result = mysql_query($query) or pupe_error($query);
 
     echo "  <script type='text/javascript'>
@@ -352,12 +352,12 @@ if ($tee == "TARKISTA") {
     echo "<table><tr><th colspan='2'>",t("Raportin valinnat"),"</th></tr>";
 
     //Haetaan tallennetut kyselyt
-    $query = "  SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
-          FROM tallennetut_parametrit
-          JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
-          WHERE tallennetut_parametrit.yhtio = '$kukarow[yhtio]'
-          and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
-          ORDER BY tallennetut_parametrit.nimitys";
+    $query = "SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
+              FROM tallennetut_parametrit
+              JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
+              WHERE tallennetut_parametrit.yhtio  = '$kukarow[yhtio]'
+              and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
+              ORDER BY tallennetut_parametrit.nimitys";
     $sresult = mysql_query($query) or pupe_error($query);
 
     echo "<tr><td>",t("Valitse raportti"),":</td>";
@@ -410,10 +410,10 @@ if ($tee == "TARKISTA") {
 
       if ($kustp != '') {
 
-        $query2 = "  SELECT nimi, koodi, tunnus
-              FROM kustannuspaikka
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$trow[kustp]'";
+        $query2 = "SELECT nimi, koodi, tunnus
+                   FROM kustannuspaikka
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   AND tunnus  = '$trow[kustp]'";
         $result2 = mysql_query($query2) or pupe_error($query2);
         $tarkenne = mysql_fetch_assoc($result2);
 
@@ -443,10 +443,10 @@ if ($tee == "TARKISTA") {
       echo "<th>",t("Yhteensä"),"</th>";
       echo "<td>{$saldo_kum}</td>";
 
-      $query2 = "  SELECT nimi, koodi
-            FROM kustannuspaikka
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$kp_tunn}'";
+      $query2 = "SELECT nimi, koodi
+                 FROM kustannuspaikka
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tunnus  = '{$kp_tunn}'";
       $result2 = mysql_query($query2) or pupe_error($query2);
       $tarkenne = mysql_fetch_assoc($result2);
 
@@ -472,12 +472,12 @@ if ($tee == "TARKISTA") {
     echo "<th>%</th>";
     echo "</tr>";
 
-    $query = "  SELECT DISTINCT koodi, nimi, tunnus
-          FROM kustannuspaikka
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tyyppi = 'K'
-          AND kaytossa != 'E'
-          ORDER BY koodi+0, koodi, nimi";
+    $query = "SELECT DISTINCT koodi, nimi, tunnus
+              FROM kustannuspaikka
+              WHERE yhtio   = '{$kukarow['yhtio']}'
+              AND tyyppi    = 'K'
+              AND kaytossa != 'E'
+              ORDER BY koodi+0, koodi, nimi";
     $res = pupe_query($query);
 
     $i = 1;
@@ -522,10 +522,10 @@ if ($tee == "TARKISTA") {
 
       echo "<tr>";
 
-      $query2 = "  SELECT nimi, koodi
-            FROM kustannuspaikka
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$kp_tunn}'";
+      $query2 = "SELECT nimi, koodi
+                 FROM kustannuspaikka
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tunnus  = '{$kp_tunn}'";
       $result2 = mysql_query($query2) or pupe_error($query2);
       $tarkenne = mysql_fetch_assoc($result2);
 

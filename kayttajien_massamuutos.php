@@ -122,11 +122,11 @@ echo "<font class='message'>".t("Kuka korvataan ").":</font>";
 
 // tehd‰‰n k‰ytt‰j‰listaukset
 
-$query = "  SELECT distinct kuka.nimi, kuka.kuka
-      FROM kuka
-      WHERE kuka.extranet = ''
-      AND kuka.yhtio = '$kukarow[yhtio]'
-      ORDER BY kuka.nimi";
+$query = "SELECT distinct kuka.nimi, kuka.kuka
+          FROM kuka
+          WHERE kuka.extranet = ''
+          AND kuka.yhtio      = '$kukarow[yhtio]'
+          ORDER BY kuka.nimi";
 $kukar = mysql_query($query) or pupe_error($query);
 
 echo "<table><tr><th align='left'>".t("K‰ytt‰j‰").":</th><td>
@@ -147,11 +147,11 @@ echo "</table>";
 echo "<br><br><font class='message'>".t("Kenell‰ korvataan").":</font>";
 
 // tehd‰‰n k‰ytt‰j‰listaukset
-$query = "  SELECT distinct kuka.nimi, kuka.kuka
-      FROM kuka
-      WHERE kuka.extranet = ''
-      AND kuka.yhtio = '$kukarow[yhtio]'
-      ORDER BY kuka.nimi";
+$query = "SELECT distinct kuka.nimi, kuka.kuka
+          FROM kuka
+          WHERE kuka.extranet = ''
+          AND kuka.yhtio      = '$kukarow[yhtio]'
+          ORDER BY kuka.nimi";
 $kukar = mysql_query($query) or pupe_error($query);
 
 echo "<table><tr><th align='left'>".t("K‰ytt‰j‰").":</th><td>

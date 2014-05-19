@@ -27,11 +27,11 @@ class Vastaavat {
 
     if (!empty($tuoteno)) {
       // Haetaan haetun tuotteen tiedot vastaavuusketjusta
-      $query = "  SELECT group_concat(DISTINCT id order by id) idt
-            FROM vastaavat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$tuoteno}'
-            $conditions";
+      $query = "SELECT group_concat(DISTINCT id order by id) idt
+                FROM vastaavat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuoteno}'
+                $conditions";
       $tuote_result = pupe_query($query);
       $tuote = mysql_fetch_assoc($tuote_result);
 
@@ -67,11 +67,11 @@ class Vastaavat {
       if ($options['vastaavuusketjun_jarjestys'] == 'K') {
 
         // Haetaan tuotteen järjestys jolla ketju on alunperin haettu
-        $query = "  SELECT if (jarjestys=0, 9999, jarjestys) jarjestys
-              FROM vastaavat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND id     = '{$ketju}'
-              AND tuoteno = '{$this->tuote}'";
+        $query = "SELECT if (jarjestys=0, 9999, jarjestys) jarjestys
+                  FROM vastaavat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND id      = '{$ketju}'
+                  AND tuoteno = '{$this->tuote}'";
         $result = pupe_query($query);
         $jarjestys = mysql_fetch_assoc($result);
 
@@ -80,13 +80,13 @@ class Vastaavat {
     }
 
     // Haetaan korvaavat ketju ja tuotteiden tiedot
-    $query = "  SELECT 'vastaava' as tyyppi, if (vastaavat.jarjestys=0, 9999, vastaavat.jarjestys) jarjestys, vastaavat.vaihtoehtoinen, vastaavat.tunnus as vastaavat_tunnus, tuote.*
-          FROM vastaavat
-          JOIN tuote ON vastaavat.yhtio=tuote.yhtio AND vastaavat.tuoteno=tuote.tuoteno
-          WHERE vastaavat.yhtio = '{$kukarow['yhtio']}'
-          AND vastaavat.id = '{$ketju}'
-          $conditions
-          ORDER BY jarjestys, tuoteno";
+    $query = "SELECT 'vastaava' as tyyppi, if (vastaavat.jarjestys=0, 9999, vastaavat.jarjestys) jarjestys, vastaavat.vaihtoehtoinen, vastaavat.tunnus as vastaavat_tunnus, tuote.*
+              FROM vastaavat
+              JOIN tuote ON vastaavat.yhtio=tuote.yhtio AND vastaavat.tuoteno=tuote.tuoteno
+              WHERE vastaavat.yhtio = '{$kukarow['yhtio']}'
+              AND vastaavat.id      = '{$ketju}'
+              $conditions
+              ORDER BY jarjestys, tuoteno";
     $result = pupe_query($query);
 
     while ($tuote = mysql_fetch_assoc($result)) {

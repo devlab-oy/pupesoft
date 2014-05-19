@@ -13,10 +13,10 @@ if ($summa != 0 or strlen($tili) > 0) {
   if (strlen($tili) > 0) {
 
     // Onko suoraan tilinumero
-    $query = "  SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus, nimi, manuaali_esto
-          FROM tili
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tilino = '$tili'";
+    $query = "SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus, nimi, manuaali_esto
+              FROM tili
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tilino  = '$tili'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -24,10 +24,10 @@ if ($summa != 0 or strlen($tili) > 0) {
       $ok = 1;
 
       // Kokeillaan nimihakua
-      $query = "  SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus, nimi
-            FROM tili
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND nimi LIKE '%$tili%'";
+      $query = "SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus, nimi
+                FROM tili
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND nimi    LIKE '%$tili%'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {

@@ -166,7 +166,7 @@ class packer
                 $t->r = $hole->l;
                 break;
             }
-        } else if ($how == 3 || $how == 6 || $how == 12 || $how == 9) {
+        } elseif ($how == 3 || $how == 6 || $how == 12 || $how == 9) {
             // Corner notch
             if (($how & 2) == 2) { // Notching left side
                 if (($how & 4) == 4) { // left top

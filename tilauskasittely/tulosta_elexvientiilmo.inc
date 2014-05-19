@@ -56,10 +56,10 @@ function transportmeans ($xml, $object, $params) {
 }
 
 //hetaan kaikki otunnukset jotka löytyvät tän uusiotunnuksen alta
-$query = "  SELECT group_concat(distinct otunnus) tilaukset
-      FROM tilausrivi
-      WHERE uusiotunnus = '$laskurow[tunnus]'
-      and yhtio = '$kukarow[yhtio]'";
+$query = "SELECT group_concat(distinct otunnus) tilaukset
+          FROM tilausrivi
+          WHERE uusiotunnus = '$laskurow[tunnus]'
+          and yhtio         = '$kukarow[yhtio]'";
 $uresult = mysql_query($query) or pupe_error($query);
 
 // varmistetaan, että löydettiin otsikoita
@@ -69,21 +69,21 @@ if (mysql_num_rows($uresult) > 0) {
 
   $otunnarit = explode(",", $urow["tilaukset"]);
 
-  $query = "  SELECT *
-        FROM laskun_lisatiedot
-        WHERE laskun_lisatiedot.otunnus = '$otunnarit[0]'
-        and laskun_lisatiedot.yhtio='$kukarow[yhtio]'";
+  $query = "SELECT *
+            FROM laskun_lisatiedot
+            WHERE laskun_lisatiedot.otunnus = '$otunnarit[0]'
+            and laskun_lisatiedot.yhtio='$kukarow[yhtio]'";
   $lisres = mysql_query($query) or pupe_error($query);
   $lisrow = mysql_fetch_assoc($lisres);
 
 
   //haetaan kollimäärä ja bruttopaino
-  $query = "  SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit
-        FROM rahtikirjat
-        WHERE otsikkonro in ($urow[tilaukset])
-        and yhtio='$kukarow[yhtio]'
-        group by pakkaus, pakkauskuvaus, pakkauskuvaustark
-        having kollit > 0";
+  $query = "SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit
+            FROM rahtikirjat
+            WHERE otsikkonro in ($urow[tilaukset])
+            and yhtio='$kukarow[yhtio]'
+            group by pakkaus, pakkauskuvaus, pakkauskuvaustark
+            having kollit > 0";
   $rahtiresult = mysql_query($query) or pupe_error($query);
 
   $kilot  = 0;
@@ -116,11 +116,11 @@ if (mysql_num_rows($uresult) > 0) {
   $kollit = round($kollit);
 
 
-  $query = "  SELECT osoite
-        FROM varastopaikat
-        WHERE tunnus = '$laskurow[varasto]'
-        and yhtio = '$yhtiorow[yhtio]'
-        and osoite != ''";
+  $query = "SELECT osoite
+            FROM varastopaikat
+            WHERE tunnus  = '$laskurow[varasto]'
+            and yhtio     = '$yhtiorow[yhtio]'
+            and osoite   != ''";
   $varresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($varresult) > 0) {
@@ -134,26 +134,26 @@ if (mysql_num_rows($uresult) > 0) {
   //ylimääräisten erien vaikutus
   $extrat = abs($laskurow["lisattava_era"])-abs($laskurow["vahennettava_era"]);
 
-  $query = "  SELECT
-        tuote.tullinimike1,
-        tuote.tullinimike2,
-        tuote.tullikohtelu,
-        (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
-        tullinimike.su,
-        tullinimike.su_vientiilmo,
-        tullinimike.dm,
-        min(tilausrivi.nimitys) nimitys,
-        GROUP_CONCAT(distinct trim(tuote.nimitys) ORDER BY tuote.nimitys SEPARATOR '##') nimitys_hieno,
-        sum(tilausrivi.rivihinta) rivihinta,
-        sum(tilausrivi.kpl) kpl,
-        round(sum(if(tuote.tuotemassa!=0, tilausrivi.kpl*tuote.tuotemassa, (tilausrivi.rivihinta/$laskurow[summa])*$kilot)), 3) nettop
-        FROM tilausrivi
-        JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = ''
-        JOIN tullinimike ON tuote.tullinimike1 = tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tuote.tullinimike1!=''
-        WHERE tilausrivi.uusiotunnus  = '$uusiotunnus'
-        and tilausrivi.yhtio      = '$kukarow[yhtio]'
-        and tilausrivi.kpl        > 0
-        GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa, tullinimike.su, tullinimike.su_vientiilmo, tullinimike.dm";
+  $query = "SELECT
+            tuote.tullinimike1,
+            tuote.tullinimike2,
+            tuote.tullikohtelu,
+            (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
+            tullinimike.su,
+            tullinimike.su_vientiilmo,
+            tullinimike.dm,
+            min(tilausrivi.nimitys) nimitys,
+            GROUP_CONCAT(distinct trim(tuote.nimitys) ORDER BY tuote.nimitys SEPARATOR '##') nimitys_hieno,
+            sum(tilausrivi.rivihinta) rivihinta,
+            sum(tilausrivi.kpl) kpl,
+            round(sum(if(tuote.tuotemassa!=0, tilausrivi.kpl*tuote.tuotemassa, (tilausrivi.rivihinta/$laskurow[summa])*$kilot)), 3) nettop
+            FROM tilausrivi
+            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = ''
+            JOIN tullinimike ON tuote.tullinimike1 = tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tuote.tullinimike1!=''
+            WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
+            and tilausrivi.yhtio         = '$kukarow[yhtio]'
+            and tilausrivi.kpl           > 0
+            GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa, tullinimike.su, tullinimike.su_vientiilmo, tullinimike.dm";
   $riviresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($riviresult) > 0) {

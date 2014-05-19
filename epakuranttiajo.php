@@ -97,27 +97,27 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
   $epa_tuotemaara = 0;
 
   // Haetaan kaikki saldolliset tuotteet
-  $query  = "  SELECT tuote.tuoteno,
-        tuote.nimitys,
-        tuote.try,
-        tuote.epakurantti25pvm,
-        tuote.epakurantti50pvm,
-        tuote.epakurantti75pvm,
-        tuote.epakurantti100pvm,
-        if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin,
-        tuote.kehahin bruttokehahin,
-        tuote.luontiaika,
-        tuote.sarjanumeroseuranta,
-        sum(tuotepaikat.saldo) saldo
-        FROM tuote
-        JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        AND tuote.ei_saldoa = ''
-        AND tuote.epakurantti100pvm = '0000-00-00'
-        AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
-        GROUP BY 1,2,3,4,5,6,7,8,9,10
-        HAVING saldo > 0
-        ORDER BY tuoteno";
+  $query  = "SELECT tuote.tuoteno,
+             tuote.nimitys,
+             tuote.try,
+             tuote.epakurantti25pvm,
+             tuote.epakurantti50pvm,
+             tuote.epakurantti75pvm,
+             tuote.epakurantti100pvm,
+             if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin,
+             tuote.kehahin bruttokehahin,
+             tuote.luontiaika,
+             tuote.sarjanumeroseuranta,
+             sum(tuotepaikat.saldo) saldo
+             FROM tuote
+             JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
+             WHERE tuote.yhtio             = '$kukarow[yhtio]'
+             AND tuote.ei_saldoa           = ''
+             AND tuote.epakurantti100pvm   = '0000-00-00'
+             AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
+             GROUP BY 1,2,3,4,5,6,7,8,9,10
+             HAVING saldo > 0
+             ORDER BY tuoteno";
   $epakurantti_result = mysql_query($query) or pupe_error($query);
 
   include('inc/pupeExcel.inc');
@@ -190,14 +190,14 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       }
 
       // Haetaan tuotteen viimeisin tulo
-      $query  = "  SELECT laadittu
-            FROM tapahtuma
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND laji in ('tulo', 'valmistus')
-            AND tuoteno = '$epakurantti_row[tuoteno]'
-            AND selite not like '%alkusaldo%'
-            ORDER BY laadittu DESC
-            LIMIT 1;";
+      $query  = "SELECT laadittu
+                 FROM tapahtuma
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND laji    in ('tulo', 'valmistus')
+                 AND tuoteno = '$epakurantti_row[tuoteno]'
+                 AND selite  not like '%alkusaldo%'
+                 ORDER BY laadittu DESC
+                 LIMIT 1;";
       $tapres = mysql_query($query) or pupe_error($query);
 
       if (!$tulorow = mysql_fetch_assoc($tapres)) {
@@ -213,13 +213,13 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       }
 
       // Haetaan tuotteen viimeisin laskutus
-      $query  = "  SELECT laadittu
-            FROM tapahtuma
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND laji in ('laskutus', 'kulutus')
-            AND tuoteno = '$epakurantti_row[tuoteno]'
-            ORDER BY laadittu DESC
-            LIMIT 1;";
+      $query  = "SELECT laadittu
+                 FROM tapahtuma
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND laji    in ('laskutus', 'kulutus')
+                 AND tuoteno = '$epakurantti_row[tuoteno]'
+                 ORDER BY laadittu DESC
+                 LIMIT 1;";
       $tapres = mysql_query($query) or pupe_error($query);
 
       if (!$laskutusrow = mysql_fetch_assoc($tapres)) {
@@ -294,21 +294,21 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
         // N‰ytet‰‰n varastossa olevat er‰t/sarjanumerot
         if ($epakurantti_row["sarjanumeroseuranta"] == "V" or $epakurantti_row['sarjanumeroseuranta'] == 'T') {
 
-          $query  = "  SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
-                tilausrivi_osto.tunnus osto_rivitunnus,
-                tilausrivi_osto.perheid2 osto_perheid2,
-                tilausrivi_osto.nimitys nimitys,
-                lasku_myynti.nimi myynimi
-                FROM sarjanumeroseuranta
-                LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-                LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-                LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
-                LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
-                WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-                and sarjanumeroseuranta.tuoteno = '$epakurantti_row[tuoteno]'
-                and sarjanumeroseuranta.myyntirivitunnus != -1
-                and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-                and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+          $query  = "SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
+                     tilausrivi_osto.tunnus osto_rivitunnus,
+                     tilausrivi_osto.perheid2 osto_perheid2,
+                     tilausrivi_osto.nimitys nimitys,
+                     lasku_myynti.nimi myynimi
+                     FROM sarjanumeroseuranta
+                     LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+                     LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+                     LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+                     LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+                     WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'
+                     and sarjanumeroseuranta.tuoteno           = '$epakurantti_row[tuoteno]'
+                     and sarjanumeroseuranta.myyntirivitunnus != -1
+                     and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+                     and tilausrivi_osto.laskutettuaika       != '0000-00-00'";
           $sarjares = pupe_query($query);
 
           while ($sarjarow = mysql_fetch_assoc($sarjares)) {
@@ -317,17 +317,17 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
         }
         elseif ($epakurantti_row["sarjanumeroseuranta"] == "E" or $epakurantti_row["sarjanumeroseuranta"] == "F") {
 
-          $query  = "  SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto,
-                sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso,
-                sarjanumeroseuranta.era_kpl kpl,
-                sarjanumeroseuranta.tunnus sarjatunnus
-                FROM sarjanumeroseuranta
-                LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-                WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-                and sarjanumeroseuranta.tuoteno = '$epakurantti_row[tuoteno]'
-                and sarjanumeroseuranta.myyntirivitunnus = 0
-                and sarjanumeroseuranta.era_kpl != 0
-                and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+          $query  = "SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto,
+                     sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso,
+                     sarjanumeroseuranta.era_kpl kpl,
+                     sarjanumeroseuranta.tunnus sarjatunnus
+                     FROM sarjanumeroseuranta
+                     LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+                     WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'
+                     and sarjanumeroseuranta.tuoteno           = '$epakurantti_row[tuoteno]'
+                     and sarjanumeroseuranta.myyntirivitunnus  = 0
+                     and sarjanumeroseuranta.era_kpl          != 0
+                     and tilausrivi_osto.laskutettuaika       != '0000-00-00'";
           $sarjares = pupe_query($query);
 
           while ($sarjarow = mysql_fetch_assoc($sarjares)) {

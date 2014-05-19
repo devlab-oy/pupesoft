@@ -32,12 +32,12 @@ kasittele_tilaukset($tilaukset);
 function hae_suoritusta_odottavat_tilaukset() {
   global $yhtiorow;
 
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '{$yhtiorow['yhtio']}'
-        AND tila   = 'N'
-        AND alatila = 'G'
-        ORDER BY luontiaika ASC";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '{$yhtiorow['yhtio']}'
+            AND tila    = 'N'
+            AND alatila = 'G'
+            ORDER BY luontiaika ASC";
   $result = pupe_query($query);
 
   $tilaukset = array();
@@ -96,24 +96,24 @@ function aseta_tilaus_kesken_tilaan_ja_aseta_uusi_lahto($laskurow) {
 function tarkista_suoratoimitus($myyntitilaus) {
   global $kukarow, $yhtiorow;
 
-  $query = "  SELECT tilausrivin_lisatiedot.tilausrivilinkki,
-        tilausrivi.otunnus
-        FROM tilausrivin_lisatiedot
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
-          AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki
-        )
-        WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivin_lisatiedot.vanha_otunnus = '{$myyntitilaus['tunnus']}'
-        AND tilausrivin_lisatiedot.tilausrivilinkki != 0
-        LIMIT 1";
+  $query = "SELECT tilausrivin_lisatiedot.tilausrivilinkki,
+            tilausrivi.otunnus
+            FROM tilausrivin_lisatiedot
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+              AND tilausrivi.tunnus                      = tilausrivin_lisatiedot.tilausrivilinkki
+            )
+            WHERE tilausrivin_lisatiedot.yhtio           = '{$kukarow['yhtio']}'
+            AND tilausrivin_lisatiedot.vanha_otunnus     = '{$myyntitilaus['tunnus']}'
+            AND tilausrivin_lisatiedot.tilausrivilinkki != 0
+            LIMIT 1";
   $suoratoimitus_result = pupe_query($query);
 
   if ($tilausrivin_lisatieto_row = mysql_fetch_assoc($suoratoimitus_result)) {
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$tilausrivin_lisatieto_row['otunnus']}'";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$tilausrivin_lisatieto_row['otunnus']}'";
     $result = pupe_query($query);
     $laskurow = mysql_fetch_assoc($result);
 
@@ -126,13 +126,13 @@ function tarkista_suoratoimitus($myyntitilaus) {
 function aseta_tilaus_kesken_tilaan($laskurow) {
   global $kukarow, $yhtiorow;
 
-  $query = "  UPDATE lasku
-        SET tila = '{$laskurow['tila']}',
-        alatila = ''
-        WHERE yhtio = '{$yhtiorow['yhtio']}'
-        AND tunnus = '{$laskurow['tunnus']}'
-        AND tila = '{$laskurow['tila']}'
-        AND alatila = 'G'";
+  $query = "UPDATE lasku
+            SET tila = '{$laskurow['tila']}',
+            alatila     = ''
+            WHERE yhtio = '{$yhtiorow['yhtio']}'
+            AND tunnus  = '{$laskurow['tunnus']}'
+            AND tila    = '{$laskurow['tila']}'
+            AND alatila = 'G'";
   pupe_query($query);
 
   if (mysql_affected_rows() > 0) {

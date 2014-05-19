@@ -26,10 +26,10 @@ $lets = '';
 $uusean = '';
 
 if ($updateean != '' and $uuseankoodi != '' and $tee != '' and $toim != 'YKS') {
-  $query = "  UPDATE tuote
-        SET eankoodi = '$uuseankoodi'
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and tuoteno  = '$tuoteno'";
+  $query = "UPDATE tuote
+            SET eankoodi = '$uuseankoodi'
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tuoteno = '$tuoteno'";
   $resulteankoodi = mysql_query($query) or pupe_error($query);
 }
 
@@ -126,10 +126,10 @@ $tkpl = $tulostakappale;
 if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
 
   if ($lets == 'go') {
-    $query = "  SELECT komento
-          FROM kirjoittimet
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$kirjoitin'";
+    $query = "SELECT komento
+              FROM kirjoittimet
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$kirjoitin'";
     $komres = mysql_query($query) or pupe_error($query);
     $komrow = mysql_fetch_array($komres);
     $komento = $komrow['komento'];
@@ -222,11 +222,11 @@ if (!isset($nayta_pdf)) {
   echo "<td><select name='kirjoitin'>";
   echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio = '$kukarow[yhtio]'
-        and komento != 'email'
-        order by kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and komento != 'email'
+            order by kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   while ($kirow = mysql_fetch_array($kires)) {

@@ -11,13 +11,13 @@ if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_G
   $ostoskori_ostoskori  = mysql_real_escape_string($_GET["ostoskori"]);
 
   // katotaan löytyykö asiakas
-  $query = "  SELECT oletus_asiakas
-        FROM kuka
-        WHERE yhtio = '$ostoskori_yhtio'
-        AND kuka = '$ostoskori_user'
-        AND salasana = md5('$ostoskori_pass')
-        AND extranet != ''
-        AND oletus_asiakas != ''";
+  $query = "SELECT oletus_asiakas
+            FROM kuka
+            WHERE yhtio         = '$ostoskori_yhtio'
+            AND kuka            = '$ostoskori_user'
+            AND salasana        = md5('$ostoskori_pass')
+            AND extranet       != ''
+            AND oletus_asiakas != ''";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -25,13 +25,13 @@ if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_G
     $kukarivi = mysql_fetch_array($result);
 
     // asiakas löytyi, katotaan löytyykö sille ostoskoria $ostoskori
-    $query = "  SELECT tilausrivi.*
-          FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-          JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'B')
-          WHERE lasku.yhtio = '$ostoskori_yhtio'
-          AND lasku.tila = 'B'
-          AND lasku.liitostunnus = '$kukarivi[oletus_asiakas]'
-          AND lasku.alatila = '$ostoskori_ostoskori'";
+    $query = "SELECT tilausrivi.*
+              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+              JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'B')
+              WHERE lasku.yhtio      = '$ostoskori_yhtio'
+              AND lasku.tila         = 'B'
+              AND lasku.liitostunnus = '$kukarivi[oletus_asiakas]'
+              AND lasku.alatila      = '$ostoskori_ostoskori'";
     $result = mysql_query($query) or pupe_error($query);
 
     while ($rivit = mysql_fetch_array($result)) {
@@ -42,10 +42,10 @@ if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_G
       echo "\n";
 
       //  Poistetaan rivi
-      $query = "  DELETE FROM tilausrivi
-            WHERE yhtio = '$ostoskori_yhtio'
-            AND tyyppi = 'B'
-            AND tunnus = '$rivit[tunnus]'";
+      $query = "DELETE FROM tilausrivi
+                WHERE yhtio = '$ostoskori_yhtio'
+                AND tyyppi  = 'B'
+                AND tunnus  = '$rivit[tunnus]'";
       $delres = mysql_query($query) or pupe_error($query);
     }
   }

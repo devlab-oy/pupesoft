@@ -164,39 +164,39 @@ if ($tee == "ajaraportti" and isset($submit_nappi)) {
     $lasku_join_ehto .= " AND lasku.kohde = '{$valmistuslinja}'";
   }
 
-  $query = "  SELECT
-        tuote.tuoteno,
-        lasku.kohde valmistuslinja,
-        tilausrivi.toimaika,
-        tilausrivi.toimitettuaika,
-        tilausrivi.kerattyaika,
-        tilausrivi.nimitys,
-        lasku.tila,
-        lasku.alatila,
-        tuote.try,
-        tuote.osasto,
-        left(lasku.kerayspvm, 10) kerayspvm,
-        lasku.toimaika,
-        lasku.tunnus valmistusnumero,
-        ifnull(sum(tilausrivi.kpl), 0) valmistettu,
-        ifnull(sum(tilausrivi.varattu), 0) valmistetaan
-        FROM lasku
-        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus
-          AND tilausrivi.tyyppi = 'W'
-          AND tilausrivi.var != 'P')
-        JOIN tuote ON (tuote.yhtio = lasku.yhtio
-          AND tuote.tuoteno = tilausrivi.tuoteno)
-        {$lisa_parametri}
-        WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-        AND lasku.tila = 'V'
-        AND lasku.toimaika >= '{$pvmalku}'
-        AND lasku.toimaika <= '{$pvmloppu}'
-        {$lasku_join_ehto}
-        {$lisa}
-        GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
-        HAVING valmistettu != 0 OR valmistetaan != 0
-        ORDER BY lasku.kohde, tilausrivi.tuoteno, lasku.alatila, lasku.tunnus";
+  $query = "SELECT
+            tuote.tuoteno,
+            lasku.kohde valmistuslinja,
+            tilausrivi.toimaika,
+            tilausrivi.toimitettuaika,
+            tilausrivi.kerattyaika,
+            tilausrivi.nimitys,
+            lasku.tila,
+            lasku.alatila,
+            tuote.try,
+            tuote.osasto,
+            left(lasku.kerayspvm, 10) kerayspvm,
+            lasku.toimaika,
+            lasku.tunnus valmistusnumero,
+            ifnull(sum(tilausrivi.kpl), 0) valmistettu,
+            ifnull(sum(tilausrivi.varattu), 0) valmistetaan
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus  = lasku.tunnus
+              AND tilausrivi.tyyppi   = 'W'
+              AND tilausrivi.var     != 'P')
+            JOIN tuote ON (tuote.yhtio = lasku.yhtio
+              AND tuote.tuoteno       = tilausrivi.tuoteno)
+            {$lisa_parametri}
+            WHERE lasku.yhtio         = '{$kukarow["yhtio"]}'
+            AND lasku.tila            = 'V'
+            AND lasku.toimaika        >= '{$pvmalku}'
+            AND lasku.toimaika        <= '{$pvmloppu}'
+            {$lasku_join_ehto}
+            {$lisa}
+            GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+            HAVING valmistettu != 0 OR valmistetaan != 0
+            ORDER BY lasku.kohde, tilausrivi.tuoteno, lasku.alatila, lasku.tunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

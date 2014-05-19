@@ -47,26 +47,26 @@ echo "<br>";
 
 if ($tee == "NAYTA") {
 
-  $query = "  SELECT
-        toimi.tunnus,
-        toimi.ytunnus,
-        if(kuka.nimi IS NULL or toimi.tyyppi = 'P', concat('~POISTETTU ', toimi.nimi), kuka.nimi) nimi,
-        tuote.kuvaus,
-        avg(tilausrivi.hinta) hinta,
-        sum(tilausrivi.kpl) kpl,
-        sum(tilausrivi.rivihinta) yhteensa
-        FROM lasku
-        JOIN toimi on (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
-        LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = toimi.nimi)
-        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-        JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.kuvaus in ('50', '56'))
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND lasku.tila = 'Y'
-        AND lasku.tilaustyyppi = 'M'
-        AND lasku.tapvm >= '$vv-01-01'
-        AND lasku.tapvm <= '$vv-12-31'
-        GROUP BY 1,2,3,4
-        ORDER BY nimi, kuvaus";
+  $query = "SELECT
+            toimi.tunnus,
+            toimi.ytunnus,
+            if(kuka.nimi IS NULL or toimi.tyyppi = 'P', concat('~POISTETTU ', toimi.nimi), kuka.nimi) nimi,
+            tuote.kuvaus,
+            avg(tilausrivi.hinta) hinta,
+            sum(tilausrivi.kpl) kpl,
+            sum(tilausrivi.rivihinta) yhteensa
+            FROM lasku
+            JOIN toimi on (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
+            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = toimi.nimi)
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+            JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.kuvaus in ('50', '56'))
+            WHERE lasku.yhtio      = '$kukarow[yhtio]'
+            AND lasku.tila         = 'Y'
+            AND lasku.tilaustyyppi = 'M'
+            AND lasku.tapvm        >= '$vv-01-01'
+            AND lasku.tapvm        <= '$vv-12-31'
+            GROUP BY 1,2,3,4
+            ORDER BY nimi, kuvaus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -149,25 +149,25 @@ if ($tee == "NAYTA") {
       }
 
       // erittely
-      $query = "  SELECT tilausrivi.tuoteno,
-            tilausrivi.nimitys,
-            tuote.vienti,
-            {$varlisa} var,
-            avg(tilausrivi.hinta) hinta,
-            sum(tilausrivi.kpl) kpl,
-            sum(tilausrivi.rivihinta) yhteensa
-            FROM lasku
-            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-            JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A','B') and tuote.kuvaus = '$row[kuvaus]')
-            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.toim_ovttunnus)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tila = 'Y'
-            AND lasku.tilaustyyppi = 'M'
-            AND lasku.tapvm >= '$vv-01-01'
-            AND lasku.tapvm <= '$vv-12-31'
-            AND lasku.liitostunnus = '$row[tunnus]'
-            GROUP BY 1,2,3,4
-            ORDER BY 1,2";
+      $query = "SELECT tilausrivi.tuoteno,
+                tilausrivi.nimitys,
+                tuote.vienti,
+                {$varlisa} var,
+                avg(tilausrivi.hinta) hinta,
+                sum(tilausrivi.kpl) kpl,
+                sum(tilausrivi.rivihinta) yhteensa
+                FROM lasku
+                JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+                JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A','B') and tuote.kuvaus = '$row[kuvaus]')
+                LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.toim_ovttunnus)
+                WHERE lasku.yhtio      = '$kukarow[yhtio]'
+                AND lasku.tila         = 'Y'
+                AND lasku.tilaustyyppi = 'M'
+                AND lasku.tapvm        >= '$vv-01-01'
+                AND lasku.tapvm        <= '$vv-12-31'
+                AND lasku.liitostunnus = '$row[tunnus]'
+                GROUP BY 1,2,3,4
+                ORDER BY 1,2";
       $eres = pupe_query($query);
 
       while ($erow = mysql_fetch_assoc($eres)) {

@@ -15,9 +15,9 @@ $kerayseran_numero = 0;
 foreach ($erat as $era_key => $era_arr) {
   if ($era_key == 'pakkaukset') {
 
-    $query = "  SELECT ifnull(max(nro), 0) AS nro
-          FROM kerayserat
-          WHERE yhtio = '{$kukarow['yhtio']}'";
+    $query = "SELECT ifnull(max(nro), 0) AS nro
+              FROM kerayserat
+              WHERE yhtio = '{$kukarow['yhtio']}'";
     $nro_fetch_res = pupe_query($query);
     $nro_fetch_row = mysql_fetch_assoc($nro_fetch_res);
 
@@ -43,21 +43,21 @@ foreach ($erat as $era_key => $era_arr) {
             $tilausrivit .= "$tilriv,";
             $kappaleet += $kpl;
 
-            $query = "  SELECT round((tuote.tuotemassa * (tilausrivi.kpl+tilausrivi.varattu)), 2) as paino, round(((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) * (tilausrivi.kpl+tilausrivi.varattu)), 4) as tilavuus, tilausrivi.otunnus
-                  FROM tilausrivi
-                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tunnus = '{$tilriv}'";
+            $query = "SELECT round((tuote.tuotemassa * (tilausrivi.kpl+tilausrivi.varattu)), 2) as paino, round(((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) * (tilausrivi.kpl+tilausrivi.varattu)), 4) as tilavuus, tilausrivi.otunnus
+                      FROM tilausrivi
+                      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tunnus  = '{$tilriv}'";
             $paino_res = pupe_query($query);
             $paino_row = mysql_fetch_assoc($paino_res);
 
             $paino += $paino_row['paino'];
             $tilavuus += $paino_row['tilavuus'];
 
-            $query = "  SELECT *
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$paino_row['otunnus']}'";
+            $query = "SELECT *
+                      FROM lasku
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$paino_row['otunnus']}'";
             $res = pupe_query($query);
             $laskurow = mysql_fetch_assoc($res);
 
@@ -68,20 +68,20 @@ foreach ($erat as $era_key => $era_arr) {
 
             $modulilisa = (isset($ohjelma_moduli) and $ohjelma_moduli != "") ? mysql_real_escape_string($ohjelma_moduli) : 'PUPESOFT';
 
-            $query = "  INSERT INTO kerayserat SET
-                  yhtio       = '{$kukarow['yhtio']}',
-                  nro       = '{$kerayseran_numero}',
-                  keraysvyohyke   = '{$erat['keraysvyohyketiedot']['keraysvyohyke']}',
-                  tila       = '{$tilalisa}',
-                  sscc       = '{$sscc}',
-                  otunnus     = '{$laskurow['tunnus']}',
-                  tilausrivi     = '{$tilriv}',
-                  pakkaus     = '{$pakkaus_nro}',
-                  pakkausnro     = '{$juokseva_nro}',
-                  kpl       = '{$kpl}',
-                  laatija     = '{$kukarow['kuka']}',
-                  luontiaika     = now(),
-                  ohjelma_moduli  = '$modulilisa'";
+            $query = "INSERT INTO kerayserat SET
+                      yhtio          = '{$kukarow['yhtio']}',
+                      nro            = '{$kerayseran_numero}',
+                      keraysvyohyke  = '{$erat['keraysvyohyketiedot']['keraysvyohyke']}',
+                      tila           = '{$tilalisa}',
+                      sscc           = '{$sscc}',
+                      otunnus        = '{$laskurow['tunnus']}',
+                      tilausrivi     = '{$tilriv}',
+                      pakkaus        = '{$pakkaus_nro}',
+                      pakkausnro     = '{$juokseva_nro}',
+                      kpl            = '{$kpl}',
+                      laatija        = '{$kukarow['kuka']}',
+                      luontiaika     = now(),
+                      ohjelma_moduli = '$modulilisa'";
             $insert_res = pupe_query($query);
           }
         }
@@ -89,14 +89,14 @@ foreach ($erat as $era_key => $era_arr) {
     }
 
     // Tsekataanko pit‰‰kˆ tilaukset/rivit splitata (eli keissi jossa koko tilaus ei ole mahtunut er‰‰n tai keissi jossa vain osa rivist‰ on mahtunut er‰‰n)
-    $query = "  SELECT tilausrivi.otunnus, tilausrivi.tunnus, sum(ifnull(kerayserat.kpl,0)) kerkpl
-          FROM tilausrivi
-          JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.ohita_kerays = '')
-          JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus and kerayserat.nro = '{$kerayseran_numero}')
-          WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-          AND tilausrivi.otunnus IN ($otunnukset)
-          GROUP BY 1,2
-          ORDER BY 1,2";
+    $query = "SELECT tilausrivi.otunnus, tilausrivi.tunnus, sum(ifnull(kerayserat.kpl,0)) kerkpl
+              FROM tilausrivi
+              JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.ohita_kerays = '')
+              JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus and kerayserat.nro = '{$kerayseran_numero}')
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus IN ($otunnukset)
+              GROUP BY 1,2
+              ORDER BY 1,2";
     $era_res = pupe_query($query);
 
     $lisatyt_tilausrivit = array();

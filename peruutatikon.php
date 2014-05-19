@@ -10,13 +10,13 @@ if (isset($kausi)) {
     echo "<font class='message'>".t("Peruutettavat tositteet")."</font><br><br>";
     echo "<table>";
 
-    $query  = "  SELECT max(tosite) pienin, min(tosite) suurin
-          FROM tiliointi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and korjattu = ''
-          and left(tapvm,7) = '$kausi'
-          and tosite >= '91000000'
-          and tosite <= '91999999'";
+    $query  = "SELECT max(tosite) pienin, min(tosite) suurin
+               FROM tiliointi
+               WHERE yhtio  = '$kukarow[yhtio]'
+               and korjattu = ''
+               and left(tapvm,7) = '$kausi'
+               and tosite   >= '91000000'
+               and tosite   <= '91999999'";
 
     $result = mysql_query($query) or pupe_error($query);
 
@@ -25,13 +25,13 @@ if (isset($kausi)) {
       echo "<tr><th>".t("Myyntisaamisia")."</th><td>$row[pienin]</td><td>-</td><td>$row[suurin]</td></tr>";
     }
 
-    $query  = "  SELECT max(tosite) pienin, min(tosite) suurin
-          FROM tiliointi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and korjattu = ''
-          and left(tapvm,7) = '$kausi'
-          and tosite >= '93000000'
-          and tosite <= '93999999'";
+    $query  = "SELECT max(tosite) pienin, min(tosite) suurin
+               FROM tiliointi
+               WHERE yhtio  = '$kukarow[yhtio]'
+               and korjattu = ''
+               and left(tapvm,7) = '$kausi'
+               and tosite   >= '93000000'
+               and tosite   <= '93999999'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -39,13 +39,13 @@ if (isset($kausi)) {
       echo "<tr><th>".t("Ostovelkoja")."</th><td>$row[pienin]</td><td>-</td><td>$row[suurin]</td></tr>";
     }
 
-    $query  = "  SELECT max(tosite) pienin, min(tosite) suurin
-          FROM tiliointi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and korjattu = ''
-          and left(tapvm,7) = '$kausi'
-          and tosite >= '50000000'
-          and tosite <= '50999999'";
+    $query  = "SELECT max(tosite) pienin, min(tosite) suurin
+               FROM tiliointi
+               WHERE yhtio  = '$kukarow[yhtio]'
+               and korjattu = ''
+               and left(tapvm,7) = '$kausi'
+               and tosite   >= '50000000'
+               and tosite   <= '50999999'";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -61,11 +61,11 @@ if (isset($kausi)) {
       </form>";
   }
   else {
-    $query  = "  UPDATE tiliointi SET tosite = ''
-          WHERE yhtio = '$kukarow[yhtio]'
-          and korjattu = ''
-          and tosite > 0
-          and left(tapvm,7) = '$kausi'";
+    $query  = "UPDATE tiliointi SET tosite = ''
+               WHERE yhtio  = '$kukarow[yhtio]'
+               and korjattu = ''
+               and tosite   > 0
+               and left(tapvm,7) = '$kausi'";
     $result = mysql_query($query) or pupe_error($query);
 
     echo "<br><font class='message'>".t("Peruutin TIKON-siirron kaudelta").": $kausi</font><br><br>";
@@ -76,14 +76,14 @@ if (!isset($kausi)) {
   //Etsitään viimeksi viety kausi
 
   //Myyntisaamiset
-  $query  = "  SELECT tunnus, left(tapvm, 7) kausi
-        FROM tiliointi
-        WHERE yhtio='$kukarow[yhtio]'
-        and korjattu=''
-        and tosite >= '91000000'
-        and tosite <= '91999999'
-        ORDER BY tosite desc
-        LIMIT 1";
+  $query  = "SELECT tunnus, left(tapvm, 7) kausi
+             FROM tiliointi
+             WHERE yhtio='$kukarow[yhtio]'
+             and korjattu=''
+             and tosite >= '91000000'
+             and tosite <= '91999999'
+             ORDER BY tosite desc
+             LIMIT 1";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -91,14 +91,14 @@ if (!isset($kausi)) {
   }
 
   //Ostovelat
-  $query  = "  SELECT tunnus,left(tapvm,7) kausi
-        FROM tiliointi
-        WHERE yhtio='$kukarow[yhtio]'
-        and korjattu=''
-        and tosite >= '93000000'
-        and tosite <= '93999999'
-        ORDER BY tosite desc
-        LIMIT 1";
+  $query  = "SELECT tunnus,left(tapvm,7) kausi
+             FROM tiliointi
+             WHERE yhtio='$kukarow[yhtio]'
+             and korjattu=''
+             and tosite >= '93000000'
+             and tosite <= '93999999'
+             ORDER BY tosite desc
+             LIMIT 1";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -106,14 +106,14 @@ if (!isset($kausi)) {
   }
 
   //Tiliotteet
-  $query  = "  SELECT tunnus,left(tapvm,7) kausi
-        FROM tiliointi
-        WHERE yhtio='$kukarow[yhtio]'
-        and korjattu=''
-        and tosite >= '50000000'
-        and tosite <= '50999999'
-        ORDER BY tosite desc
-        LIMIT 1";
+  $query  = "SELECT tunnus,left(tapvm,7) kausi
+             FROM tiliointi
+             WHERE yhtio='$kukarow[yhtio]'
+             and korjattu=''
+             and tosite >= '50000000'
+             and tosite <= '50999999'
+             ORDER BY tosite desc
+             LIMIT 1";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {

@@ -269,10 +269,10 @@ if ($alatila == "T") {
   $tunnukset   = $asiakasid;
 }
 else {
-  $query = "  SELECT group_concat(tunnus) tunnukset
-        FROM asiakas
-        WHERE yhtio = '$kukarow[yhtio]'
-        and ytunnus = '$ytunnus'";
+  $query = "SELECT group_concat(tunnus) tunnukset
+            FROM asiakas
+            WHERE yhtio = '$kukarow[yhtio]'
+            and ytunnus = '$ytunnus'";
   $result = pupe_query($query);
   $asiakasrow2 = mysql_fetch_assoc($result);
 
@@ -318,49 +318,49 @@ else {
   $on_tiliote = true;
 }
 
-$query = "  SELECT
-      lasku.ytunnus,
-      lasku.maa,
-      lasku.valkoodi,
-      lasku.tunnus,
-      lasku.erpcm,
-      lasku.liitostunnus,
-      lasku.mapvm,
-      lasku.nimi,
-      lasku.tapvm,
-      lasku.laskunro,
-      lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
-      lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
-      lasku.summa laskusumma,
-      lasku.summa_valuutassa laskusumma_valuutassa,
-      sum(tiliointi.summa) tiliointiavoinsaldo,
-      sum(tiliointi.summa_valuutassa) tiliointiavoinsaldo_valuutassa,
-      sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
-      sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
-      FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-      {$leftlisa} JOIN tiliointi use index (tositerivit_index) ON (
-        lasku.yhtio         = tiliointi.yhtio
-        and lasku.tunnus       = tiliointi.ltunnus
-        and tiliointi.tilino   in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
-        and tiliointi.korjattu  = ''
-        {$tiliointilisa} )
-      WHERE lasku.yhtio = '$kukarow[yhtio]'
-      {$mapvmlisa}
-      {$tapvmlisa}
-      and lasku.tapvm    > '0000-00-00'
-      and lasku.tila    = 'U'
-      and lasku.alatila = 'X'
-      and lasku.liitostunnus in ($tunnukset)
-      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
-      ORDER BY lasku.ytunnus, lasku.laskunro";
+$query = "SELECT
+          lasku.ytunnus,
+          lasku.maa,
+          lasku.valkoodi,
+          lasku.tunnus,
+          lasku.erpcm,
+          lasku.liitostunnus,
+          lasku.mapvm,
+          lasku.nimi,
+          lasku.tapvm,
+          lasku.laskunro,
+          lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
+          lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
+          lasku.summa laskusumma,
+          lasku.summa_valuutassa laskusumma_valuutassa,
+          sum(tiliointi.summa) tiliointiavoinsaldo,
+          sum(tiliointi.summa_valuutassa) tiliointiavoinsaldo_valuutassa,
+          sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
+          sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
+          FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+          {$leftlisa} JOIN tiliointi use index (tositerivit_index) ON (
+            lasku.yhtio            = tiliointi.yhtio
+            and lasku.tunnus       = tiliointi.ltunnus
+            and tiliointi.tilino   in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
+            and tiliointi.korjattu = ''
+            {$tiliointilisa} )
+          WHERE lasku.yhtio        = '$kukarow[yhtio]'
+          {$mapvmlisa}
+          {$tapvmlisa}
+          and lasku.tapvm          > '0000-00-00'
+          and lasku.tila           = 'U'
+          and lasku.alatila        = 'X'
+          and lasku.liitostunnus   in ($tunnukset)
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+          ORDER BY lasku.ytunnus, lasku.laskunro";
 $result = pupe_query($query);
 $laskutiedot = mysql_fetch_assoc($result);
 
 //otetaan asiakastiedot ekalta laskulta
-$query = "  SELECT *
-      FROM asiakas
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND tunnus = '$laskutiedot[liitostunnus]'";
+$query = "SELECT *
+          FROM asiakas
+          WHERE yhtio = '$kukarow[yhtio]'
+          AND tunnus  = '$laskutiedot[liitostunnus]'";
 $asiakasresult = pupe_query($query);
 $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
@@ -372,13 +372,13 @@ if (mysql_num_rows($result) > 0) {
   mysql_data_seek($result, 0);
 }
 
-$query = "  SELECT maksupvm tapvm, summa * -1 summa, valkoodi, summa*-1 laskusumma
-      FROM suoritus
-      WHERE suoritus.yhtio = '{$kukarow["yhtio"]}'
-      AND (suoritus.kohdpvm = '0000-00-00' OR suoritus.maksupvm > '{$tito_pvm}')
-      AND suoritus.kirjpvm <= '{$tito_pvm}'
-      AND suoritus.ltunnus  > 0
-      AND suoritus.asiakas_tunnus in ($tunnukset)";
+$query = "SELECT maksupvm tapvm, summa * -1 summa, valkoodi, summa*-1 laskusumma
+          FROM suoritus
+          WHERE suoritus.yhtio        = '{$kukarow["yhtio"]}'
+          AND (suoritus.kohdpvm = '0000-00-00' OR suoritus.maksupvm > '{$tito_pvm}')
+          AND suoritus.kirjpvm        <= '{$tito_pvm}'
+          AND suoritus.ltunnus        > 0
+          AND suoritus.asiakas_tunnus in ($tunnukset)";
 $suoritusresult = pupe_query($query);
 
 $firstpage = alku();

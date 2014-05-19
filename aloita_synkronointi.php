@@ -54,11 +54,11 @@ if ($tee == "SYNK") {
   }
   else {
     //  Tehd‰‰n kysely
-    $query = "  SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-          FROM yhtio
-          JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
-          WHERE konserni = '$yhtiorow[konserni]'
-          AND (synkronoi = '$table' or synkronoi like '$table,%' or synkronoi like '%,$table,%' or synkronoi like '%,$table' or synkronoi like '%,$table|%' or synkronoi like '$table|%')";
+    $query = "SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+              FROM yhtio
+              JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
+              WHERE konserni = '$yhtiorow[konserni]'
+              AND (synkronoi = '$table' or synkronoi like '$table,%' or synkronoi like '%,$table,%' or synkronoi like '%,$table' or synkronoi like '%,$table|%' or synkronoi like '$table|%')";
     $kohderes = pupe_query($query);
     $kohderow = mysql_fetch_array($kohderes);
 
@@ -91,19 +91,19 @@ if ($tee == "SYNK") {
     $query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, synclog WRITE, $table WRITE $lisa";
     $abures = pupe_query($query);
 
-    $query = "  SELECT group_concat(tunnus) tunnukset
-          FROM $table
-          WHERE yhtio in ($kohderow[yhtiot])
-          $lajit
-          $group";
+    $query = "SELECT group_concat(tunnus) tunnukset
+              FROM $table
+              WHERE yhtio in ($kohderow[yhtiot])
+              $lajit
+              $group";
     $abures = pupe_query($query);
 
     while ($aburow = mysql_fetch_array($abures)) {
-      $query = "  SELECT *
-            FROM $table
-            WHERE tunnus in ($aburow[tunnukset])
-            ORDER BY if(muutospvm = '0000-00-00 00:00:00', luontiaika, muutospvm) DESC
-            LIMIT 1";
+      $query = "SELECT *
+                FROM $table
+                WHERE tunnus in ($aburow[tunnukset])
+                ORDER BY if(muutospvm = '0000-00-00 00:00:00', luontiaika, muutospvm) DESC
+                LIMIT 1";
       $abures1 = pupe_query($query);
 
       while ($aburow1 = mysql_fetch_assoc($abures1)) {

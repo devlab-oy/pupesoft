@@ -4851,7 +4851,7 @@ if (!function_exists("alehinta")) {
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                    and (alennus < 0 or left(alennus,1) = '-'))
-                   
+
                    ORDER BY prio, minkpl desc, aika, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -5123,7 +5123,7 @@ if (!function_exists("alehinta")) {
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                    and alennus  = 999.99)
-                   
+
                    ORDER BY prio, minkpl desc, aika, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -15684,9 +15684,9 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
-                
+
                 UNION
-                
+
                 SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
                 tilausrivi.hinta * {$query_ale_lisa} hinta,
                 sum(tilausrivi.kpl + tilausrivi.varattu) kpl
@@ -15703,7 +15703,7 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
-                
+
                 ORDER BY ika ASC, kpl ASC";
       $viimhintares = pupe_query($query);
 
@@ -28029,5 +28029,185 @@ if (!function_exists('paivita_siirtolistan_toimipaikka')) {
         $updres = pupe_query($query);
       }
     }
+  }
+}
+
+if (!function_exists("tilausrivin_tarkistus_riveittain")) {
+  function tilausrivin_tarkistus_riveittain($parametrit) {
+
+    $ryhmitetty_array = array();
+
+    $tuote_temp = tuotteiden_kulutarkistus();
+
+    while ($row = mysql_fetch_assoc($parametrit['result'])) {
+
+      $ryhmitys = '1';
+
+      foreach ($parametrit['group_by'] as $value) {
+        if (isset($row[$value])) {
+          $ryhmitys .= $row[$value];
+        }
+      }
+
+      foreach ($parametrit['select'] as $k) {
+        if (isset($row[$k])) {
+          $ryhmitetty_array[$ryhmitys][$k] = $row[$k];
+        }
+      }
+
+      if (array_key_exists($ryhmitys, $ryhmitetty_array)) {
+        foreach ($parametrit['sum'] as $k) {
+
+          if (!isset($ryhmitetty_array[$ryhmitys][$k])) {$ryhmitetty_array[$ryhmitys][$k] = 0; }
+
+          if (isset($row[$k]) and in_array($k, $parametrit['lisaa_kulut']) and isset($tuote_temp[$row['tuotenumero']]) and $tuote_temp[$row['tuotenumero']] !== false ) {
+            $ostohinta = $row['rivihinta'] - $row[$k];
+            $ostohinta = $ostohinta / ((100 - $tuote_temp[$row['tuotenumero']]) / 100);
+            $row[$k] = $row['rivihinta'] - $ostohinta;
+          }
+
+            if (isset($row[$k])) { $ryhmitetty_array[$ryhmitys][$k] = $row[$k] + $ryhmitetty_array[$ryhmitys][$k]; }
+          }
+      }
+      else {
+        foreach ($parametrit['sum'] as $k) {
+
+          if (isset($row[$k]) and in_array($k, $parametrit['lisaa_kulut']) and isset($tuote_temp[$row['tuotenumero']]) and $tuote_temp[$row['tuotenumero']] !== false ) {
+            $ostohinta = $row['rivihinta'] - $row[$k];
+            $ostohinta = $ostohinta / ((100 - $tuote_temp[$row['tuotenumero']]) / 100);
+            $row[$k] = $row['rivihinta'] - $ostohinta;
+          }
+
+          if (isset($row[$k])) { $ryhmitetty_array[$ryhmitys][$k] =  $row[$k]; }
+        }
+      }
+    }
+
+    $ryhmitetty_array = array_values($ryhmitetty_array);
+
+    $sorttaajat = $parametrit['order_by'];
+
+    usort($ryhmitetty_array, function($a, $b) use ($sorttaajat) {
+      foreach ($sorttaajat as $sorttaaja) {
+        if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
+        if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
+      }
+      return 0;
+    });
+    return $ryhmitetty_array;
+  }
+}
+
+if (!function_exists("tuotteiden_kulutarkistus")) {
+  function tuotteiden_kulutarkistus() {
+    global $kukarow, $yhtiorow;
+
+    $query = "  SELECT tunnus
+          FROM yhtion_toimipaikat_parametrit
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND toimipaikka = '{$kukarow['toimipaikka']}'
+          AND parametri = 'kulujen_laskeminen_hintoihin'
+          AND arvo = 'E'";
+    $result = pupe_query($query);
+
+    $kulujen_laskeminen_hintoihin = true;
+
+    if (mysql_num_rows($result) > 0) {
+      $kulujen_laskeminen_hintoihin = false;
+    }
+
+    $query = "SELECT toimi.kulujen_laskeminen_hintoihin,
+          tuotteen_toimittajat.tuoteno
+          FROM tuotteen_toimittajat
+          JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+          AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
+          WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
+          ORDER BY
+          if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
+          tuotteen_toimittajat.tunnus ASC";
+    $result = pupe_query($query);
+
+    $tuotteet = array();
+
+    while($tuote = mysql_fetch_assoc($result)) {
+
+      if (($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') and !isset($tuotteet[$tuote['tuoteno']])) {
+        $tuotteet[$tuote['tuoteno']] = false;
+        continue;
+      }
+
+      if ($tuote['kulujen_laskeminen_hintoihin'] == 'E' and !isset($tuotteet[$tuote['tuoteno']])) {
+        $tuotteet[$tuote['tuoteno']] = false;
+        continue;
+      }
+
+      if (!$kulujen_laskeminen_hintoihin and !isset($tuotteet[$tuote['tuoteno']])) {
+        $tuotteet[$tuote['tuoteno']] = false;
+        continue;
+      }
+
+      if (!isset($tuotteet[$tuote['tuoteno']])) {
+        $tuotteet[$tuote['tuoteno']] = $yhtiorow['kuluprosentti'];
+      }
+    }
+    return $tuotteet;
+  }
+}
+
+if (!function_exists("hinnan_kuluprosentti")) {
+  function hinnan_kuluprosentti($tuotenumero) {
+    global $kukarow, $yhtiorow;
+
+    if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'E' or $kukarow['kulujen_laskeminen_hintoihin'] == 'E') {
+      return false;
+    }
+    $query = "  SELECT toimi.kulujen_laskeminen_hintoihin
+          FROM tuotteen_toimittajat
+          JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+          AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
+          WHERE tuotteen_toimittajat.yhtio =  '{$kukarow['yhtio']}'
+          AND tuotteen_toimittajat.tuoteno = '{$tuotenumero}'
+          ORDER BY
+          if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
+          tuotteen_toimittajat.tunnus ASC
+          LIMIT 1";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+
+    if ($row['kulujen_laskeminen_hintoihin'] == 'E') {
+      return false;
+    }
+    $query = "  SELECT tunnus
+          FROM yhtion_toimipaikat_parametrit
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND toimipaikka = '{$kukarow['toimipaikka']}'
+          AND parametri = 'kulujen_laskeminen_hintoihin'
+          AND arvo = 'E'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      return false;
+    }
+    return $yhtiorow['kuluprosentti'];
+  }
+}
+
+if (!function_exists("hinta_kuluineen")) {
+  function hinta_kuluineen($tuotenumero, $hinta) {
+    global $kukarow, $yhtiorow;
+    $kuluprosentti = hinnan_kuluprosentti($tuotenumero);
+    if ($kuluprosentti === false) { return $hinta; }
+    $tulos = $hinta / ((100 - $kuluprosentti) / 100);
+    return $tulos;
+  }
+}
+
+if (!function_exists("kate_kuluineen")) {
+  function kate_kuluineen($tuoteno, $hinta, $kate) {
+    global $kukarow, $yhtiorow;
+    $ostohinta = $hinta - $kate;
+    $ostohinta = hinta_kuluineen($tuoteno, $ostohinta);
+    $kate = $hinta - $ostohinta;
+    return $kate;
   }
 }

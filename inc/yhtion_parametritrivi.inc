@@ -1222,11 +1222,11 @@ if (mysql_field_name($result, $i) == "oletus_toimitusehto2") {
 
 if (mysql_field_name($result, $i) == "lasku_tulostin") {
 
-  $query = "  SELECT *
-        from kirjoittimet
-        where yhtio = '$kukarow[yhtio]'
-        AND komento != 'EDI'
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            from kirjoittimet
+            where yhtio  = '$kukarow[yhtio]'
+            AND komento != 'EDI'
+            ORDER BY kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3196,10 +3196,10 @@ if (mysql_field_name($result, $i) == "nouto_suoraan_laskutukseen") {
 }
 
 if (mysql_field_name($result, $i) == "reklamaation_vastaanottovarasto" ) {
-  $query = "  SELECT tunnus, nimitys
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query = "SELECT tunnus, nimitys
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+            ORDER BY tyyppi, nimitys";
   $sresult = mysql_query($query) or pupe_error($query);
 
   $ulos = "<td><select name='$nimi'>";
@@ -3884,10 +3884,10 @@ if (mysql_field_name($result, $i) == 'suoratoimitusvarasto') {
 
   $ulos .= "<option value = '0'>".t("Ei valittu")."</option>";
 
-  $query  = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query  = "SELECT *
+             FROM varastopaikat
+             WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+             ORDER BY tyyppi, nimitys";
   $vares = pupe_query($query);
 
   while ($varow = mysql_fetch_assoc($vares)) {
@@ -3929,10 +3929,10 @@ if (mysql_field_name($result, $i) == 'takuuvarasto') {
 
   $ulos .= "<option value = '0'>".t("Ei valittu")."</option>";
 
-  $query  = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query  = "SELECT *
+             FROM varastopaikat
+             WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+             ORDER BY tyyppi, nimitys";
   $vares = pupe_query($query);
 
   while ($varow = mysql_fetch_assoc($vares)) {

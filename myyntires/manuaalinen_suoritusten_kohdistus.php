@@ -1235,15 +1235,24 @@ if ($tila == 'tee_kohdistus') {
           //haetaan eka myyntisaamistilit stringiin
           $myyntisaamistilit = $yhtiorow["myyntisaamiset"].", ".$yhtiorow["factoringsaamiset"].", ".$yhtiorow["konsernimyyntisaamiset"];
 
+          //jos kyseessä on ollut normaalilasku niin silloin haettavan myyntisaamistiliöinnin summan tulee olla negatiivinen ja jos on kyseessä hyvityslasku niin silloin haettavan myyntisaamistiliöinnin tulee olla positiivinen
+          if ($lasku["alkup_summa"] >= 0) {
+            $wherelisa = "AND summa < 0";
+          }
+          else {
+            $wherelisa = "AND summa > 0";
+          }
+
           //sitten katsotaan milloin nämä osasuoritukset on tehty
           $query = "SELECT tapvm
                     FROM tiliointi
                      WHERE yhtio = '{$kukarow["yhtio"]}'
                     AND tilino   IN ($myyntisaamistilit)
-                    AND ABS(summa) <= ABS({$lasku["alkup_summa"]} - {$lasku["summa"]})
                     AND ltunnus  = {$lasku["tunnus"]}
+                    $wherelisa
                     ORDER BY tapvm DESC
                     LIMIT 1";
+
           $uusinresult = pupe_query($query);
           $uusin = mysql_fetch_assoc($uusinresult);
 

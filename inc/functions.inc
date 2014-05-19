@@ -28058,23 +28058,33 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
       if (array_key_exists($ryhmitys, $ryhmitetty_array)) {
         foreach ($parametrit['sum'] as $k) {
 
-          if (!isset($ryhmitetty_array[$ryhmitys][$k])) {$ryhmitetty_array[$ryhmitys][$k] = 0; }
+          if (!isset($ryhmitetty_array[$ryhmitys][$k])) {$ryhmitetty_array[$ryhmitys][$k] = 0;}
 
-          if (isset($row[$k]) and in_array($k, $parametrit['lisaa_kulut']) and isset($tuote_temp[$row['tuotenumero']]) and $tuote_temp[$row['tuotenumero']] !== false ) {
+          if (		isset($row[$k])
+          		and in_array($k, $parametrit['lisaa_kulut'])
+          		and isset($tuote_temp[$row['tuoteno']])
+          		and $tuote_temp[$row['tuoteno']] !== false) {
+
             $ostohinta = $row['rivihinta'] - $row[$k];
-            $ostohinta = $ostohinta / ((100 - $tuote_temp[$row['tuotenumero']]) / 100);
+            $ostohinta = $ostohinta / ((100 - $tuote_temp[$row['tuoteno']]) / 100);
             $row[$k] = $row['rivihinta'] - $ostohinta;
           }
 
-            if (isset($row[$k])) { $ryhmitetty_array[$ryhmitys][$k] = $row[$k] + $ryhmitetty_array[$ryhmitys][$k]; }
+          if (isset($row[$k])) {
+          	$ryhmitetty_array[$ryhmitys][$k] = $row[$k] + $ryhmitetty_array[$ryhmitys][$k];
           }
+        }
       }
       else {
         foreach ($parametrit['sum'] as $k) {
 
-          if (isset($row[$k]) and in_array($k, $parametrit['lisaa_kulut']) and isset($tuote_temp[$row['tuotenumero']]) and $tuote_temp[$row['tuotenumero']] !== false ) {
+          if (		isset($row[$k])
+          		and in_array($k, $parametrit['lisaa_kulut'])
+          		and isset($tuote_temp[$row['tuoteno']])
+          		and $tuote_temp[$row['tuoteno']] !== false ) {
+
             $ostohinta = $row['rivihinta'] - $row[$k];
-            $ostohinta = $ostohinta / ((100 - $tuote_temp[$row['tuotenumero']]) / 100);
+            $ostohinta = $ostohinta / ((100 - $tuote_temp[$row['tuoteno']]) / 100);
             $row[$k] = $row['rivihinta'] - $ostohinta;
           }
 

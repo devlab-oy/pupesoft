@@ -277,10 +277,10 @@ if (isset($jatka) and $asiakasid != "") {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = {$varasto}";
       $varasto_result = pupe_query($query);
-      $varaston_toimipaikka = mysql_fetch_assoc($varasto_result);
+      $v_toimipaikka = mysql_fetch_assoc($varasto_result);
       $params = array(
         'asiakas_tunnus' => $asiakasid,
-        'varasto_toimipaikka' => $varaston_toimipaikka['toimipaikka']
+        'varasto_toimipaikka' => $v_toimipaikka['toimipaikka']
       );
       $toimitustavat = hae_toimitustavat($params);
       $toimitustavat_selitteet = array_column($toimitustavat, 'selite');
@@ -1946,23 +1946,48 @@ if ($tila == "" and !isset($jatka)) {
       $varastot_lisa_query = " and tunnus = {$oletusvarasto}";
     }
 
-    $query  = "SELECT *
-               FROM varastopaikat
-               WHERE yhtio  = '$kukarow[yhtio]'
-               $varastot_lisa_query
-               AND tyyppi  != 'P'
-               order by tyyppi, nimitys";
+    $disabled = '';
+    
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus'])) {
+      $query = "SELECT COUNT(*) AS tilausrivi_kpl
+                FROM tilausrivi
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND otunnus  = {$srow['tunnus']}
+                AND var     != 'P'";
+      $tilausrivi_result = pupe_query($query);
+      $tilausrivit = mysql_fetch_assoc($tilausrivi_result);
+    }
+    else {
+      $tilausrivit['tilausrivi_kpl'] = 0;
+    }
+
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and $tilausrivit['tilausrivi_kpl'] > 0) {
+      $disabled = 'DISABLED';
+    }
+
+    $query = "SELECT *
+              FROM varastopaikat
+              WHERE yhtio  = '$kukarow[yhtio]'
+              $varastot_lisa_query
+              AND tyyppi  != 'P'
+              order by tyyppi, nimitys";
     $vares = pupe_query($query);
 
-    $oikea_sarake[$oikea] .= "<select name='varasto' onchange='this.form.submit()'><option value='0'>".t("Kaikista")."</option>";
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($disabled)) {
+      $oikea_sarake[$oikea] .= "<input type='hidden' name='varasto' value='{$oletusvarasto}' />";
+    }
+
+    $oikea_sarake[$oikea] .= "<select name='varasto' onchange='this.form.submit()' {$disabled}><option value='0'>".t("Kaikista")."</option>";
 
     $selectoitu_varasto_toimipaikka = 0;
 
     while ($varow = mysql_fetch_assoc($vares)) {
       $sel = ($oletusvarasto == $varow['tunnus']) ? "SELECTED" : '';
-      if ($sel != '') $selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
+      if ($sel != '')
+        $selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
       $oikea_sarake[$oikea] .= "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
     }
+
     $oikea_sarake[$oikea] .= "</select>";
 
     $oikea_sarake[$oikea] .= "</td>";
@@ -1990,7 +2015,13 @@ if ($tila == "" and !isset($jatka)) {
 
       $predefined_yhtiotoimipaikka = 0;
 
-      $oikea_sarake[$oikea] .= "<td><select name='yhtiotoimipaikka' onchange='this.form.submit()''>";
+      $oikea_sarake[$oikea] .= "<td>";
+      
+      if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($disabled)) {
+        $oikea_sarake[$oikea] .= "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
+      }
+
+      $oikea_sarake[$oikea] .= "<select name='yhtiotoimipaikka' onchange='this.form.submit()' {$disabled}>";
       $oikea_sarake[$oikea] .= "<option value='0'>".t("Yhtiön perustiedot")."</option>";
 
       while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
@@ -2016,20 +2047,110 @@ if ($tila == "" and !isset($jatka)) {
     $jtki = "";
     $rahtivapaa_chk = '';
 
-    if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilah = 'CHECKED';
+    $args = array(
+        'srow'           => $srow,
+        'toimtapa_apuro' => $toimtapa_apuro,
+    );
+    $ei_lahetettako = eilahetetta($args);
+    if ($ei_lahetettako) {
+      $eilah = 'CHECKED';
+    }
     if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
     if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
     if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
     if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
-    // Tarjouksia ei oletuksena osatoimiteta
-    if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
+    $args = array(
+        'srow'   => $srow,
+        'oletus' => $oletus,
+        'huomioidaanko_kukarow_kesen' => true
+    );
+    $osatoimitusko = osatoimitus($args);
+    if ($osatoimitusko) {
+      $osath = 'CHECKED';
+    }
+
+    $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
+    
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and $_onko_varasto_setattu) {
+      $v_toimipaikka = hae_varaston_toimipaikka($varasto);
+      if ($v_toimipaikka['tunnus'] == 0) {
+        $_toimipaikka = $kukarow['toimipaikka'];
+        $kukarow['toimipaikka'] = 0;
+      }
+
+      $vt_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
+      $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
+      unset($_toimipaikka);
+
+      $args = array(
+          'srow'               => $srow,
+          'toimtapa_apuro'     => $toimtapa_apuro,
+          'poikkeava_yhtiorow' => $vt_yhtiorow,
+      );
+      $ei_lahetettako = eilahetetta($args);
+      if ($ei_lahetettako) {
+        $eilah = 'CHECKED';
+      }
+
+      $args = array(
+          'srow'               => $srow,
+          'oletus'     => $oletus,
+          'poikkeava_yhtiorow' => $vt_yhtiorow,
+      );
+      $osatoimitusko = osatoimitus($args);
+      if ($osatoimitusko) {
+        $osath = 'CHECKED';
+      }
+    }
+
+    if ($tiedot_laskulta != 'YES') {
+      $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
+      if ($_onko_varasto_setattu) {
+        $v_toimipaikka = hae_varaston_toimipaikka($varasto);
+        if ($v_toimipaikka['tunnus'] == 0) {
+          $_toimipaikka = $kukarow['toimipaikka'];
+          $kukarow['toimipaikka'] = 0;
+        }
+
+        $vt_yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
+        $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
+        unset($_toimipaikka);
+      }
+      else {
+        $vt_yhtiorow = $yhtiorow;
+      }
+
+      $args = array(
+          'toimtapa_apuro'     => $toimtapa_apuro,
+          'poikkeava_yhtiorow' => $vt_yhtiorow,
+      );
+      $ei_lahetettako = eilahetetta($args);
+      if ($ei_lahetettako) {
+        $eilah = 'CHECKED';
+      }
+      else {
+        $eilah = '';
+      }
+
+      $args = array(
+          'toimtapa_apuro'     => $toimtapa_apuro,
+          'poikkeava_yhtiorow' => $vt_yhtiorow,
+      );
+      $osatoimitusko = osatoimitus($args);
+      if ($osatoimitusko) {
+        $osath = 'CHECKED';
+      }
+      else {
+        $osath = '';
+      }
+    }
 
     // Pitää olla myyntitilaus ja käyttäjällä oikeus laskuttaa tilaus
-    if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim =="REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
-      tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VAINLASKUTA") or
-      tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VIENTI") or
-      tarkista_oikeus("verkkolasku.php"))
+    if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
+            tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VAINLASKUTA") or
+            tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VIENTI") or
+            tarkista_oikeus("verkkolasku.php"))
     ) {
       $oikea_sarake[$oikea] = "<td>".t("Laskuta heti")." (".t("sisäinen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
       $oikea++;
@@ -2421,7 +2542,7 @@ if ($tila == "" and !isset($jatka)) {
         if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
           $sel = 'selected';
         }
-        else if (!empty($asiakas) and $toimitustapa["selite"] == $asiakas["toimitustapa"]) {
+        elseif (!empty($asiakas) and $toimitustapa["selite"] == $asiakas["toimitustapa"]) {
           $sel = 'selected';
         }
 

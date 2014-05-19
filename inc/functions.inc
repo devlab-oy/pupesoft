@@ -26973,10 +26973,10 @@ if (!function_exists('hae_yhtion_toimipaikan_varastot')) {
     // sortataan tyypin ja nimityksen mukaan varastot
     $query = "SELECT *
               FROM varastopaikat
-              WHERE yhtio      = '{$kukarow['yhtio']}'
-              AND toimipaikka  = '{$yhtio_toimipaikka}'
-              AND tyyppi      != 'P'
-              ORDER BY if(tyyppi = '', 0, if(tyyppi = 'V', 1, 2)), nimitys";
+              WHERE yhtio          = '{$kukarow['yhtio']}'
+                  AND toimipaikka  = '{$yhtio_toimipaikka}'
+                  AND tyyppi      != 'P'
+                  ORDER BY if(tyyppi = '', 0, if(tyyppi = 'V', 1, 2)), nimitys";
     $varastopaikat_result = pupe_query($query);
     $varastopaikat = array();
 
@@ -27102,7 +27102,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
       return false;
     }
 
-    $myyntitilaus   = hae_lasku($myyntitilaus_tunnus);
+    $myyntitilaus = hae_lasku($myyntitilaus_tunnus);
     $varastot       = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
     $varastot       = array_column($varastot, 'tunnus');
 
@@ -27110,7 +27110,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
     if (!in_array($myyntitilaus['varasto'], $varastot)) {
       require('tilauskasittely/tilauksesta_varastosiirto.inc');
 
-      // Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
+      //Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
       tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K');
     }
   }
@@ -27193,10 +27193,10 @@ if (!function_exists('hae_tuotteen_tuotepaikat')) {
 
     $query = "SELECT tuotepaikat.*
               FROM tuotepaikat
-              $varastojoin
-              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-              AND tuotepaikat.tuoteno = '{$tuoteno}'
-              ORDER BY tuotepaikat.oletus desc";
+                  $varastojoin
+                  WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                  AND tuotepaikat.tuoteno = '{$tuoteno}'
+                  ORDER BY tuotepaikat.oletus desc";
     $result = pupe_query($query);
 
     $tuotepaikat = array();
@@ -27877,6 +27877,118 @@ if (!function_exists('tilauksen_toimipaikka')) {
     }
 
     return 0;
+  }
+}
+
+if (!function_exists('eilahetetta')) {
+  function eilahetetta(array $args) {
+    global $kukarow, $yhtiorow, $toim;
+
+    $srow = isset($args['srow']) ? $args['srow'] : array();
+    $toimtapa_apuro = isset($args['toimtapa_apuro']) ? $args['toimtapa_apuro'] : array();
+    $poikkeava_yhtiorow = isset($args['poikkeava_yhtiorow']) ? $args['poikkeava_yhtiorow'] : array();
+
+    $_yhtiorow = $yhtiorow;
+    if (!empty($poikkeava_yhtiorow)) {
+      $_yhtiorow = $poikkeava_yhtiorow;
+    }
+
+    if (!empty($srow)) {
+      $_eilahetetta_valmistus = (
+              !isset($srow['eilahetetta'])
+              and $_yhtiorow["kerataanko_valmistukset"] == "E"
+              and $toim == "VALMISTAASIAKKAALLE"
+              );
+      $_eilahetetta_tulostustapa = (
+              !isset($srow['eilahetetta'])
+              and $_yhtiorow['lahetteen_tulostustapa'] == 'I'
+              );
+      $_eilahetetta_nouto = (
+              !isset($srow['eilahetetta'])
+              and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              and $toimtapa_apuro['nouto'] != ''
+              and $_yhtiorow['nouto_suoraan_laskutukseen'] == 'K'
+              );
+
+      if ($srow['eilahetetta'] != ''
+              or $_eilahetetta_valmistus
+              or $_eilahetetta_tulostustapa
+              or $_eilahetetta_nouto) {
+        return true;
+      }
+    }
+    else {
+      $_eilahetetta_valmistus = (
+              $_yhtiorow["kerataanko_valmistukset"] == "E"
+              and $toim == "VALMISTAASIAKKAALLE"
+              );
+      $_eilahetetta_tulostustapa = (
+              $_yhtiorow['lahetteen_tulostustapa'] == 'I'
+              );
+      $_eilahetetta_nouto = (
+              in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+              and $toimtapa_apuro['nouto'] != ''
+              and $_yhtiorow['nouto_suoraan_laskutukseen'] == 'K'
+              );
+
+      if ($srow['eilahetetta'] != ''
+              or $_eilahetetta_valmistus
+              or $_eilahetetta_tulostustapa
+              or $_eilahetetta_nouto) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
+if (!function_exists('osatoimitus')) {
+  function osatoimitus(array $args) {
+    global $kukarow, $yhtiorow, $toim;
+
+    $srow = isset($args['srow']) ? $args['srow'] : array();
+    $oletus = isset($args['oletus']) ? $args['oletus'] : array();
+    $poikkeava_yhtiorow = isset($args['poikkeava_yhtiorow']) ? $args['poikkeava_yhtiorow'] : array();
+    $huomioidaanko_kukarow_kesen = isset($args['huomioidaanko_kukarow_kesen']) ? $args['huomioidaanko_kukarow_kesen'] : false;
+
+    $_yhtiorow = $yhtiorow;
+    if (!empty($poikkeava_yhtiorow)) {
+      $_yhtiorow = $poikkeava_yhtiorow;
+    }
+
+    // Tarjouksia ei oletuksena osatoimiteta
+    $_osatoimitus_oletus = (
+            (in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "")
+            and $kukarow["kesken"] == 0
+            );
+
+    if ($huomioidaanko_kukarow_kesen) {
+      $_osatoimitus_myyntitilaus = (
+            $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+            and $kukarow["kesken"] == 0
+            and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+            );
+    }
+    else {
+      $_osatoimitus_myyntitilaus = (
+            $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
+            and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+            );
+    }
+
+    if (!empty($srow)) {
+      if ($srow['osatoimitus'] != '' or $_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {
+        return true;
+      }
+    }
+    else {
+      if ($_osatoimitus_oletus or $_osatoimitus_myyntitilaus) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 

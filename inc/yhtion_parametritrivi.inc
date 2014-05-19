@@ -3122,9 +3122,8 @@ if ($fieldname == "pakollinen_varasto") {
 
   $sel = $trow[$i] == 'K' ? "selected" : "";
 
-  $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen")."</option>";
-  $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
-
+  $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen. Tilaukselle voidaan lisätä rivejä useasta varastosta")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen. Tilaukselle voidaan lisätä rivejä vain yhdestä varastosta: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
 
   $jatko = 0;
 }

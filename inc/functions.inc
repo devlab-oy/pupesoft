@@ -8740,9 +8740,10 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
         $haku_query .= "and asiakkaan_tilausnumero like ('$haku%') ";
       }
 
-      $query = "SELECT tunnus, asiakkaan_tilausnumero, nimi
+      $query = "SELECT tunnus, asiakkaan_tilausnumero, nimi, luontiaika
                 FROM lasku use index (yhtio_asiakkaan_tilausnumero)
                 WHERE lasku.tila != 'U'
+                and DATEDIFF(luontiaika,NOW()) <= 365
                 $haku_query
                 and $logistiikka_yhtiolisa";
       $result = pupe_query($query);
@@ -8771,9 +8772,10 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
                   echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
                   echo "console.log(document.$formi);";
                 }
+                $laadittu = tv1dateconv($row["luontiaika"]);
                 echo "\"
                 style='padding:2px;'>
-                <font style='font-weight:bold'>$row[asiakkaan_tilausnumero]</font> &raquo; $row[nimi]
+                <font style='font-weight:bold'>$row[asiakkaan_tilausnumero]</font> &raquo; $row[nimi] - $laadittu
               </div><div name='selectValues$hakuid' id='$row[asiakkaan_tilausnumero]'></div>";
           $limit++;
 
@@ -9784,7 +9786,6 @@ if (!function_exists("livesearch_toimittajahaku")) {
 }
 
 if (!function_exists("livesearch_sarjanumerohaku")) {
-
   function livesearch_sarjanumerohaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
 

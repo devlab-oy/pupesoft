@@ -201,30 +201,30 @@ if ($oikeurow['paivitys'] != '1') {
 // Tietue poistetaan
 if ($del == 1) {
 
-  $query = "  SELECT *
-        FROM $toim
-        WHERE tunnus = '$tunnus'";
+  $query = "SELECT *
+            FROM $toim
+            WHERE tunnus = '$tunnus'";
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
-  $query = "  DELETE from $toim
-        WHERE tunnus='$tunnus'";
+  $query = "DELETE from $toim
+            WHERE tunnus='$tunnus'";
   $result = pupe_query($query);
 
   // Jos poistamme ifamesta tietoja niin päivitetään varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
   if ($lukitse_avaimeen != "") {
     if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
-      $query = "  UPDATE tuote
-            SET muuttaja = '$kukarow[kuka]', muutospvm=now()
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tuoteno = '$lukitse_avaimeen'";
+      $query = "UPDATE tuote
+                SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tuoteno = '$lukitse_avaimeen'";
       $result = pupe_query($query);
     }
     elseif ($toim == "liitetiedostot" and $lukitse_laji == "tuote") {
-      $query = "  UPDATE tuote
-            SET muuttaja = '$kukarow[kuka]', muutospvm=now()
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$lukitse_avaimeen'";
+      $query = "UPDATE tuote
+                SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$lukitse_avaimeen'";
       $result = pupe_query($query);
     }
   }
@@ -241,14 +241,14 @@ if ($del == 1) {
 if ($del == 2) {
   if (count($poista_check) > 0) {
     foreach ($poista_check as $poista_tunnus) {
-      $query = "  SELECT *
-            FROM $toim
-            WHERE tunnus = '$poista_tunnus'";
+      $query = "SELECT *
+                FROM $toim
+                WHERE tunnus = '$poista_tunnus'";
       $result = pupe_query($query);
       $trow = mysql_fetch_array($result);
 
-      $query = "  DELETE from $toim
-            WHERE tunnus='$poista_tunnus'";
+      $query = "DELETE from $toim
+                WHERE tunnus='$poista_tunnus'";
       $result = pupe_query($query);
 
       synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
@@ -260,9 +260,9 @@ if ($del == 2) {
 if ($upd == 1) {
 
   // Luodaan puskuri, jotta saadaan taulukot kuntoon
-  $query = "  SELECT *
-        FROM $toim
-        WHERE tunnus = '$tunnus'";
+  $query = "SELECT *
+            FROM $toim
+            WHERE tunnus = '$tunnus'";
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
@@ -295,12 +295,12 @@ if ($upd == 1) {
     // Tarkistetaan saako käyttäjä päivittää tätä kenttää
     $al_nimi = mysql_field_name($result, $i);
 
-    $query = "  SELECT *
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          and laji = 'MYSQLALIAS'
-          and selite = '$toim.$al_nimi'
-          $al_lisa";
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'
+              and laji    = 'MYSQLALIAS'
+              and selite  = '$toim.$al_nimi'
+              $al_lisa";
     $al_res = pupe_query($query);
     $pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
 
@@ -391,12 +391,12 @@ if ($upd == 1) {
           // columni ei tullut käyttöliittymästä, katsotaan onko meillä sille silti joku oletusarvo aliaksissa
           $al_nimi = mysql_field_name($result, $i);
 
-          $oletus_tarkistus_query = "  SELECT *
-                FROM avainsana
-                WHERE yhtio = '$kukarow[yhtio]'
-                and laji = 'MYSQLALIAS'
-                and selite = '$toim.$al_nimi'
-                and selitetark_4 != ''";
+          $oletus_tarkistus_query = "SELECT *
+                                     FROM avainsana
+                                     WHERE yhtio       = '$kukarow[yhtio]'
+                                     and laji          = 'MYSQLALIAS'
+                                     and selite        = '$toim.$al_nimi'
+                                     and selitetark_4 != ''";
           $oletus_tarkistus_result = pupe_query($oletus_tarkistus_query);
 
           if (mysql_num_rows($oletus_tarkistus_result) == 1) {
@@ -474,41 +474,41 @@ if ($upd == 1) {
 
     if ($tunnus > 0 and $toim == "tuotteen_toimittajat_tuotenumerot") {
 
-      $query = "  SELECT tt.tuoteno, ttt.tuoteno as ttt_tuoteno, toimi.toimittajanro
-            FROM tuotteen_toimittajat_tuotenumerot AS ttt
-            JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
-            JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.asn_sanomat IN ('K','L','M','F'))
-            WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-            AND ttt.tunnus = '{$tunnus}'";
+      $query = "SELECT tt.tuoteno, ttt.tuoteno as ttt_tuoteno, toimi.toimittajanro
+                FROM tuotteen_toimittajat_tuotenumerot AS ttt
+                JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+                JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.asn_sanomat IN ('K','L','M','F'))
+                WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+                AND ttt.tunnus  = '{$tunnus}'";
       $toim_tuoteno_chk_res = pupe_query($query);
 
       if (mysql_num_rows($toim_tuoteno_chk_res) == 1) {
 
         $toim_tuoteno_chk_row = mysql_fetch_assoc($toim_tuoteno_chk_res);
 
-        $query = "  UPDATE asn_sanomat SET
-              tuoteno = '{$toim_tuoteno_chk_row['tuoteno']}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND status != 'X'
-              AND tuoteno = ''
-              AND toim_tuoteno = '{$toim_tuoteno_chk_row['ttt_tuoteno']}'
-              AND toimittajanumero = '{$toim_tuoteno_chk_row['toimittajanro']}'";
+        $query = "UPDATE asn_sanomat SET
+                  tuoteno               = '{$toim_tuoteno_chk_row['tuoteno']}'
+                  WHERE yhtio           = '{$kukarow['yhtio']}'
+                  AND status           != 'X'
+                  AND tuoteno           = ''
+                  AND toim_tuoteno      = '{$toim_tuoteno_chk_row['ttt_tuoteno']}'
+                  AND toimittajanumero  = '{$toim_tuoteno_chk_row['toimittajanro']}'";
         $upd_res = pupe_query($query);
       }
     }
 
     if ($onko_tama_insert and $tunnus > 0 and isset($tee_myos_tuotteen_toimittaja_liitos) and isset($liitostunnus) and $toim == "tuote" and $tee_myos_tuotteen_toimittaja_liitos == 'JOO' and $liitostunnus != '') {
 
-      $query = "  SELECT *
-            FROM tuote
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$tunnus}'";
+      $query = "SELECT *
+                FROM tuote
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$tunnus}'";
       $tuote_chk_res = pupe_query($query);
 
-      $query = "  SELECT *
-            FROM toimi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$liitostunnus}'";
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$liitostunnus}'";
       $toimi_chk_res = pupe_query($query);
 
       if (mysql_num_rows($tuote_chk_res) == 1 and mysql_num_rows($toimi_chk_res) == 1) {
@@ -518,45 +518,45 @@ if ($upd == 1) {
         $toimittaja_liitos_ostohinta = pupesoft_cleannumber($toimittaja_liitos_ostohinta);
         $toimittaja_liitos_tuoteno = pupesoft_cleanstring($toimittaja_liitos_tuoteno);
 
-        $query = "  INSERT INTO tuotteen_toimittajat SET
-              yhtio = '{$kukarow['yhtio']}',
-              tuoteno = '{$tuote_chk_row['tuoteno']}',
-              liitostunnus = '{$liitostunnus}',
-              alkuperamaa = '{$toimi_chk_row['maa']}',
-              laatija = '{$kukarow['kuka']}',
-              ostohinta = '$toimittaja_liitos_ostohinta',
-              toim_tuoteno = '$toimittaja_liitos_tuoteno',
-              luontiaika = now(),
-              muutospvm = now(),
-              muuttaja = '{$kukarow['kuka']}'";
+        $query = "INSERT INTO tuotteen_toimittajat SET
+                  yhtio        = '{$kukarow['yhtio']}',
+                  tuoteno      = '{$tuote_chk_row['tuoteno']}',
+                  liitostunnus = '{$liitostunnus}',
+                  alkuperamaa  = '{$toimi_chk_row['maa']}',
+                  laatija      = '{$kukarow['kuka']}',
+                  ostohinta    = '$toimittaja_liitos_ostohinta',
+                  toim_tuoteno = '$toimittaja_liitos_tuoteno',
+                  luontiaika   = now(),
+                  muutospvm    = now(),
+                  muuttaja     = '{$kukarow['kuka']}'";
         $tuotteen_toimittaja_insertti = pupe_query($query);
       }
     }
 
     if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
 
-      $query = "  SELECT *
-            FROM asiakas
-            WHERE tunnus = '$tunnus'
-            and yhtio    = '$kukarow[yhtio]'";
+      $query = "SELECT *
+                FROM asiakas
+                WHERE tunnus = '$tunnus'
+                and yhtio    = '$kukarow[yhtio]'";
       $otsikres = pupe_query($query);
 
       if (mysql_num_rows($otsikres) == 1) {
         $otsikrow = mysql_fetch_array($otsikres);
 
-        $query = "  SELECT tunnus, tila, alatila, sisviesti1
-              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-              WHERE yhtio = '$kukarow[yhtio]'
-              and (
-                  (tila IN ('L','N','R','V','E','C') AND alatila != 'X')
-                  OR
-                  (tila = 'T' AND alatila in ('','A'))
-                  OR
-                  (tila IN ('A','0'))
-                )
-              and liitostunnus = '$otsikrow[tunnus]'
-              and tapvm = '0000-00-00'
-              and chn != 999";
+        $query = "SELECT tunnus, tila, alatila, sisviesti1
+                  FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+                  WHERE yhtio       = '$kukarow[yhtio]'
+                  and (
+                      (tila IN ('L','N','R','V','E','C') AND alatila != 'X')
+                      OR
+                      (tila = 'T' AND alatila in ('','A'))
+                      OR
+                      (tila IN ('A','0'))
+                    )
+                  and liitostunnus  = '$otsikrow[tunnus]'
+                  and tapvm         = '0000-00-00'
+                  and chn          != 999";
         $laskuores = pupe_query($query);
 
         while ($laskuorow = mysql_fetch_array($laskuores)) {
@@ -602,48 +602,48 @@ if ($upd == 1) {
             $paivita_myos_lisa .= ", maksuehto = '$otsikrow[maksuehto]' ";
           }
 
-          $query = "  UPDATE lasku
-                SET ytunnus      = '$otsikrow[ytunnus]',
-                ovttunnus      = '$otsikrow[ovttunnus]',
-                nimi        = '$otsikrow[nimi]',
-                nimitark      = '$otsikrow[nimitark]',
-                osoite         = '$otsikrow[osoite]',
-                postino       = '$otsikrow[postino]',
-                postitp        = '$otsikrow[postitp]',
-                maa           = '$otsikrow[maa]',
-                chn          = '$otsikrow[chn]',
-                verkkotunnus    = '$otsikrow[verkkotunnus]',
-                vienti        = '$otsikrow[vienti]',
-                toim_ovttunnus     = '$otsikrow[toim_ovttunnus]',
-                toim_nimi          = '$otsikrow[toim_nimi]',
-                toim_nimitark      = '$otsikrow[toim_nimitark]',
-                toim_osoite        = '$otsikrow[toim_osoite]',
-                toim_postino      = '$otsikrow[toim_postino]',
-                toim_postitp     = '$otsikrow[toim_postitp]',
-                toim_maa        = '$otsikrow[toim_maa]',
-                laskutusvkopv      = '$otsikrow[laskutusvkopv]'
-                $paivita_myos_lisa
-                $paivita_sisviesti1
-                WHERE yhtio     = '$kukarow[yhtio]'
-                and tunnus      = '$laskuorow[tunnus]'";
+          $query = "UPDATE lasku
+                    SET ytunnus      = '$otsikrow[ytunnus]',
+                    ovttunnus      = '$otsikrow[ovttunnus]',
+                    nimi           = '$otsikrow[nimi]',
+                    nimitark       = '$otsikrow[nimitark]',
+                    osoite         = '$otsikrow[osoite]',
+                    postino        = '$otsikrow[postino]',
+                    postitp        = '$otsikrow[postitp]',
+                    maa            = '$otsikrow[maa]',
+                    chn            = '$otsikrow[chn]',
+                    verkkotunnus   = '$otsikrow[verkkotunnus]',
+                    vienti         = '$otsikrow[vienti]',
+                    toim_ovttunnus = '$otsikrow[toim_ovttunnus]',
+                    toim_nimi      = '$otsikrow[toim_nimi]',
+                    toim_nimitark  = '$otsikrow[toim_nimitark]',
+                    toim_osoite    = '$otsikrow[toim_osoite]',
+                    toim_postino   = '$otsikrow[toim_postino]',
+                    toim_postitp   = '$otsikrow[toim_postitp]',
+                    toim_maa       = '$otsikrow[toim_maa]',
+                    laskutusvkopv  = '$otsikrow[laskutusvkopv]'
+                    $paivita_myos_lisa
+                    $paivita_sisviesti1
+                    WHERE yhtio    = '$kukarow[yhtio]'
+                    and tunnus     = '$laskuorow[tunnus]'";
           $updaresult = pupe_query($query);
 
-          $query = "  UPDATE laskun_lisatiedot
-                SET kolm_ovttunnus  = '$otsikrow[kolm_ovttunnus]',
-                kolm_nimi       = '$otsikrow[kolm_nimi]',
-                kolm_nimitark    = '$otsikrow[kolm_nimitark]',
-                kolm_osoite      = '$otsikrow[kolm_osoite]',
-                kolm_postino      = '$otsikrow[kolm_postino]',
-                kolm_postitp     = '$otsikrow[kolm_postitp]',
-                kolm_maa        = '$otsikrow[kolm_maa]',
-                laskutus_nimi     = '$otsikrow[laskutus_nimi]',
-                laskutus_nimitark  = '$otsikrow[laskutus_nimitark]',
-                laskutus_osoite    = '$otsikrow[laskutus_osoite]',
-                laskutus_postino    = '$otsikrow[laskutus_postino]',
-                laskutus_postitp   = '$otsikrow[laskutus_postitp]',
-                laskutus_maa      = '$otsikrow[laskutus_maa]'
-                WHERE yhtio     = '$kukarow[yhtio]'
-                and otunnus      = '$laskuorow[tunnus]'";
+          $query = "UPDATE laskun_lisatiedot
+                    SET kolm_ovttunnus  = '$otsikrow[kolm_ovttunnus]',
+                    kolm_nimi         = '$otsikrow[kolm_nimi]',
+                    kolm_nimitark     = '$otsikrow[kolm_nimitark]',
+                    kolm_osoite       = '$otsikrow[kolm_osoite]',
+                    kolm_postino      = '$otsikrow[kolm_postino]',
+                    kolm_postitp      = '$otsikrow[kolm_postitp]',
+                    kolm_maa          = '$otsikrow[kolm_maa]',
+                    laskutus_nimi     = '$otsikrow[laskutus_nimi]',
+                    laskutus_nimitark = '$otsikrow[laskutus_nimitark]',
+                    laskutus_osoite   = '$otsikrow[laskutus_osoite]',
+                    laskutus_postino  = '$otsikrow[laskutus_postino]',
+                    laskutus_postitp  = '$otsikrow[laskutus_postitp]',
+                    laskutus_maa      = '$otsikrow[laskutus_maa]'
+                    WHERE yhtio       = '$kukarow[yhtio]'
+                    and otunnus       = '$laskuorow[tunnus]'";
           $updaresult = pupe_query($query);
         }
       }
@@ -651,26 +651,26 @@ if ($upd == 1) {
 
     if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "yhtio") {
 
-      $query = "  SELECT *
-            FROM yhtio
-            WHERE tunnus = '$tunnus'
-            and yhtio    = '$kukarow[yhtio]'";
+      $query = "SELECT *
+                FROM yhtio
+                WHERE tunnus = '$tunnus'
+                and yhtio    = '$kukarow[yhtio]'";
       $otsikres = pupe_query($query);
 
       if (mysql_num_rows($otsikres) == 1) {
         $otsikrow = mysql_fetch_array($otsikres);
 
-        $query = "  SELECT *
-              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-              WHERE yhtio = '$kukarow[yhtio]'
-              and (
-                  (tila IN ('L','N','R','V','E') AND alatila != 'X')
-                  OR
-                  (tila = 'T' AND alatila in ('','A'))
-                  OR
-                  (tila IN ('A','0'))
-                )
-              and tapvm = '0000-00-00'";
+        $query = "SELECT *
+                  FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and (
+                      (tila IN ('L','N','R','V','E') AND alatila != 'X')
+                      OR
+                      (tila = 'T' AND alatila in ('','A'))
+                      OR
+                      (tila IN ('A','0'))
+                    )
+                  and tapvm   = '0000-00-00'";
         $laskuores = pupe_query($query);
 
         while ($laskuorow = mysql_fetch_array($laskuores)) {
@@ -719,17 +719,17 @@ if ($upd == 1) {
             }
           }
 
-          $query = "  UPDATE lasku
-                SET  yhtio_nimi    = '$upda_yhtionimi',
-                yhtio_osoite    = '$upda_yhtioosoite',
-                yhtio_postino    = '$upda_yhtiopostino',
-                yhtio_postitp    = '$upda_yhtiopostitp',
-                yhtio_maa      = '$upda_yhtiomaa',
-                yhtio_ovttunnus    = '$upda_yhtioovttunnus',
-                yhtio_kotipaikka  = '$upda_yhtiokotipaikka',
-                alv_tili      = '$upda_yhtioalv_tilino'
-                WHERE yhtio     = '$kukarow[yhtio]'
-                and tunnus      = '$laskuorow[tunnus]'";
+          $query = "UPDATE lasku
+                    SET  yhtio_nimi    = '$upda_yhtionimi',
+                    yhtio_osoite     = '$upda_yhtioosoite',
+                    yhtio_postino    = '$upda_yhtiopostino',
+                    yhtio_postitp    = '$upda_yhtiopostitp',
+                    yhtio_maa        = '$upda_yhtiomaa',
+                    yhtio_ovttunnus  = '$upda_yhtioovttunnus',
+                    yhtio_kotipaikka = '$upda_yhtiokotipaikka',
+                    alv_tili         = '$upda_yhtioalv_tilino'
+                    WHERE yhtio      = '$kukarow[yhtio]'
+                    and tunnus       = '$laskuorow[tunnus]'";
           $updaresult = pupe_query($query);
         }
       }
@@ -737,21 +737,21 @@ if ($upd == 1) {
 
     if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "toimi") {
 
-      $query = "  SELECT *
-            FROM toimi
-            WHERE tunnus = '$tunnus'
-            and yhtio    = '$kukarow[yhtio]'";
+      $query = "SELECT *
+                FROM toimi
+                WHERE tunnus = '$tunnus'
+                and yhtio    = '$kukarow[yhtio]'";
       $otsikres = pupe_query($query);
 
       if (mysql_num_rows($otsikres) == 1) {
         $otsikrow = mysql_fetch_array($otsikres);
 
-        $query = "  SELECT *
-              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tila IN ('H','M')
-              and liitostunnus = '$otsikrow[tunnus]'
-              and tapvm != '0000-00-00'";
+        $query = "SELECT *
+                  FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+                  WHERE yhtio       = '$kukarow[yhtio]'
+                  and tila          IN ('H','M')
+                  and liitostunnus  = '$otsikrow[tunnus]'
+                  and tapvm        != '0000-00-00'";
         $laskuores = pupe_query($query);
 
         while ($laskuorow = mysql_fetch_assoc($laskuores)) {
@@ -840,10 +840,10 @@ if ($upd == 1) {
 
           // Matkalasku
           if ($laskuorow["tilaustyyppi"] == "M") {
-            $query = "  SELECT nimi
-                  FROM kuka
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and kuka = '$otsikrow[nimi]'";
+            $query = "SELECT nimi
+                      FROM kuka
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and kuka    = '$otsikrow[nimi]'";
             $kukores = pupe_query($query);
             $kukorow = mysql_fetch_assoc($kukores);
 
@@ -855,45 +855,45 @@ if ($upd == 1) {
             $otsikrow_nimitark = $otsikrow["nimitark"];
           }
 
-          $query = "  UPDATE lasku
-                SET erpcm       = '$oletus_erapvm',
-                kapvm         = '$oletus_kapvm',
-                kasumma        = '$otsikrow[oletus_kasumma]',
-                olmapvm       = '$otsikrow[oletus_olmapvm]',
-                hyvak1         = '$laskuorow[hyvak1]',
-                hyvak2         = '$laskuorow[hyvak2]',
-                hyvak3         = '$laskuorow[hyvak3]',
-                hyvak4         = '$laskuorow[hyvak4]',
-                hyvak5         = '$laskuorow[hyvak5]',
-                h1time        = '$laskuorow[h1time]',
-                h2time        = '$laskuorow[h2time]',
-                h3time        = '$laskuorow[h3time]',
-                h4time        = '$laskuorow[h4time]',
-                h5time        = '$laskuorow[h5time]',
-                hyvaksyja_nyt     = '$laskuorow[hyvaksyja_nyt]',
-                ytunnus       = '$otsikrow[ytunnus]',
-                tilinumero       = '$otsikrow[tilinumero]',
-                nimi         = '$otsikrow_nimi',
-                nimitark       = '$otsikrow_nimitark',
-                osoite         = '$otsikrow[osoite]',
-                osoitetark       = '$otsikrow[osoitetark]',
-                postino       = '$otsikrow[postino]',
-                postitp       = '$otsikrow[postitp]',
-                maa         = '$otsikrow[maa]',
-                tila         = '$laskuorow[tila]',
-                ultilno       = '$otsikrow[ultilno]',
-                pankki_haltija     = '$otsikrow[pankki_haltija]',
-                swift         = '$otsikrow[swift]',
-                pankki1       = '$otsikrow[pankki1]',
-                pankki2       = '$otsikrow[pankki2]',
-                pankki3       = '$otsikrow[pankki3]',
-                pankki4       = '$otsikrow[pankki4]',
-                comments      = trim(concat('$komm', comments)),
-                hyvaksynnanmuutos   = '$otsikrow[oletus_hyvaksynnanmuutos]',
-                suoraveloitus     = '$otsikrow[oletus_suoraveloitus]',
-                sisviesti1       = '$otsikrow[ohjeitapankille]'
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$laskuorow[tunnus]'";
+          $query = "UPDATE lasku
+                    SET erpcm       = '$oletus_erapvm',
+                    kapvm             = '$oletus_kapvm',
+                    kasumma           = '$otsikrow[oletus_kasumma]',
+                    olmapvm           = '$otsikrow[oletus_olmapvm]',
+                    hyvak1            = '$laskuorow[hyvak1]',
+                    hyvak2            = '$laskuorow[hyvak2]',
+                    hyvak3            = '$laskuorow[hyvak3]',
+                    hyvak4            = '$laskuorow[hyvak4]',
+                    hyvak5            = '$laskuorow[hyvak5]',
+                    h1time            = '$laskuorow[h1time]',
+                    h2time            = '$laskuorow[h2time]',
+                    h3time            = '$laskuorow[h3time]',
+                    h4time            = '$laskuorow[h4time]',
+                    h5time            = '$laskuorow[h5time]',
+                    hyvaksyja_nyt     = '$laskuorow[hyvaksyja_nyt]',
+                    ytunnus           = '$otsikrow[ytunnus]',
+                    tilinumero        = '$otsikrow[tilinumero]',
+                    nimi              = '$otsikrow_nimi',
+                    nimitark          = '$otsikrow_nimitark',
+                    osoite            = '$otsikrow[osoite]',
+                    osoitetark        = '$otsikrow[osoitetark]',
+                    postino           = '$otsikrow[postino]',
+                    postitp           = '$otsikrow[postitp]',
+                    maa               = '$otsikrow[maa]',
+                    tila              = '$laskuorow[tila]',
+                    ultilno           = '$otsikrow[ultilno]',
+                    pankki_haltija    = '$otsikrow[pankki_haltija]',
+                    swift             = '$otsikrow[swift]',
+                    pankki1           = '$otsikrow[pankki1]',
+                    pankki2           = '$otsikrow[pankki2]',
+                    pankki3           = '$otsikrow[pankki3]',
+                    pankki4           = '$otsikrow[pankki4]',
+                    comments          = trim(concat('$komm', comments)),
+                    hyvaksynnanmuutos = '$otsikrow[oletus_hyvaksynnanmuutos]',
+                    suoraveloitus     = '$otsikrow[oletus_suoraveloitus]',
+                    sisviesti1        = '$otsikrow[ohjeitapankille]'
+                    WHERE yhtio       = '$kukarow[yhtio]'
+                    and tunnus        = '$laskuorow[tunnus]'";
           $updaresult = pupe_query($query);
         }
       }
@@ -902,17 +902,17 @@ if ($upd == 1) {
     // Jos päivitämme ifamesta tietoja niin päivitetään varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
     if (isset($lukitse_avaimeen) and $lukitse_avaimeen != "") {
       if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
-        $query = "  UPDATE tuote
-              SET muuttaja = '$kukarow[kuka]', muutospvm=now()
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tuoteno = '$lukitse_avaimeen'";
+        $query = "UPDATE tuote
+                  SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tuoteno = '$lukitse_avaimeen'";
         $result = pupe_query($query);
       }
       elseif ($toim == "liitetiedostot" and $lukitse_laji == "tuote") {
-        $query = "  UPDATE tuote
-              SET muuttaja = '$kukarow[kuka]', muutospvm=now()
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus = '$lukitse_avaimeen'";
+        $query = "UPDATE tuote
+                  SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$lukitse_avaimeen'";
         $result = pupe_query($query);
       }
     }
@@ -959,27 +959,27 @@ if ($errori != '' and $_POST["toim"] == "yhtion_parametrit") {
 if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and isset($js_open_yp) and $js_open_yp != "") {
 
   if ($toim == "perusalennus") {
-    $query = "  SELECT ryhma value, concat_ws(' - ', ryhma, selite) text
-          FROM perusalennus
-          WHERE tunnus = '$tmp_tuote_tunnus'
-          and yhtio    = '$kukarow[yhtio]'";
+    $query = "SELECT ryhma value, concat_ws(' - ', ryhma, selite) text
+              FROM perusalennus
+              WHERE tunnus = '$tmp_tuote_tunnus'
+              and yhtio    = '$kukarow[yhtio]'";
     $otsikres = pupe_query($query);
     $otsikrow = mysql_fetch_assoc($otsikres);
   }
   elseif ($toim == "avainsana") {
-    $query = "  SELECT selite value, concat_ws(' ', selite, selitetark) text
-          FROM avainsana
-          WHERE tunnus = '$tmp_tuote_tunnus'
-          and yhtio    = '$kukarow[yhtio]'";
+    $query = "SELECT selite value, concat_ws(' ', selite, selitetark) text
+              FROM avainsana
+              WHERE tunnus = '$tmp_tuote_tunnus'
+              and yhtio    = '$kukarow[yhtio]'";
     $otsikres = pupe_query($query);
     $otsikrow = mysql_fetch_assoc($otsikres);
   }
   elseif ($toim == "yhteyshenkilo") {
-    $query = "  SELECT nimi value, nimi text
-          FROM yhteyshenkilo
-          WHERE tunnus = '$tmp_tuote_tunnus'
-          and tyyppi   = 'A'
-          and yhtio    = '$kukarow[yhtio]'";
+    $query = "SELECT nimi value, nimi text
+              FROM yhteyshenkilo
+              WHERE tunnus = '$tmp_tuote_tunnus'
+              and tyyppi   = 'A'
+              and yhtio    = '$kukarow[yhtio]'";
     $otsikres = pupe_query($query);
     $otsikrow = mysql_fetch_assoc($otsikres);
   }
@@ -1347,18 +1347,18 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
   if (!in_array($yhtiorow['livetuotehaku_hakutapa'], array('F','G')) and $toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
 
-    $query = "  SELECT *
-          FROM tuote
-          WHERE tunnus = '$tmp_tuote_tunnus'";
+    $query = "SELECT *
+              FROM tuote
+              WHERE tunnus = '$tmp_tuote_tunnus'";
     $nykyinenresult = pupe_query($query);
     $nykyinentuote = mysql_fetch_array($nykyinenresult);
 
-    $query = "  SELECT tunnus
-                FROM tuote use index (tuoteno_index)
-                WHERE tuote.yhtio     = '$kukarow[yhtio]'
-                and tuote.tuoteno    < '$nykyinentuote[tuoteno]'
-                ORDER BY tuoteno desc
-                LIMIT 1";
+    $query = "SELECT tunnus
+              FROM tuote use index (tuoteno_index)
+              WHERE tuote.yhtio = '$kukarow[yhtio]'
+              and tuote.tuoteno < '$nykyinentuote[tuoteno]'
+              ORDER BY tuoteno desc
+              LIMIT 1";
     $noperes = pupe_query($query);
     $noperow = mysql_fetch_array($noperes);
 
@@ -1375,12 +1375,12 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     echo " <input type='submit' value='".t("Edellinen tuote")."'>";
     echo "</form>";
 
-    $query = "  SELECT tunnus
-                FROM tuote use index (tuoteno_index)
-                WHERE tuote.yhtio     = '$kukarow[yhtio]'
-                and tuote.tuoteno    > '$nykyinentuote[tuoteno]'
-                ORDER BY tuoteno
-                LIMIT 1";
+    $query = "SELECT tunnus
+              FROM tuote use index (tuoteno_index)
+              WHERE tuote.yhtio = '$kukarow[yhtio]'
+              and tuote.tuoteno > '$nykyinentuote[tuoteno]'
+              ORDER BY tuoteno
+              LIMIT 1";
     $yesres = pupe_query($query);
     $yesrow = mysql_fetch_array($yesres);
 
@@ -1468,10 +1468,10 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
           $sel = '';
 
-          $query = "  SELECT DISTINCT nimi, tunnus
-                FROM yhtion_toimipaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                ORDER BY nimi";
+          $query = "SELECT DISTINCT nimi, tunnus
+                    FROM yhtion_toimipaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    ORDER BY nimi";
           $toimipaikka_chk_res = pupe_query($query);
 
           while ($toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res)) {
@@ -1581,10 +1581,10 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             }
           }
           elseif (mysql_field_name($result, $i) == 'toim_tuoteno_tunnus') {
-            $query = "  SELECT tt.toim_tuoteno
-                  FROM tuotteen_toimittajat AS tt
-                  WHERE tt.yhtio = '{$kukarow['yhtio']}'
-                  AND tt.tunnus = '{$trow[$i]}'";
+            $query = "SELECT tt.toim_tuoteno
+                      FROM tuotteen_toimittajat AS tt
+                      WHERE tt.yhtio = '{$kukarow['yhtio']}'
+                      AND tt.tunnus  = '{$trow[$i]}'";
             $toim_tuoteno_chk_res = pupe_query($query);
             $toim_tuoteno_chk_row = mysql_fetch_assoc($toim_tuoteno_chk_res);
 
@@ -1691,9 +1691,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   // Kokeillaan geneeristä
-  $query = "  SELECT *
-        FROM $toim
-        WHERE tunnus = '$tunnus'";
+  $query = "SELECT *
+            FROM $toim
+            WHERE tunnus = '$tunnus'";
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
@@ -1703,12 +1703,12 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
   if ($uusi == '1' and $toim == 'tuote') {
 
-    $query = "  SELECT tunnus, nimi, toimittajanro
-          FROM toimi
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND pikaperustus != ''
-          AND tyyppi != 'P'
-          ORDER BY nimi";
+    $query = "SELECT tunnus, nimi, toimittajanro
+              FROM toimi
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND pikaperustus != ''
+              AND tyyppi       != 'P'
+              ORDER BY nimi";
     $toimiresult = pupe_query($query);
 
     echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO'>";
@@ -1780,12 +1780,12 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     //Haetaan tietokantasarakkeen nimialias
     $al_nimi   = mysql_field_name($result, $i);
 
-    $query = "  SELECT *
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          and laji = 'MYSQLALIAS'
-          and selite = '$toim.$al_nimi'
-          $al_lisa";
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'
+              and laji    = 'MYSQLALIAS'
+              and selite  = '$toim.$al_nimi'
+              $al_lisa";
     $al_res = pupe_query($query);
 
     if (mysql_num_rows($al_res) > 0) {
@@ -2142,12 +2142,12 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
 
-    $query = "  SELECT kuka.kuka, kuka.nimi
-                FROM kuka
-                WHERE kuka.yhtio = '$kukarow[yhtio]'
-                AND kuka.aktiivinen = 1
-                AND kuka.oletus_asiakas = {$trow["tunnus"]}
-                ORDER BY kuka.nimi";
+    $query = "SELECT kuka.kuka, kuka.nimi
+              FROM kuka
+              WHERE kuka.yhtio        = '$kukarow[yhtio]'
+              AND kuka.aktiivinen     = 1
+              AND kuka.oletus_asiakas = {$trow["tunnus"]}
+              ORDER BY kuka.nimi";
     $extkukares = pupe_query($query);
 
     if (mysql_num_rows($extkukares) > 0) {

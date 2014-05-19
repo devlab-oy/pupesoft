@@ -130,19 +130,19 @@ if ($yhtiorow["suuntalavat"] == "S") {
 }
 
 
-$query = "  SELECT tilausrivi.*,
-      tuotteen_toimittajat.toim_tuoteno,
-      tilausrivi.varattu+tilausrivi.kpl siskpl
-      {$select_lisa}
-      FROM tilausrivi
-      {$join_lisat}
-      JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-      LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
-      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-      AND tilausrivi.uusiotunnus = '{$otunnus}'
-      AND tilausrivi.tyyppi = 'O'
-      AND tilausrivi.kpl != 0
-      {$where_lisa}";
+$query = "SELECT tilausrivi.*,
+          tuotteen_toimittajat.toim_tuoteno,
+          tilausrivi.varattu+tilausrivi.kpl siskpl
+          {$select_lisa}
+          FROM tilausrivi
+          {$join_lisat}
+          JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+          LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
+          WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
+          AND tilausrivi.uusiotunnus  = '{$otunnus}'
+          AND tilausrivi.tyyppi       = 'O'
+          AND tilausrivi.kpl         != 0
+          {$where_lisa}";
 $vastaanottoraportti_result = pupe_query($query);
 
 $firstpage = alku_vastaanotto();
@@ -166,26 +166,26 @@ while ($row = mysql_fetch_assoc($vastaanottoraportti_result)) {
   if ($yhtiorow["vastaanottoraportti"] == "K") {
 
     // haetaan tapahtumalta uusihinta ja aika
-    $query1 = "  SELECT hinta, laadittu
-          FROM tapahtuma
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          and tuoteno = '{$row["tuoteno"]}'
-          and laji = 'tulo'
-          and rivitunnus = '{$row["tunnus"]}'
-          ORDER BY laadittu desc
-          LIMIT 1";
+    $query1 = "SELECT hinta, laadittu
+               FROM tapahtuma
+               WHERE yhtio    = '{$kukarow["yhtio"]}'
+               and tuoteno    = '{$row["tuoteno"]}'
+               and laji       = 'tulo'
+               and rivitunnus = '{$row["tunnus"]}'
+               ORDER BY laadittu desc
+               LIMIT 1";
     $result = pupe_query($query1);
     $uusirow = mysql_fetch_assoc($result);
 
     // haetaan tuotteelle vanhahinta
-    $query2 = "  SELECT hinta
-          FROM tapahtuma
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          and tuoteno = '{$row["tuoteno"]}'
-          and laadittu < '{$uusirow["laadittu"]}'
-          and laji = 'tulo'
-          ORDER BY laadittu desc
-          LIMIT 1";
+    $query2 = "SELECT hinta
+               FROM tapahtuma
+               WHERE yhtio  = '{$kukarow["yhtio"]}'
+               and tuoteno  = '{$row["tuoteno"]}'
+               and laadittu < '{$uusirow["laadittu"]}'
+               and laji     = 'tulo'
+               ORDER BY laadittu desc
+               LIMIT 1";
     $result = pupe_query($query2);
     $vanharow = mysql_fetch_assoc($result);
 

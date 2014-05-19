@@ -27,37 +27,37 @@ echo "<br>";
 echo "<table>";
 
 if ($peruste == "suorittaja") {
-  $query = "  SELECT
-        ifnull(a3.nimi, 'N/A') tyojono1,
-        ifnull(a2.selitetark, 'N/A') tyostatus1,
-        count(*) maara
-        FROM lasku
-        JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus=lasku.tunnus and tyomaarays.tyojono != '')
-        LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono )
-        LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus)
-        LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
-        LEFT JOIN kuka a3 ON (a3.yhtio = tyomaarays.yhtio and a3.kuka = tyomaarays.suorittaja)
-        WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-        AND lasku.tila in ('A','L','N','S','C')
-        AND lasku.alatila != 'X'
-        GROUP BY 1,2
-        ORDER BY a3.nimi, ifnull(a2.jarjestys, 9999), a2.selitetark";
+  $query = "SELECT
+            ifnull(a3.nimi, 'N/A') tyojono1,
+            ifnull(a2.selitetark, 'N/A') tyostatus1,
+            count(*) maara
+            FROM lasku
+            JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus=lasku.tunnus and tyomaarays.tyojono != '')
+            LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono )
+            LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus)
+            LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+            LEFT JOIN kuka a3 ON (a3.yhtio = tyomaarays.yhtio and a3.kuka = tyomaarays.suorittaja)
+            WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
+            AND lasku.tila     in ('A','L','N','S','C')
+            AND lasku.alatila != 'X'
+            GROUP BY 1,2
+            ORDER BY a3.nimi, ifnull(a2.jarjestys, 9999), a2.selitetark";
 }
 else {
-  $query = "  SELECT
-        a1.selitetark tyojono1,
-        ifnull(a2.selitetark, 'N/A') tyostatus1,
-        count(*) maara
-        FROM lasku
-        JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus and tyomaarays.tyojono != '')
-        LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono)
-        LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus)
-        LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
-        WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-        AND lasku.tila in ('A','L','N','S','C')
-        AND lasku.alatila != 'X'
-        GROUP BY 1,2
-        ORDER BY ifnull(a1.jarjestys, 9999), a1.selitetark, ifnull(a2.jarjestys, 9999), a2.selitetark";
+  $query = "SELECT
+            a1.selitetark tyojono1,
+            ifnull(a2.selitetark, 'N/A') tyostatus1,
+            count(*) maara
+            FROM lasku
+            JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus and tyomaarays.tyojono != '')
+            LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono)
+            LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus)
+            LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+            WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
+            AND lasku.tila     in ('A','L','N','S','C')
+            AND lasku.alatila != 'X'
+            GROUP BY 1,2
+            ORDER BY ifnull(a1.jarjestys, 9999), a1.selitetark, ifnull(a2.jarjestys, 9999), a2.selitetark";
 }
 
 $ekares = pupe_query($query);

@@ -90,12 +90,12 @@ else {
 }
 
 // mitä sovelluksia käyttäjä saa käyttää
-$query = "  SELECT distinct sovellus
-      FROM oikeu use index (oikeudet_index)
-      WHERE yhtio = '$kukarow[yhtio]'
-      and kuka = '$kukarow[kuka]'
-      $extralisa
-      ORDER BY sovellus";
+$query = "SELECT distinct sovellus
+          FROM oikeu use index (oikeudet_index)
+          WHERE yhtio = '$kukarow[yhtio]'
+          and kuka    = '$kukarow[kuka]'
+          $extralisa
+          ORDER BY sovellus";
 $result = mysql_query($query) or pupe_error($query);
 
 // löytyi usea sovellus
@@ -103,13 +103,13 @@ if (mysql_num_rows($result) > 1) {
 
   // jos ollaan tulossa loginista, valitaan oletussovellus...
   if (isset($goso) and $goso != "") {
-    $query = "  SELECT sovellus
-          FROM oikeu use index (oikeudet_index)
-          WHERE yhtio = '$kukarow[yhtio]' and
-          kuka = '$kukarow[kuka]' and
-          sovellus = '$goso'
-          ORDER BY sovellus, jarjestys
-          LIMIT 1";
+    $query = "SELECT sovellus
+              FROM oikeu use index (oikeudet_index)
+              WHERE yhtio = '$kukarow[yhtio]' and
+              kuka        = '$kukarow[kuka]' and
+              sovellus    = '$goso'
+              ORDER BY sovellus, jarjestys
+              LIMIT 1";
     $gores = mysql_query($query) or pupe_error($query);
     $gorow = mysql_fetch_array($gores);
     $sovellus = $gorow["sovellus"];
@@ -151,27 +151,27 @@ else {
 // Mitä käyttäjä saa tehdä?
 // Valitaan ensin vain ylätaso jarjestys2='0'
 
-$query = "  SELECT nimi, jarjestys
-      FROM oikeu use index (sovellus_index)
-      WHERE yhtio    = '$kukarow[yhtio]'
-      and kuka    = '$kukarow[kuka]'
-      and sovellus  = '$sovellus'
-      and jarjestys2  = '0'
-      and hidden    = ''
-      ORDER BY jarjestys";
+$query = "SELECT nimi, jarjestys
+          FROM oikeu use index (sovellus_index)
+          WHERE yhtio    = '$kukarow[yhtio]'
+          and kuka       = '$kukarow[kuka]'
+          and sovellus   = '$sovellus'
+          and jarjestys2 = '0'
+          and hidden     = ''
+          ORDER BY jarjestys";
 $result = mysql_query($query) or pupe_error($query);
 
 while ($orow = mysql_fetch_array($result)) {
 
   // tutkitaan onko meillä alamenuja
   $query = "SELECT nimi, nimitys, alanimi
-        FROM oikeu use index (sovellus_index)
-        WHERE yhtio    = '$kukarow[yhtio]'
-        and kuka    = '$kukarow[kuka]'
-        and sovellus  = '$sovellus'
-        and jarjestys  = '$orow[jarjestys]'
-        and hidden    = ''
-        ORDER BY jarjestys, jarjestys2";
+            FROM oikeu use index (sovellus_index)
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kuka      = '$kukarow[kuka]'
+            and sovellus  = '$sovellus'
+            and jarjestys = '$orow[jarjestys]'
+            and hidden    = ''
+            ORDER BY jarjestys, jarjestys2";
   $xresult = mysql_query($query) or pupe_error($query);
   $mrow = mysql_fetch_array($xresult);
 

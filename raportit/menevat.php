@@ -46,10 +46,10 @@ echo "<option value = 'nimi'    $sel[nimi]>".t("Nimi")."</option>";
 echo "</select></td></tr>";
 
 
-$query = "  SELECT nimi, tunnus
-              FROM valuu
-             WHERE yhtio = '$kukarow[yhtio]'
-               ORDER BY jarjestys";
+$query = "SELECT nimi, tunnus
+          FROM valuu
+          WHERE yhtio = '$kukarow[yhtio]'
+           ORDER BY jarjestys";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<tr><th>Valitse valuutta:</th><td><select name='savalkoodi'>";
@@ -138,19 +138,19 @@ if ($tee == 'NAYTA') {
             sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 120, round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2), 0)) ff ";
   }
 
-  $query = "  SELECT
-        $selecti,
-        $summalisa
-        FROM lasku use index (yhtio_tila_mapvm)
-        WHERE tila  in ('H','Y','M','P','Q')
-        AND mapvm = '0000-00-00'
-        and lasku.tapvm <= '$savvl-$sakkl-$sappl'
-        $lisa
-        $salisa
-        AND lasku.yhtio = '$kukarow[yhtio]'
-        GROUP BY {$grouppauslisa}
-        $having
-        order by 1,2,3";
+  $query = "SELECT
+            $selecti,
+            $summalisa
+            FROM lasku use index (yhtio_tila_mapvm)
+            WHERE tila      in ('H','Y','M','P','Q')
+            AND mapvm       = '0000-00-00'
+            and lasku.tapvm <= '$savvl-$sakkl-$sappl'
+            $lisa
+            $salisa
+            AND lasku.yhtio = '$kukarow[yhtio]'
+            GROUP BY {$grouppauslisa}
+            $having
+            order by 1,2,3";
   $result = mysql_query($query) or pupe_error($query);
 
   $aay = 0;

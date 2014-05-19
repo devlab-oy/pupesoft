@@ -207,12 +207,12 @@ if ($laskunro <> 0 and $laskunroloppu <> 0 and $laskunro < $laskunroloppu) {
 
   for ($las = $laskunro; $las<=$laskunroloppu; $las++) {
     //hateaan laskun kaikki tiedot
-    $query = "  SELECT tunnus
-          FROM lasku
-          WHERE tila    = 'U'
-          and alatila    = 'X'
-          and laskunro  = '$las'
-          and yhtio     = '$kukarow[yhtio]'";
+    $query = "SELECT tunnus
+              FROM lasku
+              WHERE tila   = 'U'
+              and alatila  = 'X'
+              and laskunro = '$las'
+              and yhtio    = '$kukarow[yhtio]'";
     $rrrresult = pupe_query($query);
 
     if ($laskurow = mysql_fetch_assoc($rrrresult)) {
@@ -227,10 +227,10 @@ if ($laskunro <> 0 and $laskunroloppu <> 0 and $laskunro < $laskunroloppu) {
 // Extranettaajat voivat ottaa kopioita omista laskuistaan ja lähetteistään
 if ($kukarow["extranet"] != "") {
   if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "LASKU" or $toim == "VIENTILASKU" or $toim == "TILAUSVAHVISTUS")) {
-    $query  = "  SELECT *
-          FROM asiakas
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and tunnus  = '$kukarow[oletus_asiakas]'";
+    $query  = "SELECT *
+               FROM asiakas
+               WHERE yhtio = '$kukarow[yhtio]'
+               and tunnus  = '$kukarow[oletus_asiakas]'";
     $vieres = pupe_query($query);
 
     if (mysql_num_rows($vieres) == 1) {
@@ -297,10 +297,10 @@ if ($tee != 'NAYTATILAUS') {
 
     echo "<tr><th>".t("Lähettävä varasto")."</th><td colspan='3'>";
 
-    $query = "  SELECT *
-          FROM varastopaikat
-          WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-          ORDER BY tyyppi, nimitys";
+    $query = "SELECT *
+              FROM varastopaikat
+              WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+              ORDER BY tyyppi, nimitys";
     $vtresult = pupe_query($query);
 
     echo "<select name='lahettava_varasto'>";
@@ -322,10 +322,10 @@ if ($tee != 'NAYTATILAUS') {
 
     echo "<tr><th>".t("Vastaanottava varasto")."</th><td colspan='3'>";
 
-    $query = "  SELECT *
-          FROM varastopaikat
-          WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-          ORDER BY tyyppi, nimitys";
+    $query = "SELECT *
+              FROM varastopaikat
+              WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+              ORDER BY tyyppi, nimitys";
     $vtresult = pupe_query($query);
 
     echo "<select name='vastaanottava_varasto'>";
@@ -882,12 +882,12 @@ if ($tee == "ETSILASKU") {
 
   if ($otunnus > 0) {
     //katotaan löytyykö lasku ja sen kaikki tilaukset
-    $query = "  SELECT l2.laskunro, l2.tapvm
-          FROM lasku l1
-          JOIN lasku l2 ON l1.yhtio=l2.yhtio and l2.tila='U' and l1.tapvm=l2.tapvm and l1.laskunro=l2.laskunro and l2.tunnus!='$otunnus'
-          WHERE l1.tunnus = '$otunnus'
-          and l1.$logistiikka_yhtiolisa
-          LIMIT 1";
+    $query = "SELECT l2.laskunro, l2.tapvm
+              FROM lasku l1
+              JOIN lasku l2 ON l1.yhtio=l2.yhtio and l2.tila='U' and l1.tapvm=l2.tapvm and l1.laskunro=l2.laskunro and l2.tunnus!='$otunnus'
+              WHERE l1.tunnus = '$otunnus'
+              and l1.$logistiikka_yhtiolisa
+              LIMIT 1";
     $laresult = pupe_query($query);
     $larow = mysql_fetch_assoc($laresult);
 
@@ -911,10 +911,10 @@ if ($tee == "ETSILASKU") {
 
   if ($kerayseran_numero > 0) {
     //katotaan löytyykö lasku ja sen kaikki tilaukset
-    $query = "  SELECT group_concat(otunnus) tilaukset
-          FROM kerayserat
-          WHERE nro = '$kerayseran_numero'
-          and kerayserat.$logistiikka_yhtiolisa";
+    $query = "SELECT group_concat(otunnus) tilaukset
+              FROM kerayserat
+              WHERE nro = '$kerayseran_numero'
+              and kerayserat.$logistiikka_yhtiolisa";
     $laresult = pupe_query($query);
     $larow = mysql_fetch_assoc($laresult);
 
@@ -951,32 +951,32 @@ if ($tee == "ETSILASKU") {
   }
 
   // Etsitään muutettavaa tilausta
-  $query = "  SELECT distinct
-        lasku.tunnus,
-        if (lasku.laskunro=0, '', lasku.laskunro) laskunro,
-        lasku.ytunnus,
-        lasku.nimi,
-        lasku.nimitark,
-        if (lasku.tapvm = '0000-00-00', left(lasku.luontiaika,10), lasku.tapvm) pvm,
-        lasku.toimaika,
-        if (kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija,
-        lasku.summa,
-        lasku.toimaika Toimitusaika,
-        lasku.tila,
-        lasku.alatila,
-        lasku.yhtio,
-        lasku.yhtio_nimi,
-        lasku.erikoisale,
-        lasku.liitostunnus,
-        lasku.viesti
-        FROM lasku {$use}
-        LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
-        {$joinlisa}
-        WHERE {$where1} {$where2} {$where3} {$where5}
-        and lasku.{$logistiikka_yhtiolisa}
-        {$where4}
-        {$jarj}
-        LIMIT 300";
+  $query = "SELECT distinct
+            lasku.tunnus,
+            if (lasku.laskunro=0, '', lasku.laskunro) laskunro,
+            lasku.ytunnus,
+            lasku.nimi,
+            lasku.nimitark,
+            if (lasku.tapvm = '0000-00-00', left(lasku.luontiaika,10), lasku.tapvm) pvm,
+            lasku.toimaika,
+            if (kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija,
+            lasku.summa,
+            lasku.toimaika Toimitusaika,
+            lasku.tila,
+            lasku.alatila,
+            lasku.yhtio,
+            lasku.yhtio_nimi,
+            lasku.erikoisale,
+            lasku.liitostunnus,
+            lasku.viesti
+            FROM lasku {$use}
+            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
+            {$joinlisa}
+            WHERE {$where1} {$where2} {$where3} {$where5}
+            and lasku.{$logistiikka_yhtiolisa}
+            {$where4}
+            {$jarj}
+            LIMIT 300";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -1112,13 +1112,13 @@ if ($tee == "ETSILASKU") {
             $kerroinlisa2 = "";
           }
 
-          $query = "  SELECT round(sum(tilausrivi.hinta $kerroinlisa1 * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) summa
-                FROM tilausrivi
-                $kerroinlisa2
-                WHERE tilausrivi.yhtio = '$row[yhtio]'
-                and tilausrivi.otunnus = '$row[tunnus]'
-                and (tilausrivi.var != 'O' or tilausrivi.tyyppi='O')
-                and tilausrivi.tyyppi not in ('D','V')";
+          $query = "SELECT round(sum(tilausrivi.hinta $kerroinlisa1 * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) summa
+                    FROM tilausrivi
+                    $kerroinlisa2
+                    WHERE tilausrivi.yhtio = '$row[yhtio]'
+                    and tilausrivi.otunnus = '$row[tunnus]'
+                    and (tilausrivi.var != 'O' or tilausrivi.tyyppi='O')
+                    and tilausrivi.tyyppi  not in ('D','V')";
           $sumres = pupe_query($query);
           $sumrow = mysql_fetch_assoc($sumres);
 
@@ -1227,63 +1227,33 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   //valitaan tulostin heti alkuun, jos se ei ole vielä valittu
   if ($toim == "OSTO" or $toim == "HAAMU") {
     $tulostimet[0] = 'Ostotilaus';
-    if ($kappaleet > 0 and $komento["Ostotilaus"] != 'email') {
-      $komento["Ostotilaus"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "PURKU") {
     $tulostimet[0] = 'Purkulista';
-    if ($kappaleet > 0 and $komento["Purkulista"] != 'email') {
-      $komento["Purkulista"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "VASTAANOTETUT") {
     $tulostimet[0] = 'Vastaanotetut';
-    if ($kappaleet > 0 and $komento["Vastaanotetut"] != 'email') {
-      $komento["Vastaanotetut"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "VASTAANOTTORAPORTTI") {
     $tulostimet[0] = 'Vastaanottoraportti';
-    if ($kappaleet > 0 and $komento["Vastaanottoraportti"] != 'email') {
-      $komento["Vastaanottoraportti"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "TARIFFI") {
     $tulostimet[0] = 'Tariffilista';
-    if ($kappaleet > 0 and $komento["Tariffilista"] != 'email') {
-      $komento["Tariffilista"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "LASKU" or $toim == "VIENTILASKU") {
     $tulostimet[0] = 'Lasku';
-    if ($kappaleet > 0 and $komento["Lasku"] != 'email') {
-      $komento["Lasku"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "TUOTETARRA") {
     $tulostimet[0] = 'Tuotetarrat';
-    if ($kappaleet > 0 and $komento["Tuotetarrat"] != 'email') {
-      $komento["Tuotetarrat"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "TILAUSTUOTETARRA") {
     $tulostimet[0] = 'Tilauksen tuotetarrat';
-    if ($kappaleet > 0 and $komento["Tilauksen tuotetarrat"] != 'email') {
-      $komento["Tilauksen tuotetarrat"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "SIIRTOLISTA") {
     $tulostimet[0] = 'Siirtolista';
-    if ($kappaleet > 0 and $komento["Siirtolista"] != 'email') {
-      $komento["Siirtolista"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "VALMISTUS") {
     $tulostimet[0] = 'Valmistus';
-    if ($kappaleet > 0 and $komento["Valmistus"] != 'email') {
-      $komento["Valmistus"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "SAD") {
     $tulostimet[0] = 'SAD-lomake';
@@ -1291,120 +1261,67 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
       $tulostimet[1] = 'SAD-lomake lisäsivu';
     }
-
-    if ($kappaleet > 0 and $komento["SAD-lomake"] != 'email') {
-      $komento["SAD-lomake"] .= " -# $kappaleet ";
-    }
-
-    if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
-      if ($kappaleet > 0 and $komento["SAD-lomake lisäsivu"] != 'email') {
-        $komento["SAD-lomake lisäsivu"] .= " -# $kappaleet ";
-      }
-    }
   }
   elseif ($toim == "LAHETE" or $toim == "KOONTILAHETE") {
     $tulostimet[0] = 'Lähete';
-    if ($kappaleet > 0 and $komento["Lähete"] != 'email') {
-      $komento["Lähete"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "DGD") {
     $tulostimet[0] = 'DGD';
-    if ($kappaleet > 0 and $komento["DGD"] != 'email') {
-      $komento["DGD"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "PAKKALISTA") {
     $tulostimet[0] = 'Pakkalista';
-    if ($kappaleet > 0 and $komento["pakkalista"] != 'email') {
-      $komento["Pakkalista"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "KERAYSLISTA") {
     $tulostimet[0] = 'Keräyslista';
-    if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
-      $komento["Keräyslista"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "OSOITELAPPU") {
     $tulostimet[0] = 'Osoitelappu';
   }
   elseif ($toim == "VIENTIERITTELY") {
     $tulostimet[0] = 'Vientierittely';
-    if ($kappaleet > 0 and $komento["Vientierittely"] != 'email') {
-      $komento["Vientierittely"] .= " -# $kappaleet ";
-    }
   }
-  elseif ($toim == "PROFORMA" and $komento["Lasku"] != 'email') {
+  elseif ($toim == "PROFORMA") {
     $tulostimet[0] = 'Lasku';
-    if ($kappaleet > 0) {
-      $komento["Lasku"] .= " -# $kappaleet ";
-    }
   }
-  elseif ($toim == "TILAUSVAHVISTUS" and $komento["Lasku"] != 'email') {
+  elseif ($toim == "TILAUSVAHVISTUS") {
     $tulostimet[0] = 'Tilausvahvistus';
-    if ($kappaleet > 0) {
-      $komento["Tilausvahvistus"] .= " -# $kappaleet ";
-    }
   }
-  elseif ($toim == "YLLAPITOSOPIMUS" and $komento["Lasku"] != 'email') {
+  elseif ($toim == "YLLAPITOSOPIMUS") {
     $tulostimet[0] = 'Yllapitosopimus';
-    if ($kappaleet > 0) {
-      $komento["Yllapitosopimus"] .= " -# $kappaleet ";
-    }
   }
-  elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
+  elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR")) {
     $tulostimet[0] = 'Tarjous';
-    if ($kappaleet > 0) {
-      $komento["Tarjous"] .= " -# $kappaleet ";
-    }
   }
-  elseif (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") and $komento["Myyntisopimus"] != 'email') {
+  elseif (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR")) {
     $tulostimet[0] = 'Myyntisopimus';
-    if ($kappaleet > 0) {
-      $komento["Myyntisopimus"] .= " -# $kappaleet ";
-    }
   }
-  elseif ($toim == "OSAMAKSUSOPIMUS" and $komento["Osamaksusopimus"] != 'email') {
+  elseif ($toim == "OSAMAKSUSOPIMUS") {
     $tulostimet[0] = 'Osamaksusopimus';
-    if ($kappaleet > 0) {
-      $komento["Osamaksusopimus"] .= " -# $kappaleet ";
-    }
   }
-  elseif ($toim == "LUOVUTUSTODISTUS" and $komento["Luovutustodistus"] != 'email') {
+  elseif ($toim == "LUOVUTUSTODISTUS") {
     $tulostimet[0] = 'Luovutustodistus';
-    if ($kappaleet > 0) {
-      $komento["Luovutustodistus"] .= " -# $kappaleet ";
-    }
   }
-  elseif ($toim == "VAKUUTUSHAKEMUS" and $komento["Vakuutushakemus"] != 'email') {
+  elseif ($toim == "VAKUUTUSHAKEMUS") {
     $tulostimet[0] = 'Vakuutushakemus';
-    if ($kappaleet > 0) {
-      $komento["Vakuutushakemus"] .= " -# $kappaleet ";
-    }
   }
-  elseif ($toim == "REKISTERIILMOITUS" and $komento["Rekisteröinti_ilmoitus"] != 'email') {
+  elseif ($toim == "REKISTERIILMOITUS") {
     $tulostimet[0] = 'Rekisteröinti_ilmoitus';
-    if ($kappaleet > 0) {
-      $komento["Rekisteröinti_ilmoitus"] .= " -# $kappaleet ";
-    }
   }
-  elseif (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
+  elseif (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
     $tulostimet[0] = 'Työmääräys';
-    if ($kappaleet > 0 and $tyomtyyppi != 'Z') {
-      $komento["Työmääräys"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "REKLAMAATIO" or $toim == "TAKUU") {
     $tulostimet[0] = 'Keräyslista';
-    if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
-      $komento["Keräyslista"] .= " -# $kappaleet ";
-    }
   }
   elseif ($toim == "VAKADR") {
     $tulostimet[0] = 'VAK_ADR';
-    if ($kappaleet > 0 and $komento["VAK_ADR"] != 'email') {
-      $komento["VAK_ADR"] .= " -# $kappaleet ";
+  }
+
+  if ($toim != "OSOITELAPPU" and $kappaleet > 0) {
+    foreach ($tulostimet as $tulostin) {
+      if ($komento[$tulostin] != 'email' and substr($komento[$tulostin], 0, 12) != 'asiakasemail') {
+        $komento[$tulostin] .= " -# $kappaleet ";
+      }
     }
   }
 
@@ -1422,9 +1339,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   }
 
   //hateaan laskun kaikki tiedot
-  $query = "  SELECT *
-        FROM lasku
-        WHERE";
+  $query = "SELECT *
+            FROM lasku
+            WHERE";
 
   if (isset($tilausnumero) and $tilausnumero != '') {
     $query .= " tunnus in ($tilausnumero) ";
@@ -1735,19 +1652,19 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       else {
 
         //Tehdään joini
-        $query = "  SELECT tyomaarays.*, lasku.*
-              FROM lasku
-              LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              and lasku.tunnus = '$laskurow[tunnus]'";
+        $query = "SELECT tyomaarays.*, lasku.*
+                  FROM lasku
+                  LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+                  WHERE lasku.yhtio = '$kukarow[yhtio]'
+                  and lasku.tunnus  = '$laskurow[tunnus]'";
         $result = pupe_query($query);
         $laskurow = mysql_fetch_assoc($result);
 
         //haetaan asiakkaan tiedot
-        $query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
-              FROM asiakas
-              WHERE tunnus = '$laskurow[liitostunnus]'
-              and yhtio = '$kukarow[yhtio]'";
+        $query = "SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
+                  FROM asiakas
+                  WHERE tunnus = '$laskurow[liitostunnus]'
+                  and yhtio    = '$kukarow[yhtio]'";
         $result = pupe_query($query);
         $asrow = mysql_fetch_assoc($result);
 
@@ -1758,22 +1675,22 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         else $pjat_sortlisa = "";
 
         //työmääräyksen rivit
-        $query = "  SELECT tilausrivi.*,
-              round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-              $sorttauskentta,
-              if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-              if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-              tuote.sarjanumeroseuranta
-              FROM tilausrivi
-              JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-              JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-              WHERE tilausrivi.otunnus = '{$laskurow["tunnus"]}'
-              and tilausrivi.yhtio   = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi  != 'D'
-              and tilausrivi.yhtio   = tuote.yhtio
-              and tilausrivi.tuoteno  = tuote.tuoteno
-              and tilausrivi.var != 'O'
-              ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+        $query = "SELECT tilausrivi.*,
+                  round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                  $sorttauskentta,
+                  if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+                  if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+                  tuote.sarjanumeroseuranta
+                  FROM tilausrivi
+                  JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                  JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+                  WHERE tilausrivi.otunnus  = '{$laskurow["tunnus"]}'
+                  and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                  and tilausrivi.tyyppi    != 'D'
+                  and tilausrivi.yhtio      = tuote.yhtio
+                  and tilausrivi.tuoteno    = tuote.tuoteno
+                  and tilausrivi.var       != 'O'
+                  ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
         $result = pupe_query($query);
 
         //generoidaan rivinumerot
@@ -1871,10 +1788,10 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       // haetaan asiakkaan tietojen takaa sorttaustiedot
       $order_sorttaus = '';
 
-      $asiakas_apu_query = "  SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
-                  FROM asiakas
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus = '$laskurow[liitostunnus]'";
+      $asiakas_apu_query = "SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
+                            FROM asiakas
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            and tunnus  = '$laskurow[liitostunnus]'";
       $asiakas_apu_res = pupe_query($asiakas_apu_query);
 
       if (mysql_num_rows($asiakas_apu_res) == 1) {
@@ -1890,18 +1807,18 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       if ($yhtiorow["lahetteen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
       else $pjat_sortlisa = "";
 
-      $query = "   SELECT tilausrivi.*,
-            $sorttauskentta,
-            if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-            tuote.valmistuslinja,
-            tuote.sarjanumeroseuranta
-            FROM tilausrivi use index (yhtio_otunnus)
-            JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-            WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-            and tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tilausrivi.var in ('','H')
-            and tilausrivi.tyyppi != 'D'
-            ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+      $query = "SELECT tilausrivi.*,
+                $sorttauskentta,
+                if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+                tuote.valmistuslinja,
+                tuote.sarjanumeroseuranta
+                FROM tilausrivi use index (yhtio_otunnus)
+                JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                WHERE tilausrivi.otunnus  = '$laskurow[tunnus]'
+                and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                and tilausrivi.var        in ('','H')
+                and tilausrivi.tyyppi    != 'D'
+                ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       $result = pupe_query($query);
 
       require_once ("tulosta_valmistus.inc");
@@ -1954,13 +1871,13 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       if ($toim == "KOONTILAHETE") {
 
-        $query = "  SELECT lasku.*,
-              asiakas.keraysvahvistus_lahetys,
-              if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email
-              FROM lasku
-              LEFT JOIN asiakas ON (lasku.yhtio = asiakas.yhtio AND lasku.liitostunnus = asiakas.tunnus)
-              WHERE lasku.tunnus IN ({$laskurow['tunnus']})
-              and lasku.yhtio = '{$kukarow['yhtio']}'";
+        $query = "SELECT lasku.*,
+                  asiakas.keraysvahvistus_lahetys,
+                  if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email
+                  FROM lasku
+                  LEFT JOIN asiakas ON (lasku.yhtio = asiakas.yhtio AND lasku.liitostunnus = asiakas.tunnus)
+                  WHERE lasku.tunnus IN ({$laskurow['tunnus']})
+                  and lasku.yhtio    = '{$kukarow['yhtio']}'";
         $alk_til_res = pupe_query($query);
         $laskurow_chk = mysql_fetch_assoc($alk_til_res);
 
@@ -2035,21 +1952,21 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tilausnumeroita = $otunnus;
 
       //haetaan asiakkaan tiedot
-      $query = "  SELECT luokka,
-            puhelin,
-            if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
-            asiakasnro as asiakasnro_aito,
-            kerayserat,
-            kieli
-            FROM asiakas
-            WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+      $query = "SELECT luokka,
+                puhelin,
+                if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+                asiakasnro as asiakasnro_aito,
+                kerayserat,
+                kieli
+                FROM asiakas
+                WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
       $result = pupe_query($query);
       $asrow = mysql_fetch_assoc($result);
 
-      $query = "  SELECT ulkoinen_jarjestelma
-            FROM varastopaikat
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$laskurow[varasto]'";
+      $query = "SELECT ulkoinen_jarjestelma
+                FROM varastopaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$laskurow[varasto]'";
       $result = pupe_query($query);
       $varastorow = mysql_fetch_assoc($result);
 
@@ -2098,41 +2015,41 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       // keräyslistan rivit
       if (isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '' and ($yhtiorow['kerayserat'] == 'K' or $yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
-        $query = "  SELECT tilausrivi.*,
-              tuote.sarjanumeroseuranta,
-              kerayserat.kpl as tilkpl,
-              kerayserat.kpl as varattu,
-              kerayserat.tunnus as ker_tunnus,
-              kerayserat.pakkaus,
-              kerayserat.pakkausnro,
-              {$sorttauskentta}
-              FROM kerayserat
-              JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
-              WHERE kerayserat.otunnus IN ({$kerayseran_tilaukset})
-              and tilausrivi.var != 'O'
-              AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
-              ORDER BY sorttauskentta";
+        $query = "SELECT tilausrivi.*,
+                  tuote.sarjanumeroseuranta,
+                  kerayserat.kpl as tilkpl,
+                  kerayserat.kpl as varattu,
+                  kerayserat.tunnus as ker_tunnus,
+                  kerayserat.pakkaus,
+                  kerayserat.pakkausnro,
+                  {$sorttauskentta}
+                  FROM kerayserat
+                  JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
+                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
+                  WHERE kerayserat.otunnus  IN ({$kerayseran_tilaukset})
+                  and tilausrivi.var       != 'O'
+                  AND kerayserat.yhtio      = '{$kukarow['yhtio']}'
+                  ORDER BY sorttauskentta";
       }
       else {
-        $query = "  SELECT tilausrivi.*,
-              $select_lisa
-              $sorttauskentta,
-              if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-              if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-              tuote.sarjanumeroseuranta,
-              tuote.eankoodi,
-              abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
-              FROM tilausrivi
-              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-              JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-              WHERE tilausrivi.otunnus in ($tilausnumeroita)
-              and tilausrivi.yhtio   = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi  != 'D'
-              and tilausrivi.var != 'O'
-              $lisa1
-              $where_lisa
-              ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+        $query = "SELECT tilausrivi.*,
+                  $select_lisa
+                  $sorttauskentta,
+                  if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+                  if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+                  tuote.sarjanumeroseuranta,
+                  tuote.eankoodi,
+                  abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
+                  FROM tilausrivi
+                  LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                  JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                  WHERE tilausrivi.otunnus  in ($tilausnumeroita)
+                  and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                  and tilausrivi.tyyppi    != 'D'
+                  and tilausrivi.var       != 'O'
+                  $lisa1
+                  $where_lisa
+                  ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       }
       $riresult = pupe_query($query);
 
@@ -2232,21 +2149,21 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       if ($oslapp != '' or $tee == 'NAYTATILAUS') {
 
-        $query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
-              FROM lasku
-              WHERE yhtio    = '$kukarow[yhtio]'
-              and tila    = 'L'
-              and kerayslista = '$laskurow[kerayslista]'
-              and kerayslista != 0";
+        $query = "SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
+                  FROM lasku
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and tila         = 'L'
+                  and kerayslista  = '$laskurow[kerayslista]'
+                  and kerayslista != 0";
         $toimresult = pupe_query($query);
         $toimrow = mysql_fetch_assoc($toimresult);
 
         $tilausnumeroita = $toimrow["tunnukset"];
 
-        $query = "  SELECT osoitelappu
-              FROM toimitustapa
-              WHERE yhtio = '$kukarow[yhtio]'
-              and selite  = '$laskurow[toimitustapa]'";
+        $query = "SELECT osoitelappu
+                  FROM toimitustapa
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and selite  = '$laskurow[toimitustapa]'";
         $oslares = pupe_query($query);
         $oslarow = mysql_fetch_assoc($oslares);
 
@@ -2256,23 +2173,23 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 
           // Yritetään komennon avulla löytää oikea tulostin....
-          $query  = "  SELECT mediatyyppi
-                FROM kirjoittimet
-                WHERE yhtio  = '$kukarow[yhtio]'
-                AND komento  = '".mysql_real_escape_string($oslapp)."'
-                LIMIT 1";
+          $query  = "SELECT mediatyyppi
+                     FROM kirjoittimet
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     AND komento = '".mysql_real_escape_string($oslapp)."'
+                     LIMIT 1";
           $kirres = pupe_query($query);
           $kirrow = mysql_fetch_assoc($kirres);
 
           $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
 
-          $query = "  SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
-                FROM kerayserat
-                LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-                WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-                AND kerayserat.otunnus = '{$laskurow['tunnus']}'
-                GROUP BY 1,2,3
-                ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+          $query = "SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+                    FROM kerayserat
+                    LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+                    WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                    AND kerayserat.otunnus = '{$laskurow['tunnus']}'
+                    GROUP BY 1,2,3
+                    ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
           $pak_chk_res = pupe_query($query);
 
           $pak_num = mysql_num_rows($pak_chk_res);

@@ -34,10 +34,10 @@ if ($tyostatus_muutos != '' and $tyomaarayksen_tunnus != '') {
 
   if ($tyostatus_muutos == "EISTATUSTA") $tyostatus_muutos = "";
 
-  $query = "  UPDATE tyomaarays SET
-        tyostatus = '$tyostatus_muutos'
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND otunnus = '$tyomaarayksen_tunnus'";
+  $query = "UPDATE tyomaarays SET
+            tyostatus   = '$tyostatus_muutos'
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND otunnus = '$tyomaarayksen_tunnus'";
   $update_tyom_res = pupe_query($query);
 }
 
@@ -48,10 +48,10 @@ if ($tyojono_muutos != '' and $tyomaarayksen_tunnus != '') {
 
   if ($tyojono_muutos == "EIJONOA") $tyojono_muutos = "";
 
-  $query = "  UPDATE tyomaarays SET
-        tyojono = '$tyojono_muutos'
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND otunnus = '$tyomaarayksen_tunnus'";
+  $query = "UPDATE tyomaarays SET
+            tyojono     = '$tyojono_muutos'
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND otunnus = '$tyomaarayksen_tunnus'";
   $update_tyom_res = pupe_query($query);
 }
 
@@ -197,50 +197,50 @@ if ($linkkihaku != "") {
 // scripti balloonien tekemiseen
 js_popup();
 
-$query = "  SELECT
-      lasku.tunnus,
-      lasku.viesti,
-      lasku.nimi,
-      lasku.tila,
-      lasku.alatila,
-      lasku.tilaustyyppi,
-      lasku.ytunnus,
-      lasku.toimaika,
-      tyomaarays.komm1,
-      tyomaarays.komm2,
-      tyomaarays.tyojono,
-      tyomaarays.tyostatus,
-      kuka.nimi myyja,
-      a1.selite tyojonokoodi,
-      a1.selitetark tyojono,
-      a2.selitetark tyostatus,
-      a2.selitetark_2 tyostatusvari,
-      yhtio.nimi yhtio,
-      yhtio.yhtio yhtioyhtio,
-      a3.nimi suorittajanimi,
-      a5.selitetark tyom_prioriteetti,
-      lasku.luontiaika,
-      group_concat(a4.selitetark_2) asekalsuorittajanimi,
-      group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
-      FROM lasku
-      JOIN yhtio ON (lasku.yhtio=yhtio.yhtio)
-      JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
-      LEFT JOIN laskun_lisatiedot ON (lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus)
-      LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja)
-      LEFT JOIN avainsana a1 ON (a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono)
-      LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
-      LEFT JOIN kuka a3 ON (a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja)
-      LEFT JOIN kalenteri ON (kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus)
-      LEFT JOIN avainsana a4 ON (a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka)
-      LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
-      WHERE $konsernit
-      and lasku.tila in ('A','L','N','S','C')
-      and lasku.alatila != 'X'
-      $lisa
-      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
-      $omattyot
-      $lisa2
-      ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
+$query = "SELECT
+          lasku.tunnus,
+          lasku.viesti,
+          lasku.nimi,
+          lasku.tila,
+          lasku.alatila,
+          lasku.tilaustyyppi,
+          lasku.ytunnus,
+          lasku.toimaika,
+          tyomaarays.komm1,
+          tyomaarays.komm2,
+          tyomaarays.tyojono,
+          tyomaarays.tyostatus,
+          kuka.nimi myyja,
+          a1.selite tyojonokoodi,
+          a1.selitetark tyojono,
+          a2.selitetark tyostatus,
+          a2.selitetark_2 tyostatusvari,
+          yhtio.nimi yhtio,
+          yhtio.yhtio yhtioyhtio,
+          a3.nimi suorittajanimi,
+          a5.selitetark tyom_prioriteetti,
+          lasku.luontiaika,
+          group_concat(a4.selitetark_2) asekalsuorittajanimi,
+          group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
+          FROM lasku
+          JOIN yhtio ON (lasku.yhtio=yhtio.yhtio)
+          JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
+          LEFT JOIN laskun_lisatiedot ON (lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus)
+          LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja)
+          LEFT JOIN avainsana a1 ON (a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono)
+          LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+          LEFT JOIN kuka a3 ON (a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja)
+          LEFT JOIN kalenteri ON (kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus)
+          LEFT JOIN avainsana a4 ON (a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka)
+          LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+          WHERE $konsernit
+          and lasku.tila     in ('A','L','N','S','C')
+          and lasku.alatila != 'X'
+          $lisa
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
+          $omattyot
+          $lisa2
+          ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
 $vresult = pupe_query($query);
 
 $tyomaarays_tunti_yhteensa = array();
@@ -351,16 +351,16 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
     }
 
     // lasketaan katotaan mitä asentajat on syöttänyt tunteja
-    $query = "  SELECT kalenteri.kuka, if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2) nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
-          sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
-          SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
-          FROM kalenteri
-          LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA' and a4.selitetark=kalenteri.kuka
-          WHERE kalenteri.yhtio = '$kukarow[yhtio]'
-          AND kalenteri.tyyppi = 'kalenteri'
-          AND kalenteri.kentta02 = '$vrow[tunnus]'
-          GROUP BY 1,2,3,4
-          ORDER BY 1,2,3";
+    $query = "SELECT kalenteri.kuka, if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2) nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
+              sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
+              SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
+              FROM kalenteri
+              LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA' and a4.selitetark=kalenteri.kuka
+              WHERE kalenteri.yhtio  = '$kukarow[yhtio]'
+              AND kalenteri.tyyppi   = 'kalenteri'
+              AND kalenteri.kentta02 = '$vrow[tunnus]'
+              GROUP BY 1,2,3,4
+              ORDER BY 1,2,3";
     $tunti_chk_res = pupe_query($query);
 
     while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {

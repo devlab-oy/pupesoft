@@ -5,11 +5,11 @@ require ("inc/parametrit.inc");
 echo "<font class='head'>".t("Peru valmistus").":</font><hr>";
 
 if ($id != 0) {
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio   = '$kukarow[yhtio]'
-        AND tunnus   = '$id'
-        AND ((tila = 'V' and alatila  in ('V','C')) or (tila = 'L' and alatila  != 'X' and tilaustyyppi='V'))";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$id'
+            AND ((tila = 'V' and alatila  in ('V','C')) or (tila = 'L' and alatila  != 'X' and tilaustyyppi='V'))";
   $res = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($res) != 1) {
@@ -29,12 +29,12 @@ if ($id != 0) {
   echo "</table><br><br>";
 
   // Näytetään tilausrivit
-  $query = "  SELECT *
-        from tilausrivi
-        where yhtio = '$kukarow[yhtio]'
-        and otunnus = '$laskurow[tunnus]'
-        and tyyppi in ('V','W','M')
-        ORDER BY perheid desc, tyyppi in ('W','M','L','D','V'), tunnus";
+  $query = "SELECT *
+            from tilausrivi
+            where yhtio = '$kukarow[yhtio]'
+            and otunnus = '$laskurow[tunnus]'
+            and tyyppi  in ('V','W','M')
+            ORDER BY perheid desc, tyyppi in ('W','M','L','D','V'), tunnus";
   $res = mysql_query($query) or pupe_error($query);
 
   echo t("Tilausrivit, Tuote ja Tapahtumat").":<br>";
@@ -53,14 +53,14 @@ if ($id != 0) {
     if ($rivirow["perheid"] == $rivirow["tunnus"]) {
 
       //Haetaan valmistetut tuotteet ja raaka-aineet
-      $query = "  SELECT tilausrivi.*, tuote.sarjanumeroseuranta
-            from tilausrivi
-            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
-            where tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tilausrivi.otunnus = '$laskurow[tunnus]'
-            and tilausrivi.perheid = '$rivirow[perheid]'
-            and tilausrivi.tyyppi in ('L','D','O','V')
-            order by tilausrivi.tunnus desc";
+      $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
+                from tilausrivi
+                JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
+                where tilausrivi.yhtio = '$kukarow[yhtio]'
+                and tilausrivi.otunnus = '$laskurow[tunnus]'
+                and tilausrivi.perheid = '$rivirow[perheid]'
+                and tilausrivi.tyyppi  in ('L','D','O','V')
+                order by tilausrivi.tunnus desc";
       $valm_res = mysql_query($query) or pupe_error($query);
 
       $sarjanumeroita = FALSE;
@@ -97,10 +97,10 @@ if ($id != 0) {
       $valmkpl =   $rivirow["kpl"];
     }
 
-    $query = "  SELECT *
-          from tuote
-          where yhtio = '$kukarow[yhtio]'
-          and tuoteno = '$rivirow[tuoteno]'";
+    $query = "SELECT *
+              from tuote
+              where yhtio = '$kukarow[yhtio]'
+              and tuoteno = '$rivirow[tuoteno]'";
     $tuoteres = mysql_query($query) or pupe_error($query);
     $tuoterow = mysql_fetch_array($tuoteres);
 
@@ -121,11 +121,11 @@ if ($id != 0) {
       echo "</table></td>";
     }
 
-    $query = "  SELECT count(*) kpl
-          from tapahtuma
-          where yhtio = '$kukarow[yhtio]'
-          and laji = 'valmistus'
-          and rivitunnus = '$rivirow[tunnus]'";
+    $query = "SELECT count(*) kpl
+              from tapahtuma
+              where yhtio    = '$kukarow[yhtio]'
+              and laji       = 'valmistus'
+              and rivitunnus = '$rivirow[tunnus]'";
     $countres = mysql_query($query) or pupe_error($query);
     $countrow = mysql_fetch_array($countres);
 
@@ -147,12 +147,12 @@ if ($id != 0) {
     }
 
     //Haetaan tapahtuman tiedot
-    $query = "  SELECT *
-          from tapahtuma
-          where yhtio = '$kukarow[yhtio]'
-          and laji in ('valmistus','kulutus')
-          and rivitunnus = '$rivirow[tunnus]'
-          order by tunnus $order";
+    $query = "SELECT *
+              from tapahtuma
+              where yhtio    = '$kukarow[yhtio]'
+              and laji       in ('valmistus','kulutus')
+              and rivitunnus = '$rivirow[tunnus]'
+              order by tunnus $order";
     $tapares = mysql_query($query) or pupe_error($query);
 
     while($taparow = mysql_fetch_array($tapares)) {
@@ -170,13 +170,13 @@ if ($id != 0) {
       }
 
       // Tutkitaan onko tätä tuotetta runkslattu tän tulon jälkeen
-      $query = "  SELECT count(*) kpl
-            from tapahtuma
-            where yhtio = '$kukarow[yhtio]'
-            and laji in ('laskutus','inventointi','epäkurantti','valmistus', 'kulutus')
-            and tuoteno = '$taparow[tuoteno]'
-            and tunnus > '$taparow[tunnus]'
-            and rivitunnus != '$taparow[rivitunnus]'";
+      $query = "SELECT count(*) kpl
+                from tapahtuma
+                where yhtio     = '$kukarow[yhtio]'
+                and laji        in ('laskutus','inventointi','epäkurantti','valmistus', 'kulutus')
+                and tuoteno     = '$taparow[tuoteno]'
+                and tunnus      > '$taparow[tunnus]'
+                and rivitunnus != '$taparow[rivitunnus]'";
       $tapares2 = mysql_query($query) or pupe_error($query);
       $taparow2 = mysql_fetch_array($tapares2);
 
@@ -201,28 +201,28 @@ if ($id != 0) {
         echo "<tr><th>".t("Voidaanko poistaa").":</th><td>$voidaankopoistaa</td></tr>";
       }
 
-      $query = "  SELECT *
-            from tapahtuma
-            where yhtio = '$kukarow[yhtio]'
-            and laji in ('tulo','valmistus')
-            and tuoteno = '$taparow[tuoteno]'
-            and tunnus < '$taparow[tunnus]'
-            ORDER BY tunnus DESC
-            LIMIT 1";
+      $query = "SELECT *
+                from tapahtuma
+                where yhtio = '$kukarow[yhtio]'
+                and laji    in ('tulo','valmistus')
+                and tuoteno = '$taparow[tuoteno]'
+                and tunnus  < '$taparow[tunnus]'
+                ORDER BY tunnus DESC
+                LIMIT 1";
       $tapares3 = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($tapares3) > 0) {
         $taparow3 = mysql_fetch_array($tapares3);
       }
       else {
-        $query = "  SELECT *
-              from tapahtuma
-              where yhtio = '$kukarow[yhtio]'
-              and laji in ('laskutus')
-              and tuoteno = '$taparow[tuoteno]'
-              and tunnus < '$taparow[tunnus]'
-              ORDER BY tunnus DESC
-              LIMIT 1";
+        $query = "SELECT *
+                  from tapahtuma
+                  where yhtio = '$kukarow[yhtio]'
+                  and laji    in ('laskutus')
+                  and tuoteno = '$taparow[tuoteno]'
+                  and tunnus  < '$taparow[tunnus]'
+                  ORDER BY tunnus DESC
+                  LIMIT 1";
         $tapares3 = mysql_query($query) or pupe_error($query);
         $taparow3 = mysql_fetch_array($tapares3);
       }
@@ -238,30 +238,30 @@ if ($id != 0) {
       if ($tee == 'KORJAA' and ($voidaankopoistaa == "Kyllä" or $vakisinpoista == 'Kyllä') and $perutaan[$rivirow["perheid"]] == $rivirow["perheid"] and $perutaan[$rivirow["perheid"]] != 0) {
 
         //Poistetaan tapahtuma
-        $query = "  DELETE from tapahtuma
-              where yhtio    = '$kukarow[yhtio]'
-              and tunnus    = '$taparow[tunnus]'";
+        $query = "DELETE from tapahtuma
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$taparow[tunnus]'";
         $korjres = mysql_query($query) or pupe_error($query);
 
         echo "$rivirow[tuoteno]: ".t("Poistetaan tapahtuma")."!<br>";
 
         //Haetaan valmistetut tuotteet ja poistetaan informativinen valmistusrivi
         if ($taparow["laji"] == "valmistus") {
-          $query = "  SELECT *
-                from tilausrivi
-                where yhtio = '$kukarow[yhtio]'
-                and otunnus = '$laskurow[tunnus]'
-                and perheid = '$rivirow[perheid]'
-                and tyyppi in ('L','D')
-                order by tunnus $order";
+          $query = "SELECT *
+                    from tilausrivi
+                    where yhtio = '$kukarow[yhtio]'
+                    and otunnus = '$laskurow[tunnus]'
+                    and perheid = '$rivirow[perheid]'
+                    and tyyppi  in ('L','D')
+                    order by tunnus $order";
           $valm_res = mysql_query($query) or pupe_error($query);
 
           while($valm_row = mysql_fetch_array($valm_res)) {
             //Poistetaan tilausrivi
-            $query = "  DELETE from tilausrivi
-                  where yhtio   = '$kukarow[yhtio]'
-                  and otunnus   = '$laskurow[tunnus]'
-                  and tunnus   = '$valm_row[tunnus]'";
+            $query = "DELETE from tilausrivi
+                      where yhtio = '$kukarow[yhtio]'
+                      and otunnus = '$laskurow[tunnus]'
+                      and tunnus  = '$valm_row[tunnus]'";
             $korjres = mysql_query($query) or pupe_error($query);
 
             echo "$valm_row[tuoteno]: ".t("Poistetaan informatiivinen valmistusrivi")."!<br>";
@@ -276,39 +276,39 @@ if ($id != 0) {
           $palkpl = $taparow["kpl"] * -1;
         }
 
-        $query = "  UPDATE tilausrivi
-              set varattu = varattu+$palkpl,
-              kpl=kpl-$palkpl
-              where yhtio = '$kukarow[yhtio]'
-              and otunnus = '$laskurow[tunnus]'
-              and tunnus  = '$rivirow[tunnus]'";
+        $query = "UPDATE tilausrivi
+                  set varattu = varattu+$palkpl,
+                  kpl=kpl-$palkpl
+                  where yhtio = '$kukarow[yhtio]'
+                  and otunnus = '$laskurow[tunnus]'
+                  and tunnus  = '$rivirow[tunnus]'";
         $korjres = mysql_query($query) or pupe_error($query);
 
         echo "$rivirow[tuoteno]: ".t("Palautetaan")." $palkpl ".t("kappaletta")." ".t("takaisin valmistukseen")."!<br>";
 
         // Laitetaan takas saldoille
         if ($tuoterow["ei_saldoa"] == "") {
-          $query = "  UPDATE tuotepaikat
-                set saldo     = saldo - $taparow[kpl],
-                saldoaika     = now()
-                where yhtio        = '$kukarow[yhtio]'
-                and tuoteno        = '$rivirow[tuoteno]'
-                and hyllyalue     = '$rivirow[hyllyalue]'
-                and hyllynro    = '$rivirow[hyllynro]'
-                and hyllyvali    = '$rivirow[hyllyvali]'
-                and hyllytaso    = '$rivirow[hyllytaso]'";
+          $query = "UPDATE tuotepaikat
+                    set saldo     = saldo - $taparow[kpl],
+                    saldoaika     = now()
+                    where yhtio   = '$kukarow[yhtio]'
+                    and tuoteno   = '$rivirow[tuoteno]'
+                    and hyllyalue = '$rivirow[hyllyalue]'
+                    and hyllynro  = '$rivirow[hyllynro]'
+                    and hyllyvali = '$rivirow[hyllyvali]'
+                    and hyllytaso = '$rivirow[hyllytaso]'";
           $korjres = mysql_query($query) or pupe_error($query);
 
           if (mysql_affected_rows() == 0) {
             echo "<font class='error'>".t("Varastopaikka")." $rivirow[hyllyalue]-$rivirow[hyllynro]-$rivirow[hyllytaso]-$rivirow[hyllyvali] ".t("ei löydy vaikka se on syötetty tilausriville! Koitetaan päivittää oletustapaikkaa!")."</font>";
 
-            $query = "  UPDATE tuotepaikat
-                  set saldo = saldo - $taparow[kpl],
-                  saldoaika   = now()
-                  where yhtio = '$kukarow[yhtio]' and
-                  tuoteno     = '$rivirow[tuoteno]' and
-                  oletus     != ''
-                  limit 1";
+            $query = "UPDATE tuotepaikat
+                      set saldo = saldo - $taparow[kpl],
+                      saldoaika    = now()
+                      where yhtio  = '$kukarow[yhtio]' and
+                      tuoteno      = '$rivirow[tuoteno]' and
+                      oletus      != ''
+                      limit 1";
             $korjres = mysql_query($query) or pupe_error($query);
 
             if (mysql_affected_rows() == 0) {
@@ -323,33 +323,33 @@ if ($id != 0) {
               echo "<br><font class='error'>".t("Tehtiin oletuspaikka")." $rivirow[tuoteno]: $rivirow[alkuhyllyalue] $rivirow[alkuhyllynro] 0 0</font><br><br>";
 
               // lisätään paikka
-              $query = "  INSERT INTO tuotepaikat set
-                    yhtio    = '$kukarow[yhtio]',
-                    tuoteno     = '$rivirow[tuoteno]',
-                    oletus      = 'X',
-                    saldo       = '$taparow[kpl]',
-                    saldoaika   = now(),
-                    hyllyalue   = '$hyllyrow[alkuhyllyalue]',
-                    hyllynro    = '$hyllyrow[alkuhyllynro]',
-                    hyllytaso   = '0',
-                    hyllyvali   = '0'";
+              $query = "INSERT INTO tuotepaikat set
+                        yhtio     = '$kukarow[yhtio]',
+                        tuoteno   = '$rivirow[tuoteno]',
+                        oletus    = 'X',
+                        saldo     = '$taparow[kpl]',
+                        saldoaika = now(),
+                        hyllyalue = '$hyllyrow[alkuhyllyalue]',
+                        hyllynro  = '$hyllyrow[alkuhyllynro]',
+                        hyllytaso = '0',
+                        hyllyvali = '0'";
               $korjres = mysql_query($query) or pupe_error($query);
 
               // tehdään tapahtuma
-              $query = "  INSERT into tapahtuma set
-                    yhtio     = '$kukarow[yhtio]',
-                    tuoteno   = '$taparow[tuoteno]',
-                    kpl     = '0',
-                    kplhinta  = '0',
-                    hinta     = '0',
-                    laji     = 'uusipaikka',
-                    selite     = '".t("Lisättiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
-                    laatija   = '$kukarow[kuka]',
-                    hyllyalue   = '$hyllyrow[alkuhyllyalue]',
-                    hyllynro    = '$hyllyrow[alkuhyllynro]',
-                    hyllytaso   = '0',
-                    hyllyvali   = '0',
-                    laadittu   = now()";
+              $query = "INSERT into tapahtuma set
+                        yhtio     = '$kukarow[yhtio]',
+                        tuoteno   = '$taparow[tuoteno]',
+                        kpl       = '0',
+                        kplhinta  = '0',
+                        hinta     = '0',
+                        laji      = 'uusipaikka',
+                        selite    = '".t("Lisättiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
+                        laatija   = '$kukarow[kuka]',
+                        hyllyalue = '$hyllyrow[alkuhyllyalue]',
+                        hyllynro  = '$hyllyrow[alkuhyllynro]',
+                        hyllytaso = '0',
+                        hyllyvali = '0',
+                        laadittu  = now()";
               $korjres = mysql_query($query) or pupe_error($query);
             }
             else {
@@ -362,20 +362,20 @@ if ($id != 0) {
 
         if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M") {
           //Päivitetään tuotteen kehahinta
-          $query = "  UPDATE tuote
-                SET kehahin   = '$taparow3[hinta]'
-                where yhtio    = '$kukarow[yhtio]'
-                and tuoteno    = '$rivirow[tuoteno]'";
+          $query = "UPDATE tuote
+                    SET kehahin   = '$taparow3[hinta]'
+                    where yhtio = '$kukarow[yhtio]'
+                    and tuoteno = '$rivirow[tuoteno]'";
           $korjres = mysql_query($query) or pupe_error($query);
 
           echo "$rivirow[tuoteno]: ".t("Päivitetään tuotteen keskihankintahinta")." ($taparow[hinta] --> $taparow3[hinta]) ".t("takaisin edelliseen arvoon")."!<br>";
         }
 
         //Päivitetään rivit takaisin keskeneräiseksi ja siivotaan samalla hieman pyöristyseroja jotka on tapahtunut perumisprosessissa
-        $query = "  UPDATE tilausrivi
-              set toimitettu = '', toimitettuaika='0000-00-00 00:00:00'
-              where yhtio = '$kukarow[yhtio]'
-              and tunnus = '$rivirow[tunnus]'";
+        $query = "UPDATE tilausrivi
+                  set toimitettu = '', toimitettuaika='0000-00-00 00:00:00'
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$rivirow[tunnus]'";
         $korjres = mysql_query($query) or pupe_error($query);
 
         echo "$rivirow[tuoteno]: ".t("Päivitetään tilausrivi takaisin tilaan ennen valmistusta")."<br>";
@@ -394,20 +394,20 @@ if ($id != 0) {
 
 
   if ($tee == 'KORJAA') {
-    $query = "  SELECT tunnus
-          FROM tilausrivi
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and otunnus = $laskurow[tunnus]
-          and toimitettuaika = '0000-00-00 00:00:00'";
+    $query = "SELECT tunnus
+              FROM tilausrivi
+              WHERE yhtio        = '$kukarow[yhtio]'
+              and otunnus        = $laskurow[tunnus]
+              and toimitettuaika = '0000-00-00 00:00:00'";
     $chkresult1 = mysql_query($query) or pupe_error($query);
 
     //Eli tilaus on osittain valmistamaton
     if (mysql_num_rows($chkresult1) != 0) {
       //Jos kyseessä on varastovalmistus
-      $query = "  UPDATE lasku
-            SET tila = 'V', alatila  = 'C'
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus  = $laskurow[tunnus]";
+      $query = "UPDATE lasku
+                SET tila = 'V', alatila  = 'C'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = $laskurow[tunnus]";
       $chkresult2 = mysql_query($query) or pupe_error($query);
 
       echo t("Päivitetään valmistus takaisin avoimeksi")."!<br>";

@@ -19,17 +19,17 @@ if ($tee != '') {
   }
 
   // haetaan kaikki tulot ja valmistukset
-  $query = "  SELECT tapahtuma.*, tuote.nimitys
-        FROM tuote
-        JOIN tapahtuma USE INDEX (yhtio_tuote_laadittu) ON
-        tapahtuma.yhtio = tuote.yhtio and
-        tapahtuma.tuoteno = tuote.tuoteno and
-        tapahtuma.laadittu >= '$vva-$kka-$ppa' and
-        tapahtuma.laadittu <= '$vvl-$kkl-$ppl' and
-        tapahtuma.laji in ('tulo', 'valmistus')
-        WHERE tuote.yhtio = '$kukarow[yhtio]'
-        $lisaa
-        ORDER BY tuoteno, laadittu";
+  $query = "SELECT tapahtuma.*, tuote.nimitys
+            FROM tuote
+            JOIN tapahtuma USE INDEX (yhtio_tuote_laadittu) ON
+            tapahtuma.yhtio    = tuote.yhtio and
+            tapahtuma.tuoteno  = tuote.tuoteno and
+            tapahtuma.laadittu >= '$vva-$kka-$ppa' and
+            tapahtuma.laadittu <= '$vvl-$kkl-$ppl' and
+            tapahtuma.laji     in ('tulo', 'valmistus')
+            WHERE tuote.yhtio  = '$kukarow[yhtio]'
+            $lisaa
+            ORDER BY tuoteno, laadittu";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<table>";
@@ -47,14 +47,14 @@ if ($tee != '') {
 
   while ($lrow = mysql_fetch_array($result)) {
     //haetaan edellinen kulutus- tai myyntitapahtuma
-    $query = "  SELECT *
-          FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tuoteno = '$lrow[tuoteno]'
-          and laadittu < '$lrow[laadittu]'
-          and laji in ('laskutus', 'kulutus')
-          ORDER BY laadittu desc
-          LIMIT 1";
+    $query = "SELECT *
+              FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tuoteno  = '$lrow[tuoteno]'
+              and laadittu < '$lrow[laadittu]'
+              and laji     in ('laskutus', 'kulutus')
+              ORDER BY laadittu desc
+              LIMIT 1";
     $eresult = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($eresult) > 0) {

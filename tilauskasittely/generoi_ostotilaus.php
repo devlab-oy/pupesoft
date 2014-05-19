@@ -6,22 +6,22 @@ function va_ti_en_jt($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
   global $kukarow, $yhtiorow, $lisavarattu;
 
   //tilauksessa, ennakkopoistot ja jt
-  $query = "  SELECT
-        sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
-        sum(if(tyyppi = 'O', varattu, 0)) tilattu,
-        sum(if(tyyppi = 'E', varattu, 0)) ennakot,
-        sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois,
-        sum(if(tyyppi in ('L','G') and var = 'J', jt $lisavarattu, 0)) jt
-        FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-        WHERE yhtio     = '{$kukarow['yhtio']}'
-         AND tyyppi in ('L','V','O','G','E','W','M')
-        AND tuoteno     = '{$tuoteno}'
-        AND laskutettuaika   = '0000-00-00'
-        AND hyllyalue     = '{$hyllyalue}'
-        AND hyllynro     = '{$hyllynro}'
-        AND hyllyvali     = '{$hyllyvali}'
-        AND hyllytaso     = '{$hyllytaso}'
-        AND (varattu+jt > 0)";
+  $query = "SELECT
+            sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
+            sum(if(tyyppi = 'O', varattu, 0)) tilattu,
+            sum(if(tyyppi = 'E', varattu, 0)) ennakot,
+            sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois,
+            sum(if(tyyppi in ('L','G') and var = 'J', jt $lisavarattu, 0)) jt
+            FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+            WHERE yhtio        = '{$kukarow['yhtio']}'
+             AND tyyppi        in ('L','V','O','G','E','W','M')
+            AND tuoteno        = '{$tuoteno}'
+            AND laskutettuaika = '0000-00-00'
+            AND hyllyalue      = '{$hyllyalue}'
+            AND hyllynro       = '{$hyllynro}'
+            AND hyllyvali      = '{$hyllyvali}'
+            AND hyllytaso      = '{$hyllytaso}'
+            AND (varattu+jt > 0)";
   $result = pupe_query($query);
   $ennp   = mysql_fetch_assoc($result);
 
@@ -74,11 +74,11 @@ echo "<form name = 'valinta' method='post'>
 echo "<tr><th>",t("Varasto johon tilataan"),"</th>";
 echo "<td><table>";
 
-$query  = "  SELECT tunnus, nimitys, maa
-      FROM varastopaikat
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND tyyppi != 'P'
-      ORDER BY tyyppi, nimitys";
+$query  = "SELECT tunnus, nimitys, maa
+           FROM varastopaikat
+           WHERE yhtio  = '{$kukarow['yhtio']}'
+           AND tyyppi  != 'P'
+           ORDER BY tyyppi, nimitys";
 $vares = pupe_query($query);
 
 $kala = 0;
@@ -121,9 +121,9 @@ echo "</td></tr>";
 
 if ($yhtiorow['kerayserat'] == 'K') {
 
-  $query = "  SELECT nimitys, tunnus
-        FROM keraysvyohyke
-        WHERE yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT nimitys, tunnus
+            FROM keraysvyohyke
+            WHERE yhtio = '{$kukarow['yhtio']}'";
   $keraysvyohyke_res = pupe_query($query);
 
   if (mysql_num_rows($keraysvyohyke_res) > 0) {
@@ -300,27 +300,27 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
   // tehd‰‰n jokaiselle valitulle kohdevarastolle erikseen
   foreach ($kohdevarastot as $kohdevarasto) {
 
-    $query = "  SELECT *
-          FROM varastopaikat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus  = '{$kohdevarasto}'";
+    $query = "SELECT *
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$kohdevarasto}'";
     $result = pupe_query($query);
     $varow = mysql_fetch_assoc($result);
 
     // Katotaan kohdepaikkojen tarvetta
-    $query = "  SELECT tuotepaikat.*,
-          if (tuotepaikat.tilausmaara = 0, 1, tuotepaikat.tilausmaara) tilausmaara,
-          if (tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era
-          FROM tuotepaikat
-          JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ostoehdotus != 'E' {$lisa})
-          JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
-          {$abcjoin}
-          {$keraysvyohykelisa}
-          WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-          AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-          AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-          AND tuotepaikat.halytysraja > 0
-          ORDER BY tuotepaikat.tuoteno";
+    $query = "SELECT tuotepaikat.*,
+              if (tuotepaikat.tilausmaara = 0, 1, tuotepaikat.tilausmaara) tilausmaara,
+              if (tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era
+              FROM tuotepaikat
+              JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ostoehdotus != 'E' {$lisa})
+              JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
+              {$abcjoin}
+              {$keraysvyohykelisa}
+              WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
+              AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
+              AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
+              AND tuotepaikat.halytysraja > 0
+              ORDER BY tuotepaikat.tuoteno";
     $resultti = pupe_query($query);
 
     //  Varmistetaan ett‰ aloitetaan aina uusi otsikko uudelle varastolle
@@ -378,21 +378,21 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
 
                     // Jos tuote ei osunut p‰‰queryyn, niin haetaan sen tiedot t‰ss‰
                     if (!isset($tuotteet[$_tuote["tuoteno"]])) {
-                      $query = "  SELECT tuotepaikat.tuoteno,
-                            tuotepaikat.saldo,
-                            tuotepaikat.halytysraja,
-                            tuotepaikat.hyllyalue,
-                            tuotepaikat.hyllynro,
-                            tuotepaikat.hyllyvali,
-                            tuotepaikat.hyllytaso
-                            FROM tuotepaikat
-                            JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ostoehdotus != 'E' {$lisa})
-                            {$abcjoin}
-                            {$keraysvyohykelisa}
-                            WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-                            AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-                            AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-                             AND tuote.tuoteno  = '{$_tuote['tuoteno']}'";
+                      $query = "SELECT tuotepaikat.tuoteno,
+                                tuotepaikat.saldo,
+                                tuotepaikat.halytysraja,
+                                tuotepaikat.hyllyalue,
+                                tuotepaikat.hyllynro,
+                                tuotepaikat.hyllyvali,
+                                tuotepaikat.hyllytaso
+                                FROM tuotepaikat
+                                JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ostoehdotus != 'E' {$lisa})
+                                {$abcjoin}
+                                {$keraysvyohykelisa}
+                                WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                                AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
+                                AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
+                                 AND tuote.tuoteno      = '{$_tuote['tuoteno']}'";
                       $vasres = pupe_query($query);
 
                       while ($vasrow = mysql_fetch_assoc($vasres)) {
@@ -477,10 +477,10 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
 
           // Otetaan osoite toimipaikalta jos varaston tiedoissa sit‰ ei oo
           if ($varow['osoite'] == "" and $varow['toimipaikka'] > 0) {
-            $query = "  SELECT nimi, osoite, postino, postitp, maa
-                  FROM yhtion_toimipaikat
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '{$varow['toimipaikka']}'";
+            $query = "SELECT nimi, osoite, postino, postitp, maa
+                      FROM yhtion_toimipaikat
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '{$varow['toimipaikka']}'";
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) == 1) {
@@ -525,10 +525,10 @@ if (isset($generoi) and $generoi != "" and $tee == 'M' and $toimittajaid > 0 and
           $otsikot[] = $kukarow["kesken"];
         }
 
-        $query = "  SELECT *
-              FROM tuote
-              WHERE tuoteno = '{$pairow['tuoteno']}'
-              AND yhtio = '{$kukarow['yhtio']}'";
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE tuoteno = '{$pairow['tuoteno']}'
+                  AND yhtio     = '{$kukarow['yhtio']}'";
         $rarresult = pupe_query($query);
 
         if (mysql_num_rows($rarresult) == 1) {

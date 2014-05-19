@@ -53,17 +53,17 @@ if (!empty($valitut_tilausrivi_tunnukset)) {
   $tilausrivi_where = " AND tilausrivi.tunnus IN ('".implode("','", $valitut_tilausrivi_tunnukset)."') ";
 }
 
-$query = "  SELECT
-      sum($hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) koko_summa,
-      sum($hinta_riv2 * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) koko_oma_summa,
-      sum(if(varattu+jt>0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) plus_summa,
-      sum(if(varattu+jt<0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) nega_summa
-      FROM tilausrivi
-      WHERE yhtio = '$kukarow[yhtio]'
-      AND otunnus = '$tilausnumero'
-      {$tilausrivi_where}
-      and rivihinta = 0
-      and uusiotunnus = 0";
+$query = "SELECT
+          sum($hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) koko_summa,
+          sum($hinta_riv2 * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) koko_oma_summa,
+          sum(if(varattu+jt>0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) plus_summa,
+          sum(if(varattu+jt<0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) nega_summa
+          FROM tilausrivi
+          WHERE yhtio     = '$kukarow[yhtio]'
+          AND otunnus     = '$tilausnumero'
+          {$tilausrivi_where}
+          and rivihinta   = 0
+          and uusiotunnus = 0";
 $result = pupe_query($query);
 $tarow = mysql_fetch_assoc($result);
 
@@ -144,15 +144,15 @@ else {
       $jypro = $halu_summa / $nega_summa;
 
       // Rullataan tilausrivejä
-      $query = "  SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl
-            FROM tilausrivi
-            WHERE yhtio    = '$kukarow[yhtio]'
-            and varattu + jt < 0
-            and otunnus    = '$tilausnumero'
-            {$tilausrivi_where}
-            and rivihinta    = 0
-            and uusiotunnus  = 0
-            ORDER BY hinta";
+      $query = "SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl
+                FROM tilausrivi
+                WHERE yhtio     = '$kukarow[yhtio]'
+                and varattu + jt < 0
+                and otunnus     = '$tilausnumero'
+                {$tilausrivi_where}
+                and rivihinta   = 0
+                and uusiotunnus = 0
+                ORDER BY hinta";
     }
     elseif ($jysum > 0 and $plus_summa != 0) {
       // jos jyvityssumma on plussaa ja meillä on veloitusrivejä, kosketaan vain veloitusriveihin
@@ -160,15 +160,15 @@ else {
       $jypro = $halu_summa / $plus_summa;
 
       // Rullataan tilausrivejä
-      $query = "  SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl
-            FROM tilausrivi
-            WHERE yhtio    = '$kukarow[yhtio]'
-            and varattu + jt > 0
-            and otunnus    = '$tilausnumero'
-            {$tilausrivi_where}
-            and rivihinta    = 0
-            and uusiotunnus  = 0
-            ORDER BY hinta";
+      $query = "SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl
+                FROM tilausrivi
+                WHERE yhtio     = '$kukarow[yhtio]'
+                and varattu + jt > 0
+                and otunnus     = '$tilausnumero'
+                {$tilausrivi_where}
+                and rivihinta   = 0
+                and uusiotunnus = 0
+                ORDER BY hinta";
     }
     else {
       echo "<font class='error'>".t("Jyvitys epäonnistui")."!</font><br>";

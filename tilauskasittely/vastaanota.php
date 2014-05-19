@@ -1,7 +1,7 @@
 <?php
 
 if (!isset($echotaanko) or (isset($echotaanko) and $echotaanko) ) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 if (!isset($tee))       $tee = "";
@@ -615,7 +615,7 @@ if ($tee == 'valmis') {
         $tee = "N";
         $kutsuja = "vastaanota.php";
 
-        require("muuvarastopaikka.php");
+        require "muuvarastopaikka.php";
 
         if ($eancheck[$tun] != '' and (int) $kirjoitin > 0) {
           $query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
@@ -624,7 +624,7 @@ if ($tee == 'valmis') {
           $komento = $komrow['komento'];
 
           for($a = 0; $a < $tkpl; $a++) {
-            require("inc/tulosta_tuotetarrat_tec.inc");
+            require "inc/tulosta_tuotetarrat_tec.inc";
           }
         }
 
@@ -701,7 +701,13 @@ if ($tee == 'valmis') {
         and alanimi = ''";
   $jtoikeudetres = pupe_query($query);
 
-  if ((mysql_num_rows($jtoikeudetres) <> 0 and $yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "") or $yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J") {
+  $_jtoikeus              = (mysql_num_rows($jtoikeudetres) <> 0);
+  $_jt_toimita            = ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] != "");
+  $_jt_toimita_j          = ($yhtiorow["automaattinen_jt_toimitus_siirtolista"] == "J");
+  $_jt_toimitus_sallittu  = (($_jtoikeus and $_jt_toimita) or $_jt_toimita_j);
+  $_normisiirto           = (!isset($_kirjanpidollinen_varastosiirto) or $_kirjanpidollinen_varastosiirto == false);
+
+  if ($_jt_toimitus_sallittu and $_normisiirto) {
     $jtoikeudetrow  = mysql_fetch_assoc($jtoikeudetres);
     $jtrivit = array();
     $jtrivit_paikat   = array();
@@ -782,9 +788,9 @@ if ($tee == 'valmis') {
 
     while ($apusummarow = mysql_fetch_assoc($result)) {
       // N‰‰ oli tossa updatessa mutta muuttujia ei ollut eik‰ tullut
-      #bruttopaino     = '$aputoimirow[bruttopaino]',
-      #lisattava_era     = '$aputoimirow[lisattava_era]',
-      #vahennettava_era  = '$aputoimirow[vahennettava_era]'
+      //bruttopaino     = '$aputoimirow[bruttopaino]',
+      //lisattava_era     = '$aputoimirow[lisattava_era]',
+      //vahennettava_era  = '$aputoimirow[vahennettava_era]'
 
       $query = "  UPDATE lasku
             SET alatila    = 'V',
@@ -817,7 +823,7 @@ if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI")
     $otunnus = $id;
     $mista = 'vastaanota';
 
-    require('tulosta_purkulista.inc');
+    require 'tulosta_purkulista.inc';
   }
 
   $id    = 0;
@@ -953,7 +959,12 @@ if ($id == '0' and $echotaanko) {
   if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {
     $varasto .= " AND lasku.yhtio_toimipaikka = {$toimipaikkarajaus}";
   }
+  elseif (!isset($toimipaikkarajaus) and $yhtiorow['toimipaikkakasittely'] == "L") {
+    // rajataan vaikka k‰ytt‰j‰ll‰ ei ole toimipaikkaa
+    $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
+  }
   else if (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] != 0) {
+    // rajataan vain kun k‰ytt‰j‰ll‰ on toimipaikka
     $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
   }
 
@@ -1646,5 +1657,5 @@ if ($id != '0') {
 }
 
 if ($echotaanko) {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

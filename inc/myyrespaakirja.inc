@@ -92,11 +92,11 @@ echo "
   <tr>";
 
   // haetaan kaikki yrityksen rahatilit mysql muodossa
-  $query  = "  SELECT oletus_rahatili, nimi, tilino
-        FROM yriti
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND kaytossa = ''
-        AND oletus_rahatili != ''";
+  $query  = "SELECT oletus_rahatili, nimi, tilino
+             FROM yriti
+             WHERE yhtio          = '$kukarow[yhtio]'
+             AND kaytossa         = ''
+             AND oletus_rahatili != ''";
   $ratire = mysql_query($query) or pupe_error($query);
 
   echo "<th>".t("Pankkitili")."</th>";
@@ -125,12 +125,12 @@ if ($tee == "1") {
     $rahatili_lisa = "";
   }
   // haetaan kaikki yrityksen rahatilit mysql muodossa
-  $query  = "  SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
-        FROM yriti
-        WHERE yhtio = '$kukarow[yhtio]'
-        and kaytossa = ''
-        $rahatili_lisa
-        and oletus_rahatili != ''";
+  $query  = "SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
+             FROM yriti
+             WHERE yhtio          = '$kukarow[yhtio]'
+             and kaytossa         = ''
+             $rahatili_lisa
+             and oletus_rahatili != ''";
   $ratire = mysql_query($query) or pupe_error($query);
   $ratiro = mysql_fetch_array($ratire);
 
@@ -165,25 +165,25 @@ if ($tee == "1") {
       $etumerkki = " * -1";
     }
 
-    $query = "  SELECT
-          min(lasku.nimi) nimi,
-          min(lasku.laskunro) laskunro,
-          group_concat(tiliointi.tapvm ORDER BY tiliointi.tunnus) tapvm,
-          group_concat(tiliointi.summa $etumerkki ORDER BY tiliointi.tunnus) summa,
-          sum(tiliointi.summa $etumerkki) sum_summa,
-          min(tiliointi.ltunnus) ltunnus,
-          min(tiliointi.tapvm) o_pvm,
-          max(tiliointi.summa) o_sum,
-          max(lasku.summa) laskusumma,
-          max(lasku.valkoodi) laskuvalkoodi
-          FROM tiliointi
-          JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus $laskulisa
-          WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
-          and tiliointi.tilino  IN ($ratiro[rahatilit])
-          and tiliointi.korjattu = ''
-          and  $lisa
-          GROUP BY lasku.tunnus
-          ORDER BY o_pvm, o_sum";
+    $query = "SELECT
+              min(lasku.nimi) nimi,
+              min(lasku.laskunro) laskunro,
+              group_concat(tiliointi.tapvm ORDER BY tiliointi.tunnus) tapvm,
+              group_concat(tiliointi.summa $etumerkki ORDER BY tiliointi.tunnus) summa,
+              sum(tiliointi.summa $etumerkki) sum_summa,
+              min(tiliointi.ltunnus) ltunnus,
+              min(tiliointi.tapvm) o_pvm,
+              max(tiliointi.summa) o_sum,
+              max(lasku.summa) laskusumma,
+              max(lasku.valkoodi) laskuvalkoodi
+              FROM tiliointi
+              JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus $laskulisa
+              WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+              and tiliointi.tilino   IN ($ratiro[rahatilit])
+              and tiliointi.korjattu = ''
+              and  $lisa
+              GROUP BY lasku.tunnus
+              ORDER BY o_pvm, o_sum";
     $result = mysql_query($query) or pupe_error($query);
 
     pupe_DataTables(array(array($pupe_DataTables, 7, 7)));

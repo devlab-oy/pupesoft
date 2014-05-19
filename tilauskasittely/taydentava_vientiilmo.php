@@ -37,17 +37,17 @@ if ($tee == 'TULOSTA') {
   //atktullauksen funktiot
   require("taydentava_vientiilmo_atktietue.inc");
 
-  $query = "  SELECT *
-        FROM lasku
-        WHERE vienti  = 'K'
-        and tila    = 'U'
-        and alatila    = 'X'
-        and tapvm     >= '$vva-$kka-$ppa'
-        and tapvm     <= '$vvl-$kkl-$ppl'
-        and tullausnumero != ''
-        and yhtio    = '$kukarow[yhtio]'
-        and lasku.kauppatapahtuman_luonne != '999'
-        ORDER BY laskunro";
+  $query = "SELECT *
+            FROM lasku
+            WHERE vienti                       = 'K'
+            and tila                           = 'U'
+            and alatila                        = 'X'
+            and tapvm                          >= '$vva-$kka-$ppa'
+            and tapvm                          <= '$vvl-$kkl-$ppl'
+            and tullausnumero                 != ''
+            and yhtio                          = '$kukarow[yhtio]'
+            and lasku.kauppatapahtuman_luonne != '999'
+            ORDER BY laskunro";
   $laskuresult = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($laskuresult) == 0)  {
@@ -117,9 +117,9 @@ if ($tee == 'TULOSTA') {
       $virhe++;
     }
     else {
-      $query = "  SELECT distinct koodi
-            FROM maat
-            WHERE koodi='$laskurow[maa_maara]'";
+      $query = "SELECT distinct koodi
+                FROM maat
+                WHERE koodi='$laskurow[maa_maara]'";
       $maaresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($maaresult) == 0) {
@@ -153,9 +153,9 @@ if ($tee == 'TULOSTA') {
       //$virhe++;
     }
     else {
-      $query = "  SELECT distinct koodi
-            FROM maat
-            WHERE koodi='$laskurow[sisamaan_kuljetus_kansallisuus]'";
+      $query = "SELECT distinct koodi
+                FROM maat
+                WHERE koodi='$laskurow[sisamaan_kuljetus_kansallisuus]'";
       $maaresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($maaresult) == 0) {
@@ -174,9 +174,9 @@ if ($tee == 'TULOSTA') {
       $virhe++;
     }
     else {
-      $query = "  SELECT distinct koodi
-            FROM maat
-            WHERE koodi='$laskurow[aktiivinen_kuljetus_kansallisuus]'";
+      $query = "SELECT distinct koodi
+                FROM maat
+                WHERE koodi='$laskurow[aktiivinen_kuljetus_kansallisuus]'";
       $maaresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($maaresult) == 0) {
@@ -198,19 +198,19 @@ if ($tee == 'TULOSTA') {
 
 
     ///* katsotaan, että laskulla on rivejä, hyvitysrivejä ei huolita mukaan vienti-ilmoitukseen, silloin erä hylätään tullissa *///
-    $cquery = "  SELECT
-          tuote.tullinimike1,
-          tuote.tullinimike2,
-          tuote.tullikohtelu,
-          (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
-          if(sum(tilausrivi.rivihinta)>0,sum(tilausrivi.rivihinta),0.01) rivihinta
-          FROM tilausrivi use index (uusiotunnus_index)
-          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
-          LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
-          WHERE tilausrivi.uusiotunnus   = '$laskurow[tunnus]'
-          and tilausrivi.yhtio      = '$kukarow[yhtio]'
-          and tilausrivi.kpl         > 0
-          GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
+    $cquery = "SELECT
+               tuote.tullinimike1,
+               tuote.tullinimike2,
+               tuote.tullikohtelu,
+               (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
+               if(sum(tilausrivi.rivihinta)>0,sum(tilausrivi.rivihinta),0.01) rivihinta
+               FROM tilausrivi use index (uusiotunnus_index)
+               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
+               LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
+               WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+               and tilausrivi.yhtio         = '$kukarow[yhtio]'
+               and tilausrivi.kpl           > 0
+               GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
     $cresult = mysql_query($cquery) or pupe_error($cquery);
 
     if (mysql_num_rows($cresult) == 0) {
@@ -245,9 +245,9 @@ if ($tee == 'TULOSTA') {
           $tid = $pdf->template->create();
           $pdf->template->size($tid, 600, 830);
 
-          $query = "  SELECT min(laskunro), max(laskunro), count(*)
-                FROM lasku
-                WHERE vienti='K' and tila='U' and tullausnumero!='' and tapvm ='$tapvm' and yhtio='$kukarow[yhtio]'";
+          $query = "SELECT min(laskunro), max(laskunro), count(*)
+                    FROM lasku
+                    WHERE vienti='K' and tila='U' and tullausnumero!='' and tapvm ='$tapvm' and yhtio='$kukarow[yhtio]'";
           $csresult = mysql_query($query) or pupe_error($query);
           $csrow = mysql_fetch_array($csresult);
 
@@ -303,10 +303,10 @@ if ($tee == 'TULOSTA') {
 
       ///* Lasketaan laskun kokonaispaino *///
       //hetaan kaikki otunnukset jotka löytyvät tän uusiotunnuksen alta
-      $query = "  SELECT distinct otunnus
-            FROM tilausrivi
-            WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
-            and tilausrivi.yhtio='$kukarow[yhtio]'";
+      $query = "SELECT distinct otunnus
+                FROM tilausrivi
+                WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+                and tilausrivi.yhtio='$kukarow[yhtio]'";
       $uresult = mysql_query($query) or pupe_error($query);
 
       $tunnukset = '';
@@ -318,10 +318,10 @@ if ($tee == 'TULOSTA') {
       $tunnukset = substr($tunnukset,0,-1);
 
       //haetaan kollimäärä ja bruttopaino
-      $query = "  SELECT *
-            FROM rahtikirjat
-            WHERE otsikkonro in ($tunnukset)
-            and yhtio='$kukarow[yhtio]'";
+      $query = "SELECT *
+                FROM rahtikirjat
+                WHERE otsikkonro in ($tunnukset)
+                and yhtio='$kukarow[yhtio]'";
       $rahtiresult = mysql_query($query) or pupe_error($query);
 
       $kilot  = 0;
@@ -331,26 +331,26 @@ if ($tee == 'TULOSTA') {
       }
 
       //Haetaan kaikki tilausrivit
-      $query = "  SELECT
-            tuote.tullinimike1,
-            tuote.tullinimike2,
-            tuote.tullikohtelu,
-            (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
-            if(sum(tilausrivi.rivihinta)>0,sum(tilausrivi.rivihinta),0.01) rivihinta,
-            sum(tilausrivi.kpl) kpl,
-            round(sum((tilausrivi.rivihinta/$laskunarvo)*$kilot),0) nettop,
-            tullinimike.su,
-            tullinimike.su_vientiilmo,
-            tilausrivi.nimitys,
-            tilausrivi.tuoteno,
-            tilausrivi.tunnus
-            FROM tilausrivi use index (uusiotunnus_index)
-            JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
-            LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
-            WHERE tilausrivi.uusiotunnus   = '$laskurow[tunnus]'
-            and tilausrivi.yhtio      = '$kukarow[yhtio]'
-            and tilausrivi.kpl         > 0
-            GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
+      $query = "SELECT
+                tuote.tullinimike1,
+                tuote.tullinimike2,
+                tuote.tullikohtelu,
+                (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
+                if(sum(tilausrivi.rivihinta)>0,sum(tilausrivi.rivihinta),0.01) rivihinta,
+                sum(tilausrivi.kpl) kpl,
+                round(sum((tilausrivi.rivihinta/$laskunarvo)*$kilot),0) nettop,
+                tullinimike.su,
+                tullinimike.su_vientiilmo,
+                tilausrivi.nimitys,
+                tilausrivi.tuoteno,
+                tilausrivi.tunnus
+                FROM tilausrivi use index (uusiotunnus_index)
+                JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
+                LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
+                WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+                and tilausrivi.yhtio         = '$kukarow[yhtio]'
+                and tilausrivi.kpl           > 0
+                GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
       $riviresult = mysql_query($query) or pupe_error($query);
 
       //piirretään rivi tarkastuslistaan
@@ -385,9 +385,9 @@ if ($tee == 'TULOSTA') {
           $virhe++;
         }
         else {
-          $query = "  SELECT cn
-                FROM tullinimike
-                WHERE cn='$rivirow[tullinimike1]' and kieli = '$yhtiorow[kieli]'";
+          $query = "SELECT cn
+                    FROM tullinimike
+                    WHERE cn='$rivirow[tullinimike1]' and kieli = '$yhtiorow[kieli]'";
           $cnresult = mysql_query($query) or pupe_error($query);
 
           if (mysql_num_rows($cnresult) != 1) {
@@ -493,9 +493,9 @@ if ($tee == 'TULOSTA') {
   $tid = $pdf->template->create();
   $pdf->template->size($tid, 600, 830);
 
-  $query = "  SELECT min(laskunro), max(laskunro), count(*)
-        FROM lasku
-        WHERE vienti='K' and tila='U' and tullausnumero!='' and tapvm ='$tapvm' and yhtio='$kukarow[yhtio]'";
+  $query = "SELECT min(laskunro), max(laskunro), count(*)
+            FROM lasku
+            WHERE vienti='K' and tila='U' and tullausnumero!='' and tapvm ='$tapvm' and yhtio='$kukarow[yhtio]'";
   $csresult = mysql_query($query) or pupe_error($query);
   $csrow = mysql_fetch_array($csresult);
 

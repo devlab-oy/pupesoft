@@ -63,10 +63,10 @@ function rest_tilaa($params) {
 
   // asiakas tarkistus
   // Haetaan asiakkaan tiedot
-  $query = "  SELECT *
-        FROM asiakas
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND tunnus = '{$tunnus}'";
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus  = '{$tunnus}'";
   $tulos = pupe_query($query);
 
   if (mysql_num_rows($tulos) == 0) {
@@ -74,10 +74,10 @@ function rest_tilaa($params) {
   }
 
   // haetaan tuotteen tiedot
-  $query = "  SELECT *
-        FROM tuote
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND tuoteno = '$tuoteno'";
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tuoteno = '$tuoteno'";
   $tuoteres = pupe_query($query);
 
   if (mysql_num_rows($tuoteres) == 0) {
@@ -92,10 +92,10 @@ function rest_tilaa($params) {
     // varmistetaan, että käyttäjällä ei ole mitään kesken
     $kukarow["kesken"] = 0;
 
-    $query  = "  UPDATE kuka
-          SET kesken = 0
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND kuka   = '{$kukarow["kuka"]}'";
+    $query  = "UPDATE kuka
+               SET kesken = 0
+               WHERE yhtio = '{$kukarow["yhtio"]}'
+               AND kuka    = '{$kukarow["kuka"]}'";
     $update = pupe_query($query);
 
     // tässä kaattuuu
@@ -104,13 +104,13 @@ function rest_tilaa($params) {
 
   $kukarow["kesken"] = $tilausnumero;
 
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio     = '{$kukarow["yhtio"]}'
-        AND laatija     = '{$kukarow["kuka"]}'
-        AND liitostunnus   = '{$tunnus}'
-        AND tila       = 'N'
-        AND tunnus       = '{$tilausnumero}'";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio      = '{$kukarow["yhtio"]}'
+            AND laatija      = '{$kukarow["kuka"]}'
+            AND liitostunnus = '{$tunnus}'
+            AND tila         = 'N'
+            AND tunnus       = '{$tilausnumero}'";
   $kesken = pupe_query($query);
 
   if (mysql_num_rows($kesken) == 0) {
@@ -169,13 +169,13 @@ function rest_login($params) {
   // Vasta virhetarkistuksien jälkeen.
   // haetaan ensin käyttäjätiedot, sen jälkeen yhtiön kaikki tiedot ja yhtion_parametrit
 
-  $query = "  SELECT kuka.*
-        FROM kuka
-        WHERE kuka.yhtio = '{$yhtio}'
-        AND kuka.kuka = '{$user}'
-        AND kuka.salasana = '{$pass}'
-        AND kuka.kuka !=''
-        AND kuka.salasana !=''";
+  $query = "SELECT kuka.*
+            FROM kuka
+            WHERE kuka.yhtio  = '{$yhtio}'
+            AND kuka.kuka     = '{$user}'
+            AND kuka.salasana = '{$pass}'
+            AND kuka.kuka !=''
+            AND kuka.salasana !=''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

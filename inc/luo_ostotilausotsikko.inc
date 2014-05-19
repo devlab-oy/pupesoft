@@ -88,10 +88,10 @@ if (!function_exists('luo_ostotilausotsikko')) {
       $valkoodi = $yhtiorow["valkoodi"];
     }
 
-    $vquery = "  SELECT nimi, kurssi, tunnus
-          FROM valuu
-          WHERE yhtio = '$kukarow[yhtio]'
-          and nimi = '$valkoodi'";
+    $vquery = "SELECT nimi, kurssi, tunnus
+               FROM valuu
+               WHERE yhtio = '$kukarow[yhtio]'
+               and nimi    = '$valkoodi'";
     $vresult = pupe_query($vquery);
     $vrow = mysql_fetch_array($vresult);
 
@@ -142,68 +142,68 @@ if (!function_exists('luo_ostotilausotsikko')) {
         break;
     }
 
-    $query = "  SELECT *
-          from lasku
-          where yhtio     = '$kukarow[yhtio]'
-          and liitostunnus   = '$tiltoi[tunnus]'
-          and tila       = 'O'
-          and alatila     = ''
-          {$ostotilauksen_kasittely_wherelisa}";
+    $query = "SELECT *
+              from lasku
+              where yhtio      = '$kukarow[yhtio]'
+              and liitostunnus = '$tiltoi[tunnus]'
+              and tila         = 'O'
+              and alatila      = ''
+              {$ostotilauksen_kasittely_wherelisa}";
     $ostotilaus_result = pupe_query($query);
 
     // ei löydy, tehdään uus otsikko
     if (mysql_num_rows($ostotilaus_result) == 0) {
 
-      $query = "  INSERT INTO lasku SET
-            alatila       = '',
-            chn          = '$chn',
-            huolitsija       = '{$tiltoi['huolitsija']}',
-            jakelu         = '{$params['jakelu']}',
-            kerayspvm       = '{$params['myyntitil_kerayspvm']}',
-            kuljetus       = '{$tiltoi['kuljetus']}',
-            laatija       = '{$kukarow['kuka']}',
-            liitostunnus    = '{$tiltoi['tunnus']}',
-            luontiaika      = now(),
-            maa         = '{$tiltoi['maa']}',
-            maksuteksti     = '{$tiltoi['maksuteksti']}',
-            myyja         = '{$params['myytil_myyja']}',
-            nimi         = '{$tiltoi['nimi']}',
-            nimitark       = '{$tiltoi['nimitark']}',
-            ohjausmerkki     = '{$params['ohjausmerkki']}',
-            osoite         = '{$tiltoi['osoite']}',
-            ovttunnus       = '{$tiltoi['ovttunnus']}',
-            postino       = '{$tiltoi['postino']}',
-            postitp       = '{$tiltoi['postitp']}',
-            sisviesti1      = '{$params['myytil_sisviesti1']}',
-            tila         = 'O',
-            tilaustyyppi    = '{$params['tilaustyyppi']}',
-            tilausyhteyshenkilo  = '{$kukarow['nimi']}',
-            toimaika       = '{$params['myytil_toimaika']}',
-            toimitusehto     = '{$tiltoi['toimitusehto']}',
-            toimitustapa     = '{$params['myytil_toimitustapa']}',
-            toim_maa       = '{$toim_maa}',
-            toim_nimi       = '{$toim_nimi}',
-            toim_nimitark     = '{$toim_nimitark}',
-            toim_osoite     = '{$toim_osoite}',
-            toim_ovttunnus    = '{$tiltoi['ovttunnus']}',
-            toim_postino     = '{$toim_postino}',
-            toim_postitp     = '{$toim_postitp}',
-            valkoodi       = '{$valkoodi}',
-            vanhatunnus      = {$params['toimipaikka']},
-            varasto       = '{$params['varasto']}',
-            verkkotunnus    = '{$params['myytil_liitostunnus']}',
-            vienti_kurssi     = '{$vrow['kurssi']}',
-            viesti         = '{$params['myytil_viesti']}',
-            viikorkopros     = '{$yhtiorow['viivastyskorko']}',
-            yhtio         = '{$kukarow['yhtio']}',
-            ytunnus        = '{$tiltoi['ytunnus']}'";
+      $query = "INSERT INTO lasku SET
+                alatila             = '',
+                chn                 = '$chn',
+                huolitsija          = '{$tiltoi['huolitsija']}',
+                jakelu              = '{$params['jakelu']}',
+                kerayspvm           = '{$params['myyntitil_kerayspvm']}',
+                kuljetus            = '{$tiltoi['kuljetus']}',
+                laatija             = '{$kukarow['kuka']}',
+                liitostunnus        = '{$tiltoi['tunnus']}',
+                luontiaika          = now(),
+                maa                 = '{$tiltoi['maa']}',
+                maksuteksti         = '{$tiltoi['maksuteksti']}',
+                myyja               = '{$params['myytil_myyja']}',
+                nimi                = '{$tiltoi['nimi']}',
+                nimitark            = '{$tiltoi['nimitark']}',
+                ohjausmerkki        = '{$params['ohjausmerkki']}',
+                osoite              = '{$tiltoi['osoite']}',
+                ovttunnus           = '{$tiltoi['ovttunnus']}',
+                postino             = '{$tiltoi['postino']}',
+                postitp             = '{$tiltoi['postitp']}',
+                sisviesti1          = '{$params['myytil_sisviesti1']}',
+                tila                = 'O',
+                tilaustyyppi        = '{$params['tilaustyyppi']}',
+                tilausyhteyshenkilo = '{$kukarow['nimi']}',
+                toimaika            = '{$params['myytil_toimaika']}',
+                toimitusehto        = '{$tiltoi['toimitusehto']}',
+                toimitustapa        = '{$params['myytil_toimitustapa']}',
+                toim_maa            = '{$toim_maa}',
+                toim_nimi           = '{$toim_nimi}',
+                toim_nimitark       = '{$toim_nimitark}',
+                toim_osoite         = '{$toim_osoite}',
+                toim_ovttunnus      = '{$tiltoi['ovttunnus']}',
+                toim_postino        = '{$toim_postino}',
+                toim_postitp        = '{$toim_postitp}',
+                valkoodi            = '{$valkoodi}',
+                vanhatunnus         = {$params['toimipaikka']},
+                varasto             = '{$params['varasto']}',
+                verkkotunnus        = '{$params['myytil_liitostunnus']}',
+                vienti_kurssi       = '{$vrow['kurssi']}',
+                viesti              = '{$params['myytil_viesti']}',
+                viikorkopros        = '{$yhtiorow['viivastyskorko']}',
+                yhtio               = '{$kukarow['yhtio']}',
+                ytunnus             = '{$tiltoi['ytunnus']}'";
       pupe_query($query);
       $ostotilaus_tunnus = mysql_insert_id();
 
-      $query = "  SELECT *
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$ostotilaus_tunnus}'";
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$ostotilaus_tunnus}'";
       $ostotilaus_result = pupe_query($query);
 
       $ostotilaus_row = mysql_fetch_assoc($ostotilaus_result);

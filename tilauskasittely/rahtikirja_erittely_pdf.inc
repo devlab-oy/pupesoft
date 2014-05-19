@@ -42,10 +42,10 @@ if (!function_exists('uusi_sivu_erittely')) {
       $pdf->draw_text(302, 797, $toitarow['selite'], $firstpage, $kirj);
 
       if (isset($laskurow["toimitustavan_lahto"]) and $laskurow["toimitustavan_lahto"] > 0) {
-        $query = "  SELECT pvm, lahdon_kellonaika
-              FROM lahdot
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus = '{$laskurow["toimitustavan_lahto"]}'";
+        $query = "SELECT pvm, lahdon_kellonaika
+                  FROM lahdot
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tunnus  = '{$laskurow["toimitustavan_lahto"]}'";
         $chk_res = pupe_query($query);
         $chk_row = mysql_fetch_assoc($chk_res);
 
@@ -133,34 +133,34 @@ if (!function_exists('rivi_erittely')) {
            $pdf->draw_text(62, $kala-48, $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $kirj);
          }
 
-         $query = "  SELECT yhteyshenkilo.nimi,
-               IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
-               FROM lasku
-               JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
-               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-               AND lasku.tunnus IN ({$laskurow['tunnus']})
-               AND lasku.tilausyhteyshenkilo != ''
-               LIMIT 1";
+         $query = "SELECT yhteyshenkilo.nimi,
+                   IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
+                   FROM lasku
+                   JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
+                   WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
+                   AND lasku.tunnus               IN ({$laskurow['tunnus']})
+                   AND lasku.tilausyhteyshenkilo != ''
+                   LIMIT 1";
          $yhres = pupe_query($query);
 
          if (mysql_num_rows($yhres) == 0) {
-           $query = "  SELECT yhteyshenkilo.nimi,
-                 IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
-                 FROM laskun_lisatiedot
-                 JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio AND yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_kaupallinen AND yhteyshenkilo.tyyppi = 'A')
-                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-                 AND laskun_lisatiedot.otunnus IN ({$laskurow['tunnus']})
-                 AND laskun_lisatiedot.yhteyshenkilo_tekninen > 0
-                 LIMIT 1";
+           $query = "SELECT yhteyshenkilo.nimi,
+                     IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
+                     FROM laskun_lisatiedot
+                     JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio AND yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_kaupallinen AND yhteyshenkilo.tyyppi = 'A')
+                     WHERE laskun_lisatiedot.yhtio                = '{$kukarow['yhtio']}'
+                     AND laskun_lisatiedot.otunnus                IN ({$laskurow['tunnus']})
+                     AND laskun_lisatiedot.yhteyshenkilo_tekninen > 0
+                     LIMIT 1";
            $yhres = pupe_query($query);
          }
 
       if (mysql_num_rows($yhres) == 0) {
-           $query = "  SELECT '2' O, '' nimi,
-                 IF(puhelin != '', puhelin, IF(gsm != '', gsm, '')) puh
-                 FROM asiakas
-                 WHERE yhtio = '{$kukarow['yhtio']}'
-                 AND tunnus = '{$laskurow['liitostunnus']}'";
+           $query = "SELECT '2' O, '' nimi,
+                     IF(puhelin != '', puhelin, IF(gsm != '', gsm, '')) puh
+                     FROM asiakas
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus  = '{$laskurow['liitostunnus']}'";
            $yhres = pupe_query($query);
          }
 
@@ -226,17 +226,17 @@ if (!function_exists('rivi_erittely')) {
     }
 
     // summataan kaikki painot yhteen
-    $query = "  SELECT pakkaus,
-          pakkauskuvaus,
-          sum(kilot) kilot,
-          sum(kollit) kollit,
-          sum(kuutiot) kuutiot,
-          sum(lavametri) lavametri
-          FROM rahtikirjat
-          WHERE otsikkonro in ({$laskurow['tunnus']})
-          AND yhtio = '$kukarow[yhtio]'
-          GROUP BY 1,2
-          ORDER BY 1,2";
+    $query = "SELECT pakkaus,
+              pakkauskuvaus,
+              sum(kilot) kilot,
+              sum(kollit) kollit,
+              sum(kuutiot) kuutiot,
+              sum(lavametri) lavametri
+              FROM rahtikirjat
+              WHERE otsikkonro in ({$laskurow['tunnus']})
+              AND yhtio        = '$kukarow[yhtio]'
+              GROUP BY 1,2
+              ORDER BY 1,2";
     $pakka = mysql_query($query) or pupe_error($query);
 
     while ($pakkarow = mysql_fetch_assoc($pakka)) {
@@ -280,35 +280,35 @@ if ($yhdistetaan_lahtoon != 0 and !empty($yhdistettavan_lahdon_tilaukset)) {
 
 // Haetaan tulostetut tilaukset
 if ($toitarow['erittely'] == 'k') {
-  $query = "  SELECT asiakkaan_tilausnumero, nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_ovttunnus, toim_postitp, tunnus, ytunnus
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus in ($otunnukset)
-        ORDER BY ytunnus, ovttunnus, toim_ovttunnus, liitostunnus, tunnus";
+  $query = "SELECT asiakkaan_tilausnumero, nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_ovttunnus, toim_postitp, tunnus, ytunnus
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  in ($otunnukset)
+            ORDER BY ytunnus, ovttunnus, toim_ovttunnus, liitostunnus, tunnus";
 }
 else {
-  $query = "  SELECT
-        lasku.nimi,
-        lasku.nimitark,
-        lasku.osoite,
-        lasku.postino,
-        lasku.postitp,
-        lasku.toim_nimi,
-        lasku.toim_nimitark,
-        lasku.toim_osoite,
-        lasku.toim_postino,
-        lasku.toim_postitp,
-        lasku.ytunnus,
-        lasku.liitostunnus,
-        max(lasku.toimitustavan_lahto) toimitustavan_lahto,
-        group_concat(lasku.tunnus) tunnus,
-        max(maksuehto.jv) jv
-        FROM lasku
-        LEFT JOIN maksuehto on (lasku.yhtio=maksuehto.yhtio AND lasku.maksuehto=maksuehto.tunnus)
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND lasku.tunnus in ($otunnukset)
-        GROUP BY lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.ytunnus, lasku.liitostunnus
-        ORDER BY lasku.ytunnus, lasku.liitostunnus, lasku.tunnus";
+  $query = "SELECT
+            lasku.nimi,
+            lasku.nimitark,
+            lasku.osoite,
+            lasku.postino,
+            lasku.postitp,
+            lasku.toim_nimi,
+            lasku.toim_nimitark,
+            lasku.toim_osoite,
+            lasku.toim_postino,
+            lasku.toim_postitp,
+            lasku.ytunnus,
+            lasku.liitostunnus,
+            max(lasku.toimitustavan_lahto) toimitustavan_lahto,
+            group_concat(lasku.tunnus) tunnus,
+            max(maksuehto.jv) jv
+            FROM lasku
+            LEFT JOIN maksuehto on (lasku.yhtio=maksuehto.yhtio AND lasku.maksuehto=maksuehto.tunnus)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tunnus  in ($otunnukset)
+            GROUP BY lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.ytunnus, lasku.liitostunnus
+            ORDER BY lasku.ytunnus, lasku.liitostunnus, lasku.tunnus";
 }
 
 $result = mysql_query($query) or pupe_error($query);

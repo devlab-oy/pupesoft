@@ -431,12 +431,12 @@ else {
 
               // jos kyseessa on myyjä, haetaan sen nimi
               if (mysql_field_name($result, $i) == "tuotemyyjä") {
-                $query = "  SELECT nimi
-                      FROM kuka
-                      WHERE yhtio in ($yhtio)
-                      and myyja = '$row[$i]'
-                      AND myyja > 0
-                      limit 1";
+                $query = "SELECT nimi
+                          FROM kuka
+                          WHERE yhtio in ($yhtio)
+                          and myyja   = '$row[$i]'
+                          AND myyja   > 0
+                          limit 1";
                 $osre = mysql_query($query) or pupe_error($query);
 
                 if (mysql_num_rows($osre) == 1) {
@@ -447,12 +447,12 @@ else {
 
               // jos kyseessa on ostaja, haetaan sen nimi
               if (mysql_field_name($result, $i) == "tuoteostaja") {
-                $query = "  SELECT nimi
-                      FROM kuka
-                      WHERE yhtio in ($yhtio)
-                      and myyja = '$row[$i]'
-                      AND myyja > 0
-                      limit 1";
+                $query = "SELECT nimi
+                          FROM kuka
+                          WHERE yhtio in ($yhtio)
+                          and myyja   = '$row[$i]'
+                          AND myyja   > 0
+                          limit 1";
                 $osre = mysql_query($query) or pupe_error($query);
                 if (mysql_num_rows($osre) == 1) {
                   $osrow = mysql_fetch_array($osre);
@@ -463,10 +463,10 @@ else {
               // kustannuspaikka
               if (mysql_field_name($result, $i) == "kustannuspaikka") {
                 // näytetään soveltuvat kustannuspaikka
-                $query = "  SELECT nimi
-                      FROM kustannuspaikka
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      and tunnus = '$row[$i]'";
+                $query = "SELECT nimi
+                          FROM kustannuspaikka
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          and tunnus  = '$row[$i]'";
                 $osre = mysql_query($query) or pupe_error($query);
 
                 if (mysql_num_rows($osre) == 1) {
@@ -630,9 +630,9 @@ else {
     echo "<form method='post'>";
     echo "<input type='hidden' name='tee' value='go'>";
 
-    $query = "  SELECT *
-          FROM yhtio
-          WHERE $logistiikka_yhtiolisa";
+    $query = "SELECT *
+              FROM yhtio
+              WHERE $logistiikka_yhtiolisa";
     $result = mysql_query($query) or pupe_error($query);
 
     // voidaan valita listaukseen useita konserniyhtiöitä, jos käyttäjällä on "PÄIVITYS" oikeus tähän raporttiin
@@ -782,11 +782,11 @@ else {
     echo "<td valign='top'>";
 
     // tehdään query
-    $query = "  SELECT DISTINCT myyja, nimi
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND myyja>0
-          ORDER BY myyja";
+    $query = "SELECT DISTINCT myyja, nimi
+              FROM kuka
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND myyja>0
+              ORDER BY myyja";
     $sresult = mysql_query($query) or pupe_error($query);
 
     echo "<select name='mul_tuotemyyja[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -815,11 +815,11 @@ else {
 
     echo "<td valign='top'>";
 
-    $query = "  SELECT distinct myyja, nimi
-          FROM kuka
-          WHERE yhtio='$kukarow[yhtio]'
-          AND myyja>0
-          ORDER BY myyja";
+    $query = "SELECT distinct myyja, nimi
+              FROM kuka
+              WHERE yhtio='$kukarow[yhtio]'
+              AND myyja>0
+              ORDER BY myyja";
     $sresult = mysql_query($query) or pupe_error($query);
 
     echo "<select name='mul_tuoteostaja[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -848,12 +848,12 @@ else {
 
     echo "<td valign='top'>";
 
-    $query = "  SELECT tunnus selite, nimi selitetark
-          FROM kustannuspaikka
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kaytossa != 'E'
-          and tyyppi = 'K'
-          ORDER BY koodi+0, koodi, nimi";
+    $query = "SELECT tunnus selite, nimi selitetark
+              FROM kustannuspaikka
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and kaytossa != 'E'
+              and tyyppi    = 'K'
+              ORDER BY koodi+0, koodi, nimi";
     $res2  = mysql_query($query) or die($query);
 
     echo "<select name='mul_kustp[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -896,10 +896,10 @@ else {
     echo "<tr>";
     echo "<td valign='top'>";
 
-    $query  = "  SELECT tunnus, nimitys
-          FROM varastopaikat
-          WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-          ORDER BY tyyppi, nimitys";
+    $query  = "SELECT tunnus, nimitys
+               FROM varastopaikat
+               WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+               ORDER BY tyyppi, nimitys";
     $vares = mysql_query($query) or pupe_error($query);
 
     echo "<select name='mul_varastot[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -949,12 +949,12 @@ else {
 
     echo "<td valign='top'>";
 
-    $query = "  SELECT kuka, nimi
-          FROM kuka
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND aktiivinen = 1
-          and extranet = ''
-          ORDER BY nimi";
+    $query = "SELECT kuka, nimi
+              FROM kuka
+              WHERE yhtio    = '$kukarow[yhtio]'
+              AND aktiivinen = 1
+              and extranet   = ''
+              ORDER BY nimi";
     $sresult = mysql_query($query) or pupe_error($query);
 
     echo "<select name='mul_invaaja[]' multiple='TRUE' size='10' style='width:100%;'>";

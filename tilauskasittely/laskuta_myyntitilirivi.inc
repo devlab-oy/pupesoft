@@ -34,11 +34,11 @@ if ($tilatapa == "VALITSE") {
 
 if ($tilatapa == "PAIVITA") {
   //P‰ivitet‰‰n is‰n perheid nollaksi jotta voidaan lis‰t‰ lis‰ lis‰varusteita
-  $query  = "  SELECT *
-        FROM tilausrivi
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND otunnus = '$kukarow[kesken]'
-        AND tunnus  = '$rivitunnus'";
+  $query  = "SELECT *
+             FROM tilausrivi
+             WHERE yhtio = '$kukarow[yhtio]'
+             AND otunnus = '$kukarow[kesken]'
+             AND tunnus  = '$rivitunnus'";
   $qres = pupe_query($query);
   $qrow = mysql_fetch_array($qres);
 
@@ -46,12 +46,12 @@ if ($tilatapa == "PAIVITA") {
     $isakpl = $qrow["kpl"];
 
     if($qrow["perheid"] != 0) {
-      $query  = "  SELECT *
-            FROM tilausrivi
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND otunnus = '$kukarow[kesken]'
-            AND perheid = '$qrow[perheid]'
-            ORDER BY tunnus";
+      $query  = "SELECT *
+                 FROM tilausrivi
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND otunnus = '$kukarow[kesken]'
+                 AND perheid = '$qrow[perheid]'
+                 ORDER BY tunnus";
       $qres = pupe_query($query);
     }
 
@@ -66,11 +66,11 @@ if ($tilatapa == "PAIVITA") {
       $erotus  = $qrow["kpl"] - $uusikpl;
 
       if ($erotus > 0) {
-        $query = "  UPDATE tilausrivi SET
-              kpl = '$uusikpl'
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND otunnus = '$kukarow[kesken]'
-              AND tunnus = '$qrow[tunnus]'";
+        $query = "UPDATE tilausrivi SET
+                  kpl         = '$uusikpl'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND otunnus = '$kukarow[kesken]'
+                  AND tunnus  = '$qrow[tunnus]'";
         $updres = pupe_query($query);
 
         $fields = mysql_field_name($qres,0);
@@ -117,22 +117,22 @@ if ($tilatapa == "PAIVITA") {
     }
     if (count($kopsatut_rivit) > 1) {
       foreach($kopsatut_rivit as $uusitunnu) {
-        $query = "  UPDATE tilausrivi SET
-              perheid = '$uuden_perheen_perheid'
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND otunnus = '$kukarow[kesken]'
-              AND tunnus = '$uusitunnu'";
+        $query = "UPDATE tilausrivi SET
+                  perheid     = '$uuden_perheen_perheid'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND otunnus = '$kukarow[kesken]'
+                  AND tunnus  = '$uusitunnu'";
         $updres = pupe_query($query);
 
       }
     }
   }
 
-  $query = "  UPDATE tilausrivi SET
-        var = '$myyntitilirivit'
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND otunnus = '$kukarow[kesken]'
-        AND (tunnus = '$rivitunnus' or perheid='$rivitunnus')";
+  $query = "UPDATE tilausrivi SET
+            var         = '$myyntitilirivit'
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND otunnus = '$kukarow[kesken]'
+            AND (tunnus = '$rivitunnus' or perheid='$rivitunnus')";
   $updres = pupe_query($query);
 
   $tila     = "";
@@ -142,19 +142,19 @@ if ($tilatapa == "PAIVITA") {
 }
 
 if ($tilatapa == "LASKUTA") {
-  $query = "  UPDATE tilausrivi
-        SET varattu = kpl
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND otunnus = '$kukarow[kesken]'
-        AND var = 'A'
-        AND kpl != 0";
+  $query = "UPDATE tilausrivi
+            SET varattu = kpl
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND otunnus  = '$kukarow[kesken]'
+            AND var      = 'A'
+            AND kpl     != 0";
   $result = pupe_query($query);
 
-  $query  = "  SELECT tunnus
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND alkuhyllyalue = '!!M'
-        AND loppuhyllyalue = '!!M'";
+  $query  = "SELECT tunnus
+             FROM varastopaikat
+             WHERE yhtio        = '$kukarow[yhtio]'
+             AND alkuhyllyalue  = '!!M'
+             AND loppuhyllyalue = '!!M'";
   $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 
@@ -167,13 +167,13 @@ if ($tilatapa == "LASKUTA") {
   echo "$tilauksesta_myyntitilaus<br><br>";
 
   //Laitetaan myyntitilin kappalem‰‰ri‰ kuntoon jotta niit‰ ei voisi laskuttaa vahingossa monta kertaa
-  $query = "  UPDATE tilausrivi
-        SET varattu = 0,
-        kpl = 0
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND otunnus = '$kukarow[kesken]'
-        AND var = 'A'
-        AND kpl != 0";
+  $query = "UPDATE tilausrivi
+            SET varattu = 0,
+            kpl          = 0
+            WHERE yhtio  = '$kukarow[yhtio]'
+            AND otunnus  = '$kukarow[kesken]'
+            AND var      = 'A'
+            AND kpl     != 0";
   $result = pupe_query($query);
 
   $tila     = "";
@@ -189,21 +189,21 @@ if ($tilatapa == "LASKUTA") {
 if ($tilatapa == "PALAUTA") {
 
   // Tehd‰‰n siirrett‰vist‰ riveist‰ siirtolista
-  $query = "  SELECT tilausrivi.*, concat_ws('#!°!#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka
-        FROM tilausrivi
-        WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-        AND tilausrivi.otunnus = '{$kukarow["kesken"]}'
-        AND tilausrivi.var = 'B'
-        AND tilausrivi.kpl != 0";
+  $query = "SELECT tilausrivi.*, concat_ws('#!°!#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka
+            FROM tilausrivi
+            WHERE tilausrivi.yhtio  = '{$kukarow["yhtio"]}'
+            AND tilausrivi.otunnus  = '{$kukarow["kesken"]}'
+            AND tilausrivi.var      = 'B'
+            AND tilausrivi.kpl     != 0";
   $palauta_result = pupe_query($query);
 
   if (mysql_num_rows($palauta_result) > 0) {
 
     // Tehd‰‰n siirtolistaotsikko
-    $query = "  SELECT varasto, clearing
-          FROM lasku
-          WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-          AND lasku.tunnus = '{$kukarow["kesken"]}'";
+    $query = "SELECT varasto, clearing
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+              AND lasku.tunnus  = '{$kukarow["kesken"]}'";
     $otsikko_result = pupe_query($query);
     $otsikko_row = mysql_fetch_assoc($otsikko_result);
 
@@ -221,20 +221,20 @@ if ($tilatapa == "PALAUTA") {
 
     $kukarow["kesken"] = $id;
 
-    $query = "  SELECT *
-          FROM lasku
-          WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-          AND lasku.tunnus = '{$kukarow["kesken"]}'";
+    $query = "SELECT *
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+              AND lasku.tunnus  = '{$kukarow["kesken"]}'";
     $laskuresult = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskuresult);
 
     // Loopataan l‰pi myyntitilin rivit..
     while ($palauta_row = mysql_fetch_assoc($palauta_result)) {
 
-      $query = "  SELECT *
-            FROM tuote
-            WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-            AND tuote.tuoteno = '{$palauta_row["tuoteno"]}'";
+      $query = "SELECT *
+                FROM tuote
+                WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                AND tuote.tuoteno = '{$palauta_row["tuoteno"]}'";
       $tuoteresult = pupe_query($query);
       $trow = mysql_fetch_assoc($tuoteresult);
 
@@ -254,28 +254,28 @@ if ($tilatapa == "PALAUTA") {
       require("tilauskasittely/lisaarivi.inc");
 
       // P‰ivitet‰‰n uusi siirtolistan rivi samantien ker‰tyksi
-      $query = "  UPDATE tilausrivi SET
-            keratty = '{$kukarow["kuka"]}',
-            kerattyaika = now()
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus in (".implode(",", $lisatyt_rivit1).")";
+      $query = "UPDATE tilausrivi SET
+                keratty     = '{$kukarow["kuka"]}',
+                kerattyaika = now()
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus  in (".implode(",", $lisatyt_rivit1).")";
       $update_result = pupe_query($query);
 
       // P‰ivitet‰‰n myyntitilin rivi k‰sittelyksi
-      $query = "  UPDATE tilausrivi SET
-            varattu = 0,
-            kpl = 0
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$palauta_row["tunnus"]}";
+      $query = "UPDATE tilausrivi SET
+                varattu     = 0,
+                kpl         = 0
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus  = {$palauta_row["tunnus"]}";
       $tilausrivi_result = pupe_query($query);
     }
 
     // P‰ivitet‰‰n uusi siirtolista odottamaan vastaanottokuittausta
-    $query = "  UPDATE lasku SET
-          lahetepvm = now(),
-          alatila = 'C'
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND tunnus = '{$laskurow["tunnus"]}'";
+    $query = "UPDATE lasku SET
+              lahetepvm   = now(),
+              alatila     = 'C'
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus  = '{$laskurow["tunnus"]}'";
     $update_result = pupe_query($query);
   }
 
@@ -294,10 +294,10 @@ if ($tilatapa == "PALAUTA") {
 
 if ($tilatapa == "LEPAA") {
   // poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
-  $query = "  UPDATE kuka SET
-        kesken = ''
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND kuka = '$kukarow[kuka]'";
+  $query = "UPDATE kuka SET
+            kesken      = ''
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND kuka    = '$kukarow[kuka]'";
   $result = pupe_query($query);
 
   $tee        = '';

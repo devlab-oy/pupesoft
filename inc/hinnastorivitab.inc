@@ -92,13 +92,13 @@ function hae_saatavuus($laskurow, $tuoteno) {
   }
   else {
     //HUOM! palauttaa vain yhden rivin
-    $tulossa_query = "   SELECT min(toimaika) paivamaara
-              FROM tilausrivi
-              WHERE yhtio = '{$kukarow[yhtio]}'
-              AND tuoteno = '{$tuoteno}'
-              AND varattu > 0
-              AND tyyppi = 'O'
-              AND toimaika >= curdate()";
+    $tulossa_query = "SELECT min(toimaika) paivamaara
+                      FROM tilausrivi
+                      WHERE yhtio  = '{$kukarow[yhtio]}'
+                      AND tuoteno  = '{$tuoteno}'
+                      AND varattu  > 0
+                      AND tyyppi   = 'O'
+                      AND toimaika >= curdate()";
     $tulossa_result = pupe_query($tulossa_query);
     $tulossa_row = mysql_fetch_assoc($tulossa_result);
 

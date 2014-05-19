@@ -310,7 +310,7 @@ if ($avain_sel['SIIRTOVARASTOT'] == 'SELECTED' and (mysql_field_name($result, $i
   $query = "SELECT *
             FROM varastopaikat
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tyyppi  = ''
+            AND tyyppi  != 'P'
             ORDER BY nimitys ASC";
   $varasto_result = pupe_query($query);
 

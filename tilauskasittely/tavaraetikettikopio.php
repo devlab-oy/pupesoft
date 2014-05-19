@@ -74,21 +74,21 @@ if ($tee == 'etsi_sscc' and $sscc != "") {
 
   $sscc = mysql_real_escape_string($sscc);
 
-  $query = "  SELECT suuntalavat.tunnus,
-        toimi.toimittajanro,
-        lasku.ytunnus, lasku.tunnus AS otunnus,
-        TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi,
-        suuntalavat_saapuminen.saapuminen, lasku.laskunro,
-        lasku.luontiaika, IF(kuka.nimi != '', kuka.nimi, lasku.laatija) AS laatija
-        FROM suuntalavat
-        JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
-        JOIN lasku ON (lasku.yhtio = suuntalavat_saapuminen.yhtio AND lasku.tunnus = suuntalavat_saapuminen.saapuminen AND lasku.tila = 'K')
-        JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
-        LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
-        WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-        AND suuntalavat.tila = 'P'
-        AND suuntalavat.sscc = '{$sscc}'
-        ORDER BY nimi, lasku.luontiaika";
+  $query = "SELECT suuntalavat.tunnus,
+            toimi.toimittajanro,
+            lasku.ytunnus, lasku.tunnus AS otunnus,
+            TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi,
+            suuntalavat_saapuminen.saapuminen, lasku.laskunro,
+            lasku.luontiaika, IF(kuka.nimi != '', kuka.nimi, lasku.laatija) AS laatija
+            FROM suuntalavat
+            JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+            JOIN lasku ON (lasku.yhtio = suuntalavat_saapuminen.yhtio AND lasku.tunnus = suuntalavat_saapuminen.saapuminen AND lasku.tila = 'K')
+            JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
+            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
+            WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+            AND suuntalavat.tila    = 'P'
+            AND suuntalavat.sscc    = '{$sscc}'
+            ORDER BY nimi, lasku.luontiaika";
   $suuntalava_res = pupe_query($query);
 
   if (mysql_num_rows($suuntalava_res) > 0) {
@@ -136,25 +136,25 @@ if ($tee == 'etsi_sscc' and $sscc != "") {
 
 if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
 
-  $query = "  SELECT suuntalavat.*, IF(suuntalavat.kaytettavyys = 'Y', '".t("Yksityinen")."', '".t("Yleinen")."') kaytettavyys,
-        laskun_lisatiedot.laskutus_nimi,
-        laskun_lisatiedot.laskutus_nimitark,
-        laskun_lisatiedot.laskutus_osoite,
-        laskun_lisatiedot.laskutus_postino,
-        laskun_lisatiedot.laskutus_postitp,
-        laskun_lisatiedot.laskutus_maa,
-        lasku.*, lasku.luontiaika lasku_luontiaika, lasku.laatija lasku_laatija, lasku.tunnus otunnus,
-        pakkaus.pakkaus, pakkaus.pakkauskuvaus, keraysvyohyke.nimitys ker_nimitys,
-        suuntalavat.laatija, suuntalavat.luontiaika, suuntalavat.muuttaja, suuntalavat.muutospvm, suuntalavat.tunnus
-        FROM suuntalavat
-        JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
-        JOIN lasku ON (lasku.yhtio = suuntalavat_saapuminen.yhtio AND lasku.tunnus = suuntalavat_saapuminen.saapuminen AND lasku.tila = 'K' AND lasku.laskunro = '{$saapuminen}')
-        JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
-        LEFT JOIN pakkaus ON (pakkaus.yhtio = suuntalavat.yhtio AND pakkaus.tunnus = suuntalavat.tyyppi)
-        LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-        WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-        AND suuntalavat.tila = 'P'
-        ORDER BY suuntalavat.sscc";
+  $query = "SELECT suuntalavat.*, IF(suuntalavat.kaytettavyys = 'Y', '".t("Yksityinen")."', '".t("Yleinen")."') kaytettavyys,
+            laskun_lisatiedot.laskutus_nimi,
+            laskun_lisatiedot.laskutus_nimitark,
+            laskun_lisatiedot.laskutus_osoite,
+            laskun_lisatiedot.laskutus_postino,
+            laskun_lisatiedot.laskutus_postitp,
+            laskun_lisatiedot.laskutus_maa,
+            lasku.*, lasku.luontiaika lasku_luontiaika, lasku.laatija lasku_laatija, lasku.tunnus otunnus,
+            pakkaus.pakkaus, pakkaus.pakkauskuvaus, keraysvyohyke.nimitys ker_nimitys,
+            suuntalavat.laatija, suuntalavat.luontiaika, suuntalavat.muuttaja, suuntalavat.muutospvm, suuntalavat.tunnus
+            FROM suuntalavat
+            JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+            JOIN lasku ON (lasku.yhtio = suuntalavat_saapuminen.yhtio AND lasku.tunnus = suuntalavat_saapuminen.saapuminen AND lasku.tila = 'K' AND lasku.laskunro = '{$saapuminen}')
+            JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
+            LEFT JOIN pakkaus ON (pakkaus.yhtio = suuntalavat.yhtio AND pakkaus.tunnus = suuntalavat.tyyppi)
+            LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+            WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+            AND suuntalavat.tila    = 'P'
+            ORDER BY suuntalavat.sscc";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {

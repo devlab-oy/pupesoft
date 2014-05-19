@@ -15,12 +15,12 @@ echo "<font class='head'>".t("Uudelleenlähetä keraysvahvistus")."</font><hr>";
 
 if ($tee == "laheta" and $tunnukset != "") {
 
-  $query = "  SELECT lasku.*, asiakas.email
-        FROM lasku
-        JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.email != '')
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        AND lasku.tila in ('N','L')
-        AND lasku.tunnus in ($tunnukset)";
+  $query = "SELECT lasku.*, asiakas.email
+            FROM lasku
+            JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.email != '')
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tila    in ('N','L')
+            AND lasku.tunnus  in ($tunnukset)";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {

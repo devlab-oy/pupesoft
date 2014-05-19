@@ -107,23 +107,23 @@ if ($tee != '') {
 
     $groupby = $keraajanro_pakollinen != '' ? "GROUP BY 1,2,3,4" : "GROUP BY 1,2,3";
 
-    $query = "  SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
-          tilausrivi.uusiotunnus keikka,
-          LEFT(tapahtuma.laadittu,10) laadittu,
-          {$keraajanrolisaselect}
-          SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
-          COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
-          FROM tapahtuma
-          JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-          LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
-          LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
-          WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-          AND tapahtuma.laji = 'tulo'
-          AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-          AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-          {$groupby}
-          {$keraajanrolisa}
-          ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
+    $query = "SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
+              tilausrivi.uusiotunnus keikka,
+              LEFT(tapahtuma.laadittu,10) laadittu,
+              {$keraajanrolisaselect}
+              SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
+              COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
+              FROM tapahtuma
+              JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
+              LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
+              LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+              WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
+              AND tapahtuma.laji     = 'tulo'
+              AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+              AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+              {$groupby}
+              {$keraajanrolisa}
+              ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
     $result = pupe_query($query);
 
     echo "<table>";
@@ -169,10 +169,10 @@ if ($tee != '') {
         $rsumma  = 0;
       }
 
-      $query = "  SELECT laskunro, TRIM(CONCAT(nimi, ' ', nimitark)) nimi
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$row['keikka']}'";
+      $query = "SELECT laskunro, TRIM(CONCAT(nimi, ' ', nimitark)) nimi
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$row['keikka']}'";
       $laskunro_res = pupe_query($query);
       $laskunro_row = mysql_fetch_assoc($laskunro_res);
 
@@ -235,19 +235,19 @@ if ($tee != '') {
     $lefti = $keraajanro_pakollinen == "" ? "LEFT" : "";
     $keraajanro_joinlisa = $keraajanro_pakollinen != "" ? "AND kuka.keraajanro != 0" : "";
 
-    $query = "  SELECT {$select}
-          SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
-          COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
-          FROM tapahtuma
-          JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-          LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
-          {$lefti} JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija {$keraajanro_joinlisa})
-          WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-          AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-          AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-          AND tapahtuma.laji = 'tulo'
-          GROUP BY 1
-          ORDER BY 1";
+    $query = "SELECT {$select}
+              SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
+              COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
+              FROM tapahtuma
+              JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
+              LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
+              {$lefti} JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija {$keraajanro_joinlisa})
+              WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
+              AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+              AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+              AND tapahtuma.laji     = 'tulo'
+              GROUP BY 1
+              ORDER BY 1";
     $result = pupe_query($query);
 
     echo "<table>";
@@ -297,21 +297,21 @@ if ($tee != '') {
 
 
 
-      $query = "  SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
-            IF(kuka.kuka IS NULL,tapahtuma.laatija, kuka.kuka) kuka_tunnus,
-            {$keraajanrolisaselect}
-            SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
-            COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
-            FROM tapahtuma
-            JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-            LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
-            LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
-            WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-            AND tapahtuma.laji = 'tulo'
-            {$wherelisa}
-            {$groupby}
-            {$keraajanrolisa}
-            ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
+      $query = "SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
+                IF(kuka.kuka IS NULL,tapahtuma.laatija, kuka.kuka) kuka_tunnus,
+                {$keraajanrolisaselect}
+                SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
+                COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
+                FROM tapahtuma
+                JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
+                LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
+                LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+                WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
+                AND tapahtuma.laji    = 'tulo'
+                {$wherelisa}
+                {$groupby}
+                {$keraajanrolisa}
+                ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
       $kayttajittain_result = pupe_query($query);
 
       echo "<tr class='{$ressu['pvm']}' style='display:none;'>";
@@ -330,22 +330,22 @@ if ($tee != '') {
         echo "<td><img title='",t("Käyttäjä"),"' alt='",t("Käyttäjä"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
         echo "</tr>";
 
-        $query = "  SELECT tilausrivi.uusiotunnus keikka,
-              LEFT(tapahtuma.laadittu,10) laadittu,
-              {$keraajanrolisaselect}
-              SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
-              COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
-              FROM tapahtuma
-              JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-              LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
-              LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
-              WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-              AND tapahtuma.laji = 'tulo'
-              {$wherelisa}
-              AND tapahtuma.laatija = '{$kayttajittain_row['kuka_tunnus']}'
-              {$groupby}
-              {$keraajanrolisa}
-              ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
+        $query = "SELECT tilausrivi.uusiotunnus keikka,
+                  LEFT(tapahtuma.laadittu,10) laadittu,
+                  {$keraajanrolisaselect}
+                  SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
+                  COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
+                  FROM tapahtuma
+                  JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
+                  LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
+                  LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+                  WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
+                  AND tapahtuma.laji    = 'tulo'
+                  {$wherelisa}
+                  AND tapahtuma.laatija = '{$kayttajittain_row['kuka_tunnus']}'
+                  {$groupby}
+                  {$keraajanrolisa}
+                  ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
         $kayttaja_result = pupe_query($query);
 
         echo "<tr class='lapsi {$ressu['pvm']}{$kayttajittain_row['kuka_tunnus']}' style='display:none;'>";
@@ -358,10 +358,10 @@ if ($tee != '') {
 
         while ($kayttaja_row = mysql_fetch_assoc($kayttaja_result)) {
 
-          $query = "  SELECT laskunro, TRIM(CONCAT(nimi, ' ', nimitark)) nimi
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$kayttaja_row['keikka']}'";
+          $query = "SELECT laskunro, TRIM(CONCAT(nimi, ' ', nimitark)) nimi
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$kayttaja_row['keikka']}'";
           $laskunro_res = pupe_query($query);
           $laskunro_row = mysql_fetch_assoc($laskunro_res);
 

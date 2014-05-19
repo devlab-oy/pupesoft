@@ -336,12 +336,12 @@ else {
       </table>";
     echo "<table><tr><th>".t("Valitse kustannuspaikka")."</th><td>";
 
-    $query = "  SELECT nimi, tunnus
-          FROM kustannuspaikka
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kaytossa != 'E'
-          and tyyppi = 'K'
-          ORDER BY koodi+0, koodi, nimi";
+    $query = "SELECT nimi, tunnus
+              FROM kustannuspaikka
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and kaytossa != 'E'
+              and tyyppi    = 'K'
+              ORDER BY koodi+0, koodi, nimi";
     $sresult = mysql_query($query) or pupe_error($query);
 
     echo "<select name='kustannuspaikka'>";

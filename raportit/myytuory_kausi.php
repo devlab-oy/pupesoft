@@ -30,12 +30,12 @@ else {
 
 
   if ($myytuorytee != '') {
-    $query = "  SELECT distinct osasto, try
-          FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-          WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and
-            laskutettuaika >= '$vva-$kka-$ppa' and
-            laskutettuaika <= '$vvl-$kkl-$ppl'
-          ORDER BY osasto, try";
+    $query = "SELECT distinct osasto, try
+              FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+              WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and
+                laskutettuaika >= '$vva-$kka-$ppa' and
+                laskutettuaika <= '$vvl-$kkl-$ppl'
+              ORDER BY osasto, try";
     $result = mysql_query($query) or pupe_error($query);
 
     $ulos  = "Os\t";
@@ -66,32 +66,32 @@ else {
 
       $bar->increase();
 
-      $query = "  SELECT
-            osasto,
-            try,
-            sum(rivihinta)  summa30,
-            sum(kate)      kate30,
-            sum(kpl)      kpl30
-            FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
-            WHERE yhtio='$kukarow[yhtio]' and tyyppi='L'
-            and osasto='$trow[osasto]' and try='$trow[try]'
-            and laskutettuaika >= '$vva-$kka-$ppa'
-            and laskutettuaika <= '$vvl-$kkl-$ppl'
-            group by 1,2";
+      $query = "SELECT
+                osasto,
+                try,
+                sum(rivihinta)  summa30,
+                sum(kate)      kate30,
+                sum(kpl)      kpl30
+                FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
+                WHERE yhtio='$kukarow[yhtio]' and tyyppi='L'
+                and osasto='$trow[osasto]' and try='$trow[try]'
+                and laskutettuaika >= '$vva-$kka-$ppa'
+                and laskutettuaika <= '$vvl-$kkl-$ppl'
+                group by 1,2";
 
       $eresult = mysql_query($query) or pupe_error($query);
       $row = mysql_fetch_array($eresult);
 
       //varaston arvo
-      $query = "  SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
-            FROM tuotepaikat, tuote
-            WHERE tuote.tuoteno     = tuotepaikat.tuoteno
-            and tuote.yhtio       = tuotepaikat.yhtio
-            and tuotepaikat.yhtio     = '$kukarow[yhtio]'
-            and tuote.osasto       = '$trow[osasto]'
-            and tuote.try         = '$trow[try]'
-            and tuote.ei_saldoa     = ''
-            and tuote.epakurantti100pvm = '0000-00-00'";
+      $query = "SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
+                FROM tuotepaikat, tuote
+                WHERE tuote.tuoteno         = tuotepaikat.tuoteno
+                and tuote.yhtio             = tuotepaikat.yhtio
+                and tuotepaikat.yhtio       = '$kukarow[yhtio]'
+                and tuote.osasto            = '$trow[osasto]'
+                and tuote.try               = '$trow[try]'
+                and tuote.ei_saldoa         = ''
+                and tuote.epakurantti100pvm = '0000-00-00'";
       $result4 = mysql_query($query) or pupe_error($query);
       $rowarvo = mysql_fetch_array($result4);
 

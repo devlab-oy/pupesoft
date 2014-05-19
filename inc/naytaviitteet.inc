@@ -57,12 +57,12 @@ elseif ($type == '3' or $type == 'S') {
   echo "<td>$viiteaineisto_viite</td>";
   echo "<td>";
 
-  $query = "  SELECT suoritus.kohdpvm, asiakas.nimi, ifnull(lasku.laskunro, 0) laskunro, lasku.tunnus
-        FROM suoritus
-        LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus)
-        LEFT JOIN lasku ON (lasku.yhtio = suoritus.yhtio and lasku.tunnus = suoritus.ltunnus and lasku.tila = 'U')
-        WHERE suoritus.yhtio = '$tiliotedatarow[yhtio]'
-        AND suoritus.tunnus = '$tiliotedatarow[tiliointitunnus]'";
+  $query = "SELECT suoritus.kohdpvm, asiakas.nimi, ifnull(lasku.laskunro, 0) laskunro, lasku.tunnus
+            FROM suoritus
+            LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus)
+            LEFT JOIN lasku ON (lasku.yhtio = suoritus.yhtio and lasku.tunnus = suoritus.ltunnus and lasku.tila = 'U')
+            WHERE suoritus.yhtio = '$tiliotedatarow[yhtio]'
+            AND suoritus.tunnus  = '$tiliotedatarow[tiliointitunnus]'";
   $suoritusresult = mysql_query($query) or pupe_error($query);
   $suoritusrow = mysql_fetch_array ($suoritusresult);
 

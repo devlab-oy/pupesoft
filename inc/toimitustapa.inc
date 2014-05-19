@@ -7,10 +7,10 @@ if ($tunnus != '' and $upd != 1) {
   // Toimitustavan saa poistaa mikäli millään asiakkaalla ei ole sitä käytössä (tsekataan tuoterivi.inc)
   $poistolukko = "ON";
 
-  $query = "  SELECT selite, vak_kielto
-        FROM toimitustapa
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus = '{$tunnus}'";
+  $query = "SELECT selite, vak_kielto
+            FROM toimitustapa
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$tunnus}'";
   $toimitustapa_check_res = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($toimitustapa_check_res) == 1) {
@@ -18,36 +18,36 @@ if ($tunnus != '' and $upd != 1) {
 
     $toita = $toimitustapa_check_row['selite'];
 
-    $query = "  SELECT tunnus
-          FROM asiakas
-          WHERE toimitustapa = '{$toita}'
-          AND yhtio = '{$kukarow['yhtio']}'
-          AND laji NOT IN ('P', 'R')";
+    $query = "SELECT tunnus
+              FROM asiakas
+              WHERE toimitustapa = '{$toita}'
+              AND yhtio          = '{$kukarow['yhtio']}'
+              AND laji           NOT IN ('P', 'R')";
     $chkres1 = pupe_query($query);
 
-    $query = "  SELECT tunnus
-           FROM lasku
-          WHERE toimitustapa = '{$toita}'
-          AND yhtio = '{$kukarow['yhtio']}'
-          AND ((tila = 'L' AND alatila IN ('A','B','C')) OR tila = 'N')";
+    $query = "SELECT tunnus
+              FROM lasku
+              WHERE toimitustapa = '{$toita}'
+              AND yhtio          = '{$kukarow['yhtio']}'
+              AND ((tila = 'L' AND alatila IN ('A','B','C')) OR tila = 'N')";
     $chkres2 = pupe_query($query);
 
-    $query = "  SELECT tunnus
-          FROM rahtimaksut
-          WHERE toimitustapa = '{$toita}'
-          AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "SELECT tunnus
+              FROM rahtimaksut
+              WHERE toimitustapa = '{$toita}'
+              AND yhtio          = '{$kukarow['yhtio']}'";
     $chkres3 = pupe_query($query);
 
-    $query = "  SELECT tunnus
-          FROM rahtisopimukset
-          WHERE toimitustapa = '{$toita}'
-          AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "SELECT tunnus
+              FROM rahtisopimukset
+              WHERE toimitustapa = '{$toita}'
+              AND yhtio          = '{$kukarow['yhtio']}'";
     $chkres4 = pupe_query($query);
 
-    $query = "  SELECT tunnus
-          FROM asiakkaan_avainsanat
-          WHERE avainsana = '{$toita}'
-          AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "SELECT tunnus
+              FROM asiakkaan_avainsanat
+              WHERE avainsana = '{$toita}'
+              AND yhtio       = '{$kukarow['yhtio']}'";
     $chkres5 = pupe_query($query);
 
     if (mysql_num_rows($chkres1) == 0 and mysql_num_rows($chkres2) == 0 and mysql_num_rows($chkres3) == 0 and mysql_num_rows($chkres4) == 0 and mysql_num_rows($chkres5) == 0 and $toimitustapa_check_row['vak_kielto'] == '') {

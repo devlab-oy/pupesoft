@@ -104,11 +104,11 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 if ($tee == '') {
 
   if ($kukarow['saatavat'] <= 1) {
-    $query = "  SELECT ytunnus, tunnus
-          FROM asiakas
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus  = '$kukarow[oletus_asiakas]'
-          LIMIT 1";
+    $query = "SELECT ytunnus, tunnus
+              FROM asiakas
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$kukarow[oletus_asiakas]'
+              LIMIT 1";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -177,13 +177,13 @@ if ($tee == '') {
     $ehto .= " and kentta08 != 'X' ";
   }
 
-  $query = "  SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
-        from kalenteri
-        left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-        where tyyppi='extranet_uutinen' $lisa and $ehto
-        and tapa != 'automanual_uutinen'
-        order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
-        $limit";
+  $query = "SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
+            from kalenteri
+            left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
+            where tyyppi='extranet_uutinen' $lisa and $ehto
+            and tapa != 'automanual_uutinen'
+            order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
+            $limit";
 
   $result = pupe_query($query);
 
@@ -239,9 +239,9 @@ if ($tee == '') {
         foreach ($matches as $m) {
 
           //  Haetaan tuotenumero
-          $query = "  SELECT *
-                 FROM tuote
-                WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
+          $query = "SELECT *
+                    FROM tuote
+                    WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
           $tres = pupe_query($query);
 
           //  Tämä me korvataan aina!
@@ -266,16 +266,16 @@ if ($tee == '') {
 
             if ($temp_laskurowwi['valkoodi'] != "" and $temp_laskurowwi['valkoodi'] != $yhtiorow["valkoodi"]) {
               // katotaan onko tuotteelle maakohtaisia valuuttahintoja
-              $query = "  SELECT *
-                    from hinnasto
-                    where yhtio = '$kukarow[yhtio]'
-                    and tuoteno = '$trow[tuoteno]'
-                    and valkoodi = '$temp_laskurowwi[valkoodi]'
-                    and maa = '$temp_laskurowwi[maa]'
-                    and laji = ''
-                    and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                    ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-                    LIMIT 1";
+              $query = "SELECT *
+                        from hinnasto
+                        where yhtio  = '$kukarow[yhtio]'
+                        and tuoteno  = '$trow[tuoteno]'
+                        and valkoodi = '$temp_laskurowwi[valkoodi]'
+                        and maa      = '$temp_laskurowwi[maa]'
+                        and laji     = ''
+                        and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                        ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+                        LIMIT 1";
               $hintaresult = pupe_query($query);
 
               if (mysql_num_rows($hintaresult) > 0) {
@@ -283,15 +283,15 @@ if ($tee == '') {
               }
               else {
                 // katotaan onko tuotteelle valuuttahintoja
-                $query = "  SELECT *
-                      from hinnasto
-                      where yhtio = '$kukarow[yhtio]'
-                      and tuoteno = '$trow[tuoteno]'
-                      and valkoodi = '$temp_laskurowwi[valkoodi]'
-                      and laji = ''
-                      and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                      ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-                      LIMIT 1";
+                $query = "SELECT *
+                          from hinnasto
+                          where yhtio  = '$kukarow[yhtio]'
+                          and tuoteno  = '$trow[tuoteno]'
+                          and valkoodi = '$temp_laskurowwi[valkoodi]'
+                          and laji     = ''
+                          and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                          ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+                          LIMIT 1";
                 $hintaresult = pupe_query($query);
 
                 if (mysql_num_rows($hintaresult) > 0) {
@@ -367,12 +367,12 @@ if ($tee == "PRINTTAA") {
     //-->
     </script>";
 
-  $query = "  SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
-        from kalenteri
-        left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-        where tyyppi='uutinen'
-        and kalenteri.yhtio='$kukarow[yhtio]'
-        and kalenteri.tunnus='$tun'";
+  $query = "SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
+            from kalenteri
+            left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
+            where tyyppi='uutinen'
+            and kalenteri.yhtio='$kukarow[yhtio]'
+            and kalenteri.tunnus='$tun'";
   $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 

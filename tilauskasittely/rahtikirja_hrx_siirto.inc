@@ -54,12 +54,12 @@ if ($kollityht > 0) {
     }
     else {
       //  Haetaan otsikkotiedot pohjalle
-      $query = "  SELECT *
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus IN ({$otunnukset})
-            ORDER BY tunnus
-            LIMIT 1";
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  IN ({$otunnukset})
+                ORDER BY tunnus
+                LIMIT 1";
       $laskures = pupe_query($query);
       $laskurow = mysql_fetch_assoc($laskures);
     }
@@ -77,30 +77,30 @@ if ($kollityht > 0) {
     $sanoma .= str_pad($v_postino_postitp, 25, " ");
     $sanoma .= str_pad($v_maa, 25, " ");
 
-    $query = "  SELECT yhteyshenkilo.nimi, yhteyshenkilo.titteli, yhteyshenkilo.email, yhteyshenkilo.puh, yhteyshenkilo.gsm, yhteyshenkilo.fax
-          FROM lasku
-          JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          AND lasku.tunnus IN ({$otunnukset})
-          AND lasku.tilausyhteyshenkilo != ''
-          LIMIT 1";
+    $query = "SELECT yhteyshenkilo.nimi, yhteyshenkilo.titteli, yhteyshenkilo.email, yhteyshenkilo.puh, yhteyshenkilo.gsm, yhteyshenkilo.fax
+              FROM lasku
+              JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
+              WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
+              AND lasku.tunnus               IN ({$otunnukset})
+              AND lasku.tilausyhteyshenkilo != ''
+              LIMIT 1";
     $yhres = pupe_query($query);
 
     if (mysql_num_rows($yhres) == 0) {
-      $query = "  SELECT nimi, titteli, email, puh, gsm, fax
-            FROM laskun_lisatiedot
-            JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio AND yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_kaupallinen AND yhteyshenkilo.tyyppi = 'A')
-            WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-            AND otunnus IN ({$otunnukset})
-            AND yhteyshenkilo_tekninen > 0
-            LIMIT 1";
+      $query = "SELECT nimi, titteli, email, puh, gsm, fax
+                FROM laskun_lisatiedot
+                JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio AND yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_kaupallinen AND yhteyshenkilo.tyyppi = 'A')
+                WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+                AND otunnus                   IN ({$otunnukset})
+                AND yhteyshenkilo_tekninen    > 0
+                LIMIT 1";
       $yhres = pupe_query($query);
 
       if (mysql_num_rows($yhres) == 0) {
-        $query = "  SELECT '2' O, '' nimi, '' titteli, email, puhelin puh, gsm, fax
-              FROM asiakas
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$laskurow['liitostunnus']}'";
+        $query = "SELECT '2' O, '' nimi, '' titteli, email, puhelin puh, gsm, fax
+                  FROM asiakas
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$laskurow['liitostunnus']}'";
         $yhres = pupe_query($query);
       }
     }
@@ -149,10 +149,10 @@ if ($kollityht > 0) {
 
      # TULOSTETAAN LIPPULAPPUSET
     // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
-    $query = "  SELECT nimi, nimitark, osoite, postino, postitp, maa
-          FROM varastopaikat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$laskurow['varasto']}'";
+    $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$laskurow['varasto']}'";
     $tempr = pupe_query($query);
     $postirow_varasto = mysql_fetch_array($tempr);
 

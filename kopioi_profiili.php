@@ -18,37 +18,37 @@ if ($copyready != '') {
   $kukar = pupe_query($query);
 
   //poistetaan se uudelta yhtiöltä jos se on olemassa
-  $query = "  DELETE from oikeu
-        where kuka = '$fromkuka'
-        and profiili = '$fromkuka'
-        and yhtio = '$tokuka'";
+  $query = "DELETE from oikeu
+            where kuka   = '$fromkuka'
+            and profiili = '$fromkuka'
+            and yhtio    = '$tokuka'";
   $delre = pupe_query($query);
 
   while ($row = mysql_fetch_array($kukar)) {
-    $query = "  INSERT into oikeu SET
-          kuka    = '{$fromkuka}',
-          sovellus  = '{$row['sovellus']}',
-          nimi    = '{$row['nimi']}',
-          alanimi   = '{$row['alanimi']}',
-          paivitys  = '{$row['paivitys']}',
-          nimitys    = '{$row['nimitys']}',
-          jarjestys   = '{$row['jarjestys']}',
-          jarjestys2  = '{$row['jarjestys2']}',
-          profiili  = '{$fromkuka}',
-          yhtio    = '{$tokuka}',
-          hidden    = '{$row['hidden']}',
-          laatija   = '{$kukarow['kuka']}',
-          luontiaika   = now(),
-          muutospvm   = now(),
-          muuttaja   = '{$kukarow['kuka']}'";
+    $query = "INSERT into oikeu SET
+              kuka       = '{$fromkuka}',
+              sovellus   = '{$row['sovellus']}',
+              nimi       = '{$row['nimi']}',
+              alanimi    = '{$row['alanimi']}',
+              paivitys   = '{$row['paivitys']}',
+              nimitys    = '{$row['nimitys']}',
+              jarjestys  = '{$row['jarjestys']}',
+              jarjestys2 = '{$row['jarjestys2']}',
+              profiili   = '{$fromkuka}',
+              yhtio      = '{$tokuka}',
+              hidden     = '{$row['hidden']}',
+              laatija    = '{$kukarow['kuka']}',
+              luontiaika = now(),
+              muutospvm  = now(),
+              muuttaja   = '{$kukarow['kuka']}'";
     $upres = pupe_query($query);
   }
 
   //päivitetään myös käyttäjien tiedot joilla on tämä profiili
-  $query = "  SELECT *
-        FROM kuka
-        WHERE yhtio = '$tokuka'
-        and profiilit != ''";
+  $query = "SELECT *
+            FROM kuka
+            WHERE yhtio    = '$tokuka'
+            and profiilit != ''";
   $kres = pupe_query($query);
 
   while ($krow = mysql_fetch_array($kres)) {
@@ -67,49 +67,49 @@ if ($copyready != '') {
 
       if ($triggeri == "HAPPY") {
         //poistetaan käyttäjän vanhat
-        $query = "  DELETE FROM oikeu
-              WHERE yhtio = '$tokuka'
-              and kuka    = '$krow[kuka]'
-              and lukittu = ''";
+        $query = "DELETE FROM oikeu
+                  WHERE yhtio = '$tokuka'
+                  and kuka    = '$krow[kuka]'
+                  and lukittu = ''";
         $pres = pupe_query($query);
 
         //käydään uudestaan profiili läpi
         foreach ($profiilit as $prof) {
-          $query = "  SELECT *
-                FROM oikeu
-                WHERE yhtio  = '$tokuka'
-                and kuka     = '$prof'
-                and profiili = '$prof'";
+          $query = "SELECT *
+                    FROM oikeu
+                    WHERE yhtio  = '$tokuka'
+                    and kuka     = '$prof'
+                    and profiili = '$prof'";
           $pres = pupe_query($query);
 
           while ($trow = mysql_fetch_array($pres)) {
             //joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
             //voi olla esim jos se on lukittuna annettu
-            $query = "  SELECT yhtio
-                  FROM oikeu
-                  WHERE yhtio    = '$tokuka'
-                  AND kuka    = '$krow[kuka]'
-                  AND sovellus  = '$trow[sovellus]'
-                  AND nimi    = '$trow[nimi]'
-                  AND alanimi   = '$trow[alanimi]'";
+            $query = "SELECT yhtio
+                      FROM oikeu
+                      WHERE yhtio  = '$tokuka'
+                      AND kuka     = '$krow[kuka]'
+                      AND sovellus = '$trow[sovellus]'
+                      AND nimi     = '$trow[nimi]'
+                      AND alanimi  = '$trow[alanimi]'";
             $tarkesult = pupe_query($query);
 
             if (mysql_num_rows($tarkesult) == 0) {
-              $query = "  INSERT into oikeu
-                    SET
-                    kuka    = '$krow[kuka]',
-                    sovellus  = '$trow[sovellus]',
-                    nimi    = '$trow[nimi]',
-                    alanimi   = '$trow[alanimi]',
-                    paivitys  = '$trow[paivitys]',
-                    nimitys    = '$trow[nimitys]',
-                    jarjestys   = '$trow[jarjestys]',
-                    jarjestys2  = '$trow[jarjestys2]',
-                    yhtio    = '$tokuka'
-                    laatija   = '{$kukarow['kuka']}',
-                    luontiaika   = now(),
-                    muutospvm   = now(),
-                    muuttaja   = '{$kukarow['kuka']}'";
+              $query = "INSERT into oikeu
+                        SET
+                        kuka       = '$krow[kuka]',
+                        sovellus   = '$trow[sovellus]',
+                        nimi       = '$trow[nimi]',
+                        alanimi    = '$trow[alanimi]',
+                        paivitys   = '$trow[paivitys]',
+                        nimitys    = '$trow[nimitys]',
+                        jarjestys  = '$trow[jarjestys]',
+                        jarjestys2 = '$trow[jarjestys2]',
+                        yhtio      = '$tokuka'
+                        laatija    = '{$kukarow['kuka']}',
+                        luontiaika = now(),
+                        muutospvm  = now(),
+                        muuttaja   = '{$kukarow['kuka']}'";
               $rresult = pupe_query($query);
             }
           }
@@ -129,10 +129,10 @@ if ($copyready != '') {
   $toyhtio='';
 }
 
-$query  = "  SELECT distinct yhtio, nimi
-      from yhtio
-      where konserni = '$yhtiorow[konserni]'
-      and konserni != ''";
+$query  = "SELECT distinct yhtio, nimi
+           from yhtio
+           where konserni  = '$yhtiorow[konserni]'
+           and konserni   != ''";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
@@ -147,11 +147,11 @@ while ($prow = mysql_fetch_array($result)) {
 }
 
 // tehdään käyttäjälistaukset
-$query = "  SELECT distinct kuka, profiili, yhtio
-      FROM oikeu
-      WHERE kuka = profiili
-      and profiili != ''
-      and yhtio in ($sovyhtiot)";
+$query = "SELECT distinct kuka, profiili, yhtio
+          FROM oikeu
+          WHERE kuka    = profiili
+          and profiili != ''
+          and yhtio     in ($sovyhtiot)";
 $kukar = pupe_query($query);
 
 echo "<br><form method='post'>";

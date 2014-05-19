@@ -7,13 +7,13 @@ if ($toim_tee == "kululasku") {
   $tunnus = mysql_real_escape_string($tunnus);
 
   // Haetaan lasku
-  $query = "  SELECT *
-        FROM lasku
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND tunnus = '$tunnus'
-        and lasku.tila in ('H','Y','M','P','Q')
-        and lasku.vienti in ('B','C','J','E','F','K','H','I','L')
-        and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'";
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio      = '$kukarow[yhtio]'
+            AND tunnus       = '$tunnus'
+            and lasku.tila   in ('H','Y','M','P','Q')
+            and lasku.vienti in ('B','C','J','E','F','K','H','I','L')
+            and lasku.tapvm  >= '$yhtiorow[tilikausi_alku]'";
   $result = pupe_query($query);
 
   if ($laskurow = mysql_fetch_array($result)) {
@@ -35,20 +35,20 @@ if ($toim_tee == "kululasku") {
 
     if ($vienti != "") {
       // Poistetaan kirjanpidosta varastoviennit
-      $query = "  UPDATE tiliointi
-            SET korjattu = '$kukarow[kuka]',
-            korjausaika = now()
-            WHERE yhtio ='$kukarow[yhtio]'
-            and ltunnus = '$tunnus'
-            and korjattu = ''
-            and tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')";
+      $query = "UPDATE tiliointi
+                SET korjattu = '$kukarow[kuka]',
+                korjausaika  = now()
+                WHERE yhtio ='$kukarow[yhtio]'
+                and ltunnus  = '$tunnus'
+                and korjattu = ''
+                and tilino   in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')";
       $updres = pupe_query($query);
 
       // Päivitetään laskun tila
-      $query = "  UPDATE lasku
-            SET vienti = '$vienti'
-            where yhtio = '$kukarow[yhtio]'
-            and tunnus = '$tunnus'";
+      $query = "UPDATE lasku
+                SET vienti = '$vienti'
+                where yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tunnus'";
       $updres = pupe_query($query);
     }
     else {
@@ -90,29 +90,29 @@ echo "</form>";
 
 echo "<br><font class='head'>".t("Laskut joita ei ole liitetty saapumisiin")."</font><hr>";
 
-$query = "  SELECT lasku.ytunnus,
-      lasku.nimi,
-      lasku.summa,
-      lasku.valkoodi,
-      lasku.tapvm,
-      lasku.vienti,
-      liitos.tunnus,
-      lasku.tunnus latunnus,
-      lasku.alv,
-      if (lasku.vienti in ('B','E','H'), 2, 1) sorttaus,
-      round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
-      if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
-      round(lasku.osto_rahti + lasku.osto_kulu + lasku.osto_rivi_kulu, 2) 'kulut'
-      FROM lasku
-      LEFT JOIN lasku AS liitos on (liitos.yhtio = lasku.yhtio and liitos.vanhatunnus = lasku.tunnus and liitos.tila = 'K')
-      WHERE lasku.yhtio = '$kukarow[yhtio]' and
-      lasku.tila in ('H','Y','M','P','Q') and
-      lasku.vienti in ('B','C','J','E','F','K','H','I','L') and
-      lasku.tapvm >= '$avv-$akk-$app' and
-      lasku.tapvm <= '$lvv-$lkk-$lpp'
-      GROUP BY 1,2,3,4,5,6,7,8,9,10
-      HAVING liitos.tunnus IS NULL
-      ORDER BY sorttaus, lasku.vienti, lasku.tapvm, lasku.valkoodi, lasku.summa";
+$query = "SELECT lasku.ytunnus,
+          lasku.nimi,
+          lasku.summa,
+          lasku.valkoodi,
+          lasku.tapvm,
+          lasku.vienti,
+          liitos.tunnus,
+          lasku.tunnus latunnus,
+          lasku.alv,
+          if (lasku.vienti in ('B','E','H'), 2, 1) sorttaus,
+          round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
+          if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
+          round(lasku.osto_rahti + lasku.osto_kulu + lasku.osto_rivi_kulu, 2) 'kulut'
+          FROM lasku
+          LEFT JOIN lasku AS liitos on (liitos.yhtio = lasku.yhtio and liitos.vanhatunnus = lasku.tunnus and liitos.tila = 'K')
+          WHERE lasku.yhtio = '$kukarow[yhtio]' and
+          lasku.tila        in ('H','Y','M','P','Q') and
+          lasku.vienti      in ('B','C','J','E','F','K','H','I','L') and
+          lasku.tapvm       >= '$avv-$akk-$app' and
+          lasku.tapvm       <= '$lvv-$lkk-$lpp'
+          GROUP BY 1,2,3,4,5,6,7,8,9,10
+          HAVING liitos.tunnus IS NULL
+          ORDER BY sorttaus, lasku.vienti, lasku.tapvm, lasku.valkoodi, lasku.summa";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0 ) {
@@ -158,13 +158,13 @@ if (mysql_num_rows($result) > 0 ) {
     }
 
     // Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
-    $query = "  SELECT sum(summa) summa
-          from tiliointi
-          where yhtio  = '$kukarow[yhtio]'
-          and ltunnus  = '$trow[latunnus]'
-          and tilino  = '$yhtiorow[alv]'
-          $alvilisa
-          and korjattu = ''";
+    $query = "SELECT sum(summa) summa
+              from tiliointi
+              where yhtio  = '$kukarow[yhtio]'
+              and ltunnus  = '$trow[latunnus]'
+              and tilino   = '$yhtiorow[alv]'
+              $alvilisa
+              and korjattu = ''";
     $alvires = pupe_query($query);
     $alvirow = mysql_fetch_array($alvires);
 
@@ -268,25 +268,25 @@ else {
 
 echo "<font class='head'>".t("Rahtilaskut joita ei ole liitetty kokonaan saapumisiin")."</font><hr>";
 
-$query = "  SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, liitos.tunnus, lasku.tunnus latunnus,
-      (  SELECT sum(summa) summa
-        FROM tiliointi
-        WHERE tiliointi.yhtio = lasku.yhtio
-        AND  tiliointi.ltunnus = lasku.tunnus
-        AND  tiliointi.tilino in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]')
-        AND  tiliointi.korjattu = '') varastossa,
-      round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
-      round(sum(liitos.arvo*liitos.vienti_kurssi),2) 'kohdistettu'
-      FROM lasku
-      LEFT JOIN lasku AS liitos on (liitos.yhtio = lasku.yhtio and liitos.vanhatunnus = lasku.tunnus and liitos.tila = 'K')
-      WHERE lasku.yhtio = '$kukarow[yhtio]'
-      AND lasku.tila in ('H','Y','M','P','Q')
-      AND lasku.vienti in ('B','E','H')
-      AND lasku.tapvm >= '$avv-$akk-$app'
-      AND lasku.tapvm <= '$lvv-$lkk-$lpp'
-      GROUP BY lasku.tunnus
-      HAVING varastossa != kohdistettu
-      ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
+$query = "SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, liitos.tunnus, lasku.tunnus latunnus,
+          (  SELECT sum(summa) summa
+            FROM tiliointi
+            WHERE tiliointi.yhtio   = lasku.yhtio
+            AND  tiliointi.ltunnus  = lasku.tunnus
+            AND  tiliointi.tilino   in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]')
+            AND  tiliointi.korjattu = '') varastossa,
+          round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
+          round(sum(liitos.arvo*liitos.vienti_kurssi),2) 'kohdistettu'
+          FROM lasku
+          LEFT JOIN lasku AS liitos on (liitos.yhtio = lasku.yhtio and liitos.vanhatunnus = lasku.tunnus and liitos.tila = 'K')
+          WHERE lasku.yhtio         = '$kukarow[yhtio]'
+          AND lasku.tila            in ('H','Y','M','P','Q')
+          AND lasku.vienti          in ('B','E','H')
+          AND lasku.tapvm           >= '$avv-$akk-$app'
+          AND lasku.tapvm           <= '$lvv-$lkk-$lpp'
+          GROUP BY lasku.tunnus
+          HAVING varastossa != kohdistettu
+          ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0 ) {
@@ -351,23 +351,23 @@ else {
 
 echo "<font class='head'>".t("Käsin viedyt tiliöinnit")."</font><hr>";
 
-$query = "  SELECT tiliointi.*, tili.nimi tilinimi, kustannuspaikka1.nimi kustpnimi, kustannuspaikka2.nimi kohdenimi, kustannuspaikka3.nimi projektinimi
-      FROM lasku
-      JOIN tiliointi ON (  tiliointi.yhtio = lasku.yhtio
-                and tiliointi.ltunnus = lasku.tunnus
-                and tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-                and tiliointi.korjattu = ''
-                and tiliointi.selite not like ('Inventointi%')
-                and tiliointi.selite not like ('Epäkuranttimuutos%'))
-      LEFT JOIN tili ON (tili.yhtio = lasku.yhtio and tili.tilino = tiliointi.tilino)
-      LEFT JOIN kustannuspaikka AS kustannuspaikka1 ON (kustannuspaikka1.yhtio = lasku.yhtio and kustannuspaikka1.tunnus = tiliointi.kustp)
-      LEFT JOIN kustannuspaikka AS kustannuspaikka2 ON (kustannuspaikka2.yhtio = lasku.yhtio and kustannuspaikka2.tunnus = tiliointi.kohde)
-      LEFT JOIN kustannuspaikka AS kustannuspaikka3 ON (kustannuspaikka3.yhtio = lasku.yhtio and kustannuspaikka3.tunnus = tiliointi.projekti)
-      WHERE lasku.yhtio = '$kukarow[yhtio]'
-      AND lasku.tila = 'X'
-      AND lasku.tapvm >= '$avv-$akk-$app'
-      AND lasku.tapvm <= '$lvv-$lkk-$lpp'
-      ORDER BY tiliointi.tapvm, tiliointi.summa";
+$query = "SELECT tiliointi.*, tili.nimi tilinimi, kustannuspaikka1.nimi kustpnimi, kustannuspaikka2.nimi kohdenimi, kustannuspaikka3.nimi projektinimi
+          FROM lasku
+          JOIN tiliointi ON (  tiliointi.yhtio = lasku.yhtio
+                    and tiliointi.ltunnus  = lasku.tunnus
+                    and tiliointi.tilino   in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+                    and tiliointi.korjattu = ''
+                    and tiliointi.selite   not like ('Inventointi%')
+                    and tiliointi.selite   not like ('Epäkuranttimuutos%'))
+          LEFT JOIN tili ON (tili.yhtio = lasku.yhtio and tili.tilino = tiliointi.tilino)
+          LEFT JOIN kustannuspaikka AS kustannuspaikka1 ON (kustannuspaikka1.yhtio = lasku.yhtio and kustannuspaikka1.tunnus = tiliointi.kustp)
+          LEFT JOIN kustannuspaikka AS kustannuspaikka2 ON (kustannuspaikka2.yhtio = lasku.yhtio and kustannuspaikka2.tunnus = tiliointi.kohde)
+          LEFT JOIN kustannuspaikka AS kustannuspaikka3 ON (kustannuspaikka3.yhtio = lasku.yhtio and kustannuspaikka3.tunnus = tiliointi.projekti)
+          WHERE lasku.yhtio                = '$kukarow[yhtio]'
+          AND lasku.tila                   = 'X'
+          AND lasku.tapvm                  >= '$avv-$akk-$app'
+          AND lasku.tapvm                  <= '$lvv-$lkk-$lpp'
+          ORDER BY tiliointi.tapvm, tiliointi.summa";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0 ) {
@@ -420,23 +420,23 @@ else {
 
 echo "<font class='head'>".t("Varastonarvoon vaikuttavat laskut joilla ei ole varastokirjauksia")."</font><hr>";
 
-$query = "  SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus, tiliointi2.ltunnus
-      FROM lasku
-      LEFT JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
-                tiliointi1.ltunnus = lasku.tunnus and
-                tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and
-                tiliointi1.korjattu = '')
-      LEFT JOIN tiliointi AS tiliointi2 ON (tiliointi2.yhtio = lasku.yhtio and
-                tiliointi2.ltunnus = lasku.tunnus and
-                tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and
-                tiliointi2.korjattu = '')
-      WHERE lasku.yhtio = '$kukarow[yhtio]' and
-      lasku.tila in ('H','Y','M','P','Q') and
-      lasku.vienti in ('B','C','J','E','F','K','H','I','L') and
-      lasku.tapvm >= '$avv-$akk-$app' and
-      lasku.tapvm <= '$lvv-$lkk-$lpp'
-      HAVING tiliointi1.ltunnus IS NULL or tiliointi2.ltunnus IS NULL
-      ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
+$query = "SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus, tiliointi2.ltunnus
+          FROM lasku
+          LEFT JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
+                    tiliointi1.ltunnus  = lasku.tunnus and
+                    tiliointi1.tilino   in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and
+                    tiliointi1.korjattu = '')
+          LEFT JOIN tiliointi AS tiliointi2 ON (tiliointi2.yhtio = lasku.yhtio and
+                    tiliointi2.ltunnus  = lasku.tunnus and
+                    tiliointi2.tilino   in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and
+                    tiliointi2.korjattu = '')
+          WHERE lasku.yhtio             = '$kukarow[yhtio]' and
+          lasku.tila                    in ('H','Y','M','P','Q') and
+          lasku.vienti                  in ('B','C','J','E','F','K','H','I','L') and
+          lasku.tapvm                   >= '$avv-$akk-$app' and
+          lasku.tapvm                   <= '$lvv-$lkk-$lpp'
+          HAVING tiliointi1.ltunnus IS NULL or tiliointi2.ltunnus IS NULL
+          ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0 ) {
@@ -495,19 +495,19 @@ else {
 
 echo "<font class='head'>".t("Normaalit kululaskut joilla on varastokirjauksia")."</font><hr>";
 
-$query = "  SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus
-      FROM lasku
-      JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
-                tiliointi1.ltunnus = lasku.tunnus and
-                tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and
-                tiliointi1.korjattu = '')
-      WHERE lasku.yhtio = '$kukarow[yhtio]' and
-      lasku.tila in ('H','Y','M','P','Q') and
-      lasku.vienti in ('A','D','G') and
-      lasku.tapvm >= '$avv-$akk-$app' and
-      lasku.tapvm <= '$lvv-$lkk-$lpp'
-      GROUP BY lasku.tunnus
-      ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
+$query = "SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus
+          FROM lasku
+          JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
+                    tiliointi1.ltunnus  = lasku.tunnus and
+                    tiliointi1.tilino   in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and
+                    tiliointi1.korjattu = '')
+          WHERE lasku.yhtio             = '$kukarow[yhtio]' and
+          lasku.tila                    in ('H','Y','M','P','Q') and
+          lasku.vienti                  in ('A','D','G') and
+          lasku.tapvm                   >= '$avv-$akk-$app' and
+          lasku.tapvm                   <= '$lvv-$lkk-$lpp'
+          GROUP BY lasku.tunnus
+          ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0 ) {
@@ -567,31 +567,31 @@ else {
   $havinglisa = "abs(summa1 + summa2) > 0.01 or abs(summaeur-summa3-osto_rahti-osto_kulu-osto_rivi_kulu+summa1) > 0.01 or abs(summaeur-summa3-osto_rahti-osto_kulu-osto_rivi_kulu-summa2) > 0.01";
 }
 
-$query = "  SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur',
-      lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
-      lasku.osto_rahti/(1+lasku.osto_rahti_alv/100) osto_rahti,
-      lasku.osto_kulu/(1+lasku.osto_kulu_alv/100) osto_kulu,
-      lasku.osto_rivi_kulu/(1+lasku.osto_rivi_kulu_alv/100) osto_rivi_kulu,
-      (SELECT sum(summa)
-        FROM tiliointi AS tiliointi1
-        WHERE tiliointi1.yhtio = lasku.yhtio and tiliointi1.ltunnus = lasku.tunnus and tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and tiliointi1.korjattu = ''
-      ) summa1,
-      (SELECT sum(summa)
-        FROM tiliointi AS tiliointi2
-        WHERE tiliointi2.yhtio = lasku.yhtio and tiliointi2.ltunnus = lasku.tunnus and tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and tiliointi2.korjattu = ''
-      ) summa2,
-      (SELECT sum(tiliointi3.summa)
-        FROM tiliointi AS tiliointi3
-        join tiliointi as tili_alet on (tili_alet.yhtio = tiliointi3.yhtio and tili_alet.ltunnus = tiliointi3.ltunnus and tili_alet.tunnus=tiliointi3.aputunnus and tili_alet.tilino!='$yhtiorow[kassaale]' and tili_alet.korjattu = '')
-        WHERE tiliointi3.yhtio = lasku.yhtio and tiliointi3.ltunnus = lasku.tunnus and tiliointi3.tilino in ('$yhtiorow[alv]') and tiliointi3.korjattu = ''
-      ) summa3
-      FROM lasku
-      WHERE lasku.yhtio = '$kukarow[yhtio]'
-      and lasku.tila in ('H','Y','M','P','Q')
-      and lasku.tapvm >= '$avv-$akk-$app'
-      and lasku.tapvm <= '$lvv-$lkk-$lpp'
-      HAVING {$havinglisa}
-      ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
+$query = "SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur',
+          lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
+          lasku.osto_rahti/(1+lasku.osto_rahti_alv/100) osto_rahti,
+          lasku.osto_kulu/(1+lasku.osto_kulu_alv/100) osto_kulu,
+          lasku.osto_rivi_kulu/(1+lasku.osto_rivi_kulu_alv/100) osto_rivi_kulu,
+          (SELECT sum(summa)
+            FROM tiliointi AS tiliointi1
+            WHERE tiliointi1.yhtio = lasku.yhtio and tiliointi1.ltunnus = lasku.tunnus and tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and tiliointi1.korjattu = ''
+          ) summa1,
+          (SELECT sum(summa)
+            FROM tiliointi AS tiliointi2
+            WHERE tiliointi2.yhtio = lasku.yhtio and tiliointi2.ltunnus = lasku.tunnus and tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and tiliointi2.korjattu = ''
+          ) summa2,
+          (SELECT sum(tiliointi3.summa)
+            FROM tiliointi AS tiliointi3
+            join tiliointi as tili_alet on (tili_alet.yhtio = tiliointi3.yhtio and tili_alet.ltunnus = tiliointi3.ltunnus and tili_alet.tunnus=tiliointi3.aputunnus and tili_alet.tilino!='$yhtiorow[kassaale]' and tili_alet.korjattu = '')
+            WHERE tiliointi3.yhtio = lasku.yhtio and tiliointi3.ltunnus = lasku.tunnus and tiliointi3.tilino in ('$yhtiorow[alv]') and tiliointi3.korjattu = ''
+          ) summa3
+          FROM lasku
+          WHERE lasku.yhtio        = '$kukarow[yhtio]'
+          and lasku.tila           in ('H','Y','M','P','Q')
+          and lasku.tapvm          >= '$avv-$akk-$app'
+          and lasku.tapvm          <= '$lvv-$lkk-$lpp'
+          HAVING {$havinglisa}
+          ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0 ) {
@@ -682,15 +682,15 @@ else {
 
 echo "<font class='head'>".t("Saapumisten eturahdit")."</font><hr>";
 
-$query = "  SELECT *, lasku.rahti_etu*lasku.vienti_kurssi rahti
-      FROM lasku
-      WHERE lasku.yhtio = '$kukarow[yhtio]' and
-      lasku.tila = 'K' and
-      lasku.vanhatunnus = 0 and
-      lasku.tapvm >= '$avv-$akk-$app' and
-      lasku.tapvm <= '$lvv-$lkk-$lpp'
-      HAVING abs(rahti) > 0.05
-      ORDER BY lasku.tapvm, lasku.rahti_etu";
+$query = "SELECT *, lasku.rahti_etu*lasku.vienti_kurssi rahti
+          FROM lasku
+          WHERE lasku.yhtio = '$kukarow[yhtio]' and
+          lasku.tila        = 'K' and
+          lasku.vanhatunnus = 0 and
+          lasku.tapvm       >= '$avv-$akk-$app' and
+          lasku.tapvm       <= '$lvv-$lkk-$lpp'
+          HAVING abs(rahti) > 0.05
+          ORDER BY lasku.tapvm, lasku.rahti_etu";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0 ) {
@@ -735,15 +735,15 @@ else {
 
 echo "<font class='head'>".t("Saapumisten pyöristyserot")."</font><hr>";
 
-$query = "  SELECT *, lasku.pyoristys_erot * lasku.vienti_kurssi pyoristys
-      FROM lasku
-      WHERE lasku.yhtio = '$kukarow[yhtio]' and
-      lasku.tila = 'K' and
-      lasku.vanhatunnus = 0 and
-      lasku.tapvm >= '$avv-$akk-$app' and
-      lasku.tapvm <= '$lvv-$lkk-$lpp'
-      HAVING abs(pyoristys) > 0.05
-      ORDER BY lasku.tapvm, lasku.pyoristys_erot";
+$query = "SELECT *, lasku.pyoristys_erot * lasku.vienti_kurssi pyoristys
+          FROM lasku
+          WHERE lasku.yhtio = '$kukarow[yhtio]' and
+          lasku.tila        = 'K' and
+          lasku.vanhatunnus = 0 and
+          lasku.tapvm       >= '$avv-$akk-$app' and
+          lasku.tapvm       <= '$lvv-$lkk-$lpp'
+          HAVING abs(pyoristys) > 0.05
+          ORDER BY lasku.tapvm, lasku.pyoristys_erot";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0 ) {

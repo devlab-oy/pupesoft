@@ -18,9 +18,9 @@ else {
 }
 
 // Etsit‰‰n lasku
-$query = "  SELECT *
-      FROM lasku
-      WHERE tunnus = '$kukarow[kesken]' and yhtio='$kukarow[yhtio]' and tila='L' and alatila!='V' and alatila!='X'";
+$query = "SELECT *
+          FROM lasku
+          WHERE tunnus = '$kukarow[kesken]' and yhtio='$kukarow[yhtio]' and tila='L' and alatila!='V' and alatila!='X'";
 $laskutusres = pupe_query($query);
 
 if (mysql_num_rows($laskutusres) == 0) {
@@ -32,19 +32,19 @@ else {
   $orow = mysql_fetch_assoc($laskutusres);
 
   // Etsit‰‰n tilausrivit
-  $laskutuksen_tilausrivi_query = "  SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys
-                    FROM tilausrivi
-                    LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-                    WHERE tilausrivi.otunnus   = '$kukarow[kesken]'
-                    and tilausrivi.yhtio     = '$kukarow[yhtio]'
-                    and tilausrivi.var       not in ('P','J', 'O')
-                    and tilausrivi.tyyppi     = 'L'
-                    ORDER BY tilausrivi.tunnus";
+  $laskutuksen_tilausrivi_query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys
+                                   FROM tilausrivi
+                                   LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                                   WHERE tilausrivi.otunnus = '$kukarow[kesken]'
+                                   and tilausrivi.yhtio     = '$kukarow[yhtio]'
+                                   and tilausrivi.var       not in ('P','J', 'O')
+                                   and tilausrivi.tyyppi    = 'L'
+                                   ORDER BY tilausrivi.tunnus";
 
-  $query = "  SELECT panttitili
-        FROM asiakas
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND tunnus   = '{$orow['liitostunnus']}'";
+  $query = "SELECT panttitili
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$orow['liitostunnus']}'";
   $asiakas_panttitili_chk_res = pupe_query($query);
   $asiakas_panttitili_chk_row = mysql_fetch_assoc($asiakas_panttitili_chk_res);
 
@@ -59,10 +59,10 @@ else {
       // cron-ohjelma on panttitili_cron.php
       if ($trow['var2'] != 'PANT') {
 
-        $query = "  SELECT panttitili
-              FROM tuote
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$trow['tuoteno']}'";
+        $query = "SELECT panttitili
+                  FROM tuote
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$trow['tuoteno']}'";
         $tuote_panttitili_chk_res = pupe_query($query);
         $tuote_panttitili_chk_row = mysql_fetch_assoc($tuote_panttitili_chk_res);
 
@@ -75,11 +75,11 @@ else {
             $wherelisa_panttitili = '';
 
             if ($orow['clearing'] == 'HYVITYS') {
-              $query = "  SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
-                    FROM lasku AS ux_otsikko
-                    JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
-                    WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}'
-                    AND ux_otsikko.tunnus  = '{$orow['vanhatunnus']}'";
+              $query = "SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
+                        FROM lasku AS ux_otsikko
+                        JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
+                        WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}'
+                        AND ux_otsikko.tunnus  = '{$orow['vanhatunnus']}'";
               $vanhatunnus_chk_res = pupe_query($query);
               $vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
 
@@ -89,26 +89,26 @@ else {
             }
 
             // etsit‰‰n vanhin pantti
-            $query = "  SELECT *
-                  FROM panttitili
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND asiakas = '{$orow['liitostunnus']}'
-                  AND tuoteno = '{$trow['tuoteno']}'
-                  {$wherelisa_panttitili}
-                  AND status = ''
-                  AND kaytettypvm = '0000-00-00'
-                  AND kaytettytilausnro = 0
-                  ORDER BY myyntipvm ASC";
+            $query = "SELECT *
+                      FROM panttitili
+                      WHERE yhtio           = '{$kukarow['yhtio']}'
+                      AND asiakas           = '{$orow['liitostunnus']}'
+                      AND tuoteno           = '{$trow['tuoteno']}'
+                      {$wherelisa_panttitili}
+                      AND status            = ''
+                      AND kaytettypvm       = '0000-00-00'
+                      AND kaytettytilausnro = 0
+                      ORDER BY myyntipvm ASC";
             $vanhin_pantti_res = pupe_query($query);
 
             while ($vanhin_pantti_row = mysql_fetch_assoc($vanhin_pantti_res)) {
 
-              $query = "  UPDATE panttitili SET
-                    status = 'K',
-                    kaytettypvm = now(),
-                    kaytettytilausnro = '{$trow['otunnus']}'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$vanhin_pantti_row['tunnus']}'";
+              $query = "UPDATE panttitili SET
+                        status            = 'K',
+                        kaytettypvm       = now(),
+                        kaytettytilausnro = '{$trow['otunnus']}'
+                        WHERE yhtio       = '{$kukarow['yhtio']}'
+                        AND tunnus        = '{$vanhin_pantti_row['tunnus']}'";
               $pantti_upd = pupe_query($query);
 
               $tilkom_upd = trim($trow['kommentti']) != '' ? $trow['kommentti']." ".t("Panttitilillinen tuote, tuote hyvitetty panttitililt‰")."." : t("Panttitilillinen tuote, tuote hyvitetty panttitililt‰").".";
@@ -126,26 +126,26 @@ else {
                     $ale_query_insert_lisa .= " ale{$alepostfix} = '".$vanhin_pantti_row["ale{$alepostfix}"]."', ";
                   }
 
-                  $query = "  INSERT INTO panttitili SET
-                        yhtio     = '{$kukarow['yhtio']}',
-                        asiakas   = '{$vanhin_pantti_row['asiakas']}',
-                        tuoteno   = '{$vanhin_pantti_row['tuoteno']}',
-                        status     = '',
-                        kpl     = '{$vanhin_pantti_row['kpl']}',
-                        hinta     = '{$vanhin_pantti_row['hinta']}',
-                        alv     = '{$vanhin_pantti_row['alv']}',
-                        erikoisale   = '{$vanhin_pantti_row['erikoisale']}',
-                        {$ale_query_insert_lisa}
-                        myyntipvm   = '{$vanhin_pantti_row['myyntipvm']}',
-                        myyntitilausnro = '{$vanhin_pantti_row['myyntitilausnro']}',
-                        kaytettypvm = '0000-00-00',
-                        kaytettytilausnro = 0";
+                  $query = "INSERT INTO panttitili SET
+                            yhtio             = '{$kukarow['yhtio']}',
+                            asiakas           = '{$vanhin_pantti_row['asiakas']}',
+                            tuoteno           = '{$vanhin_pantti_row['tuoteno']}',
+                            status            = '',
+                            kpl               = '{$vanhin_pantti_row['kpl']}',
+                            hinta             = '{$vanhin_pantti_row['hinta']}',
+                            alv               = '{$vanhin_pantti_row['alv']}',
+                            erikoisale        = '{$vanhin_pantti_row['erikoisale']}',
+                            {$ale_query_insert_lisa}
+                            myyntipvm         = '{$vanhin_pantti_row['myyntipvm']}',
+                            myyntitilausnro   = '{$vanhin_pantti_row['myyntitilausnro']}',
+                            kaytettypvm       = '0000-00-00',
+                            kaytettytilausnro = 0";
                   $uusi_pantti_res = pupe_query($query);
 
-                  $query = "  UPDATE panttitili SET
-                        kpl = {$pantti_kpl}
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
+                  $query = "UPDATE panttitili SET
+                            kpl         = {$pantti_kpl}
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus  = '{$vanhin_pantti_row['tunnus']}'";
                   $pantti_upd = pupe_query($query);
                 }
 
@@ -155,12 +155,12 @@ else {
                   $ale_query_update_lisa .= " ale{$alepostfix} = 0, ";
                 }
 
-                $query = "  UPDATE tilausrivi SET
-                      ale1 = 100,
-                      {$ale_query_update_lisa}
-                      kommentti = '{$tilkom_upd}'
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$tilausrivin_tunnus_chk}'";
+                $query = "UPDATE tilausrivi SET
+                          ale1        = 100,
+                          {$ale_query_update_lisa}
+                          kommentti   = '{$tilkom_upd}'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND tunnus  = '{$tilausrivin_tunnus_chk}'";
                 $pantti_update = pupe_query($query);
 
                 break;
@@ -197,10 +197,10 @@ else {
                 $pantti_kpl -= $vanhin_pantti_row['kpl'];
 
                 //Kopioidaan tilausrivin lisatiedot
-                $query = "  SELECT *
-                      FROM tilausrivin_lisatiedot
-                      WHERE tilausrivitunnus = '{$tilausrivin_tunnus_chk}'
-                      and yhtio = '{$kukarow['yhtio']}'";
+                $query = "SELECT *
+                          FROM tilausrivin_lisatiedot
+                          WHERE tilausrivitunnus = '{$tilausrivin_tunnus_chk}'
+                          and yhtio              = '{$kukarow['yhtio']}'";
                 $monistares2 = pupe_query($query);
 
                 if (mysql_num_rows($monistares2) > 0) {
@@ -238,13 +238,13 @@ else {
                   $ale_query_update_lisa .= " ale{$alepostfix} = 0, ";
                 }
 
-                $query = "  UPDATE tilausrivi SET
-                      varattu = -".abs($vanhin_pantti_row['kpl']).",
-                      ale1 = 100,
-                      {$ale_query_update_lisa}
-                      kommentti = '{$tilkom_upd}'
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$tilausrivin_tunnus_chk}'";
+                $query = "UPDATE tilausrivi SET
+                          varattu     = -".abs($vanhin_pantti_row['kpl']).",
+                          ale1        = 100,
+                          {$ale_query_update_lisa}
+                          kommentti   = '{$tilkom_upd}'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND tunnus  = '{$tilausrivin_tunnus_chk}'";
                 $pantti_update = pupe_query($query);
                 $tilausrivin_tunnus_chk = $insid_uusi;
               }
@@ -254,11 +254,11 @@ else {
             if ($orow['clearing'] == 'HYVITYS') {
 
               // haetaan alkuper‰isen tilauksen vanhatunnus
-              $query = "  SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
-                    FROM lasku AS ux_otsikko
-                    JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
-                    WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}'
-                    AND ux_otsikko.tunnus = '{$orow['vanhatunnus']}'";
+              $query = "SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
+                        FROM lasku AS ux_otsikko
+                        JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
+                        WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}'
+                        AND ux_otsikko.tunnus  = '{$orow['vanhatunnus']}'";
               $vanhatunnus_chk_res = pupe_query($query);
               $vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
 
@@ -266,29 +266,29 @@ else {
                 $wherelisa_panttitili = "AND kaytettytilausnro IN ({$vanhatunnus_chk_row['tunnukset']})";
 
                 // etsit‰‰n vanhin pantti, ja merkit‰‰n se k‰ytt‰m‰ttˆm‰ksi
-                $query = "  SELECT *
-                      FROM panttitili
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND asiakas = '{$orow['liitostunnus']}'
-                      AND tuoteno = '{$trow['tuoteno']}'
-                      AND kpl   = '{$trow['varattu']}'
-                      {$wherelisa_panttitili}
-                      AND status != ''
-                      AND kaytettypvm != '0000-00-00'
-                      ORDER BY myyntipvm ASC
-                      LIMIT 1";
+                $query = "SELECT *
+                          FROM panttitili
+                          WHERE yhtio      = '{$kukarow['yhtio']}'
+                          AND asiakas      = '{$orow['liitostunnus']}'
+                          AND tuoteno      = '{$trow['tuoteno']}'
+                          AND kpl          = '{$trow['varattu']}'
+                          {$wherelisa_panttitili}
+                          AND status      != ''
+                          AND kaytettypvm != '0000-00-00'
+                          ORDER BY myyntipvm ASC
+                          LIMIT 1";
                 $vanhin_pantti_res = pupe_query($query);
 
                 if (mysql_num_rows($vanhin_pantti_res) > 0) {
 
                   $vanhin_pantti_row = mysql_fetch_assoc($vanhin_pantti_res);
 
-                  $query = "  UPDATE panttitili SET
-                        status = '',
-                        kaytettypvm = '0000-00-00',
-                        kaytettytilausnro = 0
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
+                  $query = "UPDATE panttitili SET
+                            status            = '',
+                            kaytettypvm       = '0000-00-00',
+                            kaytettytilausnro = 0
+                            WHERE yhtio       = '{$kukarow['yhtio']}'
+                            AND tunnus        = '{$vanhin_pantti_row['tunnus']}'";
                   $update_res = pupe_query($query);
                 }
               }
@@ -301,18 +301,18 @@ else {
                 $ale_query_insert_lisa .= " ale{$alepostfix} = '".$trow["ale{$alepostfix}"]."', ";
               }
 
-              $query = "  INSERT INTO panttitili SET
-                    yhtio     = '{$kukarow['yhtio']}',
-                    asiakas   = '{$orow['liitostunnus']}',
-                    tuoteno   = '{$trow['tuoteno']}',
-                    status     = '',
-                    kpl     = '{$trow['varattu']}',
-                    hinta     = '{$trow['hinta']}',
-                    alv     = '{$trow['alv']}',
-                    erikoisale   = '{$trow['erikoisale']}',
-                    {$ale_query_insert_lisa}
-                    myyntipvm   = now(),
-                    myyntitilausnro = '{$trow['otunnus']}'";
+              $query = "INSERT INTO panttitili SET
+                        yhtio           = '{$kukarow['yhtio']}',
+                        asiakas         = '{$orow['liitostunnus']}',
+                        tuoteno         = '{$trow['tuoteno']}',
+                        status          = '',
+                        kpl             = '{$trow['varattu']}',
+                        hinta           = '{$trow['hinta']}',
+                        alv             = '{$trow['alv']}',
+                        erikoisale      = '{$trow['erikoisale']}',
+                        {$ale_query_insert_lisa}
+                        myyntipvm       = now(),
+                        myyntitilausnro = '{$trow['otunnus']}'";
               $panttitili_upd = pupe_query($query);
 
               $tilkom_upd = trim($trow['kommentti']) != '' ? $trow['kommentti']."\n".t("Panttitilillinen tuote, veloitus siirretty panttitilille")."." : t("Panttitilillinen tuote, veloitus siirretty panttitilille").".";
@@ -323,12 +323,12 @@ else {
                 $ale_query_update_lisa .= " ale{$alepostfix} = 0, ";
               }
 
-              $query = "  UPDATE tilausrivi SET
-                    ale1 = 100,
-                    {$ale_query_update_lisa}
-                    kommentti = '{$tilkom_upd}'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$trow['tunnus']}'";
+              $query = "UPDATE tilausrivi SET
+                        ale1        = 100,
+                        {$ale_query_update_lisa}
+                        kommentti   = '{$tilkom_upd}'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = '{$trow['tunnus']}'";
               $panttitili_upd = pupe_query($query);
             }
           }
@@ -446,9 +446,9 @@ else {
     }
 
     // Etsit‰‰n tuote
-    $query = "  SELECT kehahin, ei_saldoa, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm, sarjanumeroseuranta
-          FROM tuote
-          WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]'";
+    $query = "SELECT kehahin, ei_saldoa, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm, sarjanumeroseuranta
+              FROM tuote
+              WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]'";
     $laskutusres = pupe_query($query);
 
     if (mysql_num_rows($laskutusres) == 0) {
@@ -476,12 +476,12 @@ else {
           if ($trow["varattu"] > 0) {
 
             // Haetaan eka er‰tiedot
-            $query = "  SELECT ostorivitunnus, myyntirivitunnus, sarjanumero
-                  FROM sarjanumeroseuranta
-                  WHERE yhtio       = '$kukarow[yhtio]'
-                  and tuoteno       = '$trow[tuoteno]'
-                  and myyntirivitunnus = '$trow[tunnus]'
-                  LIMIT 1";
+            $query = "SELECT ostorivitunnus, myyntirivitunnus, sarjanumero
+                      FROM sarjanumeroseuranta
+                      WHERE yhtio          = '$kukarow[yhtio]'
+                      and tuoteno          = '$trow[tuoteno]'
+                      and myyntirivitunnus = '$trow[tunnus]'
+                      LIMIT 1";
             $lisa_res = pupe_query($query);
             $lisa_row = mysql_fetch_assoc($lisa_res);
 
@@ -496,19 +496,19 @@ else {
 
                 // koitetaan lˆyt‰‰ vapaita ostettuja eri‰ mit‰ myyd‰
                 $query =   "SELECT era_kpl, tunnus, ostorivitunnus
-                      FROM sarjanumeroseuranta
-                      WHERE yhtio       = '$kukarow[yhtio]'
-                      and tuoteno        = '$trow[tuoteno]'
-                      and ostorivitunnus     > 0
-                      and myyntirivitunnus   = 0
-                      and sarjanumero     = '$lisa_row[sarjanumero]'
-                      and era_kpl       > 0
-                      and hyllyalue       = '$trow[hyllyalue]'
-                      and hyllynro        = '$trow[hyllynro]'
-                      and hyllyvali       = '$trow[hyllyvali]'
-                      and hyllytaso       = '$trow[hyllytaso]'
-                      ORDER BY era_kpl DESC, tunnus
-                      LIMIT 1";
+                            FROM sarjanumeroseuranta
+                            WHERE yhtio          = '$kukarow[yhtio]'
+                            and tuoteno          = '$trow[tuoteno]'
+                            and ostorivitunnus   > 0
+                            and myyntirivitunnus = 0
+                            and sarjanumero      = '$lisa_row[sarjanumero]'
+                            and era_kpl          > 0
+                            and hyllyalue        = '$trow[hyllyalue]'
+                            and hyllynro         = '$trow[hyllynro]'
+                            and hyllyvali        = '$trow[hyllyvali]'
+                            and hyllytaso        = '$trow[hyllytaso]'
+                            ORDER BY era_kpl DESC, tunnus
+                            LIMIT 1";
                 $erajaljella_res = pupe_query($query);
 
                 // jos lˆytyy ostettuja eri‰ myyt‰v‰ks niin menn‰‰n t‰nne
@@ -530,38 +530,38 @@ else {
                   }
 
                   // v‰hennet‰‰n ostorivilt‰ tarvittava m‰‰r‰
-                  $query = "  UPDATE sarjanumeroseuranta
-                        SET era_kpl       = era_kpl-$eravahennetaan,
-                        muutospvm        = now(),
-                        muuttaja        = '$kukarow[kuka]'
-                        WHERE yhtio       = '$kukarow[yhtio]'
-                        and tuoteno        = '$trow[tuoteno]'
-                        and ostorivitunnus     = '$erajaljella_row[ostorivitunnus]'
-                        and myyntirivitunnus   = 0
-                        and sarjanumero     = '$lisa_row[sarjanumero]'
-                        and tunnus        = '$erajaljella_row[tunnus]'
-                        LIMIT 1";
+                  $query = "UPDATE sarjanumeroseuranta
+                            SET era_kpl       = era_kpl-$eravahennetaan,
+                            muutospvm            = now(),
+                            muuttaja             = '$kukarow[kuka]'
+                            WHERE yhtio          = '$kukarow[yhtio]'
+                            and tuoteno          = '$trow[tuoteno]'
+                            and ostorivitunnus   = '$erajaljella_row[ostorivitunnus]'
+                            and myyntirivitunnus = 0
+                            and sarjanumero      = '$lisa_row[sarjanumero]'
+                            and tunnus           = '$erajaljella_row[tunnus]'
+                            LIMIT 1";
                   $lisa_res = pupe_query($query);
 
                   // haetaan p‰ivitett‰v‰ myyntirivi jotta voidaan kloonata se myˆhemmin tarvittaessa
                   $query =   "SELECT * FROM sarjanumeroseuranta
-                        WHERE yhtio       = '$kukarow[yhtio]'
-                        and tuoteno       = '$trow[tuoteno]'
-                        and myyntirivitunnus = '$trow[tunnus]'
-                        and era_kpl       = 0
-                        LIMIT 1";
+                              WHERE yhtio          = '$kukarow[yhtio]'
+                              and tuoteno          = '$trow[tuoteno]'
+                              and myyntirivitunnus = '$trow[tunnus]'
+                              and era_kpl          = 0
+                              LIMIT 1";
                   $erahakures = pupe_query($query);
                   $erahakurow = mysql_fetch_assoc($erahakures);
 
                   // lis‰t‰‰n myyntiriville sama m‰‰r‰, ja samalla p‰ivitet‰‰n ostorivitunnus oikeaksi
-                  $query = "  UPDATE sarjanumeroseuranta
-                        SET era_kpl       = era_kpl+$eravahennetaan,
-                        ostorivitunnus     = '$erajaljella_row[ostorivitunnus]',
-                        muutospvm       = now(),
-                        muuttaja       = '$kukarow[kuka]'
-                        WHERE yhtio       = '$kukarow[yhtio]'
-                        and tunnus        = '$erahakurow[tunnus]'
-                        LIMIT 1";
+                  $query = "UPDATE sarjanumeroseuranta
+                            SET era_kpl       = era_kpl+$eravahennetaan,
+                            ostorivitunnus = '$erajaljella_row[ostorivitunnus]',
+                            muutospvm      = now(),
+                            muuttaja       = '$kukarow[kuka]'
+                            WHERE yhtio    = '$kukarow[yhtio]'
+                            and tunnus     = '$erahakurow[tunnus]'
+                            LIMIT 1";
                   $lisa_res = pupe_query($query);
 
                   // lis‰t‰‰n uusi kloonattu rivi
@@ -593,31 +593,31 @@ else {
                 // Ei lˆytynyt (en‰‰n) ostettuja eri‰, eli "myyty pakkaselle" niin luodaan uusi er‰rivi jossa ostorivitunnus on nolla jonne laitetaan loppum‰‰r‰.
                 else {
 
-                  $query = "  INSERT into sarjanumeroseuranta
-                        SET yhtio     = '$kukarow[yhtio]',
-                        tuoteno      = '$trow[tuoteno]',
-                        myyntirivitunnus= 0,
-                        ostorivitunnus   = '$trow[tunnus]',
-                        era_kpl      = '0',
-                        laatija      = '$kukarow[kuka]',
-                        luontiaika    = now(),
-                        hyllyalue     = '$trow[hyllyalue]',
-                        hyllynro      = '$trow[hyllynro]',
-                        hyllyvali     = '$trow[hyllyvali]',
-                        hyllytaso     = '$trow[hyllytaso]',
-                        sarjanumero   = '$lisa_row[sarjanumero]'";
+                  $query = "INSERT into sarjanumeroseuranta
+                            SET yhtio     = '$kukarow[yhtio]',
+                            tuoteno        = '$trow[tuoteno]',
+                            myyntirivitunnus= 0,
+                            ostorivitunnus = '$trow[tunnus]',
+                            era_kpl        = '0',
+                            laatija        = '$kukarow[kuka]',
+                            luontiaika     = now(),
+                            hyllyalue      = '$trow[hyllyalue]',
+                            hyllynro       = '$trow[hyllynro]',
+                            hyllyvali      = '$trow[hyllyvali]',
+                            hyllytaso      = '$trow[hyllytaso]',
+                            sarjanumero    = '$lisa_row[sarjanumero]'";
                   $lisa_res = pupe_query($query);
 
-                  $query = "  UPDATE sarjanumeroseuranta
-                        SET era_kpl       = $eraayht,
-                        ostorivitunnus     = '$trow[tunnus]',
-                        muutospvm       = now(),
-                        muuttaja       = '$kukarow[kuka]'
-                        WHERE yhtio       = '$kukarow[yhtio]'
-                        and tuoteno       = '$trow[tuoteno]'
-                        and myyntirivitunnus = '$trow[tunnus]'
-                        and era_kpl       = 0
-                        LIMIT 1";
+                  $query = "UPDATE sarjanumeroseuranta
+                            SET era_kpl       = $eraayht,
+                            ostorivitunnus       = '$trow[tunnus]',
+                            muutospvm            = now(),
+                            muuttaja             = '$kukarow[kuka]'
+                            WHERE yhtio          = '$kukarow[yhtio]'
+                            and tuoteno          = '$trow[tuoteno]'
+                            and myyntirivitunnus = '$trow[tunnus]'
+                            and era_kpl          = 0
+                            LIMIT 1";
                   $lisa_res = pupe_query($query);
 
                   // v‰hennet‰‰n luupattavaa m‰‰r‰‰
@@ -628,90 +628,90 @@ else {
             }
             else {
               // Laskutetaan vaikka ei olla viel‰ ostettu
-              $query = "  UPDATE sarjanumeroseuranta
-                    SET era_kpl = $trow[varattu]*-1,
-                    ostorivitunnus = 0
-                    WHERE yhtio       = '$kukarow[yhtio]'
-                    and tuoteno        = '$trow[tuoteno]'
-                    and ostorivitunnus     = '$trow[tunnus]'
-                    and myyntirivitunnus   = 0
-                    and sarjanumero      = '$lisa_row[sarjanumero]'
-                    LIMIT 1";
+              $query = "UPDATE sarjanumeroseuranta
+                        SET era_kpl = $trow[varattu]*-1,
+                        ostorivitunnus       = 0
+                        WHERE yhtio          = '$kukarow[yhtio]'
+                        and tuoteno          = '$trow[tuoteno]'
+                        and ostorivitunnus   = '$trow[tunnus]'
+                        and myyntirivitunnus = 0
+                        and sarjanumero      = '$lisa_row[sarjanumero]'
+                        LIMIT 1";
               $lisa_res = pupe_query($query);
 
-              $query = "  UPDATE sarjanumeroseuranta
-                    SET era_kpl = $trow[varattu]
-                    WHERE yhtio       = '$kukarow[yhtio]'
-                    and tuoteno       = '$trow[tuoteno]'
-                    and myyntirivitunnus = '$trow[tunnus]'
-                    LIMIT 1";
+              $query = "UPDATE sarjanumeroseuranta
+                        SET era_kpl = $trow[varattu]
+                        WHERE yhtio          = '$kukarow[yhtio]'
+                        and tuoteno          = '$trow[tuoteno]'
+                        and myyntirivitunnus = '$trow[tunnus]'
+                        LIMIT 1";
               $lisa_res = pupe_query($query);
             }
           }
         }
 
         ///* P‰ivitet‰‰n saldo tilausrivin osoittamalla paikalla *///
-        $query = "  UPDATE tuotepaikat
-              SET saldo = saldo-$trow[varattu],
-              saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
-              saldoaika = now()
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and tuoteno   = '$trow[tuoteno]'
-              and hyllyalue = '$trow[hyllyalue]'
-              and hyllynro  = '$trow[hyllynro]'
-              and hyllytaso = '$trow[hyllytaso]'
-              and hyllyvali = '$trow[hyllyvali]'";
+        $query = "UPDATE tuotepaikat
+                  SET saldo = saldo-$trow[varattu],
+                  saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
+                  saldoaika     = now()
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and tuoteno   = '$trow[tuoteno]'
+                  and hyllyalue = '$trow[hyllyalue]'
+                  and hyllynro  = '$trow[hyllynro]'
+                  and hyllytaso = '$trow[hyllytaso]'
+                  and hyllyvali = '$trow[hyllyvali]'";
         $laskutusres = pupe_query($query);
 
         if (mysql_affected_rows() == 0) {
           $tulos_ulos_laskutus .= "<font class='error'>".t("Saldoa tuotteelle")." $trow[tuoteno] ".t("ei voitu p‰ivitt‰‰ paikalla")." $trow[hyllyalue]-$trow[hyllynro]-$trow[hyllytaso]-$trow[hyllyvali].</font><br>\r\n";
 
           ///* P‰ivitet‰‰n saldo tuotteen oletuspaikalla jos tilausrivill‰ ei ollut sopivaa paikkaa *///
-          $query = "  UPDATE tuotepaikat
-                SET saldo = saldo-$trow[varattu],
-                saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
-                saldoaika = now()
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tuoteno  = '$trow[tuoteno]'
-                and oletus != ''
-                LIMIT 1";
+          $query = "UPDATE tuotepaikat
+                    SET saldo = saldo-$trow[varattu],
+                    saldo_varattu  = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
+                    saldoaika      = now()
+                    WHERE yhtio    = '$kukarow[yhtio]'
+                    and tuoteno    = '$trow[tuoteno]'
+                    and oletus    != ''
+                    LIMIT 1";
           $laskutusres = pupe_query($query);
 
           if (mysql_affected_rows() == 0) {
             $tulos_ulos_laskutus .= "<font class='error'>".t("Saldoa tuotteelle")." $trow[tuoteno] ".t("ei voitu p‰ivitt‰‰ oletuspaikalla").".<br></font>\r\n";
 
             ///* P‰ivitet‰‰n saldo jollekin sopivalle paikalle jos oletuspaikkaa ei lˆytynyt *///
-            $query = "  UPDATE tuotepaikat
-                  SET saldo = saldo-$trow[varattu],
-                  saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
-                  saldoaika = now(),
-                  oletus = ''
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tuoteno  = '$trow[tuoteno]'
-                  LIMIT 1";
+            $query = "UPDATE tuotepaikat
+                      SET saldo = saldo-$trow[varattu],
+                      saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
+                      saldoaika     = now(),
+                      oletus        = ''
+                      WHERE yhtio   = '$kukarow[yhtio]'
+                      and tuoteno   = '$trow[tuoteno]'
+                      LIMIT 1";
             $laskutusres = pupe_query($query);
 
             if (mysql_affected_rows() == 0) {
               $tulos_ulos_laskutus .= "<font class='error'>".t("Tuotteella")." $trow[tuoteno] ".t("ei ole yht‰‰n varastopaikkaa").". ".t("Perustetaan uusi").".<br></font>\r\n";
 
-              $query = "  INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, saldo, saldoaika)
-                    VALUES ('$kukarow[yhtio]','Z','99','99','99','X','$trow[tuoteno]',$trow[varattu]*-1,now())";
+              $query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, saldo, saldoaika)
+                        VALUES ('$kukarow[yhtio]','Z','99','99','99','X','$trow[tuoteno]',$trow[varattu]*-1,now())";
               $laskutusres = pupe_query($query);
 
-              $tapahtumaquery = "  INSERT into tapahtuma set
-                        yhtio     = '$kukarow[yhtio]',
-                        tuoteno   = '$trow[tuoteno]',
-                        kpl     = 0,
-                        kplhinta  = 0,
-                        hinta     = 0,
-                        laji     = 'uusipaikka',
-                        hyllyalue   = '$hyllyalue',
-                        hyllynro   = '$hyllynro',
-                        hyllyvali   = '$hyllyvali',
-                        hyllytaso   = '$hyllytaso',
-                        selite     = '".t("Tuotteella ei ole yht‰‰n varastopaikkaa, perustettiin uusi").": Z 99 99 99',
-                        laatija   = '$kukarow[kuka]',
-                        laadittu   = now()";
+              $tapahtumaquery = "INSERT into tapahtuma set
+                                 yhtio     = '$kukarow[yhtio]',
+                                 tuoteno   = '$trow[tuoteno]',
+                                 kpl       = 0,
+                                 kplhinta  = 0,
+                                 hinta     = 0,
+                                 laji      = 'uusipaikka',
+                                 hyllyalue = '$hyllyalue',
+                                 hyllynro  = '$hyllynro',
+                                 hyllyvali = '$hyllyvali',
+                                 hyllytaso = '$hyllytaso',
+                                 selite    = '".t("Tuotteella ei ole yht‰‰n varastopaikkaa, perustettiin uusi").": Z 99 99 99',
+                                 laatija   = '$kukarow[kuka]',
+                                 laadittu  = now()";
               $tapahtumaresult = pupe_query($tapahtumaquery);
 
             }
@@ -747,10 +747,10 @@ else {
         //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
 
         //T‰h‰n hyvitysriviin liitetyt sarjanumerot
-        $query = "  SELECT *
-              FROM sarjanumeroseuranta
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and ostorivitunnus   = '$trow[tunnus]'";
+        $query = "SELECT *
+                  FROM sarjanumeroseuranta
+                  WHERE yhtio        = '$kukarow[yhtio]'
+                  and ostorivitunnus = '$trow[tunnus]'";
         $sarjares = pupe_query($query);
 
         $ostohinta = 0;
@@ -758,27 +758,27 @@ else {
         while($sarjarow = mysql_fetch_assoc($sarjares)) {
 
           // Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
-          $query  = "  SELECT sarjanumeroseuranta.*
-                FROM sarjanumeroseuranta
-                JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-                WHERE sarjanumeroseuranta.yhtio   = '$kukarow[yhtio]'
-                and sarjanumeroseuranta.tuoteno   = '$trow[tuoteno]'
-                and sarjanumeroseuranta.sarjanumero = '$sarjarow[sarjanumero]'
-                and sarjanumeroseuranta.kaytetty   = '$sarjarow[kaytetty]'
-                and sarjanumeroseuranta.myyntirivitunnus > 0
-                and sarjanumeroseuranta.ostorivitunnus   > 0
-                and sarjanumeroseuranta.tunnus != '$sarjarow[tunnus]'
-                ORDER BY sarjanumeroseuranta.tunnus DESC
-                LIMIT 1";
+          $query  = "SELECT sarjanumeroseuranta.*
+                     FROM sarjanumeroseuranta
+                     JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+                     WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'
+                     and sarjanumeroseuranta.tuoteno           = '$trow[tuoteno]'
+                     and sarjanumeroseuranta.sarjanumero       = '$sarjarow[sarjanumero]'
+                     and sarjanumeroseuranta.kaytetty          = '$sarjarow[kaytetty]'
+                     and sarjanumeroseuranta.myyntirivitunnus  > 0
+                     and sarjanumeroseuranta.ostorivitunnus    > 0
+                     and sarjanumeroseuranta.tunnus           != '$sarjarow[tunnus]'
+                     ORDER BY sarjanumeroseuranta.tunnus DESC
+                     LIMIT 1";
           $sarjares1 = pupe_query($query);
 
           if (mysql_num_rows($sarjares1) == 0) {
             // Jos sarjanumeroa ei ikin‰ olla ostettu, mutta se on myyty miinukselle ja nyt halutaan perua kaupat (Tarkistukset tehty verkkolasku.phpss‰)
             // J‰tet‰‰n t‰st‰ treissi
-            $query = "  UPDATE tilausrivi
-                  SET var2 = 'EIOST'
-                  WHERE tunnus = $trow[tunnus]
-                  and yhtio = '$kukarow[yhtio]'";
+            $query = "UPDATE tilausrivi
+                      SET var2 = 'EIOST'
+                      WHERE tunnus = $trow[tunnus]
+                      and yhtio    = '$kukarow[yhtio]'";
             $sarjaupdres = pupe_query($query);
 
             $ostohinta += 0;
@@ -790,10 +790,10 @@ else {
             $ostohinta += sarjanumeron_ostohinta("tunnus", $sarjarow1["tunnus"]);
 
             // Tehd‰‰n sarjanumerotauluun uusi vapaa sarjanumero-olio
-            $query = "  UPDATE sarjanumeroseuranta
-                  SET myyntirivitunnus=ostorivitunnus, ostorivitunnus='$sarjarow1[ostorivitunnus]'
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus   = '$sarjarow[tunnus]'";
+            $query = "UPDATE sarjanumeroseuranta
+                      SET myyntirivitunnus=ostorivitunnus, ostorivitunnus='$sarjarow1[ostorivitunnus]'
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$sarjarow[tunnus]'";
             $sarjares1 = pupe_query($query);
 
             //Jos nyt hyvitett‰v‰ sarjanumero onkin jo myyty eteenp‰in.
@@ -812,9 +812,9 @@ else {
               $eraKpl = 0;
             }
 
-            $query = "  INSERT into sarjanumeroseuranta
-                  (yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, parasta_ennen, hyllyalue, hyllynro, hyllyvali, hyllytaso)
-                  VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]', '$eraKpl', '$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow1[parasta_ennen]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
+            $query = "INSERT into sarjanumeroseuranta
+                      (yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, parasta_ennen, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+                      VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]', '$eraKpl', '$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow1[parasta_ennen]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
             $sarjares1 = pupe_query($query);
           }
         }
@@ -837,21 +837,21 @@ else {
       }
 
       // tehd‰‰n tapahtuma
-      $query = "  INSERT into tapahtuma set
-            yhtio      = '$kukarow[yhtio]',
-            tuoteno    = '$trow[tuoteno]',
-            kpl        =  $trow[varattu] * -1,
-            hinta      = '$turow[kehahin]',
-            kplhinta   = '$hinta',
-            laji       = '$tapahtumattyyppi',
-            hyllyalue  = '$trow[hyllyalue]',
-            hyllynro   = '$trow[hyllynro]',
-            hyllytaso  = '$trow[hyllytaso]',
-            hyllyvali  = '$trow[hyllyvali]',
-            selite     = '$orow[nimi] $orow[nimitark] ($hinta) [$rivihinta]',
-            laatija    = '$kukarow[kuka]',
-            rivitunnus = '$trow[tunnus]',
-            laadittu   = '$laskutus_tapahtumapvm'";
+      $query = "INSERT into tapahtuma set
+                yhtio      = '$kukarow[yhtio]',
+                tuoteno    = '$trow[tuoteno]',
+                kpl        =  $trow[varattu] * -1,
+                hinta      = '$turow[kehahin]',
+                kplhinta   = '$hinta',
+                laji       = '$tapahtumattyyppi',
+                hyllyalue  = '$trow[hyllyalue]',
+                hyllynro   = '$trow[hyllynro]',
+                hyllytaso  = '$trow[hyllytaso]',
+                hyllyvali  = '$trow[hyllyvali]',
+                selite     = '$orow[nimi] $orow[nimitark] ($hinta) [$rivihinta]',
+                laatija    = '$kukarow[kuka]',
+                rivitunnus = '$trow[tunnus]',
+                laadittu   = '$laskutus_tapahtumapvm'";
       $updlaskutusres = pupe_query($query);
 
       // Tilausrivin kate (alviton)
@@ -863,16 +863,16 @@ else {
     $katesumma += $kate;
 
     // P‰ivitet‰‰n tilausrivi
-    $query = "  UPDATE tilausrivi
-          SET kate         = '$kate',
-          rivihinta         = '$rivihinta',
-          rivihinta_valuutassa  = '$rivihinta_valuutassa',
-          kpl           = varattu,
-          varattu         = 0,
-          laskutettu        = '$kukarow[kuka]',
-          laskutettuaika      = '$laskutuspvm'
-          WHERE tunnus = $trow[tunnus]
-          and yhtio = '$kukarow[yhtio]'";
+    $query = "UPDATE tilausrivi
+              SET kate         = '$kate',
+              rivihinta            = '$rivihinta',
+              rivihinta_valuutassa = '$rivihinta_valuutassa',
+              kpl                  = varattu,
+              varattu              = 0,
+              laskutettu           = '$kukarow[kuka]',
+              laskutettuaika       = '$laskutuspvm'
+              WHERE tunnus         = $trow[tunnus]
+              and yhtio            = '$kukarow[yhtio]'";
     $laskutusres = pupe_query($query);
   }
 
@@ -887,9 +887,9 @@ else {
   // tehd‰‰n maksuehtok‰sittely vain jos er‰p‰iv‰‰ ei ole syˆtetty jo laskulle...
   if ($orow["erpcm"] == "0000-00-00") {
     // Etsit‰‰n maksuehto
-    $query = "  SELECT *
-          FROM maksuehto
-          WHERE tunnus = '$orow[maksuehto]' and yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE tunnus = '$orow[maksuehto]' and yhtio = '$kukarow[yhtio]'";
     $presult = pupe_query($query);
 
     if (mysql_num_rows($presult) == 0) {
@@ -958,10 +958,10 @@ else {
   }
 
   // Etsit‰‰n asiakas
-  $query = "  SELECT laskunsummapyoristys
-        FROM asiakas
-        WHERE tunnus = '$orow[liitostunnus]'
-        and yhtio   = '$kukarow[yhtio]'";
+  $query = "SELECT laskunsummapyoristys
+            FROM asiakas
+            WHERE tunnus = '$orow[liitostunnus]'
+            and yhtio    = '$kukarow[yhtio]'";
   $asres = pupe_query($query);
   $asrow = mysql_fetch_assoc($asres);
 
@@ -1006,27 +1006,27 @@ else {
     $pyorerotus_valuutassa = $pyorerotus;
   }
 
-  $query = "  UPDATE lasku
-        SET alatila       = 'V',
-        arvo           = '$arvosumma',
-        arvo_valuutassa     = '$arvosumma_valuutassa',
-        kate           = '$katesumma',
-        summa           = '$loppusumma',
-        summa_valuutassa     = '$loppusumma_valuutassa',
-        pyoristys        = '$pyorerotus',
-        pyoristys_valuutassa  = '$pyorerotus_valuutassa',
-        erpcm           = $erapvm,
-        kapvm           = $kassa_erapvm,
-        kasumma         = '$kassa_loppusumma',
-        kasumma_valuutassa    = '$kassa_loppusumma_valuutassa',
-        viikorkopros       = '$viivastyskorko',
-        laskuttaja         = '$kukarow[kuka]',
-        tapvm           = '$laskutuspvm',
-        maksuehto         = '$orow[maksuehto]',
-        maksuteksti       = if(maksuteksti='','$xrow[teksti]',maksuteksti),
-        laskutettu         = now()
-        WHERE tunnus = '$kukarow[kesken]'
-        and yhtio   = '$kukarow[yhtio]'";
+  $query = "UPDATE lasku
+            SET alatila       = 'V',
+            arvo                 = '$arvosumma',
+            arvo_valuutassa      = '$arvosumma_valuutassa',
+            kate                 = '$katesumma',
+            summa                = '$loppusumma',
+            summa_valuutassa     = '$loppusumma_valuutassa',
+            pyoristys            = '$pyorerotus',
+            pyoristys_valuutassa = '$pyorerotus_valuutassa',
+            erpcm                = $erapvm,
+            kapvm                = $kassa_erapvm,
+            kasumma              = '$kassa_loppusumma',
+            kasumma_valuutassa   = '$kassa_loppusumma_valuutassa',
+            viikorkopros         = '$viivastyskorko',
+            laskuttaja           = '$kukarow[kuka]',
+            tapvm                = '$laskutuspvm',
+            maksuehto            = '$orow[maksuehto]',
+            maksuteksti          = if(maksuteksti='','$xrow[teksti]',maksuteksti),
+            laskutettu           = now()
+            WHERE tunnus         = '$kukarow[kesken]'
+            and yhtio            = '$kukarow[yhtio]'";
   $laskutusres = pupe_query($query);
 
   $id = 0;

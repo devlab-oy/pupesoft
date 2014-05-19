@@ -29,12 +29,12 @@ else {
   flush();
 
   if ($teemyytuory != '') {
-    $query = "  SELECT distinct osasto, try
-          FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-          WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and
-          laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month) and
-          laskutettuaika <= '$vv-$kk-$pp'
-          ORDER BY osasto, try";
+    $query = "SELECT distinct osasto, try
+              FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+              WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and
+              laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month) and
+              laskutettuaika <= '$vv-$kk-$pp'
+              ORDER BY osasto, try";
     $result = mysql_query($query) or pupe_error($query);
 
     $kate30=0;
@@ -84,38 +84,38 @@ else {
 
       $bar->increase();
 
-      $query = "  SELECT
-            osasto,
-            try,
-            sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 30 day), rivihinta,0)) summa30,
-            sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 30 day), kate,0)) kate30,
-            sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 30 day), kpl,0)) kpl30,
-            sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 90 day), rivihinta,0)) summa90,
-            sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 90 day), kate,0)) kate90,
-            sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 90 day), kpl,0)) kpl90,
-            sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month), rivihinta-kate,0)) myynti12,
-            sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', rivihinta,0)) summaVA,
-            sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', kate,0)) kateVA,
-            sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', kpl,0)) kplVA
-            FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
-            WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and osasto='$trow[osasto]' and try='$trow[try]'
-            and laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month) and laskutettuaika <= '$vv-$kk-$pp'
-            group by 1,2";
+      $query = "SELECT
+                osasto,
+                try,
+                sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 30 day), rivihinta,0)) summa30,
+                sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 30 day), kate,0)) kate30,
+                sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 30 day), kpl,0)) kpl30,
+                sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 90 day), rivihinta,0)) summa90,
+                sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 90 day), kate,0)) kate90,
+                sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 90 day), kpl,0)) kpl90,
+                sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month), rivihinta-kate,0)) myynti12,
+                sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', rivihinta,0)) summaVA,
+                sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', kate,0)) kateVA,
+                sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', kpl,0)) kplVA
+                FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
+                WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and osasto='$trow[osasto]' and try='$trow[try]'
+                and laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month) and laskutettuaika <= '$vv-$kk-$pp'
+                group by 1,2";
 
       $eresult = mysql_query($query) or pupe_error($query);
       $row = mysql_fetch_array($eresult);
 
       //varastonmuutos
       $muutosval = 0;
-      $query = "  SELECT sum(kpl*hinta) muutos
-            FROM tuote use index (osasto_try_index), tapahtuma use index (yhtio_tuote_laadittu)
-            WHERE tuote.yhtio='$kukarow[yhtio]' and
-            tuote.osasto='$trow[osasto]' and
-            tuote.try='$trow[try]' and
-            tuote.ei_saldoa='' and
-            tapahtuma.yhtio=tuote.yhtio and
-            tapahtuma.tuoteno=tuote.tuoteno and
-            tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'";
+      $query = "SELECT sum(kpl*hinta) muutos
+                FROM tuote use index (osasto_try_index), tapahtuma use index (yhtio_tuote_laadittu)
+                WHERE tuote.yhtio='$kukarow[yhtio]' and
+                tuote.osasto='$trow[osasto]' and
+                tuote.try='$trow[try]' and
+                tuote.ei_saldoa='' and
+                tapahtuma.yhtio=tuote.yhtio and
+                tapahtuma.tuoteno=tuote.tuoteno and
+                tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'";
       $result5 = mysql_query($query) or pupe_error($query);
       $rowMUUTOS = mysql_fetch_array($result5);
       $muutosval = $rowMUUTOS["muutos"];
@@ -123,15 +123,15 @@ else {
       //varaston arvo
       $varastonarvo = 0;
 
-      $query = "  SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
-            FROM tuotepaikat, tuote
-            WHERE tuote.tuoteno     = tuotepaikat.tuoteno
-            and tuote.yhtio       = '$kukarow[yhtio]'
-            and tuotepaikat.yhtio     = '$kukarow[yhtio]'
-            and tuote.osasto       = '$trow[osasto]'
-            and tuote.try         = '$trow[try]'
-            and tuote.ei_saldoa     = ''
-            and tuote.epakurantti100pvm = '0000-00-00'";
+      $query = "SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
+                FROM tuotepaikat, tuote
+                WHERE tuote.tuoteno         = tuotepaikat.tuoteno
+                and tuote.yhtio             = '$kukarow[yhtio]'
+                and tuotepaikat.yhtio       = '$kukarow[yhtio]'
+                and tuote.osasto            = '$trow[osasto]'
+                and tuote.try               = '$trow[try]'
+                and tuote.ei_saldoa         = ''
+                and tuote.epakurantti100pvm = '0000-00-00'";
       $result4 = mysql_query($query) or pupe_error($query);
       $rowARVO = mysql_fetch_array($result4);
       $varastonarvo = round($rowARVO["varasto"] - $muutosval, 2);

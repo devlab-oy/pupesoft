@@ -249,12 +249,12 @@ if (!function_exists('desadv_row')) {
     extract($params);
 
     // Katsotaan löytyykö tilaukselle keräyserä
-    $query = "  SELECT sscc, sscc_ulkoinen, pakkaus, GROUP_CONCAT(tilausrivi) AS tilausrivit
-          FROM kerayserat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND otunnus = '{$desadv_laskurow['laskutunnus']}'
-          GROUP BY 1,2,3
-          ORDER BY 1,2,3";
+    $query = "SELECT sscc, sscc_ulkoinen, pakkaus, GROUP_CONCAT(tilausrivi) AS tilausrivit
+              FROM kerayserat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$desadv_laskurow['laskutunnus']}'
+              GROUP BY 1,2,3
+              ORDER BY 1,2,3";
     $keraysera_res = pupe_query($query);
 
     $kokonais_pakettimaara = 0;
@@ -278,10 +278,10 @@ if (!function_exists('desadv_row')) {
         $desadv_message .= "PAC+1++PK'";
         $x++;
 
-        $query = "  SELECT *
-              FROM pakkaus
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$keraysera_row['pakkaus']}'";
+        $query = "SELECT *
+                  FROM pakkaus
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$keraysera_row['pakkaus']}'";
         $pakkaus_res = pupe_query($query);
         $pakkaus_row = mysql_fetch_assoc($pakkaus_res);
 
@@ -291,12 +291,12 @@ if (!function_exists('desadv_row')) {
 
         if ($desadv_version == "fi0089") {
           // Haetaan pakkauksen tiedot
-          $query = "  SELECT SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot, SUM(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys * kerayserat.kpl_keratty) tilavuus
-                FROM tilausrivi
-                JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.tunnus IN ({$keraysera_row['tilausrivit']})";
+          $query = "SELECT SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot, SUM(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys * kerayserat.kpl_keratty) tilavuus
+                    FROM tilausrivi
+                    JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
+                    JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                    WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                    AND tilausrivi.tunnus  IN ({$keraysera_row['tilausrivit']})";
           $paino_res = pupe_query($query);
           $paino_row = mysql_fetch_assoc($paino_res);
 
@@ -314,17 +314,17 @@ if (!function_exists('desadv_row')) {
           $x++;
         }
 
-        $query = "  SELECT tuote.eankoodi,
-              tilausrivi.tuoteno,
-              tilausrivi.nimitys,
-              tilausrivi.tilaajanrivinro,
-              SUM(tilausrivi.varattu+tilausrivi.kpl) varattu
-              FROM tilausrivi
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-               AND tilausrivi.tunnus IN ({$keraysera_row['tilausrivit']})
-              AND tilausrivi.tyyppi != 'D'
-              GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
+        $query = "SELECT tuote.eankoodi,
+                  tilausrivi.tuoteno,
+                  tilausrivi.nimitys,
+                  tilausrivi.tilaajanrivinro,
+                  SUM(tilausrivi.varattu+tilausrivi.kpl) varattu
+                  FROM tilausrivi
+                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                  WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+                   AND tilausrivi.tunnus  IN ({$keraysera_row['tilausrivit']})
+                  AND tilausrivi.tyyppi  != 'D'
+                  GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
         $tuotteet_res = pupe_query($query);
 
         $i = 0;
@@ -402,11 +402,11 @@ if (!function_exists('desadv_row')) {
       unset($desadv_kollitres);
 
       if ((int) $rahtikirjanro != 0) {
-        $query = "  SELECT ROUND(SUM(kollit), 0) kollit, SUM(kuutiot) kuutiot, SUM(kilot) kilot
-              FROM rahtikirjat USE INDEX (otsikko_index)
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otsikkonro = '{$desadv_laskurow['laskutunnus']}'
-              AND rahtikirjanro = '{$rahtikirjanro}'";
+        $query = "SELECT ROUND(SUM(kollit), 0) kollit, SUM(kuutiot) kuutiot, SUM(kilot) kilot
+                  FROM rahtikirjat USE INDEX (otsikko_index)
+                  WHERE yhtio       = '{$kukarow['yhtio']}'
+                  AND otsikkonro    = '{$desadv_laskurow['laskutunnus']}'
+                  AND rahtikirjanro = '{$rahtikirjanro}'";
         $desadv_kollitres = pupe_query($query);
       }
 
@@ -435,17 +435,17 @@ if (!function_exists('desadv_row')) {
       }
 
       // LIN - line item
-      $query = "  SELECT tuote.eankoodi,
-            tilausrivi.tuoteno,
-            tilausrivi.nimitys,
-            tilausrivi.tilaajanrivinro,
-            SUM(tilausrivi.varattu+tilausrivi.kpl) varattu
-            FROM tilausrivi
-            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-             AND tilausrivi.otunnus = '{$desadv_laskurow['laskutunnus']}'
-            AND tilausrivi.tyyppi != 'D'
-            GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
+      $query = "SELECT tuote.eankoodi,
+                tilausrivi.tuoteno,
+                tilausrivi.nimitys,
+                tilausrivi.tilaajanrivinro,
+                SUM(tilausrivi.varattu+tilausrivi.kpl) varattu
+                FROM tilausrivi
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                WHERE tilausrivi.yhtio   = '{$kukarow['yhtio']}'
+                 AND tilausrivi.otunnus  = '{$desadv_laskurow['laskutunnus']}'
+                AND tilausrivi.tyyppi   != 'D'
+                GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
       $tuotteet_res = pupe_query($query);
 
       $i = 0;
@@ -513,28 +513,28 @@ $toimitusvahvistus_desadv_lahetys = FALSE;
 if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
 
   //  Haetaan otsikkotiedot pohjalle
-  $query = "  SELECT lasku.*, laskun_lisatiedot.*,
-        lasku.tunnus laskutunnus,
-        asiakas.nimi asiakasnimi,
-        asiakas.nimitark asiakasnimitark,
-        asiakas.osoite asiakasosoite,
-        asiakas.postitp asiakaspostitp,
-        asiakas.postino asiakaspostino,
-        asiakas.maa asiakasmaa,
-        asiakas.ovttunnus asiakasovttunnus,
-        lasku.toim_ovttunnus asiakastoim_ovttunnus,
-        lasku.toim_nimi asiakastoim_nimi,
-        lasku.toim_nimitark asiakastoim_nimitark,
-        lasku.toim_osoite asiakastoim_osoite,
-        lasku.toim_postitp asiakastoim_postitp,
-        lasku.toim_postino asiakastoim_postino,
-        lasku.toim_maa asiakastoim_maa
-        FROM lasku
-        JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-        LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tunnus in ({$otunnukset})
-        ORDER BY lasku.tunnus";
+  $query = "SELECT lasku.*, laskun_lisatiedot.*,
+            lasku.tunnus laskutunnus,
+            asiakas.nimi asiakasnimi,
+            asiakas.nimitark asiakasnimitark,
+            asiakas.osoite asiakasosoite,
+            asiakas.postitp asiakaspostitp,
+            asiakas.postino asiakaspostino,
+            asiakas.maa asiakasmaa,
+            asiakas.ovttunnus asiakasovttunnus,
+            lasku.toim_ovttunnus asiakastoim_ovttunnus,
+            lasku.toim_nimi asiakastoim_nimi,
+            lasku.toim_nimitark asiakastoim_nimitark,
+            lasku.toim_osoite asiakastoim_osoite,
+            lasku.toim_postitp asiakastoim_postitp,
+            lasku.toim_postino asiakastoim_postino,
+            lasku.toim_maa asiakastoim_maa
+            FROM lasku
+            JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+            LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus  in ({$otunnukset})
+            ORDER BY lasku.tunnus";
   $desadv_laskures = pupe_query($query);
 
   $rajaus = 1;
@@ -543,10 +543,10 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
 
     $lahtunniste = "";
 
-    $query = "  SELECT *
-          FROM rahtikirjat
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus in ({$tunnukset})";
+    $query = "SELECT *
+              FROM rahtikirjat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  in ({$tunnukset})";
     $desadv_rakir_res = pupe_query($query);
 
     if (mysql_num_rows($desadv_rakir_res) > 0) {
@@ -559,12 +559,12 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
     }
 
     // CTA - contact information
-    $query = "  SELECT *
-          FROM yhteyshenkilo
-          WHERE yhtio    = '$kukarow[yhtio]'
-          AND liitostunnus = '$desadv_laskurow[liitostunnus]'
-          AND nimi      = '$desadv_laskurow[tilausyhteyshenkilo]'
-          and tyyppi      = 'A'";
+    $query = "SELECT *
+              FROM yhteyshenkilo
+              WHERE yhtio      = '$kukarow[yhtio]'
+              AND liitostunnus = '$desadv_laskurow[liitostunnus]'
+              AND nimi         = '$desadv_laskurow[tilausyhteyshenkilo]'
+              and tyyppi       = 'A'";
     $yhteyshenkiloresult = pupe_query($query);
     $yhteyshenkiloasiakas = mysql_fetch_assoc($yhteyshenkiloresult);
 
@@ -576,11 +576,11 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
       $yhteyshenkilo_puh = $yhteyshenkiloasiakas['puh'] != '' ? $yhteyshenkiloasiakas['puh'] : ($yhteyshenkiloasiakas['gsm'] != '' ? $yhteyshenkiloasiakas['gsm'] : '');
     }
     elseif ($desadv_laskurow['yhteyshenkilo_kaupallinen'] != '') {
-      $query = "  SELECT *
-            FROM yhteyshenkilo
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus   = '$desadv_laskurow[yhteyshenkilo_kaupallinen]'
-            and tyyppi  = 'A'";
+      $query = "SELECT *
+                FROM yhteyshenkilo
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$desadv_laskurow[yhteyshenkilo_kaupallinen]'
+                and tyyppi  = 'A'";
       $yhteyshenkilo_kaupallinen_res = pupe_query($query);
       $yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
 
@@ -588,11 +588,11 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
       $yhteyshenkilo_puh = $yhteyshenkilo_kaupallinen_row['puh'] != '' ? $yhteyshenkilo_kaupallinen_row['puh'] : ($yhteyshenkilo_kaupallinen_row['gsm'] != '' ? $yhteyshenkilo_kaupallinen_row['gsm'] : '');
     }
     elseif ($desadv_laskurow['yhteyshenkilo_tekninen'] != '') {
-      $query = "  SELECT *
-            FROM yhteyshenkilo
-            WHERE yhtio  = '$kukarow[yhtio]'
-            AND tunnus  = '$desadv_laskurow[yhteyshenkilo_tekninen]'
-            and tyyppi  = 'A'";
+      $query = "SELECT *
+                FROM yhteyshenkilo
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$desadv_laskurow[yhteyshenkilo_tekninen]'
+                and tyyppi  = 'A'";
       $yhteyshenkilo_tekninen_res = pupe_query($query);
       $yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
 

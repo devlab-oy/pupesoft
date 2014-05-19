@@ -454,9 +454,9 @@ else {
                  AND (lasku.laatija = '{$kukarow["kuka"]}' or lasku.tunnus = '{$kukarow["kesken"]}')
                  AND tila          = '0'
                  AND alatila       not in ('V','D'))
-                 
+
                  UNION
-                 
+
                  (SELECT lasku.*
                  FROM lasku use index (tila_index)
                  WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
@@ -464,7 +464,7 @@ else {
                  AND tila          = 'N'
                  AND alatila       = ''
                  AND tilaustyyppi  = 0)
-                 
+
                  ORDER BY tunnus DESC";
       $eresult = pupe_query($query);
     }

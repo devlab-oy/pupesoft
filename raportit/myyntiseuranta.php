@@ -2156,7 +2156,7 @@ else {
         $lloppu     = date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl));
         $lalku_ed   = date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva-1));
         $lloppu_ed  = date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl-1));
-        
+
         $kumulalkurajaus = $piiloed == "" ? $kumulatiivinen_alkupaiva_ed : $kumulatiivinen_alkupaiva;
 
         if ($ajotapa == 'tilausjaauki') {

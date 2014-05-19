@@ -288,10 +288,11 @@ elseif ($laskunro > 0) {
     $asiakasid     = $row["liitostunnus"];
   }
 }
+//astilnro kentässä on laskun tunnus, jotta livesearch hakukentän ID olisi yksilöllinen
 elseif ($astilnro != '') {
   $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
-            FROM lasku use index (yhtio_asiakkaan_tilausnumero)
-            WHERE asiakkaan_tilausnumero = '$astilnro'
+            FROM lasku
+            WHERE tunnus = '$astilnro'
             and $logistiikka_yhtiolisa";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);

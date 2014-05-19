@@ -2689,23 +2689,6 @@ if ($fieldname == "konsernivarasto") {
   $jatko = 0;
 }
 
-if ($fieldname == "myydaan_vain_yhteen_varastoon_kerrallaan") {
-
-  $ulos = "<td>";
-  $ulos .= "<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-  $sel = array();
-  $apu = $trow[$i];
-  $sel[$apu] = "selected";
-
-  $ulos .= "<option value = ''>".t("Ei käytössä")."</option>";
-  $ulos .= "<option value = 'K' {$sel['K']}>".t("Käytössä")."</option>";
-  $ulos .= "</select>";
-  $ulos .= "</td>";
-
-  $jatko = 0;
-}
-
 if ($fieldname == "livetuotehaku_tilauksella") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3139,9 +3122,8 @@ if ($fieldname == "pakollinen_varasto") {
 
   $sel = $trow[$i] == 'K' ? "selected" : "";
 
-  $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen")."</option>";
-  $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
-
+  $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen. Tilaukselle voidaan lisätä rivejä useasta varastosta")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen. Tilaukselle voidaan lisätä rivejä vain yhdestä varastosta: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
 
   $jatko = 0;
 }

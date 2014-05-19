@@ -3262,14 +3262,17 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
   }
 }
 
-$_yhteen_varastoon = ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K');
-if ($_yhteen_varastoon and !in_array($var, array('S', 'U', 'T', 'P'))) {
-  $myy_hyllyalue_temp = $myy_hyllyalue[0];
-  $myy_hyllynro_temp = $myy_hyllynro[0];
+$_yhteen_varastoon  = ($yhtiorow['pakollinen_varasto'] == 'K');
+$_sopivatilaustoimi = (in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO','TARJOUS')));
 
-  $_normi_tyhja = (empty($myy_hyllyalue) and empty($myy_hyllynro));
-  $_puute_ei_tyhja = (!empty($p_hyllyalue) and !empty($p_hyllynro));
+if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U', 'T', 'P'))) {
+  $myy_hyllyalue_temp = $myy_hyllyalue[0];
+  $myy_hyllynro_temp  = $myy_hyllynro[0];
+
+  $_normi_tyhja       = (empty($myy_hyllyalue) and empty($myy_hyllynro));
+  $_puute_ei_tyhja    = (!empty($p_hyllyalue) and !empty($p_hyllynro));
   $_puutteesta_hyllyt = ( $_normi_tyhja and $_puute_ei_tyhja);
+
   if ($_puutteesta_hyllyt) {
     $myy_hyllyalue_temp = $p_hyllyalue;
     $myy_hyllynro_temp = $p_hyllynro;
@@ -3296,6 +3299,7 @@ if ($_yhteen_varastoon and !in_array($var, array('S', 'U', 'T', 'P'))) {
       # Katsotaan uudella yhtiörown parametreilla pitääkö täppiä laittaa
       $_laajat_toimipaikat = ($vt_yhtiorow['toimipaikkakasittely'] == "L");
       $_laskun_toimipaikka = ($laskurow['yhtio_toimipaikka'] != $v_toimipaikka['tunnus']);
+
       if ($_laajat_toimipaikat and $_laskun_toimipaikka) {
 
         $_onko_myyntitilaus = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));

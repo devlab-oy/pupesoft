@@ -1947,7 +1947,8 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     $disabled = '';
-    if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !empty($srow['tunnus'])) {
+    
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus'])) {
       $query = "SELECT COUNT(*) AS tilausrivi_kpl
                 FROM tilausrivi
                 WHERE yhtio  = '{$kukarow['yhtio']}'
@@ -1960,7 +1961,7 @@ if ($tila == "" and !isset($jatka)) {
       $tilausrivit['tilausrivi_kpl'] = 0;
     }
 
-    if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and $tilausrivit['tilausrivi_kpl'] > 0) {
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and $tilausrivit['tilausrivi_kpl'] > 0) {
       $disabled = 'DISABLED';
     }
 
@@ -1972,7 +1973,7 @@ if ($tila == "" and !isset($jatka)) {
               order by tyyppi, nimitys";
     $vares = pupe_query($query);
 
-    if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !empty($disabled)) {
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($disabled)) {
       $oikea_sarake[$oikea] .= "<input type='hidden' name='varasto' value='{$oletusvarasto}' />";
     }
 
@@ -2015,7 +2016,8 @@ if ($tila == "" and !isset($jatka)) {
       $predefined_yhtiotoimipaikka = 0;
 
       $oikea_sarake[$oikea] .= "<td>";
-      if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and !empty($disabled)) {
+      
+      if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($disabled)) {
         $oikea_sarake[$oikea] .= "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
       }
 
@@ -2069,7 +2071,8 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
-    if ($yhtiorow['myydaan_vain_yhteen_varastoon_kerrallaan'] == 'K' and $_onko_varasto_setattu) {
+    
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and $_onko_varasto_setattu) {
       $v_toimipaikka = hae_varaston_toimipaikka($varasto);
       if ($v_toimipaikka['tunnus'] == 0) {
         $_toimipaikka = $kukarow['toimipaikka'];

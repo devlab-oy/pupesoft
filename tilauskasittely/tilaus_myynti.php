@@ -2249,6 +2249,10 @@ if ($tee == '') {
       $pika_paiv_merahti = " kohdistettu = 'K', ";
     }
 
+    if (!isset($toimitustapa)) {
+      $toimitustapa = $laskurow['toimitustapa'];
+    }
+
     $query  = "UPDATE lasku SET
                toimitustapa    = '$toimitustapa',
                rahtisopimus    = '$rahtisopimus',

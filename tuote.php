@@ -1567,6 +1567,7 @@ if ($tee == 'Z') {
               and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
               and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
               and varastopaikat.tunnus IN ({$varow['tunnukset']})";
+              break;
             }
             else {
               // Jos toimipaikkarajaus palauttaa NULLia, ei näytetä tapahtumia
@@ -2008,7 +2009,7 @@ if ($tee == 'Z') {
 
       $toimipaikkarajaus = "";
 
-      if ($onkolaajattoimipaikat and trim($toimipaikka) != "" and $toimipaikka != 'kaikki') {
+      if ($onkolaajattoimipaikat and "{$toimipaikka}" != 'kaikki') {
 
         if ($toimipaikka != 0) {
           $_toimipaikat = array($toimipaikka, 0);
@@ -2038,6 +2039,7 @@ if ($tee == 'Z') {
             and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
             and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
             and varastopaikat.tunnus IN ({$varow['tunnukset']})";
+            break;
           }
           else {
             // Jos toimipaikkarajaus palauttaa NULLia, ei näytetä tapahtumia

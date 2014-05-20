@@ -1243,18 +1243,17 @@ if ($tila == 'tee_kohdistus') {
           //sitten katsotaan milloin nämä osasuoritukset on tehty
           $query = "SELECT tapvm
                     FROM tiliointi
-                     WHERE yhtio = '{$kukarow["yhtio"]}'
+                    WHERE yhtio = '{$kukarow["yhtio"]}'
                     AND tilino   = '{$suoritus["myyntisaamiset_tilino"]}'
                     AND ltunnus  = {$lasku["tunnus"]}
                     AND korjattu = ''
                     $wherelisa
                     ORDER BY tapvm DESC
                     LIMIT 1";
-
           $uusinresult = pupe_query($query);
           $uusin = mysql_fetch_assoc($uusinresult);
 
-          if ($uusin["tapvm"] > $laskun_maksupvm) {
+          if ((int) str_replace("-", "", $uusin["tapvm"]) > (int) str_replace("-", "", $laskun_maksupvm)) {
             $laskun_maksupvm_laskulle = $uusin["tapvm"];
           }
           else {
@@ -1266,7 +1265,7 @@ if ($tila == 'tee_kohdistus') {
         }
 
         $query = "UPDATE lasku
-                  SET mapvm     = '$laskun_maksupvm_laskulle',
+                  SET mapvm                 = '$laskun_maksupvm_laskulle',
                   viikorkoeur               = '$korkosumma',
                   saldo_maksettu            = 0,
                   saldo_maksettu_valuutassa = 0

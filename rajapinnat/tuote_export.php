@@ -331,13 +331,13 @@
   
   echo date("d.m.Y @ G:i:s")." - Haetaan dynaaminen tuotepuu.\n";
   
-  $query = "  SELECT lapsi.nimi, lapsi.lft, lapsi.rgt, lapsi.tunnus, lapsi.syvyys
-              FROM dynaaminen_puu AS vanhempi, dynaaminen_puu AS lapsi
-              WHERE lapsi.lft BETWEEN vanhempi.lft AND vanhempi.rgt
-              AND vanhempi.lft = 1
-              AND vanhempi.nimi = 'magento'
-              AND vanhempi.laji = 'tuote' 
-              AND lapsi.laji = 'tuote'";
+  $query = "SELECT lapsi.nimi, lapsi.lft, lapsi.rgt, lapsi.tunnus, lapsi.syvyys
+            FROM dynaaminen_puu AS vanhempi, dynaaminen_puu AS lapsi
+            WHERE lapsi.lft BETWEEN vanhempi.lft AND vanhempi.rgt
+            AND vanhempi.lft = 1
+            AND vanhempi.nimi = 'magento'
+            AND vanhempi.laji = 'tuote' 
+            AND lapsi.laji = 'tuote'";
 
   $dynpuu_result = pupe_query($query);
 
@@ -347,19 +347,34 @@
                                           'syvyys'  => $row['syvyys'],
                                           'left'    => $row['lft'],
                                           'right'   => $row['rgt'],
+                                          'tunnus'  => $row['tunnus'],
                                         );
   }
 
-  // Etsitään isätuotteet valmiiksi alakategorioille joilla taso on > 1
+  // Etsitään isätuotteet valmiiksi kaikille kategorioille 
   foreach ($dnstuotepuu as $tun => &$val) {
-    if ($val['syvyys'] > 1) {
       foreach($dnstuotepuu as $tunni => $valli) {
-        if ($valli['left'] < $val['left'] and $valli['right'] > $val['right'] and $valli['syvyys'] < $val['syvyys'] and $valli['syvyys'] > 0 and $tunni != $tun) {
+        if ($valli['left'] < $val['left'] and $valli['right'] > $val['right']
+            and $valli['syvyys'] < $val['syvyys'] and $tunni != $tun) {
           $val['isan_nimi'] = $valli['nimi'];
+          $val['isan_tunnus'] = $valli['tunnus'];
         } 
       }
+  }
+  //var_dump($dnstuotepuu);
+  // tracetaan esi-isät
+  foreach ($dnstuotepuu as $tun => &$val) {
+    foreach($dnstuotepuu as $tunni => $valli) {
+      if (isset($valli['isan_tunnus']) and isset($val['isan_tunnus'])
+          and $val['isan_tunnus'] == $valli['tunnus']) {
+        $val['isoisan_nimi'] = $valli['isan_nimi'];
+        $val['isoisan_tunnus'] = $valli['isan_tunnus'];
+      } 
     }
   }
+
+  var_dump($dnstuotepuu);
+  exit;
 
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";

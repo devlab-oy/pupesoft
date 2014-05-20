@@ -202,15 +202,43 @@ class MagentoClient {
         elseif ($alakategoria['syvyys'] > 1 and isset($alakategoria['isan_nimi'])) {
           // Kun syvyys on > 1 niin haetaan "isä"-kategorian magentoid
           $alakategoria['isan_nimi'] = utf8_encode($alakategoria['isan_nimi']);
-          $parent_id = $this->findCategory($alakategoria['isan_nimi'], $category_tree['children']);
+
+          if (isset($alakategoria['isoisan_nimi'])) {
+            $parent_id = $this->findCategory($alakategoria['isan_nimi'], $category_tree['children'],
+            utf8_encode($alakategoria['isoisan_nimi']));
+          }
+          else {
+            $parent_id = $this->findCategory($alakategoria['isan_nimi'], $category_tree['children']);
+          }
           if (empty($parent_id)) continue;
         }
         else {
           continue;
         }
+        // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
+        /*$query = "SELECT group_concat(DISTINCT nimi) kaikki_tuotepuun_nimet FROM puun_alkio JOIN dynaaminen_puu ON (dynaaminen_puu.yhtio = puun_alkio.yhtio AND dynaaminen_puu.tunnus = puun_alkio.puun_tunnus) WHERE puun_alkio.yhtio ='srs' AND puun_alkio.liitos = '{$tuote_clean}'";
 
-        // Katsotaan löytyykö tuoteryhmä
+        $res = pupe_query($query);
+        var_dump($category_tree);
+        if (mysql_num_rows($res) == 1) {
+          $eow = mysql_fetch_assoc($res);
+          $kaikkinimet = explode(",",$eow['kaikki_tuotepuun_nimet']);
+          foreach($kaikkinimet as $etsinimi) {
+            if ($)
+            $category_ids[] = $this->findCategory(utf8_encode($etsinimi), $category_tree['children']);
+          }
+        }*/
         if (!$this->findCategory($alakategoria['nimi'], $category_tree['children'])) {
+          $doesnt_exist_yet = TRUE;
+          foreach ($category_tree['children'] as $magentopuu) {
+              if ($magentopuu['parent_id'] == $parent_id) {
+                
+                $doesnt_exist_yet = FALSE;
+              }
+          }
+        }
+        // Jos tuoteryhmää ei vielä ole
+        if ($doesnt_exist_yet) {
           // Yli 3-tason alakategoriat pitäisi piilottaa menusta(?)
           $inclusion = $alakategoria['syvyys'] > 3  ? 0 : 1;
           // Lisätään kategoria, jos ei löytynyt
@@ -297,10 +325,10 @@ class MagentoClient {
 
       $category_ids = array();
       // Etsitään kategoria_id tuoteryhmällä
-      $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+      $category_id = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
       
       // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
-      $query = "SELECT group_concat(DISTINCT nimi) kaikki_tuotepuun_nimet FROM puun_alkio JOIN dynaaminen_puu ON (dynaaminen_puu.yhtio = puun_alkio.yhtio AND dynaaminen_puu.tunnus = puun_alkio.puun_tunnus) WHERE puun_alkio.yhtio ='srs' AND puun_alkio.liitos = '{$tuote_clean}'";
+      /*$query = "SELECT group_concat(DISTINCT nimi) kaikki_tuotepuun_nimet FROM puun_alkio JOIN dynaaminen_puu ON (dynaaminen_puu.yhtio = puun_alkio.yhtio AND dynaaminen_puu.tunnus = puun_alkio.puun_tunnus) WHERE puun_alkio.yhtio ='srs' AND puun_alkio.liitos = '{$tuote_clean}'";
       
       $res = pupe_query($query);
       var_dump($category_tree);
@@ -308,9 +336,10 @@ class MagentoClient {
         $eow = mysql_fetch_assoc($res);
         $kaikkinimet = explode(",",$eow['kaikki_tuotepuun_nimet']);
         foreach($kaikkinimet as $etsinimi) {
+          if ($)
           $category_ids[] = $this->findCategory(utf8_encode($etsinimi), $category_tree['children']);
         }
-      }
+      }*/
 
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
@@ -326,7 +355,7 @@ class MagentoClient {
       );
 
       $tuote_data = array(
-          'categories'            => $category_ids,
+          'categories'            => $category_id,
           'websites'              => explode(" ", $tuote['nakyvyys']),
           'name'                  => utf8_encode($tuote['nimi']),
           'description'           => utf8_encode($tuote['kuvaus']),
@@ -854,8 +883,58 @@ class MagentoClient {
 
   /**
    * Etsii kategoriaa nimeltä Magenton kategoria puusta.
+   * $father paramilla voi hakea alakategoriaa jos tietää sen isäkategorian
    */
-  private function findCategory($name, $root) {
+  private function findCategory($name, $root, $father = false) {
+    $category_id = false;
+
+    foreach($root as $i => $category) {
+
+      if ($father) {
+        // Jos isä löytyy tästä tasosta nii haetaan isän lapsista
+        foreach ($category['children'] as $cat) {
+          if (strcasecmp($father, $cat['name']) == 0) {
+            $r = $this->findCategory($name, $cat['children']);
+            if ($r != null) {
+              return $r;
+            }
+          }
+        }
+      }
+      else {
+        // Jos löytyy tästä tasosta nii palautetaan id
+        if (strcasecmp($name, $category['name']) == 0) {
+
+          // Jos kyseisen kategorian alla on saman niminen kategoria,
+          // palautetaan sen id nykyisen sijasta (osasto ja try voivat olla saman niminisä).
+          if (!empty($category['children']) and strcasecmp($category['children'][0]['name'], $name) == 0) {
+            return $category['children'][0]['category_id'];
+          }
+
+          return $category_id = $category['category_id'];
+        }
+
+        // Muuten jatketaan ettimistä
+        $r = $this->findCategory($name, $category['children']);
+        if ($r != null) {
+          return $r;
+        }
+      }
+    }
+
+    // Mitään ei löytyny
+    return $category_id;
+  }
+
+  /**
+   * Etsii alakategoriaa Magenton kategoria puusta käyttäen van.
+   * params = $name, $root, $parent
+   */
+  private function findSubCategory(array $params) {
+
+    $name = $params['name'];
+    $root = $params['root'];
+    $parent = $params['parent'];
 
     $category_id = false;
 
@@ -872,9 +951,12 @@ class MagentoClient {
 
         return $category_id = $category['category_id'];
       }
-
+      $params = array (
+                       'name' => $category['name'],
+                       'root' => $category['children'],
+                       'parent' => $category['parent']);
       // Muuten jatketaan ettimistä
-      $r = $this->findCategory($name, $category['children']);
+      $r = $this->findSubCategory($params);
       if ($r != null) {
         return $r;
       }

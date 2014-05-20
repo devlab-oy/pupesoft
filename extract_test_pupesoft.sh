@@ -109,11 +109,11 @@ fi
 decho "Siirretään ${database_to}.."
 
 # Varmistetaan, että meillä on dest dirikka
-mkdir -p ${database_to} &> /dev/null
+mkdir -p "${database_to}" &> /dev/null
 
 # Stopataan mysql, moovataan db, chown ja mysql takas
 ${mysql_stop} > /dev/null &&
-mv -f "${tmpdir}/*" "${database_to}/" > /dev/null &&
+mv -f "${tmpdir}/"* "${database_to}/" > /dev/null &&
 chown -R ${mysql_owner} "${database_to}" > /dev/null &&
 ${mysql_start} > /dev/null
 

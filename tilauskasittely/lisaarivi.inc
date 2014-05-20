@@ -44,6 +44,23 @@ if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myy
 // debuggia varten, laita 1 jos haluut messuja
 $lisaarivi_debug = 0;
 
+if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
+  //Laitetaan tuote oletusvaraston tuotepaikalle
+  $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
+
+  if (!empty($tuotteen_oletuspaikka)) {
+    // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
+    $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
+    $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
+    $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
+    $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
+  }
+  else {
+    //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
+    lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
+  }
+}
+
 if (!isset($indeksi)) {
   $indeksi = 0;
 }

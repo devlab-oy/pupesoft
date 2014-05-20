@@ -2119,11 +2119,11 @@ if (!function_exists('saapumisen_pyoristyserot')) {
 
       if ($osrow["maa"] != "" and $osrow["maa"] != $yhtiorow["maa"]) {
         // tutkitaan ollaanko siellä alv-rekisteröity
-        $alhqur = "  SELECT *
-              FROM yhtion_toimipaikat
-              WHERE yhtio    = '$kukarow[yhtio]'
-              AND maa      = '$osrow[maa]'
-              AND vat_numero != ''";
+        $alhqur = "SELECT *
+                   FROM yhtion_toimipaikat
+                   WHERE yhtio     = '$kukarow[yhtio]'
+                   AND maa         = '$osrow[maa]'
+                   AND vat_numero != ''";
         $alhire = pupe_query($alhqur);
 
         // ollaan alv-rekisteröity

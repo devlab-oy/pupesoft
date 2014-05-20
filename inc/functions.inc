@@ -2827,22 +2827,22 @@ if (!function_exists("jalkilaskentafunktio")) {
     */
 
     // Taulut lukkoon.
-    $qu = "  LOCK TABLE asiakas READ,
-        avainsana READ,
-        lasku WRITE,
-        sarjanumeroseuranta READ,
-        sarjanumeroseuranta_arvomuutos READ,
-        sanakirja WRITE,
-        tapahtuma WRITE,
-        tilausrivi WRITE,
-        tilausrivin_lisatiedot READ,
-        tili READ,
-        tiliointi WRITE,
-        tuote WRITE,
-        tuotepaikat READ,
-        tuotteen_alv READ,
-        yhtio READ,
-        yhtion_toimipaikat READ";
+    $qu = "LOCK TABLE asiakas READ,
+           avainsana READ,
+           lasku WRITE,
+           sarjanumeroseuranta READ,
+           sarjanumeroseuranta_arvomuutos READ,
+           sanakirja WRITE,
+           tapahtuma WRITE,
+           tilausrivi WRITE,
+           tilausrivin_lisatiedot READ,
+           tili READ,
+           tiliointi WRITE,
+           tuote WRITE,
+           tuotepaikat READ,
+           tuotteen_alv READ,
+           yhtio READ,
+           yhtion_toimipaikat READ";
     $re = pupe_query($qu);
 
     require("tilauskasittely/jalkilaskenta.inc");
@@ -4851,7 +4851,7 @@ if (!function_exists("alehinta")) {
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                    and (alennus < 0 or left(alennus,1) = '-'))
-
+                   
                    ORDER BY prio, minkpl desc, aika, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -5123,7 +5123,7 @@ if (!function_exists("alehinta")) {
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                    and alennus  = 999.99)
-
+                   
                    ORDER BY prio, minkpl desc, aika, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -12577,18 +12577,18 @@ if (!function_exists("TuotteenAlkiot")) {
 
     $mista = empty($mista) ? $laji : $mista;
 
-    $qu = "  INSERT INTO puun_alkio
-        SET yhtio  = '$kukarow[yhtio]',
-        liitos     = '$liitos',
-        laji     = '$laji',
-        kutsuja   = '{$mista}',
-        puun_tunnus = '$puun_tunnus',
-        kieli     = '$kieli',
-        laatija   = '$kukarow[kuka]',
-        luontiaika   = now()
-        ON DUPLICATE KEY UPDATE
-        muuttaja = '$kukarow[kuka]',
-        muutospvm = now()";
+    $qu = "INSERT INTO puun_alkio
+           SET yhtio  = '$kukarow[yhtio]',
+           liitos      = '$liitos',
+           laji        = '$laji',
+           kutsuja     = '{$mista}',
+           puun_tunnus = '$puun_tunnus',
+           kieli       = '$kieli',
+           laatija     = '$kukarow[kuka]',
+           luontiaika  = now()
+           ON DUPLICATE KEY UPDATE
+           muuttaja    = '$kukarow[kuka]',
+           muutospvm   = now()";
     $r = pupe_query($qu);
   }
 }
@@ -12610,41 +12610,41 @@ if (!function_exists("LisaaTaso")) {
     $re = pupe_query($q2);
 
     // Pävitetään kaikki nodet, jotka on uuden noden oikealla puolella kaksi pykälää oikealle (vasen puoli)
-    $qu = "  UPDATE dynaaminen_puu
-        set lft = lft + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
-        WHERE yhtio  = '{$kukarow["yhtio"]}'
-        AND laji  = '$laji'
-        AND lft   > @myRight
-        ORDER BY lft desc";
+    $qu = "UPDATE dynaaminen_puu
+           set lft = lft + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '$laji'
+           AND lft     > @myRight
+           ORDER BY lft desc";
     $re = pupe_query($qu);
 
     // Pävitetään kaikki nodet joiden oikea laita on uuden noden oikealla puolella kaksi pykälää oikealle (oikea puoli)
-    $qu = "  UPDATE dynaaminen_puu
-        set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
-        WHERE yhtio  = '{$kukarow["yhtio"]}'
-        AND laji  = '$laji'
-        AND rgt    >= @myRight
-        ORDER BY rgt desc";
+    $qu = "UPDATE dynaaminen_puu
+           set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '$laji'
+           AND rgt     >= @myRight
+           ORDER BY rgt desc";
     $re = pupe_query($qu);
 
     // Päivitetään valitun tason leftit pykälää oikealle, jotta uusi taso mahtuu mukaan
-    $qu = "  UPDATE dynaaminen_puu
-        set lft = lft + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
-        WHERE yhtio  = '{$kukarow["yhtio"]}'
-        AND laji  = '$laji'
-        AND lft   > @myLeft
-        AND lft   < @myRight
-        ORDER BY lft desc";
+    $qu = "UPDATE dynaaminen_puu
+           set lft = lft + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '$laji'
+           AND lft     > @myLeft
+           AND lft     < @myRight
+           ORDER BY lft desc";
     $re = pupe_query($qu);
 
     // Päivitetään valitun tason rightit pykälää oikealle, jotta uusi taso mahtuu mukaan
-    $qu = "  UPDATE dynaaminen_puu
-        set rgt = rgt + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
-        WHERE yhtio  = '{$kukarow["yhtio"]}'
-        AND laji  = '$laji'
-        AND lft   > @myLeft
-        AND lft   < @myRight
-        ORDER BY rgt desc";
+    $qu = "UPDATE dynaaminen_puu
+           set rgt = rgt + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '$laji'
+           AND lft     > @myLeft
+           AND lft     < @myRight
+           ORDER BY rgt desc";
     $re = pupe_query($qu);
 
     $qu = "INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,laatija,luontiaika) values ('$kukarow[yhtio]', '{$koodi}', '{$nimi}', @myLeft + 1 , @myRight + 1, '$laji', '$kukarow[kuka]', now())";
@@ -12694,27 +12694,27 @@ if (!function_exists("LisaaLapsi")) {
     $qu = "LOCK TABLE dynaaminen_puu WRITE";
     $re = pupe_query($qu);
 
-    $qu = "  SELECT $apu3
-        FROM dynaaminen_puu
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND laji   = '$laji'
-        AND lft   = '$left'";
+    $qu = "SELECT $apu3
+           FROM dynaaminen_puu
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '$laji'
+           AND lft     = '$left'";
     $re = pupe_query($qu);
 
-    $qu = "  UPDATE dynaaminen_puu
-        SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
-        WHERE yhtio  = '{$kukarow["yhtio"]}'
-        AND laji   = '$laji'
-        $apu
-        ORDER BY rgt desc";
+    $qu = "UPDATE dynaaminen_puu
+           SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '$laji'
+           $apu
+           ORDER BY rgt desc";
     $re = pupe_query($qu);
 
-    $qu = "  UPDATE dynaaminen_puu
-        SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]'
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND laji   = '$laji'
-        $apu4
-        ORDER BY lft desc";
+    $qu = "UPDATE dynaaminen_puu
+           SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]'
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '$laji'
+           $apu4
+           ORDER BY lft desc";
     $re = pupe_query($qu);
 
     $qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, syvyys, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, $syvyys + 1, '$laji', '$kukarow[kuka]', now())";
@@ -12743,54 +12743,54 @@ if (!function_exists("PoistaLapset")) {
        $re = pupe_query($qu);
 
       // Haetaan poistettavan noden tiedot
-      $qu = "  SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1
-          FROM dynaaminen_puu
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND laji  = '$laji'
-          AND lft   = '$left'";
+      $qu = "SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1
+             FROM dynaaminen_puu
+             WHERE yhtio = '{$kukarow["yhtio"]}'
+             AND laji    = '$laji'
+             AND lft     = '$left'";
        $re = pupe_query($qu);
 
       // Poistetaan se
-      $qu = "  DELETE FROM dynaaminen_puu
-          WHERE yhtio  = '{$kukarow["yhtio"]}'
-          AND laji  = '$laji'
-          and lft   = @myLeft";
+      $qu = "DELETE FROM dynaaminen_puu
+             WHERE yhtio = '{$kukarow["yhtio"]}'
+             AND laji    = '$laji'
+             and lft     = @myLeft";
        $re = pupe_query($qu);
 
       // Päivitetään poistettavan noden lapset pykälää vasemmalle
-      $qu = "  UPDATE dynaaminen_puu
-          SET rgt = rgt - 1
-          WHERE yhtio  = '{$kukarow["yhtio"]}'
-          AND laji = '$laji'
-          AND lft between @myLeft and @myRight
-          ORDER BY rgt";
+      $qu = "UPDATE dynaaminen_puu
+             SET rgt = rgt - 1
+             WHERE yhtio = '{$kukarow["yhtio"]}'
+             AND laji    = '$laji'
+             AND lft between @myLeft and @myRight
+             ORDER BY rgt";
        $re = pupe_query($qu);
 
       // Päivitetään poistettavan noden lapset pykälää vasemmalle
-      $qu = "  UPDATE dynaaminen_puu
-          SET lft = lft - 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
-          WHERE yhtio  = '{$kukarow["yhtio"]}'
-          AND laji = '$laji'
-          AND lft between @myLeft and @myRight
-          ORDER BY lft";
+      $qu = "UPDATE dynaaminen_puu
+             SET lft = lft - 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+             WHERE yhtio = '{$kukarow["yhtio"]}'
+             AND laji    = '$laji'
+             AND lft between @myLeft and @myRight
+             ORDER BY lft";
        $re = pupe_query($qu);
 
       // Päivitetään poistetun noden oikealta puolelta löytyvät nodet vasemalle
-      $qu = "  UPDATE dynaaminen_puu
-          SET rgt = rgt - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
-          WHERE yhtio  = '{$kukarow["yhtio"]}'
-          AND laji = '$laji'
-          AND rgt > @myRight
-          ORDER BY rgt";
+      $qu = "UPDATE dynaaminen_puu
+             SET rgt = rgt - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+             WHERE yhtio = '{$kukarow["yhtio"]}'
+             AND laji    = '$laji'
+             AND rgt     > @myRight
+             ORDER BY rgt";
        $re = pupe_query($qu);
 
       // Päivitetään poistetun noden oikealta puolelta löytyvät nodet vasemalle
-      $qu = "  UPDATE dynaaminen_puu
-          SET lft = lft - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
-          WHERE yhtio  = '{$kukarow["yhtio"]}'
-          AND laji = '$laji'
-          AND lft > @myRight
-          ORDER BY lft";
+      $qu = "UPDATE dynaaminen_puu
+             SET lft = lft - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+             WHERE yhtio = '{$kukarow["yhtio"]}'
+             AND laji    = '$laji'
+             AND lft     > @myRight
+             ORDER BY lft";
        $re = pupe_query($qu);
 
       $qu = "UNLOCK TABLES";
@@ -12804,22 +12804,22 @@ if (!function_exists("lapset")) {
   function lapset($laji, $left) {
     global $kukarow;
 
-    $qu = "  SELECT node.tunnus, (COUNT(parent.tunnus) - (sub_tree.depth + 1)) AS depth
-        FROM dynaaminen_puu AS node
-        JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
-        JOIN (  SELECT node.tunnus AS tunnus, (COUNT(parent.tunnus) - 1) AS depth
-            FROM dynaaminen_puu AS node
-            JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
-            WHERE node.yhtio = '{$kukarow["yhtio"]}'
-            AND node.laji    = '$laji'
-            AND node.lft    = '$left'
-            GROUP BY node.tunnus
-            ORDER BY node.lft) AS sub_tree
-        JOIN dynaaminen_puu AS sub_parent ON (sub_parent.yhtio = node.yhtio AND sub_parent.laji = node.laji AND sub_parent.tunnus = sub_tree.tunnus AND sub_parent.lft <= node.lft AND sub_parent.rgt >= node.lft)
-        WHERE node.yhtio = '{$kukarow["yhtio"]}'
-        AND node.laji   = '$laji'
-        GROUP BY node.tunnus
-        ORDER BY node.lft";
+    $qu = "SELECT node.tunnus, (COUNT(parent.tunnus) - (sub_tree.depth + 1)) AS depth
+           FROM dynaaminen_puu AS node
+           JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
+           JOIN (  SELECT node.tunnus AS tunnus, (COUNT(parent.tunnus) - 1) AS depth
+               FROM dynaaminen_puu AS node
+               JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
+               WHERE node.yhtio = '{$kukarow["yhtio"]}'
+               AND node.laji    = '$laji'
+               AND node.lft     = '$left'
+               GROUP BY node.tunnus
+               ORDER BY node.lft) AS sub_tree
+           JOIN dynaaminen_puu AS sub_parent ON (sub_parent.yhtio = node.yhtio AND sub_parent.laji = node.laji AND sub_parent.tunnus = sub_tree.tunnus AND sub_parent.lft <= node.lft AND sub_parent.rgt >= node.lft)
+           WHERE node.yhtio     = '{$kukarow["yhtio"]}'
+           AND node.laji        = '$laji'
+           GROUP BY node.tunnus
+           ORDER BY node.lft";
     $re = pupe_query($qu);
 
     return mysql_num_rows($re);
@@ -12834,11 +12834,11 @@ if (!function_exists("paivitakat")) {
     $qu = "LOCK TABLE dynaaminen_puu WRITE";
     $re = pupe_query($qu);
 
-    $qu = "  UPDATE dynaaminen_puu
-        set nimi='{$nimi}', koodi='{$koodi}', muutospvm = now(), muuttaja = '$kukarow[kuka]'
-        where yhtio  = '{$kukarow["yhtio"]}'
-        AND laji  = '{$laji}'
-        AND tunnus  = '{$kategoriaid}'";
+    $qu = "UPDATE dynaaminen_puu
+           set nimi='{$nimi}', koodi='{$koodi}', muutospvm = now(), muuttaja = '$kukarow[kuka]'
+           where yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '{$laji}'
+           AND tunnus  = '{$kategoriaid}'";
     $re = pupe_query($qu);
 
     $qu = "UNLOCK TABLES";
@@ -12851,17 +12851,17 @@ if (!function_exists("muutaOksienRL")) {
   function muutaOksienRL($laji, $kohdevas, $muutos) {
     global $kukarow;
 
-    $qu = "  UPDATE dynaaminen_puu
-        SET lft = lft+{$muutos}
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND laji = '{$laji}' and lft >= '{$kohdevas}'";
+    $qu = "UPDATE dynaaminen_puu
+           SET lft = lft+{$muutos}
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '{$laji}' and lft >= '{$kohdevas}'";
     $re = pupe_query($qu);
 
-    $qu = "  UPDATE dynaaminen_puu
-        SET rgt = rgt+{$muutos}
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND laji = '{$laji}'
-        and rgt >= '{$kohdevas}'";
+    $qu = "UPDATE dynaaminen_puu
+           SET rgt = rgt+{$muutos}
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '{$laji}'
+           and rgt     >= '{$kohdevas}'";
     $re = pupe_query($qu);
   }
 }
@@ -12871,20 +12871,20 @@ if (!function_exists("muutaOksavalinRL")) {
   function muutaOksavalinRL($laji, $src, $muutos) {
     global $kukarow;
 
-    $qu = "  UPDATE dynaaminen_puu
-        SET lft = lft+{$muutos}
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND laji = '{$laji}'
-        AND lft >= {$src['lft']}
-        AND lft <= {$src['rgt']}";
+    $qu = "UPDATE dynaaminen_puu
+           SET lft = lft+{$muutos}
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '{$laji}'
+           AND lft     >= {$src['lft']}
+           AND lft     <= {$src['rgt']}";
     $re = pupe_query($qu);
 
-    $qu = "  UPDATE dynaaminen_puu
-        SET rgt = rgt+{$muutos}
-        WHERE yhtio = '{$kukarow["yhtio"]}'
-        AND laji = '{$laji}'
-        AND rgt >= {$src['lft']}
-        AND rgt <= {$src['rgt']}";
+    $qu = "UPDATE dynaaminen_puu
+           SET rgt = rgt+{$muutos}
+           WHERE yhtio = '{$kukarow["yhtio"]}'
+           AND laji    = '{$laji}'
+           AND rgt     >= {$src['lft']}
+           AND rgt     <= {$src['rgt']}";
     $re = pupe_query($qu);
   }
 }
@@ -12921,11 +12921,11 @@ if (!function_exists("SiirraTaso")) {
 
     if ($suunta == 'ylos') {
 
-      $qu = "  SELECT lft, rgt
-          FROM dynaaminen_puu
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND laji = '{$laji}'
-          AND rgt = {$src['lft']} - 1";
+      $qu = "SELECT lft, rgt
+             FROM dynaaminen_puu
+             WHERE yhtio = '{$kukarow["yhtio"]}'
+             AND laji    = '{$laji}'
+             AND rgt     = {$src['lft']} - 1";
       $re = pupe_query($qu);
       $kohde = mysql_fetch_array($re);
 
@@ -12934,11 +12934,11 @@ if (!function_exists("SiirraTaso")) {
     }
     if ($suunta == 'alas') {
 
-      $qu = "  SELECT lft, rgt
-          FROM dynaaminen_puu
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          AND laji = '{$laji}'
-          AND lft = {$src['rgt']} + 1";
+      $qu = "SELECT lft, rgt
+             FROM dynaaminen_puu
+             WHERE yhtio = '{$kukarow["yhtio"]}'
+             AND laji    = '{$laji}'
+             AND lft     = {$src['rgt']} + 1";
       $re = pupe_query($qu);
       $kohde = mysql_fetch_array($re);
 
@@ -12956,28 +12956,28 @@ if (!function_exists("paivitapuunsyvyys")) {
   function paivitapuunsyvyys($laji) {
     global $kukarow;
 
-    $qu = "  SELECT
-        node.lft AS lft,
-        node.rgt AS rgt,
-        node.tunnus AS node_tunnus,
-        node.syvyys as node_syvyys,
-        (COUNT(node.tunnus) - 1) AS syvyys
-        FROM dynaaminen_puu AS node
-        JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
-        WHERE node.yhtio = '{$kukarow["yhtio"]}'
-        AND node.laji = '{$laji}'
-        GROUP BY node.lft
-        ORDER BY node.lft";
+    $qu = "SELECT
+           node.lft AS lft,
+           node.rgt AS rgt,
+           node.tunnus AS node_tunnus,
+           node.syvyys as node_syvyys,
+           (COUNT(node.tunnus) - 1) AS syvyys
+           FROM dynaaminen_puu AS node
+           JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+           WHERE node.yhtio = '{$kukarow["yhtio"]}'
+           AND node.laji    = '{$laji}'
+           GROUP BY node.lft
+           ORDER BY node.lft";
     $re = pupe_query($qu);
 
     while ($row = mysql_fetch_assoc($re)) {
 
       if ($row["node_syvyys"] != $row["syvyys"]) {
-        $updqu = "  UPDATE dynaaminen_puu
-              SET syvyys = {$row["syvyys"]}
-              WHERE yhtio  = '{$kukarow["yhtio"]}'
-              AND laji  = '{$laji}'
-              AND tunnus   = {$row["node_tunnus"]}";
+        $updqu = "UPDATE dynaaminen_puu
+                  SET syvyys = {$row["syvyys"]}
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND laji    = '{$laji}'
+                  AND tunnus  = {$row["node_tunnus"]}";
         $updateres = pupe_query($updqu);
       }
     }
@@ -15684,9 +15684,9 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
-
+                
                 UNION
-
+                
                 SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
                 tilausrivi.hinta * {$query_ale_lisa} hinta,
                 sum(tilausrivi.kpl + tilausrivi.varattu) kpl
@@ -15703,7 +15703,7 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
-
+                
                 ORDER BY ika ASC, kpl ASC";
       $viimhintares = pupe_query($query);
 
@@ -16571,77 +16571,77 @@ if (!function_exists("tee_keraysera")) {
     global $kukarow, $yhtiorow, $tee_keraysera_debugdir;
 
     // HUOM!!! NÄITÄ LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
-    $query = "  LOCK TABLES lasku WRITE,
-          lasku AS lasku1 WRITE,
-          lasku AS lasku2 WRITE,
-          laskun_lisatiedot WRITE,
-          asiakas AS asiakas1 READ,
-          asiakas AS asiakas2 READ,
-          tilausrivi WRITE,
-          tilausrivi AS tilausrivi1 READ,
-          tilausrivi AS tilausrivi2 READ,
-          tilausrivin_lisatiedot WRITE,
-          tilausrivin_lisatiedot AS tilrivlis1 READ,
-          tilausrivin_lisatiedot AS tilrivlis2 READ,
-          messenger WRITE,
-          varaston_hyllypaikat AS vh READ,
-          varaston_hyllypaikat AS vh1 READ,
-          varaston_hyllypaikat AS vh2 READ,
-          tuote READ,
-          tuote AS tuote1 READ,
-          tuote AS tuote2 READ,
-          keraysvyohyke AS keraysvyohyke1 READ,
-          keraysvyohyke AS keraysvyohyke2 READ,
-          toimitustapa AS toimitustapa1 READ,
-          toimitustapa AS toimitustapa2 READ,
-          lahdot READ,
-          lahdot AS lahdot1 READ,
-          lahdot AS lahdot2 READ,
-          lahdot AS lahdot3 READ,
-          tuoteperhe READ,
-          kerayserat WRITE,
-          tuotteen_toimittajat READ,
-          pakkaus READ,
-          pakkaus AS pakkaus2 READ,
-          avainsana WRITE,
-          keraysvyohyke READ,
-          asiakas READ,
-          liitetiedostot READ,
-          tilausrivi AS t2 READ,
-          tilausrivin_lisatiedot AS tlt2 READ,
-          tilausrivi AS tilausrivi_osto READ,
-          tilausrivi AS tilausrivi_myynti READ,
-          sarjanumeroseuranta READ,
-          tilausrivi AS t3 READ,
-          sanakirja WRITE,
-          avainsana as a READ,
-          avainsana as b READ,
-          varaston_tulostimet READ,
-          tuotepaikat READ,
-          maksuehto READ,
-          maksuehto as maksuehto1 READ,
-          maksuehto as maksuehto2 READ,
-          varastopaikat READ,
-          kirjoittimet READ,
-          kuka WRITE,
-          asiakaskommentti READ,
-          tuotteen_avainsanat READ,
-          pankkiyhteystiedot READ,
-          toimitustapa READ,
-          yhtion_toimipaikat READ,
-          yhtion_parametrit READ,
-          tuotteen_alv READ,
-          maat READ,
-          rahtisopimukset READ,
-          rahtisopimukset AS rahtisopimukset2 READ,
-          rahtisopimukset AS rahtisopimukset3 READ,
-          rahtisopimukset AS rahtisopimukset4 READ,
-          pakkaamo WRITE,
-          avainsana as avainsana_kieli READ,
-          lasku as vanha_lasku READ,
-          varaston_tulostimet as vanha_varaston_tulostimet READ,
-          kuka as kuka2 READ,
-          yhtio READ";
+    $query = "LOCK TABLES lasku WRITE,
+              lasku AS lasku1 WRITE,
+              lasku AS lasku2 WRITE,
+              laskun_lisatiedot WRITE,
+              asiakas AS asiakas1 READ,
+              asiakas AS asiakas2 READ,
+              tilausrivi WRITE,
+              tilausrivi AS tilausrivi1 READ,
+              tilausrivi AS tilausrivi2 READ,
+              tilausrivin_lisatiedot WRITE,
+              tilausrivin_lisatiedot AS tilrivlis1 READ,
+              tilausrivin_lisatiedot AS tilrivlis2 READ,
+              messenger WRITE,
+              varaston_hyllypaikat AS vh READ,
+              varaston_hyllypaikat AS vh1 READ,
+              varaston_hyllypaikat AS vh2 READ,
+              tuote READ,
+              tuote AS tuote1 READ,
+              tuote AS tuote2 READ,
+              keraysvyohyke AS keraysvyohyke1 READ,
+              keraysvyohyke AS keraysvyohyke2 READ,
+              toimitustapa AS toimitustapa1 READ,
+              toimitustapa AS toimitustapa2 READ,
+              lahdot READ,
+              lahdot AS lahdot1 READ,
+              lahdot AS lahdot2 READ,
+              lahdot AS lahdot3 READ,
+              tuoteperhe READ,
+              kerayserat WRITE,
+              tuotteen_toimittajat READ,
+              pakkaus READ,
+              pakkaus AS pakkaus2 READ,
+              avainsana WRITE,
+              keraysvyohyke READ,
+              asiakas READ,
+              liitetiedostot READ,
+              tilausrivi AS t2 READ,
+              tilausrivin_lisatiedot AS tlt2 READ,
+              tilausrivi AS tilausrivi_osto READ,
+              tilausrivi AS tilausrivi_myynti READ,
+              sarjanumeroseuranta READ,
+              tilausrivi AS t3 READ,
+              sanakirja WRITE,
+              avainsana as a READ,
+              avainsana as b READ,
+              varaston_tulostimet READ,
+              tuotepaikat READ,
+              maksuehto READ,
+              maksuehto as maksuehto1 READ,
+              maksuehto as maksuehto2 READ,
+              varastopaikat READ,
+              kirjoittimet READ,
+              kuka WRITE,
+              asiakaskommentti READ,
+              tuotteen_avainsanat READ,
+              pankkiyhteystiedot READ,
+              toimitustapa READ,
+              yhtion_toimipaikat READ,
+              yhtion_parametrit READ,
+              tuotteen_alv READ,
+              maat READ,
+              rahtisopimukset READ,
+              rahtisopimukset AS rahtisopimukset2 READ,
+              rahtisopimukset AS rahtisopimukset3 READ,
+              rahtisopimukset AS rahtisopimukset4 READ,
+              pakkaamo WRITE,
+              avainsana as avainsana_kieli READ,
+              lasku as vanha_lasku READ,
+              varaston_tulostimet as vanha_varaston_tulostimet READ,
+              kuka as kuka2 READ,
+              yhtio READ";
     $result = pupe_query($query);
 
     $varasto = (int) $varasto;
@@ -24523,15 +24523,15 @@ if (!function_exists('laske_siirrettava_maara')) {
     $siirrettavat_rivit = array();
 
     // Lets lock up
-    $query = "  LOCK TABLES
-          lasku READ,
-          lasku AS l1 READ,
-          tilausrivi READ,
-          tilausrivi AS t1 READ,
-          tilausrivi AS t2 READ,
-          tuote READ,
-          tuotepaikat READ,
-          varastopaikat READ";
+    $query = "LOCK TABLES
+              lasku READ,
+              lasku AS l1 READ,
+              tilausrivi READ,
+              tilausrivi AS t1 READ,
+              tilausrivi AS t2 READ,
+              tuote READ,
+              tuotepaikat READ,
+              varastopaikat READ";
     $res = pupe_query($query);
 
     list($saldo, $hyllyssa, $siirrettava_yht, $devnull) = saldo_myytavissa($row['tuoteno'], '', 0, '', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);

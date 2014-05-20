@@ -42,9 +42,9 @@ $query = "(SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakk
            WHERE lasku.yhtio                = '$yhtio'
            AND lasku.tila                   = '0'
            AND lasku.alatila               != 'D')
-
+           
            UNION
-
+           
            (SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakkaan_tilausnumero, lasku.valkoodi
            FROM lasku
            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
@@ -55,7 +55,7 @@ $query = "(SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakk
            WHERE lasku.yhtio                = '$yhtio'
            AND lasku.tila                   = '0'
            AND lasku.alatila               != 'D')
-
+           
            ORDER BY 1 asc";
 $result = pupe_query($query);
 

@@ -47,7 +47,7 @@ $query = "SELECT lasku.*,
                       AND tilausrivi.otunnus      = lasku.tunnus
                       and tilausrivi.var         != 'O'
                       AND tilausrivi.tyyppi      != 'D')) alv
-
+          
           FROM lasku
           LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
           WHERE lasku.tunnus                      = '$tunnus'

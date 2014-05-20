@@ -14,11 +14,11 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
   }
 
   //jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-  $query = "  SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-        FROM yhtio
-        JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-        where konserni   = '$yhtiorow[konserni]'
-        and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
+  $query = "SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+            FROM yhtio
+            JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+            where konserni = '$yhtiorow[konserni]'
+            and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
   $vresult2 = mysql_query($query) or pupe_error($query);
   $srowapu = mysql_fetch_array($vresult2);
 
@@ -42,10 +42,10 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
       $apu_asiakasnumero = 0;
     }
 
-    $query = "  SELECT MAX($haku+0) $haku
-          FROM asiakas USE INDEX (asno_index)
-          WHERE yhtio in ($tarkyhtio)
-          AND asiakasnro+0 >= $apu_asiakasnumero";
+    $query = "SELECT MAX($haku+0) $haku
+              FROM asiakas USE INDEX (asno_index)
+              WHERE yhtio in ($tarkyhtio)
+              AND asiakasnro+0 >= $apu_asiakasnumero";
     $vresult = mysql_query($query) or pupe_error($query);
     $vrow = mysql_fetch_assoc($vresult);
 
@@ -57,10 +57,10 @@ if ($haku == "asiakasnro" or $haku == "ytunnus") {
     while (!isset($vresult) or mysql_num_rows($vresult) >= 1) {
       $apu_asiakasnumero++;
 
-      $query = "  SELECT $haku
-            FROM asiakas USE INDEX (asno_index)
-            WHERE yhtio in ($tarkyhtio)
-            AND asiakasnro+0 = $apu_asiakasnumero";
+      $query = "SELECT $haku
+                FROM asiakas USE INDEX (asno_index)
+                WHERE yhtio in ($tarkyhtio)
+                AND asiakasnro+0 = $apu_asiakasnumero";
       $vresult = mysql_query($query) or pupe_error($query);
 
       $counteri++;

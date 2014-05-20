@@ -220,13 +220,13 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 if ($tee == 'close_with_printer') {
 
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-    $query = "  LOCK TABLES
-          asiakas READ,
-          lasku WRITE,
-          maksuehto READ,
-          rahtikirjat WRITE,
-          rahtisopimukset READ,
-          tilausrivi WRITE";
+    $query = "LOCK TABLES
+              asiakas READ,
+              lasku WRITE,
+              maksuehto READ,
+              rahtikirjat WRITE,
+              rahtisopimukset READ,
+              tilausrivi WRITE";
     $res = pupe_query($query);
   }
 
@@ -352,13 +352,13 @@ if ($tee == 'close_with_printer') {
 if ($tee == 'tulosta') {
 
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-    $query = "  LOCK TABLES
-          asiakas READ,
-          lasku WRITE,
-          maksuehto READ,
-          rahtikirjat WRITE,
-          rahtisopimukset READ,
-          tilausrivi WRITE";
+    $query = "LOCK TABLES
+              asiakas READ,
+              lasku WRITE,
+              maksuehto READ,
+              rahtikirjat WRITE,
+              rahtisopimukset READ,
+              tilausrivi WRITE";
     $res = pupe_query($query);
   }
 

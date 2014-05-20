@@ -2197,10 +2197,10 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
   // vaihdetaan merahti toimitustavan oletuksen mukaan, kun toimitustapa vaihdetaan
   if ($toimitustapa != "" and $toimitustapa != $ed_toimtapa) {
-    $apuqu2 = "  SELECT merahti
-          FROM toimitustapa
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND selite  = '$toimitustapa'";
+    $apuqu2 = "SELECT merahti
+               FROM toimitustapa
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND selite  = '$toimitustapa'";
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 

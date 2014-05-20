@@ -1232,9 +1232,6 @@ if ($tila == 'tee_kohdistus') {
 
         //tarkistetaan vielä että jos ollaan tehty osasuorituksia laskulle jo aiemmin niin laitetaan viimeisen osasuorituksen maksupäivämäärä laskun maksettupäivämääräksi
         if ($lasku["summa"] != $lasku["alkup_summa"]) {
-          //haetaan eka myyntisaamistilit stringiin
-          $myyntisaamistilit = $yhtiorow["myyntisaamiset"].", ".$yhtiorow["factoringsaamiset"].", ".$yhtiorow["konsernimyyntisaamiset"];
-
           //jos kyseessä on ollut normaalilasku niin silloin haettavan myyntisaamistiliöinnin summan tulee olla negatiivinen ja jos on kyseessä hyvityslasku niin silloin haettavan myyntisaamistiliöinnin tulee olla positiivinen
           if ($lasku["alkup_summa"] >= 0) {
             $wherelisa = "AND summa < 0";
@@ -1247,8 +1244,9 @@ if ($tila == 'tee_kohdistus') {
           $query = "SELECT tapvm
                     FROM tiliointi
                      WHERE yhtio = '{$kukarow["yhtio"]}'
-                    AND tilino   IN ($myyntisaamistilit)
+                    AND tilino   = '{$suoritus["myyntisaamiset_tilino"]}'
                     AND ltunnus  = {$lasku["tunnus"]}
+                    AND korjattu = ''
                     $wherelisa
                     ORDER BY tapvm DESC
                     LIMIT 1";

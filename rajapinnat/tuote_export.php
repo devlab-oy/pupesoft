@@ -148,6 +148,37 @@
       $myymalahinta          = $row["myymalahinta"];
       $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
     }
+    
+    // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
+    $query = "SELECT t0.nimi node, t0.lft, 
+              tuote.tuoteno,
+              GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
+              (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
+               FROM dynaaminen_puu t6
+               WHERE t6.lft<t0.lft AND t6.rgt>t0.rgt
+               AND t6.laji = 'tuote'
+               ORDER BY t6.lft) ancestors
+              FROM dynaaminen_puu t0
+              LEFT JOIN
+              (SELECT *
+               FROM (SELECT t1.lft node,
+               MAX(t2.lft) nodeparent
+               FROM dynaaminen_puu t1
+               INNER JOIN
+               dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
+               GROUP BY t1.lft) t3 
+               LEFT JOIN
+               dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
+              LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
+               JOIN tuote ON tuote.tuoteno = puun_alkio.liitos AND tuote.yhtio = puun_alkio.yhtio
+              WHERE t0.yhtio ='{$kukarow['yhtio']}'
+              AND t0.laji = 'tuote'
+              AND tuote.tuoteno = '{$row['tuoteno']}'
+              GROUP BY t0.nimi
+              ORDER BY t0.lft";
+    $result_tp = pupe_query($query);
+    $tuotepuurow = mysql_fetch_assoc($result_tp);
+    
 
     $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
               'nimi'          => $row["nimitys"],
@@ -172,6 +203,7 @@
               'target'        => $row["target"],
               'onsale'        => $row["onsale"],
               'tunnus'        => $row['tunnus'],
+              #$breadcrumbs => array($tuotepuurow['node'], 
               );
   }
 
@@ -330,15 +362,9 @@
   }
   
   echo date("d.m.Y @ G:i:s")." - Haetaan dynaaminen tuotepuu.\n";
-  
-  /*$query = "SELECT lapsi.nimi, lapsi.lft, lapsi.rgt, lapsi.tunnus, lapsi.syvyys
-            FROM dynaaminen_puu AS vanhempi, dynaaminen_puu AS lapsi
-            WHERE lapsi.lft BETWEEN vanhempi.lft AND vanhempi.rgt
-            AND vanhempi.lft = 1
-            AND vanhempi.nimi = 'magento'
-            AND vanhempi.laji = 'tuote' 
-            AND lapsi.laji = 'tuote'";*/
+
   $query = "SELECT t0.nimi node,
+            t0.lft,
             GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
             (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
              FROM dynaaminen_puu t6
@@ -359,7 +385,8 @@
             dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
             WHERE t0.yhtio = '{$kukarow['yhtio']}'
             AND t0.laji    = 'tuote'
-            GROUP BY t0.nimi";
+            GROUP BY t0.nimi
+            ORDER BY t0.lft";
 
   $dynpuu_result = pupe_query($query);
 
@@ -372,31 +399,6 @@
                            'ancestors' => $ancestors,
                           );
   }
-/*
-  // Etsitään isätuotteet valmiiksi kaikille kategorioille 
-  foreach ($dnstuotepuu as $tun => &$val) {
-      foreach($dnstuotepuu as $tunni => $valli) {
-        if ($valli['left'] < $val['left'] and $valli['right'] > $val['right']
-            and $valli['syvyys'] < $val['syvyys'] and $tunni != $tun) {
-          $val['isan_nimi'] = $valli['nimi'];
-          $val['isan_tunnus'] = $valli['tunnus'];
-        } 
-      }
-  }
-  //var_dump($dnstuotepuu);
-  // tracetaan esi-isät
-  foreach ($dnstuotepuu as $tun => &$val) {
-    foreach($dnstuotepuu as $tunni => $valli) {
-      if (isset($valli['isan_tunnus']) and isset($val['isan_tunnus'])
-          and $val['isan_tunnus'] == $valli['tunnus']) {
-        $val['isoisan_nimi'] = $valli['isan_nimi'];
-        $val['isoisan_tunnus'] = $valli['isan_tunnus'];
-      } 
-    }
-  }
-*/
-  var_dump($dnstuotepuu);
-  exit;
 
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";

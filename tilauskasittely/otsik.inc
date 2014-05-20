@@ -923,11 +923,11 @@ if ($tila == "" and !isset($jatka)) {
 
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
 
-    if ($varasto == "" and isset($srow['varasto'])) {
-      $varasto = $srow['varasto'];
-    }
+  if ($varasto == "" and isset($srow['varasto'])) {
+    $varasto = $srow['varasto'];
+  }
 
-    $args = array(
+  $args = array(
     'asiakas_tunnus' => $srow['liitostunnus'],
     'toimipaikka_tunnus' => $yhtiotoimipaikka,
     'toim' => $toim,
@@ -2070,10 +2070,10 @@ if ($tila == "" and !isset($jatka)) {
       $osath = 'CHECKED';
     }
 
-    $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
+    $_onko_varasto_setattu = (isset($oletusvarasto) and $oletusvarasto != '0' and is_numeric($oletusvarasto));
 
     if ($yhtiorow['pakollinen_varasto'] == 'K' and $_onko_varasto_setattu) {
-      $v_toimipaikka = hae_varaston_toimipaikka($varasto);
+      $v_toimipaikka = hae_varaston_toimipaikka($oletusvarasto);
       if ($v_toimipaikka['tunnus'] == 0) {
         $_toimipaikka = $kukarow['toimipaikka'];
         $kukarow['toimipaikka'] = 0;
@@ -2105,9 +2105,9 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     if ($tiedot_laskulta != 'YES') {
-      $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
+      $_onko_varasto_setattu = (isset($oletusvarasto) and $oletusvarasto != '0' and is_numeric($oletusvarasto));
       if ($_onko_varasto_setattu) {
-        $v_toimipaikka = hae_varaston_toimipaikka($varasto);
+        $v_toimipaikka = hae_varaston_toimipaikka($oletusvarasto);
         if ($v_toimipaikka['tunnus'] == 0) {
           $_toimipaikka = $kukarow['toimipaikka'];
           $kukarow['toimipaikka'] = 0;
@@ -3096,16 +3096,6 @@ if ($tila == "" and !isset($jatka)) {
 // ** TÄSTÄ ALKAA SUBMITIN JÄLKEISET CHECKIT ** //
 if (isset($jatka)) {
 
-  if ($toim == 'PIKATILAUS') {
-    if (!isset($eilahe) and $srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilahe = 'o';
-    if (!isset($osatoimitus) and $srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0)) $osatoimitus = 'o';
-  }
-
-  //otetaan laskun Ytunnus talteen
-  $apuqu = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
-  $meapu = pupe_query($apuqu);
-  $apuro = mysql_fetch_assoc($meapu);
-
   $args = array(
     'asiakasid' => $asiakasid,
     'maa' => $maa,
@@ -3116,16 +3106,47 @@ if (isset($jatka)) {
 
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
 
-    $args = array(
+  $args = array(
     'asiakas_tunnus' => $asiakasid,
     'toimipaikka_tunnus' => $yhtiotoimipaikka,
     'toim' => $toim,
     'tilaustyyppi' => $tilaustyyppi,
     'varasto' => $varasto,
-      'toimitus_maa' => $maa,
+    'toimitus_maa' => $maa,
   );
 
-    list($varasto, $varastot) = palauta_varasto($args);
+  list($varasto, $varastot) = palauta_varasto($args);
+
+  if ($toim == 'PIKATILAUS') {
+
+    $_yhtiorow_talteen = $yhtiorow;
+    $_yhtiotoimipaikka = hae_varaston_toimipaikka($varasto);
+
+    # Jos yhtiön myyntitilauksella käytetään toimipaikkoja
+    # ja varaston toimipaikka eroaa otsikon toimipaikasta, niin täytyy hakea uudet yhtiön paramsit
+    # tässä kohtaa kiinnostaa vain "eilahetetta"- ja "osatoimitus"-täpät
+    if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $_yhtiotoimipaikka['tunnus'] != $yhtiotoimipaikka) {
+
+      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $_yhtiotoimipaikka['tunnus']);
+
+      unset($eilahe);
+      unset($osatoimitus);
+
+      if ($yhtiorow['myyntitilaus_osatoimitus'] == 'E') {
+        $osatoimitus = 'o';
+      }
+    }
+
+    if (!isset($eilahe) and $srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilahe = 'o';
+    if (!isset($osatoimitus) and $srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0)) $osatoimitus = 'o';
+
+    $yhtiorow = $_yhtiorow_talteen;
+  }
+
+  //otetaan laskun Ytunnus talteen
+  $apuqu = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
+  $meapu = pupe_query($apuqu);
+  $apuro = mysql_fetch_assoc($meapu);
 
   $otsikon_laskurow = $apuro;
 

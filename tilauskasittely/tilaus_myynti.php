@@ -5484,12 +5484,13 @@ if ($tee == '') {
 
               $query = "SELECT *
                         FROM lahdot
-                        WHERE yhtio              = '{$kukarow['yhtio']}'
-                        AND liitostunnus         = {$toimitustapa['tunnus']}
-                        AND varasto              = {$varasto['tunnus']}
-                        AND aktiivi              = ''
-                        AND pvm                  >= CURRENT_DATE
-                        AND viimeinen_tilausaika > CURRENT_TIME";
+                        WHERE yhtio               = '{$kukarow['yhtio']}'
+                        AND liitostunnus          = {$toimitustapa['tunnus']}
+                        AND varasto               = {$varasto['tunnus']}
+                        AND aktiivi               = ''
+                        AND ((pvm                 > CURRENT_DATE)
+                        OR (pvm                   = CURRENT_DATE
+                        AND viimeinen_tilausaika  > CURRENT_TIME))";
               $lahdot_result = pupe_query($query);
 
               if (mysql_num_rows($lahdot_result) == 0) {

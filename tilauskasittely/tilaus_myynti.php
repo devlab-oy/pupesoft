@@ -167,7 +167,6 @@ if (!isset($orig_tila)) {$orig_tila='';}
 if (!isset($ylatila)) {$ylatila='';}
 if (!isset($alatila)) {$alatila='';}
 if (!isset($tilaustyyppi)) {$tilaustyyppi='';}
-if (!isset($tilausvahvistus)) {$tilausvahvistus='';}
 if (!isset($rahtisopimus)) {$rahtisopimus='';}
 if (!isset($netto)) {$netto='';}
 if (!isset($var)) {$var='';}

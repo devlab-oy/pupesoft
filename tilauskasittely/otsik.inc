@@ -1947,7 +1947,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     $disabled = '';
-    
+
     if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus'])) {
       $query = "SELECT COUNT(*) AS tilausrivi_kpl
                 FROM tilausrivi
@@ -2016,7 +2016,7 @@ if ($tila == "" and !isset($jatka)) {
       $predefined_yhtiotoimipaikka = 0;
 
       $oikea_sarake[$oikea] .= "<td>";
-      
+
       if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($disabled)) {
         $oikea_sarake[$oikea] .= "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
       }
@@ -2071,7 +2071,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
-    
+
     if ($yhtiorow['pakollinen_varasto'] == 'K' and $_onko_varasto_setattu) {
       $v_toimipaikka = hae_varaston_toimipaikka($varasto);
       if ($v_toimipaikka['tunnus'] == 0) {

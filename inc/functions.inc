@@ -4851,7 +4851,7 @@ if (!function_exists("alehinta")) {
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                    and (alennus < 0 or left(alennus,1) = '-'))
-                   
+
                    ORDER BY prio, minkpl desc, aika, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -5123,7 +5123,7 @@ if (!function_exists("alehinta")) {
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                    and alennus  = 999.99)
-                   
+
                    ORDER BY prio, minkpl desc, aika, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -15684,9 +15684,9 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
-                
+
                 UNION
-                
+
                 SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
                 tilausrivi.hinta * {$query_ale_lisa} hinta,
                 sum(tilausrivi.kpl + tilausrivi.varattu) kpl
@@ -15703,7 +15703,7 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
-                
+
                 ORDER BY ika ASC, kpl ASC";
       $viimhintares = pupe_query($query);
 

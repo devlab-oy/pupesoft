@@ -1,13 +1,13 @@
 <?php
 echo "<font class='head'>".t("Laskut per valuutta")."</font><hr>";
 
-$query = "  SELECT valkoodi, sum(summa) summa, sum(summa * valuu.kurssi) kotisumma, count(*) kpl
-        FROM lasku
-      LEFT JOIN valuu ON valuu.yhtio = lasku.yhtio and lasku.valkoodi  = valuu.nimi
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-      and lasku.tila in ('H','M','P','Q')
-        GROUP BY valkoodi
-        ORDER BY valkoodi";
+$query = "SELECT valkoodi, sum(summa) summa, sum(summa * valuu.kurssi) kotisumma, count(*) kpl
+          FROM lasku
+          LEFT JOIN valuu ON valuu.yhtio = lasku.yhtio and lasku.valkoodi  = valuu.nimi
+          WHERE lasku.yhtio = '$kukarow[yhtio]'
+          and lasku.tila    in ('H','M','P','Q')
+          GROUP BY valkoodi
+          ORDER BY valkoodi";
 $result = mysql_query($query) or pupe_error($query);
 
 echo "<table>";

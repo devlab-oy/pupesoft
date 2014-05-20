@@ -16,12 +16,12 @@ if ($tee != "CHECK" or $tiliote != 'Z') {
 
 // Tultiinko tiliotteelta ja olisiko t‰m‰ jo viety?
 if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
-  $query = "  SELECT tunnus
-        FROM suoritus
-        WHERE yhtio     = '$kukarow[yhtio]'
-        AND asiakas_tunnus  = '$asiakasid'
-        AND summa       = '$summa'
-        AND kirjpvm     = '$vva-$kka-$ppa'";
+  $query = "SELECT tunnus
+            FROM suoritus
+            WHERE yhtio        = '$kukarow[yhtio]'
+            AND asiakas_tunnus = '$asiakasid'
+            AND summa          = '$summa'
+            AND kirjpvm        = '$vva-$kka-$ppa'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 0) {
@@ -100,12 +100,12 @@ if ($tee == "SYOTTO") {
     exit;
   }
 
-  $query = "  SELECT yriti.*, valuu.kurssi
-        FROM yriti
-        JOIN valuu ON (valuu.yhtio = yriti.yhtio and yriti.valkoodi = valuu.nimi)
-        WHERE yriti.yhtio = '$kukarow[yhtio]'
-        AND yriti.tunnus = '$tilino'
-        and yriti.kaytossa = ''";
+  $query = "SELECT yriti.*, valuu.kurssi
+            FROM yriti
+            JOIN valuu ON (valuu.yhtio = yriti.yhtio and yriti.valkoodi = valuu.nimi)
+            WHERE yriti.yhtio  = '$kukarow[yhtio]'
+            AND yriti.tunnus   = '$tilino'
+            and yriti.kaytossa = ''";
   $result = pupe_query($query);
 
   if ($row = mysql_fetch_assoc($result)) {
@@ -117,13 +117,13 @@ if ($tee == "SYOTTO") {
 
     if ($row["valkoodi"] != $yhtiorow['valkoodi']) {
       // koitetaan hakea maksup‰iv‰n kurssi
-      $query = "  SELECT *
-            FROM valuu_historia
-            WHERE kotivaluutta = '$yhtiorow[valkoodi]'
-            AND valuutta = '$row[valkoodi]'
-            AND kurssipvm <= '$vva-$kka-$ppa'
-            ORDER BY kurssipvm DESC
-            LIMIT 1";
+      $query = "SELECT *
+                FROM valuu_historia
+                WHERE kotivaluutta = '$yhtiorow[valkoodi]'
+                AND valuutta       = '$row[valkoodi]'
+                AND kurssipvm      <= '$vva-$kka-$ppa'
+                ORDER BY kurssipvm DESC
+                LIMIT 1";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -145,16 +145,16 @@ if ($tee == "SYOTTO") {
   }
 
   if (substr($ytunnus, 0, 1) == "£") {
-    $query = "  SELECT nimi, liitostunnus
-          FROM lasku
-          WHERE ytunnus  = '".substr($ytunnus, 1)."'
-          and yhtio     = '$kukarow[yhtio]'";
+    $query = "SELECT nimi, liitostunnus
+              FROM lasku
+              WHERE ytunnus = '".substr($ytunnus, 1)."'
+              and yhtio     = '$kukarow[yhtio]'";
   }
   else {
-    $query = "  SELECT nimi
-          FROM asiakas
-          WHERE tunnus = '$asiakasid'
-          and yhtio    = '$kukarow[yhtio]'";
+    $query = "SELECT nimi
+              FROM asiakas
+              WHERE tunnus = '$asiakasid'
+              and yhtio    = '$kukarow[yhtio]'";
   }
   $result = pupe_query($query);
 
@@ -170,12 +170,12 @@ if ($tee == "SYOTTO") {
   // tehd‰‰n dummy-lasku johon liitet‰‰n kirjaukset
   $tapvm = $vva."-".$kka."-".$ppa;
 
-  $query = "  INSERT into lasku
-        SET yhtio   = '$kukarow[yhtio]',
-        tapvm     = '$tapvm',
-        tila     = 'X',
-        laatija   = '$kukarow[kuka]',
-        luontiaika   = now()";
+  $query = "INSERT into lasku
+            SET yhtio   = '$kukarow[yhtio]',
+            tapvm      = '$tapvm',
+            tila       = 'X',
+            laatija    = '$kukarow[kuka]',
+            luontiaika = now()";
   $result = pupe_query($query);
   $ltunnus = mysql_insert_id($link);
 
@@ -184,58 +184,58 @@ if ($tee == "SYOTTO") {
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myyntisaamiset);
 
   // Myyntisaamiset
-  $query = "  INSERT INTO tiliointi SET
-        yhtio        = '$kukarow[yhtio]',
-        laatija        = '$kukarow[kuka]',
-        laadittu      = now(),
-        tapvm        = '$tapvm',
-        ltunnus        = '$ltunnus',
-        tilino        = '$myyntisaamiset',
-        summa        = $omasumma * -1,
-        summa_valuutassa  = $pistesumma * -1,
-        valkoodi      = '$tilivaluutta',
-        selite        = 'K‰sin syˆtetty suoritus $asiakas_nimi $selite',
-        lukko        = '1',
-        kustp          = '{$kustp_ins}',
-        kohde         = '{$kohde_ins}',
-        projekti       = '{$projekti_ins}'";
+  $query = "INSERT INTO tiliointi SET
+            yhtio            = '$kukarow[yhtio]',
+            laatija          = '$kukarow[kuka]',
+            laadittu         = now(),
+            tapvm            = '$tapvm',
+            ltunnus          = '$ltunnus',
+            tilino           = '$myyntisaamiset',
+            summa            = $omasumma * -1,
+            summa_valuutassa = $pistesumma * -1,
+            valkoodi         = '$tilivaluutta',
+            selite           = 'K‰sin syˆtetty suoritus $asiakas_nimi $selite',
+            lukko            = '1',
+            kustp            = '{$kustp_ins}',
+            kohde            = '{$kohde_ins}',
+            projekti         = '{$projekti_ins}'";
   $result = pupe_query($query);
   $ttunnus = mysql_insert_id($link);
 
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassatili, $kustannuspaikka);
 
   // Rahatili
-  $query = "  INSERT INTO tiliointi SET
-        yhtio        = '$kukarow[yhtio]',
-        laatija        = '$kukarow[kuka]',
-        laadittu      = now(),
-        tapvm        = '$tapvm',
-        ltunnus        = '$ltunnus',
-        tilino        = '$kassatili',
-        summa        = '$omasumma',
-        summa_valuutassa  = '$pistesumma',
-        valkoodi      = '$tilivaluutta',
-        selite        = 'K‰sin syˆtetty suoritus $asiakas_nimi $selite',
-        aputunnus      = '$ttunnus',
-        lukko        = '1',
-        kustp          = '{$kustp_ins}',
-        kohde         = '{$kohde_ins}',
-        projekti       = '{$projekti_ins}'";
+  $query = "INSERT INTO tiliointi SET
+            yhtio            = '$kukarow[yhtio]',
+            laatija          = '$kukarow[kuka]',
+            laadittu         = now(),
+            tapvm            = '$tapvm',
+            ltunnus          = '$ltunnus',
+            tilino           = '$kassatili',
+            summa            = '$omasumma',
+            summa_valuutassa = '$pistesumma',
+            valkoodi         = '$tilivaluutta',
+            selite           = 'K‰sin syˆtetty suoritus $asiakas_nimi $selite',
+            aputunnus        = '$ttunnus',
+            lukko            = '1',
+            kustp            = '{$kustp_ins}',
+            kohde            = '{$kohde_ins}',
+            projekti         = '{$projekti_ins}'";
   $result = pupe_query($query);
 
   // N‰in kaikki tiliˆinnit ovat kauniisti linkitetty toisiinsa
-  $query = "  INSERT INTO suoritus SET
-        yhtio      = '$kukarow[yhtio]',
-        tilino      = '$tilistr',
-        nimi_maksaja  = '$asiakasstr',
-        summa      = '$pistesumma',
-        maksupvm    = '$tapvm',
-        kirjpvm      = '$tapvm',
-        asiakas_tunnus  = '$asiakasid',
-        ltunnus      = '$ttunnus',
-        viesti      = '$selite',
-        valkoodi    = '$tilivaluutta',
-        kurssi      = '$tilikurssi'";
+  $query = "INSERT INTO suoritus SET
+            yhtio          = '$kukarow[yhtio]',
+            tilino         = '$tilistr',
+            nimi_maksaja   = '$asiakasstr',
+            summa          = '$pistesumma',
+            maksupvm       = '$tapvm',
+            kirjpvm        = '$tapvm',
+            asiakas_tunnus = '$asiakasid',
+            ltunnus        = '$ttunnus',
+            viesti         = '$selite',
+            valkoodi       = '$tilivaluutta',
+            kurssi         = '$tilikurssi'";
   $result = pupe_query($query);
   $suoritus_tunnus = mysql_insert_id();
 
@@ -244,10 +244,10 @@ if ($tee == "SYOTTO") {
   // tulostetaan suorituksesta kuitti
   if ($tulostakuitti != "") {
 
-    $query = "  SELECT *
-          FROM asiakas
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus   = '$asiakasid'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$asiakasid'";
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
@@ -312,12 +312,12 @@ if ($asiakasid != "" and $tee == "ETSI") {
 
   // jos ei lˆytynyt ytunnuksella kokeillaan laskunumerolla
   if ($ytunnus == "" and is_numeric($laskunro)) {
-    $query = "  SELECT liitostunnus
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tila = 'U'
-          and alatila = 'X'
-          and laskunro = '$laskunro'";
+    $query = "SELECT liitostunnus
+              FROM lasku
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tila     = 'U'
+              and alatila  = 'X'
+              and laskunro = '$laskunro'";
     $result  = pupe_query($query);
 
     if ($asiakas = mysql_fetch_assoc($result)) {
@@ -446,17 +446,17 @@ if ($ytunnus != '' and $tee == "") {
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
   if (substr($ytunnus, 0, 1) == "£") {
-    $query = "  SELECT concat('£',tunnus) tunnus, nimi, ytunnus
-          FROM lasku
-          WHERE ytunnus='".substr($ytunnus, 1)."'
-          and yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT concat('£',tunnus) tunnus, nimi, ytunnus
+              FROM lasku
+              WHERE ytunnus='".substr($ytunnus, 1)."'
+              and yhtio = '$kukarow[yhtio]'";
   }
   else {
-    $query = "  SELECT asiakas.tunnus, asiakas.nimi, ytunnus, konserniyhtio, factoring
-          FROM asiakas
-          LEFT JOIN maksuehto ON maksuehto.tunnus = asiakas.maksuehto
-          WHERE asiakas.tunnus = '$asiakasid'
-          and asiakas.yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT asiakas.tunnus, asiakas.nimi, ytunnus, konserniyhtio, factoring
+              FROM asiakas
+              LEFT JOIN maksuehto ON maksuehto.tunnus = asiakas.maksuehto
+              WHERE asiakas.tunnus = '$asiakasid'
+              and asiakas.yhtio    = '$kukarow[yhtio]'";
   }
   $result  = pupe_query($query);
   $asiakas = mysql_fetch_assoc($result);
@@ -479,12 +479,12 @@ if ($ytunnus != '' and $tee == "") {
   $haluttuselvittely = 0;
 
   if (isset($mtili)) {
-    $query  = "  SELECT *
-          FROM yriti
-          WHERE yhtio    = '$kukarow[yhtio]'
-          and kaytossa   = ''
-          and tunnus     = '$mtili'
-          order by oletus_rahatili, nimi";
+    $query  = "SELECT *
+               FROM yriti
+               WHERE yhtio  = '$kukarow[yhtio]'
+               and kaytossa = ''
+               and tunnus   = '$mtili'
+               order by oletus_rahatili, nimi";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -494,11 +494,11 @@ if ($ytunnus != '' and $tee == "") {
   }
   if ($haluttuselvittely == 0) $haluttuselvittely = $yhtiorow['selvittelytili'];
 
-  $query  = "  SELECT *
-        FROM yriti
-        WHERE yhtio  = '$kukarow[yhtio]'
-        and kaytossa = ''
-        order by tilino";
+  $query  = "SELECT *
+             FROM yriti
+             WHERE yhtio  = '$kukarow[yhtio]'
+             and kaytossa = ''
+             order by tilino";
   $result = pupe_query($query);
 
   $sel='';
@@ -518,12 +518,12 @@ if ($ytunnus != '' and $tee == "") {
   echo "</select>";
 
   // Tehd‰‰n kustannuspaikkapopup
-  $query = "  SELECT tunnus, nimi
-        FROM kustannuspaikka
-        WHERE yhtio = '$kukarow[yhtio]'
-        and tyyppi = 'K'
-        and kaytossa != 'E'
-        ORDER BY koodi+0, koodi, nimi";
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and tyyppi    = 'K'
+            and kaytossa != 'E'
+            ORDER BY koodi+0, koodi, nimi";
   $kustpvr = pupe_query($query);
 
   echo "<select name='kustannuspaikka'>";
@@ -584,11 +584,11 @@ if ($ytunnus != '' and $tee == "") {
     echo "<select name='tulostakuitti'>";
     echo "<option value=''>".t("Ei tulosteta")."</option>";
 
-    $querykieli = "  SELECT *
-            FROM kirjoittimet
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND komento != 'EDI'
-            ORDER BY kirjoitin";
+    $querykieli = "SELECT *
+                   FROM kirjoittimet
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   AND komento != 'EDI'
+                   ORDER BY kirjoitin";
     $kires = pupe_query($querykieli);
 
     while ($kirow=mysql_fetch_assoc($kires)) {

@@ -19,27 +19,27 @@ if ($tee == 'CLEAN') {
       $tuoterow = mysql_fetch_array($presult);
 
       //Poistetaan nollapaikka
-      $query = "  DELETE FROM tuotepaikat
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$rastit'
-            and saldo=0";
+      $query = "DELETE FROM tuotepaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$rastit'
+                and saldo=0";
       $result = pupe_query($query);
 
       //Tehd‰‰n tapahtuma
-      $query = "  INSERT into tapahtuma set
-            yhtio     = '$kukarow[yhtio]',
-            tuoteno   = '$tuoterow[tuoteno]',
-            kpl     = '0',
-            kplhinta  = '0',
-            hinta     = '0',
-            hyllyalue   = '$tuoterow[hyllyalue]',
-            hyllynro   = '$tuoterow[hyllynro]',
-            hyllytaso   = '$tuoterow[hyllytaso]',
-            hyllyvali   = '$tuoterow[hyllyvali]',
-            laji     = 'poistettupaikka',
-            selite     = '".t("Poistettiin tuotepaikka")." $tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]',
-            laatija   = '$kukarow[kuka]',
-            laadittu   = now()";
+      $query = "INSERT into tapahtuma set
+                yhtio     = '$kukarow[yhtio]',
+                tuoteno   = '$tuoterow[tuoteno]',
+                kpl       = '0',
+                kplhinta  = '0',
+                hinta     = '0',
+                hyllyalue = '$tuoterow[hyllyalue]',
+                hyllynro  = '$tuoterow[hyllynro]',
+                hyllytaso = '$tuoterow[hyllytaso]',
+                hyllyvali = '$tuoterow[hyllyvali]',
+                laji      = 'poistettupaikka',
+                selite    = '".t("Poistettiin tuotepaikka")." $tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]',
+                laatija   = '$kukarow[kuka]',
+                laadittu  = now()";
       $result = pupe_query($query);
 
       //Katsotaan onko oletuspaikka ok
@@ -50,14 +50,14 @@ if ($tee == 'CLEAN') {
         $prow = mysql_fetch_array($presult);
 
         if ($prow["kaikkipaikat"] > 0 and $prow["oletuspaikat"] == 0) {
-          $query = "  UPDATE tuotepaikat
-                SET oletus = 'X',
-                muuttaja = '$kukarow[kuka]',
-                muutospvm = now()
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tuoteno = '$tuoterow[tuoteno]'
-                ORDER BY hyllyalue
-                LIMIT 1";
+          $query = "UPDATE tuotepaikat
+                    SET oletus = 'X',
+                    muuttaja    = '$kukarow[kuka]',
+                    muutospvm   = now()
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and tuoteno = '$tuoterow[tuoteno]'
+                    ORDER BY hyllyalue
+                    LIMIT 1";
           $bresult = pupe_query($query);
         }
       }
@@ -74,12 +74,12 @@ if ($tee == 'CLEAN') {
 
 if ($tee == 'CLEANRIKKINAISET') {
 
-  $query = "  SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset, count(*) lukumaara, sum(saldo) saldo
-        FROM tuotepaikat
-        WHERE yhtio='$kukarow[yhtio]'
-        GROUP BY tuoteno, paikka
-        HAVING lukumaara > 1
-        ORDER BY tuoteno";
+  $query = "SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset, count(*) lukumaara, sum(saldo) saldo
+            FROM tuotepaikat
+            WHERE yhtio='$kukarow[yhtio]'
+            GROUP BY tuoteno, paikka
+            HAVING lukumaara > 1
+            ORDER BY tuoteno";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -91,36 +91,36 @@ if ($tee == 'CLEANRIKKINAISET') {
       echo "Korjataan tuotepaikka: $lrow[tuoteno] $lrow[paikka]<br>";
 
       //Otetaan tuotenumero talteen
-      $query = "  UPDATE tuotepaikat
-             SET saldo='$lrow[saldo]',
-            muuttaja = '$kukarow[kuka]',
-            muutospvm = now()
-            WHERE yhtio='$kukarow[yhtio]'
-            and tunnus = '$lrow[mintunnus]'";
+      $query = "UPDATE tuotepaikat
+                SET saldo='$lrow[saldo]',
+                muuttaja   = '$kukarow[kuka]',
+                muutospvm  = now()
+                WHERE yhtio='$kukarow[yhtio]'
+                and tunnus = '$lrow[mintunnus]'";
       $presult = pupe_query($query);
 
       //Poistetaan nollapaikka
-      $query = "  DELETE FROM tuotepaikat
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus in ($lrow[tunnukset])
-            and tunnus != '$lrow[mintunnus]'";
+      $query = "DELETE FROM tuotepaikat
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and tunnus   in ($lrow[tunnukset])
+                and tunnus  != '$lrow[mintunnus]'";
       $presult = pupe_query($query);
 
       //Tehd‰‰n tapahtuma
-      $query = "  INSERT into tapahtuma set
-            yhtio     = '$kukarow[yhtio]',
-            tuoteno   = '$lrow[tuoteno]',
-            kpl     = '0',
-            kplhinta  = '0',
-            hinta     = '0',
-            hyllyalue   = '$lrow[hyllyalue]',
-            hyllynro   = '$lrow[hyllynro]',
-            hyllytaso   = '$lrow[hyllytaso]',
-            hyllyvali   = '$lrow[hyllyvali]',
-            laji     = 'poistettupaikka',
-            selite     = '".t("Poistettiin tuotepaikka")." $lrow[paikka]',
-            laatija   = '$kukarow[kuka]',
-            laadittu   = now()";
+      $query = "INSERT into tapahtuma set
+                yhtio     = '$kukarow[yhtio]',
+                tuoteno   = '$lrow[tuoteno]',
+                kpl       = '0',
+                kplhinta  = '0',
+                hinta     = '0',
+                hyllyalue = '$lrow[hyllyalue]',
+                hyllynro  = '$lrow[hyllynro]',
+                hyllytaso = '$lrow[hyllytaso]',
+                hyllyvali = '$lrow[hyllyvali]',
+                laji      = 'poistettupaikka',
+                selite    = '".t("Poistettiin tuotepaikka")." $lrow[paikka]',
+                laatija   = '$kukarow[kuka]',
+                laadittu  = now()";
       $presult = pupe_query($query);
     }
   }
@@ -130,12 +130,12 @@ if ($tee == 'CLEANRIKKINAISET') {
 
 if ($tee == 'CLEANOLETUKSET') {
 
-  $query = "  SELECT tuoteno, sum(if(oletus!='', 1, 0)) oletukset, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset
-        FROM tuotepaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        GROUP BY tuoteno
-        HAVING oletukset != 1
-        ORDER BY tuoteno";
+  $query = "SELECT tuoteno, sum(if(oletus!='', 1, 0)) oletukset, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset
+            FROM tuotepaikat
+            WHERE yhtio = '$kukarow[yhtio]'
+            GROUP BY tuoteno
+            HAVING oletukset != 1
+            ORDER BY tuoteno";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -147,29 +147,29 @@ if ($tee == 'CLEANOLETUKSET') {
       echo "Korjataan oletuspaikka: $lrow[tuoteno]<br>";
 
       if ($lrow["oletukset"] == 0) {
-        $query = "  UPDATE tuotepaikat
-               SET oletus  = 'X',
-              muuttaja = '$kukarow[kuka]',
-              muutospvm = now()
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$lrow[mintunnus]'";
+        $query = "UPDATE tuotepaikat
+                  SET oletus  = 'X',
+                  muuttaja    = '$kukarow[kuka]',
+                  muutospvm   = now()
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$lrow[mintunnus]'";
         $presult = pupe_query($query);
       }
       else {
-        $query = "  UPDATE tuotepaikat
-               SET oletus  = '',
-              muuttaja = '$kukarow[kuka]',
-              muutospvm = now()
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus in ($lrow[tunnukset])";
+        $query = "UPDATE tuotepaikat
+                  SET oletus  = '',
+                  muuttaja    = '$kukarow[kuka]',
+                  muutospvm   = now()
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  in ($lrow[tunnukset])";
         $presult = pupe_query($query);
 
-        $query = "  UPDATE tuotepaikat
-               SET oletus  = 'X',
-              muuttaja = '$kukarow[kuka]',
-              muutospvm = now()
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$lrow[mintunnus]'";
+        $query = "UPDATE tuotepaikat
+                  SET oletus  = 'X',
+                  muuttaja    = '$kukarow[kuka]',
+                  muutospvm   = now()
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$lrow[mintunnus]'";
         $presult = pupe_query($query);
       }
     }
@@ -181,10 +181,10 @@ if ($tee == 'CLEANOLETUKSET') {
 if ($tee == 'CLEANTUOTTEETTOMAT') {
 
   foreach ($paikkatunnus as $tunnus) {
-     $query = "  DELETE
-          FROM tuotepaikat
-           WHERE yhtio = '$kukarow[yhtio]'
-           and tunnus = '$tunnus'";
+     $query = "DELETE
+               FROM tuotepaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tunnus'";
      $presult = pupe_query($query);
   }
 
@@ -196,53 +196,53 @@ if ($tee == 'CLEANTUNTEMATTOMAT') {
   foreach ($paikkatunnus as $tunnus) {
 
     // haetaan muutettava paikka
-    $query = "  SELECT *
-          FROM tuotepaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-           and tunnus = '$tunnus'";
+    $query = "SELECT *
+              FROM tuotepaikat
+              WHERE yhtio = '$kukarow[yhtio]'
+               and tunnus = '$tunnus'";
       $presult = pupe_query($query);
     $paikkarow = mysql_fetch_array($presult);
 
     // katsotaan lˆytyykˆ paikka jo ennest‰‰n
-    $query = "  SELECT *
-          FROM tuotepaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tuoteno = '$paikkarow[tuoteno]'
-          and hyllyalue = '$hyllyalue'
-          and hyllynro = '$hyllynro'
-          and hyllyvali = '$hyllyvali'
-          and hyllytaso = '$hyllytaso'";
+    $query = "SELECT *
+              FROM tuotepaikat
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and tuoteno   = '$paikkarow[tuoteno]'
+              and hyllyalue = '$hyllyalue'
+              and hyllynro  = '$hyllynro'
+              and hyllyvali = '$hyllyvali'
+              and hyllytaso = '$hyllytaso'";
      $presult = pupe_query($query);
 
     if (mysql_num_rows($presult) == 1) {
       $vanharow = mysql_fetch_array($presult);
 
-       $query = "  UPDATE tuotepaikat
-            SET saldo = saldo + $paikkarow[saldo],
-            saldo_varattu = saldo_varattu + $paikkarow[saldo_varattu],
-            saldoaika = now(),
-            muuttaja = '$kukarow[kuka]',
-            muutospvm = now()
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus = '$vanharow[tunnus]'";
+       $query = "UPDATE tuotepaikat
+                 SET saldo = saldo + $paikkarow[saldo],
+                 saldo_varattu = saldo_varattu + $paikkarow[saldo_varattu],
+                 saldoaika     = now(),
+                 muuttaja      = '$kukarow[kuka]',
+                 muutospvm     = now()
+                 WHERE yhtio   = '$kukarow[yhtio]'
+                 and tunnus    = '$vanharow[tunnus]'";
        $presult = pupe_query($query);
 
-      $query = "  DELETE
-            FROM tuotepaikat
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus = '$tunnus'";
+      $query = "DELETE
+                FROM tuotepaikat
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 and tunnus  = '$tunnus'";
        $presult = pupe_query($query);
     }
     elseif (mysql_num_rows($presult) == 0) {
-      $query = "  UPDATE tuotepaikat
-              SET hyllyalue = '$hyllyalue',
-            hyllynro = '$hyllynro',
-            hyllyvali = '$hyllyvali',
-            hyllytaso = '$hyllytaso',
-            muuttaja = '$kukarow[kuka]',
-            muutospvm = now()
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus = '$tunnus'";
+      $query = "UPDATE tuotepaikat
+                SET hyllyalue = '$hyllyalue',
+                hyllynro    = '$hyllynro',
+                hyllyvali   = '$hyllyvali',
+                hyllytaso   = '$hyllytaso',
+                muuttaja    = '$kukarow[kuka]',
+                muutospvm   = now()
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tunnus'";
        $presult = pupe_query($query);
     }
     else {
@@ -259,30 +259,30 @@ if ($tee == 'CLEANRIVIT') {
   foreach ($rivitunnus as $tunnus) {
 
     // haetaan tilausrivi
-    $query = "  SELECT *
-          FROM tilausrivi
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$tunnus'";
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$tunnus'";
       $presult = pupe_query($query);
     $rivirow = mysql_fetch_array($presult);
 
     // haetaan oletuspaikka
-    $query = "  SELECT *
-          FROM tuotepaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tuoteno = '$rivirow[tuoteno]'
-          and oletus != ''";
+    $query = "SELECT *
+              FROM tuotepaikat
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tuoteno  = '$rivirow[tuoteno]'
+              and oletus  != ''";
      $presult = pupe_query($query);
 
     if (mysql_num_rows($presult) == 1) {
       $paikkarow = mysql_fetch_array($presult);
-      $query = "  UPDATE tilausrivi
-              SET hyllyalue = '$paikkarow[hyllyalue]',
-            hyllynro = '$paikkarow[hyllynro]',
-            hyllyvali = '$paikkarow[hyllyvali]',
-            hyllytaso = '$paikkarow[hyllytaso]'
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus = '$tunnus'";
+      $query = "UPDATE tilausrivi
+                SET hyllyalue = '$paikkarow[hyllyalue]',
+                hyllynro    = '$paikkarow[hyllynro]',
+                hyllyvali   = '$paikkarow[hyllyvali]',
+                hyllytaso   = '$paikkarow[hyllytaso]'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tunnus'";
        $presult = pupe_query($query);
     }
     else {
@@ -298,30 +298,30 @@ if ($tee == 'CLEANTAPAHTUMAT') {
   foreach ($rivitunnus as $tunnus) {
 
     // haetaan tilausrivi
-    $query = "  SELECT *
-          FROM tapahtuma
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus = '$tunnus'";
+    $query = "SELECT *
+              FROM tapahtuma
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$tunnus'";
       $presult = pupe_query($query);
     $rivirow = mysql_fetch_array($presult);
 
     // haetaan oletuspaikka
-    $query = "  SELECT *
-          FROM tuotepaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tuoteno = '$rivirow[tuoteno]'
-          and oletus != ''";
+    $query = "SELECT *
+              FROM tuotepaikat
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tuoteno  = '$rivirow[tuoteno]'
+              and oletus  != ''";
      $presult = pupe_query($query);
 
     if (mysql_num_rows($presult) == 1) {
       $paikkarow = mysql_fetch_array($presult);
-      $query = "  UPDATE tapahtuma
-              SET hyllyalue = '$paikkarow[hyllyalue]',
-            hyllynro = '$paikkarow[hyllynro]',
-            hyllyvali = '$paikkarow[hyllyvali]',
-            hyllytaso = '$paikkarow[hyllytaso]'
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus = '$tunnus'";
+      $query = "UPDATE tapahtuma
+                SET hyllyalue = '$paikkarow[hyllyalue]',
+                hyllynro    = '$paikkarow[hyllynro]',
+                hyllyvali   = '$paikkarow[hyllyvali]',
+                hyllytaso   = '$paikkarow[hyllytaso]'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tunnus'";
        $presult = pupe_query($query);
     }
     else {
@@ -334,12 +334,12 @@ if ($tee == 'CLEANTAPAHTUMAT') {
 
 if ($tee == 'LISTAAOLETUKSET') {
 
-  $query = "  SELECT tuoteno, sum(if(oletus!='', 1, 0)) oletukset
-        FROM tuotepaikat
-        WHERE yhtio='$kukarow[yhtio]'
-        GROUP BY tuoteno
-        HAVING oletukset != 1
-        ORDER BY tuoteno";
+  $query = "SELECT tuoteno, sum(if(oletus!='', 1, 0)) oletukset
+            FROM tuotepaikat
+            WHERE yhtio='$kukarow[yhtio]'
+            GROUP BY tuoteno
+            HAVING oletukset != 1
+            ORDER BY tuoteno";
   $result = pupe_query($query);
 
   $num_rows = mysql_num_rows($result);
@@ -379,12 +379,12 @@ if ($tee == 'LISTAAOLETUKSET') {
 
 if ($tee == 'LISTAARIKKINAISET') {
 
-  $query = "  SELECT tuoteno, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset, count(*) lukumaara, sum(saldo) saldo
-        FROM tuotepaikat
-        WHERE yhtio = '$kukarow[yhtio]'
-        GROUP BY tuoteno, paikka
-        HAVING lukumaara > 1
-        ORDER BY tuoteno";
+  $query = "SELECT tuoteno, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset, count(*) lukumaara, sum(saldo) saldo
+            FROM tuotepaikat
+            WHERE yhtio = '$kukarow[yhtio]'
+            GROUP BY tuoteno, paikka
+            HAVING lukumaara > 1
+            ORDER BY tuoteno";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -419,14 +419,14 @@ if ($tee == 'LISTAARIKKINAISET') {
 
 if ($tee == 'LISTAATUNTEMATTOMAT') {
 
-  $query = "  SELECT tuotepaikat.tunnus ttun, tuotepaikat.tuoteno, tuotepaikat.saldo, tuotepaikat.oletus, concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) paikka, varastopaikat.tunnus
-         FROM tuotepaikat
-        LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-        and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-        and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-        AND varastopaikat.tunnus is null
-        ORDER BY tuotepaikat.tuoteno";
+  $query = "SELECT tuotepaikat.tunnus ttun, tuotepaikat.tuoteno, tuotepaikat.saldo, tuotepaikat.oletus, concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) paikka, varastopaikat.tunnus
+            FROM tuotepaikat
+            LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+            and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+            and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+            WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+            AND varastopaikat.tunnus is null
+            ORDER BY tuotepaikat.tuoteno";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -470,12 +470,12 @@ if ($tee == 'LISTAATUNTEMATTOMAT') {
 
 if ($tee == 'LISTAATUOTTEETTOMAT') {
 
-  $query = "  SELECT tuotepaikat.tunnus ttun, tuotepaikat.tuoteno, tuotepaikat.saldo, tuotepaikat.oletus, concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) paikka, tuote.tunnus
-         FROM tuotepaikat
-        LEFT JOIN tuote ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
-        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-        and (tuote.tunnus is null or tuote.ei_saldoa != '')
-        ORDER BY tuotepaikat.tuoteno";
+  $query = "SELECT tuotepaikat.tunnus ttun, tuotepaikat.tuoteno, tuotepaikat.saldo, tuotepaikat.oletus, concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) paikka, tuote.tunnus
+            FROM tuotepaikat
+            LEFT JOIN tuote ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
+            WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+            and (tuote.tunnus is null or tuote.ei_saldoa != '')
+            ORDER BY tuotepaikat.tuoteno";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -558,18 +558,18 @@ if ($tee == 'LISTAA') {
     $lisaa .= " and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) <= '$lpaikka' ";
   }
 
-  $query = "  SELECT tuotepaikat.*, tuote.nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, varastopaikat.nimitys varasto, tuotepaikat.tunnus paikkatun,
-        concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-        FROM tuotepaikat
-        LEFT JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
-        LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-        and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-        and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-        WHERE
-        tuotepaikat.yhtio='$kukarow[yhtio]'
-        and tuotepaikat.saldo $lisaa2 0
-        $lisaa
-        ORDER BY sorttauskentta, tuoteno";
+  $query = "SELECT tuotepaikat.*, tuote.nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, varastopaikat.nimitys varasto, tuotepaikat.tunnus paikkatun,
+            concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+            FROM tuotepaikat
+            LEFT JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
+            LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+            WHERE
+            tuotepaikat.yhtio='$kukarow[yhtio]'
+            and tuotepaikat.saldo $lisaa2 0
+            $lisaa
+            ORDER BY sorttauskentta, tuoteno";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -653,14 +653,14 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
   $laskuri = 0;
 
   // haetaan kaikki tuotteet, jotka varaa saldoa
-  $query = "  SELECT tilausrivi.tuoteno
-        FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-        JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
-        WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-        AND tilausrivi.tyyppi in ('L','G','V')
-        AND tilausrivi.laskutettuaika = '0000-00-00'
-        AND (tilausrivi.varattu != 0 or tilausrivi.jt != 0)
-        ORDER BY tilausrivi.tuoteno";
+  $query = "SELECT tilausrivi.tuoteno
+            FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+            JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
+            WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
+            AND tilausrivi.tyyppi         in ('L','G','V')
+            AND tilausrivi.laskutettuaika = '0000-00-00'
+            AND (tilausrivi.varattu != 0 or tilausrivi.jt != 0)
+            ORDER BY tilausrivi.tuoteno";
   $tilrivires = mysql_query($query) or die($query);
 
   echo "<table>";
@@ -675,22 +675,22 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
   while ($tilrivirow = mysql_fetch_array($tilrivires)) {
 
     // ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon
-    $query = "  SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
-          FROM tuotepaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tuoteno = '$tilrivirow[tuoteno]'
-          GROUP BY tuoteno";
+    $query = "SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
+              FROM tuotepaikat
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tuoteno = '$tilrivirow[tuoteno]'
+              GROUP BY tuoteno";
     $paikatres = mysql_query($query) or die($query);
 
      while ($paikatrow = mysql_fetch_array($paikatres)) {
       // etsit‰‰n varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
-      $query = "  SELECT *, concat_ws('-', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, jt+varattu varattu, var
-            FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            AND tilausrivi.tyyppi in ('L','G','V')
-            AND tilausrivi.tuoteno = '$tilrivirow[tuoteno]'
-            AND (tilausrivi.varattu != 0 or tilausrivi.jt != 0)
-            AND concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($paikatrow[paikat])";
+      $query = "SELECT *, concat_ws('-', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, jt+varattu varattu, var
+                FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                AND tilausrivi.tyyppi  in ('L','G','V')
+                AND tilausrivi.tuoteno = '$tilrivirow[tuoteno]'
+                AND (tilausrivi.varattu != 0 or tilausrivi.jt != 0)
+                AND concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($paikatrow[paikat])";
       $tuoteresult = mysql_query($query) or die($query);
 
       while ($tuoterow = mysql_fetch_array($tuoteresult)) {
@@ -725,16 +725,16 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
   $laskuri = 0;
 
   // haetaan kaikki tapahtumat, joilla ei ole tuotepaikkaa tai se ei kuulu mihink‰‰n varastoon
-  $query = "  SELECT tapahtuma.tuoteno, varastopaikat.alkuhyllyalue, tapahtuma.tunnus, concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) paikka, tapahtuma.laadittu, tapahtuma.laji
-        FROM tapahtuma
-        JOIN tuote on (tuote.yhtio = tapahtuma.yhtio and tuote.tuoteno = tapahtuma.tuoteno and tuote.ei_saldoa = '')
-        LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
-                      AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-                      AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0')))
-        WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
-        AND tapahtuma.laji not in ('ep‰kurantti', 'uusipaikka', 'poistettupaikka')
-        HAVING varastopaikat.alkuhyllyalue IS NULL
-        ORDER BY tapahtuma.laadittu";
+  $query = "SELECT tapahtuma.tuoteno, varastopaikat.alkuhyllyalue, tapahtuma.tunnus, concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) paikka, tapahtuma.laadittu, tapahtuma.laji
+            FROM tapahtuma
+            JOIN tuote on (tuote.yhtio = tapahtuma.yhtio and tuote.tuoteno = tapahtuma.tuoteno and tuote.ei_saldoa = '')
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
+                          AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+                          AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0')))
+            WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
+            AND tapahtuma.laji    not in ('ep‰kurantti', 'uusipaikka', 'poistettupaikka')
+            HAVING varastopaikat.alkuhyllyalue IS NULL
+            ORDER BY tapahtuma.laadittu";
   $tapahtumares = pupe_query($query);
 
   if (!isset($ei_nayteta_riveja) or trim($ei_nayteta_riveja) == '') {
@@ -808,10 +808,10 @@ if ($tee == "") {
     <option value=''>".t("N‰yt‰ kaikki")."</option>
     <option value='EI'>".t("N‰yt‰ paikat jotka ei kuulu mihink‰‰n varastoon")."</option>";
 
-  $query  = "  SELECT *
-        FROM varastopaikat
-        WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-        ORDER BY tyyppi, nimitys";
+  $query  = "SELECT *
+             FROM varastopaikat
+             WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+             ORDER BY tyyppi, nimitys";
   $vares = pupe_query($query);
 
   while ($varow = mysql_fetch_array($vares)) {

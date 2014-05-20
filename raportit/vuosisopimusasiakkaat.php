@@ -201,11 +201,11 @@ if ($tee == '') {
   echo "<td><select name='komento'>";
   echo "<option value=''>".t('Ei kirjoitinta',$kieli)."</option>";
 
-  $query = "  SELECT *
-        FROM kirjoittimet
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND komento not in ('email','EDI')
-        ORDER BY kirjoitin";
+  $query = "SELECT *
+            FROM kirjoittimet
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND komento not in ('email','EDI')
+            ORDER BY kirjoitin";
   $kires = mysql_query($query) or pupe_error($query);
 
   while ($kirow = mysql_fetch_array($kires)) {
@@ -311,10 +311,10 @@ function hae_asiakkaat($params, $laheta_sahkopostit) {
 
   //valittu asiakas
   if ($params['ytunnus'] != '') {
-    $query = "  SELECT *
-          FROM asiakas
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND asiakasnro = '{$params['ytunnus']}'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND asiakasnro = '{$params['ytunnus']}'";
     $result = pupe_query($query);
 
     if ($asiakas_row = mysql_fetch_assoc($result)) {
@@ -342,36 +342,36 @@ function hae_asiakkaat($params, $laheta_sahkopostit) {
     $group = "";
   }
 
-  $query = "  SELECT asiakas.tunnus,
-        asiakas.email asiakas_email,
-        asiakas.ytunnus,
-        asiakas.asiakasnro,
-        asiakas.nimi,
-        asiakas.nimitark,
-        asiakas.osoite,
-        asiakas.postino,
-        asiakas.postitp,
-        {$select}
-        sum(arvo)     arvo
-        FROM lasku USE INDEX (yhtio_tila_tapvm)
-        {$join}
-        WHERE lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tila = 'L'
-        and lasku.alatila = 'X'
-        and lasku.tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'
-        and lasku.tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}'
-        $aswhere
-        GROUP BY asiakas.tunnus,
-        asiakas_email,
-        asiakas.ytunnus,
-        asiakas.asiakasnro,
-        asiakas.nimi,
-        asiakas.nimitark,
-        asiakas.osoite,
-        asiakas.postino,
-        asiakas.postitp
-        {$group}
-        HAVING sum(arvo) > {$params['raja']}";
+  $query = "SELECT asiakas.tunnus,
+            asiakas.email asiakas_email,
+            asiakas.ytunnus,
+            asiakas.asiakasnro,
+            asiakas.nimi,
+            asiakas.nimitark,
+            asiakas.osoite,
+            asiakas.postino,
+            asiakas.postitp,
+            {$select}
+            sum(arvo)     arvo
+            FROM lasku USE INDEX (yhtio_tila_tapvm)
+            {$join}
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tila    = 'L'
+            and lasku.alatila = 'X'
+            and lasku.tapvm   >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'
+            and lasku.tapvm   <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}'
+            $aswhere
+            GROUP BY asiakas.tunnus,
+            asiakas_email,
+            asiakas.ytunnus,
+            asiakas.asiakasnro,
+            asiakas.nimi,
+            asiakas.nimitark,
+            asiakas.osoite,
+            asiakas.postino,
+            asiakas.postitp
+            {$group}
+            HAVING sum(arvo) > {$params['raja']}";
   $result = mysql_query($query) or pupe_error($query);
 
   $asiakkaat = array();
@@ -389,22 +389,22 @@ function hae_tilaukset($params, $asiakas_tunnus) {
   $group = "osasto, try";
   $order = "osasto, try";
 
-  $query = "  SELECT {$select}
-          sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'    and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.rivihinta, 0)) va,
-          sum(if (tapvm >= '{$params['edalkupvm']}'                      and tapvm <= '{$params['edloppupvm']}', tilausrivi.rivihinta, 0)) ed,
-          sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'    and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.kpl, 0)) kplva,
-          sum(if (tapvm >= '{$params['edalkupvm']}'                      and tapvm <= '{$params['edloppupvm']}', tilausrivi.kpl, 0)) kpled
-          FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
-          JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try > 0)
-          JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          AND lasku.liitostunnus = '{$asiakas_tunnus}'
-          AND lasku.tapvm >= '{$params['edalkupvm']}'
-          AND lasku.tila = 'L'
-          AND lasku.alatila = 'X'
-          GROUP BY {$group}
-          HAVING va != 0 OR ed != 0 OR kplva != 0 OR kpled != 0
-          ORDER BY {$order}";
+  $query = "SELECT {$select}
+            sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'    and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.rivihinta, 0)) va,
+            sum(if (tapvm >= '{$params['edalkupvm']}'                      and tapvm <= '{$params['edloppupvm']}', tilausrivi.rivihinta, 0)) ed,
+            sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'    and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.kpl, 0)) kplva,
+            sum(if (tapvm >= '{$params['edalkupvm']}'                      and tapvm <= '{$params['edloppupvm']}', tilausrivi.kpl, 0)) kpled
+            FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
+            JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try > 0)
+            JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+            WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
+            AND lasku.liitostunnus = '{$asiakas_tunnus}'
+            AND lasku.tapvm        >= '{$params['edalkupvm']}'
+            AND lasku.tila         = 'L'
+            AND lasku.alatila      = 'X'
+            GROUP BY {$group}
+            HAVING va != 0 OR ed != 0 OR kplva != 0 OR kpled != 0
+            ORDER BY {$order}";
   $result = pupe_query($query);
 
   $tilaukset_tuoteryhmittain = array();
@@ -653,7 +653,7 @@ function laheta_email($email_address, array $liitetiedostot_path = array()) {
     if(stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
       $ctype = 'pdf';
     }
-    else if(stristr(mime_content_type($liitetiedosto_path), 'xls')) {
+    elseif(stristr(mime_content_type($liitetiedosto_path), 'xls')) {
       $ctype = 'excel';
     }
     else {

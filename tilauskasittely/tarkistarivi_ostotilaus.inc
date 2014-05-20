@@ -6,11 +6,11 @@ $varaosavirhe     = "";
 $vastaavattuotteet  = 0;
 $vastaavat_html    = "";
 
-$query = "  SELECT *
-      FROM tuote
-      LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-      WHERE tuote.tuoteno  = '$prow[tuoteno]'
-      and tuote.yhtio    = '$kukarow[yhtio]'";
+$query = "SELECT *
+          FROM tuote
+          LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+          WHERE tuote.tuoteno = '$prow[tuoteno]'
+          and tuote.yhtio     = '$kukarow[yhtio]'";
 $rarresult = pupe_query($query);
 $trow = mysql_fetch_assoc($rarresult);
 
@@ -225,25 +225,25 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
 
       $tvrow = hae_tuote($_tuote['tuoteno']);
 
-      $tuotteen_toimittaja_query = "  SELECT tuotteen_toimittajat.tehdas_saldo,
-                      tuotteen_toimittajat.toim_tuoteno,
-                      tuotteen_toimittajat.ostohinta,
-                      tuotteen_toimittajat.tunnus AS tt_tunnus,
-                      toimi.nimi as toimittajan_nimi,
-                      toimi.tunnus as toimi_tunnus,
-                      tuote.myyntihinta,
-                      avainsana.selitetark_2,
-                      avainsana.selitetark_3,
-                      avainsana.selitetark_4,
-                      avainsana.selitetark_5
-                      FROM tuotteen_toimittajat
-                      JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-                      LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['vanhatunnus']}' AND toimi.tunnus = avainsana.selitetark)
-                      JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-                      WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-                      AND tuotteen_toimittajat.tuoteno = '{$_tuote['tuoteno']}'
-                      ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
-                      LIMIT 1";
+      $tuotteen_toimittaja_query = "SELECT tuotteen_toimittajat.tehdas_saldo,
+                                    tuotteen_toimittajat.toim_tuoteno,
+                                    tuotteen_toimittajat.ostohinta,
+                                    tuotteen_toimittajat.tunnus AS tt_tunnus,
+                                    toimi.nimi as toimittajan_nimi,
+                                    toimi.tunnus as toimi_tunnus,
+                                    tuote.myyntihinta,
+                                    avainsana.selitetark_2,
+                                    avainsana.selitetark_3,
+                                    avainsana.selitetark_4,
+                                    avainsana.selitetark_5
+                                    FROM tuotteen_toimittajat
+                                    JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+                                    LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['vanhatunnus']}' AND toimi.tunnus = avainsana.selitetark)
+                                    JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+                                    WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+                                    AND tuotteen_toimittajat.tuoteno = '{$_tuote['tuoteno']}'
+                                    ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+                                    LIMIT 1";
       $tuotteen_toimittaja_result = pupe_query($tuotteen_toimittaja_query);
       $tuotteen_toimittaja_row = mysql_fetch_assoc($tuotteen_toimittaja_result);
 
@@ -286,7 +286,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
         if (!empty($laskurow['varasto'])) {
           $kohde_varastot = array($laskurow['varasto']);
         }
-        else if (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
+        elseif (empty($laskurow['varasto']) and !empty($laskurow['yhtio_toimipaikka'])) {
           $kohde_varastot = hae_yhtion_toimipaikan_varastot($laskurow['yhtio_toimipaikka']);
           $kohde_varastot = array_column($kohde_varastot, 'tunnus');
         }
@@ -371,17 +371,17 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
     if (strtoupper($korvaava_tuote['tuoteno']) != strtoupper($prow["tuoteno"]) and $korvaava_tuote['status'] != 'P') {
       $tvrow = hae_tuote($korvaava_tuote['tuoteno']);
 
-      $tuotteen_toimittaja_query = "  SELECT tuotteen_toimittajat.tehdas_saldo,
-                      tuotteen_toimittajat.toim_tuoteno,
-                      tuotteen_toimittajat.ostohinta,
-                      toimi.nimi as toimittajan_nimi,
-                      toimi.tunnus as toimi_tunnus,
-                      tuote.myyntihinta
-                      FROM tuotteen_toimittajat
-                      JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-                      JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-                      WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-                      AND tuotteen_toimittajat.tuoteno = '{$korvaava_tuote['tuoteno']}'";
+      $tuotteen_toimittaja_query = "SELECT tuotteen_toimittajat.tehdas_saldo,
+                                    tuotteen_toimittajat.toim_tuoteno,
+                                    tuotteen_toimittajat.ostohinta,
+                                    toimi.nimi as toimittajan_nimi,
+                                    toimi.tunnus as toimi_tunnus,
+                                    tuote.myyntihinta
+                                    FROM tuotteen_toimittajat
+                                    JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+                                    JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+                                    WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+                                    AND tuotteen_toimittajat.tuoteno = '{$korvaava_tuote['tuoteno']}'";
       $tuotteen_toimittaja_result = pupe_query($tuotteen_toimittaja_query);
       $tuotteen_toimittaja_row = mysql_fetch_assoc($tuotteen_toimittaja_result);
 

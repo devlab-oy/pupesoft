@@ -244,10 +244,10 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($yhtiorow) and $luolasku === TRUE) {
       // ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin talhal-meileihin!
-      $query = "  SELECT distinct yhtio nimi, talhal_email, postittaja_email
-            FROM yhtion_parametrit
-            WHERE talhal_email != ''
-            AND postittaja_email != ''";
+      $query = "SELECT distinct yhtio nimi, talhal_email, postittaja_email
+                FROM yhtion_parametrit
+                WHERE talhal_email   != ''
+                AND postittaja_email != ''";
       $result = pupe_query($query);
 
       $hostname = exec('hostname');
@@ -269,9 +269,9 @@ if (!function_exists("verkkolasku_in")) {
       $return .= "Lasku yhtiölle: $yhtiorow[nimi] ($yhtiorow[yhtio])\n";
 
       // Haetaan yhtiön parametrit
-      $query = "  SELECT *
-            FROM yhtion_parametrit
-            WHERE yhtio = '$yhtiorow[yhtio]'";
+      $query = "SELECT *
+                FROM yhtion_parametrit
+                WHERE yhtio = '$yhtiorow[yhtio]'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -297,10 +297,10 @@ if (!function_exists("verkkolasku_in")) {
     // Katsotaan löytyykö yhtiön toimipaikkaa
     if (isset($yhtiorow) and $yhtio != "" and $toim_asiakkaantiedot["toim_ovttunnus"] != "") {
 
-      $query = "  SELECT ovtlisa, tunnus
-            FROM yhtion_toimipaikat
-            WHERE yhtio = '{$yhtio}'
-            AND ovtlisa != ''";
+      $query = "SELECT ovtlisa, tunnus
+                FROM yhtion_toimipaikat
+                WHERE yhtio  = '{$yhtio}'
+                AND ovtlisa != ''";
       $chk_toimipaikka_res = pupe_query($query);
 
       while ($chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res)) {
@@ -322,11 +322,11 @@ if (!function_exists("verkkolasku_in")) {
 
     if ($laskun_toimitunnus > 0) {
       // 0 etsitään toimittaja tunnuksella
-      $query  = "  SELECT *
-            FROM toimi
-            WHERE tunnus = '{$laskun_toimitunnus}'
-            and yhtio = '$yhtio'
-            and tyyppi != 'P'";
+      $query  = "SELECT *
+                 FROM toimi
+                 WHERE tunnus  = '{$laskun_toimitunnus}'
+                 and yhtio     = '$yhtio'
+                 and tyyppi   != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -336,12 +336,12 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($trow) and $laskuttajan_ovt != "") {
       // 1 etsitään toimittaja ovttunnuksella
-      $query  = "  SELECT *
-            FROM toimi
-            WHERE ovttunnus = '$laskuttajan_ovt'
-            and ovttunnus not in ('','0')
-            and yhtio = '$yhtio'
-            and tyyppi != 'P'";
+      $query  = "SELECT *
+                 FROM toimi
+                 WHERE ovttunnus  = '$laskuttajan_ovt'
+                 and ovttunnus    not in ('','0')
+                 and yhtio        = '$yhtio'
+                 and tyyppi      != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -353,12 +353,12 @@ if (!function_exists("verkkolasku_in")) {
       // 2 etsitään toimittaja ovt-tunnuksella ilman tarkenteita
       $yovt = substr($laskuttajan_ovt, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
-      $query  = "  SELECT *
-            FROM toimi
-            WHERE ovttunnus = '$yovt'
-            and ovttunnus not in ('','0')
-            and yhtio = '$yhtio'
-            and tyyppi != 'P'";
+      $query  = "SELECT *
+                 FROM toimi
+                 WHERE ovttunnus  = '$yovt'
+                 and ovttunnus    not in ('','0')
+                 and yhtio        = '$yhtio'
+                 and tyyppi      != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -368,12 +368,12 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($trow) and $laskuttajan_vat != "") {
       // 3 etsitään toimittaja vat-numerolla
-      $query  = "  SELECT *
-            FROM toimi
-            WHERE ovttunnus = '$laskuttajan_vat'
-            and ovttunnus not in ('','0')
-            and yhtio = '$yhtio'
-            and tyyppi != 'P'";
+      $query  = "SELECT *
+                 FROM toimi
+                 WHERE ovttunnus  = '$laskuttajan_vat'
+                 and ovttunnus    not in ('','0')
+                 and yhtio        = '$yhtio'
+                 and tyyppi      != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -383,12 +383,12 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($trow) and $laskuttajan_vat != "") {
       // 4 etsitään toimittaja vat-numerolla
-      $query  = "  SELECT *
-            FROM toimi
-            WHERE ytunnus = '$laskuttajan_vat'
-            and ytunnus not in ('','0')
-            and yhtio = '$yhtio'
-            and tyyppi != 'P'";
+      $query  = "SELECT *
+                 FROM toimi
+                 WHERE ytunnus  = '$laskuttajan_vat'
+                 and ytunnus    not in ('','0')
+                 and yhtio      = '$yhtio'
+                 and tyyppi    != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -401,12 +401,12 @@ if (!function_exists("verkkolasku_in")) {
       $yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
       $yovt2 = (int) $yovt1; // ilman etunollaa
 
-      $query  = "  SELECT *
-            FROM toimi
-            WHERE ytunnus in ('$yovt1', '$yovt2')
-            and ytunnus not in ('','0')
-            and yhtio = '$yhtio'
-            and tyyppi != 'P'";
+      $query  = "SELECT *
+                 FROM toimi
+                 WHERE ytunnus  in ('$yovt1', '$yovt2')
+                 and ytunnus    not in ('','0')
+                 and yhtio      = '$yhtio'
+                 and tyyppi    != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -419,12 +419,12 @@ if (!function_exists("verkkolasku_in")) {
       $intvat2 = (int) $intvat; // ilman etunollaa
 
       // 6 etsitään toimittaja vat-numerolla ilman FI-etuliitettä
-      $query  = "  SELECT *
-            FROM toimi
-            WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
-            and ytunnus not in ('','0')
-            and yhtio = '$yhtio'
-            and tyyppi != 'P'";
+      $query  = "SELECT *
+                 FROM toimi
+                 WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
+                 and ytunnus  not in ('','0')
+                 and yhtio    = '$yhtio'
+                 and tyyppi  != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -434,12 +434,12 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
       // 9 etsitään toimittaja teccomi-specific
-      $query = "  SELECT *
-            FROM toimi
-            WHERE yhtio = '$yhtio'
-            and toimittajanro = '$laskuttajan_toimittajanumero'
-            and toimittajanro not in ('','0')
-            and tyyppi != 'P'";
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio        = '$yhtio'
+                and toimittajanro  = '$laskuttajan_toimittajanumero'
+                and toimittajanro  not in ('','0')
+                and tyyppi        != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -449,12 +449,12 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($trow) and $laskuttajan_nimi != "") {
       // 7 etsitään toimittaja nimellä
-      $query = "  SELECT *
-            FROM toimi
-            WHERE yhtio = '$yhtio'
-            and nimi = '$laskuttajan_nimi'
-            and nimi not in ('','0')
-            and tyyppi != 'P'";
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio  = '$yhtio'
+                and nimi     = '$laskuttajan_nimi'
+                and nimi     not in ('','0')
+                and tyyppi  != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -467,12 +467,12 @@ if (!function_exists("verkkolasku_in")) {
       $laskuttajan_nimi = str_replace(" ", "", $laskuttajan_nimi);
 
       // 8 etsitään IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-työnnetaan laskun nimi-kenttään...)
-      $query = "  SELECT *
-            FROM toimi
-            WHERE yhtio = '$yhtio'
-            and ultilno = '$laskuttajan_nimi'
-            and ultilno not in ('','0')
-            and tyyppi != 'P'";
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio  = '$yhtio'
+                and ultilno  = '$laskuttajan_nimi'
+                and ultilno  not in ('','0')
+                and tyyppi  != 'P'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -489,20 +489,20 @@ if (!function_exists("verkkolasku_in")) {
       );
 
       foreach ($poikkeus_arvot as $poikkeus_sarake => $poikkeus_arvo) {
-        $query = "  SELECT *
-              FROM vaihtoehtoiset_verkkolaskutunnukset
-              WHERE yhtio    = '$yhtio'
-              AND kohde_sarake = '{$poikkeus_sarake}'
-              AND arvo      = '{$poikkeus_arvo}'";
+        $query = "SELECT *
+                  FROM vaihtoehtoiset_verkkolaskutunnukset
+                  WHERE yhtio      = '$yhtio'
+                  AND kohde_sarake = '{$poikkeus_sarake}'
+                  AND arvo         = '{$poikkeus_arvo}'";
         $result = pupe_query($query);
         $poikkeus = mysql_fetch_assoc($result);
 
         if (!empty($poikkeus)) {
-          $query = "  SELECT *
-                FROM toimi
-                WHERE yhtio = '$yhtio'
-                and tunnus  = '{$poikkeus['toimi_tunnus']}'
-                and tyyppi != 'P'";
+          $query = "SELECT *
+                    FROM toimi
+                    WHERE yhtio  = '$yhtio'
+                    and tunnus   = '{$poikkeus['toimi_tunnus']}'
+                    and tyyppi  != 'P'";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 1) {
@@ -596,13 +596,13 @@ if (!function_exists("verkkolasku_in")) {
       $onko_dupli_asn   = FALSE;
 
       // Onko tämä kauttalaskutusta?
-      $query = "  SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
-            FROM tiliointisaanto
-            WHERE ttunnus   = '$trow[tunnus]'
-            and tyyppi     = 'k'
-            and yhtio     = '$yhtio'
-            and tilino      in ('0','')
-            and kuvaus     = '".mysql_real_escape_string($kauttalaskutus)."'";
+      $query = "SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
+                FROM tiliointisaanto
+                WHERE ttunnus = '$trow[tunnus]'
+                and tyyppi    = 'k'
+                and yhtio     = '$yhtio'
+                and tilino    in ('0','')
+                and kuvaus    = '".mysql_real_escape_string($kauttalaskutus)."'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) != 0) {
@@ -620,10 +620,10 @@ if (!function_exists("verkkolasku_in")) {
           // Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
           if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
 
-            $query = "  SELECT kustp, kohde, projekti
-                  FROM yhtion_toimipaikat
-                  WHERE yhtio = '{$yhtio}'
-                  AND tunnus = '{$_yhtion_toimipaikka}'";
+            $query = "SELECT kustp, kohde, projekti
+                      FROM yhtion_toimipaikat
+                      WHERE yhtio = '{$yhtio}'
+                      AND tunnus  = '{$_yhtion_toimipaikka}'";
             $toimipaikka_kustp_res = pupe_query($query);
             $toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
@@ -650,11 +650,11 @@ if (!function_exists("verkkolasku_in")) {
       }
       else {
         // Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?  //
-        $query = "  SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
-              FROM tiliointisaanto
-              WHERE ttunnus   = '$trow[tunnus]'
-              and yhtio     = '$yhtio'
-              and tyyppi    = 'o'";
+        $query = "SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
+                  FROM tiliointisaanto
+                  WHERE ttunnus = '$trow[tunnus]'
+                  and yhtio     = '$yhtio'
+                  and tyyppi    = 'o'";
 
         if ($laskuformaatti == "INVOIC.D.96A") {
           $query .= "  and SUBSTRING(kuvaus,   1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['nimi'])."'
@@ -686,10 +686,10 @@ if (!function_exists("verkkolasku_in")) {
             // Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
             if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
 
-              $query = "  SELECT kustp, kohde, projekti
-                    FROM yhtion_toimipaikat
-                    WHERE yhtio = '{$yhtio}'
-                    AND tunnus = '{$_yhtion_toimipaikka}'";
+              $query = "SELECT kustp, kohde, projekti
+                        FROM yhtion_toimipaikat
+                        WHERE yhtio = '{$yhtio}'
+                        AND tunnus  = '{$_yhtion_toimipaikka}'";
               $toimipaikka_kustp_res = pupe_query($query);
               $toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
@@ -716,11 +716,11 @@ if (!function_exists("verkkolasku_in")) {
         }
 
         // Onko tälle ostajatiedoille erityinen kustannuspaikka?
-        $query = "  SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
-              FROM tiliointisaanto
-              WHERE ttunnus   = '$trow[tunnus]'
-              and yhtio     = '$yhtio'
-              and tyyppi    = 'b'";
+        $query = "SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
+                  FROM tiliointisaanto
+                  WHERE ttunnus = '$trow[tunnus]'
+                  and yhtio     = '$yhtio'
+                  and tyyppi    = 'b'";
 
         if ($laskuformaatti == "INVOIC.D.96A") {
           $query .= "  and SUBSTRING(kuvaus,   1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['nimi'])."'
@@ -752,10 +752,10 @@ if (!function_exists("verkkolasku_in")) {
             // Jos tarkenteiden prioriteetissä toimipaikka ei ole ennen toimittajaa, niin katsotaan se tässä
             if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
 
-              $query = "  SELECT kustp, kohde, projekti
-                    FROM yhtion_toimipaikat
-                    WHERE yhtio = '{$yhtio}'
-                    AND tunnus = '{$_yhtion_toimipaikka}'";
+              $query = "SELECT kustp, kohde, projekti
+                        FROM yhtion_toimipaikat
+                        WHERE yhtio = '{$yhtio}'
+                        AND tunnus  = '{$_yhtion_toimipaikka}'";
               $toimipaikka_kustp_res = pupe_query($query);
               $toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
@@ -783,13 +783,13 @@ if (!function_exists("verkkolasku_in")) {
 
         if (mysql_num_rows($result) == 0) {
           // Onko tälle asiakastunnukselle erityinen kustannuspaikka?
-          $query = "  SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
-                FROM tiliointisaanto
-                WHERE ttunnus   = '$trow[tunnus]'
-                and tyyppi     = 'a'
-                and yhtio     = '$yhtio'
-                and tilino      in ('0','')
-                and kuvaus     = '".mysql_real_escape_string($laskun_asiakastunnus)."'";
+          $query = "SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti, toimipaikka
+                    FROM tiliointisaanto
+                    WHERE ttunnus = '$trow[tunnus]'
+                    and tyyppi    = 'a'
+                    and yhtio     = '$yhtio'
+                    and tilino    in ('0','')
+                    and kuvaus    = '".mysql_real_escape_string($laskun_asiakastunnus)."'";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) != 0) {
@@ -807,10 +807,10 @@ if (!function_exists("verkkolasku_in")) {
               // Jos tarkenteiden prioriteetissä toimipaikka ennen toimittajaa, niin katsotaan se tässä
               if ($yhtiorow['tarkenteiden_prioriteetti'] == "T") {
 
-                $query = "  SELECT kustp, kohde, projekti
-                      FROM yhtion_toimipaikat
-                      WHERE yhtio = '{$yhtio}'
-                      AND tunnus = '{$_yhtion_toimipaikka}'";
+                $query = "SELECT kustp, kohde, projekti
+                          FROM yhtion_toimipaikat
+                          WHERE yhtio = '{$yhtio}'
+                          AND tunnus  = '{$_yhtion_toimipaikka}'";
                 $toimipaikka_kustp_res = pupe_query($query);
                 $toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
@@ -899,12 +899,12 @@ if (!function_exists("verkkolasku_in")) {
 
       if ($trow['oletus_vienti'] == "A" or $trow['oletus_vienti'] == "B" or $trow['oletus_vienti'] == "C" or $trow['oletus_vienti'] == "J") {
 
-        $query = "  SELECT selite
-              FROM avainsana
-              WHERE yhtio = '$yhtio'
-              and laji = 'alv'
-              and selitetark != ''
-              ORDER BY jarjestys,selite";
+        $query = "SELECT selite
+                  FROM avainsana
+                  WHERE yhtio     = '$yhtio'
+                  and laji        = 'alv'
+                  and selitetark != ''
+                  ORDER BY jarjestys,selite";
         $avainresult = pupe_query($query);
 
         if (mysql_num_rows($avainresult) != 1) {
@@ -998,13 +998,13 @@ if (!function_exists("verkkolasku_in")) {
       if (trim($laskun_numero) != '' and trim($trow['tunnus']) != '') {
 
         // katsotaan onko lasku jo ostoreskontrassa
-        $query = "  SELECT *
-              FROM lasku
-              WHERE yhtio = '{$yhtio}'
-              AND tila IN ('H','M','P','Q','Y')
-              AND laskunro = '{$laskun_numero}'
-              AND tapvm >= date_sub(now(), INTERVAL 12 MONTH)
-              AND liitostunnus = '{$trow['tunnus']}'";
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE yhtio      = '{$yhtio}'
+                  AND tila         IN ('H','M','P','Q','Y')
+                  AND laskunro     = '{$laskun_numero}'
+                  AND tapvm        >= date_sub(now(), INTERVAL 12 MONTH)
+                  AND liitostunnus = '{$trow['tunnus']}'";
         $duplikaattilasku_check_res = pupe_query($query);
 
         if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
@@ -1017,12 +1017,12 @@ if (!function_exists("verkkolasku_in")) {
 
           $lajilisa = strtolower(substr($ebid, 0, 3));
 
-          $query = "  SELECT *
-                FROM asn_sanomat
-                WHERE yhtio      = '{$yhtio}'
-                AND laji        = '{$lajilisa}'
-                AND asn_numero      = '{$laskun_numero}'
-                AND toimittajanumero = '{$trow['toimittajanro']}'";
+          $query = "SELECT *
+                    FROM asn_sanomat
+                    WHERE yhtio          = '{$yhtio}'
+                    AND laji             = '{$lajilisa}'
+                    AND asn_numero       = '{$laskun_numero}'
+                    AND toimittajanumero = '{$trow['toimittajanro']}'";
           $duplikaattilasku_check_res = pupe_query($query);
 
           if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
@@ -1058,10 +1058,10 @@ if (!function_exists("verkkolasku_in")) {
         return ($return);
       }
 
-      $query = "  SELECT kurssi
-            FROM valuu
-            WHERE nimi = '$valkoodi'
-            AND yhtio  = '$yhtio'";
+      $query = "SELECT kurssi
+                FROM valuu
+                WHERE nimi = '$valkoodi'
+                AND yhtio  = '$yhtio'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) != 1) {
@@ -1118,62 +1118,62 @@ if (!function_exists("verkkolasku_in")) {
       $osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : round($osto_rivi_kulu_alv, 2);
 
       // Kirjoitetaan lasku
-      $query = "  INSERT into lasku set
-            yhtio         = '$yhtio',
-            yhtio_toimipaikka   = '{$_yhtion_toimipaikka}',
-            summa         = '$summa',
-            kasumma       = '$kassaale',
-            erpcm         = '$erv-$erk-$erp',
-            kapvm         = '$krv-$krk-$krp',
-            olmapvm       = '$olmapvm',
-            valkoodi       = '$valkoodi',
-            hyvak1         = '$hyvak[1]',
-            hyvak2         = '$hyvak[2]',
-            hyvak3         = '$hyvak[3]',
-            hyvak4         = '$hyvak[4]',
-            hyvak5         = '$hyvak[5]',
-            hyvaksyja_nyt     = '$hyvaksyja_nyt',
-            ytunnus       = '$ytunnus',
-            tilinumero       = '$trow[tilinumero]',
-            nimi         = '$trow[nimi]',
-            nimitark       = '$trow[nimitark]',
-            osoite         = '$trow[osoite]',
-            osoitetark       = '$trow[osoitetark]',
-            postino       = '$trow[postino]',
-            postitp       = '$trow[postitp]',
-            maa         = '$trow[maa]',
-            toim_maa      = '$trow[verovelvollinen]',
-            ultilno_maa      = '$trow[ultilno_maa]',
-            viite         = '$viite',
-            viesti         = '$viesti',
-            sisviesti1       = '$trow[ohjeitapankille]',
-            sisviesti2       = '$laskun_tilausviite',
-            tapvm         = '$tpv-$tpk-$tpp',
-            lapvm         = '$vpv-$vpk-$vpp',
-            vienti         = '$trow[oletus_vienti]',
-            ebid         = '$ebid',
-            tila         = '$tila',
-            vienti_kurssi     = '$vrow[kurssi]',
-            laatija       = 'verkkolas',
-            liitostunnus     = '$trow[tunnus]',
-            luontiaika       = now(),
-            pankki1        = '$trow[pankki1]',
-            pankki2        = '$trow[pankki2]',
-            pankki3        = '$trow[pankki3]',
-            pankki4        = '$trow[pankki4]',
-            ultilno        = '$trow[ultilno]',
-            swift        = '$trow[swift]',
-            suoraveloitus    = '$trow[oletus_suoraveloitus]',
-            hyvaksynnanmuutos  = '$trow[oletus_hyvaksynnanmuutos]',
-            comments       = '$komm',
-            laskunro       = '$laskun_numero',
-            asiakkaan_tilausnumero = '$laskun_asiakkaan_tilausnumero',
-            osto_rahti      = '{$osto_rahti}',
-            osto_kulu      = '{$osto_kulu}',
-            osto_rivi_kulu    = '{$osto_rivi_kulu}',
-            osto_rahti_alv    = '{$osto_rahti_alv}',
-            osto_kulu_alv    = '{$osto_kulu_alv}',
-            osto_rivi_kulu_alv  = '{$osto_rivi_kulu_alv}'";
+      $query = "INSERT into lasku set
+                yhtio                  = '$yhtio',
+                yhtio_toimipaikka      = '{$_yhtion_toimipaikka}',
+                summa                  = '$summa',
+                kasumma                = '$kassaale',
+                erpcm                  = '$erv-$erk-$erp',
+                kapvm                  = '$krv-$krk-$krp',
+                olmapvm                = '$olmapvm',
+                valkoodi               = '$valkoodi',
+                hyvak1                 = '$hyvak[1]',
+                hyvak2                 = '$hyvak[2]',
+                hyvak3                 = '$hyvak[3]',
+                hyvak4                 = '$hyvak[4]',
+                hyvak5                 = '$hyvak[5]',
+                hyvaksyja_nyt          = '$hyvaksyja_nyt',
+                ytunnus                = '$ytunnus',
+                tilinumero             = '$trow[tilinumero]',
+                nimi                   = '$trow[nimi]',
+                nimitark               = '$trow[nimitark]',
+                osoite                 = '$trow[osoite]',
+                osoitetark             = '$trow[osoitetark]',
+                postino                = '$trow[postino]',
+                postitp                = '$trow[postitp]',
+                maa                    = '$trow[maa]',
+                toim_maa               = '$trow[verovelvollinen]',
+                ultilno_maa            = '$trow[ultilno_maa]',
+                viite                  = '$viite',
+                viesti                 = '$viesti',
+                sisviesti1             = '$trow[ohjeitapankille]',
+                sisviesti2             = '$laskun_tilausviite',
+                tapvm                  = '$tpv-$tpk-$tpp',
+                lapvm                  = '$vpv-$vpk-$vpp',
+                vienti                 = '$trow[oletus_vienti]',
+                ebid                   = '$ebid',
+                tila                   = '$tila',
+                vienti_kurssi          = '$vrow[kurssi]',
+                laatija                = 'verkkolas',
+                liitostunnus           = '$trow[tunnus]',
+                luontiaika             = now(),
+                pankki1                = '$trow[pankki1]',
+                pankki2                = '$trow[pankki2]',
+                pankki3                = '$trow[pankki3]',
+                pankki4                = '$trow[pankki4]',
+                ultilno                = '$trow[ultilno]',
+                swift                  = '$trow[swift]',
+                suoraveloitus          = '$trow[oletus_suoraveloitus]',
+                hyvaksynnanmuutos      = '$trow[oletus_hyvaksynnanmuutos]',
+                comments               = '$komm',
+                laskunro               = '$laskun_numero',
+                asiakkaan_tilausnumero = '$laskun_asiakkaan_tilausnumero',
+                osto_rahti             = '{$osto_rahti}',
+                osto_kulu              = '{$osto_kulu}',
+                osto_rivi_kulu         = '{$osto_rivi_kulu}',
+                osto_rahti_alv         = '{$osto_rahti_alv}',
+                osto_kulu_alv          = '{$osto_kulu_alv}',
+                osto_rivi_kulu_alv     = '{$osto_rivi_kulu_alv}'";
       $result = pupe_query($query);
       $tunnus = mysql_insert_id();
 
@@ -1193,32 +1193,32 @@ if (!function_exists("verkkolasku_in")) {
       }
 
       // Ostovelka, (Hoidetaan kustannuspaikka alempana, kun tiedetään kulutiliöintien kustannuspaikat....)
-      $query = "  INSERT INTO tiliointi SET
-            yhtio        = '$yhtio',
-            ltunnus      = '$tunnus',
-            tilino        = '$ostovelat',
-            kustp         = 0,
-            kohde        = 0,
-            projekti      = 0,
-            tapvm        = '$tpv-$tpk-$tpp',
-            summa        = '$vassumma',
-            summa_valuutassa = '$vassumma_valuutassa',
-            valkoodi      = '$valkoodi',
-            selite        = '$selite',
-            vero        = 0,
-            lukko        = '1',
-            laatija      = 'verkkolas',
-            laadittu      = now()";
+      $query = "INSERT INTO tiliointi SET
+                yhtio            = '$yhtio',
+                ltunnus          = '$tunnus',
+                tilino           = '$ostovelat',
+                kustp            = 0,
+                kohde            = 0,
+                projekti         = 0,
+                tapvm            = '$tpv-$tpk-$tpp',
+                summa            = '$vassumma',
+                summa_valuutassa = '$vassumma_valuutassa',
+                valkoodi         = '$valkoodi',
+                selite           = '$selite',
+                vero             = 0,
+                lukko            = '1',
+                laatija          = 'verkkolas',
+                laadittu         = now()";
       $result = pupe_query($query);
       $ostovelkatiliointitunnus = mysql_insert_id();
 
       // Onko rivikohtaisia tiliöintisääntöjä
-      $query = "  SELECT *
-            FROM tiliointisaanto
-            WHERE ttunnus  = '$trow[tunnus]'
-            and yhtio     = '$yhtio'
-            and tyyppi     = 't'
-            and tilino not in ('0','')";
+      $query = "SELECT *
+                FROM tiliointisaanto
+                WHERE ttunnus = '$trow[tunnus]'
+                and yhtio     = '$yhtio'
+                and tyyppi    = 't'
+                and tilino    not in ('0','')";
       $result = pupe_query($query);
 
       // Onko laskuriveillä useita alv-verokantoja?
@@ -1267,10 +1267,10 @@ if (!function_exists("verkkolasku_in")) {
         // Jos on toimipaikat käytössä ja toimipaikan takaa katsotaan tarkenteita toimittajan jälkeen, niin katsotaan ne tässä
         if ($_yhtion_toimipaikka != 0 and ($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['tarkenteiden_prioriteetti'] == "") {
 
-          $query = "  SELECT kustp, kohde, projekti
-                FROM yhtion_toimipaikat
-                WHERE yhtio = '{$yhtio}'
-                AND tunnus = '{$_yhtion_toimipaikka}'";
+          $query = "SELECT kustp, kohde, projekti
+                    FROM yhtion_toimipaikat
+                    WHERE yhtio = '{$yhtio}'
+                    AND tunnus  = '{$_yhtion_toimipaikka}'";
           $toimipaikka_kustp_res = pupe_query($query);
           $toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
 
@@ -1311,22 +1311,22 @@ if (!function_exists("verkkolasku_in")) {
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp, $kohde, $projekti);
 
           // Varasto
-          $query = "  INSERT into tiliointi set
-                yhtio        = '$yhtio',
-                ltunnus      = '$tunnus',
-                tilino        = '$varastotili',
-                kustp         = '{$kustp_ins}',
-                kohde        = '{$kohde_ins}',
-                projekti      = '{$projekti_ins}',
-                tapvm        = '$tpv-$tpk-$tpp',
-                summa       = '$summa_varasto',
-                summa_valuutassa = '$summa_varasto_valuutassa',
-                valkoodi     = '$valkoodi',
-                selite        = '$selite',
-                vero        = 0,
-                lukko        = '',
-                laatija      = '$kukarow[kuka]',
-                laadittu      = now()";
+          $query = "INSERT into tiliointi set
+                    yhtio            = '$yhtio',
+                    ltunnus          = '$tunnus',
+                    tilino           = '$varastotili',
+                    kustp            = '{$kustp_ins}',
+                    kohde            = '{$kohde_ins}',
+                    projekti         = '{$projekti_ins}',
+                    tapvm            = '$tpv-$tpk-$tpp',
+                    summa            = '$summa_varasto',
+                    summa_valuutassa = '$summa_varasto_valuutassa',
+                    valkoodi         = '$valkoodi',
+                    selite           = '$selite',
+                    vero             = 0,
+                    lukko            = '',
+                    laatija          = '$kukarow[kuka]',
+                    laadittu         = now()";
           $result = pupe_query($query);
 
           $varastonmuutostili = $yhtiorow["varastonmuutos"];
@@ -1342,22 +1342,22 @@ if (!function_exists("verkkolasku_in")) {
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
 
           // Varastonmuutos
-          $query = "  INSERT into tiliointi set
-                yhtio        = '$yhtio',
-                ltunnus      = '$tunnus',
-                tilino        = '$varastonmuutostili',
-                kustp         = '{$kustp_ins}',
-                kohde        = '{$kohde_ins}',
-                projekti      = '{$projekti_ins}',
-                tapvm        = '$tpv-$tpk-$tpp',
-                summa        = $summa_varasto*-1,
-                summa_valuutassa = $summa_varasto_valuutassa*-1,
-                valkoodi      = '$valkoodi',
-                selite        = '$selite',
-                vero        = 0,
-                lukko        = '',
-                laatija      = '$kukarow[kuka]',
-                laadittu      = now()";
+          $query = "INSERT into tiliointi set
+                    yhtio            = '$yhtio',
+                    ltunnus          = '$tunnus',
+                    tilino           = '$varastonmuutostili',
+                    kustp            = '{$kustp_ins}',
+                    kohde            = '{$kohde_ins}',
+                    projekti         = '{$projekti_ins}',
+                    tapvm            = '$tpv-$tpk-$tpp',
+                    summa            = $summa_varasto*-1,
+                    summa_valuutassa = $summa_varasto_valuutassa*-1,
+                    valkoodi         = '$valkoodi',
+                    selite           = '$selite',
+                    vero             = 0,
+                    lukko            = '',
+                    laatija          = '$kukarow[kuka]',
+                    laadittu         = now()";
           $result = pupe_query($query);
         }
       }
@@ -1381,26 +1381,26 @@ if (!function_exists("verkkolasku_in")) {
             $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"])) : "";
             $tuote = isset($rtuoteno[$i]["tuoteno"])  ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["tuoteno"])) : "";
 
-            $query = "  SELECT tilino, kustp
-                  FROM tiliointisaanto
-                  WHERE ttunnus   = '$trow[tunnus]'
-                  and tyyppi     = 't'
-                  and yhtio     = '$yhtio'
-                  and mintuote   <= '$tuote'
-                  and maxtuote   >= '$tuote'
-                  and tilino not in ('0','')";
+            $query = "SELECT tilino, kustp
+                      FROM tiliointisaanto
+                      WHERE ttunnus = '$trow[tunnus]'
+                      and tyyppi    = 't'
+                      and yhtio     = '$yhtio'
+                      and mintuote  <= '$tuote'
+                      and maxtuote  >= '$tuote'
+                      and tilino    not in ('0','')";
             $result = pupe_query($query);
 
              // Sopiva sääntöä ei löytynyt
             if (mysql_num_rows($result) == 0) {
 
-              $query = "  SELECT tilino, kustp
-                    FROM tiliointisaanto
-                    WHERE ttunnus   = '$trow[tunnus]'
-                    and tyyppi     = 't'
-                    and yhtio     = '$yhtio'
-                    and kuvaus like '%$rinfo%'
-                    and tilino not in ('0','')";
+              $query = "SELECT tilino, kustp
+                        FROM tiliointisaanto
+                        WHERE ttunnus = '$trow[tunnus]'
+                        and tyyppi    = 't'
+                        and yhtio     = '$yhtio'
+                        and kuvaus    like '%$rinfo%'
+                        and tilino    not in ('0','')";
               $result = pupe_query($query);
 
                // Hmm, mikään sääntö ei kelpaa
@@ -1501,22 +1501,22 @@ if (!function_exists("verkkolasku_in")) {
               list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp, $kohde, $projekti);
 
               // Varasto
-              $query = "  INSERT into tiliointi set
-                    yhtio        = '$yhtio',
-                    ltunnus      = '$tunnus',
-                    tilino        = '$varastotili',
-                    kustp         = '{$kustp_ins}',
-                    kohde        = '{$kohde_ins}',
-                    projekti      = '{$projekti_ins}',
-                    tapvm        = '$tpv-$tpk-$tpp',
-                    summa        = $summa_varasto,
-                    summa_valuutassa = $summa_varasto_valuutassa,
-                    valkoodi      = '$valkoodi',
-                    selite        = '$selite',
-                    vero        = 0,
-                    lukko        = '',
-                    laatija       = '$kukarow[kuka]',
-                    laadittu     = now()";
+              $query = "INSERT into tiliointi set
+                        yhtio            = '$yhtio',
+                        ltunnus          = '$tunnus',
+                        tilino           = '$varastotili',
+                        kustp            = '{$kustp_ins}',
+                        kohde            = '{$kohde_ins}',
+                        projekti         = '{$projekti_ins}',
+                        tapvm            = '$tpv-$tpk-$tpp',
+                        summa            = $summa_varasto,
+                        summa_valuutassa = $summa_varasto_valuutassa,
+                        valkoodi         = '$valkoodi',
+                        selite           = '$selite',
+                        vero             = 0,
+                        lukko            = '',
+                        laatija          = '$kukarow[kuka]',
+                        laadittu         = now()";
               $result = pupe_query($query);
 
               $varastonmuutostili = $yhtiorow["varastonmuutos"];
@@ -1532,22 +1532,22 @@ if (!function_exists("verkkolasku_in")) {
               list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
 
               // Varastonmuutos
-              $query = "  INSERT into tiliointi set
-                    yhtio        = '$yhtio',
-                    ltunnus      = '$tunnus',
-                    tilino        = '$varastonmuutostili',
-                    kustp         = '{$kustp_ins}',
-                    kohde        = '{$kohde_ins}',
-                    projekti      = '{$projekti_ins}',
-                    tapvm        = '$tpv-$tpk-$tpp',
-                    summa        = $summa_varasto * -1,
-                    summa_valuutassa = $summa_varasto_valuutassa * -1,
-                    valkoodi      = '$valkoodi',
-                    selite        = '$selite',
-                    vero        = 0,
-                    lukko        = '',
-                    laatija      = '$kukarow[kuka]',
-                    laadittu      = now()";
+              $query = "INSERT into tiliointi set
+                        yhtio            = '$yhtio',
+                        ltunnus          = '$tunnus',
+                        tilino           = '$varastonmuutostili',
+                        kustp            = '{$kustp_ins}',
+                        kohde            = '{$kohde_ins}',
+                        projekti         = '{$projekti_ins}',
+                        tapvm            = '$tpv-$tpk-$tpp',
+                        summa            = $summa_varasto * -1,
+                        summa_valuutassa = $summa_varasto_valuutassa * -1,
+                        valkoodi         = '$valkoodi',
+                        selite           = '$selite',
+                        vero             = 0,
+                        lukko            = '',
+                        laatija          = '$kukarow[kuka]',
+                        laadittu         = now()";
               $result = pupe_query($query);
             }
           }
@@ -1602,36 +1602,36 @@ if (!function_exists("verkkolasku_in")) {
 
             $lajilisa = strtolower(substr($ebid, 0, 3));
 
-            $insertquery = "  INSERT INTO asn_sanomat SET
-                      asn_numero       = '{$laskun_numero}',
-                      hinta         = '{$asn_hinta}',
-                      kappalemaara     = '{$rtuoteno[$i]['kpl']}',
-                      keikkarivinhinta  = 0,
-                      kulu         = '{$rtuoteno[$i]['kulu']}',
-                      laatija       = 'crond',
-                      lahetyslistannro   = '',
-                      laji         = '{$lajilisa}',
-                      lasku_ale1      = '{$rtuoteno[$i]['ale1']}',
-                      lasku_ale2      = '{$rtuoteno[$i]['ale2']}',
-                      lasku_ale3      = '{$rtuoteno[$i]['ale3']}',
-                      lisakulu       = '{$rtuoteno[$i]['lisakulu']}',
-                      luontiaika       = now(),
-                      paketinnumero     = '',
-                      paketintunniste   = '',
-                      pakkauskulu     = '{$laskun_pakkauskulu}',
-                      rahtikulu       = '{$laskun_rahtikulu}',
-                      saapumispvm     = '{$saapumispvm_chk}',
-                      sscc_koodi      = '',
-                      status        = '',
-                      tilausnumero     = '{$rtuoteno[$i]['ostotilausnro']}',
-                      tilausrivi       = NULL,
-                      tilausrivinpositio   = '{$rtuoteno[$i]['tilaajanrivinro']}',
-                      toimittajanumero   = '{$trow['toimittajanro']}',
-                      toim_tuoteno     = '{$rtuoteno[$i]['tuoteno']}',
-                      toim_tuoteno2     = '',
-                      tuoteno        = '',
-                      vastaanottaja     = '{$ostaja_asiakkaantiedot['nimi']}',
-                      yhtio         = '{$yhtio}'";
+            $insertquery = "INSERT INTO asn_sanomat SET
+             asn_numero         = '{$laskun_numero}',
+             hinta              = '{$asn_hinta}',
+             kappalemaara       = '{$rtuoteno[$i]['kpl']}',
+             keikkarivinhinta   = 0,
+             kulu               = '{$rtuoteno[$i]['kulu']}',
+             laatija            = 'crond',
+             lahetyslistannro   = '',
+             laji               = '{$lajilisa}',
+             lasku_ale1         = '{$rtuoteno[$i]['ale1']}',
+             lasku_ale2         = '{$rtuoteno[$i]['ale2']}',
+             lasku_ale3         = '{$rtuoteno[$i]['ale3']}',
+             lisakulu           = '{$rtuoteno[$i]['lisakulu']}',
+             luontiaika         = now(),
+             paketinnumero      = '',
+             paketintunniste    = '',
+             pakkauskulu        = '{$laskun_pakkauskulu}',
+             rahtikulu          = '{$laskun_rahtikulu}',
+             saapumispvm        = '{$saapumispvm_chk}',
+             sscc_koodi         = '',
+             status             = '',
+             tilausnumero       = '{$rtuoteno[$i]['ostotilausnro']}',
+             tilausrivi         = NULL,
+             tilausrivinpositio = '{$rtuoteno[$i]['tilaajanrivinro']}',
+             toimittajanumero   = '{$trow['toimittajanro']}',
+             toim_tuoteno       = '{$rtuoteno[$i]['tuoteno']}',
+             toim_tuoteno2      = '',
+             tuoteno            = '',
+             vastaanottaja      = '{$ostaja_asiakkaantiedot['nimi']}',
+             yhtio              = '{$yhtio}'";
             $asn_ins_res = pupe_query($insertquery);
             $rtuoteno[$i]["insert_id"] = mysql_insert_id();
           }
@@ -1696,12 +1696,12 @@ if (!function_exists("verkkolasku_in")) {
 
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat, $ostovel_kustp, $ostovel_kohde, $ostovel_projekti);
 
-      $query = "  UPDATE tiliointi SET
-            kustp    = '{$kustp_ins}',
-            kohde   = '{$kohde_ins}',
-            projekti = '{$projekti_ins}'
-            WHERE yhtio = '{$yhtio}'
-            AND tunnus  = '{$ostovelkatiliointitunnus}'";
+      $query = "UPDATE tiliointi SET
+                kustp       = '{$kustp_ins}',
+                kohde       = '{$kohde_ins}',
+                projekti    = '{$projekti_ins}'
+                WHERE yhtio = '{$yhtio}'
+                AND tunnus  = '{$ostovelkatiliointitunnus}'";
       $vienti_upd_res = pupe_query($query);
 
       // Jos meillä on suoraveloitus
@@ -1714,58 +1714,58 @@ if (!function_exists("verkkolasku_in")) {
 
           // Oletustiliöinnit
           // Ostovelat
-          $query = "  INSERT into tiliointi set
-                yhtio        = '$yhtio',
-                ltunnus      = '$tunnus',
-                tilino       = '$ostovelat',
-                kustp         = '{$kustp_ins}',
-                kohde        = '{$kohde_ins}',
-                projekti      = '{$projekti_ins}',
-                tapvm        = '$erv-$erk-$erp',
-                summa        = '$omasumma',
-                summa_valuutassa = '$omasumma_valuutassa',
-                valkoodi      = '$valkoodi',
-                vero        = 0,
-                lukko        = '',
-                laatija      = '$kukarow[kuka]',
-                laadittu     = now()";
+          $query = "INSERT into tiliointi set
+                    yhtio            = '$yhtio',
+                    ltunnus          = '$tunnus',
+                    tilino           = '$ostovelat',
+                    kustp            = '{$kustp_ins}',
+                    kohde            = '{$kohde_ins}',
+                    projekti         = '{$projekti_ins}',
+                    tapvm            = '$erv-$erk-$erp',
+                    summa            = '$omasumma',
+                    summa_valuutassa = '$omasumma_valuutassa',
+                    valkoodi         = '$valkoodi',
+                    vero             = 0,
+                    lukko            = '',
+                    laatija          = '$kukarow[kuka]',
+                    laadittu         = now()";
           $xresult = pupe_query($query);
 
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"]);
 
           // Rahatili
-          $query = "  INSERT into tiliointi set
-                yhtio        = '$yhtio',
-                ltunnus      = '$tunnus',
-                tilino        = '$yhtiorow[selvittelytili]',
-                kustp         = '{$kustp_ins}',
-                kohde        = '{$kohde_ins}',
-                projekti      = '{$projekti_ins}',
-                tapvm        = '$erv-$erk-$erp',
-                summa        = $vassumma,
-                summa_valuutassa = '$vassumma_valuutassa',
-                valkoodi      = '$valkoodi',
-                vero        = 0,
-                lukko        = '',
-                laatija      = '$kukarow[kuka]',
-                laadittu      = now()";
+          $query = "INSERT into tiliointi set
+                    yhtio            = '$yhtio',
+                    ltunnus          = '$tunnus',
+                    tilino           = '$yhtiorow[selvittelytili]',
+                    kustp            = '{$kustp_ins}',
+                    kohde            = '{$kohde_ins}',
+                    projekti         = '{$projekti_ins}',
+                    tapvm            = '$erv-$erk-$erp',
+                    summa            = $vassumma,
+                    summa_valuutassa = '$vassumma_valuutassa',
+                    valkoodi         = '$valkoodi',
+                    vero             = 0,
+                    lukko            = '',
+                    laatija          = '$kukarow[kuka]',
+                    laadittu         = now()";
           $xresult = pupe_query($query);
 
           if ($tila == 'M') {
-            $query = "  UPDATE lasku set
-                  tila   = 'Y',
-                  mapvm   = '$erv-$erk-$erp',
-                  maksu_kurssi = 1
-                  WHERE tunnus = '$tunnus'";
+            $query = "UPDATE lasku set
+                      tila         = 'Y',
+                      mapvm        = '$erv-$erk-$erp',
+                      maksu_kurssi = 1
+                      WHERE tunnus = '$tunnus'";
             $xresult = pupe_query($query);
           }
         }
         else {
            // Tämä koskee vain suoraveloitusta
           if ($tila == 'M') {
-            $query = "  UPDATE lasku set
-                  tila = 'Q'
-                  WHERE tunnus='$tunnus'";
+            $query = "UPDATE lasku set
+                      tila = 'Q'
+                      WHERE tunnus='$tunnus'";
             $xresult = pupe_query($query);
           }
         }
@@ -1796,24 +1796,24 @@ if (!function_exists("verkkolasku_in")) {
           $kayttotarkoitus = 'INVOIC.D.96A';
         }
 
-        $query = "  INSERT INTO liitetiedostot SET
-              yhtio          = '$yhtio',
-              liitos         = 'lasku',
-              liitostunnus     = '$tunnus',
-              data           = '$xmlstr',
-              selite         = '$selite',
-              kieli        = '$yhtiorow[kieli]',
-              filename       = '$filename',
-              filesize       = '$filesize',
-              filetype       = 'text/xml',
-              image_width      = '',
-              image_height    = '',
-              image_bits      = '',
-              image_channels    = '',
-              kayttotarkoitus    = '$kayttotarkoitus',
-              jarjestys      = '1',
-              laatija        = '$kukarow[kuka]',
-              luontiaika      = now()";
+        $query = "INSERT INTO liitetiedostot SET
+                  yhtio           = '$yhtio',
+                  liitos          = 'lasku',
+                  liitostunnus    = '$tunnus',
+                  data            = '$xmlstr',
+                  selite          = '$selite',
+                  kieli           = '$yhtiorow[kieli]',
+                  filename        = '$filename',
+                  filesize        = '$filesize',
+                  filetype        = 'text/xml',
+                  image_width     = '',
+                  image_height    = '',
+                  image_bits      = '',
+                  image_channels  = '',
+                  kayttotarkoitus = '$kayttotarkoitus',
+                  jarjestys       = '1',
+                  laatija         = '$kukarow[kuka]',
+                  luontiaika      = now()";
         $Xresult = pupe_query($query);
 
         // Haetaan verkkolaskun visualisoitu versio
@@ -1840,24 +1840,24 @@ if (!function_exists("verkkolasku_in")) {
             $data  = mysql_real_escape_string($sisalto);
 
             // lisätään kuva
-            $query = "  INSERT INTO liitetiedostot SET
-                  yhtio          = '$yhtio',
-                  liitos         = 'lasku',
-                  liitostunnus     = '$tunnus',
-                  data           = '$data',
-                  selite         = '$selite',
-                  kieli        = '$yhtiorow[kieli]',
-                  filename       = '$file',
-                  filesize       = '$filesize',
-                  filetype       = 'application/pdf',
-                  image_width      = '',
-                  image_height    = '',
-                  image_bits      = '',
-                  image_channels    = '',
-                  kayttotarkoitus    = 'VERKKOLASKU',
-                  jarjestys      = '1',
-                  laatija        = '$kukarow[kuka]',
-                  luontiaika      = now()";
+            $query = "INSERT INTO liitetiedostot SET
+                      yhtio           = '$yhtio',
+                      liitos          = 'lasku',
+                      liitostunnus    = '$tunnus',
+                      data            = '$data',
+                      selite          = '$selite',
+                      kieli           = '$yhtiorow[kieli]',
+                      filename        = '$file',
+                      filesize        = '$filesize',
+                      filetype        = 'application/pdf',
+                      image_width     = '',
+                      image_height    = '',
+                      image_bits      = '',
+                      image_channels  = '',
+                      kayttotarkoitus = 'VERKKOLASKU',
+                      jarjestys       = '1',
+                      laatija         = '$kukarow[kuka]',
+                      luontiaika      = now()";
             $Xresult = pupe_query($query);
           }
         }
@@ -1881,24 +1881,24 @@ if (!function_exists("verkkolasku_in")) {
                 $filename = str_replace("maventa_{$match[2]}_maventa-", "", basename($liitefile));
 
                 // Lisätään kuva
-                $query = "  INSERT INTO liitetiedostot SET
-                      yhtio          = '$yhtio',
-                      liitos         = 'lasku',
-                      liitostunnus     = '$tunnus',
-                      data           = '$data',
-                      selite         = '$selite',
-                      kieli        = '$yhtiorow[kieli]',
-                      filename       = '$filename',
-                      filesize       = '$filesize',
-                      filetype       = 'application/pdf',
-                      image_width      = '',
-                      image_height    = '',
-                      image_bits      = '',
-                      image_channels    = '',
-                      kayttotarkoitus    = 'VERKKOLASKU',
-                      jarjestys      = '1',
-                      laatija        = '$kukarow[kuka]',
-                      luontiaika      = now()";
+                $query = "INSERT INTO liitetiedostot SET
+                          yhtio           = '$yhtio',
+                          liitos          = 'lasku',
+                          liitostunnus    = '$tunnus',
+                          data            = '$data',
+                          selite          = '$selite',
+                          kieli           = '$yhtiorow[kieli]',
+                          filename        = '$filename',
+                          filesize        = '$filesize',
+                          filetype        = 'application/pdf',
+                          image_width     = '',
+                          image_height    = '',
+                          image_bits      = '',
+                          image_channels  = '',
+                          kayttotarkoitus = 'VERKKOLASKU',
+                          jarjestys       = '1',
+                          laatija         = '$kukarow[kuka]',
+                          luontiaika      = now()";
                 $Xresult = pupe_query($query);
               }
             }
@@ -1923,24 +1923,24 @@ if (!function_exists("verkkolasku_in")) {
                 $editilaus_laskulle_filesize = filesize($editilaus_laskulle_polku.$path_parts['basename']);
                 $data  = mysql_real_escape_string($editilaus_laskulle_data);
 
-                $query = "  INSERT INTO liitetiedostot SET
-                      yhtio          = '$yhtio',
-                      liitos         = 'lasku',
-                      liitostunnus     = '$tunnus',
-                      data           = '$data',
-                      selite         = 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
-                      kieli        = '$yhtiorow[kieli]',
-                      filename       = '$path_parts[basename]',
-                      filesize       = '$editilaus_laskulle_filesize',
-                      filetype       = 'text',
-                      image_width      = '',
-                      image_height    = '',
-                      image_bits      = '',
-                      image_channels    = '',
-                      kayttotarkoitus    = 'EDI',
-                      jarjestys      = '1',
-                      laatija        = '$kukarow[kuka]',
-                      luontiaika      = now()";
+                $query = "INSERT INTO liitetiedostot SET
+                          yhtio           = '$yhtio',
+                          liitos          = 'lasku',
+                          liitostunnus    = '$tunnus',
+                          data            = '$data',
+                          selite          = 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
+                          kieli           = '$yhtiorow[kieli]',
+                          filename        = '$path_parts[basename]',
+                          filesize        = '$editilaus_laskulle_filesize',
+                          filetype        = 'text',
+                          image_width     = '',
+                          image_height    = '',
+                          image_bits      = '',
+                          image_channels  = '',
+                          kayttotarkoitus = 'EDI',
+                          jarjestys       = '1',
+                          laatija         = '$kukarow[kuka]',
+                          luontiaika      = now()";
                 $editilaus_laskulle_result = pupe_query($query);
 
                 // Katotaan onko eroja vai onko ok
@@ -1959,18 +1959,18 @@ if (!function_exists("verkkolasku_in")) {
 
                     if ($ok == 'ok' and !$onko_dupli_lasku) {
                       // Ei eroja, laitetaan lasku suoraan maksuvalmiiksi
-                      $query = "  UPDATE lasku set
-                            tila       = 'M',
-                            hyvak1       = 'verkkolas',
-                            h1time       = now(),
-                            hyvak2       = '',
-                            hyvak3       = '',
-                            hyvak4       = '',
-                            hyvak5       = '',
-                            hyvaksyja_nyt = '',
-                            comments     = trim(concat(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
-                            WHERE tunnus = '$tunnus'
-                            AND tila   = 'H'";
+                      $query = "UPDATE lasku set
+                                tila          = 'M',
+                                hyvak1        = 'verkkolas',
+                                h1time        = now(),
+                                hyvak2        = '',
+                                hyvak3        = '',
+                                hyvak4        = '',
+                                hyvak5        = '',
+                                hyvaksyja_nyt = '',
+                                comments      = trim(concat(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
+                                WHERE tunnus  = '$tunnus'
+                                AND tila      = 'H'";
                       $xresult = pupe_query($query);
                     }
                   }

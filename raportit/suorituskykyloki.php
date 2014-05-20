@@ -36,13 +36,13 @@ echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
 echo "<tr><th>".t("K‰ytt‰j‰")."</th>
     <td colspan='3'><select name='kuka'><option value=''>".t("Valitse k‰ytt‰j‰")."</option>";
 
-$query  = "  SELECT kuka, nimi, eposti
-      FROM kuka
-      WHERE yhtio = '$kukarow[yhtio]'
-      and aktiivinen in (1,0)
-      and nimi != ''
-      and extranet = ''
-      ORDER BY nimi";
+$query  = "SELECT kuka, nimi, eposti
+           FROM kuka
+           WHERE yhtio     = '$kukarow[yhtio]'
+           and aktiivinen  in (1,0)
+           and nimi       != ''
+           and extranet    = ''
+           ORDER BY nimi";
 $res = mysql_query($query) or pupe_error($query);
 
 while ($row = mysql_fetch_array($res)) {
@@ -61,13 +61,13 @@ echo "</select></td></tr>";
 echo "<tr><th>".t("Ohjelma")."</th>
     <td colspan='3'><select name='skripti'><option value=''>".t("Valitse ohjelma")."</option>";
 
-$query = "  SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
-      FROM oikeu
-      WHERE yhtio = '$kukarow[yhtio]'
-      and kuka = ''
-      and profiili = ''
-      GROUP BY sovellus, nimi, alanimi
-      ORDER BY sovellus, jarjestys, jarjestys2";
+$query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
+          FROM oikeu
+          WHERE yhtio  = '$kukarow[yhtio]'
+          and kuka     = ''
+          and profiili = ''
+          GROUP BY sovellus, nimi, alanimi
+          ORDER BY sovellus, jarjestys, jarjestys2";
 $res = mysql_query($query) or pupe_error($query);
 
 while ($row = mysql_fetch_array($res)) {
@@ -125,15 +125,15 @@ if (isset($tee) and $tee == 'listaa') {
     $skriptilisa .= " and suorituskykyloki.laatija = '$kuka' ";
   }
 
-  $query = "  SELECT suorituskykyloki.*, kuka.nimi kukanimi
-        FROM suorituskykyloki
-        LEFT JOIN kuka on suorituskykyloki.yhtio=kuka.yhtio and suorituskykyloki.laatija=kuka.kuka
-        WHERE suorituskykyloki.yhtio = '$kukarow[yhtio]'
-        $skriptilisa
-        and suorituskykyloki.luontiaika >= '$vva-$kka-$ppa 00:00:00'
-        and suorituskykyloki.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
-        ORDER BY suorituskykyloki.luontiaika
-        LIMIT 500";
+  $query = "SELECT suorituskykyloki.*, kuka.nimi kukanimi
+            FROM suorituskykyloki
+            LEFT JOIN kuka on suorituskykyloki.yhtio=kuka.yhtio and suorituskykyloki.laatija=kuka.kuka
+            WHERE suorituskykyloki.yhtio    = '$kukarow[yhtio]'
+            $skriptilisa
+            and suorituskykyloki.luontiaika >= '$vva-$kka-$ppa 00:00:00'
+            and suorituskykyloki.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
+            ORDER BY suorituskykyloki.luontiaika
+            LIMIT 500";
   $res = mysql_query($query) or pupe_error($query);
 
   echo "<table>";

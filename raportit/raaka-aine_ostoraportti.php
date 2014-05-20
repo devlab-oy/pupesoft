@@ -88,36 +88,36 @@ function teerivi($tuoteno, $valittu_toimittaja) {
   $loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 8);
 
   // Haetaan raaka-aineen varastosaldo
-  $query = "  SELECT ifnull(sum(saldo), 0) saldo
-        FROM tuotepaikat
-        WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
-        AND tuotepaikat.tuoteno = '$tuoteno'";
+  $query = "SELECT ifnull(sum(saldo), 0) saldo
+            FROM tuotepaikat
+            WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
+            AND tuotepaikat.tuoteno = '$tuoteno'";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
   $lapsi_saldo = $row['saldo'];
 
   // Haetaan raaka-aineen vuosikulutus (rullaava 12 kk)
-  $query = "  SELECT ifnull(sum(tilausrivi.kpl), 0) vuosikulutus
-        FROM tilausrivi
-        WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-        AND tilausrivi.tyyppi = 'V'
-        AND tilausrivi.tuoteno = '$tuoteno'
-        AND tilausrivi.toimitettuaika >= DATE_SUB(now(), INTERVAL 1 YEAR)";
+  $query = "SELECT ifnull(sum(tilausrivi.kpl), 0) vuosikulutus
+            FROM tilausrivi
+            WHERE tilausrivi.yhtio        = '{$kukarow["yhtio"]}'
+            AND tilausrivi.tyyppi         = 'V'
+            AND tilausrivi.tuoteno        = '$tuoteno'
+            AND tilausrivi.toimitettuaika >= DATE_SUB(now(), INTERVAL 1 YEAR)";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
   $lapsi_vuosikulutus = $row['vuosikulutus'];
 
   // Haetaan raaka-aineen ostettu, varattu, ennakkotilattu sekä valmistuksessa oleva määrä
-  $query = "  SELECT
-        ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
-        ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
-        ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko,
-        ifnull(sum(if(tilausrivi.tyyppi in ('V','W'), tilausrivi.varattu, 0)), 0) valmistuksessa
-        FROM tilausrivi
-        WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-        AND tilausrivi.tyyppi in ('O', 'L', 'E', 'V','W')
-        AND tilausrivi.tuoteno = '$tuoteno'
-        AND tilausrivi.varattu != 0";
+  $query = "SELECT
+            ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
+            ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
+            ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko,
+            ifnull(sum(if(tilausrivi.tyyppi in ('V','W'), tilausrivi.varattu, 0)), 0) valmistuksessa
+            FROM tilausrivi
+            WHERE tilausrivi.yhtio  = '{$kukarow["yhtio"]}'
+            AND tilausrivi.tyyppi   in ('O', 'L', 'E', 'V','W')
+            AND tilausrivi.tuoteno  = '$tuoteno'
+            AND tilausrivi.varattu != 0";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
   $lapsi_varattu = $row['varattu'];
@@ -126,21 +126,21 @@ function teerivi($tuoteno, $valittu_toimittaja) {
   $lapsi_valmistuksessa = $row['valmistuksessa'];
 
   // Haetaan raaka-aineen toimittajatiedot
-  $query = "  SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
-        if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
-        toimi.ytunnus,
-        tuotteen_toimittajat.ostohinta,
-        toimi.nimi,
-        toimi.tunnus,
-        tuote.tuotemassa,
-        tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys as tilavuus
-        FROM tuotteen_toimittajat
-        JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus and toimi.tunnus = '$valittu_toimittaja')
-        JOIN tuote ON ( tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno )
-        WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}'
-        AND tuotteen_toimittajat.tuoteno = '$tuoteno'
-        ORDER BY if(jarjestys = 0, 9999, jarjestys)
-        LIMIT 1";
+  $query = "SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
+            if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
+            toimi.ytunnus,
+            tuotteen_toimittajat.ostohinta,
+            toimi.nimi,
+            toimi.tunnus,
+            tuote.tuotemassa,
+            tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys as tilavuus
+            FROM tuotteen_toimittajat
+            JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus and toimi.tunnus = '$valittu_toimittaja')
+            JOIN tuote ON ( tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno )
+            WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}'
+            AND tuotteen_toimittajat.tuoteno = '$tuoteno'
+            ORDER BY if(jarjestys = 0, 9999, jarjestys)
+            LIMIT 1";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -168,14 +168,14 @@ function teerivi($tuoteno, $valittu_toimittaja) {
   }
 
   // Loopataan läpi raaka-aineen isätuotteet ja lasketaan ostoehdotukset
-  $query = "  SELECT isatuoteno, kerroin
-        FROM tuoteperhe
-        JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
-          AND tuote.tuoteno = tuoteperhe.isatuoteno
-          {$tuote_where})
-        WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
-        AND tuoteperhe.tuoteno = '{$tuoteno}'
-        AND tuoteperhe.tyyppi = 'R'";
+  $query = "SELECT isatuoteno, kerroin
+            FROM tuoteperhe
+            JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
+              AND tuote.tuoteno    = tuoteperhe.isatuoteno
+              {$tuote_where})
+            WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+            AND tuoteperhe.tuoteno = '{$tuoteno}'
+            AND tuoteperhe.tyyppi  = 'R'";
   $isatuote_result = pupe_query($query);
 
   // While loopissa käytettävät muuttujat
@@ -195,25 +195,25 @@ function teerivi($tuoteno, $valittu_toimittaja) {
     list($isa_budjetoitu_myynti, $budjetin_peruste[]) = tuotteen_budjetoitu_myynti($params);
 
     // Haetaan isätuotteiden varastosaldo
-    $query = "  SELECT ifnull(sum(saldo), 0) saldo
-          FROM tuotepaikat
-          WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
-          AND tuotepaikat.tuoteno = '{$isatuote_row["isatuoteno"]}'";
+    $query = "SELECT ifnull(sum(saldo), 0) saldo
+              FROM tuotepaikat
+              WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
+              AND tuotepaikat.tuoteno = '{$isatuote_row["isatuoteno"]}'";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
     $isa_saldo = $row['saldo'];
 
     // Haetaan isätuotteen ostettu, varattu, ennakkotilattu sekä valmistuksessa määrä
-    $query = "  SELECT
-          ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
-          ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
-          ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko,
-          ifnull(sum(if(tilausrivi.tyyppi in ('V','W'), tilausrivi.varattu, 0)), 0) valmistuksessa
-          FROM tilausrivi
-          WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-          AND tilausrivi.tyyppi in ('O', 'L', 'E', 'V','W')
-          AND tilausrivi.tuoteno = '{$isatuote_row["isatuoteno"]}'
-          AND tilausrivi.varattu != 0";
+    $query = "SELECT
+              ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
+              ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
+              ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko,
+              ifnull(sum(if(tilausrivi.tyyppi in ('V','W'), tilausrivi.varattu, 0)), 0) valmistuksessa
+              FROM tilausrivi
+              WHERE tilausrivi.yhtio  = '{$kukarow["yhtio"]}'
+              AND tilausrivi.tyyppi   in ('O', 'L', 'E', 'V','W')
+              AND tilausrivi.tuoteno  = '{$isatuote_row["isatuoteno"]}'
+              AND tilausrivi.varattu != 0";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
     $isa_tilattu = $row['tilattu'];
@@ -331,40 +331,40 @@ if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
 
       if ($edellinen_toimittaja != $toimittaja) {
 
-        $query = "  SELECT *
-              FROM toimi
-              WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
-              AND toimi.tunnus = '$toimittaja'";
+        $query = "SELECT *
+                  FROM toimi
+                  WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
+                  AND toimi.tunnus  = '$toimittaja'";
         $result = pupe_query($query);
         $toimittajarow = mysql_fetch_assoc($result);
 
-        $query = "  INSERT INTO lasku SET
-              yhtio               = '{$kukarow["yhtio"]}',
-              yhtio_nimi          = '{$yhtiorow["nimi"]}',
-              yhtio_osoite        = '{$yhtiorow["osoite"]}',
-              yhtio_postino       = '{$yhtiorow["postino"]}',
-              yhtio_postitp       = '{$yhtiorow["postitp"]}',
-              yhtio_maa           = '{$yhtiorow["maa"]}',
-              toim_nimi           = '{$yhtiorow["nimi"]}',
-              toim_osoite         = '{$yhtiorow["osoite"]}',
-              toim_postino        = '{$yhtiorow["postino"]}',
-              toim_postitp        = '{$yhtiorow["postitp"]}',
-              toim_maa            = '{$yhtiorow["maa"]}',
-              nimi                = '{$toimittajarow["nimi"]}',
-              osoite              = '{$toimittajarow["osoite"]}',
-              postino             = '{$toimittajarow["postino"]}',
-              postitp             = '{$toimittajarow["postitp"]}',
-              maa                 = '{$toimittajarow["maa"]}',
-              valkoodi            = '{$toimittajarow["oletus_valkoodi"]}',
-              toimaika            = now(),
-              laatija             = '{$kukarow["kuka"]}',
-              luontiaika          = now(),
-              tila                = 'O',
-              toimitusehto        = '{$toimittajarow["toimitusehto"]}',
-              liitostunnus        = '{$toimittajarow["tunnus"]}',
-              ytunnus             = '{$toimittajarow["ytunnus"]}',
-              ovttunnus           = '{$toimittajarow["ovttunnus"]}',
-              tilausyhteyshenkilo = '{$toimittajarow["yhteyshenkilo"]}'";
+        $query = "INSERT INTO lasku SET
+                  yhtio               = '{$kukarow["yhtio"]}',
+                  yhtio_nimi          = '{$yhtiorow["nimi"]}',
+                  yhtio_osoite        = '{$yhtiorow["osoite"]}',
+                  yhtio_postino       = '{$yhtiorow["postino"]}',
+                  yhtio_postitp       = '{$yhtiorow["postitp"]}',
+                  yhtio_maa           = '{$yhtiorow["maa"]}',
+                  toim_nimi           = '{$yhtiorow["nimi"]}',
+                  toim_osoite         = '{$yhtiorow["osoite"]}',
+                  toim_postino        = '{$yhtiorow["postino"]}',
+                  toim_postitp        = '{$yhtiorow["postitp"]}',
+                  toim_maa            = '{$yhtiorow["maa"]}',
+                  nimi                = '{$toimittajarow["nimi"]}',
+                  osoite              = '{$toimittajarow["osoite"]}',
+                  postino             = '{$toimittajarow["postino"]}',
+                  postitp             = '{$toimittajarow["postitp"]}',
+                  maa                 = '{$toimittajarow["maa"]}',
+                  valkoodi            = '{$toimittajarow["oletus_valkoodi"]}',
+                  toimaika            = now(),
+                  laatija             = '{$kukarow["kuka"]}',
+                  luontiaika          = now(),
+                  tila                = 'O',
+                  toimitusehto        = '{$toimittajarow["toimitusehto"]}',
+                  liitostunnus        = '{$toimittajarow["tunnus"]}',
+                  ytunnus             = '{$toimittajarow["ytunnus"]}',
+                  ovttunnus           = '{$toimittajarow["ovttunnus"]}',
+                  tilausyhteyshenkilo = '{$toimittajarow["yhteyshenkilo"]}'";
         $result = pupe_query($query);
         $otunnus = mysql_insert_id();
 
@@ -372,36 +372,36 @@ if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
         $edellinen_toimittaja = $toimittaja;
       }
 
-      $query = "  SELECT tuote.try,
-            tuote.osasto,
-            tuote.nimitys,
-            tuote.yksikko,
-            tuotteen_toimittajat.ostohinta
-            FROM tuote
-            JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio
-              AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
-              AND tuotteen_toimittajat.liitostunnus = '{$toimittajarow["tunnus"]}')
-            WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-            AND tuote.tuoteno = '$tuoteno'";
+      $query = "SELECT tuote.try,
+                tuote.osasto,
+                tuote.nimitys,
+                tuote.yksikko,
+                tuotteen_toimittajat.ostohinta
+                FROM tuote
+                JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio
+                  AND tuotteen_toimittajat.tuoteno      = tuote.tuoteno
+                  AND tuotteen_toimittajat.liitostunnus = '{$toimittajarow["tunnus"]}')
+                WHERE tuote.yhtio                       = '{$kukarow["yhtio"]}'
+                AND tuote.tuoteno                       = '$tuoteno'";
       $result = pupe_query($query);
       $tuoterow = mysql_fetch_assoc($result);
 
-      $query = "  INSERT INTO tilausrivi SET
-            yhtio     = '{$kukarow["yhtio"]}',
-            tyyppi    = 'O',
-            toimaika  = now(),
-            kerayspvm = now(),
-            otunnus   = '$otunnus',
-            tuoteno   = '$tuoteno',
-            try       = '{$tuoterow["try"]}',
-            osasto    = '{$tuoterow["osasto"]}',
-            nimitys   = '{$tuoterow["nimitys"]}',
-            tilkpl    = '$maara',
-            yksikko   = '{$tuoterow["yksikko"]}',
-            varattu   = '$maara',
-            hinta     = '{$tuoterow["ostohinta"]}',
-            laatija   = '{$kukarow["kuka"]}',
-            laadittu  = now()";
+      $query = "INSERT INTO tilausrivi SET
+                yhtio     = '{$kukarow["yhtio"]}',
+                tyyppi    = 'O',
+                toimaika  = now(),
+                kerayspvm = now(),
+                otunnus   = '$otunnus',
+                tuoteno   = '$tuoteno',
+                try       = '{$tuoterow["try"]}',
+                osasto    = '{$tuoterow["osasto"]}',
+                nimitys   = '{$tuoterow["nimitys"]}',
+                tilkpl    = '$maara',
+                yksikko   = '{$tuoterow["yksikko"]}',
+                varattu   = '$maara',
+                hinta     = '{$tuoterow["ostohinta"]}',
+                laatija   = '{$kukarow["kuka"]}',
+                laadittu  = now()";
       $result = pupe_query($query);
     }
   }
@@ -452,18 +452,18 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
     }
 
     // katotaan JT:ssä olevat tuotteet ABC-analyysiä varten, koska ne pitää includata aina!
-    $query = "  SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
-          FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-          JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
-            AND tuote.tuoteno = tilausrivi.tuoteno
-            AND tuote.ei_saldoa = ''
-            AND tuote.status != 'P'
-            AND tuote.ostoehdotus != 'E'
-            $tuote_where)
-          WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-          AND tilausrivi.tyyppi IN  ('L','G')
-          AND tilausrivi.var = 'J'
-          AND tilausrivi.jt $lisavarattu > 0";
+    $query = "SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
+              FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+              JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
+                AND tuote.tuoteno      = tilausrivi.tuoteno
+                AND tuote.ei_saldoa    = ''
+                AND tuote.status      != 'P'
+                AND tuote.ostoehdotus != 'E'
+                $tuote_where)
+              WHERE tilausrivi.yhtio   = '{$kukarow["yhtio"]}'
+              AND tilausrivi.tyyppi    IN  ('L','G')
+              AND tilausrivi.var       = 'J'
+              AND tilausrivi.jt $lisavarattu > 0";
     $vtresult = pupe_query($query);
     $vrow = mysql_fetch_array($vtresult);
 
@@ -481,20 +481,20 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
   }
 
   // Haetaan raaka-aineet, jotka osuvat hakuehtoihin
-  $query = "  SELECT DISTINCT
-        tuote.tuoteno,
-        tuote.nimitys,
-        $toimittaja_select
-        FROM tuote
-        JOIN tuoteperhe ON (tuote.tuoteno = tuoteperhe.tuoteno AND tuote.yhtio = tuoteperhe.yhtio AND tuoteperhe.tyyppi = 'R')
-        $toimittaja_join
-        $abc_join
-        WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-        AND tuote.ei_saldoa = ''
-        AND tuote.status != 'P'
-        AND tuote.ostoehdotus != 'E'
-        $tuote_where
-        ORDER BY toimittaja, tuote.try, tuote.tuoteno";
+  $query = "SELECT DISTINCT
+            tuote.tuoteno,
+            tuote.nimitys,
+            $toimittaja_select
+            FROM tuote
+            JOIN tuoteperhe ON (tuote.tuoteno = tuoteperhe.tuoteno AND tuote.yhtio = tuoteperhe.yhtio AND tuoteperhe.tyyppi = 'R')
+            $toimittaja_join
+            $abc_join
+            WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
+            AND tuote.ei_saldoa    = ''
+            AND tuote.status      != 'P'
+            AND tuote.ostoehdotus != 'E'
+            $tuote_where
+            ORDER BY toimittaja, tuote.try, tuote.tuoteno";
   $res = pupe_query($query);
 
   echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
@@ -753,10 +753,10 @@ if (!isset($tee) or $tee == "") {
     echo "<input type='text' size='20' name='ytunnus' value='$ytunnus'>";
   }
   else {
-    $query = "  SELECT *
-          from toimi
-          where yhtio = '{$kukarow["yhtio"]}'
-          and tunnus = '$toimittajaid'";
+    $query = "SELECT *
+              from toimi
+              where yhtio = '{$kukarow["yhtio"]}'
+              and tunnus  = '$toimittajaid'";
     $result = mysql_query($query) or pupe_error($query);
     $toimittaja = mysql_fetch_assoc($result);
 

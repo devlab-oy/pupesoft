@@ -32,11 +32,11 @@ if(!function_exists("liitetiedostottarkista")) {
     if (mysql_field_name($result, $i) == "jarjestys") {
 
       if ((int) $t[$i] == 0) {
-        $query = "  SELECT max(jarjestys) jarjestys
-              FROM liitetiedostot
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and liitos       = '$liite_liitos'
-              and liitostunnus   = '$liite_liitostunnus'";
+        $query = "SELECT max(jarjestys) jarjestys
+                  FROM liitetiedostot
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and liitos       = '$liite_liitos'
+                  and liitostunnus = '$liite_liitostunnus'";
         $jres = pupe_query($query);
         $jrow = mysql_fetch_array($jres);
 
@@ -72,13 +72,13 @@ if(!function_exists("liitetiedostottarkista")) {
         $file_name = preg_replace("/[^A-Z0-9\._\-%]/i", "", $_FILES['liite_data']['name']);
 
         //ehkä kieli whereen
-        $query = "  SELECT filename, kayttotarkoitus
-              FROM liitetiedostot
-              where yhtio     = '$kukarow[yhtio]'
-              and liitos       = '$liite_liitos'
-              and liitostunnus  = '$liite_liitostunnus'
-              $kayttotarkoitus_lisa
-              and filename     = '$file_name'";
+        $query = "SELECT filename, kayttotarkoitus
+                  FROM liitetiedostot
+                  where yhtio      = '$kukarow[yhtio]'
+                  and liitos       = '$liite_liitos'
+                  and liitostunnus = '$liite_liitostunnus'
+                  $kayttotarkoitus_lisa
+                  and filename     = '$file_name'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {

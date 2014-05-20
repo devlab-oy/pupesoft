@@ -4,9 +4,9 @@
 require('../inc/parametrit.inc');
 
 if ((int) $liitostunnus > 0) {
-  $query   = "  SELECT *
-        FROM lasku
-        WHERE tunnus = '$liitostunnus' and yhtio = '$kukarow[yhtio]'";
+  $query   = "SELECT *
+              FROM lasku
+              WHERE tunnus = '$liitostunnus' and yhtio = '$kukarow[yhtio]'";
   $result = mysql_query($query) or pupe_error($query);
   $laskurow = mysql_fetch_array($result);
 }
@@ -29,12 +29,12 @@ if (!isset($tyojono) and $toim == 'TYOMAARAYS_ASENTAJA') {
 
 if (!isset($tyojono)) {
   // Onko käyttäjällä oletustyöjono
-  $query = "  SELECT selite
-        FROM avainsana
-        WHERE yhtio   = '$kukarow[yhtio]'
-        and laji    = 'TYOM_TYOLINJA'
-        and selitetark  = '$kukarow[kuka]'
-        and selite     != ''";
+  $query = "SELECT selite
+            FROM avainsana
+            WHERE yhtio     = '$kukarow[yhtio]'
+            and laji        = 'TYOM_TYOLINJA'
+            and selitetark  = '$kukarow[kuka]'
+            and selite     != ''";
   $yres = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($yres) > 0) {
@@ -151,17 +151,17 @@ if ($tee == "LISAA") {
     $tee = "VARAA";
   }
 
-  $query = "  SELECT tunnus
-        FROM kalenteri
-        WHERE
-        $konsernit
-        and tyyppi   = 'asennuskalenteri'
-        and kuka   = '$asentaja'
-        and (  (pvmalku >= '$year-$month-$day $aika:00' and pvmalku  < '$lyear-$lmonth-$lday $laika:00') or
-            (pvmalku  < '$year-$month-$day $aika:00' and pvmloppu > '$lyear-$lmonth-$lday $laika:00') or
-            (pvmloppu > '$year-$month-$day $aika:00' and pvmloppu<= '$lyear-$lmonth-$lday $laika:00'))
-        and tunnus != '$tyotunnus'
-        order by pvmalku";
+  $query = "SELECT tunnus
+            FROM kalenteri
+            WHERE
+            $konsernit
+            and tyyppi  = 'asennuskalenteri'
+            and kuka    = '$asentaja'
+            and (  (pvmalku >= '$year-$month-$day $aika:00' and pvmalku  < '$lyear-$lmonth-$lday $laika:00') or
+                (pvmalku  < '$year-$month-$day $aika:00' and pvmloppu > '$lyear-$lmonth-$lday $laika:00') or
+                (pvmloppu > '$year-$month-$day $aika:00' and pvmloppu<= '$lyear-$lmonth-$lday $laika:00'))
+            and tunnus != '$tyotunnus'
+            order by pvmalku";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -170,41 +170,41 @@ if ($tee == "LISAA") {
   }
 
   if ($tee == "LISAA" and $tyotunnus > 0) {
-    $query = "  UPDATE kalenteri
-          SET
-          muuttaja  = '$kukarow[kuka]',
-          muutospvm  = now(),
-          tapa    = '$tyojono',
-          kuka     = '$asentaja',
-          pvmalku   = '$year-$month-$day $aika',
-          pvmloppu   = '$lyear-$lmonth-$lday $laika',
-          liitostunnus= '$liitostunnus',
-          tyyppi     = 'asennuskalenteri'
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tyyppi  = 'asennuskalenteri'
-          and tunnus  = '$tyotunnus'";
+    $query = "UPDATE kalenteri
+              SET
+              muuttaja    = '$kukarow[kuka]',
+              muutospvm   = now(),
+              tapa        = '$tyojono',
+              kuka        = '$asentaja',
+              pvmalku     = '$year-$month-$day $aika',
+              pvmloppu    = '$lyear-$lmonth-$lday $laika',
+              liitostunnus= '$liitostunnus',
+              tyyppi      = 'asennuskalenteri'
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tyyppi  = 'asennuskalenteri'
+              and tunnus  = '$tyotunnus'";
     mysql_query($query) or pupe_error($query);
 
 
     if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and isset($lisaa_muistutus) and trim($lisaa_muistutus) == 'kylla') {
-      $query = "  SELECT *
-            FROM kalenteri
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tyyppi = 'Muistutus'
-            AND tapa = 'Asentajan kuittaus'
-            AND liitostunnus = '$liitostunnus'
-            AND kentta02 = '$liitostunnus'
-            AND kuittaus != ''
-            ORDER BY tunnus DESC";
+      $query = "SELECT *
+                FROM kalenteri
+                WHERE yhtio       = '$kukarow[yhtio]'
+                AND tyyppi        = 'Muistutus'
+                AND tapa          = 'Asentajan kuittaus'
+                AND liitostunnus  = '$liitostunnus'
+                AND kentta02      = '$liitostunnus'
+                AND kuittaus     != ''
+                ORDER BY tunnus DESC";
       $muistutus_chk_res = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($muistutus_chk_res) != 0) {
         $muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
 
-        $query = "  UPDATE kalenteri SET
-              pvmloppu = '$lyear-$lmonth-$lday $laika'
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$muistutus_chk_row[tunnus]'";
+        $query = "UPDATE kalenteri SET
+                  pvmloppu    = '$lyear-$lmonth-$lday $laika'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '$muistutus_chk_row[tunnus]'";
         $muistutus_insert_res = mysql_query($query) or pupe_error($query);
       }
       else {
@@ -222,17 +222,17 @@ if ($tee == "LISAA") {
     $tee = "";
   }
   elseif ($tee == "LISAA") {
-    $query = "  INSERT INTO kalenteri
-          SET
-          yhtio     = '$kukarow[yhtio]',
-          laatija    = '$kukarow[kuka]',
-          luontiaika  = now(),
-          tapa    = '$tyojono',
-          kuka     = '$asentaja',
-          pvmalku   = '$year-$month-$day $aika',
-          pvmloppu   = '$lyear-$lmonth-$lday $laika',
-          liitostunnus= '$liitostunnus',
-          tyyppi     = 'asennuskalenteri'";
+    $query = "INSERT INTO kalenteri
+              SET
+              yhtio      = '$kukarow[yhtio]',
+              laatija    = '$kukarow[kuka]',
+              luontiaika = now(),
+              tapa       = '$tyojono',
+              kuka       = '$asentaja',
+              pvmalku    = '$year-$month-$day $aika',
+              pvmloppu   = '$lyear-$lmonth-$lday $laika',
+              liitostunnus= '$liitostunnus',
+              tyyppi     = 'asennuskalenteri'";
 
     if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and isset($lisaa_muistutus) and trim($lisaa_muistutus) == 'kylla') {
       $query .= ", kentta02 = '$liitostunnus' ";
@@ -277,12 +277,12 @@ if ($tee == "LISAA") {
 }
 
 if ($tee == "MUOKKAA") {
-  $query = "  SELECT *
-        FROM kalenteri
-        WHERE
-        $konsernit
-        and tunnus = '$tyotunnus'
-        and tyyppi = 'asennuskalenteri'";
+  $query = "SELECT *
+            FROM kalenteri
+            WHERE
+            $konsernit
+            and tunnus = '$tyotunnus'
+            and tyyppi = 'asennuskalenteri'";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -311,48 +311,48 @@ if ($tee == "POISTA") {
 
   if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K') {
 
-    $query = "  SELECT pvmloppu, tunnus
-          FROM kalenteri
-          WHERE tyyppi = 'asennuskalenteri'
-          AND liitostunnus = '$liitostunnus'
-          AND kentta02 = '$liitostunnus'
-          #AND tapa = '$tyojono'
-          AND tunnus != '$tyotunnus'
-          ORDER BY pvmloppu DESC";
+    $query = "SELECT pvmloppu, tunnus
+              FROM kalenteri
+              WHERE tyyppi      = 'asennuskalenteri'
+              AND liitostunnus  = '$liitostunnus'
+              AND kentta02      = '$liitostunnus'
+              #AND tapa = '$tyojono'
+              AND tunnus       != '$tyotunnus'
+              ORDER BY pvmloppu DESC";
     $kappale_chk_res = mysql_query($query) or pupe_error($query);
 
-    $query = "  SELECT *
-          FROM kalenteri
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tyyppi = 'Muistutus'
-          AND tapa = 'Asentajan kuittaus'
-          AND liitostunnus = '$liitostunnus'
-          AND kentta02 = '$liitostunnus'
-          AND kuittaus != ''
-          ORDER BY tunnus DESC";
+    $query = "SELECT *
+              FROM kalenteri
+              WHERE yhtio       = '$kukarow[yhtio]'
+              AND tyyppi        = 'Muistutus'
+              AND tapa          = 'Asentajan kuittaus'
+              AND liitostunnus  = '$liitostunnus'
+              AND kentta02      = '$liitostunnus'
+              AND kuittaus     != ''
+              ORDER BY tunnus DESC";
     $muistutus_chk_res = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($muistutus_chk_res) != 0) {
       $muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
 
       if (mysql_num_rows($kappale_chk_res) == 0) {
-        $query = "  DELETE FROM kalenteri
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$muistutus_chk_row[tunnus]'
-              AND pvmalku  = '$year-$month-$day $aika'
-              AND pvmloppu = '$lyear-$lmonth-$lday $laika'
-              AND liitostunnus = '$liitostunnus'
-              AND kentta02 = '$liitostunnus'
-              AND tunnus = '$muistutus_chk_row[tunnus]'";
+        $query = "DELETE FROM kalenteri
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  AND tunnus       = '$muistutus_chk_row[tunnus]'
+                  AND pvmalku      = '$year-$month-$day $aika'
+                  AND pvmloppu     = '$lyear-$lmonth-$lday $laika'
+                  AND liitostunnus = '$liitostunnus'
+                  AND kentta02     = '$liitostunnus'
+                  AND tunnus       = '$muistutus_chk_row[tunnus]'";
         $muistutus_delete_res = mysql_query($query) or pupe_error($query);
       }
       else {
         while ($kappale_chk_row = mysql_fetch_assoc($kappale_chk_res)) {
           if ($kappale_chk_row['pvmloppu'] != "$lyear-$lmonth-$lday $laika") {
-            $query = "  UPDATE kalenteri SET
-                  pvmloppu = '$kappale_chk_row[pvmloppu]'
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tunnus = '$muistutus_chk_row[tunnus]'";
+            $query = "UPDATE kalenteri SET
+                      pvmloppu    = '$kappale_chk_row[pvmloppu]'
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND tunnus  = '$muistutus_chk_row[tunnus]'";
             $muistutus_update_res = mysql_query($query) or pupe_error($query);
             break;
           }
@@ -361,12 +361,12 @@ if ($tee == "POISTA") {
     }
   }
 
-  $query = "  DELETE
-        FROM kalenteri
-        WHERE
-        $konsernit
-        and tunnus = '$tyotunnus'
-        and tyyppi = 'asennuskalenteri'";
+  $query = "DELETE
+            FROM kalenteri
+            WHERE
+            $konsernit
+            and tunnus = '$tyotunnus'
+            and tyyppi = 'asennuskalenteri'";
   $result = mysql_query($query) or pupe_error($query);
 
   echo "<font class='message'>".t("Kalenterimerkintä poistettu")."!</font><br><br>";
@@ -585,28 +585,28 @@ if ($tee == "") {
         $tyyppilisa = "'asennuskalenteri'";
       }
 
-      $query = "  SELECT $selectlisa kalenteri.kuka,
-            kalenteri.pvmalku,
-            kalenteri.pvmloppu,
-            kalenteri.tapa,
-            kalenteri.tyyppi,
-            if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
-            if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
-            if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,
-            tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus,
-            lasku.nimi, lasku.toim_nimi,
-            kalenteri.konserni, a2.selitetark_2 tyostatusvari
-            FROM kalenteri
-            LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
-            LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus and lasku.tunnus > 0
-            LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus  and tyomaarays.otunnus > 0
-            LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
-            WHERE kalenteri.yhtio = '$kukarow[yhtio]'
-            and kalenteri.tyyppi in ($tyyppilisa)
-            and (  (pvmalku >= '$year-$month-$i 00:00:00' and pvmalku <= '$year-$month-$i 23:59:00') or
-                (pvmalku <  '$year-$month-$i 00:00:00' and pvmloppu > '$year-$month-$i 00:00:00') or
-                (pvmloppu >='$year-$month-$i 00:00:00' and pvmloppu<= '$year-$month-$i 23:59:00'))
-            order by $orderlisa pvmalku";
+      $query = "SELECT $selectlisa kalenteri.kuka,
+                kalenteri.pvmalku,
+                kalenteri.pvmloppu,
+                kalenteri.tapa,
+                kalenteri.tyyppi,
+                if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
+                if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
+                if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,
+                tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus,
+                lasku.nimi, lasku.toim_nimi,
+                kalenteri.konserni, a2.selitetark_2 tyostatusvari
+                FROM kalenteri
+                LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
+                LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus and lasku.tunnus > 0
+                LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus  and tyomaarays.otunnus > 0
+                LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
+                WHERE kalenteri.yhtio = '$kukarow[yhtio]'
+                and kalenteri.tyyppi  in ($tyyppilisa)
+                and (  (pvmalku >= '$year-$month-$i 00:00:00' and pvmalku <= '$year-$month-$i 23:59:00') or
+                    (pvmalku <  '$year-$month-$i 00:00:00' and pvmloppu > '$year-$month-$i 00:00:00') or
+                    (pvmloppu >='$year-$month-$i 00:00:00' and pvmloppu<= '$year-$month-$i 23:59:00'))
+                order by $orderlisa pvmalku";
       $vres = mysql_query($query) or pupe_error($query);
 
       $varaukset   = array();

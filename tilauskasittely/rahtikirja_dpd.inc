@@ -33,20 +33,20 @@ if ($kollityht > 0) {
   }
   else {
     //Tulostetaan standardi kolliosoitelappu
-    $query = "  SELECT *
-          FROM lasku
-          WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus in ($otunnukset)
-          ORDER BY tunnus
-          LIMIT 1";
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  in ($otunnukset)
+              ORDER BY tunnus
+              LIMIT 1";
     $tempr = mysql_query($query) or pupe_error($query);
     $laskurow = mysql_fetch_array($tempr);
 
     // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
-    $query = "  SELECT nimi, nimitark, osoite, postino, postitp, maa
-          FROM varastopaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus = '$laskurow[varasto]'";
+    $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+              FROM varastopaikat
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$laskurow[varasto]'";
     $tempr = mysql_query($query) or pupe_error($query);
     $postirow_varasto = mysql_fetch_array($tempr);
 
@@ -330,18 +330,18 @@ if ($kollityht > 0) {
     $pdf->draw_text(mm_pt(15),  mm_pt(130), $laskurow['toim_osoite'],            $firstpage, $kirj);
     $pdf->draw_text(mm_pt(15),  mm_pt(123), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $iso);
 
-    $query = "  SELECT *
-          FROM maat
-          WHERE koodi = '$laskurow[toim_maa]'";
+    $query = "SELECT *
+              FROM maat
+              WHERE koodi = '$laskurow[toim_maa]'";
     $tempr = mysql_query($query) or pupe_error($query);
     $maarow = mysql_fetch_array($tempr);
 
     $pdf->draw_text(mm_pt(15),  mm_pt(116), substr($maarow['nimi'],5),                $firstpage, $iso);
 
-    $query = "  SELECT *
-          FROM asiakas
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus  = '$laskurow[liitostunnus]'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  = '$laskurow[liitostunnus]'";
     $tempr = mysql_query($query) or pupe_error($query);
     $asiakasrow = mysql_fetch_array($tempr);
 

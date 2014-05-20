@@ -43,10 +43,10 @@ if (!function_exists("toimitarkista")) {
     }
 
     if ($fieldname == "tilino" and $t[$i] != "") {
-      $query = "  SELECT yhtio
-            FROM tili
-            WHERE yhtio = '$kukarow[yhtio]'
-            and tilino = '$t[$i]'";
+      $query = "SELECT yhtio
+                FROM tili
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tilino  = '$t[$i]'";
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) != 1) {
@@ -185,13 +185,13 @@ if (!function_exists("toimitarkista")) {
           $t[$i] = "0037".sprintf("%08d", preg_replace("/[^0-9]/", "", $tmp_ytunnus));
         }
 
-        $query = "  SELECT ytunnus, tunnus
-              FROM toimi
-              WHERE yhtio    = '$kukarow[yhtio]'
-              and ytunnus   = '$tmp_ytunnus'
-              and ovttunnus = '$t[$i]'
-              and tyyppi    != 'P'
-              and tunnus   != '$tunnus'";
+        $query = "SELECT ytunnus, tunnus
+                  FROM toimi
+                  WHERE yhtio    = '$kukarow[yhtio]'
+                  and ytunnus    = '$tmp_ytunnus'
+                  and ovttunnus  = '$t[$i]'
+                  and tyyppi    != 'P'
+                  and tunnus    != '$tunnus'";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) > 0) {
@@ -217,12 +217,12 @@ if (!function_exists("toimitarkista")) {
       $toimtyyppi = $t[$i]; // otetaan tää talteen
 
       if ($toimtyyppi == "K") {
-        $query = "  SELECT ytunnus
-              FROM toimi
-              WHERE yhtio = '$kukarow[yhtio]'
-              and ytunnus = '$ytunnus'
-              and tyyppi  = 'K'
-              and tunnus != '$tunnus'";
+        $query = "SELECT ytunnus
+                  FROM toimi
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and ytunnus  = '$ytunnus'
+                  and tyyppi   = 'K'
+                  and tunnus  != '$tunnus'";
         $vres = pupe_query($query);
 
         if (mysql_num_rows($vres) > 0)  {
@@ -248,25 +248,25 @@ if (!function_exists("toimitarkista")) {
 
       if ($toimtyyppi == "L" and $tunnus > 0 and $errori != 1) {
         // injisoidaan tuotteen_toimittajat kaikille tuotteille
-        $query = "  INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, liitostunnus, valuutta, alkuperamaa, tuotekerroin, laatija, luontiaika)
-              SELECT yhtio, tuoteno, tuoteno, '$tunnus', '$tmp_valkoodi', '$tmp_maakoodi', 1, '$kukarow[kuka]', now()
-              FROM tuote
-              WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' and tuote.status != 'P'
-              ON DUPLICATE KEY UPDATE
-              tuotteen_toimittajat.liitostunnus   = $tunnus,
-              tuotteen_toimittajat.valuutta    = '$tmp_valkoodi',
-              tuotteen_toimittajat.alkuperamaa  = '$tmp_maakoodi'";
+        $query = "INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, liitostunnus, valuutta, alkuperamaa, tuotekerroin, laatija, luontiaika)
+                  SELECT yhtio, tuoteno, tuoteno, '$tunnus', '$tmp_valkoodi', '$tmp_maakoodi', 1, '$kukarow[kuka]', now()
+                  FROM tuote
+                  WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' and tuote.status != 'P'
+                  ON DUPLICATE KEY UPDATE
+                  tuotteen_toimittajat.liitostunnus = $tunnus,
+                  tuotteen_toimittajat.valuutta     = '$tmp_valkoodi',
+                  tuotteen_toimittajat.alkuperamaa  = '$tmp_maakoodi'";
         pupe_query($query);
       }
 
       if ($toimtyyppi == "PP" and $tunnus > 0 and $errori != 1) {
         // poistetaan tuotteen_toimittajat kaikille tuotteille
-        $query = "  DELETE tuotteen_toimittajat
-              FROM tuotteen_toimittajat
-              LEFT JOIN tilausrivi ON (tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tilausrivi.tyyppi='O' and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tilausrivi.varattu != 0)
-              WHERE tuotteen_toimittajat.yhtio    = '$kukarow[yhtio]'
-              and tuotteen_toimittajat.liitostunnus = $tunnus
-              and tilausrivi.tunnus IS NULL";
+        $query = "DELETE tuotteen_toimittajat
+                  FROM tuotteen_toimittajat
+                  LEFT JOIN tilausrivi ON (tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tilausrivi.tyyppi='O' and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tilausrivi.varattu != 0)
+                  WHERE tuotteen_toimittajat.yhtio      = '$kukarow[yhtio]'
+                  and tuotteen_toimittajat.liitostunnus = $tunnus
+                  and tilausrivi.tunnus IS NULL";
         pupe_query($query);
       }
     }

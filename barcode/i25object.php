@@ -130,7 +130,7 @@ Contact author at: barcode@mribti.com
    else $ysize = $this->mHeight - BCD_DEFAULT_MAR_Y1 - BCD_DEFAULT_MAR_Y2;
 
    if ($this->mStyle & BCS_ALIGN_CENTER) $sPos = (integer)(($this->mWidth - $size ) / 2);
-   else if ($this->mStyle & BCS_ALIGN_RIGHT) $sPos = $this->mWidth - $size;
+   elseif ($this->mStyle & BCS_ALIGN_RIGHT) $sPos = $this->mWidth - $size;
        else $sPos = 0;
 
     if ($this->mStyle & BCS_DRAW_TEXT) {

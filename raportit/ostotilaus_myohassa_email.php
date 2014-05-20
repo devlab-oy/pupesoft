@@ -24,10 +24,10 @@ if (php_sapi_name() == 'cli') {
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 
   // Haetaan käyttäjän tiedot
-  $query = "  SELECT *
-        FROM kuka
-        WHERE yhtio = '$yhtio'
-        AND kuka = 'admin'";
+  $query = "SELECT *
+            FROM kuka
+            WHERE yhtio = '$yhtio'
+            AND kuka    = 'admin'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -82,28 +82,28 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
   global $kukarow;
 
   //AND tilausrivi.keratty = '', ei haeta ostotilausrivejä, jotka on jo saapuneet varastoon.
-  $query = "  SELECT lasku.tunnus as lasku_tunnus,
-        lasku.nimi as toimittaja,
-        tilausrivi.toimaika as toimitusaika,
-        tilausrivi.tuoteno,
-        tilausrivi.tilkpl,
-        tilausrivi.jaksotettu as vahvistettu,
-        lasku.laatija as ostaja,
-        tuote.ostajanro as vastuuostaja
-        FROM lasku
-        JOIN tilausrivi
-        ON ( tilausrivi.yhtio = lasku.yhtio
-          AND tilausrivi.otunnus = lasku.tunnus
-          AND tilausrivi.tyyppi = 'O'
-          AND tilausrivi.toimaika <= DATE_SUB(CURRENT_DATE, INTERVAL {$paivamaararaja} DAY)
-          AND tilausrivi.varattu > 0 )
-        JOIN tuote
-        ON ( tuote.yhtio = tilausrivi.yhtio
-          AND tuote.tuoteno = tilausrivi.tuoteno )
-        WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-        AND lasku.tila = 'O'
-        AND lasku.alatila = 'A'
-        ORDER BY lasku.nimi ASC";
+  $query = "SELECT lasku.tunnus as lasku_tunnus,
+            lasku.nimi as toimittaja,
+            tilausrivi.toimaika as toimitusaika,
+            tilausrivi.tuoteno,
+            tilausrivi.tilkpl,
+            tilausrivi.jaksotettu as vahvistettu,
+            lasku.laatija as ostaja,
+            tuote.ostajanro as vastuuostaja
+            FROM lasku
+            JOIN tilausrivi
+            ON ( tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus  = lasku.tunnus
+              AND tilausrivi.tyyppi   = 'O'
+              AND tilausrivi.toimaika <= DATE_SUB(CURRENT_DATE, INTERVAL {$paivamaararaja} DAY)
+              AND tilausrivi.varattu  > 0 )
+            JOIN tuote
+            ON ( tuote.yhtio = tilausrivi.yhtio
+              AND tuote.tuoteno       = tilausrivi.tuoteno )
+            WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
+            AND lasku.tila            = 'O'
+            AND lasku.alatila         = 'A'
+            ORDER BY lasku.nimi ASC";
   $result = pupe_query($query);
 
   $ostotilaukset = array();
@@ -200,10 +200,10 @@ function laheta_sahkopostit($email_bodys) {
 function hae_sahkopostiosoite($kuka) {
   global $kukarow;
 
-  $query = "  SELECT eposti
-        FROM kuka
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND kuka = '{$kuka}'";
+  $query = "SELECT eposti
+            FROM kuka
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND kuka    = '{$kuka}'";
   $result = pupe_query($query);
   $kuka_eposti = mysql_fetch_assoc($result);
 
@@ -220,10 +220,10 @@ function hae_sahkopostiosoite($kuka) {
 function hae_kuka_ostajanro_perusteella($ostajanro) {
   global $kukarow;
 
-  $query = "  SELECT kuka
-        FROM kuka
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND myyja = '{$ostajanro}'";
+  $query = "SELECT kuka
+            FROM kuka
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND myyja   = '{$ostajanro}'";
   $result = pupe_query($query);
 
   $kuka = mysql_fetch_assoc($result);

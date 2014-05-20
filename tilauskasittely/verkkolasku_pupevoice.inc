@@ -152,10 +152,10 @@ if (!function_exists('pupevoice_otsik')) {
     xml_add("DeliveredPartyCountryName",      $lasrow['toim_maa'],                 $tootxml);
     xml_add("DeliveredPartyOVT",          $lasrow['toim_ovttunnus'],               $tootxml);
 
-    $query = "  SELECT *
-          FROM laskun_lisatiedot
-          WHERE yhtio = '$lasrow[yhtio]'
-          AND otunnus = '$lasrow[tunnus]'";
+    $query = "SELECT *
+              FROM laskun_lisatiedot
+              WHERE yhtio = '$lasrow[yhtio]'
+              AND otunnus = '$lasrow[tunnus]'";
     $lasosres = pupe_query($query);
     $lasosrow = mysql_fetch_assoc($lasosres);
 
@@ -165,6 +165,27 @@ if (!function_exists('pupevoice_otsik')) {
       xml_add("InvoiceRecipientTownName",      $lasosrow['laskutus_postitp'],            $tootxml);
       xml_add("InvoiceRecipientPostCodeIdentifier", $lasosrow['laskutus_postino'],          $tootxml);
       xml_add("InvoiceRecipientCountryCode",    $lasosrow['laskutus_maa'],              $tootxml);
+    }
+
+    // Nämä solut lisätään vain jos pupevoice on lähdössä servinettiin
+    if ($yhtiorow['verkkolasku_lah'] == "servinet") {
+
+      //haetaan toimitustavan tiedot
+      $query = "SELECT *
+                FROM toimitustapa
+                where yhtio ='$lasrow[yhtio]'
+                and selite = '$lasrow[toimitustapa]'";
+      $terminaali_result = pupe_query($query);
+      $terminaali_row = mysql_fetch_assoc($terminaali_result);
+
+      if (!empty($terminaali_row['toim_ovttunnus'])) {
+        xml_add("CrossdockPartyName",         trim($terminaali_row['toim_nimi']." ".$terminaali_row['toim_nimitark']),       $tootxml);
+        xml_add("CrossdockPartyStreetName",   $terminaali_row['toim_osoite'],     $tootxml);
+        xml_add("CrossdockPartyPostCode",     $terminaali_row['toim_postino'],    $tootxml);
+        xml_add("CrossdockPartyTownName",     $terminaali_row['toim_postitp'],    $tootxml);
+        xml_add("CrossdockPartyCountryCode",  $terminaali_row['toim_maa'],        $tootxml);
+        xml_add("CrossdockPartyOVT",          $terminaali_row['toim_ovttunnus'],  $tootxml);
+      }
     }
 
     xml_add("DueDate",                vlas_dateconv($lasrow['erpcm']),          $tootxml);
@@ -209,12 +230,12 @@ if (!function_exists('pupevoice_rivi')) {
     xml_add("ArticleEANIdentifier",        $tilrow['eankoodi'],             $tootxml);
     xml_add("ArticleName",            $tilrow['nimitys'],             $tootxml);
 
-    $toim_query = "  SELECT toim_tuoteno, if (jarjestys = 0, 9999, jarjestys) sorttaus
-            FROM tuotteen_toimittajat
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tuoteno = '$tilrow[tuoteno]'
-            ORDER BY sorttaus
-            LIMIT 1";
+    $toim_query = "SELECT toim_tuoteno, if (jarjestys = 0, 9999, jarjestys) sorttaus
+                   FROM tuotteen_toimittajat
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   AND tuoteno = '$tilrow[tuoteno]'
+                   ORDER BY sorttaus
+                   LIMIT 1";
     $toim_tuoteno_res = pupe_query($toim_query);
     $toim_tuoteno_row = mysql_fetch_assoc($toim_tuoteno_res);
 
@@ -247,12 +268,12 @@ if (!function_exists('pupevoice_rivi')) {
       }
 
       // Tämä on tilauksen vika rivi, laitetaan työmäärystiedot tähän
-      $query = "  SELECT tyomaarays.*
-            FROM lasku
-            JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and lasku.tilaustyyppi = 'A'
-            and lasku.tunnus = '$tilrow[otunnus]'";
+      $query = "SELECT tyomaarays.*
+                FROM lasku
+                JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+                WHERE lasku.yhtio      = '$kukarow[yhtio]'
+                and lasku.tilaustyyppi = 'A'
+                and lasku.tunnus       = '$tilrow[otunnus]'";
       $tyomres = pupe_query($query);
 
       if (mysql_num_rows($tyomres) > 0) {
@@ -275,10 +296,10 @@ if (!function_exists('pupevoice_rivi')) {
                   $tyomrow[$kentta] = tv1dateconv($tyomrow[$kentta]);
                 }
                 elseif ($kentta == "suorittaja") {
-                  $query = "  SELECT nimi
-                        FROM kuka
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        and kuka    = '".$tyomrow[$kentta]."'";
+                  $query = "SELECT nimi
+                            FROM kuka
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            and kuka    = '".$tyomrow[$kentta]."'";
                   $yresult = pupe_query($query);
                   $row = mysql_fetch_assoc($yresult);
 

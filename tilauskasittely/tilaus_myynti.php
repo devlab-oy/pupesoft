@@ -2132,41 +2132,91 @@ if ($tee == '') {
   }
 
   // Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
-  if ($kukarow["kesken"] > 0 and (
-    (isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
-    (isset($rahtisopimus) and $rahtisopimus != '' and $rahtisopimus != $laskurow["rahtisopimus"]) or
-    (isset($viesti) and $viesti != $laskurow["viesti"]) or
-    (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
-    (isset($myyjanro) and $myyjanro > 0) or
-    (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
-    (isset($maksutapa) and $maksutapa != ''))) {
+  if ($kukarow["kesken"] > 0) {
+
+    $kassalipas = $laskurow['kassalipas'];
+    $nollaa_lahto = "";
+
+    $_ttapa = isset($toimitustapa) ? $toimitustapa : '';
+    $_onko_ttapa = ($_ttapa != '' and $_ttapa != $laskurow["toimitustapa"]);
+
+    if ($_onko_ttapa) {
+
+      $toimitustavan_lahto = array();
+
+      $query  = "UPDATE lasku SET
+                 toimitustapa    = '{$toimitustapa}'
+                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                 and tunnus      = '{$kukarow['kesken']}'";
+      $result = pupe_query($query);
+    }
+
+    $_rahsop = $rahtisopimus;
+    $_onko_rahsop = ($_rahsop != '' and $_rahsop != $laskurow["rahtisopimus"]);
+
+    if ($_onko_rahsop) {
+      $query  = "UPDATE lasku SET
+                 rahtisopimus    = '{$rahtisopimus}'
+                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                 and tunnus      = '{$kukarow['kesken']}'";
+      $result = pupe_query($query);
+    }
+
+    $_onko_viesti = (isset($viesti) and $viesti != $laskurow["viesti"]);
+
+    if ($_onko_viesti) {
+      $query  = "UPDATE lasku SET
+                 viesti          = '{$viesti}'
+                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                 and tunnus      = '{$kukarow['kesken']}'";
+      $result = pupe_query($query);
+    }
+
+    $_tilvah = $tilausvahvistus;
+    $_onko_tilvah = ($tilausvahvistus != '' and $tilausvahvistus != $laskurow["tilausvahvistus"]);
+
+    if ($_onko_tilvah) {
+      $query  = "UPDATE lasku SET
+                 tilausvahvistus = '{$tilausvahvistus}'
+                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                 and tunnus      = '{$kukarow['kesken']}'";
+      $result = pupe_query($query);
+    }
+
+    $pika_paiv_myyja = false;
 
     if ((int) $myyjanro > 0) {
-      $apuqu = "  SELECT *
-            FROM kuka use index (yhtio_myyja)
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND myyja = '$myyjanro'
-            AND myyja > 0";
+      $apuqu = "SELECT *
+                FROM kuka use INDEX (yhtio_myyja)
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND myyja = '{$myyjanro}'
+                AND myyja > 0";
       $meapu = pupe_query($apuqu);
 
       if (mysql_num_rows($meapu) == 1) {
         $apuro = mysql_fetch_assoc($meapu);
         $myyja = $apuro['tunnus'];
 
-        $pika_paiv_myyja = " myyja = '$myyja', ";
+        $pika_paiv_myyja = " myyja = '{$myyja}' ";
       }
-      elseif (mysql_num_rows($meapu)>1) {
-        echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("löytyi usealla käyttäjällä")."!</font><br><br>";
+      elseif (mysql_num_rows($meapu) > 1) {
+        echo "<font class='error'>",t("Syöttämäsi myyjänumero")," {$myyjanro} ",t("löytyi usealla käyttäjällä"),"!</font><br><br>";
       }
       else {
-        echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("ei löytynyt")."!</font><br><br>";
+        echo "<font class='error'>",t("Syöttämäsi myyjänumero")," {$myyjanro} ",t("ei löytynyt"),"!</font><br><br>";
       }
     }
-    elseif ((int) $myyja > 0) {
-      $pika_paiv_myyja = " myyja = '$myyja', ";
+    elseif ((int) $myyja > 0 and $myyja != $laskurow["myyja"]) {
+      $pika_paiv_myyja = " myyja = '{$myyja}' ";
     }
 
-    if ($toimitustapa != $laskurow['toimitustapa']) $toimitustavan_lahto = array();
+    if ($pika_paiv_myyja) {
+      $query  = "UPDATE lasku SET
+                 {$pika_paiv_myyja}
+                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                 and tunnus      = '{$kukarow['kesken']}'";
+      $result = pupe_query($query);
+    }
 
     if ($maksutapa != '') {
       $laskurow["maksuehto"] = $maksutapa;
@@ -2179,10 +2229,7 @@ if ($tee == '') {
           AND tunnus  = '$laskurow[maksuehto]'";
     $meapu = pupe_query($apuqu);
 
-    $kassalipas = "";
-    $nollaa_lahto = "";
-
-    if (mysql_num_rows($meapu) == 1 and $toimitustapa != '') {
+    if (mysql_num_rows($meapu) == 1 and isset($toimitustapa) and $toimitustapa != '') {
       $meapurow = mysql_fetch_assoc($meapu);
 
       // jos kyseessä oli käteinen
@@ -2215,7 +2262,9 @@ if ($tee == '') {
       }
     }
 
-    if ($toimitustapa != $laskurow["toimitustapa"]) {
+    $pika_paiv_merahti = "";
+
+    if (isset($toimitustapa) and $toimitustapa != $laskurow["toimitustapa"]) {
       $apuqu2 = "  SELECT merahti
             FROM toimitustapa
             WHERE yhtio = '$kukarow[yhtio]'
@@ -2250,17 +2299,13 @@ if ($tee == '') {
     }
 
     $query  = "UPDATE lasku SET
-               toimitustapa    = '$toimitustapa',
-               rahtisopimus    = '$rahtisopimus',
-               viesti          = '$viesti',
-               tilausvahvistus = '$tilausvahvistus',
-               $pika_paiv_merahti
-               $pika_paiv_myyja
-               $nollaa_lahto
-               kassalipas      = '$kassalipas',
-               maksuehto       = '$laskurow[maksuehto]'
-               WHERE yhtio     = '$kukarow[yhtio]'
-               and tunnus      = '$kukarow[kesken]'";
+               {$pika_paiv_merahti}
+               {$pika_paiv_myyja}
+               {$nollaa_lahto}
+               kassalipas      = '{$kassalipas}',
+               maksuehto       = '{$laskurow['maksuehto']}'
+               WHERE yhtio     = '{$kukarow['yhtio']}'
+               and tunnus      = '{$kukarow['kesken']}'";
     $result = pupe_query($query);
 
     //Haetaan laskurow uudestaan

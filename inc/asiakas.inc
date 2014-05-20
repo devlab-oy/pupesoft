@@ -91,18 +91,11 @@ $otsikko   = 'Asiakkaat';
 
 $kentatlisa = $hakukentatlisa = "";
 
-if ($yhtiorow['toimipaikkakasittely'] == 'L') {
-
-  $toimipaikkoja = mysql_num_rows(hae_yhtion_toimipaikat($kukarow['yhtio']));
-  if($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' or $toimipaikkoja > 0 ) {
-
-    $kentatlisa = "if(asiakas.toimipaikka != 0,
+if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+  $kentatlisa = "if(asiakas.toimipaikka != 0,
       (select nimi from yhtion_toimipaikat where yhtio='{$kukarow['yhtio']}'
       and tunnus = asiakas.toimipaikka), '') toimipaikka,";
-
-    $hakukentatlisa = ",toimipaikka";
-  }
-
+  $hakukentatlisa = ",toimipaikka";
 }
 
 $kentat = "tunnus, ytunnus, concat_ws('<br>',

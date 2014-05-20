@@ -53,9 +53,6 @@ if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
   $muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl."/".$tuoteno;
 
   if ($toim == 'MYYNTI') {
-
-    $ytunnus_talteen = $ytunnus;
-
     require ("inc/asiakashaku.inc");
   }
   if ($toim == 'OSTO') {

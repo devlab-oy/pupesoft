@@ -2136,7 +2136,7 @@ if ($tee == '') {
     (isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
     (isset($rahtisopimus) and $rahtisopimus != '' and $rahtisopimus != $laskurow["rahtisopimus"]) or
     (isset($viesti) and $viesti != $laskurow["viesti"]) or
-    (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
+    (isset($tilausvahvistus) and $tilausvahvistus != '' and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
     (isset($myyjanro) and $myyjanro > 0) or
     (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
     (isset($maksutapa) and $maksutapa != ''))) {
@@ -2247,10 +2247,6 @@ if ($tee == '') {
       }
 
       $pika_paiv_merahti = " kohdistettu = 'K', ";
-    }
-
-    if (!isset($toimitustapa)) {
-      $toimitustapa = $laskurow['toimitustapa'];
     }
 
     $query  = "UPDATE lasku SET

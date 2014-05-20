@@ -767,12 +767,13 @@ if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
     echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
   }
   echo "<tr><th>".t("Laskunumero")."</th><td><input type='text' size='10' name='laskunro'></td></tr>";
+
   if ($cleantoim == "MYYNTI") {
     echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td>";
-     // Tehaan kentta tai naytetaan popup
     echo livesearch_kentta("asiaktilaus", "ASIAKKAANTILAUSNUMERO", "astilnro", 170, $astilnro);
     echo "</td>";
   }
+
   echo "</table>";
 
   echo "<br><input type='submit' value='".t("Etsi")."'>";

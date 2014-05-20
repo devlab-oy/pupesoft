@@ -8742,7 +8742,7 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
 
       $query = "SELECT tunnus, asiakkaan_tilausnumero, nimi, luontiaika, tunnus
                 FROM lasku use index (yhtio_asiakkaan_tilausnumero)
-                WHERE lasku.tila NOT IN ('U', 'T')
+                WHERE tila in ('L','U','N','R','E','D')
                 and DATEDIFF(luontiaika,NOW()) <= 365
                 $haku_query
                 and $logistiikka_yhtiolisa";

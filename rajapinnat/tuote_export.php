@@ -331,26 +331,48 @@
   
   echo date("d.m.Y @ G:i:s")." - Haetaan dynaaminen tuotepuu.\n";
   
-  $query = "SELECT lapsi.nimi, lapsi.lft, lapsi.rgt, lapsi.tunnus, lapsi.syvyys
+  /*$query = "SELECT lapsi.nimi, lapsi.lft, lapsi.rgt, lapsi.tunnus, lapsi.syvyys
             FROM dynaaminen_puu AS vanhempi, dynaaminen_puu AS lapsi
             WHERE lapsi.lft BETWEEN vanhempi.lft AND vanhempi.rgt
             AND vanhempi.lft = 1
             AND vanhempi.nimi = 'magento'
             AND vanhempi.laji = 'tuote' 
-            AND lapsi.laji = 'tuote'";
+            AND lapsi.laji = 'tuote'";*/
+  $query = "SELECT t0.nimi node,
+            GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
+            (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
+             FROM dynaaminen_puu t6
+             WHERE t6.lft<t0.lft
+             AND t6.rgt>t0.rgt
+             AND t6.laji = 'tuote'
+             ORDER BY t6.lft) ancestors
+            FROM dynaaminen_puu t0
+            LEFT JOIN
+            (SELECT *
+             FROM (SELECT t1.lft node,
+                   MAX(t2.lft) nodeparent
+                   FROM dynaaminen_puu t1
+                   INNER JOIN
+                   dynaaminen_puu t2 ON (t1.lft>t2.lft AND t1.rgt<t2.rgt)
+                   GROUP BY t1.lft) t3 
+            LEFT JOIN
+            dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
+            WHERE t0.yhtio = '{$kukarow['yhtio']}'
+            AND t0.laji    = 'tuote'
+            GROUP BY t0.nimi";
 
   $dynpuu_result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($dynpuu_result)) {
-    $dnstuotepuu[$row['tunnus']] = array(
-                                          'nimi'    => $row['nimi'],
-                                          'syvyys'  => $row['syvyys'],
-                                          'left'    => $row['lft'],
-                                          'right'   => $row['rgt'],
-                                          'tunnus'  => $row['tunnus'],
-                                        );
+    $children = empty($row['children']) ? array () : explode("\n",$row['children']);
+    $ancestors = empty($row['ancestors']) ? array () : explode("\n",$row['ancestors']);
+    $dnstuotepuu[] = array(
+                           'nimi'    => $row['node'],
+                           'children'  => $children,
+                           'ancestors' => $ancestors,
+                          );
   }
-
+/*
   // Etsitään isätuotteet valmiiksi kaikille kategorioille 
   foreach ($dnstuotepuu as $tun => &$val) {
       foreach($dnstuotepuu as $tunni => $valli) {
@@ -372,7 +394,7 @@
       } 
     }
   }
-
+*/
   var_dump($dnstuotepuu);
   exit;
 

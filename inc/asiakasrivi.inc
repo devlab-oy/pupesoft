@@ -43,11 +43,10 @@ if (mysql_field_name($result, $i) == "toimipaikka") {
     $ulos .= "</select></td>";
     $jatko = 0;
   }
-}
-
-$toimipaikkoja = mysql_num_rows(hae_yhtion_toimipaikat($kukarow['yhtio']));
-if (mysql_field_name($result, $i) == "toimipaikka" and ($yhtiorow['myyntitilauksen_toimipaikka'] != 'A' and $toimipaikkoja < 1)) {
-  $tyyppi = 0;
+  $toimipaikkoja = mysql_num_rows(hae_yhtion_toimipaikat($kukarow['yhtio']));
+  if ($yhtiorow['myyntitilauksen_toimipaikka'] != 'A' and $toimipaikkoja < 1) {
+    $tyyppi = 0;
+  }
 }
 
 if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat

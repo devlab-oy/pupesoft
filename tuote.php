@@ -1138,7 +1138,7 @@ if ($tee == 'Z') {
 
     $toimipaikkarajaus = "";
 
-    if ($onkolaajattoimipaikat and trim($toimipaikka) != "" and $toimipaikka != 'kaikki') {
+    if ($onkolaajattoimipaikat and "{$toimipaikka}" != 'kaikki') {
       $toimipaikkarajaus = " and ((lasku.yhtio_toimipaikka = '{$toimipaikka}' and tilausrivi.tyyppi != 'O') OR (lasku.vanhatunnus = '{$toimipaikka}' and tilausrivi.tyyppi = 'O'))";
     }
 
@@ -1994,23 +1994,39 @@ if ($tee == 'Z') {
 
       if ($onkolaajattoimipaikat and trim($toimipaikka) != "" and $toimipaikka != 'kaikki') {
 
-        $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
-                   FROM varastopaikat
-                   WHERE yhtio      = '{$kukarow['yhtio']}'
-                   AND tyyppi      != 'P'
-                   AND toimipaikka  = '{$toimipaikka}'";
-        $vares = pupe_query($query);
-        $varow = mysql_fetch_assoc($vares);
-
-        if (!empty($varow['tunnukset'])) {
-          $toimipaikkarajaus = "JOIN varastopaikat ON varastopaikat.yhtio = tapahtuma.yhtio
-          and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-          and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-          and varastopaikat.tunnus IN ({$varow['tunnukset']})";
+        if ($toimipaikka != 0) {
+          $_toimipaikat = array($toimipaikka, 0);
         }
         else {
-          // Jos toimipaikkarajaus palauttaa NULLia, ei näytetä tapahtumia
-          $ehto = "AND tapahtuma.tunnus = 0";
+          $_toimipaikat = array(0);
+        }
+
+        foreach ($_toimipaikat as $_toimipaikka) {
+
+          $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
+                     FROM varastopaikat
+                     WHERE yhtio      = '{$kukarow['yhtio']}'
+                     AND tyyppi      != 'P'
+                     AND toimipaikka  = '{$_toimipaikka}'";
+          $vares = pupe_query($query);
+          $varow = mysql_fetch_assoc($vares);
+
+          # Jos meillä on toimipaikka setattuna ja ei löydetty tämän toimipaikan varastoja
+          # Fallback: etsitään varastoja joita ei ole liitetty toimipaikkaan
+          if (count($_toimipaikat) > 1 and $_toimipaikka != 0 and empty($varow['tunnukset'])) {
+            continue;
+          }
+
+          if (!empty($varow['tunnukset'])) {
+            $toimipaikkarajaus = "JOIN varastopaikat ON varastopaikat.yhtio = tapahtuma.yhtio
+            and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+            and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+            and varastopaikat.tunnus IN ({$varow['tunnukset']})";
+          }
+          else {
+            // Jos toimipaikkarajaus palauttaa NULLia, ei näytetä tapahtumia
+            $ehto = "AND tapahtuma.tunnus = 0";
+          }
         }
       }
 

@@ -54,11 +54,11 @@ function laske_hinta($laskurow, $tunnus) {
 
     if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
       // tutkitaan ollaanko siellä alv-rekisteröity
-      $alhqur = "  SELECT *
-            FROM yhtion_toimipaikat
-            WHERE yhtio    = '{$kukarow['yhtio']}'
-            AND maa      = '{$laskurow['maa']}'
-            AND vat_numero != ''";
+      $alhqur = "SELECT *
+                 FROM yhtion_toimipaikat
+                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                 AND maa         = '{$laskurow['maa']}'
+                 AND vat_numero != ''";
       $alhire = pupe_query($alhqur);
 
       // ollaan alv-rekisteröity

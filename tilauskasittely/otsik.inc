@@ -1436,10 +1436,10 @@ if ($tila == "" and !isset($jatka)) {
     $vasen++;
 
     // Valitun toimitustavan tietoja
-    $apuqu = "  SELECT *
-          FROM toimitustapa
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND selite  = '$srow[toimitustapa]'";
+    $apuqu = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND selite  = '$srow[toimitustapa]'";
     $meapu = pupe_query($apuqu);
     $toimtapa_apuro = mysql_fetch_assoc($meapu);
 
@@ -1947,7 +1947,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     $disabled = '';
-    
+
     if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus'])) {
       $query = "SELECT COUNT(*) AS tilausrivi_kpl
                 FROM tilausrivi
@@ -2016,7 +2016,7 @@ if ($tila == "" and !isset($jatka)) {
       $predefined_yhtiotoimipaikka = 0;
 
       $oikea_sarake[$oikea] .= "<td>";
-      
+
       if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($disabled)) {
         $oikea_sarake[$oikea] .= "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
       }
@@ -2071,7 +2071,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
-    
+
     if ($yhtiorow['pakollinen_varasto'] == 'K' and $_onko_varasto_setattu) {
       $v_toimipaikka = hae_varaston_toimipaikka($varasto);
       if ($v_toimipaikka['tunnus'] == 0) {
@@ -3431,21 +3431,21 @@ if (isset($jatka)) {
   // jos kyseessä oli käteinen
   if ($meapurow["kateinen"] != "") {
     // haetaan toimitustavan tiedot tarkastuksia varten
-    $apuqu2 = "  SELECT *
-          FROM toimitustapa
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND selite = '$toimitustapa'";
+    $apuqu2 = "SELECT *
+               FROM toimitustapa
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND selite  = '$toimitustapa'";
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 
     // ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
     if ($meapu2row["nouto"] == "") {
-      $apuqu = "  SELECT *
-            FROM toimitustapa
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND nouto != ''
-            ORDER BY jarjestys
-            LIMIT 1";
+      $apuqu = "SELECT *
+                FROM toimitustapa
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND nouto   != ''
+                ORDER BY jarjestys
+                LIMIT 1";
       $meapu = pupe_query($apuqu);
       $apuro = mysql_fetch_assoc($meapu);
 
@@ -3488,10 +3488,10 @@ if (isset($jatka)) {
     }
   }
 
-  $apuqu = "  SELECT *
-        FROM toimitustapa
-        WHERE yhtio = '$kukarow[yhtio]'
-        AND selite = '$toimitustapa'";
+  $apuqu = "SELECT *
+            FROM toimitustapa
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND selite  = '$toimitustapa'";
   $meapu = pupe_query($apuqu);
   $toimitustapa_apuro = mysql_fetch_assoc($meapu);
 
@@ -3560,10 +3560,10 @@ if (isset($jatka)) {
   // ALV-velvollisuus yliajaa aina kaikki toimipaikkatiedot
   if ($alv_velvollisuus != "") {
     // haetaan sen yhteystiedot
-    $alhqur = "  SELECT tunnus, vat_numero, toim_alv
-                FROM yhtion_toimipaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$yhtiotoimipaikka}'";
+    $alhqur = "SELECT tunnus, vat_numero, toim_alv
+               FROM yhtion_toimipaikat
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus  = '{$yhtiotoimipaikka}'";
     $alhire = pupe_query($alhqur);
     $alhiro = mysql_fetch_assoc($alhire);
 
@@ -3576,10 +3576,10 @@ if (isset($jatka)) {
     (isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
   ) {
 
-    $alhqur = "  SELECT alv, vienti
-          FROM asiakas
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$liitostunnus}'";
+    $alhqur = "SELECT alv, vienti
+               FROM asiakas
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus  = '{$liitostunnus}'";
     $alhire = pupe_query($alhqur);
     $alhiro  = mysql_fetch_assoc($alhire);
 
@@ -3592,18 +3592,18 @@ if (isset($jatka)) {
   if ($yhtiorow['nouto_suoraan_laskutukseen'] == 'K' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))) {
 
     if (isset($otsikon_laskurow['toimitustapa'])) {
-      $apuqu = "  SELECT *
-            FROM toimitustapa
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND selite = '{$otsikon_laskurow['toimitustapa']}'";
+      $apuqu = "SELECT *
+                FROM toimitustapa
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND selite  = '{$otsikon_laskurow['toimitustapa']}'";
       $meapu = pupe_query($apuqu);
       $toimitustapa_apuro2 = mysql_fetch_assoc($meapu);
     }
 
-    $apuqu = "  SELECT *
-          FROM toimitustapa
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND selite = '{$toimitustapa}'";
+    $apuqu = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND selite  = '{$toimitustapa}'";
     $meapu = pupe_query($apuqu);
     $toimitustapa_apuro3 = mysql_fetch_assoc($meapu);
 

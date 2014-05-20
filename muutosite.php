@@ -33,9 +33,9 @@ if ($tee_pdf == 'tulosta_tratta') {
 }
 
 if ($tee == 'tulosta_korkoerittely') {
-  $apuqu = "  SELECT *
-        from lasku
-        where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+  $apuqu = "SELECT *
+            from lasku
+            where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
   $res = pupe_query($apuqu);
   if (mysql_num_rows($res) == 1) {
     $trow = mysql_fetch_assoc($res);

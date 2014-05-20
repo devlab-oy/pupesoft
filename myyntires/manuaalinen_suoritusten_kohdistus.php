@@ -168,18 +168,18 @@ if ($tila == "vaihdasuorituksentili") {
 
 if ($tila == 'tee_kohdistus') {
   // Tehd‰‰n error tsekit
-  $query = "  LOCK TABLES
-        yriti READ,
-        yhtio READ,
-        tili READ,
-        taso READ,
-        lasku WRITE,
-        suoritus WRITE,
-        tiliointi WRITE,
-        tiliointi as tiliointi2 WRITE,
-        sanakirja WRITE,
-        yhtion_toimipaikat READ,
-        avainsana as avainsana_kieli READ";
+  $query = "LOCK TABLES
+            yriti READ,
+            yhtio READ,
+            tili READ,
+            taso READ,
+            lasku WRITE,
+            suoritus WRITE,
+            tiliointi WRITE,
+            tiliointi as tiliointi2 WRITE,
+            sanakirja WRITE,
+            yhtion_toimipaikat READ,
+            avainsana as avainsana_kieli READ";
   $result = pupe_query($query);
 
   // haetaan suorituksen tiedot

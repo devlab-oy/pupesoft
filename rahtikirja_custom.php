@@ -211,10 +211,10 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $osoitelappurow['yhtio_postitp']  = $yhtiorow["postitp"];
 
     // poikkeava toimipaikka,otetaan sen osoitetiedot
-    $alhqur = "  SELECT *
-          FROM yhtion_toimipaikat
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus = '$kukarow[toimipaikka]'";
+    $alhqur = "SELECT *
+               FROM yhtion_toimipaikat
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus  = '$kukarow[toimipaikka]'";
     $alhire = pupe_query($alhqur);
 
     if (mysql_num_rows($alhire) == 1) {
@@ -524,10 +524,10 @@ if (!isset($_POST['toimitustapa'])) {
     $sel    = '';
 
     // haetaan toimitustavan tiedot tarkastuksia varten
-    $apuqu2 = "  SELECT *
-        from toimitustapa
-        where yhtio  = '$kukarow[yhtio]'
-        and selite  = '$toimitustapa_val'";
+    $apuqu2 = "SELECT *
+               from toimitustapa
+               where yhtio = '$kukarow[yhtio]'
+               and selite  = '$toimitustapa_val'";
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 

@@ -34,8 +34,8 @@ if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] ==
 }
 
 if (!isset($lukotetaan) or $lukotetaan) {
-  $query = "  LOCK TABLE
-        lasku WRITE";
+  $query = "LOCK TABLE
+            lasku WRITE";
   $res = pupe_query($query);
 }
 

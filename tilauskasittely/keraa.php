@@ -464,11 +464,11 @@ if ($tee == 'P') {
 
     if ($ok_chk) {
       for ($y=0; $y<count($kerivi); $y++) {
-        $que0 = "  SELECT tilausrivi.tunnus
-              FROM tilausrivi
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
-              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.tunnus  = '{$kerivi[$y]}'";
+        $que0 = "SELECT tilausrivi.tunnus
+                 FROM tilausrivi
+                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                 AND tilausrivi.tunnus  = '{$kerivi[$y]}'";
         $tark = pupe_query($que0);
 
         if (mysql_num_rows($tark) == 1 and trim($keraysera_pakkaus[$kerivi[$y]]) == '') $virherivi++;

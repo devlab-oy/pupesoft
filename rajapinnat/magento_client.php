@@ -236,6 +236,7 @@ class MagentoClient {
           'status'                => self::ENABLED,
           'visibility'            => $visibility,
           'price'                 => $tuote[$hintakentta],
+          'dealer_hinta'          => $tuote['myyntihinta'],
           'special_price'         => $tuote['kuluprosentti'],
           'tax_class_id'          => $this->getTaxClassID(),
           'meta_title'            => '',

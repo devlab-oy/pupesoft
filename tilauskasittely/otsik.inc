@@ -3129,8 +3129,10 @@ if (isset($jatka)) {
 
       $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $_yhtiotoimipaikka['tunnus']);
 
-      unset($eilahe);
-      unset($osatoimitus);
+      if ($tee == 'OTSIK' and $ei_kayttoliittymaa != '') {
+        unset($eilahe);
+        unset($osatoimitus);
+      }
 
       if ($yhtiorow['myyntitilaus_osatoimitus'] == 'E') {
         $osatoimitus = 'o';

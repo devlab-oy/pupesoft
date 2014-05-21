@@ -1274,13 +1274,13 @@ if ($tee == 'P') {
           if ($toim == 'VASTAANOTA_REKLAMAATIO' and $keraysvirhe == 0) {
 
             $select = "SELECT *
-             FROM tuotepaikat
-             WHERE yhtio   = '$kukarow[yhtio]'
-             AND hyllyalue = '$reklahyllyalue'
-             AND hyllynro  = '$reklahyllynro'
-             AND hyllyvali = '$reklahyllyvali'
-             AND hyllytaso = '$reklahyllytaso'
-             AND tuoteno   = '{$rivin_puhdas_tuoteno[$apui]}'";
+                       FROM tuotepaikat
+                       WHERE yhtio   = '$kukarow[yhtio]'
+                       AND hyllyalue = '$reklahyllyalue'
+                       AND hyllynro  = '$reklahyllynro'
+                       AND hyllyvali = '$reklahyllyvali'
+                       AND hyllytaso = '$reklahyllytaso'
+                       AND tuoteno   = '{$rivin_puhdas_tuoteno[$apui]}'";
             $hakures = pupe_query($select);
             $sresults = mysql_fetch_assoc($hakures);
 

@@ -1940,9 +1940,9 @@ if ($kasitellaan_tiedosto) {
             }
 
             $select_query = "SELECT MAX(asiakasnro+0) asiakasnro
-             FROM asiakas USE INDEX (asno_index)
-             WHERE yhtio = '{$kukarow["yhtio"]}'
-             AND asiakasnro+0 >= $apu_asiakasnumero";
+                             FROM asiakas USE INDEX (asno_index)
+                             WHERE yhtio = '{$kukarow["yhtio"]}'
+                             AND asiakasnro+0 >= $apu_asiakasnumero";
             $select_result = pupe_query($select_query);
             $select_row = mysql_fetch_assoc($select_result);
 

@@ -76,6 +76,10 @@ class MagentoClient {
   private $_categoryaccesscontrol = FALSE;
 
   /**
+   * Configurable-tuotteella käytettävä nimitys, oletuksena nimitys
+   */
+  private $_configurable_tuote_nimityskentta = "nimitys";
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -233,6 +237,8 @@ class MagentoClient {
         $key = $parametri['option_name'];
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
+      
+      
      
       $tuote_data = array(
                           'categories'            => array($category_id),
@@ -252,15 +258,9 @@ class MagentoClient {
                           'campaign_code'         => utf8_encode($tuote['campaign_code']),
                           'onsale'                => utf8_encode($tuote['onsale']),
                           'target'                => utf8_encode($tuote['target']),
-                          'name2'                 => utf8_encode("Secondary name"),
-                          'pickup_product'        => TRUE,
+                          'additional_attributes' => array('multi_data' => $multi_data),
                           );
-
- /*     // Simple tuotteiden parametrit kuten koko ja väri
-      foreach($tuote['tuotteen_parametrit'] as $parametri) {
-        $tuote_data[$parametri['option_name']] = utf8_encode($parametri['arvo']);
-      }*/
-                          
+              
       // Lisätään tai päivitetään tuote
 
       // Jos tuotetta ei ole olemassa niin lisätään se
@@ -358,6 +358,9 @@ class MagentoClient {
     $category_tree = $this->getCategories();
 
     $hintakentta = $this->_hintakentta;
+    
+    // Mitä kenttää käytetään configurable_tuotteen nimenä
+    $configurable_tuote_nimityskentta = $this->_configurable_tuote_nimityskentta;
 
     // Lisätään tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
@@ -385,27 +388,26 @@ class MagentoClient {
 
       // Configurable tuotteen tiedot
       $configurable = array(
-        'categories'      => array($category_id),
-        'websites'        => explode(" ", $tuotteet[0]['nakyvyys']),
-        'name'          => utf8_encode($tuotteet[0]['nimitys']),
-        'description'           => utf8_encode($tuotteet[0]['kuvaus']),
-        'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
-        'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
-        'onsale'                => utf8_encode($tuotteet[0]['onsale']),
-        'target'                => utf8_encode($tuotteet[0]['target']),
-        'featured_priority'    => utf8_encode($tuotteet[0]['jarjestys']),
-        'weight'                => $tuotteet[0]['tuotemassa'],
-        'status'                => self::ENABLED,
-        'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
-        'price'                 => $tuotteet[0][$hintakentta],
-        'special_price'      => $tuotteet[0]['kuluprosentti'],
-        'tax_class_id'          => $this->getTaxClassID(), # 24%
-        'meta_title'            => '',
-        'meta_keyword'          => '',
-        'meta_description'      => '',
-        'color'                 => "Magenta",
-        'associated_skus'       => $lapsituotteet_array,
-      );
+                            'categories'            => array($category_id),
+                            'websites'              => explode(" ", $tuotteet[0]['nakyvyys']),
+                            'name'                  => utf8_encode($tuotteet[0][$configurable_tuote_nimityskentta]),
+                            'description'           => utf8_encode($tuotteet[0]['kuvaus']),
+                            'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
+                            'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
+                            'onsale'                => utf8_encode($tuotteet[0]['onsale']),
+                            'target'                => utf8_encode($tuotteet[0]['target']),
+                            'featured_priority'     => utf8_encode($tuotteet[0]['jarjestys']),
+                            'weight'                => $tuotteet[0]['tuotemassa'],
+                            'status'                => self::ENABLED,
+                            'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
+                            'price'                 => $tuotteet[0][$hintakentta],
+                            'special_price'         => $tuotteet[0]['kuluprosentti'],
+                            'tax_class_id'          => $this->getTaxClassID(), # 24%
+                            'meta_title'            => '',
+                            'meta_keyword'          => '',
+                            'meta_description'      => '',
+                            'associated_skus'       => $lapsituotteet_array,
+                            );
 
       try {
 
@@ -424,12 +426,13 @@ class MagentoClient {
             $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
           }
 
-          $simple_tuote_data = array(  'price'          => $tuote[$hintakentta],
-                        'short_description'    => utf8_encode($tuote['lyhytkuvaus']),
-                        'featured_priority'    => utf8_encode($tuote['jarjestys']),
-                        'visibility'      => self::NOT_VISIBLE_INDIVIDUALLY,
-                        'additional_attributes' => array('multi_data' => $multi_data),
-                        );
+          $simple_tuote_data = array(  
+                                     'price'                  => $tuote[$hintakentta],
+                                     'short_description'      => utf8_encode($tuote['lyhytkuvaus']),
+                                     'featured_priority'      => utf8_encode($tuote['jarjestys']),
+                                     'visibility'             => self::NOT_VISIBLE_INDIVIDUALLY,
+                                     'additional_attributes'  => array('multi_data' => $multi_data),
+                                     );
 
           // Päivitetään Simple tuote
           $result = $this->_proxy->call(  $this->_session,
@@ -809,12 +812,13 @@ class MagentoClient {
 
     $attribute_list = $this->getAttributeList();
     $attribute_id = '';
+
 var_dump($attribute_list);
     // Etsitään halutun attribuutin id
     foreach($attribute_list as $attribute) {
       if (strcasecmp($attribute['code'], $name) == 0) {
         $attribute_id = $attribute['attribute_id'];
-        echo "LÖYTYI ID $attribute_id\n";
+        $attribute_type = $attribute['type'];
         break;
       }
     }
@@ -830,11 +834,46 @@ var_dump($attribute_list);
              $attribute_id
         )
     );
-var_dump($options);
     // Etitään optionsin value
     foreach($options as $option) {
       if (strcasecmp($option['label'], $value) == 0) {
         return $option['value'];
+      }
+    }
+    
+    // Jos optionssia ei ole mutta tyyppi on select niin luodaan se
+    if ($attribute_type == "select") {
+      $optionToAdd = array(
+          "label" => array(
+              array(
+                  "store_id" => 1,
+                  "value" => $value
+              )
+          ),
+          "is_default" => 0
+      );
+      $this->_proxy->call($this->_session,
+                          "product_attribute.addOption",
+                          array(
+                                $attribute_id,
+                                $optionToAdd
+                               )
+                         );
+      echo "Luotiin uusi attribuutti $value optioid $attribute_id";
+
+      // Haetaan kaikki attribuutin optionssit uudestaan..
+      $options = $this->_proxy->call(
+          $this->_session,
+          "product_attribute.options",
+          array(
+               $attribute_id
+          )
+      );
+      // Etitään optionsin value uudestaan..
+      foreach($options as $option) {
+        if (strcasecmp($option['label'], $value) == 0) {
+          return $option['value'];
+        }
       }
     }
 
@@ -1038,6 +1077,16 @@ var_dump($options);
    */
   public function setCategoryaccesscontrol($categoryaccesscontrol) {
     $this->_categoryaccesscontrol = $categoryaccesscontrol;
+  }
+
+  /**
+    * Asettaa configurable_nimityskentta-muuttujan
+    * Oletus 'nimitys'
+    *
+    * @param string $configurable_nimityskentta 
+    */
+  public function setConfigurableNimityskentta($configurable_tuote_nimityskentta) {
+    $this->_configurable_tuote_nimityskentta = $configurable_tuote_nimityskentta;
   }
 
   /**

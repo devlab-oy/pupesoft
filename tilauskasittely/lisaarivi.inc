@@ -488,12 +488,12 @@ elseif ($var == "R" and substr($paikka,0,3) != "¡¡V" and substr($paikka,0,3) != 
 
 // Jos kyseessä on rivi joka halutaan siirtää varastosiirtona (siirtolista) var = S
 $kohde_varasto_update = "";
-$lahde_varasto_update = "";
 $paivita_hyllyt_varastosiirto = false;
 if (substr($paikka,0,3) == "¡¡S") {
   $paivita_hyllyt_varastosiirto = true;
   $var          = "S";
   $varasto_tunnukset = explode('¡¡S', $paikka);
+  //$varasto_tunnukset: 0 = tyhjä, 1 = avainsana.tunnus, 2 = lahdevarasto.tunnus, 3 = kohdevarasto.tunnus
   $toimittajan_tunnus = $varasto_tunnukset[1];
   $kohde_ja_lahde_varasto = hae_mahdolliset_siirto_varastot(array($varasto_tunnukset[3]));
   $kohde_ja_lahde_varasto = search_array_key_for_value_recursive($kohde_ja_lahde_varasto, 'tunnus', $varasto_tunnukset[1]);
@@ -501,10 +501,10 @@ if (substr($paikka,0,3) == "¡¡S") {
 
   $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($kohde_ja_lahde_varasto['kohde_tunnus']));
   $tuotepaikka = $tuotepaikkojen_saldot[0];
-  $kohde_varasto_update = "  tilausrivin_lisatiedot.kohde_hyllyalue = '{$tuotepaikka['hyllyalue']}',
-                tilausrivin_lisatiedot.kohde_hyllynro = '{$tuotepaikka['hyllynro']}',
-                tilausrivin_lisatiedot.kohde_hyllytaso = '{$tuotepaikka['hyllytaso']}',
-                tilausrivin_lisatiedot.kohde_hyllyvali = '{$tuotepaikka['hyllyvali']}',";
+  $kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '{$tuotepaikka['hyllyalue']}',
+                            tilausrivin_lisatiedot.kohde_hyllynro = '{$tuotepaikka['hyllynro']}',
+                            tilausrivin_lisatiedot.kohde_hyllytaso = '{$tuotepaikka['hyllytaso']}',
+                            tilausrivin_lisatiedot.kohde_hyllyvali = '{$tuotepaikka['hyllyvali']}',";
 
   $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($kohde_ja_lahde_varasto['lahde_tunnus']));
   $tuotepaikka = $tuotepaikkojen_saldot[0];
@@ -512,15 +512,88 @@ if (substr($paikka,0,3) == "¡¡S") {
   $myy_hyllynro_temp = $tuotepaikka['hyllynro'];
   $myy_hyllytaso_temp = $tuotepaikka['hyllytaso'];
   $myy_hyllyvali_temp = $tuotepaikka['hyllyvali'];
+
+  if (!empty($perheid)) {
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = {$laskurow['tunnus']}
+              AND perheid = {$perheid}";
+    $result = pupe_query($query);
+
+    while ($lapsirivi = mysql_fetch_assoc($result)) {
+      $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($varasto_tunnukset[3]));
+      $kohdevarasto_tuotepaikka = $tuotepaikkojen_saldot[0];
+
+      $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($varasto_tunnukset[2]));
+      $lahdevarasto_tuotepaikka = $tuotepaikkojen_saldot[0];
+
+      $query = "UPDATE tilausrivi
+                SET var = 'S',
+                hyllyalue = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
+                hyllynro = '{$lahdevarasto_tuotepaikka['hyllynro']}',
+                hyllyvali = '{$lahdevarasto_tuotepaikka['hyllyvali']}',
+                hyllytaso = '{$lahdevarasto_tuotepaikka['hyllytaso']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$lapsirivi['tunnus']}";
+      pupe_query($query);
+
+      $query = "UPDATE tilausrivin_lisatiedot
+                SET toimittajan_tunnus = '{$toimittajan_tunnus}',
+                kohde_hyllyalue = '{$kohdevarasto_tuotepaikka['hyllyalue']}',
+                kohde_hyllynro = '{$kohdevarasto_tuotepaikka['hyllynro']}',
+                kohde_hyllyvali = '{$kohdevarasto_tuotepaikka['hyllyvali']}',
+                kohde_hyllytaso = '{$kohdevarasto_tuotepaikka['hyllytaso']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivitunnus = {$lapsirivi['tunnus']}";
+      pupe_query($query);
+    }
+  }
 }
 elseif ($var == "S" and substr($paikka,0,3) != "¡¡S" and substr($paikka,0,3) != "¡¡S") {
   $paivita_hyllyt_varastosiirto = false;
   $var         = "";
   $toimittajan_tunnus  = "";
-  $kohde_varasto_update = "  tilausrivin_lisatiedot.kohde_hyllyalue = '0',
-                tilausrivin_lisatiedot.kohde_hyllynro = '0',
-                tilausrivin_lisatiedot.kohde_hyllytaso = '0',
-                tilausrivin_lisatiedot.kohde_hyllyvali = '0',";
+  $kohde_varasto_update = " tilausrivin_lisatiedot.kohde_hyllyalue = '0',
+                            tilausrivin_lisatiedot.kohde_hyllynro = '0',
+                            tilausrivin_lisatiedot.kohde_hyllytaso = '0',
+                            tilausrivin_lisatiedot.kohde_hyllyvali = '0',";
+
+  if (!empty($perheid)) {
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = {$laskurow['tunnus']}
+              AND perheid = {$perheid}";
+    $result = pupe_query($query);
+
+    $paikka_temp = explode('#!¡!#', $paikka);
+    $varasto = kuuluukovarastoon($paikka_temp[0], $paikka_temp[1]);
+
+    while ($lapsirivi = mysql_fetch_assoc($result)) {
+      $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($lapsirivi['tuoteno'], array($varasto));
+      $lahdevarasto_tuotepaikka = $tuotepaikkojen_saldot[0];
+      $query = "UPDATE tilausrivi
+                SET var = '',
+                hyllyalue = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
+                hyllynro = '{$lahdevarasto_tuotepaikka['hyllynro']}',
+                hyllyvali = '{$lahdevarasto_tuotepaikka['hyllyvali']}',
+                hyllytaso = '{$lahdevarasto_tuotepaikka['hyllytaso']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$lapsirivi['tunnus']}";
+      pupe_query($query);
+
+      $query = "UPDATE tilausrivin_lisatiedot
+                SET toimittajan_tunnus = '',
+                kohde_hyllyalue = '0',
+                kohde_hyllynro = '0',
+                kohde_hyllyvali = '0',
+                kohde_hyllytaso = '0'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivitunnus = {$lapsirivi['tunnus']}";
+      pupe_query($query);
+    }
+  }
 }
 
 $perhelisa = "";
@@ -2199,13 +2272,14 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $kohde_varastot = array();
       }
 
-      $tuoteperhe = tuoteperhe($trow['tuoteno']);
+      $_onko_isatuote = (!empty($perhearray) and isset($isatuoteno) and $isatuoteno == $trow['tuoteno']);
+      $_onko_lapsituote = (!empty($perhearray) and isset($isatuoteno) and $isatuoteno != $trow['tuoteno']);
       $siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $trow['tuoteno']);
 
       foreach ($siirto_varastot as $siirto_varasto) {
         $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
-        if (!empty($tuoteperhe)) {
-          $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
+        if ($_onko_isatuote or $_onko_lapsituote) {
+          $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($isatuoteno, '', '', $siirto_varasto['lahde_tunnus']);
           $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
         }
 

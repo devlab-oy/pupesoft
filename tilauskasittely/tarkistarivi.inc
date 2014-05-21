@@ -406,6 +406,15 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
 //Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille, eikä tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan
 $paikat  = "";
 
+$_onko_isatuote = (!empty($row['perheid']) and $row['perheid'] == $row['tunnus']);
+$_onko_lapsituote = (!empty($row['perheid']) and $row['perheid'] != $row['tunnus']);
+//Jos tilausrivi on lapsituote ja se on varastosiirtotilassa,
+//niin laitetaan tilausrivin paikka dropdown disabled tilaan
+$paikka_disabled = "";
+if ($_onko_lapsituote and $row['var'] == 'S') {
+  $paikka_disabled = "disabled";
+}
+
 if (
   $trow["ei_saldoa"] == ""
   and !in_array($row["tyyppi"], array('E', 'W'))
@@ -856,15 +865,19 @@ if (
       $kohde_varastot = array();
     }
 
-    $tuoteperhe = tuoteperhe($trow['tuoteno']);
     $siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
+    $_isa_saldot = array();
     foreach ($siirto_varastot as $siirto_varasto) {
 
       $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
-      if (!empty($tuoteperhe)) {
+      if ($_onko_isatuote) {
         $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
         $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
+        $_isa_saldot[$row['perheid']] = $saldo_myytavissa;
+      }
+      else if ($_onko_lapsituote) {
+        $saldo_myytavissa = $_isa_saldot[$row['perheid']];
       }
 
       //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat,
@@ -897,7 +910,7 @@ if (
   }
 
   if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
-    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
+    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
@@ -965,7 +978,7 @@ elseif (
   }
 
   if ($paikat != "" and $paikatlask > 1) {
-    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
+    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
@@ -1022,7 +1035,7 @@ elseif (
     $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel1>$title</option>";
   }
 
-  $paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
+  $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
 }
 
 //  Onko tätä varattuna siirtolistalla?

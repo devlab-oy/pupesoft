@@ -305,10 +305,18 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     $vares = pupe_query($query);
 
     while ($varow = mysql_fetch_array($vares)) {
-      if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
+      if (   $varow["tyyppi"] == ''
+          or $kukarow["varasto"] == $varow["tunnus"]
+          or $varow['tunnus']==$srow["varasto"]
+          or $kukarow['oletus_ostovarasto'] == $varow['tunnus']) {
 
         // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-        if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
+        if (    $varow['tunnus']==$srow["varasto"]
+            or (    $kukarow['oletus_ostovarasto'] == $varow['tunnus']
+                and $srow['varasto'] == '')
+            or (    $varow['tunnus'] == $kukarow['varasto']
+                and $srow['varasto'] == ''
+                and $kukarow['oletus_ostovarasto'] == 0)) {
           $selectoitu_varasto_toimipaikka = $varow['toimipaikka'];
           break;
         }
@@ -553,9 +561,9 @@ if (isset($jatka)) {
   // katotaan ollaanko valittu tietty varasto johon kamat tilataan
   if ($varasto > 0) {
     $edique  = "SELECT *
-                FROM varastopaikat
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$varasto'";
+          FROM varastopaikat
+          WHERE yhtio  = '$kukarow[yhtio]'
+          and tunnus   = '$varasto'";
     $vares = mysql_query($edique) or pupe_error($edique);
     $varow = mysql_fetch_array($vares);
 
@@ -578,9 +586,9 @@ if (isset($jatka)) {
   // katotaan ollaanko valittu tilaajaksi joku muu toimipiste
   if ($toimipiste > 0 and strlen(trim($tnimi)) == 0) {
     $edique  = "SELECT *
-                from yhtion_toimipaikat
-                where yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$toimipiste'";
+          from yhtion_toimipaikat
+          where yhtio  = '$kukarow[yhtio]'
+          and tunnus  = '$toimipiste'";
     $ediotr = mysql_query($edique) or pupe_error($edique);
     $edioro = mysql_fetch_array($ediotr);
 

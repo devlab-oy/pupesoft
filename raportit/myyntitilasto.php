@@ -172,10 +172,20 @@ if ($tee != '' and isset($painoinnappia)) {
             AND lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'";
   $eresult = pupe_query($query);
 
+  $group_by = array();
+
+  if (isset($mul_osasto)) {
+    $group_by[] = "osasto";
+  }
+
+  if (isset($mul_try)) {
+    $group_by[] = "tuoteryhma";
+  }
+
   $parametrit = array(
     "result" => $eresult,
     "sum" => array("myyntiVA", "kateVA", "myyntiEDVA", "kateEDVA", "myyntiED", "kateED", "myynti12", "kate12"),
-    "group_by" => array("osasto", "tuoteryhma"),
+    "group_by" => $group_by,
     "order_by" => array("osasto", "tuoteryhma"),
     "select" => array("osasto", "tuoteryhma"),
     "lisaa_kulut" => array("kateVA", "kateEDVA", "kateED", "kate12")
@@ -216,8 +226,8 @@ if ($tee != '' and isset($painoinnappia)) {
       $kateprosVA = 0;
     }
 
-    $myyntiEDVA = round($row['myyntiVA']);
-    $kateEDVA = round($row['kateVA']);
+    $myyntiEDVA = round($row['myyntiEDVA']);
+    $kateEDVA = round($row['kateEDVA']);
     if( $myyntiEDVA != 0){
       $kateprosEDVA = round($kateEDVA / $myyntiEDVA * 100, 1);
     }

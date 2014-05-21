@@ -80,7 +80,7 @@ $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on j
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 // alustetaan arrayt
-$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = 
+$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma =
 $kaikki_tuotteet = $individual_tuotteet = array();
 
 if ($ajetaanko_kaikki == "NO") {
@@ -119,17 +119,17 @@ $query = "SELECT tuote.tuoteno,
           ta_nimitys_en.selite nimi_eng,
           try_fi.selitetark try_nimi
           FROM tuote
-          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio 
-            and try_fi.selite        = tuote.try 
-            and try_fi.laji          = 'try' 
+          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+            and try_fi.selite        = tuote.try
+            and try_fi.laji          = 'try'
             and try_fi.kieli         = 'fi')
-          LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio 
-            and tuote.tuoteno        = ta_nimitys_se.tuoteno 
-            and ta_nimitys_se.laji   = 'nimitys' 
+          LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio
+            and tuote.tuoteno        = ta_nimitys_se.tuoteno
+            and ta_nimitys_se.laji   = 'nimitys'
             and ta_nimitys_se.kieli  = 'se'
-          LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio 
-            and tuote.tuoteno        = ta_nimitys_en.tuoteno 
-            and ta_nimitys_en.laji   = 'nimitys' 
+          LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio
+            and tuote.tuoteno        = ta_nimitys_en.tuoteno
+            and ta_nimitys_en.laji   = 'nimitys'
             and ta_nimitys_en.kieli  = 'en'
           WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
             AND tuote.status        != 'P'
@@ -158,9 +158,9 @@ while ($row = mysql_fetch_array($res)) {
     $myymalahinta          = $row["myymalahinta"];
     $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
-  
+
   // Haetaan kaikki tuotteen atribuutit
-  $parametritquery = "SELECT 
+  $parametritquery = "SELECT
                       tuotteen_avainsanat.selite,
                       avainsana.selitetark,
                       avainsana.selite option_name
@@ -302,7 +302,7 @@ $result = pupe_query($query);
 while ($row = mysql_fetch_assoc($result)) {
   list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
 
-  $dnstock[] = array(  
+  $dnstock[] = array(
                      'tuoteno'     => $row["tuoteno"],
                      'ean'         => $row["eankoodi"],
                      'myytavissa'  => $myytavissa,
@@ -333,29 +333,29 @@ $query = "SELECT DISTINCT  tuote.osasto,
           osasto_se.selitetark osasto_se_nimi,
           osasto_en.selitetark osasto_en_nimi
           FROM tuote
-          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio 
-            and try_fi.selite     = tuote.try 
-            and try_fi.laji       = 'try' 
+          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+            and try_fi.selite     = tuote.try
+            and try_fi.laji       = 'try'
             and try_fi.kieli      = 'fi')
-          LEFT JOIN avainsana as try_se ON (try_se.yhtio = tuote.yhtio 
-            and try_se.selite     = tuote.try 
-            and try_se.laji       = 'try' 
+          LEFT JOIN avainsana as try_se ON (try_se.yhtio = tuote.yhtio
+            and try_se.selite     = tuote.try
+            and try_se.laji       = 'try'
             and try_se.kieli      = 'se')
-          LEFT JOIN avainsana as try_en ON (try_en.yhtio = tuote.yhtio 
-            and try_en.selite     = tuote.try 
-            and try_en.laji       = 'try' 
+          LEFT JOIN avainsana as try_en ON (try_en.yhtio = tuote.yhtio
+            and try_en.selite     = tuote.try
+            and try_en.laji       = 'try'
             and try_en.kieli      = 'en')
-          LEFT JOIN avainsana as osasto_fi ON (osasto_fi.yhtio = tuote.yhtio 
-            and osasto_fi.selite  = tuote.osasto 
-            and osasto_fi.laji    = 'osasto' 
+          LEFT JOIN avainsana as osasto_fi ON (osasto_fi.yhtio = tuote.yhtio
+            and osasto_fi.selite  = tuote.osasto
+            and osasto_fi.laji    = 'osasto'
             and osasto_fi.kieli   = 'fi')
-          LEFT JOIN avainsana as osasto_se ON (osasto_se.yhtio = tuote.yhtio 
-            and osasto_se.selite  = tuote.osasto 
-            and osasto_se.laji    = 'osasto' 
+          LEFT JOIN avainsana as osasto_se ON (osasto_se.yhtio = tuote.yhtio
+            and osasto_se.selite  = tuote.osasto
+            and osasto_se.laji    = 'osasto'
             and osasto_se.kieli   = 'se')
-          LEFT JOIN avainsana as osasto_en ON (osasto_en.yhtio = tuote.yhtio 
-            and osasto_en.selite  = tuote.osasto 
-            and osasto_en.laji    = 'osasto' 
+          LEFT JOIN avainsana as osasto_en ON (osasto_en.yhtio = tuote.yhtio
+            and osasto_en.selite  = tuote.osasto
+            and osasto_en.laji    = 'osasto'
             and osasto_en.kieli   = 'en')
           WHERE tuote.yhtio       = '{$kukarow["yhtio"]}'
           AND tuote.status       != 'P'
@@ -410,7 +410,7 @@ $res = pupe_query($query);
 
 // pyöräytetään asiakkaat läpi
 while ($row = mysql_fetch_array($res)) {
-  $dnsasiakas[] = array(  
+  $dnsasiakas[] = array(
                         'nimi'    => $row["nimi"],
                         'osoite'   => $row["osoite"],
                         'postino'  => $row["postino"],
@@ -534,17 +534,17 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
         AND tuote.tuotetyyppi          NOT in ('A','B')
         AND tuote.tuoteno             != ''
         $nakyvyys_lisa)
-      LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio 
-        and try_fi.selite              = tuote.try 
-        and try_fi.laji                = 'try' 
+      LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+        and try_fi.selite              = tuote.try
+        and try_fi.laji                = 'try'
         and try_fi.kieli               = 'fi')
-      LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio 
-        and tuote.tuoteno              = ta_nimitys_se.tuoteno 
-        and ta_nimitys_se.laji         = 'nimitys' 
+      LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio
+        and tuote.tuoteno              = ta_nimitys_se.tuoteno
+        and ta_nimitys_se.laji         = 'nimitys'
         and ta_nimitys_se.kieli        = 'se')
-      LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio 
-        and tuote.tuoteno              = ta_nimitys_en.tuoteno 
-        and ta_nimitys_en.laji         = 'nimitys' 
+      LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio
+        and tuote.tuoteno              = ta_nimitys_en.tuoteno
+        and ta_nimitys_en.laji         = 'nimitys'
         and ta_nimitys_en.kieli        = 'en')
       WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
       AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
@@ -556,7 +556,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
   while ($alirow = mysql_fetch_assoc($alires)) {
 
     // Haetaan kaikki tuotteen atribuutit
-    $alinselect = "SELECT 
+    $alinselect = "SELECT
          tuotteen_avainsanat.selite,
          avainsana.selitetark,
          avainsana.selite option_name
@@ -647,7 +647,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   // Onko "Category access control"-moduli on asennettu
   if (isset($categoryaccesscontrol)) $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
-  
+
   // Mit‰ tuotteen kentt‰‰ k‰ytet‰‰n configurable-tuotteen nimityksen‰
   if (isset($magento_configurable_tuote_nimityskentta)) $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
 

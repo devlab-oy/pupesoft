@@ -237,9 +237,9 @@ class MagentoClient {
         $key = $parametri['option_name'];
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
-      
-      
-     
+
+
+
       $tuote_data = array(
                           'categories'            => array($category_id),
                           'websites'              => explode(" ", $tuote['nakyvyys']),
@@ -260,7 +260,7 @@ class MagentoClient {
                           'target'                => utf8_encode($tuote['target']),
                           'additional_attributes' => array('multi_data' => $multi_data),
                           );
-              
+
       // Lis‰t‰‰n tai p‰ivitet‰‰n tuote
 
       // Jos tuotetta ei ole olemassa niin lisätään se
@@ -358,7 +358,7 @@ class MagentoClient {
     $category_tree = $this->getCategories();
 
     $hintakentta = $this->_hintakentta;
-    
+
     // Mit‰ kentt‰‰ k‰ytet‰‰n configurable_tuotteen nimen‰
     $configurable_tuote_nimityskentta = $this->_configurable_tuote_nimityskentta;
 
@@ -426,7 +426,7 @@ class MagentoClient {
             $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
           }
 
-          $simple_tuote_data = array(  
+          $simple_tuote_data = array(
                                      'price'                  => $tuote[$hintakentta],
                                      'short_description'      => utf8_encode($tuote['lyhytkuvaus']),
                                      'featured_priority'      => utf8_encode($tuote['jarjestys']),
@@ -841,7 +841,7 @@ var_dump($attribute_list);
         return $option['value'];
       }
     }
-    
+
     // Jos optionssia ei ole mutta tyyppi on select niin luodaan se
     if ($attribute_type == "select") {
       $optionToAdd = array(
@@ -1084,7 +1084,7 @@ var_dump($attribute_list);
     * Asettaa configurable_nimityskentta-muuttujan
     * Oletus 'nimitys'
     *
-    * @param string $configurable_nimityskentta 
+    * @param string $configurable_nimityskentta
     */
   public function setConfigurableNimityskentta($configurable_tuote_nimityskentta) {
     $this->_configurable_tuote_nimityskentta = $configurable_tuote_nimityskentta;

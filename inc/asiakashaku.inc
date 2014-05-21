@@ -483,6 +483,7 @@ if ($monta > 1 and $monta <= $limit) {
 
         if (mysql_num_rows($vresult) > 0) {
 
+          echo "<input type='hidden' name='ytunnus' value='{$ytunnus_talteen}'>";
           echo "<select name='toimipaikka_rajaus' onchange='this.form.submit()'>";
           echo "<option value='X' "; if($toimipaikka_rajaus == 'X') {echo 'selected';} echo ">" . t("Kaikki") . "</option>";
           echo "<option value='0' "; if(empty($toimipaikka_rajaus)) {echo 'selected';} echo ">" . t("Ei toimipaikkaa") . "</option>";

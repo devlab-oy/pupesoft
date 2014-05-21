@@ -16,12 +16,12 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokantayhteys
-  require ("inc/connect.inc");
-  require_once("inc/functions.inc");
+  require "inc/connect.inc";
+  require_once "inc/functions.inc";
 }
 
 $lock_params = array(
-    "locktime" => 5400,
+  "locktime" => 5400,
 );
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
@@ -66,74 +66,75 @@ else {
   exit;
 }
 
-  require ("inc/verkkolasku-in.inc"); // täällä on itse koodi
-  require ("inc/verkkolasku-in-erittele-laskut.inc"); // täällä pilkotaan Finvoiceaineiston laskut omiksi tiedostoikseen
+require "inc/verkkolasku-in.inc"; // täällä on itse koodi
+require "inc/verkkolasku-in-erittele-laskut.inc"; // täällä pilkotaan Finvoiceaineiston laskut omiksi tiedostoikseen
 
 // Käsitellään ensin kaikki Finvoicet
 if ($handle = opendir($laskut)) {
   while (($file = readdir($handle)) !== FALSE) {
-    if (is_file($laskut."/".$file)) {
-      $nimi = $laskut."/".$file;
+    if (!is_file($laskut."/".$file)) {
+      continue;
+    }
 
-      // Muutetaan UTF-8:ksi jos lasku on jossain toisessa merkistössä
-      $encoding = exec("file -b --mime-encoding $nimi");
+    $nimi = $laskut."/".$file;
 
-      if ($encoding != "" and strtoupper($encoding) != 'UTF-8') {
-        exec("recode $encoding..UTF8 $nimi");
-      }
+    // Muutetaan UTF-8:ksi jos lasku on jossain toisessa merkistössä
+    $encoding = exec("file -b --mime-encoding $nimi");
 
-      $luotiinlaskuja = erittele_laskut($nimi);
+    if ($encoding != "" and strtoupper($encoding) != 'UTF-8') {
+      exec("recode $encoding..UTF8 $nimi");
+    }
 
-      // Jos tiedostosta luotiin laskuja siirretään se tieltä pois
-      if ($luotiinlaskuja > 0) {
-        rename($laskut."/".$file, $origlaskut."/".$file);
-      }
+    $luotiinlaskuja = erittele_laskut($nimi);
+
+    // Jos tiedostosta luotiin laskuja siirretään se tieltä pois
+    if ($luotiinlaskuja > 0) {
+      rename($laskut."/".$file, $origlaskut."/".$file);
     }
   }
 }
 
 if ($handle = opendir($laskut)) {
-
   while (($file = readdir($handle)) !== FALSE) {
+    if (!is_file($laskut."/".$file)) {
+      continue;
+    }
 
-    if (is_file($laskut."/".$file)) {
+    // $yhtiorow ja $xmlstr
+    unset($yhtiorow);
+    unset($xmlstr);
 
-      // $yhtiorow ja $xmlstr
-      unset($yhtiorow);
-      unset($xmlstr);
+    $nimi = $laskut."/".$file;
+    $laskuvirhe = verkkolasku_in($nimi, TRUE);
 
-      $nimi = $laskut."/".$file;
-      $laskuvirhe = verkkolasku_in($nimi, TRUE);
+    if ($laskuvirhe == "") {
+      if (!$php_cli) {
+        echo "Verkkolasku vastaanotettu onnistuneesti!<br>\n<br>\n";
+      }
 
-        if ($laskuvirhe == "") {
-        if (!$php_cli)  {
-          echo "Verkkolasku vastaanotettu onnistuneesti!<br>\n<br>\n";
-        }
+      rename($laskut."/".$file, $oklaskut."/".$file);
+    }
+    else {
+      if (!$php_cli) {
+        echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br>\n<pre>$laskuvirhe</pre><br>\n";
+      }
+      $alku = $loppu = "";
+      list($alku, $loppu) = explode("####", $laskuvirhe);
 
-        rename($laskut."/".$file, $oklaskut."/".$file);
-        }
-        else {
-        if (!$php_cli)  {
-          echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br>\n<pre>$laskuvirhe</pre><br>\n";
-        }
-        $alku = $loppu = "";
-        list($alku,$loppu) = explode("####",$laskuvirhe);
-
-        if (trim($loppu) == "ASN") {
-          // ei tehdä mitään vaan annetaan jäädä roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
-        }
-        else {
-          rename($laskut."/".$file, $errlaskut."/".$file);
-        }
+      if (trim($loppu) == "ASN") {
+        // ei tehdä mitään vaan annetaan jäädä roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
+      }
+      else {
+        rename($laskut."/".$file, $errlaskut."/".$file);
       }
     }
   }
 }
 
 if ($php_cli) {
-  # laitetaan käyttöoikeudet kuntoon
+  // laitetaan käyttöoikeudet kuntoon
   system("chown -R :apache $verkkolaskut_in; chmod -R 770 $verkkolaskut_in;");
 }
 
-# siivotaan yli 90 päivää vanhat aineistot
+// siivotaan yli 90 päivää vanhat aineistot
 system("find $verkkolaskut_in -type f -mtime +90 -delete");

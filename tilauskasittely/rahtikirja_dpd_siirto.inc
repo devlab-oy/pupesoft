@@ -273,7 +273,7 @@ if ($kollityht > 0) {
     }
 
     // Muunnetaan merkistö Windows ANSI
-    iconv("ISO-8859-1", "Windows-1252", $aineisto);
+    iconv("UTF-8", "Windows-1252", $aineisto);
 
     if (substr($dpd_ds_path,-1) != '/') {
       $dpd_ds_path .= '/';

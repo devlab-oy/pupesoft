@@ -160,12 +160,11 @@ $tulos_ulos = "edi"; // tää on ftp-send.incissä
 $filename = trim($filename);
 if ($filename == "") die('Tiedostonimi puuttui!\n');
 
-// Mutetaan ISO-merkistöön jos UTF8:ia
+// Muutetaan UTF-8:ksi jos on jossain toisessa merkistössä
 $encoding = exec("file -b --mime-encoding $filename");
 
-if (preg_match("/(utf\-8|binary)/i", $encoding)) {
-  $convert = exec("iconv -c -f utf-8 -t ISO8859-1  $filename > $filename.ISO");
-  rename($filename.".ISO", $filename);
+if ($encoding != "" and strtoupper($encoding) != 'UTF-8') {
+  exec("recode $encoding..UTF8 $filename");
 }
 
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui")."!\n");

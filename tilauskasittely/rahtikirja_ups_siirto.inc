@@ -879,7 +879,7 @@ if ($kollityht > 0) {
     */
 
     // Muunnetaan merkistö Windows ANSI
-    iconv("ISO-8859-1", "Windows-1252", $xml);
+    iconv("UTF-8", "Windows-1252", $xml);
 
     $xml_output = $xml->asXML();
 

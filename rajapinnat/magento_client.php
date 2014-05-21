@@ -243,9 +243,9 @@ class MagentoClient {
       $tuote_data = array(
                           'categories'            => array($category_id),
                           'websites'              => explode(" ", $tuote['nakyvyys']),
-                          'name'                  => utf8_encode($tuote['nimi']),
-                          'description'           => utf8_encode($tuote['kuvaus']),
-                          'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+                          'name'                  => $tuote['nimi'],
+                          'description'           => $tuote['kuvaus'],
+                          'short_description'     => $tuote['lyhytkuvaus'],
                           'weight'                => $tuote['tuotemassa'],
                           'status'                => self::ENABLED,
                           'visibility'            => $visibility,
@@ -255,9 +255,9 @@ class MagentoClient {
                           'meta_title'            => '',
                           'meta_keyword'          => '',
                           'meta_description'      => '',
-                          'campaign_code'         => utf8_encode($tuote['campaign_code']),
-                          'onsale'                => utf8_encode($tuote['onsale']),
-                          'target'                => utf8_encode($tuote['target']),
+                          'campaign_code'         => $tuote['campaign_code'],
+                          'onsale'                => $tuote['onsale'],
+                          'target'                => $tuote['target'],
                           'additional_attributes' => array('multi_data' => $multi_data),
                           );
 
@@ -390,13 +390,13 @@ class MagentoClient {
       $configurable = array(
                             'categories'            => array($category_id),
                             'websites'              => explode(" ", $tuotteet[0]['nakyvyys']),
-                            'name'                  => utf8_encode($tuotteet[0][$configurable_tuote_nimityskentta]),
-                            'description'           => utf8_encode($tuotteet[0]['kuvaus']),
-                            'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
-                            'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
-                            'onsale'                => utf8_encode($tuotteet[0]['onsale']),
-                            'target'                => utf8_encode($tuotteet[0]['target']),
-                            'featured_priority'     => utf8_encode($tuotteet[0]['jarjestys']),
+                            'name'                  => $tuotteet[0][$configurable_tuote_nimityskentta],
+                            'description'           => $tuotteet[0]['kuvaus'],
+                            'short_description'     => $tuotteet[0]['lyhytkuvaus'],
+                            'campaign_code'         => $tuotteet[0]['campaign_code'],
+                            'onsale'                => $tuotteet[0]['onsale'],
+                            'target'                => $tuotteet[0]['target'],
+                            'featured_priority'     => $tuotteet[0]['jarjestys'],
                             'weight'                => $tuotteet[0]['tuotemassa'],
                             'status'                => self::ENABLED,
                             'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
@@ -428,8 +428,8 @@ class MagentoClient {
 
           $simple_tuote_data = array(
                                      'price'                  => $tuote[$hintakentta],
-                                     'short_description'      => utf8_encode($tuote['lyhytkuvaus']),
-                                     'featured_priority'      => utf8_encode($tuote['jarjestys']),
+                                     'short_description'      => $tuote['lyhytkuvaus'],
+                                     'featured_priority'      => $tuote['jarjestys'],
                                      'visibility'             => self::NOT_VISIBLE_INDIVIDUALLY,
                                      'additional_attributes'  => array('multi_data' => $multi_data),
                                      );
@@ -878,7 +878,7 @@ var_dump($attribute_list);
       }
     }
 
-    // Mit‰‰n ei lˆytyny
+    // Mitään ei löytyny
     return 0;
   }
 

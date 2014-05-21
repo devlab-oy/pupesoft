@@ -387,14 +387,14 @@ if ($tee == "") {
 
   echo "</select></td></tr>";
 
-  $apuqu = "  SELECT kuka, nimi, puhno, eposti, tunnus
-        FROM kuka
-        WHERE yhtio    = '$kukarow[yhtio]'
-        AND aktiivinen = 1
-        AND nimi      != ''
-        AND puhno     != ''
-        AND eposti    != ''
-        AND extranet   = ''";
+  $apuqu = "SELECT kuka, nimi, puhno, eposti, tunnus
+            FROM kuka
+            WHERE yhtio     = '$kukarow[yhtio]'
+            AND aktiivinen  = 1
+            AND nimi       != ''
+            AND puhno      != ''
+            AND eposti     != ''
+            AND extranet    = ''";
   $meapu = pupe_query($apuqu);
 
   echo "<tr><th>".t("Yhteyshenkilö").":</th>";

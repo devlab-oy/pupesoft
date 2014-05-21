@@ -128,24 +128,24 @@ function loop_packet($xml_element, $parameters) {
         }
 
         // tämä siksi ettei haluta tallentaa 0 rivejä kantaan.
-        $sqlinsert =  " INSERT INTO asn_sanomat SET
-                yhtio         = '$kukarow[yhtio]',
-                laji        = 'asn',
-                toimittajanumero  = '$tavarantoimittajanumero',
-                asn_numero      = '$asn_numero',
-                sscc_koodi      = '$sscc',
-                saapumispvm     = '$toimituspvm',
-                vastaanottaja     = '$vastaanottaja',
-                tilausnumero     = '$tuotteelta_tilausno',
-                paketinnumero    = '$paketti_nro',
-                paketintunniste   = '$laatikkoind',
-                lahetyslistannro   = '$pakkauslista',
-                toim_tuoteno    = '$tuote',
-                toim_tuoteno2    = '$tuote2',
-                kappalemaara    = '$kpl',
-                tilausrivinpositio  = '$tilausrivinpositio',
-                laatija       = '$kukarow[kuka]',
-                luontiaika       = now()";
+        $sqlinsert =  "INSERT INTO asn_sanomat SET
+            yhtio              = '$kukarow[yhtio]',
+            laji               = 'asn',
+            toimittajanumero   = '$tavarantoimittajanumero',
+            asn_numero         = '$asn_numero',
+            sscc_koodi         = '$sscc',
+            saapumispvm        = '$toimituspvm',
+            vastaanottaja      = '$vastaanottaja',
+            tilausnumero       = '$tuotteelta_tilausno',
+            paketinnumero      = '$paketti_nro',
+            paketintunniste    = '$laatikkoind',
+            lahetyslistannro   = '$pakkauslista',
+            toim_tuoteno       = '$tuote',
+            toim_tuoteno2      = '$tuote2',
+            kappalemaara       = '$kpl',
+            tilausrivinpositio = '$tilausrivinpositio',
+            laatija            = '$kukarow[kuka]',
+            luontiaika         = now()";
         $result = pupe_query($sqlinsert);
         $tunnus_liitetiedostoon = mysql_insert_id();
       }
@@ -310,11 +310,11 @@ if ($handle = opendir($teccomkansio)) {
 
         if ($tavarantoimittajanumero != "" and $asn_numero != "") {
 
-          $tarkinsert = " SELECT tunnus
-                  FROM asn_sanomat
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND toimittajanumero = '$tavarantoimittajanumero'
-                  AND asn_numero = '$asn_numero'";
+          $tarkinsert = "SELECT tunnus
+                         FROM asn_sanomat
+                         WHERE yhtio          = '$kukarow[yhtio]'
+                         AND toimittajanumero = '$tavarantoimittajanumero'
+                         AND asn_numero       = '$asn_numero'";
           $checkinsertresult = pupe_query($tarkinsert);
 
           if (mysql_num_rows($checkinsertresult) > 0) {

@@ -18,18 +18,18 @@ if($tee == 'B') {
 
     $viesti = $kukarow["nimi"]." ".t("kuittasi").": ".$muuta;
 
-    $kysely = "  INSERT INTO kalenteri
-          SET asiakas    = '$prow[asiakas]',
-          liitostunnus   = '$prow[liitostunnus]',
-          henkilo      = '$prow[yhenkilo]',
-          kuka         = '$kukarow[kuka]',
-          yhtio        = '$kukarow[yhtio]',
-          tyyppi       = 'Kuittaus',
-          tapa         = '$prow[tapa]',
-          kentta01     = '$viesti',
-          kuittaus     = '',
-          pvmalku      = now(),
-          perheid     = '$kaletunnus'";
+    $kysely = "INSERT INTO kalenteri
+               SET asiakas    = '$prow[asiakas]',
+               liitostunnus = '$prow[liitostunnus]',
+               henkilo      = '$prow[yhenkilo]',
+               kuka         = '$kukarow[kuka]',
+               yhtio        = '$kukarow[yhtio]',
+               tyyppi       = 'Kuittaus',
+               tapa         = '$prow[tapa]',
+               kentta01     = '$viesti',
+               kuittaus     = '',
+               pvmalku      = now(),
+               perheid      = '$kaletunnus'";
     $result = mysql_query($kysely) or pupe_error($kysely);
 
     $query = "UPDATE kalenteri
@@ -112,14 +112,14 @@ if($tee == "LISAAMUISTUTUS") {
       $pvmalku  = "now()";
     }
 
-    $kysely = "  INSERT INTO kalenteri
-          SET kuka = '$kuka',
-          yhtio    = '$kukarow[yhtio]',
-          tyyppi   = 'Muistutus',
-          tapa     = '$tapa',
-          kentta01 = '$viesti',
-          kuittaus = '$kuittaus',
-          pvmalku  = $pvmalku";
+    $kysely = "INSERT INTO kalenteri
+               SET kuka = '$kuka',
+               yhtio    = '$kukarow[yhtio]',
+               tyyppi   = 'Muistutus',
+               tapa     = '$tapa',
+               kentta01 = '$viesti',
+               kuittaus = '$kuittaus',
+               pvmalku  = $pvmalku";
     $result = mysql_query($kysely) or pupe_error($kysely);
     $muist = mysql_insert_id();
 

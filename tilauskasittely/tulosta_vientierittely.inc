@@ -22,10 +22,10 @@ $Xsivu = 1;
 
 
 //hetaan kaikki otunnukset jotka löytyvät tän uusiotunnuksen alta
-$Xquery = "  SELECT distinct otunnus
-      FROM tilausrivi
-      WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
-      and tilausrivi.yhtio = '$kukarow[yhtio]'";
+$Xquery = "SELECT distinct otunnus
+           FROM tilausrivi
+           WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
+           and tilausrivi.yhtio         = '$kukarow[yhtio]'";
 $Xuresult = mysql_query($Xquery) or pupe_error($Xquery);
 
 $Xtunnukset2 = '';
@@ -41,9 +41,9 @@ if ($Xtunnukset2 != "") {
   $Xkilot  = 0;
 
   //haetaan kollimäärä ja bruttopaino
-  $Xquery = "  SELECT sum(kilot) kilot
-        FROM rahtikirjat
-        WHERE otsikkonro in ($Xtunnukset2) and yhtio='$kukarow[yhtio]'";
+  $Xquery = "SELECT sum(kilot) kilot
+             FROM rahtikirjat
+             WHERE otsikkonro in ($Xtunnukset2) and yhtio='$kukarow[yhtio]'";
   $Xrahtiresult = mysql_query($Xquery) or pupe_error($Xquery);
   $Xrahtirow = mysql_fetch_array($Xrahtiresult);
 
@@ -51,29 +51,29 @@ if ($Xtunnukset2 != "") {
     $Xkilot = $Xrahtirow["kilot"];
   }
 
-  $Xquery = "  SELECT
-        tuote.tuoteno,
-        tullinimike.su,
-        tuote.tullinimike1,
-        tuote.tullikohtelu,
-        (SELECT tuotteen_toimittajat.alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ORDER BY if (tuotteen_toimittajat.alkuperamaa='$yhtiorow[maa]', concat('2', tuotteen_toimittajat.alkuperamaa), concat('1', tuotteen_toimittajat.alkuperamaa)) LIMIT 1) alkuperamaa,
-        sum(tilausrivi.rivihinta) summa,
-        sum(tilausrivi.kpl) kpl,
-        round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino,
-        tuote.vakkoodi,
-        tuote.vak_imdg_koodi
-        FROM tilausrivi
-        JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-        LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
-        WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
-        and tilausrivi.yhtio = '$kukarow[yhtio]'
-        and tilausrivi.tyyppi = 'L'
-        and tilausrivi.kpl<>0
-        GROUP BY tuote.tuoteno,
-        tullinimike.su,
-        tuote.tullinimike1,
-        tuote.tullikohtelu,
-        alkuperamaa";
+  $Xquery = "SELECT
+             tuote.tuoteno,
+             tullinimike.su,
+             tuote.tullinimike1,
+             tuote.tullikohtelu,
+             (SELECT tuotteen_toimittajat.alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ORDER BY if (tuotteen_toimittajat.alkuperamaa='$yhtiorow[maa]', concat('2', tuotteen_toimittajat.alkuperamaa), concat('1', tuotteen_toimittajat.alkuperamaa)) LIMIT 1) alkuperamaa,
+             sum(tilausrivi.rivihinta) summa,
+             sum(tilausrivi.kpl) kpl,
+             round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino,
+             tuote.vakkoodi,
+             tuote.vak_imdg_koodi
+             FROM tilausrivi
+             JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+             LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
+             WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
+             and tilausrivi.yhtio         = '$kukarow[yhtio]'
+             and tilausrivi.tyyppi        = 'L'
+             and tilausrivi.kpl<>0
+             GROUP BY tuote.tuoteno,
+             tullinimike.su,
+             tuote.tullinimike1,
+             tuote.tullikohtelu,
+             alkuperamaa";
   $Xriviresult = mysql_query($Xquery) or pupe_error($Xquery);
 
   if (mysql_num_rows($Xriviresult) < 1) {

@@ -81,36 +81,36 @@ if ($ytunnus != '') {
         $eviesti = "$kukarow[nimi] lähetti memon käyttäjälle: $enimi / $email";
       }
 
-      $kysely = "  INSERT INTO kalenteri
-            SET tapa     = '$row[tapa]',
-            asiakas      = '$row[asiakas]',
-            liitostunnus   = '$row[liitostunnus]',
-            henkilo      = '$row[henkilo]',
-            kuka         = '$kukarow[kuka]',
-            yhtio        = '$kukarow[yhtio]',
-            tyyppi       = 'Memo',
-            pvmalku      = now(),
-            kentta01     = '$eviesti',
-            perheid     = '$row[tunnus]',
-            laatija      = '$kukarow[kuka]',
-            luontiaika    = now()";
+      $kysely = "INSERT INTO kalenteri
+                 SET tapa     = '$row[tapa]',
+                 asiakas      = '$row[asiakas]',
+                 liitostunnus = '$row[liitostunnus]',
+                 henkilo      = '$row[henkilo]',
+                 kuka         = '$kukarow[kuka]',
+                 yhtio        = '$kukarow[yhtio]',
+                 tyyppi       = 'Memo',
+                 pvmalku      = now(),
+                 kentta01     = '$eviesti',
+                 perheid      = '$row[tunnus]',
+                 laatija      = '$kukarow[kuka]',
+                 luontiaika   = now()";
       $result = pupe_query($kysely);
 
       if ($row["tyyppi"] == "Lead") {
-        $kysely = "  INSERT INTO kalenteri
-              SET tapa     = '$row[tapa]',
-              asiakas      = '$row[asiakas]',
-              liitostunnus   = '$row[liitostunnus]',
-              henkilo      = '$row[henkilo]',
-              kuka         = '$ekuka',
-              myyntipaallikko  = '$row[myyntipaallikko]',
-              yhtio        = '$kukarow[yhtio]',
-              tyyppi       = '$row[tyyppi]',
-              pvmalku      = '$row[pvmalku]',
-              kentta01     = '$row[kentta01]',
-              kuittaus     = '$row[kuittaus]',
-              laatija      = '$kukarow[kuka]',
-              luontiaika    = now()";
+        $kysely = "INSERT INTO kalenteri
+                   SET tapa     = '$row[tapa]',
+                   asiakas         = '$row[asiakas]',
+                   liitostunnus    = '$row[liitostunnus]',
+                   henkilo         = '$row[henkilo]',
+                   kuka            = '$ekuka',
+                   myyntipaallikko = '$row[myyntipaallikko]',
+                   yhtio           = '$kukarow[yhtio]',
+                   tyyppi          = '$row[tyyppi]',
+                   pvmalku         = '$row[pvmalku]',
+                   kentta01        = '$row[kentta01]',
+                   kuittaus        = '$row[kuittaus]',
+                   laatija         = '$kukarow[kuka]',
+                   luontiaika      = now()";
         $result = pupe_query($kysely);
       }
       //echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
@@ -175,20 +175,20 @@ if ($ytunnus != '') {
 
     if ($korjaus == '') {
       if ($viesti != '') {
-        $kysely = "  INSERT INTO kalenteri
-              SET tapa     = '$tapa',
-              asiakas      = '$ytunnus',
-              liitostunnus   = '$asiakasid',
-              henkilo      = '$yhtunnus',
-              kuka         = '$kuka',
-              myyntipaallikko  = '$myyntipaallikko',
-              yhtio        = '$kukarow[yhtio]',
-              tyyppi       = '$tyyppi',
-              pvmalku      = $pvmalku,
-              kentta01     = '$viesti',
-              kuittaus     = '$kuittaus',
-              laatija      = '$kukarow[kuka]',
-              luontiaika    = now()";
+        $kysely = "INSERT INTO kalenteri
+                   SET tapa     = '$tapa',
+                   asiakas         = '$ytunnus',
+                   liitostunnus    = '$asiakasid',
+                   henkilo         = '$yhtunnus',
+                   kuka            = '$kuka',
+                   myyntipaallikko = '$myyntipaallikko',
+                   yhtio           = '$kukarow[yhtio]',
+                   tyyppi          = '$tyyppi',
+                   pvmalku         = $pvmalku,
+                   kentta01        = '$viesti',
+                   kuittaus        = '$kuittaus',
+                   laatija         = '$kukarow[kuka]',
+                   luontiaika      = now()";
         $result = pupe_query($kysely);
         $muist = mysql_insert_id();
 
@@ -238,21 +238,21 @@ if ($ytunnus != '') {
       }
     }
     else {
-      $kysely = "  UPDATE kalenteri
-            SET tapa     = '$tapa',
-            asiakas      = '$ytunnus',
-            liitostunnus   = '$asiakasid',
-            henkilo      = '$yhtunnus',
-            kuka         = '$kuka',
-            myyntipaallikko  = '$myyntipaallikko',
-            yhtio        = '$kukarow[yhtio]',
-            tyyppi       = '$tyyppi',
-            pvmalku      = $pvmalku,
-            kentta01     = '$viesti',
-            kuittaus     = '$kuittaus',
-            muuttaja    = '$kukarow[kuka]',
-            muutospvm    = now()
-            WHERE tunnus = '$korjaus'";
+      $kysely = "UPDATE kalenteri
+                 SET tapa     = '$tapa',
+                 asiakas         = '$ytunnus',
+                 liitostunnus    = '$asiakasid',
+                 henkilo         = '$yhtunnus',
+                 kuka            = '$kuka',
+                 myyntipaallikko = '$myyntipaallikko',
+                 yhtio           = '$kukarow[yhtio]',
+                 tyyppi          = '$tyyppi',
+                 pvmalku         = $pvmalku,
+                 kentta01        = '$viesti',
+                 kuittaus        = '$kuittaus',
+                 muuttaja        = '$kukarow[kuka]',
+                 muutospvm       = now()
+                 WHERE tunnus    = '$korjaus'";
       $result = pupe_query($kysely);
 
       $aputyyppi       = $tyyppi;
@@ -291,43 +291,43 @@ if ($ytunnus != '') {
 
   if ($tee == "LISAAASANALYYSI") {
     if ($esilla != '' || $yleisilme != '') {
-      $kysely = "  INSERT INTO kalenteri
-            SET tapa = 'asiakasanalyysi',
-            asiakas  = '$ytunnus',
-            liitostunnus = '$asiakasid',
-            henkilo  = '$yhtunnus',
-            kuka     = '$kukarow[kuka]',
-            yhtio    = '$kukarow[yhtio]',
-            kentta01 = '$esilla',
-            kentta02 = '$yleisilme',
-            kentta03 = '$puvut',
-            kentta04 = '$kyparat',
-            kentta05 = '$saappaat',
-            kentta06 = '$hanskat',
-            kentta07 = '$muuta',
-            kentta08 = '$extrat',
-            tyyppi   = 'Memo',
-            pvmalku  = now()";
+      $kysely = "INSERT INTO kalenteri
+                 SET tapa = 'asiakasanalyysi',
+                 asiakas      = '$ytunnus',
+                 liitostunnus = '$asiakasid',
+                 henkilo      = '$yhtunnus',
+                 kuka         = '$kukarow[kuka]',
+                 yhtio        = '$kukarow[yhtio]',
+                 kentta01     = '$esilla',
+                 kentta02     = '$yleisilme',
+                 kentta03     = '$puvut',
+                 kentta04     = '$kyparat',
+                 kentta05     = '$saappaat',
+                 kentta06     = '$hanskat',
+                 kentta07     = '$muuta',
+                 kentta08     = '$extrat',
+                 tyyppi       = 'Memo',
+                 pvmalku      = now()";
       $result = pupe_query($kysely);
     }
     $tee = '';
   }
 
   if ($tee == "POISTAMEMO") {
-    $kysely = "  UPDATE kalenteri
-          SET
-          tyyppi = concat('DELETED ',tyyppi)
-          WHERE tunnus    = '$tunnus'
-          and yhtio      = '$kukarow[yhtio]'
-          and asiakas      = '$ytunnus'
-          and liitostunnus   = '$asiakasid'";
+    $kysely = "UPDATE kalenteri
+               SET
+               tyyppi           = concat('DELETED ',tyyppi)
+               WHERE tunnus     = '$tunnus'
+               and yhtio        = '$kukarow[yhtio]'
+               and asiakas      = '$ytunnus'
+               and liitostunnus = '$asiakasid'";
     $result = pupe_query($kysely);
 
-    $kysely = "  UPDATE liitetiedostot
-          SET   liitos = concat('DELETED ',liitos)
-          WHERE   liitostunnus   = '$tunnus'
-          AND   liitos      = '$liitostyyppi'
-          and   yhtio      = '$kukarow[yhtio]'";
+    $kysely = "UPDATE liitetiedostot
+               SET   liitos = concat('DELETED ',liitos)
+               WHERE   liitostunnus = '$tunnus'
+               AND   liitos         = '$liitostyyppi'
+               and   yhtio          = '$kukarow[yhtio]'";
 
     $result = pupe_query($kysely);
 

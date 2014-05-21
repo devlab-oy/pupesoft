@@ -135,35 +135,61 @@ if ($tee != '' and isset($painoinnappia)) {
   echo "<th nowrap>".t("Varasto")."<br>{$edellisvuosi}-{$kkl}-{$ppl}</th>";
 
   $query = "SELECT
-            tilausrivi.osasto,
-            tilausrivi.try,
-            round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0))) myyntiVA,
-            round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kate, 0))) kateVA,
-            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0))) myyntiEDVA,
-            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-{$kkl}-{$ppl}', tilausrivi.kate, 0))) kateEDVA,
-            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0))) myyntiED,
-            round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.kate, 0))) kateED,
-            round(sum(if(tilausrivi.laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 12 month), tilausrivi.rivihinta, 0))) myynti12,
-            round(sum(if(tilausrivi.laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 12 month), tilausrivi.kate, 0))) kate12
+            tilausrivi.osasto AS osasto,
+            tilausrivi.rivihinta as rivihinta,
+            tilausrivi.try AS tuoteryhma,
+            tilausrivi.tuoteno AS tuotenumero,
+            tilausrivi.tunnus AS tunnus,
+            if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
+                  and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}',
+                  tilausrivi.rivihinta, 0) myyntiVA,
+            if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
+                  and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}',
+                  tilausrivi.kate, 0) kateVA,
+            if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-{$kka}-{$ppa}'
+                  and tilausrivi.laskutettuaika <= '{$edellisvuosi}-{$kkl}-{$ppl}',
+                  tilausrivi.rivihinta, 0) myyntiEDVA,
+            if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-{$kka}-{$ppa}'
+                  and tilausrivi.laskutettuaika <= '{$edellisvuosi}-{$kkl}-{$ppl}',
+                  tilausrivi.kate, 0) kateEDVA,
+            if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01'
+                  and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31',
+                  tilausrivi.rivihinta, 0) myyntiED,
+            if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01'
+                  and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31',
+                  tilausrivi.kate, 0) kateED,
+            if(tilausrivi.laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 12 month),
+                tilausrivi.rivihinta, 0) myynti12,
+            if(tilausrivi.laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 12 month),
+                tilausrivi.kate, 0) kate12
             FROM lasku
-            JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
+            JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and lasku.tila    = 'U'
-            and lasku.alatila = 'X'
+            AND lasku.tila    = 'U'
+            AND lasku.alatila   = 'X'
             $lisa
-            and  lasku.tapvm  >= '{$edellisvuosi}-01-01'
-            and  lasku.tapvm  <= '{$vvl}-{$kkl}-{$ppl}'
-            GROUP BY tilausrivi.osasto, tilausrivi.try
-            ORDER BY tilausrivi.osasto, tilausrivi.try";
+            AND lasku.tapvm   >= '{$edellisvuosi}-01-01'
+            AND lasku.tapvm   <= '{$vvl}-{$kkl}-{$ppl}'";
   $eresult = pupe_query($query);
 
-  while ($row = mysql_fetch_assoc($eresult)) {
+  $parametrit = array(
+    "result" => $eresult,
+    "sum" => array("myyntiVA", "kateVA", "myyntiEDVA", "kateEDVA", "myyntiED", "kateED", "myynti12", "kate12"),
+    "group_by" => array("osasto", "tuoteryhma"),
+    "order_by" => array("osasto", "tuoteryhma"),
+    "select" => array("osasto", "tuoteryhma"),
+    "lisaa_kulut" => array("kateVA", "kateEDVA", "kateED", "kate12")
+  );
 
-    $parametrit       = array();
-    $parametrit['osasto']   = $row['osasto'];
-    $parametrit['try']     = $row['try'];
-    $parametrit['pvm1']   = "{$vvl}-{$kkl}-{$ppl}";
-    $parametrit['pvm2']   = "{$edellisvuosi}-{$kkl}-{$ppl}";
+  $rows = tilausrivin_tarkistus_riveittain($parametrit);
+
+  foreach($rows as $row) {
+
+    $parametrit = array();
+    $parametrit['osasto'] = $row['osasto'];
+    $parametrit['try'] = $row['tuoteryhma'];
+    $parametrit['pvm1'] = "{$vvl}-{$kkl}-{$ppl}";
+    $parametrit['pvm2'] = "{$edellisvuosi}-{$kkl}-{$ppl}";
 
     list($arvo_hetkella_1, $arvo_hetkella_2) = tuoteryhman_varastonarvo($parametrit);
 
@@ -172,34 +198,33 @@ if ($tee != '' and isset($painoinnappia)) {
 
     if ($osastorow['selitetark'] != "") $row['osasto'] = $row['osasto']." - ".$osastorow['selitetark'];
 
-    $tryres = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
+    $tryres = t_avainsana("TRY", "", "and avainsana.selite ='$row[tuoteryhma]'");
     $tryrow = mysql_fetch_assoc($tryres);
 
-    if ($tryrow['selitetark'] != "") $row['try'] = $row['try']." - ".$tryrow['selitetark'];
+    if ($tryrow['selitetark'] != "") $row['tuoteryhma'] = $row['tuoteryhma']." - ".$tryrow['selitetark'];
 
     echo "<tr>";
-    echo "<td>$row[osasto]</td>";
-    echo "<td>$row[try] </td>";
-    echo "<td align='right'>$row[myyntiVA]</td>";
-    echo "<td align='right'>$row[kateVA]</td>";
+    echo "<td>".$row['osasto']."</td>";
+    echo "<td>".$row['tuoteryhma']."</td>";
+    echo "<td align='right'>".round($row['myyntiVA'])."</td>";
+    echo "<td align='right'>".round($row['kateVA'])."</td>";
     echo "<td align='right'>".round($row['kateVA'] / $row['myyntiVA'] * 100, 1)."</td>";
-    echo "<td align='right'>$row[myyntiEDVA]</td>";
-    echo "<td align='right'>$row[kateEDVA]</td>";
+    echo "<td align='right'>".round($row['myyntiEDVA'])."</td>";
+    echo "<td align='right'>".round($row['kateEDVA'])."</td>";
     echo "<td align='right'>".round($row['myyntiEDVA'] / $row['kateEDVA'] * 100, 1)."</td>";
-    echo "<td align='right'>$row[myyntiED]</td>";
-    echo "<td align='right'>$row[kateED]</td>";
+    echo "<td align='right'>".round($row['myyntiED'])."</td>";
+    echo "<td align='right'>".round($row['kateED'])."</td>";
     echo "<td align='right'>".round($row['kateED'] / $row['myyntiED'] * 100, 1)."</td>";
-    echo "<td align='right'>$row[myynti12]</td>";
-    echo "<td align='right'>$row[kate12]</td>";
+    echo "<td align='right'>".round($row['myynti12'])."</td>";
+    echo "<td align='right'>".round($row['kate12'])."</td>";
     echo "<td align='right'>".round($row['kate12'] / $row['myynti12'] * 100, 1)."</td>";
     echo "<td align='right'></td>";
     echo "<td align='right'></td>";
     echo "<td align='right'>$arvo_hetkella_1</td>";
     echo "<td align='right'>$arvo_hetkella_2</td>";
     echo "</tr>";
+    }
+    echo "</table>";
   }
-
-  echo "</table>";
-}
-
-require ("inc/footer.inc");
+  require ("inc/footer.inc");
+?>

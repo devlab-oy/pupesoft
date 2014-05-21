@@ -584,6 +584,8 @@ if (isset($jatka)) {
 
     if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($toimipiste) and (trim($toimipiste) == '' or $toimipiste == 0) and $varow['toimipaikka'] != 0) {
       $toimipiste = $varow['toimipaikka'];
+
+      echo "<font class='message'>",t("Tilaava toimipiste haettiin varaston takaa"),".</font><br /><br />";
     }
 
     if ($varow["nimi"] != "" and $varow["osoite"] != "") {

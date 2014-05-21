@@ -29,8 +29,8 @@ $komento    = "";
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 if (!isset($lukotetaan) or $lukotetaan) {
-  $query = "  LOCK TABLE
-        lasku WRITE";
+  $query = "LOCK TABLE
+            lasku WRITE";
   $res = pupe_query($query);
 }
 

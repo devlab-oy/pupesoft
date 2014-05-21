@@ -41,9 +41,9 @@ if (!function_exists("alku")) {
     }
 
     //Haetaan yhteyshenkilon tiedot
-    $apuqu = "  SELECT *
-          from kuka
-          where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
+    $apuqu = "SELECT *
+              from kuka
+              where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
     $yres = pupe_query($apuqu);
     $yrow = mysql_fetch_assoc($yres);
 

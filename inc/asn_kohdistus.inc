@@ -939,11 +939,11 @@ if (!function_exists("asn_kohdista_suuntalava")) {
     global $yhtiorow, $kukarow;
 
     // Haetaan toimittajan tiedot
-    $toimhaku = "  SELECT *
-            FROM toimi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND toimittajanro = '{$edellinen_toimittaja}'
-            AND tyyppi != 'P'";
+    $toimhaku = "SELECT *
+                 FROM toimi
+                 WHERE yhtio        = '{$kukarow['yhtio']}'
+                 AND toimittajanro  = '{$edellinen_toimittaja}'
+                 AND tyyppi        != 'P'";
     $checkres = pupe_query($toimhaku);
 
     if (mysql_num_rows($checkres) != 1) {

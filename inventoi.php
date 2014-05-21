@@ -187,25 +187,25 @@ if ($tee == "FILE") {
 }
 
 // lukitaan tableja
-$query = "  LOCK TABLES tuotepaikat WRITE,
-      tapahtuma WRITE,
-      lasku WRITE,
-      tiliointi WRITE,
-      sanakirja WRITE,
-      tuote READ,
-      tilausrivi WRITE,
-      tuotteen_avainsanat READ,
-      sarjanumeroseuranta WRITE,
-      sarjanumeroseuranta_arvomuutos READ,
-      tilausrivi as tilausrivi_myynti READ,
-      tilausrivi as tilausrivi_osto READ,
-      tuotepaikat as tt READ,
-      avainsana as avainsana_kieli READ,
-      avainsana READ,
-      tili READ,
-      asiakas READ,
-      varastopaikat READ,
-      yhtion_toimipaikat READ";
+$query = "LOCK TABLES tuotepaikat WRITE,
+          tapahtuma WRITE,
+          lasku WRITE,
+          tiliointi WRITE,
+          sanakirja WRITE,
+          tuote READ,
+          tilausrivi WRITE,
+          tuotteen_avainsanat READ,
+          sarjanumeroseuranta WRITE,
+          sarjanumeroseuranta_arvomuutos READ,
+          tilausrivi as tilausrivi_myynti READ,
+          tilausrivi as tilausrivi_osto READ,
+          tuotepaikat as tt READ,
+          avainsana as avainsana_kieli READ,
+          avainsana READ,
+          tili READ,
+          asiakas READ,
+          varastopaikat READ,
+          yhtion_toimipaikat READ";
 $result = pupe_query($query);
 
 //tuotteen varastostatus

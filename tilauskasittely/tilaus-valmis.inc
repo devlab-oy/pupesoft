@@ -657,11 +657,11 @@ else {
     // tässä käydään läpi vähän näitä rahtijuttuja
     // katotaan saadaanko tilaus ilmaseks jos ollaan yli rajojen
     // haetaan asiakkaan alarajasumma
-    $as_que = "  SELECT rahtivapaa_alarajasumma
-          FROM asiakas
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus = '$laskurow[liitostunnus]'
-          AND rahtivapaa_alarajasumma > 0";
+    $as_que = "SELECT rahtivapaa_alarajasumma
+               FROM asiakas
+               WHERE yhtio                 = '$kukarow[yhtio]'
+               AND tunnus                  = '$laskurow[liitostunnus]'
+               AND rahtivapaa_alarajasumma > 0";
     $as_res = pupe_query($as_que);
 
     $rahtivapaa_alarajasumma = 0;

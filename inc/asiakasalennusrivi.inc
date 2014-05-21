@@ -9,9 +9,9 @@ if ($i == 0) { //yhtiötä ei näytetä
 }
 
 if (mysql_field_name($result, $i) == "piiri") {
-  $preq = "  SELECT avainsana.selite piiri, avainsana.selitetark selitetark
-        FROM avainsana
-        WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
+  $preq = "SELECT avainsana.selite piiri, avainsana.selitetark selitetark
+           FROM avainsana
+           WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
   $preres = mysql_query($preq) or pupe_error($preq);
 
   $ulos = "<td><select id='piiri' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -31,14 +31,14 @@ if (mysql_field_name($result, $i) == "piiri") {
 
 if (mysql_field_name($result, $i) == "asiakas_segmentti") {
 
-  $preq = "  SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
-        FROM dynaaminen_puu AS node
-        JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
-        WHERE node.yhtio = '$kukarow[yhtio]'
-        AND node.lft > 0
-        AND node.laji = 'asiakas'
-        GROUP BY node.tunnus
-        ORDER BY node.lft";
+  $preq = "SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
+           FROM dynaaminen_puu AS node
+           JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
+           WHERE node.yhtio = '$kukarow[yhtio]'
+           AND node.lft     > 0
+           AND node.laji    = 'asiakas'
+           GROUP BY node.tunnus
+           ORDER BY node.lft";
   $preres = mysql_query($preq) or pupe_error($preq);
 
   $ulos = "<td><select id='asiakas_segmentti' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

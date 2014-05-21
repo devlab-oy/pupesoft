@@ -177,14 +177,14 @@ if ($tee == 'T') {
     echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
 
     // Selvitet‰‰n laskun kustannuspaikat
-    $kustpq = "  SELECT tiliointi.kustp, kustannuspaikka.nimi
-          FROM tiliointi
-          JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tiliointi.yhtio AND kustannuspaikka.tunnus = tiliointi.kustp)
-          WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-          AND tiliointi.ltunnus = '$trow[tunnus]'
-          and tiliointi.kustp != 0
-          and tiliointi.korjattu = ''
-          ORDER BY tiliointi.tunnus LIMIT 1";
+    $kustpq = "SELECT tiliointi.kustp, kustannuspaikka.nimi
+               FROM tiliointi
+               JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tiliointi.yhtio AND kustannuspaikka.tunnus = tiliointi.kustp)
+               WHERE tiliointi.yhtio   = '$kukarow[yhtio]'
+               AND tiliointi.ltunnus   = '$trow[tunnus]'
+               and tiliointi.kustp    != 0
+               and tiliointi.korjattu  = ''
+               ORDER BY tiliointi.tunnus LIMIT 1";
     $kustpres = pupe_query($kustpq);
 
     $kustannuspaikan_nimi = "";

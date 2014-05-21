@@ -533,11 +533,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Katsotaan onko maksuehto jälkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
   if (!isset($jvtsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM maksuehto
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND tunnus  = '$laskurow[maksuehto]'
-          AND jv      != ''";
+    $apuqu = "SELECT tunnus
+              FROM maksuehto
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tunnus   = '$laskurow[maksuehto]'
+              AND jv      != ''";
     $jvtsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($jvtsekres) > 0) {
@@ -547,11 +547,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Vientiasiakkaille ei myydä erikoisvarastoista jos toimitustapa on nouto
   if (!isset($tntsekres)) {
-    $apuqu = "  SELECT tunnus
-          FROM toimitustapa
-          WHERE yhtio  = '$kukarow[yhtio]'
-          AND selite  = '$laskurow[toimitustapa]'
-          AND nouto  != ''";
+    $apuqu = "SELECT tunnus
+              FROM toimitustapa
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND selite   = '$laskurow[toimitustapa]'
+              AND nouto   != ''";
     $tntsekres = pupe_query($apuqu);
 
     if (mysql_num_rows($tntsekres) > 0) {
@@ -2674,10 +2674,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
 
           if ($vmyytavissa > 0) {
-            $tvsql = "  SELECT *
-                  FROM tuote
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tuoteno = '$edirow[tuoteno]'";
+            $tvsql = "SELECT *
+                      FROM tuote
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND tuoteno = '$edirow[tuoteno]'";
             $tvresult = pupe_query($tvsql);
             $tvrow = mysql_fetch_assoc($tvresult);
 

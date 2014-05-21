@@ -560,10 +560,10 @@ if (isset($jatka)) {
 
   // katotaan ollaanko valittu tietty varasto johon kamat tilataan
   if ($varasto > 0) {
-    $edique  = "SELECT *
-          FROM varastopaikat
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and tunnus   = '$varasto'";
+    $edique = " SELECT *
+                FROM varastopaikat
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND tunnus   = '$varasto'";
     $vares = mysql_query($edique) or pupe_error($edique);
     $varow = mysql_fetch_array($vares);
 
@@ -585,10 +585,10 @@ if (isset($jatka)) {
 
   // katotaan ollaanko valittu tilaajaksi joku muu toimipiste
   if ($toimipiste > 0 and strlen(trim($tnimi)) == 0) {
-    $edique  = "SELECT *
-          from yhtion_toimipaikat
-          where yhtio  = '$kukarow[yhtio]'
-          and tunnus  = '$toimipiste'";
+    $edique = " SELECT *
+                FROM yhtion_toimipaikat
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND tunnus  = '$toimipiste'";
     $ediotr = mysql_query($edique) or pupe_error($edique);
     $edioro = mysql_fetch_array($ediotr);
 

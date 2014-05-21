@@ -258,6 +258,14 @@ class MagentoClient {
         $visibility = self::NOT_VISIBLE_INDIVIDUALLY;
       }
 
+      $multi_data = array();
+
+      // Simple tuotteiden parametrit kuten koko ja v‰ri
+      foreach($tuote['tuotteen_parametrit'] as $parametri) {
+        $key = $parametri['option_name'];
+        $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+      }
+     
       $tuote_data = array(
           'categories'            => $category_ids,
           'websites'              => explode(" ", $tuote['nakyvyys']),
@@ -276,8 +284,15 @@ class MagentoClient {
           'campaign_code'         => utf8_encode($tuote['campaign_code']),
           'onsale'                => utf8_encode($tuote['onsale']),
           'target'                => utf8_encode($tuote['target']),
+          'name2'                 => utf8_encode("Secondary name"),
+          'pickup_product'        => TRUE,
         );
 
+ /*     // Simple tuotteiden parametrit kuten koko ja v‰ri
+      foreach($tuote['tuotteen_parametrit'] as $parametri) {
+        $tuote_data[$parametri['option_name']] = utf8_encode($parametri['arvo']);
+      }*/
+                          
       // Lis‰t‰‰n tai p‰ivitet‰‰n tuote
 
       // Jos tuotetta ei ole olemassa niin lis‰t‰‰n se
@@ -436,6 +451,7 @@ class MagentoClient {
         'meta_title'            => '',
         'meta_keyword'          => '',
         'meta_description'      => '',
+        'color'                 => "Magenta",
         'associated_skus'       => $lapsituotteet_array,
       );
 
@@ -918,11 +934,12 @@ class MagentoClient {
 
     $attribute_list = $this->getAttributeList();
     $attribute_id = '';
-
+var_dump($attribute_list);
     // Etsit‰‰n halutun attribuutin id
     foreach ($attribute_list as $attribute) {
       if (strcasecmp($attribute['code'], $name) == 0) {
         $attribute_id = $attribute['attribute_id'];
+        echo "L÷YTYI ID $attribute_id\n";
         break;
       }
     }
@@ -938,7 +955,7 @@ class MagentoClient {
         $attribute_id
       )
     );
-
+var_dump($options);
     // Etit‰‰n optionsin value
     foreach ($options as $option) {
       if (strcasecmp($option['label'], $value) == 0) {

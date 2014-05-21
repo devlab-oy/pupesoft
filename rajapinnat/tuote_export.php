@@ -149,8 +149,26 @@ while ($row = mysql_fetch_array($res)) {
     $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
 
+  // Haetaan kaikki tuotteen atribuutit
+  $parametritquery = " SELECT tuotteen_avainsanat.selite,
+          avainsana.selitetark,
+          avainsana.selite option_name
+          FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
+          JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+            AND avainsana.laji = 'PARAMETRI'
+            AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+          WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+          AND tuotteen_avainsanat.laji != 'parametri_variaatio'
+          AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
+          AND tuotteen_avainsanat.laji like 'parametri_%'
+          AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
+          AND tuotteen_avainsanat.kieli = 'fi'
+          ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
+  $parametritres = pupe_query($parametritquery);
+  $tuotteen_parametrit = array();
+
   // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
-  $query = "SELECT t0.nimi node, t0.lft, 
+  $query = "SELECT t0.nimi node, t0.lft,
             tuote.tuoteno,
             GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
             (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
@@ -166,7 +184,7 @@ while ($row = mysql_fetch_array($res)) {
              FROM dynaaminen_puu t1
              INNER JOIN
              dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
-             GROUP BY t1.lft) t3 
+             GROUP BY t1.lft) t3
              LEFT JOIN
              dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
             LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
@@ -179,38 +197,49 @@ while ($row = mysql_fetch_array($res)) {
   $result_tp = pupe_query($query);
 
   $tuotepuun_nodet = array ();
-  
+
   while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
     $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n",$tuotepuurow['ancestors']);
     $breadcrumbs[] = $tuotepuurow['node'];
     if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
     $tuotepuun_nodet[] = $breadcrumbs;
   }
-  $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
-            'nimi'          => $row["nimitys"],
-            'kuvaus'        => $row["kuvaus"],
-            'lyhytkuvaus'      => $row["lyhytkuvaus"],
-            'yksikko'        => $row["yksikko"],
-            'tuotemassa'      => $row["tuotemassa"],
-            'myyntihinta'      => $myyntihinta,
-            'myyntihinta_veroton'  => $myyntihinta_veroton,
-            'myymalahinta'      => $myymalahinta,
-            'myymalahinta_veroton'  => $myymalahinta_veroton,
-            'kuluprosentti'      => $row['kuluprosentti'],
-            'ean'          => $row["eankoodi"],
-            'osasto'        => $row["osasto"],
-            'try'          => $row["try"],
-            'try_nimi'        => $row["try_nimi"],
-            'alv'          => $row["alv"],
-            'nakyvyys'        => $row["nakyvyys"],
-            'nimi_swe'        => $row["nimi_swe"],
-            'nimi_eng'        => $row["nimi_eng"],
-            'campaign_code'      => $row["campaign_code"],
-            'target'        => $row["target"],
-            'onsale'        => $row["onsale"],
-            'tunnus'        => $row['tunnus'],
-            'tuotepuun_nodet' => $tuotepuun_nodet
-            );
+
+   while ($parametrirow = mysql_fetch_assoc($parametritres)) {
+    $tuotteen_parametrit[] = array(
+                                   "nimi"        => $parametrirow["selitetark"],
+                                   "option_name" => $parametrirow["option_name"],
+                                   "arvo"        => $parametrirow["selite"]
+                                   );
+  }
+
+  $dnstuote[] = array(
+                      'tuoteno'              => $row["tuoteno"],
+                      'nimi'                 => $row["nimitys"],
+                      'kuvaus'               => $row["kuvaus"],
+                      'lyhytkuvaus'          => $row["lyhytkuvaus"],
+                      'yksikko'              => $row["yksikko"],
+                      'tuotemassa'           => $row["tuotemassa"],
+                      'myyntihinta'          => $myyntihinta,
+                      'myyntihinta_veroton'  => $myyntihinta_veroton,
+                      'myymalahinta'         => $myymalahinta,
+                      'myymalahinta_veroton' => $myymalahinta_veroton,
+                      'kuluprosentti'        => $row['kuluprosentti'],
+                      'ean'                  => $row["eankoodi"],
+                      'osasto'               => $row["osasto"],
+                      'try'                  => $row["try"],
+                      'try_nimi'             => $row["try_nimi"],
+                      'alv'                  => $row["alv"],
+                      'nakyvyys'             => $row["nakyvyys"],
+                      'nimi_swe'             => $row["nimi_swe"],
+                      'nimi_eng'             => $row["nimi_eng"],
+                      'campaign_code'        => $row["campaign_code"],
+                      'target'               => $row["target"],
+                      'onsale'               => $row["onsale"],
+                      'tunnus'               => $row['tunnus'],
+                      'tuotepuun_nodet'      => $tuotepuun_nodet,
+                      'tuotteen_parametrit'  => $tuotteen_parametrit
+                      );
 }
 
 // Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
@@ -543,7 +572,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
     $properties = array();
 
     while ($syvinrow = mysql_fetch_assoc($alinres)) {
-      $properties[] = array(  
+      $properties[] = array(
                             "nimi" => $syvinrow["selitetark"],
                             "option_name" => $syvinrow["option_name"],
                             "arvo" => $syvinrow["selite"]
@@ -567,7 +596,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
     }
 
     // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
-    $query = "SELECT t0.nimi node, t0.lft, 
+    $query = "SELECT t0.nimi node, t0.lft,
               tuote.tuoteno,
               GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
               (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
@@ -583,7 +612,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
                FROM dynaaminen_puu t1
                INNER JOIN
                dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
-               GROUP BY t1.lft) t3 
+               GROUP BY t1.lft) t3
                LEFT JOIN
                dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
               LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
@@ -604,7 +633,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       $tuotepuun_nodet[] = $breadcrumbs;
     }
 
-    $dnslajitelma[$rowselite["selite"]][] = array(  
+    $dnslajitelma[$rowselite["selite"]][] = array(
       'tuoteno'               => $alirow["tuoteno"],
       'tunnus'                => $alirow["tunnus"],
       'nimitys'               => $alirow["nimitys"],
@@ -654,7 +683,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   // Verkkokaupanhintakenttä, joko myyntihinta tai myymalahinta
   if (isset($magento_hintakentta)) $magento_client->setHintakentta($magento_hintakentta);
-  
+
   // Käytetäänkö tuoteryhminä tuoteryhmiä(default) vai tuotepuuta
   if (isset($magento_kategoriat)) $magento_client->setKategoriat($magento_kategoriat);
 

@@ -148,31 +148,59 @@ while ($row = mysql_fetch_array($res)) {
     $myymalahinta          = $row["myymalahinta"];
     $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
+  
+  // Haetaan kaikki tuotteen atribuutit
+  $parametritquery = " SELECT tuotteen_avainsanat.selite,
+          avainsana.selitetark,
+          avainsana.selite option_name
+          FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
+          JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+            AND avainsana.laji = 'PARAMETRI'
+            AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+          WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+          AND tuotteen_avainsanat.laji != 'parametri_variaatio'
+          AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
+          AND tuotteen_avainsanat.laji like 'parametri_%'
+          AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
+          AND tuotteen_avainsanat.kieli = 'fi'
+          ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
+  $parametritres = pupe_query($parametritquery);
+  $tuotteen_parametrit = array();
 
-  $dnstuote[] = array('tuoteno'        => $row["tuoteno"],
-            'nimi'          => $row["nimitys"],
-            'kuvaus'        => $row["kuvaus"],
-            'lyhytkuvaus'      => $row["lyhytkuvaus"],
-            'yksikko'        => $row["yksikko"],
-            'tuotemassa'      => $row["tuotemassa"],
-            'myyntihinta'      => $myyntihinta,
-            'myyntihinta_veroton'  => $myyntihinta_veroton,
-            'myymalahinta'      => $myymalahinta,
-            'myymalahinta_veroton'  => $myymalahinta_veroton,
-            'kuluprosentti'      => $row['kuluprosentti'],
-            'ean'          => $row["eankoodi"],
-            'osasto'        => $row["osasto"],
-            'try'          => $row["try"],
-            'try_nimi'        => $row["try_nimi"],
-            'alv'          => $row["alv"],
-            'nakyvyys'        => $row["nakyvyys"],
-            'nimi_swe'        => $row["nimi_swe"],
-            'nimi_eng'        => $row["nimi_eng"],
-            'campaign_code'      => $row["campaign_code"],
-            'target'        => $row["target"],
-            'onsale'        => $row["onsale"],
-            'tunnus'        => $row['tunnus'],
-            );
+  while ($parametrirow = mysql_fetch_assoc($parametritres)) {
+    $tuotteen_parametrit[] = array(
+                                   "nimi"        => $parametrirow["selitetark"],
+                                   "option_name" => $parametrirow["option_name"],
+                                   "arvo"        => $parametrirow["selite"]
+                                   );
+  }
+
+  $dnstuote[] = array(
+                      'tuoteno'              => $row["tuoteno"],
+                      'nimi'                 => $row["nimitys"],
+                      'kuvaus'               => $row["kuvaus"],
+                      'lyhytkuvaus'          => $row["lyhytkuvaus"],
+                      'yksikko'              => $row["yksikko"],
+                      'tuotemassa'           => $row["tuotemassa"],
+                      'myyntihinta'          => $myyntihinta,
+                      'myyntihinta_veroton'  => $myyntihinta_veroton,
+                      'myymalahinta'         => $myymalahinta,
+                      'myymalahinta_veroton' => $myymalahinta_veroton,
+                      'kuluprosentti'        => $row['kuluprosentti'],
+                      'ean'                  => $row["eankoodi"],
+                      'osasto'               => $row["osasto"],
+                      'try'                  => $row["try"],
+                      'try_nimi'             => $row["try_nimi"],
+                      'alv'                  => $row["alv"],
+                      'nakyvyys'             => $row["nakyvyys"],
+                      'nimi_swe'             => $row["nimi_swe"],
+                      'nimi_eng'             => $row["nimi_eng"],
+                      'campaign_code'        => $row["campaign_code"],
+                      'target'               => $row["target"],
+                      'onsale'               => $row["onsale"],
+                      'tunnus'               => $row['tunnus'],
+                      'tuotteen_parametrit'  => $tuotteen_parametrit
+                      );
 }
 
 // Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa

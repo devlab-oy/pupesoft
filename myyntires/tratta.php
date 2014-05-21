@@ -368,9 +368,9 @@ if ($tee == "") {
     echo "<input type='hidden' name='ktunnus' value='0'>";
   }
 
-  $apuqu = "  SELECT distinct sallitut_maat
-        from maksuehto
-        where yhtio = '$kukarow[yhtio]' and sallitut_maat != ''";
+  $apuqu = "SELECT distinct sallitut_maat
+            from maksuehto
+            where yhtio = '$kukarow[yhtio]' and sallitut_maat != ''";
   $meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
   if (mysql_num_rows($meapu) > 0) {

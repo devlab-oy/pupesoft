@@ -92,11 +92,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $maksuehto = $asiakasrow["maksuehto"];
 
       if ($myyjanro != "") {
-        $apuqu = "  SELECT *
-              from kuka use index (yhtio_myyja)
-              where yhtio = '$kukarow[yhtio]'
-              and myyja = '$myyjanro'
-              AND myyja > 0";
+        $apuqu = "SELECT *
+                  from kuka use index (yhtio_myyja)
+                  where yhtio = '$kukarow[yhtio]'
+                  and myyja   = '$myyjanro'
+                  AND myyja   > 0";
         $meapu = pupe_query($apuqu);
 
         if (mysql_num_rows($meapu)==1) {
@@ -184,10 +184,10 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $kasitoimehto2 = substr($yhtiorow['oletus_toimitusehto2'], 4);
 
       // Käytetäänkö lähettäjän vai vastaanottajan rahtisopparia
-      $apuqu = "  SELECT *
-            from toimitustapa
-            where yhtio  = '$kukarow[yhtio]'
-            and selite  = '$toimitustapa'";
+      $apuqu = "SELECT *
+                from toimitustapa
+                where yhtio = '$kukarow[yhtio]'
+                and selite  = '$toimitustapa'";
       $meapu = pupe_query($apuqu);
       $apuro = mysql_fetch_assoc($meapu);
 
@@ -297,11 +297,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
     // jos meillä on lasku menossa ulkomaille
     if ($maa != "" and $maa != $yhtiorow["maa"]) {
       // tutkitaan ollaanko siellä alv-rekisteröity
-      $alhqur = "  SELECT *
-            FROM yhtion_toimipaikat
-            WHERE yhtio    = '$kukarow[yhtio]'
-            AND maa      = '$maa'
-            AND vat_numero != ''";
+      $alhqur = "SELECT *
+                 FROM yhtion_toimipaikat
+                 WHERE yhtio     = '$kukarow[yhtio]'
+                 AND maa         = '$maa'
+                 AND vat_numero != ''";
       $alhire = pupe_query($alhqur);
 
       // ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista

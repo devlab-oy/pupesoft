@@ -450,11 +450,11 @@ if (!function_exists("loppulaskuta")) {
     }
 
     //  Tarkastetaan että meillä on ok maksuehto loppulaskutukseen!!!
-    $apuqu = "  SELECT *
-          from maksuehto
-          where yhtio    = '$kukarow[yhtio]'
-          and tunnus     = '$posrow[maksuehto]'
-          and jaksotettu = ''";
+    $apuqu = "SELECT *
+              from maksuehto
+              where yhtio    = '$kukarow[yhtio]'
+              and tunnus     = '$posrow[maksuehto]'
+              and jaksotettu = ''";
     $meapu = pupe_query($apuqu);
 
     $erlisa = "";

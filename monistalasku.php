@@ -1264,11 +1264,11 @@ if ($tee == 'MONISTA') {
               // jos meillä on lasku menossa ulkomaille
               if (isset($asiakrow["maa"]) and $asiakrow["maa"] != "" and $asiakrow["maa"] != $yhtiorow["maa"]) {
                 // tutkitaan ollaanko siellä alv-rekisteröity
-                $alhqur = "  SELECT *
-                      FROM yhtion_toimipaikat
-                      WHERE yhtio     = '$kukarow[yhtio]'
-                      AND maa         = '$asiakrow[maa]'
-                      AND vat_numero != ''";
+                $alhqur = "SELECT *
+                           FROM yhtion_toimipaikat
+                           WHERE yhtio     = '$kukarow[yhtio]'
+                           AND maa         = '$asiakrow[maa]'
+                           AND vat_numero != ''";
                 $alhire = pupe_query($alhqur);
 
                 // ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista

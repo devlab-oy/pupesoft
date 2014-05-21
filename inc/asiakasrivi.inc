@@ -21,27 +21,30 @@ if (mysql_field_name($result, $i) == "tilino" or
 }
 
 if (mysql_field_name($result, $i) == "toimipaikka") {
+  if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+    $query = "SELECT *
+              FROM yhtion_toimipaikat
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND vat_numero = ''
+              ORDER BY nimi";
+    $vresult = pupe_query($query);
 
-  $query = "SELECT *
-            FROM yhtion_toimipaikat
-            WHERE yhtio    = '{$kukarow['yhtio']}'
-            AND vat_numero = ''
-            ORDER BY nimi";
-  $vresult = pupe_query($query);
+    if (mysql_num_rows($vresult) > 0) {
+      $ulos =  "<td><select name='$nimi'><option value='0'>" . t("Oletustoimipaikka") . "</option>";
 
-  if (mysql_num_rows($vresult) > 0) {
-
-    $ulos =  "<td><select name='$nimi'><option value='0'>" . t("Oletustoimipaikka") . "</option>";
-
-    while ($vrow = mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['tunnus']) {
-        $sel = "selected";
+      while ($vrow = mysql_fetch_array($vresult)) {
+        $sel="";
+        if ($trow[$i] == $vrow['tunnus']) {
+          $sel = "selected";
+        }
+        $ulos .= "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
       }
-      $ulos .= "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
+      $ulos .= "</select></td>";
+      $jatko = 0;
     }
-    $ulos .= "</select></td>";
-    $jatko = 0;
+  }
+  else{
+    $tyyppi = 0;
   }
 }
 

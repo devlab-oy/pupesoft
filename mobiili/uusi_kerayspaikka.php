@@ -232,7 +232,7 @@ if (isset($submit) and trim($submit) != '') {
 
             // Lukitaan taulut saldojen siirtoa varten
             $query = "LOCK TABLE
-                  tuotepaikat WRITE";
+                      tuotepaikat WRITE";
             $result = pupe_query($query);
 
             $query = "UPDATE tuotepaikat SET
@@ -258,10 +258,10 @@ if (isset($submit) and trim($submit) != '') {
 
             // Lukitaan taulut saldojen siirtoa varten
             $query = "LOCK TABLE
-                  tuotepaikat WRITE,
-                  tapahtuma WRITE,
-                  tuote READ,
-                  tilausrivi WRITE";
+                      tuotepaikat WRITE,
+                      tapahtuma WRITE,
+                      tuote READ,
+                      tilausrivi WRITE";
             $result = pupe_query($query);
 
             // Tarkistetaan löytyykö tuotepaikka MISTÄ saldot siirretään
